@@ -404,6 +404,7 @@ export const roles = [
   securitySolutionOnlyNoCreateComment,
   securitySolutionOnlyManageTemplates,
   securitySolutionOnlyNoManageTemplates,
+  securitySolutionOnlyAllSpacesRole,
   observabilityOnlyAll,
   observabilityOnlyRead,
   observabilityOnlyReadAlerts,

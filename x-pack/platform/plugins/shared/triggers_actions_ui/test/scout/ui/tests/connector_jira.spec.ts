@@ -43,7 +43,18 @@ const setOtherFieldsValue = async (page: ScoutPage, value: string) => {
   }, value);
 };
 
-const openTestConnectorFlyout = async (page: ScoutPage, connectorId: string) => {
+const openTestConnectorFlyout = async (
+  page: ScoutPage,
+  connectorId: string,
+  connectorName: string
+) => {
+  // Filter the paginated connectors table to the target connector before
+  // clicking its edit link — the row is otherwise not guaranteed to be on
+  // the visible page in a shared environment with many connectors.
+  const searchBox = page.locator(CONNECTORS_LIST_SELECTORS.SEARCH_INPUT);
+  await searchBox.fill(connectorName);
+  await searchBox.press('Enter');
+  await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
   await page.testSubj.click(`edit${connectorId}`);
   await page.testSubj.click('testConnectorTab');
   await page.testSubj.locator(SUMMARY_INPUT).waitFor({ state: 'visible' });
@@ -92,7 +103,7 @@ test.describe('Jira connector', { tag: tags.stateful.classic }, () => {
   });
 
   test('does not throw a type error for other fields when its valid json', async ({ page }) => {
-    await openTestConnectorFlyout(page, jiraConnectorId);
+    await openTestConnectorFlyout(page, jiraConnectorId, jiraConnectorName);
     await page.testSubj.locator(SUMMARY_INPUT).fill('Test summary');
     await setOtherFieldsValue(page, '{ "key": "value" }');
     await page.testSubj.click(EXECUTE_BUTTON);
@@ -108,7 +119,7 @@ test.describe('Jira connector', { tag: tags.stateful.classic }, () => {
   });
 
   test('disables the execute button when other fields is not valid json', async ({ page }) => {
-    await openTestConnectorFlyout(page, jiraConnectorId);
+    await openTestConnectorFlyout(page, jiraConnectorId, jiraConnectorName);
 
     await page.testSubj.locator(SUMMARY_INPUT).fill('Test summary');
     await setOtherFieldsValue(page, '{ "no_valid_json" }');

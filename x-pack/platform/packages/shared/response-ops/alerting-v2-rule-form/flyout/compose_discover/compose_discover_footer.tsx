@@ -58,6 +58,11 @@ const VALIDATION_ERRORS_NEXT_TOOLTIP = i18n.translate(
   { defaultMessage: 'Resolve ES|QL control placeholders before continuing' }
 );
 
+const TIME_FIELD_UNRESOLVED_NEXT_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.timeFieldUnresolvedNextTooltip',
+  { defaultMessage: 'Select a time field before continuing' }
+);
+
 export interface ComposeDiscoverFooterProps {
   uiState: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
@@ -91,9 +96,18 @@ export const ComposeDiscoverFooter = ({
 }: ComposeDiscoverFooterProps): React.ReactElement => {
   const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
   const watchedQuery = useWatch<FormValues, 'query'>({ name: 'query' });
+  const watchedTimeField = useWatch<FormValues, 'timeField'>({ name: 'timeField' });
 
   const isBuilderStep = currentStep ? isBuilderConditionStepId(currentStep.id) : false;
   const isConditionStep = currentStep ? isAlertConditionStepId(currentStep.id) : false;
+
+  /*
+   * The Alert Condition form step exposes the time-field select. When the source
+   * index has no resolvable date field, resolution clears the
+   * value, so an empty `timeField` means the rule can't run its lookback window —
+   * block Next until one is selected.
+   */
+  const timeFieldUnresolved = currentStep?.id === 'alertCondition' && !watchedTimeField;
 
   /*
    * Per #621/#623: when authoring an alert via the heuristic-split flow, step 1
@@ -119,7 +133,8 @@ export const ComposeDiscoverFooter = ({
     hasValidationErrors ||
     (isConditionStep && !isBuilderStep && !uiState.queryCommitted) ||
     (isBuilderStep && !isBuilderStepValid) ||
-    invalidAlertCondition;
+    invalidAlertCondition ||
+    timeFieldUnresolved;
 
   const getNextTooltip = (): string | undefined => {
     if (hasValidationErrors) return VALIDATION_ERRORS_NEXT_TOOLTIP;
@@ -127,6 +142,7 @@ export const ComposeDiscoverFooter = ({
     if (alertConditionState === 'no_alert_condition') return NO_ALERT_CONDITION_NEXT_TOOLTIP;
     if (alertConditionState === 'split_failed') return SPLIT_FAILED_NEXT_TOOLTIP;
     if (invalidAlertCondition) return NEXT_DISABLED_TOOLTIP;
+    if (timeFieldUnresolved) return TIME_FIELD_UNRESOLVED_NEXT_TOOLTIP;
     return undefined;
   };
 

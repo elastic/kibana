@@ -17,11 +17,15 @@ export class ServerlessProjectChromePage {
   public readonly primaryNav: Locator;
   public readonly morePopover: Locator;
   public readonly moreMenuTrigger: Locator;
+  public readonly breadcrumbs: Locator;
+  public readonly logo: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.primaryNav = this.page.testSubj.locator('kbnChromeNav-primaryNavigation');
     this.morePopover = this.page.testSubj.locator('side-nav-popover-More');
     this.moreMenuTrigger = this.page.testSubj.locator('kbnChromeNav-moreMenuTrigger');
+    this.breadcrumbs = this.page.testSubj.locator('breadcrumbs');
+    this.logo = this.page.testSubj.locator('nav-header-logo');
   }
 
   async navigateToSecuritySolutionHomeForChromeNav() {
@@ -39,6 +43,44 @@ export class ServerlessProjectChromePage {
     return this.primaryNav.locator(selector).or(this.morePopover.locator(selector));
   }
 
+  /** Primary strip or "More" popover — for overflow-dependent placement (same as ObservabilityNavigation.navItemInBodyByDeepLinkId). */
+  navItemInBodyByDeepLinkId(deepLinkId: string): Locator {
+    const selector = `[data-test-subj~="nav-item-deepLinkId-${deepLinkId}"]`;
+    return this.primaryNav.locator(selector).or(this.morePopover.locator(selector));
+  }
+
+  /** Item with `nav-item-isActive` in test-subj (current route) — primary strip or "More" popover. */
+  activeNavItemInBodyByDeepLinkId(deepLinkId: string): Locator {
+    const selector = `[data-test-subj~="nav-item-deepLinkId-${deepLinkId}"][data-test-subj~="nav-item-isActive"]`;
+    return this.primaryNav.locator(selector).or(this.morePopover.locator(selector));
+  }
+
+  /** Breadcrumb matching visible text. */
+  getBreadcrumbByText(text: string): Locator {
+    return this.breadcrumbs.locator('.euiBreadcrumb', { hasText: text });
+  }
+
+  async clickLogo() {
+    await this.logo.click();
+  }
+
+  async openNavSearch() {
+    await this.page.testSubj.click('nav-search-reveal');
+  }
+
+  async searchNav(term: string) {
+    await this.page.testSubj.fill('nav-search-input', term);
+  }
+
+  /** Search-result option whose EUI `url` prop matches `url` exactly. */
+  getNavSearchOptionByUrl(url: string): Locator {
+    return this.page.locator(`[data-test-subj="nav-search-option"][url="${url}"]`);
+  }
+
+  async closeNavSearch() {
+    await this.page.testSubj.click('nav-search-conceal');
+  }
+
   /** Agent Builder nav item when present (deep link id `agent_builder`). */
   getAgentBuilderNavItemInProjectChrome(): Locator {
     return this.navItemInBodyById('agent_builder');
@@ -51,6 +93,11 @@ export class ServerlessProjectChromePage {
 
   private async openMoreMenuIfTriggerVisible(): Promise<void> {
     if ((await this.moreMenuTrigger.count()) === 0 || !(await this.moreMenuTrigger.isVisible())) {
+      return;
+    }
+    // Already open: re-clicking would hit the popover's full-viewport click-to-close
+    // mask (rendered over the trigger while open) instead of the trigger itself, timing out.
+    if ((await this.moreMenuTrigger.getAttribute('aria-expanded')) === 'true') {
       return;
     }
     await this.moreMenuTrigger.click();

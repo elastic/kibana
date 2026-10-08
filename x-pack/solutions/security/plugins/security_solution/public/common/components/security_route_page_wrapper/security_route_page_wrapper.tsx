@@ -20,6 +20,11 @@ interface SecurityRoutePageWrapperOptionProps {
    * @default false
    */
   omitSpyRoute?: boolean;
+  /**
+   * Used when the wrapped page handles its own unauthorized state.
+   * @default false
+   */
+  skipLinkAuthorization?: boolean;
 }
 
 type SecurityRoutePageWrapperProps = {
@@ -46,7 +51,7 @@ const deprectedPagesWithRedirect = [SecurityPageName.detections];
  * ```
  */
 export const SecurityRoutePageWrapper: React.FC<PropsWithChildren<SecurityRoutePageWrapperProps>> =
-  React.memo(({ children, pageName, omitSpyRoute = false }) => {
+  React.memo(({ children, pageName, omitSpyRoute = false, skipLinkAuthorization = false }) => {
     const link = useLinkInfo(pageName);
     const UpsellingPage = useUpsellingPage(pageName);
 
@@ -69,7 +74,7 @@ export const SecurityRoutePageWrapper: React.FC<PropsWithChildren<SecurityRouteP
     }
 
     // Show the no privileges page if the link is unauthorized.
-    if (link && link.unauthorized) {
+    if (!skipLinkAuthorization && link?.unauthorized) {
       return (
         <>
           <SpyRoute pageName={pageName} />

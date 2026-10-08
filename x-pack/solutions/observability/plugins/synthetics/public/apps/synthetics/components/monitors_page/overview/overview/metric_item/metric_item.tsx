@@ -237,7 +237,7 @@ export const MetricItem = ({
                 onClick({
                   locationId,
                   configId: monitor.configId,
-                  id: monitor.configId,
+                  id: monitor.monitorQueryId,
                   location: locationName,
                   spaces: monitor.spaces,
                 });
@@ -268,7 +268,7 @@ export const MetricItem = ({
                           onClick({
                             locationId,
                             configId: monitor.configId,
-                            id: monitor.configId,
+                            id: monitor.monitorQueryId,
                             location: locationName ?? '',
                             spaces: monitor.spaces,
                           });
@@ -280,7 +280,7 @@ export const MetricItem = ({
                           onClick({
                             locationId,
                             configId: monitor.configId,
-                            id: monitor.configId,
+                            id: monitor.monitorQueryId,
                             location: locationName ?? '',
                             spaces: monitor.spaces,
                           });
@@ -293,7 +293,7 @@ export const MetricItem = ({
                           onClick({
                             locationId: locId,
                             configId: monitor.configId,
-                            id: monitor.configId,
+                            id: monitor.monitorQueryId,
                             location: locLabel,
                             spaces: monitor.spaces,
                           });

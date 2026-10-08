@@ -39,7 +39,7 @@ IF "%KBN_DISALLOW_CODE_GEN_FROM_STRINGS%"=="true" (
 
 :: This should run independently as the last instruction
 :: as we need NODE_OPTIONS previously set to expand
-"%NODE%" "%DIR%\src\cli\kibana\dist" %*
+"%NODE%" "%DIR%\node_modules\@kbn\cli\kibana\dist" %*
 
 :finally
 

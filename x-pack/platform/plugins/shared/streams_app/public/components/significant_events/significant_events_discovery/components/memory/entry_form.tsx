@@ -94,6 +94,9 @@ export function EntryFormFields({
         })}
       >
         <EuiComboBox
+          aria-label={i18n.translate('xpack.streams.memory.categoriesAriaLabel', {
+            defaultMessage: 'Categories',
+          })}
           options={categoryOptions}
           selectedOptions={categories}
           onChange={onCategoriesChange}
@@ -112,6 +115,9 @@ export function EntryFormFields({
         label={i18n.translate('xpack.streams.memory.tagsLabel', { defaultMessage: 'Tags' })}
       >
         <EuiComboBox
+          aria-label={i18n.translate('xpack.streams.memory.tagsAriaLabel', {
+            defaultMessage: 'Tags',
+          })}
           options={[]}
           selectedOptions={tags}
           onChange={onTagsChange}

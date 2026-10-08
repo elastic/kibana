@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { flyoutHeaderBlockStyles } from '../../shared/components/flyout_header_block';
 import { Notes } from '../../shared/components/notes';
@@ -15,7 +16,17 @@ import { HeaderTitle } from './components/header_title';
 import { Status } from './components/status';
 import { AlertsCount } from './components/alerts_count';
 import { Assignees } from './components/assignees';
-import { HEADER_SUMMARY_PANEL_TEST_ID } from './constants/test_ids';
+import { HEADER_SHARE_BUTTON_TEST_ID, HEADER_SUMMARY_PANEL_TEST_ID } from './constants/test_ids';
+import { ShareUrlIconButton } from '../../shared/components/share_url_icon_button';
+import { FlyoutHeaderActions } from '../../shared/components/flyout_header_actions';
+import { useGetAttackFlyoutLink } from '../../../flyout/attack_details/hooks/use_get_attack_flyout_link';
+
+const SHARE_ATTACK_LABEL = i18n.translate(
+  'xpack.securitySolution.flyoutV2.attack.header.shareAttackLabel',
+  {
+    defaultMessage: 'Share attack',
+  }
+);
 
 export interface HeaderProps {
   /**
@@ -42,8 +53,22 @@ export interface HeaderProps {
 export const Header: FC<HeaderProps> = memo(({ hit, onAttackUpdated, onShowNotes }) => {
   const documentId = useMemo(() => hit.raw._id ?? '', [hit]);
 
+  const attackDetailsLink = useGetAttackFlyoutLink({
+    attackId: hit.raw._id ?? '',
+    indexName: hit.raw._index ?? '',
+    timestamp: hit.flattened?.['@timestamp'] ? String(hit.flattened['@timestamp']) : undefined,
+  });
+
   return (
     <>
+      <FlyoutHeaderActions>
+        <ShareUrlIconButton
+          url={attackDetailsLink}
+          tooltip={SHARE_ATTACK_LABEL}
+          ariaLabel={SHARE_ATTACK_LABEL}
+          dataTestSubj={HEADER_SHARE_BUTTON_TEST_ID}
+        />
+      </FlyoutHeaderActions>
       <HeaderTitle hit={hit} />
       <EuiSpacer size="m" />
       <EuiFlexGroup
@@ -64,7 +89,7 @@ export const Header: FC<HeaderProps> = memo(({ hit, onAttackUpdated, onShowNotes
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem css={flyoutHeaderBlockStyles}>
-          <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+          <EuiFlexGroup direction="row" gutterSize="s" responsive={false} alignItems="center">
             <EuiFlexItem>
               <Assignees hit={hit} onAttackUpdated={onAttackUpdated} />
             </EuiFlexItem>

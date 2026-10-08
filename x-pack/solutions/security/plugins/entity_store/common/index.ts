@@ -17,21 +17,25 @@
  * import { euid, type EntityType } from '@kbn/entity-store/common/euid_helpers';
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export const PLUGIN_ID = 'entityStore';
 export const PLUGIN_NAME = 'Entity Store';
 
 export const FF_ENABLE_ENTITY_STORE_V2 = 'securitySolution:entityStoreEnableV2';
 
+export {
+  ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
+  ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+  ENTITY_STORE_CLUSTER_PRIVILEGES,
+  ENGINE_DESCRIPTOR_TYPE_NAME,
+  ENGINE_DESCRIPTOR_CREATE_PRIVILEGE,
+} from './privileges';
+
 export type EntityStoreStatus = z.infer<typeof EntityStoreStatus>;
-export const EntityStoreStatus = z.enum([
-  'not_installed',
-  'installing',
-  'running',
-  'stopped',
-  'error',
-]);
+export const EntityStoreStatus = lazySchema(() =>
+  z.enum(['not_installed', 'installing', 'running', 'stopped', 'error'])
+);
 
 export const API_VERSIONS = {
   public: {
@@ -67,7 +71,6 @@ export const ENTITY_STORE_ROUTES = {
   },
   internal: {
     CHECK_PRIVILEGES: `${INTERNAL_BASE_ROUTE}/check_privileges`,
-    PREFERENCES: `${INTERNAL_BASE_ROUTE}/preferences`,
     FORCE_LOG_EXTRACTION: `${INTERNAL_BASE_ROUTE}/{entityType}/force_log_extraction`,
     FORCE_REMOTE_EXTRACT_TO_UPDATES: `${INTERNAL_BASE_ROUTE}/{entityType}/force_remote_extract_to_updates`,
     FORCE_HISTORY_SNAPSHOT: `${INTERNAL_BASE_ROUTE}/force_history_snapshot`,
@@ -100,7 +103,7 @@ export const getErrorMessage = (error: unknown): string => {
 
 // Entity types (slim definitions; for EUID translation use common/euid_helpers)
 export type EntityType = z.infer<typeof EntityType>;
-export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
+export const EntityType = lazySchema(() => z.enum(['user', 'host', 'service', 'generic']));
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
@@ -144,6 +147,7 @@ export interface IdentitySourceFields {
 
 export type { NonEcsTimelineDataRow } from './domain/euid/non_ecs_timeline_data';
 export type { AssetCriticalityLevel, EntityRiskLevels } from './domain/definitions/entity.gen';
+export type { RiskScoreDistribution } from './domain/risk_score_distribution';
 
 export {
   ENTITY_LATEST,

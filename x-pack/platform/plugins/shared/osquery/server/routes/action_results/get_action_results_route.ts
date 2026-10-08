@@ -19,7 +19,7 @@ import type {
   GetActionResultsRequestParamsSchema,
   GetActionResultsRequestQuerySchema,
 } from '../../../common/api/action_results/get_action_results_route';
-import { API_VERSIONS } from '../../../common/constants';
+import { ACTIONS_INDEX, API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { Direction, OsqueryQueries } from '../../../common/search_strategy';
@@ -29,6 +29,8 @@ import type {
 } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { findOsqueryActionMetadata } from '../../utils/find_osquery_action_metadata';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import { actionResultsResponseSchema } from './response_schemas';
 
 export const getActionResultsRoute = (
@@ -96,6 +98,30 @@ export const getActionResultsRoute = (
 
           const search = await context.search;
 
+          const [coreStartServices] = await osqueryContext.getStartServices();
+          const internalEsClient = coreStartServices.elasticsearch.client.asInternalUser;
+          const actionsIndexExists = await internalEsClient.indices.exists({
+            index: `${ACTIONS_INDEX}*`,
+          });
+
+          // Mirrors the search strategy gate: without an osquery actions index, live
+          // actions live only on `.fleet-actions`, and the strategy keeps the
+          // data-document space filter for that read. Passing the request lets the
+          // strategy's own check reuse this lookup.
+          if (actionsIndexExists) {
+            const hasMetadata = await findOsqueryActionMetadata({
+              esClient: internalEsClient,
+              spaceId,
+              actionId: request.params.actionId,
+              actionsIndexExists,
+              request,
+            });
+
+            if (!hasMetadata) {
+              return response.notFound({ body: { message: 'Action not found' } });
+            }
+          }
+
           // Parse agentIds from query parameter
           const agentIds = request.query.agentIds
             ? request.query.agentIds.split(',').map((id) => id.trim())
@@ -128,7 +154,7 @@ export const getActionResultsRoute = (
                   : undefined,
                 spaceId,
               },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
+              { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )
           );
 
@@ -162,10 +188,10 @@ export const getActionResultsRoute = (
             },
           });
         } catch (err) {
-          const error = err as Error;
+          const error = err as Error & { statusCode?: number };
 
           return response.customError({
-            statusCode: 500,
+            statusCode: error.statusCode ?? 500,
             body: { message: error.message },
           });
         }

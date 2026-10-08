@@ -20,6 +20,7 @@ describe('useSidebarAccordionsState', () => {
     mockUseCasesLocalStorage.mockReturnValue([
       {
         attributes: true,
+        legacyCustomFields: false,
         templateFields: false,
         connectors: true,
       },
@@ -34,6 +35,7 @@ describe('useSidebarAccordionsState', () => {
       LOCAL_STORAGE_KEYS.caseViewSidebarAccordions,
       {
         attributes: true,
+        legacyCustomFields: false,
         templateFields: true,
         connectors: true,
       }
@@ -44,6 +46,7 @@ describe('useSidebarAccordionsState', () => {
     const { result } = renderHook(() => useSidebarAccordionsState());
 
     expect(result.current.isOpen('attributes')).toBe(true);
+    expect(result.current.isOpen('legacyCustomFields')).toBe(false);
     expect(result.current.isOpen('templateFields')).toBe(false);
     expect(result.current.isOpen('connectors')).toBe(true);
   });
@@ -53,6 +56,7 @@ describe('useSidebarAccordionsState', () => {
     mockUseCasesLocalStorage.mockReturnValue([
       {
         attributes: true,
+        legacyCustomFields: false,
         templateFields: true,
         connectors: true,
       },
@@ -67,6 +71,7 @@ describe('useSidebarAccordionsState', () => {
 
     expect(setAccordionsState).toHaveBeenCalledWith({
       attributes: true,
+      legacyCustomFields: false,
       templateFields: false,
       connectors: true,
     });

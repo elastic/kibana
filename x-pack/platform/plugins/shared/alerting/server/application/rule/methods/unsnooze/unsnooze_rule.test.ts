@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ConstructorOptions, RulesClientContext } from '../../../../rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { unsnoozeRule } from './unsnooze_rule';
@@ -114,6 +115,7 @@ describe('unsnoozeRule change tracking', () => {
   const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
   const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+    request: httpServerMock.createKibanaRequest(),
     taskManager,
     ruleTypeRegistry,
     unsecuredSavedObjectsClient,

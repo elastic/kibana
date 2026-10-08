@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { useReducer, useMemo, useCallback } from 'react';
-import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { escapeQuotes } from '@kbn/es-query';
 import type { BulkOperationParams } from '../services/rules_api';
 
@@ -88,20 +87,20 @@ export const useBulkSelect = ({ totalItemCount, items, filter, search }: UseBulk
 
   const itemIds = useMemo(() => items.map((item) => item.id), [items]);
 
+  useEffect(() => {
+    dispatch({ type: ActionType.CLEAR_SELECTION });
+  }, [filter, search]);
+
   const selectedCount = useMemo(() => {
     if (!totalItemCount) {
       return 0;
     }
     if (state.isAllSelected) {
-      const logical = totalItemCount - state.selectedIds.size;
-      if (totalItemCount > BULK_FILTER_MAX_RULES) {
-        return Math.min(logical, BULK_FILTER_MAX_RULES);
-      }
-      return logical;
+      // avoid negative count
+      return Math.max(0, totalItemCount - state.selectedIds.size);
     }
-    // Only IDs that are actually on the current page count
-    return itemIds.filter((id) => state.selectedIds.has(id)).length;
-  }, [state, itemIds, totalItemCount]);
+    return state.selectedIds.size;
+  }, [state, totalItemCount]);
 
   const isPageSelected = useMemo(() => {
     if (!items.length) {

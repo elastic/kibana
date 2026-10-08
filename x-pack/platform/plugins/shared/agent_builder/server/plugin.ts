@@ -216,7 +216,6 @@ export class AgentBuilderPlugin
     void registerTracingExporter({
       core: coreStart,
       tracingConfig: this.config.tracing,
-      logger: this.logger.get('tracing'),
     }).then((teardownTracing) => {
       this.teardownTracing = teardownTracing;
     });
@@ -263,8 +262,6 @@ export class AgentBuilderPlugin
 
     const modelProviderFactory = createModelProviderFactory({
       inference,
-      uiSettings,
-      savedObjects,
       trackingService: this.trackingService,
       searchInferenceEndpoints,
       logger: this.logger.get('model-provider'),

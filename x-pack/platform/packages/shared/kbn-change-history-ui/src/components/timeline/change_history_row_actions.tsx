@@ -57,6 +57,7 @@ const ChangeHistoryRowActions = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.ROW_ACTIONS_ARIA_LABEL}
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
       panelPaddingSize="none"

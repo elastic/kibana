@@ -12,9 +12,10 @@ import {
 } from '@kbn/cases-plugin/common/constants';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { postCaseReq } from '../../../../common/lib/mock';
+import { postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
   createCase,
+  createComment,
   deleteAllCaseItems,
   bulkCreateAttachments,
   getComment,
@@ -32,9 +33,77 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
+  const searchSO = (soType: string, soId: string) =>
+    es.search({
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      query: {
+        bool: {
+          must: [{ term: { type: soType } }, { term: { _id: `${soType}:${soId}` } }],
+        },
+      },
+    });
+
   describe('Unified Comments — CRUD with flag ON', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
+    });
+
+    describe('legacy user comment interop', () => {
+      it('reads a legacy `user` comment through the v2 read path (legacy type preserved in legacy mode)', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const updatedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+        });
+        const commentId = updatedCase.comments![0].id;
+
+        const fetched = await getComment({
+          supertest,
+          caseId: postedCase.id,
+          commentId,
+        });
+
+        // The legacy `/comments/{id}` route reads with mode=legacy, which preserves
+        // the legacy `user` type; unified projection only happens on mode=unified reads.
+        expect(fetched.type).to.be('user');
+        expect(getCommentContent(fetched as unknown as Record<string, unknown>)).to.be(
+          postCommentUserReq.comment
+        );
+      });
+
+      it('lifts a legacy `user` comment onto cases-attachments alongside a unified comment', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        const legacyCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+        });
+        const legacyId = legacyCase.comments![0].id;
+
+        const unifiedCase = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            {
+              type: 'comment' as const,
+              data: { content: 'unified comment' },
+              owner: 'securitySolutionFixture',
+            },
+          ],
+        });
+        const unifiedId = unifiedCase.comments!.find((c) => c.id !== legacyId)!.id;
+
+        // With the flag ON the write target is the unified SO for every request
+        // shape, so the legacy `user` payload is lifted onto cases-attachments.
+        expect((await searchSO(CASE_ATTACHMENT_SAVED_OBJECT, legacyId)).hits.hits.length).to.be(1);
+        expect((await searchSO(CASE_COMMENT_SAVED_OBJECT, legacyId)).hits.hits.length).to.be(0);
+
+        // The unified `comment` type also lands on cases-attachments.
+        expect((await searchSO(CASE_ATTACHMENT_SAVED_OBJECT, unifiedId)).hits.hits.length).to.be(1);
+        expect((await searchSO(CASE_COMMENT_SAVED_OBJECT, unifiedId)).hits.hits.length).to.be(0);
+      });
     });
 
     describe('create', () => {
@@ -210,24 +279,30 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(refreshedCase.totalComment).to.be(0);
       });
 
-      it('deletes all comments (including unified) for a case', async () => {
+      it('deletes all comments across both cases-comments and cases-attachments SOs', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        await bulkCreateAttachments({
+
+        // Legacy `user` comment is lifted onto cases-attachments (flag ON).
+        const legacyCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+        });
+        const legacyId = legacyCase.comments![0].id;
+
+        // Unified `comment` also lands on cases-attachments.
+        const unifiedCase = await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
           params: [
             {
               type: 'comment' as const,
-              data: { content: 'comment 1' },
-              owner: 'securitySolutionFixture',
-            },
-            {
-              type: 'comment' as const,
-              data: { content: 'comment 2' },
+              data: { content: 'unified comment' },
               owner: 'securitySolutionFixture',
             },
           ],
         });
+        const unifiedId = unifiedCase.comments!.find((c) => c.id !== legacyId)!.id;
 
         await deleteAllComments({
           supertest,
@@ -238,8 +313,11 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: postedCase.id,
         });
-
         expect(refreshedCase.totalComment).to.be(0);
+
+        // Both attachments lived on cases-attachments (flag ON); both are gone.
+        expect((await searchSO(CASE_ATTACHMENT_SAVED_OBJECT, legacyId)).hits.hits.length).to.be(0);
+        expect((await searchSO(CASE_ATTACHMENT_SAVED_OBJECT, unifiedId)).hits.hits.length).to.be(0);
       });
     });
 

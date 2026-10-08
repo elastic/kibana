@@ -222,7 +222,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
   public async runApi(
-    { body, model: reqModel, signal, timeout, raw }: RunActionParams,
+    { body, model: reqModel, signal, timeout, raw, maxContentLength }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse | RunActionRawResponse> {
     const parentSpan = trace.getActiveSpan();
@@ -242,6 +242,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       },
       signal,
       timeout: timeout ?? DEFAULT_TIMEOUT_MS,
+      ...(maxContentLength !== undefined ? { maxContentLength } : {}),
       responseSchema: raw ? RunActionRawResponseSchema : RunApiResponseSchema,
     } as SubActionRequestParams<RunApiResponse>;
 
@@ -259,7 +260,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
   }
 
   private async streamAPI(
-    { body, model: reqModel, signal, timeout }: RunActionParams,
+    { body, model: reqModel, signal, timeout, maxContentLength }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<StreamingResponse> {
     const parentSpan = trace.getActiveSpan();
@@ -282,6 +283,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
         },
         signal,
         timeout: timeout ?? DEFAULT_TIMEOUT_MS,
+        ...(maxContentLength !== undefined ? { maxContentLength } : {}),
       },
       connectorUsageCollector
     );
@@ -299,6 +301,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       timeout,
       toolConfig,
       maxOutputTokens,
+      maxContentLength,
     }: InvokeAIActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIActionResponse> {
@@ -316,6 +319,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
         model,
         signal,
         timeout,
+        maxContentLength,
       },
       connectorUsageCollector
     );
@@ -334,6 +338,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       tools,
       toolConfig,
       systemInstruction,
+      maxContentLength,
     }: InvokeAIRawActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIRawActionResponse> {
@@ -353,6 +358,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
         signal,
         timeout,
         raw: true,
+        maxContentLength,
       },
       connectorUsageCollector
     );
@@ -380,6 +386,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       timeout,
       tools,
       toolConfig,
+      maxContentLength,
     }: InvokeAIActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<IncomingMessage> {
@@ -399,6 +406,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
         stopSequences,
         signal,
         timeout,
+        maxContentLength,
       },
       connectorUsageCollector
     )) as unknown as IncomingMessage;

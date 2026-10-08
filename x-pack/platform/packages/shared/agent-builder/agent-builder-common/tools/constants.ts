@@ -56,6 +56,7 @@ export const platformCoreCasesTools = {
   manage: casesTool('manage'),
   attachments: casesTool('attachments'),
   observables: casesTool('observables'),
+  findTemplates: casesTool('find_templates'),
 } as const;
 
 /**

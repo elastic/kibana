@@ -68,7 +68,6 @@ export const optionCardStyles = ({ euiTheme }: UseEuiTheme) => css`
   .euiSplitPanel__inner.euiPanel--primary {
     display: flex;
     align-items: center;
-    height: 100%;
   }
   .euiCheckableCard__children {
     margin-block-start: 2px;

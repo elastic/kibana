@@ -7,6 +7,7 @@
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
+import { disableNewFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import {
   setGrouping,
   waitForGroupingTable,
@@ -64,6 +65,7 @@ describe(
     describe('Group by Resolution', () => {
       beforeEach(() => {
         login();
+        disableNewFlyout();
         interceptEntityStoreStatus('running');
         interceptEntityStoreSearch();
         visit(ENTITY_ANALYTICS_HOME_PAGE_URL);

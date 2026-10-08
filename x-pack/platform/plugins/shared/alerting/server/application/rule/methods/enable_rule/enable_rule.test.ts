@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import {
@@ -59,6 +60,7 @@ const alertsService = alertsServiceMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -310,7 +312,7 @@ describe('enable()', () => {
     expect(unsecuredSavedObjectsClient.create).not.toBeCalledWith(
       API_KEY_PENDING_INVALIDATION_TYPE
     );
-    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/name');
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/name', undefined);
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
       '1',
@@ -504,6 +506,40 @@ describe('enable()', () => {
     expect(rulesClientParams.getUserName).toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
     expect(taskManager.bulkEnable).not.toHaveBeenCalled();
+  });
+
+  test('clones the caller API key instead of persisting it when the borrowed-key flag is set', async () => {
+    // A rule created disabled stores no key, so on enable the caller's declaration that its
+    // API key is borrowed (cloneApiKeysOnCreate) must mint a framework-owned clone rather
+    // than persist the borrowed credential.
+    const clientWithBorrowedKey = new RulesClient({
+      ...rulesClientParams,
+      cloneApiKeysOnCreate: true,
+    });
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingRuleWithoutApiKey);
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValue(true);
+    rulesClientParams.cloneAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: 'cloned', name: 'Alerting: myType/name', api_key: 'cloned-secret' },
+    });
+
+    await clientWithBorrowedKey.enableRule({ id: '1' });
+
+    // Asserts the decrypted read succeeded: on the SOC fallback `attributes` would come from a
+    // different fixture, and the test could pass without exercising the borrowed-key path.
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(rulesClientParams.cloneAPIKey).toHaveBeenCalledWith('Alerting: myType/name');
+    expect(rulesClientParams.getAuthenticationAPIKey).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      expect.objectContaining({
+        enabled: true,
+        apiKey: Buffer.from('cloned:cloned-secret').toString('base64'),
+        apiKeyCreatedByUser: false,
+      }),
+      { version: '123' }
+    );
   });
 
   test('enables task when scheduledTaskId is defined and task exists', async () => {
@@ -873,7 +909,7 @@ describe('enable()', () => {
         'alert',
         '1',
         expect.objectContaining({
-          tags: expect.arrayContaining(['existing-tag', 'Missing Universal Api Key']),
+          tags: expect.arrayContaining(['existing-tag', 'Missing Elastic Cloud API Key']),
         }),
         expect.anything()
       );
@@ -926,7 +962,7 @@ describe('enable()', () => {
         'alert',
         '1',
         expect.objectContaining({
-          tags: expect.arrayContaining(['existing-tag', 'Missing Universal Api Key']),
+          tags: expect.arrayContaining(['existing-tag', 'Missing Elastic Cloud API Key']),
         }),
         expect.anything()
       );

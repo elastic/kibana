@@ -135,7 +135,17 @@ export class EntityFlyoutAnomaliesPage {
   }
 
   async clickAnomaliesCountLink() {
-    await this.anomaliesExpandablePanelTitleLink.click();
+    // Attached rather than visible: the section sits below risk contributions and may be
+    // off-screen until the click scrolls to it.
+    await this.anomaliesExpandablePanel.waitFor({ state: 'attached' });
+    // The flyout sometimes auto-navigates to both panels before this runs, and clicking then
+    // would toggle the tab back off.
+    if (!(await this.anomaliesTab.isVisible())) {
+      // noWaitAfter: the URL update that opens the left panel triggers unmocked API calls that
+      // keep Playwright's navigation tracker pending. The extended timeout covers the tab mount,
+      // which React flushes synchronously before the browser acknowledges mouseup.
+      await this.anomaliesExpandablePanelTitleLink.click({ noWaitAfter: true, timeout: 30000 });
+    }
     await this.anomaliesTab.waitFor({ state: 'visible' });
   }
 
@@ -176,7 +186,11 @@ export class EntityFlyoutAnomaliesPage {
   }
 
   async openRowActionsMenu() {
-    await this.rowActionsButton.click();
+    await this.anomaliesTabTableGrid.waitFor({ state: 'visible' });
+    // noWaitAfter: true skips Playwright's post-click navigation wait — opening the popover
+    // triggers a URL update from the flyout's state management that Playwright misidentifies
+    // as a pending navigation. The caller's getRowAction assertions are the real check.
+    await this.rowActionsButton.click({ noWaitAfter: true });
   }
 
   /**

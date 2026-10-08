@@ -255,6 +255,9 @@ export const AgentsList: React.FC = () => {
   return (
     <>
       <EuiInMemoryTable
+        tableCaption={i18n.translate('xpack.agentBuilder.agents.tableCaption', {
+          defaultMessage: 'Agents',
+        })}
         data-test-subj="agentBuilderAgentsListTable"
         rowProps={(row) => ({ 'data-test-subj': `agentBuilderAgentsListRow-${row.id}` })}
         items={agents}

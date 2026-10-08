@@ -50,6 +50,13 @@ export const bulkCreateEntityMetadataDocs = async <TDoc extends object>(
     datasource: params.docs,
     index: params.index,
     refresh: false,
+    // Refuse to auto-create a plain index if the data stream is absent or
+    // mis-configured. Without this, ES silently creates a dynamically-mapped
+    // regular index, turning a recoverable configuration gap into silent
+    // schema corruption. With it, writes are dropped (surfaced via onDrop)
+    // and the next maintainer run / summary regen retries them once the
+    // stream exists.
+    require_data_stream: true,
     onDocument: () => ({ create: {} }),
     onDrop: (dropped) => {
       dropAggregator.record(dropped);
@@ -89,7 +96,10 @@ export const getLatestEntityMetadataDoc = async <TDoc>(
     const response = await esClient.search<TDoc>({
       index: params.index,
       size: 1,
-      sort: [{ '@timestamp': { order: 'desc' } }],
+      // `unmapped_type` keeps this a graceful "no hits" instead of a hard
+      // search_phase_execution_exception on a backing index where `@timestamp`
+      // has no mapping yet (e.g. a freshly auto-created index that never received a document).
+      sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
       query: {
         bool: {
           filter: [

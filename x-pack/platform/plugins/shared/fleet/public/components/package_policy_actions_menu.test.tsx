@@ -210,9 +210,9 @@ describe('PackagePolicyActionsMenu', () => {
   describe('agentless upgrade (disableAgentlessLegacyAPI enabled)', () => {
     beforeEach(() => {
       jest.mocked(sendBulkUpgradeAgentlessPolicies).mockReset();
+      // disableAgentlessLegacyAPI is on by default via allowedExperimentalValues.
       jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
         ...allowedExperimentalValues,
-        disableAgentlessLegacyAPI: true,
       });
     });
 
@@ -262,13 +262,18 @@ describe('PackagePolicyActionsMenu', () => {
   });
 
   it('keeps the legacy upgrade link for an agentless policy while disableAgentlessLegacyAPI is off', async () => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+      ...allowedExperimentalValues,
+      disableAgentlessLegacyAPI: false,
+    });
     const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
     const packagePolicy = createMockPackagePolicy({ hasUpgrade: true, supports_agentless: true });
     const { utils } = renderMenu({ agentPolicies, packagePolicy });
 
     const upgradeButton = await utils.findByTestId('PackagePolicyActionsUpgradeItem');
-    // Flag off (default): the legacy edit-page upgrade still works, so the link is untouched.
+    // Flag off: the legacy edit-page upgrade still works, so the link is untouched.
     expect(upgradeButton).toHaveAttribute('href', '/test/upgrade-link');
+    jest.mocked(ExperimentalFeaturesService.get).mockRestore();
   });
 
   it('Should not be able to delete integration from a managed policy', async () => {
@@ -370,6 +375,8 @@ describe('PackagePolicyActionsMenu', () => {
     jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
       ...allowedExperimentalValues,
       enableAgentlessPoliciesUI: false,
+      // disableAgentlessLegacyAPI forces the UI on, so it must be off to exercise the disabled path.
+      disableAgentlessLegacyAPI: false,
     });
     const agentPolicies = createMockAgentPolicies({});
     const packagePolicy = createMockPackagePolicy({

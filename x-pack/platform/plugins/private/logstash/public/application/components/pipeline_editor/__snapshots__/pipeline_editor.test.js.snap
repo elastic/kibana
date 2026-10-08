@@ -142,6 +142,7 @@ Default value: 50ms"
 Default value: memory"
       >
         <EuiSelect
+          aria-label="Queue type"
           data-test-subj="selectQueueType"
           onChange={[Function]}
           options={
@@ -406,6 +407,7 @@ Default value: 50ms"
 Default value: memory"
       >
         <EuiSelect
+          aria-label="Queue type"
           data-test-subj="selectQueueType"
           onChange={[Function]}
           options={
@@ -670,6 +672,7 @@ Default value: 50ms"
 Default value: memory"
       >
         <EuiSelect
+          aria-label="Queue type"
           data-test-subj="selectQueueType"
           onChange={[Function]}
           options={
@@ -911,6 +914,7 @@ Default value: 50ms"
 Default value: memory"
       >
         <EuiSelect
+          aria-label="Queue type"
           data-test-subj="selectQueueType"
           onChange={[Function]}
           options={
@@ -1185,6 +1189,7 @@ Default value: 50ms"
 Default value: memory"
       >
         <EuiSelect
+          aria-label="Queue type"
           data-test-subj="selectQueueType"
           onChange={[Function]}
           options={
@@ -1426,6 +1431,7 @@ Default value: 50ms"
 Default value: memory"
       >
         <EuiSelect
+          aria-label="Queue type"
           data-test-subj="selectQueueType"
           onChange={[Function]}
           options={

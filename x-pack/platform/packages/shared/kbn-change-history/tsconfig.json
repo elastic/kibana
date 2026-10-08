@@ -15,5 +15,6 @@
     "@kbn/tooling-log",
     "@kbn/test",
     "@kbn/object-utils",
+    "@kbn/apm-utils",
   ]
 }

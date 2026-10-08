@@ -44,6 +44,13 @@ export const COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipInt
     relationshipKey: 'communicates_with',
     targetEntityType: 'host',
     requireTargetEntityIdExists: true,
+    // Host-scoped EUID is `user:<user.name>@<host.id>@local`, so `user.name` is
+    // the only actor field Step 2 reads. Listing anything else (`user.email`,
+    // `user.id`) only inflates the composite agg: extra sources multiply buckets
+    // — the same username appears with dozens of distinct Unix UIDs / Windows
+    // SIDs across hosts — so Step 1 pages and Step 2 ES|QL queries grow for
+    // actors Step 2 then discards.
+    customActor: { fields: ['user.name'] },
     // `event.category` is multivalued in ECS (Elastic Agent's syslog SSH events
     // emit `["authentication", "session"]`). ES|QL `IN` returns NULL for a
     // multivalued left-hand side, so `event.category IN (...)` silently drops
@@ -56,6 +63,7 @@ export const COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipInt
       { term: { 'event.action': 'ssh_login' } },
       SUCCESSFUL_OUTCOME_FILTER,
     ],
+    hostScopedUsersOnly: true,
   },
   {
     kind: 'standard',
@@ -65,6 +73,12 @@ export const COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipInt
     relationshipKey: 'communicates_with',
     targetEntityType: 'host',
     requireTargetEntityIdExists: true,
+    // Windows logon events carry `user.name`, which is the only actor field the
+    // host-scoped EUID (`user:<user.name>@<host.id>@local`) reads. A doc with
+    // `user.email` but no `user.name` is an IDP user that extraction indexed
+    // under a different EUID, so bucketing on it would surface actors Step 2
+    // cannot build an id for.
+    customActor: { fields: ['user.name'] },
     esqlWhereClause: `event.action IN ("logged-in", "logged-in-explicit")
     AND event.code IN ("4624", "4648")
     AND winlog.logon.type IN ("Interactive", "RemoteInteractive", "CachedInteractive")
@@ -74,6 +88,7 @@ export const COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipInt
       { terms: { 'event.action': ['logged-in', 'logged-in-explicit'] } },
       SUCCESSFUL_OUTCOME_FILTER,
     ],
+    hostScopedUsersOnly: true,
   },
   {
     kind: 'standard',

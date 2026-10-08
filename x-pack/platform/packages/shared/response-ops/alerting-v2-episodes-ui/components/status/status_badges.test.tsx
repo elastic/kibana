@@ -36,6 +36,19 @@ describe('AlertEpisodeStatusBadges', () => {
     expect(screen.getByTestId('alertEpisodeStatusCellSnoozeIndicator')).toBeInTheDocument();
   });
 
+  it('does not render snooze badge when snooze expiry has lapsed', () => {
+    renderWithI18n(
+      <AlertEpisodeStatusBadges
+        status={ALERT_EPISODE_STATUS.ACTIVE}
+        groupAction={{
+          lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+          snoozeExpiry: '2020-01-01T00:00:00.000Z',
+        }}
+      />
+    );
+    expect(screen.queryByTestId('alertEpisodeStatusCellSnoozeIndicator')).not.toBeInTheDocument();
+  });
+
   it('shows snooze expiry in tooltip on hover when snoozeExpiry is set', async () => {
     const user = userEvent.setup();
     renderWithI18n(

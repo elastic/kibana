@@ -50,6 +50,7 @@ const defaultProps = {
 
 const allEntityEnginePrivileges: EntityAnalyticsPrivileges = {
   has_all_required: true,
+  has_install_permissions: true,
   privileges: {
     elasticsearch: {
       cluster: { manage_enrich: true },
@@ -61,6 +62,7 @@ const allEntityEnginePrivileges: EntityAnalyticsPrivileges = {
 
 const missingEntityEnginePrivileges: EntityAnalyticsPrivileges = {
   has_all_required: false,
+  has_install_permissions: false,
   privileges: {
     elasticsearch: {
       cluster: { manage_enrich: false },
@@ -168,6 +170,49 @@ describe('EnablementConfirmationModal', () => {
 
       render(<EnablementConfirmationModal {...defaultProps} />, { wrapper: Wrapper });
       expect(screen.queryByTestId('enablement-modal-test')).toBeInTheDocument();
+    });
+  });
+
+  // The toggle enables both the risk score maintainer and the Entity Store in one action, so the
+  // confirm button requires both privilege sets — a user privileged for only one half must not be
+  // able to confirm (otherwise the missing half fails server-side with a 500).
+  describe('with only Entity Store privileges (missing risk engine)', () => {
+    beforeEach(() => {
+      mockUseEntityEnginePrivileges.mockReturnValue({
+        data: allEntityEnginePrivileges,
+        isLoading: false,
+      });
+      mockUseMissingRiskEnginePrivileges.mockReturnValue(missingRiskEnginePrivileges);
+    });
+
+    it('renders the enable button disabled', () => {
+      render(<EnablementConfirmationModal {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.getByTestId('entityAnalyticsEnablementConfirmButton')).toBeDisabled();
+    });
+
+    it('shows the risk engine missing privileges callout', () => {
+      render(<EnablementConfirmationModal {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.getByTestId('callout-missing-risk-engine-privileges')).toBeInTheDocument();
+    });
+  });
+
+  describe('with only risk engine privileges (missing Entity Store)', () => {
+    beforeEach(() => {
+      mockUseEntityEnginePrivileges.mockReturnValue({
+        data: missingEntityEnginePrivileges,
+        isLoading: false,
+      });
+      mockUseMissingRiskEnginePrivileges.mockReturnValue(allRiskEnginePrivileges);
+    });
+
+    it('renders the enable button disabled', () => {
+      render(<EnablementConfirmationModal {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.getByTestId('entityAnalyticsEnablementConfirmButton')).toBeDisabled();
+    });
+
+    it('shows the entity engine missing privileges callout', () => {
+      render(<EnablementConfirmationModal {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.getByTestId('callout-missing-privileges-callout')).toBeInTheDocument();
     });
   });
 });

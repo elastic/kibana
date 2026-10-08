@@ -431,7 +431,7 @@ describe('identifyTestLoads', () => {
         expect(loads).toHaveLength(0);
       });
 
-      it('includes all configs when ids set is empty', () => {
+      it('excludes all configs when ids set is empty', () => {
         const config = createMockConfig({ path: 'plugin/config.ts' });
         mockTestConfigs = [config];
 
@@ -442,7 +442,7 @@ describe('identifyTestLoads', () => {
           [{ kind: 'modules', ids: new Set() }],
           log
         );
-        expect(loads).toHaveLength(1);
+        expect(loads).toHaveLength(0);
         expect(mockFindPackageForPath).not.toHaveBeenCalled();
       });
     });

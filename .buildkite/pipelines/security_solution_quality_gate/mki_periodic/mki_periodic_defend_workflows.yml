@@ -47,6 +47,7 @@ steps:
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
+          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -64,6 +65,7 @@ steps:
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
+          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -81,6 +83,7 @@ steps:
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
+          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -98,6 +101,7 @@ steps:
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
+          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -115,6 +119,7 @@ steps:
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
+          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -126,12 +131,15 @@ steps:
       - label: "API MKI - edr_workflows:policy_response:qa:serverless"
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:policy_response:qa:serverless
         key: edr_workflows:policy_response:qa:serverless
+        env:
+          CLEAR_YARN_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
+          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -149,6 +157,7 @@ steps:
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
+          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -166,6 +175,7 @@ steps:
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
+          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -183,6 +193,7 @@ steps:
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
+          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -200,6 +211,7 @@ steps:
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
+          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -217,6 +229,7 @@ steps:
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
+          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:

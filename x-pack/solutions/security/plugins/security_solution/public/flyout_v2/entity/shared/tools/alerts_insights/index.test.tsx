@@ -50,7 +50,7 @@ jest.mock(
       value: string;
       entityId?: string;
       entityType?: string;
-      onShowAlert?: (eventId: string, indexName: string) => void;
+      onShowAlert?: (eventId: string, indexName: string, ruleName?: string) => void;
     }) => (
       <button
         type="button"
@@ -59,7 +59,7 @@ jest.mock(
         data-value={value}
         data-entity-id={entityId ?? ''}
         data-entity-type={entityType ?? ''}
-        onClick={() => onShowAlert?.('event-1', '.alerts-security')}
+        onClick={() => onShowAlert?.('event-1', '.alerts-security', 'My Alert Rule')}
       >
         {'alerts-table'}
       </button>
@@ -81,6 +81,7 @@ jest.mock('../../../../shared/components/cell_actions', () => ({
 
 jest.mock('../../../../shared/hooks/use_default_flyout_properties', () => ({
   useDefaultDocumentFlyoutProperties: () => ({ size: 'm' }),
+  useDefaultToolsFlyoutProperties: () => ({ minWidth: 384, size: 'm' }),
 }));
 
 jest.mock('../../../../../common/hooks/is_in_security_app', () => ({
@@ -101,6 +102,8 @@ jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
       overlays: { openSystemFlyout: mockOpenSystemFlyout },
+      storage: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
+      telemetry: { reportEvent: jest.fn() },
     },
   }),
 }));
@@ -108,6 +111,7 @@ jest.mock('../../../../../common/lib/kibana', () => ({
 describe('<AlertsInsights /> host', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
   });
 
   it('renders the header with the title, host label and storage icon', () => {
@@ -151,7 +155,7 @@ describe('<AlertsInsights /> host', () => {
     expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ session: 'inherit' })
+      expect.objectContaining({ session: 'inherit', title: 'Alert: My Alert Rule' })
     );
   });
 });

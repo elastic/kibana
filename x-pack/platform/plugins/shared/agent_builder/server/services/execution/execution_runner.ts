@@ -46,7 +46,7 @@ import {
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
-import { withConverseSpan } from '../../tracing';
+import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { MeteringService } from '../metering';
 import type { AgentExecutionClient } from './persistence';
@@ -123,6 +123,7 @@ const handleConversationExecution = async ({
     configurationOverrides,
     action,
     telemetryMetadata,
+    maxContentLength,
     accessControl,
   } = execution.agentParams;
 
@@ -148,6 +149,12 @@ const handleConversationExecution = async ({
     origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
   });
 
+  const author = await deps.conversationService.getConversationRoundAuthor({
+    request,
+    conversation,
+    origin,
+  });
+
   // Emit conversation ID for new conversations (only when persisting)
   const conversationIdEvent$ =
     storeConversation && conversation.operation === 'CREATE'
@@ -161,6 +168,7 @@ const handleConversationExecution = async ({
     request,
     nextInput,
     origin,
+    author,
     capabilities,
     structuredOutput,
     outputSchema,
@@ -168,6 +176,7 @@ const handleConversationExecution = async ({
     conversation,
     defaultConnectorId: selectedConnectorId,
     telemetryMetadata,
+    maxContentLength,
     runAgent,
     browserApiTools,
     configurationOverrides,
@@ -210,6 +219,11 @@ const handleConversationExecution = async ({
       : undefined;
 
   const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
+  const privacySettings = await loadTracingPrivacySettings({
+    uiSettingsClient: deps.uiSettings.asScopedToClient(deps.savedObjects.getScopedClient(request)),
+    logger,
+    spaceId,
+  });
 
   return withConverseSpan(
     {
@@ -218,6 +232,7 @@ const handleConversationExecution = async ({
       providerName: connectorProvider,
       conversationId: conversation.id,
       spaceId,
+      privacySettings,
       opikHeaders,
     },
     () =>
@@ -413,7 +428,6 @@ const buildPersistenceEvents = ({
   return updateConversation$({
     conversationClient,
     conversation,
-    title$,
     roundCompletedEvents$,
     action,
   });
@@ -436,7 +450,7 @@ const handleStandaloneExecution = async ({
 }): Promise<Observable<ChatEvent>> => {
   const agentId = execution.agentId;
   const { logger, runAgent } = deps;
-  const { telemetryMetadata } = execution.agentParams;
+  const { telemetryMetadata, maxContentLength } = execution.agentParams;
 
   const { selectedConnectorId } = await resolveServices({
     agentId,
@@ -456,6 +470,7 @@ const handleStandaloneExecution = async ({
     conversation: undefined,
     defaultConnectorId: selectedConnectorId,
     telemetryMetadata,
+    maxContentLength,
     runAgent,
     executionMode: AgentExecutionMode.standalone,
   });

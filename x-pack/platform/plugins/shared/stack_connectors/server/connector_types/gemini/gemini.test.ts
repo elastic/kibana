@@ -202,6 +202,31 @@ describe('GeminiConnector', () => {
         expect(response).toEqual(connectorResponse);
       });
 
+      it('forwards maxContentLength to the request when provided', async () => {
+        await connector.runApi(
+          {
+            body: JSON.stringify(sampleGeminiBody),
+            model: DEFAULT_MODEL,
+            maxContentLength: 10 * 1024 * 1024,
+          },
+          connectorUsageCollector
+        );
+
+        expect(mockRequest).toHaveBeenCalledWith(
+          expect.objectContaining({ maxContentLength: 10 * 1024 * 1024 }),
+          connectorUsageCollector
+        );
+      });
+
+      it('does not set maxContentLength when not provided', async () => {
+        await connector.runApi(
+          { body: JSON.stringify(sampleGeminiBody), model: DEFAULT_MODEL },
+          connectorUsageCollector
+        );
+
+        expect(mockRequest.mock.calls[0][0]).not.toHaveProperty('maxContentLength');
+      });
+
       describe('RunApiResponseSchema', () => {
         it('successfully validates a response that only has known properties', () => {
           const onlyKnownProperties = {
@@ -450,6 +475,21 @@ describe('GeminiConnector', () => {
             signal: undefined,
             timeout: 200000,
           },
+          connectorUsageCollector
+        );
+      });
+
+      it('forwards maxContentLength to the streaming request when provided', async () => {
+        await connector.invokeStream(
+          { ...aiAssistantBody, maxContentLength: 10 * 1024 * 1024 },
+          connectorUsageCollector
+        );
+
+        expect(mockRequest).toHaveBeenCalledWith(
+          expect.objectContaining({
+            responseType: 'stream',
+            maxContentLength: 10 * 1024 * 1024,
+          }),
           connectorUsageCollector
         );
       });

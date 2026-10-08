@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import type { SavedSearchTableConfig } from '@kbn/saved-search-component';
 
+import { useTimeRangeId } from '../../../../context/time_range_id/use_time_range_id';
 import { TransactionSummary } from '../../../shared/summary/transaction_summary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/transaction_action_menu';
 import { MaybeViewTraceLink } from './maybe_view_trace_link';
@@ -76,6 +77,13 @@ export function WaterfallWithSummary<TSample extends {}>({
 }: Props<TSample>) {
   const [sampleActivePage, setSampleActivePage] = useState(0);
   const [isFullTraceFlyoutOpen, setIsFullTraceFlyoutOpen] = useState(false);
+  const { pauseAutoRefresh, resumeAutoRefresh } = useTimeRangeId();
+
+  useEffect(() => {
+    if (!isFullTraceFlyoutOpen) return;
+    pauseAutoRefresh();
+    return resumeAutoRefresh;
+  }, [isFullTraceFlyoutOpen, pauseAutoRefresh, resumeAutoRefresh]);
 
   const isControlled = selectedSample !== undefined;
 

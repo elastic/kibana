@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 
 export type StaticPage =
   | 'base'
@@ -97,9 +97,6 @@ export const FLEET_ROUTING_PATHS = {
   settings_edit_fleet_proxy: '/settings/fleet-proxies/:itemId',
   settings_edit_download_sources: '/settings/downloadSources/:downloadSourceId',
   debug: '/_debug',
-
-  // TODO: Move this to the integrations app
-  add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
 };
 
 export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';
@@ -125,6 +122,7 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integration_policy_edit: '/edit-integration/:packagePolicyId',
   integration_policy_copy: '/copy-integration/:packagePolicyId',
   integration_policy_upgrade: '/edit-integration/:packagePolicyId',
+  add_integration_to_policy: '/detail/:pkgkey/add-integration/:integration?',
 };
 
 export const pagePathGetters: {
@@ -164,11 +162,8 @@ export const pagePathGetters: {
     if (showDeprecated === true) {
       queryParams.set(INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM, 'true');
     }
-    const queryString = queryParams.toString();
-    return [
-      INTEGRATIONS_BASE_PATH,
-      `/browse${categoryPath}${queryString ? `?${queryString}` : ''}`,
-    ];
+    const search = queryParams.toString();
+    return [INTEGRATIONS_BASE_PATH, `/browse${categoryPath}${search ? `?${search}` : ''}`];
   },
   integrations_installed: ({ query, category }: { query?: string; category?: string }) => {
     const categoryPath = category ? `/${category}` : ``;
@@ -188,7 +183,7 @@ export const pagePathGetters: {
   },
   integration_create: () => [INTEGRATIONS_BASE_PATH, `/create`],
   integration_details_overview: ({ pkgkey, integration, returnAppId, returnPath }) => {
-    const qs = stringify({ integration, returnAppId, returnPath });
+    const qs = queryString.stringify({ integration, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/overview${qs ? `?${qs}` : ''}`];
   },
   integration_details_policies: ({
@@ -198,31 +193,31 @@ export const pagePathGetters: {
     returnAppId,
     returnPath,
   }) => {
-    const qs = stringify({ integration, addAgentToPolicyId, returnAppId, returnPath });
+    const qs = queryString.stringify({ integration, addAgentToPolicyId, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/policies${qs ? `?${qs}` : ''}`];
   },
   integration_details_assets: ({ pkgkey, integration, returnAppId, returnPath }) => {
-    const qs = stringify({ integration, returnAppId, returnPath });
+    const qs = queryString.stringify({ integration, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/assets${qs ? `?${qs}` : ''}`];
   },
   integration_details_alerting: ({ pkgkey, integration, returnAppId, returnPath }) => {
-    const qs = stringify({ integration, returnAppId, returnPath });
+    const qs = queryString.stringify({ integration, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/alerting${qs ? `?${qs}` : ''}`];
   },
   integration_details_settings: ({ pkgkey, integration, returnAppId, returnPath }) => {
-    const qs = stringify({ integration, returnAppId, returnPath });
+    const qs = queryString.stringify({ integration, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/settings${qs ? `?${qs}` : ''}`];
   },
   integration_details_configs: ({ pkgkey, integration, returnAppId, returnPath }) => {
-    const qs = stringify({ integration, returnAppId, returnPath });
+    const qs = queryString.stringify({ integration, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/configs${qs ? `?${qs}` : ''}`];
   },
   integration_details_custom: ({ pkgkey, integration, returnAppId, returnPath }) => {
-    const qs = stringify({ integration, returnAppId, returnPath });
+    const qs = queryString.stringify({ integration, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/custom${qs ? `?${qs}` : ''}`];
   },
   integration_details_api_reference: ({ pkgkey, integration, returnAppId, returnPath }) => {
-    const qs = stringify({ integration, returnAppId, returnPath });
+    const qs = queryString.stringify({ integration, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/api-reference${qs ? `?${qs}` : ''}`];
   },
   integration_policy_edit: ({ packagePolicyId }) => [
@@ -261,14 +256,14 @@ export const pagePathGetters: {
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
   ],
   add_integration_to_policy: ({ pkgkey, integration, agentPolicyId, prerelease }) => {
-    const qs = stringify({
+    const qs = queryString.stringify({
       ...(agentPolicyId ? { policyId: agentPolicyId } : {}),
       ...(prerelease ? { prerelease } : {}),
     });
     return [
-      FLEET_BASE_PATH,
+      INTEGRATIONS_BASE_PATH,
       // prettier-ignore
-      `/integrations/${pkgkey}/add-integration${integration ? `/${integration}` : ''}${qs ? `?${qs}` : ''}`,
+      `/detail/${pkgkey}/add-integration${integration ? `/${integration}` : ''}${qs ? `?${qs}` : ''}`,
     ];
   },
   edit_integration: ({ policyId, packagePolicyId }) => [

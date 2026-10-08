@@ -28,7 +28,7 @@ export interface EntitiesTableSectionProps {
   config: EntitiesTableConfig;
 }
 
-export const EntitiesTableSection = ({ state, config }: EntitiesTableSectionProps) => {
+const EntitiesTableSectionComponent = ({ state, config }: EntitiesTableSectionProps) => {
   const { grouping } = useEntityGrouping({
     state,
     tableId: config.tableId,
@@ -56,6 +56,11 @@ export const EntitiesTableSection = ({ state, config }: EntitiesTableSectionProp
     />
   );
 };
+
+// Memoized so an unrelated URL change (e.g. the `timeline` param written when
+// Investigate-in-Timeline opens the timeline) does not reconcile the entities
+// grid. Relies on `useEntityURLState` returning a stable `state` reference.
+export const EntitiesTableSection = React.memo(EntitiesTableSectionComponent);
 
 interface GroupWithURLPaginationProps {
   state: EntityURLStateResult;

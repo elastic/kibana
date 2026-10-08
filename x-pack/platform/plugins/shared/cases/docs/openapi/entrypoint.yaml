@@ -33,8 +33,12 @@ paths:
     $ref: 'paths/api@cases@templates.yaml'
   '/api/cases/templates/{template_id}':
     $ref: 'paths/api@cases@templates@{templateid}.yaml'
+  '/api/cases/fields':
+    $ref: 'paths/api@cases@fields.yaml'
   '/api/cases/{caseId}':
     $ref: 'paths/api@cases@{caseid}.yaml'
+  '/api/cases/{caseId}/fields':
+    $ref: 'paths/api@cases@{caseid}@fields.yaml'
   '/api/cases/{caseId}/alerts':
     $ref: 'paths/api@cases@{caseid}@alerts.yaml'
   '/api/cases/{caseId}/comments':

@@ -3,40 +3,41 @@ pageLoadAssetSize:
   advancedSettings: 6196
   agentBuilder: 51190
   agentBuilderDashboards: 7786
-  agentBuilderPlatform: 26248
+  agentBuilderPlatform: 27400
   agentBuilderVisualizations: 7356
   agentBuilderWorkflows: 24405
   agentContextLayer: 10146
   aiAssistantManagementSelection: 11569
-  aiops: 15227
+  aiops: 18400
   alerting: 22371
   alertingVTwo: 56591
-  apm: 57201
+  apm: 59500
   apmSourcesAccess: 2278
   automaticImport: 18629
   banners: 4006
   canvas: 14881
-  cases: 242617
+  cases: 310000
   charts: 40269
+  clientApps: 4688
   cloud: 11743
   cloudConnect: 9149
   cloudDataMigration: 5687
   cloudDefend: 8146
-  cloudExperiments: 103984
+  cloudExperiments: 168851
   cloudFullStory: 4752
   cloudLinks: 42432
   cloudSecurityPosture: 19743
   console: 31191
   contentConnectors: 33014
-  contentManagement: 8350
+  contentManagement: 8323
   controls: 10300
   core: 606422
-  cps: 9209
+  cps: 9109
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 20000
   dashboardMarkdown: 8661
-  data: 2758999
+  data: 516784
   dataFederation: 7106
   dataQuality: 11469
   datasetQuality: 49315
@@ -45,12 +46,12 @@ pageLoadAssetSize:
   dataViewFieldEditor: 26024
   dataViewManagement: 6250
   dataViews: 66000
-  dataVisualizer: 32727
+  dataVisualizer: 33244
   developerToolbar: 6043
   devTools: 8107
   discover: 32000
   discoverEnhanced: 5353
-  discoveries: 35780
+  discoveries: 39653
   discoverShared: 2322
   elasticAssistant: 299772
   elasticAssistantSharedState: 4881
@@ -58,10 +59,10 @@ pageLoadAssetSize:
   embeddable: 19587
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
-  entityStore: 14114
+  entityStore: 17200
   esql: 29469
   esqlDataGrid: 10209
-  esUiShared: 101220
+  esUiShared: 102387
   evals: 6117
   eventAnnotation: 22334
   eventAnnotationListing: 13164
@@ -74,14 +75,14 @@ pageLoadAssetSize:
   expressions: 104955
   expressionTagcloud: 14009
   expressionXY: 45000
-  features: 4145
+  features: 4141
   feedback: 7642
   fieldFormats: 64634
   fieldsMetadata: 4901
   files: 6037
   filesManagement: 5208
   fileUpload: 22957
-  fleet: 235000
+  fleet: 235470
   genAiSettings: 6342
   globalSearch: 6890
   globalSearchBar: 31212
@@ -111,7 +112,7 @@ pageLoadAssetSize:
   kubernetesSecurity: 6807
   lens: 99147
   licenseManagement: 8193
-  licensing: 10073
+  licensing: 10058
   links: 8620
   lists: 5093
   logsDataAccess: 7900
@@ -129,15 +130,15 @@ pageLoadAssetSize:
   newsfeed: 11110
   noDataPage: 1749
   notificationCenter: 1791
-  observability: 107797
+  observability: 108732
   observabilityAgentBuilder: 10178
   observabilityAIAssistant: 67295
   observabilityAIAssistantApp: 17100
   observabilityAiAssistantManagement: 7126
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 14161
-  observabilityShared: 75022
-  osquery: 48128
+  observabilityShared: 82578
+  osquery: 51100
   painlessLab: 6299
   presentationUtil: 8391
   productDocBase: 6769
@@ -151,8 +152,8 @@ pageLoadAssetSize:
   runtimeFields: 11828
   sampleDataIngest: 2640
   savedObjects: 11735
-  savedObjectsFinder: 4319
-  savedObjectsManagement: 22361
+  savedObjectsFinder: 4306
+  savedObjectsManagement: 22273
   savedObjectsTagging: 23144
   savedObjectsTaggingOss: 2163
   savedSearch: 11000
@@ -163,13 +164,13 @@ pageLoadAssetSize:
   searchHomepage: 9005
   searchInferenceEndpoints: 9765
   searchNavigation: 8900
-  searchNotebooks: 18826
+  searchNotebooks: 20151
   searchPlayground: 12122
   searchprofiler: 6509
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79863
-  securitySolution: 188674
+  securitySolution: 210408
   securitySolutionEss: 42592
   securitySolutionServerless: 57290
   serverless: 7412
@@ -199,8 +200,8 @@ pageLoadAssetSize:
   upgradeAssistant: 6898
   uptime: 48171
   urlDrilldown: 5852
-  urlForwarding: 7349
-  usageCollection: 5655
+  urlForwarding: 7346
+  usageCollection: 5641
   ux: 8376
   visDefaultEditor: 35080
   visTypeGauge: 13006
@@ -217,6 +218,6 @@ pageLoadAssetSize:
   visualizationListing: 5148
   visualizations: 52092
   watcher: 10485
-  workflowsExtensions: 43032
+  workflowsExtensions: 44500
   workflowsManagement: 39968
   workplaceAIApp: 6234

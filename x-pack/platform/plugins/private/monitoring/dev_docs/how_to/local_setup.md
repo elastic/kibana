@@ -1,11 +1,11 @@
 # Basic setups
 
-## Yarn and internal collection
+## Local internal collection
 
 For the simplest Elasticsearch & Kibana stack monitoring setup from a kibana clone, using [internal collection](../reference/terminology.md#internal-collection), first start elasticsearch with monitoring and a local [exporter](https://www.elastic.co/guide/en/elasticsearch/reference/current/es-monitoring-exporters.html) enabled.
 
 ```shell
-yarn es snapshot --license trial \
+pnpm es snapshot --license trial \
   -E xpack.monitoring.collection.enabled=true \ 
   -E xpack.monitoring.exporters.id0.type=local
 ```
@@ -13,7 +13,7 @@ yarn es snapshot --license trial \
 Then start kibana:
 
 ```shell
-yarn start
+pnpm start
 ```
 
 Open kibana and navigate to "Stack Monitoring" (sidebar, homepage, or search bar). You should see a page like this.
@@ -22,12 +22,12 @@ Open kibana and navigate to "Stack Monitoring" (sidebar, homepage, or search bar
 
 This is definitely the simplest way to get some data to explore, but internal collection is a deprecated collection mode, so next we'll use metricbeat collection.
 
-## Yarn and metricbeat collection
+## Local metricbeat collection
 
 To set up stack monitoring with [metricbeat collection](../reference/terminology.md#metricbeat-collection), first start elasticsearch with a trial license.
 
 ```shell
-yarn es snapshot --license trial
+pnpm es snapshot --license trial
 ```
 
 Next, we'll need to give kibana a fixed base url so metricbeat can query it. So add this to your `kibana.dev.yml` file:
@@ -39,7 +39,7 @@ server.basePath: '/ftw'
 Then start kibana:
 
 ```shell
-yarn start
+pnpm start
 ```
 
 Next start metricbeat. Any method of [installing metricbeat](https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation-configuration.html) works fine. We'll use docker since it is a good common point regardless of your development OS.
@@ -73,7 +73,7 @@ docker run --name filebeat \
 
 The "[Standalone Cluster](../reference/terminology.md#standalone-cluster)" entry appears in Stack Monitoring when there are monitoring documents that lack a `cluster_uuid`. Beats will send these in some timing/failure cases, but the easiest way to generate them intentionally to start a logstash node with monitoring enabled and no elasticsearch output.
 
-For example using docker and [metricbeat collection](#yarn-and-metricbeat-collection):
+For example using docker and [metricbeat collection](#local-metricbeat-collection):
 
 ```shell
 docker run --name logstash \

@@ -27,7 +27,6 @@ export const ArtifactsSection: React.FC = () => {
           </strong>
         </EuiText>
       }
-      paddingSize="m"
       initialIsOpen
     >
       <EuiFlexGroup gutterSize="l" responsive={true} data-test-subj="ruleArtifactsSubsectionsRow">

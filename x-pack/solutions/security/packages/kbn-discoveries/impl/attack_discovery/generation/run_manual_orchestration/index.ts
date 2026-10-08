@@ -60,7 +60,7 @@ export { PipelineStepError } from './helpers/pipeline_step_error';
  * `on-failure: retry` (fail-closed): a retry would restart the long-running
  * conversation-stateful step from scratch and burn the remaining budget.
  */
-const DEFAULT_PIPELINE_TIMEOUT_MS = 30 * 60 * 1000;
+export const DEFAULT_PIPELINE_TIMEOUT_MS = 30 * 60 * 1000;
 
 export const runManualOrchestration = async ({
   alerts,
@@ -306,7 +306,7 @@ export const runManualOrchestration = async ({
       ) {
         throw new AttackDiscoveryError({
           errorCategory: ERROR_CATEGORIES.validation_error,
-          message: `Gate returned no alerts: the skill's additional retrieval was the sole source (0 deterministic candidate alerts) but the gate added 0 alerts (execution_uuid=${executionUuid}). Failing closed instead of reporting a silent no-alerts outcome.`,
+          message: `No alerts were available to analyze for the selected time range: no candidate alerts were retrieved and the skill's additional retrieval returned none (execution_uuid=${executionUuid}).`,
           workflowId: ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW_ID,
         });
       }

@@ -34,6 +34,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
     abortSignal,
     metadata,
     timeout,
+    maxContentLength,
     stream = false,
   }) => {
     const connector = executor.getConnector();
@@ -57,6 +58,9 @@ export const geminiAdapter: InferenceConnectorAdapter = {
             ? { telemetryMetadata: metadata.connectorTelemetry }
             : {}),
           ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
+          ...(typeof maxContentLength === 'number' && isFinite(maxContentLength)
+            ? { maxContentLength }
+            : {}),
         },
       });
     });
@@ -154,13 +158,28 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
               )
             : {},
         };
-      case 'string':
+      case 'string': {
+        const enumValues = def.enum
+          ? (def.enum as string[])
+          : def.const
+          ? [def.const as string]
+          : undefined;
+        // Vertex AI treats `format: 'enum'` as a promise that `enum` is
+        // non-empty and rejects the request otherwise, so only emit an enum
+        // schema when the schema actually constrains the value to an enum/const.
+        if (enumValues?.length) {
+          return {
+            type: Gemini.SchemaType.STRING,
+            format: 'enum',
+            description: def.description,
+            enum: enumValues,
+          };
+        }
         return {
           type: Gemini.SchemaType.STRING,
-          format: 'enum',
           description: def.description,
-          enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : [],
         };
+      }
       case 'boolean':
         return {
           type: Gemini.SchemaType.BOOLEAN,

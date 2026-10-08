@@ -17,6 +17,7 @@ import {
 export const tagsSearchRequestQuerySchema = schema.object({
   query: schema.maybe(
     schema.string({
+      maxLength: 2048,
       meta: {
         description:
           'Filters results by `name` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.',
@@ -28,6 +29,8 @@ export const tagsSearchRequestQuerySchema = schema.object({
 
 export const tagIdParamSchema = schema.object({
   id: schema.string({
+    minLength: 1,
+    maxLength: 256,
     meta: {
       description: 'The tag ID, as returned by the create or search endpoints.',
     },
@@ -37,18 +40,23 @@ export const tagIdParamSchema = schema.object({
 export const tagAttributesSchema = schema.object(
   {
     name: schema.string({
+      minLength: 1,
+      maxLength: 256,
       meta: {
         description: 'The display name of the tag.',
       },
     }),
     description: schema.maybe(
       schema.string({
+        maxLength: 2048,
         meta: {
           description: 'Optional description of the tag.',
         },
       })
     ),
     color: schema.string({
+      minLength: 1,
+      maxLength: 256,
       meta: {
         description:
           'The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.',
@@ -80,6 +88,7 @@ export const tagRequestAttributesSchema = schema.object(
 
 export const tagResponseItemSchema = schema.object(
   {
+    // codeql[js/kibana/unbounded-string-in-schema] output schema — server controls the response size
     id: schema.string({ meta: { description: 'The tag ID.' } }),
     data: tagAttributesSchema,
     meta: asCodeMetaSchema,

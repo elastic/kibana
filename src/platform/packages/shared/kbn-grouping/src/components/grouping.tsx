@@ -50,7 +50,7 @@ export interface GroupingProps<T> {
   activePage: number;
   data?: ParsedGroupingAggregation<T>;
   groupPanelRenderer?: GroupPanelRenderer<T>;
-  groupSelector?: JSX.Element;
+  groupSelector?: JSX.Element | null;
   // list of custom UI components which correspond to your custom rendered metrics aggregations
   getGroupStats?: GetGroupStats<T>;
   groupingId: string;
@@ -305,7 +305,7 @@ const GroupingComponent = <T,>({
                     {control}
                   </EuiFlexItem>
                 ))}
-              <EuiFlexItem>{groupSelector}</EuiFlexItem>
+              {groupSelector ? <EuiFlexItem>{groupSelector}</EuiFlexItem> : null}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

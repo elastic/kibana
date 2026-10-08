@@ -32,7 +32,12 @@ import { inlineEsqlVariables } from '../../utils/esql_rule_utils';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import { ConfirmRuleClose } from '../confirm_rule_close';
-import type { FormValues, RuleNotificationsValue, RuleQuery } from '../../form/types';
+import type {
+  FormValues,
+  RecoveryStrategy,
+  RuleNotificationsValue,
+  RuleQuery,
+} from '../../form/types';
 import { getBreachQuery } from '../../form/utils/query_helpers';
 import { enterManualSplitQuery, exitManualSplitQuery } from './manual_split_query';
 import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yaml_form_utils';
@@ -54,9 +59,13 @@ import {
   parseDiscoverQueryForBuilder,
   type BuilderState,
 } from './rule_builder';
-import type { ComposeDiscoverAction, ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
+import type { ComposeDiscoverAction, ComposeDiscoverMode, QueryTab } from './types';
 import { isBuilderConditionStepId } from './types';
-import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
+import {
+  getDefaultOpenTab,
+  getSandboxTabs,
+  useComposeDiscoverState,
+} from './use_compose_discover_state';
 import { useEsqlAutocomplete } from './use_esql_providers';
 import {
   guessRecoveryBlock,
@@ -66,7 +75,6 @@ import {
 } from './use_heuristic_split';
 import { useSplitQueryCompletion } from './use_split_query_completion';
 import { getTimeFieldResolutionQuery } from './get_time_field_resolution_query';
-import { ComposeDiscoverTimeFieldContextProvider } from './compose_discover_time_field_context';
 import { useResolveTimeField } from './use_resolve_time_field';
 
 const LazyYamlRuleForm = React.lazy(() =>
@@ -143,17 +151,6 @@ const getFlyoutTitle = (mode: ComposeDiscoverMode): string => {
   return CREATE_TITLE;
 };
 
-const getInitialRecoveryType = (
-  hasInitialCustomRecovery: boolean,
-  rule: ComposeDiscoverFlyoutProps['rule']
-): RecoveryType => {
-  if (hasInitialCustomRecovery) return 'custom';
-  if (rule != null && (rule.recovery_strategy === 'none' || rule.recovery_strategy == null)) {
-    return 'none';
-  }
-  return 'default';
-};
-
 /*
  * These hooks live in the plugin, not the package — imported via the plugin's hook layer
  * when this flyout is rendered in the rules list page.
@@ -180,14 +177,12 @@ export interface ComposeDiscoverFlyoutProps {
   /**
    * Called with id + update payload when the user submits in edit mode. When the user
    * configures simple actions, `notifications` carries the captured action draft list so
-   * the caller can create or update linked action policies; otherwise it is `undefined`.
-   * `notificationsDirty` is true only when the user changed the simple actions in this session.
+   * the caller can create linked action policies; otherwise it is `undefined`.
    */
   onUpdateRule?: (
     id: string,
     payload: ReturnType<typeof composeFormToUpdateRequest>,
-    notifications?: RuleNotificationsValue,
-    notificationsDirty?: boolean
+    notifications?: RuleNotificationsValue
   ) => void;
   /** True while a create/update mutation is in flight. */
   isSaving?: boolean;
@@ -269,9 +264,6 @@ export function ComposeDiscoverFlyout({
   const initialMapped =
     (mode === 'edit' || mode === 'clone') && rule ? mapRuleToComposeFormValues(rule) : undefined;
   const initialKind = initialMapped?.kind ?? 'alert';
-  const hasInitialCustomRecovery =
-    initialMapped?.query?.format === 'composed' && !!initialMapped.query.recovery?.segment?.trim();
-  const initialRecoveryType = getInitialRecoveryType(hasInitialCustomRecovery, rule);
 
   const forceYamlMode = Boolean(rule && isNonRepresentableRule(rule));
 
@@ -293,7 +285,6 @@ export function ComposeDiscoverFlyout({
   const [uiState, rawDispatch] = useComposeDiscoverState({
     mode: mode === 'clone' ? 'edit' : mode,
     initialKind,
-    initialRecoveryType,
     isQueryPrePopulated: isDiscoverQueryComplete,
     forceYamlMode,
   });
@@ -394,16 +385,6 @@ export function ComposeDiscoverFlyout({
   const yamlBaselineRef = useRef<string | null>(null);
   const yamlTextRef = useRef('');
   const hasBeenEditedRef = useRef(false);
-  const notificationsDirtyRef = useRef(false);
-  if (methods.formState.dirtyFields.notifications) {
-    notificationsDirtyRef.current = true;
-  }
-
-  /*
-   * recoveryType lives in uiState (not RHF), so toggling it doesn't mark
-   * the form dirty. Track the initial value to detect user changes.
-   */
-  const initialRecoveryTypeRef = useRef(initialRecoveryType);
 
   /*
    * Tracks whether the close was triggered by the Cancel button ('button')
@@ -434,13 +415,12 @@ export function ComposeDiscoverFlyout({
   const handleRequestClose = useCallback(() => {
     const yamlDirty =
       yamlBaselineRef.current !== null && yamlTextRef.current !== yamlBaselineRef.current;
-    const recoveryTypeDirty = uiState.recoveryType !== initialRecoveryTypeRef.current;
-    if (isDirtyRef.current || yamlDirty || hasBeenEditedRef.current || recoveryTypeDirty) {
+    if (isDirtyRef.current || yamlDirty || hasBeenEditedRef.current) {
       setIsConfirmCloseVisible(true);
     } else {
       onClose();
     }
-  }, [onClose, uiState.recoveryType]);
+  }, [onClose]);
 
   const handleConfirmDiscard = useCallback(() => {
     setIsConfirmCloseVisible(false);
@@ -469,14 +449,21 @@ export function ComposeDiscoverFlyout({
   const [dateRange, setDateRange] = useState({ dateStart: 'now-15m', dateEnd: 'now' });
 
   const watchedTimeField = useWatch({ control: methods.control, name: 'timeField' });
+  /*
+   * One-way RHF -> sandbox draft push. `sandboxTimeField` must stay out of the deps:
+   * with it, the effect re-fires on its own output and reverts the user's in-progress
+   * sandbox selection back to the committed form value (#281806).
+   */
   useEffect(() => {
-    if (watchedTimeField && watchedTimeField !== sandboxTimeField) {
+    if (watchedTimeField) {
       setSandboxTimeField(watchedTimeField);
     }
-  }, [watchedTimeField, sandboxTimeField]);
+  }, [watchedTimeField]);
 
   const isAlert = useWatch({ control: methods.control, name: 'kind' }) === 'alert';
   const watchedQuery = useWatch({ control: methods.control, name: 'query' });
+  const watchedRecoveryStrategy = useWatch({ control: methods.control, name: 'recoveryStrategy' });
+  const hasCustomRecovery = watchedRecoveryStrategy === 'query';
 
   const timeFieldResolutionQuery = useMemo(
     () =>
@@ -591,16 +578,26 @@ export function ComposeDiscoverFlyout({
 
   /*
    * After "Continue editing" bumps flyoutKey and the EuiFlyout remounts,
-   * the sandbox (cascade-closed by closeAllFlyouts()) needs reopening.
-   * Read isAlert via ref so this effect only fires on flyoutKey changes,
-   * not on kind toggles (where reopenChildRef is always false anyway).
+   * the sandbox (cascade-closed by closeAllFlyouts()) needs reopening on the
+   * tab it would default to for the current step/recovery/manual-split state.
+   * isAlert is read via ref so this effect doesn't fire on kind toggles; the
+   * body is gated by reopenChildRef, so extra runs from other deps are no-ops.
    */
   useEffect(() => {
     if (reopenChildRef.current) {
       reopenChildRef.current = false;
-      dispatch({ type: 'OPEN_CHILD', isAlert: isAlertRef.current });
+      dispatch({
+        type: 'OPEN_CHILD',
+        isAlert: isAlertRef.current,
+        focusedTab: getDefaultOpenTab(
+          isAlertRef.current,
+          uiState.step,
+          hasCustomRecovery,
+          uiState.manualSplitEnabled
+        ),
+      });
     }
-  }, [flyoutKey, dispatch]);
+  }, [flyoutKey, dispatch, hasCustomRecovery, uiState.step, uiState.manualSplitEnabled]);
 
   const handleKindChange = useCallback(
     (kind: 'signal' | 'alert') => {
@@ -643,10 +640,9 @@ export function ComposeDiscoverFlyout({
   }, [isBuilderMode, methods]);
 
   const handleRecoveryTypeChange = useCallback(
-    (type: RecoveryType) => {
-      if (type === 'custom') {
-        // Clear any explicit override so it's re-derived from query.recovery, not left stale.
-        methods.setValue('recoveryStrategy', undefined, { shouldDirty: true });
+    (strategy: RecoveryStrategy) => {
+      methods.setValue('recoveryStrategy', strategy, { shouldDirty: true });
+      if (strategy === 'query') {
         setSandboxQuery((q) => {
           if (q.format !== 'composed') return q;
           const current = q.recovery?.segment ?? '';
@@ -666,10 +662,10 @@ export function ComposeDiscoverFlyout({
             },
           };
         });
+        if (!isBuilderMode) {
+          dispatch({ type: 'OPEN_CHILD', isAlert, focusedTab: 'recovery' });
+        }
       } else {
-        methods.setValue('recoveryStrategy', type === 'none' ? 'none' : 'no_breach', {
-          shouldDirty: true,
-        });
         /*
          * (a) Clear recovery from sandbox regardless of mode — prevents stale recovery
          * query from surviving a type change even when the sandbox is still open.
@@ -707,11 +703,11 @@ export function ComposeDiscoverFlyout({
           dispatch({ type: 'CLOSE_CHILD' });
         }
       }
-      dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: type, isBuilderMode });
     },
     [
       dispatch,
       methods,
+      isAlert,
       isBuilderMode,
       builderState,
       uiState.queryCommitted,
@@ -777,6 +773,9 @@ export function ComposeDiscoverFlyout({
 
       if (enabled) {
         manualSplitUncommittedRef.current = false;
+        if (isDirtyRef.current) {
+          hasBeenEditedRef.current = true;
+        }
         const serialized = serializeFormToYaml(methods.getValues());
         setYamlText(serialized);
         yamlBaselineRef.current = serialized;
@@ -871,12 +870,7 @@ export function ComposeDiscoverFlyout({
     if (isCreate) {
       onCreateRule(composeFormToCreateRequest(values, builderType), values.notifications);
     } else if (ruleId && onUpdateRule) {
-      onUpdateRule(
-        ruleId,
-        composeFormToUpdateRequest(values, builderType),
-        values.notifications,
-        notificationsDirtyRef.current || Boolean(methods.formState.dirtyFields.notifications)
-      );
+      onUpdateRule(ruleId, composeFormToUpdateRequest(values, builderType), values.notifications);
     }
   });
 
@@ -979,17 +973,11 @@ export function ComposeDiscoverFlyout({
     </>
   ) : null;
 
-  /*
-   * TODO: recoveryType drives whether the recovery tab appears in YAML mode.
-   * Follow schema decisions in #268984 — if recoveryType is superseded by a
-   * field on RuleQuery itself, gate this on query shape instead.
-   */
   const sandboxTabs = useMemo<QueryTab[] | undefined>(() => {
     if (!uiState.yamlMode) {
       return getSandboxTabs(isAlert, {
         step: uiState.step,
-        recoveryType: uiState.recoveryType,
-        mode: uiState.mode,
+        hasCustomRecovery,
         manualSplitEnabled: uiState.manualSplitEnabled,
       });
     }
@@ -999,12 +987,11 @@ export function ComposeDiscoverFlyout({
      * the single unified editor; composed queries keep the split tabs.
      */
     if (sandboxQuery.format === 'standalone') return undefined;
-    return uiState.recoveryType === 'custom' ? ['base', 'alert', 'recovery'] : ['base', 'alert'];
+    return hasCustomRecovery ? ['base', 'alert', 'recovery'] : ['base', 'alert'];
   }, [
     uiState.yamlMode,
-    uiState.recoveryType,
+    hasCustomRecovery,
     uiState.step,
-    uiState.mode,
     uiState.manualSplitEnabled,
     sandboxQuery.format,
     isAlert,
@@ -1183,7 +1170,7 @@ export function ComposeDiscoverFlyout({
   return (
     <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
       <FormProvider {...methods}>
-        <ComposeDiscoverTimeFieldContextProvider value={{ timeFieldOptions, isTimeFieldResolved }}>
+        <>
           <EuiFlyout
             key={flyoutKey}
             type="overlay"
@@ -1232,7 +1219,18 @@ export function ComposeDiscoverFlyout({
                             color="text"
                             iconType="chevronLimitLeft"
                             isDisabled={uiState.childOpen}
-                            onClick={() => dispatch({ type: 'OPEN_CHILD', isAlert })}
+                            onClick={() =>
+                              dispatch({
+                                type: 'OPEN_CHILD',
+                                isAlert,
+                                focusedTab: getDefaultOpenTab(
+                                  isAlert,
+                                  uiState.step,
+                                  hasCustomRecovery,
+                                  uiState.manualSplitEnabled
+                                ),
+                              })
+                            }
                             data-test-subj="composeDiscoverYamlQuerySandbox"
                           >
                             {QUERY_SANDBOX_LABEL}
@@ -1321,7 +1319,7 @@ export function ComposeDiscoverFlyout({
                 query={sandboxQuery}
                 onQueryChange={isBuilderMode ? undefined : setSandboxQuery}
                 tabs={sandboxTabs}
-                timeField={sandboxTimeField || '@timestamp'}
+                timeField={sandboxTimeField}
                 onTimeFieldChange={isBuilderMode ? undefined : setSandboxTimeField}
                 timeFieldOptions={timeFieldOptions}
                 isTimeFieldResolved={sandboxIsTimeFieldResolved}
@@ -1342,7 +1340,7 @@ export function ComposeDiscoverFlyout({
           {isConfirmCloseVisible && (
             <ConfirmRuleClose onCancel={handleCancelDiscard} onConfirm={handleConfirmDiscard} />
           )}
-        </ComposeDiscoverTimeFieldContextProvider>
+        </>
       </FormProvider>
     </RuleFormProvider>
   );

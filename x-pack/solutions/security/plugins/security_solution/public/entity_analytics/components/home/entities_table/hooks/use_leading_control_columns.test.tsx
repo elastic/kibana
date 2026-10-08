@@ -10,14 +10,22 @@ import { render, fireEvent, renderHook } from '@testing-library/react';
 import { useLeadingControlColumns } from './use_leading_control_columns';
 import type { RowControlColumn } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { useInvestigateInTimeline } from '../../../../../common/hooks/timeline/use_investigate_in_timeline';
 
 const mockGetEuidFilterBasedOnDocument = jest.fn();
 const mockUseEntityStoreEuidApi = jest.fn();
+const mockInvestigateInTimeline = jest.fn();
 
 jest.mock('@kbn/entity-store/public', () => ({
   useEntityStoreEuidApi: (...args: unknown[]) => mockUseEntityStoreEuidApi(...args),
   ENTITY_STORE_ROUTES: { public: { RESOLUTION_GROUP: '/mock/resolution/group' } },
 }));
+
+jest.mock('../../../../../common/hooks/timeline/use_investigate_in_timeline', () => ({
+  useInvestigateInTimeline: jest.fn(),
+}));
+
+const mockUseInvestigateInTimeline = jest.mocked(useInvestigateInTimeline);
 
 const mockRecord: DataTableRecord = {
   id: '1',
@@ -59,7 +67,6 @@ const renderTimelineControl = (column: RowControlColumn, record: DataTableRecord
 describe('useLeadingControlColumns', () => {
   const defaultArgs = {
     canUseTimeline: false,
-    investigateInTimeline: jest.fn(),
   };
 
   beforeEach(() => {
@@ -68,6 +75,9 @@ describe('useLeadingControlColumns', () => {
       euid: { kql: { getEuidFilterBasedOnDocument: mockGetEuidFilterBasedOnDocument } },
     });
     mockGetEuidFilterBasedOnDocument.mockReturnValue(undefined);
+    mockUseInvestigateInTimeline.mockReturnValue({
+      investigateInTimeline: mockInvestigateInTimeline,
+    });
   });
 
   it('returns no timeline action when canUseTimeline is false', () => {
@@ -83,21 +93,17 @@ describe('useLeadingControlColumns', () => {
   });
 
   describe('timeline action onClick', () => {
-    const investigateInTimeline = jest.fn();
-
     it('calls investigateInTimeline with KQL query when euidApi returns a filter', () => {
       mockGetEuidFilterBasedOnDocument.mockReturnValue('user.name: "john.doe"');
 
-      const { result } = renderHook(() =>
-        useLeadingControlColumns({ canUseTimeline: true, investigateInTimeline })
-      );
+      const { result } = renderHook(() => useLeadingControlColumns({ canUseTimeline: true }));
 
       const column = result.current.find((c) => c.id === 'entity-analytics-timeline-action')!;
       const { getByTestId } = renderTimelineControl(column);
       fireEvent.click(getByTestId('control-button'));
 
       expect(mockGetEuidFilterBasedOnDocument).toHaveBeenCalledWith('user', mockRecord.raw);
-      expect(investigateInTimeline).toHaveBeenCalledWith({
+      expect(mockInvestigateInTimeline).toHaveBeenCalledWith({
         query: { query: 'user.name: "john.doe"', language: 'kuery' },
       });
     });
@@ -105,15 +111,13 @@ describe('useLeadingControlColumns', () => {
     it('falls back to dataProviders when euidApi returns undefined', () => {
       mockGetEuidFilterBasedOnDocument.mockReturnValue(undefined);
 
-      const { result } = renderHook(() =>
-        useLeadingControlColumns({ canUseTimeline: true, investigateInTimeline })
-      );
+      const { result } = renderHook(() => useLeadingControlColumns({ canUseTimeline: true }));
 
       const column = result.current.find((c) => c.id === 'entity-analytics-timeline-action')!;
       const { getByTestId } = renderTimelineControl(column);
       fireEvent.click(getByTestId('control-button'));
 
-      expect(investigateInTimeline).toHaveBeenCalledWith({
+      expect(mockInvestigateInTimeline).toHaveBeenCalledWith({
         dataProviders: expect.any(Array),
       });
     });
@@ -121,15 +125,13 @@ describe('useLeadingControlColumns', () => {
     it('falls back to dataProviders when euidApi is null', () => {
       mockUseEntityStoreEuidApi.mockReturnValue(null);
 
-      const { result } = renderHook(() =>
-        useLeadingControlColumns({ canUseTimeline: true, investigateInTimeline })
-      );
+      const { result } = renderHook(() => useLeadingControlColumns({ canUseTimeline: true }));
 
       const column = result.current.find((c) => c.id === 'entity-analytics-timeline-action')!;
       const { getByTestId } = renderTimelineControl(column);
       fireEvent.click(getByTestId('control-button'));
 
-      expect(investigateInTimeline).toHaveBeenCalledWith({
+      expect(mockInvestigateInTimeline).toHaveBeenCalledWith({
         dataProviders: expect.any(Array),
       });
     });
@@ -141,9 +143,7 @@ describe('useLeadingControlColumns', () => {
         flattened: {},
       };
 
-      const { result } = renderHook(() =>
-        useLeadingControlColumns({ canUseTimeline: true, investigateInTimeline })
-      );
+      const { result } = renderHook(() => useLeadingControlColumns({ canUseTimeline: true }));
 
       const column = result.current.find((c) => c.id === 'entity-analytics-timeline-action')!;
       const { getByTestId } = renderTimelineControl(column, emptyRecord);

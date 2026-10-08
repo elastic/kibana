@@ -45,6 +45,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointMemoryDump: true,
 
   /**
+   * `physical` memory dump type for the Memory Dump response action for Elastic Defend Endpoint
+   * Release: 9.6, backported to 9.5.x
+   */
+  responseActionsEndpointMemoryDumpRaw: true,
+
+  /**
    * `runscript` response action for Elastic Defend Endpoint
    * Release: 9.4
    */
@@ -126,7 +132,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics surfaces such as the entity flyout, and registers the
    * `security.entity` unified cases attachment type.
    */
-  entityAttachmentsEnabled: false,
+  entityAttachmentsEnabled: true,
 
   /**
    * Enables AI rule creation feature
@@ -198,7 +204,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    *  Enables the Microsoft Sentinel rules import feature
    */
-  sentinelRulesMigration: false,
+  sentinelRulesMigration: true,
   /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
@@ -250,13 +256,13 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the find-security-rules Agent Builder skill.
    * Part of the DEX AI skills family (`dexAiSkill*`).
    */
-  dexAiSkillFindRules: false,
+  dexAiSkillFindRules: true,
 
   /**
    * Enables the recommend-prebuilt-rules Agent Builder skill.
    * Part of the DEX AI skills family (`dexAiSkill*`).
    */
-  dexAiSkillRecommendPrebuiltRules: false,
+  dexAiSkillRecommendPrebuiltRules: true,
 
   /**
    * Disables the new flyout using the EUI flyout system. When this flag is off (the default), the
@@ -274,13 +280,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables entity ML anomaly details API
    */
-  entityAnalyticsAnomalyDetails: false,
-
-  /**
-   * Enables the deprecated prebuilt rules UI
-   * Release: 9.4
-   */
-  prebuiltRulesDeprecationUIEnabled: true,
+  entityAnalyticsAnomalyDetails: true,
 
   /**
    * Enables the Detection Rule Changes History API endpoint
@@ -293,12 +293,6 @@ export const allowedExperimentalValues = Object.freeze({
   ruleChangesHistoryEnabled: true,
 
   /**
-   * Enables public Detection Engine attacks REST APIs
-   * (`/api/detection_engine/attacks/*`).
-   */
-  publicAttacksApiEnabled: false,
-
-  /**
    * Enables the agent builder `run_rule_preview` tool and the `security.rule.preview`
    * attachment (server type + client renderer). Gates registration so the feature can
    * ship dark and be enabled per environment.
@@ -308,7 +302,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the risk score history API endpoint for Entity Analytics.
    */
-  riskScoreHistoryEnabled: false,
+  riskScoreHistoryEnabled: true,
 
   /**
    * Enables UI treatments surfacing rules whose MITRE ATT&CK mappings drift

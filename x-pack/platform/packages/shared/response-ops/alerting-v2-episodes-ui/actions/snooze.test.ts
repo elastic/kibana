@@ -52,6 +52,19 @@ describe('createSnoozeAction', () => {
     ).toBe(false);
   });
 
+  it('compatible when snooze has expired', () => {
+    expect(
+      createSnoozeAction(makeDeps()).isCompatible({
+        episodes: [
+          makeEpisode({
+            last_snooze_action: 'snooze',
+            snooze_expiry: '2020-01-01T00:00:00.000Z',
+          }),
+        ],
+      })
+    ).toBe(true);
+  });
+
   it('not compatible on empty selection', () => {
     expect(createSnoozeAction(makeDeps()).isCompatible({ episodes: [] })).toBe(false);
   });

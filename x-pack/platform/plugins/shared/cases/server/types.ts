@@ -50,8 +50,6 @@ import type {
 } from '@kbn/workflows-extensions/server';
 import type { CasesClient } from './client';
 import type { AttachmentFramework } from './attachment_framework/types';
-import type { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
-import type { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
 import type { UnifiedAttachmentTypeRegistry } from './attachment_framework/unified_attachment_registry';
 import type { ConfigType } from './config';
 
@@ -125,8 +123,6 @@ export interface CasesServerStart {
    * @returns a {@link CasesClient}
    */
   getCasesClientWithRequest(request: KibanaRequest): Promise<CasesClient>;
-  getExternalReferenceAttachmentTypeRegistry(): ExternalReferenceAttachmentTypeRegistry;
-  getPersistableStateAttachmentTypeRegistry(): PersistableStateAttachmentTypeRegistry;
   getUnifiedAttachmentTypeRegistry(): UnifiedAttachmentTypeRegistry;
   config: ConfigType;
 }
@@ -139,6 +135,12 @@ export interface CasesServerSetup {
    * Cases with the given owner will be allowed to use any close reason accepted by the validator.
    */
   registerCloseReasonValidator: (owner: string, validator: CloseReasonValidator) => void;
+  /**
+   * Registers an owner's unified-attachment prefix so its legacy `alert`/`event`
+   * attachments resolve to a valid unified type (e.g. `security.alert`). For
+   * dynamically registered owners (e.g. FTR fixtures); built-in solutions are pre-registered.
+   */
+  registerOwnerPrefix: (owner: string, prefix: string) => void;
 }
 
 export type PartialField<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;

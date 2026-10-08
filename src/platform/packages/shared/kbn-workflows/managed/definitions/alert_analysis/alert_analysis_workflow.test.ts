@@ -9,6 +9,7 @@
 
 import { parse } from 'yaml';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW } from '.';
+import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 const findStepByName = (steps: unknown[], name: string): Record<string, unknown> | undefined => {
   for (const step of steps) {
@@ -23,6 +24,38 @@ const findStepByName = (steps: unknown[], name: string): Record<string, unknown>
     }
   }
   return undefined;
+};
+
+// Look the agent step up by type rather than name so these assertions survive the
+// onechat_runAgent_step -> runAgent_step rename that lands in a separate PR.
+const findStepByType = (steps: unknown[], type: string): Record<string, unknown> | undefined => {
+  for (const step of steps) {
+    const s = step as Record<string, unknown>;
+    if (s.type === type) return s;
+    for (const key of ['steps', 'else']) {
+      const nested = s[key];
+      if (Array.isArray(nested)) {
+        const found = findStepByType(nested, type);
+        if (found) return found;
+      }
+    }
+  }
+  return undefined;
+};
+
+const collectStepsByType = (steps: unknown[], type: string): Array<Record<string, unknown>> => {
+  const matches: Array<Record<string, unknown>> = [];
+  for (const step of steps) {
+    const s = step as Record<string, unknown>;
+    if (s.type === type) matches.push(s);
+    for (const key of ['steps', 'else']) {
+      const nested = s[key];
+      if (Array.isArray(nested)) {
+        matches.push(...collectStepsByType(nested, type));
+      }
+    }
+  }
+  return matches;
 };
 
 describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
@@ -47,6 +80,23 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(fetchStep.with.path).toBe(
       '/s/{{ workflow.spaceId }}/internal/security_solution/alert_analysis_workflow/runtime_config'
     );
+  });
+
+  it('space-scopes the path of every kibana.request step', () => {
+    // Only generated `kibana.*` connector steps get a space prefix from the engine; a raw
+    // `kibana.request` is sent verbatim, so an unprefixed path writes to the default space and
+    // still returns 200. Asserting over every request step, rather than the ones that exist
+    // today, keeps steps added later covered too.
+    const requestSteps = collectStepsByType(workflow.steps, 'kibana.request') as Array<{
+      name: string;
+      with: { path: string };
+    }>;
+    const unscoped = requestSteps.filter(
+      ({ with: { path } }) => !path.startsWith('/s/{{ workflow.spaceId }}/')
+    );
+
+    expect(requestSteps.length).toBeGreaterThan(0);
+    expect(unscoped.map(({ name, with: { path } }) => `${name}: ${path}`)).toEqual([]);
   });
 
   it('reads the tag prefix from runtime config and does not bake it into consts', () => {
@@ -114,6 +164,37 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(agentStep['create-conversation']).toBe('${{ variables.create_conversation }}');
   });
 
+  it('trims the alert with the pick filter over the configured allow-list before the agent step', () => {
+    const minimalAlertStep = findStepByName(workflow.steps, 'build_minimal_alert') as {
+      type: string;
+      with: { minimal_alert: string };
+    };
+
+    expect(minimalAlertStep).toBeDefined();
+    expect(minimalAlertStep.type).toBe('data.set');
+    // Delegates the field selection to the `pick` filter + the shared const list, rather than
+    // hand-reshaping ~60 nested fields inline.
+    expect(minimalAlertStep.with.minimal_alert).toBe(
+      '${{ foreach.item | pick: consts.model_alert_fields }}'
+    );
+  });
+
+  it('lists the high-signal allow-list fields in consts.model_alert_fields', () => {
+    const fields = workflow.consts.model_alert_fields as string[];
+
+    expect(fields).toEqual(
+      expect.arrayContaining(['_id', '_index', 'process.command_line', 'kibana.alert.rule.name'])
+    );
+  });
+
+  it('sends the trimmed alert (not the full foreach item) to the agent attachment', () => {
+    const agentStep = findStepByType(workflow.steps, 'ai.agent') as {
+      with: { attachments: Array<{ type: string; data: { alert: string } }> };
+    };
+
+    expect(agentStep.with.attachments[0].data.alert).toBe('{{ variables.minimal_alert | json:2 }}');
+  });
+
   it('adds token usage metadata to the verdict note', () => {
     const verdictNoteStep = findStepByName(workflow.steps, 'add_verdict_note_to_alert') as {
       with: { body: { note: { note: string } } };
@@ -133,6 +214,74 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(verdictNoteStep.with.body.note.note).toContain(
       "{{ execution.startedAt | date: '%B %d, %Y at %H:%M:%S UTC' }}"
     );
+  });
+
+  it('guards build_techniques_for_tactic foreach against tactic-only threat entries with no technique array', () => {
+    // Rules whose threat mapping has a tactic entry but no technique array (valid per schema)
+    // caused the workflow to crash with "Foreach expression resolved to undefined" because
+    // `nil | json` returns undefined in the expression evaluator. The foreach must use
+    // `| default: "[]" | json_parse` so it safely yields an empty iteration for tactic-only entries.
+    const techniquesForeachStep = findStepByName(workflow.steps, 'build_techniques_for_tactic') as {
+      foreach: string;
+    };
+    expect(techniquesForeachStep).toBeDefined();
+
+    const expression = techniquesForeachStep.foreach;
+    // The expression is a `{{ }}` template; strip the delimiters to get the inner liquid expression
+    // that the workflow engine evaluates via evalValueSync.
+    expect(expression.startsWith('{{') && expression.endsWith('}}')).toBe(true);
+    const innerExpr = expression.slice(2, -2).trim();
+
+    const engine = createWorkflowLiquidEngine();
+
+    // Tactic-only entry (no technique key): must resolve to [] so the foreach iterates zero times
+    // rather than throwing "Foreach expression must evaluate to an array".
+    const tacticOnly = engine.evalValueSync(innerExpr, {
+      foreach: { item: { framework: 'MITRE ATT&CK', tactic: { id: 'TA0007', name: 'Discovery' } } },
+    });
+    expect(tacticOnly).toEqual([]);
+
+    // Entry with a technique array: must pass the array through unchanged.
+    const techniques = [{ id: 'T1057', name: 'Process Discovery' }];
+    const withTechniques = engine.evalValueSync(innerExpr, {
+      foreach: {
+        item: {
+          framework: 'MITRE ATT&CK',
+          tactic: { id: 'TA0007', name: 'Discovery' },
+          technique: techniques,
+        },
+      },
+    });
+    expect(withTechniques).toEqual(techniques);
+  });
+
+  it('guards build_threat_technique_lines foreach against rules with no threat mapping', () => {
+    // Rules that have no threat mapping at all (threats field is nil) crashed the workflow with
+    // "Foreach expression resolved to undefined" because `nil | json` returns undefined.
+    // The foreach must use `| default: "[]" | json_parse` so it safely yields zero iterations.
+    const outerForeachStep = findStepByName(workflow.steps, 'build_threat_technique_lines') as {
+      foreach: string;
+    };
+    expect(outerForeachStep).toBeDefined();
+
+    const expression = outerForeachStep.foreach;
+    expect(expression.startsWith('{{') && expression.endsWith('}}')).toBe(true);
+    const innerExpr = expression.slice(2, -2).trim();
+
+    const engine = createWorkflowLiquidEngine();
+
+    // No threat mapping at all (threats is nil): must resolve to [] instead of crashing.
+    const noThreats = engine.evalValueSync(innerExpr, {
+      steps: { get_rule_metadata: { output: { metadata: { threats: null } } } },
+    });
+    expect(noThreats).toEqual([]);
+
+    // Rule with a threat array: must pass it through unchanged.
+    const threats = [{ tactic: { id: 'TA0007', name: 'Discovery' }, technique: [] }];
+    const withThreats = engine.evalValueSync(innerExpr, {
+      steps: { get_rule_metadata: { output: { metadata: { threats } } } },
+    });
+    expect(withThreats).toEqual(threats);
   });
 
   it('gates auto-close on the runtime thresholds using a 0-1 confidence scale', () => {

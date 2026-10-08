@@ -112,6 +112,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
 
   const isRemoteESOutput = inputs.typeInput.value === outputType.RemoteElasticsearch;
   const isESOutput = inputs.typeInput.value === outputType.Elasticsearch;
+  const isKafkaOutput = inputs.typeInput.value === outputType.Kafka;
   const supportsPresets = inputs.typeInput.value
     ? outputTypeSupportPresets(inputs.typeInput.value as ValueOf<OutputType>)
     : false;
@@ -339,7 +340,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
           </EuiFormRow>
 
           {renderOutputTypeSection(inputs.typeInput.value)}
-          {isRemoteESOutput ? null : (
+          {isRemoteESOutput || isKafkaOutput ? null : (
             <EuiFormRow
               fullWidth
               label={

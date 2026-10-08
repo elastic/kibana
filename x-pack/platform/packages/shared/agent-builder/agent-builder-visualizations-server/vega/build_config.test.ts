@@ -74,6 +74,23 @@ describe('buildVegaConfig', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
+  it('returns the authored panel title from the graph', async () => {
+    invoke.mockResolvedValue({
+      spec: SPEC,
+      title: 'Requests by host',
+      error: null,
+      esqlQuery: PROVIDED_ESQL,
+    });
+
+    const result = await run(PROVIDED_ESQL);
+
+    expect(result).toEqual({
+      spec: SPEC,
+      title: 'Requests by host',
+      esqlQuery: PROVIDED_ESQL,
+    });
+  });
+
   it('drops an invalid provided ES|QL and warns, so the graph regenerates', async () => {
     mockedValidateEsqlQuery.mockResolvedValue('line 1, column 1: bad query');
 

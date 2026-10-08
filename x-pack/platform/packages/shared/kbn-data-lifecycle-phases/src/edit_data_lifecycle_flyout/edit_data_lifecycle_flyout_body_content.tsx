@@ -203,7 +203,9 @@ export const EditDataLifecycleFlyoutBodyContent = ({
               onSelectOption={ilm.onSelect}
               onInspect={ilm.onInspect}
               isDisabled={ilmReadOnly}
-              height="full"
+              // In read-only mode a single inherited policy is shown, so size to content instead
+              // of filling the flyout's full height.
+              height={ilmReadOnly ? undefined : 'full'}
               flyoutScrollContainerRef={flyoutScrollContainerRef}
               showSearch={!ilmReadOnly}
               listStyle={ilmReadOnly ? 'panel' : 'plain'}

@@ -1,5 +1,8 @@
 {
-  "sha1": "3c492e302cf0751c5e072664b365149356328c28",
+  "sha1": "b00a65bf6d1abe6faeb621f05bc64ebf0fd46b19",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "a88e11e11af63ac-04de5a79d29d1c0",
@@ -10,58 +13,6 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/global.setup.ts",
         "line": 11,
         "column": 16
-      }
-    },
-    {
-      "id": "4d02e446d082177-e5040a56b0ee7d7",
-      "title": "Lens Convert to ES|QL should display ES|QL conversion modal for inline visualizations",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_conversion_enabled.spec.ts",
-        "line": 51,
-        "column": 12
-      }
-    },
-    {
-      "id": "4d02e446d082177-0e83d94e28c3793",
-      "title": "Lens Convert to ES|QL should update and reflect the visualization configuration after the conversion",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_conversion_enabled.spec.ts",
-        "line": 71,
-        "column": 12
-      }
-    },
-    {
-      "id": "4d02e446d082177-d972ca73bd4e33a",
-      "title": "Lens Convert to ES|QL should correctly cancel the conversion and close the flyout",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_conversion_enabled.spec.ts",
-        "line": 102,
-        "column": 12
-      }
-    },
-    {
-      "id": "4d02e446d082177-cfb66e0984c0af4",
-      "title": "Lens Convert to ES|QL should disable Convert to ES|QL button for visualizations saved to library",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_conversion_enabled.spec.ts",
-        "line": 120,
-        "column": 12
       }
     },
     {
@@ -214,20 +165,6 @@
       }
     },
     {
-      "id": "4ac51c41fd57fce-e3b22d6d08f1ea3",
-      "title": "Lens metric trendline with custom time field renders trendline when referenced data view time field is not timestamp",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_custom_time_field.spec.ts",
-        "line": 68,
-        "column": 14
-      }
-    },
-    {
       "id": "60e41814333dc70-ebf2b94c7596db4",
       "title": "Lens metric trendline conversion to ES|QL trendline persists after converting form-based metric to ES|QL",
       "expectedStatus": "passed",
@@ -237,7 +174,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql_conversion.spec.ts",
-        "line": 80,
+        "line": 81,
         "column": 14
       }
     },
@@ -251,7 +188,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql_editor.spec.ts",
-        "line": 71,
+        "line": 72,
         "column": 14
       }
     },
@@ -265,7 +202,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql_editor.spec.ts",
-        "line": 118,
+        "line": 119,
         "column": 14
       }
     },
@@ -279,7 +216,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql_table_switch.spec.ts",
-        "line": 79,
+        "line": 80,
         "column": 14
       }
     },
@@ -293,7 +230,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql_toggle.spec.ts",
-        "line": 68,
+        "line": 69,
+        "column": 12
+      }
+    },
+    {
+      "id": "d423e9125ab0d47-918e80b53ac532a",
+      "title": "Lens aliased TBUCKET metric trendline enables and persists the trendline through the dimension editor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql_ts_toggle.spec.ts",
+        "line": 71,
         "column": 12
       }
     },
@@ -308,6 +259,20 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql.spec.ts",
         "line": 31,
+        "column": 14
+      }
+    },
+    {
+      "id": "254747588af9643-7fdeecc1c091f44",
+      "title": "Lens metric trendline on dashboard (ES|QL) renders trendline for a TS query with TBUCKET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql.spec.ts",
+        "line": 70,
         "column": 14
       }
     },

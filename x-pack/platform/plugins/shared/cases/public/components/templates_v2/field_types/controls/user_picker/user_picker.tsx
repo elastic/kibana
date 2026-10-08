@@ -29,7 +29,10 @@ import type { SelectedUser } from './utils';
 import { toSelectedUsers } from './utils';
 import { UserPickerCombobox } from './user_picker_combobox';
 
-type UserPickerProps = z.infer<typeof UserPickerFieldSchema> & ConditionRenderProps;
+type UserPickerProps = z.infer<typeof UserPickerFieldSchema> &
+  ConditionRenderProps & {
+    onEditCancel?: () => void;
+  };
 
 export const UserPicker: React.FC<UserPickerProps> = ({
   label,
@@ -37,9 +40,11 @@ export const UserPicker: React.FC<UserPickerProps> = ({
   type,
   metadata,
   isRequired,
+  isRequiredOnClose,
   onConfirm,
   isSaving,
   isSaveDisabled,
+  onEditCancel,
 }) => {
   const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
@@ -85,7 +90,8 @@ export const UserPicker: React.FC<UserPickerProps> = ({
 
   const handleCancel = useCallback(() => {
     resetField(path);
-  }, [path, resetField]);
+    onEditCancel?.();
+  }, [onEditCancel, path, resetField]);
 
   return (
     <Controller
@@ -111,6 +117,7 @@ export const UserPicker: React.FC<UserPickerProps> = ({
               isLoading={isLoading}
               isMultiple={isMultiple}
               isRequired={isRequired ?? false}
+              isRequiredOnClose={isRequiredOnClose ?? false}
               isDisabled={isSaving}
               selectedUsers={selectedUsers}
               suggestedProfiles={suggestedProfiles}
@@ -147,6 +154,7 @@ interface UserPickerComboboxWithProfilesProps {
   isLoading: boolean;
   isMultiple: boolean;
   isRequired: boolean;
+  isRequiredOnClose?: boolean;
   isDisabled?: boolean;
   selectedUsers: SelectedUser[];
   suggestedProfiles: UserProfileWithAvatar[];

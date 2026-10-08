@@ -94,17 +94,26 @@ export const buildScheduledResponsesQuery = ({
           aggs: {
             planned_time: { max: { field: 'planned_schedule_time' } },
             max_timestamp: { max: { field: '@timestamp' } },
+            // ES-default precision required: this agg fans out over 10k+ buckets and
+            // `precision_threshold: 40000` here trips the request circuit breaker.
             agent_count: { cardinality: { field: 'agent_id' } },
             total_rows: {
               sum: { field: 'action_response.osquery.count' },
             },
+            // Per-outcome agent cardinality; the filters' `doc_count` counts documents.
             success_count: {
               filter: {
                 bool: { must_not: { exists: { field: 'error' } } },
               },
+              aggs: {
+                agents: { cardinality: { field: 'agent_id' } },
+              },
             },
             error_count: {
               filter: { exists: { field: 'error' } },
+              aggs: {
+                agents: { cardinality: { field: 'agent_id' } },
+              },
             },
           },
         },

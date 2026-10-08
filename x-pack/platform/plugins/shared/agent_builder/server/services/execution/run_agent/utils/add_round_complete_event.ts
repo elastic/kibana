@@ -12,6 +12,7 @@ import type {
   RoundCompleteEvent,
   RoundInput,
   ConversationRound,
+  ConversationRoundAuthor,
   ConversationRoundStep,
   ReasoningEvent,
   ToolCallEvent,
@@ -90,10 +91,12 @@ export const addRoundCompleteEvent = ({
   pendingRound,
   userInput,
   origin,
+  author,
   startTime,
   endTime,
   getConversationState,
   modelProvider,
+  mainConnectorId,
   stateManager,
   attachmentStateManager,
   configurationOverrides,
@@ -105,12 +108,22 @@ export const addRoundCompleteEvent = ({
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
   /**
-   * External origin that initiated this execution. Stamped as authorship on newly created
-   * rounds; resumed rounds keep their original attribution.
+   * External origin that initiated this execution. Stamps `origin.type` on newly created
+   * rounds; resumed rounds keep their original origin.
    */
   origin?: ExecutionConversationOrigin;
+  /**
+   * Resolved author for the round input (external author, or the Kibana user for public
+   * conversations). Stamped on newly created rounds; resumed rounds keep their original author.
+   */
+  author?: ConversationRoundAuthor;
   startTime: Date;
   modelProvider: ModelProvider;
+  /**
+   * Connector id of the model driving the agent graph for this round. Used to
+   * attribute `model_usage` to the right connector.
+   */
+  mainConnectorId: string;
   stateManager: ConversationStateManager;
   getConversationState: () => ConversationInternalState;
   attachmentStateManager: AttachmentStateManager;
@@ -141,6 +154,7 @@ export const addRoundCompleteEvent = ({
                 startTime,
                 endTime,
                 modelProvider,
+                mainConnectorId,
                 attachmentRefs,
                 configurationOverrides,
                 compactionResult,
@@ -150,9 +164,11 @@ export const addRoundCompleteEvent = ({
                 events,
                 input: userInput,
                 origin,
+                author,
                 startTime,
                 endTime,
                 modelProvider,
+                mainConnectorId,
                 attachmentRefs,
                 configurationOverrides,
                 compactionResult,
@@ -187,6 +203,7 @@ const resumeRound = ({
   startTime,
   endTime = new Date(),
   modelProvider,
+  mainConnectorId,
   attachmentRefs,
   configurationOverrides,
   compactionResult,
@@ -197,6 +214,7 @@ const resumeRound = ({
   startTime: Date;
   endTime?: Date;
   modelProvider: ModelProvider;
+  mainConnectorId: string;
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   compactionResult?: CompactedConversation;
@@ -239,6 +257,7 @@ const resumeRound = ({
     startTime,
     endTime,
     modelProvider,
+    mainConnectorId,
     attachmentRefs,
     configurationOverrides,
     compactionResult,
@@ -274,6 +293,7 @@ const mergeRounds = (previous: ConversationRound, next: ConversationRound): Conv
     model_usage: mergeModelUsage(previous.model_usage, next.model_usage),
     response: next.response,
     origin: previous.origin,
+    author: previous.author,
     configuration_overrides: next.configuration_overrides ?? previous.configuration_overrides,
   };
 
@@ -316,9 +336,11 @@ const createRound = ({
   events,
   input,
   origin,
+  author,
   startTime,
   endTime = new Date(),
   modelProvider,
+  mainConnectorId,
   attachmentRefs,
   configurationOverrides,
   compactionResult,
@@ -328,9 +350,11 @@ const createRound = ({
   events: SourceEvents[];
   input: RoundInput;
   origin?: ExecutionConversationOrigin;
+  author?: ConversationRoundAuthor;
   startTime: Date;
   endTime?: Date;
   modelProvider: ModelProvider;
+  mainConnectorId: string;
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   compactionResult?: CompactedConversation;
@@ -435,16 +459,16 @@ const createRound = ({
     state: undefined,
     input: {
       ...input,
-      ...(origin?.author ? { origin: { author: origin.author } } : {}),
       ...(attachmentRefs.length > 0 ? { attachment_refs: attachmentRefs } : {}),
     },
     steps,
     ...(origin ? { origin: { type: origin.type } } : {}),
+    ...(author ? { author } : {}),
     trace_id: getCurrentTraceId(),
     started_at: startTime.toISOString(),
     time_to_first_token: timeToFirstToken,
     time_to_last_token: timeToLastToken,
-    model_usage: getModelUsage(modelProvider.getUsageStats()),
+    model_usage: getModelUsage(modelProvider.getUsageStats(), mainConnectorId),
     response: lastMessage
       ? {
           message: lastMessage.message_content,
@@ -500,7 +524,10 @@ const createToolCallStep = ({
   };
 };
 
-const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
+const getModelUsage = (
+  stats: ModelProviderStats,
+  mainConnectorId: string
+): RoundModelUsageStats => {
   let inputTokens = 0;
   let outputTokens = 0;
   let cachedInputTokens = 0;
@@ -513,11 +540,12 @@ const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
       hasCachedInputTokens = true;
     }
   }
-  const modelFromResponse = stats.calls.find((call) => call.model)?.model;
+  const modelFromResponse = stats.calls.find(
+    (call) => call.connectorId === mainConnectorId && call.model
+  )?.model;
 
   return {
-    // we don't support multi-models yet, so we can just pick from the first call
-    connector_id: stats.calls.length ? stats.calls[0].connectorId : 'unknown',
+    connector_id: mainConnectorId,
     llm_calls: stats.calls.length,
     input_tokens: inputTokens,
     output_tokens: outputTokens,

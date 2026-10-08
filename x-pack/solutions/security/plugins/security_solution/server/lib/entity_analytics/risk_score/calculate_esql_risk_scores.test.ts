@@ -11,6 +11,7 @@ import {
   buildRiskScoreBucket,
   getBaseScoreESQL,
   getESQL,
+  getEuidCompositeQuery,
   getResolutionCompositeQuery,
   getResolutionScoreESQLByIds,
 } from './calculate_esql_risk_scores';
@@ -18,6 +19,13 @@ import type { RiskScoreBucket } from '../types';
 import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
 
 describe('Calculate risk scores with ESQL', () => {
+  describe('getEuidCompositeQuery', () => {
+    it('sets ignore_unavailable so a missing per-space alerts index behaves as empty', () => {
+      const query = getEuidCompositeQuery(EntityType.host, [], { index: 'alerts-*', pageSize: 1 });
+      expect(query.ignore_unavailable).toBe(true);
+    });
+  });
+
   describe('ESQL query', () => {
     it('matches snapshot', () => {
       const q = getESQL(EntityType.host, { lower: 'abel', upper: 'zuzanna' }, 10000, 3500);

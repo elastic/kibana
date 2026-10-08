@@ -133,7 +133,14 @@ export interface CommandHistoryItem {
 }
 
 export interface CommandExecutionState {
-  status: 'pending' | 'success' | 'error';
+  /**
+   * The overall status of the Command execution.
+   * - creating: The command request is being created
+   * - pending: The command request has been created and is still being executed.
+   * - success: The command was executed successfully.
+   * - error: The command execution failed.
+   */
+  status: 'creating' | 'pending' | 'success' | 'error';
   store: Record<string, unknown>;
 }
 

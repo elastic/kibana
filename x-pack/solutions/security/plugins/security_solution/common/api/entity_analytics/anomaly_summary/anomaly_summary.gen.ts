@@ -11,7 +11,7 @@
  *
  * info:
  *   title: Anomaly Summary API
- *   version: 2023-10-31
+ *   version: 1
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
@@ -180,6 +180,10 @@ export const AnomalyOverviewEntry = lazySchema(() =>
      * MITRE ATT&CK tactic names for all jobs that fired in this bucket
      */
     threatTactics: z.array(z.string().max(150)).max(100),
+    /**
+     * Number of anomaly records per MITRE ATT&CK tactic within this time bucket; a job's doc_count is attributed to each tactic it is configured for
+     */
+    tacticCounts: z.object({}).catchall(z.number().int()).optional(),
   })
 );
 export type AnomalyOverviewEntry = z.infer<typeof AnomalyOverviewEntry>;

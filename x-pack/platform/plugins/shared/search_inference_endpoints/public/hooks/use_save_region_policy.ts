@@ -24,7 +24,8 @@ export const useSaveRegionPolicy = () => {
         version: ROUTE_VERSIONS.v1,
       });
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      queryClient.setQueryData([REGION_POLICY_QUERY_KEY], data);
       services.notifications.toasts.addSuccess({
         title: i18n.translate('xpack.searchInferenceEndpoints.regionPolicy.saveSuccess', {
           defaultMessage: 'Region preferences saved',
@@ -46,9 +47,6 @@ export const useSaveRegionPolicy = () => {
           }),
         });
       }
-    },
-    onSettled: async () => {
-      await queryClient.invalidateQueries({ queryKey: [REGION_POLICY_QUERY_KEY] });
     },
   });
 };

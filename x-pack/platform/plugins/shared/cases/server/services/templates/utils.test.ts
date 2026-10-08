@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { stringify as yamlStringify } from 'yaml';
 import { toFieldDefinitions, trimFieldDefaults } from './utils';
+import type { FieldDefinition } from '../../../common/types/domain/field_definition/v1';
 
 describe('toFieldDefinitions', () => {
   it('maps fields to field definitions with label falling back to name', () => {
@@ -27,6 +29,49 @@ describe('toFieldDefinitions', () => {
 
   it('returns an empty array when given no fields', () => {
     expect(toFieldDefinitions([])).toEqual([]);
+  });
+
+  it('resolves $ref fields against the field library', () => {
+    const libraryDefs: FieldDefinition[] = [
+      {
+        fieldDefinitionId: 'fd-1',
+        name: 'severity_level',
+        owner: 'securitySolution',
+        description: '',
+        isGlobal: false,
+        definition: yamlStringify({
+          name: 'severity_level',
+          label: 'Severity Level',
+          type: 'keyword',
+          control: 'SELECT_BASIC',
+          metadata: { options: ['Low', 'High'] },
+        }),
+      },
+    ];
+
+    const fields = [
+      {
+        name: 'inline_notes',
+        label: 'Notes',
+        type: 'keyword' as const,
+        control: 'INPUT_TEXT' as const,
+      },
+      { $ref: 'severity_level' },
+    ];
+
+    expect(toFieldDefinitions(fields, libraryDefs)).toEqual([
+      { name: 'inline_notes', label: 'Notes', type: 'keyword', control: 'INPUT_TEXT' },
+      {
+        name: 'severity_level',
+        label: 'Severity Level',
+        type: 'keyword',
+        control: 'SELECT_BASIC',
+      },
+    ]);
+  });
+
+  it('drops $ref fields whose library definition is missing', () => {
+    expect(toFieldDefinitions([{ $ref: 'missing_field' }], [])).toEqual([]);
   });
 });
 

@@ -13,6 +13,7 @@
     "@kbn/core",
     "@kbn/as-code-filters-schema",
     "@kbn/as-code-data-views-schema",
+    "@kbn/as-code-data-views-transforms",
     "@kbn/as-code-filters-transforms",
     "@kbn/data-views-plugin",
     "@kbn/event-annotation-common",
@@ -20,6 +21,7 @@
     "@kbn/expressions-plugin",
     "@kbn/core-saved-objects-common",
     "@kbn/esql-utils",
+    "@kbn/esql-types",
     "@kbn/config-schema",
     "@kbn/coloring",
     "@kbn/content-management-utils",
@@ -29,5 +31,6 @@
     "@kbn/transpose-utils",
     "@kbn/palettes",
     "@kbn/crypto-browser",
+    "@kbn/std",
   ]
 }

@@ -10,8 +10,8 @@
 import { execSync } from 'child_process';
 import { mkdirSync, readdirSync, readFileSync, statSync } from 'fs';
 import { join } from 'path';
-import { BuildkiteClient } from '..';
-import type { Artifact } from '../buildkite/types/artifact';
+import { BuildkiteClient } from '../index.ts';
+import type { Artifact } from '../buildkite/types/artifact.ts';
 
 const buildkite = new BuildkiteClient();
 
@@ -65,8 +65,9 @@ export const getAnnotation = (
             : '';
 
         const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
+        const issueLink = failure.githubIssue ? ` [[issue]](${failure.githubIssue})` : '';
 
-        return `[[job]](${jobUrl})${logsLink} ${failure.jobName} / ${failure.name}`;
+        return `[[job]](${jobUrl})${logsLink}${issueLink} ${failure.jobName} / ${failure.name}`;
       })
       .join('<br />\n')
   );

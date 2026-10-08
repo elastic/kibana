@@ -11,12 +11,18 @@ import { renderHook, waitFor } from '@testing-library/react';
 
 import type { AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 import type { ShareActionIntents } from '@kbn/share-plugin/public/types';
+import { openLazyFlyout } from '@kbn/presentation-util';
 
 import { dashboardContextWrapper } from '../../mocks';
 import { coreServices, shareService } from '../../services/kibana_services';
 import { useDashboardMenuItems } from './use_dashboard_menu_items';
 import { BehaviorSubject } from 'rxjs';
 import type { DashboardApi } from '../../dashboard_api/types';
+
+jest.mock('@kbn/presentation-util', () => ({
+  ...jest.requireActual('@kbn/presentation-util'),
+  openLazyFlyout: jest.fn(),
+}));
 
 describe('useDashboardMenuItems', () => {
   beforeEach(() => {
@@ -25,6 +31,35 @@ describe('useDashboardMenuItems', () => {
     jest
       .mocked(shareService!.availableIntegrations)
       .mockImplementation(() => [] as ShareActionIntents[]);
+  });
+
+  describe('Add panel', () => {
+    test('returns focus to the Add button when the flyout closes', () => {
+      const returnFocus = jest.fn();
+      const { result } = renderHook(
+        () =>
+          useDashboardMenuItems({
+            isLabsShown: false,
+            setIsLabsShown: jest.fn(),
+            maybeRedirect: jest.fn(),
+          }),
+        {
+          wrapper: dashboardContextWrapper({}),
+        }
+      );
+
+      result.current.editModeTopNavConfig.items
+        ?.find(({ id }) => id === 'add')
+        ?.run?.({
+          triggerElement: document.createElement('button'),
+          returnFocus,
+        });
+
+      const [{ returnFocus: restoreFocus }] = jest.mocked(openLazyFlyout).mock.calls[0];
+      restoreFocus?.();
+
+      expect(returnFocus).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('Export', () => {
@@ -95,6 +130,125 @@ describe('useDashboardMenuItems', () => {
       expect(editModeExportMenuItem).toBeDefined();
       expect((editModeExportMenuItem as unknown as { run?: unknown }).run).toBeDefined();
       expect((editModeExportMenuItem as unknown as AppMenuPopoverItem).items).toBeUndefined();
+    });
+
+    test('does not include Schedule export when only exportJson and scheduledReports are available', () => {
+      jest
+        .mocked(shareService!.availableIntegrations)
+        .mockImplementation((_objectType: string, groupId?: string): ShareActionIntents[] => {
+          if (groupId === 'export') {
+            return [];
+          }
+
+          if (groupId === 'exportDerivatives') {
+            return [
+              {
+                id: 'exportJson',
+                shareType: 'integration',
+                groupId: 'exportDerivatives',
+                config: async () => ({}),
+              } as ShareActionIntents,
+              {
+                id: 'scheduledReports',
+                shareType: 'integration',
+                groupId: 'exportDerivatives',
+                config: async () => ({}),
+              } as ShareActionIntents,
+            ];
+          }
+
+          return [];
+        });
+
+      const { result } = renderHook(
+        () =>
+          useDashboardMenuItems({
+            isLabsShown: false,
+            setIsLabsShown: jest.fn(),
+            maybeRedirect: jest.fn(),
+          }),
+        {
+          wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
+        }
+      );
+
+      const viewModeExportMenuItem = result.current.viewModeTopNavConfig.items!.find(
+        ({ id }) => id === 'export'
+      );
+      expect(viewModeExportMenuItem).toBeDefined();
+      expect((viewModeExportMenuItem as { run?: unknown }).run).toBeDefined();
+      expect((viewModeExportMenuItem as AppMenuPopoverItem).items).toBeUndefined();
+
+      const editModeExportMenuItem = result.current.editModeTopNavConfig.items!.find(
+        ({ id }) => id === 'export'
+      );
+      expect(editModeExportMenuItem).toBeDefined();
+      expect((editModeExportMenuItem as { run?: unknown }).run).toBeDefined();
+      expect((editModeExportMenuItem as AppMenuPopoverItem).items).toBeUndefined();
+    });
+
+    test('includes Schedule export when a schedulable export integration is available', () => {
+      jest
+        .mocked(shareService!.availableIntegrations)
+        .mockImplementation((_objectType: string, groupId?: string): ShareActionIntents[] => {
+          if (groupId === 'export') {
+            return [
+              {
+                id: 'pdfReports',
+                shareType: 'integration',
+                groupId: 'export',
+                config: async () => ({}),
+              } as ShareActionIntents,
+            ];
+          }
+
+          if (groupId === 'exportDerivatives') {
+            return [
+              {
+                id: 'exportJson',
+                shareType: 'integration',
+                groupId: 'exportDerivatives',
+                config: async () => ({}),
+              } as ShareActionIntents,
+              {
+                id: 'scheduledReports',
+                shareType: 'integration',
+                groupId: 'exportDerivatives',
+                config: async () => ({}),
+              } as ShareActionIntents,
+            ];
+          }
+
+          return [];
+        });
+
+      const { result } = renderHook(
+        () =>
+          useDashboardMenuItems({
+            isLabsShown: false,
+            setIsLabsShown: jest.fn(),
+            maybeRedirect: jest.fn(),
+          }),
+        {
+          wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
+        }
+      );
+
+      const viewModeExportMenuItem = result.current.viewModeTopNavConfig.items!.find(
+        ({ id }) => id === 'export'
+      ) as AppMenuPopoverItem;
+
+      expect(viewModeExportMenuItem.items!.map((item) => item.id)).toEqual(
+        expect.arrayContaining(['exportJson', 'pdfReports', 'scheduledReports'])
+      );
+
+      const editModeExportMenuItem = result.current.editModeTopNavConfig.items!.find(
+        ({ id }) => id === 'export'
+      ) as AppMenuPopoverItem;
+
+      expect(editModeExportMenuItem.items!.map((item) => item.id)).toEqual(
+        expect.arrayContaining(['exportJson', 'pdfReports', 'scheduledReports'])
+      );
     });
 
     test('includes Export top-nav item with JSON and Reporting items when export and exportDerivatives integrations are available', () => {

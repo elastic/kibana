@@ -30,6 +30,9 @@ export interface PresentationPanelProps<
 > {
   Component: React.FC<PropsType>;
   componentApi: ApiType;
+  componentInternalApi: {
+    setVisibility: (isVisible: boolean) => void;
+  };
   componentProps?: PropsType;
 
   showShadow?: boolean;

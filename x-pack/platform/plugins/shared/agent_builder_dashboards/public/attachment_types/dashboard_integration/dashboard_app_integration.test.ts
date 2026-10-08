@@ -23,7 +23,10 @@ import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import type { DashboardApi, DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
-import { registerDashboardAppIntegration } from './dashboard_app_integration';
+import {
+  MANUAL_CHANGES_DEBOUNCE_MS,
+  registerDashboardAppIntegration,
+} from './dashboard_app_integration';
 import type { IdGenerator } from '..';
 
 const createDashboardSaveState = (): DashboardSaveEvent['dashboardState'] => ({
@@ -239,7 +242,7 @@ describe('registerDashboardAppIntegration', () => {
     });
 
     simulateDashboardStateChange();
-    jest.advanceTimersByTime(200);
+    jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
 
     expect(addAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -272,7 +275,7 @@ describe('registerDashboardAppIntegration', () => {
     });
 
     simulateDashboardStateChange();
-    jest.advanceTimersByTime(200);
+    jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
 
     expect(addAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -354,7 +357,7 @@ describe('registerDashboardAppIntegration', () => {
     jest.runOnlyPendingTimers();
     addAttachment.mockClear();
     simulateDashboardStateChange();
-    jest.advanceTimersByTime(200);
+    jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
 
@@ -411,7 +414,7 @@ describe('registerDashboardAppIntegration', () => {
 
     addAttachment.mockClear();
     simulateDashboardStateChange();
-    jest.advanceTimersByTime(200);
+    jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
 
     expect(addAttachment).not.toHaveBeenCalled();
 

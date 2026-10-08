@@ -59,7 +59,9 @@ test.describe(
       const canvas = pageObjects.workflowEditor.graphCanvas;
 
       await test.step('all step nodes are visible in the initial full workflow', async () => {
-        for (const stepName of ['step_1', 'step_2', 'step_3', 'step_4', 'step_5']) {
+        // Graph nodes render the humanized display label (deslugifyStepName),
+        // not the raw step name — e.g. `step_1` renders as `Step 1`.
+        for (const stepName of ['Step 1', 'Step 2', 'Step 3', 'Step 4', 'Step 5']) {
           await expect(canvas.getByText(stepName)).toBeVisible();
         }
       });
@@ -88,7 +90,7 @@ test.describe(
 
         await expect(pageObjects.workflowEditor.graphYamlErrorCallout).toBeHidden();
 
-        for (const stepName of ['step_1', 'step_2', 'step_3', 'step_4', 'step_5']) {
+        for (const stepName of ['Step 1', 'Step 2', 'Step 3', 'Step 4', 'Step 5']) {
           await expect(canvas.getByText(stepName)).toBeVisible();
         }
       });

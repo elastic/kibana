@@ -18,7 +18,9 @@ import {
   RiskScoreLeftPanelSubTab,
 } from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
-const mockUseRiskContributingAlerts = jest.fn().mockReturnValue({ loading: false, data: [] });
+const mockUseRiskContributingAlerts = jest
+  .fn()
+  .mockReturnValue({ loading: false, data: [], hasAlertsRead: true });
 const mockGetEuidFromObject = jest.fn().mockReturnValue('user:entity-1');
 
 jest.mock('../../../../hooks/use_risk_contributing_alerts', () => ({
@@ -42,6 +44,7 @@ jest.mock('../../../risk_score_timeline', () => ({
     entityId: string;
     scoreType?: string;
     onPointSelect: (timestamp: string | undefined) => void;
+    onRangeChange: (range: { from: string; to: string }) => void;
   }) => (
     <div
       data-test-subj="mockRiskScoreTimeline"
@@ -52,6 +55,16 @@ jest.mock('../../../risk_score_timeline', () => ({
         type="button"
         data-test-subj="mockSelectPoint"
         onClick={() => props.onPointSelect('2021-08-10T14:00:00.000Z')}
+      />
+      <button
+        type="button"
+        data-test-subj="mockRangeExcludingSelection"
+        onClick={() => props.onRangeChange({ from: 'now-1d', to: 'now' })}
+      />
+      <button
+        type="button"
+        data-test-subj="mockRangeIncludingSelection"
+        onClick={() => props.onRangeChange({ from: 'now-10y', to: 'now' })}
       />
     </div>
   ),
@@ -81,6 +94,16 @@ jest.mock('../../../../api/hooks/use_risk_score', () => ({
   useRiskScore: (params: unknown) => mockUseRiskScore(params),
 }));
 
+const mockUseMissingRiskEnginePrivileges = jest.fn();
+
+jest.mock('../../../../hooks/use_missing_risk_engine_privileges', () => ({
+  useMissingRiskEnginePrivileges: (params: unknown) => mockUseMissingRiskEnginePrivileges(params),
+}));
+
+jest.mock('../../../risk_engine_privileges_callout', () => ({
+  RiskEnginePrivilegesCallOut: () => <div data-test-subj="missing-risk-engine-privileges" />,
+}));
+
 const mockUseGetWatchlists = jest.fn().mockReturnValue({ data: [] });
 
 jest.mock('../../../../api/hooks/use_get_watchlists', () => ({
@@ -100,10 +123,14 @@ jest.mock('../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state
 }));
 
 const mockOpenPreviewPanel = jest.fn();
+const mockOpenLeftPanel = jest.fn();
 const mockOnShowAlert = jest.fn();
 
 jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openPreviewPanel: mockOpenPreviewPanel }),
+  useExpandableFlyoutApi: () => ({
+    openPreviewPanel: mockOpenPreviewPanel,
+    openLeftPanel: mockOpenLeftPanel,
+  }),
   useExpandableFlyoutState: () => ({}),
   useExpandableFlyoutHistory: () => [],
   ExpandableFlyout: () => null,
@@ -162,6 +189,10 @@ describe('RiskInputsTab', () => {
     mockUseStableExpandableFlyoutState.mockReturnValue({});
     mockUseRiskScoreHistory.mockReturnValue({ data: undefined, isFetching: false });
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseMissingRiskEnginePrivileges.mockReturnValue({
+      isLoading: false,
+      hasAllRequiredPrivileges: true,
+    });
     mockUseRiskScore.mockImplementation((params?: { filterQuery?: unknown; skip?: boolean }) =>
       params?.skip
         ? {
@@ -188,6 +219,7 @@ describe('RiskInputsTab', () => {
       loading: false,
       error: false,
       data: [alertInputDataMock],
+      hasAlertsRead: true,
     });
     mockUseRiskScore.mockReturnValue({
       loading: false,
@@ -207,6 +239,49 @@ describe('RiskInputsTab', () => {
 
     expect(queryByTestId('risk-input-asset-criticality-title')).not.toBeInTheDocument();
     expect(getByTestId('risk-input-table-description-cell')).toHaveTextContent('Rule Name');
+  });
+
+  it('shows the missing privileges callout instead of the generic error', () => {
+    mockUseMissingRiskEnginePrivileges.mockReturnValue({
+      isLoading: false,
+      hasAllRequiredPrivileges: false,
+      missingPrivileges: {
+        indexPrivileges: [['.risk-score.risk-*', ['read']]],
+        clusterPrivileges: { enable: [], run: [] },
+      },
+    });
+    mockUseRiskScore.mockReturnValue({ loading: false, error: true, data: [] });
+
+    const { getByTestId, queryByText } = render(
+      <TestProviders>
+        <RiskInputsTab
+          entityType={EntityType.user}
+          entityName="elastic"
+          onShowAlert={mockOnShowAlert}
+        />
+      </TestProviders>
+    );
+
+    expect(mockUseMissingRiskEnginePrivileges).toHaveBeenCalledWith({ readonly: true });
+    expect(getByTestId('missing-risk-engine-privileges')).toBeInTheDocument();
+    expect(queryByText('Something went wrong')).not.toBeInTheDocument();
+  });
+
+  it('shows the generic error when risk inputs fail without missing privileges', () => {
+    mockUseRiskScore.mockReturnValue({ loading: false, error: true, data: [] });
+
+    const { getByText, queryByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab
+          entityType={EntityType.user}
+          entityName="elastic"
+          onShowAlert={mockOnShowAlert}
+        />
+      </TestProviders>
+    );
+
+    expect(getByText('Something went wrong')).toBeInTheDocument();
+    expect(queryByTestId('missing-risk-engine-privileges')).not.toBeInTheDocument();
   });
 
   it('Does not render the context section if enabled but no asset criticality', () => {
@@ -277,6 +352,7 @@ describe('RiskInputsTab', () => {
       loading: false,
       error: false,
       data: [alertInputDataMock],
+      hasAlertsRead: true,
     });
 
     const { getByTestId } = render(
@@ -290,6 +366,48 @@ describe('RiskInputsTab', () => {
     );
 
     expect(getByTestId(EXPAND_ALERT_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('does not render the alerts section when the user has no alert read privileges', () => {
+    mockUseRiskContributingAlerts.mockReturnValue({
+      loading: false,
+      error: false,
+      data: [alertInputDataMock],
+      hasAlertsRead: false,
+    });
+
+    const { queryByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab
+          entityType={EntityType.user}
+          entityName="elastic"
+          onShowAlert={mockOnShowAlert}
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('risk-input-alert-title')).not.toBeInTheDocument();
+  });
+
+  it('does not show an error state when the user has no alert read privileges', () => {
+    mockUseRiskContributingAlerts.mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+      hasAlertsRead: false,
+    });
+
+    const { queryByText } = render(
+      <TestProviders>
+        <RiskInputsTab
+          entityType={EntityType.user}
+          entityName="elastic"
+          onShowAlert={mockOnShowAlert}
+        />
+      </TestProviders>
+    );
+
+    expect(queryByText(/error/i)).not.toBeInTheDocument();
   });
 
   it('Displays 0.00 for the asset criticality contribution if the contribution value is less than -0.01', () => {
@@ -373,6 +491,7 @@ describe('RiskInputsTab', () => {
       loading: false,
       error: false,
       data: alerts,
+      hasAlertsRead: true,
     });
     mockUseRiskScore.mockReturnValue({
       loading: false,
@@ -519,6 +638,7 @@ describe('RiskInputsTab', () => {
       loading: false,
       error: false,
       data: [alertInputDataMock],
+      hasAlertsRead: true,
     });
 
     const { getByTestId, getByText } = render(
@@ -586,6 +706,7 @@ describe('RiskInputsTab', () => {
       loading: false,
       error: false,
       data: [{ ...alertInputDataMock, _id: 'resolution-alert-id' }],
+      hasAlertsRead: true,
     });
 
     const { getByText, getByTestId } = render(
@@ -1012,6 +1133,17 @@ describe('RiskInputsTab', () => {
       'aria-pressed',
       'true'
     );
+
+    expect(mockOpenLeftPanel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          path: expect.objectContaining({
+            tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
+            subTab: RiskScoreLeftPanelSubTab.ENTITY,
+          }),
+        }),
+      })
+    );
   });
 
   it('renders watchlist modifiers in context section', () => {
@@ -1193,7 +1325,6 @@ describe('RiskInputsTab', () => {
           from: PIT_TIMESTAMP,
           to: PIT_TIMESTAMP,
           includeContributions: true,
-          pageSize: 1,
           skip: false,
         })
       );
@@ -1230,6 +1361,48 @@ describe('RiskInputsTab', () => {
       );
       expect(mockUseRiskScoreHistory).toHaveBeenLastCalledWith(
         expect.objectContaining({ skip: true })
+      );
+    });
+
+    it('clears a point-in-time selection that falls outside a newly selected range', () => {
+      enableHistoryFlag();
+      mockUseRiskScoreHistory.mockReturnValue({
+        data: { entity_id: 'user:elastic', entity_type: 'user', entries: [pitEntry] },
+        isFetching: false,
+      });
+
+      const { getByTestId, queryByTestId } = renderTab();
+
+      fireEvent.click(getByTestId('mockSelectPoint'));
+      expect(getByTestId('riskInputsTabPitIndicator')).toBeInTheDocument();
+
+      // the selected 2021 timestamp is outside a now-1d..now range
+      fireEvent.click(getByTestId('mockRangeExcludingSelection'));
+
+      expect(queryByTestId('riskInputsTabPitIndicator')).not.toBeInTheDocument();
+      expect(mockUseRiskScoreHistory).toHaveBeenLastCalledWith(
+        expect.objectContaining({ skip: true })
+      );
+    });
+
+    it('keeps a point-in-time selection that still falls within a newly selected range', () => {
+      enableHistoryFlag();
+      mockUseRiskScoreHistory.mockReturnValue({
+        data: { entity_id: 'user:elastic', entity_type: 'user', entries: [pitEntry] },
+        isFetching: false,
+      });
+
+      const { getByTestId } = renderTab();
+
+      fireEvent.click(getByTestId('mockSelectPoint'));
+      expect(getByTestId('riskInputsTabPitIndicator')).toBeInTheDocument();
+
+      // the selected 2021 timestamp is still inside a now-10y..now range
+      fireEvent.click(getByTestId('mockRangeIncludingSelection'));
+
+      expect(getByTestId('riskInputsTabPitIndicator')).toBeInTheDocument();
+      expect(mockUseRiskScoreHistory).toHaveBeenLastCalledWith(
+        expect.objectContaining({ from: PIT_TIMESTAMP, to: PIT_TIMESTAMP, skip: false })
       );
     });
 
@@ -1308,7 +1481,6 @@ describe('RiskInputsTab', () => {
             from: PIT_TIMESTAMP,
             to: PIT_TIMESTAMP,
             includeContributions: true,
-            pageSize: 1,
             skip: false,
           })
         );
@@ -1329,6 +1501,7 @@ describe('RiskInputsTab - alert preview navigation', () => {
       loading: false,
       error: false,
       data: [alertInputDataMock],
+      hasAlertsRead: true,
     });
   });
 

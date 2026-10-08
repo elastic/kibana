@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ErrorToastOptions, ToastInputFields } from '@kbn/core/public';
+import type { ErrorToastOptions, ToastInputFields, ToastOptions } from '@kbn/core/public';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -34,21 +34,23 @@ import {
 import { OWNER_INFO } from '../../common/constants';
 import { useApplication } from './lib/kibana/use_application';
 import { TruncatedText } from '../components/truncated_text';
+import { hasLegacyAlertId, isAlertAttachmentType } from '../../common/utils/attachments';
 
 function getAlertsCount(attachments: CaseAttachmentsWithoutOwner): number {
-  let alertsCount = 0;
-  for (const attachment of attachments) {
-    if (attachment.type === AttachmentType.alert && `alertId` in attachment) {
-      // alertId might be an array
-      if (Array.isArray(attachment.alertId) && attachment.alertId.length > 1) {
-        alertsCount += attachment.alertId.length;
-      } else {
-        // or might be a single string
-        alertsCount++;
-      }
+  return attachments.reduce((alertsCount, attachment) => {
+    if (!isAlertAttachmentType(attachment.type)) {
+      return alertsCount;
     }
-  }
-  return alertsCount;
+    if (hasLegacyAlertId(attachment)) {
+      return alertsCount + (Array.isArray(attachment.alertId) ? attachment.alertId.length : 1);
+    }
+    if ('attachmentId' in attachment) {
+      return (
+        alertsCount + (Array.isArray(attachment.attachmentId) ? attachment.attachmentId.length : 1)
+      );
+    }
+    return alertsCount;
+  }, 0);
 }
 
 function getToastTitle({
@@ -88,7 +90,7 @@ function getToastContent({
   let toastContent;
   if (attachments !== undefined) {
     for (const attachment of attachments) {
-      if (attachment.type === AttachmentType.alert) {
+      if (attachment.type === AttachmentType.alert || isAlertAttachmentType(attachment.type)) {
         if (theCase.settings.syncAlerts && theCase.settings.extractObservables) {
           toastContent = CASE_ALERT_SUCCESS_SYNC_AND_EXTRACT_TEXT;
         } else if (theCase.settings.syncAlerts) {
@@ -192,12 +194,21 @@ export const useCasesToast = () => {
             : text ?? undefined;
         toasts.addDanger({ title, text: mountedText, className: 'eui-textBreakWord' });
       },
-      showInfoToast: (title: string, text?: string) => {
-        toasts.addInfo({
-          title,
-          text,
-          className: 'eui-textBreakWord',
-        });
+      showInfoToast: (
+        title: string,
+        text?: string,
+        actionProps?: ToastInputFields['actionProps'],
+        options?: ToastOptions
+      ) => {
+        return toasts.addInfo(
+          {
+            title,
+            text,
+            actionProps,
+            className: 'eui-textBreakWord',
+          },
+          options
+        );
       },
     }),
     [i18n, theme, userProfile, appId, getUrlForApp, navigateToUrl, toasts, rendering]

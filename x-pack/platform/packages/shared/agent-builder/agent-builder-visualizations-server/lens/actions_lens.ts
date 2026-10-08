@@ -43,6 +43,10 @@ export type Action =
   | ValidateConfigAction
   | GenerateTimeRangeAction;
 
+export function isGenerateEsqlAction(action: Action): action is GenerateEsqlAction {
+  return action.type === 'generate_esql';
+}
+
 export function isGenerateConfigAction(action: Action): action is GenerateConfigAction {
   return action.type === 'generate_config';
 }

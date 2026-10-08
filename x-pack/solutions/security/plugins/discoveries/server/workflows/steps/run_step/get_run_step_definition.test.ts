@@ -15,6 +15,12 @@ jest.mock('./constants', () => ({
   ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS: 25,
 }));
 
+const mockIsWorkflowsEnabledForSpace = jest.fn();
+
+jest.mock('../../../lib/is_workflows_enabled_for_space', () => ({
+  isWorkflowsEnabledForSpace: (...args: unknown[]) => mockIsWorkflowsEnabledForSpace(...args),
+}));
+
 import { getRunStepDefinition } from './get_run_step_definition';
 
 const mockExecuteGenerationWorkflow = jest.fn();
@@ -195,6 +201,8 @@ describe('getRunStepDefinition', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockIsWorkflowsEnabledForSpace.mockResolvedValue(true);
 
     mockResolveConnectorDetails.mockResolvedValue({
       actionTypeId: '.gen-ai',
@@ -760,6 +768,38 @@ describe('getRunStepDefinition', () => {
         execution_uuid: 'test-execution-uuid',
         status: 'completed',
       });
+    });
+  });
+
+  describe('per-space setting check', () => {
+    it('returns an error result when isWorkflowsEnabledForSpace returns false', async () => {
+      mockIsWorkflowsEnabledForSpace.mockResolvedValue(false);
+
+      const stepDefinition = getStepDefinition();
+
+      const result = await stepDefinition.handler(syncMockContext as never);
+
+      expect(result.error).toBeDefined();
+    });
+
+    it('does not call executeGenerationWorkflow when isWorkflowsEnabledForSpace returns false', async () => {
+      mockIsWorkflowsEnabledForSpace.mockResolvedValue(false);
+
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(syncMockContext as never);
+
+      expect(mockExecuteGenerationWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('error message mentions the space setting when isWorkflowsEnabledForSpace returns false', async () => {
+      mockIsWorkflowsEnabledForSpace.mockResolvedValue(false);
+
+      const stepDefinition = getStepDefinition();
+
+      const result = await stepDefinition.handler(syncMockContext as never);
+
+      expect(result.error?.message).toContain('not enabled for this space');
     });
   });
 

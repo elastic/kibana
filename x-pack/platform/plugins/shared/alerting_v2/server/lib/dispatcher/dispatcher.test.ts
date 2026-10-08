@@ -78,7 +78,9 @@ function mockNpFindAllDecrypted(
         description: `Description for ${id}`,
         enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-test-id' }],
-        auth: { apiKey: 'test-api-key', owner: 'elastic', createdByUser: false },
+        apiKey: 'test-api-key',
+        apiKeyOwner: 'elastic',
+        apiKeyCreatedByUser: false,
         createdBy: null,
         updatedBy: null,
         createdAt: '2026-01-01T00:00:00.000Z',
@@ -221,7 +223,7 @@ describe('DispatcherService', () => {
       expect(queryEsClient.esql.query).toHaveBeenCalledWith(
         {
           query: getDispatchableAlertEventsQuery().query,
-          drop_null_columns: false,
+          drop_null_columns: true,
           filter: {
             range: {
               '@timestamp': {

@@ -92,7 +92,7 @@ CHART CHOICE:
 AXES:
 - Long category labels (common on horizontal bar charts) truncate by default; set "axis": { "labelLimit": 150 } on that axis so the labels stay readable.
 - Temporal axes: set "axis": { "labelAngle": 0, "tickCount": 8 } and let Vega auto-format the dates — do NOT rotate or hand-format date labels.
-- When the "title" already conveys what an axis represents, set "title": null on that axis to drop the redundant axis title.
+- When the panel title already conveys what an axis represents, set "title": null on that axis to drop the redundant axis title.
 
 COLOR:
 - Kibana applies a theme-aware Elastic palette and adapts chart colors to the active light/dark theme. Do NOT hardcode colors: no hex values, no "config" block setting mark/axis/text colors, and no "mark": { "color": … } — hardcoding overrides the theme and breaks dark mode.
@@ -100,9 +100,13 @@ COLOR:
 - Only for a quantitative color encoding may you set a sequential "scheme" ("blues", "viridis"), since there is no themed default for continuous scales.
 - Single-series charts need no color at all — the theme supplies the default series color.
 
+TITLE RULES:
+- Always set "title" to a clear, self-explanatory visualization / dashboard panel title.
+- Prefer the panel title over redundant axis titles.
+- NEVER duplicate information across the panel title and axis titles.
+
 LAYOUT & STYLE RULES:
 - DO NOT set top-level "width" or "height"; the system makes the chart fill its container. Do NOT set fixed mark sizes (e.g. arc "outerRadius") that prevent the chart from filling its panel.
-- Provide a clear, self-explanatory "title"; prefer it over redundant axis titles.
 - SORT IN LAYERED SPECS: when a categorical axis is shared across layers, pre-sort rows in ES|QL (SORT … DESC) and set "sort": null on that encoding to avoid "conflicting sort properties" warnings.
 - SHARED SCALES IN LAYERED SPECS: when multiple layers encode the same field on a shared scale (e.g. "color"), configure the "legend"/"axis"/"scale" on ONE layer only. Do NOT set "legend": null on one layer while another sets a legend for the same scale — conflicting per-layer settings trigger "Conflicting legend property" warnings.
 - INDICATOR / BIG-NUMBER charts: stack the text marks in clearly separated vertical bands and NEVER center two large text marks on the same point. A single big value is safest; when adding a label or a secondary value (e.g. "Previous", "% change"), give each its own non-overlapping band and size fonts so the tallest mark cannot grow into its neighbours at any panel aspect ratio — overlapping text is hard to read.
@@ -121,10 +125,13 @@ Your task is to author the visualization specification for the following request
 ${nlQuery}
 </user_query>
 
-IMPORTANT: Return ONLY the JSON specification wrapped in a markdown code block:
+IMPORTANT: Return ONLY a JSON object wrapped in a markdown code block. Use this shape — "title" is the Kibana visualization / panel title, and "spec" is the Vega-Lite specification:
 \`\`\`json
 {
-  // your Vega-Lite specification here
+  "title": "Concise panel title",
+  "spec": {
+    // Vega-Lite v6 specification
+  }
 }
 \`\`\`
 

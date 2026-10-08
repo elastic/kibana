@@ -40,6 +40,7 @@ import {
   executeGenerationWorkflow,
   getInferredPrebuiltStepTypes,
 } from '../../../routes/generate/helpers';
+import { isWorkflowsEnabledForSpace } from '../../is_workflows_enabled_for_space';
 import type { DiscoveriesPluginStartDeps } from '../../../types';
 import { checkManagedWorkflowIntegrity } from '../../../managed_workflows/check_managed_workflow_integrity';
 import { wrapManagementApiForScheduledExecution } from './helpers/wrap_management_api_for_scheduled_execution';
@@ -149,8 +150,20 @@ export const workflowExecutor = async ({
       ? wrapManagementApiForScheduledExecution(deps.workflowsManagementApi)
       : deps.workflowsManagementApi;
 
-  const { pluginsStart } = await deps.getStartServices();
+  const { coreStart, pluginsStart } = await deps.getStartServices();
   const { authz } = pluginsStart.security;
+
+  const spaceEnabled = await isWorkflowsEnabledForSpace({
+    featureFlags: coreStart.featureFlags,
+    uiSettingsClient: services.uiSettingsClient,
+  });
+
+  if (!spaceEnabled) {
+    tracedLogger.info(
+      `[AD] Attack Discovery workflows disabled for this space — skipping scheduled run`
+    );
+    return { state: {} };
+  }
 
   try {
     const orchestrationOutcome = await executeGenerationWorkflow({

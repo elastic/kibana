@@ -59,7 +59,7 @@ export class OverviewTab extends ServiceDetailsTab {
   }
 
   getViewErrorsLink() {
-    return this.page.getByRole('link', { name: 'View errors' });
+    return this.page.getByRole('link', { name: 'View all errors' });
   }
 
   async clickViewErrorsLink() {

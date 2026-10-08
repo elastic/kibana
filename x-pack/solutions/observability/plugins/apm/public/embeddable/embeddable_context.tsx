@@ -12,11 +12,6 @@ import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import React, { useEffect, useMemo, useRef } from 'react';
 import {
-  UNSAFE_LocationContext as ReactRouterLocationContext,
-  UNSAFE_NavigationContext as ReactRouterNavigationContext,
-  UNSAFE_RouteContext as ReactRouterRouteContext,
-} from 'react-router-dom-v5-compat';
-import {
   OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
   OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
 } from '../../common/cps_feature_flag';
@@ -27,36 +22,12 @@ import type { ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_con
 import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
 import { ChartPointerEventContextProvider } from '../context/chart_pointer_event/chart_pointer_event_context';
 import { LicenseProvider } from '../context/license/license_context';
+import { ScopedRouterProvider } from '../context/scoped_router_provider';
 import { TimeRangeMetadataContextProvider } from '../context/time_range_metadata/time_range_metadata_context';
 import { getDateRange } from '../context/url_params_context/helpers';
 import { setApmInternalServices } from '../plugin';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import type { EmbeddableDeps } from './types';
-
-/**
- * Resets the React Router v6 context so that nested `<Router>` components
- * (via `CompatRouter` inside `@kbn/shared-ux-router`) do not trigger the
- * v6 invariant "You cannot render a <Router> inside another <Router>".
- *
- * This is necessary because embeddables may be rendered inside pages that
- * already have a v6 router context (e.g. APM alert details via `CompatRouter`),
- * while the embeddable needs its own isolated in-memory router for URL state.
- */
-function ScopedRouterProvider({ children }: { children: React.ReactElement }) {
-  return (
-    <ReactRouterRouteContext.Provider value={{ outlet: null, matches: [], isDataRoute: false }}>
-      <ReactRouterNavigationContext.Provider
-        value={null as unknown as React.ContextType<typeof ReactRouterNavigationContext>}
-      >
-        <ReactRouterLocationContext.Provider
-          value={null as unknown as React.ContextType<typeof ReactRouterLocationContext>}
-        >
-          {children}
-        </ReactRouterLocationContext.Provider>
-      </ReactRouterNavigationContext.Provider>
-    </ReactRouterRouteContext.Provider>
-  );
-}
 
 export interface ApmEmbeddableContextProps {
   deps: EmbeddableDeps;

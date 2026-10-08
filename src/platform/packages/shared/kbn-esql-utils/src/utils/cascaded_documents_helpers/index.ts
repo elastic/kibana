@@ -39,6 +39,10 @@ import { getUsedFields, getFieldTerminals, getFieldDefinitionFromArg } from '../
 import { extractCategorizeTokens } from '../extract_categorize_tokens';
 import { getOperator } from '../append_to_query/utils';
 import {
+  convertTimeseriesCommandNodeToFrom,
+  hasTimeseriesInfoCommand,
+} from '../query_parsing_helpers';
+import {
   isSupportedStatsFunction,
   type SupportedFieldTypes,
   type FieldValue,
@@ -84,14 +88,41 @@ export interface ESQLStatsQueryMeta {
   appliedFunctions: AppliedStatsFunction[];
 }
 
+const EMPTY_ESQL_STATS_QUERY_META: ESQLStatsQueryMeta = {
+  groupByFields: [],
+  appliedFunctions: [],
+};
+
+const getStatsGroupingField = (
+  summary: StatsCommandSummary,
+  field: string
+): FieldSummary | undefined => summary.grouping[field] ?? summary.grouping[`\`${field}\``];
+
 /**
  * This method is used to get the metadata on STATS command to drive the cascade experience from an ESQL query,
  * if a valid STATS command is found information about the group by fields and applied functions is returned.
  * This method will exclude queries contain commands that are not valid for the cascade experience,
  */
 export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
+  try {
+    return computeESQLStatsQueryMeta(queryString);
+  } catch (error) {
+    // Unexpected AST/parse failures must not take down Discover (or other callers).
+    // eslint-disable-next-line no-console
+    console.error('Failed to compute ES|QL stats query metadata for cascade documents', error);
+    return EMPTY_ESQL_STATS_QUERY_META;
+  }
+};
+
+const computeESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
   const groupByFields: ESQLStatsQueryMeta['groupByFields'] = [];
   const appliedFunctions: ESQLStatsQueryMeta['appliedFunctions'] = [];
+
+  if (hasTimeseriesInfoCommand(queryString)) {
+    // TS_INFO/METRICS_INFO rows are synthetic metric metadata rather than documents,
+    // so there's no underlying document to drive a cascade experience from
+    return { groupByFields, appliedFunctions };
+  }
 
   const esqlQuery = EsqlQuery.fromSrc(queryString);
 
@@ -153,9 +184,17 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
           groupDeclarationStatsCommandLookupIndex
         ))
       ) {
-        groupDeclarationStatsCommandIndex = groupDeclarationStatsCommandLookupIndex;
-        // update the group field node to it's actual definition
-        groupFieldNode = groupDeclarationCommandSummary.grouping[group.field];
+        const resolvedGroupField = getStatsGroupingField(
+          groupDeclarationCommandSummary,
+          group.field
+        );
+        if (resolvedGroupField) {
+          groupDeclarationStatsCommandIndex = groupDeclarationStatsCommandLookupIndex;
+          // update the group field node to its actual grouping definition
+          groupFieldNode = resolvedGroupField;
+        }
+        // If the preceding STATS created this field as an aggregate, keep the current
+        // STATS grouping node (a column), the same way EVAL-created fields are handled.
       }
     }
 
@@ -340,12 +379,17 @@ export const constructCascadeQuery = ({
         );
       }
 
-      fieldDeclarationCommandSummary = groupDeclarationCommandSummary
-        ? {
-            ...groupDeclarationCommandSummary,
-            index: groupDeclarationCommandIndex,
-          }
-        : fieldDeclarationCommandSummary;
+      // Only walk back to a preceding STATS when that command declared the field as a grouping
+      // key (e.g. CATEGORIZE). Aggregate aliases are just columns on the operating STATS BY clause.
+      if (
+        groupDeclarationCommandSummary &&
+        getStatsGroupingField(groupDeclarationCommandSummary, pathSegment)
+      ) {
+        fieldDeclarationCommandSummary = {
+          ...groupDeclarationCommandSummary,
+          index: groupDeclarationCommandIndex,
+        };
+      }
     }
 
     const groupValue =
@@ -463,7 +507,11 @@ function handleStatsByColumnLeafOperation(
         continue;
       }
     } else {
-      mutate.generic.commands.insert(cascadeOperationQuery.ast, cmd, 0);
+      mutate.generic.commands.insert(
+        cascadeOperationQuery.ast,
+        convertTimeseriesCommandNodeToFrom(cmd),
+        0
+      );
     }
   }
 
@@ -523,7 +571,10 @@ function handleStatsByCategorizeLeafOperation(
       return;
     }
 
-    mutate.generic.commands.append(cascadeOperationQuery.ast, cmd);
+    mutate.generic.commands.append(
+      cascadeOperationQuery.ast,
+      convertTimeseriesCommandNodeToFrom(cmd)
+    );
   });
 
   // we select the first argument because that's the field being categorized
@@ -691,12 +742,20 @@ export const appendFilteringWhereClauseForCascadeLayout = <
         fieldDeclarationCommandSummary.index !== groupDeclarationCommandIndex
       ) {
         filterTargetIsRuntimeField = true;
-        // update the field declaration command summary to the stats command
-        // that declared the field the filtering operation is targeting
-        fieldDeclarationCommandSummary = {
-          ...getStatsCommandAtIndexSummary(ESQLQuery, groupDeclarationCommandIndex)!,
-          index: groupDeclarationCommandIndex,
-        };
+        const declaredSummary = getStatsCommandAtIndexSummary(
+          ESQLQuery,
+          groupDeclarationCommandIndex
+        );
+        const declaredGroupingField =
+          declaredSummary && getStatsGroupingField(declaredSummary, rawFieldName);
+        if (declaredGroupingField && declaredSummary) {
+          // update the field declaration command summary to the stats command
+          // that declared the field the filtering operation is targeting
+          fieldDeclarationCommandSummary = {
+            ...declaredSummary,
+            index: groupDeclarationCommandIndex,
+          };
+        }
       }
     }
 

@@ -48,7 +48,7 @@ describe('useResolveTimeField', () => {
     (getESQLTimeFieldFromQuery as jest.Mock).mockResolvedValue(undefined);
   });
 
-  it('auto-corrects to the first date field from field caps', async () => {
+  it('clears an invalid current field (does not substitute) but offers the real field for selection', async () => {
     const onTimeFieldChange = jest.fn();
     (useDataFields as jest.Mock).mockReturnValue({
       data: {
@@ -57,7 +57,7 @@ describe('useResolveTimeField', () => {
       isLoading: false,
     });
 
-    renderHook(
+    const { result } = renderHook(
       () =>
         useResolveTimeField({
           ...defaultParams,
@@ -67,15 +67,19 @@ describe('useResolveTimeField', () => {
     );
 
     await waitFor(() => {
-      expect(onTimeFieldChange).toHaveBeenCalledWith('timestamp');
+      expect(result.current.timeFieldOptions).toEqual([{ value: 'timestamp', text: 'timestamp' }]);
     });
+    // Current field `@timestamp` is not on the index: clear it (never substitute
+    // `timestamp`) so the user is forced to pick.
+    expect(onTimeFieldChange).toHaveBeenCalledWith('');
+    expect(result.current.isTimeFieldResolved).toBe(false);
   });
 
-  it('falls back to the ES|QL timefield API when field caps return no date fields', async () => {
+  it('offers the ES|QL timefield API result as an option but clears the invalid current field', async () => {
     const onTimeFieldChange = jest.fn();
     (getESQLTimeFieldFromQuery as jest.Mock).mockResolvedValue('timestamp');
 
-    renderHook(
+    const { result } = renderHook(
       () =>
         useResolveTimeField({
           ...defaultParams,
@@ -89,8 +93,10 @@ describe('useResolveTimeField', () => {
         query: 'FROM kibana_sample_data_flights',
         http: defaultParams.http,
       });
-      expect(onTimeFieldChange).toHaveBeenCalledWith('timestamp');
+      expect(result.current.timeFieldOptions).toEqual([{ value: 'timestamp', text: 'timestamp' }]);
     });
+    expect(onTimeFieldChange).toHaveBeenCalledWith('');
+    expect(result.current.isTimeFieldResolved).toBe(false);
   });
 
   it('does not call onTimeFieldChange when the current time field is valid', async () => {
@@ -117,10 +123,10 @@ describe('useResolveTimeField', () => {
     });
   });
 
-  it('resets to @timestamp when no date fields are found and API returns nothing', async () => {
+  it('clears the current field (does not fabricate) when none can be resolved', async () => {
     const onTimeFieldChange = jest.fn();
 
-    renderHook(
+    const { result } = renderHook(
       () =>
         useResolveTimeField({
           ...defaultParams,
@@ -131,8 +137,10 @@ describe('useResolveTimeField', () => {
     );
 
     await waitFor(() => {
-      expect(onTimeFieldChange).toHaveBeenCalledWith('@timestamp');
+      expect(getESQLTimeFieldFromQuery).toHaveBeenCalled();
     });
+    expect(onTimeFieldChange).toHaveBeenCalledWith('');
+    expect(result.current.isTimeFieldResolved).toBe(false);
   });
 
   it('does not reset timeField when no query is committed yet', async () => {

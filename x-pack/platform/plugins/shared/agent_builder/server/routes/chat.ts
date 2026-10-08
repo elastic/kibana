@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { validate as uuidValidate } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
@@ -34,15 +35,23 @@ import type {
   ChatCallbackAcceptedResponse,
   ChatCallbackRequestBodyPayload,
 } from '../../common/http_api/chat_callback';
-import { isChatCallbackRequestBodyPayload } from '../../common/http_api/chat_callback';
 import { internalApiPath, publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import { validateToolSelection } from '../services/agents/persisted/client/utils/tools';
+import { validateSkillIds } from '../services/agents/persisted/client/utils/skills';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import converseAsyncDescription from './oas/converse_async.text';
 import { buildChatResponseFromEvents } from '../services/execution/utils/chat_response';
+
+interface ResolvedExecutionOptions {
+  useTaskManager: boolean | undefined;
+  origin: ExecutionConversationOrigin | undefined;
+  callback: { url: string } | undefined;
+  executionId: string | undefined;
+  metadata: Record<string, string> | undefined;
+}
 
 export const promptResponseEntrySchema = schema.oneOf([
   schema.object({ allow: schema.boolean() }),
@@ -60,8 +69,8 @@ export const promptResponseEntrySchema = schema.oneOf([
     },
     {
       meta: {
-        description:
-          '**Technical Preview.** Answers to an `ask_user_question` prompt; one entry per question, in order.',
+        availability: { stability: 'tech_preview' },
+        description: 'Answers to an `ask_user_question` prompt; one entry per question, in order.',
       },
     }
   ),
@@ -183,8 +192,8 @@ export const conversePayloadSchema = schema.object({
       ),
       {
         meta: {
-          description:
-            '**Technical Preview; added in 9.3.0.** Optional attachments to send with the message.',
+          availability: { stability: 'tech_preview', since: '9.3.0' },
+          description: 'Optional attachments to send with the message.',
         },
       }
     )
@@ -207,8 +216,8 @@ export const conversePayloadSchema = schema.object({
       },
       {
         meta: {
-          description:
-            '**Technical Preview; added in 9.5.0.** Optional conversation access control. Defaults to private.',
+          availability: { stability: 'tech_preview', since: '9.5.0' },
+          description: 'Optional conversation access control. Defaults to private.',
         },
       }
     )
@@ -270,6 +279,20 @@ export const conversePayloadSchema = schema.object({
             { meta: { description: 'Tool selection to enable for this execution.' } }
           )
         ),
+        skill_ids: schema.maybe(
+          schema.arrayOf(schema.string({ maxLength: 256 }), {
+            maxSize: 100,
+            meta: {
+              description:
+                'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.',
+            },
+          })
+        ),
+        enable_elastic_capabilities: schema.maybe(
+          schema.boolean({
+            meta: { description: 'Whether to enable built-in Elastic skills for this execution.' },
+          })
+        ),
       },
       {
         meta: {
@@ -290,14 +313,22 @@ export const conversePayloadSchema = schema.object({
   _execution_mode: schema.maybe(
     schema.oneOf([schema.literal('local'), schema.literal('task_manager')], {
       meta: {
-        description:
-          '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)',
+        availability: { stability: 'experimental', since: '9.4.0' },
+        description: 'define how to execute the agent (local execution or via task_manager)',
       },
     })
   ),
 });
 
 export const callbackConversePayloadSchema = conversePayloadSchema.extends({
+  execution_idempotency_key: schema.string({
+    minLength: 1,
+    maxLength: 256,
+    meta: {
+      description:
+        'Opaque key that deduplicates repeated deliveries of the same surface event (e.g. a Slack event_id). A request replaying an already-accepted key returns the existing execution instead of starting a new one. When execution_id is also provided, it takes precedence as the execution id.',
+    },
+  }),
   origin: schema.maybe(
     schema.object({
       type: schema.literal(ConversationOriginType.Slack),
@@ -305,8 +336,8 @@ export const callbackConversePayloadSchema = conversePayloadSchema.extends({
       author: schema.maybe(
         schema.object({
           id: schema.string({ minLength: 1, maxLength: 1024 }),
-          name: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
-          handle: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
+          username: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
+          full_name: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
         })
       ),
     })
@@ -377,35 +408,62 @@ export function registerChatRoutes({
         throw createBadRequestError(`Invalid tool override: ${errors.join(', ')}`);
       }
     }
+    if (payload.configuration_overrides?.skill_ids) {
+      const { skills: skillsService } = getInternalServices();
+      const skillRegistry = await skillsService.getRegistry({ request });
+      const errors = await validateSkillIds(
+        skillRegistry,
+        payload.configuration_overrides.skill_ids
+      );
+      if (errors.length > 0) {
+        throw createBadRequestError(`Invalid skill override: ${errors.join(', ')}`);
+      }
+    }
   };
 
   /**
-   * Derives execution options shared by all converse routes.
-   * Public requests may opt into local or Task Manager execution with _execution_mode,
-   * while callback requests always use Task Manager and carry the callback and origin.
+   * Derives execution options for callback converse requests, which always use
+   * Task Manager and carry the callback and origin. The execution id is the
+   * caller-provided one, or is derived from the idempotency key scoped to the
+   * space and target conversation so replayed deliveries map to the same execution.
    */
   const resolveExecutionOptions = (
-    payload: ChatRequestBodyPayload | ChatCallbackRequestBodyPayload
-  ): {
-    useTaskManager: boolean | undefined;
-    origin: ExecutionConversationOrigin | undefined;
-    callback: { url: string } | undefined;
-  } => {
-    if (isChatCallbackRequestBodyPayload(payload)) {
-      return {
-        useTaskManager: true,
-        origin: payload.origin,
-        callback: payload.callback,
-      };
-    }
+    payload: ChatCallbackRequestBodyPayload,
+    spaceId: string
+  ): ResolvedExecutionOptions => {
+    const {
+      execution_idempotency_key: executionIdempotencyKey,
+      conversation_id: conversationId,
+      execution_id: providedExecutionId,
+      origin,
+    } = payload;
 
-    const { _execution_mode: executionMode } = payload;
+    const scopeId = conversationId ?? origin?.external_conversation_id ?? '';
+    const executionId =
+      providedExecutionId ??
+      createHash('sha256')
+        .update([spaceId, origin?.type ?? '', scopeId, executionIdempotencyKey].join('\u0000'))
+        .digest('hex');
+
+    return {
+      useTaskManager: true,
+      origin,
+      callback: payload.callback,
+      executionId,
+      metadata: { execution_idempotency_key: executionIdempotencyKey },
+    };
+  };
+
+  const defaultExecutionOptions = (payload: ChatRequestBodyPayload): ResolvedExecutionOptions => {
+    const { _execution_mode: executionMode, execution_id: executionId } = payload;
 
     return {
       useTaskManager:
         executionMode === 'task_manager' ? true : executionMode === 'local' ? false : undefined,
       origin: undefined,
       callback: undefined,
+      executionId,
+      metadata: undefined,
     };
   };
 
@@ -413,15 +471,16 @@ export function registerChatRoutes({
     payload,
     request,
     executionService,
+    executionOptions,
   }: {
     payload: ChatRequestBodyPayload | ChatCallbackRequestBodyPayload;
     request: KibanaRequest;
     executionService: AgentExecutionService;
+    executionOptions?: ResolvedExecutionOptions;
   }) => {
     const {
       agent_id: agentId,
       conversation_id: conversationId,
-      execution_id: executionId,
       input,
       prompts,
       attachments,
@@ -433,12 +492,14 @@ export function registerChatRoutes({
     } = payload;
 
     const connectorId = resolveConnectorIdFromPayload(payload);
-    const { useTaskManager, origin, callback } = resolveExecutionOptions(payload);
+    const { useTaskManager, origin, callback, executionId, metadata } =
+      executionOptions ?? defaultExecutionOptions(payload);
 
     return executionService.executeAgent({
       mode: AgentExecutionMode.conversation,
       request,
       executionId,
+      metadata,
       useTaskManager,
       params: {
         agentId,
@@ -609,10 +670,13 @@ export function registerChatRoutes({
         await validateConfigurationOverrides({ payload, request });
         validateAction(payload);
 
+        const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
+
         const { executionId } = await executeAgent({
           payload,
           request,
           executionService,
+          executionOptions: resolveExecutionOptions(payload, spaceId),
         });
 
         return response.accepted<ChatCallbackAcceptedResponse>({

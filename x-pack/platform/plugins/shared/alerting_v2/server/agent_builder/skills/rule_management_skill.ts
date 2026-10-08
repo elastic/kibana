@@ -24,6 +24,7 @@ export const createRuleManagementSkill = (deps: ManageActionPolicyToolDeps) =>
     basePath: 'skills/platform/alerting',
     description:
       'Compose, discover, and modify alerting V2 rules and action policies (notification policies) within a conversation.',
+    experimental: true,
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
     referencedContent: [
       {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import getAnnotationsRequestMock from './__mocks__/get_annotations_request.json';
 import getAnnotationsResponseMock from './__mocks__/get_annotations_response.json';
 
@@ -14,30 +15,45 @@ import { isAnnotations } from '@kbn/ml-common-types/annotations';
 
 import type { DeleteParams, GetResponse, IndexAnnotationArgs } from './annotation';
 import { annotationServiceProvider } from '.';
+import type { MlClient } from '../../lib/ml_client/types';
 
 const acknowledgedResponseMock = { acknowledged: true };
 
-const jobIdMock = 'jobIdMock';
+const jobIdMock = 'job-id-mock';
 
 describe('annotation_service', () => {
   let mlClusterClientSpy = {} as any;
+  let mlClientSpy: Pick<MlClient, 'getJobs'>;
+  let annotationService: ReturnType<typeof annotationServiceProvider>;
+  let internalGetJobs: jest.Mock;
 
   beforeEach(() => {
+    internalGetJobs = jest.fn().mockResolvedValue({ jobs: [{ job_id: jobIdMock }] });
+
     const callAs = {
       delete: jest.fn(() => Promise.resolve(acknowledgedResponseMock)),
       index: jest.fn(() => Promise.resolve(acknowledgedResponseMock)),
       search: jest.fn(() => Promise.resolve(getAnnotationsResponseMock)),
+      ml: {
+        getJobs: internalGetJobs,
+      },
     };
 
     mlClusterClientSpy = {
       asCurrentUser: callAs,
       asInternalUser: callAs,
     };
+
+    mlClientSpy = {
+      getJobs: jest.fn().mockResolvedValue({ jobs: [{ job_id: jobIdMock }] }),
+    };
+
+    annotationService = annotationServiceProvider(mlClusterClientSpy, mlClientSpy as MlClient);
   });
 
   describe('deleteAnnotation()', () => {
     it('should delete annotation', async () => {
-      const { deleteAnnotation } = annotationServiceProvider(mlClusterClientSpy);
+      const { deleteAnnotation } = annotationService;
       const mockFunct = mlClusterClientSpy;
 
       const annotationMockId = 'mockId';
@@ -56,7 +72,7 @@ describe('annotation_service', () => {
 
   describe('getAnnotation()', () => {
     it('should get annotations for specific job', async () => {
-      const { getAnnotations } = annotationServiceProvider(mlClusterClientSpy);
+      const { getAnnotations } = annotationService;
       const mockFunct = mlClusterClientSpy;
 
       const indexAnnotationArgsMock: IndexAnnotationArgs = {
@@ -86,10 +102,16 @@ describe('annotation_service', () => {
       const mlClusterClientSpyError: any = {
         asInternalUser: {
           search: jest.fn(() => Promise.resolve(mockEsError)),
+          ml: {
+            getJobs: internalGetJobs,
+          },
         },
       };
 
-      const { getAnnotations } = annotationServiceProvider(mlClusterClientSpyError);
+      const { getAnnotations } = annotationServiceProvider(
+        mlClusterClientSpyError,
+        mlClientSpy as MlClient
+      );
 
       const indexAnnotationArgsMock: IndexAnnotationArgs = {
         jobIds: [jobIdMock],
@@ -106,7 +128,7 @@ describe('annotation_service', () => {
 
   describe('indexAnnotation()', () => {
     it('should index annotation', async () => {
-      const { indexAnnotation } = annotationServiceProvider(mlClusterClientSpy);
+      const { indexAnnotation } = annotationService;
       const mockFunct = mlClusterClientSpy;
 
       const annotationMock: Annotation = {
@@ -131,7 +153,7 @@ describe('annotation_service', () => {
     });
 
     it('should remove ._id and .key before updating annotation', async () => {
-      const { indexAnnotation } = annotationServiceProvider(mlClusterClientSpy);
+      const { indexAnnotation } = annotationService;
       const mockFunct = mlClusterClientSpy;
 
       const annotationMock: Annotation = {
@@ -160,7 +182,7 @@ describe('annotation_service', () => {
     });
 
     it('should update annotation text and the username for modified_username', async () => {
-      const { getAnnotations, indexAnnotation } = annotationServiceProvider(mlClusterClientSpy);
+      const { getAnnotations, indexAnnotation } = annotationService;
       const mockFunct = mlClusterClientSpy;
 
       const indexAnnotationArgsMock: IndexAnnotationArgs = {
@@ -193,6 +215,109 @@ describe('annotation_service', () => {
       expect(modifiedAnnotation.modified_username).toBe(modifiedUsernameMock);
       expect(typeof modifiedAnnotation.create_time).toBe('number');
       expect(typeof modifiedAnnotation.modified_time).toBe('number');
+    });
+  });
+
+  describe('checkJobAccess()', () => {
+    const indexAnnotationArgs = (jobIds: string[]): IndexAnnotationArgs => ({
+      jobIds,
+      earliestMs: 1454804100000,
+      latestMs: 1455233399999,
+      maxAnnotations: 500,
+    });
+
+    it('should deny access when the job exists but is inaccessible to the user', async () => {
+      const accessError = Object.assign(new Error('job not found in space'), { statusCode: 404 });
+      (mlClientSpy.getJobs as jest.Mock).mockRejectedValue(accessError);
+      internalGetJobs.mockResolvedValue({ jobs: [{ job_id: jobIdMock }] });
+
+      await expect(annotationService.getAnnotations(indexAnnotationArgs([jobIdMock]))).rejects.toBe(
+        accessError
+      );
+      expect(internalGetJobs).toHaveBeenCalledWith({ job_id: jobIdMock });
+    });
+
+    it('should allow access when the job is missing for both the user and internal client', async () => {
+      const notFoundError = Object.assign(new Error('job not found'), { statusCode: 404 });
+      (mlClientSpy.getJobs as jest.Mock).mockRejectedValue(notFoundError);
+      internalGetJobs.mockRejectedValue(notFoundError);
+
+      const response = await annotationService.getAnnotations(indexAnnotationArgs([jobIdMock]));
+
+      expect(response.success).toBe(true);
+      expect(internalGetJobs).toHaveBeenCalledWith({ job_id: jobIdMock });
+    });
+
+    it('should fail closed when the internal existence probe returns a non-404 error', async () => {
+      const accessError = Object.assign(new Error('job not found in space'), { statusCode: 404 });
+      const serviceUnavailable = Object.assign(new Error('service unavailable'), {
+        statusCode: 503,
+      });
+      (mlClientSpy.getJobs as jest.Mock).mockRejectedValue(accessError);
+      internalGetJobs.mockRejectedValue(serviceUnavailable);
+
+      await expect(annotationService.getAnnotations(indexAnnotationArgs([jobIdMock]))).rejects.toBe(
+        serviceUnavailable
+      );
+    });
+
+    it('should reject an empty job ID list', async () => {
+      await expect(annotationService.getAnnotations(indexAnnotationArgs([]))).rejects.toMatchObject(
+        {
+          isBoom: true,
+          output: { statusCode: 400, payload: { message: 'No valid job IDs provided' } },
+        }
+      );
+      expect(mlClientSpy.getJobs).not.toHaveBeenCalled();
+    });
+
+    it('should reject invalid job IDs', async () => {
+      await expect(
+        annotationService.getAnnotations(indexAnnotationArgs(['job-*']))
+      ).rejects.toMatchObject({
+        isBoom: true,
+        output: { statusCode: 400, payload: { message: 'No valid job IDs provided' } },
+      });
+      expect(mlClientSpy.getJobs).not.toHaveBeenCalled();
+    });
+
+    it('should deny access to an inaccessible job even when paired with a missing job ID', async () => {
+      const victimJobId = 'victim-job';
+      const missingJobId = 'does-not-exist';
+      const accessError = Object.assign(new Error('job not found in space'), { statusCode: 404 });
+      const notFoundError = Object.assign(new Error('job not found'), { statusCode: 404 });
+
+      (mlClientSpy.getJobs as jest.Mock).mockImplementation(({ job_id: jobId }) => {
+        if (jobId === victimJobId || jobId === missingJobId) {
+          return Promise.reject(accessError);
+        }
+        return Promise.resolve({ jobs: [{ job_id: jobId }] });
+      });
+
+      internalGetJobs.mockImplementation(({ job_id: jobId }) => {
+        if (jobId === victimJobId) {
+          return Promise.resolve({ jobs: [{ job_id: jobId }] });
+        }
+        return Promise.reject(notFoundError);
+      });
+
+      await expect(
+        annotationService.getAnnotations(indexAnnotationArgs([missingJobId, victimJobId]))
+      ).rejects.toBe(accessError);
+    });
+
+    it('should reject invalid job IDs when indexing', async () => {
+      const annotationMock: Annotation = {
+        annotation: 'Annotation text',
+        job_id: 'Invalid_Job?',
+        timestamp: 1454804100000,
+        type: ANNOTATION_TYPE.ANNOTATION,
+      };
+
+      await expect(
+        annotationService.indexAnnotation(annotationMock, 'usernameMock')
+      ).rejects.toThrow(Boom.badRequest('No valid job IDs provided'));
+      expect(mlClientSpy.getJobs).not.toHaveBeenCalled();
     });
   });
 });

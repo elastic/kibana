@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { validateScheduleLimit } from './get_schedule_frequency';
 import type { ConstructorOptions } from '../../../../rules_client';
 import { RulesClient } from '../../../../rules_client';
@@ -38,6 +39,7 @@ const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const kibanaVersion = 'v8.0.0';
 
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,

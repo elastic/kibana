@@ -67,8 +67,11 @@ export class AssetCriticalityMigrationClient {
     return resp.hits.hits.length > 0;
   };
 
-  public migrateMappings = async () => {
-    const spaceIds = await this.getAllSpacesWithAssetCriticalityInstalled();
+  public migrateMappings = async (filterSpaceId?: string) => {
+    let spaceIds = await this.getAllSpacesWithAssetCriticalityInstalled();
+    if (filterSpaceId) {
+      spaceIds = spaceIds.filter((id) => id === filterSpaceId);
+    }
 
     for (const spaceId of spaceIds) {
       const assetCriticalityDataClient = new AssetCriticalityDataClient({

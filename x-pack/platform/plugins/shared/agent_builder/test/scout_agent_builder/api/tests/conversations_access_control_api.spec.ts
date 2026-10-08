@@ -485,6 +485,37 @@ apiTest.describe(
           }
         );
 
+        await apiTest.step(
+          'public conversation rounds are attributed to the Kibana user who sent them',
+          async () => {
+            expect(publicConversation.author?.username).toBe(alice.username);
+            expect(privateConversation.author).toBeUndefined();
+
+            const getPublicResponse = await apiClient.get(
+              `${accessControlApiBase}/conversations/${encodeURIComponent(
+                publicConversation.conversation_id
+              )}`,
+              { headers: headersFor(alice), responseType: 'json' }
+            );
+            expect(getPublicResponse).toHaveStatusCode(200);
+            const conversation = getPublicResponse.body as Conversation;
+            expect(conversation.rounds).toHaveLength(2);
+            expect(conversation.rounds[0].author?.username).toBe(alice.username);
+            expect(conversation.rounds[0].author?.id).toBeDefined();
+            expect(conversation.rounds[1].author?.username).toBe(bob.username);
+            expect(conversation.rounds[1].author?.id).toBeDefined();
+
+            const getPrivateResponse = await apiClient.get(
+              `${accessControlApiBase}/conversations/${encodeURIComponent(
+                privateConversation.conversation_id
+              )}`,
+              { headers: headersFor(alice), responseType: 'json' }
+            );
+            expect(getPrivateResponse).toHaveStatusCode(200);
+            expect((getPrivateResponse.body as Conversation).rounds[0].author).toBeUndefined();
+          }
+        );
+
         await apiTest.step('Bob can mark a public conversation read', async () => {
           const markReadResponse = await markConversationReadAs(
             apiClient,
@@ -704,6 +735,56 @@ apiTest.describe(
             expect(getOrphanedResponse).toHaveStatusCode(404);
           }
         );
+      }
+    );
+
+    // ── auto-create IDOR ──────────────────────────────────────────────────────
+
+    apiTest(
+      'auto-create cannot overwrite or take over another user conversation',
+      async ({ apiClient }) => {
+        const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-autocreate-agent-${testRunId.slice(0, 8)}`;
+        await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Shared));
+
+        const aliceConversation = await createConversationAs({
+          apiClient,
+          user: alice,
+          agentId,
+          input: 'alice data',
+          title: 'Alice private conversation',
+        });
+        const conversationId = aliceConversation.conversation_id;
+
+        // converse auto-creates a conversation with the caller-supplied id, so Bob replaying
+        // Alice's id previously overwrote and took over her conversation. It must now be
+        // rejected before any create, with no LLM round (so no interceptor is set up).
+        const attempt = await apiClient.post(`${accessControlApiBase}/converse`, {
+          headers: headersFor(bob),
+          body: {
+            agent_id: agentId,
+            input: 'bob data',
+            connector_id: connectorId,
+            _execution_mode: 'local',
+            conversation_id: conversationId,
+          },
+          responseType: 'json',
+        });
+        expect(attempt).toHaveStatusCode(404);
+
+        const aliceView = await apiClient.get(
+          `${accessControlApiBase}/conversations/${encodeURIComponent(conversationId)}`,
+          { headers: headersFor(alice), responseType: 'json' }
+        );
+        expect(aliceView).toHaveStatusCode(200);
+        const conversation = aliceView.body as Conversation;
+        expect(conversation.user.username).toBe(alice.username);
+        expect(conversation.rounds).toHaveLength(1);
+
+        const bobView = await apiClient.get(
+          `${accessControlApiBase}/conversations/${encodeURIComponent(conversationId)}`,
+          { headers: headersFor(bob), responseType: 'json' }
+        );
+        expect(bobView).toHaveStatusCode(404);
       }
     );
 

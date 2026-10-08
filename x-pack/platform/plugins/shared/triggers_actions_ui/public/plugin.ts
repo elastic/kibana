@@ -7,11 +7,13 @@
 
 import type {
   AppMountParameters,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   Plugin as CorePlugin,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { from, map } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
@@ -31,6 +33,7 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { triggersActionsRoute } from '@kbn/rule-data-utils';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -88,6 +91,7 @@ import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import { AlertRuleFromVisAction } from './common/alert_rule_from_vis_ui_action';
+import { getRulesAppUpdate } from './get_rules_app_update';
 
 import type {
   ActionTypeModel,
@@ -195,6 +199,7 @@ interface PluginsStart {
   features: FeaturesPluginStart;
   expressions: ExpressionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   licensing: LicensingPluginStart;
   serverless?: ServerlessPluginStart;
   fieldFormats: FieldFormatsRegistry;
@@ -308,7 +313,15 @@ export class Plugin
         title: i18n.translate('xpack.triggersActionsUI.rulesPage.title', {
           defaultMessage: 'Rules',
         }),
-        visibleIn: ['globalSearch', 'projectSideNav'],
+        visibleIn: ['projectSideNav'],
+        // Gate this app on the Rules management capability.
+        updater$: from(core.getStartServices()).pipe(
+          map(
+            ([coreStart]): AppUpdater =>
+              () =>
+                getRulesAppUpdate(coreStart.application.capabilities)
+          )
+        ),
         category: DEFAULT_APP_CATEGORIES.management,
         async mount(params: AppMountParameters) {
           const [coreStart] = (await core.getStartServices()) as [CoreStart, PluginsStart, unknown];
@@ -357,6 +370,7 @@ export class Plugin
             alerting: pluginsStart.alerting,
             spaces: pluginsStart.spaces,
             unifiedSearch: pluginsStart.unifiedSearch,
+            kql: pluginsStart.kql,
             isCloud: Boolean(plugins.cloud?.isCloudEnabled),
             element: params.element,
             theme: coreStart.theme,
@@ -462,6 +476,7 @@ export class Plugin
             alerting: pluginsStart.alerting,
             spaces: pluginsStart.spaces,
             unifiedSearch: pluginsStart.unifiedSearch,
+            kql: pluginsStart.kql,
             isCloud: Boolean(plugins.cloud?.isCloudEnabled),
             element: params.element,
             theme: params.theme,

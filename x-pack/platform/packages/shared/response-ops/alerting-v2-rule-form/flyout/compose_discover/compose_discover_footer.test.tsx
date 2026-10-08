@@ -344,6 +344,31 @@ describe('ComposeDiscoverFooter', () => {
       });
       expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
     });
+
+    it('disables Next on the alert condition step when the time field is empty (unresolved)', () => {
+      renderFooter({
+        stateOverrides: { queryCommitted: true },
+        formValues: {
+          kind: 'alert',
+          timeField: '',
+          query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
+        },
+      });
+      expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
+    });
+
+    it('does not block Next on other steps when the time field is empty', () => {
+      renderFooter({
+        stateOverrides: { queryCommitted: true },
+        propsOverrides: { currentStep: DETAILS_STEP },
+        formValues: {
+          kind: 'alert',
+          timeField: '',
+          query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
+        },
+      });
+      expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
+    });
   });
 
   describe('Back button disabled state', () => {

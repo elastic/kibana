@@ -102,7 +102,7 @@ export const createVisPanelResolver = ({
       }
 
       if (renderer === 'vega') {
-        const { spec } = await buildVegaConfig({
+        const { spec, title } = await buildVegaConfig({
           nlQuery,
           index,
           esql,
@@ -122,7 +122,7 @@ export const createVisPanelResolver = ({
           type: 'success',
           panelContent: {
             type: VEGA_VIS_TYPE,
-            config: { spec },
+            config: { spec, ...(title ? { title } : {}) },
           },
         };
       }

@@ -10,6 +10,7 @@ import type {
   RuleResponse,
   RuleObjectId,
 } from '../../../../../../../../common/api/detection_engine/model/rule_schema';
+import { withSecuritySpan } from '../../../../../../../utils/with_security_span';
 import { ClientError } from '../../utils';
 import { getRuleById } from '../get_rule_by_id';
 
@@ -27,36 +28,44 @@ export async function fetchRuleWithHistory({
   existingRule: RuleResponse | null;
   historyItem: RuleChangeHistoryDocument;
 }> {
-  const existingRule = await getRuleById({ rulesClient, id: ruleId });
+  return withSecuritySpan(
+    {
+      name: 'DetectionRulesClient.restoreRuleFromHistory.fetchHistory',
+      labels: { solution: 'security' },
+    },
+    async () => {
+      const existingRule = await getRuleById({ rulesClient, id: ruleId });
 
-  // `from` is intentionally omitted: the event.id term-filter makes the target
-  // document the first (and only) hit; ES default of 0 is correct here.
-  const historyResult = await rulesClient.getHistory({
-    module: 'security',
-    ruleId,
-    size: 1,
-    filters: [{ term: { 'event.id': changeId } }],
-  });
+      // `from` is intentionally omitted: the event.id term-filter makes the target
+      // document the first (and only) hit; ES default of 0 is correct here.
+      const historyResult = await rulesClient.getHistory({
+        module: 'security',
+        ruleId,
+        size: 1,
+        filters: [{ term: { 'event.id': changeId } }],
+      });
 
-  if (historyResult.items.length > 0) {
-    return { existingRule, historyItem: historyResult.items[0] };
-  }
+      if (historyResult.items.length > 0) {
+        return { existingRule, historyItem: historyResult.items[0] };
+      }
 
-  if (existingRule != null) {
-    throw new ClientError(`changeId: "${changeId}" not found`, 404);
-  }
+      if (existingRule != null) {
+        throw new ClientError(`changeId: "${changeId}" not found`, 404);
+      }
 
-  // The changeId filter alone can't tell "no history for this ruleId" apart
-  // from "history exists, but not for this changeId" — probe unfiltered.
-  const anyHistoryResult = await rulesClient.getHistory({
-    module: 'security',
-    ruleId,
-    size: 1,
-  });
+      // The changeId filter alone can't tell "no history for this ruleId" apart
+      // from "history exists, but not for this changeId" — probe unfiltered.
+      const anyHistoryResult = await rulesClient.getHistory({
+        module: 'security',
+        ruleId,
+        size: 1,
+      });
 
-  if (anyHistoryResult.items.length === 0) {
-    throw new ClientError(`ruleId: "${ruleId}" not found`, 404);
-  }
+      if (anyHistoryResult.items.length === 0) {
+        throw new ClientError(`ruleId: "${ruleId}" not found`, 404);
+      }
 
-  throw new ClientError(`changeId: "${changeId}" not found`, 404);
+      throw new ClientError(`changeId: "${changeId}" not found`, 404);
+    }
+  );
 }

@@ -20,7 +20,7 @@ export interface UseRiskScoreHistoryParams extends Omit<FetchRiskScoreHistoryPar
 /**
  * Reads the risk score time-series index. Serves both the timeline chart
  * (light entries) and the point-in-time contributions detail
- * (includeContributions + pageSize 1).
+ * (includeContributions).
  */
 export const useRiskScoreHistory = ({
   entityType,
@@ -28,7 +28,6 @@ export const useRiskScoreHistory = ({
   from,
   to,
   scoreType,
-  pageSize,
   includeContributions,
   skip = false,
 }: UseRiskScoreHistoryParams) => {
@@ -45,7 +44,6 @@ export const useRiskScoreHistory = ({
       from,
       to,
       scoreType,
-      pageSize,
       includeContributions,
     ],
     queryFn: async ({ signal }) => {
@@ -54,7 +52,7 @@ export const useRiskScoreHistory = ({
       }
       return fetchRiskScoreHistory({
         signal,
-        params: { entityType, entityId, from, to, scoreType, pageSize, includeContributions },
+        params: { entityType, entityId, from, to, scoreType, includeContributions },
       });
     },
     enabled,

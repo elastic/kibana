@@ -298,6 +298,25 @@ describe('RuleConditions', () => {
     });
   });
 
+  describe('description', () => {
+    it('renders description text before the ES|QL heading when it exists', () => {
+      const ruleWithDesc = {
+        ...baseRule,
+        metadata: { name: 'Test Signal Rule', description: 'My rule desc' },
+      };
+      renderConditions(ruleWithDesc);
+      const desc = screen.getByTestId('ruleConditionsDescription');
+      expect(desc).toHaveTextContent('My rule desc');
+      const query = screen.getByTestId('alertingV2RuleDetailsBaseQuery');
+      expect(desc.compareDocumentPosition(query)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
+    it('does not render description when it is absent', () => {
+      renderConditions(baseRule);
+      expect(screen.queryByTestId('ruleConditionsDescription')).not.toBeInTheDocument();
+    });
+  });
+
   it('renders fallback values for missing optional fields', () => {
     renderConditions({
       ...baseRule,

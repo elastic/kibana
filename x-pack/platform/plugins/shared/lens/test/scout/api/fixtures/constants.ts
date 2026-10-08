@@ -23,6 +23,19 @@ export const COMMON_HEADERS = {
   'elastic-api-version': LENS_API_VERSION,
 } as const;
 
+/** ES archive with TSDB sample data used by the trendline query execution tests. */
+export const KIBANA_SAMPLE_DATA_LOGS_TSDB_ARCHIVE =
+  'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb';
+
+/** Index created by `KIBANA_SAMPLE_DATA_LOGS_TSDB_ARCHIVE`. */
+export const KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX = 'kibana_sample_data_logstsdb';
+
+/** Time range covering the TSDB sample data. */
+export const TSDB_ISO_TIME_RANGE = {
+  start: '2023-04-16T00:00:00.000Z',
+  end: '2023-06-16T00:00:00.000Z',
+} as const;
+
 /** `logstash-*` data view referenced by every doc in `lens_example_docs.json`. */
 export const SAMPLE_DATA_VIEW_ID = '91200a00-9efd-11e7-acb3-3dab96693fab';
 

@@ -60,7 +60,6 @@ describe('processLiveHistory', () => {
     const result = await processLiveHistory({
       liveHits: hits,
       osqueryContext: createMockOsqueryContext() as never,
-      spaceId: 'default',
       logger: {} as never,
     });
 
@@ -86,7 +85,6 @@ describe('processLiveHistory', () => {
     const result = await processLiveHistory({
       liveHits: hits,
       osqueryContext: createMockOsqueryContext() as never,
-      spaceId: 'default',
       logger: {} as never,
     });
 
@@ -114,7 +112,6 @@ describe('processLiveHistory', () => {
     const result = await processLiveHistory({
       liveHits: hits,
       osqueryContext: createMockOsqueryContext() as never,
-      spaceId: 'default',
       logger: {} as never,
     });
 
@@ -124,8 +121,7 @@ describe('processLiveHistory', () => {
     expect(mockGetResultCountsForActions).toHaveBeenCalledWith(
       expect.anything(),
       ['query-1'],
-      'default',
-      ['default'],
+      undefined,
       false
     );
   });
@@ -156,7 +152,6 @@ describe('processLiveHistory', () => {
     const result = await processLiveHistory({
       liveHits: hits,
       osqueryContext: createMockOsqueryContext() as never,
-      spaceId: 'default',
       logger: {} as never,
     });
 
@@ -166,8 +161,7 @@ describe('processLiveHistory', () => {
     expect(mockGetResultCountsForActions).toHaveBeenCalledWith(
       expect.anything(),
       ['query-1', 'query-2'],
-      'default',
-      ['default'],
+      undefined,
       false
     );
   });
@@ -182,7 +176,6 @@ describe('processLiveHistory', () => {
     await processLiveHistory({
       liveHits: [createLiveHit()],
       osqueryContext: createMockOsqueryContext() as never,
-      spaceId: 'production',
       integrationNamespaces: ['prod'],
       ccsEnabled: true,
       logger: {} as never,
@@ -191,7 +184,6 @@ describe('processLiveHistory', () => {
     expect(mockGetResultCountsForActions).toHaveBeenCalledWith(
       expect.anything(),
       ['query-1'],
-      'production',
       ['prod'],
       true
     );
@@ -201,7 +193,6 @@ describe('processLiveHistory', () => {
     const result = await processLiveHistory({
       liveHits: [],
       osqueryContext: createMockOsqueryContext() as never,
-      spaceId: 'default',
       logger: {} as never,
     });
 

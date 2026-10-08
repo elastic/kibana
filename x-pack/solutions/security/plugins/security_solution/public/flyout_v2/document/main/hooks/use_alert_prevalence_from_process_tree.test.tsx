@@ -162,4 +162,97 @@ describe('useAlertPrevalenceFromProcessTree', () => {
     expect(hookResult.result.current.alertIds).toEqual(undefined);
     expect(hookResult.result.current.statsNodes).toEqual(undefined);
   });
+
+  describe('interval', () => {
+    const setup = () => {
+      const postMock = jest.fn();
+      (useHttp as jest.Mock).mockReturnValue({ post: postMock });
+      (useQuery as jest.Mock).mockReturnValue({ isLoading: false, data: {} });
+      (useAlertDocumentAnalyzerSchema as jest.Mock).mockReturnValue({
+        loading: false,
+        error: false,
+        id: 'id',
+        schema: { id: 'a', parent: 'b' },
+        agentId: 'agentId',
+      });
+      return postMock;
+    };
+
+    it('does not include timeRange in the query key or the request body when interval is not provided (Analyzer case)', () => {
+      const postMock = setup();
+
+      renderHook(() =>
+        useAlertPrevalenceFromProcessTree({
+          documentId: 'documentId',
+          indices: [],
+        })
+      );
+
+      expect(useQuery).toHaveBeenCalledWith(
+        ['getAlertPrevalenceFromProcessTree', 'id', 'index', undefined, undefined],
+        expect.any(Function),
+        expect.any(Object)
+      );
+
+      const queryFn = (useQuery as jest.Mock).mock.calls[0][1];
+      queryFn();
+
+      expect(postMock).toHaveBeenCalledTimes(1);
+      const body = JSON.parse(postMock.mock.calls[0][1].body);
+      expect(body).not.toHaveProperty('timeRange');
+    });
+
+    it('includes timeRange in the query key and the request body when interval is provided', () => {
+      const postMock = setup();
+      const interval = { from: 'now-1d', to: 'now' };
+
+      renderHook(() =>
+        useAlertPrevalenceFromProcessTree({
+          documentId: 'documentId',
+          indices: [],
+          interval,
+        })
+      );
+
+      expect(useQuery).toHaveBeenCalledWith(
+        ['getAlertPrevalenceFromProcessTree', 'id', 'index', interval.from, interval.to],
+        expect.any(Function),
+        expect.any(Object)
+      );
+
+      const queryFn = (useQuery as jest.Mock).mock.calls[0][1];
+      queryFn();
+
+      expect(postMock).toHaveBeenCalledTimes(1);
+      const body = JSON.parse(postMock.mock.calls[0][1].body);
+      expect(body.timeRange).toEqual({ from: interval.from, to: interval.to });
+    });
+  });
+
+  it('exposes a refetch function that calls the underlying query refetch, bypassing the cache', () => {
+    const queryRefetchMock = jest.fn();
+    (useQuery as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: {},
+      refetch: queryRefetchMock,
+    });
+    (useAlertDocumentAnalyzerSchema as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      id: null,
+      schema: null,
+      agentId: null,
+    });
+
+    hookResult = renderHook(() =>
+      useAlertPrevalenceFromProcessTree({
+        documentId: 'documentId',
+        indices: [],
+      })
+    );
+
+    hookResult.result.current.refetch();
+
+    expect(queryRefetchMock).toHaveBeenCalledTimes(1);
+  });
 });

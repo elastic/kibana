@@ -67,6 +67,27 @@ apiTest.describe(
       expect(body.hits?.total?.value).toBeGreaterThan(0);
     });
 
+    apiTest(
+      'returns alert-authorized rule types from the internal _rule_types endpoint',
+      async ({ apiClient }) => {
+        // Alerts-only users hold `alert/get` but not `rule/*`. The internal
+        // endpoint must still return the rule types whose alerts they can read
+        // (e.g. `.es-query`) so alert views receive a non-empty ruleTypeIds list.
+        const response = await apiClient.get(
+          'internal/alerting/_rule_types?include_alert_viewable_types=true',
+          {
+            headers: { ...COMMON_HEADERS, ...withReadPrivilegeCookieHeader },
+            responseType: 'json',
+          }
+        );
+        expect(response).toHaveStatusCode(200);
+
+        const body = response.body as Array<{ id: string }>;
+        const ruleTypeIds = body.map((ruleType) => ruleType.id);
+        expect(ruleTypeIds).toContain('.es-query');
+      }
+    );
+
     apiTest('can read muted alert state via _find_muted_alerts', async ({ apiClient }) => {
       const response = await apiClient.post('internal/alerting/rules/_find_muted_alerts', {
         headers: { ...COMMON_HEADERS, ...withReadPrivilegeCookieHeader },

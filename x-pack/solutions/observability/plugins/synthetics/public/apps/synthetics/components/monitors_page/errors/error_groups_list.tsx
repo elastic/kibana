@@ -342,6 +342,9 @@ const ExpandedGroupRow = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiInMemoryTable
+            tableCaption={i18n.translate('xpack.synthetics.errorGroups.tableCaption', {
+              defaultMessage: 'Error groups',
+            })}
             items={group.items}
             columns={columns}
             compressed

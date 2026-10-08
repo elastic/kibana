@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
 import type {
   CoreSecurityDelegateContract,
   GrantUiamAPIKeyParams,
@@ -36,15 +37,30 @@ export const buildSecurityApi = ({
 }): CoreSecurityDelegateContract => {
   const enrichment = createFakeRequestEnrichment(logger.get('fake-request-enrichment'));
 
+  const getCurrentUser: CoreSecurityDelegateContract['authc']['getCurrentUser'] = (request) => {
+    if (request.isFakeRequest) {
+      const override = enrichment.getOverride(request);
+      if (override) return override;
+    }
+    return getAuthc().getCurrentUser(request);
+  };
+
+  const getPrincipal: CoreSecurityDelegateContract['authc']['getPrincipal'] = (request) => {
+    // Fake requests never pass through the authenticator, so their principal is not known without
+    // I/O. The enrichment override is deliberately not classified: it names the user a request acts
+    // for, not the credential (usually an API key) that Elasticsearch authenticates it with.
+    if (request.isFakeRequest) {
+      return null;
+    }
+
+    const user = getCurrentUser(request);
+    return user ? getAuthenticatedPrincipal(user) : null;
+  };
+
   return {
     authc: {
-      getCurrentUser: (request) => {
-        if (request.isFakeRequest) {
-          const override = enrichment.getOverride(request);
-          if (override) return override;
-        }
-        return getAuthc().getCurrentUser(request);
-      },
+      getCurrentUser,
+      getPrincipal,
       getRedactedSessionId: async (request) => {
         const sid = await getSession().getSID(request);
         return sid ? getPrintableSessionId(sid) : undefined;
@@ -52,8 +68,8 @@ export const buildSecurityApi = ({
       apiKeys: {
         areAPIKeysEnabled: () => getAuthc().apiKeys.areAPIKeysEnabled(),
         areCrossClusterAPIKeysEnabled: () => getAuthc().apiKeys.areAPIKeysEnabled(),
-        grantAsInternalUser: (request, createParams) =>
-          getAuthc().apiKeys.grantAsInternalUser(request, createParams),
+        grantAsInternalUser: (request, createParams, options) =>
+          getAuthc().apiKeys.grantAsInternalUser(request, createParams, options),
         cloneAsInternalUser: (request, cloneParams) =>
           getAuthc().apiKeys.cloneAsInternalUser(request, cloneParams),
         create: (request, createParams) => getAuthc().apiKeys.create(request, createParams),
@@ -95,6 +111,7 @@ export const buildUserProfileApi = ({
 }): CoreUserProfileDelegateContract => {
   return {
     getCurrent: (params) => getUserProfile().getCurrent(params),
+    getCurrentProfileId: (params) => getUserProfile().getCurrentProfileId(params),
     suggest: (params) => getUserProfile().suggest(params),
     bulkGet: (params) => getUserProfile().bulkGet(params),
     update: (uids, data) => getUserProfile().update(uids, data),

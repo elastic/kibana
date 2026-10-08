@@ -1865,6 +1865,7 @@ describe('SentinelOneActionsClient class', () => {
               outputDestination: 'SentinelCloud',
               requiresApproval: false,
               scriptId: '1466645476786791838',
+              password: RESPONSE_ACTIONS_ZIP_PASSCODE.sentinel_one,
               taskDescription: expect.stringContaining(
                 'Action triggered from Elastic Security by user [foo] for action [runscript'
               ),

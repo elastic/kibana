@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout/ui';
 import {
   applyLensInlineEditorAndWaitClosed,
   createDashboardWithPanelId,
+  getMetricTrendline,
   openDimensionEditorAndWaitForFlyout,
   openInlineEditorAndWaitVisible,
   testData,
@@ -69,12 +70,13 @@ spaceTest.describe('Lens ES|QL metric trendline toggle', { tag: tags.stateful.cl
     'can enable and disable trendline via dimension editor with persistence',
     async ({ browserAuth, page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
+      const sparkline = getMetricTrendline(page);
 
       await spaceTest.step('open dashboard and verify no trendline initially', async () => {
         await browserAuth.loginAsPrivilegedUser();
         await dashboard.openDashboardWithId(dashboardId);
         await expect(page.getByTestId('mtrVis')).toBeVisible();
-        await expect(page.locator('.echSingleMetricSparkline')).toHaveCount(0);
+        await expect(sparkline).toHaveCount(0);
       });
 
       await spaceTest.step('enable trendline via dimension editor', async () => {
@@ -85,7 +87,7 @@ spaceTest.describe('Lens ES|QL metric trendline toggle', { tag: tags.stateful.cl
         await openDimensionEditorAndWaitForFlyout(pageObjects, page, metricDimensionPanel);
 
         await page.getByTestId('lnsMetric_background_chart_line').click();
-        await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+        await expect(sparkline).toBeVisible();
 
         await lens.getSecondaryFlyoutBackButton().click();
         await applyLensInlineEditorAndWaitClosed({ lens });
@@ -94,16 +96,16 @@ spaceTest.describe('Lens ES|QL metric trendline toggle', { tag: tags.stateful.cl
       await spaceTest.step(
         'save dashboard and verify trendline persists after reload',
         async () => {
-          await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+          await expect(sparkline).toBeVisible();
 
           await dashboard.saveChangesToExistingDashboard();
           await expect(page.getByTestId('dashboardQuickSaveMenuItem')).toBeEnabled();
-          await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+          await expect(sparkline).toBeVisible();
 
           await page.reload();
           await dashboard.waitForRenderComplete();
           await expect(page.getByTestId('mtrVis')).toBeVisible();
-          await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+          await expect(sparkline).toBeVisible();
         }
       );
 
@@ -115,7 +117,7 @@ spaceTest.describe('Lens ES|QL metric trendline toggle', { tag: tags.stateful.cl
         await openDimensionEditorAndWaitForFlyout(pageObjects, page, metricDimensionPanel);
 
         await page.getByTestId('lnsMetric_background_chart_none').click();
-        await expect(page.locator('.echSingleMetricSparkline')).toHaveCount(0);
+        await expect(sparkline).toHaveCount(0);
 
         await lens.getSecondaryFlyoutBackButton().click();
         await applyLensInlineEditorAndWaitClosed({ lens });
@@ -124,7 +126,7 @@ spaceTest.describe('Lens ES|QL metric trendline toggle', { tag: tags.stateful.cl
       await spaceTest.step(
         'save dashboard and verify trendline stays removed after reload',
         async () => {
-          await expect(page.locator('.echSingleMetricSparkline')).toHaveCount(0);
+          await expect(sparkline).toHaveCount(0);
 
           await dashboard.saveChangesToExistingDashboard();
           await expect(page.getByTestId('dashboardQuickSaveMenuItem')).toBeEnabled();
@@ -132,7 +134,7 @@ spaceTest.describe('Lens ES|QL metric trendline toggle', { tag: tags.stateful.cl
           await page.reload();
           await dashboard.waitForRenderComplete();
           await expect(page.getByTestId('mtrVis')).toBeVisible();
-          await expect(page.locator('.echSingleMetricSparkline')).toHaveCount(0);
+          await expect(sparkline).toHaveCount(0);
         }
       );
     }

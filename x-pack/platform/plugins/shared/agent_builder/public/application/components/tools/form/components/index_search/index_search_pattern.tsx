@@ -146,6 +146,9 @@ export const IndexSearchPattern: React.FC = () => {
       <EuiSpacer size="s" />
 
       <EuiBasicTable
+        tableCaption={i18n.translate('xpack.agentBuilder.tools.indexPattern.tableCaption', {
+          defaultMessage: 'Index patterns',
+        })}
         items={pageOfItems}
         columns={columns}
         loading={hasQuery ? isLoading : false}

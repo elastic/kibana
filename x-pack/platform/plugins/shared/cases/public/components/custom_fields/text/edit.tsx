@@ -39,6 +39,8 @@ import {
   POPULATED_WITH_DEFAULT,
 } from '../translations';
 import { getTextFieldConfig } from './config';
+import { OptionalFieldLabel } from '../../optional_field_label';
+import { FieldValueRow } from '../../templates_v2/field_types/field_value_view';
 
 interface FormState {
   value: string;
@@ -49,6 +51,8 @@ interface FormState {
 interface FormWrapper {
   initialValue: string;
   isLoading: boolean;
+  canUpdate?: boolean;
+  showFormLabel?: boolean;
   customFieldConfiguration: CasesConfigurationUICustomField;
   onChange: (state: FormState) => void;
 }
@@ -57,14 +61,18 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
   initialValue,
   customFieldConfiguration,
   isLoading,
+  canUpdate = true,
+  showFormLabel = false,
   onChange,
 }) => {
+  const defaultValue =
+    customFieldConfiguration?.defaultValue != null && isEmpty(initialValue)
+      ? String(customFieldConfiguration.defaultValue)
+      : initialValue;
+
   const { form } = useForm<{ value: string }>({
     defaultValue: {
-      value:
-        customFieldConfiguration?.defaultValue != null && isEmpty(initialValue)
-          ? String(customFieldConfiguration.defaultValue)
-          : initialValue,
+      value: defaultValue,
     },
   });
   const [{ value }] = useFormData({ form });
@@ -90,11 +98,24 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
         path="value"
         config={formFieldConfig}
         component={TextField}
+        label={showFormLabel ? customFieldConfiguration.label : undefined}
         helpText={populatedWithDefault && POPULATED_WITH_DEFAULT}
         componentProps={{
+          labelAppend: showFormLabel ? (
+            !customFieldConfiguration.required || isLoading ? (
+              <>
+                {!customFieldConfiguration.required ? OptionalFieldLabel : null}
+                {isLoading ? (
+                  <EuiLoadingSpinner
+                    data-test-subj={`case-text-custom-field-loading-${customFieldConfiguration.key}`}
+                  />
+                ) : null}
+              </>
+            ) : undefined
+          ) : undefined,
           euiFieldProps: {
             fullWidth: true,
-            disabled: isLoading,
+            disabled: isLoading || (showFormLabel && !canUpdate),
             isLoading,
             'data-test-subj': `case-text-custom-field-form-field-${customFieldConfiguration.key}`,
           },
@@ -106,7 +127,7 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
 
 FormWrapperComponent.displayName = 'FormWrapper';
 
-const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
+const ClassicEdit: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
   customField,
   customFieldConfiguration,
   onSubmit,
@@ -239,6 +260,121 @@ const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
       </EuiFlexGroup>
     </>
   );
+};
+
+ClassicEdit.displayName = 'ClassicEdit';
+
+const InlineEdit: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
+  customField,
+  customFieldConfiguration,
+  onSubmit,
+  isLoading,
+  canUpdate,
+}) => {
+  const initialValue = customField?.value ?? '';
+  const defaultValueAsString =
+    customFieldConfiguration.defaultValue != null
+      ? String(customFieldConfiguration.defaultValue)
+      : undefined;
+  const effectiveInitialValue =
+    isEmpty(initialValue) && defaultValueAsString != null ? defaultValueAsString : initialValue;
+  const [formState, setFormState] = useState<FormState>({
+    isValid: undefined,
+    submit: async () => ({ isValid: false, data: { value: '' } }),
+    value: effectiveInitialValue,
+  });
+
+  const hasPendingChange = formState.value !== effectiveInitialValue;
+
+  // Section-edit mode has no separate confirm step (see CustomFieldsSection): as soon as the
+  // value differs from what's committed, validate it and buffer it into the section. Validating
+  // through `submit()` (rather than trusting the reactive `formState.isValid`, which can be
+  // momentarily stale right after a change) mirrors exactly what the old confirm click used to do,
+  // just fired automatically. The only way back is the section's own per-field Revert or
+  // whole-section Cancel, which discard the change by remounting this component via `resetTokens`
+  // (see custom_fields.tsx) — there is no local cancel affordance to fall out of sync with.
+  useEffect(() => {
+    if (!hasPendingChange) {
+      return;
+    }
+    let ignore = false;
+    formState.submit().then(({ isValid, data }) => {
+      if (!ignore && isValid) {
+        onSubmit({
+          ...customField,
+          key: customField?.key ?? customFieldConfiguration.key,
+          type: CustomFieldTypes.TEXT,
+          value: isEmpty(data.value) ? null : data.value,
+        });
+      }
+    });
+    return () => {
+      ignore = true;
+    };
+  }, [hasPendingChange, formState, customField, customFieldConfiguration.key, onSubmit]);
+
+  return (
+    <EuiFlexGroup
+      gutterSize="xs"
+      data-test-subj={`case-text-custom-field-${customFieldConfiguration.key}`}
+      direction="column"
+    >
+      <EuiFlexItem>
+        <FormWrapperComponent
+          initialValue={initialValue}
+          isLoading={isLoading}
+          canUpdate={canUpdate}
+          showFormLabel
+          onChange={setFormState}
+          customFieldConfiguration={customFieldConfiguration}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+InlineEdit.displayName = 'InlineEdit';
+
+/**
+ * Section-edit mode's view state: a label/value row identical to the template fields section's
+ * own (`FieldValueRow`), reusing this type's `View` for the value itself. Clicking anywhere on the
+ * row asks the *section* to enter edit mode — every field in it switches to `InlineEdit` together,
+ * there is no independent per-field edit state here.
+ */
+const InlineView: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
+  customField,
+  customFieldConfiguration,
+  isLoading,
+  canUpdate,
+  onRequestSectionEdit,
+}) => (
+  <FieldValueRow
+    name={customFieldConfiguration.key}
+    label={customFieldConfiguration.label}
+    isTextValue
+    onEdit={!isLoading && canUpdate ? onRequestSectionEdit : undefined}
+  >
+    <View customField={customField} />
+  </FieldValueRow>
+);
+
+InlineView.displayName = 'InlineView';
+
+const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
+  editVariant = 'classic',
+  isSectionEditing = true,
+  onRequestSectionEdit,
+  ...props
+}) => {
+  if (editVariant === 'inline') {
+    return isSectionEditing ? (
+      <InlineEdit {...props} />
+    ) : (
+      <InlineView {...props} onRequestSectionEdit={onRequestSectionEdit} />
+    );
+  }
+
+  return <ClassicEdit {...props} />;
 };
 
 EditComponent.displayName = 'Edit';

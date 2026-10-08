@@ -15,10 +15,11 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { executeGenerationWorkflow } from '@kbn/discoveries/impl/attack_discovery/generation/execute_generation_workflow';
 import type { WorkflowConfig } from '@kbn/discoveries/impl/attack_discovery/generation/types';
 import { getSpaceId } from '@kbn/discoveries/impl/lib/helpers/get_space_id';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { v4 as uuidv4 } from 'uuid';
 
 import { getAlertsIndexForSpace } from '../../../../lib/get_alerts_index_for_space';
+import { isWorkflowsEnabledForSpace } from '../../../../lib/is_workflows_enabled_for_space';
 import type { DiscoveriesPluginStartDeps } from '../../../../types';
 import { checkManagedWorkflowIntegrity } from '../../../../managed_workflows/check_managed_workflow_integrity';
 import { resolveConnectorDetails } from '../../../../workflows/helpers/resolve_connector_details';
@@ -41,79 +42,81 @@ export interface RunAttackDiscoveryToolDeps {
   workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
 }
 
-const inputSchema = z.object({
-  additional_context: z
-    .string()
-    .optional()
-    .describe(
-      'Optional analyst context that should be appended to the prompt sent to the LLM during generation.'
-    ),
-  alert_retrieval_mode: z
-    .enum(['custom_only', 'custom_query', 'esql', 'provided'])
-    .optional()
-    .default('custom_query')
-    .describe(
-      'Retrieval strategy. Auto-detected as "provided" when `alerts` is non-empty. Otherwise: "esql" (use `esql_query`), "custom_only" (use `alert_retrieval_workflow_ids`), "custom_query" (last resort; always pair with explicit `size`, `start`, `end`).'
-    ),
-  alert_retrieval_workflow_ids: z
-    .array(z.string())
-    .optional()
-    .default([])
-    .describe(
-      'Custom alert-retrieval workflow IDs to merge into the generation input. Use with `alert_retrieval_mode: "custom_only"` or to extend `esql` mode.'
-    ),
-  alerts: z
-    .array(z.string())
-    .optional()
-    .describe(
-      'Pre-curated alert text strings (preferred). When non-empty, the pipeline skips retrieval and uses these directly.'
-    ),
-  connector_id: z
-    .string()
-    .optional()
-    .describe(
-      'Optional override for the LLM connector ID. When omitted, the tool uses the connector resolved for the agent execution.'
-    ),
-  end: z
-    .string()
-    .optional()
-    .describe(
-      'End of the alert-retrieval time range, when using `custom_query` mode. Datemath expression, e.g. "now".'
-    ),
-  esql_query: z.string().optional().describe('ES|QL query for the `esql` retrieval mode.'),
-  filter: z
-    .record(z.string(), z.unknown())
-    .optional()
-    .describe(
-      'Elasticsearch DSL filter for the `custom_query` retrieval mode (e.g. `{ "term": { "kibana.alert.severity": "critical" } }`).'
-    ),
-  mode: z
-    .enum(['async', 'sync'])
-    .optional()
-    .default('sync')
-    .describe(
-      '"sync" returns inline discoveries when the pipeline finishes inside the soft deadline; "async" returns `execution_uuid` immediately without awaiting.'
-    ),
-  size: z
-    .number()
-    .int()
-    .optional()
-    .default(100)
-    .describe('Maximum number of alerts to retrieve in `custom_query` mode.'),
-  start: z
-    .string()
-    .optional()
-    .describe(
-      'Start of the alert-retrieval time range, when using `custom_query` mode. Datemath expression, e.g. "now-24h".'
-    ),
-  validation_workflow_id: z
-    .string()
-    .optional()
-    .default('')
-    .describe(
-      'Optional override for the validation workflow ID. Empty string uses the default validation workflow.'
-    ),
-});
+const inputSchema = lazySchema(() =>
+  z.object({
+    additional_context: z
+      .string()
+      .optional()
+      .describe(
+        'Optional analyst context that should be appended to the prompt sent to the LLM during generation.'
+      ),
+    alert_retrieval_mode: z
+      .enum(['custom_only', 'custom_query', 'esql', 'provided'])
+      .optional()
+      .default('custom_query')
+      .describe(
+        'Retrieval strategy. Auto-detected as "provided" when `alerts` is non-empty. Otherwise: "esql" (use `esql_query`), "custom_only" (use `alert_retrieval_workflow_ids`), "custom_query" (last resort; always pair with explicit `size`, `start`, `end`).'
+      ),
+    alert_retrieval_workflow_ids: z
+      .array(z.string())
+      .optional()
+      .default([])
+      .describe(
+        'Custom alert-retrieval workflow IDs to merge into the generation input. Use with `alert_retrieval_mode: "custom_only"` or to extend `esql` mode.'
+      ),
+    alerts: z
+      .array(z.string())
+      .optional()
+      .describe(
+        'Pre-curated alert text strings (preferred). When non-empty, the pipeline skips retrieval and uses these directly.'
+      ),
+    connector_id: z
+      .string()
+      .optional()
+      .describe(
+        'Optional override for the LLM connector ID. When omitted, the tool uses the connector resolved for the agent execution.'
+      ),
+    end: z
+      .string()
+      .optional()
+      .describe(
+        'End of the alert-retrieval time range, when using `custom_query` mode. Datemath expression, e.g. "now".'
+      ),
+    esql_query: z.string().optional().describe('ES|QL query for the `esql` retrieval mode.'),
+    filter: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .describe(
+        'Elasticsearch DSL filter for the `custom_query` retrieval mode (e.g. `{ "term": { "kibana.alert.severity": "critical" } }`).'
+      ),
+    mode: z
+      .enum(['async', 'sync'])
+      .optional()
+      .default('sync')
+      .describe(
+        '"sync" returns inline discoveries when the pipeline finishes inside the soft deadline; "async" returns `execution_uuid` immediately without awaiting.'
+      ),
+    size: z
+      .number()
+      .int()
+      .optional()
+      .default(100)
+      .describe('Maximum number of alerts to retrieve in `custom_query` mode.'),
+    start: z
+      .string()
+      .optional()
+      .describe(
+        'Start of the alert-retrieval time range, when using `custom_query` mode. Datemath expression, e.g. "now-24h".'
+      ),
+    validation_workflow_id: z
+      .string()
+      .optional()
+      .default('')
+      .describe(
+        'Optional override for the validation workflow ID. Empty string uses the default validation workflow.'
+      ),
+  })
+);
 
 const buildErrorResult = (message: string) => ({
   data: { message },
@@ -191,7 +194,18 @@ export const getRunAttackDiscoveryTool = ({
     } = args;
 
     try {
-      const { pluginsStart } = await getStartServices();
+      const { coreStart, pluginsStart } = await getStartServices();
+
+      if (
+        !(await isWorkflowsEnabledForSpace({
+          featureFlags: coreStart.featureFlags,
+          uiSettingsClient: coreStart.uiSettings.asScopedToClient(context.savedObjectsClient),
+        }))
+      ) {
+        return {
+          results: [buildErrorResult('Attack Discovery workflows are not enabled for this space.')],
+        };
+      }
 
       // Resolve the space the same way `executeGenerationWorkflow` does for its
       // authorization guard, so the alerts index is bounded to the caller's own

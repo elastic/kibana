@@ -15,6 +15,7 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { NewTermsRuleParams } from '../../rule_schema';
 import type { SecurityAlertType } from '../types';
 import { singleSearchAfter } from '../utils/single_search_after';
+import { reportMissingAggregations } from '../utils/no_readable_shards';
 import { buildEventsSearchQuery } from '../utils/build_events_query';
 import { getFilter } from '../utils/get_filter';
 import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
@@ -42,6 +43,7 @@ import {
   getIsAlertSuppressionActive,
 } from '../utils/get_is_alert_suppression_active';
 import { multiTermsComposite } from './multi_terms_composite';
+import { getBatchSizeReducedWarning, processInHalvingBatches } from './process_in_halving_batches';
 import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import * as i18n from '../translations';
@@ -192,6 +194,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
           searchResult,
           searchDuration,
           searchErrors,
+          searchWarnings,
           loggedRequests: firstPhaseLoggedRequests = [],
         } = await singleSearchAfter({
           searchRequest,
@@ -208,13 +211,24 @@ export const createNewTermsAlertType = (): SecurityAlertType<
             : undefined,
         });
         loggedRequests.push(...firstPhaseLoggedRequests);
-        if (!searchResult.aggregations) {
-          throw new Error('Aggregations were missing on recent terms search result');
-        }
         logger.debug(`Time spent on composite agg: ${searchDuration}`);
 
         result.searchAfterTimes.push(searchDuration);
         result.errors.push(...searchErrors);
+        result.warningMessages.push(...searchWarnings);
+
+        if (!searchResult.aggregations) {
+          reportMissingAggregations({
+            searchResult,
+            searchErrors,
+            searchWarnings,
+            result,
+            inputIndex,
+            cpsLinkedProjects: sharedParams.cpsData?.linkedProjects,
+            unexpectedErrorMessage: 'Aggregations were missing on recent terms search result',
+          });
+          break;
+        }
 
         // If the aggregation returns no after_key it signals that we've paged through all results
         // and the current page is empty so we can immediately break.
@@ -338,6 +352,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
             searchResult: pageSearchResult,
             searchDuration: pageSearchDuration,
             searchErrors: pageSearchErrors,
+            searchWarnings: pageSearchWarnings,
             loggedRequests: pageSearchLoggedRequests = [],
           } = await singleSearchAfter({
             searchRequest: pageSearchRequest,
@@ -353,12 +368,22 @@ export const createNewTermsAlertType = (): SecurityAlertType<
           });
           result.searchAfterTimes.push(pageSearchDuration);
           result.errors.push(...pageSearchErrors);
+          result.warningMessages.push(...pageSearchWarnings);
           loggedRequests.push(...pageSearchLoggedRequests);
 
           logger.debug(`Time spent on phase 2 terms agg: ${pageSearchDuration}`);
 
           if (!pageSearchResult.aggregations) {
-            throw new Error('Aggregations were missing on new terms search result');
+            reportMissingAggregations({
+              searchResult: pageSearchResult,
+              searchErrors: pageSearchErrors,
+              searchWarnings: pageSearchWarnings,
+              result,
+              inputIndex,
+              cpsLinkedProjects: sharedParams.cpsData?.linkedProjects,
+              unexpectedErrorMessage: 'Aggregations were missing on new terms search result',
+            });
+            break;
           }
 
           // PHASE 3: For each term that is not in the history window, fetch the oldest document in
@@ -369,60 +394,98 @@ export const createNewTermsAlertType = (): SecurityAlertType<
             const actualNewTerms = pageSearchResult.aggregations.new_terms.buckets.map(
               (bucket) => bucket.key
             );
+            const stringifiedAfterKey = stringifyAfterKey(afterKey);
+            let alertsWereTruncated = false;
+            let aggregationsWereMissing = false;
 
-            const docFetchSearchRequest = buildEventsSearchQuery({
-              aggregations: buildDocFetchAgg({
-                timestampField: aggregatableTimestampField,
-                field: params.newTermsFields[0],
-                include: actualNewTerms,
-              }),
-              runtimeMappings,
-              searchAfterSortIds: undefined,
-              index: inputIndex,
-              // For phase 3, we go back to aggregating only over the rule interval - excluding the history window
-              from: tuple.from.toISOString(),
-              to: tuple.to.toISOString(),
-              filter: esFilter,
-              size: 0,
-              primaryTimestamp,
-              secondaryTimestamp,
-            });
-            const {
-              searchResult: docFetchSearchResult,
-              searchDuration: docFetchSearchDuration,
-              searchErrors: docFetchSearchErrors,
-              loggedRequests: docFetchLoggedRequests = [],
-            } = await singleSearchAfter({
-              searchRequest: docFetchSearchRequest,
-              services,
-              ruleExecutionLogger,
-              loggedRequestsConfig: isLoggedRequestsEnabled
-                ? {
-                    type: 'findDocuments',
-                    description: i18n.FIND_NEW_TERMS_EVENTS_DESCRIPTION(
-                      stringifyAfterKey(afterKey)
-                    ),
-                    skipRequestQuery: pageNumber > 2,
-                  }
-                : undefined,
-            });
-            result.searchAfterTimes.push(docFetchSearchDuration);
-            result.errors.push(...docFetchSearchErrors);
-            loggedRequests.push(...docFetchLoggedRequests);
+            // Documents for all new terms are fetched in a single request. Every bucket carries a full source
+            // document, so the response can exceed `elasticsearch.maxResponseSize` when documents are large or
+            // when one document holds an array with many new terms. In that case the terms are split into
+            // smaller batches and retried.
+            await processInHalvingBatches({
+              items: actualNewTerms,
+              onBatchSizeReduced: (batchSizeChange) => {
+                const warningMessage = getBatchSizeReducedWarning(batchSizeChange);
 
-            if (!docFetchSearchResult.aggregations) {
-              throw new Error('Aggregations were missing on document fetch search result');
+                ruleExecutionLogger.warn(warningMessage);
+                result.warningMessages.push(warningMessage);
+              },
+              processBatch: async (newTermsBatch) => {
+                const docFetchSearchRequest = buildEventsSearchQuery({
+                  aggregations: buildDocFetchAgg({
+                    timestampField: aggregatableTimestampField,
+                    field: params.newTermsFields[0],
+                    include: newTermsBatch,
+                  }),
+                  runtimeMappings,
+                  searchAfterSortIds: undefined,
+                  index: inputIndex,
+                  // For phase 3, we go back to aggregating only over the rule interval - excluding the history window
+                  from: tuple.from.toISOString(),
+                  to: tuple.to.toISOString(),
+                  filter: esFilter,
+                  size: 0,
+                  primaryTimestamp,
+                  secondaryTimestamp,
+                });
+                const {
+                  searchResult: docFetchSearchResult,
+                  searchDuration: docFetchSearchDuration,
+                  searchErrors: docFetchSearchErrors,
+                  searchWarnings: docFetchSearchWarnings,
+                  loggedRequests: docFetchLoggedRequests = [],
+                } = await singleSearchAfter({
+                  searchRequest: docFetchSearchRequest,
+                  services,
+                  ruleExecutionLogger,
+                  loggedRequestsConfig: isLoggedRequestsEnabled
+                    ? {
+                        type: 'findDocuments',
+                        description: i18n.FIND_NEW_TERMS_EVENTS_DESCRIPTION(stringifiedAfterKey),
+                        skipRequestQuery: pageNumber > 2,
+                      }
+                    : undefined,
+                });
+                result.searchAfterTimes.push(docFetchSearchDuration);
+                result.errors.push(...docFetchSearchErrors);
+                result.warningMessages.push(...docFetchSearchWarnings);
+                loggedRequests.push(...docFetchLoggedRequests);
+
+                if (!docFetchSearchResult.aggregations) {
+                  reportMissingAggregations({
+                    searchResult: docFetchSearchResult,
+                    searchErrors: docFetchSearchErrors,
+                    searchWarnings: docFetchSearchWarnings,
+                    result,
+                    inputIndex,
+                    cpsLinkedProjects: sharedParams.cpsData?.linkedProjects,
+                    unexpectedErrorMessage:
+                      'Aggregations were missing on document fetch search result',
+                  });
+                  aggregationsWereMissing = true;
+
+                  return { stop: true };
+                }
+
+                // Collect rule execution metrics
+                alertsCandidateCount = sum([
+                  alertsCandidateCount,
+                  docFetchSearchResult.aggregations.new_terms.buckets.length,
+                ]);
+
+                const bulkCreateResult = await createAlertsHook(docFetchSearchResult);
+
+                alertsWereTruncated = bulkCreateResult.alertsWereTruncated;
+
+                return { stop: alertsWereTruncated };
+              },
+            });
+
+            if (aggregationsWereMissing) {
+              break;
             }
 
-            // Collect rule execution metrics
-            alertsCandidateCount = sum([
-              alertsCandidateCount,
-              docFetchSearchResult.aggregations.new_terms.buckets.length,
-            ]);
-
-            const bulkCreateResult = await createAlertsHook(docFetchSearchResult);
-
-            if (bulkCreateResult.alertsWereTruncated) {
+            if (alertsWereTruncated) {
               result.warningMessages.push(
                 isAlertSuppressionActive
                   ? getSuppressionMaxSignalsWarning()

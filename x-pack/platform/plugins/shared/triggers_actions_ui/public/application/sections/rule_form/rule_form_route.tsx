@@ -12,7 +12,7 @@ import { AlertConsumers, getRulesAppDetailsRoute } from '@kbn/rule-data-utils';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { useKibana } from '../../../common/lib/kibana';
-import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
+import { getAlertingSectionBreadcrumb, getRulesBreadcrumbWithHref } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
 import { RuleTemplateError } from './components/rule_template_error';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
@@ -37,7 +37,6 @@ export const RuleFormRoute = () => {
     setBreadcrumbs,
     ...startServices
   } = useKibana().services;
-  const { getUrlForApp } = application;
 
   const location = useLocation<{ returnApp?: string; returnPath?: string }>();
   const history = useHistory();
@@ -70,13 +69,7 @@ export const RuleFormRoute = () => {
 
   // Set breadcrumb and page title
   useEffect(() => {
-    const rulesBreadcrumb = getAlertingSectionBreadcrumb('rules', true);
-    const breadcrumbHref = getUrlForApp('rules', { path: '/' });
-
-    const rulesBreadcrumbWithAppPath = {
-      ...rulesBreadcrumb,
-      href: breadcrumbHref,
-    };
+    const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref();
 
     if (id) {
       setBreadcrumbs([rulesBreadcrumbWithAppPath, getAlertingSectionBreadcrumb('editRule')]);
@@ -87,7 +80,7 @@ export const RuleFormRoute = () => {
       chrome.docTitle.change(getCurrentDocTitle('createRule'));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ruleTypeId, templateId, id, getUrlForApp]);
+  }, [ruleTypeId, templateId, id]);
 
   if (isLoadingRuleTemplate) {
     return <CenterJustifiedSpinner />;

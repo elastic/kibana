@@ -29,11 +29,16 @@ describe('ensureMetadataDataStreamMappings', () => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     logger = loggerMock.create();
     resetEnsuredMetadataNamespaces();
+    esClient.indices.getDataStream.mockImplementation(
+      async ({ name } = {}) => ({ data_streams: name ? [{ name }] : [] } as never)
+    );
   });
 
-  it('re-PUTs the metadata component template (idempotent) for future rollovers', async () => {
+  it('installs the ingest pipeline, component template, and index template (all idempotent)', async () => {
     await ensureMetadataDataStreamMappings(esClient, 'default', logger);
+    expect(esClient.ingest.putPipeline).toHaveBeenCalledTimes(1);
     expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
   });
 
   it('applies the mappings in place to the metadata data stream', async () => {
@@ -53,12 +58,51 @@ describe('ensureMetadataDataStreamMappings', () => {
     expect(esClient.indices.rollover).not.toHaveBeenCalled();
   });
 
-  it('no-ops (no throw, no rollover) when the data stream does not exist yet', async () => {
+  it('creates the data stream when it does not exist (upgrade path)', async () => {
     esClient.indices.putMapping.mockRejectedValueOnce(esError('index_not_found_exception', 404));
 
     await expect(
       ensureMetadataDataStreamMappings(esClient, 'default', logger)
     ).resolves.toBeUndefined();
+    expect(esClient.indices.createDataStream).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.createDataStream.mock.calls[0][0]).toMatchObject({
+      name: DATA_STREAM,
+    });
+    expect(esClient.indices.rollover).not.toHaveBeenCalled();
+  });
+
+  it('detects and replaces a corrupted plain index with a data stream', async () => {
+    // getDataStream 404s → not a data stream
+    esClient.indices.getDataStream.mockRejectedValueOnce(esError('index_not_found_exception', 404));
+    // indices.exists returns true → a plain index is squatting at the name
+    esClient.indices.exists.mockResolvedValueOnce(true as never);
+
+    await expect(
+      ensureMetadataDataStreamMappings(esClient, 'default', logger)
+    ).resolves.toBeUndefined();
+
+    expect(esClient.indices.delete).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.delete.mock.calls[0][0]).toMatchObject({ index: DATA_STREAM });
+    expect(esClient.indices.createDataStream).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.createDataStream.mock.calls[0][0]).toMatchObject({ name: DATA_STREAM });
+    // Plain index detection must short-circuit — no mapping sync attempt
+    expect(esClient.indices.putMapping).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Plain index found'));
+  });
+
+  it('detects a plain index even when getDataStream resolves without throwing (empty/non-matching list)', async () => {
+    esClient.indices.getDataStream.mockResolvedValueOnce({ data_streams: [] } as never);
+    esClient.indices.exists.mockResolvedValueOnce(true as never);
+
+    await expect(
+      ensureMetadataDataStreamMappings(esClient, 'default', logger)
+    ).resolves.toBeUndefined();
+
+    expect(esClient.indices.delete).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.delete.mock.calls[0][0]).toMatchObject({ index: DATA_STREAM });
+    expect(esClient.indices.createDataStream).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.createDataStream.mock.calls[0][0]).toMatchObject({ name: DATA_STREAM });
+    expect(esClient.indices.putMapping).not.toHaveBeenCalled();
     expect(esClient.indices.rollover).not.toHaveBeenCalled();
   });
 
@@ -90,6 +134,9 @@ describe('ensureMetadataDataStreamMappingsOnce', () => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     logger = loggerMock.create();
     resetEnsuredMetadataNamespaces();
+    esClient.indices.getDataStream.mockImplementation(
+      async ({ name } = {}) => ({ data_streams: name ? [{ name }] : [] } as never)
+    );
   });
 
   it('runs the sync once per namespace and no-ops on subsequent calls', async () => {

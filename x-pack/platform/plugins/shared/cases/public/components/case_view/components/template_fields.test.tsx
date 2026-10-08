@@ -19,6 +19,12 @@ jest.mock('../../templates_v2/hooks/use_get_template', () => ({
   useGetTemplate: (...args: unknown[]) => mockUseGetTemplate(...args),
 }));
 
+// The field renderer reads update permissions from the cases context; this suite renders without
+// the CasesProvider, so supply the context directly.
+jest.mock('../../cases_context/use_cases_context', () => ({
+  useCasesContext: () => ({ owner: ['securitySolution'], permissions: { update: true } }),
+}));
+
 const mockUseGetFieldDefinitions = jest.fn();
 jest.mock('../../field_library/hooks/use_get_field_definitions', () => ({
   useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
@@ -181,6 +187,14 @@ describe('TemplateFields', () => {
     expect(screen.getByText('Effort')).toBeInTheDocument();
   });
 
+  /**
+   * The case view renders fields read-only with an explicit per-field Edit control
+   * (FieldsRenderer view mode), so every interaction must open the field's editor first.
+   */
+  const openFieldEditor = async (user: ReturnType<typeof userEvent.setup>, fieldName: string) => {
+    await user.click(screen.getByTestId(`template-field-edit-${fieldName}`));
+  };
+
   describe('text field inline-edit confirm/cancel', () => {
     const getSummaryInput = (): HTMLInputElement =>
       within(screen.getByTestId('template-field-summary')).getByRole('textbox') as HTMLInputElement;
@@ -196,6 +210,7 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'summary');
       await user.click(getSummaryInput());
 
       expect(screen.queryByTestId('template-field-confirm-summary')).not.toBeInTheDocument();
@@ -206,8 +221,8 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'summary');
       const summary = getSummaryInput();
-      await user.click(summary);
       await user.clear(summary);
       await user.type(summary, 'updated summary');
 
@@ -219,8 +234,8 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'summary');
       const summary = getSummaryInput();
-      await user.click(summary);
       await user.clear(summary);
       await user.type(summary, 'updated summary');
 
@@ -242,46 +257,35 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'summary');
       const summary = getSummaryInput();
       await user.clear(summary);
       await user.type(summary, 'updated summary');
-      const notes = within(screen.getByTestId('template-field-notes')).getByRole('textbox');
-      await user.clear(notes);
-      await user.type(notes, 'pending notes');
       await user.click(screen.getByTestId('template-field-confirm-summary'));
 
       const confirmButton = screen.getByTestId('template-field-confirm-summary');
       expect(confirmButton).toBeDisabled();
       expect(within(confirmButton).getByRole('progressbar')).toBeInTheDocument();
       expect(summary).toBeDisabled();
-      expect(notes).toBeEnabled();
       expect(screen.getByTestId('template-field-cancel-summary')).toBeDisabled();
-      expect(screen.getByTestId('template-field-confirm-notes')).toBeDisabled();
-      expect(screen.getByTestId('template-field-cancel-notes')).toBeEnabled();
 
       act(() => completeUpdate?.());
 
+      // A successful save closes the editor and the row returns to its read view.
       await waitFor(() => {
         expect(screen.queryByTestId('template-field-confirm-summary')).not.toBeInTheDocument();
       });
-      expect(summary).toBeEnabled();
+      expect(screen.getByTestId('template-field-edit-summary')).toBeInTheDocument();
     });
 
-    it('does NOT include other unconfirmed fields when confirming a single field', async () => {
+    it('sends only the confirmed field, not the rest of the form', async () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'summary');
       const summary = getSummaryInput();
-      await user.click(summary);
       await user.clear(summary);
       await user.type(summary, 'updated summary');
-
-      const notes = within(screen.getByTestId('template-field-notes')).getByRole(
-        'textbox'
-      ) as HTMLTextAreaElement;
-      await user.click(notes);
-      await user.clear(notes);
-      await user.type(notes, 'unconfirmed notes edit');
 
       await user.click(screen.getByTestId('template-field-confirm-summary'));
 
@@ -289,11 +293,9 @@ describe('TemplateFields', () => {
         expect(onUpdateField).toHaveBeenCalled();
       });
       const lastCall = onUpdateField.mock.calls[onUpdateField.mock.calls.length - 1][0];
+      // Exact equality: the payload carries the confirmed field alone, not the other saved values.
       expect(lastCall.value).toEqual({ summary_as_keyword: 'updated summary' });
       expect(lastCall.value).not.toHaveProperty('notes_as_keyword');
-
-      expect(notes.value).toBe('unconfirmed notes edit');
-      expect(screen.getByTestId('template-field-confirm-notes')).toBeInTheDocument();
     });
 
     it('keeps the field dirty when the update fails', async () => {
@@ -301,6 +303,7 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'summary');
       const summary = getSummaryInput();
       await user.clear(summary);
       await user.type(summary, 'updated summary');
@@ -315,8 +318,8 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'summary');
       const summary = getSummaryInput();
-      await user.click(summary);
       await user.clear(summary);
       await user.type(summary, 'discarded value');
 
@@ -329,8 +332,8 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'summary');
       const summary = getSummaryInput();
-      await user.click(summary);
       await user.clear(summary);
       await user.type(summary, 'discarded value');
 
@@ -338,8 +341,11 @@ describe('TemplateFields', () => {
 
       await user.click(screen.getByTestId('template-field-cancel-summary'));
 
+      // Cancel discards the draft and closes the editor; the read view shows the saved value.
       await waitFor(() => {
-        expect(summary.value).toBe('test summary');
+        expect(screen.getByTestId('template-field-value-text-summary')).toHaveTextContent(
+          'test summary'
+        );
       });
     });
 
@@ -347,8 +353,8 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'summary');
       const summary = getSummaryInput();
-      await user.click(summary);
       await user.clear(summary);
       await user.type(summary, 'updated summary');
       expect(screen.getByTestId('template-field-confirm-summary')).toBeInTheDocument();
@@ -364,8 +370,8 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'summary');
       const summary = getSummaryInput();
-      await user.click(summary);
       await user.clear(summary);
       await user.type(summary, 'updated summary');
       expect(screen.getByTestId('template-field-cancel-summary')).toBeInTheDocument();
@@ -381,8 +387,8 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'summary');
       const summary = getSummaryInput();
-      await user.click(summary);
       await user.clear(summary);
       await user.type(summary, 'typed but not confirmed');
       // Tab away without clicking confirm
@@ -395,8 +401,8 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'summary');
       const summary = getSummaryInput();
-      await user.click(summary);
       await user.clear(summary);
       await user.type(summary, 'updated summary');
       expect(screen.getByTestId('template-field-confirm-summary')).toBeInTheDocument();
@@ -425,6 +431,7 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'notes');
       await user.click(getNotesInput());
 
       expect(screen.queryByTestId('template-field-confirm-notes')).not.toBeInTheDocument();
@@ -435,8 +442,8 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'notes');
       const notes = getNotesInput();
-      await user.click(notes);
       await user.clear(notes);
       await user.type(notes, 'updated notes');
 
@@ -448,8 +455,8 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'notes');
       const notes = getNotesInput();
-      await user.click(notes);
       await user.clear(notes);
       await user.type(notes, 'updated notes');
 
@@ -470,6 +477,7 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'notes');
       const notes = getNotesInput();
       await user.clear(notes);
       await user.type(notes, 'updated notes');
@@ -482,16 +490,19 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'notes');
       const notes = getNotesInput();
-      await user.click(notes);
       await user.clear(notes);
       await user.type(notes, 'discarded notes');
 
       await user.click(screen.getByTestId('template-field-cancel-notes'));
 
       expect(onUpdateField).not.toHaveBeenCalled();
+      // Cancel discards the draft and closes the editor; the read view shows the saved value.
       await waitFor(() => {
-        expect(notes.value).toBe('some notes');
+        expect(screen.getByTestId('template-field-value-text-notes')).toHaveTextContent(
+          'some notes'
+        );
       });
     });
 
@@ -499,8 +510,8 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'notes');
       const notes = getNotesInput();
-      await user.click(notes);
       await user.clear(notes);
       await user.type(notes, 'updated notes');
       expect(screen.getByTestId('template-field-confirm-notes')).toBeInTheDocument();
@@ -529,6 +540,7 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'effort');
       await user.click(getEffortInput());
 
       expect(screen.queryByTestId('template-field-confirm-effort')).not.toBeInTheDocument();
@@ -539,8 +551,8 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'effort');
       const effort = getEffortInput();
-      await user.click(effort);
       await user.clear(effort);
       await user.type(effort, '10');
 
@@ -552,8 +564,8 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'effort');
       const effort = getEffortInput();
-      await user.click(effort);
       await user.clear(effort);
       await user.type(effort, '10');
 
@@ -572,6 +584,7 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'effort');
       const effort = getEffortInput();
       await user.clear(effort);
       await user.type(effort, '10');
@@ -584,16 +597,17 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'effort');
       const effort = getEffortInput();
-      await user.click(effort);
       await user.clear(effort);
       await user.type(effort, '99');
 
       await user.click(screen.getByTestId('template-field-cancel-effort'));
 
       expect(onUpdateField).not.toHaveBeenCalled();
+      // Cancel discards the draft and closes the editor; the read view shows the saved value.
       await waitFor(() => {
-        expect(effort.value).toBe('5');
+        expect(screen.getByTestId('template-field-value-text-effort')).toHaveTextContent('5');
       });
     });
 
@@ -601,8 +615,8 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'effort');
       const effort = getEffortInput();
-      await user.click(effort);
       await user.clear(effort);
       await user.type(effort, '10');
       expect(screen.getByTestId('template-field-confirm-effort')).toBeInTheDocument();
@@ -631,6 +645,7 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'priority');
       await user.selectOptions(getPrioritySelect(), 'high');
 
       expect(screen.getByTestId('template-field-confirm-priority')).toBeInTheDocument();
@@ -641,6 +656,7 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'priority');
       await user.selectOptions(getPrioritySelect(), 'high');
       await user.click(screen.getByTestId('template-field-confirm-priority'));
 
@@ -657,6 +673,7 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'priority');
       const priority = getPrioritySelect();
       await user.selectOptions(priority, 'high');
       await user.click(screen.getByTestId('template-field-confirm-priority'));
@@ -668,14 +685,18 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'priority');
       const select = getPrioritySelect();
       await user.selectOptions(select, 'low');
 
       await user.click(screen.getByTestId('template-field-cancel-priority'));
 
       expect(onUpdateField).not.toHaveBeenCalled();
+      // Cancel discards the draft and closes the editor; the read view shows the saved value.
       await waitFor(() => {
-        expect(select.value).toBe('medium');
+        expect(screen.getByTestId('template-field-value-text-priority')).toHaveTextContent(
+          'medium'
+        );
       });
     });
 
@@ -683,6 +704,7 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'priority');
       await user.selectOptions(getPrioritySelect(), 'high');
       expect(screen.getByTestId('template-field-confirm-priority')).toBeInTheDocument();
 
@@ -697,6 +719,7 @@ describe('TemplateFields', () => {
       const user = userEvent.setup();
       render(<TemplateFields {...defaultProps} />);
 
+      await openFieldEditor(user, 'priority');
       await user.selectOptions(getPrioritySelect(), 'low');
       expect(screen.getByTestId('template-field-cancel-priority')).toBeInTheDocument();
 

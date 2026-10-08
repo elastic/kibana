@@ -13,19 +13,27 @@ import { useGetGenerateDiscoverLink } from '../use_generate_discover_link';
 export interface UseDiscoverLinkAndEsqlQueryParams {
   indexPattern?: string;
   whereClause?: QueryOperator;
+  unmappedFieldsPolicy?: 'NULLIFY' | 'LOAD';
 }
 
 export function useDiscoverLinkAndEsqlQuery({
   indexPattern,
   whereClause,
+  unmappedFieldsPolicy,
 }: UseDiscoverLinkAndEsqlQueryParams) {
-  const { generateDiscoverLink } = useGetGenerateDiscoverLink({ indexPattern });
+  const { generateDiscoverLink } = useGetGenerateDiscoverLink({
+    indexPattern,
+    unmappedFieldsPolicy,
+  });
 
   if (!indexPattern || !whereClause) {
     return { discoverUrl: undefined, esqlQueryString: undefined };
   }
 
-  const esqlQueryString = from(indexPattern).pipe(whereClause).toString();
+  const settingsPrefix = unmappedFieldsPolicy
+    ? `SET unmapped_fields = "${unmappedFieldsPolicy}";\n`
+    : '';
+  const esqlQueryString = `${settingsPrefix}${from(indexPattern).pipe(whereClause).toString()}`;
   const discoverUrl = generateDiscoverLink(whereClause);
 
   return { discoverUrl, esqlQueryString };

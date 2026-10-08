@@ -462,7 +462,7 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
       ))}
       <div css={tableScrollStyles}>
         <EuiBasicTable
-          aria-label={i18n.translate(
+          tableCaption={i18n.translate(
             'xpack.securitySolution.agentBuilder.entityAttachment.table.caption',
             { defaultMessage: 'Entities referenced in this message' }
           )}

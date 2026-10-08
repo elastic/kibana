@@ -49,7 +49,7 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
     return apiIsPresentationContainer(embeddable) && this.core.uiSettings.get(ENABLE_ESQL);
   }
 
-  public async execute({ embeddable: api }: EmbeddableApiContext) {
+  public async execute({ embeddable: api, returnFocus }: EmbeddableApiContext) {
     if (!apiIsPresentationContainer(api)) throw new IncompatibleActionError();
     if (!api || !apiHasAppContext(api)) {
       return;
@@ -76,7 +76,7 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
           closeFlyout,
         });
       },
-      options: { uuid },
+      options: { uuid, returnFocus },
     });
   }
 }

@@ -74,11 +74,12 @@ export const useMemoizedCaches = ({
         ...args: [
           CoreStart,
           (() => Promise<ILicense | undefined>) | undefined,
-          ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined
+          ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined,
+          AbortSignal | undefined
         ]
       ) => ({
         timestamp: Date.now(),
-        result: getESQLSources(...args, undefined, effectiveProjectRouting),
+        result: getESQLSources(...args, effectiveProjectRouting),
       }),
       () => DATA_SOURCES_CACHE_KEY
     );

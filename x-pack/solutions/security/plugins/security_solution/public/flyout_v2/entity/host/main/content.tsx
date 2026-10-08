@@ -20,7 +20,7 @@ import { FlyoutRiskSummary } from '../../../../entity_analytics/components/risk_
 import type { RiskScoreState } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import type { EntityRiskScoresState } from '../../../../entity_analytics/api/hooks/use_entity_risk_scores';
 import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
-import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from './constants';
+import { HOST_PANEL_OBSERVED_HOST_QUERY_ID } from './constants';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
@@ -59,8 +59,10 @@ export interface ContentProps {
   entityRecord?: Entity;
   /** Refetch entity store record after AI summary persist (v2). */
   refetchEntityRecord?: () => void;
-  /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
-  skipRiskAndCriticality?: boolean;
+  /** When true (i.e. entity store v2 enabled but no entity found), hide entity highlights and risk score. */
+  noEntityInStore?: boolean;
+  /** When `true`, hide the legacy asset criticality accordion. Required so every call site wires it explicitly. */
+  entityStoreV2Enabled: boolean;
   /** Entity store entity ID for the host. */
   entityStoreEntityId?: string;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
@@ -83,6 +85,11 @@ export interface ContentProps {
     entityId: string;
     entityName: string | undefined;
   }) => void;
+  /**
+   * Inspect query id for {@link FlyoutRiskSummary}. Callers must pass a stable id that matches
+   * their `useQueryInspector` registration
+   */
+  riskScoreQueryId: string;
 }
 
 /**
@@ -101,12 +108,14 @@ export const Content = ({
   isPreviewMode,
   entityRecord,
   refetchEntityRecord,
-  skipRiskAndCriticality = false,
+  noEntityInStore = false,
+  entityStoreV2Enabled,
   entityStoreEntityId,
   prefetchedResolutionRisk,
   enableGraphAndResolutionNavigation = true,
   hideHeaderIcons = false,
   onShowEntity,
+  riskScoreQueryId,
 }: ContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
   const isAnomalyDetailsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAnomalyDetails');
@@ -126,7 +135,7 @@ export const Content = ({
 
   return (
     <>
-      {!skipRiskAndCriticality && (
+      {!noEntityInStore && (
         <EntityHighlightsAccordion
           entityIdentifier={entityRecord ? entityRecord.entity?.id ?? hostName : hostName}
           entityType={EntityType.host}
@@ -134,7 +143,7 @@ export const Content = ({
           refetchEntityRecord={refetchEntityRecord}
         />
       )}
-      {!skipRiskAndCriticality &&
+      {!noEntityInStore &&
         riskScoreState.hasEngineBeenInstalled &&
         (riskScoreState.loading || (riskScoreState.data?.length ?? 0) > 0) && (
           <>
@@ -143,7 +152,7 @@ export const Content = ({
               riskScoreData={riskScoreState}
               entityRiskScores={entityRiskScores}
               recalculatingScore={recalculatingScore}
-              queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
+              queryId={riskScoreQueryId}
               openDetailsPanel={openDetailsPanel}
               isPreviewMode={isPreviewMode}
               entityId={entityRecord?.entity?.id}
@@ -192,7 +201,7 @@ export const Content = ({
           <EuiHorizontalRule />
         </>
       )}
-      {!skipRiskAndCriticality && !entityRecord && (
+      {!entityStoreV2Enabled && (
         <AssetCriticalityAccordion
           entity={{ name: hostName, type: EntityType.host }}
           onChange={onAssetCriticalityChange}
@@ -215,6 +224,7 @@ export const Content = ({
         entityRecord={entityRecord}
         scopeId={scopeId}
         queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
+        hideAnomalies={loadAnomalies}
       />
     </>
   );

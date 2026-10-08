@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import type { Locations, ProjectMonitor } from '../../../../common/runtime_types';
 import { MonitorTypeEnum } from '../../../../common/runtime_types';
@@ -41,6 +42,7 @@ export const normalizeProjectMonitors = ({
   projectId,
   namespace,
   version,
+  maintenanceWindows,
 }: {
   locations: Locations;
   privateLocations: PrivateLocationAttributes[];
@@ -48,6 +50,7 @@ export const normalizeProjectMonitors = ({
   projectId: string;
   namespace: string;
   version: string;
+  maintenanceWindows?: MaintenanceWindow[];
 }) => {
   return monitors.map((monitor) => {
     return normalizeProjectMonitor({
@@ -57,6 +60,7 @@ export const normalizeProjectMonitors = ({
       projectId,
       namespace,
       version,
+      maintenanceWindows,
     });
   });
 };

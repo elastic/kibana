@@ -513,8 +513,11 @@ describe('ManagedWorkflowsService', () => {
       );
     });
 
-    it('bumps document.version from the existing document on managed update', async () => {
-      const definition = createDefinition({ version: 2 });
+    it('bumps document.version and logs history when managed update changes YAML', async () => {
+      const definition = createDefinition({
+        version: 2,
+        yaml: workflowYaml({ name: 'Managed Workflow - Updated' }),
+      });
       mockManagedWorkflowDefinitions = [definition];
       const { audit, crudService, service } = createService();
       mockPrepareReturnsInitialVersion(crudService);
@@ -524,6 +527,7 @@ describe('ManagedWorkflowsService', () => {
             version: 5,
             definitionHash: 'old-hash',
             managedVersion: 1,
+            yaml: workflowYaml({ name: 'Managed Workflow - Original' }),
           })
         )
       );
@@ -563,6 +567,36 @@ describe('ManagedWorkflowsService', () => {
         spaceId: SPACE_ID,
         reason: 'reinstall',
       });
+    });
+
+    it('preserves document.version and skips history when managed update YAML is unchanged', async () => {
+      const definition = createDefinition({ version: 2 });
+      mockManagedWorkflowDefinitions = [definition];
+      const { audit, crudService, service } = createService();
+      mockPrepareReturnsInitialVersion(crudService);
+      const existingYaml = workflowYaml();
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+        createVersionedDocument(
+          createWorkflowSource({
+            version: 5,
+            definitionHash: 'old-hash',
+            managedVersion: 1,
+            yaml: existingYaml,
+          })
+        )
+      );
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      expect(crudService.writeWorkflowDocumentWithOcc).toHaveBeenCalledWith(
+        WORKFLOW_ID,
+        SPACE_ID,
+        expect.objectContaining({
+          document: expect.objectContaining({ version: 5, managedVersion: 2 }),
+        })
+      );
+      expect(crudService.logWorkflowChangesAfterWrite).not.toHaveBeenCalled();
+      expect(audit.logWorkflowUpdated).toHaveBeenCalled();
     });
 
     it('logs workflow install to change history after creating a managed workflow', async () => {

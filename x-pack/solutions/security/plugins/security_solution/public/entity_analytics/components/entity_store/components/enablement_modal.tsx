@@ -48,10 +48,14 @@ export const EnablementConfirmationModal: React.FC<EnablementConfirmationModalPr
 
   const hasRiskScorePrivileges =
     !riskEnginePrivileges.isLoading && riskEnginePrivileges.hasAllRequiredPrivileges;
+  // Enabling runs the install / maintainers-init routes, which enforce the install privilege set
+  // (has_install_permissions), not entity-index read+write (has_all_required).
   const hasEntityStorePrivileges =
-    !isLoadingEntityEnginePrivileges && entityEnginePrivileges?.has_all_required;
+    !isLoadingEntityEnginePrivileges && entityEnginePrivileges?.has_install_permissions;
 
-  const isConfirmDisabled = !hasRiskScorePrivileges && !hasEntityStorePrivileges;
+  // Confirm enables BOTH the risk score maintainer and the Entity Store, so require both privilege
+  // sets (disable if either is missing) to avoid a partial-failure 500 on the half the user can't do.
+  const isConfirmDisabled = !hasRiskScorePrivileges || !hasEntityStorePrivileges;
 
   if (!visible) {
     return null;
@@ -93,7 +97,7 @@ export const EnablementConfirmationModal: React.FC<EnablementConfirmationModalPr
               <RiskEnginePrivilegesCallOut privileges={riskEnginePrivileges} />
             </EuiFlexItem>
           )}
-          {entityEnginePrivileges && !entityEnginePrivileges.has_all_required && (
+          {entityEnginePrivileges && !entityEnginePrivileges.has_install_permissions && (
             <EuiFlexItem>
               <EntityStoreMissingPrivilegesCallout privileges={entityEnginePrivileges} />
             </EuiFlexItem>

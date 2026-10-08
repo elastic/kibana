@@ -33,6 +33,7 @@ snapshots.js
 /packages/kbn-generate/templates
 /src/platform/packages/shared/kbn-test/src/functional_test_runner/__tests__/fixtures/
 /src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/__tests__/fixtures/
+/src/platform/packages/shared/kbn-test/src/jest/negative/__fixtures__/
 /src/platform/packages/shared/kbn-flot-charts/lib
 /src/platform/packages/shared/kbn-monaco/src/**/antlr
 /src/platform/packages/shared/kbn-workflows/spec/elasticsearch/generated/**

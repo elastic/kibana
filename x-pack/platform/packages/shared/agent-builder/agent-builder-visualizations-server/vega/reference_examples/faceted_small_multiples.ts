@@ -7,7 +7,6 @@
 
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
-  title: 'p95 Latency Over Time by Service',
   data: {
     url: {
       '%type%': 'esql',

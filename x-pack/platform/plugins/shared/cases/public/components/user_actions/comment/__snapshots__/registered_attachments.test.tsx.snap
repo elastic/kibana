@@ -7,7 +7,9 @@ Array [
       id="basic-comment-id"
     >
       <React.Fragment>
-        My button
+        <React.Fragment>
+          My button
+        </React.Fragment>
       </React.Fragment>
       <Memo(RegisteredAttachmentsPropertyActions)
         hideDefaultActions={false}
@@ -39,6 +41,22 @@ Array [
             }
           }
           foo="bar"
+          permissions={
+            Object {
+              "all": true,
+              "assign": true,
+              "connectors": true,
+              "create": true,
+              "createComment": true,
+              "delete": true,
+              "manageTemplates": true,
+              "push": true,
+              "read": true,
+              "reopenCase": true,
+              "settings": true,
+              "update": true,
+            }
+          }
           savedObjectId="basic-comment-id"
         />
       </React.Suspense>
@@ -50,7 +68,8 @@ Array [
       My event
     </React.Fragment>,
     "eventColor": undefined,
-    "timelineAvatar": "casesApp",
+    "timelineAvatar": "test-icon",
+    "timelineAvatarAriaLabel": "Test",
     "timestamp": <Memo(UserActionTimestamp)
       createdAt="2020-02-19T23:06:33.798Z"
     />,
@@ -108,7 +127,9 @@ Array [
       id="basic-comment-id"
     >
       <React.Fragment>
-        My button
+        <React.Fragment>
+          My button
+        </React.Fragment>
       </React.Fragment>
       <Memo(RegisteredAttachmentsPropertyActions)
         hideDefaultActions={true}
@@ -140,6 +161,22 @@ Array [
             }
           }
           foo="bar"
+          permissions={
+            Object {
+              "all": true,
+              "assign": true,
+              "connectors": true,
+              "create": true,
+              "createComment": true,
+              "delete": true,
+              "manageTemplates": true,
+              "push": true,
+              "read": true,
+              "reopenCase": true,
+              "settings": true,
+              "update": true,
+            }
+          }
           savedObjectId="basic-comment-id"
         />
       </React.Suspense>
@@ -151,7 +188,8 @@ Array [
       My event
     </React.Fragment>,
     "eventColor": undefined,
-    "timelineAvatar": "casesApp",
+    "timelineAvatar": "test-icon",
+    "timelineAvatarAriaLabel": "Test",
     "timestamp": <Memo(UserActionTimestamp)
       createdAt="2020-02-19T23:06:33.798Z"
     />,
@@ -227,6 +265,22 @@ Array [
             }
           }
           foo="bar"
+          permissions={
+            Object {
+              "all": true,
+              "assign": true,
+              "connectors": true,
+              "create": true,
+              "createComment": true,
+              "delete": true,
+              "manageTemplates": true,
+              "push": true,
+              "read": true,
+              "reopenCase": true,
+              "settings": true,
+              "update": true,
+            }
+          }
           savedObjectId="basic-comment-id"
         />
       </React.Suspense>
@@ -238,7 +292,8 @@ Array [
       My event
     </React.Fragment>,
     "eventColor": undefined,
-    "timelineAvatar": "casesApp",
+    "timelineAvatar": "test-icon",
+    "timelineAvatarAriaLabel": "Test",
     "timestamp": <Memo(UserActionTimestamp)
       createdAt="2020-02-19T23:06:33.798Z"
     />,

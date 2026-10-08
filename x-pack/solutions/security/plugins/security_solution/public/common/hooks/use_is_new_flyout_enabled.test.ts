@@ -44,18 +44,18 @@ describe('useIsNewFlyoutEnabled', () => {
     const { result } = renderHook(() => useIsNewFlyoutEnabled());
 
     expect(useIsExperimentalFeatureEnabled).toHaveBeenCalledWith('newFlyoutSystemDisabled');
-    expect(mockUiSettingsGet).toHaveBeenCalledWith(ENABLE_NEW_FLYOUT_SETTING, false);
+    expect(mockUiSettingsGet).toHaveBeenCalledWith(ENABLE_NEW_FLYOUT_SETTING, true);
     expect(result.current).toBe(true);
   });
 
-  it('returns false when the flag is off and the advanced setting is off (default)', () => {
+  it('returns false when the flag is off and the advanced setting is explicitly off', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     mockUiSettingsGet.mockReturnValue(false);
 
     const { result } = renderHook(() => useIsNewFlyoutEnabled());
 
     expect(useIsExperimentalFeatureEnabled).toHaveBeenCalledWith('newFlyoutSystemDisabled');
-    expect(mockUiSettingsGet).toHaveBeenCalledWith(ENABLE_NEW_FLYOUT_SETTING, false);
+    expect(mockUiSettingsGet).toHaveBeenCalledWith(ENABLE_NEW_FLYOUT_SETTING, true);
     expect(result.current).toBe(false);
   });
 

@@ -1289,7 +1289,7 @@ describe('ConfigureCases', () => {
 
     it('should not render observable types section if observable feature is not enabled', async () => {
       renderWithTestingProviders(<ConfigureCases />, {
-        wrapperProps: { features: { observables: { enabled: false, autoExtract: false } } },
+        wrapperProps: { owner: ['observability'] },
       });
 
       expect(screen.queryByTestId('observable-types-form-group')).not.toBeInTheDocument();

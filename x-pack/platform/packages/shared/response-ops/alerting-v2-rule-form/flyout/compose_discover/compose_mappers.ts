@@ -109,6 +109,9 @@ export const composeFormToUpdateRequest = (
     metadata: {
       ...metadata,
       builder_type: metadata.builder_type ?? null,
+      // Empty tags must be sent as an explicit `null` to clear them; omitting
+      // the key would preserve the existing tags on a partial update.
+      tags: formValues.metadata.tags?.length ? formValues.metadata.tags : null,
     },
     recovery_strategy: resolveRecoveryStrategy(formValues) ?? null,
     no_data_strategy: no_data_strategy ?? null,

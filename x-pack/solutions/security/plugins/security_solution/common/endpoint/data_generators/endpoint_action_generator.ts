@@ -221,6 +221,18 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       } as typeof output;
     }
 
+    if (command === 'memory-dump' && !output) {
+      output = {
+        type: 'json',
+        content: {
+          code: 'ra_memory-dump_success_done',
+          file_size: 2322000,
+          path: `/tmp/elastic_defend/memory_dump/dump.${new Date().toISOString()}.zip`,
+          disk_free_space: 123045678009,
+        },
+      } as typeof output;
+    }
+
     return merge(
       {
         '@timestamp': timeStamp.toISOString(),
@@ -478,6 +490,19 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             path: `/home/user/${agentId}/tmp/memory-dump.2025-11-03T16:22:05.365Z.zip`,
             file_size: 23895729,
             disk_free_space: 1234567000,
+            ...(details.parameters?.type === 'raw'
+              ? {
+                  total_memory_size: 53_000_000,
+                  total_bytes_captured: 52_000_000,
+                  success_ratio: 52_000_000 / 53_000_000,
+                }
+              : {}),
+            ...(details.parameters?.type === 'kernel'
+              ? {
+                  dump_executed_from_driver: this.randomChoice([true, false]),
+                  user_space_included: this.randomChoice([true, false]),
+                }
+              : {}),
           },
         };
       }

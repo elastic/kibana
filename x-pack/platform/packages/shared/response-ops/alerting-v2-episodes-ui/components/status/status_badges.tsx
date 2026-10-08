@@ -11,6 +11,7 @@ import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_EPISODE_ACTION_TYPE, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import type { EpisodeActionState, EpisodeStatusGroupAction } from '../../types/action';
+import { isEpisodeSnoozed } from '../../utils/is_episode_snoozed';
 import { AlertEpisodeStatusBadge } from './status_badge';
 
 // Flex anchor avoids inline line-height missizing
@@ -28,7 +29,7 @@ export function AlertEpisodeStatusBadges({
   groupAction,
 }: AlertEpisodeStatusBadgesProps) {
   const isAcknowledged = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
-  const isSnoozed = groupAction?.lastSnoozeAction === ALERT_EPISODE_ACTION_TYPE.SNOOZE;
+  const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozeExpiry);
 
   return (
     <EuiFlexGroup

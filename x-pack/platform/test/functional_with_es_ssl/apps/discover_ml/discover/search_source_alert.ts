@@ -319,9 +319,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const checkUpdatedRuleParamsState = async () => {
     expect(await toasts.getCount()).to.be(0);
     const queryString = await queryBar.getQueryString();
-    const hasFilter = await filterBar.hasFilter('message.keyword', 'msg-1');
+    await filterBar.expectFilter('message.keyword', 'msg-1');
     expect(queryString).to.be.equal('message:msg-1');
-    expect(hasFilter).to.be.equal(true);
     expect(await dataGrid.getDocCount()).to.be(1);
   };
 
@@ -695,6 +694,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await sourceDataViewOption.click();
 
+      await retry.waitFor('selection to happen', async () => {
+        const dataViewSelector = await testSubjects.find('selectDataViewExpression');
+        return (await dataViewSelector.getVisibleText()) === `DATA VIEW\n${SOURCE_DATA_VIEW}`;
+      });
+
       await testSubjects.click('rulePageFooterSaveButton');
 
       await retry.waitFor('confirmation modal', async () => {
@@ -711,7 +715,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        return await testSubjects.exists('ruleStatus-ok');
+        return await testSubjects.waitForExists('ruleStatus-ok', { timeout: 5000 });
       });
     });
   });

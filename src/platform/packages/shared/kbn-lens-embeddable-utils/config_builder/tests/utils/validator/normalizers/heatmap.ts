@@ -47,16 +47,6 @@ const alignLegacyTypes: NormalizerConfig<HeatmapAttributes> = {
     attributes.state.visualization.gridConfig.type = 'heatmap_grid';
     attributes.state.visualization.legend.type = 'heatmap_legend';
 
-    // Remove transform-added column properties not in the original
-    for (const layer of Object.values(attributes.state.datasourceStates.formBased?.layers ?? {})) {
-      for (const col of Object.values(layer.columns)) {
-        delete (col as any).params?.parentFormat;
-        if (col.operationType === 'count') {
-          delete (col as any).params;
-        }
-      }
-    }
-
     return attributes;
   },
 };

@@ -157,6 +157,14 @@ const registerUserTargetRawIdentifiersMaintainerSuite = (
           const primingActorEmail = actorEmail('prime');
           const primingActor = userId(primingActorEmail);
 
+          // Seed the priming actor with a FUTURE last_seen so it stays above any
+          // watermark a prior/concurrent auto-run may have persisted — the same
+          // mitigation every other resolvable actor in this suite already uses.
+          // Without it, the actor defaults to seed-time "now" and can fall below a
+          // run-start watermark, permanently skipping it (waitForRelationshipIds
+          // then times out).
+          const primingFutureTs = new Date(Date.now() + 3_600_000).toISOString();
+
           await seedUserEntity(esClient, {
             entityId: primingTarget,
             namespace,
@@ -168,6 +176,8 @@ const registerUserTargetRawIdentifiersMaintainerSuite = (
             email: primingActorEmail,
             entitySource: requiredEntitySource,
             relationship: { key: relationshipKey, userEmails: [primingTargetEmail] },
+            lastSeen: primingFutureTs,
+            firstSeen: primingFutureTs,
           });
 
           await triggerMaintainerRun(apiClient, internalHeaders, maintainerId, { sync: true });

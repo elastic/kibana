@@ -187,3 +187,10 @@ export const DELETE_FILE_TITLE = i18n.translate('xpack.cases.caseView.files.dele
 export const REMOVED_FILE = i18n.translate('xpack.cases.caseView.files.removedFile', {
   defaultMessage: 'removed file',
 });
+
+export const DUPLICATE_FILE_WARNING = (fileName: string) =>
+  i18n.translate('xpack.cases.caseView.files.duplicateFileWarning', {
+    defaultMessage:
+      'A file named "{fileName}" is already attached — uploading will add a second copy.',
+    values: { fileName },
+  });

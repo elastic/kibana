@@ -293,6 +293,11 @@ export class WorkflowsService {
     return this.crudService.getWorkflowsByIds(ids, spaceId, options);
   }
 
+  public async findExistingWorkflowIds(ids: string[]): Promise<string[]> {
+    await this.ensureInitialized();
+    return this.crudService.findExistingWorkflowIds(ids);
+  }
+
   public async getWorkflowsSourceByIds(
     ids: string[],
     spaceId: string,
@@ -306,10 +311,11 @@ export class WorkflowsService {
   public async createWorkflow(
     workflow: CreateWorkflowCommand,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { nameFallback?: string }
   ): Promise<WorkflowDetailDto> {
     await this.ensureInitialized();
-    return this.crudService.createWorkflow(workflow, spaceId, request);
+    return this.crudService.createWorkflow(workflow, spaceId, request, options);
   }
 
   public async bulkCreateWorkflows(

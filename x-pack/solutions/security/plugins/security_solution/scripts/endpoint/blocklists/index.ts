@@ -9,7 +9,6 @@ import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { KbnClient } from '@kbn/test';
-import type { AxiosError } from 'axios';
 import pMap from 'p-map';
 import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -55,15 +54,8 @@ class BlocklistDataLoaderError extends Error {
   }
 }
 
-const handleThrowAxiosHttpError = (err: AxiosError<{ message?: string }>): never => {
-  let message = err.message;
-
-  if (err.response) {
-    message = `[${err.response.status}] ${err.response.data.message ?? err.message} [ ${String(
-      err.response.config.method
-    ).toUpperCase()} ${err.response.config.url} ]`;
-  }
-  throw new BlocklistDataLoaderError(message, err.toJSON());
+const handleThrowHttpError = (err: Error): never => {
+  throw new BlocklistDataLoaderError(err.message, err);
 };
 
 const createBlocklists: RunFn = async ({ flags, log }) => {
@@ -91,7 +83,7 @@ const createBlocklists: RunFn = async ({ flags, log }) => {
           path: EXCEPTION_LIST_ITEM_URL,
           body,
         })
-        .catch((e) => handleThrowAxiosHttpError(e));
+        .catch((e) => handleThrowHttpError(e));
     },
     { concurrency: 10 }
   );
@@ -117,8 +109,8 @@ const ensureCreateEndpointBlocklistsList = async (kbn: KbnClient) => {
     })
     .catch((e) => {
       // Ignore if list was already created
-      if (e.response.status !== 409) {
-        handleThrowAxiosHttpError(e);
+      if (e.status !== 409) {
+        handleThrowHttpError(e);
       }
     });
 };

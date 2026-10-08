@@ -534,7 +534,7 @@ export class JobCreateUi extends Component {
         <>
           <EuiSpacer />
 
-          <EuiCallOut title={message} icon="cross" color="danger">
+          <EuiCallOut announceOnMount title={message} icon="cross" color="danger">
             {errorBody}
           </EuiCallOut>
 

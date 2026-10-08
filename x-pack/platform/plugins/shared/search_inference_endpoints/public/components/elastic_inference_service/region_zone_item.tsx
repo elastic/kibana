@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiAccordion, EuiCheckbox, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiButtonEmpty, EuiCheckbox, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getRegionDisplayName, regionKey } from '../../utils/eis_utils';
 import type { ZoneGroup } from '../../utils/eis_utils';
@@ -28,14 +28,25 @@ export const RegionZoneItem: React.FC<RegionZoneItemProps> = ({
 }) => {
   const zoneKeys = zone.regions.map(regionKey);
   const checkedCount = zoneKeys.filter((k) => checkedKeys.has(k)).length;
+  const accordionId = `zone-accordion-${zone.geo}`;
+  const isOpen = expandedZones.has(zone.geo);
 
   const extraAction = (
-    <EuiText size="s" color="subdued">
+    <EuiButtonEmpty
+      size="s"
+      color="text"
+      iconType={isOpen ? 'arrowUp' : 'arrowDown'}
+      iconSide="right"
+      onClick={() => onToggleExpand(zone.geo, !isOpen)}
+      aria-expanded={isOpen}
+      aria-controls={accordionId}
+      data-test-subj={`manageRegionsZoneCountToggle-${zone.geo}`}
+    >
       {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.zoneCount', {
         defaultMessage: '{checked} of {total, plural, one {# region} other {# regions}}',
         values: { checked: checkedCount, total: zone.regions.length },
       })}
-    </EuiText>
+    </EuiButtonEmpty>
   );
 
   return (
@@ -46,13 +57,13 @@ export const RegionZoneItem: React.FC<RegionZoneItemProps> = ({
       data-test-subj={`manageRegionsZone-${zone.geo}`}
     >
       <EuiAccordion
-        id={`zone-accordion-${zone.geo}`}
-        arrowDisplay="right"
+        id={accordionId}
+        arrowDisplay="none"
         buttonContent={<strong>{zone.displayName}</strong>}
         buttonProps={{ 'data-test-subj': `manageRegionsZoneToggle-${zone.geo}` }}
         extraAction={extraAction}
-        forceState={expandedZones.has(zone.geo) ? 'open' : 'closed'}
-        onToggle={(isOpen) => onToggleExpand(zone.geo, isOpen)}
+        forceState={isOpen ? 'open' : 'closed'}
+        onToggle={(nextIsOpen) => onToggleExpand(zone.geo, nextIsOpen)}
         paddingSize="s"
       >
         {zone.regions.map((r) => {

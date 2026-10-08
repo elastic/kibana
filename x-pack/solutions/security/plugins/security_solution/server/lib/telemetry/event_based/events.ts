@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EventTypeOpts } from '@kbn/core/server';
+import type { EventTypeOpts, RootSchema } from '@kbn/core/server';
+import type { RiskScoreDistribution } from '@kbn/entity-store/common';
 import type { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
 import type { CsvErrorCategory } from '../../entity_analytics/entity_resolution/csv_upload';
@@ -51,6 +52,13 @@ export const DETECTION_RULE_UPGRADE_EVENT: EventTypeOpts<RuleUpgradeTelemetry> =
     hasBaseVersion: {
       type: 'boolean',
       _meta: { description: 'True if base version exists for this rule' },
+    },
+    hasRuleTypeChange: {
+      type: 'boolean',
+      _meta: {
+        description:
+          "True if the rule's type was force-set to the target version's value during this upgrade",
+      },
     },
     finalResult: {
       type: 'keyword',
@@ -254,6 +262,13 @@ export const DETECTION_RULE_BULK_UPGRADE_EVENT: EventTypeOpts<RuleBulkUpgradeTel
               'Number of successfully updated rules with no conflicts in bulk update request',
           },
         },
+        numOfRulesWithRuleTypeChange: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of successfully updated rules with a rule type change in bulk update request',
+          },
+        },
       },
     },
     errorUpdates: {
@@ -296,6 +311,13 @@ export const DETECTION_RULE_BULK_UPGRADE_EVENT: EventTypeOpts<RuleBulkUpgradeTel
               'Number of rules with no conflicts that failed to update in bulk update request',
           },
         },
+        numOfRulesWithRuleTypeChange: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with a rule type change that failed to update in bulk update request',
+          },
+        },
       },
     },
     skippedUpdates: {
@@ -336,6 +358,13 @@ export const DETECTION_RULE_BULK_UPGRADE_EVENT: EventTypeOpts<RuleBulkUpgradeTel
           _meta: {
             description:
               'Number of rules with no conflicts that were skipped during bulk update request',
+          },
+        },
+        numOfRulesWithRuleTypeChange: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with a rule type change that were skipped during bulk update request',
           },
         },
       },
@@ -482,6 +511,73 @@ export type RiskScoreMaintainerStageSummaryEvent =
   | Phase2ResolutionScoringSummary
   | ResetToZeroSummary;
 
+type RiskScoreDistributionFieldSchema = RootSchema<{
+  distribution?: RiskScoreDistribution;
+}>['distribution'];
+
+const riskScoreDistributionSchema = (
+  scoreKind: 'base' | 'resolution'
+): RiskScoreDistributionFieldSchema => {
+  const scoreKindLabel = scoreKind === 'base' ? 'Base' : 'Resolution';
+  return {
+    _meta: {
+      optional: true,
+      description: `Distribution of ${scoreKind} scores written in this run by risk band and percentile`,
+    },
+    properties: {
+      critical: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: `${scoreKindLabel} scores written whose band is Critical`,
+        },
+      },
+      high: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: `${scoreKindLabel} scores written whose band is High`,
+        },
+      },
+      moderate: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: `${scoreKindLabel} scores written whose band is Moderate`,
+        },
+      },
+      low: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: `${scoreKindLabel} scores written whose band is Low`,
+        },
+      },
+      unknown: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: `${scoreKindLabel} scores written whose band is Unknown, including scores with no band`,
+        },
+      },
+      normP50: {
+        type: 'float',
+        _meta: {
+          optional: true,
+          description: `Median calculated_score_norm of ${scoreKind} scores written in this run`,
+        },
+      },
+      normP90: {
+        type: 'float',
+        _meta: {
+          optional: true,
+          description: `90th percentile calculated_score_norm of ${scoreKind} scores written in this run`,
+        },
+      },
+    },
+  };
+};
+
 export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
   namespace: string;
   entityType: string;
@@ -496,6 +592,8 @@ export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
   pagesProcessed: number;
   lookupPrunedDocs: number;
   idBasedRiskScoringEnabled: boolean;
+  baseScoreDistribution?: RiskScoreDistribution;
+  resolutionScoreDistribution?: RiskScoreDistribution;
 }> = {
   eventType: 'risk_score_maintainer_run_summary',
   schema: {
@@ -536,6 +634,8 @@ export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
       type: 'boolean',
       _meta: { description: 'Whether Entity Store dual-write was enabled' },
     },
+    baseScoreDistribution: riskScoreDistributionSchema('base'),
+    resolutionScoreDistribution: riskScoreDistributionSchema('resolution'),
   },
 };
 
@@ -1023,6 +1123,78 @@ export const PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT: EventTypeOpts<{
       _meta: {
         description: 'Error message for a resource initialization failure',
       },
+    },
+  },
+};
+
+export type AttacksApiCallOperation = 'search' | 'tags' | 'assignees' | 'status';
+
+export const ATTACKS_API_CALL_EVENT: EventTypeOpts<{
+  endpoint: string;
+  operation: AttacksApiCallOperation;
+  ids_count?: number;
+  update_related_alerts?: boolean;
+  tags_to_add_count?: number;
+  tags_to_remove_count?: number;
+  assignees_to_add_count?: number;
+  assignees_to_remove_count?: number;
+  status?: string;
+  has_aggregations?: boolean;
+  has_ids_filter?: boolean;
+  error?: string;
+}> = {
+  eventType: 'attacks_api_call',
+  schema: {
+    endpoint: {
+      type: 'keyword',
+      _meta: { description: 'The attacks API route path that was called' },
+    },
+    operation: {
+      type: 'keyword',
+      _meta: { description: 'The attacks API operation: search, tags, assignees, or status' },
+    },
+    ids_count: {
+      type: 'long',
+      _meta: { optional: true, description: 'Number of attack IDs in the request' },
+    },
+    update_related_alerts: {
+      type: 'boolean',
+      _meta: {
+        optional: true,
+        description: 'Whether related detection alerts were also updated',
+      },
+    },
+    tags_to_add_count: {
+      type: 'long',
+      _meta: { optional: true, description: 'Number of tags to add' },
+    },
+    tags_to_remove_count: {
+      type: 'long',
+      _meta: { optional: true, description: 'Number of tags to remove' },
+    },
+    assignees_to_add_count: {
+      type: 'long',
+      _meta: { optional: true, description: 'Number of assignees to add' },
+    },
+    assignees_to_remove_count: {
+      type: 'long',
+      _meta: { optional: true, description: 'Number of assignees to remove' },
+    },
+    status: {
+      type: 'keyword',
+      _meta: { optional: true, description: 'Workflow status value being set' },
+    },
+    has_aggregations: {
+      type: 'boolean',
+      _meta: { optional: true, description: 'Whether the search request included aggregations' },
+    },
+    has_ids_filter: {
+      type: 'boolean',
+      _meta: { optional: true, description: 'Whether the search request filtered by IDs' },
+    },
+    error: {
+      type: 'keyword',
+      _meta: { optional: true, description: 'Error message if the call failed' },
     },
   },
 };
@@ -1821,12 +1993,6 @@ export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT: EventTypeOpts<Health
           description: 'Circuit breaker metrics such as execution time and memory usage.',
         },
       },
-      descriptorVersion: {
-        type: 'integer',
-        _meta: {
-          description: 'Version of the query descriptor that produced this event.',
-        },
-      },
       status: {
         type: 'keyword',
         _meta: {
@@ -2400,6 +2566,7 @@ export const events = [
   PRIVMON_ENGINE_INITIALIZATION_EVENT,
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   WATCHLIST_API_CALL_EVENT,
+  ATTACKS_API_CALL_EVENT,
   TELEMETRY_DATA_STREAM_EVENT,
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT,
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT,

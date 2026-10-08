@@ -328,6 +328,19 @@ describe('track panel', () => {
       blurCleanup();
     });
 
+    it('blurs all siblings when neither the focused panel nor any sibling publishes relatedPanels$', () => {
+      const { children$, blurApi, blurCleanup } = setupBlurTest();
+      children$.next({
+        fox: buildChild('fox'),
+        hare: buildChild('hare'),
+        owl: buildChild('owl'),
+      });
+
+      blurApi.setFocusedPanelId('fox');
+      expect(blurApi.blurredPanelIds$.value.sort()).toEqual(['hare', 'owl']);
+      blurCleanup();
+    });
+
     it("reacts to relatedPanels$ updates on the focused panel's API", () => {
       const { children$, blurApi, blurCleanup } = setupBlurTest();
       const wolfRelated$ = new BehaviorSubject<string[]>(['raven']);

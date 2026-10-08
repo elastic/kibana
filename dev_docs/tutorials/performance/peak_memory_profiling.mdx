@@ -73,12 +73,12 @@ Build a distributable in each worktree:
 
 ```bash
 cd ../memory-profile-worktrees/kibana-baseline
-yarn kbn bootstrap
-yarn build --skip-os-packages
+pnpm kbn bootstrap
+pnpm build --skip-os-packages
 
 cd ../kibana-candidate
-yarn kbn bootstrap
-yarn build --skip-os-packages
+pnpm kbn bootstrap
+pnpm build --skip-os-packages
 ```
 
 The archive is created under each worktree's `target/` directory. Its platform and extension depend on the machine where you run the build.
@@ -223,13 +223,13 @@ The probe may create more than one file if Kibana starts multiple Node processes
 Make the Elasticsearch state part of the scenario. Do not reuse an already-warmed Elasticsearch instance unless the scenario explicitly requires it.
 Cold start against an empty Elasticsearch data path can trigger Kibana setup, index-creation, migrations, task scheduling, or feature initialization paths that do not run when Kibana connects to a cluster that already contains Kibana indices.
 
-Run `yarn es snapshot` from a bootstrapped Kibana source checkout. Use either a checkout on `main` or the worktree for the revision being tested. If the Elasticsearch snapshot configuration matters for the scenario, use the matching baseline or candidate worktree for that run.
+Run `pnpm es snapshot` from a bootstrapped Kibana source checkout. Use either a checkout on `main` or the worktree for the revision being tested. If the Elasticsearch snapshot configuration matters for the scenario, use the matching baseline or candidate worktree for that run.
 
 For cold-start or startup-memory checks, restart Elasticsearch with a fresh data path for every baseline and candidate run:
 
 ```bash
 rm -rf /tmp/kibana-memory-profile/es-data/baseline-round-1
-yarn es snapshot -E path.data=/tmp/kibana-memory-profile/es-data/baseline-round-1
+pnpm es snapshot -E path.data=/tmp/kibana-memory-profile/es-data/baseline-round-1
 ```
 
 Wait for the terminal to report that Elasticsearch setup is complete, then start Kibana and run the scenario.

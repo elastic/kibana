@@ -28,6 +28,12 @@ import { RulePanelKey } from '../../../../../flyout/rule_details/right';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
+import type { FlyoutOrigin } from '../../../../../common/lib/telemetry';
+import {
+  formatFlyoutTitle,
+  RULE_TITLE,
+} from '../../../../../flyout_v2/shared/constants/flyout_titles';
 
 interface RenderRuleNameProps {
   children?: React.ReactNode;
@@ -40,6 +46,12 @@ interface RenderRuleNameProps {
   truncate?: boolean;
   title?: string;
   value: string | number | null | undefined;
+  /**
+   * Which UI surface this is rendered in, for telemetry. Defaults to `table_field_link` (a
+   * standalone table/grid, e.g. the alerts table's rule name column); callers rendering this
+   * inside an already-open flyout should pass `field_link` instead.
+   */
+  origin?: FlyoutOrigin;
 }
 
 export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
@@ -53,6 +65,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   truncate,
   title,
   value,
+  origin = FLYOUT_ORIGIN.TABLE_FIELD_LINK,
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
   const { services } = useKibana();
@@ -84,7 +97,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
       }
 
       if (enableNewFlyout && ruleId) {
-        openRuleFlyout({ ruleId });
+        openRuleFlyout({ ruleId, origin, title: formatFlyoutTitle(RULE_TITLE, ruleName) });
         return;
       }
 
@@ -104,9 +117,11 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
       openInNewTab,
       openFlyout,
       eventContext,
+      origin,
       isInTimelineContext,
       enableNewFlyout,
       openRuleFlyout,
+      ruleName,
     ]
   );
 

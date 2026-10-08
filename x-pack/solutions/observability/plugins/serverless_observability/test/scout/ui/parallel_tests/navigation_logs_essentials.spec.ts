@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
+import { OBSERVABILITY_SPA_SHELL_TIMEOUT_MS, tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
@@ -118,6 +118,33 @@ test.describe(
       await test.step('/app/observability/cases shows the observability 404 page', async () => {
         await page.gotoApp('observability/cases');
         await expect(page.testSubj.locator('observabilityPageNotFoundBanner')).toBeVisible();
+      });
+    });
+
+    test('Model Management pages are not reachable via direct URL or global search', async ({
+      page,
+      pageObjects,
+    }) => {
+      const nav = pageObjects.observabilityNavigation;
+
+      await test.step('direct URL falls back to the management landing page', async () => {
+        await page.gotoApp('management/modelManagement/model_settings');
+        await expect(page.testSubj.locator('cards-navigation-page')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
+      });
+
+      await test.step('pages do not appear in global search', async () => {
+        await nav.goto();
+        await nav.waitForLoad();
+
+        await page.testSubj.click('nav-search-reveal');
+        await page.testSubj.fill('nav-search-input', 'Elastic Inference');
+        await expect(
+          page.testSubj
+            .locator('euiSelectableMessage')
+            .locator('[data-test-subj~="nav-search-no-results"]')
+        ).toBeVisible();
       });
     });
   }

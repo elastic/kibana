@@ -50,6 +50,8 @@ import { useInsightQuery } from './use_insight_query';
 import { type Provider, useInsightDataProviders } from './use_insight_data_providers';
 import { AlertDataContext } from '../../../../../flyout_v2/document/tools/investigation_guide/components/investigation_guide_view';
 import { InvestigateInTimelineButton } from '../../../event_details/investigate_in_timeline_button';
+import { useIsInSecurityApp } from '../../../../hooks/is_in_security_app';
+import { useOpenTimelineInNewTab } from '../../../../hooks/timeline/use_open_timeline_in_new_tab';
 import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
@@ -195,6 +197,8 @@ const LicensedInsightComponent = ({
     }
   }, [hit, relativeFrom, relativeTo]);
 
+  const isInSecurityApp = useIsInSecurityApp();
+  const { openAdHocTimelineInNewTab } = useOpenTimelineInNewTab();
   const { totalCount, isQueryLoading, oldestTimestamp, hasError } = useInsightQuery({
     dataProviders,
     filters,
@@ -220,11 +224,24 @@ const LicensedInsightComponent = ({
       };
     }
   }, [oldestTimestamp, relativeTimerange]);
+  const onOpenInNewTab = useCallback(() => {
+    openAdHocTimelineInNewTab({ dataProviders, filters, timeRange: timerange });
+  }, [openAdHocTimelineInNewTab, dataProviders, filters, timerange]);
+
   if (isQueryLoading) {
     return <EuiLoadingSpinner />;
-  } else {
-    return (
-      <>
+  }
+
+  const buttonContent = (
+    <>
+      <EuiIcon type="timeline" aria-hidden={true} />
+      {` ${label} (${numeral(totalCount).format(resultFormat)})`}
+    </>
+  );
+
+  return (
+    <>
+      {isInSecurityApp ? (
         <InvestigateInTimelineButton
           asEmptyButton={false}
           isDisabled={hasError}
@@ -234,13 +251,22 @@ const LicensedInsightComponent = ({
           keepDataView={true}
           data-test-subj="insight-investigate-in-timeline-button"
         >
-          <EuiIcon type="timeline" aria-hidden={true} />
-          {` ${label} (${numeral(totalCount).format(resultFormat)})`}
+          {buttonContent}
         </InvestigateInTimelineButton>
-        <div>{description}</div>
-      </>
-    );
-  }
+      ) : (
+        // Outside of the Security Solution app (e.g. in Discover) the in-app timeline is not mounted,
+        // so open the timeline in a new Security Solution tab instead.
+        <EuiButton
+          isDisabled={hasError}
+          onClick={onOpenInNewTab}
+          data-test-subj="insight-investigate-in-timeline-button"
+        >
+          {buttonContent}
+        </EuiButton>
+      )}
+      <div>{description}</div>
+    </>
+  );
 };
 
 // receives the configuration from the parser and renders

@@ -80,6 +80,16 @@ jest.mock('react-router-dom', () => {
   };
 });
 
+// HomePage wires up flyoutV2 URL restoration/interop, whose restore logic (including its
+// `useEsDocSearch` calls) is covered by dedicated unit tests in `flyout_v2/shared/url_state`.
+// Mocked here as no-ops so this suite doesn't need a `UnifiedDocViewerServices` registration.
+jest.mock('../../flyout_v2/shared/url_state/use_flyout_v2_restore', () => ({
+  useFlyoutV2RestoreFromUrl: jest.fn(),
+}));
+jest.mock('../../flyout_v2/shared/url_state/use_expandable_flyout_url_interop', () => ({
+  useLegacyFlyoutUrlInterop: jest.fn(),
+}));
+
 const mockQueryTimelineById = jest.fn();
 jest.mock('../../timelines/components/open_timeline/helpers', () => {
   const original = jest.requireActual('../../timelines/components/open_timeline/helpers');

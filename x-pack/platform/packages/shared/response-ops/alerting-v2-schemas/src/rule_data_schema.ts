@@ -10,6 +10,7 @@ import {
   DEFAULT_ARTIFACT_VALUE_LIMIT,
   ARTIFACT_VALUE_LIMITS,
   MAX_ARTIFACT_VALUE_LIMIT,
+  DEFAULT_TIME_FIELD,
 } from '@kbn/alerting-v2-constants';
 import { validateEsqlQuery, validateMinDuration, composeEsqlQuery } from './validation';
 import { durationSchema, tagsSchema } from './common';
@@ -372,7 +373,7 @@ export const createRuleDataBaseSchema = z
       .string()
       .min(1)
       .max(128)
-      .default('@timestamp')
+      .default(DEFAULT_TIME_FIELD)
       .describe('Time field used for the lookback window range filter.'),
     schedule: scheduleSchema,
     query: querySchema,
@@ -527,7 +528,12 @@ export const updateRuleDataSchema = z
   .object({
     metadata: metadataSchema
       .partial()
-      .extend({ builder_type: z.string().max(64).optional().nullable() })
+      .extend({
+        builder_type: z.string().max(64).optional().nullable(),
+        // `null` clears all tags (an empty array is rejected by `.min(1)`, and
+        // omitting `tags` preserves the existing ones on a partial update).
+        tags: tagsSchema.min(1).nullable().optional(),
+      })
       .optional(),
     time_field: z.string().min(1).max(128).optional(),
     schedule: scheduleSchema.partial().optional().nullable(),

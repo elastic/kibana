@@ -51,6 +51,7 @@ import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/us
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
 jest.mock('../../../../../data_view_manager/hooks/use_browser_fields');
 jest.mock('../../../../../flyout_v2/use_flyout_api');
@@ -873,7 +874,7 @@ describe.skip('query tab with unified timeline', () => {
         });
 
         // column exists in the table
-        expect(screen.getByTestId(`dataGridHeaderCell-${field.name}`)).toBeVisible();
+        expect(await screen.findByTestId(`dataGridHeaderCell-${field.name}`)).toBeVisible();
 
         fireEvent.click(screen.getAllByTestId(`fieldToggle-${field.name}`)[0]);
 
@@ -1105,6 +1106,7 @@ describe.skip('query tab with unified timeline', () => {
         await waitFor(() => {
           expect(flyoutApi.openNotes).toHaveBeenCalledWith({
             hit: expect.objectContaining({ _id: mockTimelineData[0]._id }),
+            origin: FLYOUT_ORIGIN.TIMELINE,
           });
         });
         expect(mockOpenFlyout).not.toHaveBeenCalled();
@@ -1142,6 +1144,9 @@ describe.skip('query tab with unified timeline', () => {
             rawEvents: [{ _id: attackDiscoveryEvent._id, _index: attackDiscoveryEvent.ecs._index }],
             inspect: { dsl: [], response: [] },
             totalCount: 1,
+            isPartial: false,
+            shardFailures: [],
+            timedOut: false,
             loadNextBatch: jest.fn(),
             refreshedAt: 0,
             refetch: jest.fn(),

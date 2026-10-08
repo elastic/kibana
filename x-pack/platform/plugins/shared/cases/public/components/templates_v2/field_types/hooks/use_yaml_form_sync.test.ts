@@ -105,7 +105,7 @@ describe('useYamlToFormSync', () => {
     const fields = createParsedFields([
       {
         name: 'requires_escalation',
-        type: 'keyword',
+        type: 'boolean',
         control: 'TOGGLE',
         defaultValue: true,
       },
@@ -114,7 +114,7 @@ describe('useYamlToFormSync', () => {
     renderHook(() => useYamlToFormSync(mockForm, fields, syncingFromYamlRef, lastSyncedRef));
 
     expect(setValue).toHaveBeenCalledWith(
-      `${CASE_EXTENDED_FIELDS}.requires_escalation_as_keyword`,
+      `${CASE_EXTENDED_FIELDS}.requires_escalation_as_boolean`,
       'true',
       expect.any(Object)
     );
@@ -124,7 +124,7 @@ describe('useYamlToFormSync', () => {
     const fields = createParsedFields([
       {
         name: 'requires_escalation',
-        type: 'keyword',
+        type: 'boolean',
         control: 'TOGGLE',
         required: true,
       },
@@ -133,7 +133,7 @@ describe('useYamlToFormSync', () => {
     renderHook(() => useYamlToFormSync(mockForm, fields, syncingFromYamlRef, lastSyncedRef));
 
     expect(setValue).toHaveBeenCalledWith(
-      `${CASE_EXTENDED_FIELDS}.requires_escalation_as_keyword`,
+      `${CASE_EXTENDED_FIELDS}.requires_escalation_as_boolean`,
       'false',
       expect.any(Object)
     );
@@ -558,7 +558,7 @@ describe('useFormToYamlSync', () => {
 
   it('serializes boolean form values for TOGGLE fields', () => {
     const fields = createParsedFields([
-      { name: 'requires_escalation', type: 'keyword', control: 'TOGGLE', defaultValue: false },
+      { name: 'requires_escalation', type: 'boolean', control: 'TOGGLE', defaultValue: false },
     ]);
     yamlDefaultsRef.current = { requires_escalation: 'false' };
 
@@ -568,7 +568,7 @@ describe('useFormToYamlSync', () => {
 
     act(() => {
       fireWatch({
-        [CASE_EXTENDED_FIELDS]: { requires_escalation_as_keyword: true },
+        [CASE_EXTENDED_FIELDS]: { requires_escalation_as_boolean: true },
       });
     });
 
@@ -622,7 +622,7 @@ describe('useYamlFormSync (composed)', () => {
     const fields = createParsedFields([
       {
         name: 'requires_escalation',
-        type: 'keyword',
+        type: 'boolean',
         control: 'TOGGLE',
         required: true,
       },

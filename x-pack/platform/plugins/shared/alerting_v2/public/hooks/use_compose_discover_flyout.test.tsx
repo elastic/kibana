@@ -114,20 +114,14 @@ const renderAndOpenEdit = async () => {
   });
 };
 
-const callOnUpdateRule = (notifications?: unknown, notificationsDirty = false) => {
+const callOnUpdateRule = (notifications?: unknown) => {
   const onUpdateRule = capturedFlyoutProps.onUpdateRule as (
     id: string,
     payload: unknown,
-    notifications?: unknown,
-    notificationsDirty?: boolean
+    notifications?: unknown
   ) => void;
   act(() => {
-    onUpdateRule(
-      'rule-1',
-      { metadata: { name: 'My rule (updated)' } },
-      notifications,
-      notificationsDirty
-    );
+    onUpdateRule('rule-1', { metadata: { name: 'My rule (updated)' } }, notifications);
   });
 };
 
@@ -213,18 +207,18 @@ describe('useComposeDiscoverFlyout — edit submission wiring', () => {
     expect(capturedFlyoutProps.onUpdateRule).toBeDefined();
   });
 
-  it('updates the rule then updates notifications and closes on success', async () => {
+  it('updates the rule then sets up notifications and closes on success', async () => {
     mockSetupMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.());
 
     await renderAndOpenEdit();
-    callOnUpdateRule({ workflows: [existingAction] }, true);
+    callOnUpdateRule({ workflows: [existingAction] });
 
     expect(mockUpdateMutate).toHaveBeenCalledWith(
       { id: 'rule-1', payload: { metadata: { name: 'My rule (updated)' } } },
       expect.objectContaining({ onSuccess: expect.any(Function) })
     );
     expect(mockSetupMutate).toHaveBeenCalledWith(
-      { rule: updatedRule, actions: [existingAction], onUpdate: true },
+      { rule: updatedRule, actions: [existingAction] },
       expect.objectContaining({ onSuccess: expect.any(Function) })
     );
 
@@ -237,34 +231,28 @@ describe('useComposeDiscoverFlyout — edit submission wiring', () => {
     mockSetupMutate.mockImplementation(() => undefined);
 
     await renderAndOpenEdit();
-    callOnUpdateRule({ workflows: [existingAction] }, true);
+    callOnUpdateRule({ workflows: [existingAction] });
 
     expect(mockSetupMutate).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
   });
 
-  it('updates (with an empty list) when the user removed all simple actions', async () => {
-    mockSetupMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.());
-
+  it('closes without setting up notifications when there are no actions', async () => {
     await renderAndOpenEdit();
-    // The user cleared the seeded rows, so workflows is empty but dirty.
-    callOnUpdateRule({ workflows: [] }, true);
+    callOnUpdateRule(undefined);
 
-    expect(mockSetupMutate).toHaveBeenCalledWith(
-      { rule: updatedRule, actions: [], onUpdate: true },
-      expect.objectContaining({ onSuccess: expect.any(Function) })
-    );
+    expect(mockUpdateMutate).toHaveBeenCalledTimes(1);
+    expect(mockSetupMutate).not.toHaveBeenCalled();
 
     await waitFor(() => {
       expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
     });
   });
 
-  it('closes without updating when notifications were not changed', async () => {
+  it('does not set up notifications when the workflows list is empty', async () => {
     await renderAndOpenEdit();
-    callOnUpdateRule({ workflows: [existingAction] }, false);
+    callOnUpdateRule({ workflows: [] });
 
-    expect(mockUpdateMutate).toHaveBeenCalledTimes(1);
     expect(mockSetupMutate).not.toHaveBeenCalled();
 
     await waitFor(() => {

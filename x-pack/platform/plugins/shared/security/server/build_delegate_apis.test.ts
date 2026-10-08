@@ -85,6 +85,51 @@ describe('buildSecurityApi', () => {
     });
   });
 
+  describe('authc.getPrincipal', () => {
+    it('classifies the current user of a real request', () => {
+      const request = httpServerMock.createKibanaRequest();
+      authc.getCurrentUser.mockReturnValue(
+        securityMock.createMockAuthenticatedUser({
+          username: 'creator',
+          authentication_provider: { type: 'http', name: '__http__' },
+          api_key: { id: 'key-id', name: 'key', managed_by: 'elasticsearch' },
+        })
+      );
+
+      expect(api.authc.getPrincipal(request)).toEqual({
+        type: 'api_key',
+        apiKeyId: 'key-id',
+        variant: 'stack',
+      });
+      expect(authc.getCurrentUser).toHaveBeenCalledWith(request);
+    });
+
+    it('returns null when no user is authenticated', () => {
+      authc.getCurrentUser.mockReturnValue(null);
+
+      expect(api.authc.getPrincipal(httpServerMock.createKibanaRequest())).toBeNull();
+    });
+
+    // The enrichment names the user a fake request acts for, not the credential Elasticsearch
+    // authenticates it with, which for Task Manager requests is an API key.
+    it('returns null for an enriched fake request rather than classifying its bound user', () => {
+      const request = httpServerMock.createFakeKibanaRequest({
+        headers: { authorization: 'ApiKey dGFzay1rZXk6c2VjcmV0' },
+      });
+      api.fakeRequestEnricher(request, { profileId: 'u_test_profile_123', username: 'jdoe' });
+
+      expect(api.authc.getPrincipal(request)).toBeNull();
+      expect(api.authc.getCurrentUser(request)).toMatchObject({ username: 'jdoe' });
+    });
+
+    it('returns null for a fake request without consulting authc', () => {
+      authc.getCurrentUser.mockReturnValue(securityMock.createMockAuthenticatedUser());
+
+      expect(api.authc.getPrincipal(httpServerMock.createFakeKibanaRequest({}))).toBeNull();
+      expect(authc.getCurrentUser).not.toHaveBeenCalled();
+    });
+  });
+
   describe('fakeRequestEnricher', () => {
     it('binds a profile_uid and username that are then surfaced via getCurrentUser', () => {
       const request = httpServerMock.createFakeKibanaRequest({});
@@ -273,6 +318,26 @@ describe('buildUserProfileApi', () => {
       const returnValue = await api.getCurrent({ request, dataPath: 'dataPath' });
 
       expect(returnValue).toBe(null);
+    });
+  });
+
+  describe('getCurrentProfileId', () => {
+    it('properly delegates to the service', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      await api.getCurrentProfileId({ request });
+
+      expect(userProfile.getCurrentProfileId).toHaveBeenCalledTimes(1);
+      expect(userProfile.getCurrentProfileId).toHaveBeenCalledWith({ request });
+    });
+
+    it('returns the result from the service', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      userProfile.getCurrentProfileId.mockResolvedValue('some-uid');
+
+      const returnValue = await api.getCurrentProfileId({ request });
+
+      expect(returnValue).toBe('some-uid');
     });
   });
 

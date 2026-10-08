@@ -8,9 +8,19 @@
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { CaseStatuses } from '@kbn/cases-components';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
 import type { CaseUI, CaseUICustomField } from '../../../../../../../common/ui/types';
+import type { InlineField } from '../../../../../../../common/types/domain/template/fields';
+import { FieldType } from '../../../../../../../common/types/domain/template/fields';
+import { getFieldCamelKey } from '../../../../../../../common/utils';
 import { FormattedRelativePreferenceDate } from '../../../../../formatted_date';
+import {
+  getExtendedFieldColumnKey,
+  getExtendedFieldDisplayValue,
+  parseUserPickerAssignees,
+} from '../../../../../all_cases/extended_field_columns';
+import { AssigneesColumn } from '../../../../../all_cases/assignees_column';
 import type { ListItemFieldContent } from './types';
 import * as i18n from '../../../translations';
 
@@ -81,6 +91,45 @@ const getCustomFieldContent = (field: string, theCase: CaseUI): ListItemFieldCon
     label: field,
     content: displayValue,
     testSubj: `cases-list-item-field-${field}`,
+  };
+};
+
+// Templates v2 renders global/extended fields (keyed `<name>_as_<type>`) instead of legacy
+// customFields. Values live on `theCase.extendedFields` under the camelCased key; empty values are
+// omitted so the card doesn't show a dangling label. User-picker fields render avatars (matching
+// the all-cases table column) instead of the comma-joined name text used for every other type.
+export const getExtendedFieldContent = (
+  field: InlineField,
+  theCase: CaseUI,
+  userProfiles: Map<string, UserProfileWithAvatar>
+): ListItemFieldContent | null => {
+  const rawValue = theCase.extendedFields?.[getFieldCamelKey(field.name, field.type)];
+  if (rawValue == null || rawValue === '') {
+    return null;
+  }
+
+  const label = field.label ?? field.name;
+  const testSubj = `cases-list-item-field-${getExtendedFieldColumnKey(field)}`;
+
+  if (field.control === FieldType.USER_PICKER) {
+    const assignees = parseUserPickerAssignees(rawValue) ?? [];
+    return {
+      label,
+      content: (
+        <AssigneesColumn
+          assignees={assignees}
+          userProfiles={userProfiles}
+          testSubjPrefix={`extendedField-${getExtendedFieldColumnKey(field)}`}
+        />
+      ),
+      testSubj,
+    };
+  }
+
+  return {
+    label,
+    content: getExtendedFieldDisplayValue(field.control, rawValue),
+    testSubj,
   };
 };
 

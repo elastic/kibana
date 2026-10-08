@@ -26,6 +26,7 @@ describe('addRoundCompleteEvent', () => {
     modelProvider: {
       getUsageStats: jest.fn(() => ({ calls: [] })),
     } as unknown as ModelProvider,
+    mainConnectorId: 'default-connector',
     stateManager: {} as unknown as ConversationStateManager,
     attachmentStateManager: {
       getAccessedRefs: jest.fn(() => []),
@@ -33,11 +34,11 @@ describe('addRoundCompleteEvent', () => {
     } as unknown as AttachmentStateManager,
   });
 
-  it('stamps origin type on the round and origin author on the input for new rounds', async () => {
+  it('stamps origin type and author on the round for new rounds', async () => {
     const origin = {
       type: ConversationOriginType.Slack,
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
-      author: { id: 'U123', name: 'Jane Doe', handle: 'jane' },
+      author: { id: 'U123', full_name: 'Jane Doe', username: 'jane' },
     };
     const messageCompleteEvent: ChatEvent = {
       type: ChatEventType.messageComplete,
@@ -57,6 +58,7 @@ describe('addRoundCompleteEvent', () => {
           pendingRound: undefined,
           userInput: { message: '@agent summarize this' },
           origin,
+          author: origin.author,
           startTime: new Date('2026-01-01T00:00:00.000Z'),
         }),
         toArray()
@@ -68,18 +70,72 @@ describe('addRoundCompleteEvent', () => {
     expect(roundCompleteEvent?.data.round.origin).toEqual({
       type: ConversationOriginType.Slack,
     });
-    expect(roundCompleteEvent?.data.round.input.origin).toEqual({
-      author: { id: 'U123', name: 'Jane Doe', handle: 'jane' },
+    expect(roundCompleteEvent?.data.round.author).toEqual({
+      id: 'U123',
+      full_name: 'Jane Doe',
+      username: 'jane',
     });
   });
 
-  it('preserves the original round origin when resuming a pending round', async () => {
+  it('attributes model_usage to the main connector, not a faster helper call that completed first', async () => {
+    const messageCompleteEvent: ChatEvent = {
+      type: ChatEventType.messageComplete,
+      data: {
+        message_id: 'message-1',
+        message_content: 'Done',
+      },
+    };
+
+    const events = await firstValueFrom(
+      of(
+        createFinalStateEvent({ currentCycle: 0, errorCount: 0 } as never) as ConvertedEvents,
+        messageCompleteEvent as ConvertedEvents
+      ).pipe(
+        addRoundCompleteEvent({
+          ...createDeps(),
+          modelProvider: {
+            getUsageStats: jest.fn(() => ({
+              calls: [
+                {
+                  connectorId: 'fast-connector',
+                  model: 'anthropic-claude-4.5-haiku',
+                  tokens: { prompt: 10, completion: 5, total: 15 },
+                },
+                {
+                  connectorId: 'default-connector',
+                  model: 'anthropic-claude-4.5-sonnet',
+                  tokens: { prompt: 100, completion: 50, total: 150 },
+                },
+              ],
+            })),
+          } as unknown as ModelProvider,
+          mainConnectorId: 'default-connector',
+          pendingRound: undefined,
+          userInput: { message: 'use Sonnet' },
+          startTime: new Date('2026-01-01T00:00:00.000Z'),
+        }),
+        toArray()
+      )
+    );
+
+    const roundCompleteEvent = events.find(isRoundCompleteEvent);
+
+    expect(roundCompleteEvent?.data.round.model_usage).toEqual({
+      connector_id: 'default-connector',
+      model: 'anthropic-claude-4.5-sonnet',
+      llm_calls: 2,
+      input_tokens: 110,
+      output_tokens: 55,
+    });
+  });
+
+  it('preserves the original round origin and author when resuming a pending round', async () => {
     const pendingRound = createRound({
       status: ConversationRoundStatus.awaitingPrompt,
       origin: { type: ConversationOriginType.Slack },
+      author: { id: 'U123', full_name: 'Jane Doe', username: 'jane' },
       input: {
         message: '@agent summarize this',
-        origin: { author: { id: 'U123', name: 'Jane Doe', handle: 'jane' } },
       },
     });
     const messageCompleteEvent: ChatEvent = {
@@ -102,7 +158,7 @@ describe('addRoundCompleteEvent', () => {
           origin: {
             type: ConversationOriginType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
-            author: { id: 'U999', name: 'John Roe', handle: 'john' },
+            author: { id: 'U999', full_name: 'John Roe', username: 'john' },
           },
           startTime: new Date('2026-01-01T00:00:00.000Z'),
         }),
@@ -115,8 +171,41 @@ describe('addRoundCompleteEvent', () => {
     expect(roundCompleteEvent?.data.round.origin).toEqual({
       type: ConversationOriginType.Slack,
     });
-    expect(roundCompleteEvent?.data.round.input.origin).toEqual({
-      author: { id: 'U123', name: 'Jane Doe', handle: 'jane' },
+    expect(roundCompleteEvent?.data.round.author).toEqual({
+      id: 'U123',
+      full_name: 'Jane Doe',
+      username: 'jane',
     });
+  });
+
+  it('stamps the resolved author on the round when there is no origin', async () => {
+    const messageCompleteEvent: ChatEvent = {
+      type: ChatEventType.messageComplete,
+      data: {
+        message_id: 'message-1',
+        message_content: 'Done',
+      },
+    };
+
+    const events = await firstValueFrom(
+      of(
+        createFinalStateEvent({ currentCycle: 0, errorCount: 0 } as never) as ConvertedEvents,
+        messageCompleteEvent as ConvertedEvents
+      ).pipe(
+        addRoundCompleteEvent({
+          ...createDeps(),
+          pendingRound: undefined,
+          userInput: { message: 'Hello' },
+          author: { id: 'profile-1', username: 'jane' },
+          startTime: new Date('2026-01-01T00:00:00.000Z'),
+        }),
+        toArray()
+      )
+    );
+
+    const roundCompleteEvent = events.find(isRoundCompleteEvent);
+
+    expect(roundCompleteEvent?.data.round.author).toEqual({ id: 'profile-1', username: 'jane' });
+    expect(roundCompleteEvent?.data.round.origin).toBeUndefined();
   });
 });

@@ -124,4 +124,29 @@ describe('<MitreAttack />', () => {
 
     expect(container).toBeEmptyDOMElement();
   });
+
+  it('should still render when technique contains a null hole', () => {
+    const hit = createMockHit({
+      'kibana.alert.rule.parameters': [
+        {
+          threat: [
+            {
+              framework: 'MITRE ATT&CK',
+              tactic: {
+                id: 'TA0009',
+                name: 'Collection',
+                reference: 'https://attack.mitre.org/tactics/TA0009',
+              },
+              technique: [null],
+            },
+          ],
+        },
+      ],
+    });
+
+    const { getByTestId } = renderMitreAttack(hit);
+
+    expect(getByTestId(MITRE_ATTACK_TITLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(MITRE_ATTACK_DETAILS_TEST_ID)).toBeInTheDocument();
+  });
 });

@@ -7,7 +7,6 @@
 
 export const spec: Record<string, unknown> = {
   $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
-  title: 'Latency vs Throughput by Host (bubble = error count)',
   autosize: { type: 'fit', contains: 'padding' },
   data: {
     url: {

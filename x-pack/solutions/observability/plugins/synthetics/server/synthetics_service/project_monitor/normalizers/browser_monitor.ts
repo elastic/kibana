@@ -28,6 +28,7 @@ export const getNormalizeBrowserFields = ({
   projectId,
   namespace,
   version,
+  maintenanceWindows,
 }: NormalizedProjectProps): NormalizerResult<BrowserFields> => {
   const defaultFields = DEFAULT_FIELDS[MonitorTypeEnum.BROWSER];
 
@@ -38,6 +39,7 @@ export const getNormalizeBrowserFields = ({
     projectId,
     namespace,
     version,
+    maintenanceWindows,
   });
 
   const throttling = normalizeThrottling(monitor.throttling);

@@ -116,7 +116,9 @@ export const eventAttachmentTransformer: AttachmentTypeTransformer<
     };
   },
   toLegacyPayload(attachment: UnifiedReferenceAttachmentPayload): EventAttachmentPayload {
-    const normalizedIndex = toStringOrStringArray(attachment.metadata?.index);
+    const normalizedIndex = toStringOrStringArray(attachment.metadata?.index, {
+      preserveArray: true,
+    });
     if (normalizedIndex == null) {
       throw new Error(
         'security.event metadata.index is required when transforming unified payload to legacy event attachment'

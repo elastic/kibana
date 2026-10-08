@@ -130,6 +130,29 @@ describe('useEsqlCallbacks', () => {
       expect(params.dataSourcesCache.has(DATA_SOURCES_CACHE_KEY)).toBe(true);
       expect(params.dataSourcesCache.get(DATA_SOURCES_CACHE_KEY)).toBe(cacheEntry);
     });
+
+    it('aborts the in-flight sources request when the editor unmounts', async () => {
+      const params = createDefaultParams();
+
+      let capturedSignal: AbortSignal | undefined;
+      (params.memoizedSources as unknown as jest.Mock).mockImplementation(
+        (_core: unknown, _getLicense: unknown, _enrichSources: unknown, signal?: AbortSignal) => {
+          capturedSignal = signal;
+          return { timestamp: Date.now(), result: new Promise(() => {}) };
+        }
+      );
+
+      const { result, unmount } = renderHook(() => useEsqlCallbacks(params));
+
+      void result.current.getSources!();
+
+      expect(capturedSignal).toBeDefined();
+      expect(capturedSignal!.aborted).toBe(false);
+
+      unmount();
+
+      expect(capturedSignal!.aborted).toBe(true);
+    });
   });
 
   describe('getColumnsFor', () => {

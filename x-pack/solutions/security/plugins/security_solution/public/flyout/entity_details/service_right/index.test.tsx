@@ -66,6 +66,10 @@ jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutState: jest.fn(),
 }));
 
+jest.mock('../../../common/utils/timeline/use_show_timeline', () => ({
+  useShowTimeline: jest.fn(() => [true]),
+}));
+
 describe('ServicePanel', () => {
   beforeEach(() => {
     mockedUseRiskScore.mockReturnValue(mockServiceRiskScoreState);

@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { getFieldValue } from '@kbn/discover-utils';
 import {
   EnhancedAlertEventOverviewLazy,
   EnhancedAlertFlyoutFooterLazy,
@@ -19,7 +20,7 @@ import {
   EnhancedIOCFlyoutHeaderLazy,
   EnhancedIOCOverviewLazy,
 } from './components';
-import { SECURITY_PROFILE_ID } from './constants';
+import { SECURITY_PROFILE_ID, SIGNAL_RULE_NAME_FIELD_NAME } from './constants';
 import { extendProfileProvider } from '../extend_profile_provider';
 import { createSecurityDocumentProfileProvider } from './security_document_profile';
 import type { ProfileProviderServices } from '../profile_provider_services';
@@ -46,6 +47,11 @@ export const createSecurityDocumentProfileProviders = (
           const isEvent = isEventDocument(params.record);
           const isIOC = isIOCDocument(params.record);
           const isAttack = isAttackDocument(params.record);
+
+          const ruleName = isAlert
+            ? (getFieldValue(params.record, SIGNAL_RULE_NAME_FIELD_NAME) as string | undefined)
+            : undefined;
+          const title = ruleName ? i18n.alertFlyoutTitle(ruleName) : prevDocViewer.title;
 
           let renderFooter = prevDocViewer.renderFooter;
           if (isIOC) {
@@ -107,6 +113,7 @@ export const createSecurityDocumentProfileProviders = (
 
           return {
             ...prevDocViewer,
+            title,
             renderHeader,
             docViewsRegistry: (registry) => {
               if (isIOC) {

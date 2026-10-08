@@ -419,6 +419,10 @@ Refer to [Terraform](./guidelines-for-terraform-friendly-http-apis.md#return-as-
 
 If you are in doubt, rather go with stricter validation. Making a requirement more lax if needed is never a breaking change!
 
+**Prefer the built-in string helpers over hand-picked lengths**
+
+`@kbn/config-schema` and `@kbn/zod` ship semantic helpers (`savedObjectId`, `displayName`, `description`, ...) that carry shared default bounds, plus a reporting mode for measuring an existing route before enforcing one. Refer to [Bounded string schemas](../../key-concepts/security/bounded-string-schemas.md).
+
 ### Headers
 
 **Should not be used to specify behavior**
@@ -649,7 +653,7 @@ Every public API should have a release tag specified at the top of its documenta
 | -----| ------------| ------------- | ------------ |
 | Undocumented | Every public API should be documented, but if it isn't, we make no guarantees about it. These need to be eliminated and should become internal or documented. | | |
 | Experimental | A public API that may break or be removed at any time. | experimental[] | |
-| Beta | A public API that we make a best effort not to break or remove. However, there are no guarantees. | beta[] | |
+| Technical Preview | A public API that we make a best effort not to break or remove. However, there are no guarantees. | tech_preview[] | |
 | Stable | No breaking changes outside of a Major | stable[] | |
 | Deprecated | Do not use, will be removed. | deprecated[] | |
 

@@ -197,4 +197,38 @@ describe(`user activity service`, () => {
       })
     );
   });
+
+  it('reports time range when `timeRestore` is false', async () => {
+    const { api } = buildMockDashboardApi();
+    api.setSettings({ time_restore: false });
+
+    getDashboardUserActivityService(api);
+    api.userActivity$.next({ type: 'refresh', start: 1777676707154 });
+    await new Promise<void>((resolve) => setTimeout(() => resolve(), 10));
+    api.userActivity$.next({ type: 'refresh', end: 1777676707204 });
+
+    await waitFor(() => {
+      expect(coreServices.http.post).toBeCalledWith(
+        expect.stringContaining('/internal/dashboard/user_activity/refresh/'),
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            title: 'My Dashboard',
+            start: 1777676707154,
+            end: 1777676707204,
+            tags: [],
+            meta: {
+              time_range: {
+                from: 'now-15m',
+                to: 'now',
+              },
+              query: { expression: 'hi', language: 'kql' },
+              panel_count: 0,
+              errors: [],
+            },
+          }),
+        }
+      );
+    });
+  });
 });

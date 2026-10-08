@@ -12,6 +12,7 @@ import type { Indicator } from '../../../../../../common/threat_intelligence/typ
 import { IOCRightPanelKey } from '../../../../../flyout/ioc_details/constants/panel_keys';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 import { BUTTON_TEST_ID } from './test_ids';
 import { VIEW_DETAILS_BUTTON_LABEL } from './translations';
 
@@ -32,7 +33,7 @@ export const OpenIndicatorFlyoutButton = memo(({ indicator }: OpenIndicatorFlyou
 
   const open = useCallback(() => {
     if (enableNewFlyout) {
-      openIocFlyout({ indicator });
+      openIocFlyout({ indicator, origin: FLYOUT_ORIGIN.THREAT_INTEL_TABLE });
     } else {
       openFlyout({
         right: {

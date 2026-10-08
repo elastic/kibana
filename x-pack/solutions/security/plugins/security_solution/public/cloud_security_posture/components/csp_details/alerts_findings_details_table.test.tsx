@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
 import { AlertsDetailsTable } from './alerts_findings_details_table';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
@@ -81,7 +81,9 @@ jest.mock('../../../common/hooks/use_navigate_to_alerts_page_with_filters', () =
   useNavigateToAlertsPageWithFilters: jest.fn().mockReturnValue(jest.fn()),
 }));
 
-const renderTable = (onShowAlert: (eventId: string, indexName: string) => void) =>
+const renderTable = (
+  onShowAlert: (eventId: string, indexName: string, ruleName?: string) => void
+) =>
   render(
     <TestProviders>
       <AlertsDetailsTable
@@ -93,9 +95,7 @@ const renderTable = (onShowAlert: (eventId: string, indexName: string) => void) 
   );
 
 const clickRowAction = () => {
-  // The row action is an icon-only button rendered with the `expand` EuiIcon.
-  const expandIcon = document.querySelector('[data-euiicon-type="expand"]');
-  fireEvent.click(expandIcon?.closest('button') as HTMLElement);
+  fireEvent.click(screen.getByTestId('securitySolutionFlyoutAlertsFindingsTableExpandButton'));
 };
 
 describe('AlertsDetailsTable', () => {
@@ -109,7 +109,7 @@ describe('AlertsDetailsTable', () => {
 
     clickRowAction();
 
-    expect(onShowAlert).toHaveBeenCalledWith('alert-1', 'index-1');
+    expect(onShowAlert).toHaveBeenCalledWith('alert-1', 'index-1', 'Rule');
   });
 
   describe('time range', () => {

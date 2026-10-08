@@ -431,4 +431,5 @@ export {
   appendTimeBucketToEsqlQuery,
   buildTrendlineQueryWithMetricFieldMap,
   queryHasStatsCommand,
+  queryHasTsSourceCommand,
 } from './esql/trendline_query';

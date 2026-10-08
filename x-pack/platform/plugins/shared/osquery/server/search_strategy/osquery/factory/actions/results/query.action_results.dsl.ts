@@ -16,7 +16,7 @@ import {
 } from '../../../../../../common/constants';
 import type { ActionResultsRequestOptions } from '../../../../../../common/search_strategy';
 import { getQueryFilter } from '../../../../../utils/build_query';
-import { buildIndexNameWithNamespace } from '../../../../../utils/build_index_name_with_namespace';
+import { buildIndexNamesWithNamespaces } from '../../../../../utils/build_index_name_with_namespace';
 import { buildSpaceIdFilter } from '../../../../../utils/build_space_id_filter';
 import { prefixIndexPatternsWithCcs } from '../../../../../utils/ccs_utils';
 
@@ -32,11 +32,14 @@ export const buildActionResultsQuery = ({
   useNewDataStream,
   integrationNamespaces,
   spaceId,
-}: ActionResultsRequestOptions): ISearchRequestParams => {
-  let filter = `action_id: ${actionId}`;
-  if (!isEmpty(kuery)) {
-    filter = filter + ` AND ${kuery}`;
-  }
+  matchMissingSpaceId,
+  matchActionDataSpaceId,
+  skipSpaceFilter,
+}: ActionResultsRequestOptions & {
+  matchActionDataSpaceId?: boolean;
+  skipSpaceFilter?: boolean;
+}): ISearchRequestParams => {
+  const kueryFilter = kuery ? [getQueryFilter({ filter: kuery })] : [];
 
   const timeRangeFilter: estypes.QueryDslQueryContainer[] =
     startDate && !isEmpty(startDate)
@@ -67,12 +70,35 @@ export const buildActionResultsQuery = ({
         ]
       : [];
 
-  const spaceIdFilter = buildSpaceIdFilter(spaceId) as estypes.QueryDslQueryContainer;
+  // Hit-level scoping is enforced centrally in the search strategy
+  // (enforceSpaceScope). The aggregation below is a separate filter context that
+  // the top-level query does not constrain, so it is scoped explicitly here.
+  //
+  // This read is bound to a single `action_id`, which the caller can only have
+  // learned from a space-stamped, Kibana-written action document. That binding is
+  // the authorization gate that makes honouring the agent-carried
+  // `action_data.space_id` safe here — see buildSpaceIdFilter. The strategy
+  // passes `matchActionDataSpaceId` from ID_BOUND_FACTORY_QUERY_TYPES so this
+  // aggregation cannot drift from the hit filter. Default off: omitting the
+  // flag must not enable the less-trusted field in aggregations only.
+  //
+  // `skipSpaceFilter` means the strategy already found this `action_id` on the
+  // Kibana-written action document in the active space and omitted the hit-level
+  // filter, so the aggregation omits it too and counts match the hits.
+  const spaceIdFilters: estypes.QueryDslQueryContainer[] = skipSpaceFilter
+    ? []
+    : [
+        buildSpaceIdFilter(spaceId, {
+          matchMissingSpaceId: matchMissingSpaceId ?? true,
+          matchActionDataSpaceId: matchActionDataSpaceId ?? false,
+        }),
+      ];
 
   const filterQuery: estypes.QueryDslQueryContainer[] = [
     ...timeRangeFilter,
     ...agentIdsFilter,
-    getQueryFilter({ filter }),
+    { term: { action_id: actionId } },
+    ...kueryFilter,
   ];
 
   let baseIndex: string;
@@ -84,16 +110,10 @@ export const buildActionResultsQuery = ({
     baseIndex = `${AGENT_ACTIONS_RESULTS_INDEX}*`;
   }
 
-  let index: string;
-  if (integrationNamespaces && integrationNamespaces.length > 0) {
-    index = integrationNamespaces
-      .map((namespace) => buildIndexNameWithNamespace(baseIndex, namespace))
-      .join(',');
-  } else {
-    index = baseIndex;
-  }
-
-  index = prefixIndexPatternsWithCcs(index, ccsEnabled ?? false);
+  const index = prefixIndexPatternsWithCcs(
+    buildIndexNamesWithNamespaces(baseIndex, integrationNamespaces),
+    ccsEnabled ?? false
+  );
 
   return {
     allow_no_indices: true,
@@ -108,11 +128,11 @@ export const buildActionResultsQuery = ({
               bool: {
                 must: [
                   {
-                    match: {
+                    term: {
                       action_id: actionId,
                     },
                   },
-                  spaceIdFilter,
+                  ...spaceIdFilters,
                 ],
               },
             },

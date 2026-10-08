@@ -54,6 +54,7 @@ describe('createRuleSmlType', () => {
   let getRule: jest.Mock;
   let getRepoSo: jest.Mock;
   let createFinder: jest.Mock;
+  let getIsAlertingV2Enabled: jest.Mock;
   let repository: ISavedObjectsRepository;
   let rulesClient: RulesClient;
 
@@ -61,6 +62,7 @@ describe('createRuleSmlType', () => {
     getRule = jest.fn();
     getRepoSo = jest.fn();
     createFinder = jest.fn();
+    getIsAlertingV2Enabled = jest.fn().mockResolvedValue(true);
 
     repository = {
       get: getRepoSo,
@@ -74,6 +76,7 @@ describe('createRuleSmlType', () => {
     createRuleSmlType({
       getScopedRulesClient: () => rulesClient,
       getInternalRepository: () => repository,
+      getIsAlertingV2Enabled: () => getIsAlertingV2Enabled(),
     });
 
   describe('id and fetchFrequency', () => {
@@ -167,6 +170,15 @@ describe('createRuleSmlType', () => {
       await expect(drainList()).rejects.toThrow('boom');
       expect(close).toHaveBeenCalledTimes(1);
     });
+
+    it('yields nothing and never touches the repository when alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      const items = await drainList();
+
+      expect(items).toEqual([]);
+      expect(createFinder).not.toHaveBeenCalled();
+    });
   });
 
   describe('getSmlData', () => {
@@ -218,6 +230,15 @@ describe('createRuleSmlType', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining("SML rule: failed to get data for 'rule-missing'")
       );
+    });
+
+    it('returns undefined without reading the saved object when alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      const result = await buildDefinition().getSmlData('rule-1', buildSmlContext());
+
+      expect(result).toBeUndefined();
+      expect(getRepoSo).not.toHaveBeenCalled();
     });
   });
 
@@ -285,6 +306,18 @@ describe('createRuleSmlType', () => {
       );
 
       expect(result).toBeUndefined();
+    });
+
+    it('returns undefined without calling the rules client when alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      const result = await buildDefinition().toAttachment(
+        buildSmlDocument(),
+        buildToAttachmentContext()
+      );
+
+      expect(result).toBeUndefined();
+      expect(getRule).not.toHaveBeenCalled();
     });
   });
 });

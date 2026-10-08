@@ -42,6 +42,15 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
       has_all_required: true,
       has_read_permissions: true,
       has_write_permissions: true,
+      has_install_permissions: true,
+      install_privileges: {
+        elasticsearch: {
+          cluster: {
+            manage_index_templates: true,
+            manage_ingest_pipelines: true,
+          },
+        },
+      },
     });
   });
 
@@ -86,6 +95,7 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
         has_all_required: false,
         has_read_permissions: false,
         has_write_permissions: false,
+        has_install_permissions: false,
       });
     }
   );
@@ -117,6 +127,7 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
         has_all_required: false,
         has_read_permissions: false,
         has_write_permissions: false,
+        has_install_permissions: false,
       });
     }
   );
@@ -153,6 +164,7 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
         has_all_required: false,
         has_read_permissions: true,
         has_write_permissions: false,
+        has_install_permissions: false,
       });
     }
   );
@@ -190,6 +202,7 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
         has_all_required: false,
         has_read_permissions: true,
         has_write_permissions: false,
+        has_install_permissions: false,
       });
     }
   );
@@ -226,6 +239,8 @@ apiTest.describe('Entity Store check privileges API', { tag: ENTITY_STORE_TAGS }
         has_all_required: false,
         has_read_permissions: true,
         has_write_permissions: true,
+        // write-only is not install-eligible (install needs manage + cluster + SO + source).
+        has_install_permissions: false,
       });
     }
   );

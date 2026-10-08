@@ -8,12 +8,15 @@
 import { css } from '@emotion/react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { EventKind } from '../constants/event_kinds';
+import { isRulePreviewDocument } from '../../../shared/utils/is_rule_preview_document';
 import {
   ALERT_DESCRIPTION_DETAILS_TEST_ID,
   ALERT_DESCRIPTION_TITLE_TEST_ID,
@@ -29,20 +32,19 @@ export interface AlertDescriptionProps {
    * Callback to show the rule summary flyout when the "Show rule summary" button is clicked. If not provided, the button won't be rendered.
    */
   onShowRuleSummary?: () => void;
-  /**
-   * Boolean to disable the "Show rule summary" button. This is used when the rule summary is loading or when there's an error loading it.
-   */
-  ruleSummaryDisabled?: boolean;
 }
 
 /**
  * Displays the rule description of a signal document.
  */
-export const AlertDescription: FC<AlertDescriptionProps> = ({
-  hit,
-  onShowRuleSummary,
-  ruleSummaryDisabled,
-}) => {
+export const AlertDescription: FC<AlertDescriptionProps> = ({ hit, onShowRuleSummary }) => {
+  const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
+  const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
+  const isRemoteDocument = useMemo(
+    () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
+    [hit]
+  );
+  const ruleSummaryDisabled = isRulePreview || !canReadRules || isRemoteDocument;
   const isAlert = useMemo(
     () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
     [hit]

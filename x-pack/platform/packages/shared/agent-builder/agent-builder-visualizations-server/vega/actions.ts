@@ -21,6 +21,8 @@ export interface AuthorSpecAction {
   success: boolean;
   /** Raw spec object parsed from the model response; shape is validated later. */
   spec?: Record<string, unknown>;
+  /** Panel / visualization title from the authoring response schema. */
+  title?: string;
   attempt: number;
   error?: string;
 }
@@ -31,9 +33,10 @@ export interface ValidateSpecAction {
   success: boolean;
   /** The finalized, render-ready spec serialized as the string the embeddable expects. */
   spec?: string;
+  /** Panel / visualization title carried through from the matching authoring attempt. */
+  title?: string;
   attempt: number;
   error?: string;
-  warnings?: string[];
 }
 
 export type VegaAction = GenerateEsqlAction | AuthorSpecAction | ValidateSpecAction;

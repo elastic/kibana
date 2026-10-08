@@ -31,6 +31,7 @@ import {
   setDocLinks,
   setMapsEms,
   setUsageCollectionStart,
+  setHttp,
 } from './services';
 
 import type { IServiceSettings } from './vega_view/vega_map_view/service_settings/service_settings_types';
@@ -107,6 +108,7 @@ export class VegaPlugin implements Plugin<void, void> {
 
   public start(core: CoreStart, deps: VegaPluginStartDependencies) {
     setNotifications(core.notifications);
+    setHttp(core.http);
     setData(deps.data);
     setDataViews(deps.dataViews);
     setDocLinks(core.docLinks);

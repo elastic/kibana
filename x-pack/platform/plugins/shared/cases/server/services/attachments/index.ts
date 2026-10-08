@@ -18,7 +18,7 @@ import type {
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
-import { fromKueryExpression } from '@kbn/es-query';
+import { fromKueryExpression, isNonLocalIndexName } from '@kbn/es-query';
 import { AttachmentType } from '../../../common/types/domain';
 import {
   UNIFIED_ALERT_TYPES_ARRAY,
@@ -47,7 +47,7 @@ import {
   resolveAttachmentSavedObjectTypes,
 } from '../../common/attachments';
 import { buildFilter, combineFilters } from '../../client/utils';
-import { defaultSortField } from '../../common/utils';
+import { defaultSortField, getIDsAndIndicesAsArrays } from '../../common/utils';
 import type { AggregationResponse } from '../../client/metrics/types';
 import {
   extractAttachmentSORefsFromAttributes,
@@ -168,17 +168,35 @@ export class AttachmentService {
    *
    * Used by the case metrics handler to display the alert count to the user.
    */
-  public async countAlertsAttachedToCase(
-    params: AlertsAttachedToCaseArgs
-  ): Promise<number | undefined> {
-    const { caseId, filter: authorizationFilter } = params;
+  public async countAlertsAttachedToCase({
+    caseId,
+    filter: authorizationFilter,
+    owner,
+    originOnly = true,
+  }: AlertsAttachedToCaseArgs): Promise<number | undefined> {
     try {
       this.context.log.debug(`Attempting to count alerts for case id ${caseId}`);
-      return this.aggregateAlertsForCase({
+
+      const documents = await this.getter.getAllDocumentsAttachedToCase({
         caseId,
-        aggType: 'cardinality',
-        extraFilter: authorizationFilter,
+        filter: authorizationFilter,
+        attachmentTypes: [AttachmentType.alert],
+        owner,
       });
+
+      const alertIds = new Set<string>();
+      for (const document of documents) {
+        const { ids, indices } = getIDsAndIndicesAsArrays(document.attributes);
+
+        ids.forEach((id, index) => {
+          const alertIndex = indices[index];
+          if (!originOnly || alertIndex == null || !isNonLocalIndexName(alertIndex)) {
+            alertIds.add(id);
+          }
+        });
+      }
+
+      return alertIds.size;
     } catch (error) {
       this.context.log.error(`Error while counting alerts for case id ${caseId}: ${error}`);
       throw error;
@@ -196,7 +214,7 @@ export class AttachmentService {
       this.context.log.debug(
         `Attempting to count all alerts (legacy + unified) for case ${caseId}`
       );
-      return this.aggregateAlertsForCase({ caseId, aggType: 'value_count' });
+      return this.aggregateAlertsForCase(caseId);
     } catch (error) {
       this.context.log.error(`Error while counting alerts for case ${caseId}: ${error}`);
       throw error;
@@ -204,21 +222,10 @@ export class AttachmentService {
   }
 
   /**
-   * Shared aggregation across legacy (`cases-comments.attributes.alertId`) and
-   * unified (`cases-attachments.attributes.attachmentId`) alert storage.
-   *
-   * @param aggType `'cardinality'` for unique alert ids, `'value_count'` for occurrences.
-   * @param extraFilter additional KueryNode (e.g. authorization) AND-combined onto the type filter.
+   * Aggregates alert occurrence counts across legacy (`cases-comments.attributes.alertId`)
+   * and unified (`cases-attachments.attributes.attachmentId`) alert storage.
    */
-  private async aggregateAlertsForCase({
-    caseId,
-    aggType,
-    extraFilter,
-  }: {
-    caseId: string;
-    aggType: 'cardinality' | 'value_count';
-    extraFilter?: KueryNode;
-  }): Promise<number> {
+  private async aggregateAlertsForCase(caseId: string): Promise<number> {
     const typeFilters: Array<KueryNode | undefined> = [
       buildFilter({
         filters: [AttachmentType.alert],
@@ -236,15 +243,14 @@ export class AttachmentService {
 
     const aggregations: Record<string, estypes.AggregationsAggregationContainer> = {
       legacyAlerts: {
-        [aggType]: { field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId` },
+        value_count: { field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId` },
       },
       unifiedAlerts: {
-        [aggType]: { field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.attachmentId` },
+        value_count: { field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.attachmentId` },
       },
     };
 
-    const combinedTypeFilter = combineFilters(typeFilters, 'or');
-    const combinedFilter = combineFilters([combinedTypeFilter, extraFilter]);
+    const combinedFilter = combineFilters(typeFilters, 'or');
 
     const response = await this.context.unsecuredSavedObjectsClient.find<
       unknown,
@@ -353,8 +359,17 @@ export class AttachmentService {
       const unifiedTypesToCount = [
         ...PERSISTABLE_ATTACHMENT_TYPES_ARRAY,
         SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+        // Custom externalReference/persistableState subtypes with no unified
+        // mapping (e.g. FTR `.test` types) are still written to
+        // `cases-attachments` but keep their legacy `type`, so count those too.
+        AttachmentType.persistableState,
+        AttachmentType.externalReference,
       ];
-      const unifiedTypeFilter = buildFilter({
+      // Files are stored with the migrated unified `file` type (not the legacy
+      // `.files` externalReference subtype), so excluding `file` from the type
+      // list is enough — no subtype filter needed. `externalReferenceAttachmentTypeId`
+      // isn't mapped on `cases-attachments`, so filtering on it would 400.
+      const unifiedFilter = buildFilter({
         filters: unifiedTypesToCount,
         field: 'type',
         operator: 'or',
@@ -369,7 +384,7 @@ export class AttachmentService {
         page: 1,
         perPage: 1,
         sortField: defaultSortField,
-        filter: unifiedTypeFilter,
+        filter: unifiedFilter,
       });
 
       const [legacyResponse, unifiedResponse] = await Promise.all([
@@ -683,12 +698,26 @@ export class AttachmentService {
       if (soType === CASE_ATTACHMENT_SAVED_OBJECT) {
         const unifiedAttributes = transformer.toUnifiedSchema(decodedAttributes);
 
+        // Mirror `attachmentId` into references for SO-backed unified attachments
+        // (e.g. files) so a patch doesn't drop the dependency and blank out
+        // `attachmentId` on the next read. Matches the unified `create` path.
+        const {
+          attributes: extractedAttributes,
+          references: extractedReferences,
+          didDeleteOperation,
+        } = extractAttachmentSORefsFromAttributes(unifiedAttributes, options?.references ?? []);
+
+        // Same guard as the legacy branch: only overwrite references when we
+        // actually have some, otherwise a partial patch would wipe the existing
+        // (e.g. case) references.
+        const shouldUpdateRefs = extractedReferences.length > 0 || didDeleteOperation;
+
         const res =
           await this.context.unsecuredSavedObjectsClient.update<UnifiedAttachmentAttributes>(
             CASE_ATTACHMENT_SAVED_OBJECT,
             savedObjectId,
-            unifiedAttributes,
-            { ...options }
+            extractedAttributes as UnifiedAttachmentAttributes,
+            { ...options, references: shouldUpdateRefs ? extractedReferences : undefined }
           );
         // analyticsV2 mirror via a full re-read — see `mirrorUpdatedAttachments`.
         // Mirroring the partial `update` response directly would drop the

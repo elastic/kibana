@@ -316,6 +316,7 @@ export class WorkflowContextManager {
         coreStart: this.coreStart,
         cloudSetup: this.dependencies.cloudSetup,
         workflowRunId: this.workflowExecutionState.getWorkflowExecution().id,
+        spaceId: this.getWorkflowSpaceId(),
       },
       params
     );
@@ -512,6 +513,11 @@ export class WorkflowContextManager {
       stepContext.workflow = {
         ...stepContext.workflow,
         ...(contextOverride.workflow || {}),
+      };
+
+      stepContext.variables = {
+        ...stepContext.variables,
+        ...(contextOverride.variables || {}),
       };
 
       if (!stepContext.foreach) {

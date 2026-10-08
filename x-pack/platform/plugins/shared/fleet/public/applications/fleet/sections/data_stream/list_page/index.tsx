@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate, FormattedTime } from '@kbn/i18n-react';
 
 import type { DataStream } from '../../../types';
-import { useGetDataStreams, usePagination, useBreadcrumbs } from '../../../hooks';
+import { useGetDataStreams, usePagination, useBreadcrumbs, useStartServices } from '../../../hooks';
 import { useGetDeprecatedILMCheckQuery } from '../../../../../hooks/use_request/data_stream';
 import { PackageIcon } from '../../../components';
 
@@ -30,6 +30,7 @@ import { DataStreamRowActions } from './components/data_stream_row_actions';
 
 export const DataStreamListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('data_streams');
+  const { docLinks } = useStartServices();
 
   const { pagination, pageSizeOptions } = usePagination();
 
@@ -230,7 +231,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
                       .join(', '),
                     learnMoreLink: (
                       <EuiLink
-                        href="https://www.elastic.co/docs/manage-data/lifecycle/index-lifecycle-management/tutorial-customize-built-in-policies"
+                        href={docLinks.links.management.ilmCustomizeBuiltInPolicies}
                         target="_blank"
                         external
                       >

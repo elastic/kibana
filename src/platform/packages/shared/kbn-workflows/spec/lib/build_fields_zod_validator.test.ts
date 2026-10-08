@@ -66,6 +66,18 @@ describe('convertJsonSchemaToZod', () => {
     expect(zodSchema).toBeDefined();
   });
 
+  it('should preserve and validate schema-valued additional properties', () => {
+    const jsonSchema: JSONSchema7 = {
+      type: 'object',
+      properties: { name: { type: 'string' } },
+      additionalProperties: { type: 'number' },
+    };
+    const zodSchema = convertJsonSchemaToZod(jsonSchema);
+
+    expect(zodSchema.safeParse({ name: 'Alice', extra: 42 }).success).toBe(true);
+    expect(zodSchema.safeParse({ name: 'Alice', extra: 'not a number' }).success).toBe(false);
+  });
+
   it('should convert a nested object schema to Zod', () => {
     const jsonSchema: JSONSchema7 = {
       type: 'object',

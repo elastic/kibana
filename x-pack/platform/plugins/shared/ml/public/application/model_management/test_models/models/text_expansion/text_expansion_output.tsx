@@ -159,6 +159,10 @@ export const DocumentResultWithTokens: FC<{
             </EuiCallOut>
             <EuiSpacer size="s" />
             <EuiInMemoryTable
+              tableCaption={i18n.translate(
+                'xpack.ml.trainedModels.testModelsFlyout.textExpansion.tableCaption',
+                { defaultMessage: 'Text expansion results' }
+              )}
               items={tokens}
               columns={[
                 {

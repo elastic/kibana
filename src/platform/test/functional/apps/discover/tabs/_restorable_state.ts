@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should restore sidebar filters', async function () {
-        const initialCount = 48;
+        const initialCount = 49;
         const expectState = async (state: number) => {
           expect(await unifiedFieldList.getSidebarSectionFieldCount('available')).to.be(state);
         };
@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await expectState(initialCount);
         await unifiedFieldList.findFieldByName('i');
         await retry.try(async () => {
-          await expectState(28);
+          await expectState(29);
         });
 
         await unifiedTabs.createNewTab();
@@ -95,13 +95,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await expectState(initialCount);
         await unifiedFieldList.findFieldByName('e');
         await retry.try(async () => {
-          await expectState(42);
+          await expectState(43);
         });
         await unifiedFieldList.openSidebarFieldFilter();
         await testSubjects.click('typeFilter-number');
         await unifiedFieldList.closeSidebarFieldFilter();
         await retry.try(async () => {
-          await expectState(4);
+          await expectState(5);
         });
 
         await unifiedTabs.selectTab(0);
@@ -110,11 +110,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await unifiedTabs.selectTab(1);
         await discover.waitUntilTabIsLoaded();
-        await expectState(28);
+        await expectState(29);
 
         await unifiedTabs.selectTab(2);
         await discover.waitUntilTabIsLoaded();
-        await expectState(4);
+        await expectState(5);
 
         await unifiedFieldList.clearFieldSearchInput();
         await unifiedFieldList.clearSidebarFieldFilters();
@@ -127,7 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('sidebar existing fields', function () {
       it('should not fetch existing fields again when returning', async function () {
         const expectState = async () => {
-          await unifiedFieldList.waitUntilFieldlistHasCountOfFields(48);
+          await unifiedFieldList.waitUntilFieldlistHasCountOfFields(49);
         };
         await expectState();
 
@@ -153,8 +153,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should refetch when returning to an edited data view', async function () {
-        const initialCount = 48;
-        const countAfterEditing = 49;
+        const initialCount = 49;
+        const countAfterEditing = 50;
         const expectState = async (state: number) => {
           await unifiedFieldList.waitUntilSidebarHasLoaded();
           await unifiedFieldList.waitUntilFieldlistHasCountOfFields(state);

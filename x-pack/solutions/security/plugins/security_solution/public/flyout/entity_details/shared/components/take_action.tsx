@@ -14,8 +14,10 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../../../common/utils/normalize_time_range';
+import { useShowTimeline } from '../../../../common/utils/timeline/use_show_timeline';
 
 interface TakeActionProps {
   kqlQuery: string;
@@ -38,6 +40,8 @@ export const TakeAction = ({ kqlQuery, isDisabled, additionalItems }: TakeAction
     setPopoverOpen(false);
   }, []);
 
+  const [showTimeline] = useShowTimeline();
+
   const last30MinRange = normalizeTimeRange({
     kind: 'absolute',
     from: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes in milliseconds
@@ -45,6 +49,7 @@ export const TakeAction = ({ kqlQuery, isDisabled, additionalItems }: TakeAction
   });
 
   const { investigateInTimeline } = useInvestigateInTimeline();
+  const { closeFlyout } = useExpandableFlyoutApi();
   const openTimelineCallback = useCallback(async () => {
     investigateInTimeline({
       timeRange: {
@@ -58,7 +63,11 @@ export const TakeAction = ({ kqlQuery, isDisabled, additionalItems }: TakeAction
         query: kqlQuery,
       },
     });
-  }, [kqlQuery, last30MinRange, investigateInTimeline]);
+    // Timeline opens as a full-screen overlay, but the entity flyout renders on a
+    // higher z-index and would otherwise stay visible on top of it (see issue #277997).
+    // Close the flyout so Timeline takes over, mirroring the document details flyout.
+    closeFlyout();
+  }, [kqlQuery, last30MinRange, investigateInTimeline, closeFlyout]);
 
   const smallContextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'smallContextMenuPopover',
@@ -80,14 +89,22 @@ export const TakeAction = ({ kqlQuery, isDisabled, additionalItems }: TakeAction
     </EuiButton>
   );
   const actionsItems = [
-    <InvestigateInTimeline
-      key="investigateInTimeline"
-      investigateInTimelineFn={openTimelineCallback}
-      setIsLoading={setIsLoading}
-      closePopover={closePopover}
-    />,
+    ...(showTimeline
+      ? [
+          <InvestigateInTimeline
+            key="investigateInTimeline"
+            investigateInTimelineFn={openTimelineCallback}
+            setIsLoading={setIsLoading}
+            closePopover={closePopover}
+          />,
+        ]
+      : []),
     ...(additionalItems?.(closePopover) ?? []),
   ];
+
+  if (actionsItems.length === 0) {
+    return null;
+  }
 
   return (
     <EuiPopover

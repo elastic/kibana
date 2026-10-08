@@ -34,6 +34,7 @@ jest.mock('../../../../../../hooks', () => ({
 jest.mock('../../../../../../../../hooks', () => ({
   ...jest.requireActual('../../../../../../../../hooks'),
   sendGetAgents: jest.fn(),
+  sendGetPackageInfoByKeyForRq: jest.fn().mockResolvedValue({ data: undefined, error: null }),
 }));
 
 const mockUseLocation = useLocation as jest.MockedFunction<typeof useLocation>;
@@ -212,6 +213,8 @@ describe('AgentlessPackagePoliciesTable', () => {
     jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
       ...allowedExperimentalValues,
       enableAgentlessPoliciesUI: false,
+      // disableAgentlessLegacyAPI forces the UI on, so it must be off to exercise the disabled path.
+      disableAgentlessLegacyAPI: false,
     });
     const renderer = createIntegrationsTestRendererMock();
     const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
@@ -230,25 +233,70 @@ describe('AgentlessPackagePoliciesTable', () => {
     await waitFor(() => {
       expect(mockSendGetAgents).toHaveBeenCalledWith({
         perPage: 10000,
-        kuery: `${AGENTS_PREFIX}.policy_id: "policy1"`,
+        kuery: `(${AGENTS_PREFIX}.policy_base_id:(policy1) or (${AGENTS_PREFIX}.policy_id:(policy1) and not ${AGENTS_PREFIX}.policy_base_id:*))`,
       });
     });
     expect(await result.findByText('Healthy')).toBeInTheDocument();
   });
 
-  it('opens flyout when status badge is clicked', async () => {
+  it('opens the enrollment flyout when status badge is clicked', async () => {
     const renderer = createIntegrationsTestRendererMock();
     const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
     await waitFor(() => {
       expect(mockSendGetAgents).toHaveBeenCalledWith({
         perPage: 10000,
-        kuery: `${AGENTS_PREFIX}.policy_id: "policy1"`,
+        kuery: `(${AGENTS_PREFIX}.policy_base_id:(policy1) or (${AGENTS_PREFIX}.policy_id:(policy1) and not ${AGENTS_PREFIX}.policy_base_id:*))`,
       });
     });
     await act(async () => {
       fireEvent.click(await result.findByText('Healthy'));
     });
     expect(result.getByText('Confirm managed integration enrollment')).toBeInTheDocument();
+    expect(result.queryByTestId('agentlessStatusDetailsFlyout')).not.toBeInTheDocument();
+  });
+
+  describe('Details row action', () => {
+    const agentlessProps = {
+      ...defaultProps,
+      packagePolicies: [
+        {
+          ...defaultProps.packagePolicies[0],
+          packagePolicy: {
+            ...defaultProps.packagePolicies[0].packagePolicy,
+            supports_agentless: true,
+          },
+        },
+      ],
+    };
+
+    it('is enabled and opens the status details flyout when an agent is enrolled', async () => {
+      const renderer = createIntegrationsTestRendererMock();
+      const result = renderer.render(<AgentlessPackagePoliciesTable {...agentlessProps} />);
+      await result.findByText('Healthy');
+      await act(async () => {
+        fireEvent.click(result.getByLabelText('Actions for Package Policy 1'));
+      });
+      const details = await result.findByTestId('PackagePolicyActionsDetailsItem');
+      expect(details).toBeEnabled();
+      await act(async () => {
+        fireEvent.click(details);
+      });
+      expect(await result.findByTestId('agentlessStatusDetailsFlyout')).toBeInTheDocument();
+    });
+
+    it('is disabled when no agent is enrolled', async () => {
+      mockSendGetAgents.mockResolvedValue({
+        data: { items: [], total: 0, page: 1, perPage: 10000 },
+        error: null,
+      });
+      const renderer = createIntegrationsTestRendererMock();
+      const result = renderer.render(<AgentlessPackagePoliciesTable {...agentlessProps} />);
+      await result.findByText('Pending');
+      await act(async () => {
+        fireEvent.click(result.getByLabelText('Actions for Package Policy 1'));
+      });
+      expect(await result.findByTestId('PackagePolicyActionsDetailsItem')).toBeDisabled();
+    });
   });
 
   it('opens flyout when openEnrollmentFlyout query param matches a package policy id', async () => {
@@ -263,6 +311,35 @@ describe('AgentlessPackagePoliciesTable', () => {
     await waitFor(() => {
       expect(result.getByText('Confirm managed integration enrollment')).toBeInTheDocument();
     });
+  });
+
+  it('displays agent health status when agent has a version-specific variant policy_id', async () => {
+    // Simulate an agent whose .fleet-agents doc has policy_id: 'policy1#9.2' (suffix from the
+    // version-specific assignment task). The result map must key by the stripped base id so the
+    // lookup by agentPolicy.id ('policy1') still resolves correctly.
+    mockSendGetAgents.mockResolvedValueOnce({
+      data: {
+        items: [
+          {
+            policy_id: 'policy1#9.2',
+            id: 'agent-variant',
+            packages: ['package'],
+            type: 'PERMANENT',
+            active: true,
+            enrolled_at: '2023-01-01T00:00:00Z',
+            local_metadata: {},
+            status: 'online',
+          },
+        ],
+        total: 1,
+        page: 1,
+        perPage: 10000,
+      },
+      error: null,
+    });
+    const renderer = createIntegrationsTestRendererMock();
+    const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
+    expect(await result.findByText('Healthy')).toBeInTheDocument();
   });
 
   it('does not open flyout when openEnrollmentFlyout query param does not match any policy', async () => {

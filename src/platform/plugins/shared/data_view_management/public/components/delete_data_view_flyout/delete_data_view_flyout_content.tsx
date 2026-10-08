@@ -24,8 +24,10 @@ import type { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/p
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState, type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { RemoveDataViewProps } from '../edit_index_pattern';
 import { MAX_DISPLAYED_RELATIONSHIPS } from '../../constants';
+import type { IndexPatternManagmentContext } from '../../types';
 
 const all = i18n.translate('indexPatternManagement.dataViewTable.spaceCountAll', {
   defaultMessage: 'all',
@@ -84,6 +86,8 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
   reviewedItems,
   setReviewedItems,
 }) => {
+  const { http } = useKibana<IndexPatternManagmentContext>().services;
+
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
@@ -103,7 +107,7 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
           }),
           render: (meta: SavedObjectRelation['meta']) => {
             return meta.inAppUrl ? (
-              <EuiLink target="_blank" href={meta.inAppUrl.path}>
+              <EuiLink target="_blank" href={http.basePath.prepend(meta.inAppUrl.path)}>
                 {meta.title}
               </EuiLink>
             ) : (

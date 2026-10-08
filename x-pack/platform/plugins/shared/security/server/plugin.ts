@@ -271,6 +271,7 @@ export class SecurityPlugin
       config: config.audit,
       logging: core.logging,
       http: core.http,
+      status: core.status,
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request),
       getSID: (request) => this.getSession().getSID(request),
       getCurrentUser,
@@ -491,6 +492,7 @@ export class SecurityPlugin
       },
       userProfiles: {
         getCurrent: this.userProfileStart.getCurrent,
+        getCurrentProfileId: this.userProfileStart.getCurrentProfileId,
         bulkGet: this.userProfileStart.bulkGet,
         suggest: this.userProfileStart.suggest,
       },

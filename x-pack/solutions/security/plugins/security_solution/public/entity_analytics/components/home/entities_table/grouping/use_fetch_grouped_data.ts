@@ -129,9 +129,12 @@ export const useFetchGroupedData = ({
         })
       );
 
-      if (!aggregations) throw new Error('Failed to aggregate by, missing resource id');
-
-      return aggregations;
+      // A successful search against a missing/empty index (e.g. the entity store has been
+      // cleared or was never installed) comes back with no `aggregations`. Treat that as
+      // "no groups" so the grouped view degrades to the empty state — matching the
+      // non-grouped table — instead of throwing, which surfaced an error toast and left the
+      // group list stuck in its loading placeholder.
+      return aggregations ?? {};
     },
     {
       onError: (err: Error) => showErrorToast(toasts, err),

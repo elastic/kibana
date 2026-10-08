@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import { applySpacePrefix } from '@kbn/workflows';
 import {
   getOutboundEventChainHeaders,
   KibanaApiCallError,
@@ -54,7 +56,11 @@ export class CallKibanaApiResponseTooLargeError extends Error {
  */
 export interface CallKibanaApiParams {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  /** Route path starting with `/`, e.g. `/api/cases`. Space prefix is added automatically. */
+  /**
+   * Space-relative route path starting with `/`, e.g. `/api/cases`. When `deps.spaceId`
+   * is a non-default space, it is prefixed with `/s/{spaceId}` automatically; pass the
+   * path without a space segment.
+   */
   path: string;
   body?: unknown;
   query?: Record<string, string | number | boolean | undefined>;
@@ -82,6 +88,11 @@ export interface CallKibanaApiDeps {
   coreStart: CoreStart;
   cloudSetup?: CloudSetup;
   /**
+   * Space the workflow is running in. When set to a non-default space, the request path is
+   * prefixed with `/s/{spaceId}`. When omitted or `'default'`, the path is used as-is.
+   */
+  spaceId?: string;
+  /**
    * Cap on the size of the response body in bytes. `0` disables the limit. When omitted,
    * `DEFAULT_MAX_RESPONSE_BYTES` is used.
    */
@@ -100,6 +111,7 @@ export interface CallKibanaApiDeps {
  * under the engine's control.
  */
 const RESERVED_HEADER_NAMES = new Set([
+  ALERTING_CLONE_API_KEY_HEADER,
   'authorization',
   'content-type',
   'kbn-xsrf',
@@ -228,11 +240,12 @@ export async function callKibanaApi<T = unknown>(
   deps: CallKibanaApiDeps,
   params: CallKibanaApiParams
 ): Promise<CallKibanaApiResult<T>> {
-  const { fakeRequest, workflowRunId, coreStart, cloudSetup, baseUrlOverride } = deps;
+  const { fakeRequest, workflowRunId, coreStart, cloudSetup, baseUrlOverride, spaceId } = deps;
   const maxResponseBytes = deps.maxResponseBytes ?? DEFAULT_MAX_RESPONSE_BYTES;
 
   const baseUrl = baseUrlOverride ?? getKibanaUrl(coreStart, cloudSetup);
-  const url = `${baseUrl}${params.path}${buildQueryString(params.query)}`;
+  const path = applySpacePrefix(params.path, spaceId);
+  const url = `${baseUrl}${path}${buildQueryString(params.query)}`;
 
   const callerHeaders = stripReservedHeaders(params.headers);
   const outboundHeaders: Record<string, string> = {
@@ -242,6 +255,11 @@ export async function callKibanaApi<T = unknown>(
     'kbn-xsrf': 'true',
     [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana',
     ...getOutboundEventChainHeaders(fakeRequest, workflowRunId),
+    // Our API key dies after the workflow run (Task Manager revokes it). This header tells alerting
+    // to give any rule it creates or enables its own key instead of keeping ours.
+    // Only alerting reads this header. Other routes ignore it, so it is safe to send on every call.
+    // See: https://github.com/elastic/kibana/pull/291318
+    [ALERTING_CLONE_API_KEY_HEADER]: 'true',
   };
 
   const requestInit: RequestInit = {

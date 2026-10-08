@@ -14,4 +14,4 @@ export {
   timeRangeToDisplayText,
   timeRangeToFullFormattedText,
 } from './format_time_range';
-export type { TimeRangeTransformOptions } from '../types';
+export type { TimeRangeFormatOptions, TimeRangeTransformOptions } from '../types';

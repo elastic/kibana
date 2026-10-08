@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
         await apis.enable({ id: createdSchedule.id });
 
         // Check that schedule is enabled
-        checkIfScheduleEnabled({ getService, id: createdSchedule.id });
+        await checkIfScheduleEnabled({ getService, id: createdSchedule.id });
       });
     });
 

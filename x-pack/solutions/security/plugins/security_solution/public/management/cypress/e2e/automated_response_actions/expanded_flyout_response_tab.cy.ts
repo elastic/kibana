@@ -6,6 +6,7 @@
  */
 
 import { waitForEndpointListPageToBeLoaded } from '../../tasks/response_console';
+import { disableNewFlyout } from '../../tasks/kibana_advanced_settings';
 import { getWithResponseActionsRole } from '../../../../../scripts/endpoint/common/roles_users';
 import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 import { login } from '../../tasks/login';
@@ -107,6 +108,7 @@ describe(
     });
 
     beforeEach(() => {
+      disableNewFlyout();
       loginWithoutResponseActionsHistory();
     });
 

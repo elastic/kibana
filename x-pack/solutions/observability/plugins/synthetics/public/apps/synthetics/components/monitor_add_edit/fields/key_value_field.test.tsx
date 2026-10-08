@@ -42,6 +42,45 @@ describe('<KeyValuePairsField />', () => {
     expect(getByText('Add pair')).toBeInTheDocument();
   });
 
+  it('uses the default labels as the accessible names of the inputs', () => {
+    const { getByTestId } = render(<WrappedComponent />);
+
+    expect(getByTestId('keyValuePairsKey0')).toHaveAccessibleName('Key');
+    expect(getByTestId('keyValuePairsValue0')).toHaveAccessibleName('Value');
+  });
+
+  it('uses the custom labels as the accessible names of the inputs', () => {
+    const { getByTestId, getByText } = render(
+      <KeyValuePairsField
+        defaultPairs={defaultDefaultValue}
+        onChange={onChange}
+        addPairControlLabel="Add pair"
+        keyLabel="Field"
+        valueLabel="Expression"
+      />
+    );
+
+    expect(getByText('Field')).toBeInTheDocument();
+    expect(getByText('Expression')).toBeInTheDocument();
+    expect(getByTestId('keyValuePairsKey0')).toHaveAccessibleName('Field');
+    expect(getByTestId('keyValuePairsValue0')).toHaveAccessibleName('Expression');
+  });
+
+  it('uses element labels as the accessible names of the inputs', () => {
+    const { getByTestId } = render(
+      <KeyValuePairsField
+        defaultPairs={defaultDefaultValue}
+        onChange={onChange}
+        addPairControlLabel="Add pair"
+        keyLabel={<span>Field</span>}
+        valueLabel={<span>Expression</span>}
+      />
+    );
+
+    expect(getByTestId('keyValuePairsKey0')).toHaveAccessibleName('Field');
+    expect(getByTestId('keyValuePairsValue0')).toHaveAccessibleName('Expression');
+  });
+
   it('calls onBlur', async () => {
     const { getByText, getByTestId } = render(<WrappedComponent />);
     const addPair = getByText('Add pair');

@@ -280,7 +280,7 @@ describe('Bucket Operation Schemas', () => {
       });
     });
 
-    it('enforces granularity limits', () => {
+    it('enforces the minimum granularity but leaves the ceiling to the runtime', () => {
       expect(() =>
         bucketHistogramOperationSchema.validate({
           operation: 'histogram',
@@ -289,13 +289,15 @@ describe('Bucket Operation Schemas', () => {
         })
       ).toThrow();
 
-      expect(() =>
-        bucketHistogramOperationSchema.validate({
-          operation: 'histogram',
-          field: 'price',
-          granularity: 8,
-        })
-      ).toThrow();
+      // No upper bound is enforced: the real ceiling is the deployment-configurable
+      // `histogram:maxBars` advanced setting, so large values are accepted here and
+      // clamped at render time rather than rejected during validation.
+      const aboveDefaultCeiling = bucketHistogramOperationSchema.validate({
+        operation: 'histogram',
+        field: 'price',
+        granularity: 5000,
+      });
+      expect(aboveDefaultCeiling.granularity).toBe(5000);
     });
   });
 

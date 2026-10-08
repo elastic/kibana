@@ -19,6 +19,11 @@ interface ExternalIncident {
 
 interface GetMenuArgs {
   permissions: CasesPermissions;
+  /**
+   * Whether the current solution enables any case setting (alert syncing, observable extraction, or
+   * metrics). When false the settings popover would be empty, so the button is omitted entirely.
+   */
+  hasCaseSettings: boolean;
   caseId: string;
   currentExternalIncident: ExternalIncident | null;
   chat: { addToChat: () => void; summarizeCase: () => void; isAddToChatAvailable: boolean };
@@ -30,6 +35,7 @@ interface GetMenuArgs {
 
 export const getMenu = ({
   permissions,
+  hasCaseSettings,
   caseId,
   chat,
   currentExternalIncident,
@@ -47,7 +53,7 @@ export const getMenu = ({
       testId: 'case-refresh',
       order: 100,
     },
-    ...(permissions.update
+    ...(permissions.update && hasCaseSettings
       ? [
           {
             id: 'caseSettings',

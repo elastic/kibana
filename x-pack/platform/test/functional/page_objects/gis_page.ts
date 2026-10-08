@@ -234,16 +234,12 @@ export class GisPageObject extends FtrService {
 
   async onMapListingPage() {
     this.log.debug(`onMapListingPage`);
-    return await this.testSubjects.exists('mapLandingPage', {
-      timeout: 5000,
-    });
+    return await this.testSubjects.exists('mapLandingPage');
   }
 
   async onMapPage() {
     this.log.debug(`onMapPage`);
-    return await this.testSubjects.exists('mapLayerTOC', {
-      timeout: 5000,
-    });
+    return await this.testSubjects.exists('mapLayerTOC');
   }
 
   async searchForMapWithName(name: string) {
@@ -328,7 +324,9 @@ export class GisPageObject extends FtrService {
   // Please keep in mind when udpating, removing or adding to this method
   // upgrade needs to be tested too
   async clearLegendTooltip() {
-    const isTooltipOpen = await this.testSubjects.exists(`layerTocTooltip`, { timeout: 5000 });
+    // The tooltip renders instantly when present, so use a short timeout: this is an
+    // absence probe called many times per hook, and a long timeout burns hook budget.
+    const isTooltipOpen = await this.testSubjects.exists(`layerTocTooltip`);
     if (isTooltipOpen) {
       await this.testSubjects.click(`layerTocTooltip`);
       // Wait for tooltip to go away
@@ -395,7 +393,7 @@ export class GisPageObject extends FtrService {
     const escapedDisplayName = escapeLayerName(layerName);
     await this.retry.try(async () => {
       await this.testSubjects.moveMouseTo(`layerTocActionsPanelToggleButton${escapedDisplayName}`);
-      const isOpen = await this.testSubjects.exists(`layerTocTooltip`, { timeout: 5000 });
+      const isOpen = await this.testSubjects.waitForExists(`layerTocTooltip`);
       if (!isOpen) {
         throw new Error('layer TOC tooltip not open');
       }

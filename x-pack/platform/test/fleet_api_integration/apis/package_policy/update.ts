@@ -748,7 +748,7 @@ export default function (providerContext: FtrProviderContext) {
         const {
           body: { item },
         } = await supertest
-          .put(`/api/fleet/package_policies/${packagePolicyId}?format=simplified`)
+          .put(`/api/fleet/package_policies/${packagePolicyId3}?format=simplified`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: `update-simplified-package-policy-with_required_variables-${Date.now()}`,
@@ -778,7 +778,7 @@ export default function (providerContext: FtrProviderContext) {
         const {
           body: { item },
         } = await supertest
-          .put(`/api/fleet/package_policies/${packagePolicyId}?format=legacy`)
+          .put(`/api/fleet/package_policies/${packagePolicyId3}?format=legacy`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: `update-simplified-package-policy-with_required_variables-${Date.now()}`,
@@ -806,7 +806,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should return 400 if an invalid format query param is passed', async function () {
         await supertest
-          .put(`/api/fleet/package_policies/${packagePolicyId}?format=foo`)
+          .put(`/api/fleet/package_policies/${packagePolicyId3}?format=foo`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: `update-simplified-package-policy-with_required_variables-${Date.now()}`,
@@ -886,6 +886,118 @@ export default function (providerContext: FtrProviderContext) {
 
         // Associated agent policies that existed before agentless deployment update should NOT be deleted
         await supertest.get(`/api/fleet/agent_policies/${agentPolicyId}`).expect(200);
+      });
+    });
+
+    describe('Package name immutability', () => {
+      it('should return 400 when package name is changed', async function () {
+        const response = await supertest
+          .put(`/api/fleet/package_policies/${packagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'filetest-1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [],
+            package: {
+              name: 'with_required_variables',
+              title: 'With Required Variables',
+              version: '0.1.0',
+            },
+          })
+          .expect(400);
+
+        expect(response.body.message).to.eql(
+          'Cannot change the package of an existing integration policy. Create a new policy with the desired package.'
+        );
+      });
+
+      it('should return 200 when package name is unchanged', async function () {
+        await supertest
+          .put(`/api/fleet/package_policies/${packagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'filetest-1',
+            description: 'updated description',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [],
+            package: {
+              name: 'filetest',
+              title: 'For File Tests',
+              version: '0.1.0',
+            },
+          })
+          .expect(200);
+      });
+    });
+
+    describe('Agent variable placeholder in data_stream.dataset', () => {
+      const placeholder = '${env.LOGS_DATASET}';
+      let placeholderPolicyId: string;
+
+      const buildBody = (description: string, dataset: string) => ({
+        policy_id: agentPolicyId,
+        force: true,
+        package: { name: 'integration_to_input', version: '1.0.0' },
+        name: 'integration_to_input-placeholder',
+        description,
+        namespace: 'default',
+        inputs: {
+          'logs-logfile': {
+            enabled: true,
+            streams: {
+              'integration_to_input.log': {
+                enabled: true,
+                vars: {
+                  paths: ['/tmp/test.log'],
+                  'data_stream.dataset': dataset,
+                  custom: '',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      before(async () => {
+        const { body } = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(buildBody('', placeholder))
+          .expect(200);
+        placeholderPolicyId = body.item.id;
+      });
+
+      after(async () => {
+        await supertest
+          .delete(`/api/fleet/package_policies/${placeholderPolicyId}`)
+          .set('kbn-xsrf', 'xxxx');
+      });
+
+      it('should allow updating another field while the placeholder is unchanged', async () => {
+        const { body } = await supertest
+          .put(`/api/fleet/package_policies/${placeholderPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(buildBody('updated description', placeholder))
+          .expect(200);
+
+        expect(body.item.description).to.eql('updated description');
+      });
+
+      it('should still reject changing the dataset value', async () => {
+        const { body } = await supertest
+          .put(`/api/fleet/package_policies/${placeholderPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(buildBody('updated description', 'somedataset'))
+          .expect(400);
+
+        expect(body.message).to.eql(
+          'Package policy dataset cannot be modified, please create a new package policy.'
+        );
       });
     });
 

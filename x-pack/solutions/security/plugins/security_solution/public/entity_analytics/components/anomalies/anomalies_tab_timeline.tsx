@@ -38,8 +38,21 @@ const tacticNames = [...mitreTactics]
 
 const TACTIC_ACCESSOR = 'mitre_tactic';
 
+interface SwimlaneRecord {
+  '@timestamp': number;
+  record_score: number;
+  count: number;
+}
+
+interface AnomalyTimeBucketEntry {
+  timestamp: string;
+  maxScore: number;
+  threatTactics?: string[];
+  tacticCounts?: Record<string, number>;
+}
+
 interface AnomalyTabTimelineProps {
-  anomalies: Array<{ timestamp: string; maxScore: number; threatTactics?: string[] }>;
+  anomalies: AnomalyTimeBucketEntry[];
   selectedTactic?: string | null;
   timeRangeMs: { from: number; to: number };
   isEmpty?: boolean;
@@ -71,10 +84,14 @@ export const AnomalyTabTimelineSection: React.FC<AnomalyTabTimelineProps> = ({
   );
 
   const records = useMemo(() => {
-    const byTactic = new Map<string, Array<{ '@timestamp': number; record_score: number }>>();
+    const byTactic = new Map<string, SwimlaneRecord[]>();
     for (const a of anomalies) {
       for (const tactic of a.threatTactics ?? []) {
-        const entry = { '@timestamp': new Date(a.timestamp).getTime(), record_score: a.maxScore };
+        const entry = {
+          '@timestamp': new Date(a.timestamp).getTime(),
+          record_score: a.maxScore,
+          count: a.tacticCounts?.[tactic] ?? 0,
+        };
         const existing = byTactic.get(tactic);
         if (existing) {
           existing.push(entry);

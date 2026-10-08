@@ -28,12 +28,14 @@ import type {
   ESQLSource,
   ESQLFunction,
   ESQLColumn,
+  ESQLCommand,
   ESQLSingleAstItem,
   ESQLInlineCast,
   ESQLCommandOption,
   ESQLAstForkCommand,
   ESQLAstQueryExpression,
 } from '@elastic/esql/types';
+import type { VariableNamePrefix } from '@kbn/esql-types';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/code-editor';
@@ -177,6 +179,14 @@ export function removeDropCommandsFromESQLQuery(esql?: string): string {
 }
 
 /**
+ * Converts a single TS command node to an equivalent FROM command node, preserving its
+ * source arguments. Returns the command unchanged if it isn't a TS command.
+ */
+export function convertTimeseriesCommandNodeToFrom<T extends ESQLCommand>(cmd: T): T {
+  return cmd.name === 'ts' ? { ...cmd, name: 'from' } : cmd;
+}
+
+/**
  * Converts timeseries (TS) commands to FROM commands in an ES|QL query
  * @param esql - The ES|QL query string
  * @returns The modified query with TS commands converted to FROM commands
@@ -186,10 +196,7 @@ export function convertTimeseriesCommandToFrom(esql?: string): string {
   const timeseriesCommand = Walker.commands(root).find(({ name }) => name === 'ts');
   if (!timeseriesCommand) return esql || '';
 
-  const fromCommand = {
-    ...timeseriesCommand,
-    name: 'from',
-  };
+  const fromCommand = convertTimeseriesCommandNodeToFrom(timeseriesCommand);
 
   // Replace the ts command with the from command in the commands array
   const newCommands = root.commands.map((command) =>
@@ -318,10 +325,30 @@ export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
   return columns.map((column) => column.name);
 };
 
-export const getESQLQueryVariables = (esql: string): string[] => {
+/**
+ * Returns the names of ES|QL variables used in a query, without `?`/`??` prefixes.
+ * @param esql The ESQL query string
+ * @param prefix Keep only Identifier (`??`) or Value (`?`) variables; omit for both.
+ */
+export const getESQLQueryVariables = (esql: string, prefix?: VariableNamePrefix): string[] => {
   const { root } = Parser.parse(esql);
-  const usedVariablesInQuery = Walker.params(root);
-  return usedVariablesInQuery.map((v) => v.text.replace(LEADING_PARAM_PREFIX_REGEX, ''));
+  const params: Array<{ text: string; paramKind?: string }> = [];
+  const collect = (node: { literalType: string; text: string; paramKind?: string }) => {
+    if (node.literalType === 'param') params.push({ text: node.text, paramKind: node.paramKind });
+  };
+  // TODO: simplify to Walker.params(root) once @elastic/esql is bumped to the version
+  // that natively collects PromQL param literals via visitPromqlLiteral.
+  Walker.walk(root, {
+    visitLiteral: collect,
+    promql: { visitPromqlLiteral: collect },
+  });
+  return [
+    ...new Set(
+      params
+        .filter((p) => !prefix || p.paramKind === prefix)
+        .map((p) => p.text.replace(LEADING_PARAM_PREFIX_REGEX, ''))
+    ),
+  ];
 };
 
 /**
