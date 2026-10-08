@@ -14,6 +14,12 @@ export type {
   ContractMockOptions,
 } from './src/fetch/create_contract_mock_fetch';
 export type {
+  PaginatedOperation,
+  PaginationDescriptor,
+  PaginationEnd,
+  PaginationOptions,
+} from './src/engine/paginate';
+export type {
   OperationRef,
   RecordedExchange,
   Recording,

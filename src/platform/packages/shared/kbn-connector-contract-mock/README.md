@@ -52,6 +52,15 @@ const { fetch, rejectedResponses } = createContractMockFetch({
 
 Examples and samples use the lowest declared 2xx response (then `2XX`, then `default`) and the content type that best matches the request's `Accept` header, preferring JSON; the mock answers **406** when no content type matches. Sampled values come from the schema's first `examples` entry, `example`, `default`, `const` or `enum` value, and otherwise from a placeholder that matches the schema's type, format and bounds. Below a fixed depth only required properties are generated, which keeps recursive schemas finite. Pass `respond: (operation, request) => response` to replace examples and samples.
 
+## Pagination
+
+Operations listed in `pagination` (method, path template and a descriptor from the connector's manifest) serve a virtual collection of `collectionSize` items (default 3), built from the first item of the response they would otherwise get, with distinct `id`s. The request's cursor, offset or page number and page size select a slice:
+
+- `cursor`: the next cursor is written at `nextPath` (and `hasMorePath`, if given); the last page signals the end as the vendor does (`empty_string`, `null` or `missing`). Cursors are opaque positions; a cursor the mock didn't issue gets **400**.
+- `offset` and `page`: the total is written at `totalPath`, if given.
+
+Page sizes above the vendor's `maximum` already get **422** from request validation.
+
 ## Spec loading
 
 `loadContractOperations` accepts a parsed OpenAPI 3.x or Swagger 2.0 document (converted to OpenAPI 3.0 first) and returns its operations: method, path, servers, parameters (with `style` and `explode` defaults applied), request body and responses. Parameter, request body, response and header refs are resolved. Schemas are not dereferenced: each one stays in place in a copy of the document, together with its JSON pointer, so its refs keep resolving against the document. This keeps large specs such as Microsoft Graph fast to load. The schema dialect follows the OpenAPI version: OpenAPI 3.0 schemas for 3.0, JSON Schema 2020-12 for 3.1 and later.
