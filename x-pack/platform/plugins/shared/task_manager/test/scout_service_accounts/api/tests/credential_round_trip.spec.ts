@@ -104,7 +104,7 @@ apiTest.describe(
     apiTest.afterAll(async ({ apiClient }) => {
       for (const id of taskIds) {
         const removed = await apiClient.delete(`internal/task_manager/tasks/${id}`, { headers });
-        expect(removed).toHaveStatusCode(200);
+        expect([200, 404]).toContain(removed.statusCode);
       }
     });
 

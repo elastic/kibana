@@ -1020,6 +1020,8 @@ Task Manager stores `runAs` as the task's `credential` (with `type: 'service_acc
 - `ensureScheduled` throws a conflict error (409) if the existing task's `runAs` doesn't match the call's, including when only one of them has a `runAs`.
 - `bulkSchedule` throws a conflict error (409) for a `runAs` task whose id already exists, and for a task that would overwrite an existing task with a `credential`. `schedule` never overwrites an existing task.
 
+To catch these conflicts, check `error.statusCode === 409`, which all three APIs set. `bulkSchedule` throws a saved-object error payload rather than an `Error`, so `SavedObjectsErrorHelpers.isConflictError` doesn't detect its conflicts.
+
 To change `runAs`, remove the task and schedule it again.
 
 This version of Kibana doesn't run these tasks yet: the task runner reports an error for any task that has a `credential`.

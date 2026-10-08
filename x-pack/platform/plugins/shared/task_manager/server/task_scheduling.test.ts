@@ -566,22 +566,27 @@ describe('TaskScheduling', () => {
     });
 
     test.each([
-      ['a different runAs', serviceAccountCredential, middlewareRunAs],
-      ['runAs for a task without one', undefined, runAs],
-      ['no runAs for a task with one', serviceAccountCredential, undefined],
+      { name: 'a different runAs', stored: serviceAccountCredential, requested: middlewareRunAs },
+      { name: 'runAs for a task without one', stored: undefined, requested: runAs },
+      {
+        name: 'no runAs for a task with one',
+        stored: serviceAccountCredential,
+        requested: undefined,
+      },
     ])(
-      'ensureScheduled rejects with a conflict when called with %s',
-      async (_, credential, taskRunAs) => {
+      'ensureScheduled rejects with a conflict when called with $name',
+      async ({ stored, requested }) => {
         const taskScheduling = new TaskScheduling(taskSchedulingOpts);
         const bulkUpdateSchedulesSpy = jest.spyOn(taskScheduling, 'bulkUpdateSchedules');
         mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
-        mockTaskStore.getCredential.mockResolvedValueOnce(credential);
+        mockTaskStore.getCredential.mockResolvedValueOnce(stored);
 
         const error = await taskScheduling
-          .ensureScheduled({ ...getTask(), runAs: taskRunAs })
+          .ensureScheduled({ ...getTask(), runAs: requested })
           .catch((e) => e);
 
         expect(SavedObjectsErrorHelpers.isConflictError(error)).toBe(true);
+        expect(error.statusCode).toBe(409);
         expect(error.message).toBe(
           'Task "my-foo-id" exists with a different runAs. Remove it and schedule it again.'
         );
@@ -590,39 +595,45 @@ describe('TaskScheduling', () => {
       }
     );
 
-    test.each([
-      [
-        'has the same runAs',
-        () => mockTaskStore.getCredential.mockResolvedValueOnce(serviceAccountCredential),
-      ],
-      [
-        'is removed before its credential is read',
-        () =>
-          mockTaskStore.getCredential.mockRejectedValueOnce(
-            SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'my-foo-id')
-          ),
-      ],
-    ])(
-      'ensureScheduled updates the schedule of an existing task that %s',
-      async (_, mockCredential) => {
-        const task = { ...getTask(), runAs };
-        const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-        const bulkUpdateSchedulesSpy = jest
-          .spyOn(taskScheduling, 'bulkUpdateSchedules')
-          .mockResolvedValue({ tasks: [task], errors: [] });
-        mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
-        mockCredential();
+    test('ensureScheduled updates the schedule of an existing task that has the same runAs', async () => {
+      const task = { ...getTask(), runAs };
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const bulkUpdateSchedulesSpy = jest
+        .spyOn(taskScheduling, 'bulkUpdateSchedules')
+        .mockResolvedValue({ tasks: [task], errors: [] });
+      mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
+      mockTaskStore.getCredential.mockResolvedValueOnce(serviceAccountCredential);
 
-        const result = await taskScheduling.ensureScheduled(task);
+      const result = await taskScheduling.ensureScheduled(task);
 
-        expect(bulkUpdateSchedulesSpy).toHaveBeenCalledWith(
-          ['my-foo-id'],
-          { interval: '1m' },
-          undefined
-        );
-        expect(result.id).toEqual('my-foo-id');
-      }
-    );
+      expect(bulkUpdateSchedulesSpy).toHaveBeenCalledWith(
+        ['my-foo-id'],
+        { interval: '1m' },
+        undefined
+      );
+      expect(result.id).toEqual('my-foo-id');
+    });
+
+    test('ensureScheduled updates the schedule of an existing task that is removed before its credential is read', async () => {
+      const task = { ...getTask(), runAs };
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const bulkUpdateSchedulesSpy = jest
+        .spyOn(taskScheduling, 'bulkUpdateSchedules')
+        .mockResolvedValue({ tasks: [task], errors: [] });
+      mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
+      mockTaskStore.getCredential.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'my-foo-id')
+      );
+
+      const result = await taskScheduling.ensureScheduled(task);
+
+      expect(bulkUpdateSchedulesSpy).toHaveBeenCalledWith(
+        ['my-foo-id'],
+        { interval: '1m' },
+        undefined
+      );
+      expect(result.id).toEqual('my-foo-id');
+    });
 
     test('ensureScheduled throws when the credential of the existing task cannot be read', async () => {
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);

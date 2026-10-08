@@ -156,24 +156,28 @@ type TaskBulkCreateResult =
 
 type ServiceAccountCredentialFields = ReturnType<typeof getServiceAccountCredentialAttributes>;
 
-const BULK_SCHEDULE_WRITE_MODES = ['serviceAccount', 'overwrite', 'create'] as const;
-type BulkScheduleWriteMode = (typeof BULK_SCHEDULE_WRITE_MODES)[number];
-
 type BulkScheduleTask =
-  | { mode: 'conflict'; taskInstance: TaskInstanceWithId; conflict: SavedObjectErrorResult }
+  | { action: 'conflict'; taskInstance: TaskInstanceWithId; conflict: SavedObjectErrorResult }
+  | { action: 'overwrite'; taskInstance: TaskInstanceWithId; version: string }
   | {
-      mode: 'serviceAccount';
+      action: 'create';
       taskInstance: TaskInstanceWithId;
-      credentialFields: ServiceAccountCredentialFields;
-    }
-  | { mode: 'overwrite'; taskInstance: TaskInstanceWithId; version: string }
-  | { mode: 'create'; taskInstance: TaskInstanceWithId };
+      credentialFields?: ServiceAccountCredentialFields;
+    };
 
-type BulkScheduleWriteTask = Exclude<BulkScheduleTask, { mode: 'conflict' }>;
+type BulkScheduleWriteTask = Exclude<BulkScheduleTask, { action: 'conflict' }>;
+
+// `bulkCreate` takes `overwrite` for the whole call, and tasks with a credential are created by
+// another client, so each batch is written by its own call.
+const BULK_SCHEDULE_WRITE_BATCHES = ['createWithCredential', 'overwrite', 'create'] as const;
+type BulkScheduleWriteBatch = (typeof BULK_SCHEDULE_WRITE_BATCHES)[number];
+
+const getBulkScheduleWriteBatch = (task: BulkScheduleWriteTask): BulkScheduleWriteBatch =>
+  task.action === 'create' && task.credentialFields ? 'createWithCredential' : task.action;
 
 // Where each task's result is, so the response keeps the order of the input.
 type BulkSchedulePlacement =
-  | { mode: BulkScheduleWriteMode; index: number }
+  | { batch: BulkScheduleWriteBatch; index: number }
   | { conflict: SavedObjectErrorResult };
 
 const getCredentialConflict = (id: string): SavedObjectErrorResult => ({
@@ -682,7 +686,10 @@ export class TaskStore {
     const tasks = await this.planBulkSchedule(taskInstances);
 
     const taskInstancesToGrant = tasks
-      .filter(({ mode }) => mode === 'overwrite' || mode === 'create')
+      .filter(
+        (task) =>
+          task.action === 'overwrite' || (task.action === 'create' && !task.credentialFields)
+      )
       .map(({ taskInstance }) => taskInstance);
     const apiKeySOFieldsMap: Map<string, ApiKeySOFields> =
       (taskInstancesToGrant.length
@@ -713,7 +720,7 @@ export class TaskStore {
     );
 
     const savedObjects = placements.map((placement) =>
-      'conflict' in placement ? placement.conflict : results[placement.mode][placement.index]
+      'conflict' in placement ? placement.conflict : results[placement.batch][placement.index]
     );
 
     if (options?.request && !this.getIsSecurityEnabled()) {
@@ -760,16 +767,20 @@ export class TaskStore {
     return taskInstancesWithIds.map((taskInstance, index): BulkScheduleTask => {
       const serviceAccountFields = credentialFields[index];
       if (serviceAccountFields) {
-        return { mode: 'serviceAccount', taskInstance, credentialFields: serviceAccountFields };
+        return { action: 'create', taskInstance, credentialFields: serviceAccountFields };
       }
       const existingTask = existingTasks.get(taskInstance.id);
       if (existingTask?.hasCredential) {
-        return { mode: 'conflict', taskInstance, conflict: getCredentialConflict(taskInstance.id) };
+        return {
+          action: 'conflict',
+          taskInstance,
+          conflict: getCredentialConflict(taskInstance.id),
+        };
       }
       if (existingTask?.version) {
-        return { mode: 'overwrite', taskInstance, version: existingTask.version };
+        return { action: 'overwrite', taskInstance, version: existingTask.version };
       }
-      return { mode: 'create', taskInstance };
+      return { action: 'create', taskInstance };
     });
   }
 
@@ -777,8 +788,8 @@ export class TaskStore {
     tasks: BulkScheduleTask[],
     apiKeySOFieldsMap: Map<string, ApiKeySOFields>
   ) {
-    const objects: Record<BulkScheduleWriteMode, TaskBulkCreateObject[]> = {
-      serviceAccount: [],
+    const objects: Record<BulkScheduleWriteBatch, TaskBulkCreateObject[]> = {
+      createWithCredential: [],
       overwrite: [],
       create: [],
     };
@@ -791,20 +802,21 @@ export class TaskStore {
       const { taskInstance } = task;
       this.definitions.ensureHas(taskInstance.taskType);
 
-      if (task.mode === 'conflict') {
+      if (task.action === 'conflict') {
         placements.push({ conflict: task.conflict });
         continue;
       }
 
+      const batch = getBulkScheduleWriteBatch(task);
       const apiKeySOFields = apiKeySOFieldsMap.get(taskInstance.id);
       try {
-        const index = objects[task.mode].push(this.toBulkCreateObject(task, apiKeySOFields)) - 1;
-        placements.push({ mode: task.mode, index });
+        const index = objects[batch].push(this.toBulkCreateObject(task, apiKeySOFields)) - 1;
+        placements.push({ batch, index });
       } catch (e) {
         this.logger.error(
           `[TaskStore] An error occured. Task ${taskInstance.id} will not be updated. Error: ${e.message}`
         );
-        omittedTaskApiKeys.push(task.mode === 'serviceAccount' ? undefined : apiKeySOFields);
+        omittedTaskApiKeys.push(batch === 'createWithCredential' ? undefined : apiKeySOFields);
       }
     }
 
@@ -820,7 +832,7 @@ export class TaskStore {
     const validatedTaskInstance =
       this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
     const credentialAttributes =
-      task.mode === 'serviceAccount' ? task.credentialFields : apiKeySOFields;
+      task.action === 'create' && task.credentialFields ? task.credentialFields : apiKeySOFields;
 
     return {
       type: 'task',
@@ -830,51 +842,51 @@ export class TaskStore {
         runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
       },
       id,
-      ...(task.mode === 'overwrite' ? { version: task.version } : {}),
+      ...(task.action === 'overwrite' ? { version: task.version } : {}),
     };
   }
 
   // Settles every write before cleaning up, so a failed write never invalidates the keys of a
   // write that persisted.
   private async executeBulkScheduleWrites(
-    objects: Record<BulkScheduleWriteMode, TaskBulkCreateObject[]>,
+    objects: Record<BulkScheduleWriteBatch, TaskBulkCreateObject[]>,
     apiKeySOFieldsMap: Map<string, ApiKeySOFields>,
     omittedTaskApiKeys: Array<ApiKeySOFields | undefined>,
     options?: ApiKeyOptions
-  ): Promise<Record<BulkScheduleWriteMode, TaskBulkCreateResult[]>> {
+  ): Promise<Record<BulkScheduleWriteBatch, TaskBulkCreateResult[]>> {
     const soClient = this.getSoClientForCreate(options || {});
     const settledWrites = await Promise.allSettled(
-      BULK_SCHEDULE_WRITE_MODES.map(
-        async (mode): Promise<SavedObjectsBulkResponse<SerializedConcreteTaskInstance>> => {
-          if (!objects[mode].length) {
+      BULK_SCHEDULE_WRITE_BATCHES.map(
+        async (batch): Promise<SavedObjectsBulkResponse<SerializedConcreteTaskInstance>> => {
+          if (!objects[batch].length) {
             return { saved_objects: [] };
           }
-          const client = mode === 'serviceAccount' ? this.serviceAccountSoClient : soClient;
-          return client.bulkCreate<SerializedConcreteTaskInstance>(objects[mode], {
+          const client = batch === 'createWithCredential' ? this.serviceAccountSoClient : soClient;
+          return client.bulkCreate<SerializedConcreteTaskInstance>(objects[batch], {
             refresh: false,
-            overwrite: mode === 'overwrite',
+            overwrite: batch === 'overwrite',
           });
         }
       )
     );
 
-    const results: Record<BulkScheduleWriteMode, TaskBulkCreateResult[]> = {
-      serviceAccount: [],
+    const results: Record<BulkScheduleWriteBatch, TaskBulkCreateResult[]> = {
+      createWithCredential: [],
       overwrite: [],
       create: [],
     };
     const unpersistedApiKeys = [...omittedTaskApiKeys];
     let writeError: Error | undefined;
     for (const [index, write] of settledWrites.entries()) {
-      const mode = BULK_SCHEDULE_WRITE_MODES[index];
+      const batch = BULK_SCHEDULE_WRITE_BATCHES[index];
       const getGrantedApiKeys = (taskId?: string) =>
-        mode === 'serviceAccount' || !taskId ? undefined : apiKeySOFieldsMap.get(taskId);
+        batch === 'createWithCredential' || !taskId ? undefined : apiKeySOFieldsMap.get(taskId);
       if (write.status === 'rejected') {
         writeError = writeError ?? write.reason;
-        unpersistedApiKeys.push(...objects[mode].map(({ id }) => getGrantedApiKeys(id)));
+        unpersistedApiKeys.push(...objects[batch].map(({ id }) => getGrantedApiKeys(id)));
         continue;
       }
-      results[mode] = write.value.saved_objects;
+      results[batch] = write.value.saved_objects;
       unpersistedApiKeys.push(
         ...write.value.saved_objects
           .filter(isSavedObjectErrorResult)

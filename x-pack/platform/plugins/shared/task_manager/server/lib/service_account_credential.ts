@@ -16,8 +16,6 @@ import type { TaskCredential, TaskRunAs } from '../task';
 
 export const SERVICE_ACCOUNT_CREDENTIAL_TYPE = 'service_account';
 
-// The credential fields are keyword mappings with `ignore_above: 1024`.
-const CREDENTIAL_FIELD_MAX_LENGTH = 1024;
 const ENCRYPTED_CREDENTIAL_BYTES = 32;
 
 // `unknowns: 'ignore'` so a whole binding passed as `runAs` doesn't persist its other fields.
@@ -32,10 +30,11 @@ const runAsSchema = schema.object(
       },
     }),
     workloadId: schema.string({ minLength: 1, maxLength: SERVICE_ACCOUNT_WORKLOAD_ID_MAX_LENGTH }),
-    spaceId: schema.string({ minLength: 1, maxLength: CREDENTIAL_FIELD_MAX_LENGTH }),
+    // `spaceId` and `expectedServiceAccountId` are keyword mappings with `ignore_above: 1024`.
+    spaceId: schema.string({ minLength: 1, maxLength: 1024 }),
     // Required but nullable: `schema.nullable` would turn a missing pin into `null`.
     expectedServiceAccountId: schema.oneOf([
-      schema.string({ minLength: 1, maxLength: CREDENTIAL_FIELD_MAX_LENGTH }),
+      schema.string({ minLength: 1, maxLength: 1024 }),
       schema.literal(null),
     ]),
   },

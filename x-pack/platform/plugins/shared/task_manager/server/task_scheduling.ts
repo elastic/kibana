@@ -514,6 +514,8 @@ export class TaskScheduling {
 
   // A task's identity is only set when it is created, so a different `runAs` can't be applied to an
   // existing task, and keeping the old identity would run it as an account the caller didn't ask for.
+  // The schedule update reads the task again, so a task removed and scheduled again with another
+  // `runAs` in between gets this schedule. That's accepted: the update keeps the task's credential.
   private async ensureExistingCredentialMatchesRunAs({ id, runAs }: TaskInstanceWithId) {
     let credential: TaskCredential | undefined;
     try {
@@ -526,9 +528,11 @@ export class TaskScheduling {
     }
 
     if (!credentialMatchesRunAs(credential, runAs)) {
-      throw SavedObjectsErrorHelpers.decorateConflictError(
+      const error = SavedObjectsErrorHelpers.decorateConflictError(
         new Error(`Task "${id}" exists with a different runAs. Remove it and schedule it again.`)
       );
+      // `bulkSchedule`'s conflict only has a top-level `statusCode`, so set it here too.
+      throw Object.assign(error, { statusCode: VERSION_CONFLICT_STATUS });
     }
   }
 }
