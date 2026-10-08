@@ -29,7 +29,7 @@ permissions:
 
 # Activation rules:
 # - Every trigger requires an open, in-repository PR authored by kibanamachine
-#   (checked by validate_pr).
+#   (checked by check_pr_eligibility).
 # - Manual runs request verification subject to the same PR validation.
 # - `kickoff`: a PR is labeled `flaky-test-fixer`.
 # - `process_results`: the Flaky Test Runner posts its `## Flaky Test Runner Stats`
@@ -128,19 +128,19 @@ checkout:
 
 jobs:
   activation:
-    needs: [validate_pr]
-  validate_pr:
+    needs: [check_pr_eligibility]
+  check_pr_eligibility:
     needs: pre_activation
     if: needs.pre_activation.outputs.activated == 'true'
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read
     outputs:
-      pr_number: ${{ steps.validate.outputs.pr_number }}
+      pr_number: ${{ steps.check.outputs.pr_number }}
     steps:
       # No checkout: validation must run before any PR code or agent tools.
-      - name: Validate flaky fix PR
-        id: validate
+      - name: Check flaky fix PR eligibility
+        id: check
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           PR_NUMBER: *pr_number
@@ -164,7 +164,7 @@ jobs:
             }
 
             core.setOutput('pr_number', String(prNumber));
-            core.info(`Validated PR #${prNumber} by ${pr.user.login}.`);
+            core.info(`PR #${prNumber} by ${pr.user.login} is eligible.`);
   prefetch_pr_context:
     permissions:
       contents: read
