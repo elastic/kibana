@@ -8,6 +8,7 @@
 import type { ReactNode } from 'react';
 import React, { lazy, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { FlyoutOrigin, FlyoutSessionKind } from '../../common/lib/telemetry';
 import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TYPE } from '../../common/lib/telemetry';
@@ -33,6 +34,11 @@ export interface OpenRuleFlyoutParams {
   ruleId: string;
   /** Which UI trigger opened this flyout, when known. */
   origin?: FlyoutOrigin;
+  /**
+   * Size of the flyout this one replaces. A number is a pixel width; a string is an EUI flyout size.
+   * When set, the persisted Security flyout width is not applied.
+   */
+  originFlyoutSize?: EuiFlyoutProps['size'];
   /**
    * Flyout-history title to use for this open, e.g. `formatFlyoutTitle(RULE_TITLE, ruleName)`.
    * Omitted falls back to the bare "Rule" title.
@@ -87,30 +93,41 @@ export const useRuleFlyoutApi = (): RuleFlyoutApi => {
       session: FlyoutSessionKind,
       title: OverlaySystemFlyoutOpenOptions['title'],
       onClose: (() => void) | undefined,
-      origin?: FlyoutOrigin
+      origin?: FlyoutOrigin,
+      originFlyoutSize?: EuiFlyoutProps['size']
     ) => {
+      const matchOriginFlyout = originFlyoutSize !== undefined;
       const properties: OverlaySystemFlyoutOpenOptions = {
         ...defaultDocumentFlyoutProperties,
         historyKey,
         session,
         title,
         onClose,
+        ...(matchOriginFlyout ? { size: originFlyoutSize, maxWidth: false } : {}),
       };
       openFlyout(
         children,
         properties,
         { surface: FLYOUT_SURFACE.FLYOUT, flyoutType: FLYOUT_TYPE.RULE, session, origin },
-        session === FLYOUT_SESSION_KIND.INHERIT ? FLYOUT_SESSION_KIND.INHERIT : sessionMode
+        session === FLYOUT_SESSION_KIND.INHERIT ? FLYOUT_SESSION_KIND.INHERIT : sessionMode,
+        matchOriginFlyout ? { persistWidth: false } : undefined
       );
     },
     [openFlyout, defaultDocumentFlyoutProperties, historyKey, sessionMode]
   );
 
   const openRuleFlyout = useCallback(
-    ({ ruleId, title, origin }: OpenRuleFlyoutParams) => {
+    ({ ruleId, title, origin, originFlyoutSize }: OpenRuleFlyoutParams) => {
       writeOnOpen({ kind: FLYOUT_DESCRIPTOR_KIND.rule, ruleId });
       const onClose = buildOnClose(null);
-      open(<RuleDetails ruleId={ruleId} />, sessionMode, title ?? RULE_TITLE, onClose, origin);
+      open(
+        <RuleDetails ruleId={ruleId} />,
+        sessionMode,
+        title ?? RULE_TITLE,
+        onClose,
+        origin,
+        originFlyoutSize
+      );
     },
     [open, sessionMode, writeOnOpen, buildOnClose]
   );
