@@ -678,6 +678,66 @@ describe('detection rule workflows', () => {
         );
       });
 
+      // Rule A was edited after its false positives, so they came from an older
+      // version. Rule B was not edited. Only rule B should be reviewed.
+      it('reviews a rule only on false positives from its current version', () => {
+        const resolveVersions = tuningSteps.find(
+          ({ name }) => name === 'resolve_current_revisions'
+        )!;
+        const rows = tuningSteps.find(({ name }) => name === 'resolve_fanout_rows')!;
+
+        expect(harvestQuery).toContain('BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`');
+
+        const currentVersions = createWorkflowLiquidEngine().parseAndRenderSync(
+          String(resolveVersions.with?.rule_revision_keys),
+          {
+            steps: {
+              list_enabled_candidates: {
+                output: {
+                  data: [
+                    { id: 'rule-a', revision: 2 },
+                    { id: 'rule-b', revision: 5 },
+                  ],
+                },
+              },
+            },
+          }
+        );
+
+        // The last column is the "rule@version" key the harvest query adds to each row.
+        const ruleAOldVersion = [
+          'rule-a',
+          12,
+          '2026-10-01T00:00:00.000Z',
+          ['a1'],
+          20,
+          12,
+          ',rule-a@1,',
+        ];
+        const ruleBCurrentVersion = [
+          'rule-b',
+          15,
+          '2026-10-01T00:00:00.000Z',
+          ['b1'],
+          20,
+          15,
+          ',rule-b@5,',
+        ];
+
+        const reviewedRows = resolveExpression(rows.with?.rows, {
+          consts: tuning.consts,
+          steps: {
+            harvest_fp_alerts_by_rule: {
+              output: { values: [ruleAOldVersion, ruleBCurrentVersion] },
+            },
+            resolve_current_revisions: { output: { rule_revision_keys: currentVersions } },
+            collect_candidates: { output: { fanout_limit: 10 } },
+          },
+        });
+
+        expect(reviewedRows).toEqual([ruleBCurrentVersion]);
+      });
+
       // The pool is cut in ES|QL before the enabled check runs, so it must exceed
       // the launch cap for the enabled filter to have anything to backfill from.
       it('overscans the harvest pool beyond the launch cap', () => {
