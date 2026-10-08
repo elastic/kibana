@@ -7,7 +7,10 @@
 
 import React from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { MigrationDashboardsPage } from '.';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import { useLatestStats } from '../service/hooks/use_latest_stats';
@@ -22,10 +25,6 @@ jest.mock('../components/dashboard_table', () => ({
 
 jest.mock('./empty', () => ({
   EmptyMigrationDashboardsPage: () => <div data-test-subj="emptyMigrationDashboards" />,
-}));
-
-jest.mock('../../../common/components/header_page', () => ({
-  HeaderPage: () => <div data-test-subj="headerPage" />,
 }));
 
 jest.mock('../../common/components/migration_panels/migration_progress_panel', () => ({
@@ -49,6 +48,7 @@ jest.mock('../logic/use_get_migration_translation_stats');
 
 const refreshStats: jest.Mock = jest.fn();
 const navigateTo: jest.Mock = jest.fn();
+const getAppUrl: jest.Mock = jest.fn();
 const invalidateGetMigrationDashboards: jest.Mock = jest.fn();
 const invalidateGetMigrationTranslationStats: jest.Mock = jest.fn();
 
@@ -80,15 +80,17 @@ const renderComponent = (migrationId?: string) => {
   };
 
   return render(
-    <TestProviders>
-      <MigrationDashboardsPage match={mockMatch} location={mockLocation} history={mockHistory} />
-    </TestProviders>
+    <MockAppHeaderProvider>
+      <TestProviders>
+        <MigrationDashboardsPage match={mockMatch} location={mockLocation} history={mockHistory} />
+      </TestProviders>
+    </MockAppHeaderProvider>
   );
 };
 
 describe('MigrationDashboardsPage', () => {
   beforeEach(() => {
-    (useNavigation as jest.Mock).mockReturnValue({ navigateTo });
+    (useNavigation as jest.Mock).mockReturnValue({ navigateTo, getAppUrl });
     (useInvalidateGetMigrationDashboards as jest.Mock).mockReturnValue(
       invalidateGetMigrationDashboards
     );
@@ -146,6 +148,18 @@ describe('MigrationDashboardsPage', () => {
       const { getByTestId } = renderComponent();
       expect(getByTestId('emptyMigrationDashboards')).toBeInTheDocument();
     });
+
+    it('renders the page title', () => {
+      renderComponent();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Translated dashboards'
+      );
+    });
+
+    it('does not render the migration selector', () => {
+      renderComponent();
+      expect(screen.queryByTestId('siemMigrationsSelectMigrationButton')).not.toBeInTheDocument();
+    });
   });
 
   describe('when there are migrations', () => {
@@ -185,6 +199,19 @@ describe('MigrationDashboardsPage', () => {
         deepLinkId: 'siem_migrations-dashboards',
         path: '1',
       });
+    });
+
+    it('renders the migration selector', () => {
+      const { getByTestId } = renderComponent('1');
+      expect(getByTestId('siemMigrationsSelectMigrationButton')).toBeInTheDocument();
+    });
+
+    it('renders the add another migration menu action', async () => {
+      renderComponent('1');
+
+      await openAppMenuOverflow();
+
+      expect(await screen.findByTestId('addAnotherMigrationButton')).toBeInTheDocument();
     });
 
     describe('when migration status is RUNNING', () => {
