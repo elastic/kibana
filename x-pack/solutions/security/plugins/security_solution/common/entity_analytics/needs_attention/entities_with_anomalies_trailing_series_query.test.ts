@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityStoreEuid } from '@kbn/entity-store/public';
+import type { EntityStoreEuid } from '@kbn/entity-store/common/euid_helpers';
 import {
   buildEntitiesWithAnomaliesTrailingSeriesQuery,
   trailingAnomaliesColumn,

@@ -14,6 +14,10 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import {
+  buildNewEntityCountQuery,
+  buildNewEntityPrevCountQuery,
+} from '../../../../../../common/entity_analytics/needs_attention/new_entity_count_query';
 import { EMPTY_ENTITY_IDS } from '../data';
 import {
   buildNewEntityTrailingSeriesQuery,
@@ -26,18 +30,6 @@ import {
   EMPTY_ENTITY_FILTERS,
   type EntityFilters,
 } from '../../use_entity_filters_param';
-
-const TIME_RANGE_TO_ESQL: Record<TimeRange, string> = {
-  '24h': '24 hours',
-  '7d': '7 days',
-  '30d': '30 days',
-};
-
-const DOUBLE_TIME_RANGE: Record<TimeRange, string> = {
-  '24h': '48 hours',
-  '7d': '14 days',
-  '30d': '60 days',
-};
 
 interface NewEntityTileOpts {
   spaceId: string;
@@ -63,15 +55,7 @@ export const useNewEntityCount = ({
 
   const query = useMemo(
     () =>
-      index
-        ? [
-            `FROM ${index}`,
-            `| WHERE entity.lifecycle.first_seen >= NOW() - ${TIME_RANGE_TO_ESQL[timeRange]} AND entity.risk.calculated_score > 0`,
-            ...getEntityFilterESQL(entityFilters),
-            `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
-            `| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(entity.id)`,
-          ].join('\n')
-        : null,
+      index ? buildNewEntityCountQuery(index, timeRange, getEntityFilterESQL(entityFilters)) : null,
     [index, timeRange, entityFilters]
   );
 
@@ -152,13 +136,7 @@ const useNewEntityCountPrevPeriod = ({
   const query = useMemo(
     () =>
       index
-        ? [
-            `FROM ${index}`,
-            `| WHERE entity.lifecycle.first_seen >= NOW() - ${DOUBLE_TIME_RANGE[timeRange]} AND entity.lifecycle.first_seen < NOW() - ${TIME_RANGE_TO_ESQL[timeRange]} AND entity.risk.calculated_score > 0`,
-            ...getEntityFilterESQL(entityFilters),
-            `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
-            `| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(entity.id)`,
-          ].join('\n')
+        ? buildNewEntityPrevCountQuery(index, timeRange, getEntityFilterESQL(entityFilters))
         : null,
     [index, timeRange, entityFilters]
   );

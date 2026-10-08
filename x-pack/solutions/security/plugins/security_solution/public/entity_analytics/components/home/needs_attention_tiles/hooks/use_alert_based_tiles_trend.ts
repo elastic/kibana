@@ -16,11 +16,10 @@ import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import {
-  buildAlertBasedTilesTrailingSeriesQuery,
-  trailingAlertsColumn,
-  trailingWatchlistedColumn,
-} from '../queries/entities_with_alerts_trailing_series_query';
-import { TRAILING_WINDOW } from '../queries/tile_trailing_window';
+  parseAlertBasedTilesTrend,
+  type AlertBasedTilesTrend,
+} from '../../../../../../common/entity_analytics/needs_attention/parse_alert_based_tiles';
+import { buildAlertBasedTilesTrailingSeriesQuery } from '../queries/entities_with_alerts_trailing_series_query';
 import type { TimeRange } from '../../use_time_range_param';
 import {
   getEntityFilterESQL,
@@ -28,37 +27,7 @@ import {
   type EntityFilters,
 } from '../../use_entity_filters_param';
 
-export interface AlertBasedTilesTrend {
-  /** Entities with alerts, one value per dot, oldest first; the last one is the tile's number. */
-  alerts: number[];
-  /** Watchlisted, one value per dot, oldest first; the last one is the tile's number. */
-  watchlisted: number[];
-}
-
-/**
- * Reads the single result row into oldest-first dots. A missing or null column counts as 0, and
- * an empty response gives all zeros.
- */
-export const parseAlertBasedTilesTrend = (
-  raw: ESQLSearchResponse,
-  timeRange: TimeRange
-): AlertBasedTilesTrend => {
-  const { dots } = TRAILING_WINDOW[timeRange];
-  const row = raw.values?.[0];
-
-  const dotValues = (columnOf: (k: number) => string): number[] =>
-    Array.from({ length: dots }, (_, i) => {
-      const k = dots - 1 - i;
-      const index = raw.columns?.findIndex((c) => c.name === columnOf(k)) ?? -1;
-      const value = index < 0 ? undefined : row?.[index];
-      return typeof value === 'number' ? value : 0;
-    });
-
-  return {
-    alerts: dotValues(trailingAlertsColumn),
-    watchlisted: dotValues(trailingWatchlistedColumn),
-  };
-};
+export { parseAlertBasedTilesTrend, type AlertBasedTilesTrend };
 
 /**
  * Runs the trailing-window series query for the Entities with alerts and Watchlisted tiles.

@@ -22,6 +22,7 @@ import {
 } from '../queries/entities_with_alerts_query';
 import type { TimeRange } from '../../use_time_range_param';
 import { EMPTY_ENTITY_IDS } from '../data';
+import { parseAlertBasedTilesResponse } from '../../../../../../common/entity_analytics/needs_attention/parse_alert_based_tiles';
 import { useAlertBasedTilesTrend } from './use_alert_based_tiles_trend';
 import {
   getEntityFilterESQL,
@@ -29,38 +30,7 @@ import {
   type EntityFilters,
 } from '../../use_entity_filters_param';
 
-interface AlertBasedTilesResult {
-  alertsCount: number;
-  alertsEntityIds: string[];
-  watchlistedCount: number;
-  watchlistedEntityIds: string[];
-}
-
-export const parseAlertBasedTilesResponse = (raw: ESQLSearchResponse): AlertBasedTilesResult => {
-  const row = raw.values?.[0];
-  if (!row)
-    return { alertsCount: 0, alertsEntityIds: [], watchlistedCount: 0, watchlistedEntityIds: [] };
-
-  const col = (name: string) => raw.columns?.findIndex((c) => c.name === name) ?? -1;
-  const toIds = (idx: number): string[] => {
-    if (idx < 0) return [];
-    const v = row[idx];
-    if (Array.isArray(v)) return (v as string[]).filter(Boolean);
-    if (typeof v === 'string' && v) return [v];
-    return [];
-  };
-
-  return {
-    alertsCount:
-      typeof row[col('alerts_count')] === 'number' ? (row[col('alerts_count')] as number) : 0,
-    alertsEntityIds: toIds(col('alerts_entity_ids')),
-    watchlistedCount:
-      typeof row[col('watchlisted_count')] === 'number'
-        ? (row[col('watchlisted_count')] as number)
-        : 0,
-    watchlistedEntityIds: toIds(col('watchlisted_entity_ids')),
-  };
-};
+export { parseAlertBasedTilesResponse };
 
 /**
  * Runs a single alerts query that produces counts and entity ID lists for both the

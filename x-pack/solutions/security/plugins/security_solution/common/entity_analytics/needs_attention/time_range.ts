@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-// Moved to common so the server-side executive brief can share it.
-export * from '../../../../../../common/entity_analytics/needs_attention/alert_euid_pipeline';
+export const TIME_RANGE_OPTIONS = ['24h', '7d', '30d'] as const;
+export type TimeRange = (typeof TIME_RANGE_OPTIONS)[number];
