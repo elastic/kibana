@@ -77,6 +77,29 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
+    describe('when data has both kubernetes fields and a container id', () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
+      before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        await generateData({
+          apmSynthtraceEsClient,
+          start,
+          end,
+          containerFields: { 'kubernetes.pod.uid': 'test', 'container.id': 'abc123' },
+        });
+      });
+
+      after(() => apmSynthtraceEsClient.clean());
+
+      it('returns Kubernetes as container type', async () => {
+        const { status, body } = await callApi();
+
+        expect(status).to.be(200);
+        expect(body.containerType).to.be('Kubernetes');
+      });
+    });
+
     describe('when data has a container id and no kubernetes fields', () => {
       let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
