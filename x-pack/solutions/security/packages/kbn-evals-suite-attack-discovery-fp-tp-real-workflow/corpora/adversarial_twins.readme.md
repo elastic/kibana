@@ -7,15 +7,21 @@ relabelled.** 3 mutations were discarded this way (see catalog end).
 
 ## Mutation catalog (21 kept cases)
 
-| type | per chain | label | broken invariant |
+One variant per base chain per row; `type` values match `payload.mutation_spec.type`
+exactly (a/b and mdm/sccm variants are distinguished in `description` only).
+
+| type | count | label | broken invariant |
 |---|---|---|---|
-| `domain-swap-a` | ×3 | false_positive | documented C2 domain replaced with `api.dropbox.com`; benign SaaS destination makes the alert a benign-mimic FP |
-| `domain-swap-b` | ×3 | false_positive | same, with `graph.microsoft.com` |
-| `role-swap-mdm` | ×3 | false_positive | workstation → MDM server (`mdmdaemon.exe` parent); benign-administration explanation for identical process events |
-| `role-swap-sccm` | ×3 | false_positive | workstation → SCCM server (`CcmExec.exe` parent) |
-| `parent-spoof` | ×3 | false_positive | explorer.exe delivery vector replaced with msiexec.exe → vendor `install-deps.ps1`; plausible legitimate software-install ancestry |
-| `chain-reorder` | ×3 | inconclusive | chronological/parent-child ordering inverted; sequence is neither confirmed TP nor benign |
-| `drop-link` | ×3 | inconclusive | sole-evidence stage of the documented chain removed; chain incomplete |
+| `domain-swap` | 6 (a/b × 3 chains) | false_positive | documented C2 domain replaced with a legitimate SaaS domain (`api.dropbox.com` / `graph.microsoft.com`); benign SaaS destination makes the alert a benign-mimic FP |
+| `entity-role-swap` | 6 (mdm/sccm × 3 chains) | false_positive | workstation replaced with a management server (MDM `mdmdaemon.exe` / SCCM `CcmExec.exe` parent); benign-administration explanation for identical process events |
+| `parent-process-spoof` | 3 | false_positive | explorer.exe delivery vector replaced with msiexec.exe → vendor `install-deps.ps1`; plausible legitimate software-install ancestry |
+| `chain-reorder` | 3 | inconclusive | chronological/parent-child ordering inverted; sequence is neither confirmed TP nor benign |
+| `drop-link` | 3 | inconclusive | sole-evidence stage of the documented chain removed; chain incomplete |
+
+> **Label integrity:** the FP labels above are known-contested — mutations rewrite the
+> entity/parent/domain fields but retain the base chain's free-text event messages,
+> which still describe the malicious behavior. See `docs/label-integrity-findings.md`
+> before relying on adversarial_twins FP cases in gated metrics.
 
 ## Discarded mutations (unbroken invariants) — 3
 
