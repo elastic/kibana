@@ -15,7 +15,9 @@ import type {
 
 import type { ServiceAccountWorkloadBindingsApi } from './bindings';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
+import type { ServiceAccountsManagementApi } from './service_accounts_management';
 import type {
+  DeleteServiceAccountResponse,
   ListServiceAccountsResponse,
   ServiceAccountDirectoryEntry,
 } from '../../common/service_accounts';
@@ -53,6 +55,15 @@ export interface ServiceAccountsBackend {
    * Fetches one service account by id, with the same authorization model as {@link list}.
    */
   get(request: KibanaRequest, id: string): Promise<ServiceAccountDirectoryEntry>;
+
+  /**
+   * Deletes one service account, rejecting with a 404 when there is no such account. Requires the
+   * same privilege as {@link create}. Resolves with warnings about anything the delete could not
+   * clean up.
+   *
+   * Leaves the account's workload bindings alone. Checking for them first is the caller's job.
+   */
+  delete(request: KibanaRequest, id: string): Promise<DeleteServiceAccountResponse>;
 
   /**
    * Mints a fake `KibanaRequest` bound to the given service account, for use with `asScoped(...)`
@@ -107,6 +118,9 @@ export interface ServiceAccountsBackend {
 export interface ServiceAccountsServiceStart {
   /** Service account management and credential minting for this deployment's backend. */
   backend: ServiceAccountsBackend;
+
+  /** Operations that span an account and its workload bindings, for the management routes. */
+  management: ServiceAccountsManagementApi;
 
   /**
    * Workload binding management and execution. Consumed exclusively by the Core security

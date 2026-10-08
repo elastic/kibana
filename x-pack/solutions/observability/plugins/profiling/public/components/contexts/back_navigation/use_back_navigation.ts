@@ -10,8 +10,10 @@ import type { AppHeaderBack } from '@kbn/app-header';
 import { useLocation } from 'react-router-dom';
 import type { PathsOf } from '@kbn/typed-react-router-config';
 import { useProfilingDependencies } from '../profiling_dependencies/use_profiling_dependencies';
-import { useProfilingSetupStatus } from '../profiling_setup_status/use_profiling_setup_status';
+import { hasProfilingData } from '../../../utils/has_profiling_data';
+import { useProfilingStatus } from '../profiling_status/use_profiling_status';
 import type { ProfilingRoutes } from '../../../routing';
+import { PROFILING_PATHNAMES } from '../../../routing/pathnames';
 
 // Routes that render a back button in AppHeader.
 // NOTE: This is compared against raw location.pathname, NOT via useProfilingRoutePath(), because
@@ -19,9 +21,9 @@ import type { ProfilingRoutes } from '../../../routing';
 // throws a plain Error when rangeFrom/rangeTo are absent from the URL (they have no defaults in
 // the route codec).
 export const ROUTES_WITH_BACK_NAVIGATION = [
-  '/settings',
-  '/storage-explorer',
-  '/add-data-instructions',
+  PROFILING_PATHNAMES.settings,
+  PROFILING_PATHNAMES.storageExplorer,
+  PROFILING_PATHNAMES.addDataInstructions,
 ] as const satisfies ReadonlyArray<PathsOf<ProfilingRoutes>>;
 
 export const hasBackNavigation = (pathname: string): boolean =>
@@ -36,15 +38,19 @@ export const useBackNavigation = (): AppHeaderBack | undefined => {
   const {
     start: { core },
   } = useProfilingDependencies();
-  const status = useProfilingSetupStatus();
+  const { data } = useProfilingStatus();
 
-  if (!hasBackNavigation(pathname)) {
+  if (!hasBackNavigation(pathname) || !data?.isEnabled) {
     return undefined;
   }
 
-  // No back button on the add data page unless we positively know there is data. While the setup
-  // status is unresolved the button would otherwise render and then vanish once has_data: false lands.
-  if (pathname === '/add-data-instructions' && status.profilingSetupStatus?.has_data !== true) {
+  // No back button on the add data page unless we positively know there is data. While the
+  // status is unresolved the button would otherwise render and then vanish once it reports no data.
+  // With data from before 8.9.1, going back would only redirect to this page again.
+  if (
+    pathname === PROFILING_PATHNAMES.addDataInstructions &&
+    (!hasProfilingData(data) || data.universalProfiling.hasLegacyData)
+  ) {
     return undefined;
   }
 

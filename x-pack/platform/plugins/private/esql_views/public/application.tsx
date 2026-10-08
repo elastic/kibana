@@ -23,7 +23,7 @@ const LazyEsqlEditor = React.lazy(async () => {
 
 export const mountManagementSection = (
   coreStart: CoreStart,
-  { share }: StartDependencies,
+  { data, share }: StartDependencies,
   { element, setBreadcrumbs }: ManagementAppMountParams
 ) => {
   const { docTitle } = coreStart.chrome;
@@ -31,20 +31,29 @@ export const mountManagementSection = (
   setBreadcrumbs([{ text: PLUGIN_NAME }]);
 
   const client = createEsqlViewsManagementClient(coreStart.http);
+  // Anything other than an explicit grant, including a stale or missing feature, hides the control.
   const capabilities = coreStart.application.capabilities[PLUGIN_ID];
+  const isGranted = (capability: keyof typeof ESQL_VIEWS_CAPABILITIES) =>
+    capabilities?.[ESQL_VIEWS_CAPABILITIES[capability]] === true;
   const discoverLocator = share.url.locators.get<DiscoverEsqlLocatorParams>(DISCOVER_APP_LOCATOR);
   const isDiscoverAvailable = Boolean(coreStart.application.capabilities.discover_v2?.show);
   const root = createRoot(element);
   root.render(
     coreStart.rendering.addContext(
       <ManagementApp
-        canCreate={capabilities?.[ESQL_VIEWS_CAPABILITIES.create] === true}
-        canEdit={capabilities?.[ESQL_VIEWS_CAPABILITIES.edit] === true}
+        canCreate={isGranted('create')}
+        canEdit={isGranted('edit')}
+        canDelete={isGranted('delete')}
         client={client}
         isDiscoverAvailable={isDiscoverAvailable}
         discoverLocator={discoverLocator}
         documentationUrl={coreStart.docLinks.links.query.queryESQLViews}
         EsqlEditor={LazyEsqlEditor}
+        previewDependencies={{
+          dataViews: data.dataViews,
+          http: coreStart.http,
+          search: data.search.search,
+        }}
         toasts={coreStart.notifications.toasts}
       />
     )

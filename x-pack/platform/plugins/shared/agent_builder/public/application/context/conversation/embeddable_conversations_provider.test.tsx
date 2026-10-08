@@ -37,7 +37,9 @@ jest.mock('../streaming/streaming_context', () => ({
   StreamingProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 jest.mock('../../../services/events', () => ({
-  ConversationStreamService: class ConversationStreamService {},
+  ConversationStreamService: class ConversationStreamService {
+    dispose() {}
+  },
 }));
 // Rendered by the component but irrelevant here (it has its own dependencies).
 jest.mock('./conversation_change_notifier', () => ({ ConversationChangeNotifier: () => null }));
