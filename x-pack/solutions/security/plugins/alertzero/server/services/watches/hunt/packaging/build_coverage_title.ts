@@ -12,6 +12,9 @@ export const MAX_COVERAGE_TITLE_CHARS = 200;
 /** CE allows 2048; one sentence rarely needs more than this. */
 export const MAX_COVERAGE_DESCRIPTION_CHARS = 300;
 
+/** `Hunt confirmed for <report id>` / `Hunt complete for <report id>`, the mapper's fallback title. */
+const GENERIC_FINDING_TITLE = /^Hunt (confirmed|complete) for /;
+
 /** The technique's own name or id, or the label the SSE title already carries as a prefix. */
 const isOnlyTechniqueLabel = (phrase: string, techniqueId: string, techniqueName?: string) => {
   const normalized = phrase.toLowerCase();
@@ -32,12 +35,18 @@ export const findingPhrase = ({
   hypothesis,
   techniqueId,
   techniqueName,
+  reportTitle,
 }: {
   sseTitle: string;
   hypothesis?: string;
   techniqueId?: string;
   techniqueName?: string;
+  reportTitle?: string;
 }): string => {
+  // The mapper's fallback title for a finding with no behavior names the report by id.
+  if (GENERIC_FINDING_TITLE.test(sseTitle)) {
+    return reportTitle ?? (hypothesis ? firstSentence(hypothesis) : 'Hunt finding');
+  }
   const stripped = stripFindingTitle(sseTitle);
   const redundant =
     techniqueId !== undefined && isOnlyTechniqueLabel(stripped, techniqueId, techniqueName);

@@ -265,4 +265,67 @@ describe('deriveCoverageSubjects', () => {
       ['T1110.003', ['logs-okta.system-*'], 'FROM logs-okta.system-*\n| LIMIT 5'],
     ]);
   });
+
+  describe('hit events and data sources', () => {
+    const PACK_INDEX = 'logs-endpoint.events.c4d1e7d4.2026.10.08';
+
+    it('prefers the events matched to the technique over unmatched shared IOC events', () => {
+      const [subject] = derive(
+        hitState({
+          findings: [
+            finding({
+              eventRefs: [
+                { index: CLOUDTRAIL_BACKING },
+                {
+                  index: '.ds-logs-endpoint.events.process-default-2026.10.08-000001',
+                  techniqueId: 'T1078.004',
+                },
+              ],
+            }),
+          ],
+        })
+      );
+
+      expect(subject.dataSources).toEqual(['logs-endpoint.events.process-*']);
+    });
+
+    it('omits data sources when the technique hit events that name no dataset', () => {
+      const [subject] = derive(
+        hitState({
+          findings: [finding({ eventRefs: [{ index: PACK_INDEX, techniqueId: 'T1078.004' }] })],
+          coordinator: {
+            tier2Targets: ['logs-aws.cloudtrail-*'],
+            actionableIndices: [],
+          },
+        })
+      );
+
+      expect(subject.dataSources).toEqual([]);
+    });
+  });
+
+  describe('a finding with the generic mapper title', () => {
+    const genericState = () =>
+      hitState({
+        techniques: [],
+        corroboratedTechniques: [],
+        findings: [
+          finding({
+            title: 'Hunt confirmed for ti-report-aws-iam-ioc-only-historic-10',
+            hypothesis: undefined,
+            corroboratedTechniqueId: undefined,
+            behaviors: [],
+          }),
+        ],
+        reportContext: { title: 'Indicator bulletin: mailbox and IP join keys' },
+      });
+
+    it('uses the report title as the headline', () => {
+      expect(derive(genericState())[0].title).toBe('Indicator bulletin: mailbox and IP join keys');
+    });
+
+    it('does not put the report id in the headline', () => {
+      expect(derive(genericState())[0].title).not.toContain('ti-report');
+    });
+  });
 });

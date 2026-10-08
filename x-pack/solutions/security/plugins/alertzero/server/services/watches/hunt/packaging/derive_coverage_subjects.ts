@@ -51,6 +51,9 @@ export type CoverageSubjectState = Pick<
     reportContext?: ReportHuntContext;
   };
 
+const firstNonEmpty = (...lists: string[][]): string[] =>
+  lists.find((list) => list.length > 0) ?? [];
+
 /** The finding a subject is about: the one that corroborated its technique, else the report-scoped one. */
 const pickFinding = (
   findings: CurrentRunFinding[],
@@ -60,7 +63,13 @@ const pickFinding = (
     ? findings.find((finding) => finding.corroboratedTechniqueId === undefined) ?? findings[0]
     : findings.find((finding) => finding.corroboratedTechniqueId === techniqueId);
 
-/** Source event indices attributed to a technique, or the report-scoped finding's whole hit set. */
+/**
+ * Source event indices attributed to a technique, or the report-scoped finding's whole hit set.
+ * Events the hunt matched to the technique come first. Events with no technique (Tier 1 IOC
+ * hits, which ride along on every technique's SSE as shared context) only count when the
+ * technique has none of its own, so a CloudTrail IOC hit does not become the data source of a
+ * process technique.
+ */
 const hitIndices = ({
   findings,
   finding,
@@ -69,18 +78,20 @@ const hitIndices = ({
   findings: CurrentRunFinding[];
   finding: CurrentRunFinding;
   techniqueId: string | undefined;
-}): string[] =>
-  techniqueId === undefined
-    ? [...finding.eventRefs.map((ref) => ref.index), ...finding.tier1Indices]
-    : findings.flatMap((candidate) =>
-        candidate.eventRefs
-          .filter(
-            (ref) =>
-              ref.techniqueId === techniqueId ||
-              (ref.techniqueId === undefined && candidate.corroboratedTechniqueId === techniqueId)
-          )
-          .map((ref) => ref.index)
-      );
+}): string[] => {
+  if (techniqueId === undefined) {
+    return [...finding.eventRefs.map((ref) => ref.index), ...finding.tier1Indices];
+  }
+  const matched = findings.flatMap((candidate) =>
+    candidate.eventRefs.filter((ref) => ref.techniqueId === techniqueId).map((ref) => ref.index)
+  );
+  if (matched.length > 0) return matched;
+  return findings.flatMap((candidate) =>
+    candidate.corroboratedTechniqueId === techniqueId
+      ? candidate.eventRefs.filter((ref) => ref.techniqueId === undefined).map((ref) => ref.index)
+      : []
+  );
+};
 
 /**
  * One coverage subject per technique on the current run; report-scoped when the run named no
@@ -128,22 +139,19 @@ export const deriveCoverageSubjects = ({
         ? behaviors.length
         : behaviors.filter((behavior) => behavior.techniqueId === techniqueId).length;
 
-    const eventSources = finding
-      ? eventDataSources(hitIndices({ findings, finding, techniqueId }))
-      : [];
-    const reportIntent =
-      eventSources.length > 0
-        ? []
-        : reportIntentDataSources({ tier2Targets, actionableIndices, behaviors });
+    const hitRefIndices = finding ? hitIndices({ findings, finding, techniqueId }) : [];
+    // Hit events that exist but name no dataset (plain pack indices) leave `data_sources`
+    // empty: the report's own streams would be a guess about where the technique hit.
     const dataSources =
-      eventSources.length > 0
-        ? eventSources
-        : reportIntent.length > 0
-        ? reportIntent
-        : vendorFallbackDataSources({
-            vendor: state.reportContext?.vendor,
-            product: state.reportContext?.product,
-          });
+      hitRefIndices.length > 0
+        ? eventDataSources(hitRefIndices)
+        : firstNonEmpty(
+            reportIntentDataSources({ tier2Targets, actionableIndices, behaviors }),
+            vendorFallbackDataSources({
+              vendor: state.reportContext?.vendor,
+              product: state.reportContext?.product,
+            })
+          );
 
     const hypothesis = finding?.hypothesis;
     const evidenceQuote = selectedEsql.behavior?.evidenceQuote;
@@ -162,6 +170,7 @@ export const deriveCoverageSubjects = ({
           hypothesis: hypothesis ?? evidenceQuote,
           techniqueId,
           techniqueName,
+          reportTitle: state.reportContext?.title,
         })
       : state.reportContext?.title ?? 'Threat report with no environment hit';
 
