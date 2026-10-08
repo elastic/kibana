@@ -34,6 +34,14 @@ describe('isAlertingV2Enabled', () => {
     expect(isAlertingV2Enabled(core)).toBe(false);
   });
 
+  it('resolves to the registered default when no user value is set', () => {
+    // Mirrors the settings client: a fallback passed to `get` wins over the registered default.
+    core.settings.globalClient.get = <T>(_key: string, defaultOverride?: T) =>
+      (defaultOverride !== undefined ? defaultOverride : true) as T;
+
+    expect(isAlertingV2Enabled(core)).toBe(true);
+  });
+
   it('returns false when alerting v2 is not set', () => {
     core.settings.globalClient.get = <T>(_key: string) => undefined as T;
 

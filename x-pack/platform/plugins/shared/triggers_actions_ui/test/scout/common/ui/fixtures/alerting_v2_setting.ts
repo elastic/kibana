@@ -20,3 +20,12 @@ export const setAlertingV2Enabled = (kbnClient: KbnClient, enabled: boolean) =>
     headers: { 'kbn-xsrf': 'scout' },
     body: { value: enabled },
   });
+
+/** Deleting the user value restores the registered default, which is on. */
+export const resetAlertingV2Enabled = (kbnClient: KbnClient) =>
+  kbnClient.request({
+    method: 'DELETE',
+    path: ALERTING_V2_ENABLED_GLOBAL_SETTING_PATH,
+    headers: { 'kbn-xsrf': 'scout' },
+    ignoreErrors: [404],
+  });
