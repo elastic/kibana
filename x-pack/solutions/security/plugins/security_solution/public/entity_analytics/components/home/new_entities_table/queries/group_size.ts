@@ -23,8 +23,12 @@ import {
   buildSortSuffix,
   buildCursorClause,
   esc,
+  buildEntitiesInViewCountQuery,
+  buildEntitiesInViewSteps,
+  buildMergedForeignSortQuery,
 } from '../common';
 import type {
+  EsqlRunner,
   QueryArgs,
   PageEnricher,
   Row,
@@ -33,29 +37,11 @@ import type {
   SortDir,
   SortPageContext,
 } from '../common';
-import { shouldSplitSort } from './split_sort';
+import { SPLIT_SORT_MIN_VIEW_SIZE } from './split_sort';
 
 const GROUP_KEY = `COALESCE(${RESOLVED_TO_FIELD}, ${ENTITY_ID_FIELD})`;
 
 // ── sort queries ──────────────────────────────────────────────────────────────
-
-/**
- * Counts entities per resolution group, keyed by the target's `entity.id`.
- * The search expression filters the members. A group matches when any member matches,
- * even when the target does not. The inner FROM is the entity index, so KQL is valid.
- */
-const buildGroupSizeBaseQuery = (
-  { namespace, searchExpression }: QueryArgs,
-  countColumn: string
-): string =>
-  [
-    `FROM ${entityAliasOf(namespace)}`,
-    `| WHERE ${ENTITY_TYPE_FILTER}`,
-    ...buildFilterClause(searchExpression),
-    `| EVAL group_key = ${GROUP_KEY}`,
-    `| STATS ${countColumn} = COUNT(*) BY group_key`,
-    `| RENAME group_key AS \`entity.id\``,
-  ].join('\n');
 
 /**
  * Unfiltered page: sort and limit the groups first, then join only the page rows. The join
@@ -136,19 +122,22 @@ const buildAliasFirstGroupSizeSortQuery = (args: QueryArgs): string => {
 };
 
 /**
- * A search applies to every member, so the size counts matching members and a target that does
- * not match still heads a group. A search cannot run after a join, so it keeps the join-first query.
+ * A search picks the rows, like it does for every sort: the targets that match. It doesn't
+ * change their values, so each row keeps the size of its whole group and stays expandable.
+ * KQL can't run after a join, so the targets in view merge with the sizes of every group.
  */
 const buildSearchGroupSizeSortQuery = (args: QueryArgs): string =>
-  [
-    `FROM (\n${buildGroupSizeBaseQuery(args, GROUP_SIZE_FIELD)}\n)`,
-    buildLookupJoinClause(args.concreteEntityIndexName),
-    `| WHERE ${ENTITY_TYPE_FILTER}`,
-    ...buildFilterClause(args.entityExpression),
-    buildKeepClause(args, GROUP_SIZE_FIELD),
-    ...buildCursorClause(args.cursor),
-    buildSortSuffix(GROUP_SIZE_FIELD, args.sort.direction, args.pageSize),
-  ].join('\n');
+  buildMergedForeignSortQuery(args, {
+    foreignRows: [
+      `FROM ${entityAliasOf(args.namespace)}`,
+      `| WHERE ${ENTITY_TYPE_FILTER}`,
+      `| EVAL group_key = ${GROUP_KEY}`,
+      `| STATS ${GROUP_SIZE_FIELD} = COUNT(*) BY group_key`,
+      '| RENAME group_key AS `entity.id`',
+    ],
+    mergeAggregations: [`${GROUP_SIZE_FIELD} = MAX(${GROUP_SIZE_FIELD})`],
+    sortField: GROUP_SIZE_FIELD,
+  });
 
 const buildGroupSizeSortQuery = (args: QueryArgs): string => {
   if (args.searchExpression) return buildSearchGroupSizeSortQuery(args);
@@ -178,15 +167,13 @@ const buildAliasGroupsQuery = (args: QueryArgs): string =>
   ].join('\n');
 
 /**
- * Entities in view that are not aliases, as groups of one, after `afterId` by entity.id. A top
- * level query, so Lucene sorts and limits it; inside a FROM subquery it reads every entity.id.
- * Some of them head a group with aliases, so callers ask for that many extra rows.
+ * Entities in view, as groups of one, after `afterId` by entity.id. A top level query, so
+ * Lucene sorts and limits it; inside a FROM subquery it reads every entity.id. Some of them
+ * head a group with aliases, so callers ask for that many extra rows.
  */
 const buildSingleEntitiesQuery = (args: QueryArgs, afterId: string | null, limit: number) =>
   [
-    `FROM ${entityAliasOf(args.namespace)}`,
-    `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NULL`,
-    ...buildFilterClause(args.entityExpression),
+    ...buildEntitiesInViewSteps(args),
     ...(afterId != null ? [`| WHERE ${ENTITY_ID_FIELD} > ${esc(afterId)}`] : []),
     `| SORT ${ENTITY_ID_FIELD} ASC`,
     `| LIMIT ${limit}`,
@@ -214,21 +201,128 @@ const isAfterCursor =
     return cursor.sortDirection === 'desc' ? size < cursor.sortValue : size > cursor.sortValue;
   };
 
-/**
- * One page of rows plus one for views of SPLIT_SORT_MIN_VIEW_SIZE entities or more, without a
- * search: the groups with aliases and a page of single entities, merged here. Grouping every
- * entity in one query took about 20s for 10M entities on ECH; this takes 2–5s. Smaller views
- * and searches keep the single query.
- */
-const runGroupSizeSortPage = async (
-  args: QueryArgs,
-  { runQuery, viewSize }: SortPageContext
-): Promise<Row[]> => {
-  if (!shouldSplitSort(args, viewSize)) return runQuery(buildGroupSizeSortQuery(args));
+/** Most targets a search page reads directly; above it, it reads the groups with aliases. */
+const MAX_DIRECT_TARGETS = 10_000;
 
-  const groups = await runQuery(buildAliasGroupsQuery(args));
-  if (groups.length > MAX_ALIAS_GROUPS) return runQuery(buildGroupSizeSortQuery(args));
-  const groupIds = new Set(entityIdsOf(groups));
+/** Ids per IN list: ids run to about 100 characters, and an ES|QL statement is capped at 1MB. */
+const ID_LIST_CHUNK_SIZE = 2_000;
+
+/** Runs one query per chunk of ids, in parallel, and concatenates the rows. */
+const runPerIdChunk = async (
+  runQuery: EsqlRunner,
+  ids: readonly string[],
+  buildQuery: (chunk: readonly string[]) => string
+): Promise<Row[]> => {
+  const chunks: Array<readonly string[]> = [];
+  for (let i = 0; i < ids.length; i += ID_LIST_CHUNK_SIZE) {
+    chunks.push(ids.slice(i, i + ID_LIST_CHUNK_SIZE));
+  }
+  return (await Promise.all(chunks.map((chunk) => runQuery(buildQuery(chunk))))).flat();
+};
+
+/** Size of the whole group of each target: its aliases and itself. */
+const buildGroupSizesQuery = ({ namespace }: QueryArgs, targetIds: readonly string[]): string => {
+  const ids = toList(targetIds);
+  return [
+    `FROM ${entityAliasOf(namespace)}`,
+    `| WHERE ${ENTITY_TYPE_FILTER}`,
+    `| WHERE ${RESOLVED_TO_FIELD} IN (${ids}) OR (${ENTITY_ID_FIELD} IN (${ids}) AND ${RESOLVED_TO_FIELD} IS NULL)`,
+    `| EVAL group_key = ${GROUP_KEY}`,
+    `| STATS ${GROUP_SIZE_FIELD} = COUNT(*) BY group_key`,
+    '| RENAME group_key AS `entity.id`',
+    `| LIMIT ${targetIds.length}`,
+  ].join('\n');
+};
+
+/** The targets among `targetIds` that the search matches. */
+const buildSearchedTargetsQuery = (args: QueryArgs, targetIds: readonly string[]): string =>
+  [
+    ...buildEntitiesInViewSteps(args),
+    `| WHERE ${ENTITY_ID_FIELD} IN (${toList(targetIds)})`,
+    `| KEEP \`entity.id\``,
+    `| LIMIT ${targetIds.length}`,
+  ].join('\n');
+
+/** Adds the entity fields to the page rows in `ids`, which carry only id and size. */
+const withEntityDocs = async (
+  args: QueryArgs,
+  runQuery: EsqlRunner,
+  page: Row[],
+  ids: ReadonlySet<string>
+): Promise<Row[]> => {
+  const pageIds = entityIdsOf(page).filter((id) => ids.has(id));
+  if (!pageIds.length) return page;
+  const docs = await runQuery(
+    [
+      `FROM ${entityAliasOf(args.namespace)}`,
+      `| WHERE ${ENTITY_ID_FIELD} IN (${toList(pageIds)})`,
+      buildKeepClause(args),
+    ].join('\n')
+  );
+  const docsById = new Map(docs.map((doc) => [getEntityId(doc), doc]));
+  return page.map((row) => {
+    const id = getEntityId(row);
+    return id != null && ids.has(id) ? { ...docsById.get(id), ...row } : row;
+  });
+};
+
+const pageOf = (rows: Row[], { sort, cursor, pageSize }: QueryArgs): Row[] =>
+  rows
+    .sort(compareGroups(sort.direction))
+    .filter(isAfterCursor(cursor))
+    .slice(0, pageSize + 1);
+
+/**
+ * A search that matches few targets: read them, then the size of just their groups. Faster
+ * the narrower the search (about 0.6s for one name on a 10M-entity ECH). `null` when the
+ * search matches more than MAX_DIRECT_TARGETS targets.
+ */
+const runSearchedTargetsPage = async (
+  args: QueryArgs,
+  runQuery: EsqlRunner
+): Promise<Row[] | null> => {
+  const targets = await runQuery(
+    [
+      ...buildEntitiesInViewSteps(args),
+      `| KEEP \`entity.id\``,
+      `| LIMIT ${MAX_DIRECT_TARGETS + 1}`,
+    ].join('\n')
+  );
+  const targetIds = entityIdsOf(targets);
+  if (targetIds.length > MAX_DIRECT_TARGETS) return null;
+
+  const sizes = await runPerIdChunk(runQuery, targetIds, (chunk) =>
+    buildGroupSizesQuery(args, chunk)
+  );
+  const sizeById = new Map(sizes.map((row) => [getEntityId(row), groupSizeOf(row)]));
+  const page = pageOf(
+    targetIds.map((id) => ({ [ENTITY_ID_FIELD]: id, [GROUP_SIZE_FIELD]: sizeById.get(id) ?? 1 })),
+    args
+  );
+  return withEntityDocs(args, runQuery, page, new Set(targetIds));
+};
+
+/**
+ * The groups with aliases and a page of single entities, merged here. With a search, only
+ * the groups whose target matches it. Grouping every entity in one query took about 20s for
+ * 10M entities on ECH; this takes 2–5s.
+ */
+const runAliasGroupsPage = async (args: QueryArgs, runQuery: EsqlRunner): Promise<Row[]> => {
+  const aliasGroups = await runQuery(buildAliasGroupsQuery(args));
+  if (aliasGroups.length > MAX_ALIAS_GROUPS) return runQuery(buildGroupSizeSortQuery(args));
+  const aliasGroupIds = new Set(entityIdsOf(aliasGroups));
+
+  // KQL can't run after the join in the alias groups query: check their targets separately.
+  const searchedIds = args.searchExpression
+    ? new Set(
+        entityIdsOf(
+          await runPerIdChunk(runQuery, [...aliasGroupIds], (chunk) =>
+            buildSearchedTargetsQuery(args, chunk)
+          )
+        )
+      )
+    : aliasGroupIds;
+  const groups = aliasGroups.filter((row) => searchedIds.has(getEntityId(row) ?? ''));
 
   const { cursor } = args;
   const limit = args.pageSize + 1;
@@ -242,52 +336,30 @@ const runGroupSizeSortPage = async (
   // Single entities sort by entity.id: only a cursor among them skips some.
   const afterId = cursor?.sortValue === 1 ? cursor.entityId : null;
   const singles = needsSingles
-    ? (await runQuery(buildSingleEntitiesQuery(args, afterId, limit + groupIds.size)))
+    ? (await runQuery(buildSingleEntitiesQuery(args, afterId, limit + aliasGroupIds.size)))
         // A target with aliases is in `groups` with its full size.
-        .filter((row) => !groupIds.has(getEntityId(row) ?? ''))
+        .filter((row) => !aliasGroupIds.has(getEntityId(row) ?? ''))
     : [];
 
-  const page = [...groups, ...singles]
-    .sort(compareGroups(args.sort.direction))
-    .filter(isAfterCursor(cursor))
-    .slice(0, limit);
-
-  // Entity fields of the page's groups with aliases.
-  const pageGroupIds = entityIdsOf(page).filter((id) => groupIds.has(id));
-  if (!pageGroupIds.length) return page;
-  const docs = await runQuery(
-    [
-      `FROM ${entityAliasOf(args.namespace)}`,
-      `| WHERE ${ENTITY_ID_FIELD} IN (${toList(pageGroupIds)})`,
-      buildKeepClause(args),
-    ].join('\n')
-  );
-  const docsById = new Map(docs.map((doc) => [getEntityId(doc), doc]));
-  return page.map((row) => {
-    const id = getEntityId(row);
-    return id != null && groupIds.has(id) ? { ...docsById.get(id), ...row } : row;
-  });
+  return withEntityDocs(args, runQuery, pageOf([...groups, ...singles], args), searchedIds);
 };
 
 /**
- * Without a search, there is one group per target or standalone entity, and entity filters
- * apply to it: no aggregation or join needed.
+ * One page of rows plus one. A search reads its targets directly, or the groups with aliases
+ * when it matches many: the single search query groups every entity in the store, however
+ * few rows the search keeps. Without a search, views of SPLIT_SORT_MIN_VIEW_SIZE entities or
+ * more read the page in parts, and smaller views keep the single query.
  */
-const buildGroupSizeCountQuery = (args: QueryArgs): string =>
-  args.searchExpression
-    ? [
-        `FROM (\n${buildGroupSizeBaseQuery(args, '_c')}\n)`,
-        buildLookupJoinClause(args.concreteEntityIndexName),
-        `| WHERE ${ENTITY_TYPE_FILTER}`,
-        ...buildFilterClause(args.entityExpression),
-        `| STATS total = COUNT(*)`,
-      ].join('\n')
-    : [
-        `FROM ${entityAliasOf(args.namespace)}`,
-        `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NULL`,
-        ...buildFilterClause(args.entityExpression),
-        `| STATS total = COUNT(*)`,
-      ].join('\n');
+const runGroupSizeSortPage = async (
+  args: QueryArgs,
+  { runQuery, viewSize }: SortPageContext
+): Promise<Row[]> => {
+  if (args.searchExpression) {
+    return (await runSearchedTargetsPage(args, runQuery)) ?? runAliasGroupsPage(args, runQuery);
+  }
+  if (viewSize < SPLIT_SORT_MIN_VIEW_SIZE) return runQuery(buildGroupSizeSortQuery(args));
+  return runAliasGroupsPage(args, runQuery);
+};
 
 // ── enrichment ────────────────────────────────────────────────────────────────
 
@@ -330,7 +402,8 @@ const groupSizeEnricher: PageEnricher = {
 export const groupSizeQuerySpec = {
   sort: {
     buildSortQuery: buildGroupSizeSortQuery,
-    buildCountQuery: buildGroupSizeCountQuery,
+    // One row per target in view, like every other sort.
+    buildCountQuery: buildEntitiesInViewCountQuery,
     runSortPage: runGroupSizeSortPage,
   },
   enricher: groupSizeEnricher,

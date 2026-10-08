@@ -164,6 +164,13 @@ describe('entities grid query builders', () => {
         'a page after an empty value',
         { sort: { field: sortField, direction: 'desc' }, cursor: emptyCursor },
       ],
+      [
+        'the first page with a search',
+        {
+          sort: { field: sortField, direction: 'desc' },
+          searchExpression: 'KQL("""entity.name: host-001-payments-db""")',
+        },
+      ],
     ] as const)('runs the queries of %s', async (_name, overrides) => {
       const runQuery = jest.fn(
         async (_query: string): Promise<Row[]> => [{ 'entity.id': 'host:h-1', [sortField]: 3 }]

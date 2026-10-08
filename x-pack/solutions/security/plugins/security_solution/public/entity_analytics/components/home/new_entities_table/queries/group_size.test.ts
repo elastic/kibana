@@ -22,16 +22,43 @@ const baseArgs: QueryArgs = {
   anomalyJobIds: ['security_auth_rare_user'],
 };
 
+const SEARCH = 'KQL("""entity.name: x""")';
+
 const group = (id: string, size: number): Row => ({ 'entity.id': id, group_size: size });
 const single = (id: string): Row => ({ 'entity.id': id, group_size: 1, 'entity.name': id });
 
+interface SearchFixtures {
+  /** Targets that the search matches. */
+  targets?: Row[];
+  /** Full group sizes by target. */
+  sizes?: Row[];
+  /** Targets of the groups with aliases that the search matches. */
+  searched?: Row[];
+}
+
 /** Answers each query kind from fixtures and records which kinds ran. */
-const fakeRunner = (groups: Row[], singles: Row[]) => {
+const fakeRunner = (
+  groups: Row[],
+  singles: Row[],
+  { targets = [], sizes = [], searched = [] }: SearchFixtures = {}
+) => {
   const kinds: string[] = [];
   const runQuery = async (query: string): Promise<Row[]> => {
     if (query.includes('alias_count')) {
       kinds.push('groups');
       return groups;
+    }
+    if (query.includes('STATS group_size = COUNT(*) BY group_key')) {
+      kinds.push('sizes');
+      return sizes;
+    }
+    if (query.includes('KEEP `entity.id`') && query.includes('entity.id IN (')) {
+      kinds.push('searched');
+      return searched;
+    }
+    if (query.includes('KEEP `entity.id`')) {
+      kinds.push('targets');
+      return targets;
     }
     if (query.includes('TO_LONG(1)')) {
       kinds.push('singles');
@@ -41,7 +68,7 @@ const fakeRunner = (groups: Row[], singles: Row[]) => {
     }
     if (query.includes('entity.id IN (')) {
       kinds.push('docs');
-      return groups.map((g) => ({
+      return [...groups, ...targets].map((g) => ({
         'entity.id': g['entity.id'],
         'entity.name': `${g['entity.id']} name`,
       }));
@@ -58,11 +85,37 @@ const runPage = (args: QueryArgs, runQuery: (q: string) => Promise<Row[]>, viewS
 const ids = (rows: Row[]) => rows.map((r) => r['entity.id']);
 
 describe('group size sort page', () => {
-  it('runs the single query for small views and for search', async () => {
+  it('runs the single query for small views without a search', async () => {
     const { runQuery, kinds } = fakeRunner([], []);
     await runPage(baseArgs, runQuery, 10);
-    await runPage({ ...baseArgs, searchExpression: 'KQL("""x""")' }, runQuery);
-    expect(kinds).toEqual(['general', 'general']);
+    expect(kinds).toEqual(['general']);
+  });
+
+  it('reads the targets a search matches with the size of their whole groups', async () => {
+    const { runQuery, kinds } = fakeRunner([], [], {
+      targets: [{ 'entity.id': 'a' }, { 'entity.id': 't' }],
+      sizes: [
+        { 'entity.id': 't', group_size: 3 },
+        { 'entity.id': 'a', group_size: 1 },
+      ],
+    });
+    // A small view: the single search query would group every entity in the store.
+    const rows = await runPage({ ...baseArgs, searchExpression: SEARCH }, runQuery, 1);
+    expect(rows).toEqual([
+      { 'entity.id': 't', 'entity.name': 't name', group_size: 3 },
+      { 'entity.id': 'a', 'entity.name': 'a name', group_size: 1 },
+    ]);
+    expect(kinds).toEqual(['targets', 'sizes', 'docs']);
+  });
+
+  it('keeps the groups with aliases whose target a broad search matches', async () => {
+    const { runQuery, kinds } = fakeRunner([group('t', 3), group('u', 2)], [single('a')], {
+      targets: Array.from({ length: 10_001 }, (_, i) => ({ 'entity.id': `e${i}` })),
+      searched: [{ 'entity.id': 'u' }],
+    });
+    const rows = await runPage({ ...baseArgs, searchExpression: SEARCH }, runQuery);
+    expect(ids(rows)).toEqual(['u', 'a']);
+    expect(kinds).toEqual(['targets', 'groups', 'searched', 'singles', 'docs']);
   });
 
   it('reads only the groups with aliases when they fill the page, descending', async () => {
