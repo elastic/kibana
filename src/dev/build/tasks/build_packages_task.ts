@@ -25,6 +25,7 @@ import execa from 'execa';
 import type { Task } from '../lib';
 import { deleteAll, scanCopy, write } from '../lib';
 import type { Record } from '../lib/fs_records';
+import { bundlePluginServer } from './bundle_plugin_server';
 import { fleetBuildTasks } from './fleet';
 
 const distPerms = (rec: Record) => (rec.type === 'file' ? 0o644 : 0o755);
@@ -349,6 +350,10 @@ export const BuildPackages: Task = {
         if (pkg.manifest.id === '@kbn/fleet-plugin') {
           // run fleet-specific build tasks
           await fleetBuildTasks(pkgDistPath, log, config);
+        }
+
+        if (pkg.isPlugin()) {
+          await bundlePluginServer(pkgDistPath);
         }
 
         log.info(`Copied`, pkg.manifest.id, 'into build');
