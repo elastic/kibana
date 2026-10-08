@@ -25,7 +25,7 @@ export async function createEsqlSource({
   projectRoutingFallback?: string;
   timeRange?: { from: string; to: string };
   esqlVariables?: ESQLControlVariable[];
-  timeFieldName?: string;
+  timeFieldName?: string | null;
 }): Promise<EsqlSource> {
   const projectRouting =
     getProjectRoutingFromEsqlQuery(esql) ?? projectRoutingFallback ?? undefined;

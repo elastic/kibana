@@ -274,6 +274,7 @@ async function renderComponent(
   return {
     result,
     user,
+    toolkit,
   };
 }
 
@@ -596,6 +597,44 @@ describe('discover responsive sidebar', function () {
     expect(screen.getByTestId('fieldListGrouped__ariaDescription')).toHaveTextContent(
       '2 selected fields. 3 available fields.'
     );
+  });
+
+  it('allows choosing another ES|QL time field or no time field', async () => {
+    const { user, toolkit } = await renderComponent(
+      {
+        ...props,
+        fieldListVariant: 'list-always',
+        documents$: new BehaviorSubject({
+          fetchStatus: FetchStatus.COMPLETE,
+          result: getDataTableRecords(stubLogstashDataView),
+          dataSource: createMockEsqlSource(
+            [{ name: 'event.created', type: 'date', source: 'index' }],
+            [
+              { id: '1', name: '@timestamp', meta: { type: 'date' } },
+              { id: '2', name: 'message', meta: { type: 'string' } },
+            ],
+            '@timestamp'
+          ),
+        }) as DataDocuments$,
+      },
+      { query: { esql: 'FROM logs-*' } }
+    );
+
+    const selector = screen.getByTestId('discoverEsqlTimeFieldSelect');
+    expect(within(selector).queryByRole('option', { name: 'message' })).not.toBeInTheDocument();
+    await screen.findByRole('option', { name: 'event.created' });
+
+    await user.selectOptions(selector, 'field:event.created');
+    expect(toolkit.getCurrentTab().appState.dataSource).toEqual({
+      type: 'esql',
+      timeFieldName: 'event.created',
+    });
+
+    await user.selectOptions(selector, 'none');
+    expect(toolkit.getCurrentTab().appState.dataSource).toEqual({
+      type: 'esql',
+      timeFieldName: null,
+    });
   });
 
   it('should render correctly unmapped fields', async () => {

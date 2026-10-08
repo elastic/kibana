@@ -29,6 +29,7 @@ export async function resolveEsqlSource({
   timeRange,
   previousSourceId,
   projectRoutingFallback,
+  timeFieldName,
 }: {
   esql: string;
   services: DiscoverServices;
@@ -36,6 +37,7 @@ export async function resolveEsqlSource({
   timeRange?: { from: string; to: string };
   previousSourceId?: string;
   projectRoutingFallback?: string;
+  timeFieldName?: string | null;
 }): Promise<{ esqlSource: EsqlSource; dataView: DataView }> {
   const esqlSource = await createEsqlSource({
     esql,
@@ -43,6 +45,7 @@ export async function resolveEsqlSource({
     projectRoutingFallback: projectRoutingFallback ?? services.cps?.cpsManager?.getProjectRouting(),
     timeRange: timeRange ?? services.data.query.timefilter.timefilter.getTime(),
     esqlVariables,
+    timeFieldName,
   });
 
   if (previousSourceId && previousSourceId !== esqlSource.id) {

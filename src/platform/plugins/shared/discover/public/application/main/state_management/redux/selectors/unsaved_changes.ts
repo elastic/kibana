@@ -292,6 +292,7 @@ const TAB_COMPARATORS: TabComparators = {
   documentsDisplayMode: fieldComparator('documentsDisplayMode', 'table'),
   jsonModeSettings: fieldComparator('jsonModeSettings', {}),
   esqlApproximation: fieldComparator('esqlApproximation', false),
+  esqlTimeFieldName: fieldComparator('esqlTimeFieldName', undefined),
   visContext: visContextComparator,
   controlGroupJson: controlGroupComparator,
   tabTypeState: fieldComparator('tabTypeState', undefined),

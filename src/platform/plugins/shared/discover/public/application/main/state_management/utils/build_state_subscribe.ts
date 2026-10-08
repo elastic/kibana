@@ -56,6 +56,14 @@ export const buildStateSubscribe =
     const prevState = getCurrentTab().previousAppState;
     const isEsqlMode = isDataSourceType(nextState.dataSource, DataSourceType.Esql);
     const queryChanged = !isEqual(nextState.query, prevState.query);
+    const esqlTimeFieldName = isDataSourceType(nextState.dataSource, DataSourceType.Esql)
+      ? nextState.dataSource.timeFieldName
+      : undefined;
+    const esqlTimeFieldChanged =
+      isEsqlMode &&
+      (isDataSourceType(prevState.dataSource, DataSourceType.Esql)
+        ? prevState.dataSource.timeFieldName
+        : undefined) !== esqlTimeFieldName;
     const queryLanguageChanged =
       isEsqlMode !== isDataSourceType(prevState.dataSource, DataSourceType.Esql);
     // Capture before reset() so a later ES|QL transition does not look uninitialized
@@ -63,12 +71,22 @@ export const buildStateSubscribe =
     const isUninitialized =
       dataState.data$.main$.getValue().fetchStatus === FetchStatus.UNINITIALIZED;
 
-    if (isEsqlMode && prevState.viewMode !== nextState.viewMode && !queryChanged) {
+    if (
+      isEsqlMode &&
+      prevState.viewMode !== nextState.viewMode &&
+      !queryChanged &&
+      !esqlTimeFieldChanged
+    ) {
       addLog('[appstate] subscribe $fetch ignored for es|ql', { prevState, nextState });
       return;
     }
 
-    if (isEsqlMode && isEqualState(prevState, nextState, ['dataSource']) && !queryChanged) {
+    if (
+      isEsqlMode &&
+      isEqualState(prevState, nextState, ['dataSource']) &&
+      !queryChanged &&
+      !esqlTimeFieldChanged
+    ) {
       // When there's a switch from data view to es|ql, this just leads to a cleanup of index
       // And there's no subsequent action in this function required
       addLog('[appstate] subscribe update ignored for es|ql', { prevState, nextState });
@@ -89,7 +107,11 @@ export const buildStateSubscribe =
       }
     }
 
-    if (isEsqlMode && queryChanged && isNonEmptyEsqlQuery(nextState.query)) {
+    if (
+      isEsqlMode &&
+      (queryChanged || esqlTimeFieldChanged) &&
+      isNonEmptyEsqlQuery(nextState.query)
+    ) {
       const tabId = getCurrentTab().id;
       const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
       const previousSource = currentDataSource$.getValue();
@@ -99,6 +121,7 @@ export const buildStateSubscribe =
         esqlVariables: getCurrentTab().esqlVariables,
         timeRange: services.data.query.timefilter.timefilter.getTime(),
         previousSourceId: previousSource?.kind === 'esql' ? previousSource.id : undefined,
+        timeFieldName: esqlTimeFieldName,
       });
       dispatch(internalStateActions.assignNextDataSource({ tabId, dataSource: esqlSource }));
     }
@@ -183,6 +206,7 @@ export const buildStateSubscribe =
       docTableSortChanged ||
       dataSourceChanged ||
       queryChanged ||
+      esqlTimeFieldChanged ||
       approximationChanged
     ) {
       const logData = {

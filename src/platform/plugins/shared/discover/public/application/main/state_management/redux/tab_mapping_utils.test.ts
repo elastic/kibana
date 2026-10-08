@@ -11,6 +11,7 @@ import { omit } from 'lodash';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
+import { DataSourceType } from '../../../../../common/data_sources';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
@@ -78,6 +79,28 @@ const tab2 = getTabStateMock({
 
 describe('tab mapping utils', () => {
   describe('fromSavedObjectTabToAppState', () => {
+    it('restores an explicit ES|QL choice of no time field', () => {
+      const tab = getTabStateMock({
+        id: 'esql-no-time',
+        appState: {
+          query: { esql: 'FROM logs-*' },
+          dataSource: { type: DataSourceType.Esql, timeFieldName: null },
+        },
+      });
+      const savedTab = fromTabStateToSavedObjectTab({
+        tab,
+        services,
+        currentDataView: dataViewMockWithTimeField,
+        tabType: undefined,
+      });
+
+      expect(savedTab.esqlTimeFieldName).toBeNull();
+      expect(fromSavedObjectTabToAppState({ tab: savedTab }).dataSource).toEqual({
+        type: 'esql',
+        timeFieldName: null,
+      });
+    });
+
     it('should map saved object tab to app state', () => {
       const persistedTab = getPersistedTabMock({
         tabId: 'test-tab',

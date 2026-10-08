@@ -76,6 +76,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
               esql: query.esql,
               services,
               esqlVariables,
+              timeFieldName: tab.esqlTimeFieldName,
               timeRange: tab.timeRestore ? tab.timeRange : existingTab?.globalState.timeRange,
               previousSourceId: previousSource?.kind === 'esql' ? previousSource.id : undefined,
             });

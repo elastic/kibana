@@ -19,6 +19,8 @@ export interface DataViewDataSource {
 
 export interface EsqlDataSource {
   type: DataSourceType.Esql;
+  /** Undefined uses automatic detection; null explicitly disables the time field. */
+  timeFieldName?: string | null;
 }
 
 export type DiscoverDataSource = DataViewDataSource | EsqlDataSource;

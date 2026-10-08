@@ -501,7 +501,7 @@ function ButtonVariant({
               alwaysShowActionButton={true}
               buttonAddFieldVariant="primary" // always for the flyout
               isSidebarCollapsed={undefined}
-              prepend={prependInFlyout?.()}
+              prepend={prependInFlyout?.() ?? commonSidebarProps.prepend}
             />
           </EuiFlyout>
         </EuiPortal>

@@ -136,6 +136,8 @@ export interface DiscoverSessionTab {
   rowHeight?: number;
   headerRowHeight?: number;
   esqlApproximation?: boolean;
+  /** Undefined uses automatic detection; null explicitly disables the time field. */
+  esqlTimeFieldName?: string | null;
   timeRestore?: boolean;
   timeRange?: Pick<TimeRange, 'from' | 'to'>;
   refreshInterval?: RefreshInterval;

@@ -60,7 +60,7 @@ import { DEFAULT_EXPANDED_DOC_OWNER } from './constants';
 import { type HasUnsavedChangesResult, selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 import type { DiscoverSearchSessionManager } from '../discover_search_session';
-import { createEsqlDataSource } from '../../../../../common/data_sources';
+import { createEsqlDataSource, isEsqlSource } from '../../../../../common/data_sources';
 import type { CascadedDocumentsStateManager } from '../../data_fetching/cascaded_documents_fetcher';
 import { createCascadedDocumentsStateManager } from './cascaded_documents_state_manager';
 
@@ -332,7 +332,12 @@ const internalStateSliceDef = createSlice({
 
         // When updating to an ES|QL query, sync the data source
         if (isOfAggregateQueryType(appState.query)) {
-          appState = { ...appState, dataSource: createEsqlDataSource() };
+          appState = {
+            ...appState,
+            dataSource: isEsqlSource(appState.dataSource)
+              ? appState.dataSource
+              : createEsqlDataSource(),
+          };
         }
 
         if (!action.payload.isSystemTriggered) {

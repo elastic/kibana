@@ -39,7 +39,8 @@ export interface EsqlSourceArgs {
    * Use {@link EsqlSource.withColumns} to replace columns on an existing id.
    */
   resultColumns?: readonly DatatableColumn[];
-  timeFieldName?: string;
+  /** Null explicitly disables automatic time field detection. */
+  timeFieldName?: string | null;
   /**
    * CPS project routing string. When present it is included in the id hash so
    * that the same query run in different projects produces distinct ids and
@@ -172,17 +173,19 @@ export class EsqlSource implements DataSourceBase {
     // An explicit time field is part of the key, so a different one gets its own entry. An
     // instance created without resolving the time field is kept apart, so it is never returned
     // to a caller that needs the time field.
+    const noTimeField = args.timeFieldName === null;
     const skipsTimeField = args.timeFieldName == null && args.resolveTimeField === false;
-    const instanceKey =
-      args.timeFieldName != null
-        ? `${baseKey}\0${args.timeFieldName}`
-        : skipsTimeField
-        ? `${baseKey}\0without-time-field`
-        : baseKey;
+    const instanceKey = noTimeField
+      ? `${baseKey}\0no-time-field`
+      : args.timeFieldName != null
+      ? `${baseKey}\0${args.timeFieldName}`
+      : skipsTimeField
+      ? `${baseKey}\0without-time-field`
+      : baseKey;
 
     // A caller that skips the time field prefers an instance that has it.
     const cached =
-      (skipsTimeField ? EsqlSource.instanceCache.get(baseKey) : undefined) ??
+      (skipsTimeField && !noTimeField ? EsqlSource.instanceCache.get(baseKey) : undefined) ??
       EsqlSource.instanceCache.get(instanceKey);
     if (cached) return cached;
 
@@ -190,14 +193,16 @@ export class EsqlSource implements DataSourceBase {
     const projectRouting = getProjectRoutingFromEsqlQuery(query) ?? args.projectRouting;
 
     // Without `http`, getESQLTimeField only returns an already resolved time field.
-    let timeFieldName: string | undefined = skipsTimeField
-      ? await getESQLTimeField({ query, projectRouting: args.projectRouting })
-      : args.timeFieldName;
+    let timeFieldName: string | undefined =
+      skipsTimeField && !noTimeField
+        ? await getESQLTimeField({ query, projectRouting: args.projectRouting })
+        : args.timeFieldName ?? undefined;
     let resultColumns: readonly DatatableColumn[] = args.resultColumns ?? [];
     let discoveredSchema: Awaited<ReturnType<typeof getESQLSourceInfo>> | null | undefined;
 
     const { http } = args;
-    const shouldResolveTimeField = Boolean(http) && timeFieldName === undefined && !skipsTimeField;
+    const shouldResolveTimeField =
+      Boolean(http) && timeFieldName === undefined && !skipsTimeField && !noTimeField;
     const shouldResolveSchema = Boolean(http) && args.resultColumns === undefined;
 
     if (http && (shouldResolveTimeField || shouldResolveSchema)) {
@@ -215,7 +220,7 @@ export class EsqlSource implements DataSourceBase {
               http,
               projectRouting: args.projectRouting,
               timeRange: args.timeRange,
-              timeFieldName: args.timeFieldName,
+              timeFieldName: args.timeFieldName ?? undefined,
               esqlVariables: cleanVariables,
             }).catch(() => null)
           : Promise.resolve(null),
