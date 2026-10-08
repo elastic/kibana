@@ -7,16 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CascadeMixin } from './cascade';
+import { DiscoverLayout } from './layout';
 
-/**
- * Concrete page object for the Discover application.
- *
- * All functionality lives in the mixin chain:
- * `CascadeMixin → LayoutMixin → SaveMixin → NavigationMixin → DiscoverAppBase`
- *
- * Layer C (`discover/test/scout`) will subclass this with `DiscoverPage extends DiscoverApp`
- * and rebind the `discover` fixture key, moving Discover-only surface out of the
- * `kbn-scout` critical-files path.
- */
-export class DiscoverApp extends CascadeMixin {}
+/** Page object for the Discover application, registered as `pageObjects.discover`. */
+export class DiscoverApp extends DiscoverLayout {}
