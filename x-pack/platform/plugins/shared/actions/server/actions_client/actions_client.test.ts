@@ -48,7 +48,7 @@ import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
 import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_credentials_access_token';
 import type { OAuthParams } from '../routes/get_oauth_access_token';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
-import { fromKueryExpression } from '@kbn/es-query';
+import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import type { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../../common';
 import type { estypes } from '@elastic/elasticsearch';
 import { ConnectorRateLimiter } from '../lib/connector_rate_limiter';
@@ -3604,12 +3604,18 @@ describe('isSystemAction()', () => {
 });
 
 describe('getGlobalExecutionLogWithAuth()', () => {
+  const executionNamespaces = ['space-1', 'space-2'];
+  const executionAuthorizationFilter = nodeBuilder.or([
+    nodeBuilder.is('kibana.space_ids', 'space-1'),
+    nodeBuilder.is('kibana.space_ids', 'space-2'),
+  ]);
   const opts: GetGlobalExecutionLogParams = {
     dateStart: '2023-01-09T08:55:56-08:00',
     dateEnd: '2023-01-10T08:55:56-08:00',
     page: 1,
     perPage: 50,
     sort: [{ timestamp: { order: 'desc' } }],
+    namespaces: executionNamespaces,
   };
   const results = {
     aggregations: {
@@ -3628,13 +3634,20 @@ describe('getGlobalExecutionLogWithAuth()', () => {
       hits: [],
     } as estypes.SearchHitsMetadata<unknown>,
   };
+
+  beforeEach(() => {
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      filter: executionAuthorizationFilter,
+    });
+  });
+
   describe('authorization', () => {
     test('ensures user is authorised to access logs', async () => {
       eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue(results);
 
       await actionsClient.getGlobalExecutionLogWithAuth(opts);
       expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
-        namespaces: undefined,
+        namespaces: executionNamespaces,
       });
     });
 
@@ -3648,7 +3661,7 @@ describe('getGlobalExecutionLogWithAuth()', () => {
       );
 
       expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
-        namespaces: undefined,
+        namespaces: executionNamespaces,
       });
     });
   });
@@ -3664,18 +3677,24 @@ describe('getGlobalExecutionLogWithAuth()', () => {
     `);
     expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
       'action',
-      fromKueryExpression('*'),
+      executionAuthorizationFilter,
       expect.any(Object),
-      undefined,
+      executionNamespaces,
       true
     );
   });
 });
 
 describe('getGlobalExecutionKpiWithAuth()', () => {
+  const executionNamespaces = ['space-1', 'space-2'];
+  const executionAuthorizationFilter = nodeBuilder.or([
+    nodeBuilder.is('kibana.space_ids', 'space-1'),
+    nodeBuilder.is('kibana.space_ids', 'space-2'),
+  ]);
   const opts: GetGlobalExecutionKPIParams = {
     dateStart: '2023-01-09T08:55:56-08:00',
     dateEnd: '2023-01-10T08:55:56-08:00',
+    namespaces: executionNamespaces,
   };
   const results = {
     aggregations: {
@@ -3693,13 +3712,20 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
       hits: [],
     } as estypes.SearchHitsMetadata<unknown>,
   };
+
+  beforeEach(() => {
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      filter: executionAuthorizationFilter,
+    });
+  });
+
   describe('authorization', () => {
     test('ensures user is authorised to access kpi', async () => {
       eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue(results);
 
       await actionsClient.getGlobalExecutionKpiWithAuth(opts);
       expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
-        namespaces: undefined,
+        namespaces: executionNamespaces,
       });
     });
 
@@ -3713,7 +3739,7 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
       );
 
       expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
-        namespaces: undefined,
+        namespaces: executionNamespaces,
       });
     });
   });
@@ -3731,9 +3757,9 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
     `);
     expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
       'action',
-      fromKueryExpression('*'),
+      executionAuthorizationFilter,
       expect.any(Object),
-      undefined,
+      executionNamespaces,
       true
     );
   });
