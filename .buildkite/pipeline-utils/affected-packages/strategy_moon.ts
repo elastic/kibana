@@ -46,6 +46,8 @@ export function getAffectedProjectsMoon(
     env: {
       ...process.env,
       MOON_BASE: actualBase,
+      // An explicit head keeps generated files in the working tree out of the comparison.
+      MOON_HEAD: 'HEAD',
     },
   });
 
