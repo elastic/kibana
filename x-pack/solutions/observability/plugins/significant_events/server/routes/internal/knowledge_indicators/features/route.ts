@@ -165,7 +165,8 @@ const listFeaturesRoute = createServerRoute({
     const { licensing, sourcesClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
-    await sourcesClient.get(params.path.sourceId);
+    // The reader below runs as the internal user, so check the caller's own data access first.
+    await sourcesClient.assertReadable(params.path.sourceId);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const {

@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { escapeKuery } from '@kbn/es-query';
+import { isResponseError } from '@kbn/es-errors';
 import { hasSameEsql } from '@kbn/streams-schema';
 import {
   createSourceRequestSchema,
@@ -30,7 +31,7 @@ import {
   type NightshiftSourceAttributes,
 } from '../saved_objects/nightshift_source_saved_object';
 import { assertSourceQueryExecutes, hasNoIndicesBehind } from './assert_source_query_executes';
-import { isEsqlUnknownIndexError, isEsqlVerificationError } from './es_errors';
+import { isEsqlUnknownIndexError, isEsqlVerificationError, toBoom } from './es_errors';
 import type { EsqlViewsClient } from './esql_views_client';
 import type { SourceChange } from './source_change_emitter';
 import { validateSourceQuery } from './validate_source_query';
@@ -193,6 +194,26 @@ export class SourcesClient {
     const { attributes } = await this.getSavedObject(id);
     const source = toSource(id, attributes);
     return { source, health: await this.getHealth(source) };
+  }
+
+  /**
+   * Rejects with 403 when the current user cannot read the source's data. Stored knowledge
+   * is read through the internal user, so this is the only place a caller's own index
+   * privileges are checked before that data is returned. Failures that are not a denial
+   * (missing view, no data yet) pass: they say nothing about the caller's access.
+   */
+  async assertReadable(id: string): Promise<void> {
+    const { attributes } = await this.getSavedObject(id);
+    try {
+      await this.deps.dataEsClient.esql.query({
+        query: `FROM ${attributes.view_name} | LIMIT 0`,
+        format: 'json',
+      });
+    } catch (error) {
+      if (isResponseError(error) && error.statusCode === 403) {
+        throw toBoom(error, `Cannot read source ${id}`);
+      }
+    }
   }
 
   /**

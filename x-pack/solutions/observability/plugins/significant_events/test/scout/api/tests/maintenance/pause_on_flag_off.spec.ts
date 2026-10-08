@@ -27,9 +27,7 @@ const SPACE_WORKFLOW_ENDPOINT = 'api/workflows/workflow/system-significant-event
 const ALERTING_V2_ENABLED_SETTING_PATH = `/internal/kibana/global_settings/${encodeURIComponent(
   ALERTING_V2_ENABLED_SETTING_ID
 )}`;
-const QUERY_STREAM = 'logs.otel';
-// A filter-only MATCH query, so creating it also installs its backing rule.
-const QUERY_ESQL = `FROM ${QUERY_STREAM}, ${QUERY_STREAM}.* | WHERE severity_text == "ERROR"`;
+const SOURCE_ESQL = 'FROM logs.otel, logs.otel.*';
 // The flag-off pause runs only after the flag value settles, plus, on Cloud, the ~10s config
 // poll that carries the override to every node.
 const POLL_OPTIONS = { timeout: 45_000, intervals: [1_000] };
@@ -102,19 +100,44 @@ const createClient = (
       });
       return response.statusCode === 200 ? response.body.enabled : undefined;
     },
+    /** Creates the source the rule-backed query is stored under. */
+    async createSource(title: string) {
+      const response = await apiClient.post('internal/nightshift/sources', {
+        headers: internalHeaders,
+        body: { title, esql: SOURCE_ESQL },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
+      return { id: response.body.source.id, viewName: response.body.source.view_name };
+    },
+    async deleteSource(sourceId: string) {
+      const response = await apiClient.delete(`internal/nightshift/sources/${sourceId}`, {
+        headers: internalHeaders,
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
+    },
     /** Stores a rule-backed query and returns the id of its backing rule. */
-    async createRuleBackedQuery(queryId: string) {
+    async createRuleBackedQuery({
+      queryId,
+      source,
+    }: {
+      queryId: string;
+      source: { id: string; viewName: string };
+    }) {
+      // A filter-only MATCH query, so creating it also installs its backing rule.
+      const esql = `FROM ${source.viewName} | WHERE severity_text == "ERROR"`;
       const response = await apiClient.put(`internal/significant_events/queries/${queryId}`, {
         headers: internalHeaders,
         body: {
           title: 'Nightshift flag-off rule',
-          esql: { query: QUERY_ESQL },
-          source_id: QUERY_STREAM,
+          esql: { query: esql },
+          source_id: source.id,
         },
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
-      return computeRuleId('default', QUERY_STREAM, queryId, QUERY_ESQL);
+      return computeRuleId('default', source.id, queryId, esql);
     },
     /** Deletes the query together with its backing rule. */
     async deleteQuery(queryId: string) {
@@ -136,6 +159,7 @@ apiTest.describe(
     let cookieHeader: Record<string, string>;
     let engineAdminCookieHeader: Record<string, string>;
     let queryId: string | undefined;
+    let sourceId: string | undefined;
 
     apiTest.beforeAll(async ({ samlAuth, apiServices, kbnClient }) => {
       ({ cookieHeader } = await samlAuth.asStreamsAdmin());
@@ -157,6 +181,9 @@ apiTest.describe(
       );
       if (queryId !== undefined) {
         await createClient(apiClient, cookieHeader, engineAdminCookieHeader).deleteQuery(queryId);
+      }
+      if (sourceId !== undefined) {
+        await createClient(apiClient, cookieHeader, engineAdminCookieHeader).deleteSource(sourceId);
       }
       await unsetAlertingV2(kbnClient);
     });
@@ -182,8 +209,10 @@ apiTest.describe(
             await expect
               .poll(() => client.isWorkflowEnabled(SPACE_WORKFLOW_ENDPOINT), POLL_OPTIONS)
               .toBe(true);
+            const source = await client.createSource(`flag-off-${uuidv4()}`);
+            sourceId = source.id;
             queryId = `flag-off-${uuidv4()}`;
-            const id = await client.createRuleBackedQuery(queryId);
+            const id = await client.createRuleBackedQuery({ queryId, source });
             expect(await client.isRuleEnabled(id)).toBe(true);
             return id;
           }

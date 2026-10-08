@@ -116,6 +116,40 @@ const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
 };
 
 describe('SourcesClient', () => {
+  describe('assertReadable', () => {
+    it('probes the source view as the current user', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      await client.assertReadable('source-1');
+
+      expect(dataEsClient.esql.query).toHaveBeenCalledWith({
+        query: `FROM ${NGINX_VIEW_NAME} | LIMIT 0`,
+        format: 'json',
+      });
+    });
+
+    it('rejects with 403 when the user cannot read the view', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      dataEsClient.esql.query.mockRejectedValue(
+        createEsResponseError(403, 'security_exception', 'action denied')
+      );
+
+      await expect(client.assertReadable('source-1')).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+    });
+
+    it('passes when the failure is not a denial', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      dataEsClient.esql.query.mockRejectedValue(new Error('view not found'));
+
+      await expect(client.assertReadable('source-1')).resolves.toBeUndefined();
+    });
+  });
+
   describe('getHealth', () => {
     it('is unknown when the view cannot be read', async () => {
       const { client, viewsClient } = setup();
