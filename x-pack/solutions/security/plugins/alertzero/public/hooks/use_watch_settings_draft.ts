@@ -7,7 +7,9 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
+import type { CoreStart } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   UpdateWorkerRequestBody,
   Worker,
@@ -19,6 +21,10 @@ import {
   diffWorkerSettings,
   getCompleteWorkerSettingsSchema,
 } from '@kbn/alertzero-common';
+import {
+  ensureWorkerServiceAccounts,
+  type CoreServiceAccounts,
+} from '../service_accounts/ensure_worker_service_accounts';
 import { useUpdateWorker } from './use_workers_api';
 
 interface WorkerSettingsDraft {
@@ -52,8 +58,14 @@ const isWorkerDirty = (worker: Worker, overlay: WorkerDraftOverlay | undefined):
  * Settings edits are compared, diffed and revision-checked against the saved state the user
  * started from, not against whatever a later refetch returned. Otherwise someone else's change
  * would read as part of this draft and be written back with a fresh revision.
+ *
+ * A Worker saved as enabled without a service account is bound to its prebuilt account first,
+ * which is created if missing. If that fails, the Worker keeps its draft and shows the error.
  */
 export const useWatchSettingsDraft = (workers: Worker[]) => {
+  const {
+    services: { http, serviceAccounts },
+  } = useKibana<CoreStart & { serviceAccounts?: CoreServiceAccounts }>();
   const { mutateAsync } = useUpdateWorker();
   const [overlays, setOverlays] = useState<Record<string, WorkerDraftOverlay>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -124,20 +136,44 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
       throw new Error('invalid');
     }
 
+    const setError = (workerId: string, message: string) =>
+      setOverlays((current) => ({
+        ...current,
+        [workerId]: { ...current[workerId], error: message },
+      }));
+
     const savedWorkerIds: string[] = [];
     setIsSaving(true);
     try {
+      const needsAccount = outstanding.filter((worker) => {
+        const { enabled, settings } = resolve(worker);
+        return enabled && !settings.serviceAccountId;
+      });
+      const accounts = await ensureWorkerServiceAccounts(
+        http,
+        serviceAccounts,
+        needsAccount.map((worker) => worker.id)
+      );
+
       for (const worker of outstanding) {
         const draft = resolve(worker);
         const settingsDraft = overlays[worker.id]?.settings;
-        const settings = settingsDraft
+        const account = accounts.get(worker.id);
+        if (account && !account.ok) {
+          setError(worker.id, account.error);
+          continue;
+        }
+
+        const changed = settingsDraft
           ? diffWorkerSettings(settingsDraft.baseline, settingsDraft.draft)
           : undefined;
+        const settings = account?.ok
+          ? { ...changed, serviceAccountId: account.serviceAccountId }
+          : changed;
+        const settingsRevision = settingsDraft ? settingsDraft.revision : worker.settingsRevision;
         const patch: UpdateWorkerRequestBody = {
           ...(draft.enabled !== worker.enabled ? { enabled: draft.enabled } : {}),
-          ...(settings === undefined || settingsDraft === undefined
-            ? {}
-            : { settings, settingsRevision: settingsDraft.revision }),
+          ...(settings === undefined ? {} : { settings, settingsRevision }),
         };
 
         try {
@@ -157,17 +193,14 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
               : error instanceof Error
               ? error.message
               : String(error);
-          setOverlays((current) => ({
-            ...current,
-            [worker.id]: { ...current[worker.id], error: message },
-          }));
+          setError(worker.id, message);
         }
       }
     } finally {
       setIsSaving(false);
     }
     return savedWorkerIds;
-  }, [mutateAsync, overlays, resolve, workers]);
+  }, [http, mutateAsync, overlays, resolve, serviceAccounts, workers]);
 
   return {
     discard,
