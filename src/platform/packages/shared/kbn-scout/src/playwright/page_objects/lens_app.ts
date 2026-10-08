@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JSHandle } from 'playwright/test';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
@@ -22,6 +23,8 @@ interface ChartSwitchPopoverOptions {
 }
 
 export class LensApp {
+  protected static readonly FORMULA_EDITOR_TEST_SUBJ = 'lnsFormulaEditor';
+
   readonly lensApp;
   readonly saveAndReturnButton;
   readonly saveButton;
@@ -46,7 +49,6 @@ export class LensApp {
   private readonly chartSwitchPopover;
   private readonly chartSwitchList;
   /**
-   * Formula Monaco textarea — Lens has no data-test-subj on the editor input.
    * Note: `lnsFormulaWidget` is the overflow/suggest portal on `document.body`, not the editor.
    */
   private readonly formulaEditorTextarea;
@@ -64,15 +66,15 @@ export class LensApp {
     this.closeDimensionEditorButton = this.page.testSubj.locator(
       'lns-indexPattern-dimensionContainerClose'
     );
-    this.formulaEditorTextarea = this.page.locator(
-      '.lnsFormula__editorContent .monaco-editor textarea'
-    );
     this.applyFlyoutButton = this.page.getByTestId('applyFlyoutButton');
     this.cancelFlyoutButton = this.page.getByTestId('cancelFlyoutButton');
     this.dimensionColorPicker = this.page.locator(
       '[data-test-subj~="indexPattern-dimension-colorPicker"]'
     );
     this.codeEditor = new KibanaCodeEditorWrapper(this.page);
+    this.formulaEditorTextarea = this.page
+      .locator('.lnsFormula__editorContent')
+      .locator(this.codeEditor.editorInputLocator);
   }
 
   async waitForLensApp() {
@@ -175,7 +177,8 @@ export class LensApp {
 
   /**
    * Opens the Lens save modal, fills in the title, optionally selects
-   * a dashboard target, and confirms. Waits for the modal to close.
+   * a dashboard target, and confirms. Waits for the modal to close and, when the save
+   * created a new library visualization, for the editor to finish reloading it.
    */
   async save(
     title: string,
@@ -193,36 +196,83 @@ export class LensApp {
           addToDashboard: 'none';
         }
   ) {
-    await this.openSaveOptionsIfNeeded();
-    await this.saveButton.click();
-    await this.saveModal.waitFor({ state: 'visible' });
-    await this.savedObjectTitleInput.fill(title);
+    const savedObjectIdBeforeSave = await this.getSavedObjectIdFromUrl();
+    const workspaceBeforeSave = await this.page.evaluateHandle(() =>
+      document.querySelector('[data-test-subj="lnsWorkspace"]')
+    );
 
-    // Prefer checking the radio input — label clicks race save-modal remounts.
-    if (options?.addToDashboard === 'existing') {
-      await this.page.locator('#existing-dashboard-option').check();
-      await this.page.testSubj.locator('open-dashboard-picker').click();
-      await this.page.testSubj
-        .locator(`dashboard-picker-option-${options.dashboardTitle.split(' ').join('-')}`)
-        .click();
-    } else if (options?.addToDashboard === 'new') {
-      if (options.saveAsNew !== undefined) {
-        await this.setEuiSwitch('saveAsNewCheckbox', options.saveAsNew);
-      }
-      await this.page.locator('#new-dashboard-option').check();
-      if (options.saveToLibrary !== undefined) {
-        if (options.saveToLibrary) {
-          await this.addToLibraryCheckbox.check();
-        } else {
-          await this.addToLibraryCheckbox.uncheck();
+    try {
+      await this.openSaveOptionsIfNeeded();
+      await this.saveButton.click();
+      await this.saveModal.waitFor({ state: 'visible' });
+      await this.savedObjectTitleInput.fill(title);
+
+      // Prefer checking the radio input — label clicks race save-modal remounts.
+      if (options?.addToDashboard === 'existing') {
+        await this.page.locator('#existing-dashboard-option').check();
+        await this.page.testSubj.locator('open-dashboard-picker').click();
+        await this.page.testSubj
+          .locator(`dashboard-picker-option-${options.dashboardTitle.split(' ').join('-')}`)
+          .click();
+      } else if (options?.addToDashboard === 'new') {
+        if (options.saveAsNew !== undefined) {
+          await this.setEuiSwitch('saveAsNewCheckbox', options.saveAsNew);
         }
+        await this.page.locator('#new-dashboard-option').check();
+        if (options.saveToLibrary !== undefined) {
+          if (options.saveToLibrary) {
+            await this.addToLibraryCheckbox.check();
+          } else {
+            await this.addToLibraryCheckbox.uncheck();
+          }
+        }
+      } else if (options?.addToDashboard === 'none') {
+        await this.page.locator('#add-to-library-option').check();
       }
-    } else if (options?.addToDashboard === 'none') {
-      await this.page.locator('#add-to-library-option').check();
-    }
 
-    await this.confirmSaveButton.click();
-    await this.saveModal.waitFor({ state: 'hidden' });
+      await this.confirmSaveButton.click();
+      await this.saveModal.waitFor({ state: 'hidden' });
+      await this.waitForPostSaveReload(savedObjectIdBeforeSave, workspaceBeforeSave);
+    } finally {
+      // Release the handle so the detached pre-save workspace can be garbage collected.
+      await workspaceBeforeSave.dispose();
+    }
+  }
+
+  /** Reads the `#/edit/<id>` saved object id from the in-page URL, if the editor shows one. */
+  private async getSavedObjectIdFromUrl(): Promise<string | undefined> {
+    const url = await this.page.evaluate(() => window.location.href);
+    return /\/edit\/([^/?#]+)/.exec(url)?.[1];
+  }
+
+  /**
+   * Saving a *new* library visualization redirects the editor to `#/edit/<id>`, which makes
+   * Lens re-initialise its state from the saved object (`EditorRenderer` re-runs `loadInitial`).
+   * Until that reload lands the editor still looks interactive, but any edit made in the
+   * meantime is discarded when the reloaded state replaces it. The reload unmounts and
+   * remounts the editor frame, so wait for a *new* `lnsWorkspace` node before returning.
+   * Re-saving an existing visualization, or saving into a dashboard, does not reload.
+   */
+  private async waitForPostSaveReload(
+    savedObjectIdBeforeSave: string | undefined,
+    workspaceBeforeSave: JSHandle<Element | null>
+  ) {
+    const savedObjectIdAfterSave = await this.getSavedObjectIdFromUrl();
+    if (!savedObjectIdAfterSave || savedObjectIdAfterSave === savedObjectIdBeforeSave) {
+      return;
+    }
+    // Compare DOM nodes rather than waiting for `hidden` then `visible`: the unmounted
+    // window can be shorter than a poll interval locally, so a hidden-wait could miss it.
+    await this.page.waitForFunction(
+      (previousWorkspace) => {
+        const workspace = document.querySelector('[data-test-subj="lnsWorkspace"]');
+        return workspace !== null && workspace !== previousWorkspace;
+      },
+      workspaceBeforeSave,
+      // Two round trips (data view check + saved object load); slow on cloud.
+      { timeout: 20_000 }
+    );
+    await this.page.testSubj.locator('lnsWorkspace').waitFor({ state: 'visible' });
   }
 
   async applyFlyoutChanges() {
@@ -329,6 +379,13 @@ export class LensApp {
 
   async switchToFormula() {
     await this.page.testSubj.click('lens-dimensionTabs-formula');
+    // Switching from "quick function" tears down that input and mounts a fresh formula
+    // Monaco editor instance; it isn't necessarily attached the instant the tab click
+    // resolves. Callers (both `configureDimension`'s own follow-up `typeInFormula` and tests
+    // that call this directly then immediately read `getFormulaText()`) can otherwise race an
+    // editor that isn't mounted yet — observed as the formula editor staying on its
+    // empty-state placeholder regardless of what's typed or already configured.
+    await this.codeEditor.waitCodeEditorReady(LensApp.FORMULA_EDITOR_TEST_SUBJ);
   }
 
   async selectOperation(operation: string, isPreviousIncompatible = false) {
@@ -372,22 +429,26 @@ export class LensApp {
    * Types into the formula Monaco editor.
    * Use `replace: true` to clear first (dimension configure). Omit replace to append
    * (autocomplete paths). Lens auto-inserts quotes/parens after some tokens (e.g. `kql=`),
-   * so callers should `expect.poll(() => lens.getFormulaText())` for the final value.
+   * so callers should `expect.poll(() => lens.workspace.getFormulaText())` for the final value.
    */
   async typeInFormula(text: string, options?: { replace?: boolean; focus?: boolean }) {
+    await this.codeEditor.waitCodeEditorReady(LensApp.FORMULA_EDITOR_TEST_SUBJ);
+
     if (options?.focus !== false) {
       await this.focusFormulaEditor();
     }
     if (options?.replace) {
-      const modelIndex = await this.getFormulaModelIndex();
-      await this.codeEditor.setCodeEditorValue('', modelIndex);
+      await this.codeEditor.setCodeEditorValueByTestSubj(LensApp.FORMULA_EDITOR_TEST_SUBJ, '');
       await this.focusFormulaEditor();
     }
-    await this.page.keyboard.type(text, { delay: 25 });
+
+    await this.codeEditor.simulateTyping(LensApp.FORMULA_EDITOR_TEST_SUBJ, text, { delay: 25 });
   }
 
   /**
-   * Focuses the formula Monaco textarea (avoid `{ force: true }` — suggest portals intercept clicks).
+   * Focuses the formula Monaco editor's real input surface (avoid `{ force: true }` — suggest
+   * portals intercept clicks). The resolved node is a `div` under Chrome's native EditContext
+   * mode, or a `textarea` otherwise — see `formulaEditorTextarea`.
    */
   private async focusFormulaEditor() {
     await this.formulaEditorTextarea.waitFor({ state: 'attached' });
@@ -396,22 +457,10 @@ export class LensApp {
     });
   }
 
-  /**
-   * Lens formula uses the last registered Monaco model (not always index 0).
-   * Needed by the Lens plugin's `getFormulaText` as well as `typeInFormula` here.
-   */
-  protected async getFormulaModelIndex(): Promise<number> {
-    return this.page.evaluate(() => {
-      const monacoEnv = (
-        window as unknown as {
-          MonacoEnvironment?: {
-            monaco?: { editor?: { getModels: () => unknown[] } };
-          };
-        }
-      ).MonacoEnvironment;
-      const models = monacoEnv?.monaco?.editor?.getModels() ?? [];
-      return Math.max(0, models.length - 1);
-    });
+  /** Reads the formula Monaco editor's current value, resolved by its own container rather
+   * than a global model index (see `FORMULA_EDITOR_TEST_SUBJ`). */
+  async getFormulaText(): Promise<string> {
+    return this.codeEditor.getCodeEditorValueByTestSubj(LensApp.FORMULA_EDITOR_TEST_SUBJ);
   }
 
   async setEuiSwitch(testSubj: string, checked: boolean) {

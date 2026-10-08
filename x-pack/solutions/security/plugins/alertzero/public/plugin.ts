@@ -16,24 +16,27 @@ import {
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { i18n } from '@kbn/i18n';
-import { Subject } from 'rxjs';
+import {
+  BehaviorSubject,
+  Subject,
+  combineLatest,
+  filter,
+  map,
+  startWith,
+  take,
+  type Subscription,
+} from 'rxjs';
 import { getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import {
+  ALERTZERO_FEATURE_ID,
   ALERTZERO_APP_ID,
   ALERTZERO_APP_PATH,
-  TEMPLATE_ID_INVESTIGATION,
-  TEMPLATE_ID_ESCALATION,
+  ALERTZERO_ENABLED_SETTING_ID,
 } from '@kbn/alertzero-common';
 import React from 'react';
-import {
-  registerAgenticInvestigationTemplateUI,
-  registerEscalationTemplateUI,
-  type RenderAssignees,
-} from '@kbn/agentic-investigations-common';
-import { getAgenticInvestigationsCapabilities } from './hooks/use_agentic_investigations_capabilities';
+import { getSubscriptionAvailability, type SubscriptionAvailability } from '../common/availability';
 import { getAlertZeroDeepLinks } from './deep_links';
 import { registerAlertZeroAttachmentTypesUI } from './agent_builder/attachment_types';
-import { EscalationModalBoundary } from './pages/conversations/escalation_modal_boundary';
 import type {
   AlertZeroClientConfig,
   AlertZeroPublicSetup,
@@ -48,15 +51,6 @@ const APP_TITLE = i18n.translate('xpack.alertzero.appTitle', {
   defaultMessage: 'AlertZero',
 });
 
-const INVESTIGATION_TEMPLATE_NAME = i18n.translate('xpack.alertzero.conversationTemplate.name', {
-  defaultMessage: 'Investigation',
-});
-
-const ESCALATION_TEMPLATE_NAME = i18n.translate(
-  'xpack.alertzero.escalationConversationTemplate.name',
-  { defaultMessage: 'Escalation' }
-);
-
 export class AlertZeroPublicPlugin
   implements
     Plugin<
@@ -67,6 +61,15 @@ export class AlertZeroPublicPlugin
     >
 {
   private readonly config: AlertZeroClientConfig;
+  private readonly isServerless: boolean;
+  private readonly serverlessTierAvailable$ = new BehaviorSubject(false);
+  private readonly availability$ = new BehaviorSubject<SubscriptionAvailability>('loading');
+  private availabilitySubscription?: Subscription;
+  private attachmentRegistration?: Subscription;
+  private readonly startContract: AlertZeroPublicStart = {
+    setServerlessTierAvailable: (available) => this.serverlessTierAvailable$.next(available),
+  };
+  private statusSubscription?: Subscription;
   private readonly logger: Logger;
   /**
    * Allows `start()` to push updated deep links (with capability-resolved visibility)
@@ -76,6 +79,7 @@ export class AlertZeroPublicPlugin
 
   constructor(context: PluginInitializerContext<AlertZeroClientConfig>) {
     this.config = context.config.get();
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
     this.logger = context.logger.get();
   }
 
@@ -93,7 +97,10 @@ export class AlertZeroPublicPlugin
       appRoute: ALERTZERO_APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
       euiIconType: 'securitySignalDetected',
-      status: AppStatus.accessible,
+      // Inaccessible until the per-space setting is on. Core then empties `visibleIn` and
+      // `deepLinks` for us, which is what removes the AlertZero nodes from the Security
+      // navigation tree — those trees hold no check of their own.
+      status: AppStatus.inaccessible,
       visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
       order: 101,
       // Initial deep links without capability filtering — capabilities are not available at
@@ -107,6 +114,7 @@ export class AlertZeroPublicPlugin
           coreStart,
           startDeps,
           params,
+          availability$: this.availability$,
         });
       },
     });
@@ -116,108 +124,44 @@ export class AlertZeroPublicPlugin
 
   public start(core: CoreStart, startDeps: AlertZeroStartDependencies): AlertZeroPublicStart {
     if (!this.config.enabled) {
-      return {};
+      return this.startContract;
     }
 
-    // Push capability-resolved deep links now that `core.application.capabilities` is available.
-    this.appUpdater$.next(() => ({
-      deepLinks: getAlertZeroDeepLinks(core.application.capabilities),
-    }));
+    this.availabilitySubscription = combineLatest([
+      startDeps.licensing.license$.pipe(startWith(undefined)),
+      this.serverlessTierAvailable$,
+    ])
+      .pipe(
+        map(([license, serverlessTierAvailable]) =>
+          getSubscriptionAvailability({
+            isServerless: this.isServerless,
+            serverlessTierAvailable,
+            license,
+          })
+        )
+      )
+      .subscribe(this.availability$);
 
-    // ---------------------------------------------------------------------------
-    // Lazy provider wrapper
-    // ---------------------------------------------------------------------------
-    // Both the escalation modal and the assignee picker need to mount inside
-    // KibanaContextProvider + QueryClientProvider. The factory is called once
-    // per flyout-type so each gets its own isolated QueryClient. Wrapped lazily so
-    // these heavy deps land in async chunks rather than the main bundle.
-
-    /**
-     * Returns a React.lazy factory that wraps `getComponent()` with providers.
-     * Each call creates an independent QueryClient so caches don't bleed across flyouts.
-     */
-    const makeLazyWithProviders = <P extends object>(
-      getComponent: () => Promise<React.ComponentType<P>>
-    ): React.LazyExoticComponent<React.ComponentType<P>> => {
-      return React.lazy(async () => {
-        const [{ KibanaContextProvider }, { QueryClient, QueryClientProvider }, Component] =
-          await Promise.all([
-            import('@kbn/kibana-react-plugin/public'),
-            import('@kbn/react-query'),
-            getComponent(),
-          ]);
-
-        const queryClient = new QueryClient();
-        const stableServices = { ...core, ...startDeps };
-
-        const Wrapped: React.FC<P> = (props) =>
-          React.createElement(
-            KibanaContextProvider,
-            { services: stableServices },
-            React.createElement(
-              QueryClientProvider,
-              { client: queryClient },
-              React.createElement(Component, props)
-            )
-          );
-
-        return { default: Wrapped };
-      });
-    };
-
-    // ---------------------------------------------------------------------------
-    // Escalation creation modal (opened from the investigation flyout footer)
-    // ---------------------------------------------------------------------------
-    const LazyEscalationModal = makeLazyWithProviders(async () => {
-      const { ConnectedEscalationModal } = await import(
-        './pages/conversations/connected_escalation_modal'
-      );
-      return ConnectedEscalationModal as React.ComponentType<
-        React.ComponentProps<typeof ConnectedEscalationModal>
-      >;
-    });
-
-    // ---------------------------------------------------------------------------
-    // Assignee picker (embedded in both investigation and escalation flyout headers)
-    // ---------------------------------------------------------------------------
-    const LazyConnectedAssignees = makeLazyWithProviders(async () => {
-      const { ConnectedAssignees } = await import(
-        './components/connected_assignees/connected_assignees'
-      );
-      return ConnectedAssignees as React.ComponentType<
-        React.ComponentProps<typeof ConnectedAssignees>
-      >;
-    });
-
-    const { manageEscalations: canManageEscalations } = getAgenticInvestigationsCapabilities(
-      core.application.capabilities
+    const canRead = core.application.capabilities[ALERTZERO_FEATURE_ID]?.show === true;
+    const settingEnabled$ = core.uiSettings.get$<boolean>(ALERTZERO_ENABLED_SETTING_ID, false);
+    this.statusSubscription = combineLatest([settingEnabled$, this.availability$]).subscribe(
+      ([settingEnabled, availability]) => {
+        const showNavigation = settingEnabled && canRead && availability === 'available';
+        this.appUpdater$.next(() => ({
+          status: settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
+          visibleIn: showNavigation ? ['classicSideNav', 'projectSideNav', 'globalSearch'] : [],
+          deepLinks: showNavigation ? getAlertZeroDeepLinks(core.application.capabilities) : [],
+        }));
+      }
     );
 
-    // ---------------------------------------------------------------------------
-    // renderAssignees render prop — shared by both templates
-    // ---------------------------------------------------------------------------
-    const renderAssignees: RenderAssignees = (props) =>
-      React.createElement(
-        EscalationModalBoundary,
-        null,
-        React.createElement(LazyConnectedAssignees, props)
-      );
-
-    registerAgenticInvestigationTemplateUI({
-      conversationTemplates: startDeps.agentBuilder.conversationTemplates,
-      templateId: TEMPLATE_ID_INVESTIGATION,
-      name: INVESTIGATION_TEMPLATE_NAME,
-      icon: 'securitySignalDetected',
-      renderAssignees,
-      renderEscalationModal: canManageEscalations
-        ? (props) =>
-            React.createElement(
-              EscalationModalBoundary,
-              null,
-              React.createElement(LazyEscalationModal, props)
-            )
-        : undefined,
-    });
+    const { agentBuilder } = startDeps;
+    if (!agentBuilder || !startDeps.agenticInvestigations || !startDeps.proposals) {
+      return this.startContract;
+    }
+    const canAccess$ = combineLatest([settingEnabled$, this.availability$]).pipe(
+      map(([enabled, availability]) => enabled && canRead && availability === 'available')
+    );
 
     // Space id comes from the base path so registration starts synchronously.
     const { spaceId } = getSpaceIdFromPath(
@@ -225,26 +169,49 @@ export class AlertZeroPublicPlugin
       core.http.basePath.serverBasePath
     );
 
-    registerAlertZeroAttachmentTypesUI(startDeps.agentBuilder.attachments, {
-      http: core.http,
-      navigation: {
-        share: startDeps.share,
-        spaceId,
-      },
-    }).catch((error) => {
-      this.logger.error('Failed to register AlertZero attachment UI definitions', error);
+    const AttachmentAccessBoundary = React.lazy(async () => {
+      const [{ KibanaContextProvider }, { AccessBoundary }] = await Promise.all([
+        import('@kbn/kibana-react-plugin/public'),
+        import('./components/access_boundary'),
+      ]);
+      const services = { ...core, ...startDeps };
+      const Boundary: React.FC<React.PropsWithChildren> = ({ children }) =>
+        React.createElement(
+          KibanaContextProvider,
+          { services },
+          React.createElement(
+            AccessBoundary,
+            {
+              availability$: this.availability$,
+              serviceAccountsEnabled: core.security.serviceAccounts.isEnabled(),
+            },
+            children
+          )
+        );
+      return { default: Boundary };
     });
 
-    registerEscalationTemplateUI({
-      conversationTemplates: startDeps.agentBuilder.conversationTemplates,
-      templateId: TEMPLATE_ID_ESCALATION,
-      name: ESCALATION_TEMPLATE_NAME,
-      icon: 'warning',
-      renderAssignees,
+    this.attachmentRegistration = canAccess$.pipe(filter(Boolean), take(1)).subscribe(() => {
+      registerAlertZeroAttachmentTypesUI(agentBuilder.attachments, {
+        AccessBoundary: AttachmentAccessBoundary,
+        http: core.http,
+        navigation: {
+          share: startDeps.share,
+          spaceId,
+          prependPath: (path) => core.http.basePath.prepend(path),
+          getUrlForApp: core.application.getUrlForApp,
+        },
+      }).catch((error) => {
+        this.logger.error('Failed to register AlertZero attachment UI definitions', error);
+      });
     });
 
-    return {};
+    return this.startContract;
   }
 
-  public stop() {}
+  public stop() {
+    this.availabilitySubscription?.unsubscribe();
+    this.attachmentRegistration?.unsubscribe();
+    this.statusSubscription?.unsubscribe();
+  }
 }

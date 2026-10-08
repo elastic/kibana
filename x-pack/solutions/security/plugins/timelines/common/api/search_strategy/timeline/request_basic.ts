@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { filterQuery } from '../model/filter_query';
 import { runtimeMappings } from '../model/runtime_mappings';
 import { timerange } from '../model/timerange';
 
-export const timelineRequestBasicOptionsSchema = z.object({
-  indexType: z.string().optional(),
-  id: z.string().optional(),
-  timerange: timerange.optional(),
-  filterQuery,
-  defaultIndex: z.array(z.string()).optional(),
-  entityType: z.enum(['events', 'sessions']).optional(),
-  runtimeMappings,
-  params: z.any().optional(),
-  filterStatus: z
-    .union([z.literal('open'), z.literal('closed'), z.literal('acknowledged')])
-    .optional(),
-});
+export const timelineRequestBasicOptionsSchema = lazySchema(() =>
+  z.object({
+    indexType: z.string().optional(),
+    id: z.string().optional(),
+    timerange: timerange.optional(),
+    filterQuery,
+    defaultIndex: z.array(z.string()).optional(),
+    entityType: z.enum(['events', 'sessions']).optional(),
+    runtimeMappings,
+    params: z.any().optional(),
+    filterStatus: z
+      .union([z.literal('open'), z.literal('closed'), z.literal('acknowledged')])
+      .optional(),
+  })
+);

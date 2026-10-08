@@ -10,18 +10,13 @@
 import { ZodError } from '@kbn/zod';
 import { transformType } from '@kbn/embeddable-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
-import {
-  discoverSessionApiControlPanelSchema,
-  discoverSessionApiControlPanelsSchema,
-} from '@kbn/as-code-discover-schema';
+import { discoverSessionApiControlPanelSchema } from '@kbn/as-code-discover-schema';
 import {
   getControlOrder,
   isRecord,
   convertControlGroupEntryToApi,
 } from '../../../common/session/control_panels';
 import type { DiscoverSessionApiControlPanels, DiscoverSessionWarning } from '../schema';
-
-export { serializeEsqlControls as transformControlPanelsIn } from '../../../common/session/control_panels';
 
 const createDroppedControlPanelsWarning = (
   tabId: string,
@@ -115,7 +110,7 @@ export const transformControlPanelsOut = (
   }
 
   return {
-    panels: panels.length ? discoverSessionApiControlPanelsSchema.parse(panels) : undefined,
+    panels: panels.length ? panels : undefined,
     warnings,
   };
 };

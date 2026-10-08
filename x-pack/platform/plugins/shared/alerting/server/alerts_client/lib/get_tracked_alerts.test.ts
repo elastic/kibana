@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   ALERT_INSTANCE_ID,
   ALERT_RULE_UUID,
   ALERT_RULE_EXECUTION_UUID,
+  ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
-  ALERT_STATUS_UNTRACKED,
   ALERT_STATUS_DELAYED,
-  ALERT_TRACKED,
   ALERT_UUID,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import {
-  getTrackedAlerts,
   createEmptyTrackedAlerts,
   populateTrackedAlerts,
   findMissingAlertUuids,
@@ -31,25 +28,10 @@ import type { SearchResult, TrackedAADAlerts } from '../types';
 
 type TestAlertDoc = TrackedAADAlerts<RuleAlertData>['all'][string];
 
-const logger = loggingSystemMock.create().get();
 const ruleId = 'test-rule-id';
-const ruleInfoMessage = "for test.rule-type:test-rule-id 'test-rule'";
-const logTags = { tags: ['test.rule-type', ruleId, 'alerts-client'] };
 
 const makeRawAlertInstance = (uuid: string): RawAlertInstance => ({
   meta: { uuid },
-});
-
-const makeStateFromUuids = (
-  uuids: string[]
-): {
-  activeAlertsFromState: Record<string, RawAlertInstance>;
-  recoveredAlertsFromState: Record<string, RawAlertInstance>;
-} => ({
-  activeAlertsFromState: Object.fromEntries(
-    uuids.map((uuid, i) => [`alert-${i}`, makeRawAlertInstance(uuid)])
-  ),
-  recoveredAlertsFromState: {},
 });
 
 const makeHit = ({
@@ -60,6 +42,7 @@ const makeHit = ({
   index = '.alerts-test-000001',
   seqNo = 1,
   primaryTerm = 1,
+  start,
 }: {
   uuid: string;
   instanceId: string;
@@ -68,6 +51,7 @@ const makeHit = ({
   index?: string;
   seqNo?: number;
   primaryTerm?: number;
+  start?: string;
 }) => ({
   _index: index,
   _id: uuid,
@@ -80,8 +64,12 @@ const makeHit = ({
     [ALERT_RULE_UUID]: ruleId,
     [ALERT_RULE_EXECUTION_UUID]: executionUuid,
     [TIMESTAMP]: '2023-03-28T12:27:28.159Z',
+    ...(start ? { [ALERT_START]: start } : {}),
   },
 });
+
+const toHits = (hits: Array<ReturnType<typeof makeHit>>) =>
+  hits as SearchResult<RuleAlertData>['hits'];
 
 describe('get_tracked_alerts', () => {
   beforeEach(() => {
@@ -110,67 +98,135 @@ describe('get_tracked_alerts', () => {
       expect(tracked.get('uuid-1')).toBe(mockAlert);
     });
 
+    it('creates an empty instance id index', () => {
+      const tracked = createEmptyTrackedAlerts();
+      expect(tracked.instanceIdIndex).toEqual({ active: {}, recovered: {}, delayed: {} });
+    });
+
     it('getById finds alert by instance id', () => {
       const tracked = createEmptyTrackedAlerts<{}>();
-      const mockAlert = {
-        [ALERT_UUID]: 'uuid-1',
-        [ALERT_INSTANCE_ID]: 'id-1',
-        [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
-      } as unknown as TestAlertDoc;
-      tracked.all['uuid-1'] = mockAlert;
-      tracked.active['uuid-1'] = mockAlert;
-      expect(tracked.getById('id-1')).toBe(mockAlert);
+      populateTrackedAlerts(
+        tracked,
+        toHits([
+          makeHit({
+            uuid: 'uuid-1',
+            instanceId: 'id-1',
+            status: ALERT_STATUS_ACTIVE,
+            executionUuid: 'exec-1',
+          }),
+        ])
+      );
+      expect(tracked.getById('id-1')).toBe(tracked.all['uuid-1']);
       expect(tracked.getById('nonexistent')).toBeUndefined();
     });
 
     it('getById prefers active over recovered when same instance id exists in both', () => {
       const tracked = createEmptyTrackedAlerts<{}>();
-      const recoveredAlert = {
-        [ALERT_UUID]: 'uuid-old',
-        [ALERT_INSTANCE_ID]: 'id-1',
-        [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
-      } as unknown as TestAlertDoc;
-      const activeAlert = {
-        [ALERT_UUID]: 'uuid-new',
-        [ALERT_INSTANCE_ID]: 'id-1',
-        [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
-      } as unknown as TestAlertDoc;
-      tracked.all['uuid-old'] = recoveredAlert;
-      tracked.recovered['uuid-old'] = recoveredAlert;
-      tracked.all['uuid-new'] = activeAlert;
-      tracked.active['uuid-new'] = activeAlert;
-      expect(tracked.getById('id-1')).toBe(activeAlert);
+      populateTrackedAlerts(
+        tracked,
+        toHits([
+          makeHit({
+            uuid: 'uuid-old',
+            instanceId: 'id-1',
+            status: ALERT_STATUS_RECOVERED,
+            executionUuid: 'exec-1',
+          }),
+          makeHit({
+            uuid: 'uuid-new',
+            instanceId: 'id-1',
+            status: ALERT_STATUS_ACTIVE,
+            executionUuid: 'exec-2',
+          }),
+        ])
+      );
+      expect(tracked.getById('id-1')).toBe(tracked.all['uuid-new']);
     });
 
     it('getById prefers recovered over delayed when same instance id exists in both', () => {
       const tracked = createEmptyTrackedAlerts<{}>();
-      const delayedAlert = {
-        [ALERT_UUID]: 'uuid-delayed',
-        [ALERT_INSTANCE_ID]: 'id-1',
-        [ALERT_STATUS]: ALERT_STATUS_DELAYED,
-      } as unknown as TestAlertDoc;
-      const recoveredAlert = {
-        [ALERT_UUID]: 'uuid-recovered',
-        [ALERT_INSTANCE_ID]: 'id-1',
-        [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
-      } as unknown as TestAlertDoc;
-      tracked.all['uuid-delayed'] = delayedAlert;
-      tracked.delayed['uuid-delayed'] = delayedAlert;
-      tracked.all['uuid-recovered'] = recoveredAlert;
-      tracked.recovered['uuid-recovered'] = recoveredAlert;
-      expect(tracked.getById('id-1')).toBe(recoveredAlert);
+      populateTrackedAlerts(
+        tracked,
+        toHits([
+          makeHit({
+            uuid: 'uuid-delayed',
+            instanceId: 'id-1',
+            status: ALERT_STATUS_DELAYED,
+            executionUuid: 'exec-1',
+          }),
+          makeHit({
+            uuid: 'uuid-recovered',
+            instanceId: 'id-1',
+            status: ALERT_STATUS_RECOVERED,
+            executionUuid: 'exec-2',
+          }),
+        ])
+      );
+      expect(tracked.getById('id-1')).toBe(tracked.all['uuid-recovered']);
     });
 
     it('getById falls back to delayed when no active or recovered match', () => {
       const tracked = createEmptyTrackedAlerts<{}>();
-      const delayedAlert = {
-        [ALERT_UUID]: 'uuid-delayed',
-        [ALERT_INSTANCE_ID]: 'id-1',
-        [ALERT_STATUS]: ALERT_STATUS_DELAYED,
-      } as unknown as TestAlertDoc;
-      tracked.all['uuid-delayed'] = delayedAlert;
-      tracked.delayed['uuid-delayed'] = delayedAlert;
-      expect(tracked.getById('id-1')).toBe(delayedAlert);
+      populateTrackedAlerts(
+        tracked,
+        toHits([
+          makeHit({
+            uuid: 'uuid-delayed',
+            instanceId: 'id-1',
+            status: ALERT_STATUS_DELAYED,
+            executionUuid: 'exec-1',
+          }),
+        ])
+      );
+      expect(tracked.getById('id-1')).toBe(tracked.all['uuid-delayed']);
+    });
+
+    it('getById returns the most recently started document when several share an instance id and status', () => {
+      const tracked = createEmptyTrackedAlerts<{}>();
+      const older = makeHit({
+        uuid: 'uuid-older',
+        instanceId: 'id-1',
+        status: ALERT_STATUS_ACTIVE,
+        executionUuid: 'exec-1',
+        start: '2023-03-01T00:00:00.000Z',
+      });
+      const newer = makeHit({
+        uuid: 'uuid-newer',
+        instanceId: 'id-1',
+        status: ALERT_STATUS_ACTIVE,
+        executionUuid: 'exec-2',
+        start: '2023-03-02T00:00:00.000Z',
+      });
+
+      // regardless of the order the documents are returned in
+      const trackedNewerFirst = createEmptyTrackedAlerts<{}>();
+      populateTrackedAlerts(tracked, toHits([older, newer]));
+      populateTrackedAlerts(trackedNewerFirst, toHits([newer, older]));
+
+      expect(tracked.getById('id-1')).toBe(tracked.all['uuid-newer']);
+      expect(trackedNewerFirst.getById('id-1')).toBe(trackedNewerFirst.all['uuid-newer']);
+      expect(tracked.instanceIdIndex.active).toEqual({ 'id-1': 'uuid-newer' });
+    });
+
+    it('getById keeps the first document seen when starts are equal', () => {
+      const tracked = createEmptyTrackedAlerts<{}>();
+      populateTrackedAlerts(
+        tracked,
+        toHits([
+          makeHit({
+            uuid: 'uuid-first',
+            instanceId: 'id-1',
+            status: ALERT_STATUS_ACTIVE,
+            executionUuid: 'exec-1',
+          }),
+          makeHit({
+            uuid: 'uuid-second',
+            instanceId: 'id-1',
+            status: ALERT_STATUS_ACTIVE,
+            executionUuid: 'exec-2',
+          }),
+        ])
+      );
+      expect(tracked.getById('id-1')).toBe(tracked.all['uuid-first']);
     });
   });
 
@@ -308,309 +364,6 @@ describe('get_tracked_alerts', () => {
     it('returns empty array when no alerts in state', () => {
       const uuids = getAlertUuidsFromState({}, {});
       expect(uuids).toEqual([]);
-    });
-  });
-
-  describe('getTrackedAlerts', () => {
-    it('fetches tracked alerts via tracked field query', async () => {
-      const search = jest.fn().mockResolvedValueOnce({
-        hits: [
-          makeHit({
-            uuid: 'uuid-1',
-            instanceId: 'alert-1',
-            status: ALERT_STATUS_ACTIVE,
-            executionUuid: 'exec-1',
-          }),
-        ],
-      });
-
-      const result = await getTrackedAlerts({
-        ruleId,
-        ...makeStateFromUuids(['uuid-1']),
-        search,
-        logger,
-        ruleInfoMessage,
-        logTags,
-      });
-
-      expect(search).toHaveBeenCalledTimes(1);
-      expect(result.all['uuid-1']).toBeDefined();
-      expect(result.active['uuid-1']).toBeDefined();
-      expect(logger.warn).not.toHaveBeenCalled();
-    });
-
-    it('fetches missing alerts by id when state has extra uuids', async () => {
-      const search = jest
-        .fn()
-        .mockResolvedValueOnce({
-          hits: [
-            makeHit({
-              uuid: 'uuid-1',
-              instanceId: 'alert-1',
-              status: ALERT_STATUS_ACTIVE,
-              executionUuid: 'exec-1',
-            }),
-          ],
-        })
-        .mockResolvedValueOnce({
-          hits: [
-            makeHit({
-              uuid: 'uuid-2',
-              instanceId: 'alert-2',
-              status: ALERT_STATUS_ACTIVE,
-              executionUuid: 'exec-old',
-              seqNo: 5,
-              primaryTerm: 2,
-            }),
-          ],
-        });
-
-      const result = await getTrackedAlerts({
-        ruleId,
-        ...makeStateFromUuids(['uuid-1', 'uuid-2']),
-        search,
-        logger,
-        ruleInfoMessage,
-        logTags,
-      });
-
-      expect(search).toHaveBeenCalledTimes(2);
-
-      expect(search.mock.calls[1][0]).toEqual(
-        expect.objectContaining({
-          size: 1,
-          seq_no_primary_term: true,
-          query: expect.objectContaining({
-            bool: expect.objectContaining({
-              filter: [{ ids: { values: ['uuid-2'] } }],
-            }),
-          }),
-        })
-      );
-
-      expect(result.all['uuid-1']).toBeDefined();
-      expect(result.all['uuid-2']).toBeDefined();
-      expect(result.seqNo['uuid-2']).toBe(5);
-      expect(result.primaryTerm['uuid-2']).toBe(2);
-
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining(
-          'Found 1 alerts in task state not returned by tracked alerts query'
-        ),
-        logTags
-      );
-    });
-
-    it('does not fetch missing alerts when all state uuids are tracked', async () => {
-      const search = jest.fn().mockResolvedValueOnce({
-        hits: [
-          makeHit({
-            uuid: 'uuid-1',
-            instanceId: 'alert-1',
-            status: ALERT_STATUS_ACTIVE,
-            executionUuid: 'exec-1',
-          }),
-        ],
-      });
-
-      await getTrackedAlerts({
-        ruleId,
-        ...makeStateFromUuids(['uuid-1']),
-        search,
-        logger,
-        ruleInfoMessage,
-        logTags,
-      });
-
-      expect(search).toHaveBeenCalledTimes(1);
-      expect(logger.warn).not.toHaveBeenCalled();
-    });
-
-    it('handles empty state uuids', async () => {
-      const search = jest.fn().mockResolvedValueOnce({
-        hits: [
-          makeHit({
-            uuid: 'uuid-1',
-            instanceId: 'alert-1',
-            status: ALERT_STATUS_ACTIVE,
-            executionUuid: 'exec-1',
-          }),
-        ],
-      });
-
-      const result = await getTrackedAlerts({
-        ruleId,
-        activeAlertsFromState: {},
-        recoveredAlertsFromState: {},
-        search,
-        logger,
-        ruleInfoMessage,
-        logTags,
-      });
-
-      expect(search).toHaveBeenCalledTimes(1);
-      expect(result.all['uuid-1']).toBeDefined();
-      expect(logger.warn).not.toHaveBeenCalled();
-    });
-
-    it('handles no tracked alerts found with no state alerts', async () => {
-      const search = jest.fn().mockResolvedValueOnce({
-        hits: [],
-      });
-
-      const result = await getTrackedAlerts({
-        ruleId,
-        activeAlertsFromState: {},
-        recoveredAlertsFromState: {},
-        search,
-        logger,
-        ruleInfoMessage,
-        logTags,
-      });
-
-      expect(search).toHaveBeenCalledTimes(1);
-      expect(Object.keys(result.all)).toHaveLength(0);
-      expect(logger.warn).not.toHaveBeenCalled();
-    });
-
-    it('fetches missing alerts when no tracked alerts found but state has alerts', async () => {
-      const search = jest
-        .fn()
-        .mockResolvedValueOnce({
-          hits: [],
-        })
-        .mockResolvedValueOnce({
-          hits: [
-            makeHit({
-              uuid: 'uuid-1',
-              instanceId: 'alert-1',
-              status: ALERT_STATUS_ACTIVE,
-              executionUuid: 'exec-old',
-              seqNo: 3,
-              primaryTerm: 1,
-            }),
-          ],
-        });
-
-      const result = await getTrackedAlerts({
-        ruleId,
-        ...makeStateFromUuids(['uuid-1']),
-        search,
-        logger,
-        ruleInfoMessage,
-        logTags,
-      });
-
-      expect(search).toHaveBeenCalledTimes(2);
-      expect(result.all['uuid-1']).toBeDefined();
-      expect(result.seqNo['uuid-1']).toBe(3);
-      expect(logger.warn).toHaveBeenCalled();
-    });
-
-    it('correctly passes query parameters for tracked alerts query', async () => {
-      const search = jest.fn().mockResolvedValueOnce({
-        hits: [],
-      });
-
-      await getTrackedAlerts({
-        ruleId,
-        activeAlertsFromState: {},
-        recoveredAlertsFromState: {},
-        search,
-        logger,
-        ruleInfoMessage,
-        logTags,
-      });
-
-      expect(search.mock.calls[0][0]).toEqual({
-        size: 10000,
-        seq_no_primary_term: true,
-        query: {
-          bool: {
-            must: [{ term: { [ALERT_RULE_UUID]: ruleId } }, { term: { [ALERT_TRACKED]: true } }],
-            must_not: [{ term: { [ALERT_STATUS]: ALERT_STATUS_UNTRACKED } }],
-          },
-        },
-      });
-    });
-
-    it('logs error and returns partial results when fetchAlertsByIds fails', async () => {
-      const searchError = new Error('search failure');
-      const search = jest
-        .fn()
-        .mockResolvedValueOnce({
-          hits: [],
-        })
-        .mockRejectedValueOnce(searchError);
-
-      const result = await getTrackedAlerts({
-        ruleId,
-        ...makeStateFromUuids(['uuid-1']),
-        search,
-        logger,
-        ruleInfoMessage,
-        logTags,
-      });
-
-      expect(Object.keys(result.all)).toHaveLength(0);
-
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Found 1 alerts in task state'),
-        logTags
-      );
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error fetching missing tracked alerts'),
-        expect.objectContaining({
-          tags: logTags.tags,
-          error: expect.objectContaining({ stack_trace: searchError.stack }),
-        })
-      );
-    });
-
-    it('handles multiple missing alerts', async () => {
-      const search = jest
-        .fn()
-        .mockResolvedValueOnce({
-          hits: [],
-        })
-        .mockResolvedValueOnce({
-          hits: [
-            makeHit({
-              uuid: 'uuid-1',
-              instanceId: 'alert-1',
-              status: ALERT_STATUS_ACTIVE,
-              executionUuid: 'exec-old-1',
-            }),
-            makeHit({
-              uuid: 'uuid-2',
-              instanceId: 'alert-2',
-              status: ALERT_STATUS_RECOVERED,
-              executionUuid: 'exec-old-2',
-            }),
-          ],
-        });
-
-      const result = await getTrackedAlerts({
-        ruleId,
-        ...makeStateFromUuids(['uuid-1', 'uuid-2', 'uuid-3']),
-        search,
-        logger,
-        ruleInfoMessage,
-        logTags,
-      });
-
-      expect(search).toHaveBeenCalledTimes(2);
-
-      expect(search.mock.calls[1][0].size).toBe(3);
-
-      expect(result.active['uuid-1']).toBeDefined();
-      expect(result.recovered['uuid-2']).toBeDefined();
-      expect(result.all['uuid-3']).toBeUndefined();
-
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Found 3 alerts in task state'),
-        logTags
-      );
     });
   });
 });

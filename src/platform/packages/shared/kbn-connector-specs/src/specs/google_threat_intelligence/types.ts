@@ -20,13 +20,15 @@ const pagingLimitSchema = (noun: string) =>
       `Maximum number of ${noun} to retrieve. Minimum 0, maximum 40. Defaults to 10 if omitted.`
     );
 
-const CURSOR_SCHEMA = z
-  .string()
-  .max(2048)
-  .optional()
-  .describe(
-    'Continuation cursor from a previous response, used to retrieve the next page of results.'
-  );
+const CURSOR_SCHEMA = lazySchema(() =>
+  z
+    .string()
+    .max(2048)
+    .optional()
+    .describe(
+      'Continuation cursor from a previous response, used to retrieve the next page of results.'
+    )
+);
 
 const relationshipSchema = (objectType: string, examples: string, docPath: string) =>
   z
@@ -55,71 +57,89 @@ const urlIdSchema = (analysisAction: string) =>
         `\`${analysisAction}\` response. Not derived by this action.`
     );
 
-const COLLECTION_FILTER_SCHEMA = z
-  .string()
-  .max(2000)
-  .optional()
-  .describe(
-    'Collection filter. Supports fields such as collection_type, last_modification_date, origin, targeted_region, and targeted_industry, combined with AND, OR, or NOT.'
-  );
+const COLLECTION_FILTER_SCHEMA = lazySchema(() =>
+  z
+    .string()
+    .max(2000)
+    .optional()
+    .describe(
+      'Collection filter. Supports fields such as collection_type, last_modification_date, origin, targeted_region, and targeted_industry, combined with AND, OR, or NOT.'
+    )
+);
 
-const COLLECTION_ORDER_SCHEMA = z
-  .string()
-  .max(100)
-  .optional()
-  .describe('Collection sort expression, for example "last_modification_date-" or "relevance-".');
+const COLLECTION_ORDER_SCHEMA = lazySchema(() =>
+  z
+    .string()
+    .max(100)
+    .optional()
+    .describe('Collection sort expression, for example "last_modification_date-" or "relevance-".')
+);
 
-const IOC_SEARCH_ORDER_SCHEMA = z
-  .string()
-  .max(100)
-  .optional()
-  .describe(
-    'IOC sort expression supported by the selected entity type, for example "last_submission_date-" or "positives-".'
-  );
+const IOC_SEARCH_ORDER_SCHEMA = lazySchema(() =>
+  z
+    .string()
+    .max(100)
+    .optional()
+    .describe(
+      'IOC sort expression supported by the selected entity type, for example "last_submission_date-" or "positives-".'
+    )
+);
 
-const QUERY_SCHEMA = z
-  .string()
-  .min(1)
-  .max(2000)
-  .describe(
-    'GTI intelligence query. Use GTI search modifiers, for example "entity:domain positives:5+".'
-  );
+const QUERY_SCHEMA = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(2000)
+    .describe(
+      'GTI intelligence query. Use GTI search modifiers, for example "entity:domain positives:5+".'
+    )
+);
 
-const COLLECTION_ID_SCHEMA = z
-  .string()
-  .min(1)
-  .max(200)
-  .describe(
-    'GTI collection object ID returned by searchCollections, for example "threat-actor--bcaaad6f-0597-4b89-b69b-84a6be2b7bc3".'
-  );
+const COLLECTION_ID_SCHEMA = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(200)
+    .describe(
+      'GTI collection object ID returned by searchCollections, for example "threat-actor--bcaaad6f-0597-4b89-b69b-84a6be2b7bc3".'
+    )
+);
 
 const FILE_HASH_RE = /^([a-fA-F0-9]{64}|[a-fA-F0-9]{40}|[a-fA-F0-9]{32})$/;
 
-export const FILE_HASH_SCHEMA = z
-  .string()
-  .max(64)
-  .regex(FILE_HASH_RE, {
-    message:
-      'Must be a SHA-256 (64 hex chars), SHA-1 (40 hex chars), or MD5 (32 hex chars) file hash',
-  })
-  .describe(
-    'SHA-256, SHA-1, or MD5 hash identifying the file, e.g. a 64-character SHA-256 hex string'
-  );
+export const FILE_HASH_SCHEMA = lazySchema(() =>
+  z
+    .string()
+    .max(64)
+    .regex(FILE_HASH_RE, {
+      message:
+        'Must be a SHA-256 (64 hex chars), SHA-1 (40 hex chars), or MD5 (32 hex chars) file hash',
+    })
+    .describe(
+      'SHA-256, SHA-1, or MD5 hash identifying the file, e.g. a 64-character SHA-256 hex string'
+    )
+);
 
-export const IP_ADDRESS_SCHEMA = z
-  .union([z.ipv4(), z.ipv6()])
-  .describe('IPv4 or IPv6 address to look up, e.g. "8.8.8.8" or "2001:4860:4860::8888"');
+export const IP_ADDRESS_SCHEMA = lazySchema(() =>
+  z
+    .union([z.ipv4().max(15), z.ipv6().max(45)])
+    .describe('IPv4 or IPv6 address to look up, e.g. "8.8.8.8" or "2001:4860:4860::8888"')
+);
 
-export const DOMAIN_SCHEMA = z
-  .string()
-  .max(253)
-  .regex(z.regexes.domain, { message: 'Must be a valid domain name' })
-  .describe('Domain name to look up, e.g. "example.com"');
+export const DOMAIN_SCHEMA = lazySchema(() =>
+  z
+    .string()
+    .max(253)
+    .regex(z.regexes.domain, { message: 'Must be a valid domain name' })
+    .describe('Domain name to look up, e.g. "example.com"')
+);
 
-export const URL_SCHEMA = z
-  .url()
-  .max(2048)
-  .describe('URL to look up, e.g. "https://example.com/path" or "ftp://example.com/file"');
+export const URL_SCHEMA = lazySchema(() =>
+  z
+    .url()
+    .max(2048)
+    .describe('URL to look up, e.g. "https://example.com/path" or "ftp://example.com/file"')
+);
 
 export const GetIpReportInputSchema = lazySchema(() =>
   z.object({

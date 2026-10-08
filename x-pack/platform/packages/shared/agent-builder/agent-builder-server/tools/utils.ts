@@ -7,7 +7,7 @@
 
 import { randomInt } from 'crypto';
 import type { ErrorResult, OtherResult } from '@kbn/agent-builder-common';
-import { ToolResultType } from '@kbn/agent-builder-common';
+import { NON_INTERACTIVE_DECLINED_REASON, ToolResultType } from '@kbn/agent-builder-common';
 
 const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 const idRegex = /^[a-zA-Z0-9]{6}$/;
@@ -32,6 +32,21 @@ export const createErrorResult = (message: string | ErrorResult['data']): ErrorR
     type: ToolResultType.error,
     data: typeof message === 'string' ? { message } : message,
   };
+};
+
+/**
+ * Error result a non-interactive run returns in place of a HITL prompt, tagged with
+ * `NON_INTERACTIVE_DECLINED_REASON` so consumers can tell an auto-declined prompt apart from any
+ * other tool error without parsing the message.
+ */
+export const createNonInteractiveDeclinedResult = (
+  message: string,
+  metadata?: Record<string, unknown>
+): ErrorResult => {
+  return createErrorResult({
+    message,
+    metadata: { ...metadata, declined_reason: NON_INTERACTIVE_DECLINED_REASON },
+  });
 };
 
 export const createOtherResult = <T extends Object>(data: T): OtherResult<T> => {

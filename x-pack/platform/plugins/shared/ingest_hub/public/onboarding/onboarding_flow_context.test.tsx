@@ -14,7 +14,14 @@ jest.mock('./use_aws_service_matrix', () => ({
     .mockReturnValue({ matrix: [], isError: false, refetch: jest.fn() }),
 }));
 
+jest.mock('./use_is_self_managed', () => ({
+  useIsSelfManaged: jest.fn(() => false),
+}));
+
 import { OnboardingFlowProvider, useOnboardingFlow } from './onboarding_flow_context';
+import { useIsSelfManaged } from './use_is_self_managed';
+
+const mockUseIsSelfManaged = useIsSelfManaged as jest.Mock;
 
 jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
 
@@ -48,6 +55,9 @@ describe('OnboardingFlowProvider', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseSessionStorage.mockImplementation(makeStatefulStorageMock());
+    // Default to cloud: the pre-existing suite exercises the managed_integration <-> agent_based
+    // switching that only cloud and serverless offer.
+    mockUseIsSelfManaged.mockReturnValue(false);
   });
 
   describe('updateDetectAndReviewStep', () => {
@@ -649,6 +659,53 @@ describe('OnboardingFlowProvider', () => {
     });
   });
 
+  describe('deployment method on self-managed', () => {
+    beforeEach(() => {
+      mockUseIsSelfManaged.mockReturnValue(true);
+    });
+
+    it('defaults to agent_based when nothing is persisted', () => {
+      const { result } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      expect(result.current.deploymentMethod).toBe('agent_based');
+    });
+
+    it('coerces a persisted managed_integration to agent_based', () => {
+      // A session started on cloud, or before self-managed was restricted, can carry the
+      // agentless method in session storage. It must not resurrect the agentless path.
+      mockUseSessionStorage.mockImplementation((key: string, defaultValue: unknown) =>
+        key.includes('authenticateAndDeployStep')
+          ? [{ deploymentMethod: 'managed_integration' }, jest.fn()]
+          : [defaultValue, jest.fn()]
+      );
+
+      const { result } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      expect(result.current.deploymentMethod).toBe('agent_based');
+    });
+
+    it('treats setDeploymentMethod("agent_based") as a no-op even with a stale persisted method', () => {
+      // Regression guard: the context reports agent_based, so the auto-force effect in Step 3
+      // calls setDeploymentMethod('agent_based') on mount. If the no-op comparison read the
+      // stale persisted value instead, that call would look like a real switch and wipe the
+      // in-progress deploy state on every mount.
+      const setPersisted = jest.fn();
+      mockUseSessionStorage.mockImplementation((key: string, defaultValue: unknown) =>
+        key.includes('authenticateAndDeployStep')
+          ? [{ deploymentMethod: 'managed_integration', agentPolicyId: 'policy-1' }, setPersisted]
+          : [defaultValue, jest.fn()]
+      );
+
+      const { result } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.setDeploymentMethod('agent_based');
+      });
+
+      expect(setPersisted).not.toHaveBeenCalled();
+    });
+  });
+
   describe('setAgentBasedDeployment', () => {
     it('merges partial state without clobbering unrelated persisted fields', () => {
       const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
@@ -673,7 +730,7 @@ describe('OnboardingFlowProvider', () => {
       const { result } = renderHook(() => useOnboardingFlow(), { wrapper });
 
       expect(result.current.agentBasedDeployment.agentHostsMode).toBe('new');
-      expect(result.current.agentBasedDeployment.agentCredentialMethod).toBe('direct_access_keys');
+      expect(result.current.agentBasedDeployment.agentCredentialMethod).toBe('static_keys');
       expect(result.current.agentBasedDeployment.selectedAgentPolicyIds).toEqual([]);
     });
 
@@ -789,6 +846,34 @@ describe('OnboardingFlowProvider', () => {
 
       expect(result.current.authenticateAndDeployStep.staticKeys).toBeUndefined();
       expect(result.current.authenticateAndDeployStep.authMethod).toBeUndefined();
+    });
+  });
+
+  describe('clearStagedStaticKeys', () => {
+    it('drops the in-memory keys and the persisted access key id but keeps the auth method', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.setStaticKeys({ access_key_id: 'AKIA', secret_access_key: 'secret' });
+      });
+      rerender();
+      expect(result.current.authenticateAndDeployStep.staticKeys).toBeDefined();
+
+      act(() => {
+        result.current.clearStagedStaticKeys();
+      });
+      rerender();
+
+      expect(result.current.authenticateAndDeployStep.staticKeys).toBeUndefined();
+      expect(result.current.authenticateAndDeployStep.authMethod).toBe('static_keys');
+      // Not seeded back from the persisted access key id after a reload.
+      const authStepIndex = mockUseSessionStorage.mock.calls.findLastIndex(
+        ([key]) => typeof key === 'string' && key.endsWith('authenticateAndDeployStep')
+      );
+      const setAuthStep = mockUseSessionStorage.mock.results[authStepIndex].value[1] as jest.Mock;
+      expect(setAuthStep.mock.calls.at(-1)?.[0]).toEqual(
+        expect.objectContaining({ authMethod: 'static_keys', accessKeyId: undefined })
+      );
     });
   });
 });

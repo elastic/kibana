@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { getDataTestSubjectSelectorMatch } from '../helpers/common';
+import { getDataTestSubjectSelector, getDataTestSubjectSelectorMatch } from '../helpers/common';
 
 export const MORE_MENU_BTN = getDataTestSubjectSelectorMatch('kbnChromeNav-moreMenuTrigger');
+export const MORE_MENU_PANEL = getDataTestSubjectSelector('side-nav-popover-More');
 
 export const FOOTER_LAUNCHPAD = getDataTestSubjectSelectorMatch(
   'nav-item-id-securityGroup:launchpad'
@@ -165,4 +166,6 @@ export const showMoreItems = () => {
   cy.wait(1000);
   cy.get(MORE_MENU_BTN).click();
   cy.get(MORE_MENU_BTN).should('have.attr', 'aria-expanded', 'true');
+  // `aria-expanded` flips in the click handler, before the popover portal paints the overflow items.
+  cy.get(MORE_MENU_PANEL).should('be.visible');
 };
