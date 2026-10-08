@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import fs from 'fs';
 import os from 'os';
 import Papa from 'papaparse';
+import { test } from '../../fixtures';
 import { cleanupDownloadedFile } from '../../helpers';
 
 const defaultSettings = {

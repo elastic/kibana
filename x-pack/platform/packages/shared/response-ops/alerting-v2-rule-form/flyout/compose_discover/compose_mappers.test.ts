@@ -56,6 +56,16 @@ const baseFormValues: FormValues = {
 // ── composeFormToCreateRequest ───────────────────────────────────────────────
 
 describe('composeFormToCreateRequest', () => {
+  it('maps builder type to builder metadata', () => {
+    const result = composeFormToCreateRequest(baseFormValues, 'threshold');
+
+    expect(result.metadata).toEqual({
+      name: 'Test Rule',
+      tags: ['tag1'],
+      builder: { type: 'threshold' },
+    });
+  });
+
   it('maps basic form values to create request', () => {
     const result = composeFormToCreateRequest(baseFormValues);
     expect(result.kind).toBe('alert');
@@ -305,6 +315,18 @@ describe('composeFormToCreateRequest', () => {
 // ── composeFormToUpdateRequest ───────────────────────────────────────────────
 
 describe('composeFormToUpdateRequest', () => {
+  it('maps builder type to builder metadata', () => {
+    const result = composeFormToUpdateRequest(baseFormValues, 'threshold');
+
+    expect(result.metadata?.builder).toEqual({ type: 'threshold' });
+  });
+
+  it('clears builder metadata outside builder mode', () => {
+    const result = composeFormToUpdateRequest(baseFormValues);
+
+    expect(result.metadata?.builder).toBeNull();
+  });
+
   it('excludes kind from update request', () => {
     const result = composeFormToUpdateRequest(baseFormValues);
     expect(result).not.toHaveProperty('kind');

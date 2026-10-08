@@ -321,7 +321,13 @@ function validateCommand(
   };
 
   if (commandDefinition.methods.validate) {
-    const allErrors = commandDefinition.methods.validate(command, rootCommands, context, callbacks);
+    const allErrors = commandDefinition.methods.validate(
+      command,
+      rootCommands,
+      context,
+      callbacks,
+      references.query
+    );
 
     const filteredErrors = allErrors.filter((error) => {
       if (error.errorType === 'semantic' && error.requiresCallback) {
