@@ -131,13 +131,11 @@ export const ReverseCategorizeBtn = ({
   field,
   dataGridRef,
   uiActions,
-  valueToStringConverter,
 }: {
   cellActionProps: EuiDataGridColumnCellActionProps;
   field: DataViewField;
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
   uiActions?: UiActionsStart;
-  valueToStringConverter: ValueToStringConverter;
 }) => {
   const context = useContext(UnifiedDataTableContext);
   const buttonTitle = i18n.translate('unifiedDataTable.grid.reverseCategorizeAria', {
@@ -151,18 +149,21 @@ export const ReverseCategorizeBtn = ({
     return <></>;
   }
 
-  const result = valueToStringConverter(rowIndex, columnId);
-  const valueFormatted = result.formattedString;
-
   return (
     <Component
       onClick={() => {
+        const row = context.getRowByIndex(rowIndex);
+        const rawValue = row?.flattened[columnId];
+        // Use the indexed/flattened value so category regex matching is not broken by
+        // field formatting or clipboard escaping from valueToStringConverter.
+        const fieldValue =
+          typeof rawValue === 'string' ? rawValue : rawValue == null ? '' : String(rawValue);
+
         uiActions.executeTriggerActions(REVERSE_CATEGORIZE_FIELD_TRIGGER, {
           field,
           dataView: context.dataView,
           originatingApp: 'discover',
-          fieldValue: valueFormatted,
-          onFilter: context.onFilter,
+          fieldValue,
         });
         dataGridRef?.current?.closeCellPopover();
       }}
@@ -263,7 +264,6 @@ export function buildCellActions(
               field,
               dataGridRef,
               uiActions,
-              valueToStringConverter,
             }),
         ]
       : []),
