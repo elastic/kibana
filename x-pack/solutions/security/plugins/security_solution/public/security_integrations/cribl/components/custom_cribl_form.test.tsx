@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { NewPackagePolicy, PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { render, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
@@ -106,7 +106,7 @@ describe('<CustomCriblForm />', () => {
     });
 
     const invalidDataId = `evil' || true || '`;
-    await userEvent.type(dataId, invalidDataId);
+    fireEvent.change(dataId, { target: { value: invalidDataId } });
 
     const datastreamComboBox = getByTestId('comboBoxSearchInput');
     await userEvent.type(datastreamComboBox, datastreamOpts[0]);

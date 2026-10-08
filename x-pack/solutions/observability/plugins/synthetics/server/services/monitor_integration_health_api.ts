@@ -7,7 +7,6 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   ConfigKey,
@@ -273,25 +272,26 @@ export class MonitorIntegrationHealthApi {
     allSpaces: Set<string>
   ) {
     if (expectedPackagePolicyIds.length === 0) {
-      return new Map<string, PackagePolicy>();
+      return new Map<string, { id: string }>();
     }
 
-    // The Synthetics wrapper builds a namespace-scoped saved-objects client
-    // per space and de-duplicates the results, so package policies created
-    // for monitors in any space are visible regardless of the caller's space.
+    // The Synthetics wrapper queries all relevant namespaces in one bulk read,
+    // so package policies created for monitors in any space are visible
+    // regardless of the caller's space.
     const packagePolicyService = new PackagePolicyService(this.server);
     const additionalSpaceIds = [...allSpaces].filter((space) => space !== this.spaceId);
     const existingPackagePolicies = await packagePolicyService.getByIds({
       spaceId: this.spaceId,
       packagePolicyIds: expectedPackagePolicyIds,
       additionalSpaceIds,
+      fields: ['name'],
     });
     return new Map((existingPackagePolicies ?? []).map((policy) => [policy.id, policy]));
   }
 
   private async getExistingAgentPoliciesMap(agentPolicyIds: string[], allSpaces: Set<string>) {
     if (agentPolicyIds.length === 0) {
-      return new Map<string, AgentPolicy>();
+      return new Map<string, { id: string }>();
     }
 
     // Agent policies can be scoped to a non-default space via space_ids. A plain
@@ -305,7 +305,7 @@ export class MonitorIntegrationHealthApi {
         this.server.fleet.agentPolicyService.getByIds(
           unsafeClient.asScopedToNamespace(space),
           agentPolicyIds,
-          { ignoreMissing: true, withPackagePolicies: false }
+          { ignoreMissing: true, withPackagePolicies: false, fields: ['name'] }
         )
       )
     );

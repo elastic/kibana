@@ -8,7 +8,7 @@
 import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
-import { edotEnvHash, isEdotStale } from './services';
+import { connectorsHash, edotEnvHash, isEdotStale, isScoutStale, scoutEnvHash } from './services';
 
 const LOCAL_ES = 'http://elastic:changeme@localhost:9200';
 const CLOUD_ES = 'https://kbn-evals-serverless.es.us-central1.gcp.elastic.cloud';
@@ -76,5 +76,80 @@ describe('isEdotStale', () => {
 
   it('says nothing when no collector was ever started', () => {
     expect(isEdotStale(repoRoot, LOCAL_ES)).toEqual({ stale: false });
+  });
+});
+
+describe('scoutEnvHash', () => {
+  const base = { TRACING_EXPORTERS: '[]', GCS_CREDENTIALS: '{}' };
+
+  it('keeps the hash of stacks started without scoutHook output', () => {
+    expect(scoutEnvHash({ ...base })).toBe(scoutEnvHash(base));
+    expect(scoutEnvHash(undefined)).toBe(scoutEnvHash({}));
+  });
+
+  it('changes when a scoutHook variable is added or changed', () => {
+    const withHook = scoutEnvHash({ ...base, SUITE_KEY: 'a' });
+    expect(withHook).not.toBe(scoutEnvHash(base));
+    expect(scoutEnvHash({ ...base, SUITE_KEY: 'b' })).not.toBe(withHook);
+  });
+
+  it('ignores the order scoutHook variables were provided in', () => {
+    expect(scoutEnvHash({ ...base, B: 'k', A: 'h' })).toBe(
+      scoutEnvHash({ ...base, A: 'h', B: 'k' })
+    );
+  });
+});
+
+describe('isScoutStale', () => {
+  let repoRoot: string;
+  const serverless = { arch: 'serverless', domain: 'observability_complete' } as const;
+
+  beforeEach(() => {
+    repoRoot = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'kbn-evals-services-'));
+  });
+
+  afterEach(() => {
+    Fs.rmSync(repoRoot, { recursive: true, force: true });
+  });
+
+  const writeScoutState = (entry: Record<string, unknown>) => {
+    const dir = Path.join(repoRoot, 'target/evals');
+    Fs.mkdirSync(dir, { recursive: true });
+    Fs.writeFileSync(
+      Path.join(dir, 'services.json'),
+      JSON.stringify({
+        scout: {
+          pid: process.pid,
+          logFile: 'target/evals/scout.log',
+          startedAt: new Date().toISOString(),
+          connectorsHash: connectorsHash(),
+          envHash: scoutEnvHash({}),
+          ...entry,
+        },
+      })
+    );
+  };
+
+  it('treats a Scout started before arch/domain were recorded as stateful/classic', () => {
+    writeScoutState({});
+
+    expect(isScoutStale(repoRoot, undefined, {})).toEqual({ stale: false });
+    expect(isScoutStale(repoRoot, undefined, {}, serverless)).toEqual({
+      stale: true,
+      reason:
+        'Scout arch/domain changed (running: stateful/classic, requested: serverless/observability_complete)',
+    });
+  });
+
+  it('reuses a Scout already running on the requested arch/domain', () => {
+    writeScoutState({ scoutArch: 'serverless', scoutDomain: 'observability_complete' });
+
+    expect(isScoutStale(repoRoot, undefined, {}, serverless)).toEqual({ stale: false });
+  });
+
+  it('restarts a serverless Scout when stateful is requested', () => {
+    writeScoutState({ scoutArch: 'serverless', scoutDomain: 'observability_complete' });
+
+    expect(isScoutStale(repoRoot, undefined, {}).stale).toBe(true);
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { isTextBasedAttributes } from '@kbn/lens-common';
 import { EuiButtonEmpty } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
@@ -15,7 +15,7 @@ import type { LensProps } from './types';
 type Props = LensProps & { savedObjectId: string };
 
 export const isOpenLensActionCompatible = (attributes: LensProps['attributes']): boolean =>
-  !isOfAggregateQueryType(attributes.state.query);
+  !isTextBasedAttributes(attributes);
 
 const OpenLensButtonComponent: React.FC<Props> = ({ savedObjectId, attributes, timeRange }) => {
   const {

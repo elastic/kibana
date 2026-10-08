@@ -11,7 +11,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiThemeProvider } from '@elastic/eui';
-import { PROJECT_ROUTING } from '@kbn/cps-common';
 
 import type { ProjectPickerState } from '../../../../state/reducers';
 import { ProjectPickerFrameHeader } from './header';
@@ -45,19 +44,32 @@ const createFilterExpressions = (
     ])
   );
 
-const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => ({
-  filterExpressions: new Map(),
-  filteringDimensions: [],
-  availableProjects: new Map(),
-  excludedOverrides: [],
-  filteredProjectIds: [],
-  visibleProjectIds: [],
-  selectedProjects: [],
-  ...overrides,
-  defaultProjectRouting: overrides.defaultProjectRouting ?? '_alias:*',
-  hasUserModifiedRouting: overrides.hasUserModifiedRouting ?? false,
-  originProjectId: overrides.originProjectId,
-});
+const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => {
+  const filterExpressions = overrides.filterExpressions ?? new Map();
+
+  return {
+    filterExpressions,
+    filteringDimensions: [],
+    availableProjects: new Map(),
+    excludedOverrides: [],
+    proposedFilters: null,
+    filteredProjectIds: [],
+    isFilterSearchLoading: false,
+    filterSearchError: null,
+    visibleProjectIds: [],
+    selectedProjectIds: [],
+    originProjectId: 'origin',
+    defaultProjectRouting: '',
+    projectRoutingStrategy: 'dynamic',
+    hasUserModifiedRouting: false,
+    currentProjectRouting: '',
+    isUsingSpaceDefaults: false,
+    displayedFilterExpressions: filterExpressions,
+    isFilterProposalPending: false,
+    controlsState: 'enabled',
+    ...overrides,
+  };
+};
 
 const defaultActions = {
   clearProjectFilters: jest.fn(),
@@ -91,39 +103,45 @@ describe('ProjectPickerFrameHeader', () => {
     excludedOverrides: ['p2'],
   };
 
-  describe('read-only mode', () => {
-    it('disables clear and revert menu items', async () => {
-      renderHeader({ ...stateWithFilters, isReadOnly: true });
+  describe('controlsState', () => {
+    it('disables clear and revert menu items when controlsState is `disabled`', async () => {
+      renderHeader({ ...stateWithFilters, controlsState: 'disabled' });
       await openGlobalActionsMenu();
 
       expect(screen.getByText('Clear project tag filters').closest('button')).toBeDisabled();
       expect(screen.getByText('Revert to space defaults').closest('button')).toBeDisabled();
     });
+
+    it('enables clear and revert menu items when controlsState is `enabled`', async () => {
+      renderHeader({ ...stateWithFilters, controlsState: 'enabled' });
+      await openGlobalActionsMenu();
+
+      expect(screen.getByText('Clear project tag filters').closest('button')).not.toBeDisabled();
+      expect(screen.getByText('Revert to space defaults').closest('button')).not.toBeDisabled();
+    });
   });
 
-  it('enables clear and revert menu items when not read-only', async () => {
-    renderHeader({ ...stateWithFilters, isReadOnly: false });
-    await openGlobalActionsMenu();
+  describe('propose-then-commit filter state', () => {
+    it('disables clear and revert menu items while a filter proposal is pending, even with filters displayed', async () => {
+      renderHeader({
+        ...stateWithFilters,
+        proposedFilters: { filterExpressions: new Map(), excludedOverrides: [] },
+        isFilterProposalPending: true,
+      });
+      await openGlobalActionsMenu();
 
-    expect(screen.getByText('Clear project tag filters').closest('button')).not.toBeDisabled();
-    expect(screen.getByText('Revert to space defaults').closest('button')).not.toBeDisabled();
-  });
-
-  it('shows the space defaults badge when the state matches an origin default', async () => {
-    renderHeader({
-      availableProjects: new Map([
-        ['p1', { _id: 'p1', _alias: 'p1', _type: 'security', _organisation: 'org' }],
-        ['p2', { _id: 'p2', _alias: 'p2', _type: 'security', _organisation: 'org' }],
-      ]),
-      defaultProjectRouting: PROJECT_ROUTING.ORIGIN,
-      excludedOverrides: ['p2'],
-      originProjectId: 'p1',
+      expect(screen.getByText('Clear project tag filters').closest('button')).toBeDisabled();
+      expect(screen.getByText('Revert to space defaults').closest('button')).toBeDisabled();
     });
 
-    expect(screen.getByText('Using space defaults')).toBeInTheDocument();
+    it('reads displayedFilterExpressions (not the committed filters) for the clear-filters disabled check', async () => {
+      renderHeader({
+        filterExpressions: new Map(),
+        displayedFilterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+      });
+      await openGlobalActionsMenu();
 
-    await openGlobalActionsMenu();
-
-    expect(screen.getByText('Revert to space defaults').closest('button')).toBeDisabled();
+      expect(screen.getByText('Clear project tag filters').closest('button')).not.toBeDisabled();
+    });
   });
 });

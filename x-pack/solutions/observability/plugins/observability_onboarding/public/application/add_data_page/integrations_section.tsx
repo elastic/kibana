@@ -20,10 +20,15 @@ import {
  * The o11y host composition of the curated Add Data grid in the Variant A
  * layout: a flat section that stays visible whatever the search state is.
  */
-export const ObservabilityIntegrationsSection = () => {
+export const ObservabilityIntegrationsSection = ({
+  onOpenCollection,
+}: {
+  /** Names the chooser the page should open, by Fleet's group id. */
+  onOpenCollection: (groupId: string) => void;
+}) => {
   const titleId = useGeneratedHtmlId({ prefix: 'integrationsGridTitle' });
-  const categories = useObservabilityCuratedCategories();
-  const miniTiles = useObservabilityMiniTiles();
+  const categories = useObservabilityCuratedCategories({ onOpenCollection });
+  const miniTiles = useObservabilityMiniTiles({ onOpenCollection });
 
   return (
     <section aria-labelledby={titleId}>

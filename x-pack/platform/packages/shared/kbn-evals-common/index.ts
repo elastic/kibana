@@ -15,6 +15,15 @@ export {
   buildSpaceFilter,
   buildStatsAggregation,
   parseStatsAggregationResponse,
+  buildEvaluatorModelsAggregation,
+  parseEvaluatorModelsAggregation,
+  buildExperimentEvaluatorsAggregation,
+  parseExperimentEvaluatorsAggregation,
+  buildExperimentRunsAggregation,
+  parseExperimentRunsAggregation,
+  buildExperimentRunsFetchQuery,
+  buildExperimentTracesAggregation,
+  parseExperimentTracesAggregation,
   SCORES_SORT_ORDER,
   buildExperimentsListingFilterQuery,
   buildExperimentsListingAggregation,
@@ -25,8 +34,20 @@ export {
 export type {
   ExperimentsListingResult,
   ExperimentDetailEvaluatorStat,
+  EvaluatorJudgeModel,
+  ExperimentRunKey,
 } from './impl/query_builders';
 export { getDatasetId } from './impl/dataset_ids';
+export { getEvaluatorDefinitionId } from './impl/evaluator_ids';
 export { ALL_SPACES_ID, DEFAULT_SPACE_ID, resolveDatasetHomeSpace } from './impl/spaces';
-export { pairScores, computePairedTTestResults } from './impl/statistical_analysis';
+export {
+  pairScores,
+  computePairedTTestResults,
+  resolveDirection,
+  isImproved,
+} from './impl/statistical_analysis';
 export type { PairedScore } from './impl/statistical_analysis';
+export {
+  DEFAULT_JUDGE_SCORE_DIRECTION,
+  getJudgeScoreDirection,
+} from './impl/judge_score_direction';

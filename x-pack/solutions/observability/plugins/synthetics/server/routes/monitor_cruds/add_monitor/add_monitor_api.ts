@@ -7,6 +7,7 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { getPackagePolicySavedObjectType } from '@kbn/fleet-plugin/server/services/package_policy';
 import { i18n } from '@kbn/i18n';
@@ -38,6 +39,7 @@ import {
   DEFAULT_FIELDS,
   DEFAULT_NAMESPACE_STRING,
 } from '../../../../common/constants/monitor_defaults';
+import { mergeHttpAuthDefaults } from '../../../../common/utils/merge_http_auth_defaults';
 import { triggerTestNow } from '../../synthetics_service/test_now_monitor';
 import { DefaultRuleService } from '../../default_alerts/default_alert_service';
 import type { RouteContext } from '../../types';
@@ -46,6 +48,24 @@ import { formatKibanaNamespace } from '../../../../common/formatters';
 import { getPrivateLocationsForNamespaces } from '../../../synthetics_service/get_private_locations';
 import { resolveMaintenanceWindowsOrThrow } from '../../../synthetics_service/maintenance_windows/resolve_maintenance_windows';
 import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
+
+/**
+ * Fleet bulkCreate reports saved-object 409s as plain `{ statusCode, error }`
+ * objects, not `Error` instances. Package-policy ids are deterministic
+ * (`${monitorId}-${locationId}`), so a conflict means that policy already
+ * exists — typically a concurrent cleanup sync or a Fleet retry after the SO
+ * write landed. Failing the create (and reverting) turns that into a 500.
+ */
+export const isPackagePolicyConflictFailure = (error: unknown): boolean => {
+  if (error instanceof Error) {
+    return SavedObjectsErrorHelpers.isConflictError(error);
+  }
+  if (error && typeof error === 'object') {
+    const soError = error as { statusCode?: number; error?: string };
+    return soError.statusCode === 409 || soError.error === 'Conflict';
+  }
+  return false;
+};
 
 export type CreateMonitorPayLoad = MonitorFields & {
   url?: string;
@@ -125,10 +145,15 @@ export class AddEditMonitorAPI {
       if ((packagePolicyResult?.failed?.length ?? 0) > 0) {
         // Fleet reports saved object level failures (e.g. a policy id conflict) as plain
         // objects, so they have to be formatted explicitly to stay readable.
-        const failed = packagePolicyResult.failed.map(({ error }) =>
-          error instanceof Error ? error.message : JSON.stringify(error)
+        const failed = packagePolicyResult.failed.filter(
+          ({ error }) => !isPackagePolicyConflictFailure(error)
         );
-        throw new Error(failed.join(', '));
+        if (failed.length > 0) {
+          const messages = failed.map(({ error }) =>
+            error instanceof Error ? error.message : JSON.stringify(error)
+          );
+          throw new Error(messages.join(', '));
+        }
       }
 
       monitorSavedObject = soResult.value;
@@ -191,7 +216,8 @@ export class AddEditMonitorAPI {
     requestPayload: CreateMonitorPayLoad,
     monitorPayload: CreateMonitorPayLoad,
     prevLocations?: MonitorFields['locations'],
-    maintenanceWindows: MaintenanceWindow[] = []
+    maintenanceWindows: MaintenanceWindow[] = [],
+    resolvedPrivateLocations?: PrivateLocationAttributes[]
   ) {
     const { syntheticsMonitorClient, request } = this.routeContext;
     const internal = Boolean((request.query as { internal?: boolean })?.internal);
@@ -229,31 +255,15 @@ export class AddEditMonitorAPI {
 
       const prevPrivateLocations = prevLocations.filter((loc) => !loc.isServiceManaged);
       if (prevPrivateLocations.length > 0) {
-        const monitorSpaces = monitor[ConfigKey.KIBANA_SPACES] ?? [];
-        const namespacesForLookup = [
-          ...new Set([this.routeContext.spaceId, ...monitorSpaces]),
-        ].filter(Boolean);
-        const internalClient =
-          this.routeContext.server.coreStart.savedObjects.createInternalRepository();
-        this.allPrivateLocations = await getPrivateLocationsForNamespaces(
-          internalClient,
-          namespacesForLookup
-        );
+        this.allPrivateLocations =
+          resolvedPrivateLocations ?? (await this.getPrivateLocationsForMonitorSpaces(monitor));
       }
     } else {
       const monitorLocations = parseMonitorLocations(monitorPayload, prevLocations, internal);
 
       if (monitorLocations.privateLocations.length > 0) {
-        const monitorSpaces = monitor[ConfigKey.KIBANA_SPACES] ?? [];
-        const namespacesForLookup = [
-          ...new Set([this.routeContext.spaceId, ...monitorSpaces]),
-        ].filter(Boolean);
-        const internalClient =
-          this.routeContext.server.coreStart.savedObjects.createInternalRepository();
-        this.allPrivateLocations = await getPrivateLocationsForNamespaces(
-          internalClient,
-          namespacesForLookup
-        );
+        this.allPrivateLocations =
+          resolvedPrivateLocations ?? (await this.getPrivateLocationsForMonitorSpaces(monitor));
       } else {
         this.allPrivateLocations = [];
       }
@@ -265,7 +275,7 @@ export class AddEditMonitorAPI {
       });
     }
 
-    return {
+    const normalized = {
       ...DEFAULT_FIELDS[monitorType],
       ...monitor,
       [ConfigKey.SCHEDULE]: getMonitorSchedule(schedule ?? defaultFields[ConfigKey.SCHEDULE]),
@@ -274,6 +284,18 @@ export class AddEditMonitorAPI {
       [ConfigKey.MAINTENANCE_WINDOWS]:
         resolvedMaintenanceWindows ?? defaultFields?.[ConfigKey.MAINTENANCE_WINDOWS] ?? [],
     } as MonitorFields;
+
+    return monitorType === MonitorTypeEnum.HTTP ? mergeHttpAuthDefaults(normalized) : normalized;
+  }
+
+  private async getPrivateLocationsForMonitorSpaces(monitor: MonitorFields) {
+    const monitorSpaces = monitor[ConfigKey.KIBANA_SPACES] ?? [];
+    const namespacesForLookup = [...new Set([this.routeContext.spaceId, ...monitorSpaces])].filter(
+      Boolean
+    );
+    const internalClient =
+      this.routeContext.server.coreStart.savedObjects.createInternalRepository();
+    return getPrivateLocationsForNamespaces(internalClient, namespacesForLookup);
   }
 
   async validateUniqueMonitorName(name: string, id?: string) {

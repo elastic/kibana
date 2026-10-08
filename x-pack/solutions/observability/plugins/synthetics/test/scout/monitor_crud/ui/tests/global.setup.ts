@@ -10,7 +10,7 @@ import { resetArchivedSyntheticsDataStreams, testData } from '../../../common/ui
 
 globalSetupHook(
   'Ingest Synthetics test data',
-  { tag: tags.stateful.classic },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   async ({ esArchiver, esClient, log }) => {
     await resetArchivedSyntheticsDataStreams(esClient, log);
 

@@ -9,7 +9,8 @@
 
 import Fs from 'fs';
 import Path from 'path';
-import type { EvalsSuiteMetadataEntry } from './eval_pipeline';
+import { parse as parseYaml } from 'yaml';
+import type { EvalsSuiteMetadataEntry } from './eval_pipeline.ts';
 
 // Reads the real config, unlike `eval_pipeline.test.ts` which mocks `fs` with a fixture. These
 // mistakes are only reachable by hand-editing the file, so a PR-time check is the cheapest guard.
@@ -96,6 +97,71 @@ describe('evals.suites.json shards', () => {
         .filter(([, shardIds]) => shardIds.length > 1)
         .map(([specFile, shardIds]) => `${suiteId}: "${specFile}" is in [${shardIds.join(', ')}]`);
     });
+
+    expect(problems).toEqual([]);
+  });
+});
+
+describe('evals.suites.json Scout arch/domain', () => {
+  it('only uses arches run_suite.sh and the evals CLI support, with a domain for serverless', () => {
+    const problems = suites.flatMap(({ id, scoutArch, scoutDomain }) => {
+      if (scoutArch === undefined) return [];
+      if (scoutArch !== 'stateful' && scoutArch !== 'serverless') {
+        return [`${id}: scoutArch "${scoutArch}" is not stateful or serverless`];
+      }
+      // `node scripts/evals start` refuses a serverless suite without a domain; catch it at PR time.
+      if (scoutArch === 'serverless' && !scoutDomain) {
+        return [`${id}: scoutArch "serverless" has no scoutDomain`];
+      }
+      return [];
+    });
+
+    expect(problems).toEqual([]);
+  });
+});
+
+interface WeeklyStep {
+  env?: Record<string, string | undefined>;
+  steps?: WeeklyStep[];
+}
+
+// `[suiteId, requested model groups]` for every suite step in llm_evals.yml, including those
+// nested in groups.
+const weeklySuiteModelGroups = (steps: WeeklyStep[]): Array<[string, Set<string>]> =>
+  steps.flatMap(({ env = {}, steps: nested = [] }) => [
+    ...(env.EVAL_SUITE_ID
+      ? [
+          [
+            env.EVAL_SUITE_ID,
+            new Set((env.EVAL_MODEL_GROUPS ?? '').split(',').filter(Boolean)),
+          ] as [string, Set<string>],
+        ]
+      : []),
+    ...weeklySuiteModelGroups(nested),
+  ]);
+
+const weeklyModelGroupsBySuite = new Map(
+  weeklySuiteModelGroups(
+    (parseYaml(Fs.readFileSync(Path.join(__dirname, 'llm_evals.yml'), 'utf-8')) as WeeklyStep)
+      .steps ?? []
+  )
+);
+
+describe('evals.suites.json weeklyEisModelGroups', () => {
+  it('is covered by the EVAL_MODEL_GROUPS of the suite step in llm_evals.yml', () => {
+    // The weekly job requests EVAL_MODEL_GROUPS, not weeklyEisModelGroups, so a model present only
+    // in evals.suites.json is provisioned but never gets a step. Fail on the PR that drifts.
+    const problems = suites
+      .filter((suite) => (suite.weeklyEisModelGroups?.length ?? 0) > 0)
+      .flatMap(({ id, weeklyEisModelGroups = [] }) => {
+        const requested = weeklyModelGroupsBySuite.get(id);
+        if (!requested) {
+          return [`${id}: has weeklyEisModelGroups but no step in llm_evals.yml`];
+        }
+        return weeklyEisModelGroups
+          .filter((model) => !requested.has(model))
+          .map((model) => `${id}: "${model}" is in weeklyEisModelGroups but not in llm_evals.yml`);
+      });
 
     expect(problems).toEqual([]);
   });

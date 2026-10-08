@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, isError, isFunction } from 'lodash';
+import { isEmpty, isError, isFunction, isObject, isString } from 'lodash';
 import { inject, injectable } from 'inversify';
 import type { Logger, LogMessageSource } from '@kbn/logging';
 import { createToken, Logger as BaseLogger } from '@kbn/core-di';
@@ -37,8 +37,22 @@ export interface LoggerServiceContract {
 
 export const LoggerServiceToken = createToken<LoggerServiceContract>('alerting_v2.LoggerService');
 
-const normalizeError = (error: unknown): Error =>
-  isError(error) ? error : new Error(String(error));
+/**
+ * Saved object and ES client failures surface as plain `{ message, statusCode }`
+ * shapes rather than `Error` instances, and `String(...)` would reduce them to
+ * `[object Object]`, dropping the only useful detail.
+ */
+const normalizeError = (error: unknown): Error => {
+  if (isError(error)) {
+    return error;
+  }
+
+  if (isObject(error) && 'message' in error && isString(error.message)) {
+    return new Error(error.message);
+  }
+
+  return new Error(String(error));
+};
 
 const resolveMessage = (message: LogMessageSource): string =>
   isFunction(message) ? message() : message;

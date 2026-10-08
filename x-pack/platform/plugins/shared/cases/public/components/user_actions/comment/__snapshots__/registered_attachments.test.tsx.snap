@@ -66,7 +66,8 @@ Array [
       My event
     </React.Fragment>,
     "eventColor": undefined,
-    "timelineAvatar": "casesApp",
+    "timelineAvatar": "test-icon",
+    "timelineAvatarAriaLabel": "Test",
     "timestamp": <Memo(UserActionTimestamp)
       createdAt="2020-02-19T23:06:33.798Z"
     />,
@@ -183,7 +184,8 @@ Array [
       My event
     </React.Fragment>,
     "eventColor": undefined,
-    "timelineAvatar": "casesApp",
+    "timelineAvatar": "test-icon",
+    "timelineAvatarAriaLabel": "Test",
     "timestamp": <Memo(UserActionTimestamp)
       createdAt="2020-02-19T23:06:33.798Z"
     />,
@@ -286,7 +288,8 @@ Array [
       My event
     </React.Fragment>,
     "eventColor": undefined,
-    "timelineAvatar": "casesApp",
+    "timelineAvatar": "test-icon",
+    "timelineAvatarAriaLabel": "Test",
     "timestamp": <Memo(UserActionTimestamp)
       createdAt="2020-02-19T23:06:33.798Z"
     />,

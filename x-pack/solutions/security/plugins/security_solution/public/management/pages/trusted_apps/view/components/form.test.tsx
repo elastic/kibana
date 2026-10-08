@@ -8,7 +8,6 @@
 import React from 'react';
 import { screen, cleanup, act, fireEvent, getByTestId, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
 import { OperatingSystem, ConditionEntryField } from '@kbn/securitysolution-utils';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
@@ -243,8 +242,7 @@ describe('Trusted apps form', () => {
     });
 
     it('should default OS to Windows', () => {
-      // Note: the trailing `, ` comes from screen-reader-only text
-      expect(getOsField().textContent).toEqual('Windows, ');
+      expect(getOsField().textContent).toEqual('Windows');
     });
 
     it('should allow user to select between 3 OSs', () => {
@@ -293,10 +291,13 @@ describe('Trusted apps form', () => {
       expect(formProps.onChange).toHaveBeenCalledWith(expected);
     });
 
-    it('should correctly change OS', async () => {
-      await userEvent.click(getOsField());
-      await waitForEuiPopoverOpen();
-      await userEvent.click(screen.getByRole('option', { name: 'Linux' }));
+    it('should correctly change OS', () => {
+      act(() => {
+        fireEvent.click(getOsField());
+      });
+      act(() => {
+        fireEvent.click(screen.getByRole('option', { name: 'Linux' }));
+      });
       const expected = createOnChangeArgs({
         item: createItem({ os_types: [OperatingSystem.LINUX] }),
       });
@@ -718,14 +719,10 @@ describe('Trusted apps form', () => {
       expect(renderResult.getByText(INPUT_ERRORS.name));
     });
 
-    it('should validate invalid Hash value', async () => {
-      const valueField = getConditionValue(getCondition());
-      await act(async () => {
-        await userEvent.clear(valueField);
-        await userEvent.type(valueField, 'someHASH');
-        fireEvent.blur(valueField);
-      });
-      rerenderWithLatestProps();
+    it('should validate invalid Hash value', () => {
+      setTextFieldValue(getConditionValue(getCondition()), 'someHASH');
+      formProps.item = (formProps.onChange as jest.Mock).mock.calls.at(-2)[0].item;
+      rerender();
       expect(renderResult.getByText(INPUT_ERRORS.invalidHash(0)));
     });
 

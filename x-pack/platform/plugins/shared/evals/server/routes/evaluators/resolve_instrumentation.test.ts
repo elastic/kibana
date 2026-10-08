@@ -18,6 +18,7 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { EVALS_API_PRIVILEGES } from '../../../common';
+import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import type { EvaluatorRegistry } from '../../evaluators/types';
 import { registerResolveInstrumentationRoute } from './resolve_instrumentation';
 import {
@@ -306,10 +307,7 @@ const buildRouteSearchMock = () =>
   });
 
 describe('POST /internal/evals/traces/_resolve_instrumentation', () => {
-  const evaluatorRegistry: EvaluatorRegistry = {
-    list: () => [],
-    get: () => undefined,
-  };
+  const evaluatorRegistry: EvaluatorRegistry = createEvaluatorRegistryMock();
 
   const setup = () => {
     const router = httpServiceMock.createRouter();
@@ -338,9 +336,10 @@ describe('POST /internal/evals/traces/_resolve_instrumentation', () => {
       core: Promise.resolve({
         elasticsearch: {
           client: {
-            asInternalUser: {
-              search: searchMock,
-            },
+            // The probe returns samples of the trace, so it reads under the caller's
+            // privileges. An internal-user search here would be a bug.
+            asCurrentUser: { search: searchMock },
+            asInternalUser: { search: jest.fn() },
           },
         },
       }),
@@ -546,7 +545,7 @@ describe('POST /internal/evals/traces/_resolve_instrumentation', () => {
 
     expect(response.status).toBe(404);
     expect(response.payload).toEqual({
-      message: `Error: Trace ${ABSENT_TRACE_ID} is not ready: no documents indexed in traces-* or logs-* yet`,
+      message: `Trace ${ABSENT_TRACE_ID} is not ready: no documents indexed in traces-* or logs-* yet`,
     });
   });
 });

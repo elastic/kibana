@@ -220,7 +220,7 @@ xpack.actions.preconfigured:
 ## Host-reachability notes
 
 - Server cert CN must match the host Kibana connects to (`localhost` here).
-- If Kibana runs from source on the host (`yarn start`), `localhost:443` reaches the published
+- If Kibana runs from source on the host (`pnpm start`), `localhost:443` reaches the published
   nginx port and this works as-is.
 - If Kibana is itself in a container, `localhost` won't reach the nginx container — point
   `apiUrl` at the reachable service/hostname and regenerate `server.crt` with a matching CN.

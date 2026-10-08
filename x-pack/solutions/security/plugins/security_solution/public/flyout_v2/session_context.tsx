@@ -7,6 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext } from 'react';
+import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { useIsInSecurityApp } from '../common/hooks/is_in_security_app';
 import { documentFlyoutHistoryKey } from './shared/constants/flyout_history';
@@ -30,6 +31,19 @@ export interface FlyoutSessionContextValue {
    * scoped to itself, isolated from whatever flyout was already open before Timeline was shown.
    */
   historyKey?: symbol;
+  /**
+   * Whether THIS flyout was opened as a child (`session: 'inherit'`). Set by `useOpenFlyout`. The
+   * flyout settings menu (push/overlay toggle + "Reset size") is inert for children — a child is
+   * always an overlay and doesn't own a persisted width — so the whole gear is hidden there. Unlike
+   * `session`/`historyKey` (ambient state for nested opens), this describes the current flyout.
+   * Defaults to `false`.
+   */
+  isChildFlyout?: boolean;
+  /**
+   * Pins the push/overlay type of the flyouts opened in scope, ahead of the user's stored
+   * preference. `undefined` leaves the stored preference in charge.
+   */
+  type?: OverlaySystemFlyoutOpenOptions['type'];
 }
 
 const FlyoutSessionContext = createContext<FlyoutSessionContextValue>({ session: 'start' });
@@ -46,11 +60,17 @@ export const FlyoutSessionContextProvider: FC<
  * default - shared by alert/event/IOC flyouts when inside Security, or Discover's document viewer
  * key when outside it.
  */
-export const useFlyoutSessionContext = (): Required<FlyoutSessionContextValue> => {
-  const { session, historyKey: ambientHistoryKey } = useContext(FlyoutSessionContext);
+export const useFlyoutSessionContext = (): Required<Omit<FlyoutSessionContextValue, 'type'>> &
+  Pick<FlyoutSessionContextValue, 'type'> => {
+  const {
+    session,
+    historyKey: ambientHistoryKey,
+    isChildFlyout,
+    type,
+  } = useContext(FlyoutSessionContext);
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey =
     ambientHistoryKey ??
     (isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY);
-  return { session, historyKey };
+  return { session, historyKey, isChildFlyout: isChildFlyout ?? false, type };
 };

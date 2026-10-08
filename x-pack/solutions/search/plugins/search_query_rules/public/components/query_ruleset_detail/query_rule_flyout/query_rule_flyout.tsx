@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -27,6 +26,7 @@ import {
 import { css } from '@emotion/react';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { Controller } from 'react-hook-form';
 import { isQueryRuleFieldError } from '../../../utils/field_error_utils';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -201,24 +201,20 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
 
               {isIdRule && (
                 <>
-                  <EuiCallOut
+                  <KbnWarningCallout
                     announceOnMount
                     title={i18n.translate(
                       'xpack.search.queryRuleset.queryRuleFlyout.documentActionUsingidsLabel',
                       { defaultMessage: "Document action using 'ids' are unsupported" }
                     )}
-                    color="warning"
                     size="s"
-                  >
-                    <EuiText size="s">
-                      <p>
-                        <FormattedMessage
-                          id="xpack.search.queryRuleset.queryRuleFlyout.idsActionDeprecation"
-                          defaultMessage="Query rules pinning/excluding documents using ids only are not supported in the UIs. Please convert them to pinning by docs"
-                        />
-                      </p>
-                    </EuiText>
-                  </EuiCallOut>
+                    text={
+                      <FormattedMessage
+                        id="xpack.search.queryRuleset.queryRuleFlyout.idsActionDeprecation"
+                        defaultMessage="Query rules pinning/excluding documents using ids only are not supported in the UIs. Please convert them to pinning by docs"
+                      />
+                    }
+                  />
                   <EuiSpacer size="m" />
                 </>
               )}
@@ -237,9 +233,8 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                 />
               </EuiFlexItem>
               {pinType === 'pinned' && documentCount !== 0 && (
-                <EuiCallOut
+                <KbnInfoCallout
                   announceOnMount
-                  iconType="transitionTopIn"
                   size="s"
                   title={
                     <FormattedMessage
@@ -298,9 +293,8 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               <EuiSpacer size="m" />
               {shouldShowCriteriaCallout && (
                 <>
-                  <EuiCallOut
+                  <KbnInfoCallout
                     announceOnMount
-                    iconType="info"
                     size="s"
                     onDismiss={() => {
                       setCriteriaCalloutActive(false);
@@ -351,11 +345,9 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                     })
                   ) : (
                     <>
-                      <EuiCallOut
+                      <KbnWarningCallout
                         announceOnMount
-                        iconType="info"
                         size="s"
-                        color="warning"
                         title={
                           <FormattedMessage
                             id="xpack.search.queryRulesetDetail.queryRuleFlyout.criteriaRequiredCallout"

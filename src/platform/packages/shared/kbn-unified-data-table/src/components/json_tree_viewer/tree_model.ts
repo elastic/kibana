@@ -31,6 +31,10 @@ export const CHILDREN_INCREMENT = 10;
 // We need to put a limit to not blow up the DOM.
 export const MAX_SEARCH_REVEAL = 100;
 
+// Safety budget for bulk expansion (Expand all / recursive Cmd-click)
+// indices-stats is a good index to test this limit.
+export const MAX_RENDERED_NODES = 1000;
+
 export const ROOT_ID = 'json-viewer-$root';
 
 export const OPEN_BRACKET = { object: '{', array: '[' } as const;
@@ -62,13 +66,31 @@ export type JsonNode = CollectionNode | LeafNode;
 
 export type FormatValue = (leaf: { value: JsonPrimitive; path: readonly string[] }) => ReactNode;
 
+/** A trailing action rendered at the end of a leaf row (e.g. a filter button). */
+export interface JsonTreeRowAction {
+  id: string;
+  iconType: string;
+  /** Used as both the aria-label and the tooltip. */
+  label: string;
+  onClick: () => void;
+  'data-test-subj'?: string;
+}
+
+/** Called for each leaf row to build its actions (e.g. filter buttons). Hosts define the concrete actions. */
+export type GetLeafActions = (leaf: {
+  value: JsonPrimitive;
+  path: readonly string[];
+  /** True when the leaf is a direct element of an array (i.e. a multi-value field entry). */
+  isArrayItem: boolean;
+}) => JsonTreeRowAction[];
+
 /**
  * Turns a json document into a Nodes tree. Each node contains all the
  * metadata needed to perform operations in an easy way.
  */
 export const buildNodes = (json: JsonValue): JsonNode[] => {
   if (Array.isArray(json)) {
-    return json.map((value, index) =>
+    return Array.from(json, (value, index) =>
       buildNode({ key: String(index), path: [String(index)], value, isArrayItem: true })
     );
   }
@@ -98,7 +120,7 @@ const buildNode = ({
       isArrayItem,
       kind: 'collection',
       collectionType: 'array',
-      children: value.map((child, index) =>
+      children: Array.from(value, (child, index) =>
         buildNode({
           key: String(index),
           path: [...path, String(index)],
@@ -138,8 +160,7 @@ const buildNode = ({
   };
 };
 
-// ---- Flatten visible rows, decides what to show and what not ----
-
+// ---- Flatten visible rows (drives rendering order and keyboard navigation) ----
 export interface NodeRow {
   kind: 'node';
   node: JsonNode;
@@ -170,6 +191,7 @@ export interface PagerRow {
   collectionId: string;
   collectionType: CollectionType;
   hiddenCount: number;
+  totalCount: number;
   canShowFewer: boolean;
 }
 
@@ -256,6 +278,7 @@ const flattenRows = (
       collectionId: listId,
       collectionType: listType,
       hiddenCount: hidden,
+      totalCount: nodes.length,
       canShowFewer,
     });
   }
@@ -289,14 +312,99 @@ export const getNodeId = (path: readonly string[]): string =>
   path.reduce((id, key) => `${id}/${key.length}:${key}`, 'json-viewer');
 
 /**
- * Returns a list of Node ids that can be expanded. Empty coollections can't be expanded.
+ * Collects the ids of collections to expand, breadth-first, until expanding one more would render
+ * more than `budget` rows. Empty collections can't be expanded. Breadth-first so the first levels
+ * expand first; deeper nodes stay collapsed and can be expanded on demand.
  */
-export const collectExpandableIds = (nodes: JsonNode[]): string[] =>
-  nodes.flatMap((node) => {
-    if (node.kind !== 'collection') return [];
-    const childIds = collectExpandableIds(node.children);
-    return node.children.length > 0 ? [node.id, ...childIds] : childIds;
-  });
+export const collectExpandableIds = (
+  roots: JsonNode[],
+  budget: number = MAX_RENDERED_NODES
+): string[] => {
+  const ids: string[] = [];
+  let remaining = budget;
+  const queue: CollectionNode[] = [];
+  const enqueue = (nodes: JsonNode[]) => {
+    for (const node of nodes) {
+      if (node.kind === 'collection' && node.children.length > 0) {
+        queue.push(node);
+      }
+    }
+  };
+
+  enqueue(roots);
+  for (let head = 0; head < queue.length; head++) {
+    const node = queue[head];
+    // Expanding a collection reveals up to INITIAL_CHILDREN child rows (the pager caps the rest).
+    const cost = Math.min(node.children.length, INITIAL_CHILDREN);
+    if (cost > remaining) {
+      // Budget spent for this branch; keep scanning — a smaller sibling may still fit.
+      continue;
+    }
+    ids.push(node.id);
+    remaining -= cost;
+    enqueue(node.children);
+  }
+
+  return ids;
+};
+
+export interface DefaultExpansionSeed {
+  expanded: Set<string>;
+  revealed: Map<string, number>;
+}
+
+/**
+ * Builds the initial expand/reveal state: opens collections and lifts pagers, breadth-first,
+ * until about `rowBudget` rows are rendered. Children are revealed in
+ * INITIAL_CHILDREN-sized chunks that interleave across arrays/objects using a round-robin approach.
+ *
+ * This prevents a gigant array/object to eat all the budget leaving other collections hidden,
+ * instead the budget is splitted between the collections.
+ *
+ */
+export const collectDefaultExpansionSeed = (
+  roots: JsonNode[],
+  rowBudget: number
+): DefaultExpansionSeed => {
+  const expanded = new Set<string>();
+  const revealed = new Map<string, number>();
+  let rows = 0;
+
+  const queue: Array<{
+    listId: string;
+    collectionId?: string;
+    nodes: JsonNode[];
+    offset: number;
+  }> = [{ listId: ROOT_ID, nodes: roots, offset: 0 }];
+
+  for (let head = 0; head < queue.length; head++) {
+    if (rows >= rowBudget) break;
+    const { listId, collectionId, nodes, offset } = queue[head];
+    if (collectionId) {
+      expanded.add(collectionId); // reaching a collection with budget left is what opens it
+    }
+    const end = Math.min(offset + INITIAL_CHILDREN, nodes.length);
+    let shown = offset;
+    for (let i = offset; i < end && rows < rowBudget; i++) {
+      const node = nodes[i];
+      shown = i + 1;
+      rows += 1; // every shown child renders one row
+      if (node.kind === 'collection' && node.children.length > 0) {
+        queue.push({ listId: node.id, collectionId: node.id, nodes: node.children, offset: 0 });
+      }
+    }
+    // Lift this list's pager only when we revealed past the default window.
+    if (shown > INITIAL_CHILDREN) {
+      revealed.set(listId, shown);
+    }
+    // More hidden children remain — revisit this list later (round-robin) if budget allows.
+    if (end < nodes.length && rows < rowBudget) {
+      queue.push({ listId, collectionId, nodes, offset: end });
+    }
+  }
+
+  return { expanded, revealed };
+};
 
 /** Serialize a subtree back to JSON (used by the copy-value / copy-subtree features) */
 export const nodeToJsonString = (node: JsonNode): string =>
@@ -316,50 +424,14 @@ export const nodeToJsonValue = (node: JsonNode): JsonValue => {
   return object;
 };
 
-export interface SearchMatches {
-  /** Every collection whose subtree contains a match; auto-expanded so the match renders. */
-  containers: ReadonlySet<string>;
-  /**
-   * The minimum number of children that list must reveal ("Show more") a node containing a match is visible.
-   */
-  reveals: ReadonlyMap<string, number>;
-}
-
-/**
- * Collects the nodes that needs to be expanded / reveladed to display a search match.
- */
-export const collectSearchMatches = (nodes: JsonNode[], termLower: string): SearchMatches => {
-  const containers = new Set<string>();
-  const reveals = new Map<string, number>();
-
-  const bumpReveal = (listId: string, index: number) => {
-    const needed = index + 1;
-    if (
-      needed > INITIAL_CHILDREN &&
-      needed <= MAX_SEARCH_REVEAL &&
-      needed > (reveals.get(listId) ?? 0)
-    ) {
-      reveals.set(listId, needed);
-    }
-  };
-
-  const visit = (node: JsonNode, listId: string, index: number): boolean => {
-    let hasMatch: boolean;
-    if (node.kind === 'leaf') {
-      hasMatch = String(node.value).toLowerCase().includes(termLower);
-    } else {
-      hasMatch = false;
-      node.children.forEach((child, childIndex) => {
-        if (visit(child, node.id, childIndex)) hasMatch = true;
-      });
-      if (hasMatch) containers.add(node.id);
-    }
-
-    // Check if the node needs to be revealed.
-    if (hasMatch) bumpReveal(listId, index);
-    return hasMatch;
-  };
-
-  nodes.forEach((node, index) => visit(node, ROOT_ID, index));
-  return { containers, reveals };
+/** Serialize the whole document (the root node list) to JSON, matching how the tree renders it. */
+export const rootToJsonString = (nodes: JsonNode[], rootType: CollectionType): string => {
+  return nodeToJsonString({
+    id: ROOT_ID,
+    key: '',
+    isArrayItem: false,
+    kind: 'collection',
+    collectionType: rootType,
+    children: nodes,
+  });
 };

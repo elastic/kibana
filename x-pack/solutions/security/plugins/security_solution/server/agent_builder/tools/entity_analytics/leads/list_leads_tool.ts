@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -21,22 +21,24 @@ import { securityTool } from '../../constants';
 
 export const SECURITY_LIST_LEADS_TOOL_ID = securityTool('list_leads');
 
-const schema = z.object({
-  status: LeadStatusEnum.optional().describe(
-    'Filter by lead status: active, dismissed, or expired. Omit to return all statuses.'
-  ),
-  sortField: z
-    .enum(['priority', 'timestamp'])
-    .optional()
-    .describe('Sort by priority (default, highest first) or timestamp (newest first).'),
-  perPage: z
-    .number()
-    .int()
-    .min(1)
-    .max(100)
-    .optional()
-    .describe('Number of leads to return (default: 20, max: 100).'),
-});
+const schema = lazySchema(() =>
+  z.object({
+    status: LeadStatusEnum.optional().describe(
+      'Filter by lead status: active, dismissed, or expired. Omit to return all statuses.'
+    ),
+    sortField: z
+      .enum(['priority', 'timestamp'])
+      .optional()
+      .describe('Sort by priority (default, highest first) or timestamp (newest first).'),
+    perPage: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe('Number of leads to return (default: 20, max: 100).'),
+  })
+);
 
 export const listLeadsTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
@@ -76,7 +78,7 @@ export const listLeadsTool = (
       try {
         const [, { security }] = await core.getStartServices();
         const privileges = await getUserLeadPrivileges(request, security, spaceId);
-        if (!privileges.adhoc.has_read_permissions || !privileges.scheduled.has_read_permissions) {
+        if (!privileges.has_read_permissions) {
           success = false;
           errorMessage = 'You do not have permission to read leads in this space.';
           return {

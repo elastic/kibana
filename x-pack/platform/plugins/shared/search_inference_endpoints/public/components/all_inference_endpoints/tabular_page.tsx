@@ -151,17 +151,17 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
       {
         actions: [
           {
-            name: i18n.translate('xpack.searchInferenceEndpoints.actions.viewEndpooint', {
-              defaultMessage: 'View endpoint',
+            name: i18n.translate('xpack.searchInferenceEndpoints.actions.editEndpoint', {
+              defaultMessage: 'Edit endpoint',
             }),
-            description: i18n.translate('xpack.searchInferenceEndpoints.actions.viewEndpooint', {
-              defaultMessage: 'View endpoint',
+            description: i18n.translate('xpack.searchInferenceEndpoints.actions.editEndpoint', {
+              defaultMessage: 'Edit endpoint',
             }),
-            icon: 'eye',
+            icon: 'pencil',
             type: 'icon',
             available: () => canManage,
             onClick: (item) => displayInferenceFlyout(item),
-            'data-test-subj': 'inference-endpoints-action-view-endpoint-label',
+            'data-test-subj': 'inference-endpoints-action-edit-endpoint-label',
           },
           {
             name: i18n.translate('xpack.searchInferenceEndpoints.actions.copyID', {

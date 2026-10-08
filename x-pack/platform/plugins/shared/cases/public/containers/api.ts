@@ -25,6 +25,7 @@ import type {
   AddObservableRequest,
   UpdateObservableRequest,
   UserActionInternalFindResponse,
+  UserActionFindRequestSources,
   FindCasesContainingAllAlertsResponse,
   FindCasesContainingAllDocumentsRequest,
   UpdateSummary,
@@ -117,17 +118,15 @@ import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from './constants';
 export const resolveCase = async ({
   caseId,
   signal,
-  mode = 'legacy',
 }: {
   caseId: string;
   signal?: AbortSignal;
-  mode?: 'legacy' | 'unified';
 }): Promise<ResolvedCase> => {
   const response = await KibanaServices.get().http.fetch<CaseResolveResponse>(
     `${getCaseDetailsUrl(caseId)}/resolve`,
     {
       method: 'GET',
-      query: { includeComments: true, mode },
+      query: { includeComments: true },
       signal,
     }
   );
@@ -232,6 +231,7 @@ export const findCaseUserActions = async (
     perPage: number;
     search?: string;
     authors?: string[];
+    sources?: UserActionFindRequestSources[];
   },
   signal?: AbortSignal
 ): Promise<InternalFindCaseUserActions> => {
@@ -242,6 +242,7 @@ export const findCaseUserActions = async (
     perPage: params.perPage,
     ...(params.search ? { search: params.search } : {}),
     ...(params.authors?.length ? { authors: params.authors } : {}),
+    ...(params.sources?.length ? { sources: params.sources } : {}),
   };
 
   const response = await KibanaServices.get().http.fetch<UserActionInternalFindResponse>(

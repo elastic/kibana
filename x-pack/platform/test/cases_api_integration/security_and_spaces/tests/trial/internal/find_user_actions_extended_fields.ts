@@ -40,6 +40,20 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
+    // Create emits an extended_fields user action for every persisted value that differs from
+    // the resolved defaults (both fields here — their definitions declare no default), and the
+    // PATCH emits a second one with the updated map. Searches below therefore project over two
+    // activity rows: the create-time row carrying the initial values and the patch row carrying
+    // the updated values.
+    const INITIAL_EXTENDED_FIELDS = {
+      my_field_as_keyword: 'initial',
+      label_as_keyword: 'option_1',
+    };
+    const PATCHED_EXTENDED_FIELDS = {
+      my_field_as_keyword: 'xyzaua',
+      label_as_keyword: 'option_2',
+    };
+
     const createCaseWithTwoFields = async () => {
       await Promise.all([
         supertest
@@ -56,19 +70,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
       return createCase(supertest, {
         ...getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-        [CASE_EXTENDED_FIELDS]: {
-          my_field_as_keyword: 'initial',
-          label_as_keyword: 'option_1',
-        },
+        [CASE_EXTENDED_FIELDS]: INITIAL_EXTENDED_FIELDS,
       });
-    };
-
-    // Create without a template does not emit an extended_fields user action
-    // (that audit path is template-scoped). PATCH is what produces the activity row
-    // these tests search over.
-    const PATCHED_EXTENDED_FIELDS = {
-      my_field_as_keyword: 'xyzaua',
-      label_as_keyword: 'option_2',
     };
 
     const patchExtendedFields = async (createdCase: Case): Promise<Case> => {
@@ -154,9 +157,22 @@ export default ({ getService }: FtrProviderContext): void => {
       const extendedFieldActions = response.userActions.filter(
         (action) => action.type === 'extended_fields'
       );
-      expect(extendedFieldActions.length).to.be.greaterThan(0);
 
-      expect(extendedFieldActions[0].payload.extended_fields).to.eql(PATCHED_EXTENDED_FIELDS);
+      // Two unprojected rows: the create-time action (initial values differing from the empty
+      // defaults baseline) and the patch action. Without a search, each returns its full map.
+      // Located by content rather than index — the two actions are written in quick succession
+      // and their relative sort order is not what this test pins.
+      expect(extendedFieldActions.length).to.be(2);
+
+      const createAction = extendedFieldActions.find(
+        (action) => action.payload.extended_fields?.my_field_as_keyword === 'initial'
+      );
+      const patchAction = extendedFieldActions.find(
+        (action) => action.payload.extended_fields?.my_field_as_keyword === 'xyzaua'
+      );
+
+      expect(createAction?.payload.extended_fields).to.eql(INITIAL_EXTENDED_FIELDS);
+      expect(patchAction?.payload.extended_fields).to.eql(PATCHED_EXTENDED_FIELDS);
     });
   });
 };

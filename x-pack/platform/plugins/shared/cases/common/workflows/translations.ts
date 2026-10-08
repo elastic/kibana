@@ -457,7 +457,7 @@ export const ADD_OBSERVABLES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.addObservables.documentation.details',
   {
     defaultMessage:
-      'This step adds observables to an existing case using `typeKey`, `value`, and optional description fields.',
+      'This step adds observables to an existing case using `typeKey`, `value`, and optional description fields. If this step is used by a workflow triggered by `cases.observablesAdded`, set `on.workflowEvents: ignore` on the trigger to prevent self-triggered loops.',
   }
 );
 
@@ -592,12 +592,79 @@ export const ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION 
   }
 );
 
+export const ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_IDS_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.attachmentsDeleted.eventSchema.attachmentIds',
+  {
+    defaultMessage: 'The IDs of the attachments that were deleted (all of the same type).',
+  }
+);
+
+export const ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.attachmentsDeleted.eventSchema.attachmentType',
+  {
+    defaultMessage:
+      'The type of the attachments that were deleted (e.g. "comment", "security.alert", "observability.alert", "stack.alert", "security.event"). Legacy attachments can report "alert" or "event"; to match any alert or event type, use event.alertIds: * or event.eventIds: *.',
+  }
+);
+
+export const ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ALERT_IDS_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.attachmentsDeleted.eventSchema.alertIds',
+  {
+    defaultMessage:
+      'The IDs of the alerts referenced by the deleted attachments. Only present for alert attachments.',
+  }
+);
+
+export const ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ALERT_INDICES_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.attachmentsDeleted.eventSchema.alertIndices',
+  {
+    defaultMessage:
+      'The indices of the alerts referenced by the deleted attachments, index-aligned with alertIds. Only present for alert attachments.',
+  }
+);
+
+export const ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_EVENT_IDS_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.attachmentsDeleted.eventSchema.eventIds',
+  {
+    defaultMessage:
+      'The IDs of the events referenced by the deleted attachments. Only present for event attachments.',
+  }
+);
+
+export const ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_EVENT_INDICES_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.attachmentsDeleted.eventSchema.eventIndices',
+  {
+    defaultMessage:
+      'The indices of the events referenced by the deleted attachments, index-aligned with eventIds. Only present for event attachments.',
+  }
+);
+
 export const COMMENTS_ADDED_TRIGGER_EVENT_SCHEMA_COMMENT_IDS_DESCRIPTION = i18n.translate(
   'xpack.cases.workflowTriggers.commentsAdded.eventSchema.commentIds',
   {
     defaultMessage: 'The IDs of the comments that were added.',
   }
 );
+
+export const EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_CHANGED_FIELDS_DESCRIPTION =
+  i18n.translate('xpack.cases.workflowTriggers.extendedFieldsUpdated.eventSchema.changedFields', {
+    defaultMessage:
+      'The extended-field keys whose values changed. Use this field in trigger conditions (e.g. event.changedFields: "priority_as_keyword"). Use a cases.getCase step to read current values.',
+  });
+
+export const OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLE_IDS_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.observablesAdded.eventSchema.observableIds',
+  {
+    defaultMessage:
+      'IDs of the newly-persisted observables, in insertion order. Use with a cases.getCase step to read values.',
+  }
+);
+
+export const OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLE_TYPE_KEYS_DESCRIPTION =
+  i18n.translate('xpack.cases.workflowTriggers.observablesAdded.eventSchema.observableTypeKeys', {
+    defaultMessage:
+      'Type keys for the newly-persisted observables, one entry per observable, index-aligned with event.observableIds (e.g. "observable-type-ipv4"). A key may repeat when several observables of the same type are added in one request. Use in trigger conditions: event.observableTypeKeys: "observable-type-ipv4".',
+  });
 
 export const CUSTOM_FIELD_CAN_BE_USED_MESSAGE = (fieldName: string) =>
   i18n.translate('xpack.cases.workflowSteps.shared.customFieldCanBeUsedMessage', {

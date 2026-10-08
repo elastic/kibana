@@ -104,7 +104,7 @@ const RulesListChangeHistoryStory = (): JSX.Element => {
         })}
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiCallOut size="s" title="Mock adapter — no Kibana server required" iconType="iInCircle" />
+      <EuiCallOut size="s" title="Mock adapter — no Kibana server required" iconType="info" />
       <EuiSpacer size="m" />
       <RulesListTable
         items={rules}

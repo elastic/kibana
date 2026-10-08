@@ -9,7 +9,8 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiStepStatus } from '@elastic/eui';
-import { EuiText, EuiSpacer, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiCard } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiCard } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 
@@ -88,10 +89,8 @@ export const AgentlessStepConfigureConnector = ({
 
   return (
     <>
-      <EuiCallOut
+      <KbnInfoCallout
         announceOnMount
-        color="primary"
-        iconType="rocket"
         title={i18n.translate(
           'xpack.fleet.agentlessEnrollmentFlyout.configureConnector.calloutTitle',
           {

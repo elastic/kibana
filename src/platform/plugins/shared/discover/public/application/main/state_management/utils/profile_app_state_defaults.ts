@@ -10,6 +10,8 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { uniqBy } from 'lodash';
+import { SOURCE_COLUMN } from '@kbn/unified-data-table';
+import type { DataSource } from '@kbn/data-source';
 import {
   type DiscoverAppState,
   PROFILE_APP_STATE_DEFAULT_FIELDS,
@@ -19,18 +21,17 @@ import {
 } from '../redux';
 import type { DefaultAppStateColumn, ScopedProfilesManager } from '../../../../context_awareness';
 import { getMergedAccessor } from '../../../../context_awareness';
-import type { DataDocumentsMsg } from '../discover_data_state_container';
 
 export const getProfileAppStateDefaults = ({
   scopedProfilesManager,
   profileAppStateDefaults,
-  dataView,
+  dataSource,
 }: {
   scopedProfilesManager: ScopedProfilesManager;
   profileAppStateDefaults: TabState['profileAppStateDefaults'];
-  dataView: DataView;
+  dataSource: DataSource;
 }) => {
-  const defaultState = getDefaultState(scopedProfilesManager, dataView);
+  const defaultState = getDefaultState(scopedProfilesManager, dataSource);
 
   return {
     /**
@@ -44,7 +45,7 @@ export const getProfileAppStateDefaults = ({
       if (
         shouldResetProfileAppStateDefaultField(profileAppStateDefaults, 'breakdownField') &&
         defaultState.breakdownField !== undefined &&
-        dataView.fields.getByName(defaultState.breakdownField)
+        dataSource.getColumn(defaultState.breakdownField)
       ) {
         stateUpdate.breakdownField = defaultState.breakdownField;
       }
@@ -80,16 +81,16 @@ export const getProfileAppStateDefaults = ({
      */
     getPostFetchState: ({
       defaultColumns,
-      esqlQueryColumns,
+      dataSource: postFetchDataSource = dataSource,
     }: {
       defaultColumns: string[];
-      esqlQueryColumns: DataDocumentsMsg['esqlQueryColumns'];
+      dataSource?: DataSource;
     }) => {
       const stateUpdate: DiscoverAppState = {};
 
       if (shouldResetProfileAppStateDefaultField(profileAppStateDefaults, 'columns')) {
         const mappedDefaultColumns = defaultColumns.map((name) => ({ name }));
-        const isValidColumn = getIsValidColumn(dataView, esqlQueryColumns);
+        const isValidColumn = getIsValidColumn(postFetchDataSource);
         const validColumns = uniqBy(
           defaultState.columns?.concat(mappedDefaultColumns).filter(isValidColumn),
           'name'
@@ -141,17 +142,17 @@ export const getFieldsToReset = (
   return [firstField, ...restFields];
 };
 
-const getDefaultState = (scopedProfilesManager: ScopedProfilesManager, dataView: DataView) => {
+const getDefaultState = (scopedProfilesManager: ScopedProfilesManager, dataSource: DataSource) => {
   const getDefaultAppState = getMergedAccessor(
     scopedProfilesManager.getProfiles(),
     'getDefaultAppState',
     () => ({})
   );
 
-  return getDefaultAppState({ dataView });
+  return getDefaultAppState({ dataView: toProfileDataView(dataSource) });
 };
 
-const shouldResetProfileAppStateDefaultField = (
+export const shouldResetProfileAppStateDefaultField = (
   profileAppStateDefaults: TabState['profileAppStateDefaults'],
   field: ProfileAppStateDefaultField
 ) =>
@@ -159,12 +160,27 @@ const shouldResetProfileAppStateDefaultField = (
   (profileAppStateDefaults.fieldsToReset !== 'none' &&
     profileAppStateDefaults.fieldsToReset.includes(field));
 
-const getIsValidColumn =
-  (dataView: DataView, esqlQueryColumns: DataDocumentsMsg['esqlQueryColumns']) =>
-  (column: DefaultAppStateColumn) => {
-    const isValid = esqlQueryColumns
-      ? esqlQueryColumns.some((esqlColumn) => esqlColumn.name === column.name)
-      : dataView.fields.getByName(column.name);
+const getIsValidColumn = (dataSource: DataSource) => (column: DefaultAppStateColumn) => {
+  // Summary is a synthetic column; allow it even when absent from the source
+  if (column.name === SOURCE_COLUMN) {
+    return true;
+  }
 
-    return Boolean(isValid);
-  };
+  return Boolean(dataSource.getColumn(column.name));
+};
+
+/**
+ * `getDefaultAppState` still takes a DataView. DataViewSource already wraps one;
+ * EsqlSource only needs time-field identity for current profile accessors.
+ */
+const toProfileDataView = (dataSource: DataSource): DataView => {
+  if (dataSource.kind === 'index-pattern') {
+    return dataSource.getDataView();
+  }
+
+  return {
+    isTimeBased: () => dataSource.isTimeBased(),
+    timeFieldName: dataSource.timeFieldName,
+    getIndexPattern: () => dataSource.title,
+  } as DataView;
+};

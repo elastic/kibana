@@ -20,9 +20,27 @@ import type { Locator, ScoutPage } from '@kbn/scout';
  */
 export class WorkflowExecutionPage {
   public executionPanel: Locator;
+  public readonly serviceAccountIdentity: Locator;
+  public readonly serviceAccountBadges: Locator;
+  public readonly copyServiceAccountId: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.executionPanel = this.page.testSubj.locator('workflowExecutionPanel');
+    this.serviceAccountIdentity = this.page.testSubj.locator('workflowServiceAccountName');
+    this.serviceAccountBadges = this.page.testSubj
+      .locator('workflowServiceAccountResolved')
+      .or(this.page.testSubj.locator('workflowServiceAccountUnavailable'));
+    this.copyServiceAccountId = this.page.getByRole('button', { name: 'Copy service account ID' });
+  }
+
+  async gotoOverview(workflowId: string, executionId: string): Promise<void> {
+    await this.page.gotoApp(`workflows/${workflowId}`, {
+      params: { executionId, stepExecutionId: '__overview', tab: 'executions' },
+    });
+    await this.page.testSubj
+      .locator('workflowExecutionOverview')
+      .or(this.page.testSubj.locator('workflowExecutionFlyout'))
+      .waitFor({ state: 'visible' });
   }
 
   /**
@@ -132,7 +150,7 @@ export class WorkflowExecutionPage {
    * Selects a step in the execution tree by navigating through a hierarchical path.
    *
    * @param path - The hierarchical path to the step, using '>' as separator
-   *   (e.g., "Parent > Child > Target Step" or "loop_over_results > 0 > process-item")
+   *   (e.g., "Parent > Child > Target Step" or "loop_over_results > Iteration #0 > process-item")
    * @returns A promise that resolves to the locator for the target step button
    * @throws Error if any node in the path is not found
    */
@@ -186,6 +204,11 @@ export class WorkflowExecutionPage {
     await workflowStepExecutionDetails
       .locator(`button[data-test-subj="workflowStepTab_${type}"]`)
       .click();
+    // The view-mode toggle lives inside the data viewer, which mounts only once the
+    // step's execution data has finished loading; wait for it before clicking.
+    await workflowStepExecutionDetails
+      .locator('[data-test-subj="workflowJsonDataViewer"]')
+      .waitFor({ state: 'visible' });
     await workflowStepExecutionDetails
       .locator('button[data-test-subj="workflowViewMode_json"]')
       .click();

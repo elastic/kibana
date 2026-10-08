@@ -792,7 +792,7 @@ describe('DatatableComponent', () => {
 
           renderDatatableComponent();
 
-          expect(getCellColorFn).toBeCalledTimes(2); // 2 initial renders of table
+          expect(getCellColorFn).toHaveBeenCalledTimes(2); // 2 initial renders of table
         });
 
         test('caches getCellColorFn by columnId with transpose columns', () => {
@@ -819,7 +819,7 @@ describe('DatatableComponent', () => {
             },
           });
 
-          expect(getCellColorFn).toBeCalledTimes(2); // 2 initial renders of table
+          expect(getCellColorFn).toHaveBeenCalledTimes(2); // 2 initial renders of table
         });
       });
 

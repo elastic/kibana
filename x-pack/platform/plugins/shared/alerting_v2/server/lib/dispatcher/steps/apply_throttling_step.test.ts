@@ -6,28 +6,33 @@
  */
 
 import { ApplyThrottlingStep, applyThrottling } from './apply_throttling_step';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { createLastNotifiedTimestampsResponse } from '../fixtures/dispatcher';
 import {
-  createAlertEpisode,
   createActionGroup,
   createActionPolicy,
+  createAlert,
   createDispatcherPipelineState,
+  createStepLogger,
 } from '../fixtures/test_utils';
+import { PolicyCatalog } from '../state';
 import type { ActionGroupId, LastNotifiedInfo } from '../types';
+
+const logger = createStepLogger();
 
 const NOW = new Date('2026-01-22T10:00:00.000Z');
 
-const info = (lastNotified: string, episodeStatus?: string): LastNotifiedInfo => ({
+const info = (lastNotified: string, alertStatus?: string): LastNotifiedInfo => ({
   lastNotified: new Date(lastNotified),
-  episodeStatus,
+  alertStatus,
 });
 
 describe('applyThrottling', () => {
-  describe('per_episode + on_status_change', () => {
+  describe('per_alert + on_status_change', () => {
     const basePolicy = createActionPolicy({
       id: 'p1',
-      groupingMode: 'per_episode',
+      groupingMode: 'per_alert',
       throttle: { strategy: 'on_status_change' },
     });
 
@@ -36,7 +41,7 @@ describe('applyThrottling', () => {
 
       const { dispatch, throttled } = applyThrottling(
         [group],
-        new Map([['p1', basePolicy]]),
+        PolicyCatalog.of(new Map([['p1', basePolicy]])),
         new Map(),
         NOW
       );
@@ -49,12 +54,12 @@ describe('applyThrottling', () => {
       const group = createActionGroup({
         id: 'g1',
         policyId: 'p1',
-        episodes: [createAlertEpisode({ episode_status: 'recovering' })],
+        alerts: [createAlert({ alert_status: 'recovering' })],
       });
 
       const { dispatch, throttled } = applyThrottling(
         [group],
-        new Map([['p1', basePolicy]]),
+        PolicyCatalog.of(new Map([['p1', basePolicy]])),
         new Map<ActionGroupId, LastNotifiedInfo>([
           ['g1', info('2026-01-22T09:59:00.000Z', 'active')],
         ]),
@@ -69,12 +74,12 @@ describe('applyThrottling', () => {
       const group = createActionGroup({
         id: 'g1',
         policyId: 'p1',
-        episodes: [createAlertEpisode({ episode_status: 'active' })],
+        alerts: [createAlert({ alert_status: 'active' })],
       });
 
       const { dispatch, throttled } = applyThrottling(
         [group],
-        new Map([['p1', basePolicy]]),
+        PolicyCatalog.of(new Map([['p1', basePolicy]])),
         new Map<ActionGroupId, LastNotifiedInfo>([
           ['g1', info('2026-01-22T09:59:00.000Z', 'active')],
         ]),
@@ -86,10 +91,10 @@ describe('applyThrottling', () => {
     });
   });
 
-  describe('per_episode + per_status_interval', () => {
+  describe('per_alert + per_status_interval', () => {
     const basePolicy = createActionPolicy({
       id: 'p1',
-      groupingMode: 'per_episode',
+      groupingMode: 'per_alert',
       throttle: { strategy: 'per_status_interval', interval: '1h' },
     });
 
@@ -98,7 +103,7 @@ describe('applyThrottling', () => {
 
       const { dispatch, throttled } = applyThrottling(
         [group],
-        new Map([['p1', basePolicy]]),
+        PolicyCatalog.of(new Map([['p1', basePolicy]])),
         new Map(),
         NOW
       );
@@ -111,12 +116,12 @@ describe('applyThrottling', () => {
       const group = createActionGroup({
         id: 'g1',
         policyId: 'p1',
-        episodes: [createAlertEpisode({ episode_status: 'recovering' })],
+        alerts: [createAlert({ alert_status: 'recovering' })],
       });
 
       const { dispatch, throttled } = applyThrottling(
         [group],
-        new Map([['p1', basePolicy]]),
+        PolicyCatalog.of(new Map([['p1', basePolicy]])),
         new Map<ActionGroupId, LastNotifiedInfo>([
           ['g1', info('2026-01-22T09:59:00.000Z', 'active')],
         ]),
@@ -131,12 +136,12 @@ describe('applyThrottling', () => {
       const group = createActionGroup({
         id: 'g1',
         policyId: 'p1',
-        episodes: [createAlertEpisode({ episode_status: 'active' })],
+        alerts: [createAlert({ alert_status: 'active' })],
       });
 
       const { dispatch, throttled } = applyThrottling(
         [group],
-        new Map([['p1', basePolicy]]),
+        PolicyCatalog.of(new Map([['p1', basePolicy]])),
         new Map<ActionGroupId, LastNotifiedInfo>([
           ['g1', info('2026-01-22T08:00:00.000Z', 'active')],
         ]),
@@ -151,12 +156,12 @@ describe('applyThrottling', () => {
       const group = createActionGroup({
         id: 'g1',
         policyId: 'p1',
-        episodes: [createAlertEpisode({ episode_status: 'active' })],
+        alerts: [createAlert({ alert_status: 'active' })],
       });
 
       const { dispatch, throttled } = applyThrottling(
         [group],
-        new Map([['p1', basePolicy]]),
+        PolicyCatalog.of(new Map([['p1', basePolicy]])),
         new Map<ActionGroupId, LastNotifiedInfo>([
           ['g1', info('2026-01-22T09:30:00.000Z', 'active')],
         ]),
@@ -168,10 +173,10 @@ describe('applyThrottling', () => {
     });
   });
 
-  describe('per_episode + every_time', () => {
+  describe('per_alert + every_time', () => {
     const basePolicy = createActionPolicy({
       id: 'p1',
-      groupingMode: 'per_episode',
+      groupingMode: 'per_alert',
       throttle: { strategy: 'every_time' },
     });
 
@@ -180,7 +185,7 @@ describe('applyThrottling', () => {
 
       const { dispatch, throttled } = applyThrottling(
         [group],
-        new Map([['p1', basePolicy]]),
+        PolicyCatalog.of(new Map([['p1', basePolicy]])),
         new Map(),
         NOW
       );
@@ -193,12 +198,12 @@ describe('applyThrottling', () => {
       const group = createActionGroup({
         id: 'g1',
         policyId: 'p1',
-        episodes: [createAlertEpisode({ episode_status: 'active' })],
+        alerts: [createAlert({ alert_status: 'active' })],
       });
 
       const { dispatch, throttled } = applyThrottling(
         [group],
-        new Map([['p1', basePolicy]]),
+        PolicyCatalog.of(new Map([['p1', basePolicy]])),
         new Map<ActionGroupId, LastNotifiedInfo>([
           ['g1', info('2026-01-22T09:59:59.000Z', 'active')],
         ]),
@@ -223,7 +228,7 @@ describe('applyThrottling', () => {
 
       const { dispatch, throttled } = applyThrottling(
         [group],
-        new Map([['p1', basePolicy]]),
+        PolicyCatalog.of(new Map([['p1', basePolicy]])),
         new Map(),
         NOW
       );
@@ -237,7 +242,7 @@ describe('applyThrottling', () => {
 
       const { dispatch, throttled } = applyThrottling(
         [group],
-        new Map([['p1', basePolicy]]),
+        PolicyCatalog.of(new Map([['p1', basePolicy]])),
         new Map<ActionGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:50:00.000Z')]]),
         NOW
       );
@@ -251,7 +256,7 @@ describe('applyThrottling', () => {
 
       const { dispatch, throttled } = applyThrottling(
         [group],
-        new Map([['p1', basePolicy]]),
+        PolicyCatalog.of(new Map([['p1', basePolicy]])),
         new Map<ActionGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:58:00.000Z')]]),
         NOW
       );
@@ -271,7 +276,7 @@ describe('applyThrottling', () => {
 
       const { dispatch, throttled } = applyThrottling(
         [group],
-        new Map([['p1', policy]]),
+        PolicyCatalog.of(new Map([['p1', policy]])),
         new Map<ActionGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:59:59.000Z')]]),
         NOW
       );
@@ -294,7 +299,7 @@ describe('applyThrottling', () => {
 
       const { dispatch, throttled } = applyThrottling(
         [group],
-        new Map([['p1', basePolicy]]),
+        PolicyCatalog.of(new Map([['p1', basePolicy]])),
         new Map(),
         NOW
       );
@@ -308,7 +313,7 @@ describe('applyThrottling', () => {
 
       const { dispatch, throttled } = applyThrottling(
         [group],
-        new Map([['p1', basePolicy]]),
+        PolicyCatalog.of(new Map([['p1', basePolicy]])),
         new Map<ActionGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:59:59.000Z')]]),
         NOW
       );
@@ -330,7 +335,7 @@ describe('applyThrottling', () => {
 
       const { dispatch, throttled } = applyThrottling(
         [group],
-        new Map([['p1', basePolicy]]),
+        PolicyCatalog.of(new Map([['p1', basePolicy]])),
         new Map(),
         NOW
       );
@@ -344,7 +349,7 @@ describe('applyThrottling', () => {
 
       const { dispatch, throttled } = applyThrottling(
         [group],
-        new Map([['p1', basePolicy]]),
+        PolicyCatalog.of(new Map([['p1', basePolicy]])),
         new Map<ActionGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:50:00.000Z')]]),
         NOW
       );
@@ -358,7 +363,7 @@ describe('applyThrottling', () => {
 
       const { dispatch, throttled } = applyThrottling(
         [group],
-        new Map([['p1', basePolicy]]),
+        PolicyCatalog.of(new Map([['p1', basePolicy]])),
         new Map<ActionGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:58:00.000Z')]]),
         NOW
       );
@@ -377,7 +382,7 @@ describe('applyThrottling', () => {
 
       const { dispatch, throttled } = applyThrottling(
         [group],
-        new Map([['p1', policy]]),
+        PolicyCatalog.of(new Map([['p1', policy]])),
         new Map<ActionGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:59:59.000Z')]]),
         NOW
       );
@@ -399,7 +404,7 @@ describe('applyThrottling', () => {
 
       const { dispatch, throttled } = applyThrottling(
         [group],
-        new Map([['p1', basePolicy]]),
+        PolicyCatalog.of(new Map([['p1', basePolicy]])),
         new Map(),
         NOW
       );
@@ -413,7 +418,7 @@ describe('applyThrottling', () => {
 
       const { dispatch, throttled } = applyThrottling(
         [group],
-        new Map([['p1', basePolicy]]),
+        PolicyCatalog.of(new Map([['p1', basePolicy]])),
         new Map<ActionGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:59:59.000Z')]]),
         NOW
       );
@@ -428,12 +433,12 @@ describe('applyThrottling', () => {
       const g1 = createActionGroup({
         id: 'g1',
         policyId: 'p1',
-        episodes: [createAlertEpisode({ episode_status: 'active' })],
+        alerts: [createAlert({ alert_status: 'active' })],
       });
       const g2 = createActionGroup({
         id: 'g2',
         policyId: 'p1',
-        episodes: [createAlertEpisode({ episode_status: 'recovering' })],
+        alerts: [createAlert({ alert_status: 'recovering' })],
       });
       const policy = createActionPolicy({
         id: 'p1',
@@ -442,7 +447,7 @@ describe('applyThrottling', () => {
 
       const { dispatch, throttled } = applyThrottling(
         [g1, g2],
-        new Map([['p1', policy]]),
+        PolicyCatalog.of(new Map([['p1', policy]])),
         new Map<ActionGroupId, LastNotifiedInfo>([
           ['g1', info('2026-01-22T09:30:00.000Z', 'active')],
           ['g2', info('2026-01-22T09:30:00.000Z', 'active')],
@@ -457,10 +462,41 @@ describe('applyThrottling', () => {
     });
 
     it('returns empty arrays when no groups', () => {
-      const { dispatch, throttled } = applyThrottling([], new Map(), new Map(), NOW);
+      const { dispatch, throttled } = applyThrottling([], PolicyCatalog.empty(), new Map(), NOW);
 
       expect(dispatch).toHaveLength(0);
       expect(throttled).toHaveLength(0);
+    });
+  });
+
+  describe('invalid throttle interval', () => {
+    it('warns once per policy however many groups it covers', () => {
+      const { loggerService, mockLogger } = createLoggerService();
+      const policy = createActionPolicy({
+        id: 'p1',
+        groupingMode: 'all',
+        throttle: { strategy: 'time_interval', interval: 'not-a-duration' },
+      });
+      const groups = ['g1', 'g2', 'g3'].map((id) => createActionGroup({ id, policyId: 'p1' }));
+
+      const { dispatch } = applyThrottling(
+        groups,
+        PolicyCatalog.of(new Map([['p1', policy]])),
+        new Map<ActionGroupId, LastNotifiedInfo>(
+          groups.map((group) => [group.id, info('2026-01-22T09:30:00.000Z')])
+        ),
+        NOW,
+        loggerService
+      );
+
+      expect(dispatch).toHaveLength(3);
+      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Action policy throttle interval is invalid',
+        expect.objectContaining({
+          labels: expect.objectContaining({ policy_id: 'p1' }),
+        })
+      );
     });
   });
 });
@@ -495,7 +531,7 @@ describe('ApplyThrottlingStep', () => {
     });
 
     const state = createDispatcherPipelineState({ groups, policies });
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(mockEsClient.esql.query.mock.calls.length).toBeGreaterThanOrEqual(2);
     for (const [args] of mockEsClient.esql.query.mock.calls) {
@@ -505,20 +541,61 @@ describe('ApplyThrottlingStep', () => {
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     // every_time strategy → all groups dispatch regardless of last_notified.
-    expect(result.data?.dispatch).toHaveLength(200);
-    expect(result.data?.throttled).toHaveLength(0);
+    expect(result.data?.plan?.toDispatch).toHaveLength(200);
+    expect(result.data?.plan?.throttled).toHaveLength(0);
+  });
+
+  it('compares the alert_status of the last notified record for on_status_change', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const step = new ApplyThrottlingStep(queryService);
+
+    const groups = [
+      createActionGroup({
+        id: 'unchanged',
+        policyId: 'p1',
+        alerts: [createAlert({ alert_status: 'active' })],
+      }),
+      createActionGroup({
+        id: 'changed',
+        policyId: 'p1',
+        alerts: [createAlert({ alert_status: 'recovering' })],
+      }),
+    ];
+    const policies = new Map([
+      ['p1', createActionPolicy({ id: 'p1', throttle: { strategy: 'on_status_change' } })],
+    ]);
+    const lastNotified = '2026-01-22T08:00:00.000Z';
+
+    mockEsClient.esql.query.mockResolvedValue(
+      createLastNotifiedTimestampsResponse([
+        { action_group_id: 'unchanged', last_notified: lastNotified, alert_status: 'active' },
+        { action_group_id: 'changed', last_notified: lastNotified, alert_status: 'active' },
+      ])
+    );
+
+    const result = await step.execute(createDispatcherPipelineState({ groups, policies }), logger);
+
+    expect(result).toMatchObject({
+      type: 'continue',
+      data: {
+        plan: {
+          toDispatch: [expect.objectContaining({ id: 'changed' })],
+          throttled: [expect.objectContaining({ id: 'unchanged' })],
+        },
+      },
+    });
   });
 
   it('returns empty dispatch and throttled when no groups', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new ApplyThrottlingStep(queryService);
 
-    const result = await step.execute(createDispatcherPipelineState({ groups: [] }));
+    const result = await step.execute(createDispatcherPipelineState({ groups: [] }), logger);
 
     expect(mockEsClient.esql.query).not.toHaveBeenCalled();
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.dispatch).toHaveLength(0);
-    expect(result.data?.throttled).toHaveLength(0);
+    expect(result.data?.plan?.toDispatch).toHaveLength(0);
+    expect(result.data?.plan?.throttled).toHaveLength(0);
   });
 });

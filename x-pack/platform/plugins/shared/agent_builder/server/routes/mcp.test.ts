@@ -8,6 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { registerMCPRoutes, filterToolsByNamespace } from './mcp';
+import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 import type { RouteDependencies } from './types';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -175,9 +176,13 @@ describe('MCP route — registerTool arguments', () => {
       annotations: mockAnnotations,
     });
     const unannotatedTool = createMockTool('platform.core.search');
+    const excludedTool = createMockTool('platform.core.execute_connector_sub_action', {
+      annotations: mockAnnotations,
+      excludeFromMcp: true,
+    });
 
     const mockRegistry = {
-      list: jest.fn().mockResolvedValue([annotatedTool, unannotatedTool]),
+      list: jest.fn().mockResolvedValue([annotatedTool, unannotatedTool, excludedTool]),
       execute: jest.fn().mockResolvedValue({ results: [{ type: 'other', data: {} }] }),
     };
     const getInternalServices = jest.fn().mockReturnValue({
@@ -244,6 +249,16 @@ describe('MCP route — registerTool arguments', () => {
     const [, config, callback] = unannotatedCall!;
     expect(config.annotations).toBeUndefined();
     expect(typeof callback).toBe('function');
+  });
+
+  it('excludes tools with excludeFromMcp: true', async () => {
+    await postHandler(createMockContext(), createMockRequest(), { customError: jest.fn() });
+
+    const excludedCall = mockRegisterTool.mock.calls.find(
+      (call: any[]) => call[0] === 'platform_core_execute_connector_sub_action'
+    );
+    expect(excludedCall).toBeUndefined();
+    expect(mockRegisterTool).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -373,6 +388,22 @@ describe('registerMCPRoutes', () => {
 
     const querySchema = routeConfig?.validate?.request?.query;
     expect(querySchema).toBeDefined();
+  });
+
+  describe('POST (socket timeout)', () => {
+    const DEFAULT_SERVER_SOCKET_TIMEOUT_MS = 120 * 1000;
+
+    it('overrides the idle socket timeout so long-running tool executions are not killed mid-request', () => {
+      const { routeConfig } = routeHandlers[routeKey];
+      expect(routeConfig.options?.timeout?.idleSocket).toBe(AGENT_SOCKET_TIMEOUT_MS);
+    });
+
+    it('sets an idle socket timeout greater than the server default', () => {
+      const { routeConfig } = routeHandlers[routeKey];
+      expect(routeConfig.options?.timeout?.idleSocket).toBeGreaterThan(
+        DEFAULT_SERVER_SOCKET_TIMEOUT_MS
+      );
+    });
   });
 
   describe('GET (unsupported method)', () => {

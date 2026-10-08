@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType, type ErrorResult } from '@kbn/agent-builder-common';
 import type {
   BuiltinToolDefinition,
@@ -38,54 +38,56 @@ const DEFAULT_FROM = 'now-90d' as const;
 const DEFAULT_TO = 'now' as const;
 const DEFAULT_SCORE_TYPE = 'base' as const;
 
-const schema = z.object({
-  entityType: IdentifierType.describe(
-    'The type of entity: host, user, service, or generic'
-  ).optional(),
-  entityId: z
-    .string()
-    .min(1)
-    .max(1000)
-    .describe(
-      'The entity id (EUID), canonical entity.name, or user.full_name to retrieve risk score history for. ' +
-        'Examples: "host:server1" (prefixed EUID), "server1" (non-prefixed), ' +
-        '"LAPTOP-SALES04" (entity.name), "John Doe" (user.full_name). ' +
-        'When a security.entity attachment identifies the target, use its prefixed entity id here.'
-    ),
-  from: z
-    .string()
-    .min(1)
-    .max(100)
-    .describe(
-      'Start of the time range in Kibana date-math (e.g. "now-30d", "now-1y", "2026-01-01"). ' +
-        `Defaults to "${DEFAULT_FROM}". For "last 30 days" pass from="now-30d"; for a calendar date use ISO.`
-    )
-    .optional(),
-  to: z
-    .string()
-    .min(1)
-    .max(100)
-    .describe(
-      `End of the time range in Kibana date-math (e.g. "now", "2026-03-15"). Defaults to "${DEFAULT_TO}".`
-    )
-    .optional(),
-  scoreType: z
-    .enum(['base', 'resolution'])
-    .optional()
-    .describe(
-      'Which score series to chart. Defaults to "base" (the entity\'s own score). ' +
-        'Use "resolution" only for resolution-group / linked-identity cluster trends ' +
-        '(e.g. when a security.entity attachment has resolutionRiskStats for a multi-member group).'
-    ),
-  includeContributions: z
-    .boolean()
-    .optional()
-    .describe(
-      'When true, each history entry also includes the contributing alert inputs and modifiers ' +
-        'for that scoring run. Use only when the user asks why a score changed or what drove a spike; ' +
-        'default is false (light timestamps + scores).'
-    ),
-});
+const schema = lazySchema(() =>
+  z.object({
+    entityType: IdentifierType.describe(
+      'The type of entity: host, user, service, or generic'
+    ).optional(),
+    entityId: z
+      .string()
+      .min(1)
+      .max(1000)
+      .describe(
+        'The entity id (EUID), canonical entity.name, or user.full_name to retrieve risk score history for. ' +
+          'Examples: "host:server1" (prefixed EUID), "server1" (non-prefixed), ' +
+          '"LAPTOP-SALES04" (entity.name), "John Doe" (user.full_name). ' +
+          'When a security.entity attachment identifies the target, use its prefixed entity id here.'
+      ),
+    from: z
+      .string()
+      .min(1)
+      .max(100)
+      .describe(
+        'Start of the time range in Kibana date-math (e.g. "now-30d", "now-1y", "2026-01-01"). ' +
+          `Defaults to "${DEFAULT_FROM}". For "last 30 days" pass from="now-30d"; for a calendar date use ISO.`
+      )
+      .optional(),
+    to: z
+      .string()
+      .min(1)
+      .max(100)
+      .describe(
+        `End of the time range in Kibana date-math (e.g. "now", "2026-03-15"). Defaults to "${DEFAULT_TO}".`
+      )
+      .optional(),
+    scoreType: z
+      .enum(['base', 'resolution'])
+      .optional()
+      .describe(
+        'Which score series to chart. Defaults to "base" (the entity\'s own score). ' +
+          'Use "resolution" only for resolution-group / linked-identity cluster trends ' +
+          '(e.g. when a security.entity attachment has resolutionRiskStats for a multi-member group).'
+      ),
+    includeContributions: z
+      .boolean()
+      .optional()
+      .describe(
+        'When true, each history entry also includes the contributing alert inputs and modifiers ' +
+          'for that scoring run. Use only when the user asks why a score changed or what drove a spike; ' +
+          'default is false (light timestamps + scores).'
+      ),
+  })
+);
 
 export const SECURITY_GET_ENTITY_RISK_SCORE_HISTORY_TOOL_ID = securityTool(
   'get_entity_risk_score_history'
@@ -176,6 +178,13 @@ IMPORTANT — entries are aggregated, not every scoring run: the series is a dat
 Time range via optional \`from\`/\`to\` date-math (default last 90 days). Defaults to the entity's \`base\` score series; pass \`scoreType: "resolution"\` for resolution-group trends. Pass \`includeContributions: true\` only when explaining *why* a score changed. For fleet-level "who increased the most", use security.search_entities with riskScoreChangeInterval first, then drill in with this tool.`,
     schema,
     tags: ['security', 'entity-analytics', 'risk-score', 'history'],
+    annotations: {
+      title: 'Get Entity Risk Score History',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: async ({ request, spaceId }: ToolAvailabilityContext) => {
@@ -238,7 +247,10 @@ Time range via optional \`from\`/\`to\` date-math (default last 90 days). Defaul
           entityType,
         });
         if (!resolved.ok) {
-          return { results: resolved.results };
+          if (resolved.result.type === ToolResultType.error) {
+            telemetryTracker.recordFailure(resolved.result.data.message);
+          }
+          return { results: [resolved.result] };
         }
 
         const { identifierType, identifier, entityStoreId } = resolved.identity;

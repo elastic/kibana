@@ -94,6 +94,7 @@ export const AppMenuOverflowButton = ({
       onClose={onPopoverClose}
       onCloseOverflowButton={onPopoverClose}
       anchorPosition="downRight"
+      repositionToCrossAxis={false}
     />
   );
 };

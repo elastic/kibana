@@ -31,6 +31,7 @@ export {
   type IndexSearchSource,
   type DataStreamSearchSource,
   type DatasetSearchSource,
+  type ViewSearchSource,
   type EsSearchSource,
   type ListSourcesResponse,
 } from './tools/steps';
@@ -48,6 +49,7 @@ export {
   type NaturalLanguageSearchResponse,
   runSearchTool,
   type TopSnippetsConfig,
+  setDefaultEsqlCacheKey,
 } from './tools';
 export {
   resolveResourceForEsqlWithSamplingStats,

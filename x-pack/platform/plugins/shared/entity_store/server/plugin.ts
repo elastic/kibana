@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Subject } from 'rxjs';
 import type { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import { registerRoutes } from './routes';
 import type {
@@ -27,7 +28,7 @@ import {
   EntityStoreGlobalStateType,
   EntityStorePreferencesType,
   LegacyCcsLogExtractionStateType,
-  RemoteLogExtractionStateType,
+  LegacyRemoteLogExtractionStateType,
 } from './domain/saved_objects';
 import { EntityResolutionRuleType } from './domain/resolution/rules/saved_object';
 import { registerEntityMaintainerTask } from './tasks/entity_maintainers';
@@ -37,9 +38,23 @@ import { CRUDClient } from './domain/crud';
 import { EntityMetadataClient } from './domain/entity_metadata';
 import { RelationshipsClient } from './domain/relationships';
 import { ResolutionClient } from './domain/resolution';
+import { ResolutionRulesClient } from './domain/resolution/rules';
 import { registerTelemetry, createReportEvent } from './telemetry/events';
+import { registerEntityStoreUsageCollector } from './telemetry/usage_collector';
 import { automatedResolutionMaintainerConfig } from './domain/resolution/rules/maintainers/automated_resolution';
 import { createWorkflowTriggerEmitter } from './workflow/create_workflow_trigger_emitter';
+import {
+  subscribeToDualProcessFlag,
+  subscribeToLegacySecurityAssetsMigrationFlag,
+} from './infra/feature_flags';
+import {
+  EntityDefinitionRegistry,
+  createEntityDefinitionsClient,
+} from './domain/definitions/registry';
+import { userEntityDefinition } from '../common/domain/definitions/user';
+import { hostEntityDefinition } from '../common/domain/definitions/host';
+import { serviceEntityDefinition } from '../common/domain/definitions/service';
+import { genericEntityDefinition } from '../common/domain/definitions/generic';
 
 export class EntityStorePlugin
   implements
@@ -52,9 +67,14 @@ export class EntityStorePlugin
 {
   private readonly logger: Logger;
   private readonly isServerless: boolean;
+  private readonly stop$ = new Subject<void>();
+  private readonly entityDefinitionRegistry: EntityDefinitionRegistry;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.entityDefinitionRegistry = new EntityDefinitionRegistry(
+      this.logger.get('entity_definition_registry')
+    );
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
@@ -64,8 +84,13 @@ export class EntityStorePlugin
   ): EntityStoreSetupContract {
     plugins.taskManager.registerCanEncryptedSavedObjects(plugins.encryptedSavedObjects.canEncrypt);
 
+    this.registerBuiltInEntityDefinitions();
+
     this.logger.debug('Registering telemetry events');
     registerTelemetry(core.analytics);
+    if (plugins.usageCollection) {
+      registerEntityStoreUsageCollector(plugins.usageCollection);
+    }
 
     const router = core.http.createRouter<EntityStoreRequestHandlerContext>();
     core.http.registerRouteHandlerContext<EntityStoreRequestHandlerContext, typeof PLUGIN_ID>(
@@ -94,7 +119,7 @@ export class EntityStorePlugin
     core.savedObjects.registerType(EngineDescriptorType);
     core.savedObjects.registerType(EntityStoreGlobalStateType);
     core.savedObjects.registerType(EntityStorePreferencesType);
-    core.savedObjects.registerType(RemoteLogExtractionStateType);
+    core.savedObjects.registerType(LegacyRemoteLogExtractionStateType);
     core.savedObjects.registerType(LegacyCcsLogExtractionStateType);
     core.savedObjects.registerType(EntityResolutionRuleType);
 
@@ -115,10 +140,13 @@ export class EntityStorePlugin
           core,
           analytics: createReportEvent(core.analytics),
         }),
+      registerEntityDefinition: (definition) => this.entityDefinitionRegistry.register(definition),
     };
   }
 
   public start(core: CoreStart, plugins: EntityStoreStartPlugins): EntityStoreStartContract {
+    // Kibana starts plugins only after every plugin's setup has finished, so code registration closes here.
+    this.entityDefinitionRegistry.closeSetupRegistration();
     this.logger.info('Initializing plugin');
 
     plugins.taskManager.registerEncryptedSavedObjectsClient(
@@ -131,15 +159,25 @@ export class EntityStorePlugin
       plugins.security?.authc.apiKeys.invalidateAsInternalUser
     );
 
-    // Upgrade path: migrate Security-scoped `.entities.v2.*.security_*` assets for spaces
-    // that already have the store enabled, without waiting for a human to re-run install.
-    void scheduleLegacySecurityAssetsMigrationIfNeeded({
+    subscribeToLegacySecurityAssetsMigrationFlag({
       coreStart: core,
-      taskManager: plugins.taskManager,
       logger: this.logger,
+      stop$: this.stop$,
+      scheduleMigration: () =>
+        scheduleLegacySecurityAssetsMigrationIfNeeded({
+          coreStart: core,
+          taskManager: plugins.taskManager,
+          logger: this.logger,
+        }),
     });
 
-    const logger = this.logger;
+    subscribeToDualProcessFlag({
+      coreStart: core,
+      logger: this.logger,
+      stop$: this.stop$,
+    });
+
+    const { logger, entityDefinitionRegistry } = this;
     return {
       createCRUDClient: (esClient, namespace, getWorkflowsClient) => {
         const emitWorkflowTriggerEvent = getWorkflowsClient
@@ -157,12 +195,34 @@ export class EntityStorePlugin
         new RelationshipsClient({ logger, esClient, namespace }),
       createResolutionClient: (esClient, namespace) =>
         new ResolutionClient({ logger, esClient, namespace }),
+      createResolutionRulesClient: (savedObjectsClient, namespace) =>
+        new ResolutionRulesClient(savedObjectsClient, namespace, logger),
       getMaintainerStatus: (namespace, ids) =>
         getMaintainerStatus({ taskManager: plugins.taskManager, namespace, logger, ids }),
+      getEntityDefinitionsClient: (request) =>
+        createEntityDefinitionsClient(
+          entityDefinitionRegistry,
+          plugins.spaces.spacesService.getSpaceId(request)
+        ),
+      getEntityDefinitionsClientForSpace: (spaceId) =>
+        createEntityDefinitionsClient(entityDefinitionRegistry, spaceId),
     };
+  }
+
+  private registerBuiltInEntityDefinitions(): void {
+    const builtIns = [
+      userEntityDefinition,
+      hostEntityDefinition,
+      serviceEntityDefinition,
+      genericEntityDefinition,
+    ];
+    // Rejections are logged by the registry itself; there is nothing to add here.
+    builtIns.forEach((definition) => this.entityDefinitionRegistry.register(definition));
   }
 
   public stop() {
     this.logger.info('Stopping plugin');
+    this.stop$.next();
+    this.stop$.complete();
   }
 }

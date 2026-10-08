@@ -11,6 +11,7 @@ import { FilterOperator, type FilterExpressionValue } from './filter_input_codec
 import type { ProjectRoutingExpression } from './project_routing_codec';
 import {
   decodeTagFilterRoutingClause,
+  encodeFilterOnlyRouting,
   encodeTagFilterRoutingClause,
   projectRoutingCodec,
   ProjectRoutingExpressionSchema,
@@ -47,7 +48,7 @@ describe('encodeTagFilterRoutingClause', () => {
         tagName: 'env',
         tagValue: 'prod',
       })
-    ).toBe('env:* AND NOT env:prod');
+    ).toBe('(env:* AND NOT env:prod)');
   });
 
   it('encodes a one-of filter as OR-joined tag:value clauses', () => {
@@ -67,7 +68,7 @@ describe('encodeTagFilterRoutingClause', () => {
         tagName: 'env',
         tagValue: ['prod', 'staging'],
       })
-    ).toBe('env:* AND NOT (env:prod OR env:staging)');
+    ).toBe('(env:* AND NOT (env:prod OR env:staging))');
   });
 
   it('encodes an exists filter as a wildcard clause', () => {
@@ -91,6 +92,29 @@ describe('encodeTagFilterRoutingClause', () => {
   });
 });
 
+describe('encodeFilterOnlyRouting', () => {
+  it('returns undefined when there are no filter expressions', () => {
+    expect(encodeFilterOnlyRouting([])).toBeUndefined();
+  });
+
+  it('encodes tag filters without _id selection clauses', () => {
+    expect(encodeFilterOnlyRouting([typeSecurityExpression])).toBe('_type:security');
+  });
+
+  it('joins multiple tag filters with AND', () => {
+    expect(
+      encodeFilterOnlyRouting([
+        typeSecurityExpression,
+        {
+          operator: FilterOperator.EQUALS,
+          tagName: 'env',
+          tagValue: 'prod',
+        },
+      ])
+    ).toBe('_type:security AND env:prod');
+  });
+});
+
 describe('decodeTagFilterRoutingClause', () => {
   it('decodes an equals filter from a tag:value clause', () => {
     expect(decodeTagFilterRoutingClause('env:prod')).toEqual({
@@ -102,6 +126,11 @@ describe('decodeTagFilterRoutingClause', () => {
 
   it('decodes a not-equals filter from an exists clause minus the value', () => {
     expect(decodeTagFilterRoutingClause('env:* AND NOT env:prod')).toEqual({
+      operator: FilterOperator.NOT_EQUALS,
+      tagName: 'env',
+      tagValue: 'prod',
+    });
+    expect(decodeTagFilterRoutingClause('(env:* AND NOT env:prod)')).toEqual({
       operator: FilterOperator.NOT_EQUALS,
       tagName: 'env',
       tagValue: 'prod',
@@ -118,6 +147,11 @@ describe('decodeTagFilterRoutingClause', () => {
 
   it('decodes a not-one-of filter from an exists clause minus the OR group', () => {
     expect(decodeTagFilterRoutingClause('env:* AND NOT (env:prod OR env:staging)')).toEqual({
+      operator: FilterOperator.NOT_ONE_OF,
+      tagName: 'env',
+      tagValue: ['prod', 'staging'],
+    });
+    expect(decodeTagFilterRoutingClause('(env:* AND NOT (env:prod OR env:staging))')).toEqual({
       operator: FilterOperator.NOT_ONE_OF,
       tagName: 'env',
       tagValue: ['prod', 'staging'],
@@ -205,220 +239,581 @@ describe('tag filter round-tripping', () => {
   });
 });
 
-describe('projectRoutingCodec.encode', () => {
-  it('returns an empty string when there are no filters or exclusions', () => {
-    expect(
-      projectRoutingCodec.encode({
-        ...emptyEncodeInput,
+describe('project routing codec', () => {
+  describe('projectRoutingCodec.encode', () => {
+    it('throws when asked to encode an input with unknown strategy', () => {
+      expect(() =>
+        projectRoutingCodec.encode({
+          ...emptyEncodeInput,
+          projectRoutingStrategy: 'unknown',
+        })
+      ).toThrow('project routing strategy unknown is not valid for encoding');
+    });
+
+    describe('dynamic mode', () => {
+      it('returns an empty string when there are no filters or exclusions', () => {
+        expect(
+          projectRoutingCodec.encode({
+            ...emptyEncodeInput,
+            selectedProjectIds: ['origin', 'linked1'],
+          })
+        ).toBe('');
+      });
+
+      it('emits tag filters without _id clauses when there are no exclusions', () => {
+        expect(
+          projectRoutingCodec.encode({
+            ...emptyEncodeInput,
+            filterExpressions: [typeSecurityExpression],
+            selectedProjectIds: ['origin'],
+          })
+        ).toBe('_type:security');
+      });
+
+      it('emits an _id wildcard and NOT clause when exclusions exist in dynamic mode', () => {
+        expect(
+          projectRoutingCodec.encode({
+            ...emptyEncodeInput,
+            excludedProjectIds: ['linked1'],
+            selectedProjectIds: ['origin', 'linked2'],
+          })
+        ).toBe('_id:* AND NOT _id:linked1');
+      });
+
+      it('groups multiple dynamic exclusions as a NOT of an OR', () => {
+        expect(
+          projectRoutingCodec.encode({
+            ...emptyEncodeInput,
+            excludedProjectIds: ['linked1', 'linked2'],
+            selectedProjectIds: ['origin'],
+          })
+        ).toBe('_id:* AND NOT (_id:linked1 OR _id:linked2)');
+      });
+
+      it('combines free tag filters with a grouped dynamic selection negation', () => {
+        expect(
+          projectRoutingCodec.encode({
+            ...emptyEncodeInput,
+            filterExpressions: [typeSecurityExpression],
+            excludedProjectIds: ['linked1', 'linked2'],
+            selectedProjectIds: ['origin'],
+          })
+        ).toBe('_type:security AND (_id:* AND NOT (_id:linked1 OR _id:linked2))');
+      });
+
+      it('keeps parenthesized NOT_EQUALS free beside the dynamic selection group', () => {
+        expect(
+          projectRoutingCodec.encode({
+            ...emptyEncodeInput,
+            filterExpressions: [
+              {
+                operator: FilterOperator.NOT_EQUALS,
+                tagName: 'env',
+                tagValue: 'prod',
+              },
+            ],
+            excludedProjectIds: ['linked1', 'linked2'],
+          })
+        ).toBe('(env:* AND NOT env:prod) AND (_id:* AND NOT (_id:linked1 OR _id:linked2))');
+      });
+
+      it('keeps parenthesized NOT_ONE_OF free beside the dynamic selection group', () => {
+        expect(
+          projectRoutingCodec.encode({
+            ...emptyEncodeInput,
+            filterExpressions: [
+              {
+                operator: FilterOperator.NOT_ONE_OF,
+                tagName: 'env',
+                tagValue: ['prod', 'staging'],
+              },
+            ],
+            excludedProjectIds: ['linked1', 'linked2'],
+          })
+        ).toBe(
+          '(env:* AND NOT (env:prod OR env:staging)) AND (_id:* AND NOT (_id:linked1 OR _id:linked2))'
+        );
+      });
+
+      it('keeps ONE_OF free beside the dynamic selection group', () => {
+        expect(
+          projectRoutingCodec.encode({
+            ...emptyEncodeInput,
+            filterExpressions: [
+              {
+                operator: FilterOperator.ONE_OF,
+                tagName: 'env',
+                tagValue: ['prod', 'staging'],
+              },
+            ],
+            excludedProjectIds: ['linked1', 'linked2'],
+          })
+        ).toBe('(env:prod OR env:staging) AND (_id:* AND NOT (_id:linked1 OR _id:linked2))');
+      });
+
+      it('does not emit selectedProjectIds in dynamic output', () => {
+        expect(
+          projectRoutingCodec.encode({
+            ...emptyEncodeInput,
+            filterExpressions: [typeSecurityExpression],
+            excludedProjectIds: ['linked1'],
+            selectedProjectIds: ['origin', 'linked2'],
+          })
+        ).toBe('_type:security AND (_id:* AND NOT _id:linked1)');
+      });
+
+      it('ANDs together multiple independent tag filters in dynamic mode', () => {
+        expect(
+          projectRoutingCodec.encode({
+            ...emptyEncodeInput,
+            filterExpressions: [
+              typeSecurityExpression,
+              { operator: FilterOperator.EQUALS, tagName: 'region', tagValue: 'us' },
+            ],
+            selectedProjectIds: ['origin'],
+          })
+        ).toBe('_type:security AND region:us');
+      });
+
+      it('keeps two independent filters (one compound) free beside grouped exclusions', () => {
+        expect(
+          projectRoutingCodec.encode({
+            ...emptyEncodeInput,
+            filterExpressions: [
+              typeSecurityExpression,
+              {
+                operator: FilterOperator.NOT_EQUALS,
+                tagName: 'env',
+                tagValue: 'prod',
+              },
+            ],
+            excludedProjectIds: ['linked1', 'linked2'],
+          })
+        ).toBe(
+          '_type:security AND (env:* AND NOT env:prod) AND (_id:* AND NOT (_id:linked1 OR _id:linked2))'
+        );
+      });
+    });
+
+    describe('snapshot mode', () => {
+      it('returns an empty string when there are no filters or selected ids', () => {
+        expect(
+          projectRoutingCodec.encode({
+            ...emptyEncodeInput,
+            projectRoutingStrategy: 'snapshot',
+          })
+        ).toBe('');
+      });
+
+      it('emits an OR of explicit id clauses in snapshot mode and ignores exclusions', () => {
+        expect(
+          projectRoutingCodec.encode({
+            ...emptyEncodeInput,
+            excludedProjectIds: ['linked1'],
+            selectedProjectIds: ['origin', 'linked2'],
+            projectRoutingStrategy: 'snapshot',
+          })
+        ).toBe('_id:origin OR _id:linked2');
+      });
+
+      it('emits a single selected id without parentheses', () => {
+        expect(
+          projectRoutingCodec.encode({
+            ...emptyEncodeInput,
+            selectedProjectIds: ['origin'],
+            projectRoutingStrategy: 'snapshot',
+          })
+        ).toBe('_id:origin');
+      });
+
+      it('emits snapshot filters as free conjuncts and AND-adds the grouped selected ids', () => {
+        expect(
+          projectRoutingCodec.encode({
+            ...emptyEncodeInput,
+            filterExpressions: [typeSecurityExpression],
+            selectedProjectIds: ['origin', 'linked1'],
+            projectRoutingStrategy: 'snapshot',
+          })
+        ).toBe('_type:security AND (_id:origin OR _id:linked1)');
+      });
+
+      it('keeps compound filters self-parenthesized beside snapshot selected ids', () => {
+        expect(
+          projectRoutingCodec.encode({
+            ...emptyEncodeInput,
+            filterExpressions: [
+              {
+                operator: FilterOperator.NOT_EQUALS,
+                tagName: 'env',
+                tagValue: 'prod',
+              },
+              { operator: FilterOperator.EQUALS, tagName: 'region', tagValue: 'us' },
+            ],
+            selectedProjectIds: ['origin'],
+            projectRoutingStrategy: 'snapshot',
+          })
+        ).toBe('(env:* AND NOT env:prod) AND region:us AND _id:origin');
+      });
+    });
+  });
+
+  describe('projectRoutingCodec.decode', () => {
+    it('returns empty unknown defaults for blank routing', () => {
+      expect(projectRoutingCodec.decode('')).toEqual({
+        filterExpressions: [],
+        excludedProjectIds: [],
+        selectedProjectIds: [],
+        projectRoutingStrategy: 'unknown',
+      });
+    });
+
+    it('returns empty unknown defaults for whitespace-only routing', () => {
+      expect(projectRoutingCodec.decode('   ')).toEqual({
+        filterExpressions: [],
+        excludedProjectIds: [],
+        selectedProjectIds: [],
+        projectRoutingStrategy: 'unknown',
+      });
+    });
+
+    it('decodes a single tag filter as unknown without an _id tail', () => {
+      expect(projectRoutingCodec.decode('env:prod')).toEqual({
+        filterExpressions: [
+          {
+            operator: FilterOperator.EQUALS,
+            tagName: 'env',
+            tagValue: 'prod',
+          },
+        ],
+        excludedProjectIds: [],
+        selectedProjectIds: [],
+        projectRoutingStrategy: 'unknown',
+      });
+    });
+
+    it('decodes multiple independent tag filters ANDed together as unknown without an _id tail', () => {
+      expect(projectRoutingCodec.decode('env:prod AND region:us')).toEqual({
+        filterExpressions: [
+          {
+            operator: FilterOperator.EQUALS,
+            tagName: 'env',
+            tagValue: 'prod',
+          },
+          {
+            operator: FilterOperator.EQUALS,
+            tagName: 'region',
+            tagValue: 'us',
+          },
+        ],
+        excludedProjectIds: [],
+        selectedProjectIds: [],
+        projectRoutingStrategy: 'unknown',
+      });
+    });
+
+    it('returns selected project ids for an ids-only snapshot OR group', () => {
+      expect(projectRoutingCodec.decode('(_id:origin OR _id:linked1)')).toEqual({
+        filterExpressions: [],
+        excludedProjectIds: [],
         selectedProjectIds: ['origin', 'linked1'],
-      })
-    ).toBe('');
-  });
+        projectRoutingStrategy: 'snapshot',
+      });
+    });
 
-  it('emits tag filters without _id clauses when there are no exclusions', () => {
-    expect(
-      projectRoutingCodec.encode({
-        ...emptyEncodeInput,
-        filterExpressions: [typeSecurityExpression],
+    it('returns a selected project id for a lone _id equality', () => {
+      expect(projectRoutingCodec.decode('_id:origin')).toEqual({
+        filterExpressions: [],
+        excludedProjectIds: [],
         selectedProjectIds: ['origin'],
-      })
-    ).toBe('_type:security');
-  });
+        projectRoutingStrategy: 'snapshot',
+      });
+    });
 
-  it('emits _id wildcard and NOT clauses when exclusions exist in dynamic mode', () => {
-    expect(
-      projectRoutingCodec.encode({
-        ...emptyEncodeInput,
-        excludedProjectIds: ['linked1'],
-        selectedProjectIds: ['origin', 'linked2'],
-      })
-    ).toBe('_id:* AND NOT _id:linked1');
-  });
+    it('returns unknown when an id equality is mixed with an id OR group', () => {
+      expect(projectRoutingCodec.decode('_id:origin AND (_id:linked1 OR _id:linked2)')).toEqual({
+        filterExpressions: [],
+        excludedProjectIds: [],
+        selectedProjectIds: [],
+        projectRoutingStrategy: 'unknown',
+      });
+    });
 
-  it('combines tag filters with dynamic id exclusions', () => {
-    expect(
-      projectRoutingCodec.encode({
-        ...emptyEncodeInput,
-        filterExpressions: [typeSecurityExpression],
-        excludedProjectIds: ['linked1'],
-        selectedProjectIds: ['origin', 'linked2'],
-      })
-    ).toBe('_type:security AND _id:* AND NOT _id:linked1');
-  });
+    it('returns unknown when a selection OR group contains a wildcard', () => {
+      expect(projectRoutingCodec.decode('(_id:* OR _id:origin)')).toEqual({
+        filterExpressions: [],
+        excludedProjectIds: [],
+        selectedProjectIds: [],
+        projectRoutingStrategy: 'unknown',
+      });
+    });
 
-  it('emits explicit id clauses in snapshot mode when exclusions exist', () => {
-    expect(
-      projectRoutingCodec.encode({
-        ...emptyEncodeInput,
+    it('classifies a grouped dynamic selection negation without filters', () => {
+      expect(projectRoutingCodec.decode('(_id:* AND NOT _id:linked1)')).toEqual({
+        filterExpressions: [],
         excludedProjectIds: ['linked1'],
+        selectedProjectIds: [],
+        projectRoutingStrategy: 'dynamic',
+      });
+    });
+
+    it('classifies grouped dynamic exclusions from a NOT of an OR', () => {
+      expect(projectRoutingCodec.decode('(_id:* AND NOT (_id:linked1 OR _id:linked2))')).toEqual({
+        filterExpressions: [],
+        excludedProjectIds: ['linked1', 'linked2'],
+        selectedProjectIds: [],
+        projectRoutingStrategy: 'dynamic',
+      });
+    });
+
+    it('decodes a free filter beside a grouped single exclusion', () => {
+      expect(projectRoutingCodec.decode('_type:security AND (_id:* AND NOT _id:linked1)')).toEqual({
+        filterExpressions: [
+          {
+            operator: FilterOperator.EQUALS,
+            tagName: '_type',
+            tagValue: 'security',
+          },
+        ],
+        excludedProjectIds: ['linked1'],
+        selectedProjectIds: [],
+        projectRoutingStrategy: 'dynamic',
+      });
+    });
+
+    it('groups compound tag filters split by a grouped _id selection', () => {
+      expect(
+        projectRoutingCodec.decode(
+          '(_type:* AND NOT _type:observability) AND (_id:* AND NOT _id:linked1)'
+        )
+      ).toEqual({
+        filterExpressions: [
+          {
+            operator: FilterOperator.NOT_EQUALS,
+            tagName: '_type',
+            tagValue: 'observability',
+          },
+        ],
+        excludedProjectIds: ['linked1'],
+        selectedProjectIds: [],
+        projectRoutingStrategy: 'dynamic',
+      });
+    });
+
+    it('decodes an independent filter alongside a compound filter and grouped exclusions', () => {
+      expect(
+        projectRoutingCodec.decode(
+          'region:us AND (_type:* AND NOT _type:observability) AND (_id:* AND NOT (_id:linked1 OR _id:linked2))'
+        )
+      ).toEqual({
+        filterExpressions: [
+          {
+            operator: FilterOperator.EQUALS,
+            tagName: 'region',
+            tagValue: 'us',
+          },
+          {
+            operator: FilterOperator.NOT_EQUALS,
+            tagName: '_type',
+            tagValue: 'observability',
+          },
+        ],
+        excludedProjectIds: ['linked1', 'linked2'],
+        selectedProjectIds: [],
+        projectRoutingStrategy: 'dynamic',
+      });
+    });
+
+    it('does not mix a NOT_ONE_OF OR group into _id exclusions', () => {
+      expect(
+        projectRoutingCodec.decode(
+          '(env:* AND NOT (env:prod OR env:staging)) AND (_id:* AND NOT (_id:linked1 OR _id:linked2))'
+        )
+      ).toEqual({
+        filterExpressions: [
+          {
+            operator: FilterOperator.NOT_ONE_OF,
+            tagName: 'env',
+            tagValue: ['prod', 'staging'],
+          },
+        ],
+        excludedProjectIds: ['linked1', 'linked2'],
+        selectedProjectIds: [],
+        projectRoutingStrategy: 'dynamic',
+      });
+    });
+
+    it('returns unknown for multiple selection groups instead of leaking _id filters', () => {
+      expect(
+        projectRoutingCodec.decode('(_id:* AND NOT _id:linked1) AND (_id:* AND NOT _id:linked2)')
+      ).toEqual({
+        filterExpressions: [],
+        excludedProjectIds: [],
+        selectedProjectIds: [],
+        projectRoutingStrategy: 'unknown',
+      });
+    });
+
+    it('returns unknown when a grouped _id:* is missing its NOT negation', () => {
+      expect(projectRoutingCodec.decode('_type:security AND _id:*')).toEqual({
+        filterExpressions: [],
+        excludedProjectIds: [],
+        selectedProjectIds: [],
+        projectRoutingStrategy: 'unknown',
+      });
+    });
+
+    it('decodes free snapshot filters beside a grouped id selection', () => {
+      expect(projectRoutingCodec.decode('_type:security AND (_id:origin OR _id:linked2)')).toEqual({
+        filterExpressions: [
+          {
+            operator: FilterOperator.EQUALS,
+            tagName: '_type',
+            tagValue: 'security',
+          },
+        ],
+        excludedProjectIds: [],
         selectedProjectIds: ['origin', 'linked2'],
         projectRoutingStrategy: 'snapshot',
-      })
-    ).toBe('_id:origin AND _id:linked2');
-  });
+      });
+    });
 
-  it('ANDs together multiple independent tag filters', () => {
-    expect(
-      projectRoutingCodec.encode({
-        ...emptyEncodeInput,
+    it('decodes compound snapshot filters beside selected ids', () => {
+      expect(
+        projectRoutingCodec.decode('(env:* AND NOT env:prod) AND region:us AND _id:origin')
+      ).toEqual({
         filterExpressions: [
-          typeSecurityExpression,
-          { operator: FilterOperator.EQUALS, tagName: 'region', tagValue: 'us' },
+          {
+            operator: FilterOperator.NOT_EQUALS,
+            tagName: 'env',
+            tagValue: 'prod',
+          },
+          {
+            operator: FilterOperator.EQUALS,
+            tagName: 'region',
+            tagValue: 'us',
+          },
         ],
+        excludedProjectIds: [],
         selectedProjectIds: ['origin'],
-      })
-    ).toBe('_type:security AND region:us');
-  });
-});
+        projectRoutingStrategy: 'snapshot',
+      });
+    });
 
-describe('projectRoutingCodec.decode', () => {
-  it('returns empty defaults for blank routing', () => {
-    expect(projectRoutingCodec.decode('')).toEqual({
-      filterExpressions: [],
-      excludedProjectIds: [],
-      selectedProjectIds: [],
-      projectRoutingStrategy: 'dynamic',
+    it('decodes unparenthesized compound snapshot filters beside selected ids', () => {
+      expect(projectRoutingCodec.decode('env:* AND NOT env:prod AND _id:origin')).toEqual({
+        filterExpressions: [
+          {
+            operator: FilterOperator.NOT_EQUALS,
+            tagName: 'env',
+            tagValue: 'prod',
+          },
+        ],
+        excludedProjectIds: [],
+        selectedProjectIds: ['origin'],
+        projectRoutingStrategy: 'snapshot',
+      });
+    });
+
+    it('decodes NOT_ONE_OF snapshot filters beside selected ids', () => {
+      expect(
+        projectRoutingCodec.decode('(env:* AND NOT (env:prod OR env:staging)) AND _id:origin')
+      ).toEqual({
+        filterExpressions: [
+          {
+            operator: FilterOperator.NOT_ONE_OF,
+            tagName: 'env',
+            tagValue: ['prod', 'staging'],
+          },
+        ],
+        excludedProjectIds: [],
+        selectedProjectIds: ['origin'],
+        projectRoutingStrategy: 'snapshot',
+      });
+    });
+
+    it('returns unknown when a selection group is missing _id:*', () => {
+      expect(projectRoutingCodec.decode('_type:security AND NOT _id:linked1')).toEqual({
+        filterExpressions: [],
+        excludedProjectIds: [],
+        selectedProjectIds: [],
+        projectRoutingStrategy: 'unknown',
+      });
+    });
+
+    it('returns empty unknown defaults for unparseable routing', () => {
+      expect(projectRoutingCodec.decode('env:prod AND (((broken')).toEqual({
+        filterExpressions: [],
+        excludedProjectIds: [],
+        selectedProjectIds: [],
+        projectRoutingStrategy: 'unknown',
+      });
+    });
+
+    it('returns named references as empty unknown defaults', () => {
+      expect(projectRoutingCodec.decode('@custom-expression')).toEqual({
+        filterExpressions: [],
+        excludedProjectIds: [],
+        selectedProjectIds: [],
+        projectRoutingStrategy: 'unknown',
+      });
+    });
+
+    it('validates decode output against ProjectRoutingExpressionSchema', () => {
+      const decoded = projectRoutingCodec.decode('_type:security AND (_id:* AND NOT _id:linked1)');
+      expect(ProjectRoutingExpressionSchema.parse(decoded)).toEqual(decoded);
     });
   });
 
-  it('decodes a single tag filter', () => {
-    expect(projectRoutingCodec.decode('env:prod')).toEqual({
-      filterExpressions: [
-        {
-          operator: FilterOperator.EQUALS,
-          tagName: 'env',
-          tagValue: 'prod',
-        },
-      ],
-      excludedProjectIds: [],
-      selectedProjectIds: [],
-      projectRoutingStrategy: 'snapshot',
+  describe('projectRoutingCodec round-trip', () => {
+    it('round-trips parsed defaults through encode in dynamic mode', () => {
+      const defaultProjectRouting = '_type:security AND (_id:* AND NOT _id:linked1)';
+      const decoded = projectRoutingCodec.decode(defaultProjectRouting);
+
+      expect(decoded.projectRoutingStrategy).toBe('dynamic');
+      expect(projectRoutingCodec.encode(decoded)).toBe(defaultProjectRouting);
     });
-  });
 
-  it('decodes multiple independent tag filters ANDed together', () => {
-    expect(projectRoutingCodec.decode('env:prod AND region:us')).toEqual({
-      filterExpressions: [
-        {
-          operator: FilterOperator.EQUALS,
-          tagName: 'env',
-          tagValue: 'prod',
-        },
-        {
-          operator: FilterOperator.EQUALS,
-          tagName: 'region',
-          tagValue: 'us',
-        },
-      ],
-      excludedProjectIds: [],
-      selectedProjectIds: [],
-      projectRoutingStrategy: 'snapshot',
+    it('round-trips a parenthesized NOT_EQUALS with two dynamic exclusions', () => {
+      const defaultProjectRouting =
+        '(env:* AND NOT env:prod) AND (_id:* AND NOT (_id:linked1 OR _id:linked2))';
+      const decoded = projectRoutingCodec.decode(defaultProjectRouting);
+
+      expect(decoded.projectRoutingStrategy).toBe('dynamic');
+      expect(projectRoutingCodec.encode(decoded)).toBe(defaultProjectRouting);
     });
-  });
 
-  it('returns selected and excluded project ids explicitly without reconciliation', () => {
-    expect(projectRoutingCodec.decode('_id:origin AND _id:linked1')).toEqual({
-      filterExpressions: [],
-      excludedProjectIds: [],
-      selectedProjectIds: ['origin', 'linked1'],
-      projectRoutingStrategy: 'snapshot',
+    it('round-trips a parenthesized NOT_ONE_OF with two dynamic exclusions', () => {
+      const defaultProjectRouting =
+        '(env:* AND NOT (env:prod OR env:staging)) AND (_id:* AND NOT (_id:linked1 OR _id:linked2))';
+      const decoded = projectRoutingCodec.decode(defaultProjectRouting);
+
+      expect(decoded.projectRoutingStrategy).toBe('dynamic');
+      expect(projectRoutingCodec.encode(decoded)).toBe(defaultProjectRouting);
     });
-  });
 
-  it('classifies dynamic exclusions without selected ids', () => {
-    expect(projectRoutingCodec.decode('_id:* AND NOT _id:linked1')).toEqual({
-      filterExpressions: [],
-      excludedProjectIds: ['linked1'],
-      selectedProjectIds: [],
-      projectRoutingStrategy: 'dynamic',
+    it('round-trips snapshot filters and grouped selected ids', () => {
+      const defaultProjectRouting =
+        '(env:* AND NOT env:prod) AND region:us AND (_id:origin OR _id:linked2)';
+      const decoded = projectRoutingCodec.decode(defaultProjectRouting);
+
+      expect(decoded.projectRoutingStrategy).toBe('snapshot');
+      expect(projectRoutingCodec.encode(decoded)).toBe(defaultProjectRouting);
     });
-  });
 
-  it('groups compound tag filters split by _id clauses', () => {
-    expect(
-      projectRoutingCodec.decode(
-        '_type:* AND NOT _type:observability AND _id:* AND NOT _id:linked1'
-      )
-    ).toEqual({
-      filterExpressions: [
-        {
-          operator: FilterOperator.NOT_EQUALS,
-          tagName: '_type',
-          tagValue: 'observability',
-        },
-      ],
-      excludedProjectIds: ['linked1'],
-      selectedProjectIds: [],
-      projectRoutingStrategy: 'dynamic',
+    it('round-trips an ids-only snapshot OR group', () => {
+      const defaultProjectRouting = '_id:origin OR _id:linked2';
+      const decoded = projectRoutingCodec.decode(defaultProjectRouting);
+
+      expect(decoded.projectRoutingStrategy).toBe('snapshot');
+      expect(projectRoutingCodec.encode(decoded)).toBe(defaultProjectRouting);
     });
-  });
 
-  it('decodes an independent filter alongside a compound filter and _id clauses', () => {
-    expect(
-      projectRoutingCodec.decode(
-        'region:us AND _type:* AND NOT _type:observability AND _id:* AND NOT _id:linked1'
-      )
-    ).toEqual({
-      filterExpressions: [
-        {
-          operator: FilterOperator.EQUALS,
-          tagName: 'region',
-          tagValue: 'us',
-        },
-        {
-          operator: FilterOperator.NOT_EQUALS,
-          tagName: '_type',
-          tagValue: 'observability',
-        },
-      ],
-      excludedProjectIds: ['linked1'],
-      selectedProjectIds: [],
-      projectRoutingStrategy: 'dynamic',
+    it('round-trips a simple snapshot filter with a selected id', () => {
+      const defaultProjectRouting = '_type:security AND _id:origin';
+      const decoded = projectRoutingCodec.decode(defaultProjectRouting);
+
+      expect(decoded.projectRoutingStrategy).toBe('snapshot');
+      expect(projectRoutingCodec.encode(decoded)).toBe(defaultProjectRouting);
     });
-  });
-
-  it('returns named references as empty defaults', () => {
-    expect(projectRoutingCodec.decode('@custom-expression')).toEqual({
-      filterExpressions: [],
-      excludedProjectIds: [],
-      selectedProjectIds: [],
-      projectRoutingStrategy: 'dynamic',
-    });
-  });
-
-  it('validates decode output against ProjectRoutingExpressionSchema', () => {
-    const decoded = projectRoutingCodec.decode('_type:security AND _id:* AND NOT _id:linked1');
-    expect(ProjectRoutingExpressionSchema.parse(decoded)).toEqual(decoded);
-  });
-});
-
-describe('projectRoutingCodec round-trip', () => {
-  it('round-trips parsed defaults through encode in dynamic mode', () => {
-    const defaultProjectRouting = '_type:security AND _id:* AND NOT _id:linked1';
-    const decoded = projectRoutingCodec.decode(defaultProjectRouting);
-
-    expect(
-      projectRoutingCodec.encode({
-        filterExpressions: decoded.filterExpressions,
-        excludedProjectIds: decoded.excludedProjectIds,
-        selectedProjectIds: ['origin', 'linked2'],
-        projectRoutingStrategy: 'dynamic',
-      })
-    ).toBe(defaultProjectRouting);
-  });
-
-  it('round-trips multiple independent tag filters mixed with a compound filter and exclusions', () => {
-    const defaultProjectRouting =
-      'region:us AND _type:* AND NOT _type:observability AND _id:* AND NOT _id:linked1';
-    const decoded = projectRoutingCodec.decode(defaultProjectRouting);
-
-    expect(
-      projectRoutingCodec.encode({
-        filterExpressions: decoded.filterExpressions,
-        excludedProjectIds: decoded.excludedProjectIds,
-        selectedProjectIds: ['origin', 'linked2'],
-        projectRoutingStrategy: 'dynamic',
-      })
-    ).toBe(defaultProjectRouting);
   });
 });

@@ -4,35 +4,85 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
 import { StateGraph, Annotation } from '@langchain/langgraph';
+import { ToolMessage, type BaseMessage, type BaseMessageLike } from '@langchain/core/messages';
+import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { executeEsql } from '@kbn/agent-builder-genai-utils';
+import { buildTimeRangeParams } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
 import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
+import { formatRepairMessages } from '../shared/repair_messages';
 import { chartTypeRegistry } from './chart_type_registry';
 import type { VisualizationConfig } from './chart_type_registry';
 import {
   GENERATE_ESQL_NODE,
+  RESOLVE_COLUMNS_NODE,
   GENERATE_CONFIG_NODE,
   VALIDATE_CONFIG_NODE,
-  GENERATE_TIME_RANGE_NODE,
   MAX_RETRY_ATTEMPTS,
   type Action,
   type GenerateEsqlAction,
   type GenerateConfigAction,
   type ValidateConfigAction,
-  type GenerateTimeRangeAction,
   isGenerateEsqlAction,
   isGenerateConfigAction,
   isValidateConfigAction,
 } from './actions_lens';
 import { createGenerateConfigPrompt } from './prompts';
+import {
+  createLoadSchemaSectionsTool,
+  filterSchemaSections,
+  getFailingSchemaSections,
+  renderSchemaSections,
+} from './schema_sections';
 
 // Regex to extract JSON from markdown code blocks
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
+
+/**
+ * Range bound to `?_tstart`/`?_tend` when a provided query runs to collect its
+ * columns. Kibana applies the live range at render time.
+ */
+const COLUMNS_PROBE_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
+
+const REPAIR_INSTRUCTIONS =
+  'Return the complete corrected response in the same minified JSON format ("authoring_note" and "config"). Change only what is needed to fix the error.';
+
+/**
+ * Adds the schema of each failing section to the first repair message that needs it,
+ * skipping sections the model already loaded through the tool.
+ */
+const addFailingSchemaContext = ({
+  chartType,
+  validated,
+  loadedSchemaSections,
+}: {
+  chartType: SupportedChartType;
+  validated: readonly ValidateConfigAction[];
+  loadedSchemaSections: readonly string[];
+}): Array<ValidateConfigAction & { repairContext?: string }> => {
+  const shownSections = new Set(loadedSchemaSections);
+  return validated.map((action) => {
+    const newSections = (action.failingSchemaSections ?? []).filter(
+      (section) => !shownSections.has(section)
+    );
+    if (newSections.length === 0) {
+      return action;
+    }
+    newSections.forEach((section) => shownSections.add(section));
+    return {
+      ...action,
+      repairContext: `Schema of the failing config sections:\n\`\`\`json\n${renderSchemaSections(
+        chartType,
+        newSections
+      )}\n\`\`\``,
+    };
+  });
+};
 
 const parseConfigAuthoringResponse = (
   responseText: string
@@ -87,7 +137,7 @@ export const getEsqlDataSourceCarriers = (config: unknown): EsqlDataSourceCarrie
  * Handles both single-dataset configs (metric, gauge, tagcloud) and layers-based configs (XY).
  * For XY charts with multiple layers, returns all unique ESQL queries.
  */
-function getExistingEsqlQueries(config: VisualizationConfig | null): string[] {
+export function getExistingEsqlQueries(config: VisualizationConfig | null): string[] {
   if (!config) return [];
 
   const queries: string[] = [];
@@ -106,11 +156,27 @@ const VisualizationStateAnnotation = Annotation.Root({
   nlQuery: Annotation<string>(),
   index: Annotation<string | undefined>(),
   chartType: Annotation<SupportedChartType>(),
-  schema: Annotation<object>(),
   existingConfig: Annotation<string | undefined>(),
   parsedExistingConfig: Annotation<VisualizationConfig | null>(),
+  /**
+   * Preserve the existing ES|QL queries. Each layer keeps its existing
+   * `data_source` instead of receiving the single resolved query.
+   */
+  preserveESQL: Annotation<boolean>(),
+  applyChartRules: Annotation<boolean>(),
   // internal
   esqlQuery: Annotation<string>(),
+  /** Result columns of the resolved query. Absent when they could not be collected. */
+  columns: Annotation<EsqlEsqlColumnInfo[] | undefined>(),
+  /** The tool exchange that loaded schema sections, replayed on every later attempt. */
+  schemaSectionMessages: Annotation<BaseMessage[]>({
+    reducer: (_, newValue) => newValue,
+    default: () => [],
+  }),
+  loadedSchemaSections: Annotation<string[]>({
+    reducer: (_, newValue) => newValue,
+    default: () => [],
+  }),
   currentAttempt: Annotation<number>({ reducer: (_, newValue) => newValue, default: () => 0 }),
   actions: Annotation<Action[]>({
     reducer: (a, b) => [...a, ...b],
@@ -119,19 +185,27 @@ const VisualizationStateAnnotation = Annotation.Root({
   // outputs
   validatedConfig: Annotation<VisualizationConfig | null>(),
   authoringNote: Annotation<string | null>(),
-  timeRange: Annotation<{ from: string; to: string } | null>(),
   error: Annotation<string | null>(),
 });
 
 type VisualizationState = typeof VisualizationStateAnnotation.State;
 
+type LoadedSchemaSections = Pick<
+  VisualizationState,
+  'schemaSectionMessages' | 'loadedSchemaSections'
+>;
+
+interface ConfigAuthorResult {
+  response: BaseMessage;
+  /** Present when the model loaded schema sections. */
+  schemaSections?: LoadedSchemaSections;
+}
+
 export const createVisualizationGraph = async (
   modelProvider: ModelProvider,
   logger: Logger,
   events: ToolEventEmitter,
-  esClient: IScopedClusterClient,
-  includeTimeRange = true,
-  additionalChartConfigInstructions?: string
+  esClient: IScopedClusterClient
 ) => {
   const defaultModel = await modelProvider.getDefaultModel();
 
@@ -166,6 +240,7 @@ export const createVisualizationGraph = async (
           type: 'generate_esql',
           success: true,
           query: generated.query,
+          columns: generated.columns,
         };
       }
     } catch (error) {
@@ -179,8 +254,82 @@ export const createVisualizationGraph = async (
     }
 
     return {
+      columns: action.columns,
       actions: [action],
     };
+  };
+
+  // Node: Collect the result columns of a provided or preserved query, so the
+  // config author sees their names and types. The query is kept as is; when it
+  // fails to run, the config is authored without columns.
+  const resolveColumnsNode = async (state: VisualizationState) => {
+    // Preserved layers with different queries have different columns, so one
+    // query's columns would mislead the config author.
+    if (state.preserveESQL && getExistingEsqlQueries(state.parsedExistingConfig).length > 1) {
+      return {};
+    }
+    try {
+      const { columns } = await executeEsql({
+        query: state.esqlQuery,
+        params: buildTimeRangeParams(COLUMNS_PROBE_TIME_RANGE),
+        limit: 1,
+        dropNullColumns: false,
+        esClient: esClient.asCurrentUser,
+      });
+      return { columns };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.warn(`Failed to collect the result columns of the ES|QL query: ${errorMessage}`);
+      return {};
+    }
+  };
+
+  // Offers the schema-section tool once. When the model calls it, the sections are
+  // returned and the model is asked again with tool use disabled, so it must write
+  // the config. Every call binds the same tool so the prompt prefix stays cacheable.
+  const invokeConfigAuthor = async ({
+    chartType,
+    prompt,
+    offerSchemaSections,
+  }: {
+    chartType: SupportedChartType;
+    prompt: BaseMessageLike[];
+    offerSchemaSections: boolean;
+  }): Promise<ConfigAuthorResult> => {
+    const tool = createLoadSchemaSectionsTool(chartType);
+    const writer = defaultModel.chatModel.bindTools([tool], { tool_choice: 'none' });
+    if (!offerSchemaSections) {
+      return { response: await writer.invoke(prompt) };
+    }
+
+    const firstResponse = await defaultModel.chatModel
+      .bindTools([tool], { tool_choice: 'auto' })
+      .invoke(prompt);
+    const toolCalls = firstResponse.tool_calls ?? [];
+    if (toolCalls.length === 0) {
+      return { response: firstResponse };
+    }
+
+    const requestedSections = toolCalls.map(({ args }) =>
+      filterSchemaSections(chartType, Array.isArray(args.sections) ? args.sections : [])
+    );
+    const loadedSchemaSections = filterSchemaSections(chartType, requestedSections.flat());
+    logger.debug(
+      `Loaded ${chartType} schema sections: ${loadedSchemaSections.join(', ') || 'none'}`
+    );
+
+    const schemaSectionMessages: BaseMessage[] = [
+      firstResponse,
+      ...toolCalls.map(
+        ({ id }, index) =>
+          new ToolMessage({
+            tool_call_id: id ?? '',
+            content: renderSchemaSections(chartType, requestedSections[index]),
+          })
+      ),
+    ];
+    const response = await writer.invoke([...prompt, ...schemaSectionMessages]);
+    return { response, schemaSections: { schemaSectionMessages, loadedSchemaSections } };
   };
 
   // Node: Generate configuration
@@ -197,59 +346,66 @@ export const createVisualizationGraph = async (
       .pop();
     const esqlQuery = lastGenerateEsqlAction?.query || state.esqlQuery;
 
-    // Build context from previous actions for retry attempts
-    const previousActionContext = state.actions
-      .filter((action) => isGenerateConfigAction(action) || isValidateConfigAction(action))
-      .map((action) => {
-        if (isGenerateConfigAction(action)) {
-          return `Previous generation attempt ${action.attempt}: ${
-            action.success ? 'SUCCESS' : `FAILED - ${action.error}`
-          }`;
-        }
-        if (isValidateConfigAction(action)) {
-          return `Validation attempt ${action.attempt}: ${
-            action.success ? 'SUCCESS' : `FAILED - ${action.error}`
-          }`;
-        }
-        return '';
-      })
-      .filter(Boolean)
-      .join('\n');
-
-    const additionalContext = previousActionContext
-      ? `Previous attempts:\n${previousActionContext}\n\nPlease fix the issues mentioned above.`
-      : undefined;
-
-    const prompt = createGenerateConfigPrompt({
-      nlQuery: state.nlQuery,
-      esqlQuery,
-      chartType: state.chartType,
-      schema: state.schema,
-      existingConfig: state.existingConfig,
-      additionalChartConfigInstructions,
-      additionalContext,
-    });
+    // On retries, replay the loaded schema sections, then the raw failed responses
+    // (without the injected data_source) and their errors.
+    const prompt = [
+      ...createGenerateConfigPrompt({
+        nlQuery: state.nlQuery,
+        esqlQuery,
+        columns: state.columns,
+        chartType: state.chartType,
+        existingConfig: state.existingConfig,
+        parsedExistingConfig: state.parsedExistingConfig,
+        preserveESQL: state.preserveESQL,
+        applyChartRules: state.applyChartRules,
+      }),
+      ...state.schemaSectionMessages,
+      ...formatRepairMessages({
+        authored: state.actions.filter(isGenerateConfigAction),
+        validated: addFailingSchemaContext({
+          chartType: state.chartType,
+          validated: state.actions.filter(isValidateConfigAction),
+          loadedSchemaSections: state.loadedSchemaSections,
+        }),
+        instructions: REPAIR_INSTRUCTIONS,
+      }),
+    ];
 
     let action: GenerateConfigAction;
+    let responseText: string | undefined;
+    let schemaSections: Partial<LoadedSchemaSections> = {};
     try {
-      // Invoke model without schema validation
-      const response = await defaultModel.chatModel.invoke(prompt);
-      const responseText = extractTextFromMessage(response);
+      const result = await invokeConfigAuthor({
+        chartType: state.chartType,
+        prompt,
+        offerSchemaSections: attempt === 1,
+      });
+      const { response } = result;
+      schemaSections = result.schemaSections ?? {};
+      responseText = extractTextFromMessage(response);
       const { config: configResponse, authoringNote } = parseConfigAuthoringResponse(responseText);
 
-      // Pin the validated ES|QL query before config validation. ES|QL generation owns the query;
-      // config generation only binds columns from it.
-      if (esqlQuery) {
-        for (const carrier of getEsqlDataSourceCarriers(configResponse)) {
+      // Pin the ES|QL query before config validation. ES|QL generation owns the query,
+      // and config generation only binds columns from it. Preserving ES|QL keeps
+      // each layer's existing data_source instead, so layers with different queries keep them.
+      const existingCarriers = state.preserveESQL
+        ? getEsqlDataSourceCarriers(state.parsedExistingConfig)
+        : [];
+      getEsqlDataSourceCarriers(configResponse).forEach((carrier, index) => {
+        const existingDataSource = (existingCarriers[index] ?? existingCarriers[0])?.data_source;
+        if (existingDataSource) {
+          carrier.data_source = existingDataSource;
+        } else if (esqlQuery) {
           carrier.data_source = { type: 'esql', query: esqlQuery };
         }
-      }
+      });
 
       action = {
         type: 'generate_config',
         success: true,
         config: configResponse,
         authoringNote,
+        response: responseText,
         attempt,
       };
     } catch (error) {
@@ -262,6 +418,7 @@ export const createVisualizationGraph = async (
       action = {
         type: 'generate_config',
         success: false,
+        response: responseText,
         attempt,
         error: errorMessage,
       };
@@ -270,6 +427,7 @@ export const createVisualizationGraph = async (
     return {
       currentAttempt: attempt,
       actions: [action],
+      ...schemaSections,
     };
   };
 
@@ -286,7 +444,8 @@ export const createVisualizationGraph = async (
         type: 'validate_config',
         success: false,
         attempt,
-        error: 'No configuration found to validate',
+        // Surface why generation failed (e.g. unparsable JSON) instead of a generic message.
+        error: lastGenerateAction?.error ?? 'No configuration found to validate',
       };
       return {
         actions: [action],
@@ -323,86 +482,13 @@ export const createVisualizationGraph = async (
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.warn(`Configuration validation failed: ${errorMessage}`);
 
+      const failingSchemaSections = getFailingSchemaSections(state.chartType, error);
       action = {
         type: 'validate_config',
         success: false,
         attempt,
         error: errorMessage,
-      };
-    }
-
-    return {
-      actions: [action],
-    };
-  };
-
-  // Node: Generate time range - ask the LLM to determine the appropriate time range
-  const generateTimeRangeNode = async (state: VisualizationState) => {
-    logger.debug('Generating time range for visualization');
-
-    const lastGenerateEsqlAction = [...state.actions]
-      .reverse()
-      .find((action): action is GenerateEsqlAction => action.type === 'generate_esql');
-    const esqlQuery = lastGenerateEsqlAction?.query || state.esqlQuery;
-
-    let action: GenerateTimeRangeAction;
-    try {
-      const timeRangeModel = defaultModel.chatModel.withStructuredOutput(
-        z.object({
-          from: z
-            .string()
-            .describe(
-              'Start of the time range in Elasticsearch date math format (e.g., "now-24h", "now-7d", "now-1M")'
-            ),
-          to: z
-            .string()
-            .describe('End of the time range in Elasticsearch date math format (e.g., "now")'),
-        }),
-        { name: 'determine_time_range' }
-      );
-
-      const result = await timeRangeModel.invoke([
-        [
-          'system',
-          `You are an expert at determining appropriate time ranges for Elasticsearch visualizations.
-Given a user's natural language query and the ES|QL query that was generated, determine the most appropriate time range for the visualization.
-
-Use Elasticsearch date math expressions for both "from" and "to" values:
-- "now-15m" for last 15 minutes
-- "now-1h" for last hour
-- "now-24h" for last 24 hours
-- "now-7d" for last 7 days
-- "now-30d" for last 30 days
-- "now-1y" for last year
-- "now" for the current time
-
-The "to" value should almost always be "now" unless the user specifies a specific end time.
-Choose a "from" value that best matches the intent of the query. If unsure, default to "now-24h".`,
-        ],
-        [
-          'human',
-          `User query: ${state.nlQuery}
-
-ES|QL query: ${esqlQuery}
-
-What is the most appropriate time range for this visualization?`,
-        ],
-      ]);
-
-      logger.debug(`Generated time range: ${result.from} to ${result.to}`);
-      action = {
-        type: 'generate_time_range',
-        success: true,
-        timeRange: { from: result.from, to: result.to },
-      };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.warn(`Failed to generate time range, defaulting to now-24h: ${errorMessage}`);
-      action = {
-        type: 'generate_time_range',
-        success: false,
-        timeRange: { from: 'now-24h', to: 'now' },
-        error: errorMessage,
+        ...(failingSchemaSections.length > 0 ? { failingSchemaSections } : {}),
       };
     }
 
@@ -415,9 +501,6 @@ What is the most appropriate time range for this visualization?`,
   const finalizeNode = async (state: VisualizationState) => {
     const lastValidateAction = [...state.actions].reverse().find(isValidateConfigAction);
     const lastGenerateEsqlAction = [...state.actions].reverse().find(isGenerateEsqlAction);
-    const lastTimeRangeAction = [...state.actions]
-      .reverse()
-      .find((action): action is GenerateTimeRangeAction => action.type === 'generate_time_range');
 
     // Surface an ES|QL resolution failure (a query that was never generated, so
     // no config was attempted) so the caller gets the real root cause.
@@ -433,7 +516,6 @@ What is the most appropriate time range for this visualization?`,
       authoringNote: lastValidateAction?.success ? lastValidateAction.authoringNote ?? null : null,
       error: lastValidateAction?.success ? null : lastValidateAction?.error || esqlError,
       esqlQuery: lastGenerateEsqlAction?.query || state.esqlQuery,
-      timeRange: lastTimeRangeAction?.timeRange ?? null,
     };
   };
 
@@ -441,14 +523,8 @@ What is the most appropriate time range for this visualization?`,
   const shouldRetryRouter = (state: VisualizationState): string => {
     const lastValidateAction = [...state.actions].reverse().find(isValidateConfigAction);
 
-    // Success case - optionally generate a time range before finalizing
     if (lastValidateAction?.success) {
-      if (includeTimeRange) {
-        logger.debug('Configuration validated successfully, generating time range');
-        return GENERATE_TIME_RANGE_NODE;
-      }
-
-      logger.debug('Configuration validated successfully, skipping time range generation');
+      logger.debug('Configuration validated successfully, finalizing');
       return 'finalize';
     }
 
@@ -484,7 +560,7 @@ What is the most appropriate time range for this visualization?`,
   const shouldGenerateESQLRouter = (state: VisualizationState): string => {
     if (state.esqlQuery) {
       logger.debug('Using provided ES|QL query');
-      return GENERATE_CONFIG_NODE;
+      return RESOLVE_COLUMNS_NODE;
     }
 
     logger.debug('No ES|QL query provided, generating ES|QL query');
@@ -495,15 +571,16 @@ What is the most appropriate time range for this visualization?`,
   const graph = new StateGraph(VisualizationStateAnnotation)
     // Add nodes
     .addNode(GENERATE_ESQL_NODE, generateESQLNode)
+    .addNode(RESOLVE_COLUMNS_NODE, resolveColumnsNode)
     .addNode(GENERATE_CONFIG_NODE, generateConfigNode)
     .addNode(VALIDATE_CONFIG_NODE, validateConfigNode)
-    .addNode(GENERATE_TIME_RANGE_NODE, generateTimeRangeNode)
     .addNode('finalize', finalizeNode)
     // Add edges
     .addConditionalEdges('__start__', shouldGenerateESQLRouter, {
-      [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
+      [RESOLVE_COLUMNS_NODE]: RESOLVE_COLUMNS_NODE,
       [GENERATE_ESQL_NODE]: GENERATE_ESQL_NODE,
     })
+    .addEdge(RESOLVE_COLUMNS_NODE, GENERATE_CONFIG_NODE)
     .addConditionalEdges(GENERATE_ESQL_NODE, afterGenerateEsqlRouter, {
       [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
       finalize: 'finalize',
@@ -511,10 +588,8 @@ What is the most appropriate time range for this visualization?`,
     .addEdge(GENERATE_CONFIG_NODE, VALIDATE_CONFIG_NODE)
     .addConditionalEdges(VALIDATE_CONFIG_NODE, shouldRetryRouter, {
       [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
-      [GENERATE_TIME_RANGE_NODE]: GENERATE_TIME_RANGE_NODE,
       finalize: 'finalize',
     })
-    .addEdge(GENERATE_TIME_RANGE_NODE, 'finalize')
     .addEdge('finalize', '__end__')
     .compile();
 

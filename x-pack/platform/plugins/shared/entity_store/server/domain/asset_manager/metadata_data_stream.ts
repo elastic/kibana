@@ -7,12 +7,21 @@
 
 import {
   getEntityIndexPattern,
+  getLegacySecurityEntityIndexPattern,
   ENTITY_SCHEMA_VERSION_V2,
   ENTITY_METADATA,
 } from '../../../common/domain/entity_index';
 
 export const getMetadataEntitiesDataStreamName = (namespace: string) =>
   getEntityIndexPattern({
+    schemaVersion: ENTITY_SCHEMA_VERSION_V2,
+    dataset: ENTITY_METADATA,
+    namespace,
+  });
+
+/** @deprecated Legacy Security-scoped metadata stream; used only until migration deletes it. */
+export const getLegacySecurityMetadataEntitiesDataStreamName = (namespace: string) =>
+  getLegacySecurityEntityIndexPattern({
     schemaVersion: ENTITY_SCHEMA_VERSION_V2,
     dataset: ENTITY_METADATA,
     namespace,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { signalEntrySchema } from './common_schemas';
+import { blastRadiusEntrySchema, causalFeatureSchema, signalEntrySchema } from './common_schemas';
 
 const metadata = {
   detection_id: 'det-1',
@@ -60,9 +60,9 @@ describe('signalEntrySchema verdict/evidence consistency', () => {
     expect(parseSignal({ verdict: 'refutes', evidence: null }).success).toBe(false);
   });
 
-  it('rejects inconclusive with found evidence', () => {
+  it('accepts inconclusive with found evidence (rate-flat rows)', () => {
     expect(parseSignal({ verdict: 'inconclusive', evidence: evidence('found') }).success).toBe(
-      false
+      true
     );
   });
 
@@ -70,6 +70,26 @@ describe('signalEntrySchema verdict/evidence consistency', () => {
     expect(parseSignal({ verdict: 'inconclusive', evidence: evidence('empty') }).success).toBe(
       true
     );
+  });
+
+  it('rejects inconclusive when evidence is omitted', () => {
+    expect(parseSignal({ verdict: 'inconclusive' }).success).toBe(false);
+  });
+
+  it('rejects inconclusive when evidence is null', () => {
+    expect(parseSignal({ verdict: 'inconclusive', evidence: null }).success).toBe(false);
+  });
+
+  it('accepts evidence carrying the executed time_range', () => {
+    expect(
+      parseSignal({
+        verdict: 'confirms',
+        evidence: {
+          ...evidence('found'),
+          time_range: { from: '2026-07-20T07:00:00.000Z', to: '2026-07-20T08:00:00.000Z' },
+        },
+      }).success
+    ).toBe(true);
   });
 
   it('rejects not_checked with query evidence', () => {
@@ -80,5 +100,166 @@ describe('signalEntrySchema verdict/evidence consistency', () => {
 
   it('accepts not_checked when evidence is omitted', () => {
     expect(parseSignal({ verdict: 'not_checked' }).success).toBe(true);
+  });
+});
+
+describe('topology classification compatibility', () => {
+  it.each([
+    {
+      type: 'dependency',
+      feature_id: 'orders-db',
+      source: 'orders-api',
+      target: 'postgres',
+      stream_name: 'logs.orders',
+    },
+    {
+      type: 'infrastructure',
+      feature_id: 'orders-cluster',
+      stream_name: 'logs.orders',
+    },
+    {
+      type: 'entity',
+      feature_id: 'orders-api',
+      name: 'orders-api',
+      stream_name: 'logs.orders',
+    },
+  ])('accepts legacy $type blast-radius rows without subtype', (entry) => {
+    expect(blastRadiusEntrySchema.safeParse(entry).success).toBe(true);
+  });
+
+  it('accepts legacy causal features without classification', () => {
+    expect(
+      causalFeatureSchema.safeParse({
+        feature_id: 'orders-api',
+        name: 'orders-api',
+        stream_name: 'logs.orders',
+      }).success
+    ).toBe(true);
+  });
+});
+
+describe('signalEntrySchema effect/outage_paths guard', () => {
+  it('omitting effect is valid on every verdict', () => {
+    expect(parseSignal({ verdict: 'refutes', evidence: evidence('empty') }).success).toBe(true);
+    expect(
+      parseSignal({ verdict: 'confirms', evidence: evidence('found'), effect: undefined }).success
+    ).toBe(true);
+  });
+
+  it('accepts effect "none" on every verdict', () => {
+    expect(
+      parseSignal({ verdict: 'refutes', evidence: evidence('empty'), effect: 'none' }).success
+    ).toBe(true);
+    expect(parseSignal({ verdict: 'not_checked', effect: 'none' }).success).toBe(true);
+  });
+
+  it.each(['degradation', 'outage', 'exposure'] as const)(
+    'rejects effect "%s" on refutes',
+    (effect) => {
+      const result = parseSignal({
+        verdict: 'refutes',
+        evidence: evidence('empty'),
+        effect,
+        ...(effect === 'outage' ? { outage_paths: ['checkout'] } : {}),
+      });
+      expect(result.success).toBe(false);
+    }
+  );
+
+  it.each(['degradation', 'outage', 'exposure'] as const)(
+    'rejects effect "%s" on inconclusive',
+    (effect) => {
+      expect(
+        parseSignal({ verdict: 'inconclusive', evidence: evidence('empty'), effect }).success
+      ).toBe(false);
+    }
+  );
+
+  it.each(['degradation', 'outage', 'exposure'] as const)(
+    'rejects effect "%s" on not_checked',
+    (effect) => {
+      expect(parseSignal({ verdict: 'not_checked', effect }).success).toBe(false);
+    }
+  );
+
+  it('accepts effect "degradation" on confirms', () => {
+    expect(
+      parseSignal({ verdict: 'confirms', evidence: evidence('found'), effect: 'degradation' })
+        .success
+    ).toBe(true);
+  });
+
+  it('accepts effect "degradation" on off_topic with a concrete observed error', () => {
+    expect(
+      parseSignal({ verdict: 'off_topic', evidence: evidence('found'), effect: 'degradation' })
+        .success
+    ).toBe(true);
+  });
+
+  it('accepts effect "exposure" on off_topic with a concrete observed error', () => {
+    expect(
+      parseSignal({ verdict: 'off_topic', evidence: evidence('found'), effect: 'exposure' }).success
+    ).toBe(true);
+  });
+
+  it('accepts effect "outage" on off_topic with a concrete observed error, given outage_paths', () => {
+    expect(
+      parseSignal({
+        verdict: 'off_topic',
+        evidence: evidence('found'),
+        effect: 'outage',
+        outage_paths: ['checkout'],
+      }).success
+    ).toBe(true);
+  });
+
+  it('rejects effect "outage" on off_topic with no outage_paths entries', () => {
+    expect(
+      parseSignal({
+        verdict: 'off_topic',
+        evidence: evidence('found'),
+        effect: 'outage',
+        outage_paths: [],
+      }).success
+    ).toBe(false);
+  });
+
+  it('accepts effect "exposure" on confirms', () => {
+    expect(
+      parseSignal({ verdict: 'confirms', evidence: evidence('found'), effect: 'exposure' }).success
+    ).toBe(true);
+  });
+
+  it('rejects effect "outage" with no outage_paths entries', () => {
+    expect(
+      parseSignal({
+        verdict: 'confirms',
+        evidence: evidence('found'),
+        effect: 'outage',
+        outage_paths: [],
+      }).success
+    ).toBe(false);
+  });
+
+  it('accepts effect "outage" with outage_paths entries', () => {
+    expect(
+      parseSignal({
+        verdict: 'confirms',
+        evidence: evidence('found'),
+        effect: 'outage',
+        outage_paths: ['checkout', 'balance'],
+      }).success
+    ).toBe(true);
+  });
+
+  it('rejects outage_paths entries when effect is not "outage"', () => {
+    expect(
+      parseSignal({
+        verdict: 'confirms',
+        evidence: evidence('found'),
+        effect: 'degradation',
+        outage_paths: ['checkout'],
+      }).success
+    ).toBe(false);
   });
 });

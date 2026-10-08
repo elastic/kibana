@@ -7,7 +7,8 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { EuiSpacer, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useKibana } from '../../../../shared_imports';
 
 import { i18nTexts } from './i18n_texts';
@@ -44,12 +45,7 @@ export const PipelineFormError: React.FunctionComponent<Props> = ({ error }) => 
   }, [services, error]);
   return (
     <>
-      <EuiCallOut
-        title={i18nTexts.title}
-        color="danger"
-        iconType="warning"
-        data-test-subj="savePipelineError"
-      >
+      <KbnDangerCallout title={i18nTexts.title} data-test-subj="savePipelineError">
         {results.length > 1 ? (
           <ul>
             {results.map((e, idx) => (
@@ -94,7 +90,7 @@ export const PipelineFormError: React.FunctionComponent<Props> = ({ error }) => 
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : undefined}
-      </EuiCallOut>
+      </KbnDangerCallout>
       <EuiSpacer size="m" />
     </>
   );

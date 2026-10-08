@@ -15,7 +15,12 @@ import {
 } from '@kbn/cases-plugin/common/types/domain';
 import type { ConnectorJiraTypeFields } from '@kbn/cases-plugin/common/types/domain';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
-import { getPostCaseRequest, postCaseResp, defaultUser } from '../../../../common/lib/mock';
+import {
+  getPostCaseRequest,
+  postCaseResp,
+  defaultUser,
+  userActionSourceUser,
+} from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
   createCase,
@@ -150,6 +155,7 @@ export default ({ getService }: FtrProviderContext): void => {
           created_by: defaultUser,
           comment_id: null,
           owner: 'securitySolutionFixture',
+          source: userActionSourceUser,
           payload: {
             description: postedCase.description,
             title: postedCase.title,

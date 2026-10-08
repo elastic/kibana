@@ -23,7 +23,7 @@ const ruleCreatedEvent: RuleCreatedEvent = {
 };
 
 // Workflows only ever see the projected rule reference, never the full payload.
-const projectedWorkflowPayload = { rule: { ruleId: 'rule-1', spaceId: 'my-space' } };
+const projectedWorkflowPayload = { rule: { ruleId: 'rule-1', spaceId: 'my-space', tags: [] } };
 
 describe('RuleWorkflowSubscriber', () => {
   let bus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
@@ -69,10 +69,23 @@ describe('RuleWorkflowSubscriber', () => {
   });
 
   describe('event dispatch', () => {
+    it('skips the workflow trigger for changes made by the internal user', async () => {
+      subscriber.start();
+
+      await handlerFor(bus, RULE_CREATED_EVENT_TYPE)(ruleCreatedEvent, {
+        request,
+        origin: 'internal',
+      });
+
+      expect(workflowsExtensions.getClient).not.toHaveBeenCalled();
+      expect(mockEmitEvent).not.toHaveBeenCalled();
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
     it("forwards context.request through WorkflowService, with the binding's triggerId and the event payload", async () => {
       subscriber.start();
 
-      await handlerFor(bus, RULE_CREATED_EVENT_TYPE)(ruleCreatedEvent, { request });
+      await handlerFor(bus, RULE_CREATED_EVENT_TYPE)(ruleCreatedEvent, { request, origin: 'user' });
 
       // The acting user's request must reach getClient so the workflow runs with
       // the same credentials/space that changed the rule (RNA #504 requirement 3).
@@ -87,7 +100,7 @@ describe('RuleWorkflowSubscriber', () => {
       subscriber.start();
 
       await expect(
-        handlerFor(bus, RULE_CREATED_EVENT_TYPE)(ruleCreatedEvent, { request })
+        handlerFor(bus, RULE_CREATED_EVENT_TYPE)(ruleCreatedEvent, { request, origin: 'user' })
       ).resolves.toBeUndefined();
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);

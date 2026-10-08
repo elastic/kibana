@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
+import { KbnDangerCallout, KbnSuccessCallout } from '@kbn/ui-callout';
 import {
   fieldLimitMitigationFailedMessage,
   fieldLimitMitigationFailedMessageDescription,
@@ -63,57 +63,47 @@ export function SuccessCallout() {
   });
 
   return (
-    <EuiCallOut
+    <KbnSuccessCallout
       title={fieldLimitMitigationSuccessMessage}
-      color="success"
-      iconType="checkCircleFill"
       data-test-subj="datasetQualityDetailsDegradedFlyoutNewLimitSetSuccessCallout"
-    >
-      <EuiLink
-        data-test-subj="datasetQualityDetailsDegradedFlyoutNewLimitSetCheckComponentTemplate"
-        href={componentTemplateUrl}
-        target="_blank"
-        color="success"
-      >
-        {fieldLimitMitigationSuccessComponentTemplateLinkText}
-      </EuiLink>
-    </EuiCallOut>
+      actionProps={{
+        primary: {
+          'data-test-subj': 'datasetQualityDetailsDegradedFlyoutNewLimitSetCheckComponentTemplate',
+          href: componentTemplateUrl,
+          target: '_blank',
+          children: fieldLimitMitigationSuccessComponentTemplateLinkText,
+        },
+      }}
+    />
   );
 }
 
 export function ManualRolloverCallout() {
   const { triggerRollover, isRolloverInProgress } = useQualityIssues();
   return (
-    <EuiCallOut
+    <KbnDangerCallout
       title={fieldLimitMitigationPartiallyFailedMessage}
-      color="danger"
-      iconType="checkCircleFill"
-    >
-      <p>{fieldLimitMitigationPartiallyFailedMessageDescription}</p>
-      <EuiButton
-        data-test-subj="datasetQualityNewLimitSetManualRollover"
-        onClick={triggerRollover}
-        iconType="external"
-        size="s"
-        title={fieldLimitMitigationRolloverButton}
-        color="danger"
-        isLoading={isRolloverInProgress}
-      >
-        {fieldLimitMitigationRolloverButton}
-      </EuiButton>
-    </EuiCallOut>
+      text={fieldLimitMitigationPartiallyFailedMessageDescription}
+      actionProps={{
+        primary: {
+          'data-test-subj': 'datasetQualityNewLimitSetManualRollover',
+          onClick: triggerRollover,
+          iconType: 'external',
+          title: fieldLimitMitigationRolloverButton,
+          isLoading: isRolloverInProgress,
+          children: fieldLimitMitigationRolloverButton,
+        },
+      }}
+    />
   );
 }
 
 export function ErrorCallout() {
   return (
-    <EuiCallOut
+    <KbnDangerCallout
       title={fieldLimitMitigationFailedMessage}
-      color="danger"
-      iconType="error"
       data-test-subj="datasetQualityDetailsNewFieldLimitErrorCallout"
-    >
-      <p>{fieldLimitMitigationFailedMessageDescription}</p>
-    </EuiCallOut>
+      text={fieldLimitMitigationFailedMessageDescription}
+    />
   );
 }

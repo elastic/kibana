@@ -138,7 +138,12 @@ export const BaseDefaultableFields = lazySchema(() =>
     /**
      * Array defining the automated actions (notifications) taken when alerts are generated.
      */
-    actions: z.array(RuleAction).optional(),
+    actions: z
+      .array(RuleAction)
+      .optional()
+      .describe(
+        'Array defining the automated actions (notifications) taken when alerts are generated.'
+      ),
     exceptions_list: z.array(RuleExceptionList).optional(),
     author: RuleAuthorArray.optional(),
     false_positives: RuleFalsePositiveArray.optional(),
@@ -153,7 +158,12 @@ export const BaseDefaultableFields = lazySchema(() =>
 > The value of `required_fields` does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use `required_fields` as an informational property to document the fields that the rule expects to be present in the data.
 
       */
-    required_fields: z.array(RequiredFieldInput).optional(),
+    required_fields: z
+      .array(RequiredFieldInput)
+      .optional()
+      .describe(
+        'Elasticsearch fields and their types that need to be present for the rule to function.\n> info\n> The value of `required_fields` does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use `required_fields` as an informational property to document the fields that the rule expects to be present in the data.\n'
+      ),
   })
 );
 export type BaseDefaultableFields = z.infer<typeof BaseDefaultableFields>;
@@ -181,8 +191,26 @@ export const ResponseFields = lazySchema(() =>
     rule_source: RuleSource,
     updated_at: z.string().datetime(),
     updated_by: z.string(),
+    /**
+     * The user profile UID of the user who last updated the rule. Only present when the rule was updated through an authenticated Kibana session. Resolve it to a display name with the user profiles API.
+     */
+    updated_by_profile_uid: z
+      .string()
+      .optional()
+      .describe(
+        'The user profile UID of the user who last updated the rule. Only present when the rule was updated through an authenticated Kibana session. Resolve it to a display name with the user profiles API.'
+      ),
     created_at: z.string().datetime(),
     created_by: z.string(),
+    /**
+     * The user profile UID of the user who created the rule. Only present when the rule was created through an authenticated Kibana session. Resolve it to a display name with the user profiles API.
+     */
+    created_by_profile_uid: z
+      .string()
+      .optional()
+      .describe(
+        'The user profile UID of the user who created the rule. Only present when the rule was created through an authenticated Kibana session. Resolve it to a display name with the user profiles API.'
+      ),
     revision: RuleRevision,
     required_fields: RequiredFieldArray,
     execution_summary: RuleExecutionSummary.optional(),
@@ -230,12 +258,12 @@ export const EqlRequiredFields = lazySchema(() =>
     /**
      * Rule type
      */
-    type: z.literal('eql'),
+    type: z.literal('eql').describe('Rule type'),
     query: RuleQuery,
     /**
      * Query language to use
      */
-    language: EqlQueryLanguage,
+    language: EqlQueryLanguage.describe('Query language to use'),
   })
 );
 export type EqlRequiredFields = z.infer<typeof EqlRequiredFields>;
@@ -281,7 +309,7 @@ export const QueryRuleRequiredFields = lazySchema(() =>
     /**
      * Rule type
      */
-    type: z.literal('query'),
+    type: z.literal('query').describe('Rule type'),
   })
 );
 export type QueryRuleRequiredFields = z.infer<typeof QueryRuleRequiredFields>;
@@ -343,7 +371,7 @@ export const SavedQueryRuleRequiredFields = lazySchema(() =>
     /**
      * Rule type
      */
-    type: z.literal('saved_query'),
+    type: z.literal('saved_query').describe('Rule type'),
     saved_id: SavedQueryId,
   })
 );
@@ -413,7 +441,7 @@ export const ThresholdRuleRequiredFields = lazySchema(() =>
     /**
      * Rule type
      */
-    type: z.literal('threshold'),
+    type: z.literal('threshold').describe('Rule type'),
     query: RuleQuery,
     threshold: Threshold,
   })
@@ -484,7 +512,7 @@ export const ThreatMatchRuleRequiredFields = lazySchema(() =>
     /**
      * Rule type
      */
-    type: z.literal('threat_match'),
+    type: z.literal('threat_match').describe('Rule type'),
     query: RuleQuery,
     threat_query: ThreatQuery,
     threat_mapping: ThreatMapping,
@@ -562,7 +590,7 @@ export const MachineLearningRuleRequiredFields = lazySchema(() =>
     /**
      * Rule type
      */
-    type: z.literal('machine_learning'),
+    type: z.literal('machine_learning').describe('Rule type'),
     anomaly_threshold: AnomalyThreshold,
     machine_learning_job_id: MachineLearningJobId,
   })
@@ -616,7 +644,7 @@ export const NewTermsRuleRequiredFields = lazySchema(() =>
     /**
      * Rule type
      */
-    type: z.literal('new_terms'),
+    type: z.literal('new_terms').describe('Rule type'),
     query: RuleQuery,
     new_terms_fields: NewTermsFields,
     history_window_start: HistoryWindowStart,
@@ -686,7 +714,7 @@ export const EsqlRuleRequiredFields = lazySchema(() =>
     /**
      * Rule type
      */
-    type: z.literal('esql'),
+    type: z.literal('esql').describe('Rule type'),
     language: EsqlQueryLanguage,
     query: RuleQuery,
   })

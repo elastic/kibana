@@ -22,10 +22,23 @@ export const DEFAULT_WORKFLOW_EXECUTIONS_TABLE_COLUMNS = [
 export type WorkflowExecutionsTableColumnId =
   (typeof DEFAULT_WORKFLOW_EXECUTIONS_TABLE_COLUMNS)[number];
 
+/**
+ * Fixed widths for predictable columns so Workflow can absorb leftover space.
+ * Restored to the pre-tightening 250px spacing for a roomier table layout.
+ */
+export const EXECUTIONS_TABLE_COLUMN_WIDTH_TAGS = 250;
+export const EXECUTIONS_TABLE_COLUMN_WIDTH_TRIGGER = 250;
+export const EXECUTIONS_TABLE_COLUMN_WIDTH_STARTED = 250;
+export const EXECUTIONS_TABLE_COLUMN_WIDTH_DURATION = 250;
+
+/** Floor width so fixed columns + Actions + a usable Workflow column (~200px) still fit; below this we scroll. */
+export const EXECUTIONS_TABLE_MIN_WIDTH_PX = 1300;
+
 export interface WorkflowExecutionsGridColumnSettings {
   display: string;
   isResizable?: boolean;
   initialWidth?: number;
+  schema?: EuiDataGridColumn['schema'];
 }
 
 export const WORKFLOW_EXECUTIONS_TABLE_COLUMN_SETTINGS: Record<
@@ -42,25 +55,26 @@ export const WORKFLOW_EXECUTIONS_TABLE_COLUMN_SETTINGS: Record<
     display: i18n.translate('workflowsManagement.executionsPage.column.tags', {
       defaultMessage: 'Tags',
     }),
-    initialWidth: 250,
+    initialWidth: EXECUTIONS_TABLE_COLUMN_WIDTH_TAGS,
   },
   triggers: {
     display: i18n.translate('workflowsManagement.executionsPage.column.trigger', {
       defaultMessage: 'Trigger',
     }),
-    initialWidth: 250,
+    initialWidth: EXECUTIONS_TABLE_COLUMN_WIDTH_TRIGGER,
   },
   startedAt: {
     display: i18n.translate('workflowsManagement.executionsPage.column.started', {
       defaultMessage: 'Started',
     }),
-    initialWidth: 250,
+    initialWidth: EXECUTIONS_TABLE_COLUMN_WIDTH_STARTED,
   },
   duration: {
     display: i18n.translate('workflowsManagement.executionsPage.column.duration', {
       defaultMessage: 'Duration',
     }),
-    initialWidth: 250,
+    initialWidth: EXECUTIONS_TABLE_COLUMN_WIDTH_DURATION,
+    schema: 'numeric',
   },
 };
 
@@ -86,6 +100,7 @@ export const buildWorkflowExecutionsGridColumns = (
       isSortable: SORTABLE_COLUMNS.has(columnId),
       initialWidth: columnWidths[columnId] ?? settings.initialWidth,
       isResizable: settings.isResizable,
+      schema: settings.schema,
     };
 
     return column;

@@ -148,6 +148,7 @@ describe('bulkEnableRules', () => {
           attributes: expect.objectContaining({
             enabled: true,
             lastEnabledAt: '2019-02-12T21:01:22.479Z',
+            updatedByProfileUid: null,
           }),
         }),
         expect.objectContaining({
@@ -155,6 +156,7 @@ describe('bulkEnableRules', () => {
           attributes: expect.objectContaining({
             enabled: true,
             lastEnabledAt: '2019-02-12T21:01:22.479Z',
+            updatedByProfileUid: null,
           }),
         }),
       ]),
@@ -410,7 +412,7 @@ describe('bulkEnableRules', () => {
 
     const result = await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
 
-    expect(unsecuredSavedObjectsClient.bulkCreate).toBeCalledWith([], { overwrite: true });
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith([], { overwrite: true });
     expect(result).toStrictEqual({
       errors: [
         {
@@ -453,6 +455,7 @@ describe('bulkEnableRules', () => {
           attributes: expect.objectContaining({
             enabled: true,
             lastEnabledAt: '2019-02-12T21:01:22.479Z',
+            updatedByProfileUid: null,
           }),
         }),
       ]),
@@ -496,6 +499,7 @@ describe('bulkEnableRules', () => {
           attributes: expect.objectContaining({
             enabled: true,
             lastEnabledAt: '2019-02-12T21:01:22.479Z',
+            updatedByProfileUid: null,
           }),
         }),
       ]),
@@ -590,7 +594,7 @@ describe('bulkEnableRules', () => {
       taskIdsFailedToBeEnabled: [],
     });
 
-    expect(logger.error).toBeCalledWith(
+    expect(logger.error).toHaveBeenCalledWith(
       'Failure to clear flapping history from rule ["id1","id2"] - something went wrong!'
     );
   });
@@ -799,12 +803,14 @@ describe('bulkEnableRules', () => {
 
       const result = await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
 
-      expect(logger.debug).toBeCalledTimes(1);
-      expect(logger.debug).toBeCalledWith(
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenCalledWith(
         'Successfully enabled schedules for underlying tasks: id1'
       );
-      expect(logger.error).toBeCalledTimes(1);
-      expect(logger.error).toBeCalledWith('Failure to enable schedules for underlying tasks: id2');
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failure to enable schedules for underlying tasks: id2'
+      );
 
       expect(result).toStrictEqual({
         errors: [],
@@ -824,8 +830,8 @@ describe('bulkEnableRules', () => {
 
       const result = await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
 
-      expect(logger.error).toBeCalledTimes(1);
-      expect(logger.error).toBeCalledWith(
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(
         'Failure to enable schedules for underlying tasks: id1, id2. TaskManager bulkEnable failed with Error: UPS'
       );
 
@@ -880,11 +886,11 @@ describe('bulkEnableRules', () => {
       expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkEnable).toHaveBeenCalledWith(['id1']);
 
-      expect(logger.debug).toBeCalledTimes(1);
-      expect(logger.debug).toBeCalledWith(
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenCalledWith(
         'Successfully enabled schedules for underlying tasks: id1'
       );
-      expect(logger.error).toBeCalledTimes(0);
+      expect(logger.error).toHaveBeenCalledTimes(0);
     });
 
     test('should schedule task when scheduledTaskId is defined but task with that ID does not', async () => {
@@ -1121,7 +1127,7 @@ describe('bulkEnableRules', () => {
         throw new Error('Unauthorized');
       });
 
-      await expect(rulesClient.bulkEnableRules({ filter: 'fake_filter' })).rejects.toThrowError(
+      await expect(rulesClient.bulkEnableRules({ filter: 'fake_filter' })).rejects.toThrow(
         'Unauthorized'
       );
 
@@ -1134,9 +1140,7 @@ describe('bulkEnableRules', () => {
         throw new Error('Error');
       });
 
-      await expect(rulesClient.bulkEnableRules({ filter: 'fake_filter' })).rejects.toThrowError(
-        'Error'
-      );
+      await expect(rulesClient.bulkEnableRules({ filter: 'fake_filter' })).rejects.toThrow('Error');
 
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_enable');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('failure');

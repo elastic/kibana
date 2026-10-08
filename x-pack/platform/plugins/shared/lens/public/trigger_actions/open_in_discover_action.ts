@@ -29,7 +29,7 @@ export const createOpenInDiscoverAction = (
     type: ACTION_OPEN_IN_DISCOVER,
     id: ACTION_OPEN_IN_DISCOVER,
     order: 20, // right before Inspect which is 19
-    getIconType: () => 'discoverApp',
+    getIconType: () => 'productDiscover',
     getDisplayName: () =>
       i18n.translate('xpack.lens.action.exploreInDiscover', {
         defaultMessage: 'Explore in Discover',

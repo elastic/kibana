@@ -324,8 +324,8 @@ workflows_management/
 ### Local Development
 
 1. Enable the feature flag in `kibana.dev.yml`
-2. Start Elasticsearch: `yarn es snapshot`
-3. Start Kibana: `yarn start`
+2. Start Elasticsearch: `pnpm es snapshot`
+3. Start Kibana: `pnpm start`
 4. Navigate to `/app/workflows`
 
 ### Event-driven custom trigger `on` options
@@ -341,15 +341,15 @@ Registered (non-built-in) triggers may set optional flags under `triggers[].on` 
 
 ```bash
 # Run unit tests
-yarn test:jest src/platform/plugins/shared/workflows_management
+pnpm test:jest src/platform/plugins/shared/workflows_management
 # Running a specific test
-yarn test:jest -- $path # (e.g. src/platform/plugins/shared/workflows_management/public/widgets/workflow_yaml_editor/lib/snippets/insert_trigger_snippet.test.ts)
+pnpm test:jest -- $path # (e.g. src/platform/plugins/shared/workflows_management/public/widgets/workflow_yaml_editor/lib/snippets/insert_trigger_snippet.test.ts)
 
 # Run integration tests
-yarn test:jest_integration src/platform/plugins/shared/workflows_management
+pnpm test:jest_integration src/platform/plugins/shared/workflows_management
 
 # Run FTR tests (if available)
-yarn test:ftr --config x-pack/test/workflows_management_api_integration/config.ts
+pnpm test:ftr --config x-pack/test/workflows_management_api_integration/config.ts
 ```
 
 ### Authentication & Authorization
@@ -363,6 +363,17 @@ All API endpoints require authentication. The plugin integrates with Kibana's se
 
 Workflows are space-aware and respect Kibana Spaces boundaries.
 
+### Queryable execution data
+
+The managed data views for `.workflows-executions*` and `.workflows-step-executions*` use the Workflows feature privileges to provide space-scoped access with DLS and FLS.
+
+Elasticsearch index privileges are additive. A role or API key with unrestricted `read` or `all` on `*` or either execution index pattern is not limited by the Workflows DLS and FLS grant:
+
+- `read` can access execution documents from all spaces and all fields.
+- `all` can also modify or delete execution data.
+
+For least-privilege access, grant the Workflows feature privilege for the required spaces without a direct Elasticsearch index privilege on `*` or `.workflows-*`.
+
 ---
 
 ## Additional Resources
@@ -373,3 +384,123 @@ Workflows are space-aware and respect Kibana Spaces boundaries.
 ---
 
 **Plugin Owner**: `@elastic/workflows-eng`
+
+## Workflow access control
+
+Workflow access control is in **technical preview**. It may change or be removed
+in a future release and is not covered by the support SLA.
+
+### Known limitation: queryable execution data
+
+Workflow ACLs apply to the Workflows UI and APIs. They do not restrict direct
+Elasticsearch queries of `.workflows-executions*` or `.workflows-step-executions*`
+when those indices are available as queryable hidden indices. This includes
+queries from Discover, Lens, ES|QL, and the Elasticsearch API.
+
+The Read Workflow Execution privilege, included in Workflows Read, can grant
+access to this data within a space. Those Elasticsearch grants filter by space,
+managed status, and allowed fields, but do not check the workflow owner or ACL.
+No separate index grant is needed for this path. Explicit index grants can
+provide broader access under Elasticsearch authorization rules.
+
+For example, Alice makes workflow X private and does not grant Bob access. Bob
+cannot open X or its execution history through the Workflows UI or APIs. If Bob
+has Read Workflow Execution in that space, he can still query the permitted
+execution and step fields through Elasticsearch. Marking an index as hidden does
+not enforce the workflow ACL.
+
+This is a known technical preview limitation. Enforcing workflow ACLs for
+queryable execution data is planned follow-up work. Until then, do not rely on
+private workflow access to keep execution data confidential from users who can
+query these indices.
+
+See the queryable execution data changes in
+[Kibana #284860](https://github.com/elastic/kibana/pull/284860) and
+[Elasticsearch #156669](https://github.com/elastic/elasticsearch/pull/156669).
+
+### Access model
+
+The workflow Access control dialog uses `@kbn/entity-access-control` and
+`@kbn/entity-access-control-ui`. Its ACL has the same field structure as Agent
+Builder conversations: `access_mode` and `entries` with `type`, profile `id`,
+`role`, and server-assigned `added_at`. The workflow stores the owner in `owner_id`.
+Save a new workflow before you change its access controls. Access controls are stored on the workflow document.
+Open Access control from the workflow header.
+
+| Role | View | Run | Edit and soft-delete | Change access |
+| --- | --- | --- | --- | --- |
+| Administrator | Yes | Requires owner or ACL access | Requires owner or Editor access | Yes |
+| Owner | Yes | Yes | Yes | Yes |
+| Editor | Yes | Yes | Yes | No |
+| Executor | Yes | Yes | No | No |
+| Viewer | Yes | No | No | No |
+
+These permissions also require the corresponding feature privileges in the space.
+The shared `@kbn/entity-access-control` administrator check uses wildcard
+application privileges, including those in the Stack `superuser` and Serverless project `admin` roles.
+Custom roles with those wildcard grants also qualify. Workflows All does not.
+API keys continue to use the normal ACL checks.
+Administrators can view private workflows and recover access after an owner is
+offboarded. Updating access preserves the existing owner. An administrator who
+makes an ownerless legacy workflow private becomes its owner. Keeping it public
+does not assign ownership.
+Administrators must add themselves as Executor to run a private workflow, or
+Editor to edit it or test draft YAML and steps. The access dialog shows a notice
+when an administrator edits another user's ACL. Background execution keeps its
+normal ACL checks.
+
+With Kibana audit logging enabled, `workflow_access_control_update` records a
+summary of each access update and one event per added, removed, or changed user.
+It records visibility and owner changes without repeating unchanged grants.
+`workflow_access_control_denied` records failed ACL checks, including execution
+checks. `workflow_access_control_admin_override` records administrative access
+when viewing a workflow, managing its ACL, or hard-deleting it.
+Searches, lists, batch lookups, filters, and result mapping do not emit ACL events.
+Write prechecks audit denials. The check on the stored document audits overrides.
+A rejected scheduled run emits a denial on each tick until access is restored or
+the schedule is disabled.
+Override events confirm authorization only. Existing operation events report the
+operation outcome. ACL events do not contain workflow YAML or execution data.
+
+The owner and administrators can request user suggestions, which require
+Workflows Read in that space. New grants and permission increases require the recipient's current RBAC:
+Viewer requires Read, Executor also requires Execute, and Editor also requires
+Update. Removals, unchanged entries, and permission decreases can be saved even
+if a recipient has lost RBAC. A write conflict repeats validation against the
+latest ACL. Runtime access still requires RBAC. A rejected grant leaves the
+access settings unchanged.
+Public workflows use the existing RBAC permissions for viewing, running, editing,
+and deletion. ACL entries apply only to private workflows. The owner and
+administrators control visibility and sharing. Managed workflows keep their existing plugin access rules.
+
+The detail page tests workflows even when disabled. Executors test the saved YAML;
+Editors and owners can test draft YAML. Test runs do not enable the workflow.
+Normal runs and scheduled runs still require an enabled workflow.
+
+Workflows without an ACL keep their existing access. New workflows with a user
+profile record the creator as owner and start with public access under RBAC.
+For older workflows, the recorded creator or an administrator can set the first
+ACL. Keeping an ownerless workflow public does not assign an owner. Making it
+private assigns the caller as owner. Subsequent checks use profile IDs.
+
+Workflow searches apply ACL filters before pagination and aggregation. Execution
+and Inbox searches exclude inaccessible workflow IDs, including soft-deleted
+workflows. This requires a search of inaccessible workflows in the space before
+querying execution data. Writes retain the ACL during YAML updates and imports.
+Execution checks use the current ACL and the execution identity.
+
+Soft deletion retains the workflow document and its ACL for execution and change
+history reads.
+The owner or an administrator can hard-delete a private workflow. Administrator
+overrides are audited. The request must
+include `force=true&acknowledgeAclLoss=true`. Public workflows retain feature RBAC and
+require no ACL acknowledgment. Their documents are removed before best-effort
+history cleanup, and cleanup failures do not fail deletion.
+Hard deletion of a private workflow first marks it as deleted and disabled, then
+removes its steps and executions before removing the workflow document. If history
+cleanup fails or is incomplete, the API returns an error and retains the
+soft-deleted workflow and its ACL. The caller can retry force deletion after the
+error is resolved.
+Direct Elasticsearch document deletion bypasses these checks. Private workflows
+are excluded from Agent Builder's search index, which currently supports feature
+privileges only.
