@@ -343,7 +343,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       ]);
     const experimentalFeatures: ExperimentalFeatures = {
       skills: true,
-      aiIndices: experimentalEnabled && contextEngineEnabled,
+      aiIndices: contextEngineEnabled,
       relevantSkills: experimentalEnabled,
       todos: experimentalEnabled,
       // forcefully disabled until the UI is implemented

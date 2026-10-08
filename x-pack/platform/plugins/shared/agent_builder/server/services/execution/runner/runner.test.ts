@@ -352,36 +352,15 @@ describe('AgentBuilder runner', () => {
     });
 
     it.each([
-      {
-        experimentalEnabled: false,
-        contextEngineEnabled: false,
-        expectedAiIndices: false,
-      },
-      {
-        experimentalEnabled: false,
-        contextEngineEnabled: true,
-        expectedAiIndices: false,
-      },
-      {
-        experimentalEnabled: true,
-        contextEngineEnabled: false,
-        expectedAiIndices: false,
-      },
-      {
-        experimentalEnabled: true,
-        contextEngineEnabled: true,
-        expectedAiIndices: true,
-      },
+      { contextEngineEnabled: false, expectedAiIndices: false },
+      { contextEngineEnabled: true, expectedAiIndices: true },
     ])(
-      'sets AI index instructions to $expectedAiIndices when experimental=$experimentalEnabled and contextEngine=$contextEngineEnabled',
-      async ({ experimentalEnabled, contextEngineEnabled, expectedAiIndices }) => {
+      'sets AI index instructions to $expectedAiIndices from contextEngine=$contextEngineEnabled',
+      async ({ contextEngineEnabled, expectedAiIndices }) => {
         const runnerDeps = createRunnerDepsMock();
         runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
         (runnerDeps.uiSettings.asScopedToClient as jest.Mock).mockReturnValue({
           get: jest.fn((settingId: string) => {
-            if (settingId === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID) {
-              return Promise.resolve(experimentalEnabled);
-            }
             if (settingId === CONTEXT_ENGINE_ENABLED_SETTING_ID) {
               return Promise.resolve(contextEngineEnabled);
             }
