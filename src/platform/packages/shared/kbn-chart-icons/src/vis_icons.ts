@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import type { ICON_TYPES } from '@elastic/eui';
 import { IconCircle, IconTriangle } from './assets';
+
+type EuiIconType = (typeof ICON_TYPES)[number];
 
 export type VisIcon = EuiIconType | typeof IconCircle | typeof IconTriangle;
 
