@@ -19,9 +19,8 @@ settings:
   # sentinel of `52w`), so raising a caller's `expiresIn` past this ceiling
   # fails here rather than silently cancelling reviews.
   #
-  # Sized for one gate. A manual-autonomy run can chain two: `propose_entry`
-  # only short-circuits on a *dismissal*, so an entry gate nobody answers falls
-  # through to a second gate and the pair can outlast this ceiling. Left at
+  # Sized for one gate. When the analyst approves the entry gate, a manual run
+  # waits for a second gate, and both together can take longer than this. Left at
   # `176h` deliberately — it does not cover that path, but the ceiling runs no
   # handler when it fires, so the margin is worth more here than arithmetic that
   # matches a single gate exactly.
@@ -165,7 +164,7 @@ steps:
       metadata:
         status: open
         description: "{{ inputs.fp_count }} false-positive alerts on rule {{ steps.fetch_rule.output.name }} in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days"
-        workflow_execution_id: "{{ execution.id }}"
+        workflow_execution_ids: ["{{ execution.id }}"]
 
   # A snapshot of the rule as it was when this review started. The rule card reads
   # `origin` as the saved-object id for View rule, edit and its saved-rule diff,
@@ -212,78 +211,93 @@ steps:
       rule_line: "**Rule:** [{{ steps.fetch_rule.output.name }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ inputs.rule_uuid }}) (`{{ inputs.rule_uuid }}`)"
       fp_summary: "{% if inputs.total_alert_count > 0 %}{{ inputs.total_fp_count }} of {{ inputs.total_alert_count }} alerts ({{ inputs.total_fp_count | times: 100 | divided_by: inputs.total_alert_count }}%) in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days were closed as false positives; {{ inputs.fp_count }} of them are not reviewed yet.{% else %}{{ inputs.fp_count }} alerts were closed as false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.{% endif %}"
 
-  # Manual autonomy entry gate: the sweep's findings are reported and nothing else
-  # happens until an analyst approves the review. No action, so approval is the whole
-  # lifecycle; a dismissal ends the run below. Assisted runs skip straight to
-  # diagnosis and meet only the proposal gate.
-  - name: propose_entry
-    type: workflow.execute
-    if: >-
+  # Manual mode only: ask the analyst before the agent diagnoses this rule. Assisted
+  # mode skips this step and goes directly to diagnosis.
+  - name: entry_gate
+    type: if
+    condition: >-
       ${{ inputs.autonomy_level == 'manual'
         and steps.create_investigation.output.conversation_id != null }}
-    with:
-      workflow-id: system-create-alertzero-proposal
-      inputs:
-        conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-        # Raised before any diagnosis, so the comment's own heading is the only
-        # name this proposal has.
-        title: Review rule for tuning
-        comment: |-
-          **Review rule for tuning?**
+    steps:
+      - name: propose_entry
+        type: workflow.execute
+        with:
+          workflow-id: system-create-alertzero-proposal
+          inputs:
+            conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+            # Raised before any diagnosis, so the comment's own heading is the only
+            # name this proposal has.
+            title: Review rule for tuning
+            comment: |-
+              **Review rule for tuning?**
 
-          {{ steps.compose_evidence.output.rule_line }}
+              {{ steps.compose_evidence.output.rule_line }}
 
-          **Why this rule was picked**
-          {{ steps.compose_evidence.output.fp_summary }}
+              **Why this rule was picked**
+              {{ steps.compose_evidence.output.fp_summary }}
 
-          **On approval**
-          The agent diagnoses these false positives and proposes a tuning change, which returns as a second proposal for your approval before anything is applied to the rule. Dismissing marks these alerts reviewed and ends the review.
-        impact: low
-        # No action, so no inherited category, and the queue drops an
-        # uncategorised proposal. Grouped with the tuning proposal that follows.
-        category: configure
+              **On approval**
+              The agent diagnoses these false positives and proposes a tuning change, which returns as a second proposal for your approval before anything is applied to the rule. Dismissing marks these alerts reviewed and ends the review.
+            impact: low
+            # No action, so no inherited category, and the queue drops an
+            # uncategorised proposal. Grouped with the tuning proposal that follows.
+            category: configure
 
-  - name: record_entry
-    type: data.set
-    with:
-      declined: "${{ steps.propose_entry.output.decision == 'dismissed' }}"
+      # Only an approval continues to diagnosis. Approval has no case (a case must
+      # contain steps), so it goes to the next step. An expired proposal returns an
+      # empty decision, so the expression maps it to `expired`.
+      - name: entry_decision
+        type: switch
+        expression: "{% if steps.propose_entry.output.decision == 'dismissed' %}dismissed{% elsif steps.propose_entry.output.decision != 'approved' %}expired{% endif %}"
+        cases:
+          - match: dismissed
+            steps:
+              # A declined review still retires its alerts, or the next sweep would
+              # open the same entry gate for the same alerts again.
+              - name: mark_alerts_declined
+                type: security.setAlertTags
+                with:
+                  alert_ids: "${{ inputs.alert_ids }}"
+                  tags_to_add:
+                    - "{{ consts.reviewed_tag }}"
+                    - "{{ consts.dismissed_tag }}"
 
-  # A declined review still retires its alerts, or the next sweep would open the
-  # same entry gate for the same alerts again.
-  - name: mark_alerts_declined
-    type: security.setAlertTags
-    if: "${{ steps.record_entry.output.declined == true }}"
-    with:
-      alert_ids: "${{ inputs.alert_ids }}"
-      tags_to_add:
-        - "{{ consts.reviewed_tag }}"
-        - "{{ consts.dismissed_tag }}"
+              - name: close_investigation_declined
+                type: ai.conversation.metadata.patch
+                with:
+                  conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  updates:
+                    status: closed
+                    close_reason: other
+                    verdict: "Analyst declined the tuning review."
+                on-failure:
+                  continue: true
 
-  - name: close_investigation_declined
-    type: ai.conversation.metadata.patch
-    if: "${{ steps.record_entry.output.declined == true }}"
-    with:
-      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-      updates:
-        status: closed
-        close_reason: other
-        verdict: "Analyst declined the tuning review."
-    on-failure:
-      continue: true
+              # workflow.output terminates the run, so no later step needs to check
+              # the entry decision.
+              - name: stop_declined
+                type: workflow.output
+                status: completed
+                with:
+                  rule_uuid: "{{ inputs.rule_uuid }}"
+                  approved: false
+                  applied: false
 
-  # workflow.output terminates the run, so no later step needs to check the entry
-  # decision.
-  - name: stop_declined
-    type: workflow.output
-    if: "${{ steps.record_entry.output.declined == true }}"
-    status: completed
-    with:
-      rule_uuid: "{{ inputs.rule_uuid }}"
-      approved: false
-      applied: false
+          # No answer. Stop the run. The alerts stay untagged and the investigation
+          # stays open, so the next sweep asks again.
+          - match: expired
+            steps:
+              - name: stop_expired
+                type: workflow.output
+                status: completed
+                with:
+                  rule_uuid: "{{ inputs.rule_uuid }}"
+                  approved: false
+                  applied: false
 
   - name: diagnose_rule
     type: ai.agent
+    agent-id: alertzero-thin-agent
     # Keep in sync with ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
     connector-id-by-feature: alertzero_agentic
     # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
@@ -295,6 +309,13 @@ steps:
     timeout: "10m"
     create-conversation: true
     with:
+      # The thin agent has no skills or tools of its own. List every skill the
+      # step needs, including the skills those skills load.
+      configuration_overrides:
+        enable_elastic_capabilities: false
+        tools: []
+        skill_ids:
+          - investigate-rule
       # The 100-id cap must match ALERTS_BY_IDS_MAX in the security_solution skill
       # (investigate_rule_skill.ts), the most ids one get_alerts_by_ids call accepts.
       message: |-
@@ -744,6 +765,29 @@ steps:
     on-failure:
       continue: true
 
+  # A risk score change has no backtest, so this note explains what approving does.
+  - name: post_risk_score_note
+    type: kibana.request
+    if: >-
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.diagnose_rule.output.structured_output.change_type == 'risk_score' }}
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+        input: |-
+          About the proposed risk score change for {{ steps.fetch_rule.output.name }}:
+
+          A risk score change does not change which alerts fire. Approving re-labels the rule's future alerts from {{ steps.fetch_rule.output.severity }} to {{ steps.diagnose_rule.output.structured_output.proposed_severity }}; existing alerts keep their current severity. The false positive count in the proposal is the evidence for this change.
+        trigger_mode: never
+    on-failure:
+      continue: true
+
   - name: compose_proposal
     type: data.set
     with:
@@ -795,10 +839,8 @@ steps:
         {% endfor %}
         Approving adds the exception to the rule's own exception list. It can be removed in the Detection Rules UI.
         {% when "risk_score" %}
-        Current risk score: {{ steps.fetch_rule.output.risk_score }}
-        Current severity: {{ steps.fetch_rule.output.severity }}
-        Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}
-        Proposed severity: {{ steps.diagnose_rule.output.structured_output.proposed_severity }}
+        Current risk score: {{ steps.fetch_rule.output.risk_score }} ({{ steps.fetch_rule.output.severity }})
+        Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }} ({{ steps.diagnose_rule.output.structured_output.proposed_severity }})
         Approving patches the rule's risk score and severity. It can be changed back in the Detection Rules UI.
         {% when "threshold" %}
         Current threshold value: {{ steps.fetch_rule.output.threshold.value }}

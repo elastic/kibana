@@ -626,6 +626,7 @@ export class SignificantEventsPlugin
         streamsKIsOnboardingClient: this.streamsKIsOnboardingClient,
         maintenanceService: this.maintenanceService,
         getScopedClients: this.getScopedClients,
+        server: this.server,
         logger: this.logger,
         isAvailable,
         availability: createSignificantEventsAvailability({

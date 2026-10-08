@@ -19,12 +19,13 @@ import {
 import { getNightshiftCapabilities, NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
 import { NightshiftApp } from './app/app';
-import { NightshiftAppHeader, nightshiftTabs } from './app/app_header';
+import { NightshiftAppHeader, nightshiftTabs, SETTINGS_PAGE_TITLE } from './app/app_header';
 import { AutomationsPage } from './automations/automations_page';
 import { useKibana } from './hooks/use_kibana';
 import { useSignificantEventsAvailability } from './hooks/use_significant_events_availability';
 import { SandboxSecretsFlyout } from './sandbox_secrets/sandbox_secrets_flyout';
 import { CustomContextFlyout } from './custom_context/custom_context_flyout';
+import { SettingsPage } from './settings/page';
 
 export function NightshiftPage(): React.ReactElement | null {
   const {
@@ -40,7 +41,7 @@ export function NightshiftPage(): React.ReactElement | null {
   const { canShow, canManage, canManageAndConfigure } = getNightshiftCapabilities(
     application.capabilities.nightshift
   );
-  const settingsHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
+  const settingsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/settings',
   });
   const managementHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
@@ -69,6 +70,7 @@ export function NightshiftPage(): React.ReactElement | null {
   );
   const isInvestigationsPage =
     pathname.startsWith('/investigations') || pathname === '/automations';
+  const isSettingsPage = pathname === '/settings' || pathname.startsWith('/settings/');
   const canUseInvestigationsPage = canUseAutomations && isInvestigationsPage;
   const tabs = canUseAutomations
     ? nightshiftTabs.map((tab) => ({
@@ -104,6 +106,7 @@ export function NightshiftPage(): React.ReactElement | null {
         }),
         deepLinkId: NIGHTSHIFT_APP_ID,
       },
+      ...(isSettingsPage ? [{ text: SETTINGS_PAGE_TITLE }] : []),
     ],
     { serverless }
   );
@@ -114,7 +117,17 @@ export function NightshiftPage(): React.ReactElement | null {
     }
   }, [application, isAvailable, isAvailabilityLoading]);
 
+  useEffect(() => {
+    if (isSettingsPage && !canManageAndConfigure) {
+      application.navigateToApp(NIGHTSHIFT_APP_ID);
+    }
+  }, [application, canManageAndConfigure, isSettingsPage]);
+
   if (!isAvailable) {
+    return null;
+  }
+
+  if (isSettingsPage && !canManageAndConfigure) {
     return null;
   }
 
@@ -126,38 +139,60 @@ export function NightshiftPage(): React.ReactElement | null {
         paddingSize: 'none',
       }}
     >
-      <NightshiftAppHeader
-        onManagementClick={navigateToManagement}
-        managementHref={managementHref}
-        onSettingsClick={canManageAndConfigure ? navigateToSettings : undefined}
-        settingsHref={canManageAndConfigure ? settingsHref : undefined}
-        onSandboxSecretsClick={canManageSandboxSecrets ? openSandboxSecretsFlyout : undefined}
-        onCustomContextClick={canViewCustomContext ? openCustomContextFlyout : undefined}
-        onAutomationsClick={canUseAutomations ? navigateToInvestigations : undefined}
-        investigationsHref={canUseAutomations ? investigationsHref : undefined}
-        tabs={canUseInvestigationsPage ? tabs : undefined}
-        back={
-          canUseInvestigationsPage
-            ? {
-                href: application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' }),
-                label: 'Nightshift',
-              }
-            : undefined
-        }
-      />
-      <EuiPageTemplate.Section
-        component="div"
-        restrictWidth={pathname.endsWith('/automations') ? false : '900px'}
-      >
-        {canUseInvestigationsPage ? (
-          <Routes>
-            <Route path="/automations" component={AutomationsPage} />
-            <Route path="/investigations" component={() => <div>WIP</div>} />
-          </Routes>
-        ) : (
-          <NightshiftApp />
-        )}
-      </EuiPageTemplate.Section>
+      {isSettingsPage ? (
+        <Routes>
+          <Route path="/settings/:tab?">
+            <SettingsPage
+              headerProps={{
+                onManagementClick: navigateToManagement,
+                managementHref,
+                onSandboxSecretsClick: canManageSandboxSecrets
+                  ? openSandboxSecretsFlyout
+                  : undefined,
+                onCustomContextClick: canViewCustomContext ? openCustomContextFlyout : undefined,
+                onAutomationsClick: canUseAutomations ? navigateToInvestigations : undefined,
+                investigationsHref: canUseAutomations ? investigationsHref : undefined,
+              }}
+            />
+          </Route>
+        </Routes>
+      ) : (
+        <>
+          <NightshiftAppHeader
+            page={canUseInvestigationsPage ? 'investigations' : 'landing'}
+            onManagementClick={navigateToManagement}
+            managementHref={managementHref}
+            onSettingsClick={canManageAndConfigure ? navigateToSettings : undefined}
+            settingsHref={canManageAndConfigure ? settingsHref : undefined}
+            onSandboxSecretsClick={canManageSandboxSecrets ? openSandboxSecretsFlyout : undefined}
+            onCustomContextClick={canViewCustomContext ? openCustomContextFlyout : undefined}
+            onAutomationsClick={canUseAutomations ? navigateToInvestigations : undefined}
+            investigationsHref={canUseAutomations ? investigationsHref : undefined}
+            tabs={canUseInvestigationsPage ? tabs : undefined}
+            back={
+              canUseInvestigationsPage
+                ? {
+                    href: application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' }),
+                    label: 'Nightshift',
+                  }
+                : undefined
+            }
+          />
+          <EuiPageTemplate.Section
+            component="div"
+            restrictWidth={pathname.endsWith('/automations') ? false : '900px'}
+          >
+            {canUseInvestigationsPage ? (
+              <Routes>
+                <Route path="/automations" component={AutomationsPage} />
+                <Route path="/investigations" component={() => <div>WIP</div>} />
+              </Routes>
+            ) : (
+              <NightshiftApp />
+            )}
+          </EuiPageTemplate.Section>
+        </>
+      )}
       {canManageSandboxSecrets && isSandboxSecretsFlyoutOpen && (
         <SandboxSecretsFlyout onClose={closeSandboxSecretsFlyout} />
       )}

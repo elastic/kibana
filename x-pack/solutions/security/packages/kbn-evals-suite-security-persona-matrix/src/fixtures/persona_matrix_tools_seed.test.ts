@@ -18,10 +18,13 @@ interface MockClient {
 
 const asKbn = (client: MockClient) => client as unknown as KbnClient;
 
-const agentWith = (tools?: Array<Record<string, unknown>>) => ({
+const agentWith = (
+  tools?: Array<Record<string, unknown>>,
+  accessControl: Record<string, unknown> = { access_mode: 'public' }
+) => ({
   name: 'Elastic AI Agent',
   description: 'desc',
-  access_control: { access_mode: 'public' },
+  access_control: accessControl,
   configuration: { tools },
 });
 
@@ -101,6 +104,29 @@ describe('persona_matrix_tools_seed', () => {
         ...existing,
         { tool_ids: ['on_call_lookup'] },
       ]);
+    });
+    it('forwards exactly { access_mode } in the PUT access_control even when the GET returns entries (shape since #290353)', async () => {
+      const { seedPersonaMatrixTools } = await import('./persona_matrix_tools_seed');
+      const client = createClient(agentWith([], { access_mode: 'public', entries: [] }));
+
+      await seedPersonaMatrixTools({ kbnClient: asKbn(client), log, parity: false });
+
+      const puts = agentPuts(client);
+      expect(puts).toHaveLength(1);
+      expect(puts[0][0].body.access_control).toEqual({ access_mode: 'public' });
+    });
+
+    it("preserves a 'private' access_mode from the GET in the PUT body", async () => {
+      const { seedPersonaMatrixTools } = await import('./persona_matrix_tools_seed');
+      const client = createClient(
+        agentWith([], { access_mode: 'private', entries: [{ type: 'user', id: 'u_1' }] })
+      );
+
+      await seedPersonaMatrixTools({ kbnClient: asKbn(client), log, parity: false });
+
+      const puts = agentPuts(client);
+      expect(puts).toHaveLength(1);
+      expect(puts[0][0].body.access_control).toEqual({ access_mode: 'private' });
     });
   });
 
