@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
@@ -206,11 +205,17 @@ export const useEcfDeployment = ({
 
   const anyStale = Object.values(isStaleByFamily).some(Boolean);
 
+  // A family is done only when launched AND a valid ARN has been provided.
   const isDone =
     !anyStale &&
-    (!hasEcfUnified || launchedFamilies.includes('unified')) &&
-    (!hasEcfOtel || launchedFamilies.includes('otel')) &&
-    (!hasEcfCrowdstrike || launchedFamilies.includes('crowdstrike'));
+    (!hasEcfUnified ||
+      (launchedFamilies.includes('unified') &&
+        isEcfStackArnValid(stackArns.unified?.trim() ?? ''))) &&
+    (!hasEcfOtel ||
+      (launchedFamilies.includes('otel') && isEcfStackArnValid(stackArns.otel?.trim() ?? ''))) &&
+    (!hasEcfCrowdstrike ||
+      (launchedFamilies.includes('crowdstrike') &&
+        isEcfStackArnValid(stackArns.crowdstrike?.trim() ?? '')));
 
   const ecfServiceIds = useMemo(
     () => new Set([...allEcfConfigs.map((c) => c.serviceId), ...ecfCrowdstrikeServices]),
@@ -355,10 +360,6 @@ export const useEcfDeployment = ({
 
 // ── EcfFamilyPanel ─────────────────────────────────────────────────────────────
 
-// Delay (ms) after clicking Launch before showing the "Reopen console" link — gives users a
-// quick way to re-open the AWS Console tab if they accidentally closed it.
-const REOPEN_LINK_DELAY_MS = 5_000;
-
 interface EcfFamilyPanelProps {
   description: React.ReactNode;
   launchUrl: string | undefined;
@@ -384,7 +385,6 @@ interface EcfFamilyPanelProps {
 }
 
 interface EcfFamilyPanelPostLaunchProps {
-  launchUrl: string | undefined;
   stackName: string;
   stackVersion: string | undefined;
   defaultStackName: string;
@@ -396,9 +396,8 @@ interface EcfFamilyPanelPostLaunchProps {
   onUpdateStack: () => void;
 }
 
-/** Post-launch content for one ECF template family: confirmation, stack name field, version, reopen, ARN, stale callout. */
+/** Post-launch content for one ECF template family: stack name, version, stale callout (if applicable), and ARN field. */
 const EcfFamilyPanelPostLaunch = ({
-  launchUrl,
   stackName,
   stackVersion,
   defaultStackName,
@@ -409,7 +408,6 @@ const EcfFamilyPanelPostLaunch = ({
   onStackArnChange,
   onUpdateStack,
 }: EcfFamilyPanelPostLaunchProps) => {
-  const [showReopen, setShowReopen] = useState(false);
   const [touched, setTouched] = useState(false);
 
   const stackNameError = useMemo(() => {
@@ -420,18 +418,11 @@ const EcfFamilyPanelPostLaunch = ({
     });
   }, [stackName, touched]);
 
-  // Only feed a valid name into the URL builder — invalid names show an inline error but do
-  // not prevent navigation (the field is optional throughout).
   const isStackNameValid = stackName === '' || STACK_NAME_REGEX.test(stackName);
 
   const stackArnTrimmed = stackArn.trim();
   const isArnValid = isEcfStackArnValid(stackArnTrimmed);
   const stackConsoleUrl = isArnValid ? buildEcfStackConsoleUrl(stackArnTrimmed) : undefined;
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setShowReopen(true), REOPEN_LINK_DELAY_MS);
-    return () => window.clearTimeout(timer);
-  }, []);
 
   return (
     <>
@@ -488,16 +479,6 @@ const EcfFamilyPanelPostLaunch = ({
         </>
       )}
 
-      <EuiText size="s">
-        <p>
-          <FormattedMessage
-            id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.launchedConfirmation"
-            defaultMessage="The Elastic Cloud Forwarder has been created in your AWS account. Data detection is running in the background — check Detect &amp; Review for arrival status."
-          />
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
-
       {/* Stack name field */}
       <EuiFormRow
         label={
@@ -514,7 +495,7 @@ const EcfFamilyPanelPostLaunch = ({
                   'xpack.ingestHub.authenticateAndDeployStep.ecfSection.stackNameTooltip',
                   {
                     defaultMessage:
-                      'The CloudFormation stack name pre-filled when you launched. If you renamed the stack in the AWS Console, update this field so the Reopen link targets the right stack.',
+                      'The CloudFormation stack name pre-filled when you launched. If you renamed the stack in the AWS Console, update this field to keep the saved record accurate.',
                   }
                 )}
                 position="right"
@@ -559,7 +540,7 @@ const EcfFamilyPanelPostLaunch = ({
         </>
       )}
 
-      {/* Stack ARN field — always editable so the user can correct a mis-paste */}
+      {/* Stack ARN field — always shown post-launch so the user can paste or correct the ARN */}
       <EuiSpacer size="m" />
       <EuiFormRow
         label={i18n.translate(
@@ -569,7 +550,7 @@ const EcfFamilyPanelPostLaunch = ({
         helpText={
           <FormattedMessage
             id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.stackArnHelp"
-            defaultMessage="Copy the Stack ID from the AWS CloudFormation console and paste it here to enable the View and Update stack links."
+            defaultMessage="Copy the Stack ID from the AWS CloudFormation console and paste it here to confirm deployment and enable the Update stack link."
           />
         }
         data-test-subj={`${testSubjPrefix}-stackArnRow`}
@@ -584,46 +565,6 @@ const EcfFamilyPanelPostLaunch = ({
           data-test-subj={`${testSubjPrefix}-stackArnField`}
         />
       </EuiFormRow>
-
-      {/* View stack link — shown when a valid ARN is stored and not stale (stale state shows Update stack instead) */}
-      {stackConsoleUrl && !isStale && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiButtonEmpty
-            href={stackConsoleUrl}
-            target="_blank"
-            iconType="external"
-            iconSide="right"
-            size="s"
-            data-test-subj={`${testSubjPrefix}-viewStack`}
-          >
-            <FormattedMessage
-              id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.viewStackButton"
-              defaultMessage="View stack in AWS Console"
-            />
-          </EuiButtonEmpty>
-        </>
-      )}
-
-      {/* Reopen link (shown after 5s) */}
-      {showReopen && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiButtonEmpty
-            href={isStackNameValid ? launchUrl : undefined}
-            target="_blank"
-            iconType="external"
-            iconSide="right"
-            size="s"
-            data-test-subj={`${testSubjPrefix}-reopen`}
-          >
-            <FormattedMessage
-              id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.reopenButton"
-              defaultMessage="Reopen CloudFormation launcher"
-            />
-          </EuiButtonEmpty>
-        </>
-      )}
     </>
   );
 };
@@ -644,6 +585,13 @@ const EcfFamilyPanel = ({
   onStackArnChange,
   onUpdateStack,
 }: EcfFamilyPanelProps) => {
+  const isArnValid = isEcfStackArnValid(stackArn.trim());
+
+  // Show the Launch button until the user has provided a valid ARN. When stale (services changed),
+  // hide the Launch button and show the Update button in the stale callout instead — re-launching
+  // would create a new stack rather than update the existing one.
+  const showLaunchButton = !isLaunched || (!isArnValid && !isStale);
+
   return (
     <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
       <EuiText size="s" color="subdued">
@@ -651,8 +599,7 @@ const EcfFamilyPanel = ({
       </EuiText>
       <EuiSpacer size="m" />
 
-      {!isLaunched ? (
-        /* ── Pre-launch ─────────────────────────────────────────────────────── */
+      {showLaunchButton && (
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -671,20 +618,23 @@ const EcfFamilyPanel = ({
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      ) : (
-        /* ── Post-launch ────────────────────────────────────────────────────── */
-        <EcfFamilyPanelPostLaunch
-          launchUrl={launchUrl}
-          stackName={stackName}
-          stackVersion={stackVersion}
-          defaultStackName={defaultStackName}
-          onStackNameChange={onStackNameChange}
-          testSubjPrefix={launchButtonTestSubj}
-          stackArn={stackArn}
-          isStale={isStale}
-          onStackArnChange={onStackArnChange}
-          onUpdateStack={onUpdateStack}
-        />
+      )}
+
+      {isLaunched && (
+        <>
+          {showLaunchButton && <EuiSpacer size="m" />}
+          <EcfFamilyPanelPostLaunch
+            stackName={stackName}
+            stackVersion={stackVersion}
+            defaultStackName={defaultStackName}
+            onStackNameChange={onStackNameChange}
+            testSubjPrefix={launchButtonTestSubj}
+            stackArn={stackArn}
+            isStale={isStale}
+            onStackArnChange={onStackArnChange}
+            onUpdateStack={onUpdateStack}
+          />
+        </>
       )}
     </EuiPanel>
   );
@@ -719,7 +669,6 @@ export const EcfDeploymentSection = ({
   unifiedLaunchUrl,
   otelLaunchUrl,
   crowdstrikeLaunchUrl,
-  globalRegion,
   launchedFamilies,
   stackNames,
   stackVersions,
@@ -739,16 +688,31 @@ export const EcfDeploymentSection = ({
 
   const isDone =
     !Object.values(isStaleByFamily).some(Boolean) &&
-    (!hasEcfUnified || launchedFamilies.includes('unified')) &&
-    (!hasEcfOtel || launchedFamilies.includes('otel')) &&
-    (!hasEcfCrowdstrike || launchedFamilies.includes('crowdstrike'));
+    (!hasEcfUnified ||
+      (launchedFamilies.includes('unified') &&
+        isEcfStackArnValid(stackArns.unified?.trim() ?? ''))) &&
+    (!hasEcfOtel ||
+      (launchedFamilies.includes('otel') && isEcfStackArnValid(stackArns.otel?.trim() ?? ''))) &&
+    (!hasEcfCrowdstrike ||
+      (launchedFamilies.includes('crowdstrike') &&
+        isEcfStackArnValid(stackArns.crowdstrike?.trim() ?? '')));
+
+  // Families where the user previously launched (with a valid ARN) but all services were
+  // subsequently removed. The family panel is hidden, but the CloudFormation stack may still
+  // be running in the user's AWS account.
+  const removedFamiliesWithArn = (['unified', 'otel', 'crowdstrike'] as const).filter((family) => {
+    if (!launchedFamilies.includes(family)) return false;
+    const arn = stackArns[family];
+    if (!arn || !isEcfStackArnValid(arn.trim())) return false;
+    if (family === 'unified') return !hasEcfUnified;
+    if (family === 'otel') return !hasEcfOtel;
+    return !hasEcfCrowdstrike;
+  });
 
   const totalServiceCount =
     ecfUnifiedConfigs.length + ecfOtelConfigs.length + ecfCrowdstrikeServices.length;
 
-  // Always start open. Post-launch the Done badge + stack name field are shown while expanded.
-  // The user can manually collapse. No auto-collapse on isDone: the stack name field must remain
-  // visible after launch (per design review and mockup 2).
+  // Always start open. The user can manually collapse after reviewing.
   const [isOpen, setIsOpen] = useState(true);
 
   const headerButtonCss = css`
@@ -815,33 +779,62 @@ export const EcfDeploymentSection = ({
 
       {isOpen && (
         <div id={contentId} role="region">
-          {hasEcfUnified && (
-            <EcfFamilyPanel
-              description={
+          {/* Section-level warning: user removed all services for a family that had a deployed
+              stack (with a valid ARN). The CloudFormation stack may still be running in AWS. */}
+          {removedFamiliesWithArn.length > 0 && (
+            <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
+              <EuiCallOut
+                announceOnMount
+                color="warning"
+                iconType="warning"
+                title={
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.removedFamilyCallout.title"
+                    defaultMessage="CloudFormation stack may still be running"
+                  />
+                }
+                data-test-subj="ecfDeploymentSection-removedFamilyCallout"
+              >
                 <FormattedMessage
-                  id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.unified.description"
-                  defaultMessage="Log collection via a single AWS CloudFormation stack — no agents required. Deploys the <b>ECS-compatible</b> template. Trigger source (S3 or CloudWatch) is configured per service in Service settings. Launch CloudFormation to deploy."
-                  values={{ b: (chunks) => <strong>{chunks}</strong> }}
+                  id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.removedFamilyCallout.body"
+                  defaultMessage="One or more services have been removed, but the associated CloudFormation stack may still be running in your AWS account. To stop log ingestion and avoid ongoing charges, delete the stack manually in the AWS Console."
                 />
-              }
-              launchUrl={unifiedLaunchUrl}
-              isLaunched={launchedFamilies.includes('unified')}
-              onLaunch={() => onLaunch('unified')}
-              launchButtonTestSubj="ecfDeploymentSection-unifiedLaunchButton"
-              stackName={stackNames.unified || ECF_UNIFIED_STACK_NAME}
-              stackVersion={stackVersions.unified}
-              defaultStackName={ECF_UNIFIED_STACK_NAME}
-              onStackNameChange={(name) => onStackNameChange('unified', name)}
-              stackArn={stackArns.unified ?? ''}
-              isStale={isStaleByFamily.unified}
-              onStackArnChange={(arn) => onStackArnChange('unified', arn)}
-              onUpdateStack={() => onUpdateStack('unified')}
-            />
+              </EuiCallOut>
+            </EuiPanel>
+          )}
+
+          {hasEcfUnified && (
+            <>
+              {removedFamiliesWithArn.length > 0 && <EuiHorizontalRule margin="none" />}
+              <EcfFamilyPanel
+                description={
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.unified.description"
+                    defaultMessage="Log collection via a single AWS CloudFormation stack — no agents required. Deploys the <b>ECS-compatible</b> template. Trigger source (S3 or CloudWatch) is configured per service in Service settings. Launch CloudFormation to deploy."
+                    values={{ b: (chunks) => <strong>{chunks}</strong> }}
+                  />
+                }
+                launchUrl={unifiedLaunchUrl}
+                isLaunched={launchedFamilies.includes('unified')}
+                onLaunch={() => onLaunch('unified')}
+                launchButtonTestSubj="ecfDeploymentSection-unifiedLaunchButton"
+                stackName={stackNames.unified || ECF_UNIFIED_STACK_NAME}
+                stackVersion={stackVersions.unified}
+                defaultStackName={ECF_UNIFIED_STACK_NAME}
+                onStackNameChange={(name) => onStackNameChange('unified', name)}
+                stackArn={stackArns.unified ?? ''}
+                isStale={isStaleByFamily.unified}
+                onStackArnChange={(arn) => onStackArnChange('unified', arn)}
+                onUpdateStack={() => onUpdateStack('unified')}
+              />
+            </>
           )}
 
           {hasEcfOtel && (
             <>
-              {hasEcfUnified && <EuiHorizontalRule margin="none" />}
+              {(removedFamiliesWithArn.length > 0 || hasEcfUnified) && (
+                <EuiHorizontalRule margin="none" />
+              )}
               <EcfFamilyPanel
                 description={
                   <FormattedMessage
@@ -868,7 +861,9 @@ export const EcfDeploymentSection = ({
 
           {hasEcfCrowdstrike && (
             <>
-              {(hasEcfUnified || hasEcfOtel) && <EuiHorizontalRule margin="none" />}
+              {(removedFamiliesWithArn.length > 0 || hasEcfUnified || hasEcfOtel) && (
+                <EuiHorizontalRule margin="none" />
+              )}
               <EcfFamilyPanel
                 description={
                   <FormattedMessage

@@ -206,7 +206,26 @@ describe('useEcfDeployment', () => {
       expect(result.current.isDone).toBe(false);
     });
 
-    it('is true once all required families are launched and none are stale', () => {
+    it('is true once all required families are launched, none are stale, and all have valid ARNs', () => {
+      mockGetEcfServiceConfigs.mockReturnValue([unifiedConfig('cloudtrail')]);
+      makeSessionStorageMock({
+        launchedFamilies: ['unified'],
+        launchedServiceIds: { unified: ['cloudtrail'] },
+        stackArns: { unified: 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid' },
+      });
+      const { result } = renderHook(() =>
+        useEcfDeployment({
+          instances: [baseInstance('cloudtrail')],
+          serviceVars: {},
+          globalRegion: 'us-east-1',
+          otlpEndpoint: undefined,
+          dataFormat: 'ecs' as const,
+        })
+      );
+      expect(result.current.isDone).toBe(true);
+    });
+
+    it('is false when all families are launched but no ARN has been provided', () => {
       mockGetEcfServiceConfigs.mockReturnValue([unifiedConfig('cloudtrail')]);
       makeSessionStorageMock({
         launchedFamilies: ['unified'],
@@ -221,7 +240,7 @@ describe('useEcfDeployment', () => {
           dataFormat: 'ecs' as const,
         })
       );
-      expect(result.current.isDone).toBe(true);
+      expect(result.current.isDone).toBe(false);
     });
 
     it('is false when a launched family is stale', () => {
@@ -361,12 +380,22 @@ describe('EcfDeploymentSection', () => {
       );
     });
 
-    it('renders the Done badge when all families are launched', () => {
+    it('renders the Done badge when all families are launched and have valid ARNs', () => {
       renderSection({
         ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
         launchedFamilies: ['unified'],
+        stackArns: { unified: 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid' },
       });
       expect(screen.getByText('Done')).toBeInTheDocument();
+    });
+
+    it('does not render the Done badge when launched but no ARN provided', () => {
+      renderSection({
+        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
+        launchedFamilies: ['unified'],
+        stackArns: {},
+      });
+      expect(screen.queryByText('Done')).not.toBeInTheDocument();
     });
 
     it('does not render Done badge when not all families are launched', () => {
@@ -427,15 +456,44 @@ describe('EcfDeploymentSection', () => {
       expect(btn).toHaveTextContent('Launch CloudFormation');
     });
 
-    it('is replaced by the confirmation text after launch', () => {
+    it('remains visible after launch until a valid ARN is provided', () => {
       renderSection({
         ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
         launchedFamilies: ['unified'],
+        stackArns: {},
+      });
+      // Launch button is still shown — user may not have completed CFN setup yet
+      expect(screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton')).toBeInTheDocument();
+      // ARN field is also shown post-launch
+      expect(
+        screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-stackArnField')
+      ).toBeInTheDocument();
+    });
+
+    it('is hidden once a valid ARN has been provided', () => {
+      renderSection({
+        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
+        launchedFamilies: ['unified'],
+        stackArns: { unified: 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid' },
       });
       expect(
         screen.queryByTestId('ecfDeploymentSection-unifiedLaunchButton')
       ).not.toBeInTheDocument();
-      expect(screen.getByText(/Elastic Cloud Forwarder has been created/i)).toBeInTheDocument();
+    });
+
+    it('is hidden when the family is stale (Update stack is shown instead)', () => {
+      renderSection({
+        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
+        launchedFamilies: ['unified'],
+        stackArns: {},
+        isStaleByFamily: { unified: true, otel: false, crowdstrike: false },
+      });
+      expect(
+        screen.queryByTestId('ecfDeploymentSection-unifiedLaunchButton')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-staleCallout')
+      ).toBeInTheDocument();
     });
   });
 
@@ -587,10 +645,7 @@ describe('EcfDeploymentSection', () => {
   });
 
   describe('Reopen AWS Console link', () => {
-    beforeEach(() => jest.useFakeTimers());
-    afterEach(() => jest.useRealTimers());
-
-    it('is hidden immediately after launch', () => {
+    it('is never shown — the button has been removed in favour of the Launch button staying visible until an ARN is pasted', () => {
       renderSection({
         ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
         launchedFamilies: ['unified'],
@@ -598,19 +653,6 @@ describe('EcfDeploymentSection', () => {
       expect(
         screen.queryByTestId('ecfDeploymentSection-unifiedLaunchButton-reopen')
       ).not.toBeInTheDocument();
-    });
-
-    it('appears after the 5s delay', () => {
-      renderSection({
-        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
-        launchedFamilies: ['unified'],
-      });
-      act(() => {
-        jest.advanceTimersByTime(5000);
-      });
-      expect(
-        screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-reopen')
-      ).toBeInTheDocument();
     });
   });
 
@@ -662,7 +704,7 @@ describe('EcfDeploymentSection', () => {
       );
     });
 
-    it('shows the View stack link when a valid ARN is stored and family is not stale', () => {
+    it('shows a check icon when a valid ARN is stored', () => {
       const arn = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid';
       renderSection({
         ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
@@ -670,22 +712,13 @@ describe('EcfDeploymentSection', () => {
         stackArns: { unified: arn },
         isStaleByFamily: { unified: false, otel: false, crowdstrike: false },
       });
-      expect(
-        screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-viewStack')
-      ).toBeInTheDocument();
-    });
-
-    it('hides the View stack link when the family is stale (Update stack is shown instead)', () => {
-      const arn = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid';
-      renderSection({
-        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
-        launchedFamilies: ['unified'],
-        stackArns: { unified: arn },
-        isStaleByFamily: { unified: true, otel: false, crowdstrike: false },
-      });
+      // The View stack button was removed; the ARN field shows a check icon instead.
       expect(
         screen.queryByTestId('ecfDeploymentSection-unifiedLaunchButton-viewStack')
       ).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-stackArnField')
+      ).toHaveValue(arn);
     });
   });
 
