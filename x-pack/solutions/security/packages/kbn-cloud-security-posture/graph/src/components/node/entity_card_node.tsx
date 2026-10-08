@@ -831,6 +831,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
     nodeClick,
     ipClickHandler,
   } = props.data as EntityNodeViewModel;
+  const isOrigin = Boolean((props.data as Record<string, unknown>).isOrigin);
 
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m');
@@ -977,6 +978,21 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
               </GraphDisplayOptionsContext.Provider>
             )}
           </EntityCardWrapper>
+
+          {/* Origin highlight — solid blue ring with a gap outside the card edge,
+              placed as a sibling of EntityCardWrapper so overflow:hidden doesn't clip it */}
+          {isOrigin && globalOpts.highlightOrigin && (
+            <div
+              aria-hidden="true"
+              css={css`
+                position: absolute;
+                inset: -${euiTheme.size.s};
+                border-radius: calc(${NODE_BORDER_RADIUS}px + ${euiTheme.size.s});
+                border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.primary};
+                pointer-events: none;
+              `}
+            />
+          )}
 
           {/* Single stacked card peeking from the bottom edge — always shown for grouped nodes */}
           {showStackedShape(count) && (
