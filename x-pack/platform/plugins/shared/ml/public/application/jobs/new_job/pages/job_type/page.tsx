@@ -404,18 +404,16 @@ export const Page: FC = () => {
                 defaultMessage: 'Data Visualizer',
               }
             )}
-            title={
-              <FormattedMessage
-                id="xpack.ml.newJob.wizard.jobType.dataVisualizerTitle"
-                defaultMessage="Data Visualizer"
-              />
-            }
-            description={
-              <FormattedMessage
-                id="xpack.ml.newJob.wizard.jobType.dataVisualizerDescription"
-                defaultMessage="Learn more about the characteristics of your data and identify the fields for analysis with machine learning."
-              />
-            }
+            title={i18n.translate('xpack.ml.newJob.wizard.jobType.dataVisualizerTitle', {
+              defaultMessage: 'Data Visualizer',
+            })}
+            description={i18n.translate(
+              'xpack.ml.newJob.wizard.jobType.dataVisualizerDescription',
+              {
+                defaultMessage:
+                  'Learn more about the characteristics of your data and identify the fields for analysis with machine learning.',
+              }
+            )}
             onClick={addSelectionToRecentlyAccessed}
           />
         </EuiFlexItem>

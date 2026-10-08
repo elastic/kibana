@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, ReactElement, ReactNode } from 'react';
+import type { FC, ReactElement } from 'react';
 import React from 'react';
 
 import type { IconType } from '@elastic/eui';
@@ -14,8 +14,8 @@ import { EuiCard, EuiIcon } from '@elastic/eui';
 interface Props {
   icon: IconType | ReactElement;
   iconAreaLabel?: string;
-  title: ReactNode;
-  description: ReactNode;
+  title: string;
+  description: string;
   href?: string;
   onClick?: () => void;
   isDisabled?: boolean;
