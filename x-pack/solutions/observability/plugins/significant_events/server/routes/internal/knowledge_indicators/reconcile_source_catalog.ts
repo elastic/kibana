@@ -12,7 +12,7 @@ import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators/knowledge_indicator_client/knowledge_indicator_client';
-import { parseSourceSlugFromConcurrencyKey } from '../../../lib/workflows/onboarding_workflow_client';
+import { parseSourceSlugFromKiConcurrencyKey } from '../../../lib/workflows/onboarding_workflow_client';
 import { listAllSources } from '../../utils/list_all_sources';
 import type { SourceKnowledgeStateClient } from '../../../lib/knowledge_indicators/source_knowledge_state';
 import { StatusError } from '../../../lib/errors/status_error';
@@ -428,7 +428,7 @@ async function loadRunningSourceSlugs(
     if (!execution.concurrencyGroupKey) {
       continue;
     }
-    const sourceSlug = parseSourceSlugFromConcurrencyKey(execution.concurrencyGroupKey);
+    const sourceSlug = parseSourceSlugFromKiConcurrencyKey(execution.concurrencyGroupKey);
     if (sourceSlug) {
       sourceSlugs.add(sourceSlug);
     }

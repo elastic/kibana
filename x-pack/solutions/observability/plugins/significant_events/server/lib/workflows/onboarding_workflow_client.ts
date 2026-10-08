@@ -8,7 +8,11 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
-import { SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import {
   SignificantEventsWorkflowStatus,
@@ -204,6 +208,24 @@ export const parseSourceSlugFromConcurrencyKey = (key: string): string | null =>
   return key.slice(CONCURRENCY_KEY_PREFIX.length);
 };
 
+const FEATURES_IDENTIFICATION_CONCURRENCY_KEY_PREFIX = 'nightshift-source-features-identification-';
+const QUERIES_GENERATION_CONCURRENCY_KEY_PREFIX = 'nightshift-source-queries-generation-';
+
+const KI_CONCURRENCY_KEY_PREFIXES = [
+  CONCURRENCY_KEY_PREFIX,
+  FEATURES_IDENTIFICATION_CONCURRENCY_KEY_PREFIX,
+  QUERIES_GENERATION_CONCURRENCY_KEY_PREFIX,
+];
+
+/**
+ * Like {@link parseSourceSlugFromConcurrencyKey}, but also accepts the keys of the onboarding
+ * sub-workflows (features identification, queries generation), which carry the same slug.
+ */
+export const parseSourceSlugFromKiConcurrencyKey = (key: string): string | null => {
+  const prefix = KI_CONCURRENCY_KEY_PREFIXES.find((candidate) => key.startsWith(candidate));
+  return prefix === undefined ? null : key.slice(prefix.length);
+};
+
 export const MAX_SOURCES_PER_QUERY = 10000;
 /**
  * Client that wraps the workflows management API to provide a source-centric
@@ -215,6 +237,15 @@ export const MAX_SOURCES_PER_QUERY = 10000;
  */
 export class SignificantEventsKIsOnboardingClient {
   private readonly workflowExecutionService: WorkflowExecutionService<OnboardingWorkflowInputPayload>;
+  /**
+   * The sub-workflows an onboarding run starts. They are keyed by the source slug with `drop`
+   * concurrency and keep running for a while after their parent is cancelled, so a new run for
+   * the slug is dropped at its first sub-workflow until they have stopped.
+   */
+  private readonly subWorkflowExecutionServices: Array<{
+    service: WorkflowExecutionService;
+    concurrencyKeyPrefix: string;
+  }>;
   private readonly telemetry: EbtTelemetryClient;
   private readonly getSourcesClient: (request: KibanaRequest) => Promise<SourcesClient>;
 
@@ -232,6 +263,23 @@ export class SignificantEventsKIsOnboardingClient {
       workflowId: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
       workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
+    this.subWorkflowExecutionServices = [
+      {
+        workflowId: SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
+        concurrencyKeyPrefix: FEATURES_IDENTIFICATION_CONCURRENCY_KEY_PREFIX,
+      },
+      {
+        workflowId: SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
+        concurrencyKeyPrefix: QUERIES_GENERATION_CONCURRENCY_KEY_PREFIX,
+      },
+    ].map(({ workflowId, concurrencyKeyPrefix }) => ({
+      service: new WorkflowExecutionService({
+        managementApi,
+        workflowId,
+        workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      }),
+      concurrencyKeyPrefix,
+    }));
     this.telemetry = telemetry;
     this.getSourcesClient = getSourcesClient;
   }
@@ -403,9 +451,12 @@ export class SignificantEventsKIsOnboardingClient {
   }
 
   /**
-   * Cancels all non-terminal onboarding executions for a slug. Unlike
-   * {@link cancel} it needs no catalog lookup, so it also works for sources that
-   * were already deleted.
+   * Cancels all non-terminal onboarding executions for a slug, then the sub-workflow executions
+   * they started. Unlike {@link cancel} it needs no catalog lookup, so it also works for sources
+   * that were already deleted.
+   *
+   * Cancelling the parent leaves its running sub-workflow to wind down on its own, which can take
+   * a while; cancelling it directly asks it to stop right away.
    */
   async cancelBySourceSlug({
     sourceSlug,
@@ -414,25 +465,47 @@ export class SignificantEventsKIsOnboardingClient {
     sourceSlug: string;
     request: KibanaRequest;
   }): Promise<string | null> {
-    return this.workflowExecutionService.cancelActive({
+    const executionId = await this.workflowExecutionService.cancelActive({
       spaceId: request.spaceId,
       request,
       concurrencyGroupKey: buildConcurrencyKey(sourceSlug),
     });
+    await Promise.all(
+      this.subWorkflowExecutionServices.map(({ service, concurrencyKeyPrefix }) =>
+        service.cancelActive({
+          spaceId: request.spaceId,
+          request,
+          concurrencyGroupKey: `${concurrencyKeyPrefix}${sourceSlug}`,
+        })
+      )
+    );
+    return executionId;
   }
 
-  /** Returns non-terminal onboarding executions of the request space in one query. */
+  /**
+   * Returns the non-terminal onboarding and sub-workflow executions of the request space. A
+   * sub-workflow still running after its onboarding was cancelled counts: it holds the source's
+   * concurrency slot, so a new run could not start yet.
+   */
   async getNonTerminalExecutions({
     request,
   }: {
     request: KibanaRequest;
   }): Promise<WorkflowExecutionListItemDto[]> {
-    const { results } = await this.workflowExecutionService.getExecutions(
-      { statuses: [...NonTerminalExecutionStatuses], size: MAX_SOURCES_PER_QUERY },
-      request.spaceId,
-      request
+    const services = [
+      this.workflowExecutionService,
+      ...this.subWorkflowExecutionServices.map(({ service }) => service),
+    ];
+    const pages = await Promise.all(
+      services.map((service) =>
+        service.getExecutions(
+          { statuses: [...NonTerminalExecutionStatuses], size: MAX_SOURCES_PER_QUERY },
+          request.spaceId,
+          request
+        )
+      )
     );
-    return results;
+    return pages.flatMap(({ results }) => results);
   }
 
   /**
