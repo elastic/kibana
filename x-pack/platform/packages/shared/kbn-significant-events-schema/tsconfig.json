@@ -6,6 +6,7 @@
   },
   "include": ["**/*.ts"],
   "kbn_references": [
+    "@kbn/alerting-v2-schemas",
     "@kbn/zod",
     "@kbn/zod-helpers",
     "@kbn/streamlang",

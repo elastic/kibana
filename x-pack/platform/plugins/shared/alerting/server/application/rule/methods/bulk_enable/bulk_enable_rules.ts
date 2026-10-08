@@ -182,6 +182,7 @@ const bulkEnableRulesWithOCC = async (
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
   const username = await context.getUserName();
+  const profileUid = await context.getProfileUid();
   const rulesToClearFlapping: Array<{ id: string; ruleTypeId: string }> = [];
   let scheduleValidationError = '';
 
@@ -246,6 +247,7 @@ const bulkEnableRulesWithOCC = async (
                   id: rule.attributes.alertTypeId,
                   ruleName,
                   username,
+                  profileUid,
                   shouldUpdateApiKey: true,
                   apiKeyOwnership: { apiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser },
                   refresh: false,
@@ -261,6 +263,7 @@ const bulkEnableRulesWithOCC = async (
                 : rule.attributes),
               enabled: true,
               updatedBy: username,
+              updatedByProfileUid: profileUid,
               updatedAt: nowIso,
               ...(!rule.attributes.enabled ? { lastEnabledAt: nowIso } : {}),
               executionStatus: {

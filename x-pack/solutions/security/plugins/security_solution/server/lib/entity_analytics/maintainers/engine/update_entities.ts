@@ -15,6 +15,14 @@ import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common/domain
 
 import type { EntityRelationshipRecord } from './types';
 import { entityTypeFromEuid } from './types';
+import { errMsg } from './es_errors';
+
+/**
+ * Candidate target EUIDs checked per search. Must stay below the entity index's
+ * `index.max_result_window` (10,000 by default): one hit comes back per existing
+ * ID, so a larger chunk is rejected outright rather than truncated.
+ */
+export const TARGET_VALIDATION_CHUNK_SIZE = 5_000;
 
 // Must stay in sync with hashEuid in entity_store/common/domain/euid/hash_euid.ts.
 // Avoids a cross-plugin import of a private module.
@@ -68,6 +76,13 @@ function mergeRecords(records: ValidRecord[]): Map<string, MergedRelationships> 
  * and, unlike the neutral wildcard pattern, still matches legacy `security_{namespace}`
  * indices before the shared-index migration runs — same name the raw_identifiers
  * query itself uses in Step 2.
+ *
+ * Candidates are checked in chunks of `TARGET_VALIDATION_CHUNK_SIZE`: a single
+ * page can carry more unique targets than `index.max_result_window` allows in one
+ * search (a Workday page of 3,500 managers routinely has 10k+ reports).
+ *
+ * A failed search is not logged here: it is rethrown with the failing chunk in the
+ * message (original error kept as `cause`) so the engine's stage handler logs it once.
  */
 export const matchExistingTargetIds = async (
   esClient: ElasticsearchClient,
@@ -77,19 +92,38 @@ export const matchExistingTargetIds = async (
   if (candidateIds.size === 0) return new Set();
 
   const index = getEntitiesAlias(ENTITY_LATEST, namespace);
-  const result = await esClient.search({
-    index,
-    size: candidateIds.size,
-    _source: false,
-    query: { terms: { 'entity.id': Array.from(candidateIds) } },
-    fields: ['entity.id'],
-  });
-
+  const ids = Array.from(candidateIds);
+  const chunkCount = Math.ceil(ids.length / TARGET_VALIDATION_CHUNK_SIZE);
   const existing = new Set<string>();
-  for (const hit of result.hits.hits) {
-    const fieldVal = (hit.fields as Record<string, unknown> | undefined)?.['entity.id'];
-    const id = Array.isArray(fieldVal) ? (fieldVal[0] as string) : (fieldVal as string | undefined);
-    if (id) existing.add(id);
+
+  for (let chunkIndex = 0; chunkIndex < chunkCount; chunkIndex++) {
+    const chunk = ids.slice(
+      chunkIndex * TARGET_VALIDATION_CHUNK_SIZE,
+      (chunkIndex + 1) * TARGET_VALIDATION_CHUNK_SIZE
+    );
+    const result = await esClient
+      .search({
+        index,
+        size: chunk.length,
+        _source: false,
+        query: { terms: { 'entity.id': chunk } },
+        fields: ['entity.id'],
+      })
+      .catch((err: unknown) => {
+        throw new Error(
+          `Target ID validation failed on chunk ${chunkIndex + 1}/${chunkCount} ` +
+            `(${chunk.length} of ${ids.length} candidates) against "${index}": ${errMsg(err)}`,
+          { cause: err }
+        );
+      });
+
+    for (const hit of result.hits.hits) {
+      const fieldVal = (hit.fields as Record<string, unknown> | undefined)?.['entity.id'];
+      const id = Array.isArray(fieldVal)
+        ? (fieldVal[0] as string)
+        : (fieldVal as string | undefined);
+      if (id) existing.add(id);
+    }
   }
   return existing;
 };
@@ -185,7 +219,8 @@ export const writeEntityIds = async (
   records: EntityRelationshipRecord[],
   esClient: ElasticsearchClient,
   namespace: string,
-  validateTargetIds = false
+  validateTargetIds = false,
+  logPrefix = ''
 ): Promise<WriteEntityIdsResult & WriteEntityIdsPageState> => {
   if (records.length === 0) return EMPTY_RESULT;
 
@@ -216,7 +251,7 @@ export const writeEntityIds = async (
     targetIdsNotInStore = pruneNonExistingTargets(merged, validTargetIds);
     if (targetIdsNotInStore > 0) {
       logger.info(
-        `Dropped ${targetIdsNotInStore} target EUIDs that have no entity document in the store`
+        `${logPrefix} Dropped ${targetIdsNotInStore} target EUIDs that have no entity document in the store`
       );
     }
   }
@@ -253,7 +288,7 @@ export const writeEntityIds = async (
       succeededEntityIds: new Set<string>(),
     };
 
-  logger.info(`Writing relationship ids for ${objects.length} entity records`);
+  logger.info(`${logPrefix} Writing relationship ids for ${objects.length} entity records`);
   const responseErrors = await crudClient.bulkUpdateEntity({ objects, force: true });
 
   const missingErrors = responseErrors.filter((e) => e.status === 404);
@@ -266,15 +301,17 @@ export const writeEntityIds = async (
   // summary so the caller (task scheduler, alerting) can react.
   if (missingErrors.length > 0) {
     logger.info(
-      `Skipped ${missingErrors.length} records: actor entities not yet in store ` +
+      `${logPrefix} Skipped ${missingErrors.length} records: actor entities not yet in store ` +
         `(extraction lag, namespace mismatch, or suppression)`
     );
   }
   if (realErrors.length > 0) {
-    logger.error(`Failed to write ${realErrors.length} records: ${JSON.stringify(realErrors)}`);
+    logger.error(
+      `${logPrefix} Failed to write ${realErrors.length} records: ${JSON.stringify(realErrors)}`
+    );
   }
 
-  logger.info(`Wrote relationship ids for ${updated} entities`);
+  logger.info(`${logPrefix} Wrote relationship ids for ${updated} entities`);
 
   // `bulkUpdateEntity` returns hashed EUIDs in `_id`, not raw entity IDs, so we
   // hash each entityId before checking. Count one per entity per rel-type (not per

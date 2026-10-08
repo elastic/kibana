@@ -102,13 +102,24 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
     await page.route(
       (url) => /\/api\/fleet\/cloud_onboarding_deployments\/dep-e2e-001$/.test(url.pathname),
       (route) =>
-        route.request().method() === 'PUT'
-          ? route.fulfill({
-              status: 200,
-              contentType: 'application/json',
-              body: JSON.stringify({ item: { id: 'dep-e2e-001' } }),
-            })
-          : route.continue()
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          // GET (post-deploy drift check) must return a clean SO so Next is enabled.
+          body: JSON.stringify({
+            item:
+              route.request().method() === 'GET'
+                ? {
+                    id: 'dep-e2e-001',
+                    provider: 'aws',
+                    connectorId: 'connector-test-123',
+                    mechanisms: ['managed_integration'],
+                    services: ['elb'],
+                    serviceVars: {},
+                  }
+                : { id: 'dep-e2e-001' },
+          }),
+        })
     );
     await page.route(
       (url) => /\/api\/fleet\/managed_integrations$/.test(url.pathname),
@@ -175,10 +186,7 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
     expect(page.url()).toContain('deploymentId=dep-e2e-resume');
   });
 
-  test('static-keys ?deploymentId= resume renders StaticKeysReplaceView', async ({
-    browserAuth,
-    page,
-  }) => {
+  test('static-keys ?deploymentId= resume renders the key form', async ({ browserAuth, page }) => {
     await page.route(
       (url) => /\/api\/fleet\/cloud_onboarding_deployments\/dep-static-resume$/.test(url.pathname),
       (route) =>
@@ -207,9 +215,9 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
       hash: 'authenticate-and-deploy',
     });
 
-    // Static-keys resume shows the Replace form with hidden credential toggles.
+    // Static-keys resume shows the key form (plain inputs: no stored secrets are mocked here).
     await expect(page.testSubj.locator('managedIntegrationsSection')).toBeVisible();
-    await expect(page.testSubj.locator('staticKeysReplace-accessKeyId-toggle')).toBeVisible();
-    await expect(page.testSubj.locator('staticKeysReplace-secretAccessKey-toggle')).toBeVisible();
+    await expect(page.testSubj.locator('awsStaticKeysForm-accessKeyId')).toBeVisible();
+    await expect(page.testSubj.locator('awsStaticKeysForm-secretAccessKey')).toBeVisible();
   });
 });

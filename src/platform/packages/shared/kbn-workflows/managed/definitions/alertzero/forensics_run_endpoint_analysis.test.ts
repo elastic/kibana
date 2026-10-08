@@ -12,9 +12,9 @@ import {
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW,
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
 } from '.';
+import { ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID } from './create_proposal';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './forensics_endpoint_analysis.yaml';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
-import { CREATE_PROPOSAL_WORKFLOW_ID } from '../proposals';
 
 interface YamlStep {
   name: string;
@@ -66,6 +66,21 @@ const evaluate = (expression: string, context: Record<string, unknown>): unknown
   );
 
 describe('Endpoint analysis run', () => {
+  it('records the forensic execution on the verified investigation before processing it', () => {
+    const validRequest = stepByName('when_ki_valid');
+    expect(validRequest?.condition).toContain('steps.resolve_request.output.has_request == true');
+    expect(validRequest?.condition).toContain('steps.verify_investigation.output.metadata != null');
+    expect(validRequest?.steps?.[0]).toEqual({
+      name: 'append_workflow_execution',
+      type: 'investigations.appendWorkflowExecutionId',
+      'on-failure': { continue: true },
+      with: {
+        conversationId: '{{ steps.resolve_request.output.investigation_id }}',
+        workflowExecutionId: '{{ execution.id }}',
+      },
+    });
+  });
+
   it('is the untagged global forensic pass, dispatched rather than scheduled', () => {
     expect(ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW.id).toBe(
       ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID
@@ -544,7 +559,7 @@ describe('Endpoint analysis run', () => {
     const journalSteps = allSteps.filter(
       ({ with: withInputs }) =>
         (withInputs as { 'workflow-id'?: string } | undefined)?.['workflow-id'] ===
-        '{{ consts.journal_note }}'
+        'system-alertzero-journal-note'
     );
 
     it('narrates problem paths and the assessment as journal notes rather than attachments', () => {
@@ -560,7 +575,9 @@ describe('Endpoint analysis run', () => {
         'journal_rationale',
         'journal_timeline',
       ]);
-      expect(definition.consts?.journal_note).toBe('system-alertzero-journal-note');
+      expect(
+        journalSteps.every(({ with: withInputs }) => withInputs?.['run-as-mode'] === 'inherit')
+      ).toBe(true);
     });
 
     // A missing discovery alert is narrated and then falls through to the no-host
@@ -616,7 +633,7 @@ describe('Endpoint analysis run', () => {
       expect(rationaleCap + longerPrefix.length).toBeLessThanOrEqual(JOURNAL_MESSAGE_MAX_LENGTH);
       expect(journal?.type).toBe('workflow.execute');
       expect((journal?.with as { 'workflow-id'?: string })?.['workflow-id']).toBe(
-        '{{ consts.journal_note }}'
+        'system-alertzero-journal-note'
       );
       const message = (journal?.with as { inputs?: { message?: string } })?.inputs?.message ?? '';
       expect(message).toContain('{{ steps.forensic_analysis.output.structured_output.rationale }}');
@@ -1031,7 +1048,9 @@ describe('Endpoint analysis run', () => {
       };
       const inputs = proposeAction?.inputs;
 
-      expect(proposeAction?.['workflow-id']).toBe(CREATE_PROPOSAL_WORKFLOW_ID);
+      // The bridge, not the gate: it owns `origin`, so containment proposals
+      // land in the queue AlertZero actually reads.
+      expect(proposeAction?.['workflow-id']).toBe(ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID);
       expect(inputs?.confidence).toBe("{{ foreach.item.confidence | default: '' }}");
       expect(inputs?.impact).toBeUndefined();
       expect(inputs?.category).toBeUndefined();

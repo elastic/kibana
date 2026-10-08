@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     // Legacy `externalReference` / `persistableState` wire shapes are only accepted
-    // for migrated type ids (EXTERNAL_REFERENCE_TYPE_MAP / PERSISTABLE_STATE_TYPE_MAP),
+    // for mapped type ids (EXTERNAL_REFERENCE_TYPE_MAP / PERSISTABLE_STATE_LEGACY_TO_UNIFIED_MAP),
     // which route through the transformer to a registered unified type. An unmapped id
     // has no unified target and must be rejected — this replaces the removed
     // custom-ER/PS-type registration coverage.

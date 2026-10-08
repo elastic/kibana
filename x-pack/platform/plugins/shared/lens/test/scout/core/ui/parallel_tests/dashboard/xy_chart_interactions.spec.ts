@@ -39,6 +39,9 @@ spaceTest.describe(
       const imported = await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE_PATHS.LENS_BASIC);
       xyVisId = getImportedSavedObjectId(imported, 'lens', testData.LENS_BASIC_TITLES.XY_VIS);
       await suiteSetup.beforeAll({ scoutSpace, apiServices });
+      // Clicks are offset to a 3-hour bar. The saved vis uses an auto interval,
+      // which is 1 hour at the default target of 100.
+      await scoutSpace.uiSettings.set({ 'histogram:barTarget': 50 });
       xyDashboardId = await createDashboardWithLibraryLensPanel(apiServices, scoutSpace.id, {
         dashboardTitle: `lns-xy-${scoutSpace.id}`,
         lensSavedObjectId: xyVisId,
@@ -47,7 +50,10 @@ spaceTest.describe(
 
     spaceTest.beforeEach(suiteSetup.beforeEach);
 
-    spaceTest.afterAll(suiteSetup.afterAll);
+    spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {
+      await scoutSpace.uiSettings.unset('histogram:barTarget');
+      await suiteSetup.afterAll({ apiServices, scoutSpace });
+    });
 
     spaceTest('adds filters and time range by clicking', async ({ page, pageObjects }) => {
       const { dashboard } = pageObjects;

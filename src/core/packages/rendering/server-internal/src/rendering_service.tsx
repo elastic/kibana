@@ -300,6 +300,7 @@ export class RenderingService {
       translationHashes,
       serverBasePath,
       allowLocaleCookie: i18n.allowLocaleCookie,
+      detectBrowserLocale: i18n.detectBrowserLocale,
     });
     // When the effective locale is English, the browser's pre-allocated `intl`
     // instance is already wired to English (see kbn-i18n module initialisation).

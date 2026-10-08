@@ -5,47 +5,47 @@
  * 2.0.
  */
 
-import { episodeSubject } from './subject';
+import { alertSubject } from './subject';
 
-describe('episodeSubject', () => {
-  it('returns rule_id for internal episodes', () => {
-    expect(episodeSubject({ source: 'internal', rule_id: 'rule-1', space_id: 'default' })).toBe(
+describe('alertSubject', () => {
+  it('returns rule_id for internal alerts', () => {
+    expect(alertSubject({ source: 'internal', rule_id: 'rule-1', space_id: 'default' })).toBe(
       'rule-1'
     );
   });
 
-  it('returns a space-scoped source for external episodes', () => {
-    expect(episodeSubject({ source: 'pagerduty', rule_id: null, space_id: 'default' })).toBe(
+  it('returns a space-scoped source for external alerts', () => {
+    expect(alertSubject({ source: 'pagerduty', rule_id: null, space_id: 'default' })).toBe(
       'default::pagerduty'
     );
   });
 
   it('returns different subjects for the same vendor in different spaces', () => {
-    expect(episodeSubject({ source: 'pagerduty', rule_id: null, space_id: 'space-a' })).not.toBe(
-      episodeSubject({ source: 'pagerduty', rule_id: null, space_id: 'space-b' })
+    expect(alertSubject({ source: 'pagerduty', rule_id: null, space_id: 'space-a' })).not.toBe(
+      alertSubject({ source: 'pagerduty', rule_id: null, space_id: 'space-b' })
     );
   });
 
-  it('throws when an external episode has no space_id', () => {
-    expect(() => episodeSubject({ source: 'pagerduty', rule_id: null, space_id: null })).toThrow(
-      'episodeSubject: external episode has no space_id'
+  it('throws when an external alert has no space_id', () => {
+    expect(() => alertSubject({ source: 'pagerduty', rule_id: null, space_id: null })).toThrow(
+      'alertSubject: external alert has no space_id'
     );
   });
 
   it('returns rule_id when source is null (treated as internal)', () => {
-    expect(episodeSubject({ source: null, rule_id: 'rule-1' })).toBe('rule-1');
+    expect(alertSubject({ source: null, rule_id: 'rule-1' })).toBe('rule-1');
   });
 
   it('returns rule_id when source is undefined (treated as internal)', () => {
-    expect(episodeSubject({ source: undefined, rule_id: 'rule-1' })).toBe('rule-1');
+    expect(alertSubject({ source: undefined, rule_id: 'rule-1' })).toBe('rule-1');
   });
 
   it('throws when source is null/internal and rule_id is also null (malformed data)', () => {
-    expect(() => episodeSubject({ source: null, rule_id: null })).toThrow(
-      'episodeSubject: episode has neither a valid source nor a rule_id'
+    expect(() => alertSubject({ source: null, rule_id: null })).toThrow(
+      'alertSubject: alert has neither a valid source nor a rule_id'
     );
-    expect(() => episodeSubject({ source: 'internal', rule_id: null })).toThrow(
-      'episodeSubject: episode has neither a valid source nor a rule_id'
+    expect(() => alertSubject({ source: 'internal', rule_id: null })).toThrow(
+      'alertSubject: alert has neither a valid source nor a rule_id'
     );
   });
 });

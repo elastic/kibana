@@ -11,7 +11,7 @@ import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import { map } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map } from 'rxjs';
 import { AsyncLocalStorage } from 'async_hooks';
 import type { TrackUserActionParams, UserActivityEventType } from '@kbn/core-user-activity-server';
 import {
@@ -25,7 +25,7 @@ import type {
   InternalUserActivityServiceStart,
 } from './types';
 import { shouldLog } from './user_activity_filters';
-import { shapeServerlessOtelAppenders } from './user_activity_otel_transform';
+import { shapeUserActivityOtelAppenders } from './user_activity_otel_transform';
 
 /** @internal */
 interface UserActivitySetupDeps {
@@ -69,13 +69,19 @@ export class UserActivityService
 
     const isServerless = this.coreContext.env.packageInfo.buildFlavor === 'serverless';
 
+    // presence of `xpack.cloud.id` marks Elastic Cloud
+    const isElasticCloud$ = this.coreContext.configService.getConfig$().pipe(
+      map((rawConfig) => Boolean(rawConfig.get(['xpack', 'cloud', 'id']))),
+      // dedupe: raw config re-emits on every dynamic config override, and re-emitting here
+      // would needlessly reconfigure the user_activity logging context on unrelated changes
+      distinctUntilChanged()
+    );
+
     logging.configure(
       ['user_activity'],
-      config$.pipe(
-        map((config) => ({
-          appenders: isServerless
-            ? shapeServerlessOtelAppenders(config.appenders)
-            : config.appenders,
+      combineLatest([config$, isElasticCloud$]).pipe(
+        map(([config, isElasticCloud]) => ({
+          appenders: shapeUserActivityOtelAppenders(config.appenders, isServerless, isElasticCloud),
           loggers: [
             {
               name: 'event',
@@ -106,13 +112,7 @@ export class UserActivityService
     this.enabled = false;
   }
 
-  private trackUserAction = ({
-    message,
-    event,
-    object,
-    metadata,
-    error,
-  }: TrackUserActionParams) => {
+  private trackUserAction = ({ message, event, object, kibana, error }: TrackUserActionParams) => {
     if (!this.enabled || !shouldLog(event.action, this.filters)) return;
 
     const injectedContext = this.getInjectedContext();
@@ -133,10 +133,10 @@ export class UserActivityService
         type: event.type as UserActivityEventType[],
         outcome: event.outcome ?? 'unknown',
       },
-      ...(metadata ? { metadata } : {}),
       ...(error ? { error } : {}),
       ...injectedContext,
       kibana: {
+        ...kibana,
         ...injectedContext.kibana,
         object,
         ...(isSavedObject ? { saved_object: { type: object.type, id: object.id } } : {}),

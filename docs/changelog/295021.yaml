@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/295021
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: 'Announce query rule flyout tooltips when using VoiceOver in Google Chrome'
+description: Fixes the Rule ID, Metadata field, and Values tooltips on the Query Rules create rule page not being announced by screen readers in Chrome.

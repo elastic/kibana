@@ -177,9 +177,16 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(200);
-      const body = response.body as { hasData?: boolean };
+      const body = response.body as {
+        hasData?: boolean;
+        configuration?: { metricAlias?: string };
+      };
       expect(body.hasData).toBeDefined();
       expect(body.hasData).toBe(true);
+      // `createMetricsHasData` reads `configuration.metricAlias` off this payload
+      // to populate the Observability Overview's `indices` field, so the shape is
+      // part of the contract, not just the boolean.
+      expect(body.configuration?.metricAlias).toBe(DEFAULT_METRIC_ALIAS);
     });
 
     // The FTR suite queried `?modules=system|nginx`, which the route's query codec no longer

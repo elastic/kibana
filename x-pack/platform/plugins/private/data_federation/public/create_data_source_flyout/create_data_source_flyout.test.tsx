@@ -78,7 +78,7 @@ const renderFederatedS3EditFlyout = (onSave: jest.Mock) => {
     datasetsClient: createDatasetsClientMock(),
     toasts: createToastsMock(),
     docLinks: createDocLinksMock(),
-    featureFlags: { enableFederatedIdentityAuth: true },
+    featureFlags: {},
     cloudInfo: {
       jwtIssuer: 'https://issuer.example.com',
       deploymentId: 'deployment:abc123',
@@ -100,7 +100,73 @@ const renderFederatedS3EditFlyout = (onSave: jest.Mock) => {
   );
 };
 
+const renderCreateFlyout = (cloudInfo?: DataFederationKibanaServices['cloudInfo']) => {
+  const services: DataFederationKibanaServices = {
+    dataSourcesClient: createClientMock(),
+    datasetsClient: createDatasetsClientMock(),
+    toasts: createToastsMock(),
+    docLinks: createDocLinksMock(),
+    featureFlags: {},
+    cloudInfo,
+  };
+
+  return render(
+    <EuiProvider>
+      <KibanaContextProvider services={services}>
+        <CreateDataSourceFlyout
+          onClose={jest.fn()}
+          onSave={jest.fn().mockResolvedValue(null)}
+          existingDataSourceNames={[]}
+        />
+      </KibanaContextProvider>
+    </EuiProvider>
+  );
+};
+
 describe('CreateDataSourceFlyout', () => {
+  describe('in create mode', () => {
+    it('offers and selects federated identity when an issuer is present', async () => {
+      const { getByTestId, queryByTestId, findAllByRole, getByRole } = renderCreateFlyout({
+        jwtIssuer: 'https://issuer.example.com',
+        deploymentId: 'deployment:abc123',
+        isServerless: false,
+      });
+
+      expect(
+        getByTestId('createDataSourceFlyoutAuthenticationLearnMore-federated_identity')
+      ).toBeInTheDocument();
+      expect(getByTestId('createDataSourceFlyoutS3FederatedRoleArn')).toBeInTheDocument();
+      expect(queryByTestId('createDataSourceFlyoutS3AccessKey')).not.toBeInTheDocument();
+
+      fireEvent.click(getByTestId('createDataSourceFlyoutAuthentication'));
+
+      expect(await findAllByRole('option')).toHaveLength(3);
+      expect(
+        getByRole('option', {
+          name: new RegExp(authenticationStrings.federatedIdentityLabel),
+          selected: true,
+        })
+      ).toBeInTheDocument();
+    });
+
+    it('hides federated identity when no issuer is present', async () => {
+      const { getByTestId, queryByTestId, findAllByRole, queryByRole } = renderCreateFlyout();
+
+      expect(
+        getByTestId('createDataSourceFlyoutAuthenticationLearnMore-access_and_secret_keys')
+      ).toBeInTheDocument();
+      expect(getByTestId('createDataSourceFlyoutS3AccessKey')).toBeInTheDocument();
+      expect(queryByTestId('createDataSourceFlyoutS3FederatedRoleArn')).not.toBeInTheDocument();
+
+      fireEvent.click(getByTestId('createDataSourceFlyoutAuthentication'));
+
+      expect(await findAllByRole('option')).toHaveLength(2);
+      expect(
+        queryByRole('option', { name: new RegExp(authenticationStrings.federatedIdentityLabel) })
+      ).not.toBeInTheDocument();
+    });
+  });
+
   it('renders core actions and disables save while saving', async () => {
     const toasts = createToastsMock();
     const client = createClientMock();
@@ -122,7 +188,6 @@ describe('CreateDataSourceFlyout', () => {
       name: 'ds',
       description: '',
       settings: {
-        region: '',
         endpoint: '',
         access_key: '',
         secret_key: '',
@@ -181,6 +246,13 @@ describe('CreateDataSourceFlyout', () => {
     );
 
     expect(queryByTestId('createDataSourceFlyoutS3Region')).not.toBeInTheDocument();
+    expect(
+      queryByText(
+        'Unique name for use in datasets. All lowercase, dash, underscore, and numbers are supported.'
+      )
+    ).toBeInTheDocument();
+    expect(queryByText('Description (optional)')).toBeInTheDocument();
+    expect(queryByText('A brief description to identify this data source.')).toBeInTheDocument();
     expect(queryByTestId('createDataSourceFlyoutConnectionSettingsToggle')).not.toBeInTheDocument();
 
     fireEvent.change(getByTestId('createDataSourceFlyoutName'), { target: { value: 'my-ds' } });

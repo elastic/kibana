@@ -10,9 +10,12 @@
 import React, { useMemo } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { CommentsButton } from '@kbn/dev-comments';
+import { useI18n } from '@kbn/i18n-react';
 import { createCommentsHostServices } from './host_services';
 
 export const CommentsItem = ({ core }: { core: CoreStart }) => {
-  const services = useMemo(() => createCommentsHostServices(core), [core]);
+  // Core's intl context: dates format in Kibana's locale.
+  const intl = useI18n();
+  const services = useMemo(() => createCommentsHostServices(core, intl), [core, intl]);
   return <CommentsButton services={services} />;
 };

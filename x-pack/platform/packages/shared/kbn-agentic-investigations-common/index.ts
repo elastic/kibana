@@ -9,6 +9,7 @@ export {
   EscalationQueue,
   EscalationCard,
   AssignToUsers,
+  AssigneeAvatarStack,
   EscalationMetaInfo,
   LinkedInvestigationsBadge,
   type EscalationQueueItem,
@@ -16,6 +17,7 @@ export {
 } from './src/components/escalation_queue';
 
 export { ActionButton } from './src/components/actions/action_button';
+export { getCopyLinkFlyoutAction } from './src/components/actions/copy_link_action';
 export {
   BaseActions,
   type BaseActionsProps,
@@ -59,15 +61,18 @@ export {
 } from './src/components/details/proposed_action_button';
 
 export {
-  AttachmentSummarySection,
-  type AttachmentSummarySectionProps,
-  AttachmentSummaryList,
-  type AttachmentSummaryListProps,
-  selectSummaryAttachments,
-  type SummaryAttachment,
-  SUMMARY_ATTACHMENT_TYPES,
-  type SummaryAttachmentType,
-} from './src/components/attachment_summary';
+  FlyoutGroupedAttachments,
+  createFlyoutGroupedAttachmentsRegistry,
+  GroupedAttachmentRow,
+  GroupedAttachmentsSection,
+  type FlyoutGroupedAttachmentDefinition,
+  type FlyoutGroupedAttachmentRendererProps,
+  type FlyoutGroupedAttachmentsRegistry,
+  type GroupedAttachmentRowAction,
+  type GroupedAttachmentRowProps,
+  type GroupedAttachmentsSectionProps,
+  type RegisterFlyoutGroupedAttachment,
+} from './src/components/grouped_attachments';
 
 export {
   registerAgenticInvestigationTemplateUI,
@@ -106,11 +111,12 @@ export {
   impactPills,
   investigationEntityIds,
   matchesEntityFilter,
+  useEntityFilter,
+  type ImpactFilterable,
   type ImpactPill,
 } from './src/components/filters/impact';
 
 export { BaseActionModal } from './src/components/modals/base_action_modal';
-export { AssignActionModal } from './src/components/modals/assign_action_modal';
 export { MODAL_TRANSLATIONS } from './src/components/modals/translations';
 export {
   InvestigationActionModals,

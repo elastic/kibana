@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import styled from '@emotion/styled';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,7 +23,6 @@ import { ConversationMetaInfo } from './conversation_meta_info';
 
 interface ConversationCardProps {
   investigation: Investigation;
-  hasBorder: boolean;
   /** Marks the card whose details flyout is currently open. */
   isSelected?: boolean;
   onClickRecommendedAction: BaseActionsProps['onClickRecommendedAction'];
@@ -35,6 +35,7 @@ interface ConversationCardProps {
   canManageEscalations?: boolean;
   /** When true the "Close investigation" action appears. */
   canCloseInvestigation?: boolean;
+  onCopyLink: BaseActionsProps['onCopyLink'];
   /**
    * Optional: render the assignee picker widget for this investigation. Supplied by the page
    * so that hook calls (profile fetch, mutation) stay outside the package.
@@ -42,12 +43,42 @@ interface ConversationCardProps {
    * trigger the card click.
    */
   renderAssignees: (investigation: Investigation) => React.ReactNode;
+  /**
+   * Optional: render a badge for an approve/decline still being submitted, or nothing otherwise.
+   * Supplied by the page so the mutation state stays outside the package.
+   */
+  renderInFlightStatus?: (investigation: Investigation) => React.ReactNode;
 }
+
+const StyledEuiPanel = styled(EuiPanel, {
+  shouldForwardProp: (prop) => !prop.startsWith('$'),
+})<{ $isSelected: boolean }>(({ theme: { euiTheme }, $isSelected }) => ({
+  // 16px on the right only: the 32px icon buttons carry 8px of their own inset,
+  // so their glyphs land at 24px from the edge like the text on the left.
+  padding: `${euiTheme.size.l} ${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.l}`,
+  cursor: 'pointer',
+  borderRadius: 0,
+  '&:not(:last-child)': {
+    borderBottom: `1px solid ${euiTheme.colors.disabled}`,
+  },
+  // The last row rounds to the queue panel's corners so the hover fill does not
+  // square them off. A footer after the rows keeps it from being the last child.
+  '&:last-child': {
+    borderRadius: `0 0 ${euiTheme.border.radius.panel} ${euiTheme.border.radius.panel}`,
+  },
+  boxSizing: 'border-box',
+  backgroundColor: $isSelected ? euiTheme.colors.backgroundBaseInteractiveSelect : undefined,
+  '&:hover': {
+    backgroundColor: $isSelected
+      ? euiTheme.colors.backgroundBaseInteractiveSelect
+      : euiTheme.colors.backgroundBaseSubdued,
+    boxShadow: 'none',
+  },
+}));
 
 export const ConversationCard = memo<ConversationCardProps>(
   ({
     investigation,
-    hasBorder,
     isSelected = false,
     onClickRecommendedAction,
     onClickAction,
@@ -56,33 +87,21 @@ export const ConversationCard = memo<ConversationCardProps>(
     chatHref,
     canManageEscalations,
     canCloseInvestigation,
+    onCopyLink,
     renderAssignees,
+    renderInFlightStatus,
   }) => {
     const { euiTheme } = useEuiTheme();
 
     return (
-      <EuiPanel
+      <StyledEuiPanel
         paddingSize="none"
         role="button"
         tabIndex={0}
         aria-label={investigation.title}
         aria-current={isSelected || undefined}
         borderRadius="none"
-        css={{
-          // Asymmetric by design — off EUI's padding scale, which has no 20px step.
-          padding: '20px 16px 24px 24px',
-          cursor: 'pointer',
-          borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
-          borderRadius: hasBorder ? 'none' : `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
-          boxSizing: 'border-box',
-          backgroundColor: isSelected ? euiTheme.colors.backgroundBaseInteractiveSelect : undefined,
-          '&:hover': {
-            backgroundColor: isSelected
-              ? euiTheme.colors.backgroundBaseInteractiveSelect
-              : euiTheme.colors.backgroundBaseSubdued,
-            boxShadow: 'none',
-          },
-        }}
+        $isSelected={isSelected}
         hasBorder={false}
         hasShadow={false}
         onClick={() => onClickCard(investigation.id)}
@@ -96,7 +115,9 @@ export const ConversationCard = memo<ConversationCardProps>(
         {/* The age and the actions share the top row, which leaves the title and
             summary the full width of the card rather than the actions' leftovers. */}
         <EuiFlexGroup gutterSize="xs" responsive direction="column">
-          <EuiFlexItem grow={false}>
+          {/* The controls below overhang the row by 8px on each side; give the 8px
+              back under the row so the age-to-title gap stays where it was. */}
+          <EuiFlexItem grow={false} css={{ paddingBlockEnd: euiTheme.size.s }}>
             <EuiFlexGroup
               alignItems="center"
               gutterSize="l"
@@ -105,10 +126,20 @@ export const ConversationCard = memo<ConversationCardProps>(
               direction="row"
             >
               <EuiFlexItem grow={false}>
-                <ConversationMetaInfo createdAt={investigation.createdAt} />
+                <ConversationMetaInfo
+                  createdAt={investigation.createdAt}
+                  inFlightStatus={renderInFlightStatus?.(investigation)}
+                />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              <EuiFlexItem
+                grow={false}
+                // The 32px icon buttons would otherwise set the row height and centre
+                // the 16px age text 8px below the padding line. Let them overhang the
+                // padding instead so the text (and the icon glyphs) sit at the 24px inset
+                // while the actions render on one line (at and above breakpoint `m`).
+                css={{ marginBlock: `-${euiTheme.size.s}` }}
+              >
+                <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
                   {/*
                    * Stop propagation so interacting with the assignee picker
                    * (clicking the + button or selecting a user) does not trigger the card click.
@@ -129,6 +160,7 @@ export const ConversationCard = memo<ConversationCardProps>(
                       chatHref={chatHref}
                       canManageEscalations={canManageEscalations}
                       canCloseInvestigation={canCloseInvestigation}
+                      onCopyLink={onCopyLink}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -148,7 +180,7 @@ export const ConversationCard = memo<ConversationCardProps>(
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
-      </EuiPanel>
+      </StyledEuiPanel>
     );
   }
 );

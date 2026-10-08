@@ -11,6 +11,8 @@ import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV2 } 
 import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV3 } from './v3';
 import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV4 } from './v4';
 import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV5 } from './v5';
+import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV6 } from './v6';
+import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV7 } from './v7';
 
 /** Attributes as stored up to model version 3, where artifacts carried `value: string`. */
 export type RuleSavedObjectAttributesV2 = TypeOf<typeof ruleSavedObjectAttributesSchemaV2>;
@@ -21,8 +23,11 @@ export type RuleSavedObjectAttributesV2 = TypeOf<typeof ruleSavedObjectAttribute
  */
 export type RuleSavedObjectAttributesV4 = TypeOf<typeof ruleSavedObjectAttributesSchemaV4>;
 
-/** Latest attributes shape, introduced by model version 7. */
-export type RuleSavedObjectAttributes = TypeOf<typeof ruleSavedObjectAttributesSchemaV5>;
+/** Introduced by model version 7. */
+export type RuleSavedObjectAttributesV5 = TypeOf<typeof ruleSavedObjectAttributesSchemaV5>;
+
+/** Latest attributes shape, introduced by model version 9. */
+export type RuleSavedObjectAttributes = TypeOf<typeof ruleSavedObjectAttributesSchemaV7>;
 
 export {
   ruleSavedObjectAttributesSchemaV1,
@@ -30,4 +35,6 @@ export {
   ruleSavedObjectAttributesSchemaV3,
   ruleSavedObjectAttributesSchemaV4,
   ruleSavedObjectAttributesSchemaV5,
+  ruleSavedObjectAttributesSchemaV6,
+  ruleSavedObjectAttributesSchemaV7,
 };

@@ -22,6 +22,8 @@ import {
   registerEscalationTemplateUI,
 } from './register';
 import type { RenderAssignees, RenderLinkedInvestigations } from './types';
+import { ACTIONS_TRANSLATIONS } from '../components/actions/translations';
+import { createFlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
 
 const conversation: Conversation = {
   id: 'conversation-1',
@@ -54,10 +56,15 @@ const createFakeService = () => {
   const tabs = new Map<string, ConversationTemplateTabDefinition>();
   const templates = new Map<string, ConversationTemplateUIDefinition>();
   const openFullscreenConversation = jest.fn();
+  const getConversationUrl = jest.fn(
+    ({ conversationId, agentId }: { conversationId: string; agentId: string }) =>
+      `http://localhost/app/agent_builder/agents/${agentId}/conversations/${conversationId}?openConversationDetails=true`
+  );
   const context: ConversationTemplateUIContext = {
     attachmentsService,
     openSidebarConversation: jest.fn(),
     openFullscreenConversation,
+    getConversationUrl,
   };
 
   const contract: ConversationTemplateServiceStartContract = {
@@ -100,8 +107,10 @@ const register = (
   registerAgenticInvestigationTemplateUI({
     conversationTemplates: contract,
     templateId: 'investigation',
+    groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
     name: 'Investigation',
     icon: 'securitySignalDetected',
+    onCopyLink: () => true,
     ...overrides,
   });
 
@@ -169,6 +178,22 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     expect(definition?.detailsFlyout?.footer).toBeDefined();
   });
 
+  it('adds a Copy link flyout action that calls onCopyLink', () => {
+    const onCopyLink = jest.fn().mockReturnValue(true);
+    const { contract } = createFakeService();
+    register(contract, { onCopyLink });
+
+    const getActions =
+      contract.getTemplateUIDefinition('investigation')?.detailsFlyout?.trailingActions;
+    const [action] = getActions?.({ conversation }) ?? [];
+
+    expect(action).toMatchObject({ iconType: 'link', 'aria-label': 'Copy link' });
+    action.onClick?.({} as never);
+    expect(onCopyLink).toHaveBeenCalledWith(
+      'http://localhost/app/agent_builder/agents/agent/conversations/conversation-1?openConversationDetails=true'
+    );
+  });
+
   it('gives each solution its own tab ids, so a second one does not collide', () => {
     const { contract } = createFakeService();
 
@@ -232,6 +257,20 @@ describe('registerAgenticInvestigationTemplateUI', () => {
       agentId: 'agent',
       openDetails: true,
     });
+  });
+
+  it('hides the footer slot Open in chat when the flyout was opened from within chat', async () => {
+    const { contract } = createFakeService();
+    // The escalation button loads on the same lazy chunk as Open in chat; wiring one in gives a
+    // reliable element to await, so the assertion below cannot pass merely because the chunk
+    // has not resolved yet (the Suspense fallback is `null`).
+    register(contract, { renderEscalationModal: jest.fn(() => <div>Escalation modal</div>) });
+    const Footer = getSlot(contract, 'investigation', 'footer');
+
+    renderWithKibanaRenderContext(<Footer conversation={conversation} isOpenedFromChat />);
+
+    await screen.findByText(ACTIONS_TRANSLATIONS.buttons.openEscalation);
+    expect(screen.queryByTestId('investigationFlyoutOpenChat')).not.toBeInTheDocument();
   });
 
   it('calls renderAssignees with the conversation id, templateId, uids, and refetchConversation', async () => {
