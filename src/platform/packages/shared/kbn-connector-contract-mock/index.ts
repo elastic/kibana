@@ -9,6 +9,8 @@
 
 export { createContractMockFetch } from './src/fetch/create_contract_mock_fetch';
 export { sampleBoundaryResponse, sampleResponse } from './src/engine/sample_response';
+export { sampleJsonSchema } from './src/engine/sample_schema';
+export type { SampleJsonSchemaOptions } from './src/engine/sample_schema';
 export type {
   ContractCall,
   ContractMock,
@@ -44,6 +46,7 @@ export { applyOverlay, InvalidOverlayError, JsonPathError } from './src/overlay'
 export type { OverlayAction, OverlayDocument, OverlayFinding, OverlayResult } from './src/overlay';
 export {
   convertDiscovery,
+  convertSwagger2,
   InvalidSchemaError,
   isDiscoveryDocument,
   loadContractOperations,

@@ -11,10 +11,14 @@ import type { ContractResponse, Responder, Violation } from '../contract/types';
 import type { ContractOperation } from '../openapi/types';
 import { validateResponse } from '../openapi/validate_response';
 
-/** Identifies an operation by method and path template, e.g. `GET /repos/{owner}/{repo}`. */
+/**
+ * Identifies an operation by method and path template, e.g. `GET /repos/{owner}/{repo}`. With
+ * named specs, `source` restricts it to one of them; without, it names the operation in every spec.
+ */
 export interface OperationRef {
   readonly method: string;
   readonly path: string;
+  readonly source?: string;
 }
 
 export interface StoredResponse {
@@ -74,6 +78,21 @@ export interface ResponseEngine {
 export const toOperationKey = ({ method, path }: OperationRef): string =>
   `${method.toUpperCase()} ${path}`;
 
+/** Returns a lookup of the operations an `OperationRef` names. */
+export const createOperationIndex = (
+  operations: readonly ContractOperation[]
+): ((ref: OperationRef) => readonly ContractOperation[]) => {
+  const byKey = new Map<string, ContractOperation[]>();
+  for (const operation of operations) {
+    const key = toOperationKey(operation);
+    byKey.set(key, [...(byKey.get(key) ?? []), operation]);
+  }
+  return (ref) =>
+    (byKey.get(toOperationKey(ref)) ?? []).filter(
+      ({ spec }) => ref.source === undefined || spec.source === ref.source
+    );
+};
+
 const toContractResponse = ({ status, headers = {}, body }: StoredResponse): ContractResponse => {
   const hasContentType = Object.keys(headers).some((name) => name.toLowerCase() === 'content-type');
   // Stored bodies that aren't text are JSON, which is how the mock serializes them.
@@ -102,34 +121,37 @@ export const createResponseEngine = (
   operations: readonly ContractOperation[],
   { fixtures = [], recordings = [], fallback }: ResponseEngineOptions
 ): ResponseEngine => {
-  const byKey = new Map(operations.map((operation) => [toOperationKey(operation), operation]));
+  const findOperations = createOperationIndex(operations);
   const served = new Map<ContractOperation, ContractResponse>();
   const recorded = new Map<ContractOperation, RecordedExchange[]>();
   const withFixture = new Set<ContractOperation>();
   const rejected: RejectedResponse[] = [];
 
-  const add = (source: RejectedResponse['source'], entry: ResponseFixture | RecordedExchange) => {
+  const add = (origin: RejectedResponse['source'], entry: ResponseFixture | RecordedExchange) => {
     const { operation: ref, response } = entry;
     const key = toOperationKey(ref);
-    const operation = byKey.get(key);
-    if (!operation) {
-      rejected.push({ source, operation: key, violations: [NOT_IN_SPEC] });
+    const matched = findOperations(ref);
+    if (matched.length === 0) {
+      rejected.push({ source: origin, operation: key, violations: [NOT_IN_SPEC] });
       return;
     }
     const contractResponse = toContractResponse(response);
-    // Fixtures are deliberate overrides; their violations show up in `calls` when served.
-    const violations = source === 'recording' ? validateResponse(operation, contractResponse) : [];
-    if (violations.length > 0) {
-      rejected.push({ source, operation: key, violations });
-      return;
-    }
-    if (source === 'fixture') {
-      withFixture.add(operation);
-    } else if (!withFixture.has(operation)) {
-      recorded.set(operation, [...(recorded.get(operation) ?? []), entry]);
-    }
-    if (!served.has(operation)) {
-      served.set(operation, contractResponse);
+    for (const operation of matched) {
+      // Fixtures are deliberate overrides; their violations show up in `calls` when served.
+      const violations =
+        origin === 'recording' ? validateResponse(operation, contractResponse) : [];
+      if (violations.length > 0) {
+        rejected.push({ source: origin, operation: key, violations });
+      } else {
+        if (origin === 'fixture') {
+          withFixture.add(operation);
+        } else if (!withFixture.has(operation)) {
+          recorded.set(operation, [...(recorded.get(operation) ?? []), entry]);
+        }
+        if (!served.has(operation)) {
+          served.set(operation, contractResponse);
+        }
+      }
     }
   };
 

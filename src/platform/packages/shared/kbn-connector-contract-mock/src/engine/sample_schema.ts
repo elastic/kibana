@@ -10,7 +10,7 @@
 import { appendPointer, getAtPointer, refToPointer } from '../openapi/json_pointer';
 import type { SchemaNode } from '../openapi/schema_walk';
 import { isRecord } from '../openapi/schema_walk';
-import type { OpenApiDocument, SpecSchema } from '../openapi/types';
+import type { JsonSchema, OpenApiDocument, SpecSchema } from '../openapi/types';
 import { samplePattern } from './sample_pattern';
 
 // Beyond SHALLOW_DEPTH only required properties and `minItems` items are generated, which
@@ -172,6 +172,8 @@ export interface SampleOptions {
    * arrays and the last `enum` value, ignoring examples and defaults.
    */
   readonly boundary?: boolean;
+  /** Leaves out optional properties at every depth. */
+  readonly requiredOnly?: boolean;
 }
 
 /**
@@ -182,7 +184,7 @@ export interface SampleOptions {
 export const sampleSchema = (
   schema: unknown,
   document: OpenApiDocument,
-  { pointer, conforms, boundary = false }: SampleOptions = {}
+  { pointer, conforms, boundary = false, requiredOnly = false }: SampleOptions = {}
 ): unknown => {
   // `at` is the node's pointer; nodes merged from allOf parts have none, and their examples
   // are used unchecked.
@@ -254,7 +256,7 @@ export const sampleSchema = (
         const required = new Set(Array.isArray(node.required) ? node.required : []);
         const properties = isRecord(node.properties) ? node.properties : {};
         const sampled = Object.entries(properties).flatMap(([name, property]) => {
-          if (!expands && !required.has(name)) {
+          if ((requiredOnly || !expands) && !required.has(name)) {
             return [];
           }
           const value = child(property, 'properties', name);
@@ -313,3 +315,20 @@ export const sampleSchema = (
   };
   return sample(schema, pointer, 0);
 };
+
+export interface SampleJsonSchemaOptions {
+  /**
+   * `all` (the default) includes optional properties down to the depth below which only required
+   * ones are generated; `required` leaves them out at every depth.
+   */
+  readonly optional?: 'all' | 'required';
+}
+
+/**
+ * Samples a standalone JSON Schema, such as one generated from a zod schema, whose refs resolve
+ * against the schema itself (`#/$defs/...`). Examples and defaults are used unchecked.
+ */
+export const sampleJsonSchema = (
+  schema: JsonSchema,
+  { optional = 'all' }: SampleJsonSchemaOptions = {}
+): unknown => sampleSchema(schema, schema, { requiredOnly: optional === 'required' });

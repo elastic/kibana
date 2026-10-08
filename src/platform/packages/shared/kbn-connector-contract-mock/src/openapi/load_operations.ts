@@ -136,9 +136,13 @@ const getDialect = ({ openapi }: OpenApiDocument): ContractSpec['dialect'] => {
  * in a copy of the document, so their refs keep resolving against it and large specs such as
  * Microsoft Graph load quickly.
  */
-export const loadOperations = (source: OpenApiDocument): ContractOperation[] => {
-  const openApi = source.swagger === '2.0' ? convertSwagger2(source) : structuredClone(source);
-  const spec: ContractSpec = { document: openApi, dialect: getDialect(openApi) };
+export const loadOperations = (input: OpenApiDocument, source?: string): ContractOperation[] => {
+  const openApi = input.swagger === '2.0' ? convertSwagger2(input) : structuredClone(input);
+  const spec: ContractSpec = {
+    document: openApi,
+    dialect: getDialect(openApi),
+    ...(source === undefined ? {} : { source }),
+  };
   const { document } = spec;
   const resolve = (node: unknown, pointer: string) => resolveObject(document, node, pointer);
   const rootServers = toServers(document.servers) ?? [];
