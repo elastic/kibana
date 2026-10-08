@@ -142,7 +142,8 @@ const formatConnectorChoice = (c: AvailableConnectorEntry): { name: string; valu
 export const promptForConnector = async (
   repoRoot: string,
   log: ToolingLog,
-  message = 'Select evaluation connector (judge):'
+  message = 'Select evaluation connector (judge):',
+  defaultConnectorId?: string
 ): Promise<string> => {
   const connectors = getAllAvailableConnectors(repoRoot);
 
@@ -157,11 +158,25 @@ export const promptForConnector = async (
     return connectors[0].id;
   }
 
+  // The default judge is listed first as `default (<connector>)` and pre-selected.
+  const defaultConnector = connectors.find((c) => c.id === defaultConnectorId);
+  if (defaultConnectorId && !defaultConnector) {
+    log.warning(
+      `Default judge ${defaultConnectorId} is not among the available connectors. Run \`node scripts/evals init\` to refresh them.`
+    );
+  }
+  const choices = connectors.filter((c) => c !== defaultConnector).map(formatConnectorChoice);
+  if (defaultConnector) {
+    const { name, value } = formatConnectorChoice(defaultConnector);
+    choices.unshift({ name: `default (${name})`, value });
+  }
+
   const { connectorId } = await inquirer.prompt<{ connectorId: string }>({
     type: 'list',
     name: 'connectorId',
     message,
-    choices: connectors.map(formatConnectorChoice),
+    choices,
+    default: defaultConnector?.id,
   });
 
   return connectorId;

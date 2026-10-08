@@ -488,11 +488,22 @@ You can use these as-is or build your own directly in the suite.
 
 #### LLM-as-a-judge
 
-Set `--judge` to select which model judges results. Judge evaluators receive the judge connector automatically.
+Judge evaluators receive the judge connector automatically. Without `--judge`, the [default judge](#default-judge) is used; set `--judge` to pick another model.
 
 ```bash
 node scripts/evals start --suite agent-builder --judge eis-claude-4-5-sonnet
 ```
+
+#### Default judge
+
+All suites can use the default judge.
+
+> **Note:** The default judge was Gemini 3.1 Pro (`eis-google-gemini-3-1-pro`); it is now GLM-5.2 (`eis-zai-glm-5-2`).
+
+**Exceptions.** Suites that deliberately pin a different judge and document why:
+
+- `kbn-security-evals-matrix` runs a multi-judge jury configured in `config/security_matrix_persona.json`; it refuses a judge that is also a candidate.
+- `kbn-evals-suite-attack-discovery-fp-tp` README records the judge used for a specific measured commit as a historical note.
 
 #### Selecting evaluators at runtime
 

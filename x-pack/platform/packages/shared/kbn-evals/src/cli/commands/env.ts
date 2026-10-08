@@ -16,7 +16,8 @@ const ENV_DOCS = [
   },
   {
     name: 'EVAL_CONNECTOR_ID',
-    description: 'Connector used for LLM-as-a-judge evaluators (required).',
+    description:
+      'Connector used for LLM-as-a-judge evaluators. Defaults to the profile\'s evaluationConnectorId (see the kbn-evals README, "Default judge").',
     example: 'EVAL_CONNECTOR_ID=bedrock-claude',
   },
   {

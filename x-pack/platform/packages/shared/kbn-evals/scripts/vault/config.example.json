@@ -8,7 +8,7 @@
     "baseUrl": "https://openrouter.ai/api/v1",
     "apiKey": "REPLACE_ME"
   },
-  "evaluationConnectorId": "eis-google-gemini-3-1-pro",
+  "evaluationConnectorId": "eis-zai-glm-5-2",
   "evaluationsEs": {
     "url": "https://kbn-evals-serverless-ed035a.es.us-central1.gcp.elastic.cloud",
     "apiKey": "REPLACE_ME"
