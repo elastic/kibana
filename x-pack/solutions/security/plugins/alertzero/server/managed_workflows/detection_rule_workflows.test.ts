@@ -895,29 +895,34 @@ describe('detection rule workflows', () => {
         expect(metadata.approvalPolicy).toBe('always-gate');
       });
 
-      it.each([
-        ['a deleted rule', { error: { message: 'HTTP 404: Not Found' } }, 0, 'fail_rule_deleted'],
-        [
-          'any other read failure',
-          { error: { message: 'HTTP 500: Internal Server Error' } },
-          0,
-          'fail_rule_read',
-        ],
-        ['a rule edited since', { output: { revision: 1 } }, 0, 'fail_rule_changed'],
-        ['an unchanged rule', { output: { revision: 0 } }, 0, undefined],
-        ['a proposal without a revision', { output: { revision: 3 } }, undefined, undefined],
-      ])('refuses a stale edit: %s', (_, fetchRule, expectedRevision, expectedFailStep) => {
-        const yaml = parse(getManagedYaml(ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID)) as WorkflowYaml;
-        const context = {
-          inputs: { actionInput: { id: 'rule-1', expected_revision: expectedRevision } },
-          steps: { fetch_rule: fetchRule },
-        };
-        const failStep = flattenSteps(yaml.steps as unknown as NestedStep[]).find(
-          ({ type, if: condition }) =>
-            type === 'workflow.fail' && resolveExpression(condition, context) === true
-        );
+      describe.each([
+        ['edit', ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID],
+        ['exception', ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW_ID],
+      ])('refuses a stale %s proposal', (_kind, workflowId) => {
+        it.each([
+          ['a deleted rule', { error: { message: 'HTTP 404: Not Found' } }, 0, 'fail_rule_deleted'],
+          [
+            'any other read failure',
+            { error: { message: 'HTTP 500: Internal Server Error' } },
+            0,
+            'fail_rule_read',
+          ],
+          ['a rule edited since', { output: { revision: 1 } }, 0, 'fail_rule_changed'],
+          ['an unchanged rule', { output: { revision: 0 } }, 0, undefined],
+          ['a proposal without a revision', { output: { revision: 3 } }, undefined, undefined],
+        ])('for %s', (_, fetchRule, expectedRevision, expectedFailStep) => {
+          const yaml = parse(getManagedYaml(workflowId)) as WorkflowYaml;
+          const context = {
+            inputs: { actionInput: { id: 'rule-1', expected_revision: expectedRevision } },
+            steps: { fetch_rule: fetchRule },
+          };
+          const failStep = flattenSteps(yaml.steps as unknown as NestedStep[]).find(
+            ({ type, if: condition }) =>
+              type === 'workflow.fail' && resolveExpression(condition, context) === true
+          );
 
-        expect(failStep?.name).toBe(expectedFailStep);
+          expect(failStep?.name).toBe(expectedFailStep);
+        });
       });
 
       // The gate validates actionInput against this schema at proposal creation.
@@ -1032,6 +1037,7 @@ describe('detection rule workflows', () => {
         const propose = reviewSteps.find(({ name }) => name === 'propose_exception')!;
         const {
           rule_id: ruleId,
+          expected_revision: expectedRevision,
           description: actionDescription,
           ...exceptionItem
         } = (propose.with?.inputs as { actionInput: Record<string, unknown> }).actionInput;
@@ -1044,6 +1050,7 @@ describe('detection rule workflows', () => {
             'Exception proposed by the rule tuning workflow after reviewing {{ inputs.fp_count }} false-positive alerts.',
         });
         expect(ruleId).toBe('{{ inputs.rule_uuid }}');
+        expect(expectedRevision).toBe('${{ steps.fetch_rule.output.revision }}');
         expect(actionDescription).toBe(
           'Added by the rule tuning workflow after {{ inputs.fp_count }} false positives were reviewed.'
         );

@@ -944,6 +944,7 @@ steps:
                 actionWorkflowId: system-alertzero-action-add-rule-exception
                 actionInput:
                   rule_id: "{{ inputs.rule_uuid }}"
+                  expected_revision: "${{ steps.fetch_rule.output.revision }}"
                   name: "Tuning: {{ steps.fetch_rule.output.name }}"
                   description: "Added by the rule tuning workflow after {{ inputs.fp_count }} false positives were reviewed."
                   # `${{ }}` keeps the entries as objects.
