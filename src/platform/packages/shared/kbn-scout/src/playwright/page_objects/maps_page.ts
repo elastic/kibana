@@ -424,7 +424,7 @@ export class MapsPage {
    * Opens the layer settings panel for `layerName`, sets a join where-clause
    * to `query`, submits it, and waits for layers to reload.
    */
-  async setJoinWhereQuery(layerName: string, query: string) {
+  async setJoinWhereQuery(query: string) {
     await this.page.testSubj.click('mapJoinWhereExpressionButton');
     const queryInput = this.page.locator(
       '[data-test-subj="mapJoinWhereFilterEditor"] [data-test-subj="queryInput"]'

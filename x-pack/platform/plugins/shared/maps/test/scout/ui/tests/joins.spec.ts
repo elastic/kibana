@@ -120,7 +120,7 @@ test.describe(
 
       await test.step('where clause', async () => {
         await maps.openLayerPanel('geo_shapes*');
-        await maps.setJoinWhereQuery('geo_shapes*', 'prop1 >= 11');
+        await maps.setJoinWhereQuery('prop1 >= 11');
 
         await expect
           .poll(
