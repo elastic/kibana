@@ -16,4 +16,4 @@ export {
   ALERTZERO_READ_ROLE,
   NO_ALERTZERO_PRIVILEGE_ROLE,
 } from './constants';
-export { listActions } from './helpers';
+export { listActions, waitForActionCatalog } from './helpers';

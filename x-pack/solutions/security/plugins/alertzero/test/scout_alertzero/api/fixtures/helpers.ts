@@ -6,8 +6,9 @@
  */
 
 import type { ApiClientFixture } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/api';
 import type { ListActionsResponse } from '@kbn/alertzero-common';
-import { INTERNAL_HEADERS, LIST_ACTIONS_PATH } from './constants';
+import { ALL_ACTION_IDS, INTERNAL_HEADERS, LIST_ACTIONS_PATH } from './constants';
 
 /**
  * `ApiClientFixture['get']` is generic over the body type, so deriving the response from
@@ -46,4 +47,36 @@ export const listActions = async (
     headers: { ...INTERNAL_HEADERS, ...cookieHeader },
     responseType: 'json',
   });
+};
+
+/**
+ * Managed action workflows are installed asynchronously after plugin start, so on a fresh or
+ * slow startup the endpoint can answer 200 with a partial catalog. Polls until every expected
+ * action is listed, so the suite asserts against a fully installed catalog instead of racing
+ * the install.
+ *
+ * Mismatches are returned rather than thrown: an exception inside `expect.poll` aborts polling,
+ * whereas a returned value keeps retrying and is printed in the timeout message.
+ */
+export const waitForActionCatalog = async (
+  apiClient: ApiClientFixture,
+  cookieHeader: Record<string, string>
+): Promise<void> => {
+  await expect
+    .poll(
+      async () => {
+        const response = await listActions(apiClient, cookieHeader);
+        if (response.statusCode !== 200) {
+          return `status ${response.statusCode}: ${JSON.stringify(response.body)}`;
+        }
+        const installed = new Set(response.body.actions.map((action) => action.workflowId));
+        return ALL_ACTION_IDS.filter((id) => !installed.has(id)).sort();
+      },
+      {
+        message: 'AlertZero managed action workflows were not all installed in time',
+        timeout: 120_000,
+        intervals: [1_000, 2_000, 5_000],
+      }
+    )
+    .toStrictEqual([]);
 };

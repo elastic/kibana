@@ -16,6 +16,7 @@ import {
   CATEGORIES_MAX_ITEMS,
   ISOLATE_HOST_ACTION_ID,
   NO_ALERTZERO_PRIVILEGE_ROLE,
+  waitForActionCatalog,
 } from '../fixtures';
 
 const idsOf = (actions: ActionCatalogEntry[]): string[] =>
@@ -30,8 +31,10 @@ apiTest.describe(
   () => {
     let cookieHeader: Record<string, string>;
 
-    apiTest.beforeAll(async ({ samlAuth }) => {
+    apiTest.beforeAll(async ({ samlAuth, apiClient }) => {
       ({ cookieHeader } = await samlAuth.asInteractiveUser(ALERTZERO_READ_ROLE));
+      // Installation is async after plugin start; assert only against a complete catalog.
+      await waitForActionCatalog(apiClient, cookieHeader);
     });
 
     apiTest(
