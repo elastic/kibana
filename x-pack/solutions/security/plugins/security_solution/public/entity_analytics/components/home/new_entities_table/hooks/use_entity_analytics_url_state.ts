@@ -52,6 +52,15 @@ const PARAM = {
   DATA_SOURCES: 'eaDataSources',
 } as const;
 
+/** URL param of each entity filter, in filter order. */
+const ENTITY_FILTER_PARAMS: ReadonlyArray<[keyof EntityFilters, string]> = [
+  ['entityTypes', PARAM.ENTITY_TYPES],
+  ['riskLevels', PARAM.RISK_LEVELS],
+  ['assetCriticality', PARAM.ASSET_CRITICALITY],
+  ['watchlists', PARAM.WATCHLISTS],
+  ['dataSources', PARAM.DATA_SOURCES],
+];
+
 /** Caps URL length; most recently expanded ids are kept. */
 export const MAX_EXPANDED_ENTITY_IDS = 20;
 
@@ -142,16 +151,10 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
   const p = useMemo(() => new URLSearchParams(search), [search]);
 
   const rawTimeRange = p.get(PARAM.TIME_RANGE);
-  const timeRange = useMemo(
-    (): TimeRange => (isTimeRange(rawTimeRange) ? rawTimeRange : DEFAULTS.timeRange),
-    [rawTimeRange]
-  );
+  const timeRange: TimeRange = isTimeRange(rawTimeRange) ? rawTimeRange : DEFAULTS.timeRange;
 
   const rawRowsMode = p.get(PARAM.ROWS_MODE);
-  const rowsMode = useMemo(
-    (): RowsMode => (isRowsMode(rawRowsMode) ? rawRowsMode : DEFAULTS.rowsMode),
-    [rawRowsMode]
-  );
+  const rowsMode: RowsMode = isRowsMode(rawRowsMode) ? rawRowsMode : DEFAULTS.rowsMode;
 
   // An invalid sort field reads as the default sort, direction included.
   const rawSortField = p.get(PARAM.SORT_FIELD);
@@ -159,11 +162,8 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
   const sortField = isSortFieldValid ? rawSortField : DEFAULTS.sortField;
 
   const rawSortDir = p.get(PARAM.SORT_DIR);
-  const sortDirection = useMemo(
-    (): SortDir =>
-      isSortFieldValid && isSortDir(rawSortDir) ? rawSortDir : DEFAULTS.sortDirection,
-    [isSortFieldValid, rawSortDir]
-  );
+  const sortDirection: SortDir =
+    isSortFieldValid && isSortDir(rawSortDir) ? rawSortDir : DEFAULTS.sortDirection;
 
   const rawEntityTypes = p.get(PARAM.ENTITY_TYPES) ?? '';
   const rawRiskLevels = p.get(PARAM.RISK_LEVELS) ?? '';
@@ -184,10 +184,7 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
   const expandedIds = useMemo(() => getExpandedIds(p), [p]);
 
   const rawActiveTile = p.get(PARAM.ACTIVE_TILE);
-  const activeTile = useMemo(
-    (): SignalCardId | null => (isSignalCardId(rawActiveTile) ? rawActiveTile : null),
-    [rawActiveTile]
-  );
+  const activeTile: SignalCardId | null = isSignalCardId(rawActiveTile) ? rawActiveTile : null;
 
   // ── write ─────────────────────────────────────────────────────────────────
 
@@ -235,15 +232,10 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
   const setEntityFilters = useCallback(
     (next: EntityFilters) =>
       update((params) => {
-        for (const [key, arr] of [
-          [PARAM.ENTITY_TYPES, next.entityTypes],
-          [PARAM.RISK_LEVELS, next.riskLevels],
-          [PARAM.ASSET_CRITICALITY, next.assetCriticality],
-          [PARAM.WATCHLISTS, next.watchlists],
-          [PARAM.DATA_SOURCES, next.dataSources],
-        ] as const) {
-          if (arr.length) params.set(key, arr.join(','));
-          else params.delete(key);
+        for (const [key, param] of ENTITY_FILTER_PARAMS) {
+          const values = next[key];
+          if (values.length) params.set(param, values.join(','));
+          else params.delete(param);
         }
       }),
     [update]
@@ -259,11 +251,7 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
   const resetGridQuery = useCallback(
     () =>
       update((params) => {
-        params.delete(PARAM.ENTITY_TYPES);
-        params.delete(PARAM.RISK_LEVELS);
-        params.delete(PARAM.ASSET_CRITICALITY);
-        params.delete(PARAM.WATCHLISTS);
-        params.delete(PARAM.DATA_SOURCES);
+        for (const [, param] of ENTITY_FILTER_PARAMS) params.delete(param);
         params.delete(PARAM.ACTIVE_TILE);
         params.set(PARAM.SORT_FIELD, DEFAULTS.sortField);
         params.set(PARAM.SORT_DIR, DEFAULTS.sortDirection);
@@ -278,7 +266,7 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
           const current = getExpandedIds(params);
           const next = current.includes(entityId)
             ? current.filter((id) => id !== entityId)
-            : [...current.filter((id) => id !== entityId), entityId];
+            : [...current, entityId];
           setExpandedIds(params, next);
         },
         { replace: true }

@@ -76,8 +76,8 @@ export interface UseEntityGridDataOptions {
   searchExpression?: string;
   entityExpression?: string;
   timeRange: TimeRange;
-  rowsMode?: RowsMode;
-  keepFields?: readonly string[];
+  rowsMode: RowsMode;
+  keepFields: readonly string[];
   keyScope?: EntityGridKeyScope;
 }
 
@@ -127,7 +127,7 @@ const getRowsKey = (context: GridContext, options: UseEntityGridDataOptions) =>
       ...getViewKey(context, options),
       sortDirection: options.sortDirection,
       pageSize: options.pageSize,
-      keepFields: (options.keepFields ?? []).join('\0'),
+      keepFields: options.keepFields.join('\0'),
       // Only the anomaly sort reads the anomaly jobs; other sorts don't wait for them.
       anomalyJobIds: isAnomalySort(options) ? context.anomalyJobIds.join('\0') : '',
     },
@@ -171,7 +171,7 @@ const buildQueryArgs = (
   sort: { field: options.sortField, direction: options.sortDirection },
   cursor,
   pageSize: options.pageSize,
-  rowsMode: options.rowsMode ?? 'resolved',
+  rowsMode: options.rowsMode,
   concreteEntityIndexName,
   searchExpression: options.searchExpression,
   entityExpression: options.entityExpression,
@@ -272,7 +272,7 @@ const fetchEnrichedBatch = (
     batch.rows,
     buildQueryArgs(context, options, context.concreteEntityIndexName, null),
     { runQuery: createEsqlRunner(context.searchService, signal), http: context.http, signal },
-    PAGE_ENRICHERS[options.rowsMode ?? 'resolved']
+    PAGE_ENRICHERS[options.rowsMode]
   );
 };
 

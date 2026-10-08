@@ -15,45 +15,40 @@ import { useEntityAnalyticsUrlState, type EntityFilters } from './use_entity_ana
 import { buildFilterClause, esc, toList } from '../queries/esql';
 
 /** Membership on multivalue keyword fields — scalar `IN` returns null for multi-valued docs. */
-const buildMvContainsExpression = (field: string, values: string[]): string => {
+const buildMvContainsExpression = (field: string, values: readonly string[]): string => {
   const clauses = values.map((v) => `MV_CONTAINS(${field}, ${esc(v)})`);
   return clauses.length === 1 ? clauses[0] : `(${clauses.join(' OR ')})`;
 };
 
+/** Entity doc field of each entity filter, in filter order. */
+const ENTITY_FILTER_FIELDS: ReadonlyArray<{
+  key: keyof EntityFilters;
+  field: string;
+  isMultiValue?: boolean;
+}> = [
+  { key: 'entityTypes', field: 'entity.EngineMetadata.Type' },
+  { key: 'riskLevels', field: 'entity.risk.calculated_level' },
+  { key: 'assetCriticality', field: 'asset.criticality' },
+  { key: 'watchlists', field: 'entity.attributes.watchlists', isMultiValue: true },
+  { key: 'dataSources', field: 'entity.source', isMultiValue: true },
+];
+
 /** AND-joined ES|QL predicate for URL entity filters (no leading `| WHERE`). */
-export const buildEntityFiltersExpression = (filters: EntityFilters): string => {
-  const parts: string[] = [];
-
-  if (filters.entityTypes.length)
-    parts.push(`entity.EngineMetadata.Type IN (${toList(filters.entityTypes)})`);
-  if (filters.riskLevels.length)
-    parts.push(`entity.risk.calculated_level IN (${toList(filters.riskLevels)})`);
-  if (filters.assetCriticality.length)
-    parts.push(`asset.criticality IN (${toList(filters.assetCriticality)})`);
-  if (filters.watchlists.length)
-    parts.push(buildMvContainsExpression('entity.attributes.watchlists', filters.watchlists));
-  if (filters.dataSources.length)
-    parts.push(buildMvContainsExpression('entity.source', filters.dataSources));
-
-  return parts.join(' AND ');
-};
+export const buildEntityFiltersExpression = (filters: EntityFilters): string =>
+  ENTITY_FILTER_FIELDS.flatMap(({ key, field, isMultiValue }) => {
+    const values: readonly string[] = filters[key];
+    if (!values.length) return [];
+    return isMultiValue
+      ? [buildMvContainsExpression(field, values)]
+      : [`${field} IN (${toList(values)})`];
+  }).join(' AND ');
 
 /** DSL counterpart of {@link buildEntityFiltersExpression}. */
-export const buildEntityFiltersQuery = (filters: EntityFilters): QueryDslQueryContainer[] => {
-  const clauses: QueryDslQueryContainer[] = [];
-
-  if (filters.entityTypes.length)
-    clauses.push({ terms: { 'entity.EngineMetadata.Type': filters.entityTypes } });
-  if (filters.riskLevels.length)
-    clauses.push({ terms: { 'entity.risk.calculated_level': filters.riskLevels } });
-  if (filters.assetCriticality.length)
-    clauses.push({ terms: { 'asset.criticality': filters.assetCriticality } });
-  if (filters.watchlists.length)
-    clauses.push({ terms: { 'entity.attributes.watchlists': filters.watchlists } });
-  if (filters.dataSources.length) clauses.push({ terms: { 'entity.source': filters.dataSources } });
-
-  return clauses;
-};
+export const buildEntityFiltersQuery = (filters: EntityFilters): QueryDslQueryContainer[] =>
+  ENTITY_FILTER_FIELDS.flatMap(({ key, field }) => {
+    const values: readonly string[] = filters[key];
+    return values.length ? [{ terms: { [field]: [...values] } }] : [];
+  });
 
 /** `| WHERE …` pipe clauses for NAT tile queries (empty when no filters). */
 export const buildEntityFilterClauses = (filters: EntityFilters): string[] =>

@@ -370,8 +370,6 @@ export interface EntitiesGridProps {
   sortField: string;
   sortDirection: SortDir;
   onSortChange: (field: string, direction: SortDir) => void;
-  /** Rows per load. */
-  pageSize?: number;
   searchExpression?: string;
   entityExpression?: string;
   cellHandlers?: CellHandlers;
@@ -390,7 +388,6 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   sortField,
   sortDirection,
   onSortChange,
-  pageSize = ROWS_PER_LOAD,
   searchExpression,
   entityExpression,
   cellHandlers,
@@ -452,7 +449,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   } = useEntityGridData({
     sortField,
     sortDirection,
-    pageSize,
+    pageSize: ROWS_PER_LOAD,
     searchExpression,
     entityExpression,
     timeRange,

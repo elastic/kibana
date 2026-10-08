@@ -129,6 +129,15 @@ const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
 
           const w = colDef.initialWidth ?? 150;
           const value = child[col.id];
+          const cell = renderEntityCell(
+            col.id,
+            value,
+            child,
+            watchlistNames,
+            euiTheme,
+            handlers,
+            isEnriching
+          );
 
           if (col.id === 'entity.name') {
             return (
@@ -156,15 +165,7 @@ const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
                         ${euiTheme.size.xs};
                     `}
                   >
-                    {renderEntityCell(
-                      col.id,
-                      value,
-                      child,
-                      watchlistNames,
-                      euiTheme,
-                      handlers,
-                      isEnriching
-                    )}
+                    {cell}
                   </div>
                 </div>
               </div>
@@ -187,15 +188,7 @@ const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
                 padding: ${paddingBlock};
               `}
             >
-              {renderEntityCell(
-                col.id,
-                value,
-                child,
-                watchlistNames,
-                euiTheme,
-                handlers,
-                isEnriching
-              )}
+              {cell}
             </div>
           );
         })}
