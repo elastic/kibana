@@ -92,7 +92,7 @@ export const useInstallEntityStoreMutation = () => {
         timestamp: new Date().toISOString(),
         action: 'start',
       });
-      const entityTypes = [...SECURITY_DEFAULT_ENTITY_STORE_INSTALL_TYPES];
+      const entityTypes: EntityStoreEntityType[] = [...SECURITY_DEFAULT_ENTITY_STORE_INSTALL_TYPES];
       // Security previously installed service extraction by default, so retain it for spaces
       // where an existing engine or surviving risk scores show that it was already in use.
       if (await shouldInstallServiceEngine(ENTITY_STORE_INSTALL_CONTEXT)) {

@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { searchServiceMock } from '@kbn/data-plugin/public/search/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
@@ -35,12 +36,12 @@ describe('useShouldInstallServiceEngine', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     spaces.getActiveSpace.mockResolvedValue({
-      id: 'space-a',
+      id: asSpaceId('space-a'),
       name: 'Space A',
       disabledFeatures: [],
     });
     getEntityStoreStatus.mockResolvedValue({ status: 'running', engines: [] });
-    search.search.mockImplementation(() => of({ totalCount: 0 }));
+    search.search.mockImplementation(() => of({ totalCount: 0, rawResponse: {} }));
     (useKibana as jest.Mock).mockReturnValue({ services: { data, spaces } });
     (useEntityStoreRoutes as jest.Mock).mockReturnValue({ getEntityStoreStatus });
   });
@@ -71,7 +72,7 @@ describe('useShouldInstallServiceEngine', () => {
   });
 
   it('returns true when service risk scores exist', async () => {
-    search.search.mockImplementation(() => of({ totalCount: 1 }));
+    search.search.mockImplementation(() => of({ totalCount: 1, rawResponse: {} }));
     const { result } = renderHook(() => useShouldInstallServiceEngine());
 
     await expect(result.current()).resolves.toBe(true);
