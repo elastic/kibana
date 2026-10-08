@@ -92,6 +92,15 @@ describe('sampleResponse', () => {
     expect((await response.json()).detail).toContain('application/json');
   });
 
+  it('answers vendor JSON types the spec does not declare with its JSON content', async () => {
+    const response = await fetch('https://api.example.com/report', {
+      headers: { accept: 'application/vnd.github+json' },
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-type')).toBe('application/json');
+  });
+
   it('answers without a body when the response declares no content', async () => {
     const response = await fetch('https://api.example.com/empty', { method: 'DELETE' });
 

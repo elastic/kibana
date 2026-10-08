@@ -48,7 +48,9 @@ const matchesRange = (range: string, mediaType: string): boolean => {
 
 /**
  * Picks the response content that best satisfies the `Accept` header, preferring JSON when
- * several match. Returns undefined when the response has contents but none is acceptable.
+ * several match. A vendor JSON type such as `application/vnd.github+json` that the spec doesn't
+ * declare gets its JSON content, as vendors answer those with `application/json`. Returns
+ * undefined when the response has contents but none is acceptable.
  */
 export const negotiateContent = (
   contents: readonly MediaTypeContent[],
@@ -62,7 +64,9 @@ export const negotiateContent = (
       return match;
     }
   }
-  return undefined;
+  return ranges.some(({ range }) => range.endsWith('+json'))
+    ? contents.find(({ mediaType }) => isJson(mediaType))
+    : undefined;
 };
 
 /** Answers with a deterministic sample of the operation's success response. */
