@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { ServiceFlyoutService } from '.';
-import { ServiceFlyout } from '.';
+import { ServiceFlyout, SERVICE_FLYOUT_TABS } from '.';
 
 jest.mock('../../../plugin', () => ({
   getApmInternalServices: () => ({ callApmApi: jest.fn() }),
@@ -24,32 +24,59 @@ jest.mock('../../../context/time_range_metadata/time_range_metadata_context', ()
   ),
 }));
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-  return {
-    ...original,
-    EuiPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    useGeneratedHtmlId: () => 'service-flyout-title-id',
-  };
-});
-
-jest.mock('../responsive_flyout', () => ({
-  ResponsiveFlyout: ({
+// A lightweight stand-in for the template that renders the zones' children and exposes the close and
+// tab-change handlers + the history key, so the container's state wiring can be asserted in isolation.
+jest.mock('@kbn/flyout-template', () => {
+  const passthrough = ({ children }: { children?: React.ReactNode }) => <>{children}</>;
+  const FlyoutTemplate = ({
     children,
     onClose,
     historyKey,
+    onTabChange,
+    tabs = [],
   }: {
     children: React.ReactNode;
     onClose: () => void;
     historyKey?: symbol;
+    onTabChange?: (id: string) => void;
+    tabs?: Array<{ id: string; label: React.ReactNode; [key: string]: unknown }>;
   }) => (
-    <section data-test-subj="responsiveFlyoutMock" data-history-key={historyKey?.toString()}>
-      <button data-test-subj="responsiveFlyoutCloseButton" onClick={onClose}>
+    <section data-test-subj="serviceFlyout" data-history-key={historyKey?.toString()}>
+      <button data-test-subj="flyoutCloseButton" onClick={onClose}>
         close
       </button>
+      {tabs.map(({ id, label, ...rest }) => (
+        <button key={id} {...rest} onClick={() => onTabChange?.(id)}>
+          {label}
+        </button>
+      ))}
       {children}
     </section>
-  ),
+  );
+  FlyoutTemplate.Header = passthrough;
+  FlyoutTemplate.Body = Object.assign(passthrough, { TabPanel: passthrough });
+  FlyoutTemplate.Footer = Object.assign(passthrough, {
+    PrimaryActionMenu: () => null,
+    PrimaryAction: () => null,
+    SecondaryAction: () => null,
+  });
+  return { __esModule: true, FlyoutTemplate };
+});
+
+jest.mock('./header', () => ({
+  useServiceFlyoutTitle: (title: string) => title,
+}));
+
+jest.mock('./header/service_badges', () => ({
+  useServiceBadges: () => [],
+}));
+
+jest.mock('./footer', () => ({
+  useServiceFlyoutFooterMenu: () => ({
+    panels: [{ id: 0, items: [] }],
+    isLoading: false,
+    hasActions: false,
+  }),
 }));
 
 jest.mock('./hooks/use_service_flyout_capabilities', () => ({
@@ -64,23 +91,6 @@ jest.mock('./hooks/use_service_flyout_capabilities', () => ({
 }));
 jest.mock('../../../hooks/use_time_range', () => ({
   useTimeRange: () => ({ start: '2024-01-01T00:00:00.000Z', end: '2024-01-01T01:00:00.000Z' }),
-}));
-
-jest.mock('./header', () => ({
-  ServiceFlyoutHeader: ({
-    title,
-    onSelectedTabIdChange,
-  }: {
-    title: string;
-    onSelectedTabIdChange: (tabId: string) => void;
-  }) => (
-    <div>
-      <h2>{title}</h2>
-      <button data-test-subj="mockTabChange" onClick={() => onSelectedTabIdChange('alerts')}>
-        change tab
-      </button>
-    </div>
-  ),
 }));
 
 // The overview reads environment/transactionType from context and calls the context setters.
@@ -108,23 +118,6 @@ jest.mock('./overview', () => {
           <span data-test-subj="serviceFlyoutOverviewReadout">
             {environment}:{transactionType}
           </span>
-        </div>
-      );
-    },
-  };
-});
-
-// The footer reads environment/transactionType from context to display them.
-jest.mock('./footer', () => {
-  const { useServiceFlyoutContext } = jest.requireActual('./service_flyout_context');
-  return {
-    ServiceFlyoutFooter: () => {
-      const {
-        filters: { environment, transactionType },
-      } = useServiceFlyoutContext();
-      return (
-        <div data-test-subj="serviceFlyoutFooterMock">
-          {environment}:{transactionType}
         </div>
       );
     },
@@ -172,24 +165,6 @@ describe('ServiceFlyout telemetry', () => {
       source: 'test-source',
     });
   });
-
-  it('reports the new tab when the selected tab changes', () => {
-    render(
-      <ServiceFlyout
-        {...contextProps}
-        service={service}
-        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
-        onClose={jest.fn()}
-      />
-    );
-
-    fireEvent.click(screen.getByTestId('mockTabChange'));
-
-    expect(mockReportServiceFlyoutViewed).toHaveBeenLastCalledWith({
-      tabId: 'alerts',
-      source: 'test-source',
-    });
-  });
 });
 
 describe('ServiceFlyout initial state', () => {
@@ -204,6 +179,26 @@ describe('ServiceFlyout initial state', () => {
     );
 
     expect(screen.getByTestId('serviceFlyoutOverviewReadout')).not.toHaveTextContent('request');
+  });
+});
+
+describe('ServiceFlyout tabs', () => {
+  it('renders a tab per definition instrumented with EBT click attributes', () => {
+    render(
+      <ServiceFlyout
+        {...contextProps}
+        service={service}
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
+        onClose={jest.fn()}
+      />
+    );
+
+    SERVICE_FLYOUT_TABS.forEach(({ id }) => {
+      const tab = screen.getByTestId(`serviceFlyoutTab-${id}`);
+      expect(tab).toHaveAttribute('data-ebt-action', 'viewServiceFlyoutTab');
+      expect(tab).toHaveAttribute('data-ebt-element', 'serviceFlyoutTabs');
+      expect(tab).toHaveAttribute('data-ebt-detail', id);
+    });
   });
 });
 
@@ -224,7 +219,6 @@ describe('ServiceFlyout local filter state', () => {
     fireEvent.click(screen.getByTestId('mockTransactionTypeChange'));
 
     expect(onClose).not.toHaveBeenCalled();
-    expect(screen.getByTestId('serviceFlyoutFooterMock')).toHaveTextContent('production:page-load');
     expect(screen.getByTestId('serviceFlyoutOverviewReadout')).toHaveTextContent(
       'production:page-load'
     );
@@ -242,7 +236,7 @@ describe('ServiceFlyout local filter state', () => {
       />
     );
 
-    fireEvent.click(screen.getByTestId('responsiveFlyoutCloseButton'));
+    fireEvent.click(screen.getByTestId('flyoutCloseButton'));
 
     expect(onClose).toHaveBeenCalledTimes(1);
   });
@@ -307,7 +301,7 @@ describe('ServiceFlyout local filter state', () => {
 });
 
 describe('ServiceFlyout historyKey', () => {
-  it('forwards historyKey to ResponsiveFlyout when provided', () => {
+  it('forwards historyKey to the flyout when provided', () => {
     const historyKey = Symbol('test-history-key');
 
     render(
@@ -320,7 +314,7 @@ describe('ServiceFlyout historyKey', () => {
       />
     );
 
-    expect(screen.getByTestId('responsiveFlyoutMock')).toHaveAttribute(
+    expect(screen.getByTestId('serviceFlyout')).toHaveAttribute(
       'data-history-key',
       historyKey.toString()
     );
@@ -338,6 +332,6 @@ describe('ServiceFlyout historyKey', () => {
       />
     );
 
-    expect(screen.getByTestId('responsiveFlyoutMock')).toHaveAttribute('data-history-key');
+    expect(screen.getByTestId('serviceFlyout')).toHaveAttribute('data-history-key');
   });
 });

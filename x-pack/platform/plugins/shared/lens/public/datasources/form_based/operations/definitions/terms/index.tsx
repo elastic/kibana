@@ -48,6 +48,9 @@ import { getFirstValue } from '../../../pure_utils';
 import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
+  getOrderAggErrorMessages,
+  getOrderAggLastValueSortFieldStatus,
+  isCustomLastValueOrderAgg,
   getFieldsByValidationState,
   isSortableByColumn,
   isPercentileRankSortable,
@@ -217,6 +220,7 @@ export const termsOperation: OperationDefinition<
       ...getInvalidFieldMessage(layer, columnId, indexPattern),
       ...getDisallowedTermsMessage(layer, columnId, indexPattern),
       ...getMultiTermsScriptedFieldErrorMessage(layer, columnId, indexPattern),
+      ...getOrderAggErrorMessages(layer, columnId, indexPattern),
     ];
   },
   getNonTransferableFields: (column, newIndexPattern) => {
@@ -328,12 +332,28 @@ export const termsOperation: OperationDefinition<
       orderBy = 'custom';
       const def = operationDefinitionMap?.[orderAggColumn?.operationType];
       if (def && 'toEsAggsFn' in def) {
+        let resolvedOrderAggColumn = orderAggColumn;
+        if (isCustomLastValueOrderAgg(column)) {
+          const status = getOrderAggLastValueSortFieldStatus(column, _indexPattern);
+          const { orderAgg: lastValueOrderAgg } = column.params;
+          const resolvedOrderAgg = {
+            ...lastValueOrderAgg,
+            params: {
+              ...lastValueOrderAgg.params,
+              sortField:
+                status.status === 'missing-with-default'
+                  ? status.defaultField
+                  : lastValueOrderAgg.params?.sortField ?? '',
+            },
+          };
+          resolvedOrderAggColumn = resolvedOrderAgg;
+        }
         orderAgg = [
           {
             type: 'expression' as const,
             chain: [
               def.toEsAggsFn(
-                orderAggColumn,
+                resolvedOrderAggColumn,
                 `${columnId}-orderAgg`,
                 _indexPattern,
                 layer,
