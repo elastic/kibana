@@ -15,7 +15,10 @@ export type {
   ContractCall,
   ContractMock,
   ContractMockOptions,
+  ContractMockSpec,
 } from './src/fetch/create_contract_mock_fetch';
+export { isGraphQLSpec } from './src/graphql/graphql_protocol';
+export type { GraphQLSpec } from './src/graphql/graphql_protocol';
 export type {
   CursorRequest,
   NextUrlRequest,
@@ -37,8 +40,12 @@ export type {
 } from './src/engine/response_engine';
 export type {
   ContractAdapter,
+  ContractProtocol,
   ContractRequest,
   ContractResponse,
+  NamedOperation,
+  NamedOperationRef,
+  ProtocolExchange,
   Responder,
   Violation,
 } from './src/contract/types';
