@@ -31,6 +31,12 @@ export const enableDependencyButtonLabel = (dependencyName: string): string =>
     values: { dependencyName },
   });
 
+export const dependencyEnabledTitle = (dependencyName: string): string =>
+  i18n.translate('xpack.alertzero.workerDependencies.dependencyEnabledTitle', {
+    defaultMessage: '{dependencyName} enabled',
+    values: { dependencyName },
+  });
+
 export const enableDependencyFailedTitle = (dependencyName: string): string =>
   i18n.translate('xpack.alertzero.workerDependencies.enableDependencyFailedTitle', {
     defaultMessage: 'Could not enable {dependencyName}',

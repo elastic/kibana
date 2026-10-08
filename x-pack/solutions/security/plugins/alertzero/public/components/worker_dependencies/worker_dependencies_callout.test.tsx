@@ -142,6 +142,7 @@ describe('WorkerDependenciesCallout', () => {
       expect(core.uiSettings.set).toHaveBeenCalledWith(CONTEXT_ENGINE_ENABLED_SETTING_ID, true);
       expect(screen.queryByTestId('alertZeroWorkerDependency-contextEngine')).toBeNull();
     });
+    expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith('Context Engine enabled');
   });
 
   it('keeps the enable button in its loading state until the setting saves', async () => {
@@ -292,6 +293,9 @@ describe('WorkerDependenciesCallout', () => {
       });
       expect(screen.queryByTestId('alertZeroWorkerDependency-threatIngest')).toBeNull();
     });
+    expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+      'Ingest threat feeds enabled'
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Enable Enrich threat report' }));
     await waitFor(() => {
       expect(core.http.put).toHaveBeenCalledWith(`/api/workflows/workflow/${enrich.id}`, {
@@ -300,6 +304,10 @@ describe('WorkerDependenciesCallout', () => {
       });
       expect(screen.queryByTestId('alertZeroWorkerDependency-threatEnrich')).toBeNull();
     });
+    expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+      'Enrich threat report enabled'
+    );
+    expect(core.notifications.toasts.addSuccess).toHaveBeenCalledTimes(2);
   });
 
   it('keeps the disabled workflow visible and reports a failed enable attempt', async () => {
@@ -319,6 +327,7 @@ describe('WorkerDependenciesCallout', () => {
     expect(core.notifications.toasts.addError).toHaveBeenCalledWith(error, {
       title: 'Could not enable Ingest threat feeds',
     });
+    expect(core.notifications.toasts.addSuccess).not.toHaveBeenCalled();
   });
 
   it('keeps workflow remediation as a link without update permission', async () => {
