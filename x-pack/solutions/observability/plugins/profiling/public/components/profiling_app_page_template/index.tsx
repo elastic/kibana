@@ -23,6 +23,30 @@ import { AddDataTabs } from '../../views/add_data_view/types';
 import { ProfilingSchemaContextProvider } from '../contexts/profiling_schema/profiling_schema_context';
 import { SchemaSelector } from '../schema_selector';
 import { useSchemaQueryParam } from '../../hooks/use_schema_query_param';
+import { useProfilingStatus } from '../contexts/profiling_status/use_profiling_status';
+import {
+  getStorageExplorerAvailability,
+  StorageExplorerAvailability,
+} from '../../utils/get_storage_explorer_availability';
+
+export const STORAGE_EXPLORER_NOT_SET_UP_TOOLTIP = i18n.translate(
+  'xpack.profiling.headerActionMenu.storageExplorer.notSetUpTooltip',
+  {
+    defaultMessage:
+      'Storage explorer only supports Universal Profiling. Run the setup process to start using it.',
+  }
+);
+
+export const STORAGE_EXPLORER_NOT_AVAILABLE_TOOLTIP = i18n.translate(
+  'xpack.profiling.headerActionMenu.storageExplorer.notAvailableTooltip',
+  { defaultMessage: 'Serverless support for Storage explorer is coming soon.' }
+);
+
+const STORAGE_EXPLORER_DISABLED_REASONS: Record<StorageExplorerAvailability, string | undefined> = {
+  [StorageExplorerAvailability.Available]: undefined,
+  [StorageExplorerAvailability.NotSetUp]: STORAGE_EXPLORER_NOT_SET_UP_TOOLTIP,
+  [StorageExplorerAvailability.NotAvailable]: STORAGE_EXPLORER_NOT_AVAILABLE_TOOLTIP,
+};
 
 export function ProfilingAppPageTemplate({
   children,
@@ -68,6 +92,12 @@ export function ProfilingAppPageTemplate({
   const rangeTo = searchParams.get('rangeTo') || defaultRangeTo;
 
   const backTarget = useBackNavigation();
+  const { data: profilingStatus } = useProfilingStatus();
+  const storageExplorerDisabledReason = profilingStatus?.isEnabled
+    ? STORAGE_EXPLORER_DISABLED_REASONS[
+        getStorageExplorerAvailability(profilingStatus.universalProfiling)
+      ]
+    : undefined;
   // The schema provider is rendered below, so we need to read the current schema from the query param here.
   const schema = useSchemaQueryParam();
 
@@ -91,6 +121,8 @@ export function ProfilingAppPageTemplate({
           },
         }),
         iconType: 'database',
+        disableButton: storageExplorerDisabledReason !== undefined,
+        tooltipContent: storageExplorerDisabledReason,
       },
       {
         id: 'settings',

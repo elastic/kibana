@@ -13,11 +13,12 @@ jest.mock('../../hooks/use_profiling_router');
 jest.mock('../../hooks/use_default_time_range');
 jest.mock('../contexts/profiling_dependencies/use_profiling_dependencies');
 jest.mock('../contexts/back_navigation/use_back_navigation');
+jest.mock('../contexts/profiling_status/use_profiling_status');
 jest.mock('./primary_profiling_search_bar', () => ({
   PrimaryProfilingSearchBar: jest.fn(() => null),
 }));
 jest.mock('@kbn/app-header', () => ({
-  AppHeader: () => null,
+  AppHeader: jest.fn(() => null),
   SuppressChromeBackButton: () => null,
 }));
 jest.mock('../contexts/profiling_schema/profiling_schema_context', () => ({
@@ -28,14 +29,21 @@ jest.mock('../schema_selector', () => ({
 }));
 
 import { useLocation } from 'react-router-dom';
+import type { ProfilingStatus } from '@kbn/profiling-utils';
+import { AppHeader } from '@kbn/app-header';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useDefaultTimeRange } from '../../hooks/use_default_time_range';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { useBackNavigation } from '../contexts/back_navigation/use_back_navigation';
+import { useProfilingStatus } from '../contexts/profiling_status/use_profiling_status';
 import { ProfilingSchemaContextProvider } from '../contexts/profiling_schema/profiling_schema_context';
 import { SchemaSelector } from '../schema_selector';
 import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
-import { ProfilingAppPageTemplate } from '.';
+import {
+  ProfilingAppPageTemplate,
+  STORAGE_EXPLORER_NOT_AVAILABLE_TOOLTIP,
+  STORAGE_EXPLORER_NOT_SET_UP_TOOLTIP,
+} from '.';
 
 describe('ProfilingAppPageTemplate', () => {
   const mockLink = jest.fn().mockReturnValue('/mock-url');
@@ -50,6 +58,23 @@ describe('ProfilingAppPageTemplate', () => {
   });
   const mockDefaultTimeRange = { from: 'now-30m', to: 'now-5m' };
 
+  const mockProfilingStatus = (
+    universalProfiling: Partial<Extract<ProfilingStatus, { isEnabled: true }>['universalProfiling']>
+  ) =>
+    (useProfilingStatus as jest.Mock).mockReturnValue({
+      data: {
+        isEnabled: true,
+        otel: { isAvailable: true, hasData: true },
+        universalProfiling: {
+          isAvailable: true,
+          hasSetup: true,
+          hasData: true,
+          hasLegacyData: false,
+          ...universalProfiling,
+        },
+      },
+    });
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -60,6 +85,8 @@ describe('ProfilingAppPageTemplate', () => {
     (useProfilingRouter as jest.Mock).mockReturnValue({ link: mockLink });
 
     (useBackNavigation as jest.Mock).mockReturnValue(undefined);
+
+    mockProfilingStatus({});
 
     (useProfilingDependencies as jest.Mock).mockReturnValue({
       start: {
@@ -130,6 +157,47 @@ describe('ProfilingAppPageTemplate', () => {
         rangeFrom: 'now-1h',
         rangeTo: mockDefaultTimeRange.to,
       });
+    });
+  });
+
+  describe('storage explorer button', () => {
+    const getStorageExplorerItem = () => {
+      const [[{ menu }]] = jest.mocked(AppHeader).mock.calls;
+      return menu?.items?.find(({ id }) => id === 'storage-explorer');
+    };
+
+    it('is enabled when Universal Profiling is set up', () => {
+      renderTemplate('');
+
+      expect(getStorageExplorerItem()).toEqual(
+        expect.objectContaining({ disableButton: false, tooltipContent: undefined })
+      );
+    });
+
+    it('is disabled with a setup hint when Universal Profiling is not set up', () => {
+      mockProfilingStatus({ hasSetup: false, hasData: false });
+
+      renderTemplate('');
+
+      expect(getStorageExplorerItem()).toEqual(
+        expect.objectContaining({
+          disableButton: true,
+          tooltipContent: STORAGE_EXPLORER_NOT_SET_UP_TOOLTIP,
+        })
+      );
+    });
+
+    it('is disabled with a serverless note when Universal Profiling is not available', () => {
+      mockProfilingStatus({ isAvailable: false, hasSetup: false, hasData: false });
+
+      renderTemplate('');
+
+      expect(getStorageExplorerItem()).toEqual(
+        expect.objectContaining({
+          disableButton: true,
+          tooltipContent: STORAGE_EXPLORER_NOT_AVAILABLE_TOOLTIP,
+        })
+      );
     });
   });
 
