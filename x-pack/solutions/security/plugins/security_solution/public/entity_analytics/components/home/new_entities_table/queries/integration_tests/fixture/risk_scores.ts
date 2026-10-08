@@ -11,22 +11,21 @@ import { DATE, DAY_MS, FLOAT, HOUR_MS, KEYWORD, NAMESPACE, toIsoAgo } from './fi
 import type { FixtureIndex } from './fixture_index';
 
 /** Scores before the window: one hour before the 30 day window starts. */
-const REFERENCE_SCORES: Readonly<Record<string, [score: number, level: string]>> = {
-  'host:h1': [60, 'Moderate'],
-  'host:h2': [50, 'Moderate'],
-  'user:alice@okta': [80, 'High'],
+const REFERENCE_SCORES: Readonly<Record<string, number>> = {
+  'host:h1': 60,
+  'host:h2': 50,
+  'user:alice@okta': 80,
 };
 
 const RISK_ENTITY_TYPES = ['host', 'user', 'service'] as const;
 
-const toRiskDoc = (entityId: string, [score, level]: [number, string], now: number) => {
+const toRiskDoc = (entityId: string, score: number, now: number) => {
   const type = entityId.split(':')[0];
   return {
     '@timestamp': toIsoAgo(now, 30 * DAY_MS + HOUR_MS),
     [`${type}.risk.id_field`]: 'entity.id',
     [`${type}.risk.id_value`]: entityId,
     [`${type}.risk.calculated_score_norm`]: score,
-    [`${type}.risk.calculated_level`]: level,
   };
 };
 
@@ -40,7 +39,6 @@ export const riskScoresIndex: FixtureIndex = {
           [`${type}.risk.id_field`, KEYWORD],
           [`${type}.risk.id_value`, KEYWORD],
           [`${type}.risk.calculated_score_norm`, FLOAT],
-          [`${type}.risk.calculated_level`, KEYWORD],
         ]
       )
     ),

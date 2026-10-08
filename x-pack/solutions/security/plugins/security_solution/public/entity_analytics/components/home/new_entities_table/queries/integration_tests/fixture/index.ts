@@ -24,19 +24,19 @@ import type { FixtureIndex } from './fixture_index';
  *
  * Resolved rows (main entities):
  *
- * | entity.id        | name     | risk          | criticality | records | alerts (open, 30d)     | anomalies | risk change           | first seen |
- * |------------------|----------|---------------|-------------|---------|------------------------|-----------|-----------------------|------------|
- * | host:h1          | web-1    | 90, Critical  | high_impact | 3       | 3 (1 C, 2 H), last 3h  | –         | +30 (Moderate before) | 60d ago    |
- * | host:h2          | web-2    | 50, Moderate  | –           | 1       | 1 (L), last 1h         | 1         | 0 (Moderate before)   | 20d ago    |
- * | host:h3          | web-3    | –             | –           | 1       | 0                      | –         | –                     | 20d ago    |
- * | service:payments | payments | 20, Low       | –           | 1       | 0                      | –         | –                     | 20d ago    |
- * | user:alice@okta  | alice    | 70, High      | –           | 1       | 2 (2 M), last 2h       | 2         | -10 (High before)     | 20d ago    |
- * | user:bob@okta    | bob      | –             | –           | 2       | 0                      | –         | –                     | 20d ago    |
+ * | entity.id        | name     | risk         | criticality | records | alerts (open, 30d)    | anomalies | risk change |
+ * |------------------|----------|--------------|-------------|---------|-----------------------|-----------|-------------|
+ * | host:h1          | web-1    | 90, Critical | high_impact | 3       | 3 (1 C, 2 H), last 3h | –         | +30         |
+ * | host:h2          | web-2    | 50, Moderate | –           | 1       | 1 (L), last 1h        | 1         | 0           |
+ * | host:h3          | web-3    | –            | –           | 1       | 0                     | –         | –           |
+ * | service:payments | payments | 20, Low      | –           | 1       | 0                     | –         | –           |
+ * | user:alice@okta  | alice    | 70, High     | –           | 1       | 2 (2 M), last 2h      | 2         | -10         |
+ * | user:bob@okta    | bob      | –            | –           | 2       | 0                     | –         | –           |
  *
  * Aliases: host:h4 and host:h5 resolve to host:h1, user:carol@okta resolves to user:bob@okta.
  * Alerts are stamped with the entity id, except the one of host:h2, whose id comes from
  * `host.id`. Anomaly records carry no entity id: theirs comes from `user.name` with
- * `event.module` (okta), or from `host.name`.
+ * `event.module` (okta), or from `host.id`.
  * Excluded alerts: a closed alert of host:h3, and an alert of host:h3 from 40 days ago.
  * Risk change is the current score minus the last score in the 2 hours before the window;
  * service:payments has no score there. host:h2 is on watchlist `wl-1`.

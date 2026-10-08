@@ -28,7 +28,6 @@ interface EntitySeed {
   risk?: [score: number, level: string];
   criticality?: string;
   watchlists?: string[];
-  firstSeenDaysAgo?: number;
   resolvedTo?: string;
 }
 
@@ -39,7 +38,6 @@ const ENTITIES: readonly EntitySeed[] = [
     name: 'web-1',
     risk: [90, 'Critical'],
     criticality: 'high_impact',
-    firstSeenDaysAgo: 60,
   },
   { id: 'host:h2', type: 'host', name: 'web-2', risk: [50, 'Moderate'], watchlists: ['wl-1'] },
   { id: 'host:h3', type: 'host', name: 'web-3' },
@@ -51,12 +49,20 @@ const ENTITIES: readonly EntitySeed[] = [
   { id: 'user:carol@okta', type: 'user', name: 'carol', resolvedTo: 'user:bob@okta' },
 ];
 
+/** The identity fields a real entity doc carries, which the alert fill rebuilds EUIDs from. */
+const toIdentityFields = ({ id, type, name }: EntitySeed): Record<string, string> => {
+  if (type === 'host') return { 'host.id': id.slice('host:'.length), 'host.name': name };
+  if (type === 'user') return { 'user.name': name, 'entity.namespace': 'okta' };
+  return { 'service.name': name };
+};
+
 const toEntityDoc = (seed: EntitySeed, now: number) => ({
+  ...toIdentityFields(seed),
   '@timestamp': toIsoAgo(now, HOUR_MS),
   'entity.id': seed.id,
   'entity.name': seed.name,
   'entity.EngineMetadata.Type': seed.type,
-  'entity.lifecycle.first_seen': toIsoAgo(now, (seed.firstSeenDaysAgo ?? 20) * DAY_MS),
+  'entity.lifecycle.first_seen': toIsoAgo(now, 20 * DAY_MS),
   ...(seed.risk
     ? {
         'entity.risk.calculated_score_norm': seed.risk[0],

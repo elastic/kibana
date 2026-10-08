@@ -18,11 +18,14 @@ import type { FixtureIndex } from './fixture_index';
 
 export const ANOMALY_JOB_ID = 'test_security_job';
 
-/** Identity fields of the records: alice's EUID comes from `user.name` and `event.module`. */
+/**
+ * Identity fields of the records. Alice's EUID comes from `user.name` with `event.module`,
+ * web-2's from `host.id`, as on their entity docs.
+ */
 const ANOMALY_IDENTITIES: ReadonlyArray<Record<string, string>> = [
   { 'user.name': 'alice', 'event.module': 'okta' },
   { 'user.name': 'alice', 'event.module': 'okta' },
-  { 'host.name': 'h2' },
+  { 'host.id': 'h2', 'host.name': 'web-2' },
 ];
 
 /** Final records of an installed security job; matches the queries' `.ml-anomalies-shared*`. */
