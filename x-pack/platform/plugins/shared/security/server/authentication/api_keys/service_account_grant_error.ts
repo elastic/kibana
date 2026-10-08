@@ -39,11 +39,13 @@ const getRefusal = (error: unknown): { statusCode: number; reason: string } | un
 
 /**
  * Turns a refused API key grant for a service account into a 4xx that names the account, or
- * returns `undefined` so the original error propagates unchanged.
+ * returns `undefined` so the original error propagates unchanged. `reason` replaces the backend's
+ * own wording when the caller knows better why the grant was refused.
  */
 export const toServiceAccountGrantError = (
   error: unknown,
-  user: AuthenticatedUser | null
+  user: AuthenticatedUser | null,
+  { reason }: { reason?: string } = {}
 ): Boom.Boom | undefined => {
   const principal = user ? getAuthenticatedPrincipal(user) : null;
   if (principal?.type !== 'service_account') {
@@ -56,8 +58,13 @@ export const toServiceAccountGrantError = (
     return undefined;
   }
 
+  // Kibana already authenticated the caller, so a 401 here is about the grant, not the caller's
+  // credential. Passing it through would tell clients to re-authenticate.
+  const statusCode = refusal.statusCode === 401 ? 403 : refusal.statusCode;
   return new Boom.Boom(
-    `Unable to grant an API key for service account [${principal.serviceAccountId}]: ${refusal.reason}`,
-    { statusCode: refusal.statusCode }
+    `Unable to grant an API key for service account [${principal.serviceAccountId}]: ${
+      reason ?? refusal.reason
+    }`,
+    { statusCode }
   );
 };

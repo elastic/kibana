@@ -103,8 +103,14 @@ export class UiamAPIKeys implements UiamAPIKeysType {
 
       this.logger.debug('API key was granted successfully');
     } catch (e) {
+      const serviceAccountError = toServiceAccountGrantError(e, this.getCurrentUser(request));
+      if (serviceAccountError) {
+        // The caller's credential was refused, which is not a Kibana failure.
+        this.logger.warn(`Failed to grant API key: ${getDetailedErrorMessage(e)}`);
+        throw serviceAccountError;
+      }
       this.logger.error(`Failed to grant API key: ${getDetailedErrorMessage(e)}`);
-      throw toServiceAccountGrantError(e, this.getCurrentUser(request)) ?? e;
+      throw e;
     }
 
     return result;

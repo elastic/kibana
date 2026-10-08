@@ -305,6 +305,18 @@ describe('UiamAPIKeys', () => {
           'Unable to grant an API key for service account [organization-service-account-id]: ' +
             '[0x8E231F] service accounts cannot grant API keys'
         );
+        expect(logger.warn).toHaveBeenCalledTimes(1);
+        expect(logger.error).not.toHaveBeenCalled();
+      });
+
+      it('maps a 401 to a 403, since Kibana already authenticated the caller', async () => {
+        mockUiam.grantApiKey.mockRejectedValue(createUiamError(401, '0x7E0116', 'token expired'));
+
+        await expect(
+          uiamApiKeys.grant(createMockRequest('Bearer essu_service_account_token'), {
+            name: 'test-key',
+          })
+        ).rejects.toMatchObject({ output: { statusCode: 403 } });
       });
 
       it('keeps the original error for a server error', async () => {

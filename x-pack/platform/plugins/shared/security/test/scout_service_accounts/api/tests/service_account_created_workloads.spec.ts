@@ -27,7 +27,7 @@ interface RuleResponse {
 }
 
 interface ExecutionLog {
-  data: Array<{ status: string }>;
+  data: Array<{ status: string; num_active_alerts: number }>;
 }
 
 apiTest.describe(
@@ -41,15 +41,17 @@ apiTest.describe(
     const builtInTokenNames: string[] = [];
     const roleName = uniqueName();
     const indexName = uniqueName();
+    // An index the account's role does not cover, to show its keys are limited to that role.
+    const deniedIndexName = uniqueName();
 
-    const ruleBody = (name: string) => ({
+    const ruleBody = (name: string, index = indexName) => ({
       name,
       rule_type_id: '.es-query',
       consumer: 'stackAlerts',
       schedule: { interval: '1d' },
       actions: [],
       params: {
-        index: [indexName],
+        index: [index],
         timeField: '@timestamp',
         esQuery: '{\n  "query":{\n    "match_all" : {}\n  }\n}',
         size: 100,
@@ -81,14 +83,19 @@ apiTest.describe(
       return { name, accountId: `kibana/${name}`, token: token.value };
     };
 
-    /** Runs the rule now and waits for a successful run, which needs its API key to work. */
-    const expectSuccessfulRun = async (
+    /**
+     * Runs the rule now and returns its first successful run. The ES query rule skips indices its
+     * API key can't read instead of failing, so callers check `num_active_alerts`: each index
+     * holds one document, so a run that could read it reports one active alert.
+     */
+    const runRule = async (
       kbnClient: KbnClient,
       runSoon: (ruleId: string) => Promise<void>,
       ruleId: string
     ) => {
       const dateStart = new Date().toISOString();
       await runSoon(ruleId);
+      let runs: ExecutionLog['data'] = [];
       await expect
         .poll(
           async () => {
@@ -97,19 +104,23 @@ apiTest.describe(
               path: `/internal/alerting/rule/${ruleId}/_execution_log`,
               query: { date_start: dateStart, per_page: 10 },
             });
-            return data.data.map(({ status }) => status);
+            runs = data.data;
+            return runs.map(({ status }) => status);
           },
           { timeout: 120_000, intervals: [2_000], message: `Rule ${ruleId} did not run` }
         )
         .toContain('success');
+      return runs.find(({ status }) => status === 'success');
     };
 
     apiTest.beforeAll(async ({ esClient, kbnClient }) => {
-      await esClient.index({
-        index: indexName,
-        document: { '@timestamp': new Date().toISOString() },
-        refresh: 'wait_for',
-      });
+      for (const index of [indexName, deniedIndexName]) {
+        await esClient.index({
+          index,
+          document: { '@timestamp': new Date().toISOString() },
+          refresh: 'wait_for',
+        });
+      }
       await kbnClient.request({
         method: 'PUT',
         path: `/api/security/role/${roleName}`,
@@ -141,7 +152,7 @@ apiTest.describe(
         path: `/api/security/role/${roleName}`,
         ignoreErrors: [404],
       });
-      await esClient.indices.delete({ index: indexName }, { ignore: [404] });
+      await esClient.indices.delete({ index: [indexName, deniedIndexName] }, { ignore: [404] });
     });
 
     apiTest(
@@ -159,13 +170,43 @@ apiTest.describe(
         ruleIds.push(rule.id);
         expect(rule.api_key_owner).toBe(accountId);
 
-        await expectSuccessfulRun(kbnClient, apiServices.alerting.rules.runSoon, rule.id);
+        expect(await runRule(kbnClient, apiServices.alerting.rules.runSoon, rule.id)).toMatchObject(
+          {
+            num_active_alerts: 1,
+          }
+        );
 
         // B8: the rule keeps its own key after the account that created it is gone.
         await deleteServiceAccounts(esClient, config, [{ namespace: 'kibana', name }], {
           tokenNames: [DIRECT_TOKEN_NAME],
         });
-        await expectSuccessfulRun(kbnClient, apiServices.alerting.rules.runSoon, rule.id);
+        expect(await runRule(kbnClient, apiServices.alerting.rules.runSoon, rule.id)).toMatchObject(
+          {
+            num_active_alerts: 1,
+          }
+        );
+      }
+    );
+
+    apiTest(
+      "a direct caller's rule can only read what the account's role can read",
+      async ({ apiClient, apiServices, esClient, kbnClient }) => {
+        const { name, token } = await createAccount(kbnClient, esClient);
+
+        const created = await apiClient.post('api/alerting/rule', {
+          headers: { ...HEADERS, authorization: `Bearer ${token}` },
+          body: ruleBody(name, deniedIndexName),
+          responseType: 'json',
+        });
+        expect(created).toHaveStatusCode(200);
+        const rule = created.body as RuleResponse;
+        ruleIds.push(rule.id);
+
+        expect(await runRule(kbnClient, apiServices.alerting.rules.runSoon, rule.id)).toMatchObject(
+          {
+            num_active_alerts: 0,
+          }
+        );
       }
     );
 
@@ -209,7 +250,11 @@ apiTest.describe(
         ruleIds.push(body.id);
         expect(body.api_key_owner).toBe(accountId);
 
-        await expectSuccessfulRun(kbnClient, apiServices.alerting.rules.runSoon, body.id);
+        expect(await runRule(kbnClient, apiServices.alerting.rules.runSoon, body.id)).toMatchObject(
+          {
+            num_active_alerts: 1,
+          }
+        );
       }
     );
 

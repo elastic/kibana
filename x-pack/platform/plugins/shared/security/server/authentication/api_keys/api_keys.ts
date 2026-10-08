@@ -368,11 +368,15 @@ export class APIKeys implements NativeAPIKeysType {
           : await this.clusterClient.asInternalUser.security.grantApiKey(params);
       this.logger.debug('API key was granted successfully');
     } catch (e) {
-      this.logger.error(`Failed to grant API key: ${e.message}`);
-      const serviceAccountError = toServiceAccountGrantError(e, this.getCurrentUser(request));
+      const serviceAccountError = toServiceAccountGrantError(e, this.getCurrentUser(request), {
+        reason: this.getServiceAccountGrantRefusalReason(authorizationHeader),
+      });
       if (serviceAccountError) {
+        // The caller's credential was refused, which is not a Kibana failure.
+        this.logger.warn(`Failed to grant API key: ${e.message}`);
         throw serviceAccountError;
       }
+      this.logger.error(`Failed to grant API key: ${e.message}`);
       // The original error's request metadata carries the service account token, so it must not
       // leave this method.
       if (params.grant_type === '_user_managed_service_account') {
@@ -529,6 +533,21 @@ export class APIKeys implements NativeAPIKeysType {
     return (
       error.statusCode !== 400 || error.body?.error?.type !== 'action_request_validation_exception'
     );
+  }
+
+  /**
+   * Explains a refused grant that Kibana itself caused: a service account token presented while
+   * service accounts are disabled is sent as an access token, which Elasticsearch never accepts.
+   */
+  private getServiceAccountGrantRefusalReason(
+    authorizationHeader: HTTPAuthorizationHeader
+  ): string | undefined {
+    return !this.serviceAccountsEnabled &&
+      authorizationHeader.scheme.toLowerCase() === 'bearer' &&
+      isEsServiceAccountToken(authorizationHeader.credentials)
+      ? 'Kibana grants API keys from service account tokens only when ' +
+          '`xpack.security.serviceAccounts.enabled` is `true`'
+      : undefined;
   }
 
   private getGrantParams(

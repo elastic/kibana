@@ -624,6 +624,69 @@ describe('API Keys', () => {
       );
     });
 
+    it('maps a 401 to a 403, since Kibana already authenticated the caller', async () => {
+      mockClusterClient.asInternalUser.transport.request.mockRejectedValueOnce(
+        createResponseError(401, 'unable to authenticate')
+      );
+
+      const failure = await apiKeys
+        .grantAsInternalUser(createServiceAccountRequest(), {
+          name: 'test_api_key',
+          role_descriptors: {},
+        })
+        .catch((error: Boom.Boom) => error);
+
+      expect((failure as Boom.Boom).output.statusCode).toBe(403);
+    });
+
+    it('logs a refusal as a warning and a server error as an error', async () => {
+      mockClusterClient.asInternalUser.transport.request
+        .mockRejectedValueOnce(createResponseError(400, 'refused'))
+        .mockRejectedValueOnce(createResponseError(503, 'unavailable'));
+      const grant = () =>
+        apiKeys
+          .grantAsInternalUser(createServiceAccountRequest(), {
+            name: 'test_api_key',
+            role_descriptors: {},
+          })
+          .catch(() => undefined);
+
+      await grant();
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.error).not.toHaveBeenCalled();
+
+      await grant();
+      expect(logger.error).toHaveBeenCalledTimes(1);
+    });
+
+    it('explains the refusal when service accounts are disabled', async () => {
+      apiKeys = new APIKeys({
+        clusterClient: mockClusterClient,
+        logger,
+        license: mockLicense,
+        applicationName: 'kibana-.kibana',
+        kibanaFeatures: [],
+        getCurrentUser,
+      });
+      mockClusterClient.asInternalUser.security.grantApiKey.mockRejectedValueOnce(
+        createResponseError(403, 'Failed to authenticate api key grant')
+      );
+
+      const failure = await apiKeys
+        .grantAsInternalUser(createServiceAccountRequest(), {
+          name: 'test_api_key',
+          role_descriptors: {},
+        })
+        .catch((error: Boom.Boom) => error);
+
+      expect((failure as Boom.Boom).output.statusCode).toBe(403);
+      expect((failure as Boom.Boom).message).toBe(
+        'Unable to grant an API key for service account [kibana/automation]: Kibana grants API ' +
+          'keys from service account tokens only when `xpack.security.serviceAccounts.enabled` ' +
+          'is `true`'
+      );
+    });
+
     it('keeps the status of a server error without exposing the original error', async () => {
       const sourceError = createResponseError(503, 'unavailable');
       mockClusterClient.asInternalUser.transport.request.mockRejectedValueOnce(sourceError);
