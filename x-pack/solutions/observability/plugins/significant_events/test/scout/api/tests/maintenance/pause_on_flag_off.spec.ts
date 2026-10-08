@@ -95,10 +95,13 @@ const createClient = (apiClient: ApiClientFixture, cookieHeader: Record<string, 
     },
     /** Deletes the query together with its backing rule. */
     async deleteQuery(queryId: string) {
-      await apiClient.post('internal/streams/queries/_bulk_delete', {
+      const response = await apiClient.post('internal/streams/queries/_bulk_delete', {
         headers: internalHeaders,
         body: { queryIds: [queryId] },
+        responseType: 'json',
       });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.failed).toBe(0);
     },
   };
 };
