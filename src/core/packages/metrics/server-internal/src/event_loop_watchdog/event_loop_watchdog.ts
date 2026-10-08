@@ -8,7 +8,6 @@
  */
 
 import Path from 'node:path';
-import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type {
   InternalThreadsStart,
   ManagedWorker,
@@ -16,8 +15,8 @@ import type {
 } from '@kbn/core-threads-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { AdmissionLimits } from './admission';
-import { ProfilingSession } from './profiling_session';
-import type { PprofProfile, PprofTime, ProfileWindow, SessionLimits } from './profiling_session';
+import { ProfilingSession, createV8CpuProfiler } from './profiling_session';
+import type { CpuProfiler, KeptProfile, SessionLimits } from './profiling_session';
 import {
   BLOCK_THRESHOLD_MS,
   HEARTBEAT_INTERVAL_MS,
@@ -35,47 +34,13 @@ export const MAX_RESTARTS = 3;
 export const RESTART_BASE_DELAY_MS = 1_000;
 const WORKER_ENTRY = Path.resolve(__dirname, 'worker_entry.js');
 
-export interface LoadedPprof {
-  time: PprofTime;
-  /** Native binary that was loaded, for diagnostics. */
-  binary?: string;
-}
-
-type NodeBuildVariables = typeof process.config.variables & {
-  v8_enable_pointer_compression?: number | boolean;
-};
-
-/** Whether Node.js was built with V8 pointer compression (as Serverless runs Kibana). */
-export const isPointerCompressed = (
-  variables: NodeBuildVariables = process.config.variables
-): boolean => Number(variables.v8_enable_pointer_compression ?? 0) === 1;
-
-/**
- * Loads the native profiler lazily so that nothing native is loaded unless the watchdog runs.
- * Its prebuilt binaries target standard Node.js builds: with pointer compression V8's object
- * layout differs and starting the profiler crashes the process, so it is refused there.
- */
-export const loadPprof = async (
-  pointerCompressed: boolean = isPointerCompressed()
-): Promise<LoadedPprof> => {
-  if (pointerCompressed) {
-    throw new Error(
-      'the prebuilt @datadog/pprof binaries are incompatible with Node.js built with pointer compression'
-    );
-  }
-  const { time } = await import('@datadog/pprof');
-  const binary = Object.keys(require.cache).find(
-    (path) => path.endsWith('.node') && path.includes('pprof')
-  );
-  return { time, binary };
-};
-
 export interface EventLoopWatchdogParams {
   threads: InternalThreadsStart;
   logger: Logger;
   sanitizeRoot: string;
   diagnosticDir?: string;
-  loadProfiler?: () => Promise<LoadedPprof>;
+  /** Defaults to Node's V8 CPU profiler (`v8.startCpuProfile`). */
+  profiler?: CpuProfiler;
   limits?: SessionLimits;
   admissionLimits?: AdmissionLimits;
   workerEntry?: string;
@@ -93,9 +58,12 @@ export class EventLoopWatchdog {
   private stopping?: Promise<void>;
   private generation = 0;
   private shared?: BigInt64Array;
+  private readonly profiler: CpuProfiler;
   private runningSinceUs = 0;
 
-  constructor(private readonly params: EventLoopWatchdogParams) {}
+  constructor(private readonly params: EventLoopWatchdogParams) {
+    this.profiler = params.profiler ?? createV8CpuProfiler();
+  }
 
   public start(): void {
     if (this.worker) return;
@@ -155,7 +123,7 @@ export class EventLoopWatchdog {
       onExhausted: () => {
         clearInterval(this.heartbeatTimer);
         this.heartbeatTimer = undefined;
-        this.generation++; // cancels a session start still loading the profiler
+        this.generation++; // cancels a pending session start
         this.session?.end('watchdog worker unavailable');
       },
     });
@@ -163,7 +131,9 @@ export class EventLoopWatchdog {
     logger.info(
       `Event loop watchdog started (threshold ${BLOCK_THRESHOLD_MS}ms, heartbeat ${HEARTBEAT_INTERVAL_MS}ms)`
     );
-    void this.startProfiling(shared, ++this.generation);
+    // The cold start pauses the main thread: let the caller (a flag toggle) complete first.
+    const generation = ++this.generation;
+    setImmediate(() => this.startProfiling(shared, generation));
   }
 
   /** Marks the end of startup: later blocks are written within the running budget. */
@@ -173,14 +143,9 @@ export class EventLoopWatchdog {
     if (this.shared) Atomics.store(this.shared, Slot.runningSince, BigInt(this.runningSinceUs));
   }
 
-  /** Whether a profiling session is collecting samples (and so labels). */
+  /** Whether a profiling session is collecting samples. */
   public get isProfiling(): boolean {
     return this.session?.isActive ?? false;
-  }
-
-  /** Runs `run` with profiler labels for `context` while a session is active. */
-  public runWithLabels<R>(context: KibanaExecutionContext, run: () => R): R {
-    return this.session ? this.session.runWithLabels(context, run) : run();
   }
 
   public stop(): Promise<void> {
@@ -204,13 +169,12 @@ export class EventLoopWatchdog {
     return this.stopping;
   }
 
-  private async startProfiling(shared: BigInt64Array, generation: number): Promise<void> {
-    const { logger, limits, loadProfiler = loadPprof } = this.params;
+  private startProfiling(shared: BigInt64Array, generation: number): void {
+    if (generation !== this.generation) return;
+    const { logger, limits } = this.params;
     try {
-      const { time, binary } = await loadProfiler();
-      if (generation !== this.generation) return;
       const session = new ProfilingSession({
-        time,
+        profiler: this.profiler,
         limits,
         logger,
         now: monotonicUs,
@@ -220,36 +184,30 @@ export class EventLoopWatchdog {
             phase === 'start' ? Slot.rotationStart : Slot.rotationEnd,
             BigInt(atUs)
           ),
-        onKeep: (profile, window, kept) => this.sendProfile(profile, window, kept),
+        onKeep: (profile) => this.sendProfile(profile),
       });
-      session.start(Number(Atomics.load(shared, Slot.blocks)), binary ? `, ${binary}` : '');
+      session.start(Number(Atomics.load(shared, Slot.blocks)));
       this.session = session;
     } catch (error) {
       logger.warn(`Event loop profiling unavailable: ${error.message}`);
     }
   }
 
-  private sendProfile(profile: PprofProfile, window: ProfileWindow, kept: number): void {
-    // Only the worker that flagged the window knows its blocks.
+  private sendProfile({ json, stoppedAtUs, window, kept }: KeptProfile): void {
+    // Only the worker that flagged the window knows its blocks; a string is cheap to post.
     const { post } = this;
-    profile
-      .encodeAsync()
-      .then((bytes) => {
-        if (!post || post !== this.post) throw new Error('watchdog worker unavailable');
-        post(
-          {
-            type: 'profile',
-            bytes,
-            windowStartUs: window.startUs,
-            windowEndUs: window.endUs,
-            kept,
-          },
-          // encoded into a fresh, unshared buffer
-          [bytes.buffer as ArrayBuffer]
-        );
-      })
-      .catch((error) =>
-        this.params.logger.warn(`Dropped event loop block profile #${kept}: ${error.message}`)
-      );
+    try {
+      if (!post) throw new Error('watchdog worker unavailable');
+      post({
+        type: 'profile',
+        json,
+        stoppedAtUs,
+        windowStartUs: window.startUs,
+        windowEndUs: window.endUs,
+        kept,
+      });
+    } catch (error) {
+      this.params.logger.warn(`Dropped event loop block profile #${kept}: ${error.message}`);
+    }
   }
 }

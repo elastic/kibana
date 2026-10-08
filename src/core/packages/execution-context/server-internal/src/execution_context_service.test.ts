@@ -400,25 +400,6 @@ describe('ExecutionContextService', () => {
 
         expect(fn).toHaveBeenCalledTimes(1);
       });
-
-      it('runs the registered wrapper around the function, inside the new context', () => {
-        const seen: unknown[] = [];
-        service.registerContextWrapper((container, run) => {
-          seen.push(container.toJSON());
-          return run();
-        });
-        const result = service.withContext({ type: 'outer', name: 'a' }, () =>
-          service.withContext({ type: 'inner', name: 'b' }, () => service.get()?.toJSON())
-        );
-        expect(seen).toEqual([
-          { type: 'outer', name: 'a' },
-          { type: 'outer', name: 'a', child: { type: 'inner', name: 'b' } },
-        ]);
-        expect(result).toEqual(seen[1]);
-        expect(() => service.registerContextWrapper((_, run) => run())).toThrow(
-          'already registered'
-        );
-      });
     });
 
     describe('getAsLabels', () => {

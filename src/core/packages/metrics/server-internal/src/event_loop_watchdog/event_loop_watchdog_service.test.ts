@@ -8,10 +8,8 @@
  */
 
 const mockWatchdog = {
-  isProfiling: false,
   start: jest.fn(),
   stop: jest.fn().mockResolvedValue(undefined),
-  runWithLabels: jest.fn((_context, run) => run()),
   markRunning: jest.fn(),
 };
 jest.mock('./event_loop_watchdog', () => ({ EventLoopWatchdog: jest.fn(() => mockWatchdog) }));
@@ -19,7 +17,6 @@ jest.mock('./event_loop_watchdog', () => ({ EventLoopWatchdog: jest.fn(() => moc
 import { BehaviorSubject, NEVER, Subject } from 'rxjs';
 import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-common';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 import type { InternalThreadsStart } from '@kbn/core-threads-server-internal';
 import {
@@ -32,13 +29,9 @@ import { RUNNING_FALLBACK_MS, RUNNING_GRACE_MS } from './types';
 describe('EventLoopWatchdogService', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('toggles the watchdog with the feature flag and labels execution contexts', async () => {
+  it('toggles the watchdog with the feature flag', async () => {
     const service = new EventLoopWatchdogService(mockCoreContext.create());
-    const executionContext = executionContextServiceMock.createInternalSetupContract();
-    service.setup({ executionContext, status: { overall$: NEVER } });
-    const wrapper = executionContext.registerContextWrapper.mock.calls[0][0];
-    const toJSON = jest.fn(() => ({ type: 'a' }));
-    expect(wrapper({ toJSON } as never, () => 1)).toBe(1);
+    service.setup({ status: { overall$: NEVER } });
 
     const flag$ = new BehaviorSubject(false);
     const featureFlags = coreFeatureFlagsMock.createStart();
@@ -52,12 +45,6 @@ describe('EventLoopWatchdogService', () => {
     // toggles are serialised behind the initial (disabled) toggle
     await new Promise(setImmediate);
     expect(mockWatchdog.start).toHaveBeenCalledTimes(1);
-    // not profiling yet: the context is not even converted
-    expect(wrapper({ toJSON } as never, () => 2)).toBe(2);
-    expect(toJSON).not.toHaveBeenCalled();
-    mockWatchdog.isProfiling = true;
-    expect(wrapper({ toJSON } as never, () => 3)).toBe(3);
-    expect(mockWatchdog.runWithLabels).toHaveBeenCalledWith({ type: 'a' }, expect.any(Function));
     flag$.next(false);
     await new Promise(setImmediate);
     expect(mockWatchdog.stop).toHaveBeenCalledTimes(2); // initial disabled value, then the toggle
@@ -77,10 +64,7 @@ describe('EventLoopWatchdogService startup phase', () => {
     jest.clearAllMocks();
     overall$ = new Subject();
     service = new EventLoopWatchdogService(mockCoreContext.create());
-    service.setup({
-      executionContext: executionContextServiceMock.createInternalSetupContract(),
-      status: { overall$ },
-    });
+    service.setup({ status: { overall$ } });
     service.start({ featureFlags, threads: {} as InternalThreadsStart });
   });
 

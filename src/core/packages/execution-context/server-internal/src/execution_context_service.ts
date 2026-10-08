@@ -54,19 +54,9 @@ export interface IExecutionContext {
 }
 
 /**
- * Wraps the run of every `withContext` call, e.g. to attach profiler labels to the work it runs.
- * Must call `run` exactly once and return its result.
  * @internal
  */
-export type ExecutionContextWrapper = <R>(context: IExecutionContextContainer, run: () => R) => R;
-
-/**
- * @internal
- */
-export interface InternalExecutionContextSetup extends IExecutionContext {
-  /** Registers the single process-wide `withContext` wrapper. */
-  registerContextWrapper(wrapper: ExecutionContextWrapper): void;
-}
+export type InternalExecutionContextSetup = IExecutionContext;
 
 /**
  * @internal
@@ -81,7 +71,6 @@ export class ExecutionContextService
   private readonly requestIdStore: AsyncLocalStorage<{ requestId: string }>;
   private enabled = false;
   private configSubscription?: Subscription;
-  private contextWrapper?: ExecutionContextWrapper;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('execution_context');
@@ -104,11 +93,6 @@ export class ExecutionContextService
       get: this.get.bind(this),
       getAsHeader: this.getAsHeader.bind(this),
       getAsLabels: this.getAsLabels.bind(this),
-      registerContextWrapper: (wrapper) => {
-        if (this.contextWrapper)
-          throw new Error('An execution context wrapper is already registered');
-        this.contextWrapper = wrapper;
-      },
     };
   }
 
@@ -126,7 +110,6 @@ export class ExecutionContextService
 
   stop() {
     this.enabled = false;
-    this.contextWrapper = undefined;
     if (this.configSubscription) {
       this.configSubscription.unsubscribe();
       this.configSubscription = undefined;
@@ -157,8 +140,7 @@ export class ExecutionContextService
       this.log.debug(JSON.stringify(contextContainer));
     }
 
-    const run = () => this.contextStore.run(contextContainer, fn);
-    return this.contextWrapper ? this.contextWrapper(contextContainer, run) : run();
+    return this.contextStore.run(contextContainer, fn);
   }
 
   private setRequestId(requestId: string) {

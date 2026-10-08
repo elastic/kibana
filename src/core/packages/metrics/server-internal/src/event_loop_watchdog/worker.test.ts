@@ -11,7 +11,6 @@ import Fs from 'node:fs';
 import Os from 'node:os';
 import Path from 'node:path';
 import { MessageChannel, type MessagePort } from 'node:worker_threads';
-import { Profile, StringTable } from 'pprof-format';
 import { runWatchdogWorker } from './worker';
 import { SLOT_COUNT, type LogMessage, type ProfileMessage } from './types';
 
@@ -37,10 +36,17 @@ describe('runWatchdogWorker', () => {
 
   it('does not write a window it recorded no block for (e.g. flagged by a replaced worker)', async () => {
     const logged = new Promise<LogMessage>((resolve) => main.once('message', resolve));
-    const bytes = new Profile({ stringTable: new StringTable() }).encode();
+    const json = JSON.stringify({
+      nodes: [],
+      startTime: 0,
+      endTime: 1,
+      samples: [],
+      timeDeltas: [],
+    });
     main.postMessage({
       type: 'profile',
-      bytes,
+      json,
+      stoppedAtUs: 1,
       windowStartUs: 0,
       windowEndUs: 1_000_000,
       kept: 1,

@@ -22,7 +22,6 @@ import {
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
-import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { InternalThreadsStart } from '@kbn/core-threads-server-internal';
 import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-common';
@@ -33,7 +32,6 @@ import { RUNNING_FALLBACK_MS, RUNNING_GRACE_MS } from './types';
 export const EVENT_LOOP_WATCHDOG_FEATURE_FLAG = 'core.eventLoopWatchdog.enabled';
 
 export interface EventLoopWatchdogSetupDeps {
-  executionContext: Pick<InternalExecutionContextSetup, 'registerContextWrapper'>;
   /** Kibana's overall status: startup ends once it is first available. */
   status: { overall$: Observable<ServiceStatus> };
 }
@@ -54,7 +52,7 @@ export const resolveDiagnosticDir = (
 
 /**
  * Core-owned event-loop watchdog PoC: while the feature flag is on, a worker detects blocks and
- * the main thread keeps pprof profiles of the windows they happen in.
+ * the main thread keeps V8 CPU profiles of the windows they happen in.
  * @internal
  */
 export class EventLoopWatchdogService {
@@ -67,12 +65,8 @@ export class EventLoopWatchdogService {
     this.logger = coreContext.logger.get('metrics', 'event_loop_watchdog');
   }
 
-  public setup({ executionContext, status }: EventLoopWatchdogSetupDeps): void {
+  public setup({ status }: EventLoopWatchdogSetupDeps): void {
     this.overall$ = status.overall$;
-    // Only a getter check while not profiling: the context is converted only when labelling.
-    executionContext.registerContextWrapper((context, run) =>
-      this.watchdog?.isProfiling ? this.watchdog.runWithLabels(context.toJSON(), run) : run()
-    );
   }
 
   public start({ featureFlags, threads }: EventLoopWatchdogStartDeps): void {

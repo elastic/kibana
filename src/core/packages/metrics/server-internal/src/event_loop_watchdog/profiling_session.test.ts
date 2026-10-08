@@ -7,30 +7,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const mockCalls: string[] = [];
+const mockStartCpuProfile = jest.fn(() => {
+  mockCalls.push('start');
+  return { stop: () => '{}' };
+});
+jest.mock('node:v8', () => ({
+  __esModule: true,
+  default: {
+    setFlagsFromString: (flag: string) => mockCalls.push(flag),
+    startCpuProfile: () => mockStartCpuProfile(),
+  },
+}));
+
 import { loggerMock } from '@kbn/logging-mocks';
-import { ProfilingSession, toLabels, type PprofTime } from './profiling_session';
-import { MAX_SESSION_MS, SAMPLING_INTERVAL_US } from './types';
+import {
+  ProfilingSession,
+  createV8CpuProfiler,
+  type CpuProfiler,
+  type ProfilingSessionParams,
+} from './profiling_session';
+import { MAX_SESSION_MS } from './types';
 
 const S = 1_000_000;
 
 describe('ProfilingSession', () => {
   let now: number;
-  let time: jest.Mocked<PprofTime>;
-  let params: ConstructorParameters<typeof ProfilingSession>[0];
+  let profiles: Array<{ id: number; stop: jest.Mock }>;
+  let profiler: jest.Mocked<CpuProfiler>;
+  let params: ProfilingSessionParams & { onKeep: jest.Mock; markRotation: jest.Mock };
   let session: ProfilingSession;
 
   beforeEach(() => {
     now = 1_000 * S;
-    time = {
-      start: jest.fn(),
-      stop: jest.fn(() => ({ id: Math.random() } as unknown as ReturnType<PprofTime['stop']>)),
-      // the generic signature cannot be inferred by jest.fn
-      runWithContext: jest.fn((_context: object, fn: () => unknown) =>
-        fn()
-      ) as unknown as jest.Mocked<PprofTime>['runWithContext'],
+    profiles = [];
+    profiler = {
+      start: jest.fn(() => {
+        const id = profiles.length + 1;
+        const profile = { id, stop: jest.fn(() => `profile-${id}`) };
+        profiles.push(profile);
+        return profile;
+      }),
     };
     params = {
-      time,
+      profiler,
       logger: loggerMock.create(),
       now: () => now,
       markRotation: jest.fn(),
@@ -45,27 +65,23 @@ describe('ProfilingSession', () => {
     session.tick(blocks);
   };
 
-  it('publishes the profiler start as a rotation so its pause is not reported as a block', () => {
+  it('publishes the profiler cold start as a rotation so its pause is not reported as a block', () => {
+    expect(profiler.start).toHaveBeenCalledTimes(1);
     expect(params.markRotation).toHaveBeenNthCalledWith(1, 'start', now);
     expect(params.markRotation).toHaveBeenNthCalledWith(2, 'end', now);
-  });
-
-  it('samples continuously at 99Hz with labels', () => {
-    expect(time.start).toHaveBeenCalledWith(
-      expect.objectContaining({
-        intervalMicros: SAMPLING_INTERVAL_US,
-        withContexts: true,
-        useCPED: true,
-      })
-    );
     expect(session.isActive).toBe(true);
   });
 
-  it('rotates every 60s, discarding windows without blocks', () => {
+  it('rotates every 60s by starting the next profile before stopping the current one', () => {
     advance(59);
-    expect(time.stop).not.toHaveBeenCalled();
+    expect(profiler.start).toHaveBeenCalledTimes(1);
     advance(1);
-    expect(time.stop).toHaveBeenCalledWith(true, undefined, expect.any(Array));
+    expect(profiler.start).toHaveBeenCalledTimes(2);
+    expect(profiles[0].stop).toHaveBeenCalledTimes(1);
+    // overlap: the next profile was already running when the current one stopped
+    expect(profiler.start.mock.invocationCallOrder[1]).toBeLessThan(
+      profiles[0].stop.mock.invocationCallOrder[0]
+    );
     expect(params.onKeep).not.toHaveBeenCalled();
     expect(params.markRotation).toHaveBeenNthCalledWith(3, 'start', now);
     expect(params.markRotation).toHaveBeenNthCalledWith(4, 'end', now);
@@ -73,42 +89,31 @@ describe('ProfilingSession', () => {
 
   it('keeps a flagged window, rotating it early once it is 10s old', () => {
     advance(2, 1);
-    expect(time.stop).not.toHaveBeenCalled();
+    expect(profiles[0].stop).not.toHaveBeenCalled();
     advance(8, 1);
-    expect(time.stop).toHaveBeenCalledWith(true, expect.any(Function), expect.any(Array));
-    expect(params.onKeep).toHaveBeenCalledWith(
-      time.stop.mock.results[0].value,
-      { startUs: 1_000 * S, endUs: 1_010 * S },
-      1
-    );
+    expect(params.onKeep).toHaveBeenCalledWith({
+      json: 'profile-1',
+      stoppedAtUs: now,
+      window: { startUs: 1_000 * S, endUs: 1_010 * S },
+      kept: 1,
+    });
     // the next window is only kept if another block is flagged
     advance(60, 1);
     expect(params.onKeep).toHaveBeenCalledTimes(1);
   });
 
-  it('labels samples with their timestamp and the context labels', () => {
-    advance(10, 1);
-    const generateLabels = time.stop.mock.calls[0][1]!;
-    expect(
-      generateLabels({
-        node: {} as never,
-        context: { context: { context_outer: 'a:b' }, timestamp: 42n },
-      })
-    ).toEqual({ context_outer: 'a:b', timestamp_us: 42 });
-    expect(generateLabels({ node: {} as never })).toEqual({});
-  });
-
   it('keeps flagged windows for the whole session: the worker bounds the files written', () => {
     for (let i = 0; i < 500; i++) advance(10, i + 1);
     expect(params.onKeep).toHaveBeenCalledTimes(500);
-    expect(params.onKeep).toHaveBeenLastCalledWith(expect.anything(), expect.anything(), 500);
+    expect(params.onKeep).toHaveBeenLastCalledWith(expect.objectContaining({ kept: 500 }));
+    expect(profiler.start).toHaveBeenCalledTimes(501);
     expect(session.isActive).toBe(true);
   });
 
-  it('ends after the time limit, publishing the final stop as a rotation', () => {
+  it('ends after the time limit, stopping the profile and publishing the stop as a rotation', () => {
     now += MAX_SESSION_MS * 1000;
     session.tick(0);
-    expect(time.stop).toHaveBeenCalledWith(false);
+    expect(profiles[0].stop).toHaveBeenCalledTimes(1);
     expect(params.markRotation).toHaveBeenLastCalledWith('end', now);
     expect(params.markRotation).toHaveBeenCalledTimes(4);
     expect(session.isActive).toBe(false);
@@ -119,58 +124,61 @@ describe('ProfilingSession', () => {
     now += 5 * S;
     session.tick(1);
     expect(params.onKeep).toHaveBeenCalledTimes(1);
-    expect(time.stop).toHaveBeenLastCalledWith(false);
+    expect(profiles.every(({ stop }) => stop.mock.calls.length === 1)).toBe(true);
+    expect(session.isActive).toBe(false);
   });
 
-  it('ends when a rotation fails, still publishing its end', () => {
-    time.stop.mockImplementationOnce(() => {
+  it('ends when the next profile fails to start, stopping the one still running', () => {
+    profiler.start.mockImplementationOnce(() => {
       throw new Error('boom');
     });
     advance(60);
+    expect(profiles[0].stop).toHaveBeenCalledTimes(1);
     expect(params.markRotation).toHaveBeenCalledWith('end', now);
     expect(session.isActive).toBe(false);
   });
 
-  it('labels work only while active and labels are supported', () => {
-    const run = jest.fn(() => 'result');
-    expect(session.runWithLabels({ type: 'task manager', name: 'run x', id: '1' }, run)).toBe(
-      'result'
-    );
-    expect(time.runWithContext).toHaveBeenLastCalledWith(
-      { context_outer: 'task manager:run x' },
-      run
-    );
-    session.end('test');
-    time.runWithContext.mockClear();
-    session.runWithLabels({ type: 'a' }, run);
-    expect(time.runWithContext).not.toHaveBeenCalled();
-  });
-
-  it('continues without labels when the runtime lacks AsyncContextFrame', () => {
-    time.runWithContext.mockImplementationOnce(() => {
-      throw new Error('Can only use runWithContext with AsyncContextFrame');
+  it('ends when stopping fails, stopping the profile that already took over', () => {
+    profiles[0].stop.mockImplementationOnce(() => {
+      throw new Error('boom');
     });
-    const other = new ProfilingSession(params);
-    other.start(0);
-    time.runWithContext.mockClear();
-    expect(other.runWithLabels({ type: 'a' }, () => 1)).toBe(1);
-    expect(time.runWithContext).not.toHaveBeenCalled();
+    advance(60);
+    expect(profiles[1].stop).toHaveBeenCalledTimes(1);
+    expect(session.isActive).toBe(false);
   });
 });
 
-describe('toLabels', () => {
-  it('uses the outermost and innermost context, never ids', () => {
-    expect(
-      toLabels({
-        type: 'task manager',
-        name: 'run workflow:run',
-        id: 'task-id',
-        child: { type: 'workflow step', name: 'test.cpuSpin', id: 'step-id' },
-      })
-    ).toEqual({
-      context_outer: 'task manager:run workflow:run',
-      context_inner: 'workflow step:test.cpuSpin',
+describe('createV8CpuProfiler', () => {
+  beforeEach(() => {
+    mockCalls.length = 0;
+    jest.clearAllMocks();
+  });
+
+  it('sets the sampling interval only while creating the profiler, then restores the default', () => {
+    const profiler = createV8CpuProfiler();
+    profiler.start();
+    profiler.start();
+    expect(mockCalls).toEqual([
+      '--cpu-profiler-sampling-interval=10101',
+      'start',
+      '--cpu-profiler-sampling-interval=1000',
+      'start',
+    ]);
+  });
+
+  it('restores the default even if starting fails, and sets it again on the next attempt', () => {
+    mockStartCpuProfile.mockImplementationOnce(() => {
+      throw new Error('boom');
     });
-    expect(toLabels({ id: 'only-id' })).toEqual({});
+    const profiler = createV8CpuProfiler();
+    expect(() => profiler.start()).toThrow('boom');
+    profiler.start();
+    expect(mockCalls).toEqual([
+      '--cpu-profiler-sampling-interval=10101',
+      '--cpu-profiler-sampling-interval=1000',
+      '--cpu-profiler-sampling-interval=10101',
+      'start',
+      '--cpu-profiler-sampling-interval=1000',
+    ]);
   });
 });

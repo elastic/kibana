@@ -18,6 +18,8 @@ export const BLOCK_THRESHOLD_MS = 200;
 export const POLL_INTERVAL_MS = 25;
 /** 99 Hz, as Datadog's tracer: avoids sampling in lockstep with 10ms timers. */
 export const SAMPLING_INTERVAL_US = Math.round(1_000_000 / 99);
+/** V8's default `--cpu-profiler-sampling-interval`, restored once the profiler exists. */
+export const V8_DEFAULT_SAMPLING_INTERVAL_US = 1_000;
 export const WINDOW_MS = 60_000;
 /** A window holding a block is rotated early, but never before it is this old. */
 export const MIN_FLAGGED_WINDOW_MS = 10_000;
@@ -40,14 +42,8 @@ export const RUNNING_FALLBACK_MS = 5 * 60_000;
 /** Startup blocks are expected (and seen before serving traffic); they get their own budget. */
 export type Phase = 'startup' | 'running';
 
-/** Label holding each sample's epoch timestamp in microseconds, to locate blocks in a window. */
-export const TIMESTAMP_LABEL = 'timestamp_us';
-/** Label numbering the block (1-based, in logged order) a written sample was taken in. */
-export const BLOCK_LABEL = 'block';
 /** Samples within this margin of a block are written as context; the rest of the window is not. */
 export const CONTEXT_MARGIN_MS = 1_000;
-export const OUTER_CONTEXT_LABEL = 'context_outer';
-export const INNER_CONTEXT_LABEL = 'context_inner';
 
 /**
  * Slots of the BigInt64Array shared by the main thread and the worker. Times are process-wide
@@ -81,7 +77,10 @@ export interface WatchdogWorkerData {
 
 export interface ProfileMessage {
   type: 'profile';
-  bytes: Uint8Array;
+  /** The window's V8 CPU profile (`.cpuprofile` JSON), as returned by the profiler. */
+  json: string;
+  /** Monotonic time (`process.hrtime`) right after the profile was stopped, to map V8's clock. */
+  stoppedAtUs: number;
   windowStartUs: number;
   windowEndUs: number;
   /** Number of windows kept so far in the session, including this one. */

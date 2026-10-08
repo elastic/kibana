@@ -136,22 +136,8 @@ async function checkProdNativeModules(log: ToolingLog) {
       return false;
     }
 
-    // PoC-only exception after discovery so nested native dependencies are still checked.
-    const disallowedNativeModules = prodNativeModulesFound.filter(({ name, version }) => {
-      if (name === '@datadog/pprof' && version === '5.19.0') {
-        log.warning('Temporary PoC exception: @datadog/pprof@5.19.0 (PR #295800; not for merge)');
-        return false;
-      }
-      return true;
-    });
-
-    if (!disallowedNativeModules.length) {
-      log.success('Only temporary PoC native module exceptions were found');
-      return false;
-    }
-
-    // Logs every disallowed native module at once
-    disallowedNativeModules.forEach((dep) => {
+    // Logs every detected native module at once
+    prodNativeModulesFound.forEach((dep) => {
       log.error(`Production native module detected: ${path.relative(REPO_ROOT, dep.path)}`);
     });
 

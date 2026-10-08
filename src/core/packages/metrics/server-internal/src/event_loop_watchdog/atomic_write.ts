@@ -21,7 +21,7 @@ export const STAGING_DIR = '.event-loop-watchdog-staging';
 export const writeFileAtomically = async (
   dir: string,
   name: string,
-  data: Uint8Array
+  data: string | Uint8Array
 ): Promise<string> => {
   const stagingDir = Path.join(dir, STAGING_DIR);
   const staged = Path.join(stagingDir, name);

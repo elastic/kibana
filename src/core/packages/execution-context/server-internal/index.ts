@@ -12,6 +12,5 @@ export type {
   InternalExecutionContextSetup,
   InternalExecutionContextStart,
   IExecutionContext,
-  ExecutionContextWrapper,
 } from './src/execution_context_service';
 export { executionContextConfig } from './src/execution_context_config';

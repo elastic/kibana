@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExecutionContextStart } from '@kbn/core/server';
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import type { ServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { isOneShotStepDefinition, isPollStepDefinition } from '@kbn/workflows-extensions/server';
@@ -45,8 +44,7 @@ export class CustomStepImpl
     stepExecutionRuntime: StepExecutionRuntime,
     connectorExecutor: ConnectorExecutor,
     workflowExecutionRuntime: WorkflowExecutionRuntimeManager,
-    private workflowLogger: IWorkflowEventLogger,
-    private executionContext: Pick<ExecutionContextStart, 'withContext'>
+    private workflowLogger: IWorkflowEventLogger
   ) {
     const baseStep: BaseStep = {
       name: node.stepId,
@@ -83,16 +81,15 @@ export class CustomStepImpl
    * Execute the custom step handler
    */
   protected override async _run(input: unknown): Promise<RunStepResult> {
-    const { stepHandler } = this;
-    if (!stepHandler) {
+    if (!this.stepHandler) {
       throw new Error(`Step "${this.node.stepType}" has no executable phase.`);
     }
 
     try {
-      // Execution context lets diagnostics (e.g. profiler labels) attribute work to the step type.
-      return await this.executionContext.withContext(
-        { type: 'workflow step', name: this.node.stepType },
-        () => stepHandler.run(input, this.node.configuration.with, this.getRenderedConfig())
+      return await this.stepHandler.run(
+        input,
+        this.node.configuration.with,
+        this.getRenderedConfig()
       );
     } catch (err) {
       const error = toExecutionError(err as Error).toSerializableObject();

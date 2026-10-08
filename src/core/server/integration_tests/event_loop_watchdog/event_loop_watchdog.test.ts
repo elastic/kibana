@@ -10,16 +10,16 @@
 import Fs from 'node:fs';
 import Os from 'node:os';
 import Path from 'node:path';
-import Zlib from 'node:zlib';
 import { setTimeout as sleep } from 'node:timers/promises';
-import { Profile } from 'pprof-format';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ThreadsService } from '@kbn/core-threads-server-internal';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
+import { EventLoopWatchdog } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/event_loop_watchdog';
+import { createV8CpuProfiler } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/profiling_session';
 import {
-  EventLoopWatchdog,
-  loadPprof,
-} from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/event_loop_watchdog';
+  sampleTimestamps,
+  type CpuProfile,
+} from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/profile_summary';
 
 const limits = {
   windowMs: 3_000,
@@ -62,7 +62,7 @@ describe('EventLoopWatchdog (real worker, real profiler)', () => {
   let logger: MockedLogger;
   let watchdog: EventLoopWatchdog;
   let diagnosticDir: string;
-  let rotations: number;
+  let starts: number;
 
   const messages = (level: 'info' | 'warn' | 'error') =>
     logger[level].mock.calls.map(([message]) => String(message));
@@ -73,7 +73,7 @@ describe('EventLoopWatchdog (real worker, real profiler)', () => {
 
   beforeEach(async () => {
     logger = loggerMock.create();
-    rotations = 0;
+    starts = 0;
     diagnosticDir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'elw-'));
     watchdog = new EventLoopWatchdog({
       threads: new ThreadsService().start(),
@@ -82,22 +82,15 @@ describe('EventLoopWatchdog (real worker, real profiler)', () => {
       diagnosticDir,
       limits,
       admissionLimits,
-      loadProfiler: async () => {
-        const loaded = await loadPprof();
-        const stop = loaded.time.stop.bind(loaded.time);
+      profiler: (() => {
+        const profiler = createV8CpuProfiler();
         return {
-          ...loaded,
-          time: {
-            ...loaded.time,
-            start: loaded.time.start.bind(loaded.time),
-            runWithContext: loaded.time.runWithContext.bind(loaded.time),
-            stop: (restart, ...rest) => {
-              if (restart) rotations++;
-              return stop(restart, ...rest);
-            },
+          start: () => {
+            starts++;
+            return profiler.start();
           },
         };
-      },
+      })(),
     });
     watchdog.start();
     await waitFor(() =>
@@ -114,53 +107,42 @@ describe('EventLoopWatchdog (real worker, real profiler)', () => {
   });
 
   it.each([300, 500, 1_000])(
-    'keeps a labelled profile of a %sms block, locating the blocking code',
+    'keeps a profile of a %sms block, locating the blocking code',
     async (blockMs) => {
-      watchdog.runWithLabels(
-        {
-          type: 'task manager',
-          name: 'run workflow:run',
-          id: 'task-id',
-          child: { type: 'workflow step', name: 'test.cpuSpin' },
-        },
-        () => spinTheEventLoop(blockMs)
-      );
-      const [message, meta] = await waitFor(() => profileLogs()[0]);
+      spinTheEventLoop(blockMs);
+      const [, meta] = await waitFor(() => profileLogs()[0]);
       expect(messages('warn').some((m) => m.startsWith('Event loop blocked for ~'))).toBe(true);
       // V8 may inline the hot spin into its caller, so match the source file rather than the name.
       expect(profileTopLocation(meta)).toContain('event_loop_watchdog.test.ts');
-      expect(message).toContain('workflow step:test.cpuSpin in task manager:run workflow:run');
       const profile = (meta as { kibana: { event_loop_watchdog: { profile: any } } }).kibana
         .event_loop_watchdog.profile;
       expect(profile).toMatchObject({ scope: 'blocks', kept: 1 });
       // not marked running: Kibana is still starting up
       expect(profile).toMatchObject({ phase: 'startup' });
-      expect(Path.basename(profile.file)).toMatch(/^event-loop-block-startup-\d{6}ms-/);
-      expect(profile.samples).toBeGreaterThan(0);
-
-      const decoded = Profile.decode(Zlib.gunzipSync(Fs.readFileSync(profile.file)));
-      expect(decoded.sample.length).toBeGreaterThan(0);
-      // samples taken during the block are labelled with its number, so pprof can focus on them
-      const blockKey = decoded.stringTable.strings.indexOf('block');
-      const inBlock = decoded.sample.filter(({ label }) =>
-        label.some(({ key, num }) => Number(key) === blockKey && Number(num) === 1)
+      expect(Path.basename(profile.file)).toMatch(
+        /^event-loop-block-startup-\d{6}ms-.*\.cpuprofile$/
       );
-      expect(inBlock.length).toBeGreaterThan(0);
       expect(Path.dirname(profile.file)).toBe(diagnosticDir);
+      // roughly the block's share of 99Hz samples was attributed to it
+      expect(profile.samples).toBeGreaterThan((blockMs / 1000) * 99 * 0.5);
+      expect(profile.samples).toBeLessThan((blockMs / 1000) * 99 * 1.5);
+
+      // a .cpuprofile trimmed to the block and its ±1s context, with the block's samples in it
+      const written: CpuProfile = JSON.parse(Fs.readFileSync(profile.file, 'utf8'));
+      const timestamps = sampleTimestamps(written);
+      expect(written.endTime - written.startTime).toBeLessThanOrEqual(
+        (blockMs + 2_000 + 100) * 1000
+      );
+      expect(timestamps.every((at) => at >= written.startTime && at <= written.endTime)).toBe(true);
+      const spinNodes = new Set(
+        written.nodes
+          .filter(({ callFrame }) => callFrame.url.includes('event_loop_watchdog.test.ts'))
+          .map(({ id }) => id)
+      );
+      expect(written.samples.filter((leaf) => spinNodes.has(leaf)).length).toBeGreaterThan(0);
       expect(logger.error).not.toHaveBeenCalled();
     }
   );
-
-  it('locates unlabelled blocks too (every sample is timestamped on the epoch clock)', async () => {
-    spinTheEventLoop(500);
-    const [message, meta] = await waitFor(() => profileLogs()[0]);
-    expect(message).toContain('100% unlabelled');
-    expect(profileTopLocation(meta)).toContain('event_loop_watchdog.test.ts');
-    expect(
-      (meta as { kibana: { event_loop_watchdog: { profile: any } } }).kibana.event_loop_watchdog
-        .profile.scope
-    ).toBe('blocks');
-  });
 
   it('writes only running windows with a larger block, logging the others', async () => {
     watchdog.markRunning();
@@ -187,17 +169,16 @@ describe('EventLoopWatchdog (real worker, real profiler)', () => {
   });
 
   it('discards windows without blocks', async () => {
-    await waitFor(() => (rotations >= 1 ? true : undefined), limits.windowMs * 3);
+    await waitFor(() => (starts >= 2 ? true : undefined), limits.windowMs * 3);
     expect(profileLogs()).toHaveLength(0);
     expect(Fs.readdirSync(diagnosticDir)).toEqual([]);
   });
 
-  it('ends the session and disposes the profiler on stop', async () => {
+  it('ends the session on stop, and starts a new one on restart', async () => {
     await watchdog.stop();
     expect(
       messages('info').some((m) => m.startsWith('Event loop profiling ended (watchdog stopped)'))
     ).toBe(true);
-    // A new session can start after a restart (the native profiler was disposed).
     watchdog.start();
     await waitFor(() =>
       messages('info').filter((m) => m.startsWith('Event loop profiling started')).length === 2

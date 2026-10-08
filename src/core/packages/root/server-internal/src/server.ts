@@ -439,10 +439,7 @@ export class Server {
       coreUsageData: coreUsageDataSetup,
       loggingSystem: this.loggingSystem,
     });
-    this.eventLoopWatchdog.setup({
-      executionContext: executionContextSetup,
-      status: statusSetup,
-    });
+    this.eventLoopWatchdog.setup({ status: statusSetup });
 
     const customBrandingSetup = this.customBranding.setup();
     const userSettingsServiceSetup = this.userSettingsService.setup();

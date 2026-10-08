@@ -7,9 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Label, type Profile } from 'pprof-format';
 import { sanitize } from './sanitize';
-import { BLOCK_LABEL, INNER_CONTEXT_LABEL, OUTER_CONTEXT_LABEL, TIMESTAMP_LABEL } from './types';
+
+/** V8's CPU profile, as serialised to `.cpuprofile` JSON (Chrome DevTools, speedscope). */
+export interface CpuProfile {
+  nodes: CpuProfileNode[];
+  /** Microseconds on V8's monotonic clock. */
+  startTime: number;
+  endTime: number;
+  /** Node id of each sample's leaf frame. */
+  samples: number[];
+  /** Microseconds since the previous sample (the first: since `startTime`). */
+  timeDeltas: number[];
+}
+
+export interface CpuProfileNode {
+  id: number;
+  callFrame: {
+    functionName: string;
+    url: string;
+    /** 0-based; -1 when unknown. */
+    lineNumber: number;
+    columnNumber: number;
+    scriptId?: number | string;
+  };
+  hitCount?: number;
+  children?: number[];
+}
 
 export interface FrameSummary {
   name: string;
@@ -21,29 +45,24 @@ export interface FrameSummary {
   callers: string[];
 }
 
-export interface LabelSummary {
-  outer?: string;
-  inner?: string;
-  samples: number;
-  percent: number;
-}
-
 export interface ProfileSummary {
   /** `blocks` when samples fell within the blocks; else the whole window is summarised. */
   scope: 'blocks' | 'window';
   samples: number;
+  /** Busy (non-idle) samples in the window. */
   windowSamples: number;
   frames: FrameSummary[];
-  labels: LabelSummary[];
 }
 
-/** Epoch microsecond ranges, inclusive. */
+/** Microsecond ranges on the profile's clock, inclusive. */
 export type TimeRange = readonly [number, number];
 
 const MAX_FRAMES = 5;
-const MAX_LABELS = 5;
 const MAX_CALLERS = 3;
-const SKIPPED_FRAMES = new Set(['(program)', '(idle)', '(root)']);
+const IDLE = '(idle)';
+const SKIPPED_FRAMES = new Set(['(program)', IDLE, '(root)']);
+/** Stands in for samples trimmed between blocks, so that timelines do not stretch a frame over it. */
+export const TRIMMED_FRAME = '(trimmed)';
 
 /** Returns a repo-relative path, a `node:` specifier, or a basename. */
 export const sanitizeLocation = (file: string, line: number, root: string): string | undefined => {
@@ -61,139 +80,177 @@ export const sanitizeLocation = (file: string, line: number, root: string): stri
 const percentOf = (part: number, total: number) =>
   total === 0 ? 0 : Math.round((part / total) * 1000) / 10;
 
+/** Timestamp of each sample, on the profile's clock. */
+export const sampleTimestamps = ({ startTime, timeDeltas }: CpuProfile): number[] => {
+  let at = startTime;
+  return timeDeltas.map((delta) => (at += delta));
+};
+
+const inAnyRange = (at: number, ranges: readonly TimeRange[], marginUs = 0) =>
+  ranges.some(([start, end]) => at >= start - marginUs && at <= end + marginUs);
+
 /** Summarises the samples of a kept window, focusing on those taken during `blocks`. */
 export const summarizeProfile = (
-  profile: Profile,
+  profile: CpuProfile,
   blocks: readonly TimeRange[],
   sanitizeRoot: string
 ): ProfileSummary => {
-  const strings = profile.stringTable.strings;
-  const str = (index: number | bigint) => strings[Number(index)] ?? '';
-  const functions = new Map(profile.function.map((fn) => [Number(fn.id), fn]));
-  // A location lists its inlined frames innermost first.
-  const locations = new Map(
-    profile.location.map((location) => [
-      Number(location.id),
-      location.line.map(({ functionId, line }) => {
-        const fn = functions.get(Number(functionId));
-        const name = sanitize(str(fn?.name ?? 0) || '(anonymous)');
-        const at = sanitizeLocation(str(fn?.filename ?? 0), Number(line), sanitizeRoot);
-        return { name, location: at, label: at ? `${name} (${at})` : name };
-      }),
-    ])
-  );
-
-  const all = profile.sample.map((sample) => {
-    const labels = new Map(sample.label.map((label) => [str(label.key), label]));
-    const timestamp = Number(labels.get(TIMESTAMP_LABEL)?.num ?? -1);
-    return {
-      count: Number(sample.value[0] ?? 0),
-      inBlock: blocks.some(([start, end]) => timestamp >= start && timestamp <= end),
-      outer: labels.has(OUTER_CONTEXT_LABEL)
-        ? str(labels.get(OUTER_CONTEXT_LABEL)!.str)
-        : undefined,
-      inner: labels.has(INNER_CONTEXT_LABEL)
-        ? str(labels.get(INNER_CONTEXT_LABEL)!.str)
-        : undefined,
-      stack: sample.locationId.flatMap((id) => locations.get(Number(id)) ?? []),
+  const nodes = new Map(profile.nodes.map((node) => [node.id, node]));
+  const parents = new Map<number, number>();
+  for (const { id, children = [] } of profile.nodes)
+    for (const child of children) parents.set(child, id);
+  const frameOf = (id: number) => {
+    const { functionName, url, lineNumber } = nodes.get(id)?.callFrame ?? {
+      functionName: '',
+      url: '',
+      lineNumber: -1,
     };
-  });
-  const windowSamples = all.reduce((sum, { count }) => sum + count, 0);
-  const inBlocks = all.filter(({ inBlock }) => inBlock);
-  const scope = inBlocks.length > 0 ? 'blocks' : 'window';
-  const selected = scope === 'blocks' ? inBlocks : all;
-  const total = selected.reduce((sum, { count }) => sum + count, 0);
-
-  const frames = new Map<string, FrameSummary & { heaviest: number }>();
-  const labels = new Map<string, LabelSummary>();
-  for (const { count, stack, outer, inner } of selected) {
-    const [top, ...callers] = stack.filter(({ name }) => !SKIPPED_FRAMES.has(name));
-    if (top) {
-      const frame = frames.get(top.label) ?? {
-        name: top.name,
-        location: top.location,
-        samples: 0,
-        percent: 0,
-        callers: [],
-        heaviest: 0,
-      };
-      frame.samples += count;
-      if (count > frame.heaviest) {
-        frame.heaviest = count;
-        frame.callers = callers.slice(0, MAX_CALLERS).map(({ label }) => label);
+    const name = sanitize(functionName || '(anonymous)');
+    const location = sanitizeLocation(url, lineNumber + 1, sanitizeRoot);
+    return { name, location, label: location ? `${name} (${location})` : name };
+  };
+  // Leaf-first frames of a node's stack, without V8's pseudo frames.
+  const stacks = new Map<number, Array<ReturnType<typeof frameOf>>>();
+  const stackOf = (leaf: number) => {
+    let stack = stacks.get(leaf);
+    if (!stack) {
+      stack = [];
+      for (let id: number | undefined = leaf; id !== undefined; id = parents.get(id)) {
+        const frame = frameOf(id);
+        if (!SKIPPED_FRAMES.has(frame.name)) stack.push(frame);
       }
-      frames.set(top.label, frame);
+      stacks.set(leaf, stack);
     }
-    const key = `${outer}\n${inner}`;
-    const label = labels.get(key) ?? {
-      outer: outer && sanitize(outer),
-      inner: inner && sanitize(inner),
+    return stack;
+  };
+
+  const timestamps = sampleTimestamps(profile);
+  const busy = profile.samples
+    .map((leaf, index) => ({ leaf, at: timestamps[index] }))
+    .filter(({ leaf }) => nodes.get(leaf)?.callFrame.functionName !== IDLE);
+  const inBlocks = busy.filter(({ at }) => inAnyRange(at, blocks));
+  const scope = inBlocks.length > 0 ? 'blocks' : 'window';
+  const selected = scope === 'blocks' ? inBlocks : busy;
+
+  const frames = new Map<string, FrameSummary & { leaves: Map<number, number> }>();
+  for (const { leaf } of selected) {
+    const [top] = stackOf(leaf);
+    if (!top) continue;
+    const frame = frames.get(top.label) ?? {
+      name: top.name,
+      location: top.location,
       samples: 0,
       percent: 0,
+      callers: [],
+      leaves: new Map<number, number>(),
     };
-    label.samples += count;
-    labels.set(key, label);
+    frame.samples++;
+    frame.leaves.set(leaf, (frame.leaves.get(leaf) ?? 0) + 1);
+    frames.set(top.label, frame);
   }
 
-  const bySamples = <T extends { samples: number }>(a: T, b: T) => b.samples - a.samples;
   return {
     scope,
-    samples: total,
-    windowSamples,
+    samples: selected.length,
+    windowSamples: busy.length,
     frames: [...frames.values()]
-      .sort(bySamples)
+      .sort((a, b) => b.samples - a.samples)
       .slice(0, MAX_FRAMES)
-      .map(({ heaviest, ...frame }) => ({ ...frame, percent: percentOf(frame.samples, total) })),
-    labels: [...labels.values()]
-      .sort(bySamples)
-      .slice(0, MAX_LABELS)
-      .map((label) => ({ ...label, percent: percentOf(label.samples, total) })),
+      .map(({ leaves, ...frame }) => {
+        const [heaviest] = [...leaves].sort((a, b) => b[1] - a[1])[0];
+        return {
+          ...frame,
+          percent: percentOf(frame.samples, selected.length),
+          callers: stackOf(heaviest)
+            .slice(1, MAX_CALLERS + 1)
+            .map(({ label }) => label),
+        };
+      }),
   };
 };
 
 /**
- * Keeps only the samples within `marginUs` of `blocks`, labels those taken during a block with its
- * 1-based number, drops locations and functions no longer referenced, and narrows the time span.
+ * Keeps only the samples within `marginUs` of `blocks` (as context), with the nodes they reference,
+ * and narrows the profile's time span accordingly. Where samples between blocks are dropped, a
+ * `(trimmed)` sample marks the gap so that timeline views do not stretch the last frame over it.
  */
 export const trimToBlocks = (
-  profile: Profile,
+  profile: CpuProfile,
   blocks: readonly TimeRange[],
   marginUs: number
-): void => {
-  const timestampKey = profile.stringTable.dedup(TIMESTAMP_LABEL);
-  const blockKey = profile.stringTable.dedup(BLOCK_LABEL);
-  let firstUs = Infinity;
-  let lastUs = -Infinity;
-  profile.sample = profile.sample.filter((sample) => {
-    const timestamp = Number(
-      sample.label.find(({ key }) => Number(key) === timestampKey)?.num ?? -1
-    );
-    const nearBlock = blocks.some(
-      ([start, end]) => timestamp >= start - marginUs && timestamp <= end + marginUs
-    );
-    if (!nearBlock) return false;
-    const index = blocks.findIndex(([start, end]) => timestamp >= start && timestamp <= end);
-    if (index !== -1) sample.label.push(new Label({ key: blockKey, num: index + 1 }));
-    firstUs = Math.min(firstUs, timestamp);
-    lastUs = Math.max(lastUs, timestamp);
-    return true;
+): CpuProfile => {
+  const timestamps = sampleTimestamps(profile);
+  const kept: Array<{ leaf: number; at: number }> = [];
+  let trimmedId: number | undefined;
+  let previous = -1;
+  profile.samples.forEach((leaf, index) => {
+    const at = timestamps[index];
+    if (!inAnyRange(at, blocks, marginUs)) return;
+    if (previous !== -1 && previous !== index - 1) {
+      trimmedId ??= Math.max(...profile.nodes.map(({ id }) => id)) + 1;
+      kept.push({ leaf: trimmedId, at: timestamps[previous + 1] });
+    }
+    kept.push({ leaf, at });
+    previous = index;
   });
+  if (kept.length === 0) return profile;
 
-  const locationIds = new Set(profile.sample.flatMap(({ locationId }) => locationId.map(Number)));
-  profile.location = profile.location.filter(({ id }) => locationIds.has(Number(id)));
-  const functionIds = new Set(
-    profile.location.flatMap(({ line }) => line.map(({ functionId }) => Number(functionId)))
-  );
-  profile.function = profile.function.filter(({ id }) => functionIds.has(Number(id)));
-  if (profile.sample.length > 0) {
-    // Epoch nanoseconds exceed Number.MAX_SAFE_INTEGER.
-    profile.timeNanos = BigInt(firstUs) * 1000n;
-    profile.durationNanos = BigInt(lastUs - firstUs) * 1000n;
+  const root = profile.nodes[0];
+  const nodes = new Map(profile.nodes.map((node) => [node.id, node]));
+  const parents = new Map<number, number>();
+  for (const { id, children = [] } of profile.nodes)
+    for (const child of children) parents.set(child, id);
+  if (trimmedId !== undefined) {
+    nodes.set(trimmedId, {
+      id: trimmedId,
+      callFrame: { functionName: TRIMMED_FRAME, url: '', lineNumber: -1, columnNumber: -1 },
+    });
+    parents.set(trimmedId, root.id);
   }
-};
+  const hits = new Map<number, number>();
+  const used = new Set<number>();
+  for (const { leaf } of kept) {
+    hits.set(leaf, (hits.get(leaf) ?? 0) + 1);
+    for (
+      let id: number | undefined = leaf;
+      id !== undefined && !used.has(id);
+      id = parents.get(id)
+    ) {
+      used.add(id);
+    }
+  }
+  const children = new Map<number, number[]>();
+  for (const id of used) {
+    const parent = parents.get(id);
+    if (parent !== undefined) children.set(parent, [...(children.get(parent) ?? []), id]);
+  }
 
-const describeLabel = ({ outer, inner }: LabelSummary) =>
-  inner && outer ? `${inner} in ${outer}` : inner ?? outer ?? 'unlabelled';
+  const firstAt = kept[0].at;
+  const lastAt = kept[kept.length - 1].at;
+  const startTime = Math.min(
+    firstAt,
+    Math.max(profile.startTime, Math.min(...blocks.map(([start]) => start - marginUs)))
+  );
+  const endTime = Math.max(
+    lastAt,
+    Math.min(profile.endTime, Math.max(...blocks.map(([, end]) => end + marginUs)))
+  );
+  return {
+    // Line-level `positionTicks` are dropped: they would not match the trimmed samples.
+    nodes: [...nodes.values()]
+      .filter(({ id }) => used.has(id))
+      .map(({ id, callFrame }) => ({
+        id,
+        callFrame,
+        hitCount: hits.get(id) ?? 0,
+        ...(children.has(id) && { children: children.get(id) }),
+      })),
+    startTime,
+    endTime,
+    samples: kept.map(({ leaf }) => leaf),
+    timeDeltas: kept.map(({ at }, index) => at - (index === 0 ? startTime : kept[index - 1].at)),
+  };
+};
 
 /** Where a kept profile went: a written file, or why it was not written. */
 export type ProfileOutcome = { file: string } | { notWritten: string };
@@ -216,13 +273,9 @@ export const formatSummary = (
       [`${percent}% ${name}${location ? ` (${location})` : ''}`, ...callers].join(' <- ')
     )
     .join('; ');
-  const labels = summary.labels
-    .slice(0, 3)
-    .map((label) => `${label.percent}% ${describeLabel(label)}`)
-    .join(', ');
   const output =
     'file' in outcome ? `File: ${outcome.file}` : `Not written: ${outcome.notWritten}.`;
   return `Event loop block profile #${kept}: blocks [${blocks}], ${samples}. Top: ${
     frames || 'none'
-  }. Labels: ${labels || 'none'}. ${output}`;
+  }. ${output}`;
 };

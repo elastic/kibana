@@ -72,5 +72,3 @@ graphql
 oxlint-tsgolint
 bump-cli
 @oxlint/plugins
-@datadog/pprof
-pprof-format

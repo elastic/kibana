@@ -14,11 +14,8 @@
  */
 
 import Os from 'node:os';
-import { promisify } from 'node:util';
-import Zlib from 'node:zlib';
 import type { MessagePort } from 'node:worker_threads';
 import { isMainThread, parentPort, workerData } from 'node:worker_threads';
-import { Profile } from 'pprof-format';
 import { BlockDetector, type DetectedBlock } from './block_detector';
 import { WriteAdmission, type AdmissionLimits } from './admission';
 import { writeFileAtomically } from './atomic_write';
@@ -26,6 +23,7 @@ import {
   formatSummary,
   summarizeProfile,
   trimToBlocks,
+  type CpuProfile,
   type ProfileOutcome,
   type TimeRange,
 } from './profile_summary';
@@ -42,7 +40,6 @@ import {
   type WatchdogWorkerData,
 } from './types';
 
-const gzip = promisify(Zlib.gzip);
 /** Recent blocks remembered to locate them in kept windows (a window lasts at most 60s). */
 const MAX_REMEMBERED_BLOCKS = 200;
 
@@ -68,7 +65,7 @@ export const overlapsRotation = (
 const fileName = (phase: Phase, maxBlockedMs: number, date: Date) =>
   `event-loop-block-${phase}-${String(Math.round(maxBlockedMs)).padStart(6, '0')}ms-${date
     .toISOString()
-    .replace(/[:.]/g, '-')}-${Os.hostname()}-${process.pid}.pb.gz`;
+    .replace(/[:.]/g, '-')}-${Os.hostname()}-${process.pid}.cpuprofile`;
 
 /** Startup windows are written only for a new largest startup block. */
 const STARTUP_ADMISSION_LIMITS: AdmissionLimits = {
@@ -140,14 +137,22 @@ export const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): 
     );
   };
 
-  const onProfile = async ({ bytes, windowStartUs, windowEndUs, kept }: MainToWorkerMessage) => {
+  const onProfile = async ({
+    json,
+    stoppedAtUs,
+    windowStartUs,
+    windowEndUs,
+    kept,
+  }: MainToWorkerMessage) => {
     const windowBlocks = blocks.filter(
       ({ startUs, endUs }) => endUs >= windowStartUs && startUs <= windowEndUs
     );
+    const profile: CpuProfile = JSON.parse(json);
+    // V8's profile clock is not hrtime's: the profile ended just before the main thread's stamp.
+    const clockOffsetUs = profile.endTime - stoppedAtUs;
     const ranges = windowBlocks.map(
-      ({ startUs, endUs }): TimeRange => [startUs + epochOffsetUs, endUs + epochOffsetUs]
+      ({ startUs, endUs }): TimeRange => [startUs + clockOffsetUs, endUs + clockOffsetUs]
     );
-    const profile = Profile.decode(bytes);
     // Summarise the whole window first: the summary reports how many of its samples were in blocks.
     const summary = summarizeProfile(profile, ranges, sanitizeRoot);
     const blockedMs = windowBlocks.map(({ blockedMs: ms }) => Math.round(ms));
@@ -166,11 +171,14 @@ export const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): 
       const admitted = admissions[phase].admit(maxBlockedMs);
       if (admitted.write) {
         // Without samples in blocks, the whole window is the only evidence: keep it.
-        if (summary.scope === 'blocks') trimToBlocks(profile, ranges, CONTEXT_MARGIN_MS * 1000);
+        const written =
+          summary.scope === 'blocks'
+            ? trimToBlocks(profile, ranges, CONTEXT_MARGIN_MS * 1000)
+            : profile;
         const file = await writeFileAtomically(
           diagnosticDir,
           fileName(phase, maxBlockedMs, new Date()),
-          await gzip(profile.encode())
+          JSON.stringify(written)
         );
         outcome = { file };
       } else {

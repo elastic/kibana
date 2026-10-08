@@ -8,80 +8,74 @@
  */
 
 import {
-  Function as PprofFunction,
-  Label,
-  Line,
-  Location,
-  Profile,
-  Sample,
-  StringTable,
-} from 'pprof-format';
-import { formatSummary, sanitizeLocation, summarizeProfile, trimToBlocks } from './profile_summary';
+  TRIMMED_FRAME,
+  formatSummary,
+  sampleTimestamps,
+  sanitizeLocation,
+  summarizeProfile,
+  trimToBlocks,
+  type CpuProfile,
+} from './profile_summary';
 
 const ROOT = '/kibana';
 
-/** Builds an encoded-then-decoded profile; stacks are listed leaf first. */
+/** Builds a `.cpuprofile`; stacks are listed leaf first. */
 const buildProfile = (
-  samples: Array<{ stack: string[]; ts: number; count?: number; inner?: string; outer?: string }>
-) => {
-  const table = new StringTable();
-  const names = [...new Set(samples.flatMap(({ stack }) => stack))];
-  const functions = names.map(
-    (name, index) =>
-      new PprofFunction({
-        id: index + 1,
-        name: table.dedup(name),
-        filename: table.dedup(`${ROOT}/src/${name}.ts`),
-      })
-  );
-  const locations = names.map(
-    (_, index) =>
-      new Location({ id: index + 1, line: [new Line({ functionId: index + 1, line: 10 })] })
-  );
-  const label = (key: string, value: string | number) =>
-    typeof value === 'number'
-      ? new Label({ key: table.dedup(key), num: value })
-      : new Label({ key: table.dedup(key), str: table.dedup(value) });
-  const profile = new Profile({
-    sample: samples.map(
-      ({ stack, ts, count = 1, inner, outer }) =>
-        new Sample({
-          locationId: stack.map((name) => names.indexOf(name) + 1),
-          value: [count, count * 10_000_000],
-          label: [
-            label('timestamp_us', ts),
-            ...(outer ? [label('context_outer', outer)] : []),
-            ...(inner ? [label('context_inner', inner)] : []),
-          ],
-        })
-    ),
-    function: functions,
-    location: locations,
-    stringTable: table,
-  });
-  return Profile.decode(profile.encode());
+  samples: Array<{ stack: string[]; at: number }>,
+  { startTime = 0, endTime = 10_000 } = {}
+): CpuProfile => {
+  const nodes: CpuProfile['nodes'] = [
+    { id: 1, callFrame: { functionName: '(root)', url: '', lineNumber: -1, columnNumber: -1 } },
+  ];
+  const leafOf = (stack: string[]) => {
+    let parent = nodes[0];
+    for (const name of [...stack].reverse()) {
+      let node = nodes.find(
+        ({ id, callFrame }) => callFrame.functionName === name && parent.children?.includes(id)
+      );
+      if (!node) {
+        node = {
+          id: nodes.length + 1,
+          callFrame: {
+            functionName: name,
+            url: name.startsWith('(') ? '' : `file://${ROOT}/src/${name}.ts`,
+            lineNumber: 9,
+            columnNumber: 0,
+          },
+        };
+        nodes.push(node);
+        parent.children = [...(parent.children ?? []), node.id];
+      }
+      parent = node;
+    }
+    return parent.id;
+  };
+  const leaves = samples.map(({ stack }) => leafOf(stack));
+  return {
+    nodes,
+    startTime,
+    endTime,
+    samples: leaves,
+    timeDeltas: samples.map(({ at }, i) => at - (i === 0 ? startTime : samples[i - 1].at)),
+  };
 };
+
+const names = (profile: CpuProfile) =>
+  profile.nodes.map(({ callFrame }) => callFrame.functionName).sort();
 
 describe('summarizeProfile', () => {
   const profile = buildProfile([
-    {
-      stack: ['now', 'handler', 'run'],
-      ts: 1_100,
-      count: 3,
-      outer: 'task manager:run x',
-      inner: 'workflow step:test.cpuSpin',
-    },
-    {
-      stack: ['now', 'handler', 'run'],
-      ts: 1_200,
-      inner: 'workflow step:test.cpuSpin',
-      outer: 'task manager:run x',
-    },
-    { stack: ['handler', 'run'], ts: 1_300 },
-    { stack: ['other', 'run'], ts: 5_000, count: 10 },
+    { stack: ['now', 'handler', 'run'], at: 1_100 },
+    { stack: ['now', 'handler', 'run'], at: 1_200 },
+    { stack: ['now', 'handler', 'run'], at: 1_300 },
+    { stack: ['now', 'handler', 'run'], at: 1_400 },
+    { stack: ['handler', 'run'], at: 1_500 },
+    { stack: ['(idle)'], at: 1_600 },
+    ...Array.from({ length: 10 }, (_, i) => ({ stack: ['other', 'run'], at: 5_000 + i })),
+    { stack: ['(idle)'], at: 6_000 },
   ]);
 
-  it('summarises samples within the blocks: self frames, callers and labels', () => {
+  it('summarises busy samples within the blocks: self frames and callers', () => {
     expect(summarizeProfile(profile, [[1_000, 2_000]], ROOT)).toEqual({
       scope: 'blocks',
       samples: 5,
@@ -102,15 +96,6 @@ describe('summarizeProfile', () => {
           callers: ['run (src/run.ts:10)'],
         },
       ],
-      labels: [
-        {
-          outer: 'task manager:run x',
-          inner: 'workflow step:test.cpuSpin',
-          samples: 4,
-          percent: 80,
-        },
-        { outer: undefined, inner: undefined, samples: 1, percent: 20 },
-      ],
     });
   });
 
@@ -122,11 +107,10 @@ describe('summarizeProfile', () => {
 
   it('formats a single readable line', () => {
     const summary = summarizeProfile(profile, [[1_000, 2_000]], ROOT);
-    expect(formatSummary(summary, [1203], 1, { file: '/diag/x.pb.gz' })).toBe(
+    expect(formatSummary(summary, [1203], 1, { file: '/diag/x.cpuprofile' })).toBe(
       'Event loop block profile #1: blocks [~1203ms], 5/15 samples in blocks. ' +
         'Top: 80% now (src/now.ts:10) <- handler (src/handler.ts:10) <- run (src/run.ts:10); ' +
-        '20% handler (src/handler.ts:10) <- run (src/run.ts:10). ' +
-        'Labels: 80% workflow step:test.cpuSpin in task manager:run x, 20% unlabelled. File: /diag/x.pb.gz'
+        '20% handler (src/handler.ts:10) <- run (src/run.ts:10). File: /diag/x.cpuprofile'
     );
     expect(formatSummary(summary, [1203], 2, { notWritten: 'file limit (100) reached' })).toMatch(
       /^Event loop block profile #2: .* Not written: file limit \(100\) reached\.$/
@@ -135,57 +119,51 @@ describe('summarizeProfile', () => {
 });
 
 describe('trimToBlocks', () => {
-  const build = () =>
-    buildProfile([
-      { stack: ['early', 'run'], ts: 100 },
-      { stack: ['before', 'run'], ts: 1_500 },
-      { stack: ['now', 'handler', 'run'], ts: 2_000 },
-      { stack: ['now', 'handler', 'run'], ts: 2_400 },
-      { stack: ['between', 'run'], ts: 2_700 },
-      { stack: ['spin', 'run'], ts: 3_000 },
-      { stack: ['late', 'run'], ts: 9_000 },
-    ]);
-  const blockOf = (profile: Profile, sampleIndex: number) => {
-    const strings = profile.stringTable.strings;
-    return profile.sample[sampleIndex].label
-      .filter(({ key }) => strings[Number(key)] === 'block')
-      .map(({ num }) => Number(num));
-  };
-  const functionNames = (profile: Profile) =>
-    profile.function.map(({ name }) => profile.stringTable.strings[Number(name)]).sort();
+  const profile = buildProfile([
+    { stack: ['early', 'run'], at: 100 },
+    { stack: ['before', 'run'], at: 1_500 },
+    { stack: ['now', 'handler', 'run'], at: 2_000 },
+    { stack: ['now', 'handler', 'run'], at: 2_400 },
+    { stack: ['between', 'run'], at: 5_000 },
+    { stack: ['spin', 'run'], at: 8_000 },
+    { stack: ['late', 'run'], at: 9_900 },
+  ]);
 
-  it('keeps samples within the margin, labels in-block samples and prunes the rest', () => {
-    const profile = build();
-    trimToBlocks(
+  it('keeps the samples within the margin and narrows the time span', () => {
+    const trimmed = trimToBlocks(profile, [[2_000, 2_400]], 500);
+    expect(sampleTimestamps(trimmed)).toEqual([1_500, 2_000, 2_400]);
+    expect(trimmed).toMatchObject({ startTime: 1_500, endTime: 2_900 });
+    expect(names(trimmed)).toEqual(['(root)', 'before', 'handler', 'now', 'run']);
+    // a valid tree: every child exists and hit counts match the kept samples
+    const ids = new Set(trimmed.nodes.map(({ id }) => id));
+    expect(trimmed.nodes.flatMap(({ children = [] }) => children).every((id) => ids.has(id))).toBe(
+      true
+    );
+    expect(trimmed.nodes.reduce((sum, { hitCount = 0 }) => sum + hitCount, 0)).toBe(3);
+  });
+
+  it('marks samples dropped between distant blocks so timelines show the gap', () => {
+    const trimmed = trimToBlocks(
       profile,
       [
         [2_000, 2_400],
-        [3_000, 3_000],
+        [8_000, 8_000],
       ],
       500
     );
-    // what is written must survive encoding
-    const trimmed = Profile.decode(profile.encode());
-    // 100 and 9_000 fall outside both blocks' margins; overlapping margins are merged.
-    expect(trimmed.sample).toHaveLength(5);
-    expect([0, 1, 2, 3, 4].map((index) => blockOf(trimmed, index))).toEqual([
-      [],
-      [1],
-      [1],
-      [],
-      [2],
-    ]);
-    expect(functionNames(trimmed)).toEqual(['before', 'between', 'handler', 'now', 'run', 'spin']);
-    expect(trimmed.location).toHaveLength(6);
-    expect(BigInt(trimmed.timeNanos)).toBe(1_500_000n);
-    expect(BigInt(trimmed.durationNanos)).toBe(1_500_000n);
+    const leafNames = trimmed.samples.map(
+      (leaf) => trimmed.nodes.find(({ id }) => id === leaf)?.callFrame.functionName
+    );
+    expect(leafNames).toEqual(['before', 'now', 'now', TRIMMED_FRAME, 'spin']);
+    // the gap starts where the first dropped sample was taken
+    expect(sampleTimestamps(trimmed)).toEqual([1_500, 2_000, 2_400, 5_000, 8_000]);
+    expect(trimmed).toMatchObject({ startTime: 1_500, endTime: 8_500 });
   });
 
-  it('keeps nothing outside the blocks without a margin', () => {
-    const profile = build();
-    trimToBlocks(profile, [[2_000, 2_400]], 0);
-    expect(profile.sample).toHaveLength(2);
-    expect(functionNames(profile)).toEqual(['handler', 'now', 'run']);
+  it('survives a JSON round trip, as written', () => {
+    const trimmed = trimToBlocks(profile, [[2_000, 2_400]], 0);
+    expect(JSON.parse(JSON.stringify(trimmed))).toEqual(trimmed);
+    expect(sampleTimestamps(trimmed)).toEqual([2_000, 2_400]);
   });
 });
 
