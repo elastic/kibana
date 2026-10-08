@@ -7,6 +7,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
@@ -167,11 +168,20 @@ const buildShowEntityCallback = (
  *
  * Exported for reuse by `useLegacyFlyoutUrlInterop`.
  */
+export interface OpenDescriptorAsStartOptions {
+  /**
+   * Forwarded only when the descriptor is an attack main flyout.
+   * Other kinds ignore it, and callers that omit it keep the persisted Security width.
+   */
+  originFlyoutSize?: EuiFlyoutProps['size'];
+}
+
 export const openDescriptorAsStart = (
   descriptor: FlyoutDescriptor,
   ctx: RestoreContext,
   api: FlyoutApi,
-  originOverride?: FlyoutOrigin
+  originOverride?: FlyoutOrigin,
+  options?: OpenDescriptorAsStartOptions
 ): void => {
   const { kind } = descriptor;
   const origin = originOverride ?? descriptor.origin;
@@ -342,7 +352,14 @@ export const openDescriptorAsStart = (
     // --- Attack main flyout + tools ---
     case 'attack': {
       const { attackId, indexName } = descriptor as AttackDescriptor;
-      api.openAttackFlyout({ attackId, indexName, ...originParams });
+      api.openAttackFlyout({
+        attackId,
+        indexName,
+        ...originParams,
+        ...(options?.originFlyoutSize !== undefined
+          ? { originFlyoutSize: options.originFlyoutSize }
+          : {}),
+      });
       break;
     }
     case 'attackCorrelations': {
