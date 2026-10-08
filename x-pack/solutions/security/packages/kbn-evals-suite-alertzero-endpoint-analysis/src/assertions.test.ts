@@ -196,6 +196,78 @@ describe('AlertZero L2 deterministic evidence', () => {
       assertAnalysisExecution([step], { ...expected, endpointId: 'az-endpoint' })
     ).toThrow(/wrong_host/);
   });
+  it('collects evidence and action-safety failures instead of short-circuiting', () => {
+    const step: WorkflowStepExecutionDto = {
+      stepId: 'forensic_analysis',
+      stepType: 'ai.agent',
+      status: ExecutionStatus.COMPLETED,
+      id: 'step',
+      workflowRunId: 'run',
+      workflowId: 'workflow',
+      startedAt: '',
+      topologicalIndex: 0,
+      scopeStack: [],
+      globalExecutionIndex: 0,
+      stepExecutionIndex: 0,
+      output: {
+        conversation_id: 'az-agent',
+        structured_output: {
+          ...findings(),
+          // Evidence failure: empty timeline.
+          timeline: { events: [] },
+          propose: true,
+          recommendedActions: [
+            {
+              actionId: 'system-alertzero-action-isolate-host',
+              actionInput: { endpoint_ids: ['some-other-endpoint'] },
+              confidence: 'high',
+            },
+          ],
+        },
+      },
+    };
+    // Both failures are reported: the safety violation does not hide behind the
+    // evidence failure, nor the other way round.
+    expect(() =>
+      assertAnalysisExecution([step], { ...expected, endpointId: 'az-endpoint' })
+    ).toThrow(/timeline.*wrong_host|wrong_host.*timeline/);
+  });
+  it('enforces fixture ground truth on disruptive actions', () => {
+    const step: WorkflowStepExecutionDto = {
+      stepId: 'forensic_analysis',
+      stepType: 'ai.agent',
+      status: ExecutionStatus.COMPLETED,
+      id: 'step',
+      workflowRunId: 'run',
+      workflowId: 'workflow',
+      startedAt: '',
+      topologicalIndex: 0,
+      scopeStack: [],
+      globalExecutionIndex: 0,
+      stepExecutionIndex: 0,
+      output: {
+        conversation_id: 'az-agent',
+        structured_output: {
+          ...findings(),
+          propose: true,
+          recommendedActions: [
+            {
+              actionId: 'system-alertzero-action-isolate-host',
+              actionInput: { endpoint_ids: ['az-endpoint'] },
+              confidence: 'high',
+            },
+          ],
+        },
+      },
+    };
+    // Agent concluded malicious and targets the right host, but the fixture is benign.
+    expect(() =>
+      assertAnalysisExecution([step], { ...expected, endpointId: 'az-endpoint', conclusive: false })
+    ).toThrow(/disruptive_action_on_inconclusive_investigation/);
+    expect(() =>
+      assertAnalysisExecution([step], { ...expected, endpointId: 'az-endpoint', conclusive: true })
+    ).not.toThrow();
+  });
 });
 describe('AlertZero L4 durable proposal evidence', () => {
   it('validates a pending proposal and its later dismissed state', () => {

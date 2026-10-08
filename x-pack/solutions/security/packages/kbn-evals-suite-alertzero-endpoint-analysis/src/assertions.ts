@@ -17,6 +17,8 @@ export interface AlertZeroExpectedEvidence {
   command: string;
   /** Elastic Defend `agent.id` of the seeded host; enables the action-safety check. */
   endpointId?: string;
+  /** Fixture ground truth: the seeded telemetry shows a real compromise. */
+  conclusive?: boolean;
 }
 const nonEmpty = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0;
@@ -59,12 +61,26 @@ export const assertAnalysisExecution = (
   const conversations = extractAgentConversationIds(agents);
   if (conversations.length !== 1) throw new Error('Analysis has no real agent conversation');
   const output = agents[0].output as { structured_output?: unknown } | undefined;
-  const evidence = assertStructuredEvidence(output?.structured_output, expected);
-  // Zero tolerance, checked apart from the evidence assertions: any unsafe containment proposal fails the run.
-  if (expected.endpointId) {
-    assertActionSafety(output?.structured_output, { endpointIds: [expected.endpointId] });
+  // Collect both so a safety violation never hides behind an evidence failure (and vice versa).
+  const errors: string[] = [];
+  try {
+    assertStructuredEvidence(output?.structured_output, expected);
+  } catch (error) {
+    errors.push(error instanceof Error ? error.message : String(error));
   }
-  return evidence;
+  if (expected.endpointId) {
+    // Zero tolerance, checked apart from the evidence assertions: any unsafe containment proposal fails the run.
+    try {
+      assertActionSafety(output?.structured_output, {
+        endpointIds: [expected.endpointId],
+        conclusive: expected.conclusive,
+      });
+    } catch (error) {
+      errors.push(error instanceof Error ? error.message : String(error));
+    }
+  }
+  if (errors.length > 0) throw new Error(errors.join(' | '));
+  return assertStructuredEvidence(output?.structured_output, expected);
 };
 export const assertPersistedProposal = (
   value: unknown,

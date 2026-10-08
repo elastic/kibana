@@ -19,6 +19,10 @@ describe('evals_alertzero_endpoint_analysis config set', () => {
     '--xpack.security.serviceAccounts.enabled=true',
     '--uiSettings.overrides.contextEngine:enabled=true',
     '--uiSettings.overrides.workflows:aiAgent:enabled=true',
+    '--uiSettings.overrides.securitySolution:enableAlertZero=true',
+    `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+      'endpointForensicAnalysisSkill',
+    ])}`,
   ])('enables %s', (arg) => {
     expect(args).toContain(arg);
   });

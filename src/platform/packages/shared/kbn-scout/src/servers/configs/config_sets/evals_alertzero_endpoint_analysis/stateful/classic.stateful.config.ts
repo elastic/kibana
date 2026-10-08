@@ -37,6 +37,15 @@ export const servers: ScoutServerConfig = {
       '--uiSettings.overrides.workflows:ui:enabled=true',
       '--uiSettings.overrides.workflows:aiAgent:enabled=true',
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
+      // `withAlertZeroEnabled` gates every AlertZero route on the per-space
+      // `securitySolution:enableAlertZero` advanced setting and 404s while it is off, so the
+      // proposals API the L4 eval drives is unreachable without this override.
+      '--uiSettings.overrides.securitySolution:enableAlertZero=true',
+      // The endpoint-forensic skill (and its discover_telemetry tool) only registers under
+      // this experimental flag; without it the L1 routing eval cannot find the tool at all.
+      `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+        'endpointForensicAnalysisSkill',
+      ])}`,
     ],
   },
 };
