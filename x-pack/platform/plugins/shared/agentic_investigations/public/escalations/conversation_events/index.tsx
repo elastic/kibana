@@ -15,16 +15,18 @@ import type {
   ConversationEventsServiceStartContract,
 } from '@kbn/agent-builder-browser';
 import {
+  ESCALATION_ATTACHMENTS_SYNCED_EVENT_TYPE,
   ESCALATION_CREATED_FROM_INVESTIGATION_EVENT_TYPE,
   ESCALATION_INVESTIGATION_LINKED_EVENT_TYPE,
+  type EscalationAttachmentsSyncedEventData,
   type EscalationInvestigationEventData,
 } from '../../../common/escalations/conversation_events';
 import { InvestigationLink } from './investigation_link';
 
-type Definition<TType extends string> = ConversationEventUIDefinition<
-  TType,
-  EscalationInvestigationEventData
->;
+type Definition<
+  TType extends string,
+  TData = EscalationInvestigationEventData
+> = ConversationEventUIDefinition<TType, TData>;
 
 const getHeader = () => ({
   icon: 'flag',
@@ -39,7 +41,8 @@ export const createEscalationConversationEventUiDefinitions = ({
   application: ApplicationStart;
 }): [
   Definition<typeof ESCALATION_CREATED_FROM_INVESTIGATION_EVENT_TYPE>,
-  Definition<typeof ESCALATION_INVESTIGATION_LINKED_EVENT_TYPE>
+  Definition<typeof ESCALATION_INVESTIGATION_LINKED_EVENT_TYPE>,
+  Definition<typeof ESCALATION_ATTACHMENTS_SYNCED_EVENT_TYPE, EscalationAttachmentsSyncedEventData>
 ] => {
   const renderLink = ({
     investigation_id: id,
@@ -81,6 +84,19 @@ export const createEscalationConversationEventUiDefinitions = ({
         </EuiText>
       ),
     },
+    {
+      type: ESCALATION_ATTACHMENTS_SYNCED_EVENT_TYPE,
+      getHeader,
+      render: ({ data }) => (
+        <EuiText size="s" color="primary" data-test-subj="escalationAttachmentsSyncedEvent">
+          <FormattedMessage
+            id="xpack.agenticInvestigations.escalations.events.attachmentsSynced"
+            defaultMessage="{count, plural, one {# attachment was} other {# attachments were}} synced from {title}"
+            values={{ count: data.attachment_ids.length, title: renderLink(data) }}
+          />
+        </EuiText>
+      ),
+    },
   ];
 };
 
@@ -91,7 +107,10 @@ export const registerEscalationConversationEventUiDefinitions = ({
   conversationEvents: ConversationEventsServiceStartContract;
   application: ApplicationStart;
 }): void => {
-  const [createdFrom, linked] = createEscalationConversationEventUiDefinitions({ application });
+  const [createdFrom, linked, attachmentsSynced] = createEscalationConversationEventUiDefinitions({
+    application,
+  });
   conversationEvents.register(createdFrom);
   conversationEvents.register(linked);
+  conversationEvents.register(attachmentsSynced);
 };
