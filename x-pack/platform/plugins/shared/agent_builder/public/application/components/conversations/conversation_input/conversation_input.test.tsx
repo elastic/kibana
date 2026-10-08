@@ -37,9 +37,6 @@ jest.mock('../../../hooks/use_conversation_stream', () => ({
 jest.mock('../../../hooks/agents/use_agents', () => ({
   useAgentBuilderAgents: jest.fn(),
 }));
-jest.mock('../../../hooks/agents/use_agent_by_id', () => ({
-  useAgentBuilderAgentById: jest.fn().mockReturnValue({ agent: undefined, isLoading: false }),
-}));
 jest.mock('../../../hooks/agents/use_validate_agent_id', () => ({
   useValidateAgentId: jest.fn(),
 }));

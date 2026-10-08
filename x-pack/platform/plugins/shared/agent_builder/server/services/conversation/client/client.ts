@@ -598,10 +598,7 @@ class ConversationClientImpl implements ConversationClient {
           const { [executionId]: _removed, ...remaining } = existing;
           return { feedback: remaining };
         }
-        const terminalEvent = current.events?.find(
-          (e) => isExecutionTerminalEvent(e) && e.execution_id === executionId
-        );
-        if (!terminalEvent) {
+        if (!hasTerminalEventFor(current, executionId)) {
           throw createConversationNotFoundError({ conversationId });
         }
         return {
@@ -1004,21 +1001,11 @@ class ConversationClientImpl implements ConversationClient {
         throw createInternalError('Conversation list search returned an incomplete hit');
       }
 
-      const result = toResponseConversationWithoutRounds({
+      return toResponseConversationWithoutRounds({
         document: hit,
         user: this.getUser(),
         resolveTemplate: getTemplate,
       });
-
-      if (result.feedback) {
-        const isOwner = hasConversationOwnerAccess({ conversation: result, user: this.getUser() });
-        if (!isOwner) {
-          const { feedback: _feedback, ...withoutFeedback } = result;
-          return withoutFeedback;
-        }
-      }
-
-      return result;
     });
 
     return { results, total };
