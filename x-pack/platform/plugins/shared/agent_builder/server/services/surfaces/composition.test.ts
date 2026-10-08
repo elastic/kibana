@@ -95,16 +95,16 @@ describe('buildComposition', () => {
     ]);
   });
 
-  it('uses the round ref version of tags without a version', () => {
+  it('uses the latest version of tags without a version', () => {
+    expect(build('<render_attachment id="a1" />')).toEqual(['[a1 v2]']);
+  });
+
+  it('uses the latest version even when the round sent an older one', () => {
     expect(
       build('<render_attachment id="a1" />', {
         attachmentRefs: [{ attachment_id: 'a1', version: 1 }],
       })
-    ).toEqual(['[a1 v1]']);
-  });
-
-  it('uses the latest version of tags without a version or a ref', () => {
-    expect(build('<render_attachment id="a1" />')).toEqual(['[a1 v2]']);
+    ).toEqual(['[a1 v2]']);
   });
 
   it('ignores versions that are not positive integers', () => {

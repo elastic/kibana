@@ -8,9 +8,8 @@
 import { formatValidationError } from '@elastic/isomer-sdk';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import {
+  getLatestVersion,
   getVersion,
-  resolveAttachmentVersion,
-  type AttachmentVersionRef,
   type VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import {
@@ -32,7 +31,7 @@ const { tagName, attributes } = renderAttachmentElement;
 
 /**
  * A `<render_attachment>` tag of the response message, with its attributes as written. Its
- * version is validated when it's resolved, by `resolveAttachmentVersion`.
+ * version is validated when the attachment is resolved.
  */
 interface AttachmentNode extends RenderAttachmentElementAttributes {
   type: 'attachment';
@@ -101,14 +100,11 @@ const resolveAttachmentNode = (
   node: AttachmentNode,
   {
     attachments,
-    attachmentRefs,
     attachmentsService,
     logger,
   }: {
     /** The conversation's attachments, as carried by `round_complete`. */
     attachments: VersionedAttachment[];
-    /** The round's attachment refs, which pick the version of tags without one. */
-    attachmentRefs?: AttachmentVersionRef[];
     attachmentsService: AttachmentServiceStart;
     logger: Logger;
   }
@@ -120,17 +116,16 @@ const resolveAttachmentNode = (
     return [];
   }
 
-  const version = resolveAttachmentVersion({
-    explicitVersion: node.version,
-    attachmentId: node.attachmentId,
-    attachmentRefs,
-    attachment,
-  });
+  const explicitVersion = Number(node.version);
 
-  const attachmentVersion = version === undefined ? undefined : getVersion(attachment, version);
+  // Without a valid version, use the latest one, which includes updates made during the round.
+  const attachmentVersion =
+    Number.isInteger(explicitVersion) && explicitVersion > 0
+      ? getVersion(attachment, explicitVersion)
+      : getLatestVersion(attachment);
 
   if (!attachmentVersion) {
-    logger.debug(`Leaving out attachment "${attachment.id}": version ${version} not found`);
+    logger.debug(`Leaving out attachment "${attachment.id}": version ${node.version} not found`);
     return [];
   }
 
@@ -180,7 +175,7 @@ const resolveAttachmentNode = (
  * `toSurfaceComposition` returns.
  */
 export const buildComposition = ({
-  round: { response, input },
+  round: { response },
   attachments,
   attachmentsService,
   logger,
@@ -196,7 +191,6 @@ export const buildComposition = ({
     node.type === 'attachment'
       ? resolveAttachmentNode(node, {
           attachments,
-          attachmentRefs: input.attachment_refs,
           attachmentsService,
           logger,
         })
