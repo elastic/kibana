@@ -170,3 +170,10 @@ export const buildJoinedPageSteps = (
 ];
 
 export const ENTITY_TYPE_FILTER = `${ENTITY_TYPE_FIELD} IN (${toList(ALLOWED_ENTITY_TYPES)})`;
+
+/** Indents the steps of a FORK branch under its parentheses. */
+export const indentForkBranch = (esql: string): string =>
+  esql
+    .split('\n')
+    .map((line) => `    ${line}`)
+    .join('\n');

@@ -6,15 +6,10 @@
  */
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
+import { indentForkBranch } from '../../new_entities_table/queries/esql';
 import { evalGuardedTypedEuids } from './guarded_typed_euid_eval';
 
 const ENTITY_TYPES = ['user', 'host', 'service'] as const;
-
-const indentBranch = (esql: string): string =>
-  esql
-    .split('\n')
-    .map((line) => `    ${line}`)
-    .join('\n');
 
 /**
  * Returns ES|QL pipeline stages that resolve entity.id for alert documents.
@@ -57,7 +52,7 @@ export const buildAlertEuidPipeline = (euid: EntityStoreEuid): string[] => {
     `    | KEEP ${KEEP_COLUMNS}`,
     '  )',
     '  (',
-    indentBranch(derivedSteps.join('\n')),
+    indentForkBranch(derivedSteps.join('\n')),
     '  )',
   ].join('\n');
 

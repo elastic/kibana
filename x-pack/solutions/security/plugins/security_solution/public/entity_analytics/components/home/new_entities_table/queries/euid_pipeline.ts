@@ -7,47 +7,30 @@
 
 import { getEuidEsqlEvaluation, getFieldEvaluationsEsql } from '../euid_esql';
 import { ALLOWED_ENTITY_TYPES } from '../common';
-import { toList } from './esql';
+import { evalGuardedTypedEuids } from '../../needs_attention_tiles/queries/guarded_typed_euid_eval';
+import { indentForkBranch, toList } from './esql';
 
 // ── EUID query pipeline builders ─────────────────────────────────────────────
+
+/** `EVAL`s of the user, host and service EUIDs into `user_euid`, `host_euid`, `service_euid`. */
+const buildPerTypeEuidEvals = (): string[] =>
+  ALLOWED_ENTITY_TYPES.flatMap((entityType) => {
+    const fieldEvals = getFieldEvaluationsEsql(entityType);
+    return [
+      ...(fieldEvals ? [`| EVAL ${fieldEvals}`] : []),
+      `| EVAL ${getEuidEsqlEvaluation(entityType, `${entityType}_euid`)}`,
+    ];
+  });
 
 /**
  * Derives one EUID per document into `entity.id` (first of user, host, service).
  * Anomaly queries use it: ML records do not carry `entity.id`.
  */
-export const buildEuidStages = (): string[] => {
-  const parts: string[] = [];
-  for (const entityType of ALLOWED_ENTITY_TYPES) {
-    const fieldEvals = getFieldEvaluationsEsql(entityType);
-    if (fieldEvals) parts.push(`| EVAL ${fieldEvals}`);
-    parts.push(`| EVAL ${getEuidEsqlEvaluation(entityType, `${entityType}_euid`)}`);
-  }
-  parts.push(
-    `| EVAL \`entity.id\` = COALESCE(${ALLOWED_ENTITY_TYPES.map((t) => `${t}_euid`).join(', ')})`
-  );
-  parts.push('| WHERE `entity.id` IS NOT NULL');
-  return parts;
-};
-
-/**
- * Puts the user, host and service EUIDs into one multi-value column.
- * `MV_APPEND` returns null when an argument is null. Each slot is a rotated COALESCE,
- * which is not null when any EUID exists, and MV_DEDUPE removes the repeats.
- * This is about 3.5x faster than a CASE over every null combination.
- */
-const buildTypedEuidsEval = (outputColumn: string): string =>
-  [
-    `| EVAL ${outputColumn} = MV_DEDUPE(MV_APPEND(MV_APPEND(`,
-    '  COALESCE(user_euid, host_euid, service_euid),',
-    '  COALESCE(host_euid, service_euid, user_euid)),',
-    '  COALESCE(service_euid, user_euid, host_euid)))',
-  ].join('\n');
-
-const indentForkBranch = (esql: string): string =>
-  esql
-    .split('\n')
-    .map((line) => `    ${line}`)
-    .join('\n');
+export const buildEuidStages = (): string[] => [
+  ...buildPerTypeEuidEvals(),
+  `| EVAL \`entity.id\` = COALESCE(${ALLOWED_ENTITY_TYPES.map((t) => `${t}_euid`).join(', ')})`,
+  '| WHERE `entity.id` IS NOT NULL',
+];
 
 export interface AlertEuidPipelineOptions {
   /** When set, the stamped branch keeps only alerts stamped with one of these entity ids. */
@@ -95,13 +78,7 @@ export const buildAlertEuidPipeline = (options: AlertEuidPipelineOptions = {}): 
     `| KEEP ${keepCols}`,
   ];
 
-  const unstampedEvals: string[] = [];
-  for (const entityType of ALLOWED_ENTITY_TYPES) {
-    const fieldEvals = getFieldEvaluationsEsql(entityType);
-    if (fieldEvals) unstampedEvals.push(`| EVAL ${fieldEvals}`);
-    unstampedEvals.push(`| EVAL ${getEuidEsqlEvaluation(entityType, `${entityType}_euid`)}`);
-  }
-  unstampedEvals.push(buildTypedEuidsEval('_ea_entity_id'));
+  const unstampedEvals = [...buildPerTypeEuidEvals(), evalGuardedTypedEuids('_ea_entity_id')];
 
   let unstampedWhere: string;
   if (idsList != null && unstampedIdentityClause == null) {
