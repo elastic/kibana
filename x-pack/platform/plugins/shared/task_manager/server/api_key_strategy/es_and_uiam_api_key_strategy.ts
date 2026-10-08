@@ -166,21 +166,22 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
       return userUiamResult;
     }
 
-    const esKeys = await createApiKey(taskInstances, request, security, opts, {
-      user,
-      apiKeyCreatedByUser,
-    });
-    const uiamKeys =
+    const [esKeys, uiamKeys] = await Promise.all([
+      createApiKey(taskInstances, request, security, opts, {
+        user,
+        apiKeyCreatedByUser,
+      }),
       opts?.onEsKey === true
-        ? new Map<string, UiamApiKeyResult>()
-        : await this.grantUiamApiKeys(
+        ? Promise.resolve(new Map<string, UiamApiKeyResult>())
+        : this.grantUiamApiKeys(
             taskInstances,
             request,
             user,
             apiKeyCreatedByUser,
             isUiamRequest,
             opts?.onApiKeyCreated
-          );
+          ),
+    ]);
 
     const result = new Map<string, ApiKeySOFields>();
     taskInstances.forEach((task) => {
