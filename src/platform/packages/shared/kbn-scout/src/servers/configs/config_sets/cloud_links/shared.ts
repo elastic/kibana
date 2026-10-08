@@ -32,6 +32,4 @@ export const cloudLinksServerArgs = [
   // Enable trial product intercepts (timer triggered via localStorage in tests, not via short interval)
   '--xpack.product_intercept.enabled=true',
   `--xpack.cloud.trial_end_date=${trialEndDate.toISOString()}`,
-  // Allow the standard saved objects HTTP API to access hiddenFromHttpApis types (e.g. 'cloud').
-  '--savedObjects.allowHttpApiAccess=true',
 ];
