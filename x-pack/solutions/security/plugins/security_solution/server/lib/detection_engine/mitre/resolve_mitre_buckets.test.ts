@@ -60,16 +60,18 @@ describe('resolveMitreBuckets — managed path', () => {
     expect(result.techniques[0]).toMatchObject({ id: 'T9001', name: 'Managed Technique' });
   });
 
-  it('caches a non-empty result so list() is called only once across two calls', async () => {
+  it('calls list() on every invocation so runtime data changes are always visible', async () => {
     const { client, mockList } = makeClient();
 
-    await resolveMitreBuckets(client);
-    await resolveMitreBuckets(client);
+    const first = await resolveMitreBuckets(client);
+    const second = await resolveMitreBuckets(client);
 
-    expect(mockList).toHaveBeenCalledTimes(1);
+    expect(mockList).toHaveBeenCalledTimes(2);
+    expect(first.tactics[0]).toMatchObject({ id: 'TA0099' });
+    expect(second.tactics[0]).toMatchObject({ id: 'TA0099' });
   });
 
-  it('rejects with "not initialized" and does not cache an empty result, so list() is retried on the next call', async () => {
+  it('rejects with "not initialized" when the managed collection is empty', async () => {
     const { client, mockList } = makeClient(true /* empty */);
 
     await expect(resolveMitreBuckets(client)).rejects.toThrow(
@@ -79,11 +81,11 @@ describe('resolveMitreBuckets — managed path', () => {
       'Managed MITRE data is not initialized'
     );
 
-    // Cache must have been cleared after each rejection so each call re-queries.
+    // Each call goes to list() because managed results are never cached.
     expect(mockList).toHaveBeenCalledTimes(2);
   });
 
-  it('does not poison the cache when list() throws, and retries on the next call', async () => {
+  it('propagates list() errors and succeeds on a subsequent call', async () => {
     const mockList = jest
       .fn()
       .mockRejectedValueOnce(new Error('SO unavailable'))
@@ -116,18 +118,16 @@ describe('resolveMitreBuckets — legacy fallback path', () => {
   });
 });
 
-describe('resolveMitreBuckets — separate cache keys', () => {
-  it('managed and legacy results do not share a cache entry', async () => {
-    const { client: managedClient, mockList } = makeClient();
+// Managed results are never cached, so they cannot bleed into legacy reads or vice versa.
+it('managed results are never served from the legacy cache', async () => {
+  const { client: managedClient, mockList } = makeClient();
 
-    // Populate managed cache.
-    const managedResult = await resolveMitreBuckets(managedClient);
-    // Legacy path is independent.
-    const legacyResult = await resolveMitreBuckets();
+  const managedResult = await resolveMitreBuckets(managedClient);
+  const legacyResult = await resolveMitreBuckets();
 
-    expect(mockList).toHaveBeenCalledTimes(1);
-    // Managed has TA0099; legacy has TA0001 — they are different datasets.
-    expect(managedResult.tactics[0].id).toBe('TA0099');
-    expect(legacyResult.tactics[0].id).toBe('TA0001');
-  });
+  // list() is called for the managed read; legacy comes from the static blob.
+  expect(mockList).toHaveBeenCalledTimes(1);
+  // Managed has TA0099; legacy has TA0001 — they are different datasets.
+  expect(managedResult.tactics[0].id).toBe('TA0099');
+  expect(legacyResult.tactics[0].id).toBe('TA0001');
 });

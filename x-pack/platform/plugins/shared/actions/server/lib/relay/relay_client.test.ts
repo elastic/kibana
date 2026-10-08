@@ -385,6 +385,32 @@ describe('RelayClient', () => {
       );
     });
 
+    it('sends message_ts and drops thread_ts when editing a posted message', async () => {
+      requestMock.mockResolvedValue({
+        status: 200,
+        data: { ref: '1700000000.000200', tenant_key: 'team-A' },
+      } as never);
+
+      await createClient().trigger({
+        tenantKey: 'team-A',
+        channel: 'C123',
+        message: 'edited',
+        threadTs: '1700000000.000100',
+        messageTs: '1700000000.000200',
+      });
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: {
+            tenant_key: 'team-A',
+            channel: 'C123',
+            message: 'edited',
+            message_ts: '1700000000.000200',
+          },
+        })
+      );
+    });
+
     it.each([403, 409, 429, 502])(
       'turns a %s into a RelayRequestError carrying the status',
       async (status) => {

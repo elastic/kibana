@@ -1,9 +1,65 @@
 {
-  "sha1": "13116be157f522e22b73ca80622a50e047bce710",
+  "sha1": "33d678ba16bcdef59eb0afd56f3c0133f899bd5a",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "0c4755b530e8e43-3698d0ef85547fc",
+      "title": "CreateMonitorBulkAPI creates multiple monitors in one request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_bulk.spec.ts",
+        "line": 64,
+        "column": 7
+      }
+    },
+    {
+      "id": "0c4755b530e8e43-11f34d574f46190",
+      "title": "CreateMonitorBulkAPI rejects duplicate monitor names before creating any monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_bulk.spec.ts",
+        "line": 84,
+        "column": 29
+      }
+    },
+    {
+      "id": "0c4755b530e8e43-69aa483fa6483aa",
+      "title": "CreateMonitorBulkAPI rejects persisted duplicate names before creating earlier valid monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_bulk.spec.ts",
+        "line": 118,
+        "column": 30
+      }
+    },
+    {
+      "id": "0c4755b530e8e43-a19c5ff8ef28326",
+      "title": "CreateMonitorBulkAPI rejects a target space the caller cannot access before persisting monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/api/tests/create_monitor_bulk.spec.ts",
+        "line": 183,
+        "column": 25
+      }
+    },
     {
       "id": "3c5879fd2d8f2d0-aa292fd3a18018f",
       "title": "AddNewMonitorsPublicAPI - Private locations should return error for empty monitor",

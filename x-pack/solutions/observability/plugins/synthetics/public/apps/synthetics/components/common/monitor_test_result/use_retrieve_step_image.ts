@@ -10,10 +10,11 @@ import type {
   ScreenshotImageBlob,
   ScreenshotRefImageData,
 } from '../../../../../../common/runtime_types';
-import { isScreenshotRef } from '../../../../../../common/runtime_types';
+
 import { useComposeImageFromRef } from '../../../hooks/use_composite_image';
 import type { BackoffOptions } from '../../../state';
 import { getJourneyScreenshot } from '../../../state';
+import { isScreenshotRef } from '../../../../../../common/runtime_types/schemas/ping_guards';
 
 type ImageResponse = ScreenshotImageBlob | ScreenshotRefImageData | null;
 interface ImageDataResult {

@@ -29,8 +29,10 @@ import { UserFlyout } from './flyout_v2/entity/user_flyout';
 import { CorrelationsTool } from './flyout_v2/document/tools/correlations_tool';
 import { PrevalenceTool } from './flyout_v2/document/tools/prevalence_tool';
 import { AnalyzerTool } from './flyout_v2/document/tools/analyzer_tool';
+import { ResponseTool } from './flyout_v2/document/tools/response_tool';
 import { EntityFlyoutAnomaliesPage } from './entity_flyout_anomalies_page';
 import { CoverageOverviewPage } from './coverage_overview';
+import { SecurityOverviewPage } from './security_overview_page';
 
 export type { RuleCreateWizardPage } from './rule_create_wizard';
 export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
@@ -70,10 +72,14 @@ export interface SecurityPageObjects extends PageObjects {
   prevalenceTool: PrevalenceTool;
   /** Analyzer tool overlay (resolver process-tree graph) inside the flyout v2 document flyout. */
   analyzerTool: AnalyzerTool;
+  /** Response section and details inside the flyout v2 document overview. */
+  responseTool: ResponseTool;
   /** Entity flyout anomalies section and tab — requires entityAnalyticsAnomalyDetails feature flag. */
   entityFlyoutAnomaliesPage: EntityFlyoutAnomaliesPage;
   /** MITRE ATT&CK coverage overview dashboard — rule coverage matrix. */
   coverageOverviewPage: CoverageOverviewPage;
+  /** Security Overview page — threat intelligence panel. */
+  securityOverviewPage: SecurityOverviewPage;
 }
 
 export function extendPageObjects(
@@ -109,7 +115,9 @@ export function extendPageObjects(
     correlationsTool: createLazyPageObject(CorrelationsTool, page),
     prevalenceTool: createLazyPageObject(PrevalenceTool, page),
     analyzerTool: createLazyPageObject(AnalyzerTool, page),
+    responseTool: createLazyPageObject(ResponseTool, page),
     entityFlyoutAnomaliesPage: createLazyPageObject(EntityFlyoutAnomaliesPage, page),
     coverageOverviewPage: createLazyPageObject(CoverageOverviewPage, page),
+    securityOverviewPage: createLazyPageObject(SecurityOverviewPage, page),
   };
 }

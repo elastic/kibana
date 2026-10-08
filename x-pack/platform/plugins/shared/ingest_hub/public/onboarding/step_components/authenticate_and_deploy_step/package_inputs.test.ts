@@ -8,7 +8,12 @@
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { ServiceInstance, ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildDeployGroups } from './deploy_groups';
-import { buildIacIntegrations, buildPackageInputs } from './package_inputs';
+import {
+  buildIacIntegrations,
+  buildPackageInputs,
+  buildStreamVars,
+  toSOServiceVars,
+} from './package_inputs';
 
 function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsServiceMatrixEntry {
   return {
@@ -273,19 +278,6 @@ describe('buildIacIntegrations', () => {
         },
       ]);
     });
-
-    it('falls back to the service id for a duplicate whose vars predate instance keying', () => {
-      const stored: Record<string, ServiceVars> = {
-        cloudtrail: {
-          enabledDataStreams: ['cloudtrail'],
-          varsByDataStream: { cloudtrail: { enabledInputs: ['aws-s3'], varsByInput: {} } },
-        },
-      };
-
-      expect(buildIacIntegrations([duplicate(cloudtrail)], stored)).toEqual([
-        { name: 'aws', policyTemplates: [{ name: 'cloudtrail', enabledInputs: ['aws-s3'] }] },
-      ]);
-    });
   });
 
   it('is stable regardless of member order and unsorted manifest inputs', () => {
@@ -409,6 +401,21 @@ describe('buildIacIntegrations ↔ Deploy parity', () => {
   });
 });
 
+describe('toSOServiceVars', () => {
+  it('keeps each instance namespace so a resumed deployment restores it', () => {
+    const serviceVars: Record<string, ServiceVars> = {
+      ec2: { enabledDataStreams: ['ec2'], varsByDataStream: {}, namespace: 'prod' },
+      'ec2__dup-1': { enabledDataStreams: ['ec2'], varsByDataStream: {}, namespace: 'staging' },
+    };
+    const servicesMap = new Map([['ec2', { id: 'ec2' } as AwsServiceMatrixEntry]]);
+
+    const result = toSOServiceVars(serviceVars, servicesMap) as Record<string, ServiceVars>;
+
+    expect(result.ec2.namespace).toBe('prod');
+    expect(result['ec2__dup-1'].namespace).toBe('staging');
+  });
+});
+
 describe('buildPackageInputs', () => {
   it('emits array defaults for multi fields when no user value is stored', () => {
     // Regression test: buildStreamVars previously only emitted bool/string manifest defaults.
@@ -458,5 +465,75 @@ describe('buildPackageInputs', () => {
     const streamVars = inputs['aws_billing-aws-s3']?.streams?.['aws_billing.billing']?.vars;
 
     expect(streamVars?.tags).toEqual(['forwarded', 'aws-billing']);
+  });
+});
+
+describe('buildStreamVars — collect_s3_logs', () => {
+  const def = (name: string, extra: object = {}) =>
+    ({ name, type: 'text', title: name, show_user: true, ...extra } as any);
+  const s3Service = makeService({
+    inputs: ['aws-s3'],
+    requiredConfig: ['bucket_arn'],
+    optionalConfig: ['queue_url', 'collect_s3_logs'],
+    varDefsByInput: {
+      'aws-s3': {
+        bucket_arn: def('bucket_arn'),
+        queue_url: def('queue_url'),
+        collect_s3_logs: def('collect_s3_logs', { type: 'bool', default: false }),
+      },
+    },
+  });
+  const dsVars = (vars: Record<string, string | string[]>) => ({
+    enabledInputs: ['aws-s3'],
+    varsByInput: { 'aws-s3': vars },
+  });
+
+  it('turns collect_s3_logs on when a bucket ARN is set and the toggle is untouched', () => {
+    const out = buildStreamVars(s3Service, dsVars({ bucket_arn: 'arn:aws:s3:::b' }), '', 'aws-s3');
+    expect(out.collect_s3_logs).toBe(true);
+  });
+
+  it('turns collect_s3_logs on for an access-point ARN alone', () => {
+    const service = makeService({
+      ...s3Service,
+      varDefsByInput: {
+        'aws-s3': {
+          ...s3Service.varDefsByInput!['aws-s3'],
+          access_point_arn: def('access_point_arn'),
+        },
+      },
+    });
+    const out = buildStreamVars(
+      service,
+      dsVars({ access_point_arn: 'arn:aws:s3:ap' }),
+      '',
+      'aws-s3'
+    );
+    expect(out.collect_s3_logs).toBe(true);
+  });
+
+  it('keeps an explicit collect_s3_logs choice', () => {
+    const out = buildStreamVars(
+      s3Service,
+      dsVars({ bucket_arn: 'arn:aws:s3:::b', collect_s3_logs: 'false' }),
+      '',
+      'aws-s3'
+    );
+    expect(out.collect_s3_logs).toBe(false);
+  });
+
+  it('leaves the SQS default alone when no bucket ARN is set', () => {
+    const out = buildStreamVars(s3Service, dsVars({ queue_url: 'https://sqs/q' }), '', 'aws-s3');
+    expect(out.collect_s3_logs).toBe(false);
+  });
+
+  it('does not apply to ECF-scoped services', () => {
+    const out = buildStreamVars(
+      { ...s3Service, settingsScope: 'ecf' },
+      dsVars({ bucket_arn: 'arn:aws:s3:::b' }),
+      '',
+      'aws-s3'
+    );
+    expect(out.collect_s3_logs).toBe(false);
   });
 });

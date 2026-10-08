@@ -126,6 +126,8 @@ export const INTERNAL_CASE_OBSERVABLES_PATCH_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
 export const INTERNAL_CASE_OBSERVABLES_DELETE_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
+export const INTERNAL_CASE_OBSERVABLES_BULK_DELETE_URL =
+  `${INTERNAL_CASE_OBSERVABLES_URL}/_bulk_delete` as const;
 export const INTERNAL_CASE_WORKFLOW_RUN_URL =
   `${CASES_INTERNAL_URL}/workflows/{workflow_id}/run` as const;
 export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
@@ -489,6 +491,8 @@ export const MAX_OBSERVABLE_TYPE_KEY_LENGTH = 36;
 /** v4 UUID — 8-4-4-4-12 hex + 4 hyphens */
 export const OBSERVABLE_ID_MAX_LENGTH = 36;
 
+export const MIN_BULK_DELETE_OBSERVABLE_IDS = 1;
+
 export const MAX_OBSERVABLE_TYPE_LABEL_LENGTH = 50;
 
 export const MAX_CUSTOM_OBSERVABLE_TYPES = 10;
@@ -502,9 +506,6 @@ export const CASE_ATTACH_EVENTS_EVENT_TYPE = 'case_attach_events' as const;
 
 export const CASE_VIEW_ATTACHMENTS_TAB_CLICKED_EVENT_TYPE =
   'case_view_attachments_tab_clicked' as const;
-
-export const CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE =
-  'case_view_attachments_sub_tab_clicked' as const;
 
 export const CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE = 'cases_list_view_mode_changed' as const;
 

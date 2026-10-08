@@ -10,6 +10,7 @@ import { conversationStepRegistry, type ConversationStepDeps } from './registry'
 import { attachmentStepRegistry, type AttachmentStepDeps } from './attachment_registry';
 import {
   conversationMetadataUpdatedTriggerCommonDefinition,
+  conversationUpdatedTriggerCommonDefinition,
   attachmentTriggerCommonDefinitions,
 } from '../../common/workflows/triggers';
 
@@ -18,6 +19,7 @@ export function registerConversationWorkflowSteps(
   deps: ConversationStepDeps
 ) {
   workflowsExtensions.registerTriggerDefinition(conversationMetadataUpdatedTriggerCommonDefinition);
+  workflowsExtensions.registerTriggerDefinition(conversationUpdatedTriggerCommonDefinition);
   for (const definition of attachmentTriggerCommonDefinitions) {
     workflowsExtensions.registerTriggerDefinition(definition);
   }

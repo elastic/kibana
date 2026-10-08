@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import pMap from 'p-map';
 import type {
   ActionPolicyResponse,
+  ActionPolicyRoutingTagsResponse,
   BulkResponse,
   MatchActionPoliciesResponse,
   MatchedActionPolicy,
@@ -19,10 +20,9 @@ import {
   putActionPolicyDataSchema,
   updateActionPolicyDataSchema,
 } from '@kbn/alerting-v2-schemas';
+import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { KueryNode } from '@kbn/es-query';
-import { nodeBuilder } from '@kbn/es-query';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
@@ -51,6 +51,8 @@ import {
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
 import { buildSoSearch } from '../build_so_search';
+import { buildActionPolicySoFilter } from './build_action_policy_filter';
+import { groupRoutingTags } from './group_routing_tags';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import { ActionPolicyNamespaceToken } from './tokens';
@@ -60,6 +62,7 @@ import type {
   CreateActionPolicyParams,
   FindActionPoliciesArgs,
   FindActionPoliciesResponse,
+  GetRoutingTagsParams,
   MatchActionPoliciesParams,
   SnoozeActionPolicyParams,
   UpdateActionPolicyApiKeyParams,
@@ -75,6 +78,9 @@ import {
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 20;
+
+/** Most policies read to build the routing tag suggestions. */
+const ROUTING_TAGS_MAX_POLICIES = 10_000;
 
 const getActionPolicyApiKeyName = (policyName: string): string =>
   `Action Policy: ${policyName.trim()}`;
@@ -359,7 +365,7 @@ export class ActionPolicyClient {
     const page = params.page ?? DEFAULT_PAGE;
     const perPage = params.perPage ?? DEFAULT_PER_PAGE;
 
-    const filter = this.buildFindFilter(params);
+    const filter = params.filter ? buildActionPolicySoFilter(params.filter) : undefined;
     const sortField = this.mapSortField(params.sortField);
 
     const search = buildSoSearch(params.search);
@@ -389,7 +395,7 @@ export class ActionPolicyClient {
   public async matchActionPolicies(
     params: MatchActionPoliciesParams
   ): Promise<MatchActionPoliciesResponse> {
-    const { ruleTags = [] } = params;
+    const { routingTags = [] } = params;
 
     const items: MatchedActionPolicy[] = [];
 
@@ -403,7 +409,7 @@ export class ActionPolicyClient {
         continue;
       }
 
-      if (policyMatcher.hasTags() && policyMatcher.matchesTags(ruleTags)) {
+      if (policyMatcher.hasTags() && policyMatcher.matchesRoutingTags(routingTags)) {
         items.push({ action_policy: actionPolicy, category: 'tags' });
       }
     }
@@ -414,6 +420,24 @@ export class ActionPolicyClient {
       evaluated_count: evaluatedCount,
       is_truncated: allPolicies.total > evaluatedCount,
     };
+  }
+
+  public async getRoutingTags({
+    search,
+    policiesPerTag,
+  }: GetRoutingTagsParams): Promise<ActionPolicyRoutingTagsResponse> {
+    const { policies, isTruncated } =
+      await this.actionPolicySavedObjectService.findRoutingTagSources({
+        maxPolicies: ROUTING_TAGS_MAX_POLICIES,
+      });
+    const { items, totalTags } = groupRoutingTags({
+      policies,
+      search,
+      policiesPerTag,
+      tagsLimit: TAGS_RESPONSE_LIMIT,
+    });
+
+    return { items, total_tags: totalTags, is_truncated: isTruncated };
   }
 
   public async enableActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
@@ -618,16 +642,6 @@ export class ActionPolicyClient {
     }
 
     return { affected_count: affectedCount, errors };
-  }
-
-  private buildFindFilter(params: FindActionPoliciesArgs): KueryNode | undefined {
-    const attrPrefix = `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes`;
-
-    if (params.enabled !== undefined) {
-      return nodeBuilder.is(`${attrPrefix}.enabled`, params.enabled ? 'true' : 'false');
-    }
-
-    return undefined;
   }
 
   private mapSortField(sortField?: string): string | undefined {

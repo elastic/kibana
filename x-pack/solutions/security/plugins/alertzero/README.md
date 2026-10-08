@@ -25,14 +25,15 @@ uiSettings.overrides:
   securitySolution:enableAlertZero: true
 ```
 
-It controls four things. Enabling takes effect live, but **disabling takes full effect only after a page reload** — the setting is registered with `requiresPageReload: true`, so Advanced Settings prompts for one. Dismiss that prompt and the Agent Builder surfaces in the last row stay in place until the page is reloaded:
+It controls three things, and both enabling and disabling take effect live. The setting is still registered with `requiresPageReload: true`, so Advanced Settings prompts for a reload, but none of the surfaces below needs one:
 
 | Surface | When off |
 |---------|----------|
 | Browser app `/app/alertzero` | Registered but `AppStatus.inaccessible`; every page renders core's "Application unavailable" |
 | Security solution navigation | AlertZero nodes disappear — core empties `visibleIn` and `deepLinks` for an inaccessible app, and chrome drops nav nodes whose link has no nav link. The navigation trees hold no check of their own |
 | HTTP `/internal/alertzero/*` | `404`, via the `withAlertZeroEnabled` wrapper on every route |
-| Agent Builder Investigation template and its tabs | Absent from the next page load. Agent Builder's conversation template contract has no deregistration counterpart, so a session that already registered them keeps them until it reloads; in that window AlertZero-provided content shows the disabled gate instead of loading feature data |
+
+The Agent Builder conversation template UI for investigations and escalations (the details flyout and its tabs) is **not** gated by this setting. The `agenticInvestigations` plugin registers it whenever Agent Builder is available, so the flyout is the same in every space and every solution. See the agentic investigations README, "Template UI and gating".
 
 ### `xpack.alertzero.enabled` — the deployment kill switch
 
@@ -55,13 +56,17 @@ UI and HTTP API access additionally require:
 
 - ECH: an available, active license supporting Enterprise.
 - Serverless: the **Security** product's **Complete** tier. Security Serverless supplies this entitlement through `setServerlessTierAvailable` on the server setup and browser start contracts. Other products' Complete tiers do not qualify.
-- AlertZero **Read** to view content and **All** for AlertZero-owned write actions, such as worker settings. Existing dependent-feature privileges, such as managed-workflow update access, are still required.
+- AlertZero **Read** to view content and **All** for AlertZero-owned write actions, such as worker settings. Changing a worker also requires the `manage_security` cluster privilege; enabling or disabling one also requires Workflows managed-workflow update access.
 
-An insufficient subscription or missing AlertZero Read access removes AlertZero navigation and deep links while keeping direct URLs mountable for the environment-specific upgrade or access-denied screen. The queue additionally requires **Proposed Actions Read** (`proposals`); without it, the queue shows a gate naming the missing privilege before requesting queue data. This additional privilege does not affect navigation visibility or access to worker settings. AlertZero Read-only users cannot edit worker settings. Proposal approval, dismissal, and revision are governed by **Proposed Actions All/Manage**, independently of AlertZero Write. The revision tool still checks the per-space AlertZero setting. The application boundary prevents feature content from mounting until access is resolved and responds to license changes.
+An insufficient subscription or missing AlertZero Read access removes AlertZero navigation and deep links while keeping direct URLs mountable for the environment-specific upgrade or access-denied screen. The queue additionally requires **Proposed Actions Read** (`proposals`); without it, the queue shows a gate naming the missing privilege before requesting queue data. This additional privilege does not affect navigation visibility or access to worker settings. AlertZero Read-only users cannot edit worker settings. Proposal approval, dismissal, and revision are governed by **Proposed Actions All/Manage**, independently of AlertZero Write. An approved action runs as the approver, so they also need the action's own privileges (for example Alerts All or Rules All). The revision tool still checks the per-space AlertZero setting. The application boundary prevents feature content from mounting until access is resolved and responds to license changes.
 
 Every AlertZero HTTP route uses `withAlertZeroEnabled` to check the per-space setting and subscription before running its handler, alongside declarative read/write authorization. Setting-off requests return 404 for otherwise authorized callers; subscription and authorization failures return 403.
 
-The proposed-actions panel and both AlertZero attachment renderers in Agent Builder also observe availability after registration. Losing eligibility unmounts their content and stops active query observers; restoring eligibility shows the content again. Stored attachments and the authorization of their underlying shared APIs are unchanged.
+Both AlertZero attachment renderers in Agent Builder also observe availability after registration. Losing eligibility unmounts their content and stops active query observers; restoring eligibility shows the content again. Stored attachments and the authorization of their underlying shared APIs are unchanged.
+
+None of this gates the investigation and escalation details flyout. The `agenticInvestigations` plugin registers that flyout regardless of the subscription, the setting and `AccessBoundary`; its write actions follow the Agentic Investigations UI capabilities or API privileges, and its proposed actions the Proposed Actions privileges. The AlertZero feature grants those API privileges: **All** grants `read_investigations`, `manage_investigations`, `read_escalations` and `manage_escalations`, and **Read** grants `read_investigations` and `read_escalations`. So an AlertZero All user can assign, change status, close and escalate in the flyout without the Agentic Investigations feature.
+
+AlertZero's own queue and escalations pages gate those actions on the Agentic Investigations UI capabilities and AlertZero **All** (`useAlertZeroInvestigationsCapabilities`).
 
 These availability checks gate **UI and API access only**. They do not stop, disable, or unschedule background work when a subscription changes.
 
@@ -70,6 +75,14 @@ These availability checks gate **UI and API access only**. They do not stop, dis
 Workers install when a user enables one or saves settings on one. There is no Watch-level enablement switch. Disable leaves the per-space Worker document and its settings in place. The only bulk cleanup is turning `xpack.alertzero.enabled` off and restarting — AlertZero then stops registering as a managed-workflow owner and orphan cleanup force-deletes its documents across every space. Turning the *advanced setting* off does **not** trigger cleanup; it only hides the surfaces.
 
 Managed-workflow ownership remains registered when optional runtime dependencies are missing, so their absence does not cause installed AlertZero workflows to be deleted as orphans.
+
+Each Worker runs as its own `alertzero_<worker>` service account, with a role of the same name. AlertZero creates both from the browser, with the admin's privileges, when a Worker is turned on without an account, and reuses existing ones without changing them.
+
+The Worker's child workflows run as the same account. Every `workflow.execute` and `workflow.executeAsync` call in a Worker's chain sets `run-as-mode: inherit` and names the child by a literal `workflow-id`. Inheritance requires a literal id, and the step input schema ignores unknown keys, so a misspelled `run-as-mode` silently runs the child as the original caller. Action workflows are the exception: proposals start them by a templated id, so they keep the default identity. `service_account_inheritance.test.ts` enforces both rules.
+
+Inheritance needs a parent that runs as a service account. Running a child workflow such as a review or sweep by hand fails at its first child call, so run the Worker instead. The Attack Discovery pipeline that `security.attack-discovery.run` starts is a known gap: it still runs as the user who enabled the Worker.
+
+**Known limitation (MVP):** AlertZero does not detect or repair a Worker whose role or service account was deleted. If the role is deleted, the Worker's runs fail with authorization errors until the role is re-created with the same name and privileges. If the account is deleted (Kibana only allows this with force while Workers are bound to it), the Worker's runs fail until it is re-bound to a new account through the worker API (`PATCH /internal/alertzero/workers/{workerId}` with a new `settings.serviceAccountId` and the Worker's current `settingsRevision`). Detecting and repairing both cases is planned post-MVP.
 
 To inspect a Worker's installed managed workflow — its rendered YAML, triggers, and executions — in the Workflows UI, also set:
 
@@ -137,22 +150,19 @@ AlertZero is a **standalone Security-category app** (`/app/alertzero`) that **us
 | `/app/alertzero` | Brief — Investigation queue |
 | `/app/discover` | Real Discover (via Security / AlertZero nav Discover item) |
 | `/app/security/dashboards` | Real Security dashboards (via Throughline Dashboards item) |
-| `/app/alertzero/alerts` | Placeholder — coming soon |
-| `/app/alertzero/attacks` | Placeholder — coming soon |
-| `/app/alertzero/threat-hunt` | Placeholder — coming soon |
-| `/app/alertzero/streams` | Placeholder — coming soon |
 | `/app/alertzero/watches` | Watch catalog (`system-security-watch-*`) |
 | `/app/alertzero/watches/:watchId` | Watch detail |
 | `/app/alertzero/watches/workflows` … `/guardrails` | Watches section stubs |
-| `/app/alertzero/settings` | Settings stub (no dedicated nav item) |
 
 An investigation has no route of its own: it is a templated Agent Builder conversation, so its
 details open in Agent Builder's conversation flyout (`?selectedConversationId=` on the queue) and
-its chat opens at `/app/agent_builder/agents/{agentId}/conversations/{id}`.
+its chat opens at `/app/agent_builder/agents/{agentId}/conversations/{id}`. The flyout UI is
+registered by the `agenticInvestigations` plugin; AlertZero's queue pages import its shared hooks,
+signals, query client and modals from `@kbn/agentic-investigations-plugin/public`.
 
 ### Security left-rail order (when `securitySolution:enableAlertZero` is on)
 
-**AlertZero → Discover → Dashboards → Alerts → Attacks → Threat hunt → Streams → Watches**, then the rest of Security’s existing destinations (including the platform **More** overflow — not an AlertZero stub).
+**AlertZero → Discover → Dashboards → Escalations → Watches**, then the rest of Security’s existing destinations (including the platform **More** overflow — not an AlertZero stub).
 
 ### Internal API (`/internal/alertzero/*`)
 
@@ -220,6 +230,8 @@ The current YAML files are Worker stubs rather than final Watch-team definitions
 6. A PATCH composes the next settings from the stored ones and validates the result with the same complete schema (semantics under [Worker-specific settings](#worker-specific-settings-extras)). Failures return 400 naming the field; nothing is written. Do not add per-Worker branches to the server path — extend the declaration.
 7. `toSettings` projects stored values into `WorkerSettings`: `workerId`, `autonomy`, `scheduleInterval` for schedule-driven Workers, `extras` for Workers that declare them. Read and PATCH use the same names and nesting.
 8. Add settings-module tests for defaults, patches, and that projected keys are not stripped. Add managed-definition tests for valid rendered YAML and registry tests for catalog/settings wiring. Imported YAML changes require an explicit managed-definition version decision.
+9. If the Worker only acts on records another Worker writes, so it has nothing to do while that Worker is off, add an entry to `WORKER_DEPENDENCIES` in `public/pages/watches/worker_dependencies/worker_dependencies.tsx`. The entry carries its own dialog and warning copy. Workers that merely get fewer inputs do not belong there.
+10. Every child workflow the Worker calls with `workflow.execute` or `workflow.executeAsync`, directly or through another child, sets `run-as-mode: inherit` with a literal `workflow-id` (see [Worker lifecycle](#worker-lifecycle)). Action workflows keep the default identity.
 
 The Workers service owns per-space installation, reading persisted values, enable/disable, and upgrades. Settings responses carry a logical revision (`settingsRevision`, `null` before the per-space document exists). A settings PATCH sends the revision its draft was built from; the server returns 409 when the stored revision differs and the client keeps the draft. Compare-then-write, not an atomic guard.
 
@@ -284,7 +296,9 @@ Adding a field to an existing Worker touches only Watch-owned code (Rule Tuning'
 3. **Template** — forward `values.extras.<field>` in the Worker's `yamlTemplate` renderer and YAML and bump the definition `version`; the setting is done only when the saved value reaches the run.
 4. **Control** — build a real control in the Worker's own folder under `public/pages/watches/custom_settings/<worker>/` (Rule Tuning lives in `custom_settings/rule_tuning/`), registered by Worker id in `custom_settings/registry.ts`. It receives `settings` and `onExtrasChange(extras)` and hands back the complete `extras` object. It never calls an API and there is no form generator or app-load completeness check; cover it with a component test.
 
-The shared Watch page renders the interval control from the presence of `scheduleInterval`, offers only the Worker's `allowedAutonomyLevels` (one level renders as a fixed value), and mounts the registered custom component. Every edit, including Enabled, changes a draft. Save validates all dirty Workers, then writes Worker by Worker with the revision each draft started from; failed Workers keep draft and error; Discard drops unsaved edits without undoing successful writes.
+The shared Watch page renders the interval control from the presence of `scheduleInterval`, offers only the Worker's `allowedAutonomyLevels` (one level renders as a fixed value), and mounts the registered custom component. Every card also carries a Models row linking to Stack Management → Feature Settings, where models are picked per space for each AlertZero tier; a Worker has no model setting of its own, so don't add one to `extras`. Every edit, including Enabled, changes a draft. Save validates all dirty Workers, then writes Worker by Worker with the revision each draft started from; failed Workers keep draft and error; Discard drops unsaved edits without undoing successful writes.
+
+Hard Worker dependencies (`WORKER_DEPENDENCIES`) are judged client-side against every Worker's saved enabled state, with this page's draft on top, so they work across Watches. Turning off a Worker that an enabled Worker depends on asks for confirmation before the draft changes; turning a Worker on never asks. Each Worker header carries one warning icon listing its reasons. After Save, a Worker the save turned on that is still blocked gets an acknowledge-only notice; settings-only saves get none, and the notice never blocks the save.
 
 ### Pre-customer state
 
@@ -313,7 +327,6 @@ AlertZero is not live. A new required extra or schedule key that has a default i
 ## Non-goals (this PR)
 
 - Nesting routes under `/app/security` or importing Security page wrappers
-- Wiring remaining operate destinations (Alerts, Attacks, …) to real apps
 - Pixel-perfect Throughline CSS port
 - Implementing Workflows / Activity / Performance / Guardrails data
 - No `.kibana-threat-intel-hunt-findings` index / Intelligence Hub findings queue
@@ -339,3 +352,17 @@ Measure with:
 node scripts/build_kibana_platform_plugins.js --dist --no-cache
 # inspect target/public/bundles/metrics.json → "page load bundle size" for alertzero
 ```
+
+
+## Discovering actions and revising proposals with Elastic AI
+
+AlertZero registers the `alertzero-action-discovery` skill and
+`security.alertzero.actions.list` tool. The skill exposes the action catalog tool
+when loaded, with availability checked against the caller's AlertZero read
+privilege and the current space's enablement setting. The tool repeats that check
+when invoked.
+
+Proposal revisions are owned by the shared proposals plugin. Its
+`proposal-management` skill exposes `platform.proposals.revise` independently of
+AlertZero. See the [proposal revision guidance](../../../../platform/plugins/shared/proposals/README.md#revising-proposals-with-elastic-ai)
+for behavior and manual validation.
