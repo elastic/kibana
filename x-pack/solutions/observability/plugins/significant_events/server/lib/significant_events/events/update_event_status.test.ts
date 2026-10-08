@@ -13,7 +13,7 @@ import {
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import { EVENT_STATUS_CHANGED_TRIGGER_ID } from '../../../../common/workflows/triggers';
 import { updateSignificantEventStatus } from './update_event_status';
-import type { SignificantEvent } from './data_stream';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 
 const createSignificantEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
