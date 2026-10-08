@@ -25,6 +25,7 @@ const createMatcher = (servers: Array<Record<string, unknown>>) =>
           delete: { operationId: 'delete', responses: ok },
         },
         '/items/new': { get: { operationId: 'new', responses: ok } },
+        '/items/{id}:archive': { get: { operationId: 'archive', responses: ok } },
       },
     })
   );
@@ -77,6 +78,15 @@ describe('createOperationMatcher', () => {
 
     expect(match(matcher, 'GET', 'https://api.example.com/items/new')).toMatchObject({
       operation: 'new',
+    });
+  });
+
+  it('prefers the template with more literal text among as many parameters', () => {
+    const matcher = createMatcher([{ url: 'https://api.example.com' }]);
+
+    expect(match(matcher, 'GET', 'https://api.example.com/items/a:archive')).toEqual({
+      operation: 'archive',
+      pathParameters: { id: 'a' },
     });
   });
 
