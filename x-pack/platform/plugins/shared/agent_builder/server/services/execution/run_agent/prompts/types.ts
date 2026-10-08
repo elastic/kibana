@@ -55,6 +55,8 @@ export interface PromptFactoryParams {
   relevantSkillsEnabled: boolean;
   imageResolver?: PromptImageResolver;
   conversationTemplates: ConversationTemplatesService;
+  /** Whether the run can write the conversation's metadata (`set_conversation_metadata` is registered). */
+  conversationMetadataWritable: boolean;
 }
 
 export interface HandoverParams {
