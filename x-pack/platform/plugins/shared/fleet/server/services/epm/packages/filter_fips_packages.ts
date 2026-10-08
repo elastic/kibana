@@ -9,19 +9,6 @@ import type { RegistrySearchResult } from '../../../types';
 import type { Installable } from '../../../types';
 
 /**
- * Temporary denylist of packages known to be non-FIPS-compatible but whose manifests
- * do not carry `fips_compatible: false`. Remove entries once the manifest flag is in place.
- *
- * Entries are only hidden from the catalogue and are not blocked from being installed.
- * `endpoint` is installed by the Security Solution setup, which would fail if the install
- * was rejected. Remove it once Elastic Defend is FIPS compliant or Security Solution
- * handles it.
- *
- * Tracked in: https://github.com/elastic/ingest-dev/issues/9559
- */
-export const FIPS_INCOMPATIBLE_PACKAGES = new Set(['endpoint']);
-
-/**
  * A package is FIPS incompatible when it has policy templates and all of them
  * are explicitly marked `fips_compatible: false`. A missing flag means compatible.
  */
@@ -36,20 +23,15 @@ export function isPackageFipsIncompatible(
 }
 
 /**
- * In FIPS mode, filter out packages that are known non-FIPS (via hardcoded denylist)
- * or whose policy templates all have `fips_compatible: false`.
+ * In FIPS mode, filter out the policy templates that have `fips_compatible: false`.
  * A missing flag is treated as compatible (per package-spec default of true).
  * If all templates of a package are non-FIPS, the package is dropped entirely.
- * Packages with no templates at all are kept (unless on the denylist).
+ * Packages with no templates at all are kept.
  */
 export function filterOutNonFipsPolicyTemplates<T extends RegistrySearchResult>(
   packageList: Array<Installable<T>>
 ): Array<Installable<T>> {
   return packageList.reduce((acc, pkg) => {
-    if (FIPS_INCOMPATIBLE_PACKAGES.has(pkg.name)) {
-      return acc;
-    }
-
     const { policy_templates: policyTemplates } = pkg;
 
     if (!policyTemplates || policyTemplates.length === 0) {

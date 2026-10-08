@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  filterOutNonFipsPolicyTemplates,
-  isPackageFipsIncompatible,
-  FIPS_INCOMPATIBLE_PACKAGES,
-} from './filter_fips_packages';
+import { filterOutNonFipsPolicyTemplates, isPackageFipsIncompatible } from './filter_fips_packages';
 
 const makeTemplate = (name: string, fipsCompatible?: boolean) => ({
   name,
@@ -60,20 +56,6 @@ describe('filterOutNonFipsPolicyTemplates', () => {
     expect(filterOutNonFipsPolicyTemplates([pkg])).toHaveLength(0);
   });
 
-  it('drops packages in the hardcoded FIPS_INCOMPATIBLE_PACKAGES denylist regardless of manifest flags', () => {
-    const denylisted = makePkg('endpoint', [makeTemplate('t', true)]);
-    expect(filterOutNonFipsPolicyTemplates([denylisted])).toHaveLength(0);
-  });
-
-  it('drops a denylisted package even when it has no policy_templates', () => {
-    const denylisted = { name: 'endpoint', id: 'endpoint' } as any;
-    expect(filterOutNonFipsPolicyTemplates([denylisted])).toHaveLength(0);
-  });
-
-  it('FIPS_INCOMPATIBLE_PACKAGES contains only endpoint', () => {
-    expect([...FIPS_INCOMPATIBLE_PACKAGES]).toEqual(['endpoint']);
-  });
-
   it('handles a mixed list: drops non-FIPS packages, keeps and trims partially-FIPS packages, keeps no-template packages', () => {
     const allBad = makePkg('all-bad', [makeTemplate('x', false)]);
     const mixed = makePkg('mixed', [makeTemplate('ok', undefined), makeTemplate('bad', false)]);
@@ -107,10 +89,5 @@ describe('isPackageFipsIncompatible', () => {
     expect(
       isPackageFipsIncompatible([makeTemplate('a', false), makeTemplate('b', undefined)])
     ).toBe(false);
-  });
-
-  it('does not use the hardcoded catalogue denylist', () => {
-    expect(FIPS_INCOMPATIBLE_PACKAGES.has('endpoint')).toBe(true);
-    expect(isPackageFipsIncompatible([makeTemplate('t', undefined)])).toBe(false);
   });
 });
