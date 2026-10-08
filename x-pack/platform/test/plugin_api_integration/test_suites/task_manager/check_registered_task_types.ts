@@ -213,6 +213,7 @@ export default function ({ getService }: FtrProviderContext) {
         'entity_store:v2:resilience_task',
         'entity_store:v2:status_report_task',
         'fleet:agent-status-change-task',
+        'fleet:agentless-auto-upgrade-task',
         'fleet:agentless-deployment-sync-task',
         'fleet:auto-install-content-packages-task',
         'fleet:automatic-agent-upgrade-task',

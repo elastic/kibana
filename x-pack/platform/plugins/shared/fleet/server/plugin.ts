@@ -165,6 +165,10 @@ import {
   scheduleAgentlessDeploymentSyncTask,
 } from './tasks/agentless/deployment_sync_task';
 import {
+  registerAgentlessAutoUpgradeTask,
+  scheduleAgentlessAutoUpgradeTask,
+} from './tasks/agentless/auto_upgrade_task';
+import {
   registerVerifierPolicyCleanupTask,
   scheduleVerifierPolicyCleanupTask,
 } from './tasks/agentless/verifier_policy_cleanup_task';
@@ -716,6 +720,7 @@ export class FleetPlugin
     registerPackagesBulkOperationTask(deps.taskManager);
     registerSetupTasks(deps.taskManager);
     registerAgentlessDeploymentSyncTask(deps.taskManager, this.configInitialValue);
+    registerAgentlessAutoUpgradeTask(deps.taskManager);
     registerVerifyPermissionsTask(deps.taskManager);
     registerVerifierPolicyCleanupTask(deps.taskManager);
     registerIacUpgradeCheckTask(deps.taskManager);
@@ -886,6 +891,10 @@ export class FleetPlugin
       .catch(() => {});
     this.agentStatusChangeTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
     scheduleAgentlessDeploymentSyncTask(
+      plugins.taskManager,
+      this.configInitialValue as FleetConfigType
+    ).catch(() => {});
+    scheduleAgentlessAutoUpgradeTask(
       plugins.taskManager,
       this.configInitialValue as FleetConfigType
     ).catch(() => {});
