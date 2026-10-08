@@ -6,12 +6,12 @@
  */
 
 import type { EuiDataGridColumn } from '@elastic/eui';
-import { alertCountQuerySpec, lastSeenAlertQuerySpec } from './columns/alerts';
-import { anomalyCountQuerySpec } from './columns/anomalies';
-import { riskScoreChangeQuerySpec } from './columns/risk_score_change';
-import { groupSizeQuerySpec } from './columns/group_size';
-import { caseCountQuerySpec } from './columns/cases';
-import { nativeSortQuerySpec } from './columns/native';
+import { alertCountQuerySpec, lastSeenAlertQuerySpec } from './queries/alerts';
+import { anomalyCountQuerySpec } from './queries/anomalies';
+import { riskScoreChangeQuerySpec } from './queries/risk_score_change';
+import { groupSizeQuerySpec } from './queries/group_size';
+import { caseCountQuerySpec } from './queries/cases';
+import { nativeSortQuerySpec } from './queries/native';
 import type { ColumnQuerySpec, PageEnricher, RowsMode, SortQuerySpec } from './common';
 
 /*
