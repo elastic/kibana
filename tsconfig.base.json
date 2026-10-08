@@ -2053,6 +2053,8 @@
       "@kbn/plugin-generator/*": ["./packages/kbn-plugin-generator/*"],
       "@kbn/plugin-helpers": ["./packages/kbn-plugin-helpers"],
       "@kbn/plugin-helpers/*": ["./packages/kbn-plugin-helpers/*"],
+      "@kbn/poc-stacked-toast-plugin": ["./src/platform/plugins/shared/poc_stacked_toast"],
+      "@kbn/poc-stacked-toast-plugin/*": ["./src/platform/plugins/shared/poc_stacked_toast/*"],
       "@kbn/portable-dashboards-example": ["./examples/portable_dashboards_example"],
       "@kbn/portable-dashboards-example/*": ["./examples/portable_dashboards_example/*"],
       "@kbn/preboot-example-plugin": ["./examples/preboot_example"],
