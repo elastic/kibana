@@ -5,25 +5,17 @@
  * 2.0.
  */
 
-import type { FC, ReactElement } from 'react';
+import type { FC, ReactElement, ReactNode } from 'react';
 import React from 'react';
 
 import type { IconType } from '@elastic/eui';
-import {
-  EuiIcon,
-  EuiText,
-  EuiTitle,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiPanel,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiCard, EuiIcon } from '@elastic/eui';
 
 interface Props {
   icon: IconType | ReactElement;
   iconAreaLabel?: string;
-  title: any;
-  description: any;
+  title: ReactNode;
+  description: ReactNode;
   href?: string;
   onClick?: () => void;
   isDisabled?: boolean;
@@ -41,46 +33,25 @@ export const LinkCard: FC<Props> = ({
   href,
   isDisabled,
   'data-test-subj': dataTestSubj,
-}) => {
-  const linkHrefAndOnClickProps = {
-    ...(href ? { href } : {}),
-    ...(onClick ? { onClick } : {}),
-  };
-  return (
-    <EuiPanel
-      style={{ cursor: isDisabled ? 'not-allowed' : undefined }}
-      hasShadow={false}
-      hasBorder
-    >
-      <EuiLink
-        style={{
-          display: 'block',
-          pointerEvents: isDisabled ? 'none' : undefined,
-          background: 'transparent',
-          outline: 'none',
-        }}
-        data-test-subj={dataTestSubj}
-        color="subdued"
-        {...linkHrefAndOnClickProps}
-      >
-        <EuiFlexGroup gutterSize="l" responsive={true}>
-          <EuiFlexItem grow={false} style={{ paddingTop: '8px' }}>
-            {typeof icon === 'string' ? (
-              <EuiIcon size="xl" type={icon} aria-label={iconAreaLabel} />
-            ) : (
-              (icon as React.ReactNode)
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle size="s">
-              <h3>{title}</h3>
-            </EuiTitle>
-            <EuiText color="subdued">
-              <p>{description}</p>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiLink>
-    </EuiPanel>
-  );
-};
+}) => (
+  <EuiCard
+    hasBorder
+    hasShadow={false}
+    layout="horizontal"
+    title={title}
+    titleSize="xs"
+    titleElement="h3"
+    description={description}
+    icon={
+      typeof icon === 'string' ? (
+        <EuiIcon size="xl" type={icon} aria-label={iconAreaLabel} />
+      ) : (
+        icon
+      )
+    }
+    onClick={onClick}
+    href={href}
+    isDisabled={isDisabled}
+    data-test-subj={dataTestSubj}
+  />
+);
