@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, memo, useCallback, useRef, useState } from 'react';
+import React, { Fragment, memo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { connect } from 'react-redux';
@@ -83,7 +83,7 @@ export const WorkspaceLayoutComponent = ({
   const [pickerOpen, setPickerOpen] = useState(false);
   const [mergeCandidates, setMergeCandidates] = useState<TermIntersect[]>([]);
   const [control, setControl] = useState<ControlType>('none');
-  const selectedNode = useRef<WorkspaceNode | undefined>(undefined);
+  const [selectedNode, setSelectedNode] = useState<WorkspaceNode>();
 
   const search = useLocation().search;
   const urlQuery = new URLSearchParams(search).get('query');
@@ -95,12 +95,12 @@ export const WorkspaceLayoutComponent = ({
   );
 
   const selectSelected = useCallback((node: WorkspaceNode) => {
-    selectedNode.current = node;
+    setSelectedNode(node);
     setControl('editLabel');
   }, []);
 
   const onSetControl = useCallback((newControl: ControlType) => {
-    selectedNode.current = undefined;
+    setSelectedNode(undefined);
     setControl(newControl);
   }, []);
 
@@ -226,7 +226,7 @@ export const WorkspaceLayoutComponent = ({
             renderCounter={renderCounter}
             workspace={workspace}
             control={control}
-            selectedNode={selectedNode.current}
+            selectedNode={selectedNode}
             colors={colorChoices}
             mergeCandidates={mergeCandidates}
             selectSelected={selectSelected}

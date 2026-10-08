@@ -94,19 +94,6 @@ describe('ExecutionHistoryApi', () => {
     });
   });
 
-  it('supports a count-only read via perPage=0 and from', async () => {
-    const { api, http } = buildApi();
-
-    await api.listActionPolicyExecutions({ from: '2026-01-01T00:00:00.000Z', per_page: 0 });
-
-    expect(http.get).toHaveBeenCalledWith(
-      ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
-      expect.objectContaining({
-        query: expect.objectContaining({ per_page: 0, from: '2026-01-01T00:00:00.000Z' }),
-      })
-    );
-  });
-
   it('returns the response from http.get', async () => {
     const { api, http } = buildApi();
     const fakeResponse = {

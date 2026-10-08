@@ -7,14 +7,14 @@
 
 import type { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { ProfilingDataAccessPluginStart } from '@kbn/profiling-data-access-plugin/server';
-import type { ProfilingStatus } from '@kbn/profiling-utils';
+import type { UniversalProfilingStatus } from '@kbn/profiling-utils';
 import type { InfraRequestHandlerContext } from '../../../types';
 
 export async function fetchProfilingStatus(
   profilingDataAccess: ProfilingDataAccessPluginStart,
   coreRequestContext: CoreRequestHandlerContext,
   infraRequestContext: InfraRequestHandlerContext
-): Promise<ProfilingStatus> {
+): Promise<UniversalProfilingStatus> {
   return await profilingDataAccess.services.universalProfiling.getStatus({
     esClient: coreRequestContext.elasticsearch.client,
     soClient: coreRequestContext.savedObjects.client,

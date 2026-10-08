@@ -30,6 +30,7 @@ import { CaseFileMetadataForDeletionRt } from '../../../common/files';
 import type { CasesClient } from '../client';
 import { createFileEntities, deleteFiles } from '../files';
 import { handleAlerts, updateCaseAttachmentStats } from './delete';
+import { emitAttachmentsDeletedEvents } from './trigger_utils';
 import { isAssociatedToCase } from '../../common/partitioning';
 import type { AttachmentSavedObjectType } from '../../services/user_actions/types';
 
@@ -157,19 +158,21 @@ export const bulkDeleteAttachments = async (
       savedObjectType: attachment.type as AttachmentSavedObjectType,
     }));
 
-    const failedIds = await attachmentService.bulkDelete({
+    const deletedIds = await attachmentService.bulkDelete({
       savedObjectIds: uniqueIds,
       refresh: true,
     });
 
-    // Core's bulk delete reports per-object failures instead of throwing. Surface them before any
-    // stats or user actions are written, so the case is never recorded as having lost attachments
-    // that are in fact still there.
-    if (failedIds.length > 0) {
+    // Core's bulk delete reports per-object failures instead of throwing, and only confirmed
+    // deletes come back. Surface anything that did not before stats or user actions are written,
+    // so the case is never recorded as having lost attachments that are in fact still there.
+    const notDeletedIds = uniqueIds.filter((id) => !deletedIds.includes(id));
+
+    if (notDeletedIds.length > 0) {
       throw Boom.internal(
-        `Failed to delete ${failedIds.length === 1 ? 'attachment' : 'attachments'} ${failedIds.join(
-          ', '
-        )} on case ${caseId}.`
+        `Failed to delete ${
+          notDeletedIds.length === 1 ? 'attachment' : 'attachments'
+        } ${notDeletedIds.join(', ')} on case ${caseId}.`
       );
     }
 
@@ -186,6 +189,8 @@ export const bulkDeleteAttachments = async (
       attachments: attachmentsInCase.map((attachment) => attachment.attributes),
       caseId,
     });
+
+    emitAttachmentsDeletedEvents(clientArgs, caseId, attachmentsInCase);
   } catch (error) {
     throw createCaseError({
       message: `Failed to bulk delete attachments for case: ${caseId}: ${error}`,
@@ -238,7 +243,7 @@ export const bulkDeleteFileAttachments = async (
       operation: Operations.deleteComment,
     });
 
-    await Promise.all([
+    const [, deletedAttachmentIds] = await Promise.all([
       deleteFiles(
         fileEntities.map((entity) => entity.id),
         fileService
@@ -258,6 +263,12 @@ export const bulkDeleteFileAttachments = async (
       })),
       user,
     });
+
+    emitAttachmentsDeletedEvents(
+      clientArgs,
+      caseId,
+      fileAttachments.filter(({ id }) => deletedAttachmentIds.includes(id))
+    );
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete file attachments for case: ${caseId}: ${error}`,

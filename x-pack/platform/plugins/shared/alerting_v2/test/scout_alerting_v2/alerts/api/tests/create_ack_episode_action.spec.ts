@@ -50,7 +50,7 @@ apiTest.describe('Create ack episode action API', { tag: '@local-stateful-classi
       buildAlertEvent({
         rule: { id: ruleId, version: 1 },
         group_hash: groupHash,
-        episode: { id: episodeId, status: 'active' },
+        alert: { id: episodeId, status: 'active' },
       }),
     ]);
     const response = await apiClient.post(getAckEpisodeActionUrl(episodeId), {
@@ -67,7 +67,7 @@ apiTest.describe('Create ack episode action API', { tag: '@local-stateful-classi
     expect(actions[0]).toMatchObject({
       action_type: 'ack',
       group_hash: groupHash,
-      episode_id: episodeId,
+      alert_id: episodeId,
       rule_id: ruleId,
       space_id: 'default',
     });
@@ -91,13 +91,13 @@ apiTest.describe('Create ack episode action API', { tag: '@local-stateful-classi
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
           status: 'recovered',
-          episode: { id: olderEpisodeId, status: 'inactive' },
+          alert: { id: olderEpisodeId, status: 'inactive' },
         }),
         buildAlertEvent({
           '@timestamp': new Date(now).toISOString(),
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: newerEpisodeId, status: 'active' },
+          alert: { id: newerEpisodeId, status: 'active' },
         }),
       ]);
 
@@ -115,7 +115,7 @@ apiTest.describe('Create ack episode action API', { tag: '@local-stateful-classi
       expect(actions[0]).toMatchObject({
         action_type: 'ack',
         group_hash: groupHash,
-        episode_id: olderEpisodeId,
+        alert_id: olderEpisodeId,
       });
     }
   );

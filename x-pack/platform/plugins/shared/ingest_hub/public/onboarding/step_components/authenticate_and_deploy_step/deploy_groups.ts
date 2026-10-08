@@ -138,15 +138,12 @@ export async function deployGroup(
 
   const { connectorId, staticKeys } = authenticateAndDeployStep;
 
-  // Build a vars map keyed by service.id for buildPackageInputs.
-  // Look up vars by instanceId first; fall back to serviceId for sessions predating instance keying.
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of group.members) {
-    serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ??
-      storedServiceVars[instance.serviceId] ?? {
-        enabledDataStreams: service.dataStreams,
-        varsByDataStream: {},
-      };
+    serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ?? {
+      enabledDataStreams: service.dataStreams,
+      varsByDataStream: {},
+    };
   }
 
   const services = group.members.map(({ service }) => service);
@@ -173,7 +170,15 @@ export async function deployGroup(
   }
 
   const pkgVarNames = getPackageVarNames(pkgInfo);
-  const vars = buildPackageVars(globalRegion, staticKeys, pkgVarNames);
+  // Refs of a sibling policy let a new group reuse credentials the user kept; Fleet tracks them
+  // on the new policy too, so deleting the sibling does not delete the shared secret.
+  const vars = buildPackageVars(
+    globalRegion,
+    staticKeys,
+    pkgVarNames,
+    undefined,
+    connectorId ? undefined : authenticateAndDeployStep.existingSecretRefs
+  );
 
   const response = await sendCreateAgentlessPolicy({
     name: buildAgentlessPolicyName(group),

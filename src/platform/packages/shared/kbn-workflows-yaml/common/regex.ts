@@ -70,7 +70,8 @@ const IDENT = String.raw`[a-zA-Z_$][a-zA-Z0-9_$]*`;
  * (`[0]`, `["rule-1"]`, `[ep]`, `[ep.rule_id]`).
  */
 const BRACKET_KEY = String.raw`(?:\d+|"[^"]*"|'[^']*'|${IDENT}(?:\.${IDENT})*)`;
-const PATH_TAIL = String.raw`(?:\.${IDENT}|\[\s*${BRACKET_KEY}\s*\])`;
+/** Liquid also reads a numeric dot segment as an index (`items.0` is `items[0]`). */
+const PATH_TAIL = String.raw`(?:\.(?:${IDENT}|\d+)|\[\s*${BRACKET_KEY}\s*\])`;
 
 export const ALLOWED_KEY_REGEX = new RegExp(String.raw`^${IDENT}${PATH_TAIL}*(?:\s*\|.*)?$`);
 

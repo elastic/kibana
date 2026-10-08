@@ -15,6 +15,7 @@ import { IDLE_SOCKET_TIMEOUT } from '.';
 import { getRoutePaths, MAX_NAME_LENGTH } from '../../common';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { getClient } from './compat';
+import { PROFILING_API_PRIVILEGE } from '../feature';
 
 const querySchema = schema.object({
   timeFrom: schema.number(),
@@ -39,7 +40,7 @@ export function registerTopNFunctionsAPMTransactionsRoute({
       path: paths.APMTransactions,
       security: {
         authz: {
-          requiredPrivileges: ['profiling', 'apm'],
+          requiredPrivileges: [PROFILING_API_PRIVILEGE, 'apm'],
         },
       },
       options: {

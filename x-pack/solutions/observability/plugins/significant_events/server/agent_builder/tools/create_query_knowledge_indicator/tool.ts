@@ -19,6 +19,7 @@ import { MAX_ID_LENGTH, upsertStreamQueryRequestSchema } from '@kbn/significant-
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
+import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { createQueryKnowledgeIndicatorToolHandler } from './handler';
@@ -132,6 +133,7 @@ export function createQueryKnowledgeIndicatorTool({
           server,
           licensing: scopedClients.licensing,
         });
+        await assertCanManageSignificantEvents({ request, server });
 
         const definition = await scopedClients.streamsClient.getStream(streamName);
         streamType = getStreamTypeFromDefinition(definition);

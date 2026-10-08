@@ -120,12 +120,16 @@ export const getEcfServiceConfigs = (
         : [];
     };
 
-    const bucketArns = enabledInputs.includes('aws-s3')
-      ? splitArns(dsVars?.varsByInput?.['aws-s3']?.bucket_arn)
-      : [];
-    const logGroupArns = enabledInputs.includes('aws-cloudwatch')
-      ? splitArns(dsVars?.varsByInput?.['aws-cloudwatch']?.log_group_arn)
-      : [];
+    // Inputs outside `ecfInputs` (e.g. WAF CloudWatch) are agent-based only: never launch them via ECF.
+    const ecfCanRoute = (input: string) => !entry.ecfInputs || entry.ecfInputs.includes(input);
+    const bucketArns =
+      enabledInputs.includes('aws-s3') && ecfCanRoute('aws-s3')
+        ? splitArns(dsVars?.varsByInput?.['aws-s3']?.bucket_arn)
+        : [];
+    const logGroupArns =
+      enabledInputs.includes('aws-cloudwatch') && ecfCanRoute('aws-cloudwatch')
+        ? splitArns(dsVars?.varsByInput?.['aws-cloudwatch']?.log_group_arn)
+        : [];
 
     const existing = configsByServiceId.get(serviceId);
     if (existing) {

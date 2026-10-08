@@ -143,7 +143,11 @@ const boundToolCallResult = (_key: string, value: unknown): unknown => {
 // evidence, and echoing the wiki into its own optimizer would spend the budget on known pages.
 const SEEDED_WORKSPACE_ROOTS = [CORTEX_WORKSPACE_ROOT, DECISION_TREE_WORKSPACE_ROOT];
 
-const isSeededWorkspaceRead = ({ tool_id: toolId, params }: InvestigationToolCall): boolean => {
+/** True when the call reads back a Cortex or decision-tree file Nightshift seeded itself. */
+export const isSeededWorkspaceRead = ({
+  tool_id: toolId,
+  params,
+}: InvestigationToolCall): boolean => {
   const filePath = params?.file_path;
   if (toolId !== SANDBOX_VIEW_FILE_TOOL_ID || typeof filePath !== 'string') {
     return false;
@@ -301,6 +305,12 @@ export const applyCortexEdits = async ({
   logger: Logger;
 }): Promise<void> => {
   const { pages } = await store.list();
+  logger.info(`Applying ${edits.length} Cortex edit(s)`);
+  logger.debug(
+    `Cortex edit proposals: ${edits
+      .map((edit) => `${edit.action}:${edit.entity_type}/${edit.slug}`)
+      .join(', ')}`
+  );
   const applied: AppliedCortexEdit[] = [];
   // A run confirms a page at most once, and never one it created: promotion needs a confirmation
   // from a later run.
@@ -326,7 +336,7 @@ export const applyCortexEdits = async ({
         if (updated) {
           touchedIds.add(id);
           applied.push({ action: 'corroborate', entityType: edit.entity_type });
-          logger.info(`Corroborated Cortex page ${id}`);
+          logger.debug(`Corroborated Cortex page ${id}`);
         }
         continue;
       }
@@ -335,7 +345,7 @@ export const applyCortexEdits = async ({
         const updated = await store.archive(id);
         if (updated) {
           applied.push({ action: 'archive', entityType: edit.entity_type });
-          logger.info(`Archived Cortex page ${id}`);
+          logger.debug(`Archived Cortex page ${id}`);
         }
         continue;
       }
@@ -364,7 +374,7 @@ export const applyCortexEdits = async ({
         corroborations,
       });
       applied.push({ action: 'upsert', entityType: edit.entity_type });
-      logger.info(`Upserted Cortex page ${id}`);
+      logger.debug(`Upserted Cortex page ${id}`);
     }
   } finally {
     telemetry.reportEditsApplied(applied);
@@ -406,8 +416,8 @@ export const optimizeCortex = async ({
   ].join('\n');
 
   const { edits } = await proposeEdits({ transcript, catalog: pages });
+  logger.info(`Cortex optimizer proposed ${edits.length} edit(s)`);
   if (edits.length === 0) {
-    logger.debug('Cortex optimizer proposed no edits');
     return;
   }
 

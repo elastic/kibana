@@ -13,6 +13,8 @@ tags:
   - watch
   - watch-floor
 
+settings:
+  __WORKER_RUN_AS_LINE__:
 triggers:
   - type: alert
   # Keep manual for desk testing without a rule execution.
@@ -51,9 +53,10 @@ consts:
 #   3. attach_alerts             — attach the alert batch
 #   4. classify_alerts           — run the classification sub-workflow
 #   5. compute_fp_candidates     — filter verdicts to false_positive at or above the floor
-#   6. attach_impact             — entity × verdict summary
-#   7. set_az_tags               — static AZ classification tags (R5, always)
-#   8. add_verdict_notes         — verdict + Investigation reference per alert (R4/R13, always)
+#   6. attach_impact             — record impacted hosts/users (shared Impact)
+#   7. set_az_*_tags             — static AZ classification tags (R5, always), in bulk
+#   8. add_verdict_notes         — verdict + Investigation reference per alert (R4/R13, always),
+#                                  written 20 at a time
 #   9. gate_fp_close             — start the closure review and record its dispatch (if any FP candidates)
 #  10. close_investigation_no_fp — explicit close when there are no FP candidates
 #
@@ -99,7 +102,7 @@ steps:
 
   # ---------------------------------------------------------------------------
   # 2. Open an Investigation conversation seeded from the `investigation`
-  #    template. Seeds status, severity, and the workflow_execution_id that links
+  #    template. Seeds status, severity, and the workflow_execution_ids that link
   #    the Investigation to this run.
   # ---------------------------------------------------------------------------
   - name: create_investigation
@@ -118,7 +121,7 @@ steps:
         description: >-
           Automated triage of {{ event.alerts.size }} alert{% if event.alerts.size != 1 %}s{% endif %} from rule
           "{{ event.rule.name }}" ({{ event.rule.id }}).
-        workflow_execution_id: "{{ execution.id }}"
+        workflow_execution_ids: ["{{ execution.id }}"]
 
   # ---------------------------------------------------------------------------
   # 3. Attach the analysed alerts to the Investigation in chunks of 20.
@@ -222,6 +225,7 @@ steps:
               tagged or closed.
     with:
       workflow-id: system-security-alert-analysis
+      run-as-mode: inherit
       inputs:
         # A child run has no trigger event of its own, so the batch must be passed
         # explicitly or the sub-workflow analyses nothing and returns empty verdicts.
@@ -335,104 +339,254 @@ steps:
         {{ steps.classify_alerts.output.generated_summary }}{% if steps.classify_alerts.output.connector_id != '' %} _(Connector: `{{ steps.classify_alerts.output.connector_id }}`, Agent: `{{ steps.classify_alerts.output.agent_id }}`)_{% endif %}
 
   # ---------------------------------------------------------------------------
-  # 6. Attach impact summary (entity × verdict breakdown) to the Investigation.
-  #    The sub-workflow caps impacted_entities at MAX_IMPACTED_ENTITIES and sets
-  #    impacted_entities_truncated when it dropped any.
+  # 6. Record the impacted hosts and users on the Investigation through the shared
+  #    investigations.attachImpact step (the landing-page entity pills read it).
+  #    The sub-workflow caps impacted_entities at 100. The step rejects an empty list
+  #    and needs manage_investigations; a failure is not worth failing the run for.
   # ---------------------------------------------------------------------------
-  - name: attach_impact
-    type: ai.attachment.add
-    on-failure:
-      continue: true
-    with:
-      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-      type: security.impact
-      render_inline: true
-      data:
-        entities: "${{ steps.classify_alerts.output.impacted_entities }}"
-        total_alert_count: "${{ steps.classify_alerts.output.verdicts | size }}"
-        truncated: "{{ steps.classify_alerts.output.impacted_entities_truncated }}"
-      description: "Impacted entities from alert triage"
+  - name: attach_impact_gate
+    type: if
+    condition: "${{ steps.classify_alerts.output.impacted_entities.size > 0 }}"
+    steps:
+      - name: attach_impact
+        type: investigations.attachImpact
+        on-failure:
+          continue: true
+        with:
+          conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+          entities: "${{ steps.classify_alerts.output.impacted_entities }}"
 
   # ---------------------------------------------------------------------------
   # 7. Apply static AZ classification tags to every analysed alert (R5).
   #    Tags are always written — never gated on autonomy level or FP count.
   #    Replaces any stale AZ classification tag before adding the current one.
   # ---------------------------------------------------------------------------
-  # Removing and adding are two calls, not one: kibana.SetAlertTags rejects a tag present in
-  # both lists ("Duplicate tags ... were found"), and the tag being added is always one of the
-  # three being cleared. Listing abbreviations in tags_to_remove dodges the collision but
-  # matches no real tag, leaving a re-analysed alert carrying both its old verdict and its new.
-  # Same remove-then-add split alert_analysis_workflow.yaml uses for its own tags.
-  - name: set_az_tags
-    foreach: "${{ steps.classify_alerts.output.verdicts | json }}"
+  # Each verdict class is one call per chunk that adds its own tag and removes the other two.
+  # kibana.SetAlertTags rejects a tag present in both lists ("Duplicate tags ... were found"),
+  # so the tag being added is never in tags_to_remove. Removing and adding in one call also
+  # means a failed call leaves an alert with its previous verdict tag, never with none.
+  # An alert id sits in exactly one class: the Alert Analysis Worker path rejects duplicate
+  # alert ids before batching and returns one verdict per id. Were an id in two classes, the
+  # last class written would win.
+  #
+  # Written in bulk, not per alert: kibana.SetAlertTags takes a list of ids, so the batch costs
+  # one call per verdict class (per chunk of 500) instead of one call
+  # per alert. Every step of a loop is recorded in the execution, so a per-alert loop over a
+  # thousand alerts is thousands of step records on the same event loop as the UI.
+  # The ids are partitioned by classification here.
+  - name: compute_az_tag_ids
+    type: data.set
+    with:
+      az_true_positive_ids: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | where: 'classification', 'true_positive'
+            | map: 'alert_id' }}
+      az_false_positive_ids: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | where: 'classification', 'false_positive'
+            | map: 'alert_id' }}
+      az_inconclusive_ids: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | where: 'classification', 'inconclusive'
+            | map: 'alert_id' }}
+
+  # Each list is walked in chunks of 500 ids, as floor_alert_triage_review.yaml does for its
+  # re-tag. One call carries the whole chunk, so a batch costs a call per chunk and class rather
+  # than per alert, yet no call grows with the batch: the route turns `ids` into a `terms` query
+  # (capped by index.max_terms_count) and emits one alert-tags-changed trigger event per call,
+  # which is truncated beyond 10000 ids. A batch with no verdicts (missing connector, skipped
+  # sub-workflow) chunks to an empty list, so each loop below runs zero times and `ids` is never
+  # sent empty.
+  - name: set_az_true_positive_tags
     type: foreach
+    foreach: "${{ variables.az_true_positive_ids | chunk: 500 | json }}"
     steps:
-      - name: remove_stale_az_tags
+      - name: set_az_true_positive_tags_call
         type: kibana.SetAlertTags
         on-failure:
           retry:
             max-attempts: 3
             delay: 5s
         with:
-          ids:
-            - "{{ foreach.item.alert_id }}"
+          ids: "${{ foreach.item }}"
+          tags:
+            tags_to_remove:
+              - "az:false_positive"
+              - "az:inconclusive"
+            tags_to_add:
+              - "az:true_positive"
+
+  - name: set_az_false_positive_tags
+    type: foreach
+    foreach: "${{ variables.az_false_positive_ids | chunk: 500 | json }}"
+    steps:
+      - name: set_az_false_positive_tags_call
+        type: kibana.SetAlertTags
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+        with:
+          ids: "${{ foreach.item }}"
+          tags:
+            tags_to_remove:
+              - "az:true_positive"
+              - "az:inconclusive"
+            tags_to_add:
+              - "az:false_positive"
+
+  - name: set_az_inconclusive_tags
+    type: foreach
+    foreach: "${{ variables.az_inconclusive_ids | chunk: 500 | json }}"
+    steps:
+      - name: set_az_inconclusive_tags_call
+        type: kibana.SetAlertTags
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+        with:
+          ids: "${{ foreach.item }}"
           tags:
             tags_to_remove:
               - "az:true_positive"
               - "az:false_positive"
-              - "az:inconclusive"
-            tags_to_add: []
-
-      - name: add_az_classification_tag
-        type: kibana.SetAlertTags
-        on-failure:
-          retry:
-            max-attempts: 3
-            delay: 5s
-        with:
-          ids:
-            - "{{ foreach.item.alert_id }}"
-          tags:
-            tags_to_remove: []
             tags_to_add:
-              - "az:{{ foreach.item.classification }}"
+              - "az:inconclusive"
 
   # ---------------------------------------------------------------------------
   # 8. Write a verdict note to each alert referencing the Investigation (R4, R13).
   #    Always written — never gated on autonomy level. The only verdict note on the
   #    Worker path: the sub-workflow skips its own when calledByWorker is true.
+  #
+  #    The notes API takes one note per call and each call takes about a second (the write
+  #    waits for the next index refresh), so a serial loop costs about a second per alert.
+  #    Notes are written 20 at a time instead: each chunk is a `parallel` fan-out of 20
+  #    branches at concurrency 20, which finishes within one tick because the fan-out does not
+  #    exceed the concurrency. That is the schema ceiling for concurrency, and well under the
+  #    fan-out ceiling of 100.
+  #
+  #    A parallel branch cannot carry `on-failure`, so a note that fails here is not retried in
+  #    place. `settled` lets every note in the chunk run, the failed ones are collected, and
+  #    they are retried serially afterwards with the same retry as before. A note that still
+  #    fails fails the run, as it always did.
   # ---------------------------------------------------------------------------
-  - name: add_verdict_notes
-    foreach: "${{ steps.classify_alerts.output.verdicts | json }}"
-    type: kibana.request
-    on-failure:
-      retry:
-        max-attempts: 3
-        delay: 5s
+  - name: init_failed_verdict_notes
+    type: data.set
     with:
-      method: PATCH
-      path: "/s/{{ workflow.spaceId }}/api/note"
-      body:
-        note:
-          eventId: "{{ foreach.item.alert_id }}"
-          timelineId: ''
-          note: |
-            [Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}) · [Workflow execution]({{ execution.url }})
+      failed_note_verdicts: []
 
-            **Verdict:** {{ foreach.item.classification }}
-            **Confidence:** {{ foreach.item.confidence_score }}
+  - name: add_verdict_notes
+    type: foreach
+    foreach: "${{ steps.classify_alerts.output.verdicts | chunk: 20 | json }}"
+    steps:
+      # Copied out of `foreach.item`: inside the parallel step below `foreach.item` is a single
+      # verdict, not the chunk.
+      - name: current_note_chunk
+        type: data.set
+        with:
+          verdicts: "${{ foreach.item }}"
 
-            {{ foreach.item.rationale }}
-            {% if foreach.item.contributing_factors.size > 0 %}
-            **Contributing factors**
-            {% for factor in foreach.item.contributing_factors %}
-            - {{ factor }}
-            {%- endfor %}
-            {% endif %}
-      headers:
-        kbn-xsrf: string
-        Content-Type: application/json
+      - name: write_note_chunk
+        type: parallel
+        foreach: "${{ steps.current_note_chunk.output.verdicts }}"
+        mode: settled
+        concurrency:
+          max: 20
+        steps:
+          - name: add_verdict_note
+            type: kibana.request
+            with:
+              method: PATCH
+              path: "/s/{{ workflow.spaceId }}/api/note"
+              body:
+                note:
+                  eventId: "{{ foreach.item.alert_id }}"
+                  timelineId: ''
+                  note: |
+                    [Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}) · [Workflow execution]({{ execution.url }})
 
+                    **Verdict:** {{ foreach.item.classification }}
+                    **Confidence:** {{ foreach.item.confidence_score }}
+
+                    {{ foreach.item.rationale }}
+                    {% if foreach.item.contributing_factors.size > 0 %}
+                    **Contributing factors**
+                    {% for factor in foreach.item.contributing_factors %}
+                    - {{ factor }}
+                    {%- endfor %}
+                    {% endif %}
+              headers:
+                kbn-xsrf: string
+                Content-Type: application/json
+
+      # A branch's `key` is the verdict it was given, so the verdicts of the notes that did not
+      # complete can be read straight off the results. Anything but `completed` counts, so a
+      # timed-out branch is retried as well. The cost is that each verdict is stored twice in the
+      # branch state and in `results[].key`; attack_discovery_batched_generation.yaml avoids that
+      # by fanning out over integer offsets. Here a branch needs the whole verdict to render its
+      # note and the retry needs it back, and a branch cannot look it up by index without
+      # reading shared variables other branches are writing, so the key stays the verdict.
+      # A verdict is at most about 1.5 KB under the classify schema (512-character id, 500-character
+      # rationale, three 100-character factors), so a 1000-alert batch (the input maximum) holds
+      # at most about 3 MB of duplicated state, and a 100-alert batch about 0.3 MB. That is an
+      # upper bound from the schema, not a measurement of a run.
+      #
+      # The failed verdicts are read from this step's own output, not from `variables`: the
+      # variables are a merge of every `data.set` output in run order, and an empty list does
+      # not reliably shadow the previous chunk's, which would retry a failed note twice.
+      - name: collect_chunk_failed_notes
+        type: data.set
+        with:
+          chunk_failed_verdicts: >-
+            ${{ steps.write_note_chunk.output.results
+                | where_exp: 'r', 'r.status != "completed"'
+                | map: 'key' }}
+
+      - name: record_failed_verdict_notes
+        type: data.set
+        with:
+          failed_note_verdicts: "${{ variables.failed_note_verdicts | concat: steps.collect_chunk_failed_notes.output.chunk_failed_verdicts }}"
+
+  # Empty on a clean run, so this loop does nothing. The note is the same one as above: keep the
+  # two in step.
+  - name: retry_failed_verdict_notes
+    type: foreach
+    foreach: "${{ variables.failed_note_verdicts | json }}"
+    steps:
+      - name: retry_verdict_note
+        type: kibana.request
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+        with:
+          method: PATCH
+          path: "/s/{{ workflow.spaceId }}/api/note"
+          body:
+            note:
+              eventId: "{{ foreach.item.alert_id }}"
+              timelineId: ''
+              note: |
+                [Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}) · [Workflow execution]({{ execution.url }})
+
+                **Verdict:** {{ foreach.item.classification }}
+                **Confidence:** {{ foreach.item.confidence_score }}
+
+                {{ foreach.item.rationale }}
+                {% if foreach.item.contributing_factors.size > 0 %}
+                **Contributing factors**
+                {% for factor in foreach.item.contributing_factors %}
+                - {{ factor }}
+                {%- endfor %}
+                {% endif %}
+          headers:
+            kbn-xsrf: string
+            Content-Type: application/json
+
+  # Tags are reported as submitted, not written: SetAlertTags returns the update-by-query body on
+  # HTTP 200, so a call whose `updated` is below the chunk size (ids matching no alert) passes
+  # unchecked. Notes are confirmed, since a failed note retries and then fails the run.
   - name: post_comment_alert_updates
     type: ai.conversation.add_user_message
     on-failure:
@@ -440,7 +594,7 @@ steps:
     with:
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       message: >-
-        Tags and verdict notes written to {{ steps.classify_alerts.output.verdicts.size }} alert{% if steps.classify_alerts.output.verdicts.size != 1 %}s{% endif %}.
+        Verdict notes written and classification tags submitted for {{ steps.classify_alerts.output.verdicts.size }} alert{% if steps.classify_alerts.output.verdicts.size != 1 %}s{% endif %}.
 
   # ---------------------------------------------------------------------------
   # 9. Hand the closure proposal to the review workflow (if any FP candidates).
@@ -482,6 +636,7 @@ steps:
                   {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive.
         with:
           workflow-id: system-security-floor-alert-triage-review
+          run-as-mode: inherit
           inputs:
             conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
             rule_id: "{{ event.rule.id }}"

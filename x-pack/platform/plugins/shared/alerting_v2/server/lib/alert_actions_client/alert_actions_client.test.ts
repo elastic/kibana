@@ -53,7 +53,7 @@ describe('AlertActionsClient', () => {
       return operations.filter((_, index) => index % 2 === 1);
     };
 
-    it('persists the audit doc with episode_id null and series anchors from the latest event', async () => {
+    it('persists the audit doc with alert_id null and series anchors from the latest event', async () => {
       queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
 
       await client.createSeriesAction({
@@ -71,15 +71,15 @@ describe('AlertActionsClient', () => {
         action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
         expiry: '2026-08-12T00:00:00.000Z',
         group_hash: 'test-group-hash',
-        episode_id: null,
+        alert_id: null,
         rule_id: 'test-rule-id',
         last_series_event_timestamp: '2025-01-01T00:00:00.000Z',
-        actor: 'test-uid',
+        actor: { type: 'user', profile_uid: 'test-uid' },
         space_id: 'default',
       });
     });
 
-    it('emits the domain event with episode_id null, like the persisted doc', async () => {
+    it('emits the domain event with alert_id null, like the persisted doc', async () => {
       queryServiceEsClient.esql.query.mockResolvedValueOnce(
         getAlertEventESQLResponse([{ episode_id: 'episode-7' }])
       );
@@ -89,11 +89,11 @@ describe('AlertActionsClient', () => {
         action: { action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE },
       });
 
-      expect(getDocs()[0]).toMatchObject({ episode_id: null });
+      expect(getDocs()[0]).toMatchObject({ alert_id: null });
       expect(emitEpisodeActionsSpy).toHaveBeenCalledWith(expect.anything(), [
         expect.objectContaining({
           action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-          episode_id: null,
+          alert_id: null,
         }),
       ]);
     });
@@ -115,7 +115,7 @@ describe('AlertActionsClient', () => {
       expect(emitEpisodeActionsSpy).not.toHaveBeenCalled();
     });
 
-    it('handles null profile uid when security is not available', async () => {
+    it('records a user actor without profile_uid when security is not available', async () => {
       queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
       userProfileService.getCurrentProfileId.mockResolvedValueOnce(null);
 
@@ -124,7 +124,8 @@ describe('AlertActionsClient', () => {
         action: { action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE },
       });
 
-      expect(getDocs()[0]).toMatchObject({ actor: null });
+      expect(getDocs()[0]).toMatchObject({ actor: { type: 'user' } });
+      expect(getDocs()[0]).not.toHaveProperty(['actor', 'profile_uid']);
     });
   });
 
@@ -151,12 +152,14 @@ describe('AlertActionsClient', () => {
       expect(docs).toHaveLength(1);
       expect(docs[0]).toMatchObject({
         action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
-        episode_id: 'episode-3',
+        alert_id: 'episode-3',
         group_hash: 'resolved-group',
-        actor: 'test-uid',
+        actor: { type: 'user', profile_uid: 'test-uid' },
       });
+      expect(docs[0]).not.toHaveProperty('episode_id');
+      expect(docs[0]).not.toHaveProperty('episode_status');
       expect(emitEpisodeActionsSpy).toHaveBeenCalledWith(expect.anything(), [
-        expect.objectContaining({ episode_id: 'episode-3' }),
+        expect.objectContaining({ alert_id: 'episode-3' }),
       ]);
     });
 
@@ -173,7 +176,7 @@ describe('AlertActionsClient', () => {
       expect(getDocs()[0]).toMatchObject({
         action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
         assignee_uid: 'assignee-1',
-        episode_id: 'episode-3',
+        alert_id: 'episode-3',
       });
     });
 
@@ -206,7 +209,7 @@ describe('AlertActionsClient', () => {
       });
 
       expect(queryServiceEsClient.esql.query).toHaveBeenCalledTimes(1);
-      expect(getDocs()[0]).toMatchObject({ episode_id: 'old-episode' });
+      expect(getDocs()[0]).toMatchObject({ alert_id: 'old-episode' });
     });
 
     it('deactivates the latest episode of its series, writing the synthetic rule-event', async () => {
@@ -230,13 +233,13 @@ describe('AlertActionsClient', () => {
       const operations = storageServiceEsClient.bulk.mock.calls[0][0].operations ?? [];
       expect(operations[0]).toEqual({ create: { _index: '.rule-events' } });
       expect(operations[1]).toMatchObject({
-        episode: { id: 'episode-3', status: 'inactive' },
+        alert: { id: 'episode-3', status: 'inactive' },
         status: 'recovered',
       });
       expect(operations[2]).toEqual({ create: { _index: '.alert-actions' } });
       expect(operations[3]).toMatchObject({
         action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
-        episode_id: 'episode-3',
+        alert_id: 'episode-3',
         reason: 'resolved',
       });
     });
@@ -359,7 +362,7 @@ describe('AlertActionsClient', () => {
       return operations.filter((_, index) => index % 2 === 1);
     };
 
-    it('persists every action and emits every event with episode_id null', async () => {
+    it('persists every action and emits every event with alert_id null', async () => {
       const items: BulkCreateSeriesAlertActionItemBody[] = [
         {
           group_hash: 'group-1',
@@ -384,13 +387,13 @@ describe('AlertActionsClient', () => {
       expect(docs).toHaveLength(2);
       expect(docs[0]).toMatchObject({
         group_hash: 'group-1',
-        episode_id: null,
+        alert_id: null,
         expiry: '2026-08-12T00:00:00.000Z',
       });
-      expect(docs[1]).toMatchObject({ group_hash: 'group-2', episode_id: null });
+      expect(docs[1]).toMatchObject({ group_hash: 'group-2', alert_id: null });
       expect(emitEpisodeActionsSpy.mock.calls[0][1]).toEqual([
-        expect.objectContaining({ group_hash: 'group-1', episode_id: null }),
-        expect.objectContaining({ group_hash: 'group-2', episode_id: null }),
+        expect.objectContaining({ group_hash: 'group-1', alert_id: null }),
+        expect.objectContaining({ group_hash: 'group-2', alert_id: null }),
       ]);
     });
 
@@ -444,9 +447,9 @@ describe('AlertActionsClient', () => {
       expect(result).toEqual({ affected_count: 2, errors: [] });
       expect(queryServiceEsClient.esql.query).toHaveBeenCalledTimes(1);
       const docs = getDocs();
-      expect(docs[0]).toMatchObject({ episode_id: 'episode-1', group_hash: 'group-1' });
+      expect(docs[0]).toMatchObject({ alert_id: 'episode-1', group_hash: 'group-1' });
       expect(docs[1]).toMatchObject({
-        episode_id: 'episode-2',
+        alert_id: 'episode-2',
         group_hash: 'group-2',
         assignee_uid: 'assignee-1',
       });
@@ -511,7 +514,7 @@ describe('AlertActionsClient', () => {
       // The audit-only ack on the same superseded episode still persists.
       expect(getDocs()[0]).toMatchObject({
         action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
-        episode_id: 'old-episode',
+        alert_id: 'old-episode',
       });
     });
 
@@ -540,12 +543,12 @@ describe('AlertActionsClient', () => {
       const operations = storageServiceEsClient.bulk.mock.calls[0][0].operations ?? [];
       expect(operations[0]).toEqual({ create: { _index: '.rule-events' } });
       expect(operations[1]).toMatchObject({
-        episode: { id: 'episode-1', status: 'active' },
+        alert: { id: 'episode-1', status: 'active' },
         status: 'breached',
       });
       expect(operations[3]).toMatchObject({
         action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
-        episode_id: 'episode-1',
+        alert_id: 'episode-1',
       });
     });
 
