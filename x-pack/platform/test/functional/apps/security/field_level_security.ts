@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('user customer1 should see ssn', async function () {
       await PageObjects.security.forceLogout();
       await PageObjects.security.login('customer1', 'changeme');
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp({ queryMode: 'classic' });
       await retry.tryForTime(10000, async () => {
         const hitCount = await PageObjects.discover.getHitCount();
         expect(hitCount).to.be('2');
@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('user customer2 should not see ssn', async function () {
       await PageObjects.security.forceLogout();
       await PageObjects.security.login('customer2', 'changeme');
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp({ queryMode: 'classic' });
       await retry.tryForTime(10000, async () => {
         const hitCount = await PageObjects.discover.getHitCount();
         expect(hitCount).to.be('2');

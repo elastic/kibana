@@ -34,7 +34,7 @@ test.describe(
 
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAlertingV2Editor();
-      await pageObjects.ruleForm.gotoDiscover();
+      await pageObjects.discover.goto({ queryMode: 'esql' });
     });
 
     test.afterAll(async ({ esClient }) => {
@@ -42,8 +42,7 @@ test.describe(
     });
 
     test('flyout query updates when the Discover query changes', async ({ pageObjects }) => {
-      await test.step('switch to ES|QL, run an initial query, and open rule flyout', async () => {
-        await pageObjects.ruleForm.switchToEsqlMode();
+      await test.step('run an initial ES|QL query and open rule flyout', async () => {
         await pageObjects.discover.writeAndSubmitEsqlQuery(
           'FROM logs-* | WHERE message != "" | LIMIT 10'
         );

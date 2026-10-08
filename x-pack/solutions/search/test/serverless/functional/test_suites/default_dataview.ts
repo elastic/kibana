@@ -13,6 +13,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
+  const discover = getPageObject('discover');
   const dataViewApi = getService('dataViewApi');
   const samlAuth = getService('samlAuth');
   let roleAuthc: RoleCredentials;
@@ -20,6 +21,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   describe('default dataView', function () {
     before(async () => {
       await svlCommonPage.loginWithRole('developer');
+      await discover.setQueryMode('classic');
       await svlSearchNavigation.navigateToLandingPage();
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
 
