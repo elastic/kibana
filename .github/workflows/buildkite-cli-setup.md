@@ -29,7 +29,7 @@ steps:
         echo "::error::OPS_BUILDKITE_TOKEN secret is not set" >&2
         exit 1
       fi
-      # bk needs the token inside the agent sandbox. gh-aw filters direct secret
+      # bk needs the token inside the agent sandbox. The compiler filters direct secret
       # references in engine.env, so consumers use this explicit masked handoff.
       # Do not export the token job-wide; the detector must not consume the output.
       printf '::add-mask::%s\n' "$OPS_BUILDKITE_TOKEN"

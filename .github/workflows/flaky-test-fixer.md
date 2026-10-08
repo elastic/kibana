@@ -133,6 +133,7 @@ safe-outputs:
   threat-detection:
     engine:
       id: claude
+      version: '2.1.165'
       env:
         BUILDKITE_API_TOKEN: ${{ '' }}
   activation-comments: true
