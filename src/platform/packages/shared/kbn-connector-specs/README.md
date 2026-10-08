@@ -562,6 +562,24 @@ import type {
 } from '@kbn/connector-specs';
 ```
 
+## Contract Tests
+
+`createContractContext` (in `src/test`) runs actions offline against the vendor's OpenAPI spec, using [`@kbn/connector-contract-mock`](../kbn-connector-contract-mock/README.md). The handler gets a real axios client, authenticated by the connector's own auth type, whose requests are validated and answered by the mock:
+
+```typescript
+import { createContractContext } from '../../test/create_contract_context';
+
+const { runAction, mock } = await createContractContext({
+  connector: FirecrawlConnector,
+  specs: [firecrawlOpenApiSpec],
+});
+
+await runAction('scrape', { url: 'https://example.com' });
+expect(mock.calls.flatMap(({ requestViolations }) => requestViolations)).toEqual([]);
+```
+
+Inputs are parsed with the action's schema first. Auth secrets the test leaves out get the auth type's defaults, or placeholders its schema accepts. OAuth auth types get a fixed access token.
+
 ## Related Documentation
 
 - [Connector Spec](./src/connector_spec.ts) - Full API reference
