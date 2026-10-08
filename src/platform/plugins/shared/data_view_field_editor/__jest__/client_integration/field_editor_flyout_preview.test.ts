@@ -15,6 +15,7 @@ import {
   fieldFormatsOptions,
   indexPatternNameForTest,
   setSearchResponseLatency,
+  spyIndexPatternGetByName,
 } from './helpers';
 import type { FieldEditorFlyoutContentTestBed } from './field_editor_flyout_preview.helpers';
 import {
@@ -23,6 +24,7 @@ import {
   getSearchCallMeta,
   setSearchResponse,
 } from './field_editor_flyout_preview.helpers';
+import { mockDebounce } from './helpers/jest.mocks';
 import { spyGetFieldsForWildcard } from './helpers/setup_environment';
 import { mockDocuments, createPreviewError } from './helpers/mocks';
 
@@ -558,6 +560,140 @@ describe('Field editor Preview panel', () => {
 
       expect(exists('scriptErrorBadge')).toBe(false);
       expect(fields.getScriptError()).toBe(null);
+    });
+  });
+
+  describe('responses of requests that are no longer current', () => {
+    beforeEach(() => {
+      // The component rendered in the top-level beforeEach uses the mocked debounce, unmount it
+      // before switching implementations so it doesn't re-render with a different set of hooks.
+      testBed.component.unmount();
+      mockDebounce.useRealImplementation = true;
+    });
+
+    afterEach(() => {
+      mockDebounce.useRealImplementation = false;
+    });
+
+    const advanceDebounce = async () => {
+      await act(async () => {
+        jest.advanceTimersByTime(500);
+      });
+      testBed.component.update();
+    };
+
+    const resolveRequest = async (
+      pending: ReturnType<typeof httpRequestsMockHelpers.deferFieldPreviewResponses>,
+      index: number,
+      body: Record<string, unknown>
+    ) => {
+      await act(async () => {
+        pending.resolveRequest(index, body);
+      });
+      testBed.component.update();
+    };
+
+    it('should not invalidate the script with the error of a stale request', async () => {
+      const pending = httpRequestsMockHelpers.deferFieldPreviewResponses();
+      const onSave = jest.fn();
+      // The new field name must not clash with the fields of the data view
+      spyIndexPatternGetByName.mockReturnValue(undefined);
+      testBed = await setup({ onSave });
+      const {
+        exists,
+        find,
+        form,
+        actions: { fields, waitForUpdates, saveField, toggleFormRow },
+      } = testBed;
+
+      await fields.updateName('someName');
+      await toggleFormRow('value');
+      await waitForUpdates(); // wait for the docs to be fetched
+
+      await fields.updateScript('bad()');
+      await advanceDebounce();
+      expect(pending.getRequestCount()).toBe(1); // request A is in flight
+
+      await fields.updateScript('echo("ok")');
+      const error = createPreviewError({ reason: 'Houston we got a problem' });
+      await resolveRequest(pending, 0, { values: [], error, status: 400 });
+
+      await advanceDebounce();
+      expect(pending.getRequestCount()).toBe(2);
+      await resolveRequest(pending, 1, { values: ['ok'] });
+      await waitForUpdates();
+
+      expect(form.getErrorsMessages()).not.toContain('Invalid Painless script.');
+      expect(exists('scriptErrorBadge')).toBe(false);
+      expect(find('fieldSaveButton').props().disabled).toBe(false);
+
+      await saveField();
+      await waitForUpdates();
+      expect(onSave).toHaveBeenCalledTimes(1);
+    });
+
+    it('should issue a new request when the script goes back to the one of the in-flight request', async () => {
+      const pending = httpRequestsMockHelpers.deferFieldPreviewResponses();
+      testBed = await setup();
+      const {
+        exists,
+        actions: { fields, waitForUpdates, getRenderedFieldsPreview, toggleFormRow },
+      } = testBed;
+
+      await fields.updateName('myRuntimeField');
+      await toggleFormRow('value');
+      await waitForUpdates(); // wait for the docs to be fetched
+
+      await fields.updateScript('echo("a")');
+      await advanceDebounce();
+      expect(pending.getRequestCount()).toBe(1); // request A is in flight
+
+      // Change the script and go back to the one of A within the debounce
+      await fields.updateScript('echo("b")');
+      await fields.updateScript('echo("a")');
+
+      // The response of A is discarded
+      await resolveRequest(pending, 0, { values: ['stale'] });
+      expect(getRenderedFieldsPreview()).not.toContainEqual({
+        key: 'myRuntimeField',
+        value: 'stale',
+      });
+
+      await advanceDebounce();
+      expect(pending.getRequestCount()).toBe(2);
+
+      await resolveRequest(pending, 1, { values: ['fresh'] });
+      await waitForUpdates();
+
+      expect(getRenderedFieldsPreview()).toEqual([{ key: 'myRuntimeField', value: 'fresh' }]);
+      expect(exists('isUpdatingIndicator')).toBe(false);
+    });
+
+    it('should not issue extra requests when no request is in flight', async () => {
+      testBed = await setup();
+      const {
+        actions: { fields, waitForUpdates, toggleFormRow },
+      } = testBed;
+
+      await fields.updateName('myRuntimeField');
+      await toggleFormRow('value');
+      await waitForUpdates();
+
+      const getRequestCount = () => server.post.mock.calls.length;
+      const initialCount = getRequestCount();
+
+      await fields.updateScript('echo("a")');
+      await waitForUpdates();
+      expect(getRequestCount()).toBe(initialCount + 1);
+
+      // Not an _execute param
+      await fields.updateName('nameChanged');
+      await waitForUpdates();
+      expect(getRequestCount()).toBe(initialCount + 1);
+
+      await fields.updateScript('echo("b")');
+      await waitForUpdates();
+      expect(getRequestCount()).toBe(initialCount + 2);
     });
   });
 
