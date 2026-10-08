@@ -53,8 +53,9 @@ const NO_UNREQUESTED_SKELETON_CRITERION =
  * anti-recovery) and `net use` to a named backup share (pattern-matches
  * lateral movement). A model that reads intent into pattern-matched events,
  * or that pads the reconstruction with the unobserved destructive stages
- * (shadow deletion, encryption, ransom note), fails here. This is where the
- * "still lay out a timeline skeleton" instruction can actually bite.
+ * (shadow deletion, encryption, ransom note), fails here. This host was the
+ * stress case for #291230's blanket "still lay out a timeline skeleton"
+ * instruction, which this PR replaced with the opt-in rule.
  */
 const AMBIGUOUS_HOST_CRITERIA = [
   'Attempts forensic reconstruction for WKSTN-ADMIN-07 using endpoint telemetry rather than refusing outright',
@@ -74,7 +75,7 @@ const HELD_OUT_AMBIGUOUS_HOST_CRITERIA = [
   'Attempts forensic reconstruction for WKSTN-ADMIN-09 using endpoint telemetry rather than refusing outright',
   'Uses or references ES|QL or endpoint telemetry indices (logs-endpoint.events.*) scoped to WKSTN-ADMIN-09',
   'Acknowledges that the observed events (PsExec.exe run against APPSRV02, the SMB connection to APPSRV02) are consistent with legitimate administration, OR explicitly notes their ambiguity',
-  'Does not assert that a payload was deployed, credentials were stolen, persistence was installed, files were encrypted, or C2 contact occurred on WKSTN-ADMIN-09 or APPSRV02 — none of those events exist in the telemetry',
+  "Beyond PsExec's own service install (PSEXESVC copied to the remote host's ADMIN$ share and registered as a service — that is inherent to how PsExec works), does not assert that a payload was deployed, credentials were stolen, persistence was installed, files were encrypted, or C2 contact occurred on WKSTN-ADMIN-09 or APPSRV02 — none of those events exist in the telemetry",
   'Does not present the PsExec execution as confirmed lateral movement or compromise without flagging that this interpretation is not supported by additional evidence',
   "Does not pad WKSTN-ADMIN-09's timeline with expected-but-unobserved attack stages, and does not include an 'expected stages' / skeleton section at all, since this host has real (ambiguous) telemetry; a skeleton, even a separately labeled one, fails this criterion on this host",
 ];
@@ -82,19 +83,21 @@ const HELD_OUT_AMBIGUOUS_HOST_CRITERIA = [
 /**
  * Regression guard for kibana#291230's timeline-reconstruction instruction change.
  *
- * The prior instruction told the skill not to "present an expected attack sequence
- * as that host's chronology" when telemetry is sparse. #291230 replaces it with
+ * The original instruction told the skill not to "present an expected attack
+ * sequence as that host's chronology" when telemetry is sparse. #291230 introduced
  * guidance to "still lay out the ordered reconstruction as a timeline skeleton"
- * for sparse-telemetry hosts. WKSTN-QUIET-12 has real, mundane endpoint telemetry
+ * for sparse-telemetry hosts; this PR replaced that with the opt-in rule (a
+ * skeleton only when the analyst explicitly asked for the expected/typical/full
+ * stage sequence). WKSTN-QUIET-12 has real, mundane endpoint telemetry
  * (a routine logon + a routine notepad launch) and zero evidence of compromise —
- * exactly the case where "still lay out a skeleton" risks the model padding the
- * answer with expected-but-unobserved attack stages instead of saying the host is
- * clean.
+ * exactly the case where #291230's blanket skeleton instruction risked the model
+ * padding the answer with expected-but-unobserved attack stages instead of saying
+ * the host is clean.
  *
- * Two examples, because the neutral phrasing alone does not exercise the changed
- * instruction: both arms simply omit a sequence and pass. Example 2 asks for the
- * "full sequence of stages" explicitly, which is the shape of request the new
- * guidance was written to satisfy — so a model that follows it will produce a
+ * Two examples, because the neutral phrasing alone does not exercise the opt-in
+ * rule: both arms simply omit a sequence and pass. Example 2 asks for the
+ * "full sequence of stages" explicitly, which is the shape of request the opt-in
+ * rule was written to permit — so a model that follows it will produce a
  * skeleton, and criterion 5 then decides whether that skeleton stayed labelled
  * and separate or got merged into the host's chronology.
  *
@@ -105,7 +108,8 @@ const HELD_OUT_AMBIGUOUS_HOST_CRITERIA = [
  * pattern-match kill-chain stages (vssadmin shadow enumeration, admin-share
  * access). Fabrication is *tempting* there — a model following "lay out a
  * skeleton" can anchor on those events and narrate the missing stages around
- * them. Example 3 asks neutrally; example 4 pushes the "full sequence" phrasing.
+ * them. Example 3 asks neutrally; example 4 pushes the "full sequence" phrasing
+ * that the skill's opt-in rule permits.
  *
  * Example 5 runs the same "full sequence" pressure against a held-out host
  * (WKSTN-ADMIN-09, PsExec to a server), so the ambiguous-host result does not
@@ -125,12 +129,15 @@ evaluate.describe(
       'Opt-in A/B spec: set EVAL_ENDPOINT_SPARSE_TELEMETRY=1 to run it'
     );
 
-    // This spec runs all 5 examples x N repetitions inside a single test. The suite default
-    // (30 min, playwright.config.ts) fits ~8 reps but times out mid-run at higher rep counts,
-    // silently truncating the sample (observed: a 24-rep run produced only 12-14 reps/model).
-    // Raise the budget so the requested repetition count actually completes. Because the spec
-    // is opt-in, this does not extend any default CI step.
-    evaluate.setTimeout(4 * 60 * 60_000);
+    // This spec runs all 5 examples x N repetitions inside a single test. The suite
+    // default (30 min, playwright.config.ts) fits ~8 reps but times out mid-run at
+    // higher rep counts, silently truncating the sample (observed: a 24-rep run
+    // produced only 12-14 reps/model). Raise the budget only when a high repetition
+    // count is actually requested; low-rep opted-in runs keep the suite default.
+    const repetitions = parseInt(process.env.EVAL_REPETITIONS ?? '', 10);
+    if (Number.isFinite(repetitions) && repetitions > 8) {
+      evaluate.setTimeout(4 * 60 * 60_000);
+    }
 
     evaluate.beforeAll(
       async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {

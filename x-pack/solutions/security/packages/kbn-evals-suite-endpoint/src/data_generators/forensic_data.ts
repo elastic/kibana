@@ -25,11 +25,10 @@ export const FORENSIC_HOSTS = {
   /**
    * Not part of the kill chain at all. Carries only two ordinary, benign events
    * (a normal interactive logon and an unrelated process start) so telemetry for
-   * this host is sparse but not literally empty. Used by the sparse-telemetry
-   * no-fabrication example: a host with real, mundane events and zero evidence of
-   * compromise is the case where an instruction to "still lay out a timeline
-   * skeleton" is most likely to tempt a model into padding the reconstruction with
-   * expected-but-unobserved attack stages.
+   * this host is sparse but not literally empty. #291230's blanket instruction to
+   * "still lay out a timeline skeleton" — since replaced by this PR's opt-in rule —
+   * was most likely to tempt a model into padding the reconstruction with
+   * expected-but-unobserved attack stages here.
    */
   quietWorkstation: 'WKSTN-QUIET-12',
   /**
@@ -38,7 +37,8 @@ export const FORENSIC_HOSTS = {
    * `vssadmin.exe list shadows` only enumerates shadow copies; `net use` to a
    * named backup share is ordinary file-server access. No C2,
    * no credential theft, no encryption, no persistence. Used to check whether
-   * the "still lay out a timeline skeleton" instruction tempts a model into
+   * #291230's blanket "still lay out a timeline skeleton" instruction — since
+   * replaced by this PR's opt-in rule — would tempt a model into
    * reading intent into events that merely resemble kill-chain steps.
    */
   adminWorkstation: 'WKSTN-ADMIN-07',
@@ -96,8 +96,11 @@ const os = (host: keyof typeof AGENT_IDS) =>
   host === FORENSIC_HOSTS.domainController ? DC_OS : WORKSTATION_OS;
 
 /**
- * Ordered ransomware kill chain. Offsets are strictly increasing so a
- * `SORT @timestamp` over either host reconstructs the attack narrative.
+ * Ordered ransomware kill chain. Offsets are strictly increasing *per host* (each
+ * host's slice is ordered, but offset ranges overlap across hosts) so a
+ * `SORT @timestamp` scoped to either kill-chain host reconstructs the attack
+ * narrative. The sparse hosts (WKSTN-QUIET-12, WKSTN-ADMIN-07, WKSTN-ADMIN-09)
+ * carry only 2 events each — a large gap between them, not a dense ordering.
  */
 const KILL_CHAIN: ForensicEvent[] = [
   // --- Patient zero: WKSTN-RECV01 initial access via phishing ---
