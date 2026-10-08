@@ -19,6 +19,13 @@ export const accountUnusable = (name: string) =>
     values: { name },
   });
 
+export const predefinedRoleMissing = (roleName: string) =>
+  i18n.translate('xpack.alertzero.serviceAccounts.predefinedRoleMissing', {
+    defaultMessage:
+      'The predefined role "{roleName}" does not exist in this project, so AlertZero cannot create the service account for this worker.',
+    values: { roleName },
+  });
+
 export const NO_PREBUILT_ROLE = i18n.translate('xpack.alertzero.serviceAccounts.noPrebuiltRole', {
   defaultMessage: 'AlertZero has no prebuilt role for this worker.',
 });
