@@ -18,7 +18,8 @@ const stripTokenTypePrefix = (accessToken: string): string => {
 
 /**
  * Revokes both the access token and refresh token for a set of stored OAuth credentials
- * via EARS. Throws on failure — callers are responsible for best-effort handling.
+ * via EARS. Both revokes are always attempted; request ids of the ones that succeeded are returned
+ * alongside any errors so a partial failure doesn't lose them. Callers handle failures best-effort.
  */
 export const revokeEarsCredentials = async ({
   provider,
@@ -30,15 +31,26 @@ export const revokeEarsCredentials = async ({
   credentials: OAuthPersonalCredentials;
   configurationUtilities: ActionsConfigurationUtilities;
   logger: Logger;
-}): Promise<void> => {
+}): Promise<{ earsRequestIds: string[]; errors: unknown[] }> => {
   const tokensToRevoke = [
     credentials.accessToken ? stripTokenTypePrefix(credentials.accessToken) : undefined,
     credentials.refreshToken,
   ].filter((token): token is string => Boolean(token));
 
-  await Promise.all(
+  const results = await Promise.allSettled(
     tokensToRevoke.map((token) =>
       requestEarsRevoke(provider, logger, { token }, configurationUtilities)
     )
   );
+
+  const earsRequestIds: string[] = [];
+  const errors: unknown[] = [];
+  for (const result of results) {
+    if (result.status === 'rejected') {
+      errors.push(result.reason);
+    } else if (result.value.earsRequestId) {
+      earsRequestIds.push(result.value.earsRequestId);
+    }
+  }
+  return { earsRequestIds, errors };
 };

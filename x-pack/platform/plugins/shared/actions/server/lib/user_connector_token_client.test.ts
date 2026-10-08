@@ -11,6 +11,7 @@ import sinon from 'sinon';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { UserConnectorTokenClient } from './user_connector_token_client';
+import { EarsRequestError } from './ears/ears_request_error';
 import { revokeEarsCredentials } from './ears/revoke_ears_credentials';
 import { actionsConfigMock } from '../actions_config.mock';
 import type { Logger } from '@kbn/core/server';
@@ -45,7 +46,7 @@ beforeEach(() => {
   clock.reset();
   jest.resetAllMocks();
   jest.restoreAllMocks();
-  mockRevokeEarsCredentials.mockResolvedValue(undefined);
+  mockRevokeEarsCredentials.mockResolvedValue({ earsRequestIds: [], errors: [] });
   userClient = new UserConnectorTokenClient({
     unsecuredSavedObjectsClient,
     encryptedSavedObjectsClient,
@@ -488,7 +489,7 @@ describe('UserConnectorTokenClient', () => {
 
       mockRevokeEarsCredentials
         .mockRejectedValueOnce(new Error('provider timeout'))
-        .mockResolvedValueOnce(undefined);
+        .mockResolvedValueOnce({ earsRequestIds: [], errors: [] });
 
       await userClient.deleteAllConnectorTokens({
         connectorId: '123',
@@ -502,6 +503,88 @@ describe('UserConnectorTokenClient', () => {
       // second user was still attempted
       expect(mockRevokeEarsCredentials).toHaveBeenCalledWith(
         expect.objectContaining({ credentials: { accessToken: 'access-token-2' } })
+      );
+    });
+
+    test('logs a tagged revoke line per user with the EARS request ids', async () => {
+      const createdAt = new Date().toISOString();
+      const tokenFor = (id: string, profileUid: string) => ({
+        id,
+        type: 'user_connector_token',
+        references: [],
+        attributes: {
+          profileUid,
+          connectorId: '123',
+          credentialType: 'oauth',
+          credentials: { accessToken: `access-token-${profileUid}` },
+          createdAt,
+          updatedAt: createdAt,
+        },
+      });
+      mockOAuthTokensFinder([tokenFor('token-id-1', 'user-1'), tokenFor('token-id-2', 'user-2')]);
+      mockEmptyDeletion();
+
+      mockRevokeEarsCredentials
+        .mockResolvedValueOnce({ earsRequestIds: ['req-a', 'req-b'], errors: [] })
+        .mockRejectedValueOnce(
+          new EarsRequestError({
+            message: 'Failed to revoke token via auth redirect service',
+            status: 502,
+            earsRequestId: 'req-502',
+          })
+        );
+
+      await userClient.deleteAllConnectorTokens({
+        connectorId: '123',
+        authType: 'ears',
+        provider: 'test-provider',
+      });
+
+      expect(logger.info).toHaveBeenCalledWith(
+        'EARS revoke success: connectorId=123 provider=test-provider profileUid=user-1 earsRequestId=req-a,req-b',
+        { tags: ['ears', 'revoke', 'success'] }
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        'EARS revoke failure: connectorId=123 provider=test-provider profileUid=user-2 earsRequestId=req-502 status=502',
+        { tags: ['ears', 'revoke', 'failure'] }
+      );
+    });
+
+    test('logs a revoke failure with the request id of the revoke that succeeded', async () => {
+      const createdAt = new Date().toISOString();
+      mockOAuthTokensFinder([
+        {
+          id: 'token-id-1',
+          type: 'user_connector_token',
+          references: [],
+          attributes: {
+            profileUid: 'user-1',
+            connectorId: '123',
+            credentialType: 'oauth',
+            credentials: { accessToken: 'access-token-user-1' },
+            createdAt,
+            updatedAt: createdAt,
+          },
+        },
+      ]);
+      mockEmptyDeletion();
+      mockRevokeEarsCredentials.mockResolvedValueOnce({
+        earsRequestIds: ['req-a'],
+        errors: [new Error('provider timeout')],
+      });
+
+      await userClient.deleteAllConnectorTokens({
+        connectorId: '123',
+        authType: 'ears',
+        provider: 'test-provider',
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to revoke EARS OAuth token')
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        'EARS revoke failure: connectorId=123 provider=test-provider profileUid=user-1 earsRequestId=req-a reason=provider timeout',
+        { tags: ['ears', 'revoke', 'failure'] }
       );
     });
 

@@ -17,6 +17,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { getEarsEndpointsForProvider, resolveEarsUrl } from '../lib/ears';
+import { logEarsEvent } from '../lib/ears/log_ears_event';
 import type { ILicenseState } from '../lib';
 import {
   BASE_ACTION_API_PATH,
@@ -338,6 +339,15 @@ async function startOAuthAuthorizationFlow(params: {
       callbackUri: redirectUri,
       state: state.state,
       pkceChallenge: codeChallenge,
+    });
+    logEarsEvent(routeLogger, {
+      step: 'authorize',
+      outcome: 'success',
+      connectorId,
+      provider: oauthConfig.provider,
+      profileUid: profile_uid,
+      spaceId,
+      state: state.state,
     });
   } else {
     authorizationUrl = oauthService.buildAuthorizationUrl({
