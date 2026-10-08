@@ -88,7 +88,7 @@ const buildItem = (
     description: '',
     enabled: true,
     destinations: [{ type: 'workflow', id: 'workflow-1' }],
-    grouping_mode: 'per_alert',
+    grouping: { mode: 'per_alert' },
     created_by: { profile_uid: 'u_user' },
     created_at: '2026-01-01T00:00:00.000Z',
     updated_by: { profile_uid: 'u_user' },

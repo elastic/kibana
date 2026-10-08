@@ -386,7 +386,7 @@ describe('ActionPolicyClient', () => {
         undefined
       );
       expect(res.matcher).toBeUndefined();
-      expect(res.group_by).toBeUndefined();
+      expect(res.grouping).toBeUndefined();
       expect(res.throttle).toBeUndefined();
       expect(res.snoozed_until).toBeUndefined();
     });
@@ -683,7 +683,7 @@ describe('ActionPolicyClient', () => {
 
       expect(res.items).toHaveLength(1);
       expect(res.items[0].matcher).toBeUndefined();
-      expect(res.items[0].group_by).toBeUndefined();
+      expect(res.items[0].grouping).toBeUndefined();
       expect(res.items[0].throttle).toBeUndefined();
       expect(res.items[0].snoozed_until).toBeUndefined();
     });
@@ -882,8 +882,7 @@ describe('ActionPolicyClient', () => {
         enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         matcher: { tags: ['prod'], expression: 'event.severity: critical' },
-        groupBy: ['host.name'],
-        groupingMode: 'per_alert',
+        grouping: { mode: 'per_alert' },
         tags: null,
         throttle: { strategy: 'per_status_interval', interval: '1h' },
         snoozedUntil: null,
@@ -972,7 +971,7 @@ describe('ActionPolicyClient', () => {
         expect(stored.name).toBe('renamed');
         expect(stored.matcher).toEqual(storedAttributes.matcher);
         expect(stored.throttle).toEqual(storedAttributes.throttle);
-        expect(stored.groupBy).toEqual(storedAttributes.groupBy);
+        expect(stored.grouping).toEqual(storedAttributes.grouping);
         expect(stored.enabled).toBe(true);
         expect(stored.createdAt).toBe('2024-12-01T00:00:00.000Z');
       });
@@ -997,7 +996,7 @@ describe('ActionPolicyClient', () => {
         enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         matcher: { expression: 'event.severity: critical' },
-        groupBy: ['host.name'],
+        grouping: { mode: 'per_field', fields: ['host.name'] },
         throttle: { interval: '1h' },
         apiKey: 'old-api-key',
         apiKeyOwner: 'old-user',
@@ -1025,7 +1024,7 @@ describe('ActionPolicyClient', () => {
       const res = await client.updateActionPolicy({
         data: {
           matcher: null,
-          group_by: null,
+          grouping: null,
           throttle: null,
         },
         options: { id: 'policy-id-update-1' },
@@ -1044,10 +1043,10 @@ describe('ActionPolicyClient', () => {
       );
       const attributes = storedByUpdate();
       expect(attributes.matcher).toBeUndefined();
-      expect(attributes.groupBy).toBeUndefined();
+      expect(attributes.grouping).toBeUndefined();
       expect(attributes.throttle).toBeUndefined();
       expect(res.matcher).toBeUndefined();
-      expect(res.group_by).toBeUndefined();
+      expect(res.grouping).toBeUndefined();
       expect(res.throttle).toBeUndefined();
       expect(res.snoozed_until).toBeUndefined();
     });
@@ -1058,7 +1057,7 @@ describe('ActionPolicyClient', () => {
         description: 'transition-policy description',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'wf-1' }],
-        groupingMode: 'per_alert',
+        grouping: { mode: 'per_alert' },
         throttle: { strategy: 'per_status_interval', interval: '10m' },
         apiKey: 'old-api-key',
         apiKeyOwner: 'old-user',
@@ -1101,7 +1100,7 @@ describe('ActionPolicyClient', () => {
         description: 'keep-interval-policy description',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'wf-1' }],
-        groupingMode: 'per_alert',
+        grouping: { mode: 'per_alert' },
         throttle: { strategy: 'on_status_change', interval: null },
         apiKey: 'old-api-key',
         apiKeyOwner: 'old-user',
@@ -1660,7 +1659,7 @@ describe('ActionPolicyClient', () => {
         enabled: false,
         destinations: [{ type: 'workflow', id: 'wf-before' }],
         matcher: { expression: 'env: production' },
-        groupBy: ['host.name'],
+        grouping: { mode: 'per_field', fields: ['host.name'] },
         snoozedUntil: '2099-01-01T00:00:00.000Z',
         apiKey: 'old-api-key',
         apiKeyOwner: 'old-user',

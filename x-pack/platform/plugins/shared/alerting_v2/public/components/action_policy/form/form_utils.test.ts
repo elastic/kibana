@@ -44,7 +44,7 @@ describe('action policy form utils', () => {
       expect(toCreatePayload(state)).toEqual({
         name: 'Policy',
         description: 'Description',
-        grouping_mode: 'per_alert',
+        grouping: { mode: 'per_alert' },
         throttle: { strategy: 'on_status_change' },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       });
@@ -62,8 +62,7 @@ describe('action policy form utils', () => {
       expect(payload).toEqual({
         name: 'Policy',
         description: 'Description',
-        grouping_mode: 'per_field',
-        group_by: ['host.name'],
+        grouping: { mode: 'per_field', fields: ['host.name'] },
         throttle: { strategy: 'time_interval', interval: '5m' },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       });
@@ -122,9 +121,8 @@ describe('action policy form utils', () => {
       expect(toUpdatePayload(state)).toEqual({
         name: 'Policy',
         description: 'Description',
-        grouping_mode: 'per_alert',
+        grouping: { mode: 'per_alert' },
         matcher: null,
-        group_by: null,
         throttle: { strategy: 'on_status_change' },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       });
@@ -152,9 +150,8 @@ describe('action policy form utils', () => {
       ).toEqual({
         name: 'Policy',
         description: 'Description',
-        grouping_mode: 'per_field',
+        grouping: { mode: 'per_field', fields: ['host.name'] },
         matcher: { tags: null, expression: 'event.severity: critical' },
-        group_by: ['host.name'],
         throttle: { strategy: 'time_interval', interval: '5m' },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       });
@@ -170,8 +167,7 @@ describe('action policy form utils', () => {
       description: 'A test policy',
       enabled: true,
       matcher: severityMatcher,
-      group_by: ['host.name'],
-      grouping_mode: 'per_field',
+      grouping: { mode: 'per_field', fields: ['host.name'] },
       throttle: { strategy: 'time_interval', interval: '5m' },
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
       created_by: { profile_uid: 'elastic' },
@@ -198,9 +194,8 @@ describe('action policy form utils', () => {
       expect(
         toFormState({
           ...baseResponse,
-          grouping_mode: undefined,
+          grouping: undefined,
           throttle: undefined,
-          group_by: undefined,
         })
       ).toEqual({
         name: 'Test Policy',
@@ -218,7 +213,7 @@ describe('action policy form utils', () => {
     it('leaves the interval blank for a strategy that does not take one', () => {
       const formState = toFormState({
         ...baseResponse,
-        grouping_mode: 'all',
+        grouping: { mode: 'all' },
         throttle: { strategy: 'every_time' },
       });
 

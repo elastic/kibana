@@ -7,12 +7,14 @@
 
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
+import { needsInterval } from '@kbn/alerting-v2-schemas';
 import {
   actionPolicySavedObjectAttributesSchemaV1,
   actionPolicySavedObjectAttributesSchemaV2,
   actionPolicySavedObjectAttributesSchemaV3,
   actionPolicySavedObjectAttributesSchemaV4,
   actionPolicySavedObjectAttributesSchemaV5,
+  actionPolicySavedObjectAttributesSchemaV6,
 } from '../schemas/action_policy_saved_object_attributes';
 import type { ActionPolicySavedObjectAttributesV1 } from '../schemas/action_policy_saved_object_attributes';
 import { toActor } from './to_actor';
@@ -209,6 +211,82 @@ export const actionPolicyModelVersions: SavedObjectsModelVersionMap = {
         { unknowns: 'ignore' }
       ),
       create: actionPolicySavedObjectAttributesSchemaV5,
+    },
+  },
+  '6': {
+    /**
+     * v6 folds `groupingMode` and `groupBy` into a single `grouping` block keyed by `mode`, and
+     * normalises `throttle` the same way: in both, a stored document could hold keys its mode or
+     * strategy never read, which is what the unions on the API now make unsayable.
+     *
+     * The mode is kept as it was stored, so an explicit `per_alert` still reads back as one; only
+     * the dead configuration goes. `groupBy` on a mode that groups on no field is dropped, and
+     * `per_field` with nothing to group by names a mode it cannot satisfy, so it loses the mode
+     * too and falls back to `per_alert`. A throttle whose strategy takes no interval loses the
+     * stray interval, and one
+     * with no strategy at all names no behaviour, so it migrates to `null` and reads as unset.
+     * Dropping a key off `throttle` needs `unsafe_transform`: a `data_backfill` result is merged
+     * into the document with a deep merge, which cannot remove anything.
+     *
+     * This reshapes existing attributes, so it is NOT rollback-compatible: the v1-v5 schemas have
+     * no `grouping` key and require the two they replace. Accepted while alerting v2 is in
+     * technical preview. None of these attributes is encrypted or part of the decryption AAD, so a
+     * plain model version is correct.
+     */
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: (doc) => {
+          const { groupingMode, groupBy } = doc.attributes as {
+            groupingMode?: unknown;
+            groupBy?: string[] | null;
+          };
+
+          if (groupingMode === 'per_field') {
+            return groupBy?.length
+              ? { attributes: { grouping: { mode: 'per_field' as const, fields: groupBy } } }
+              : { attributes: {} };
+          }
+
+          return groupingMode === 'all' || groupingMode === 'per_alert'
+            ? { attributes: { grouping: { mode: groupingMode } } }
+            : { attributes: {} };
+        },
+      },
+      {
+        type: 'data_removal',
+        removedAttributePaths: ['groupingMode', 'groupBy'],
+      },
+      {
+        type: 'unsafe_transform',
+        transformFn: (typeSafeGuard) =>
+          typeSafeGuard((doc) => {
+            const attributes = doc.attributes as Record<string, unknown> & {
+              throttle?: { strategy?: string; interval?: string | null } | null;
+            };
+            const { throttle } = attributes;
+            if (!throttle) return { document: doc };
+
+            const { strategy, interval } = throttle;
+            if (needsInterval(strategy) || (strategy != null && interval == null)) {
+              return { document: doc };
+            }
+
+            return {
+              document: {
+                ...doc,
+                attributes: { ...attributes, throttle: strategy == null ? null : { strategy } },
+              },
+            };
+          }),
+      },
+    ],
+    schemas: {
+      forwardCompatibility: actionPolicySavedObjectAttributesSchemaV6.extends(
+        {},
+        { unknowns: 'ignore' }
+      ),
+      create: actionPolicySavedObjectAttributesSchemaV6,
     },
   },
 };

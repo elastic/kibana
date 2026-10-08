@@ -26,16 +26,27 @@ const buildThrottle = (state: ActionPolicyFormState): CreateActionPolicyData['th
     ? { strategy: state.throttleStrategy, interval: state.throttleInterval }
     : { strategy: state.throttleStrategy };
 
+/**
+ * The grouping is one mode variant, so the fields are sent only by the mode that groups on them.
+ * The form blocks submitting `per_field` with no fields, which is the only pairing the union
+ * cannot express.
+ */
+const buildGrouping = (state: ActionPolicyFormState): CreateActionPolicyData['grouping'] =>
+  state.groupingMode === 'per_field'
+    ? { mode: state.groupingMode, fields: state.groupBy }
+    : { mode: state.groupingMode };
+
 export const toFormState = (response: ActionPolicyResponse): ActionPolicyFormState => {
-  const groupingMode = response.grouping_mode ?? 'per_alert';
-  const { throttle } = response;
+  const { grouping, throttle } = response;
+  const groupingMode = grouping?.mode ?? 'per_alert';
 
   return {
     name: response.name,
     description: response.description ?? '',
     matcher: response.matcher ?? null,
     groupingMode,
-    groupBy: response.group_by ?? [],
+    // The form keeps the field list across mode switches, so the modes that group on none seed it empty.
+    groupBy: grouping?.mode === 'per_field' ? grouping.fields : [],
     throttleStrategy: throttle?.strategy ?? DEFAULT_STRATEGY_FOR_MODE[groupingMode],
     // The form keeps an interval field for every strategy, so the intervalless variants seed it blank.
     throttleInterval: throttle && 'interval' in throttle ? throttle.interval : '',
@@ -49,11 +60,8 @@ export const toCreatePayload = (state: ActionPolicyFormState): CreateActionPolic
   return {
     name: state.name,
     ...(state.description ? { description: state.description } : {}),
-    grouping_mode: state.groupingMode,
+    grouping: buildGrouping(state),
     ...(matcher ? { matcher } : {}),
-    ...(state.groupingMode === 'per_field' && state.groupBy.length > 0
-      ? { group_by: state.groupBy }
-      : {}),
     throttle: buildThrottle(state),
     destinations: state.destinations.map((d) => ({ type: d.type, id: d.id })),
   };
@@ -76,9 +84,8 @@ export const toUpdatePayload = (state: ActionPolicyFormState): UpdateActionPolic
   return {
     name: state.name,
     description: state.description || null,
-    grouping_mode: state.groupingMode,
+    grouping: buildGrouping(state),
     matcher: toMatcherPatch(state.matcher),
-    group_by: state.groupingMode === 'per_field' && state.groupBy.length > 0 ? state.groupBy : null,
     throttle: buildThrottle(state),
     destinations: state.destinations.map((d) => ({ type: d.type, id: d.id })),
   };

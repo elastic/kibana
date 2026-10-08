@@ -6,7 +6,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { ActionPolicyAttachmentData, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
+import type {
+  ActionPolicyAttachmentData,
+  ActionPolicyGrouping,
+  GroupingMode,
+  ThrottleStrategy,
+} from '@kbn/alerting-v2-schemas';
 import {
   actionPolicyDestinationSchema,
   createActionPolicyDataSchema,
@@ -66,7 +71,9 @@ export const setGroupingOperationSchema = z
       .max(10)
       .optional()
       .nullable()
-      .describe('Fields used to group alerts (required when groupingMode is per_field).'),
+      .describe(
+        'Fields used to group alerts. Required by `per_field`, and rejected by the other modes, which group on no field.'
+      ),
   })
   .describe(
     'Use `set_grouping` to batch matched alerts into notifications — one per alert (`per_alert`), one for all matching alerts, or grouped by field.'
@@ -141,6 +148,36 @@ type ThrottleDraft = NonNullable<ActionPolicyAttachmentData['throttle']>;
  * uses one, so switching to an intervalless strategy needs no extra operation; one the agent spells
  * out for such a strategy is an error rather than a value the server would have to discard.
  */
+/**
+ * Builds the grouping variant the mode names. Fields carry over only to the mode that groups on
+ * them, so switching away from `per_field` needs no extra operation; fields the agent spells out
+ * for another mode are an error rather than a value the server would have to discard.
+ */
+function buildGroupingDraft(
+  mode: GroupingMode,
+  explicitFields: string[] | undefined | null,
+  stored: ActionPolicyGrouping | undefined
+): ActionPolicyGrouping {
+  if (mode !== 'per_field') {
+    if (explicitFields?.length) {
+      throw new ActionPolicyOperationValidationError(
+        `Grouping mode "${mode}" does not group on fields. Omit groupBy, or use "per_field".`
+      );
+    }
+    return { mode };
+  }
+
+  const fields = explicitFields ?? (stored?.mode === 'per_field' ? stored.fields : undefined);
+
+  if (!fields?.length) {
+    throw new ActionPolicyOperationValidationError(
+      'groupBy fields are required when groupingMode is "per_field".'
+    );
+  }
+
+  return { mode, fields };
+}
+
 function buildThrottleDraft(
   strategy: ThrottleStrategy,
   explicitInterval: string | undefined,
@@ -198,16 +235,8 @@ export const executeActionPolicyOperations = (
         break;
 
       case 'set_grouping': {
-        if (op.groupingMode === 'per_field' && (!op.groupBy || op.groupBy.length === 0)) {
-          throw new ActionPolicyOperationValidationError(
-            'groupBy fields are required when groupingMode is "per_field".'
-          );
-        }
-        next = {
-          ...next,
-          ...(op.groupingMode !== undefined ? { grouping_mode: op.groupingMode } : {}),
-          ...(op.groupBy !== undefined ? { group_by: op.groupBy ?? undefined } : {}),
-        };
+        const mode = op.groupingMode ?? next.grouping?.mode ?? 'per_alert';
+        next = { ...next, grouping: buildGroupingDraft(mode, op.groupBy, next.grouping) };
         break;
       }
 
@@ -247,7 +276,7 @@ export const executeActionPolicyOperations = (
     );
   }
 
-  validateThrottleGroupingCompat(next.grouping_mode, next.throttle?.strategy);
+  validateThrottleGroupingCompat(next.grouping?.mode, next.throttle?.strategy);
 
   return next;
 };

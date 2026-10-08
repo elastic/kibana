@@ -28,8 +28,7 @@ const EXISTING_POLICY: ActionPolicyResponse = {
   description: 'Routes critical alerts',
   enabled: true,
   matcher: { expression: 'data.severity : "critical"' },
-  group_by: ['host.name', 'service.name'],
-  grouping_mode: 'per_field',
+  grouping: { mode: 'per_field', fields: ['host.name', 'service.name'] },
   throttle: { strategy: 'time_interval', interval: '5m' },
   destinations: [{ type: 'workflow', id: 'workflow-2' }],
   created_by: { profile_uid: 'elastic' },
@@ -185,7 +184,7 @@ describe('useActionPolicyForm', () => {
     it('maps default strategy when no throttle is present', () => {
       const policyWithoutThrottle: ActionPolicyResponse = {
         ...EXISTING_POLICY,
-        grouping_mode: undefined,
+        grouping: undefined,
         throttle: undefined,
       };
       const { result } = renderHook(() =>

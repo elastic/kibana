@@ -47,10 +47,6 @@ const toApiThrottle = (
   return throttle?.interval ? { strategy, interval: throttle.interval } : undefined;
 };
 
-const toApiGroupBy = (
-  groupBy: ActionPolicySavedObjectAttributes['groupBy']
-): ActionPolicyResponse['group_by'] => (groupBy?.length ? groupBy : undefined);
-
 const toApiDescription = (
   description: ActionPolicySavedObjectAttributes['description']
 ): ActionPolicyResponse['description'] => description || undefined;
@@ -72,8 +68,7 @@ export const toPatchableActionPolicyData = (
   description: toApiDescription(attributes.description),
   destinations: attributes.destinations,
   matcher: normalizeMatcher(attributes.matcher),
-  group_by: toApiGroupBy(attributes.groupBy),
-  grouping_mode: attributes.groupingMode ?? undefined,
+  grouping: attributes.grouping,
   throttle: toApiThrottle(attributes.throttle),
 });
 
@@ -89,8 +84,7 @@ const toStoredPolicyFields = (data: CreateActionPolicyData) => ({
   description: data.description,
   destinations: data.destinations,
   matcher: normalizeMatcher(data.matcher),
-  groupBy: data.group_by,
-  groupingMode: data.grouping_mode,
+  grouping: data.grouping,
   throttle: data.throttle,
 });
 
@@ -164,8 +158,7 @@ export const transformActionPolicySoAttributesToApiResponse = ({
     enabled: attributes.enabled,
     destinations: attributes.destinations,
     matcher: normalizeMatcher(attributes.matcher),
-    group_by: toApiGroupBy(attributes.groupBy),
-    grouping_mode: attributes.groupingMode ?? undefined,
+    grouping: attributes.grouping,
     throttle: toApiThrottle(attributes.throttle),
     snoozed_until: attributes.snoozedUntil ?? undefined,
     created_by: attributes.createdBy,

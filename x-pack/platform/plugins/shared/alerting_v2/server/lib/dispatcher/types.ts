@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
+import type { ActionPolicyGrouping, AlertEventSeverity } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '../../resources/datastreams/alert_events';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import type {
@@ -112,10 +112,11 @@ export interface ActionPolicy {
   /** Structured matcher evaluated against the alert episode context.
    *  Null or absent means catch-all (matches every episode). */
   matcher?: PolicyMatcherAttributes | null;
-  /** data.* fields used to group episodes into a single action group */
-  groupBy: string[];
-  /** How episodes are grouped into action group payloads. Defaulted at hydration (DEFAULT_GROUPING_MODE). */
-  groupingMode: 'per_alert' | 'all' | 'per_field';
+  /**
+   * How episodes are batched into action group payloads. The mode decides whether `data.*` fields
+   * come with it. Defaulted at hydration (DEFAULT_GROUPING).
+   */
+  grouping: ActionPolicyGrouping;
   /** Throttle configuration controlling action frequency */
   throttle?: {
     strategy?: 'on_status_change' | 'per_status_interval' | 'time_interval' | 'every_time';

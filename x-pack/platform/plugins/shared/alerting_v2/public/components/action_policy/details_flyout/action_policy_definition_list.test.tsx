@@ -53,7 +53,7 @@ const defaultProps: ActionPolicyDefinitionListProps = {
   policy: {
     description: 'A test description',
     matcher: { tags: ['abc'] },
-    grouping_mode: 'per_alert',
+    grouping: { mode: 'per_alert' },
     destinations: [
       { type: 'workflow', id: 'wf-1' },
       { type: 'workflow', id: 'wf-2' },
@@ -87,8 +87,7 @@ describe('ActionPolicyDefinitionList', () => {
     renderWithI18n({
       policy: {
         ...defaultProps.policy,
-        grouping_mode: 'per_field',
-        group_by: ['host.name', 'service.name'],
+        grouping: { mode: 'per_field', fields: ['host.name', 'service.name'] },
       },
     });
 
@@ -97,7 +96,7 @@ describe('ActionPolicyDefinitionList', () => {
   });
 
   it('does not render Group by when groupingMode is not per_field', () => {
-    renderWithI18n({ policy: { ...defaultProps.policy, grouping_mode: 'per_alert' } });
+    renderWithI18n({ policy: { ...defaultProps.policy, grouping: { mode: 'per_alert' } } });
 
     expect(screen.queryByText('Group by')).toBeNull();
   });

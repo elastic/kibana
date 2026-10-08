@@ -46,11 +46,11 @@ export const STUCK_TICK_LIMIT = 10;
 export const PRE_FETCH_STUCK_ADVANCE_LAG_MS = MAX_WINDOW_MINUTES * 60_000;
 
 /**
- * Grouping mode applied when an action policy does not specify one. Applied
- * once at policy hydration (FetchPoliciesStep); `PolicyCatalog.groupingModeOf`
- * falls back to it only for policies missing from the catalog.
+ * Grouping applied when an action policy does not specify one. Applied once at
+ * policy hydration (FetchPoliciesStep); `PolicyCatalog.groupingModeOf` falls
+ * back to it only for policies missing from the catalog.
  */
-export const DEFAULT_GROUPING_MODE = 'per_alert' as const;
+export const DEFAULT_GROUPING = { mode: 'per_alert' } as const;
 
 /** Task Manager timeout for one dispatcher tick. Also consumed by task_definition.ts. */
 export const DISPATCHER_TASK_TIMEOUT = '1m' as const;

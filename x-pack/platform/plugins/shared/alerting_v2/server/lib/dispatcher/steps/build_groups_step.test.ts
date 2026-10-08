@@ -55,7 +55,7 @@ describe('BuildGroupsStep', () => {
 });
 
 describe('buildActionGroups', () => {
-  it('creates separate groups for different episodes with no groupBy', () => {
+  it('creates separate groups for different episodes when grouping per alert', () => {
     const policy = createActionPolicy({
       id: 'p1',
       destinations: [{ type: 'workflow', id: 'w1' }],
@@ -109,8 +109,7 @@ describe('buildActionGroups', () => {
   it('groups episodes by a single data field', () => {
     const policy = createActionPolicy({
       id: 'p1',
-      groupBy: ['data.host.name'],
-      groupingMode: 'per_field' as const,
+      grouping: { mode: 'per_field' as const, fields: ['data.host.name'] },
       destinations: [{ type: 'workflow', id: 'w1' }],
     });
     const matched = [
@@ -142,8 +141,7 @@ describe('buildActionGroups', () => {
   it('creates separate groups for different field values', () => {
     const policy = createActionPolicy({
       id: 'p1',
-      groupBy: ['data.host.name'],
-      groupingMode: 'per_field' as const,
+      grouping: { mode: 'per_field' as const, fields: ['data.host.name'] },
       destinations: [{ type: 'workflow', id: 'w1' }],
     });
     const matched = [
@@ -175,8 +173,7 @@ describe('buildActionGroups', () => {
   it('groups episodes by multiple data fields', () => {
     const policy = createActionPolicy({
       id: 'p1',
-      groupBy: ['data.host.name', 'data.env'],
-      groupingMode: 'per_field' as const,
+      grouping: { mode: 'per_field' as const, fields: ['data.host.name', 'data.env'] },
       destinations: [{ type: 'workflow', id: 'w1' }],
     });
     const matched = [
@@ -218,8 +215,7 @@ describe('buildActionGroups', () => {
   it('defaults missing data fields to null', () => {
     const policy = createActionPolicy({
       id: 'p1',
-      groupBy: ['data.host.name', 'data.env'],
-      groupingMode: 'per_field' as const,
+      grouping: { mode: 'per_field' as const, fields: ['data.host.name', 'data.env'] },
       destinations: [{ type: 'workflow', id: 'w1' }],
     });
     const matched = [
@@ -253,7 +249,7 @@ describe('buildActionGroups', () => {
   it('creates one group per rule for all mode', () => {
     const policy = createActionPolicy({
       id: 'p1',
-      groupingMode: 'all',
+      grouping: { mode: 'all' },
       destinations: [{ type: 'workflow', id: 'w1' }],
     });
     const matched = [
@@ -277,7 +273,7 @@ describe('buildActionGroups', () => {
   it('merges episodes from different rules into one group in all mode', () => {
     const policy = createActionPolicy({
       id: 'p1',
-      groupingMode: 'all',
+      grouping: { mode: 'all' },
       destinations: [{ type: 'workflow', id: 'w1' }],
     });
     const matched = [
@@ -300,7 +296,7 @@ describe('buildActionGroups', () => {
   });
 
   it('populates rules map from state.rules for episodes in the group', () => {
-    const policy = createActionPolicy({ id: 'p1', groupingMode: 'all' });
+    const policy = createActionPolicy({ id: 'p1', grouping: { mode: 'all' } });
     const rules = new Map([
       ['r1', createRule({ id: 'r1', name: 'CPU spike' })],
       ['r2', createRule({ id: 'r2', name: 'Cert expiry' })],
@@ -361,7 +357,7 @@ describe('buildActionGroups', () => {
   it('creates one group per episode for explicit per_alert mode', () => {
     const policy = createActionPolicy({
       id: 'p1',
-      groupingMode: 'per_alert',
+      grouping: { mode: 'per_alert' },
       destinations: [{ type: 'workflow', id: 'w1' }],
     });
     const matched = [

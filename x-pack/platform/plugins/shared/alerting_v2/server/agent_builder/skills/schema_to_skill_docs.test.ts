@@ -409,7 +409,7 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('`name`');
       expect(doc).toContain('`destinations`');
       expect(doc).toContain('`matcher`');
-      expect(doc).toContain('`grouping_mode`');
+      expect(doc).toContain('`grouping`');
       expect(doc).toContain('`throttle`');
     });
   });
@@ -505,9 +505,9 @@ describe('schema_to_skill_docs', () => {
     it('keeps the referencing field description when the definition also has one', () => {
       const doc = generateActionPolicySchemaDoc();
       expect(doc).toContain(
-        '| `grouping_mode` | "per_alert" \\| "all" \\| "per_field" | optional | The grouping mode for alert notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it. |'
+        '| `destinations` | { type: "workflow", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |'
       );
-      expect(doc).not.toContain('per_alert groups by alert lifecycle');
+      expect(doc).not.toContain('An action policy destination configuration.');
     });
   });
 

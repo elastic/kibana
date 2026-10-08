@@ -1,0 +1,493 @@
+{
+  "10.5.0": [
+    {
+      "name": "catch-all-policy",
+      "description": "An action policy with an explicitly null matcher",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-1"
+        }
+      ],
+      "matcher": null,
+      "groupBy": null,
+      "tags": null,
+      "groupingMode": null,
+      "throttle": null,
+      "auth": {
+        "owner": "elastic",
+        "createdByUser": true
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "catch-all-policy",
+      "description": "An action policy with an explicitly null matcher",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-1"
+        }
+      ],
+      "matcher": null,
+      "tags": null,
+      "throttle": null,
+      "auth": {
+        "owner": "elastic",
+        "createdByUser": true
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "matcher-less-policy",
+      "description": "An action policy without a matcher attribute",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-2"
+        }
+      ],
+      "groupBy": ["host.name"],
+      "tags": ["oncall"],
+      "groupingMode": "per_field",
+      "throttle": {
+        "strategy": "time_interval",
+        "interval": "5m"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "matcher-less-policy",
+      "description": "An action policy without a matcher attribute",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-2"
+        }
+      ],
+      "tags": ["oncall"],
+      "throttle": {
+        "strategy": "time_interval",
+        "interval": "5m"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "digest-policy",
+      "description": "An action policy that combines all matching alerts into one notification",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-3"
+        }
+      ],
+      "matcher": null,
+      "groupBy": null,
+      "tags": null,
+      "groupingMode": "all",
+      "throttle": {
+        "strategy": "time_interval",
+        "interval": "1h"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "digest-policy",
+      "description": "An action policy that combines all matching alerts into one notification",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-3"
+        }
+      ],
+      "matcher": null,
+      "tags": null,
+      "throttle": {
+        "strategy": "time_interval",
+        "interval": "1h"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "per-alert-policy",
+      "description": "An action policy whose grouping fields and throttle interval are both dead configuration",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-4"
+        }
+      ],
+      "matcher": null,
+      "groupBy": ["service.name"],
+      "tags": null,
+      "groupingMode": "per_alert",
+      "throttle": {
+        "strategy": "on_status_change",
+        "interval": "5m"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "per-alert-policy",
+      "description": "An action policy whose grouping fields and throttle interval are both dead configuration",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-4"
+        }
+      ],
+      "matcher": null,
+      "tags": null,
+      "throttle": {
+        "strategy": "on_status_change"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "strategy-less-throttle-policy",
+      "description": "An action policy with a throttle that names no strategy",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-5"
+        }
+      ],
+      "matcher": null,
+      "groupBy": null,
+      "tags": null,
+      "groupingMode": null,
+      "throttle": {
+        "interval": "10m"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "strategy-less-throttle-policy",
+      "description": "An action policy with a throttle that names no strategy",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-5"
+        }
+      ],
+      "matcher": null,
+      "tags": null,
+      "throttle": null,
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    }
+  ],
+  "10.6.0": [
+    {
+      "name": "catch-all-policy",
+      "description": "An action policy with an explicitly null matcher",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-1"
+        }
+      ],
+      "matcher": null,
+      "tags": null,
+      "throttle": null,
+      "auth": {
+        "owner": "elastic",
+        "createdByUser": true
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "catch-all-policy",
+      "description": "An action policy with an explicitly null matcher",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-1"
+        }
+      ],
+      "matcher": null,
+      "tags": null,
+      "throttle": null,
+      "auth": {
+        "owner": "elastic",
+        "createdByUser": true
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "matcher-less-policy",
+      "description": "An action policy without a matcher attribute",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-2"
+        }
+      ],
+      "tags": ["oncall"],
+      "grouping": {
+        "mode": "per_field",
+        "fields": ["host.name"]
+      },
+      "throttle": {
+        "strategy": "time_interval",
+        "interval": "5m"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "matcher-less-policy",
+      "description": "An action policy without a matcher attribute",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-2"
+        }
+      ],
+      "tags": ["oncall"],
+      "throttle": {
+        "strategy": "time_interval",
+        "interval": "5m"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "digest-policy",
+      "description": "An action policy that combines all matching alerts into one notification",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-3"
+        }
+      ],
+      "matcher": null,
+      "tags": null,
+      "grouping": {
+        "mode": "all"
+      },
+      "throttle": {
+        "strategy": "time_interval",
+        "interval": "1h"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "digest-policy",
+      "description": "An action policy that combines all matching alerts into one notification",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-3"
+        }
+      ],
+      "matcher": null,
+      "tags": null,
+      "throttle": {
+        "strategy": "time_interval",
+        "interval": "1h"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "per-alert-policy",
+      "description": "An action policy whose grouping fields and throttle interval are both dead configuration",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-4"
+        }
+      ],
+      "matcher": null,
+      "tags": null,
+      "grouping": {
+        "mode": "per_alert"
+      },
+      "throttle": {
+        "strategy": "on_status_change"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "per-alert-policy",
+      "description": "An action policy whose grouping fields and throttle interval are both dead configuration",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-4"
+        }
+      ],
+      "matcher": null,
+      "tags": null,
+      "throttle": {
+        "strategy": "on_status_change"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "strategy-less-throttle-policy",
+      "description": "An action policy with a throttle that names no strategy",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-5"
+        }
+      ],
+      "matcher": null,
+      "tags": null,
+      "throttle": null,
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "strategy-less-throttle-policy",
+      "description": "An action policy with a throttle that names no strategy",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-5"
+        }
+      ],
+      "matcher": null,
+      "tags": null,
+      "throttle": null,
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    }
+  ]
+}

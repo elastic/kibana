@@ -110,9 +110,9 @@ describe('reading legacy empty sentinels', () => {
     expect(() => actionPolicyResponseSchema.parse(result)).not.toThrow();
   });
 
-  it('projects an empty groupBy as absent', () => {
-    const result = read({ groupBy: [] });
-    expect(result.group_by).toBeUndefined();
+  it('projects an absent grouping as absent, which reads as per_alert', () => {
+    const result = read({ grouping: undefined });
+    expect(result.grouping).toBeUndefined();
     expect(() => actionPolicyResponseSchema.parse(result)).not.toThrow();
   });
 
@@ -151,17 +151,42 @@ describe('reading legacy empty sentinels', () => {
     const patchable = toPatchableActionPolicyData(
       storedAttributes({
         description: '',
-        groupBy: [],
         throttle: { interval: '5m' },
         matcher: {},
       })
     );
 
     expect(patchable.description).toBeUndefined();
-    expect(patchable.group_by).toBeUndefined();
     expect(patchable.throttle).toBeUndefined();
     expect(patchable.matcher).toBeUndefined();
   });
+});
+
+describe('grouping round trips between storage and the API', () => {
+  const groupings: Array<[string, ActionPolicySavedObjectAttributes['grouping']]> = [
+    ['per_alert', { mode: 'per_alert' }],
+    ['all', { mode: 'all' }],
+    ['per_field', { mode: 'per_field', fields: ['host.name', 'service.name'] }],
+  ];
+
+  it.each(groupings)('reads a stored %s grouping unchanged', (_label, grouping) => {
+    const result = transformActionPolicySoAttributesToApiResponse({
+      id: 'policy-1',
+      attributes: storedAttributes({ grouping }),
+    });
+
+    expect(result.grouping).toStrictEqual(grouping);
+    expect(() => actionPolicyResponseSchema.parse(result)).not.toThrow();
+  });
+
+  it.each(groupings)(
+    'offers a stored %s grouping to a patch merge unchanged',
+    (_label, grouping) => {
+      expect(toPatchableActionPolicyData(storedAttributes({ grouping })).grouping).toStrictEqual(
+        grouping
+      );
+    }
+  );
 });
 
 describe('writing optional fields', () => {

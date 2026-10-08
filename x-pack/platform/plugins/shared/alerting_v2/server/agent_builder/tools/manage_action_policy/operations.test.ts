@@ -127,8 +127,7 @@ describe('executeActionPolicyOperations', () => {
 
       const result = executeActionPolicyOperations({}, ops);
 
-      expect(result.grouping_mode).toBe('per_field');
-      expect(result.group_by).toEqual(['host.name']);
+      expect(result.grouping).toEqual({ mode: 'per_field', fields: ['host.name'] });
     });
 
     it('throws when per_field grouping has no groupBy fields', () => {
@@ -138,6 +137,62 @@ describe('executeActionPolicyOperations', () => {
 
       expect(() => executeActionPolicyOperations({}, ops)).toThrow(
         'groupBy fields are required when groupingMode is "per_field"'
+      );
+    });
+  });
+
+  /**
+   * The grouping is one mode variant, so the draft the tool builds names exactly one: a mode that
+   * groups on no field cannot carry fields, and `per_field` cannot be left without them.
+   */
+  describe('set_grouping builds the variant the mode names', () => {
+    const run = (
+      op: Extract<ActionPolicyOperation, { operation: 'set_grouping' }>,
+      existing: Parameters<typeof executeActionPolicyOperations>[0] = {}
+    ) => executeActionPolicyOperations(existing, [op]);
+
+    it.each(['per_alert', 'all'] as const)('builds %s with no fields', (groupingMode) => {
+      expect(run({ operation: 'set_grouping', groupingMode }).grouping).toEqual({
+        mode: groupingMode,
+      });
+    });
+
+    it('drops the stored fields when switching away from per_field', () => {
+      const existing = { grouping: { mode: 'per_field' as const, fields: ['host.name'] } };
+
+      expect(run({ operation: 'set_grouping', groupingMode: 'all' }, existing).grouping).toEqual({
+        mode: 'all',
+      });
+    });
+
+    it('carries the stored fields over when only the mode is repeated', () => {
+      const existing = { grouping: { mode: 'per_field' as const, fields: ['host.name'] } };
+
+      expect(
+        run({ operation: 'set_grouping', groupingMode: 'per_field' }, existing).grouping
+      ).toEqual({ mode: 'per_field', fields: ['host.name'] });
+    });
+
+    it('groups by field when only fields are named and the stored mode is per_field', () => {
+      const existing = { grouping: { mode: 'per_field' as const, fields: ['host.name'] } };
+
+      expect(
+        run({ operation: 'set_grouping', groupBy: ['service.name'] }, existing).grouping
+      ).toEqual({ mode: 'per_field', fields: ['service.name'] });
+    });
+
+    it.each(['per_alert', 'all'] as const)(
+      'rejects fields on %s, which groups on none',
+      (groupingMode) => {
+        expect(() =>
+          run({ operation: 'set_grouping', groupingMode, groupBy: ['host.name'] })
+        ).toThrow('does not group on fields');
+      }
+    );
+
+    it('rejects per_field when neither the operation nor the draft has fields', () => {
+      expect(() => run({ operation: 'set_grouping', groupingMode: 'per_field' })).toThrow(
+        'groupBy fields are required'
       );
     });
   });
@@ -164,7 +219,7 @@ describe('executeActionPolicyOperations', () => {
         { operation: 'set_throttle', strategy: 'time_interval', interval: '5m' },
       ];
 
-      expect(() => executeActionPolicyOperations({ grouping_mode: 'per_alert' }, ops)).toThrow(
+      expect(() => executeActionPolicyOperations({ grouping: { mode: 'per_alert' } }, ops)).toThrow(
         'not valid for grouping mode'
       );
     });
@@ -183,7 +238,7 @@ describe('executeActionPolicyOperations', () => {
       const ops: ActionPolicyOperation[] = [{ operation: 'set_throttle', strategy: 'every_time' }];
 
       const result = executeActionPolicyOperations(
-        { grouping_mode: 'all', throttle: { strategy: 'time_interval', interval: '5m' } },
+        { grouping: { mode: 'all' }, throttle: { strategy: 'time_interval', interval: '5m' } },
         ops
       );
 
@@ -196,7 +251,10 @@ describe('executeActionPolicyOperations', () => {
       ];
 
       const result = executeActionPolicyOperations(
-        { grouping_mode: 'per_alert', throttle: { strategy: 'time_interval', interval: '5m' } },
+        {
+          grouping: { mode: 'per_alert' },
+          throttle: { strategy: 'time_interval', interval: '5m' },
+        },
         ops
       );
 
@@ -220,7 +278,7 @@ describe('executeActionPolicyOperations', () => {
 
       const result = executeActionPolicyOperations(
         {
-          grouping_mode: 'per_alert',
+          grouping: { mode: 'per_alert' },
           throttle: { strategy: 'per_status_interval', interval: '5m' },
         },
         ops

@@ -47,8 +47,7 @@ apiTest.describe('Patch action policy saved object', { tag: '@local-stateful-cla
       buildCreateActionPolicyData({
         name: 'patch-clear',
         matcher: { tags: ['prod'] },
-        group_by: ['service.name'],
-        grouping_mode: 'per_field',
+        grouping: { mode: 'per_field', fields: ['service.name'] },
         throttle: { strategy: 'time_interval', interval: '5m' },
       })
     );
@@ -57,14 +56,13 @@ apiTest.describe('Patch action policy saved object', { tag: '@local-stateful-cla
 
     await actionPolicies.patch(created.id, {
       matcher: null,
-      group_by: null,
-      grouping_mode: null,
+      grouping: null,
       throttle: null,
     });
 
     const after = await actionPolicySavedObject.getAttributes(created.id);
     expect(omit(after, VOLATILE_FIELDS)).toStrictEqual(
-      omit(before, [...VOLATILE_FIELDS, 'matcher', 'groupBy', 'groupingMode', 'throttle'])
+      omit(before, [...VOLATILE_FIELDS, 'matcher', 'grouping', 'throttle'])
     );
     expect(findNullPaths(after)).toStrictEqual([]);
     expect(after.updatedAt).not.toBe(before.updatedAt);
@@ -78,8 +76,7 @@ apiTest.describe('Patch action policy saved object', { tag: '@local-stateful-cla
         description: 'original description',
         destinations: [{ type: 'workflow', id: 'wf-1' }],
         matcher: { tags: ['prod'], expression: 'severity == "high"' },
-        group_by: ['service.name'],
-        grouping_mode: 'per_field',
+        grouping: { mode: 'per_field', fields: ['service.name'] },
         throttle: { strategy: 'time_interval', interval: '5m' },
       })
     );
@@ -117,7 +114,7 @@ apiTest.describe('Patch action policy saved object', { tag: '@local-stateful-cla
     const created = await actionPolicies.create(
       buildCreateActionPolicyData({
         name: 'patch-throttle',
-        grouping_mode: 'per_alert',
+        grouping: { mode: 'per_alert' },
         throttle: { strategy: 'per_status_interval', interval: '5m' },
       })
     );
@@ -147,33 +144,36 @@ apiTest.describe('Patch action policy saved object', { tag: '@local-stateful-cla
   });
 
   apiTest(
-    'rejects an empty throttle patch and leaves the stored throttle alone',
+    'rejects an empty union patch and leaves the stored block alone',
     async ({ apiClient, apiServices, requestAuth }) => {
       const { actionPolicies, actionPolicySavedObject } = apiServices.alertingV2;
       const created = await actionPolicies.create(
         buildCreateActionPolicyData({
-          name: 'patch-throttle-empty',
-          grouping_mode: 'all',
+          name: 'patch-union-empty',
+          grouping: { mode: 'all' },
           throttle: { strategy: 'time_interval', interval: '5m' },
         })
       );
 
-      // `{}` is not a throttle the typed client can express, so this one body goes over the wire.
+      // `{}` is not a variant the typed client can express, so these bodies go over the wire raw.
       const credentials: RoleApiCredentials = await requestAuth.getApiKeyForCustomRole(
         ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE
       );
-      // A matcher patch names leaves, so `{}` there names none of them. A throttle is replaced
-      // whole, so `{}` is a throttle with no strategy rather than an empty selection.
-      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
-        body: { throttle: {} },
-      });
+      // A matcher patch names leaves, so `{}` there names none of them. A throttle and a grouping
+      // are replaced whole, so `{}` is a block naming no variant rather than an empty selection.
+      for (const body of [{ throttle: {} }, { grouping: {} }]) {
+        const response = await apiClient.patch(getActionPolicyUrl(created.id), {
+          headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader },
+          body,
+        });
 
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
+        expect(response).toHaveStatusCode(400);
+        expect(response.body.code).toBe('BAD_REQUEST');
+      }
 
       const after = await actionPolicySavedObject.getAttributes(created.id);
       expect(after.throttle).toStrictEqual({ strategy: 'time_interval', interval: '5m' });
+      expect(after.grouping).toStrictEqual({ mode: 'all' });
     }
   );
 

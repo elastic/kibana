@@ -52,11 +52,17 @@ export const actionPolicyDestinationSchema = z
   .describe('An action policy destination configuration.')
   .meta({ id: 'alerting_action_policy_destination' });
 
+const GROUPING_MODE_COPY = {
+  per_alert: 'one notification per alert lifecycle (default).',
+  all: 'a single notification for all matching alerts.',
+  per_field: 'group by the specified `fields`.',
+} as const;
+
 export const groupingModeSchema = z
   .union([
-    z.literal('per_alert').describe('one notification per alert lifecycle (default).'),
-    z.literal('all').describe('a single notification for all matching alerts.'),
-    z.literal('per_field').describe('group by specified `groupBy` fields.'),
+    z.literal('per_alert').describe(GROUPING_MODE_COPY.per_alert),
+    z.literal('all').describe(GROUPING_MODE_COPY.all),
+    z.literal('per_field').describe(GROUPING_MODE_COPY.per_field),
   ])
   .describe(
     'The grouping mode: per_alert groups by alert lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.'
@@ -64,6 +70,41 @@ export const groupingModeSchema = z
   .meta({ id: 'alerting_action_policy_grouping_mode' });
 
 export type GroupingMode = z.infer<typeof groupingModeSchema>;
+
+const GROUPING_FIELDS_DESCRIPTION =
+  'The fields alerts are grouped by. At least one is required, and no other mode accepts them.';
+
+const groupingFieldsSchema = z
+  .array(z.string().max(MAX_FIELD_NAME_LENGTH).trim().min(1))
+  .min(1)
+  .max(MAX_GROUPING_FIELDS)
+  .describe(GROUPING_FIELDS_DESCRIPTION);
+
+const fieldlessGroupingSchema = <M extends Exclude<GroupingMode, 'per_field'>>(mode: M) =>
+  z
+    .object({ mode: z.literal(mode) })
+    .strict()
+    .describe(GROUPING_MODE_COPY[mode])
+    .meta({ id: `alerting_action_policy_grouping_${mode}` });
+
+/**
+ * The mode decides which keys the grouping has, so each one is its own variant: `per_field` groups
+ * by `fields` and is the only mode that reads them, which is why they are required there and are
+ * not a key the others accept. Replaced whole on PATCH, like every union.
+ */
+export const actionPolicyGroupingSchema = z
+  .discriminatedUnion('mode', [
+    fieldlessGroupingSchema('per_alert'),
+    fieldlessGroupingSchema('all'),
+    z
+      .object({ mode: z.literal('per_field'), fields: groupingFieldsSchema })
+      .strict()
+      .describe(GROUPING_MODE_COPY.per_field)
+      .meta({ id: 'alerting_action_policy_grouping_per_field' }),
+  ])
+  .meta({ id: 'alerting_action_policy_grouping' });
+
+export type ActionPolicyGrouping = z.infer<typeof actionPolicyGroupingSchema>;
 
 const THROTTLE_STRATEGY_COPY = {
   on_status_change: 'notify only on alert status transitions (default for `per_alert`).',
@@ -142,7 +183,7 @@ export type Throttle = z.infer<typeof throttleSchema>;
 
 export interface ValidationPayload {
   value: {
-    grouping_mode?: string | null;
+    grouping?: { mode: string } | null;
     throttle?: { strategy: string } | null;
   };
   issues: z.core.$ZodRawIssue[];
@@ -151,7 +192,7 @@ export interface ValidationPayload {
 const validateGroupingModeAndStrategy = ({ value: data, issues }: ValidationPayload) => {
   if (data.throttle == null) return;
 
-  const mode = data.grouping_mode ?? 'per_alert';
+  const mode = data.grouping?.mode ?? 'per_alert';
   const { strategy } = data.throttle;
   const allowed = mode === 'per_alert' ? PER_ALERT_STRATEGIES : AGGREGATE_STRATEGIES;
 
@@ -204,11 +245,8 @@ const actionPolicyNameSchema = z
 const ACTION_POLICY_DESCRIPTION_DESCRIPTION =
   'A description of the action policy. Absent when the policy has none; send `null` on PATCH to clear it.';
 
-const GROUP_BY_DESCRIPTION =
-  'The fields used to group alerts, read by the `per_field` grouping mode. Absent when the alerts are not grouped by field. An empty array is rejected: omit the field on create, or send `null` on PATCH to clear it.';
-
-const GROUPING_MODE_DESCRIPTION =
-  'The grouping mode for alert notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it.';
+const GROUPING_DESCRIPTION =
+  'How matched alerts are batched into notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it. The mode decides the rest of the block, so a PATCH replaces it whole: send the complete mode variant rather than a single field.';
 
 const THROTTLE_DESCRIPTION =
   'The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it. The strategy decides the rest of the block, so a PATCH replaces it whole: send the complete strategy variant rather than a single field.';
@@ -220,12 +258,6 @@ const actionPolicyDescriptionSchema = z
   .min(1)
   .describe(ACTION_POLICY_DESCRIPTION_DESCRIPTION);
 
-const actionPolicyGroupBySchema = z
-  .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
-  .min(1)
-  .max(MAX_GROUPING_FIELDS)
-  .describe(GROUP_BY_DESCRIPTION);
-
 const createActionPolicyDataBaseSchema = z
   .object({
     name: actionPolicyNameSchema,
@@ -236,8 +268,7 @@ const createActionPolicyDataBaseSchema = z
       .max(ACTION_POLICY_MAX_DESTINATIONS)
       .describe('The list of destinations. At least one is required.'),
     matcher: policyMatcherSchema.optional().describe(POLICY_MATCHER_DESCRIPTION),
-    group_by: actionPolicyGroupBySchema.optional(),
-    grouping_mode: groupingModeSchema.optional().describe(GROUPING_MODE_DESCRIPTION),
+    grouping: actionPolicyGroupingSchema.optional().describe(GROUPING_DESCRIPTION),
     throttle: throttleSchema.optional().describe(THROTTLE_DESCRIPTION),
   })
   .strict();
@@ -283,8 +314,7 @@ export const updateActionPolicyDataSchema = z
       .nullable()
       .optional()
       .describe(POLICY_MATCHER_PATCH_DESCRIPTION),
-    group_by: actionPolicyGroupBySchema.nullable().optional(),
-    grouping_mode: groupingModeSchema.nullable().optional().describe(GROUPING_MODE_DESCRIPTION),
+    grouping: actionPolicyGroupingSchema.nullable().optional().describe(GROUPING_DESCRIPTION),
     throttle: throttleSchema.nullable().optional().describe(THROTTLE_DESCRIPTION),
   })
   .strict()

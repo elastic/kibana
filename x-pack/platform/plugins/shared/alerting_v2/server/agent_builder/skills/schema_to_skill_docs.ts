@@ -992,7 +992,7 @@ export const generateDispatchFlowDoc = (): string =>
     '2. **Dispatcher** (runs on its own Task Manager schedule) reads alerts from `.rule-events`.',
     '3. Dispatcher loads **enabled action policies** for the relevant space.',
     "4. **Matcher evaluation**: each policy's KQL matcher is tested against each alert's context.",
-    "5. **Grouping**: matched alerts are grouped according to the policy's `groupingMode` / `groupBy`.",
+    "5. **Grouping**: matched alerts are grouped according to the policy's `grouping` mode.",
     "6. **Throttling**: groups are filtered based on the policy's throttle strategy and notification history.",
     "7. **Dispatch**: eligible groups are sent to the policy's **workflow destinations** via `scheduleWorkflow`.",
     '8. **Workflow execution**: workflow steps run, using connectors to deliver notifications (email, Slack, etc.).',

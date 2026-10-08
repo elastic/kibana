@@ -135,6 +135,35 @@ const createV4PolicyDocument = (overrides: Record<string, unknown> = {}): SavedO
   references: [],
 });
 
+const createV5PolicyDocument = (overrides: Record<string, unknown> = {}): SavedObject => ({
+  id: 'policy-1',
+  type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+  attributes: {
+    name: 'test-policy',
+    description: 'A test action policy',
+    enabled: true,
+    destinations: [{ type: 'workflow', id: 'workflow-1' }],
+    matcher: { expression: 'tags : "production"' },
+    groupBy: ['host.name'],
+    tags: null,
+    groupingMode: 'per_field',
+    throttle: { strategy: 'time_interval', interval: '5m' },
+    snoozedUntil: null,
+    apiKeyOwner: 'elastic',
+    apiKeyCreatedByUser: true,
+    auth: {
+      owner: 'elastic',
+      createdByUser: true,
+    },
+    createdBy: { profile_uid: 'author_profile_uid' },
+    updatedBy: { profile_uid: 'editor_profile_uid' },
+    createdAt: '2025-01-01T00:00:00.000Z',
+    updatedAt: '2025-01-02T00:00:00.000Z',
+    ...overrides,
+  },
+  references: [],
+});
+
 describe('actionPolicyModelVersions', () => {
   describe('v1 to v2 migration', () => {
     const migrator = createModelVersionTestMigrator({ type: actionPolicyType });
@@ -336,6 +365,113 @@ describe('actionPolicyModelVersions', () => {
       expect(migrate(document)).toEqual({
         ...(document.attributes as Record<string, unknown>),
         groupingMode: 'per_alert',
+      });
+    });
+  });
+
+  describe('v5 to v6 migration', () => {
+    const migrator = createModelVersionTestMigrator({ type: actionPolicyType });
+
+    const migrate = (document: SavedObject) =>
+      migrator.migrate({ document, fromVersion: 5, toVersion: 6 }).attributes as Record<
+        string,
+        unknown
+      >;
+
+    it('folds a per_field mode and its fields into one grouping block', () => {
+      expect(migrate(createV5PolicyDocument()).grouping).toEqual({
+        mode: 'per_field',
+        fields: ['host.name'],
+      });
+    });
+
+    it('folds the all mode into a grouping block with no fields', () => {
+      const document = createV5PolicyDocument({ groupingMode: 'all', groupBy: null });
+      expect(migrate(document).grouping).toEqual({ mode: 'all' });
+    });
+
+    // An explicit mode is kept even when it is the default one, because a write keeps it too.
+    it('folds the per_alert mode into a grouping block with no fields', () => {
+      const document = createV5PolicyDocument({ groupingMode: 'per_alert', groupBy: null });
+      expect(migrate(document).grouping).toEqual({ mode: 'per_alert' });
+    });
+
+    it.each([
+      ['null', null],
+      ['absent', undefined],
+      ['the legacy per_episode', 'per_episode'],
+    ])('leaves a %s grouping mode with no grouping block', (_label, groupingMode) => {
+      const document = createV5PolicyDocument({ groupingMode, groupBy: null });
+      expect(migrate(document).grouping).toBeUndefined();
+    });
+
+    // `per_field` groups on its fields, so without any it named no behaviour to carry over.
+    it.each([
+      ['null', null],
+      ['an empty array', []],
+      ['absent', undefined],
+    ])('drops a per_field mode whose fields are %s', (_label, groupBy) => {
+      const document = createV5PolicyDocument({ groupingMode: 'per_field', groupBy });
+      expect(migrate(document).grouping).toBeUndefined();
+    });
+
+    // Fields on a mode that reads none were dead configuration, so they are not carried over.
+    it.each([['all'], ['per_alert']])(
+      'drops the fields stored against the %s mode, which does not group on them',
+      (groupingMode) => {
+        const document = createV5PolicyDocument({ groupingMode, groupBy: ['host.name'] });
+        expect(migrate(document).grouping).toEqual({ mode: groupingMode });
+      }
+    );
+
+    it.each([
+      ['per_field with fields', { groupingMode: 'per_field', groupBy: ['host.name'] }],
+      ['all', { groupingMode: 'all', groupBy: null }],
+      ['per_alert', { groupingMode: 'per_alert', groupBy: null }],
+    ])('removes the replaced attributes for %s', (_label, overrides) => {
+      const attributes = migrate(createV5PolicyDocument(overrides));
+
+      expect(attributes).not.toHaveProperty('groupingMode');
+      expect(attributes).not.toHaveProperty('groupBy');
+    });
+
+    it('drops a throttle interval the stored strategy does not use', () => {
+      const document = createV5PolicyDocument({
+        groupingMode: 'per_alert',
+        groupBy: null,
+        throttle: { strategy: 'on_status_change', interval: '5m' },
+      });
+
+      expect(migrate(document).throttle).toEqual({ strategy: 'on_status_change' });
+    });
+
+    it('keeps the interval of a strategy that notifies on a schedule', () => {
+      expect(migrate(createV5PolicyDocument()).throttle).toEqual({
+        strategy: 'time_interval',
+        interval: '5m',
+      });
+    });
+
+    it('clears a throttle that names no strategy', () => {
+      const document = createV5PolicyDocument({ throttle: { interval: '5m' } });
+      expect(migrate(document).throttle).toBeNull();
+    });
+
+    it.each([
+      ['null', null],
+      ['absent', undefined],
+    ])('leaves a %s throttle alone', (_label, throttle) => {
+      const document = createV5PolicyDocument({ throttle });
+      expect(migrate(document).throttle ?? null).toBeNull();
+    });
+
+    it('preserves unrelated attributes unchanged', () => {
+      const document = createV5PolicyDocument();
+      const { groupingMode, groupBy, ...rest } = document.attributes as Record<string, unknown>;
+
+      expect(migrate(document)).toEqual({
+        ...rest,
+        grouping: { mode: 'per_field', fields: ['host.name'] },
       });
     });
   });

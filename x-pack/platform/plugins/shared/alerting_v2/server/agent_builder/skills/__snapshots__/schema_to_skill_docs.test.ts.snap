@@ -41,7 +41,7 @@ Use \`set_grouping\` to batch matched alerts into notifications — one per aler
 |---|---|---|---|
 | \`operation\` | \\"set_grouping\\" | required |  |
 | \`groupingMode\` | \\"per_alert\\" \\\\| \\"all\\" \\\\| \\"per_field\\" | optional | The grouping mode. |
-| \`groupBy\` | string[] \\\\| null | optional | Fields used to group alerts (required when groupingMode is per_field). |
+| \`groupBy\` | string[] \\\\| null | optional | Fields used to group alerts. Required by \`per_field\`, and rejected by the other modes, which group on no field. |
 
 #### \`operation: \\"set_throttle\\"\`
 
@@ -75,8 +75,7 @@ exports[
 | \`description\` | string | optional | A description of the action policy. Absent when the policy has none; send \`null\` on PATCH to clear it. (min length: 1, max length: 1024) |
 | \`destinations\` | { type: \\"workflow\\", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |
 | \`matcher\` | object | optional | Selects the alerts this policy applies to. Set \`tags\` to match alerts from rules with those routing tags. Set \`expression\` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both \`tags\` and \`expression\`, an alert must match the tags and the expression for the policy to apply. At least one of \`tags\` and \`expression\` must be set, so an empty \`matcher\` is rejected. Omit \`matcher\` entirely for a catch-all policy that applies to all alerts. |
-| \`group_by\` | string[] | optional | The fields used to group alerts, read by the \`per_field\` grouping mode. Absent when the alerts are not grouped by field. An empty array is rejected: omit the field on create, or send \`null\` on PATCH to clear it. (min items: 1, max items: 16) |
-| \`grouping_mode\` | \\"per_alert\\" \\\\| \\"all\\" \\\\| \\"per_field\\" | optional | The grouping mode for alert notifications. Absent falls back to \`per_alert\`; send \`null\` on PATCH to clear it. |
+| \`grouping\` | { mode: \\"per_alert\\", ... } \\\\| { mode: \\"all\\", ... } \\\\| { mode: \\"per_field\\", ... } | optional | How matched alerts are batched into notifications. Absent falls back to \`per_alert\`; send \`null\` on PATCH to clear it. The mode decides the rest of the block, so a PATCH replaces it whole: send the complete mode variant rather than a single field. |
 | \`throttle\` | { strategy: \\"on_status_change\\", ... } \\\\| { strategy: \\"per_status_interval\\", ... } \\\\| { strategy: \\"time_interval\\", ... } \\\\| { strategy: \\"every_time\\", ... } | optional | The throttle configuration for notifications. Absent when notifications are not throttled; send \`null\` on PATCH to clear it. The strategy decides the rest of the block, so a PATCH replaces it whole: send the complete strategy variant rather than a single field. |"
 `;
 
@@ -180,7 +179,7 @@ The end-to-end notification path:
 2. **Dispatcher** (runs on its own Task Manager schedule) reads alerts from \`.rule-events\`.
 3. Dispatcher loads **enabled action policies** for the relevant space.
 4. **Matcher evaluation**: each policy's KQL matcher is tested against each alert's context.
-5. **Grouping**: matched alerts are grouped according to the policy's \`groupingMode\` / \`groupBy\`.
+5. **Grouping**: matched alerts are grouped according to the policy's \`grouping\` mode.
 6. **Throttling**: groups are filtered based on the policy's throttle strategy and notification history.
 7. **Dispatch**: eligible groups are sent to the policy's **workflow destinations** via \`scheduleWorkflow\`.
 8. **Workflow execution**: workflow steps run, using connectors to deliver notifications (email, Slack, etc.).
@@ -195,7 +194,7 @@ exports[
 
 - \`per_alert\`: one notification per alert lifecycle (default).
 - \`all\`: a single notification for all matching alerts.
-- \`per_field\`: group by specified \`groupBy\` fields.
+- \`per_field\`: group by the specified \`fields\`.
 
 Throttle strategy must be compatible with the grouping mode — see [action-policy-throttle-grouping-compatibility](./action-policy-throttle-grouping-compatibility.md)."
 `;
@@ -738,7 +737,7 @@ exports[
 
 - \`per_alert\`: one notification per alert lifecycle (default).
 - \`all\`: a single notification for all matching alerts.
-- \`per_field\`: group by specified \`groupBy\` fields.
+- \`per_field\`: group by the specified \`fields\`.
 
 Caveats:
 - Only valid with \`per_alert\`: \`on_status_change\`, \`per_status_interval\`.

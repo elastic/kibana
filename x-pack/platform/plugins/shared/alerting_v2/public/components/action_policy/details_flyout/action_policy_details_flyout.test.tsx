@@ -94,8 +94,7 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
     { type: 'workflow', id: 'wf-2' },
   ],
   matcher: { expression: 'data.severity : "critical"' },
-  group_by: ['host.name', 'service.name'],
-  grouping_mode: 'per_field',
+  grouping: { mode: 'per_field', fields: ['host.name', 'service.name'] },
   throttle: { strategy: 'time_interval', interval: '5m' },
   created_by: ELASTIC_ACTOR,
   created_at: '2026-03-01T10:00:00.000Z',
@@ -330,8 +329,7 @@ describe('ActionPolicyDetailsFlyout', () => {
     it('does not render the Group by column when grouping mode is per_alert', () => {
       renderFlyout({
         policy: createPolicy({
-          grouping_mode: 'per_alert',
-          group_by: undefined,
+          grouping: { mode: 'per_alert' },
           throttle: { strategy: 'on_status_change' },
         }),
       });
@@ -370,8 +368,7 @@ describe('ActionPolicyDetailsFlyout', () => {
     it('does not render group-by field badges when grouping mode is per_alert', () => {
       renderFlyout({
         policy: createPolicy({
-          grouping_mode: 'per_alert',
-          group_by: undefined,
+          grouping: { mode: 'per_alert' },
           throttle: { strategy: 'on_status_change' },
         }),
       });

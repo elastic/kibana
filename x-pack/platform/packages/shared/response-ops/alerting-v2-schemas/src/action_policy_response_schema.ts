@@ -8,8 +8,8 @@
 import { z } from '@kbn/zod/v4';
 import { actorSchema, ESTIMATED_COUNT_NOTE } from './common';
 import {
-  groupingModeSchema,
   actionPolicyDestinationSchema,
+  actionPolicyGroupingSchema,
   throttleSchema,
 } from './action_policy_data_schema';
 import { POLICY_MATCHER_DESCRIPTION, policyMatcherSchema } from './policy_matcher_schema';
@@ -25,13 +25,11 @@ export const actionPolicyResponseSchema = z
     enabled: z.boolean().describe('Whether the action policy is enabled.'),
     destinations: z.array(actionPolicyDestinationSchema).describe('The list of destinations.'),
     matcher: policyMatcherSchema.optional().describe(POLICY_MATCHER_DESCRIPTION),
-    group_by: z
-      .array(z.string())
+    grouping: actionPolicyGroupingSchema
       .optional()
-      .describe('The fields used to group alerts. Omitted when the alerts are not grouped.'),
-    grouping_mode: groupingModeSchema
-      .optional()
-      .describe('The grouping mode for alert notifications. Omitted when none is set.'),
+      .describe(
+        'How matched alerts are batched into notifications. Omitted when none is set, which groups per alert.'
+      ),
     throttle: throttleSchema
       .optional()
       .describe('The throttle configuration for notifications. Omitted when none is set.'),

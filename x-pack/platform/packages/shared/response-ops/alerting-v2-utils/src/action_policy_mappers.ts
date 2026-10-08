@@ -23,8 +23,7 @@ export const attachmentDataToActionPolicyPayload = (
     destinations: data.destinations ?? [],
     ...(data.description ? { description: data.description } : {}),
     ...(matcher ? { matcher } : {}),
-    ...(data.group_by?.length ? { group_by: data.group_by } : {}),
-    ...(data.grouping_mode !== undefined ? { grouping_mode: data.grouping_mode } : {}),
+    ...(data.grouping !== undefined ? { grouping: data.grouping } : {}),
     ...(data.throttle !== undefined ? { throttle: data.throttle } : {}),
   };
 };

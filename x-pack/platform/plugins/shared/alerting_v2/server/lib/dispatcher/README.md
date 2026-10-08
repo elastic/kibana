@@ -153,7 +153,7 @@ An action policy is a saved object scoped to a Kibana space. Policies are not em
 Each policy defines:
 
 - `matcher`: optional KQL filter evaluated against the episode context and `data.*`
-- `groupBy` and `groupingMode`: how matched episodes are batched
+- `grouping`: how matched episodes are batched
 - `throttle`: when repeated actions are allowed
 - `destinations`: where matching groups should go
 - `snoozedUntil`: optional time-based suppression

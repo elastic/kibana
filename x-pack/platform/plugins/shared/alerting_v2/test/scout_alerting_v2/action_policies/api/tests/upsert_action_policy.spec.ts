@@ -125,8 +125,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     expect(
       await put({
         ...buildCreateActionPolicyData({ name: 'empty-group-by' }),
-        grouping_mode: 'per_field',
-        group_by: [],
+        grouping: { mode: 'per_field', fields: [] },
       })
     ).toHaveStatusCode(400);
     expect(
@@ -161,8 +160,8 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
           name: 'first-version',
           description: 'before replace',
           matcher: { expression: 'env == "production"' },
-          group_by: ['service.name'],
-          throttle: { strategy: 'per_status_interval', interval: '5m' },
+          grouping: { mode: 'per_field', fields: ['service.name'] },
+          throttle: { strategy: 'time_interval', interval: '5m' },
         })
       );
 
@@ -198,8 +197,8 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
         buildCreateActionPolicyData({
           name: 'with-optional-fields',
           matcher: { expression: 'env == "production"' },
-          group_by: ['service.name'],
-          throttle: { strategy: 'per_status_interval', interval: '5m' },
+          grouping: { mode: 'per_field', fields: ['service.name'] },
+          throttle: { strategy: 'time_interval', interval: '5m' },
         })
       );
 
@@ -210,9 +209,8 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
 
       expect(replaced).toHaveStatusCode(200);
       expect(replaced.body.matcher).toBeUndefined();
-      expect(replaced.body.group_by).toBeUndefined();
       expect(replaced.body.throttle).toBeUndefined();
-      expect(replaced.body.grouping_mode).toBeUndefined();
+      expect(replaced.body.grouping).toBeUndefined();
     }
   );
 
@@ -377,24 +375,27 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     }
   );
 
-  apiTest('validation: rejects strategy/grouping_mode combo mismatch', async ({ apiClient }) => {
-    const response = await apiClient.put(getActionPolicyUrl('upsert-bad-combo'), {
-      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({
-        grouping_mode: 'all',
-        throttle: { strategy: 'on_status_change' },
-      }),
-    });
+  apiTest(
+    'validation: rejects a strategy the grouping mode does not allow',
+    async ({ apiClient }) => {
+      const response = await apiClient.put(getActionPolicyUrl('upsert-bad-combo'), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: buildCreateActionPolicyData({
+          grouping: { mode: 'all' },
+          throttle: { strategy: 'on_status_change' },
+        }),
+      });
 
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
-  });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
 
   apiTest('validation: rejects time_interval strategy without interval', async ({ apiClient }) => {
     const response = await apiClient.put(getActionPolicyUrl('upsert-missing-interval'), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
-        ...buildCreateActionPolicyData({ grouping_mode: 'all' }),
+        ...buildCreateActionPolicyData({ grouping: { mode: 'all' } }),
         throttle: { strategy: 'time_interval' },
       },
     });
@@ -408,7 +409,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     const response = await apiClient.put(getActionPolicyUrl('upsert-stray-interval'), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: {
-        ...buildCreateActionPolicyData({ grouping_mode: 'all' }),
+        ...buildCreateActionPolicyData({ grouping: { mode: 'all' } }),
         throttle: { strategy: 'every_time', interval: '5m' },
       },
     });
