@@ -9,9 +9,14 @@ import type { SignificantEventsMaintenanceState } from '../../../../common/maint
 import { internalEventsRoutes } from './route';
 
 const mockCleanupStaleEvents = jest.fn();
+const mockReconcileEventStatus = jest.fn();
 
 jest.mock('../../../lib/significant_events/events/cleanup_stale_events', () => ({
   cleanupStaleEvents: (...args: unknown[]) => mockCleanupStaleEvents(...args),
+}));
+
+jest.mock('../../../lib/significant_events/events/reconcile_event_status', () => ({
+  reconcileEventStatus: (...args: unknown[]) => mockReconcileEventStatus(...args),
 }));
 
 jest.mock('../../utils/assert_significant_events_access', () => ({
@@ -27,6 +32,8 @@ const eventsGetRoute = internalEventsRoutes['GET /internal/significant_events/ev
 const eventsUpdateRoute =
   internalEventsRoutes['POST /internal/significant_events/events/{id}/update'];
 const cleanupRoute = internalEventsRoutes['POST /internal/significant_events/events/_cleanup'];
+const reconcileRoute =
+  internalEventsRoutes['POST /internal/significant_events/events/_reconcile_status'];
 
 type HandlerParams = Parameters<typeof investigateRoute.handler>[0];
 
@@ -59,6 +66,122 @@ describe('POST /internal/significant_events/events/_cleanup', () => {
       alertEventsClient: undefined,
     });
     expect(result).toEqual({ scanned: 1, closed: 1, kept: 0, skipped: 0 });
+  });
+});
+
+describe('POST /internal/significant_events/events/_reconcile_status', () => {
+  const makeHandlerParams = (maintenanceState: SignificantEventsMaintenanceState = 'enabled') => {
+    const eventClient = {};
+    const knowledgeIndicatorClient = {};
+    const streamDataEsClient = {};
+    const alertEventsClient = {};
+    const emitTrigger = jest.fn();
+    const logger = {};
+    const telemetry = { trackSignificantEventsStatusReconcile: jest.fn() };
+    return {
+      refs: {
+        eventClient,
+        knowledgeIndicatorClient,
+        streamDataEsClient,
+        alertEventsClient,
+        emitTrigger,
+        logger,
+        telemetry,
+      },
+      handlerParams: {
+        params: { body: { windowMinutes: 15 } },
+        request: {},
+        getScopedClients: jest.fn().mockResolvedValue({
+          licensing: {},
+          uiSettingsClient: { get: jest.fn().mockResolvedValue(40) },
+          streamDataEsClient,
+          emitTrigger,
+          getEventSearchClient: () => eventClient,
+          getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(knowledgeIndicatorClient),
+          getAlertEventsClient: jest.fn().mockResolvedValue(alertEventsClient),
+        }),
+        server: {},
+        logger,
+        maintenanceService: makeMaintenanceService(maintenanceState),
+        getSpaceId: jest.fn().mockResolvedValue('space-a'),
+        telemetry,
+      } as never,
+    };
+  };
+
+  beforeEach(() => {
+    mockReconcileEventStatus.mockReset();
+  });
+
+  it('reconciles with the manage-scoped clients and the requested window', async () => {
+    const summary = {
+      windowMinutes: 40,
+      scanned: 2,
+      held: 0,
+      deferred: 0,
+      evaluated: 2,
+      recovering: 1,
+      inactivated: 0,
+      reactivated: 0,
+      unchanged: 1,
+      noData: 1,
+      superseded: 0,
+      failed: 0,
+    };
+    mockReconcileEventStatus.mockResolvedValue(summary);
+    const { refs, handlerParams } = makeHandlerParams();
+
+    const result = await reconcileRoute.handler(handlerParams);
+
+    expect(mockReconcileEventStatus).toHaveBeenCalledWith({
+      eventSearchClient: refs.eventClient,
+      knowledgeIndicatorClient: refs.knowledgeIndicatorClient,
+      streamDataEsClient: refs.streamDataEsClient,
+      alertEventsClient: refs.alertEventsClient,
+      emitTrigger: refs.emitTrigger,
+      logger: refs.logger,
+      windowMinutes: 15,
+      lookbackMinutes: 40,
+    });
+    expect(result).toBe(summary);
+    expect(refs.telemetry.trackSignificantEventsStatusReconcile).toHaveBeenCalledWith(
+      expect.objectContaining({
+        window_minutes: 40,
+        scanned: 2,
+        evaluated: 2,
+        recovering: 1,
+        no_data: 1,
+        space_id: 'space-a',
+        duration_ms: expect.any(Number),
+      })
+    );
+  });
+
+  it('falls back to the interval when the detection lookback setting cannot be read', async () => {
+    mockReconcileEventStatus.mockResolvedValue({});
+    const { handlerParams } = makeHandlerParams();
+    (
+      await (handlerParams as unknown as { getScopedClients: jest.Mock }).getScopedClients()
+    ).uiSettingsClient.get.mockRejectedValue(new Error('unavailable'));
+
+    await reconcileRoute.handler(handlerParams);
+
+    expect(mockReconcileEventStatus).toHaveBeenCalledWith(
+      expect.objectContaining({ windowMinutes: 15, lookbackMinutes: undefined })
+    );
+  });
+
+  it('rejects with 409 while paused, before touching any event', async () => {
+    const { handlerParams } = makeHandlerParams('paused');
+
+    await expect(reconcileRoute.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 409 },
+    });
+    expect(mockReconcileEventStatus).not.toHaveBeenCalled();
+  });
+
+  it.each([0, -1, 1.5, 24 * 60 + 1])('rejects a window of %s minutes', (windowMinutes) => {
+    expect(reconcileRoute.params.safeParse({ body: { windowMinutes } }).success).toBe(false);
   });
 });
 

@@ -6,7 +6,10 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_STATUS_RECONCILE_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SignificantEventsMaintenanceService } from '../maintenance/maintenance_service';
 import { bootstrapCleanupWorkflow, createCleanupWorkflowService } from './cleanup_workflow';
@@ -36,7 +39,8 @@ const createManagedWorkflowsClient = () => ({
 
 const request = {} as KibanaRequest;
 const spaceId = 'space-a';
-const workflowDocumentId = `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-${spaceId}`;
+const cleanupDocumentId = `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-${spaceId}`;
+const statusDocumentId = `${SIGNIFICANT_EVENTS_STATUS_RECONCILE_WORKFLOW_ID}-${spaceId}`;
 
 describe('CleanupWorkflowService', () => {
   let logger: Logger;
@@ -56,32 +60,65 @@ describe('CleanupWorkflowService', () => {
       getManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
     });
 
-  it('installs and enables the workflow for the requested space', async () => {
-    (managementApi.getWorkflow as jest.Mock)
-      .mockResolvedValueOnce(undefined)
-      .mockResolvedValueOnce({ enabled: false });
+  /** Stored workflows by document id; `install` adds a disabled one, as the real client does. */
+  const useStore = (stored: Record<string, { enabled: boolean } | undefined> = {}) => {
+    const store = new Map(Object.entries(stored));
+    (managementApi.getWorkflow as jest.Mock).mockImplementation(async (id: string) =>
+      store.get(id)
+    );
+    managedWorkflowsClient.install.mockImplementation(
+      async (workflowId: string, { workflowIdSuffix }: { workflowIdSuffix: string }) => {
+        store.set(`${workflowId}-${workflowIdSuffix}`, { enabled: false });
+      }
+    );
+  };
+
+  it('installs and enables the cleanup and status workflows for the requested space', async () => {
+    useStore();
 
     await createService().ensureEnabled({ request, spaceId });
 
-    expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
+    [
       SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
-      { spaceId, workflowIdSuffix: spaceId }
+      SIGNIFICANT_EVENTS_STATUS_RECONCILE_WORKFLOW_ID,
+    ].forEach((workflowId) =>
+      expect(managedWorkflowsClient.install).toHaveBeenCalledWith(workflowId, {
+        spaceId,
+        workflowIdSuffix: spaceId,
+      })
     );
-    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-      workflowDocumentId,
-      { enabled: true },
-      spaceId,
-      request
+    [cleanupDocumentId, statusDocumentId].forEach((documentId) =>
+      expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
+        documentId,
+        { enabled: true },
+        spaceId,
+        request
+      )
     );
   });
 
-  it('is a no-op when the per-space workflow is already enabled', async () => {
-    (managementApi.getWorkflow as jest.Mock).mockResolvedValue({ enabled: true });
+  it('is a no-op when both per-space workflows are already enabled', async () => {
+    useStore({
+      [cleanupDocumentId]: { enabled: true },
+      [statusDocumentId]: { enabled: true },
+    });
 
     await createService().ensureEnabled({ request, spaceId });
 
     expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
     expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('installs only the workflow that is missing', async () => {
+    useStore({ [cleanupDocumentId]: { enabled: true } });
+
+    await createService().ensureEnabled({ request, spaceId });
+
+    expect(managedWorkflowsClient.install).toHaveBeenCalledTimes(1);
+    expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
+      SIGNIFICANT_EVENTS_STATUS_RECONCILE_WORKFLOW_ID,
+      { spaceId, workflowIdSuffix: spaceId }
+    );
   });
 
   it('does not enable when best-effort installation did not persist the workflow', async () => {
@@ -91,7 +128,28 @@ describe('CleanupWorkflowService', () => {
 
     expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalledWith(
-      `Managed cleanup workflow ${workflowDocumentId} was not installed; skipping enablement`
+      `Managed workflow ${statusDocumentId} was not installed; skipping enablement`
+    );
+  });
+
+  it('still enables the status workflow when installing the cleanup workflow fails', async () => {
+    useStore();
+    const install = managedWorkflowsClient.install.getMockImplementation();
+    managedWorkflowsClient.install.mockImplementation(async (workflowId, options) => {
+      if (workflowId === SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID) {
+        throw new Error('install failed');
+      }
+      return install?.(workflowId, options);
+    });
+
+    await expect(createService().ensureEnabled({ request, spaceId })).rejects.toThrow(
+      'install failed'
+    );
+    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
+      statusDocumentId,
+      { enabled: true },
+      spaceId,
+      request
     );
   });
 });
@@ -135,7 +193,7 @@ describe('bootstrapCleanupWorkflow', () => {
       })
     ).resolves.toBeUndefined();
     expect(logger.warn).toHaveBeenCalledWith(
-      'Failed to ensure Significant Events cleanup workflow is enabled: workflow unavailable'
+      'Failed to ensure Significant Events cleanup and status workflows are enabled: workflow unavailable'
     );
   });
 });

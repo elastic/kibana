@@ -14,6 +14,7 @@ import type {
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
   CodeAnalysisGroundingProps,
   DetectionScanProps,
+  StatusReconcileProps,
   KnowledgeIndicatorFeaturesIdentifiedProps,
   KnowledgeIndicatorQueriesGeneratedProps,
   KnowledgeIndicatorOnboardingScheduledProps,
@@ -445,6 +446,39 @@ const discoveryTriggeredSchema = {
   },
 };
 
+const statusReconcileCount = (description: string) => ({
+  type: 'long' as const,
+  _meta: { description },
+});
+
+const statusReconcileSchema: RootSchema<StatusReconcileProps> = {
+  duration_ms: statusReconcileCount(
+    'Wall-clock duration (ms) of one status reconciliation run: scan, hold lookup, probes and writes'
+  ),
+  window_minutes: statusReconcileCount(
+    'Probe window in minutes: the review interval, widened to the detector lookback'
+  ),
+  scanned: statusReconcileCount('Live (active or recovering) significant event series found'),
+  held: statusReconcileCount('Series pinned active by an operator and therefore not evaluated'),
+  deferred: statusReconcileCount('Series over the per-run caps; their status stands'),
+  evaluated: statusReconcileCount('Series whose member rules were probed this run'),
+  recovering: statusReconcileCount('Series written recovering this run'),
+  inactivated: statusReconcileCount('Series written inactive this run'),
+  reactivated: statusReconcileCount('Series returned from recovering to active this run'),
+  unchanged: statusReconcileCount('Series evaluated with nothing to write'),
+  no_data: statusReconcileCount(
+    'Series evaluated with at least one member rule that could not be judged (subset of unchanged)'
+  ),
+  superseded: statusReconcileCount(
+    'Transitions dropped because the series was written by something else after it was read'
+  ),
+  failed: statusReconcileCount('Series whose evaluation or write threw'),
+  space_id: {
+    type: 'keyword',
+    _meta: { description: 'Kibana space the run reconciled' },
+  },
+};
+
 const detectionScanSchema: RootSchema<DetectionScanProps> = {
   took_ms: {
     type: 'long',
@@ -719,4 +753,5 @@ export {
   knowledgeIndicatorFeaturesIdentifiedSchema,
   knowledgeIndicatorQueriesGeneratedSchema,
   onboardingScheduledSchema,
+  statusReconcileSchema,
 };

@@ -112,6 +112,35 @@ interface DiscoveryTriggeredProps {
   space_id: string;
 }
 
+/** One run of the deterministic status reconciliation (active -> recovering -> inactive). */
+interface StatusReconcileProps {
+  /** Wall-clock (ms) of the whole run: scan, hold lookup, probes and writes. */
+  duration_ms: number;
+  /** Probe window (minutes): the review interval, widened to the detector lookback. */
+  window_minutes: number;
+  /** Live (`active` / `recovering`) series found. */
+  scanned: number;
+  /** Operator-pinned `active`; never evaluated. */
+  held: number;
+  /** Over the per-run caps; status stands. */
+  deferred: number;
+  evaluated: number;
+  /** Written `recovering` this run (entry, or another clean evaluation). */
+  recovering: number;
+  /** Written `inactive` this run. */
+  inactivated: number;
+  /** Returned `recovering` -> `active` this run. */
+  reactivated: number;
+  /** Evaluated with nothing to write. */
+  unchanged: number;
+  /** Evaluated with at least one member that could not be judged (subset of `unchanged`). */
+  no_data: number;
+  /** Transition dropped because the series was written after it was read. */
+  superseded: number;
+  failed: number;
+  space_id: string;
+}
+
 interface DetectionScanProps {
   /** ES `took` (ms) reported by the alerts-source search itself. */
   took_ms: number;
@@ -181,6 +210,7 @@ export {
   type CodeAnalysisGroundingProps,
   type DetectionScanProps,
   type DiscoveryTriggeredProps,
+  type StatusReconcileProps,
   type KnowledgeIndicatorQueriesGeneratedProps,
   type KnowledgeIndicatorFeaturesIdentifiedProps,
   type KnowledgeIndicatorOnboardingScheduledProps,

@@ -8,6 +8,7 @@
 import { esql, type ComposerQuery } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import {
   ALERT_EPISODE_STATUS,
   type AlertEpisodeStatus,
@@ -30,9 +31,12 @@ import {
 import {
   applyLifetimeOverlap,
   applyTimeRange,
+  esqlToObjects,
   executeCountQuery,
   executeEsqlQuery,
+  isIndexNotFoundError,
   pickLatestPerGroup,
+  queryEsql,
 } from '../latest_source_query';
 import { RULE_EVENTS_INDEX } from '../alerting/rule_events_metric_series';
 import type { EventsFilterOptions, EventsPaginatedSearchOptions } from './types';
@@ -202,8 +206,16 @@ const topologyFeatureIdsIntersects = (values: string[]): ESQLAstExpression => {
  * - `findLatestActive`, topology/continuation search, `attach` — agent/discovery reads (#1517).
  * - Writes — this class is read-only; writes go through `AlertEventsClient.createAlertEvent`.
  */
+/** Series per held-lookup query; keeps the query text well under request-size limits. */
+const HELD_LOOKUP_CHUNK_SIZE = 500;
+
 export class RuleEventsClient {
-  constructor(private readonly clients: { esClient: ElasticsearchClient; space: string }) {}
+  constructor(
+    private readonly clients: {
+      esClient: ElasticsearchClient;
+      space: string;
+    }
+  ) {}
 
   private buildLatestByCurrentStateQuery(
     options: RuleEventsCurrentStateSearchOptions
@@ -313,9 +325,56 @@ export class RuleEventsClient {
     };
   }
 
-  async findLatestByCurrentStateBatch(
-    options: RuleEventsBatchSearchOptions
-  ): Promise<{ hits: SignificantEventResponse[]; lastGroupHash?: string }> {
+  /**
+   * Series an operator has pinned `active` and not released yet. Mirrors the Alerting v2
+   * director's user lock: the latest lifecycle action (`activate` / `deactivate`) counts only when
+   * it targets the series' current episode, so a stale action on an earlier episode never holds a
+   * later one. `deactivate` writes `inactive` itself, so only `activate` can hold a live series.
+   *
+   * Errors propagate: a lookup that fails must not silently drop the hold and let the engine
+   * override an operator.
+   */
+  async findOperatorHeldGroupHashes(groupHashes: string[]): Promise<Set<string>> {
+    const held = new Set<string>();
+    // Chunked so the inline `IN (...)` list stays small however many series are live.
+    for (let from = 0; from < groupHashes.length; from += HELD_LOOKUP_CHUNK_SIZE) {
+      const chunk = groupHashes.slice(from, from + HELD_LOOKUP_CHUNK_SIZE);
+      (await this.findHeldInChunk(chunk)).forEach((hash) => held.add(hash));
+    }
+    return held;
+  }
+
+  private async findHeldInChunk(groupHashes: string[]): Promise<string[]> {
+    const query = esql.from([RULE_EVENTS_INDEX, ALERT_ACTIONS_DATA_STREAM]).where`${esql.col(
+      GROUP_HASH_FIELD
+    )} IN (${groupHashes.map((hash) => esql.str(hash))})`.pipe`STATS
+      last_episode_id = LAST(alert.id, @timestamp) WHERE type == "alert" AND alert.status IS NOT NULL,
+      last_action_episode_id = LAST(alert_id, @timestamp) WHERE action_type IN ("activate", "deactivate"),
+      last_action_type = LAST(action_type, @timestamp) WHERE action_type IN ("activate", "deactivate")
+    BY group_hash`
+      .pipe`EVAL lock = CASE(last_action_episode_id == last_episode_id, last_action_type, NULL)`
+      .where`lock == "activate"`.keep(GROUP_HASH_FIELD);
+
+    try {
+      const rows = esqlToObjects<{ group_hash: string }>(
+        await queryEsql({ esClient: this.clients.esClient, query })
+      );
+      return rows.map((row) => row.group_hash);
+    } catch (error) {
+      // No audit stream yet means no operator has ever acted, so nothing is held.
+      if (isIndexNotFoundError(error)) {
+        return [];
+      }
+      throw error;
+    }
+  }
+
+  async findLatestByCurrentStateBatch(options: RuleEventsBatchSearchOptions): Promise<{
+    hits: SignificantEventResponse[];
+    /** `group_hash` of each hit, in the same order — the series key `.alert-actions` is joined on. */
+    groupHashes: string[];
+    lastGroupHash?: string;
+  }> {
     let query = this.buildLatestByCurrentStateQuery(options);
     if (options.afterGroupHash !== undefined) {
       query = query.where`${esql.col(GROUP_HASH_FIELD)} > ${esql.str(options.afterGroupHash)}`;
@@ -332,6 +391,7 @@ export class RuleEventsClient {
 
     return {
       hits: hits.map(decodeSignificantEventResponse),
+      groupHashes: hits.map((row) => row[GROUP_HASH_FIELD]),
       lastGroupHash: hits.at(-1)?.[GROUP_HASH_FIELD],
     };
   }

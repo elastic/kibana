@@ -9,6 +9,7 @@ import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { EbtTelemetryClient } from './client';
 import {
   SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_STATUS_RECONCILE_EVENT_TYPE,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
 } from './constants';
 
@@ -80,6 +81,34 @@ describe('EbtTelemetryClient', () => {
           },
           external_content_tool_continuations: 3,
         }
+      );
+    });
+  });
+
+  describe('trackSignificantEventsStatusReconcile', () => {
+    it('tracks one status reconciliation run', () => {
+      const run = {
+        duration_ms: 310,
+        window_minutes: 40,
+        scanned: 12,
+        held: 1,
+        deferred: 0,
+        evaluated: 11,
+        recovering: 3,
+        inactivated: 1,
+        reactivated: 0,
+        unchanged: 7,
+        no_data: 2,
+        superseded: 0,
+        failed: 0,
+        space_id: 'default',
+      };
+
+      client.trackSignificantEventsStatusReconcile(run);
+
+      expect(analyticsService.reportEvent).toHaveBeenCalledWith(
+        SIGNIFICANT_EVENTS_STATUS_RECONCILE_EVENT_TYPE,
+        run
       );
     });
   });

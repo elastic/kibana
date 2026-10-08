@@ -72,7 +72,7 @@ describe('cleanup workflow bootstrap route', () => {
     await expect(route.handler(params.handlerParams)).resolves.toEqual({ success: true });
 
     expect(params.logger.warn).toHaveBeenCalledWith(
-      'Failed to ensure Significant Events cleanup workflow is enabled: workflow unavailable'
+      'Failed to ensure Significant Events cleanup and status workflows are enabled: workflow unavailable'
     );
   });
 });

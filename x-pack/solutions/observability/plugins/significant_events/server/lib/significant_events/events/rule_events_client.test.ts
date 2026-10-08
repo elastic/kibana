@@ -444,6 +444,7 @@ describe('RuleEventsClient', () => {
       const result = await client.findLatestByCurrentStateBatch({ batchSize: 2 });
 
       expect(result.hits).toHaveLength(2);
+      expect(result.groupHashes).toEqual(['hash-1', 'hash-2']);
       expect(result.lastGroupHash).toBe('hash-2');
     });
 
@@ -453,6 +454,75 @@ describe('RuleEventsClient', () => {
       const result = await client.findLatestByCurrentStateBatch({ batchSize: 10 });
 
       expect(result.lastGroupHash).toBeUndefined();
+    });
+  });
+
+  describe('findOperatorHeldGroupHashes', () => {
+    const heldResponse = (hashes: string[]): ESQLSearchResponse =>
+      ({
+        columns: [{ name: 'group_hash', type: 'keyword' }],
+        values: hashes.map((hash) => [hash]),
+      } as unknown as ESQLSearchResponse);
+
+    it('returns the series whose latest lifecycle action targets the current episode and is activate', async () => {
+      const { client } = createClient(async () => heldResponse(['hash-a']));
+
+      await expect(client.findOperatorHeldGroupHashes(['hash-a', 'hash-b'])).resolves.toEqual(
+        new Set(['hash-a'])
+      );
+    });
+
+    it('reads both streams, scoped to the requested series, and gates the action on the current episode', async () => {
+      const { client, query } = createClient(async () => heldResponse([]));
+
+      await client.findOperatorHeldGroupHashes(['hash-a', 'hash-b']);
+
+      const q = lastQuery(query);
+      expect(q).toContain('FROM .rule-events, .alert-actions');
+      expect(q).toContain('group_hash IN ("hash-a", "hash-b")');
+      expect(q).toContain(
+        'CASE(last_action_episode_id == last_episode_id, last_action_type, NULL)'
+      );
+      expect(q).toContain('lock == "activate"');
+    });
+
+    it('splits a large series list across queries and merges the held ones', async () => {
+      const hashes = Array.from({ length: 1200 }, (_, i) => `hash-${i}`);
+      const { client, query } = createClient(async (request) =>
+        heldResponse(request.query.includes('"hash-1100"') ? ['hash-1100'] : ['hash-3'])
+      );
+
+      const held = await client.findOperatorHeldGroupHashes(hashes);
+
+      expect(query).toHaveBeenCalledTimes(3);
+      expect(held).toEqual(new Set(['hash-3', 'hash-1100']));
+    });
+
+    it('does not query when there are no series', async () => {
+      const { client, query } = createClient(async () => heldResponse([]));
+
+      await expect(client.findOperatorHeldGroupHashes([])).resolves.toEqual(new Set());
+      expect(query).not.toHaveBeenCalled();
+    });
+
+    it('holds nothing when the audit stream does not exist yet', async () => {
+      const { client } = createClient(async () => {
+        throw new Error(
+          'verification_exception: Found 1 problem\nline 1:1: Unknown index [.alert-actions]'
+        );
+      });
+
+      await expect(client.findOperatorHeldGroupHashes(['hash-a'])).resolves.toEqual(new Set());
+    });
+
+    it('rethrows any other error, so a failed lookup cannot silently drop a hold', async () => {
+      const { client } = createClient(async () => {
+        throw new Error('security_exception');
+      });
+
+      await expect(client.findOperatorHeldGroupHashes(['hash-a'])).rejects.toThrow(
+        'security_exception'
+      );
     });
   });
 

@@ -19,6 +19,7 @@ import {
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_STATUS_RECONCILE_EVENT_TYPE,
 } from './constants';
 import {
   agentBuilderKnowledgeIndicatorCreatedSchema,
@@ -30,6 +31,7 @@ import {
   agentToolKnowledgeIndicatorIdentificationStartedSchema,
   codeAnalysisGroundingSchema,
   detectionScanSchema,
+  statusReconcileSchema,
   discoveryTriggeredSchema,
   knowledgeIndicatorFeaturesIdentifiedSchema,
   knowledgeIndicatorQueriesGeneratedSchema,
@@ -86,6 +88,11 @@ const detectionScanEventType = {
   schema: detectionScanSchema,
 };
 
+const statusReconcileEventType = {
+  eventType: SIGNIFICANT_EVENTS_STATUS_RECONCILE_EVENT_TYPE,
+  schema: statusReconcileSchema,
+};
+
 const onboardingScheduledEventType = {
   eventType: SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE,
   schema: onboardingScheduledSchema,
@@ -115,4 +122,5 @@ export {
   knowledgeIndicatorEventsGeneratedEventType,
   knowledgeIndicatorFeaturesIdentifiedEventType,
   onboardingScheduledEventType,
+  statusReconcileEventType,
 };

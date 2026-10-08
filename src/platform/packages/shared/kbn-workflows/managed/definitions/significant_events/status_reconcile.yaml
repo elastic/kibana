@@ -1,0 +1,44 @@
+# Significant Events status reconciliation workflow.
+#
+# Installed per Kibana space alongside the cleanup workflow (on the first discovery execution in
+# that space), so a space with events always progresses their status, whether or not scheduled
+# discovery is enabled. Deterministic, no agent call: every tick evaluates each live event
+# (`active` / `recovering`) and moves it active -> recovering -> inactive, or back to active.
+
+version: '1'
+name: 'Significant Events Status Reconciliation'
+enabled: false
+description: 'Moves live Significant Events through active, recovering and inactive.'
+tags:
+  - observability
+  - streams
+  - significant-events
+  - status
+settings:
+  timeout: '10m'
+  # Only one instance runs at a time; overlapping triggers are dropped.
+  concurrency:
+    key: significant-events-status-reconcile
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: '15m'
+  - type: manual
+steps:
+  - name: reconcile_event_status
+    type: kibana.request
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/events/_reconcile_status'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        # Equal to the schedule above, so consecutive clean evaluations are disjoint evidence.
+        windowMinutes: 15
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: '5s'
+        strategy: exponential

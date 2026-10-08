@@ -24,10 +24,16 @@ import {
 } from '@kbn/significant-events-schema';
 import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
+import type { IUiSettingsClient } from '@kbn/core/server';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import { OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_LOOKBACK_MINUTES } from '@kbn/management-settings-ids';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
 import { applyLifecycleInput } from '../../../lib/significant_events/events/lifecycle_controller';
 import { operatorInputFor } from '../../../lib/significant_events/events/lifecycle_state_machine';
+import {
+  reconcileEventStatus,
+  type ReconcileEventStatusResult,
+} from '../../../lib/significant_events/events/reconcile_event_status';
 import {
   cleanupStaleEvents,
   type CleanupStaleEventsResult,
@@ -441,6 +447,97 @@ const cleanupStaleEventsRoute = createServerRoute({
   },
 });
 
+const MAX_RECONCILE_WINDOW_MINUTES = 24 * 60;
+
+/** The detector's lookback; undefined when unreadable, so reconciliation falls back to its interval. */
+const readDetectionLookbackMinutes = async (
+  uiSettingsClient: IUiSettingsClient
+): Promise<number | undefined> => {
+  try {
+    const value = await uiSettingsClient.get<unknown>(
+      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_LOOKBACK_MINUTES
+    );
+    return typeof value === 'number' && value > 0 ? value : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const reconcileEventStatusRoute = createServerRoute({
+  endpoint: 'POST /internal/significant_events/events/_reconcile_status',
+  options: {
+    access: 'internal',
+    summary: 'Reconcile live significant event statuses',
+    description:
+      "Evaluates every active or recovering significant event against its member rules' stored queries over the last window and moves it active, recovering, or inactive deterministically. Makes no agent call.",
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      windowMinutes: z.number().int().min(1).max(MAX_RECONCILE_WINDOW_MINUTES),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+    maintenanceService,
+    getSpaceId,
+    telemetry,
+  }): Promise<ReconcileEventStatusResult> => {
+    const scopedClients = await getScopedClients({ request });
+    const {
+      getEventSearchClient,
+      getAlertEventsClient,
+      getKnowledgeIndicatorClient,
+      streamDataEsClient,
+      uiSettingsClient,
+      emitTrigger,
+      licensing,
+    } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
+
+    const startedAt = Date.now();
+    const result = await reconcileEventStatus({
+      eventSearchClient: await getEventSearchClient(),
+      knowledgeIndicatorClient: await getKnowledgeIndicatorClient(),
+      streamDataEsClient,
+      alertEventsClient: await getAlertEventsClient(),
+      emitTrigger,
+      logger,
+      windowMinutes: params.body.windowMinutes,
+      lookbackMinutes: await readDetectionLookbackMinutes(uiSettingsClient),
+    });
+
+    telemetry.trackSignificantEventsStatusReconcile({
+      duration_ms: Date.now() - startedAt,
+      window_minutes: result.windowMinutes,
+      scanned: result.scanned,
+      held: result.held,
+      deferred: result.deferred,
+      evaluated: result.evaluated,
+      recovering: result.recovering,
+      inactivated: result.inactivated,
+      reactivated: result.reactivated,
+      unchanged: result.unchanged,
+      no_data: result.noData,
+      superseded: result.superseded,
+      failed: result.failed,
+      space_id: await getSpaceId(request),
+    });
+
+    return result;
+  },
+});
+
 const investigationStatusesRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/investigations/_status',
   options: {
@@ -491,5 +588,6 @@ export const internalEventsRoutes = {
   ...eventsTriggerInvestigationRoute,
   ...eventsUpdateRoute,
   ...cleanupStaleEventsRoute,
+  ...reconcileEventStatusRoute,
   ...investigationStatusesRoute,
 };

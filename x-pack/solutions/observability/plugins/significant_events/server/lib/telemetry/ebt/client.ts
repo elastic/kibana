@@ -18,6 +18,7 @@ import type {
   KnowledgeIndicatorQueriesGeneratedProps,
   KnowledgeIndicatorOnboardingScheduledProps,
   DetectionScanProps,
+  StatusReconcileProps,
   DiscoveryTriggeredProps,
   AgentToolEventWriteProps,
 } from './types';
@@ -33,6 +34,7 @@ import {
   SIGNIFICANT_EVENTS_CODE_ANALYSIS_GROUNDING_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_STATUS_RECONCILE_EVENT_TYPE,
   SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE,
 } from './constants';
@@ -101,6 +103,10 @@ export class EbtTelemetryClient {
 
   public trackSignificantEventsDetectionScan(params: DetectionScanProps) {
     this.analytics.reportEvent(SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE, params);
+  }
+
+  public trackSignificantEventsStatusReconcile(params: StatusReconcileProps) {
+    this.analytics.reportEvent(SIGNIFICANT_EVENTS_STATUS_RECONCILE_EVENT_TYPE, params);
   }
 
   public trackAgentToolEventsWrite(params: AgentToolEventWriteProps) {
