@@ -81,7 +81,11 @@ const ImpactEntityRow = ({ entity, isLast }: { entity: ImpactEntity; isLast: boo
   const { euiTheme } = useEuiTheme();
   const accordionId = useGeneratedHtmlId({ prefix: 'investigationImpactEntity' });
   const opensFlyout = hasImpactEntityOpener() && entityStoreIdType(entity.id) !== undefined;
-  const header = opensFlyout ? <FlyoutEntityButton entity={entity} /> : <EntityHeader entity={entity} />;
+  const header = opensFlyout ? (
+    <FlyoutEntityButton entity={entity} />
+  ) : (
+    <EntityHeader entity={entity} />
+  );
 
   return (
     <EuiPanel
@@ -130,13 +134,14 @@ const ImpactEntityRow = ({ entity, isLast }: { entity: ImpactEntity; isLast: boo
 };
 
 const EntityList = ({ entities }: { entities: ImpactEntity[] }) => (
-  <EuiPanel hasBorder hasShadow={false} paddingSize="none" data-test-subj="investigationImpactEntities">
+  <EuiPanel
+    hasBorder
+    hasShadow={false}
+    paddingSize="none"
+    data-test-subj="investigationImpactEntities"
+  >
     {entities.map((entity, index) => (
-      <ImpactEntityRow
-        key={entity.id}
-        entity={entity}
-        isLast={index === entities.length - 1}
-      />
+      <ImpactEntityRow key={entity.id} entity={entity} isLast={index === entities.length - 1} />
     ))}
   </EuiPanel>
 );
