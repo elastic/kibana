@@ -19,17 +19,10 @@ const QUERY_INDEX = {
   DURATION_SUMMARY_NOT_SUPPORTED: 1,
 } as const;
 
-// A msearch response entry can be missing (e.g. a partial failure for one of
-// the sub-queries), in which case `response.hits` is undefined. Guard against
-// that before reading `hits.total.value` to avoid a `Cannot read properties of
-// undefined (reading 'total')` crash.
-const getTotalHits = (response?: { hits?: { total?: { value?: number } } }): number => {
-  const total = response?.hits?.total;
-  if (typeof total === 'number') {
-    return total;
-  }
-  return total?.value ?? 0;
-};
+// A msearch entry carries no `hits` when its sub-query fails, so a document
+// type whose count is unknown is reported as having no documents.
+const getTotalHits = (response?: { hits?: { total?: { value?: number } } }): number =>
+  response?.hits?.total?.value ?? 0;
 
 export interface DocumentSourcesRequest {
   apmEventClient: APMEventClient;

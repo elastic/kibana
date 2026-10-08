@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { fetchNodesFromClusterStats } from './fetch_nodes_from_cluster_stats';
 
@@ -413,55 +414,73 @@ describe('fetchNodesFromClusterStats', () => {
     expect(result).toEqual([]);
   });
 
-  it('does not throw when hits have missing or partial _source', async () => {
-    const partialSourceRes = {
-      aggregations: {
-        clusters: {
-          buckets: [
-            {
-              key: 'NG2d5jHiSBGPE6HLlUN2Bg',
-              doc_count: 2,
-              top: {
-                hits: {
-                  total: { value: 2, relation: 'eq' },
-                  max_score: null,
-                  hits: [
-                    {
-                      _index: '.ds-.monitoring-es-8-mb-2023.03.27-000001',
-                      _id: 'CUJ6I4cBwUW49K58n-b9',
-                      _score: null,
-                      // _source omitted entirely (e.g. source filtering matched nothing)
-                      sort: [1679927450602],
-                    },
-                    {
-                      _index: '.ds-.monitoring-es-8-mb-2023.03.27-000001',
-                      _id: '6kJ6I4cBwUW49K58KuXP',
-                      _score: null,
-                      // _source present but without the expected node paths
-                      _source: {},
-                      sort: [1679927420602],
-                    },
-                  ],
+  describe('when a document is missing node data', () => {
+    const nodesSource = {
+      elasticsearch: {
+        cluster: {
+          stats: {
+            state: {
+              nodes: {
+                'LjJ9FhDATIq9uh1kAa-XPA': {
+                  name: 'instance-0000000000',
+                  ephemeral_id: '3ryJEBWZS1e3x-_K_Yt-ww',
                 },
               },
             },
-          ],
+          },
         },
       },
     };
 
-    esClient.search.mockResponse(
-      // @ts-expect-error not full response interface
-      partialSourceRes
-    );
+    // `undefined` stands for a hit whose `_source` is omitted entirely, which is
+    // what Elasticsearch returns when the source filter matches no field.
+    const mockSearchResponse = (sources: Array<Record<string, unknown> | undefined>) => {
+      esClient.search.mockResponse({
+        aggregations: {
+          clusters: {
+            buckets: [
+              {
+                key: 'NG2d5jHiSBGPE6HLlUN2Bg',
+                doc_count: sources.length,
+                top: {
+                  hits: {
+                    total: { value: sources.length, relation: 'eq' },
+                    max_score: null,
+                    hits: sources.map((_source, index) => ({
+                      _index: '.ds-.monitoring-es-8-mb-2023.03.27-000001',
+                      _id: `CUJ6I4cBwUW49K58n-b${index}`,
+                      _score: null,
+                      ...(_source ? { _source } : {}),
+                      sort: [1679927450602 - index],
+                    })),
+                  },
+                },
+              },
+            ],
+          },
+        },
+      } as unknown as estypes.SearchResponse);
+    };
 
-    const result = await fetchNodesFromClusterStats(esClient, clusters);
-    expect(result).toEqual([
-      {
-        clusterUuid: 'NG2d5jHiSBGPE6HLlUN2Bg',
-        recentNodes: [],
-        priorNodes: [],
-      },
-    ]);
+    it('ignores the cluster when no document has node data', async () => {
+      mockSearchResponse([undefined, {}]);
+
+      const result = await fetchNodesFromClusterStats(esClient, clusters);
+      expect(result).toEqual([]);
+    });
+
+    it('ignores the cluster when only the prior document has node data', async () => {
+      mockSearchResponse([undefined, nodesSource]);
+
+      const result = await fetchNodesFromClusterStats(esClient, clusters);
+      expect(result).toEqual([]);
+    });
+
+    it('ignores the cluster when only the recent document has node data', async () => {
+      mockSearchResponse([nodesSource, undefined]);
+
+      const result = await fetchNodesFromClusterStats(esClient, clusters);
+      expect(result).toEqual([]);
+    });
   });
 });
