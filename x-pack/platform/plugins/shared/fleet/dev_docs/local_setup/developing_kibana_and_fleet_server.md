@@ -25,7 +25,7 @@ _This guide expects you have forked + cloned the https://github.com/elastic/flee
 
 ```bash
 # Set a data path to prevent blowing away your Elasticsearch data between server restarts
-$ yarn es snapshot --license trial -E path.data=/tmp/es-data
+$ pnpm es snapshot --license trial -E path.data=/tmp/es-data
 ```
 
 2. Add the following to your `kibana.dev.yml`
@@ -162,8 +162,8 @@ The instructions for HTTPS are largely the same, with a few key differences:
 
 ```bash
 # In your `kibana` directory
-$ yarn es snapshot --license trial --ssl -E path.data=/tmp/es-data
-$ yarn start --ssl
+$ pnpm es snapshot --license trial --ssl -E path.data=/tmp/es-data
+$ pnpm start --ssl
 ```
 
 2. Change various URLs in `kibana.dev.yml` to use `https` instead of `http`, and add a `ca_trusted_fingerprint` calculated from the `ca.crt` certificate in Kibana's dev utils package. Your `kibana.dev.yml` should be the same as above, with the following changes:
@@ -314,16 +314,16 @@ If you want to run your local stack in serverless mode, you'll only need to alte
 
 ```bash
 # Start Elasticsearch in serverless mode as a security project
-yarn es serverless --projectType=security --kill
+pnpm es serverless --projectType=security --kill
 
 # Start Elasticsearch in serverless mode as an observability project
-yarn es serverless --projectType=oblt --kill
+pnpm es serverless --projectType=oblt --kill
 
 # Run kibana as a security project
-yarn serverless-security
+pnpm serverless-security
 
 # Run kibana as an observability project
-yarn serverless-oblt
+pnpm serverless-oblt
 ```
 
 Once running, you can login with the username `elastic_serverless` or `system_indices_superuser` and the password `changeme`.

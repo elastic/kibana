@@ -832,6 +832,7 @@ paths:
           example: kb12345
           in: path
           name: resource
+          required: true
           schema:
             type: string
       responses:
@@ -898,6 +899,7 @@ paths:
           example: kb12345
           in: path
           name: resource
+          required: true
           schema:
             type: string
         - description: ELSER modelId to use when setting up the Knowledge Base. If not

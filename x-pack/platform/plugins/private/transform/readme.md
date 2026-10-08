@@ -31,7 +31,7 @@ info, refer to
    If you need to update your Node version, the response message contains the
    command you need to run to do it.
 
-1. Run `yarn kbn bootstrap`. It takes all the dependencies in the code and
+1. Run `pnpm kbn bootstrap`. It takes all the dependencies in the code and
    installs/checks them. It is recommended to use it every time when you switch
    between branches.
 
@@ -40,7 +40,7 @@ info, refer to
 
 1. Provide the appropriate password and user name in `kibana.dev.yml`.
 
-1. Run `yarn start` to start Kibana.
+1. Run `pnpm start` to start Kibana.
 
 1. Go to http://localhost:560x/xxx (check the terminal message for the exact
    path).
@@ -73,25 +73,25 @@ Run the test following jest tests from `kibana/x-pack/platform/plugins/private/t
 New snapshots, all plugins:
 
 ```
-yarn test:jest
+pnpm test:jest
 ```
 
 Update snapshots for the transform plugin:
 
 ```
-yarn test:jest -u
+pnpm test:jest -u
 ```
 
 Update snapshots for a specific directory only:
 
 ```
-yarn test:jest public/app/sections
+pnpm test:jest public/app/sections
 ```
 
 Run tests with verbose output:
 
 ```
-yarn test:jest --verbose
+pnpm test:jest --verbose
 ```
 
 ### Functional tests

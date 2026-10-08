@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import queryString, { ParsedQuery } from 'query-string';
+import type { ParsedQuery } from 'query-string';
+import queryString from 'query-string';
 
 import { getAppSearchUrl } from '../../../shared/enterprise_search_url';
 import { EngineLogic } from '../engine';

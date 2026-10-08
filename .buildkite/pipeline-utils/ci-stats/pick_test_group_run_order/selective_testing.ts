@@ -14,7 +14,7 @@ import {
   getAffectedPackages,
   listChangedFiles,
   touchedCriticalFiles,
-} from '../../affected-packages';
+} from '../../affected-packages/index.ts';
 
 /**
  * The shared inputs both per-variant filters need: which packages the PR

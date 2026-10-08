@@ -121,11 +121,11 @@ For more detailed instructions you can check [apm-server dev documentation](http
 - Install golang and set go path properly
 - Run Elasticsearch locally
   ```
-  yarn es snapshot
+  pnpm es snapshot
   ```
 - Run Kibana locally
   ```
-  yarn start
+  pnpm start
   ```
 - Git Clone APM Server locally
   ```

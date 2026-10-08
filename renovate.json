@@ -5,6 +5,10 @@
     "helpers:pinGitHubActionDigests",
     "helpers:pinGitHubActionDigestsToSemver"
   ],
+  "gitIgnoredAuthors": [
+    "174716857+elastic-renovate-prod[bot]@users.noreply.github.com",
+    "42973632+kibanamachine@users.noreply.github.com"
+  ],
   "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**"],
   "enabledManagers": ["npm", "github-actions", "custom.regex", "devcontainer"],
   "baseBranches": ["main", "9.0", "8.19", "8.18", "8.17", "7.17"],
@@ -536,8 +540,8 @@
       "minimumReleaseAge": "7 days"
     },
     {
-      "groupName": "mime related",
-      "matchDepNames": ["mime", "mime-types", "@types/mime", "@types/mime-types"],
+      "groupName": "mime-types",
+      "matchDepNames": ["mime-types", "@types/mime-types"],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Core", "release_note:skip", "backport:all-open"],
@@ -691,8 +695,8 @@
     {
       "groupName": "LaunchDarkly",
       "matchDepNames": [
-        "launchdarkly-js-client-sdk",
         "@openfeature/launchdarkly-client-provider",
+        "@launchdarkly/js-client-sdk",
         "@launchdarkly/node-server-sdk",
         "@launchdarkly/openfeature-node-server",
         "launchdarkly/find-code-references"
@@ -767,7 +771,7 @@
     },
     {
       "groupName": "OpenAPI Spec",
-      "matchDepNames": ["@apidevtools/swagger-parser", "@redocly/cli", "openapi-types"],
+      "matchDepNames": ["@apidevtools/swagger-parser", "@redocly/cli", "openapi-types", "bump-cli"],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "Team:Core"],
@@ -1288,8 +1292,8 @@
       "enabled": true
     },
     {
-      "groupName": "package.json/yarn.lock utils",
-      "matchDepNames": ["@yarnpkg/lockfile", "sort-package-json", "yarn-deduplicate"],
+      "groupName": "package.json/pnpm-lock.yaml utils",
+      "matchDepNames": ["sort-package-json"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
@@ -1916,8 +1920,7 @@
         "jest-runtime",
         "jest-specific-snapshot",
         "jest-snapshot",
-        "jest-styled-components",
-        "mutation-observer"
+        "jest-styled-components"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
