@@ -17,6 +17,7 @@ import {
   selectOverflowRetryArticleContext,
   type ArticleContext,
 } from './article_context';
+import { requireParsedStructuredOutput } from './structured_output';
 
 /**
  * Bounds a free-text model field before it is stored. Truncates rather than
@@ -132,17 +133,14 @@ export const assessRelevance = async (
     includeRaw: true,
   });
 
-  // withStructuredOutput casts the raw tool-call args to the schema's inferred
-  // type without validating them; re-parse so boundedText/link truncation
-  // actually runs instead of letting unbounded model output through.
   const invokeRelevance = async (
     text: string
   ): Promise<{ raw: { response_metadata: Record<string, unknown> }; parsed: RelevanceOutput }> => {
     const invoked = (await structured.invoke(buildRelevancePrompt(params, text))) as {
       raw: { response_metadata: Record<string, unknown> };
-      parsed: unknown;
+      parsed: RelevanceOutput | null;
     };
-    return { raw: invoked.raw, parsed: relevanceOutputSchema.parse(invoked.parsed) };
+    return requireParsedStructuredOutput(invoked, 'assess_relevance');
   };
 
   let context = fullArticleContext(params.text);

@@ -10,7 +10,7 @@ import { buildCreateRuleData, test } from '../fixtures';
 
 /*
  * Routing tags editing through the shared rule form (compose_discover flyout,
- * Actions step), on the ES|QL path: a composed rule with no `builder_type`.
+ * Actions step), on the ES|QL path: a composed rule with no `builder` metadata.
  */
 const TEST_INDEX = `test-rule-routing-tags-edit-${Date.now()}`;
 
