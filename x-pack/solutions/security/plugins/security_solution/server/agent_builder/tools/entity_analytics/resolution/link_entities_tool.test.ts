@@ -77,6 +77,7 @@ const seedApprovedLink = (
   ctx: ReturnType<typeof buildHandlerContextWithPrompts>,
   state: {
     targetEuid: string;
+    targetSelection?: 'user' | 'suggested';
     resolved: string[];
     unresolved: Array<{ entityId: string; status: string }>;
   } = {
@@ -85,7 +86,10 @@ const seedApprovedLink = (
     unresolved: [],
   }
 ) => {
-  (ctx.stateManager.getState as jest.Mock).mockReturnValue(state);
+  (ctx.stateManager.getState as jest.Mock).mockReturnValue({
+    targetSelection: 'user',
+    ...state,
+  });
   return ctx;
 };
 
@@ -132,6 +136,12 @@ describe('linkEntitiesTool', () => {
   });
 
   describe('schema', () => {
+    it('accepts a payload without a target', () => {
+      expect(tool.schema.safeParse({ entityIds: ['host:server1', 'host:server2'] }).success).toBe(
+        true
+      );
+    });
+
     it('accepts a valid payload', () => {
       expect(
         tool.schema.safeParse({ targetId: 'host:server1', entityIds: ['host:server2'] }).success
@@ -168,6 +178,158 @@ describe('linkEntitiesTool', () => {
       expect(result.results).toEqual([notFoundResult]);
     });
 
+    describe('suggested target', () => {
+      const unpromptedCtx = () =>
+        buildHandlerContextWithPrompts(mocks, { checkStatus: ConfirmationStatus.unprompted });
+
+      it('proposes the identity-provider entity when no target is given', async () => {
+        mockResolveEntityIdsForResolution.mockResolvedValueOnce({
+          resolved: [
+            { euid: 'user:jsmith.local', namespace: 'local' },
+            { euid: 'user:jsmith@okta', namespace: 'okta' },
+            { euid: 'user:jsmith@entra', namespace: 'entra_id' },
+          ],
+          unresolved: [],
+        });
+        const ctx = unpromptedCtx();
+
+        await tool.handler({ entityIds: ['jsmith.local', 'jsmith@okta', 'jsmith@entra'] }, ctx);
+
+        expect(mockRequireResolvedEntity).not.toHaveBeenCalled();
+        expect(ctx.stateManager.setState).toHaveBeenCalledWith({
+          targetEuid: 'user:jsmith@okta',
+          targetSelection: 'suggested',
+          resolved: ['user:jsmith.local', 'user:jsmith@entra'],
+          unresolved: [],
+        });
+        const askArgs = (ctx.prompts.askForConfirmation as jest.Mock).mock.calls[0][0];
+        expect(askArgs.message).toContain('Link 2 entities to `user:jsmith@okta` as aliases?');
+      });
+
+      it.each([
+        [
+          'active_directory over okta and entra_id',
+          [
+            { euid: 'user:a@entra', namespace: 'entra_id' },
+            { euid: 'user:a@okta', namespace: 'okta' },
+            { euid: 'user:a@ad', namespace: 'active_directory' },
+          ],
+          'user:a@ad',
+        ],
+        [
+          'okta over entra_id and local',
+          [
+            { euid: 'user:a.local', namespace: 'local' },
+            { euid: 'user:a@entra', namespace: 'entra_id' },
+            { euid: 'user:a@okta', namespace: 'okta' },
+          ],
+          'user:a@okta',
+        ],
+        [
+          'the alphabetically first id when no identity provider is involved',
+          [
+            { euid: 'user:b', namespace: 'local' },
+            { euid: 'user:a', namespace: 'local' },
+          ],
+          'user:a',
+        ],
+        [
+          'an identity provider over an entity without a namespace',
+          [{ euid: 'user:a' }, { euid: 'user:b@okta', namespace: 'okta' }],
+          'user:b@okta',
+        ],
+        [
+          'a non-alias, even when an alias comes from a higher-priority namespace',
+          [
+            { euid: 'user:a@ad', namespace: 'active_directory', resolvedTo: 'user:x' },
+            { euid: 'user:a.local', namespace: 'local' },
+            { euid: 'user:b.local', namespace: 'local' },
+          ],
+          'user:a.local',
+        ],
+      ])('proposes %s', async (_label, resolved, expectedTarget) => {
+        mockResolveEntityIdsForResolution.mockResolvedValueOnce({ resolved, unresolved: [] });
+        const ctx = unpromptedCtx();
+
+        await tool.handler({ entityIds: resolved.map(({ euid }) => euid) }, ctx);
+
+        expect(ctx.stateManager.setState).toHaveBeenCalledWith(
+          expect.objectContaining({ targetEuid: expectedTarget, targetSelection: 'suggested' })
+        );
+      });
+
+      it('asks for a target when only one entity is not already an alias', async () => {
+        mockResolveEntityIdsForResolution.mockResolvedValueOnce({
+          resolved: [
+            { euid: 'user:a', namespace: 'okta' },
+            { euid: 'user:b', namespace: 'okta', resolvedTo: 'user:x' },
+          ],
+          unresolved: [],
+        });
+        const ctx = unpromptedCtx();
+
+        const result = (await tool.handler(
+          { entityIds: ['a', 'b'] },
+          ctx
+        )) as ToolHandlerStandardReturn;
+
+        expect(ctx.prompts.askForConfirmation).not.toHaveBeenCalled();
+        expect((result.results[0] as OtherResult).data.message).toContain(
+          'Ask the user which entity should be the target'
+        );
+      });
+
+      it('asks for a target instead of prompting when only one entity is linkable', async () => {
+        mockResolveEntityIdsForResolution.mockResolvedValueOnce({
+          resolved: [{ euid: 'user:jsmith@okta', namespace: 'okta' }],
+          unresolved: [{ entityId: 'ghost', status: 'not_found' }],
+        });
+        const ctx = unpromptedCtx();
+
+        const result = (await tool.handler(
+          { entityIds: ['jsmith@okta', 'ghost'] },
+          ctx
+        )) as ToolHandlerStandardReturn;
+
+        expect(ctx.prompts.askForConfirmation).not.toHaveBeenCalled();
+        expect(ctx.stateManager.setState).not.toHaveBeenCalled();
+        const other = result.results[0] as OtherResult;
+        expect(other.type).toBe(ToolResultType.other);
+        expect(other.data.message).toContain('Ask the user which entity should be the target');
+        expect(other.data.unresolvedReferences).toEqual([
+          { entityId: 'ghost', status: 'not_found' },
+        ]);
+      });
+
+      it('on accept: reports that the target was suggested', async () => {
+        mockLinkEntities.mockResolvedValueOnce({
+          target_id: 'user:jsmith@okta',
+          entity_type: 'user',
+          linked: ['user:jsmith.local'],
+          skipped: [],
+        });
+        const ctx = seedApprovedLink(
+          buildHandlerContextWithPrompts(mocks, { checkStatus: ConfirmationStatus.accepted }),
+          {
+            targetEuid: 'user:jsmith@okta',
+            targetSelection: 'suggested',
+            resolved: ['user:jsmith.local'],
+            unresolved: [],
+          }
+        );
+
+        const result = (await tool.handler(
+          { entityIds: ['jsmith.local', 'jsmith@okta'] },
+          ctx
+        )) as ToolHandlerStandardReturn;
+
+        expect(mockLinkEntities).toHaveBeenCalledWith('user:jsmith@okta', ['user:jsmith.local'], {
+          awaitVisibility: true,
+        });
+        expect((result.results[0] as OtherResult).data.targetSelection).toBe('suggested');
+      });
+    });
+
     describe('HITL', () => {
       it('on unprompted: confirmation message names the target and previews the resolved entity ids', async () => {
         const ctx = buildHandlerContextWithPrompts(mocks, {
@@ -184,10 +346,11 @@ describe('linkEntitiesTool', () => {
           confirm_text: 'Link',
           cancel_text: 'Cancel',
         });
-        expect(askArgs.message).toContain('"host:server1"');
-        expect(askArgs.message).toContain('host:server2');
+        expect(askArgs.message).toContain('`host:server1`');
+        expect(askArgs.message).toContain('`host:server2`');
         expect(ctx.stateManager.setState).toHaveBeenCalledWith({
           targetEuid: 'host:server1',
+          targetSelection: 'user',
           resolved: ['host:server2'],
           unresolved: [],
         });
@@ -220,6 +383,7 @@ describe('linkEntitiesTool', () => {
         expect(other.type).toBe(ToolResultType.other);
         expect(other.data).toEqual({
           targetId: 'host:server1',
+          targetSelection: 'user',
           entityType: 'host',
           linked: ['host:server2'],
           skipped: [],

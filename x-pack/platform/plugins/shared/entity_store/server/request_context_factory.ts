@@ -149,6 +149,7 @@ export async function createRequestHandlerContext({
       logger,
       esClient: core.elasticsearch.client.asCurrentUser,
       namespace,
+      analytics,
     }),
     entityResolutionRuleClient: new ResolutionRulesClient(
       core.savedObjects.client,

@@ -77,12 +77,13 @@ const seedApprovedUnlink = (
   state: {
     resolved: Array<{ euid: string; resolvedTo?: string }>;
     unresolved: Array<{ entityId: string; status: string }>;
+    nonAliases?: Array<Record<string, unknown>>;
   } = {
     resolved: [{ euid: 'host:server2', resolvedTo: 'host:server1' }],
     unresolved: [],
   }
 ) => {
-  (ctx.stateManager.getState as jest.Mock).mockReturnValue(state);
+  (ctx.stateManager.getState as jest.Mock).mockReturnValue({ nonAliases: [], ...state });
   return ctx;
 };
 
@@ -91,6 +92,7 @@ describe('unlinkEntitiesTool', () => {
   const tool = unlinkEntitiesTool(mocks.mockCore, mocks.mockLogger, mockExperimentalFeatures);
   let mockCoreStart: ReturnType<typeof coreMock.createStart>;
   const mockUnlinkEntities = jest.fn();
+  const mockFindEntitiesWithAliases = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -99,13 +101,17 @@ describe('unlinkEntitiesTool', () => {
       mockCoreStart,
       {
         entityStore: {
-          createResolutionClient: jest.fn().mockReturnValue({ unlinkEntities: mockUnlinkEntities }),
+          createResolutionClient: jest.fn().mockReturnValue({
+            unlinkEntities: mockUnlinkEntities,
+            findEntitiesWithAliases: mockFindEntitiesWithAliases,
+          }),
         },
         security: mocks.mockSecurityStart,
       },
       {},
     ]);
     mockGetResolutionToolAvailability.mockResolvedValue({ status: 'available' });
+    mockFindEntitiesWithAliases.mockResolvedValue(new Map());
     mockResolveEntityIdsForResolution.mockResolvedValue({
       resolved: [{ euid: 'host:server2', resolvedTo: 'host:server1' }],
       unresolved: [],
@@ -174,10 +180,12 @@ describe('unlinkEntitiesTool', () => {
         expect(ctx.stateManager.setState).toHaveBeenCalledWith({
           resolved: [{ euid: 'host:server2', resolvedTo: 'host:server1' }],
           unresolved: [],
+          nonAliases: [],
         });
+        expect(mockFindEntitiesWithAliases).not.toHaveBeenCalled();
       });
 
-      it('on unprompted: flags entities in the batch that are not linked to anything', async () => {
+      it('on unprompted: lists entities that are not aliases separately as skipped', async () => {
         mockResolveEntityIdsForResolution.mockResolvedValueOnce({
           resolved: [
             { euid: 'host:server2', resolvedTo: 'host:server1' },
@@ -194,10 +202,13 @@ describe('unlinkEntitiesTool', () => {
         const askArgs = (ctx.prompts.askForConfirmation as jest.Mock).mock.calls[0][0];
         expect(askArgs.message).toBe(
           [
-            'Unlink 2 entities from their resolution groups?',
+            'Unlink 1 entity from its resolution group?',
             '',
             '- `host:server2` — currently linked to `host:server1`',
-            '- `host:server3` — not currently linked to anything (will be skipped)',
+            '',
+            '1 entity will be skipped:',
+            '',
+            '- 1 entity is not part of any resolution group',
           ].join('\n')
         );
       });
@@ -248,6 +259,176 @@ describe('unlinkEntitiesTool', () => {
           message: expect.stringContaining('nothing to unlink'),
           unlinked: [],
           skipped: ['host:server2', 'host:server3'],
+          nonAliases: [
+            { euid: 'host:server2', kind: 'standalone' },
+            { euid: 'host:server3', kind: 'standalone' },
+          ],
+        });
+        expect(mockFindEntitiesWithAliases).toHaveBeenCalledWith(['host:server2', 'host:server3']);
+      });
+
+      describe('group targets', () => {
+        const targetWithAliases = new Map([['user:head', ['user:alias.one', 'user:alias.two']]]);
+
+        it('reports a group target with its aliases instead of saying it is not linked', async () => {
+          mockResolveEntityIdsForResolution.mockResolvedValueOnce({
+            resolved: [{ euid: 'user:head' }],
+            unresolved: [],
+          });
+          mockFindEntitiesWithAliases.mockResolvedValueOnce(targetWithAliases);
+          const ctx = buildHandlerContextWithPrompts(mocks, {
+            checkStatus: ConfirmationStatus.unprompted,
+          });
+
+          const result = (await tool.handler(
+            { entityIds: ['head'] },
+            ctx
+          )) as ToolHandlerStandardReturn;
+
+          expect(ctx.prompts.askForConfirmation).not.toHaveBeenCalled();
+          const other = result.results[0] as OtherResult;
+          expect(other.data.nonAliases).toEqual([
+            {
+              euid: 'user:head',
+              kind: 'group_target',
+              aliases: ['user:alias.one', 'user:alias.two'],
+            },
+          ]);
+          expect(other.data.message).toContain('offer to unlink some of its listed `aliases`');
+        });
+
+        it('on unprompted: marks a group target in the confirmation and saves it in state', async () => {
+          mockResolveEntityIdsForResolution.mockResolvedValueOnce({
+            resolved: [{ euid: 'user:alias.one', resolvedTo: 'user:head' }, { euid: 'user:head' }],
+            unresolved: [],
+          });
+          mockFindEntitiesWithAliases.mockResolvedValueOnce(targetWithAliases);
+          const ctx = buildHandlerContextWithPrompts(mocks, {
+            checkStatus: ConfirmationStatus.unprompted,
+          });
+
+          await tool.handler({ entityIds: ['alias.one', 'head'] }, ctx);
+
+          const askArgs = (ctx.prompts.askForConfirmation as jest.Mock).mock.calls[0][0];
+          expect(askArgs.message).toBe(
+            [
+              'Unlink 1 entity from its resolution group?',
+              '',
+              '- `user:alias.one` — currently linked to `user:head`',
+              '',
+              '1 entity will be skipped:',
+              '',
+              '- 1 entity is a group primary',
+            ].join('\n')
+          );
+          expect(ctx.stateManager.setState).toHaveBeenCalledWith(
+            expect.objectContaining({
+              nonAliases: [expect.objectContaining({ euid: 'user:head', kind: 'group_target' })],
+            })
+          );
+        });
+
+        it('on unprompted: counts group primaries and standalone entities separately', async () => {
+          mockResolveEntityIdsForResolution.mockResolvedValueOnce({
+            resolved: [
+              { euid: 'user:alias.one', resolvedTo: 'user:head' },
+              { euid: 'user:head' },
+              { euid: 'user:head.two' },
+              { euid: 'user:solo' },
+            ],
+            unresolved: [],
+          });
+          mockFindEntitiesWithAliases.mockResolvedValueOnce(
+            new Map([
+              ['user:head', ['user:alias.one']],
+              ['user:head.two', ['user:alias.two']],
+            ])
+          );
+          const ctx = buildHandlerContextWithPrompts(mocks, {
+            checkStatus: ConfirmationStatus.unprompted,
+          });
+
+          await tool.handler({ entityIds: ['alias.one', 'head', 'head.two', 'solo'] }, ctx);
+
+          const askArgs = (ctx.prompts.askForConfirmation as jest.Mock).mock.calls[0][0];
+          expect(askArgs.message).toContain(
+            [
+              '3 entities will be skipped:',
+              '',
+              '- 2 entities are group primaries',
+              '- 1 entity is not part of any resolution group',
+            ].join('\n')
+          );
+        });
+
+        it('on accept: reports why the skipped entity was not unlinked', async () => {
+          mockUnlinkEntities.mockResolvedValueOnce({
+            entity_type: 'user',
+            unlinked: ['user:alias.one'],
+            skipped: ['user:head'],
+          });
+          const groupTarget = {
+            euid: 'user:head',
+            kind: 'group_target',
+            aliases: ['user:alias.one', 'user:alias.two'],
+          };
+          const ctx = seedApprovedUnlink(
+            buildHandlerContextWithPrompts(mocks, { checkStatus: ConfirmationStatus.accepted }),
+            {
+              resolved: [
+                { euid: 'user:alias.one', resolvedTo: 'user:head' },
+                { euid: 'user:head' },
+              ],
+              unresolved: [],
+              nonAliases: [groupTarget],
+            }
+          );
+
+          const result = (await tool.handler(
+            { entityIds: ['alias.one', 'head'] },
+            ctx
+          )) as ToolHandlerStandardReturn;
+
+          const other = result.results[0] as OtherResult;
+          expect(other.data.skipped).toEqual(['user:head']);
+          expect(other.data.nonAliases).toEqual([groupTarget]);
+        });
+
+        it('with groupEntityId: reports a group target mismatch with its aliases', async () => {
+          mockRequireResolvedEntity.mockResolvedValueOnce({
+            ok: true,
+            identity: {
+              identifierType: 'user',
+              identifier: 'bob.admin',
+              entityStoreId: 'user:bob.admin',
+            },
+          });
+          mockResolveEntityIdsForResolution.mockResolvedValueOnce({
+            resolved: [
+              { euid: 'user:bob.temp', resolvedTo: 'user:bob.admin' },
+              { euid: 'user:head' },
+            ],
+            unresolved: [],
+          });
+          mockFindEntitiesWithAliases.mockResolvedValueOnce(targetWithAliases);
+          const ctx = buildHandlerContextWithPrompts(mocks, {
+            checkStatus: ConfirmationStatus.unprompted,
+          });
+
+          const result = (await tool.handler(
+            { entityIds: ['bob.temp', 'head'], groupEntityId: 'bob.admin' },
+            ctx
+          )) as ToolHandlerStandardReturn;
+
+          expect(ctx.prompts.askForConfirmation).not.toHaveBeenCalled();
+          const other = result.results[0] as OtherResult;
+          expect(other.data.groupMismatches).toEqual([
+            {
+              euid: 'user:head',
+              reason: 'group_target',
+              aliases: ['user:alias.one', 'user:alias.two'],
+            },
+          ]);
         });
       });
 
@@ -403,7 +584,7 @@ describe('unlinkEntitiesTool', () => {
         const other = result.results[0] as OtherResult;
         expect(other.data.groupMismatches).toEqual([
           { euid: 'user:bob.temp', resolvedTo: 'user:bob.other', reason: 'different_group' },
-          { euid: 'user:bob.solo', reason: 'not_linked' },
+          { euid: 'user:bob.solo', reason: 'standalone' },
         ]);
       });
 
@@ -429,7 +610,7 @@ describe('unlinkEntitiesTool', () => {
         expect(other.data.skipped).toEqual(['user:bob.solo', 'user:bob.other.solo']);
       });
 
-      it('reports an entity that is not linked to anything even when every other entity matches', async () => {
+      it('reports an entity that is not an alias even when every other entity matches', async () => {
         seedNamedGroup({ entityStoreId: 'user:bob.admin' });
         mockResolveEntityIdsForResolution.mockResolvedValueOnce({
           resolved: [
@@ -451,7 +632,7 @@ describe('unlinkEntitiesTool', () => {
         expect(mockUnlinkEntities).not.toHaveBeenCalled();
         const other = result.results[0] as OtherResult;
         expect(other.data.groupMismatches).toEqual([
-          { euid: 'user:bob.solo', reason: 'not_linked' },
+          { euid: 'user:bob.solo', reason: 'standalone' },
         ]);
       });
 

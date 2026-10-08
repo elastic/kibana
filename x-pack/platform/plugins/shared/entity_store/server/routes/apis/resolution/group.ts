@@ -16,7 +16,7 @@ import { wrapMiddlewares } from '../../middleware';
 import { enterpriseLicenseMiddleware } from '../../middleware/enterprise_license';
 import { EntitiesNotFoundError, ResolutionSearchTruncatedError } from '../../../domain/errors';
 import { ENTITY_STORE_RESOLUTION_GROUP_VIEW_EVENT } from '../../../telemetry/events';
-import { reportResolutionError } from './utils/resolution_telemetry';
+import { reportResolutionError } from '../../../domain/resolution/resolution_telemetry';
 
 const querySchema = lazySchema(() =>
   z.object({

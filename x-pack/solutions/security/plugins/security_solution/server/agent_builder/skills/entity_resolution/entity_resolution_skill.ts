@@ -52,15 +52,16 @@ User: "Who is host:laptop-a resolved with?" — same flow for "What aliases does
 ### Link
 User: "These two are the same user, jsmith123 and jsmith.contractor — merge them."
 
-1. Decide the target (the account that should remain canonical — ask the user if it isn't clear from context).
-2. Call \`security.link_entities\` with \`{ targetId: 'jsmith123', entityIds: ['jsmith.contractor'] }\`.
-3. The tool handles user confirmation. On accept, report which entities were \`linked\` vs \`skipped\` (already linked). On reject, state that no change was made.
+1. If the user named the target (the account that should remain canonical), pass it as \`targetId\`. If they didn't, omit \`targetId\` and list every entity in \`entityIds\` — the tool proposes a target.
+2. Call \`security.link_entities\` with \`{ targetId: 'jsmith123', entityIds: ['jsmith.contractor'] }\`, or \`{ entityIds: ['jsmith123', 'jsmith.contractor'] }\` when no target was named.
+3. The tool handles user confirmation. On accept, report which entities were \`linked\` vs \`skipped\` (already linked); if the target was proposed (\`targetSelection: 'suggested'\`), say which one and why. On reject, state that no change was made.
 
 ### Unlink
 User: "Unlink jsmith.contractor from that group."
 
 1. Call \`security.unlink_entities\` with \`{ entityIds: ['jsmith.contractor'] }\`. Confirm.
-2. On accept, report the result — \`unlinked\` vs \`skipped\` (wasn't linked to anything).
+2. On accept, report the result — \`unlinked\` vs \`skipped\`. Skipped entities are described in \`nonAliases\`: \`standalone\` (not part of any group) or \`group_target\` (the primary of a group).
+3. A group target can't be unlinked. When one comes back (in \`nonAliases\`, or as a \`group_target\` mismatch), tell the user it is the primary of a group and offer to unlink some of the listed \`aliases\` instead — don't call it "not linked". If the user wants the whole group broken up, unlink every alias (\`security.get_resolution_group\` lists them all).
 
 ### Rules — enumerate then toggle
 User: "What resolution rules do we have, and can you turn off/on the Windows SID one?"
@@ -73,7 +74,6 @@ User: "What resolution rules do we have, and can you turn off/on the Windows SID
 ## Best Practices
 - Always resolve entity references before linking/unlinking — pass whatever the user gave you (name or EUID); the tools resolve it internally. If a reference is ambiguous or not found, relay the tool's message and candidate ids rather than guessing.
 - If a prior tool call in this conversation already returned an entity's EUID (e.g. \`target\`/\`aliases\` from \`security.get_resolution_group\`), pass that EUID to the next call instead of the original name — it resolves as a cheap exact match instead of a fuzzy lookup. Don't call \`security.get_entity\` solely to fetch an id for another tool; these tools already resolve names internally.
-- When the user doesn't specify which entity should be the link target, ask rather than assuming — the target becomes the resolution group's canonical identity.
 - Resolution rule ids are stable strings (e.g. \`email_exact_match\`, \`windows_sid_bridge\`) — always get them from \`security.list_resolution_rules\`, never invent one from the user's wording.
 `;
 

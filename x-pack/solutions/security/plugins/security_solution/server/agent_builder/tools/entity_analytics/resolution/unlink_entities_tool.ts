@@ -10,6 +10,7 @@ import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
+import type { ResolutionClient } from '@kbn/entity-store/server';
 import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { RESOLUTION_GROUP_UPDATED_TOOL_EVENT } from '../../../../../common/entity_analytics/tool_events';
@@ -27,9 +28,18 @@ import { getResolutionToolAvailability } from './resolution_availability';
 
 const MAX_ENTITIES_PER_CALL = 100;
 
+/**
+ * A resolved entity that is not an alias, so it cannot be unlinked: either it is not part of
+ * any group, or it is the target (primary) of one.
+ */
+type NonAliasEntity =
+  | { euid: string; kind: 'standalone' }
+  | { euid: string; kind: 'group_target'; aliases: string[] };
+
 interface ResolvedEntitiesState {
   resolved: ResolvedEntityResult[];
   unresolved: UnresolvedEntityResult[];
+  nonAliases: NonAliasEntity[];
 }
 
 const schema = z.object({
@@ -71,9 +81,9 @@ export const unlinkEntitiesTool = (
 
 Use when the user asks to unmerge, unlink, or split entities that were previously resolved together (e.g. "unlink this alias", "these shouldn't be merged, split them apart"). Entity references are resolved to canonical EUIDs automatically — pass names or ids as the user gave them.
 
-When the user names what to unlink *from* ("unlink bob.temp from bob.admin"), pass it as \`groupEntityId\` so every entity in the batch is verified to be in that group first. If any of them turns out not to be in that group — either because it belongs to a different one or because it is not linked to anything — nothing is unlinked and those entities are reported back in \`groupMismatches\`, each with the \`reason\` it did not match, so you can check with the user. One call handles one group — to unlink from several groups, make a separate call per group.
+When the user names what to unlink *from* ("unlink bob.temp from bob.admin"), pass it as \`groupEntityId\` so every entity in the batch is verified to be in that group first. If any of them turns out not to be in that group — either because it belongs to a different one or because it is not an alias (it is standalone, reason \`standalone\`, or the target of a group, reason \`group_target\`) — nothing is unlinked and those entities are reported back in \`groupMismatches\`, each with the \`reason\` it did not match, so you can check with the user. One call handles one group — to unlink from several groups, make a separate call per group.
 
-Entity references that don't resolve to a canonical id are excluded from the batch and reported back, not treated as an error. Beyond that, the call is all-or-nothing: an unlinking failure rejects the whole batch with an error (the message states why). Entities that are not currently an alias of anything (i.e. not linked) are reported as \`skipped\`, not an error; if none of the entities are linked there is nothing to unlink, so that is reported back immediately without asking for confirmation. This tool only unlinks — it does not affect any other members remaining in the group, and it does not itself recalculate risk scores (that happens separately, next time scoring runs).`,
+Entity references that don't resolve to a canonical id are excluded from the batch and reported back, not treated as an error. Beyond that, the call is all-or-nothing: an unlinking failure rejects the whole batch with an error (the message states why). Entities that are not currently an alias of anything are reported as \`skipped\`, not an error, and described in \`nonAliases\`: \`kind: 'standalone'\` (not part of any group) or \`kind: 'group_target'\` (the primary of a group, with its \`aliases\`). A group target cannot be unlinked: tell the user it is the primary of a group and offer to unlink some of its listed aliases instead. If none of the entities is an alias there is nothing to unlink, so that is reported back immediately without asking for confirmation. This tool only unlinks — it does not affect any other members remaining in the group, and it does not itself recalculate risk scores (that happens separately, next time scoring runs).`,
     schema,
     tags: ['security', 'entity-store', 'entity-analytics', 'resolution'],
     annotations: {
@@ -159,6 +169,10 @@ Entity references that don't resolve to a canonical id are excluded from the bat
             awaitVisibility: true,
           });
 
+          const skippedNonAliases = resolvedEntities.nonAliases.filter(({ euid }) =>
+            result.skipped.includes(euid)
+          );
+
           telemetryTracker.recordResultCount(result.unlinked.length);
           events.sendUiEvent(RESOLUTION_GROUP_UPDATED_TOOL_EVENT, {});
           return {
@@ -170,6 +184,7 @@ Entity references that don't resolve to a canonical id are excluded from the bat
                   entityType: result.entity_type,
                   unlinked: result.unlinked,
                   skipped: result.skipped,
+                  ...(skippedNonAliases.length > 0 ? { nonAliases: skippedNonAliases } : {}),
                   ...(resolvedEntities.unresolved.length > 0
                     ? { unresolvedReferences: resolvedEntities.unresolved }
                     : {}),
@@ -204,7 +219,6 @@ Entity references that don't resolve to a canonical id are excluded from the bat
           spaceId,
           entityIds: params.entityIds,
         });
-        stateManager.setState<ResolvedEntitiesState>({ resolved, unresolved });
 
         // 4. If none of the entities could be resolved, do not proceed with the unlinking action
         if (resolved.length === 0) {
@@ -241,7 +255,15 @@ Entity references that don't resolve to a canonical id are excluded from the bat
           };
         }
 
-        // 5. If nothing in the batch is actually an alias, unlinking is a no-op. Report it
+        // 5. Get the classified non-alias entities to inform the user if they are not part of any group or the primary of a group
+        const nonAliases = await getNonAliasEntities(
+          resolved,
+          entityStore.createResolutionClient(client, spaceId)
+        );
+
+        stateManager.setState<ResolvedEntitiesState>({ resolved, unresolved, nonAliases });
+
+        // 6. If nothing in the batch is actually an alias, unlinking is a no-op. Report it
         // instead of asking the user to confirm a change that would do nothing.
         if (resolved.every((entity) => !entity.resolvedTo)) {
           return {
@@ -251,9 +273,10 @@ Entity references that don't resolve to a canonical id are excluded from the bat
                 type: ToolResultType.other,
                 data: {
                   message:
-                    'None of the given entities are currently linked to a resolution group, so there is nothing to unlink.',
+                    'None of the given entities is an alias in a resolution group, so there is nothing to unlink. See `nonAliases`: an entity of kind "standalone" is not part of any group; one of kind "group_target" is the primary of a group and cannot be unlinked, so tell the user and offer to unlink some of its listed `aliases` instead.',
                   unlinked: [],
                   skipped: resolved.map((entity) => entity.euid),
+                  nonAliases,
                   ...(unresolved.length > 0 ? { unresolvedReferences: unresolved } : {}),
                 },
               },
@@ -261,15 +284,28 @@ Entity references that don't resolve to a canonical id are excluded from the bat
           };
         }
 
-        // 6. Check if the entities are from the group the user named. If not it might be a mistake, so we need to report it to the user
+        // 7. Check if the entities are from the group the user named. If not it might be a mistake, so we need to report it to the user
         if (groupTargetId) {
+          const nonAliasByEuid = new Map(nonAliases.map((entity) => [entity.euid, entity]));
           const groupMismatches = resolved
             .filter((entity) => entity.resolvedTo !== groupTargetId)
-            .map((entity) =>
-              entity.resolvedTo
-                ? { euid: entity.euid, resolvedTo: entity.resolvedTo, reason: 'different_group' }
-                : { euid: entity.euid, reason: 'not_linked' }
-            );
+            .map((entity) => {
+              if (entity.resolvedTo) {
+                return {
+                  euid: entity.euid,
+                  resolvedTo: entity.resolvedTo,
+                  reason: 'different_group',
+                };
+              }
+              const nonAlias = nonAliasByEuid.get(entity.euid);
+              return nonAlias?.kind === 'group_target'
+                ? {
+                    euid: entity.euid,
+                    reason: nonAlias.kind,
+                    aliases: nonAlias.aliases,
+                  }
+                : { euid: entity.euid, reason: 'standalone' };
+            });
 
           if (groupMismatches.length > 0) {
             return {
@@ -278,7 +314,7 @@ Entity references that don't resolve to a canonical id are excluded from the bat
                   tool_result_id: getToolResultId(),
                   type: ToolResultType.other,
                   data: {
-                    message: `Some of the given entities are not in the resolution group of "${resolvedGroupEntityId}" (target "${groupTargetId}"). For entries with reason "different_group", tell the user which group the entity is actually in (\`resolvedTo\`) and ask whether to unlink it from that group instead. For entries with reason "not_linked", the entity is not linked to anything and is already standalone, so there is nothing to unlink for it.`,
+                    message: `Some of the given entities are not in the resolution group of "${resolvedGroupEntityId}" (target "${groupTargetId}"). For entries with reason "different_group", tell the user which group the entity is actually in (\`resolvedTo\`) and ask whether to unlink it from that group instead. For entries with reason "standalone", the entity is not linked to anything, so there is nothing to unlink for it. For entries with reason "group_target", the entity is the primary of a group and cannot be unlinked: tell the user, and offer to unlink some of its listed \`aliases\` instead`,
                     groupMismatches,
                   },
                 },
@@ -287,18 +323,19 @@ Entity references that don't resolve to a canonical id are excluded from the bat
           }
         }
 
-        // 7. Since unlinking is a mutation action, ask the user for confirmation before proceeding
-        const noun = resolved.length === 1 ? 'entity' : 'entities';
-        const groupNoun =
-          resolved.length === 1 ? 'its resolution group' : 'their resolution groups';
+        // 8. Since unlinking is a mutation action, ask the user for confirmation before proceeding
+        const aliases = resolved.filter(({ resolvedTo }) => resolvedTo);
+        const noun = aliases.length === 1 ? 'entity' : 'entities';
+        const groupNoun = aliases.length === 1 ? 'its resolution group' : 'their resolution groups';
         telemetryTracker.recordAwaitingConfirmation();
         return prompts.askForConfirmation({
           id: promptId,
           title: 'Unlink entities',
           message: [
-            `Unlink ${resolved.length} ${noun} from ${groupNoun}?`,
+            `Unlink ${aliases.length} ${noun} from ${groupNoun}?`,
             '',
-            formatUnlinkTargetsForPrompt(resolved),
+            formatUnlinkTargetsForPrompt(aliases),
+            ...(nonAliases.length > 0 ? ['', formatSkippedEntitiesForPrompt(nonAliases)] : []),
           ].join('\n'),
           confirm_text: 'Unlink',
           cancel_text: 'Cancel',
@@ -323,25 +360,68 @@ Entity references that don't resolve to a canonical id are excluded from the bat
   };
 };
 
+/**
+ * Finds out, for the resolved entities that are not aliases, whether each one is standalone or the target of a group.
+ */
+const getNonAliasEntities = async (
+  resolved: readonly ResolvedEntityResult[],
+  resolutionClient: ResolutionClient
+): Promise<NonAliasEntity[]> => {
+  const euids = resolved.filter(({ resolvedTo }) => !resolvedTo).map(({ euid }) => euid);
+  if (euids.length === 0) {
+    return [];
+  }
+
+  const aliasesByTarget = await resolutionClient.findEntitiesWithAliases(euids);
+  return euids.map((euid): NonAliasEntity => {
+    const aliases = aliasesByTarget.get(euid) ?? [];
+    return aliases.length > 0
+      ? { euid, kind: 'group_target', aliases }
+      : { euid, kind: 'standalone' };
+  });
+};
+
 const ENTITY_PREVIEW_LIMIT = 10;
 /**
  * Render EUIDs alongside the resolution group target each one is currently linked to,
  * so the user confirms against the group actually being modified rather than the alias
- * name alone. Entities without a `resolvedTo` are not aliases and are marked as such —
- * they will be skipped by the unlink.
+ * name alone.
  */
-const formatUnlinkTargetsForPrompt = (entities: readonly ResolvedEntityResult[]): string => {
-  const shown = entities.slice(0, ENTITY_PREVIEW_LIMIT);
-  const lines = shown.map((entity) => {
-    const target = entity.resolvedTo;
-    return target
-      ? `- \`${entity.euid}\` — currently linked to \`${target}\``
-      : `- \`${entity.euid}\` — not currently linked to anything (will be skipped)`;
-  });
+const formatUnlinkTargetsForPrompt = (aliases: readonly ResolvedEntityResult[]): string => {
+  const shown = aliases.slice(0, ENTITY_PREVIEW_LIMIT);
+  const lines = shown.map(
+    (entity) => `- \`${entity.euid}\` — currently linked to \`${entity.resolvedTo}\``
+  );
 
-  const remaining = entities.length - shown.length;
+  const remaining = aliases.length - shown.length;
   if (remaining > 0) {
     lines.push(`- … and ${remaining} more`);
   }
   return lines.join('\n');
+};
+
+/** Summarizes the entities that will be skipped because they are not aliases, and why. */
+const formatSkippedEntitiesForPrompt = (nonAliases: readonly NonAliasEntity[]): string => {
+  const groupTargets = nonAliases.filter(({ kind }) => kind === 'group_target').length;
+  const standalone = nonAliases.length - groupTargets;
+  const countOf = (count: number): string => `${count} ${count === 1 ? 'entity' : 'entities'}`;
+
+  return [
+    `${countOf(nonAliases.length)} will be skipped:`,
+    '',
+    ...(groupTargets > 0
+      ? [
+          `- ${countOf(groupTargets)} ${
+            groupTargets === 1 ? 'is a group primary' : 'are group primaries'
+          }`,
+        ]
+      : []),
+    ...(standalone > 0
+      ? [
+          `- ${countOf(standalone)} ${
+            standalone === 1 ? 'is' : 'are'
+          } not part of any resolution group`,
+        ]
+      : []),
+  ].join('\n');
 };
