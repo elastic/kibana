@@ -46,10 +46,20 @@ export function DiagnosticsIndexTemplates() {
         }
 
         if (!exists) {
-          return <EuiBadge color="danger">Not found</EuiBadge>;
+          return (
+            <EuiBadge color="danger">
+              {i18n.translate('xpack.apm.columns.notFoundBadgeLabel', {
+                defaultMessage: 'Not found',
+              })}
+            </EuiBadge>
+          );
         }
 
-        return <EuiBadge color="green">OK</EuiBadge>;
+        return (
+          <EuiBadge color="green">
+            {i18n.translate('xpack.apm.columns.okBadgeLabel', { defaultMessage: 'OK' })}
+          </EuiBadge>
+        );
       },
       truncateText: true,
     },
@@ -59,7 +69,10 @@ export function DiagnosticsIndexTemplates() {
     <>
       <NonStandardIndexTemplateCalout diagnosticsBundle={diagnosticsBundle} />
       <EuiText>
-        This section lists the names of the default APM Index Templates and whether it exists or not
+        {i18n.translate('xpack.apm.diagnosticsIndexTemplates.thisSectionListsTheTextLabel', {
+          defaultMessage:
+            'This section lists the names of the default APM Index Templates and whether it exists or not',
+        })}
       </EuiText>
 
       <EuiSpacer />
@@ -89,8 +102,21 @@ function NonStandardIndexTemplateCalout({
 
   return (
     <>
-      <EuiCallOut title="Non-standard index templates" color="warning" iconType="warning">
-        The following index templates do not follow the recommended naming scheme:{' '}
+      <EuiCallOut
+        title={i18n.translate(
+          'xpack.apm.nonStandardIndexTemplateCalout.euiCallOut.nonstandardIndexTemplatesLabel',
+          { defaultMessage: 'Non-standard index templates' }
+        )}
+        color="warning"
+        iconType="warning"
+      >
+        {i18n.translate(
+          'xpack.apm.nonStandardIndexTemplateCalout.theFollowingIndexTemplatesCallOutLabel',
+          {
+            defaultMessage:
+              'The following index templates do not follow the recommended naming scheme:',
+          }
+        )}{' '}
         {nonStandardIndexTemplates.map(({ name }) => (
           <EuiBadge>{name}</EuiBadge>
         ))}

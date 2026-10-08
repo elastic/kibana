@@ -34,7 +34,9 @@ export function FieldMappingStatus() {
         data-test-subj="apmFieldMappingStatusSeeDetailsLink"
         href={router.link('/diagnostics/indices', { query })}
       >
-        See details
+        {i18n.translate('xpack.apm.fieldMappingStatus.seeDetailsLinkLabel', {
+          defaultMessage: 'See details',
+        })}
       </EuiLink>
     </TabStatus>
   );

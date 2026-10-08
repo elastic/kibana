@@ -32,7 +32,11 @@ export function TabStatus({
                   {i18n.translate('xpack.apm.tabStatus.okBadgeLabel', { defaultMessage: 'OK' })}
                 </EuiBadge>
               ) : (
-                <EuiBadge color="warning">Warning</EuiBadge>
+                <EuiBadge color="warning">
+                  {i18n.translate('xpack.apm.tabStatus.warningBadgeLabel', {
+                    defaultMessage: 'Warning',
+                  })}
+                </EuiBadge>
               )}
             </EuiFlexItem>
           </EuiFlexGroup>

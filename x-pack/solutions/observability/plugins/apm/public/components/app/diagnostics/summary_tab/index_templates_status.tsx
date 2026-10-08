@@ -32,7 +32,9 @@ export function IndexTemplatesStatus() {
         data-test-subj="apmIndexTemplatesStatusSeeDetailsLink"
         href={router.link('/diagnostics/index-templates', { query })}
       >
-        See details
+        {i18n.translate('xpack.apm.indexTemplatesStatus.seeDetailsLinkLabel', {
+          defaultMessage: 'See details',
+        })}
       </EuiLink>
     </TabStatus>
   );

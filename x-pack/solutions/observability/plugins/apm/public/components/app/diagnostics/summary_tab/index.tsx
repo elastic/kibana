@@ -58,9 +58,8 @@ function CrossClusterSearchCallout() {
       )}
       color="warning"
     >
-      The APM index settings is targetting remote clusters. Please note that this is not currently
-      supported by the Diagnostics Tool and functionality will therefore be limited.
-    </EuiCallOut>
+      {i18n.translate('xpack.apm.crossClusterSearchCallout.theAPMIndexSettingsCallOutLabel', { defaultMessage: 'The APM index settings is targetting remote clusters. Please note that this is not currently
+      supported by the Diagnostics Tool and functionality will therefore be limited.' })}</EuiCallOut>
   );
 }
 
@@ -75,9 +74,8 @@ function PrivilegesCallout({ diagnosticsBundle }: { diagnosticsBundle: Diagnosti
 
   return (
     <>
-      <EuiCallOut title="Insufficient access" color="warning">
-        Not all features are available due to missing privileges.
-        <br />
+      <EuiCallOut title={i18n.translate('xpack.apm.privilegesCallout.euiCallOut.insufficientAccessLabel', { defaultMessage: 'Insufficient access' })} color="warning">
+        {i18n.translate('xpack.apm.privilegesCallout.notAllFeaturesAreCallOutLabel', { defaultMessage: 'Not all features are available due to missing privileges.' })}<br />
         <br />
         <EuiDescriptionList
           listItems={[

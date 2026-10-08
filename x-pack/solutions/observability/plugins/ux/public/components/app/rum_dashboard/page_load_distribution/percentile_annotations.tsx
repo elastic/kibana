@@ -60,9 +60,21 @@ export function PercentileAnnotations({ percentiles }: Props) {
             <span data-cy="percentile-markers">
               <EuiToolTip
                 title={<PercentileTooltip annotation={annotation} />}
-                content={<span>Pages loaded: {Math.round(annotation.dataValue)}</span>}
+                content={
+                  <span>
+                    {i18n.translate('xpack.ux.percentileAnnotations.span.pagesLoadedLabel', {
+                      defaultMessage: 'Pages loaded:',
+                    })}
+                    {Math.round(annotation.dataValue)}
+                  </span>
+                }
               >
-                <>{annotation.details}th</>
+                <>
+                  {annotation.details}
+                  {i18n.translate('xpack.ux.percentileAnnotations.thLabel', {
+                    defaultMessage: 'th',
+                  })}
+                </>
               </EuiToolTip>
             </span>
           }

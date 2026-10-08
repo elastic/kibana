@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFieldNumber, EuiFlexItem, EuiFormPrepend } from '@elastic/eui';
 import type { ColorMapping } from '../../config';
@@ -63,7 +64,9 @@ export const Range: React.FC<{
           onChange={(e) =>
             updateValue(rule.min, +e.currentTarget.value, rule.minInclusive, rule.maxInclusive)
           }
-          aria-label="The max value"
+          aria-label={i18n.translate('coloring.range.euiFieldNumber.theMaxValueLabel', {
+            defaultMessage: 'The max value',
+          })}
         />
       </EuiFlexItem>
     </>
