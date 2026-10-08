@@ -7,6 +7,7 @@
 
 import {
   MAX_SIGNAL_DESCRIPTION_LENGTH,
+  SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
   type SignificantEvent,
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
@@ -14,6 +15,7 @@ import {
   DEFAULT_EVENTS_SEARCH_FROM,
   DEFAULT_EVENTS_SEARCH_TO,
 } from '../../../lib/significant_events/events';
+import { isBreachMemberSignal } from '../../../lib/significant_events/events/event_members';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 
 export const EVENT_SEARCH_DEFAULT_PER_PAGE = 20;
@@ -25,6 +27,19 @@ export const DESCRIPTION_CONTENT_LENGTH =
   MAX_SIGNAL_DESCRIPTION_LENGTH - DESCRIPTION_TRUNCATION_SUFFIX.length;
 
 export type EventSearchView = 'compact' | 'full';
+
+/**
+ * `active` means live: a recovering event is still the episode a re-firing rule continues, so
+ * routing must see it. Any other status filters to exactly that status.
+ */
+const toStatusFilter = (
+  status: SignificantEventStatus | undefined
+): SignificantEventStatus[] | undefined => {
+  if (status === undefined) {
+    return undefined;
+  }
+  return status === 'active' ? [...SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS] : [status];
+};
 
 export const normalizeEventSearchQuery = (query: string | undefined): string | undefined => {
   const normalizedQuery = query?.trim();
@@ -74,9 +89,9 @@ export interface CompactEventSearchItem
     | 'symptom_hypothesis'
     | 'title'
   > {
-  signal_rule_uuids: string[];
   signal_counts: SignalSummary;
-  unresolved_rule_uuids: string[];
+  /** Rules whose signal asserts a breach on the event: the members the status evaluation probes. */
+  signal_rule_uuids: string[];
 }
 
 interface DetailedEventSearchItem
@@ -117,15 +132,12 @@ export type EventSearchResponse =
 
 type Signal = NonNullable<SignificantEvent['signals']>[number];
 
-const preventsClosure = (signal: Signal): boolean =>
-  signal.verdict === 'confirms' || signal.verdict === 'inconclusive';
+const byMemberThenRecency = (left: Signal, right: Signal): number => {
+  const leftIsMember = isBreachMemberSignal(left);
+  const rightIsMember = isBreachMemberSignal(right);
 
-const byClosureStatusThenRecency = (left: Signal, right: Signal): number => {
-  const leftPreventsClosure = preventsClosure(left);
-  const rightPreventsClosure = preventsClosure(right);
-
-  if (leftPreventsClosure !== rightPreventsClosure) {
-    return leftPreventsClosure ? -1 : 1;
+  if (leftIsMember !== rightIsMember) {
+    return leftIsMember ? -1 : 1;
   }
   return (right.collected_at ?? '').localeCompare(left.collected_at ?? '');
 };
@@ -147,9 +159,8 @@ const collectSignalMetadata = (signals: Signal[]) =>
     (metadata, signal) => {
       const ruleUuid = getRuleUuid(signal);
       if (ruleUuid !== undefined) {
-        metadata.ruleUuids.add(ruleUuid);
-        if (preventsClosure(signal)) {
-          metadata.closureBlockingRuleUuids.add(ruleUuid);
+        if (isBreachMemberSignal(signal)) {
+          metadata.memberRuleUuids.add(ruleUuid);
         }
       }
       metadata.signalCounts.total++;
@@ -157,8 +168,7 @@ const collectSignalMetadata = (signals: Signal[]) =>
       return metadata;
     },
     {
-      ruleUuids: new Set<string>(),
-      closureBlockingRuleUuids: new Set<string>(),
+      memberRuleUuids: new Set<string>(),
       signalCounts: createSignalSummary(),
     }
   );
@@ -188,13 +198,12 @@ const toEventSearchItemBase = (
 
 const toCompactEvent = (event: SignificantEvent): CompactEventSearchItem => {
   const signals = event.signals ?? [];
-  const { ruleUuids, closureBlockingRuleUuids, signalCounts } = collectSignalMetadata(signals);
+  const { memberRuleUuids, signalCounts } = collectSignalMetadata(signals);
   return {
     ...toEventSearchItemBase(event),
     summary: event.summary,
-    signal_rule_uuids: [...ruleUuids].sort(),
     signal_counts: signalCounts,
-    unresolved_rule_uuids: [...closureBlockingRuleUuids].sort(),
+    signal_rule_uuids: [...memberRuleUuids].sort(),
     causal_features: event.causal_features,
     blast_radius: event.blast_radius,
   };
@@ -210,7 +219,7 @@ const toDetailedEvent = (
   signalsPage: number,
   signalsPerPage: number
 ): DetailedEventSearchItem => {
-  const signals = [...(event.signals ?? [])].sort(byClosureStatusThenRecency);
+  const signals = [...(event.signals ?? [])].sort(byMemberThenRecency);
   const start = (signalsPage - 1) * signalsPerPage;
   const pageSignals = signals.slice(start, start + signalsPerPage);
   return {
@@ -278,7 +287,7 @@ export async function searchEventsToolHandler<V extends EventSearchView = 'compa
   const response = hasEventSearchFilters(params)
     ? await eventSearchClient.findLatestByCurrentStatePaginated({
         ...sharedParams,
-        status: params.status ? [params.status] : undefined,
+        status: toStatusFilter(params.status),
         ruleUuids: params.rule_uuids,
         eventIds: params.event_ids,
         topologyFeatureIds: params.topology_feature_ids,

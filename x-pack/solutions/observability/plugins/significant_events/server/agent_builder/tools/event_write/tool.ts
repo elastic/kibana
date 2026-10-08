@@ -36,14 +36,21 @@ import {
   trackTelemetryBestEffort,
 } from '../bulk_write';
 import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '../../agents/discovery/discovery';
+import { agentLifecycle } from './agent_lifecycle';
 import { eventsWriteBulkHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEventsTools.eventsWrite;
 
+/**
+ * Every item the agent writes asserts a breach, which is the status it asks for: `active`. The
+ * state machine resolves the status actually written (`agentLifecycle`): `recovering` and
+ * `inactive` belong to the status evaluation, never to the agent.
+ */
+const AGENT_WRITE_STATUS = 'active' as const;
+
 export const eventsWriteItemSchema = significantEventSchema
   .pick({
     event_id: true,
-    status: true,
     stream_names: true,
     title: true,
     symptom_hypothesis: true,
@@ -58,6 +65,14 @@ export const eventsWriteItemSchema = significantEventSchema
     conversation_id: true,
   })
   .extend({
+    // Rejected (not stripped), so a stale caller trying to close an event fails loudly instead of
+    // having its item written `active`.
+    status: z
+      .never({
+        error:
+          'status is not an input: events open active; the engine manages recovering and inactive.',
+      })
+      .optional(),
     event_id: z
       .string()
       .optional()
@@ -108,32 +123,24 @@ export const eventsWriteItemSchema = significantEventSchema
   )
   .superRefine((item, ctx) => {
     const signals = item.signals ?? [];
-    const grounded = signals.filter((s) => s.evidence != null);
-    const hasConfirms = grounded.some((s) => s.verdict === 'confirms');
-    const hasOffTopicObservedError = grounded.some((s) => s.verdict === 'off_topic');
+    const hasConfirms = signals.some((s) => s.evidence != null && s.verdict === 'confirms');
+    const hasOffTopicObservedError = signals.some(
+      (s) => s.evidence != null && s.verdict === 'off_topic'
+    );
     const hasNotChecked = signals.some((s) => s.verdict === 'not_checked');
 
     if (hasConfirms && hasNotChecked) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
-          'A confirms item cannot include not_checked signals; emit each not_checked detection as its own inactive item.',
+          'A confirms item cannot include not_checked signals; leave each not_checked detection out of the write.',
       });
     }
-    // Continuations inherit prior severity; this cycle's signals may be
-    // inconclusive (telemetry gap, errored query) without a new confirms.
-    if (
-      item.event_id === undefined &&
-      item.status === 'active' &&
-      (item.severity === 'high' || item.severity === 'critical') &&
-      grounded.length > 0 &&
-      !hasConfirms &&
-      !hasOffTopicObservedError
-    ) {
+    if (!hasConfirms && !hasOffTopicObservedError) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
-          'An active event at "high" or above whose signals carry query evidence requires at least one confirms or off_topic (observed-error) signal; without confirmed or observed-error evidence use a lower severity or a non-active status.',
+          'Every item must carry at least one confirms signal, or an off_topic signal with an observed error. Events open on a confirmed breach and the engine moves them to recovering and inactive, so do not write an item for refutes, inconclusive, or not_checked detections alone.',
       });
     }
   });
@@ -162,7 +169,7 @@ const eventsWriteItemsSchema = z
   .describe(
     i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
       defaultMessage:
-        'Non-empty array of event objects. One call assigns every batch detection. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals.',
+        'Non-empty array of event objects. One call assigns every batch detection. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals. Every item must carry a confirms signal (or an off_topic signal with an observed error); status is not an input — events open active and the engine manages recovering and inactive.',
     })
   );
 
@@ -308,12 +315,12 @@ export function createEventsWriteTool({
 
       Discovery calls must set top-level \`source\` to \`"discovery"\`.
 
-      **With event_id**: append a version to an existing event with the supplied status.
-      Signals and topology are merged with prior versions. No-op if severity and status are
+      **With event_id**: append a version to an existing event; a recovering event returns to
+      active. Signals and topology are merged with prior versions. No-op if severity and status are
       unchanged (written: false, reason: unchanged_outcome). For Discovery writes, a completed
       investigation makes the stored severity authoritative. It is preserved unless Discovery
-      marks the event inactive, reactivates an inactive event, or submits a confirmed
-      rule UUID absent from the current event. When no new rule UUIDs are introduced, title and
+      reactivates an inactive event or submits a confirmed rule UUID absent from the current
+      event. When no new rule UUIDs are introduced, title and
       symptom_hypothesis are frozen to the stored values and narrative_preserved: true is returned.
 
       **Without event_id**: find-or-create. When the item has confirmed rules, scans all
@@ -355,8 +362,9 @@ export function createEventsWriteTool({
 
         const data = await eventsWriteBulkHandler({
           eventSearchClient: await getEventSearchClient(),
-          inputs: items,
+          inputs: items.map((item) => ({ ...item, status: AGENT_WRITE_STATUS })),
           source: toolParams.source,
+          resolveLifecycle: agentLifecycle,
           rejectUnknownEventIds:
             getAgentFromRunContext(context.runContext)?.agentId ===
             SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
@@ -399,7 +407,7 @@ export function createEventsWriteTool({
               telemetry.trackAgentToolEventsWrite({
                 success: false,
                 event_id: input.event_id ?? 'unknown',
-                status: input.status,
+                status: AGENT_WRITE_STATUS,
                 written: false,
                 stream_names: input.stream_names,
                 error_message: message,
