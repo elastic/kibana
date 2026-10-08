@@ -14,6 +14,10 @@ import type { ContractOperation } from './types';
 // The mock accepts any token, so the issued ones are fixed.
 const ACCESS_TOKEN = 'contract-mock-access-token';
 const REFRESH_TOKEN = 'contract-mock-refresh-token';
+const ID_TOKEN = 'contract-mock-id-token';
+
+// RFC 7523, which service accounts (e.g. Google's) use to trade a signed JWT for a token.
+const JWT_BEARER = 'urn:ietf:params:oauth:grant-type:jwt-bearer';
 
 // The grant types each OAuth 2 flow uses at its token URL, and the parameters they require.
 const FLOW_GRANTS: Readonly<Record<string, string>> = {
@@ -26,6 +30,7 @@ const GRANT_PARAMETERS: Readonly<Record<string, readonly string[]>> = {
   password: ['username', 'password'],
   authorization_code: ['code'],
   refresh_token: ['refresh_token'],
+  [JWT_BEARER]: ['assertion'],
 };
 
 /** Grant types accepted per token URL, without query string. */
@@ -66,6 +71,8 @@ export const findTokenEndpoints = (operations: readonly ContractOperation[]): To
         }
         if (flow in FLOW_GRANTS) {
           add(toEndpoint(settings.tokenUrl, base), FLOW_GRANTS[flow]);
+          // OpenAPI has no flow for it, but token URLs commonly accept it too.
+          add(toEndpoint(settings.tokenUrl, base), JWT_BEARER);
         }
         add(toEndpoint(settings.refreshUrl ?? settings.tokenUrl, base), 'refresh_token');
       }
@@ -82,6 +89,16 @@ const oauthError = (statusCode: number, error: string, description: string): Con
 
 const hasClientCredentials = (form: URLSearchParams, authorization: string | undefined) =>
   form.has('client_id') || /^basic\s+\S/i.test(authorization ?? '');
+
+const jwtClaims = (jwt: string): Record<string, unknown> | undefined => {
+  const [, payload] = jwt.split('.');
+  try {
+    const claims: unknown = JSON.parse(Buffer.from(payload ?? '', 'base64url').toString('utf8'));
+    return isRecord(claims) ? claims : undefined;
+  } catch {
+    return undefined;
+  }
+};
 
 /**
  * Answers a request to a token URL as an OAuth 2 authorization server would (RFC 6749): a
@@ -114,6 +131,22 @@ export const respondToTokenRequest = (
   }
   if (grant === 'client_credentials' && !hasClientCredentials(form, headers.authorization)) {
     return oauthError(401, 'invalid_client', 'Expected client_id or Basic client authentication');
+  }
+  if (grant === JWT_BEARER) {
+    const claims = jwtClaims(form.get('assertion') ?? '');
+    if (!claims) {
+      return oauthError(400, 'invalid_grant', 'The assertion is not a JWT');
+    }
+    // Google issues an ID token instead when the assertion asks for one.
+    const issued =
+      typeof claims.target_audience === 'string'
+        ? { id_token: ID_TOKEN }
+        : { access_token: ACCESS_TOKEN, token_type: 'Bearer' };
+    return {
+      statusCode: 200,
+      headers: { 'content-type': 'application/json', 'cache-control': 'no-store' },
+      body: { ...issued, expires_in: 3600 },
+    };
   }
   return {
     statusCode: 200,

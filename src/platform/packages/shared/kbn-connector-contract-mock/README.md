@@ -16,7 +16,7 @@ The mock is a standard `fetch`. Connector clients built on axios use it through 
 
 For every request, the mock:
 
-1. routes it to an operation by server URL and path template, answering **404** with the method and URL when none matches and **405** naming the allowed methods when only the method is wrong;
+1. routes it to an operation by server URL and path template, answering **404** with the method and URL when none matches and **405** naming the allowed methods when only the method is wrong. When several templates match, the one with the fewest parameters wins, then the one with the most literal text, so `/items/new` and `/items/{id}:archive` both take precedence over `/items/{id}`;
 2. validates it against the operation, answering **422** with `{ operation, violations }` when it breaks the spec. Parameters are deserialized by `style` and `explode` and checked against their schemas, as is the body for its declared content type. Undeclared query parameters and repeated keys for `explode: false` parameters are flagged too;
 3. builds a response, then validates its status code, headers and body against the spec.
 
@@ -26,7 +26,7 @@ Each request is recorded in `calls` with its operation, status, and request and 
 
 Requests need the credentials of one of the operation's `security` requirements (or the document's), in the place each scheme declares: the `apiKey` header, query parameter or cookie, or an `Authorization` header with the `http` scheme (`Basic`, `Bearer`, …), and `Bearer` for `oauth2` and `openIdConnect`. Any value is accepted. A request without them gets **401** listing what the operation expects, which catches connectors that forget a credential or send it in the wrong place. Schemes that can't be checked on a request, such as `mutualTLS`, count as present, and API keys in the query string aren't reported as undeclared parameters.
 
-The `tokenUrl` and `refreshUrl` of each `oauth2` flow (relative ones resolved against the server) issue stub bearer tokens, as an authorization server would (RFC 6749): a form-encoded `POST` with the `grant_type` of a declared flow and the parameters it requires gets a token, and `client_credentials` also needs `client_id` or Basic client authentication. Other requests get the OAuth error a vendor would return, such as `unsupported_grant_type`. Token URLs the spec also documents as operations are answered by those operations.
+The `tokenUrl` and `refreshUrl` of each `oauth2` flow (relative ones resolved against the server) issue stub bearer tokens, as an authorization server would (RFC 6749): a form-encoded `POST` with the `grant_type` of a declared flow and the parameters it requires gets a token, and `client_credentials` also needs `client_id` or Basic client authentication. Token URLs also accept JWT bearer assertions (RFC 7523, `urn:ietf:params:oauth:grant-type:jwt-bearer`), as service accounts such as Google's send them; signatures aren't checked, and an assertion that claims a `target_audience` gets an `id_token`, as Google issues. Other requests get the OAuth error a vendor would return, such as `unsupported_grant_type`. Token requests are recorded in `calls` with `token: true`. Token URLs the spec also documents as operations are answered by those operations.
 
 Vendor specs are sometimes wrong about authentication too. Trello's declares only OAuth2 for most operations, while the API also takes `key` and `token` query parameters; an overlay can add the missing requirement:
 
