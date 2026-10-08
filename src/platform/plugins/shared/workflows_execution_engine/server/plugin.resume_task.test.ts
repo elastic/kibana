@@ -86,6 +86,7 @@ describe('workflow:resume task runner event fields', () => {
     const initializerContext = coreMock.createPluginInitializerContext({
       logging: { console: false },
       eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+      storage: { source: 'plain_index', dataRetention: '90d' },
     });
     const plugin = new WorkflowsExecutionEnginePlugin(initializerContext);
     const coreSetup = coreMock.createSetup();

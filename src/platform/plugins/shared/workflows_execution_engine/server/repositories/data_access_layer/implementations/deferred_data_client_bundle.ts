@@ -29,8 +29,6 @@ export class DeferredDataClientBundle implements DataClientBundle {
   private readonly dataClientBundle: DataClientBundle;
   private startPromise: Promise<void> | undefined;
   private setupPromise: Promise<void> | undefined;
-  private workflowClient: WorkflowExecutionsDataClient | undefined;
-  private stepClient: StepExecutionsDataClient | undefined;
 
   constructor(private readonly deps: DeferredDataClientBundleDeps) {
     this.dataClientBundle = this.createDataClientBundle();
@@ -59,15 +57,11 @@ export class DeferredDataClientBundle implements DataClientBundle {
   }
 
   createWorkflowDataClient(): WorkflowExecutionsDataClient {
-    this.workflowClient ??= this.deferClient(() =>
-      this.dataClientBundle.createWorkflowDataClient()
-    );
-    return this.workflowClient;
+    return this.deferClient(() => this.dataClientBundle.createWorkflowDataClient());
   }
 
   createStepDataClient(): StepExecutionsDataClient {
-    this.stepClient ??= this.deferClient(() => this.dataClientBundle.createStepDataClient());
-    return this.stepClient;
+    return this.deferClient(() => this.dataClientBundle.createStepDataClient());
   }
 
   private createDataClientBundle(): DataClientBundle {
