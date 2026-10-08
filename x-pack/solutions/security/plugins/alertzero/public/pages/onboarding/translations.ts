@@ -77,6 +77,20 @@ export const workersSelectedCount = (selected: number, total: number) =>
     values: { selected, total },
   });
 
+export const SERVICE_ACCOUNT_SETUP_FAILED_TITLE = i18n.translate(
+  'xpack.alertzero.onboarding.serviceAccountSetupFailedTitle',
+  {
+    defaultMessage: "Some Workers weren't turned on",
+  }
+);
+
+export const serviceAccountSetupFailedText = (failures: string) =>
+  i18n.translate('xpack.alertzero.onboarding.serviceAccountSetupFailedText', {
+    defaultMessage:
+      "AlertZero couldn't set up their service accounts. {failures}. Select Enable and run to try again.",
+    values: { failures },
+  });
+
 export const BACK = i18n.translate('xpack.alertzero.onboarding.back', {
   defaultMessage: 'Back',
 });
@@ -96,10 +110,13 @@ export const ONBOARDING_MODIFY_FORBIDDEN = i18n.translate(
   }
 );
 
-export const ONBOARDING_READ_ONLY_BODY = i18n.translate('xpack.alertzero.onboarding.readOnlyBody', {
-  defaultMessage:
-    'AlertZero automatically investigates security alerts and proposes actions. Ask an administrator to enable a Watch worker to start receiving investigations.',
-});
+export const ONBOARDING_CONTINUE_REQUIRES_WRITE = i18n.translate(
+  'xpack.alertzero.onboarding.continueRequiresWrite',
+  {
+    defaultMessage:
+      'You need the AlertZero All privilege to set up Watches. Ask an administrator to enable them.',
+  }
+);
 
 // Onboarding-specific one-line descriptions, separate from the technical worker descriptions used
 // on the Watch settings page.
@@ -165,10 +182,6 @@ const ONBOARDING_WORKER_EVENT_TRIGGERS: Record<string, string> = {
 
 export const onboardingWorkerEventTrigger = (workerId: string): string | undefined =>
   ONBOARDING_WORKER_EVENT_TRIGGERS[workerId];
-
-export const INTRO_TITLE = i18n.translate('xpack.alertzero.onboarding.intro.title', {
-  defaultMessage: 'AlertZero in 90 seconds',
-});
 
 export const INTRO_PROMO_LEAD = i18n.translate('xpack.alertzero.onboarding.intro.promoLead', {
   defaultMessage: 'AlertZero is a coworker that is always there — always working for you.',

@@ -12,6 +12,7 @@ import { ContentListProvider } from '@kbn/content-list-provider';
 import {
   DEFAULT_EIS_DISPLAY_OPTIONS,
   getProviderOptions,
+  getRegionOptions,
   type GroupedModel,
 } from '../../utils/eis_utils';
 import {
@@ -25,6 +26,7 @@ import {
 } from '../../utils/eis_content_list_utils';
 import { EisModelsListing, type EisViewMode } from './eis_models_listing';
 import { ModelFamilyOptionsProvider } from './eis_model_filters';
+import { RegionOptionsProvider } from './region_filter';
 
 interface EisModelsListingProviderProps {
   models: GroupedModel[];
@@ -92,6 +94,10 @@ export const EisModelsListingProvider = ({
   );
   const fields = useMemo(() => createEisFieldDefinitions(models), [models]);
   const modelFamilyOptions = useMemo(() => getProviderOptions(models), [models]);
+  const regionOptions = useMemo(
+    () => getRegionOptions(models.flatMap((model) => model.endpoints)),
+    [models]
+  );
   const queryKeyScope = `eis-models-listing-${viewMode}-${Number(
     displayOptions.showOutsideRegionPreferences
   )}-${Number(displayOptions.showEndOfLifeModels)}-${Number(displayOptions.showPreviewModels)}`;
@@ -130,11 +136,13 @@ export const EisModelsListingProvider = ({
       {...{ dataSource, features }}
     >
       <ModelFamilyOptionsProvider value={modelFamilyOptions}>
-        <EisModelsListing
-          {...{ onViewModelDetails, displayOptions, hasBlockedModels, viewMode }}
-          onApplyDisplayOptions={setDisplayOptions}
-          onViewModeChange={setViewMode}
-        />
+        <RegionOptionsProvider value={regionOptions}>
+          <EisModelsListing
+            {...{ onViewModelDetails, displayOptions, hasBlockedModels, viewMode }}
+            onApplyDisplayOptions={setDisplayOptions}
+            onViewModeChange={setViewMode}
+          />
+        </RegionOptionsProvider>
       </ModelFamilyOptionsProvider>
     </ContentListProvider>
   );

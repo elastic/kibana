@@ -78,6 +78,7 @@ jest.mock('./compose_discover_form', () => {
       const { setValue, getValues } = useFormContext<FormValues>();
       readCommittedQuery = () => getValues('query');
       readRecovery = () => getValues('recovery');
+      readRoutingTags = () => getValues('metadata.routingTags');
       readTimeField = () => getValues('timeField');
       return (
         <div data-test-subj="composeDiscoverFormMock">
@@ -137,6 +138,7 @@ let yamlRuleFormProps:
   | undefined;
 let readCommittedQuery: (() => RuleQuery) | undefined;
 let readRecovery: (() => FormValues['recovery']) | undefined;
+let readRoutingTags: (() => FormValues['metadata']['routingTags']) | undefined;
 let readTimeField: (() => FormValues['timeField']) | undefined;
 
 jest.mock('./query_sandbox_flyout', () => ({
@@ -335,6 +337,7 @@ describe('ComposeDiscoverFlyout', () => {
     yamlRuleFormProps = undefined;
     readCommittedQuery = undefined;
     readRecovery = undefined;
+    readRoutingTags = undefined;
     readTimeField = undefined;
     mockParseYamlToFormValues = (yaml) => ({
       values: yaml ? defaultYamlFormValues : null,
@@ -2050,6 +2053,22 @@ describe('ComposeDiscoverFlyout', () => {
       });
 
       expect(readRecovery?.()).toBeUndefined();
+    });
+
+    it('clears routing tags when kind changes to signal, so they are never sent for signal rules', () => {
+      const rule = {
+        ...ruleWithRecovery,
+        metadata: { ...ruleWithRecovery.metadata, routing_tags: ['sre'] },
+      };
+      renderFlyout({ mode: 'edit', rule: rule as any });
+
+      expect(readRoutingTags?.()).toEqual(['sre']);
+
+      act(() => {
+        getLatestFormProps().onKindChange('signal');
+      });
+
+      expect(readRoutingTags?.()).toBeUndefined();
     });
 
     it('resets recovery to no_breach when kind changes back to alert', () => {

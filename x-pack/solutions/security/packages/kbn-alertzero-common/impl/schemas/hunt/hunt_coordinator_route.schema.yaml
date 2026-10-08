@@ -429,6 +429,32 @@ paths:
                         data:
                           type: object
                           additionalProperties: true
+                  impacted_entities:
+                    type: array
+                    maxItems: 50
+                    description: >-
+                      Present alongside `sse`: the hosts and users the SSE
+                      entries name, deduplicated across entries, ready for the
+                      investigations impact route. Ids are
+                      `host:<host.name>` or `user:<user.name>`. Capped at 50,
+                      half of what one Investigation's impact may hold, because
+                      every sweep of a report merges onto the same
+                      Investigation.
+                    items:
+                      type: object
+                      required: [id, name, type]
+                      properties:
+                        id:
+                          type: string
+                          minLength: 1
+                          maxLength: 256
+                        name:
+                          type: string
+                          minLength: 1
+                          maxLength: 512
+                        type:
+                          type: string
+                          enum: [host, user]
 components:
   schemas:
     HuntCoordinatorStatus:

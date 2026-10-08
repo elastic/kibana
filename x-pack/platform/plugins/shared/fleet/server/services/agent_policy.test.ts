@@ -57,6 +57,7 @@ import { reassignAgentsFromVersionSpecificPolicies } from './utils/version_speci
 import { agentlessAgentService } from './agents/agentless_agent';
 import { unenrollForAgentPolicyId } from './agents';
 import { getPackageInfo } from './epm/packages';
+import { getPackageInfoCache, setPackageInfoCache } from './epm/packages/cache';
 import { ensureInstalledPackage } from './epm/packages/install';
 
 jest.mock('./spaces/helpers');
@@ -917,6 +918,63 @@ describe('Agent policy', () => {
     });
   });
 
+  describe('list with showAgentless', () => {
+    const emptyResult = { total: 0, saved_objects: [], per_page: 0, page: 1 };
+    const hideAgentless = `NOT ${AGENT_POLICY_SAVED_OBJECT_TYPE}.attributes.supports_agentless:true`;
+
+    it('should not filter agentless policies by default', async () => {
+      const soClient = createSavedObjectClientMock();
+      soClient.find.mockResolvedValueOnce(emptyResult);
+
+      await agentPolicyService.list(soClient, { kuery: '' });
+
+      expect(soClient.find).toHaveBeenCalledWith(expect.objectContaining({ filter: undefined }));
+    });
+
+    it('should hide agentless policies when showAgentless is false', async () => {
+      const soClient = createSavedObjectClientMock();
+      soClient.find.mockResolvedValueOnce(emptyResult);
+
+      await agentPolicyService.list(soClient, { showAgentless: false });
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ filter: hideAgentless })
+      );
+    });
+
+    it('should combine the agentless filter with the kuery', async () => {
+      const soClient = createSavedObjectClientMock();
+      soClient.find.mockResolvedValueOnce(emptyResult);
+
+      await agentPolicyService.list(soClient, {
+        showAgentless: false,
+        kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.name:test`,
+      });
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `(${hideAgentless}) AND (${AGENT_POLICY_SAVED_OBJECT_TYPE}.attributes.name:test)`,
+        })
+      );
+    });
+
+    it('should keep the agentless filter when falling back to a simple search', async () => {
+      const soClient = createSavedObjectClientMock();
+      soClient.find
+        .mockRejectedValueOnce({ output: { statusCode: 400 }, message: 'Bad Request' })
+        .mockResolvedValueOnce(emptyResult);
+
+      await agentPolicyService.list(soClient, {
+        showAgentless: false,
+        kuery: 'agentless',
+      });
+
+      expect(soClient.find).toHaveBeenLastCalledWith(
+        expect.objectContaining({ filter: hideAgentless, search: 'agentless' })
+      );
+    });
+  });
+
   describe('delete', () => {
     let soClient: ReturnType<typeof savedObjectsClientMock.create>;
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
@@ -1219,6 +1277,69 @@ describe('Agent policy', () => {
           ],
         })
       );
+    });
+
+    it('should fall back to package info when version conditions are missing', async () => {
+      const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      // The suite mocks getPackageInfo, so reuse has to go through the real request cache.
+      // collectAgentVersionConditions still calls it once per policy.
+      let lookups = 0;
+      jest.mocked(getPackageInfo).mockImplementation(async ({ pkgName, pkgVersion }) => {
+        const cached = getPackageInfoCache(pkgName, pkgVersion);
+        if (cached) {
+          return cached;
+        }
+        lookups += 1;
+        const packageInfo = {
+          name: pkgName,
+          version: pkgVersion,
+          title: 'Apache',
+          conditions: { agent: { version: '>=8.12.0' } },
+        } as any;
+        setPackageInfoCache(pkgName, pkgVersion, packageInfo);
+        return packageInfo;
+      });
+
+      mockPackagePolicySOs(soClient, [
+        {
+          name: 'apache-1',
+          package: { name: 'apache', title: 'Apache', version: '1.3.2' },
+        },
+        {
+          name: 'apache-2',
+          package: { name: 'apache', title: 'Apache', version: '1.3.2' },
+        },
+      ]);
+
+      try {
+        await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy');
+
+        expect(lookups).toBe(1);
+        expect(getPackageInfo).toHaveBeenCalledTimes(2);
+        expect(getPackageInfo).toHaveBeenCalledWith(
+          expect.objectContaining({
+            pkgName: 'apache',
+            pkgVersion: '1.3.2',
+            prerelease: true,
+          })
+        );
+        expect(soClient.update).toHaveBeenCalledWith(
+          expect.anything(),
+          'agent-policy',
+          expect.objectContaining({
+            has_agent_version_conditions: true,
+            min_agent_version: '8.12.0',
+            package_agent_version_conditions: [
+              { name: 'apache', title: 'Apache', version_condition: '>=8.12.0' },
+              { name: 'apache', title: 'Apache', version_condition: '>=8.12.0' },
+            ],
+          })
+        );
+      } finally {
+        jest.mocked(getPackageInfo).mockReset();
+      }
     });
 
     it('should persist null min_agent_version when no package policies have version conditions', async () => {

@@ -26,6 +26,14 @@ import {
   ALERTZERO_PLUGIN_NAME,
 } from '../common/constants';
 import type { AlertZeroConfig } from './config';
+
+// The investigation and escalation flyouts and AlertZero's queue use the shared
+// `agenticInvestigations` routes, which require these API privileges. Cross-plugin server imports
+// are forbidden, so they are spelled out here and pinned by the plugin tests.
+const INVESTIGATIONS_API_PRIVILEGE_READ = 'read_investigations';
+const INVESTIGATIONS_API_PRIVILEGE_MANAGE = 'manage_investigations';
+const ESCALATIONS_API_PRIVILEGE_READ = 'read_escalations';
+const ESCALATIONS_API_PRIVILEGE_MANAGE = 'manage_escalations';
 import type {
   AlertZeroRequestHandlerContext,
   AlertTriageAttachmentServiceProvider,
@@ -39,6 +47,7 @@ import { registerUiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
+import { installRegisteredWorkerForRequest } from './managed_workflows/worker_registry';
 import { WatchesService } from './services/watches/watches_service';
 import { WorkersService } from './services/workers/workers_service';
 import { ConversationProposalsService } from './services/conversation_proposals/conversation_proposals_service';
@@ -95,6 +104,9 @@ export class AlertZeroPlugin
    * since that consumer starts after this plugin; `WorkersService` reads it lazily per call.
    */
   private alertTriageAttachmentServiceProvider?: AlertTriageAttachmentServiceProvider;
+
+  /** Set in start from `xpack.security.serviceAccounts.enabled`. False until then. */
+  private serviceAccountsEnabled = false;
 
   constructor(context: PluginInitializerContext<AlertZeroConfig>) {
     this.logger = context.logger.get();
@@ -177,13 +189,24 @@ export class AlertZeroPlugin
       privileges: {
         all: {
           app: ['kibana'],
-          api: [ALERTZERO_API_PRIVILEGE_READ, ALERTZERO_API_PRIVILEGE_WRITE],
+          api: [
+            ALERTZERO_API_PRIVILEGE_READ,
+            ALERTZERO_API_PRIVILEGE_WRITE,
+            INVESTIGATIONS_API_PRIVILEGE_READ,
+            INVESTIGATIONS_API_PRIVILEGE_MANAGE,
+            ESCALATIONS_API_PRIVILEGE_READ,
+            ESCALATIONS_API_PRIVILEGE_MANAGE,
+          ],
           savedObject: { all: [], read: [] },
           ui: ['show', 'write'],
         },
         read: {
           app: ['kibana'],
-          api: [ALERTZERO_API_PRIVILEGE_READ],
+          api: [
+            ALERTZERO_API_PRIVILEGE_READ,
+            INVESTIGATIONS_API_PRIVILEGE_READ,
+            ESCALATIONS_API_PRIVILEGE_READ,
+          ],
           savedObject: { all: [], read: [] },
           ui: ['show'],
         },
@@ -193,7 +216,9 @@ export class AlertZeroPlugin
     coreSetup.http.registerRouteHandlerContext<AlertZeroRequestHandlerContext, 'alertzero'>(
       'alertzero',
       async (context) => ({
-        hasRequiredDependencies: Boolean(agentBuilder && proposals && agenticInvestigations),
+        hasRequiredDependencies: Boolean(
+          agentBuilder && proposals && agenticInvestigations && this.serviceAccountsEnabled
+        ),
         subscription: getSubscriptionAvailability({
           isServerless: this.isServerless,
           serverlessTierAvailable: this.serverlessTierAvailable,
@@ -233,9 +258,13 @@ export class AlertZeroPlugin
       };
     }
 
+    this.serviceAccountsEnabled = core.security.serviceAccounts.isEnabled();
+
     const { agentBuilder, agenticInvestigations, proposals } = plugins;
     // Optional dependencies allow the upgrade shell to load without starting feature work.
-    if (!agentBuilder || !proposals || !agenticInvestigations) {
+    // Service accounts are required the same way: with the flag off the plugin stays mounted
+    // for the unavailable screen and does not install or schedule workers.
+    if (!agentBuilder || !proposals || !agenticInvestigations || !this.serviceAccountsEnabled) {
       return {
         registerAlertTriageAttachmentServiceProvider:
           this.registerAlertTriageAttachmentServiceProvider,
@@ -299,6 +328,10 @@ export class AlertZeroPlugin
           core.uiSettings
             .asScopedToClient(core.savedObjects.getScopedClient(request))
             .get<boolean>(SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED),
+      },
+      async (request, registration, options) => {
+        const client = await plugins.workflowsExtensions.getClient(request);
+        await installRegisteredWorkerForRequest(client.managedWorkflows, registration, options);
       }
     );
 

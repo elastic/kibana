@@ -11,7 +11,7 @@ import type { EpisodeFetchErrorSurface } from '../types/episode_data_source';
 export const RELATED_EPISODES_LOAD_ERROR = i18n.translate(
   'xpack.alertingV2EpisodesUi.relatedEpisodes.loadError',
   {
-    defaultMessage: 'Failed to load related alert episodes',
+    defaultMessage: 'Failed to load related alerts',
   }
 );
 
@@ -22,7 +22,7 @@ export const EPISODES_FETCH_ERROR_TOAST_TITLE: Record<
 > = {
   list: (sourceId) =>
     i18n.translate('xpack.alertingV2EpisodesUi.episodes.list.fetchErrorToastTitle', {
-      defaultMessage: 'Failed to fetch alert episodes for {sourceId} alerts',
+      defaultMessage: 'Failed to fetch alerts for {sourceId} alerts',
       values: { sourceId },
     }),
   kpis: (sourceId) =>

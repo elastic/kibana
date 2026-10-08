@@ -29,7 +29,7 @@ const INVESTIGATION_METADATA = {
   status: 'open',
   severity: 'high',
   summary: 'Suspicious activity',
-  workflow_execution_id: 'wf-123', // investigation-only; must not reach the escalation
+  workflow_execution_ids: ['wf-123'], // investigation-only; must not reach the escalation
 };
 
 const MOCK_INVESTIGATION = {
@@ -92,6 +92,7 @@ const makeClient = (overrides: Record<string, jest.Mock> = {}) => ({
     changedFields: [ESCALATION_LINKED_INVESTIGATIONS_FIELD],
   }),
   update: jest.fn().mockResolvedValue(MOCK_ESCALATION),
+  addEvents: jest.fn().mockResolvedValue([]),
   ...overrides,
 });
 
@@ -120,8 +121,14 @@ const makeService = (clientOverrides: Record<string, jest.Mock> = {}) => {
   };
   const getAttachmentsClient = jest.fn().mockResolvedValue(attachmentsClient);
 
+  const impactClient = {
+    getEntityIdsByConversationId: jest.fn().mockResolvedValue(new Map<string, string[]>()),
+  };
+  const getImpactClient = jest.fn().mockReturnValue(impactClient);
+
   const service = new EscalationsService({
     logger,
+    getImpactClient,
     getConversationClient,
     getAttachmentsClient,
     conversationTemplates,
@@ -136,6 +143,8 @@ const makeService = (clientOverrides: Record<string, jest.Mock> = {}) => {
     attachmentsClient,
     conversationTemplates,
     investigationStatusService,
+    getImpactClient,
+    impactClient,
   };
 };
 
@@ -199,7 +208,7 @@ describe('EscalationsService.create', () => {
     ).rejects.toBeInstanceOf(InvalidLinkedInvestigationError);
   });
 
-  it('filters out workflow_execution_id from the copied metadata', async () => {
+  it('filters out workflow_execution_ids from the copied metadata', async () => {
     const { service, client } = makeService();
 
     await service.create(request, {
@@ -209,7 +218,7 @@ describe('EscalationsService.create', () => {
     });
 
     const { metadata } = client.create.mock.calls[0][0];
-    expect(metadata).not.toHaveProperty('workflow_execution_id');
+    expect(metadata).not.toHaveProperty('workflow_execution_ids');
   });
 
   it('sets linked_investigations to [linked_investigation_id] in metadata', async () => {
@@ -374,6 +383,100 @@ describe('EscalationsService.create', () => {
 
     const { metadata } = client.create.mock.calls[0][0];
     expect(metadata.assignees).toEqual(['uid-creator']);
+  });
+});
+
+describe('EscalationsService.create — timeline event', () => {
+  const createBody = {
+    linked_investigation_id: 'inv-1',
+    visibility: 'public' as const,
+    assignees: ['user-a'],
+  };
+
+  it('adds a "created from investigation" event with the investigation title and agent id', async () => {
+    const { service, client } = makeService();
+
+    await service.create(request, createBody);
+
+    expect(client.addEvents).toHaveBeenCalledWith({
+      conversationId: 'escalation-1',
+      events: [
+        {
+          type: 'escalation_created_from_investigation',
+          data: { investigation_id: 'inv-1', title: 'My Investigation', agent_id: 'default-agent' },
+        },
+      ],
+    });
+  });
+
+  it('still returns the escalation when writing the event fails', async () => {
+    const { service } = makeService({
+      addEvents: jest.fn().mockRejectedValue(new Error('boom')),
+    });
+
+    await expect(service.create(request, createBody)).resolves.toEqual(MOCK_ESCALATION);
+  });
+});
+
+describe('EscalationsService.link — timeline events', () => {
+  const escalationWith = (linked: string[]) =>
+    jest.fn().mockResolvedValue({
+      id: 'escalation-1',
+      template_id: ESCALATION_TEMPLATE_ID,
+      metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: linked },
+    });
+
+  it('adds one event per newly linked investigation', async () => {
+    const { service, client } = makeService({ get: escalationWith(['inv-1']) });
+
+    await service.link(request, 'escalation-1', { linked_investigations: ['inv-2', 'inv-3'] });
+
+    expect(client.addEvents).toHaveBeenCalledTimes(1);
+    const { events } = client.addEvents.mock.calls[0][0];
+    expect(
+      events.map((e: { data: { investigation_id: string } }) => e.data.investigation_id)
+    ).toEqual(['inv-2', 'inv-3']);
+    expect(events[0].type).toBe('escalation_investigation_linked');
+  });
+
+  it('skips already linked investigations and in-payload duplicates', async () => {
+    const { service, client } = makeService({ get: escalationWith(['inv-1']) });
+
+    await service.link(request, 'escalation-1', {
+      linked_investigations: ['inv-1', 'inv-2', 'inv-2'],
+    });
+
+    const { events } = client.addEvents.mock.calls[0][0];
+    expect(events).toHaveLength(1);
+    expect(events[0].data.investigation_id).toBe('inv-2');
+  });
+
+  it('does not call addEvents when nothing new was linked', async () => {
+    const { service, client } = makeService({ get: escalationWith(['inv-1']) });
+
+    await service.link(request, 'escalation-1', { linked_investigations: ['inv-1'] });
+
+    expect(client.addEvents).not.toHaveBeenCalled();
+  });
+
+  it('splits more than 10 events across requests', async () => {
+    const { service, client } = makeService({ get: escalationWith([]) });
+    const ids = Array.from({ length: 25 }, (_, i) => `inv-${i}`);
+
+    await service.link(request, 'escalation-1', { linked_investigations: ids });
+
+    expect(client.addEvents.mock.calls.map(([arg]) => arg.events.length)).toEqual([10, 10, 5]);
+  });
+
+  it('still returns the escalation when writing events fails', async () => {
+    const { service } = makeService({
+      get: escalationWith([]),
+      addEvents: jest.fn().mockRejectedValue(new Error('boom')),
+    });
+
+    await expect(
+      service.link(request, 'escalation-1', { linked_investigations: ['inv-1'] })
+    ).resolves.toEqual(MOCK_ESCALATION);
   });
 });
 
@@ -546,6 +649,63 @@ describe('EscalationsService.list', () => {
     expect(result).toEqual({
       pagination: { total: 42, page: 2, per_page: 10 },
       results: [MOCK_SUMMARY],
+    });
+  });
+
+  describe('entity_ids', () => {
+    const withLinked = (id: string, linked: string[]) => ({
+      ...MOCK_SUMMARY,
+      id,
+      metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: linked },
+    });
+
+    it('attaches the deduped union of the linked investigations entity ids', async () => {
+      const { service, impactClient, getImpactClient } = makeService({
+        search: jest.fn().mockResolvedValue({
+          results: [withLinked('e1', ['inv-1', 'inv-2']), withLinked('e2', ['inv-3'])],
+          total: 2,
+        }),
+      });
+      impactClient.getEntityIdsByConversationId.mockResolvedValue(
+        new Map([
+          ['inv-1', ['host-1', 'user-1']],
+          ['inv-2', ['host-1', 'svc-1']],
+        ])
+      );
+
+      const result = await service.list(request, { page: 1, per_page: 50, status: 'open' });
+
+      expect(getImpactClient).toHaveBeenCalledWith(request);
+      expect(impactClient.getEntityIdsByConversationId).toHaveBeenCalledTimes(1);
+      expect(impactClient.getEntityIdsByConversationId).toHaveBeenCalledWith([
+        'inv-1',
+        'inv-2',
+        'inv-3',
+      ]);
+      expect(result.results[0].entity_ids).toEqual(['host-1', 'user-1', 'svc-1']);
+      expect(result.results[1]).not.toHaveProperty('entity_ids');
+    });
+
+    it('skips the impact read when no escalation links an investigation', async () => {
+      const { service, getImpactClient } = makeService({
+        search: jest.fn().mockResolvedValue({ results: [MOCK_SUMMARY], total: 1 }),
+      });
+
+      await service.list(request, { page: 1, per_page: 50, status: 'open' });
+
+      expect(getImpactClient).not.toHaveBeenCalled();
+    });
+
+    it('still returns the rows when the impact read fails', async () => {
+      const row = withLinked('e1', ['inv-1']);
+      const { service, impactClient } = makeService({
+        search: jest.fn().mockResolvedValue({ results: [row], total: 1 }),
+      });
+      impactClient.getEntityIdsByConversationId.mockRejectedValue(new Error('forbidden'));
+
+      const result = await service.list(request, { page: 1, per_page: 50, status: 'open' });
+
+      expect(result.results).toEqual([row]);
     });
   });
 

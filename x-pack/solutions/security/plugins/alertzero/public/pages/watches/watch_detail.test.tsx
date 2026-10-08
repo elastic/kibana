@@ -42,6 +42,15 @@ jest.mock('../../hooks/use_can_write_alertzero', () => ({
 }));
 jest.mock('../../hooks/use_watches_api');
 jest.mock('../../hooks/use_workers_api');
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  useKibana: () => ({
+    services: {
+      http: { get: jest.fn().mockResolvedValue(undefined) },
+      application: { getUrlForApp: jest.fn(() => '/app/workflows') },
+    },
+  }),
+}));
 jest.mock('./components/watches_section_layout', () => ({
   WatchesSectionLayout: ({
     children,
@@ -113,6 +122,8 @@ jest.mock('./components/watches_section_layout', () => ({
   },
 }));
 
+const renderWithI18n = (ui: React.ReactElement) => render(ui, { wrapper: I18nProvider });
+
 const mockUseWatch = jest.mocked(useWatch);
 const mockUseWorkers = jest.mocked(useWorkers);
 const mockUseUpdateWorker = jest.mocked(useUpdateWorker);
@@ -120,18 +131,25 @@ const mockUseCanWriteAlertZero = jest.mocked(useCanWriteAlertZero);
 
 const createWorker = (
   overrides: Partial<Worker> & Pick<Worker, 'id' | 'name' | 'watchIds'>
-): Worker => ({
-  enabled: false,
-  lastRun: null,
-  state: 'paused',
-  settingsRevision: null,
-  workflowId: null,
-  settings: {
-    workerId: overrides.id,
-    autonomy: 'manual',
-  },
-  ...overrides,
-});
+): Worker => {
+  const worker: Worker = {
+    enabled: false,
+    lastRun: null,
+    state: 'paused',
+    settingsRevision: null,
+    workflowId: null,
+    settings: {
+      workerId: overrides.id,
+      autonomy: 'manual',
+    },
+    ...overrides,
+  };
+  return {
+    ...worker,
+    // Workers that already have an account skip prebuilt account setup on save.
+    settings: { ...worker.settings, serviceAccountId: 'kibana/az-worker-1' },
+  };
+};
 
 const floorWorkers: Worker[] = [
   createWorker({
@@ -342,6 +360,11 @@ describe('WatchDetailPage', () => {
       )
     ).toBeInTheDocument();
     expect(within(section).getByTestId('alertZeroAutonomyLevelControl')).toBeInTheDocument();
+    expect(
+      within(section).getByTestId(
+        `alertZeroModelsRow-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
+      )
+    ).toBeInTheDocument();
     expect(screen.queryByTestId('alertZeroCandidateLimit')).not.toBeInTheDocument();
   });
 
@@ -350,6 +373,7 @@ describe('WatchDetailPage', () => {
 
     for (const worker of floorWorkers) {
       expect(screen.getByTestId(`alertZeroWatchWorkerAccordion-${worker.id}`)).toBeInTheDocument();
+      expect(screen.getByTestId(`alertZeroModelsRow-${worker.id}`)).toBeInTheDocument();
     }
 
     // A Watch with exactly one Worker has no accordion chrome — its settings are a static panel.
@@ -462,7 +486,7 @@ describe('WatchDetailPage', () => {
     } as never);
     mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
 
-    render(
+    renderWithI18n(
       <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -517,7 +541,7 @@ describe('WatchDetailPage', () => {
     } as never);
     mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
 
-    const { rerender } = render(
+    const { rerender } = renderWithI18n(
       <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -712,7 +736,7 @@ describe('WatchDetailPage', () => {
         </Route>
       </MemoryRouter>
     );
-    const { rerender } = render(tree());
+    const { rerender } = renderWithI18n(tree());
 
     const field = screen.getByTestId('alertZeroAnalysisWindowDays');
     fireEvent.change(field, { target: { value: '7' } });
@@ -1017,7 +1041,7 @@ describe('WatchDetailPage', () => {
     const history = createMemoryHistory({
       initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
     });
-    render(
+    renderWithI18n(
       <Router history={history}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -1027,11 +1051,16 @@ describe('WatchDetailPage', () => {
 
     const [first] = floorWorkers;
     // With `buttonElement="div"` EUI puts `aria-expanded` on the arrow control, not the
-    // data-test-subj node, and the enable switch is also a button — so query by expanded.
-    const arrowFor = (workerId: string, expanded: boolean) =>
-      within(screen.getByTestId(`alertZeroWatchWorkerAccordion-${workerId}`)).getByRole('button', {
-        expanded,
-      });
+    // data-test-subj node. The Run as control is also a button with `aria-expanded`.
+    const arrowFor = (workerId: string, expanded: boolean) => {
+      const arrow = within(screen.getByTestId(`alertZeroWatchWorkerAccordion-${workerId}`))
+        .getAllByRole('button', { expanded })
+        .find((button) => button.getAttribute('aria-controls') === `${workerId}-settings`);
+      if (!arrow) {
+        throw new Error(`expected the ${workerId} accordion arrow`);
+      }
+      return arrow;
+    };
     fireEvent.click(screen.getByTestId(`alertZeroWorkerAccordionHeader-${first.id}`));
     expect(arrowFor(first.id, false)).toBeInTheDocument();
 
@@ -1094,7 +1123,7 @@ describe('WatchDetailPage', () => {
     const history = createMemoryHistory({
       initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
     });
-    render(
+    renderWithI18n(
       <Router history={history}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -1159,7 +1188,7 @@ describe('WatchDetailPage', () => {
     const history = createMemoryHistory({
       initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
     });
-    render(
+    renderWithI18n(
       <Router history={history}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -1212,7 +1241,7 @@ describe('WatchDetailPage', () => {
     const mutateAsync = jest.fn().mockRejectedValue(new Error('patch failed'));
     mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync } as never);
 
-    render(
+    renderWithI18n(
       <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />

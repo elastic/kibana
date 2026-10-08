@@ -18,38 +18,45 @@ const TRACE_ID_PATTERN = /^[0-9a-zA-Z-]{1,35}$/;
 const INSIGHT_ID_LENGTH = 36;
 const TRACE_ID_MAX_LENGTH = 35;
 
-const startTimeField = z
-  .number()
-  .int()
-  .describe('Start of the time window as a Unix timestamp in seconds. Example: 1716200000.');
-const endTimeField = z
-  .number()
-  .int()
-  .describe('End of the time window as a Unix timestamp in seconds. Example: 1716203600.');
+const startTimeField = lazySchema(() =>
+  z
+    .number()
+    .int()
+    .describe('Start of the time window as a Unix timestamp in seconds. Example: 1716200000.')
+);
+const endTimeField = lazySchema(() =>
+  z
+    .number()
+    .int()
+    .describe('End of the time window as a Unix timestamp in seconds. Example: 1716203600.')
+);
 const nextTokenField = (maxLength: number) =>
   z
     .string()
     .max(maxLength)
     .optional()
     .describe('Pagination token from a previous response. Omit to fetch the first page.');
-const groupArnField = z
-  .string()
-  .max(400)
-  .optional()
-  .describe(
-    'ARN of the X-Ray group to scope the query to. Use getGroups to look up a group ARN. Provide either groupArn or groupName, not both.'
-  );
-const groupNameField = z
-  .string()
-  .max(32)
-  .optional()
-  .describe(
-    'Name of the X-Ray group to scope the query to (case-sensitive). Use getGroups to look up a group name. Provide either groupArn or groupName, not both.'
-  );
-const traceIdField = z
-  .string()
-  .max(TRACE_ID_MAX_LENGTH)
-  .regex(TRACE_ID_PATTERN, 'Must be a valid X-Ray trace ID.');
+const groupArnField = lazySchema(() =>
+  z
+    .string()
+    .max(400)
+    .optional()
+    .describe(
+      'ARN of the X-Ray group to scope the query to. Use getGroups to look up a group ARN. Provide either groupArn or groupName, not both.'
+    )
+);
+const groupNameField = lazySchema(() =>
+  z
+    .string()
+    .max(32)
+    .optional()
+    .describe(
+      'Name of the X-Ray group to scope the query to (case-sensitive). Use getGroups to look up a group name. Provide either groupArn or groupName, not both.'
+    )
+);
+const traceIdField = lazySchema(() =>
+  z.string().max(TRACE_ID_MAX_LENGTH).regex(TRACE_ID_PATTERN, 'Must be a valid X-Ray trace ID.')
+);
 
 export const GetInsightSummariesInputSchema = lazySchema(() =>
   z
