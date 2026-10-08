@@ -81,6 +81,10 @@ interface CustomEditorConfig {
  * A visualization type definition representing a spec of one specific type of "classical"
  * visualizations (i.e. not Lens visualizations).
  */
+export type VisTypeOnCreate = (options: {
+  onEditorClose: () => void;
+}) => boolean | Promise<boolean>;
+
 export interface VisTypeDefinition<TVisParams extends VisParams> {
   /**
    * Visualization unique name
@@ -137,6 +141,14 @@ export interface VisTypeDefinition<TVisParams extends VisParams> {
   ) => Promise<Array<{ name?: string; value: string }> | undefined>;
 
   readonly getEsqlQuery?: (visParams: VisParams) => AggregateQuery | undefined;
+
+  /**
+   * If given, the "Create visualization" wizard calls it when this type is selected, so the type
+   * can open its own editor in place. Resolve `true` once the editor is open to stop the wizard
+   * from navigating; resolve `false` to fall back to the default creation flow.
+   * Call `onEditorClose` when the editor closes so the wizard's host can refresh.
+   */
+  readonly onCreate?: VisTypeOnCreate;
 
   readonly isAccessible?: boolean;
   /**

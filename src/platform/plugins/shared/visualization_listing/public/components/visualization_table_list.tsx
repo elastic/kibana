@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useRef, useMemo, useEffect } from 'react';
+import React, { useCallback, useRef, useMemo, useEffect, useState } from 'react';
 import { firstValueFrom } from 'rxjs';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -34,6 +34,7 @@ import {
   getNoItemsMessage,
   getVisualizationListingTableStyles,
 } from '@kbn/visualization-listing-components';
+import { visualizationListingRefresh$ } from '../listing_refresh';
 
 interface VisualizationTableListProps {
   core: CoreStart;
@@ -63,6 +64,14 @@ export const VisualizationTableList = ({
   const visualizeCapabilities = core.application.capabilities.visualize_v2;
   const visualizedUserContent = useRef<VisualizeUserContent[]>();
   const closeNewVisModal = useRef(() => {});
+  const [refreshListBouncer, setRefreshListBouncer] = useState(false);
+  const refreshList = useCallback(() => setRefreshListBouncer((bouncer) => !bouncer), []);
+
+  useEffect(() => {
+    // The create button lives outside this table, so it signals through a shared subject.
+    const subscription = visualizationListingRefresh$.subscribe(refreshList);
+    return () => subscription.unsubscribe();
+  }, [refreshList]);
 
   const createNewVis = useCallback(() => {
     firstValueFrom(core.application.currentAppId$)
@@ -81,7 +90,7 @@ export const VisualizationTableList = ({
           }),
         });
       });
-  }, [visualizations, core.application, core.notifications.toasts, getBreadcrumbs]);
+  }, [visualizations, core.application, core.notifications.toasts, getBreadcrumbs, refreshList]);
 
   useEffect(() => {
     return () => {
@@ -93,6 +102,8 @@ export const VisualizationTableList = ({
     async ({ attributes: { id }, editor = { editUrl: '' } }: VisualizeUserContent) => {
       if (!('editApp' in editor || 'editUrl' in editor)) {
         await (editor as { onEdit: (id: string) => Promise<void> }).onEdit(id);
+        // The editor may have saved changes, so reload the list once it closes.
+        refreshList();
         return;
       }
 
@@ -118,7 +129,7 @@ export const VisualizationTableList = ({
 
       core.application.navigateToApp(targetApp, { path });
     },
-    [core.application, embeddable, getBreadcrumbs]
+    [core.application, embeddable, getBreadcrumbs, refreshList]
   );
 
   const fetchItems = useCallback(
@@ -215,6 +226,7 @@ export const VisualizationTableList = ({
         findItems={fetchItems}
         deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
         editItem={visualizeCapabilities.save ? editItem : undefined}
+        refreshListBouncer={refreshListBouncer}
         contentEditor={{
           isReadonly: !visualizeCapabilities.save,
           onSave: onContentEditorSave,
