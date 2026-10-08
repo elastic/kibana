@@ -17,6 +17,7 @@ import { createTagsUserActionBuilder } from './tags';
 import { createTitleUserActionBuilder } from './title';
 import { createCaseUserActionBuilder } from './create_case';
 import type { UserActionBuilderMap } from './types';
+import { createAccessUserActionBuilder } from './access';
 import { createCategoryUserActionBuilder } from './category';
 import { createCustomFieldsUserActionBuilder } from './custom_fields/custom_fields';
 import { createObservablesUserActionBuilder } from './observables';
@@ -25,6 +26,7 @@ import { createTemplateUserActionBuilder } from './template';
 import { createWorkflowUserActionBuilder } from './workflow';
 
 export const builderMap: UserActionBuilderMap = {
+  access: createAccessUserActionBuilder,
   create_case: createCaseUserActionBuilder,
   connector: createConnectorUserActionBuilder,
   tags: createTagsUserActionBuilder,

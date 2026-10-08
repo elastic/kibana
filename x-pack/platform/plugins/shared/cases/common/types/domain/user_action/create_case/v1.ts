@@ -7,6 +7,7 @@
 
 import * as rt from 'io-ts';
 import { UserActionTypes } from '../action/v1';
+import { AccessUserActionPayloadRt } from '../access/v1';
 import { AssigneesUserActionPayloadRt } from '../assignees/v1';
 import { CategoryUserActionPayloadRt } from '../category/v1';
 import {
@@ -38,6 +39,7 @@ const OptionalPayloadAttributesRt = rt.exact(
   rt.partial({
     category: CategoryUserActionPayloadRt.type.props.category,
     customFields: CustomFieldsUserActionPayloadRt.type.props.customFields,
+    access: AccessUserActionPayloadRt.type.props.access,
   })
 );
 

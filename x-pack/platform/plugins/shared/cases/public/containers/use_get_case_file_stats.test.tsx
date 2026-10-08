@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
-import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 
 import { basicCase } from './mock';
-import { TestProviders, mockedTestProvidersOwner } from '../common/mock';
+import { TestProviders } from '../common/mock';
 import { useToasts } from '../common/lib/kibana';
 import { useGetCaseFileStats } from './use_get_case_file_stats';
-import { constructFileKindIdByOwner } from '../../common/files';
+import * as api from './api';
 
+jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
 const searchTerm = 'foobar';
@@ -23,10 +23,11 @@ const hookParams = {
 };
 
 const expectedCallParams = {
-  kind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
+  caseId: hookParams.caseId,
   page: 1,
   perPage: 1,
-  meta: { caseIds: [hookParams.caseId] },
+  searchTerm: undefined,
+  signal: expect.any(AbortSignal),
 };
 
 describe('useGetCaseFileStats', () => {
@@ -34,45 +35,34 @@ describe('useGetCaseFileStats', () => {
     jest.clearAllMocks();
   });
 
-  it('calls filesClient.list when searchTerm is not provided', async () => {
-    const filesClient = createMockFilesClient();
+  it('calls getCaseFiles when searchTerm is not provided', async () => {
+    const spy = jest.spyOn(api, 'getCaseFiles').mockResolvedValue({ files: [], total: 0 });
 
     renderHook(() => useGetCaseFileStats(hookParams), {
-      wrapper: (props) => <TestProviders {...props} filesClient={filesClient} />,
+      wrapper: (props) => <TestProviders {...props} />,
     });
 
-    await waitFor(() => expect(filesClient.list).toHaveBeenCalledWith(expectedCallParams));
+    await waitFor(() => expect(spy).toHaveBeenCalledWith(expectedCallParams));
   });
 
-  it('calls filesClient.list with correct arguments when searchTerm is provided', async () => {
-    const filesClient = createMockFilesClient();
-    const hookParamsWithSearchTerm = { ...hookParams, searchTerm };
-    renderHook(() => useGetCaseFileStats(hookParamsWithSearchTerm), {
-      wrapper: (props) => <TestProviders {...props} filesClient={filesClient} />,
+  it('calls getCaseFiles with correct arguments when searchTerm is provided', async () => {
+    const spy = jest.spyOn(api, 'getCaseFiles').mockResolvedValue({ files: [], total: 0 });
+
+    renderHook(() => useGetCaseFileStats({ ...hookParams, searchTerm }), {
+      wrapper: (props) => <TestProviders {...props} />,
     });
-    await waitFor(() =>
-      expect(filesClient.list).toHaveBeenCalledWith({
-        ...expectedCallParams,
-        name: `*${searchTerm}*`,
-      })
-    );
+
+    await waitFor(() => expect(spy).toHaveBeenCalledWith({ ...expectedCallParams, searchTerm }));
   });
 
-  it('shows an error toast when filesClient.list throws', async () => {
-    const filesClient = createMockFilesClient();
+  it('shows an error toast when getCaseFiles throws', async () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
-    filesClient.list = jest.fn().mockImplementation(() => {
-      throw new Error('Something went wrong');
-    });
+    jest.spyOn(api, 'getCaseFiles').mockRejectedValue(new Error('Something went wrong'));
 
     renderHook(() => useGetCaseFileStats(hookParams), {
-      wrapper: (props) => <TestProviders {...props} filesClient={filesClient} />,
-    });
-
-    await waitFor(() => {
-      expect(filesClient.list).toHaveBeenCalledWith(expectedCallParams);
+      wrapper: (props) => <TestProviders {...props} />,
     });
 
     await waitFor(() => {

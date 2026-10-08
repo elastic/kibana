@@ -9,7 +9,7 @@ import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definitio
 import { platformCoreTools, platformCoreCasesTools } from '@kbn/agent-builder-common';
 
 const SKILL_DESCRIPTION =
-  'Manage investigation and incident cases across Elastic Security, Observability, and Stack Management. Covers creating, updating, searching, and enriching cases with comments, alerts, events, and observables (IOCs).';
+  'Manage investigation and incident cases across Elastic Security, Observability, and Stack Management. Covers creating, updating, searching, and enriching cases with comments, alerts, events, and observables (IOCs). Restricted cases are visible only to their assignees.';
 
 const EXTENDED_FIELDS_SECTION = `
 ## Extended fields (template fields)
@@ -126,6 +126,10 @@ Examples:
 | \`cases\` | General-purpose, no domain assumptions | Rarely relevant | — |
 
 Domain note: \`assignees\` are user profile UIDs, not usernames. \`status\` flow: \`open\` → \`in-progress\` → \`closed\`.
+
+## Restricted cases
+
+A case with \`access.mode: "restricted"\` is visible only to its assignees. Restricted cases never appear in search results for non-assignees, and getting one by id returns not-found — tell the user the case was not found rather than speculating about hidden cases. Restricting a case (create or update with \`access\`) requires a Platinum license; the acting user is added as an assignee automatically so they keep access.
 
 ## Bulk and batch
 

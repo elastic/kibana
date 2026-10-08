@@ -41,7 +41,10 @@ export const bulkDeleteFileAttachments = async (
   try {
     const request = decodeWithExcessOrThrow(BulkDeleteFileAttachmentsRequestRt)({ ids: fileIds });
 
-    await casesClient.cases.resolve({ id: caseId, includeComments: false });
+    const { case: resolvedCase } = await casesClient.cases.resolve({
+      id: caseId,
+      includeComments: false,
+    });
 
     const fileEntities = await getFileEntities({
       caseId,
@@ -91,7 +94,7 @@ export const bulkDeleteFileAttachments = async (
 
     emitAttachmentsDeletedEvents(
       clientArgs,
-      caseId,
+      { id: caseId, access: resolvedCase.access },
       fileAttachments.filter(({ id }) => deletedAttachmentIds.includes(id))
     );
   } catch (error) {

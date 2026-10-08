@@ -41,6 +41,8 @@ import {
   CaseCloseReasonRt,
 } from '../../domain';
 import {
+  CaseAccessModeRt,
+  CaseAccessRt,
   CaseRt,
   CaseSettingsRt,
   CaseSeverityRt,
@@ -178,6 +180,10 @@ export const CaseBaseOptionalFieldsRequestRt = rt.exact(
      * The close reason to sync to attached alerts
      */
     closeReason: CaseCloseReasonRt,
+    /**
+     * The access control of the case
+     */
+    access: CaseAccessRt,
   })
 );
 
@@ -267,6 +273,11 @@ export const CasePostRequestRt = rt.intersection([
       customFields: CaseRequestCustomFieldsRt,
       template: rt.union([CaseRequestTemplateRt, rt.null]),
       [CASE_EXTENDED_FIELDS]: rt.record(rt.string, rt.string),
+      /**
+       * The access control of the case. Defaults to `default` (visible to
+       * everyone with Cases privileges in the space) if not provided.
+       */
+      access: CaseAccessRt,
     })
   ),
 ]);
@@ -408,6 +419,10 @@ export const CasesFindRequestBaseFieldsRt = rt.intersection([
         }),
         rt.string,
       ]),
+      /**
+       * The access mode of the cases to filter by
+       */
+      access: rt.union([CaseAccessModeRt, rt.array(CaseAccessModeRt)]),
     })
   ),
   paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE }),

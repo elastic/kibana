@@ -116,6 +116,7 @@ export const INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL =
 export const INTERNAL_CASE_USERS_URL = `${CASES_INTERNAL_URL}/{case_id}/_users` as const;
 export const INTERNAL_DELETE_FILE_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/files/_bulk_delete` as const;
+export const INTERNAL_CASE_FILES_URL = `${CASES_INTERNAL_URL}/{case_id}/files` as const;
 export const INTERNAL_GET_CASE_CATEGORIES_URL = `${CASES_INTERNAL_URL}/categories` as const;
 export const INTERNAL_CASE_METRICS_URL = `${CASES_INTERNAL_URL}/metrics` as const;
 export const INTERNAL_CASE_METRICS_DETAILS_URL = `${CASES_INTERNAL_URL}/metrics/{case_id}` as const;
@@ -506,6 +507,8 @@ export const CASE_ATTACH_EVENTS_EVENT_TYPE = 'case_attach_events' as const;
 
 export const CASE_VIEW_ATTACHMENTS_TAB_CLICKED_EVENT_TYPE =
   'case_view_attachments_tab_clicked' as const;
+
+export const CASE_ACCESS_CONTROL_CLICKED_EVENT_TYPE = 'case_access_control_clicked' as const;
 
 export const CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE = 'cases_list_view_mode_changed' as const;
 

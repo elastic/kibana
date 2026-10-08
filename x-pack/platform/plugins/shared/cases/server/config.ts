@@ -156,6 +156,13 @@ export const ConfigSchema = schema.object({
       min: 1,
     }),
   }),
+  // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
+  // Technical preview flag for restricted (assignee-only) cases. When off, the
+  // `access` field is ignored on write, hidden in responses, and no visibility
+  // rules are enforced.
+  restrictedCases: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
   stack: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),

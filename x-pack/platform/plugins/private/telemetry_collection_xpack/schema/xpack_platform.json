@@ -8314,6 +8314,12 @@
                 "totalWithConnectors": {
                   "type": "long"
                 },
+                "totalRestrictedCases": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of cases restricted to their assignees"
+                  }
+                },
                 "latestDates": {
                   "properties": {
                     "createdAt": {
@@ -8487,6 +8493,12 @@
                   "_meta": {
                     "description": "Number of cases with maximum observables"
                   }
+                },
+                "totalRestrictedCases": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of cases restricted to their assignees"
+                  }
                 }
               }
             },
@@ -8648,6 +8660,12 @@
                   "_meta": {
                     "description": "Number of cases with maximum observables"
                   }
+                },
+                "totalRestrictedCases": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of cases restricted to their assignees"
+                  }
                 }
               }
             },
@@ -8808,6 +8826,12 @@
                   "type": "long",
                   "_meta": {
                     "description": "Number of cases with maximum observables"
+                  }
+                },
+                "totalRestrictedCases": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of cases restricted to their assignees"
                   }
                 }
               }

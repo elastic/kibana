@@ -134,6 +134,7 @@ export type CaseAggregationResult = Record<
     assigneeFilters: AssigneesFilters;
     observables: ObservablesAggregationResult;
     totalWithMaxObservables: TotalWithMaxObservablesAggregationResult;
+    restrictedCases?: { doc_count: number };
   }
 > & {
   assigneeFilters: AssigneesFilters;
@@ -147,6 +148,7 @@ export type CaseAggregationResult = Record<
   totalAssignees: ValueCount;
   totalsByOwner: Buckets;
   totalWithMaxObservables: TotalWithMaxObservablesAggregationResult;
+  restrictedCases?: { doc_count: number };
 };
 
 export interface Assignees {
@@ -201,6 +203,7 @@ export interface SolutionTelemetry extends Count, AttachmentFramework {
   status: Status;
   observables: ObservablesTelemetry;
   totalWithMaxObservables: number;
+  totalRestrictedCases: number;
 }
 
 export interface Status {
@@ -324,6 +327,7 @@ export interface CasesTelemetry {
         totalTags: number;
         totalWithAlerts: number;
         totalWithConnectors: number;
+        totalRestrictedCases: number;
         latestDates: LatestDates;
       };
     sec: SolutionTelemetry;

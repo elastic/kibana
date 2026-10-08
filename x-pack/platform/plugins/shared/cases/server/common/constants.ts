@@ -59,6 +59,13 @@ export const LICENSING_CASE_ASSIGNMENT_FEATURE = 'Cases user usage';
  */
 export const LICENSING_CASE_OBSERVABLES_FEATURE = 'Cases observable assignment';
 
+/**
+ * The Elasticsearch reserved role that bypasses restricted-case visibility on
+ * stateful deployments. Serverless has no customer-facing superuser role, so
+ * there is no bypass there.
+ */
+export const SUPERUSER_ROLE_NAME = 'superuser';
+
 export const SEVERITY_EXTERNAL_TO_ESMODEL: Record<CaseSeverity, CasePersistedSeverity> = {
   [CaseSeverity.LOW]: CasePersistedSeverity.LOW,
   [CaseSeverity.MEDIUM]: CasePersistedSeverity.MEDIUM,

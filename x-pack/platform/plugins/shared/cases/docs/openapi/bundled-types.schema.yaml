@@ -2467,6 +2467,20 @@ components:
             - workflow
           example: create_case
   schemas:
+    case_access:
+      type: object
+      description: |
+        The access control for the case. A restricted case and everything attached to it is visible only to its assignees. Requires the `xpack.cases.restrictedCases.enabled` setting and a Platinum license.
+      required:
+        - mode
+      properties:
+        mode:
+          type: string
+          description: Whether the case is visible to everyone with access to its owner (`default`) or only to its assignees (`restricted`).
+          enum:
+            - default
+            - restricted
+          example: default
     assignees:
       type: array
       description: An array containing users that are assigned to the case.
@@ -2836,6 +2850,8 @@ components:
         - tags
         - title
       properties:
+        access:
+          $ref: '#/components/schemas/case_access'
         assignees:
           $ref: '#/components/schemas/assignees'
         connector:
@@ -3333,6 +3349,8 @@ components:
         - updated_by
         - version
       properties:
+        access:
+          $ref: '#/components/schemas/case_access'
         assignees:
           $ref: '#/components/schemas/assignees'
         category:
@@ -3529,6 +3547,8 @@ components:
               - id
               - version
             properties:
+              access:
+                $ref: '#/components/schemas/case_access'
               assignees:
                 $ref: '#/components/schemas/assignees'
               category:

@@ -9,14 +9,15 @@ import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Case } from '../../../common/types/domain';
-import { CaseSeverity, UserActionTypes, CaseRt } from '../../../common/types/domain';
+import { CaseAccessMode, CaseSeverity, UserActionTypes, CaseRt } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
-import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
+import { flattenCaseSavedObject, isCaseRestricted, transformNewCase } from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
+import { MAX_ASSIGNEES_PER_CASE } from '../../../common/constants';
 import type { Owner } from '../../../common/constants/types';
 import { resolveExtractObservables } from '../../../common/utils/case_settings';
 import type { CasePostRequest } from '../../../common/types/api';
@@ -56,6 +57,7 @@ import {
 import {
   CREATE_CASE_WITHOUT_TEMPLATE_COUNTER,
   CREATE_CASE_WITH_TEMPLATE_COUNTER,
+  CREATE_RESTRICTED_CASE_COUNTER,
   incrementCasesClientCounter,
 } from '../usage_counters';
 
@@ -85,6 +87,14 @@ export const create = async (
   try {
     const rawQuery = decodeWithExcessOrThrow(CasePostRequestRt)(data);
     let query = emptyCaseAssigneesSanitizer(rawQuery);
+
+    // The access field is ignored on write while the restricted-cases feature
+    // is disabled.
+    if (!clientArgs.config.restrictedCases.enabled && query.access !== undefined) {
+      const { access, ...queryWithoutAccess } = query;
+      query = queryWithoutAccess;
+    }
+
     const configurations = await casesClient.configure.get({ owner: data.owner });
     const customFieldsConfiguration = configurations[0]?.customFields;
 
@@ -252,6 +262,42 @@ export const create = async (
       }
 
       licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
+    }
+
+    if (query.access?.mode === CaseAccessMode.RESTRICTED) {
+      hasPlatinumLicenseOrGreater =
+        hasPlatinumLicenseOrGreater ?? (await licensingService.isAtLeastPlatinum());
+
+      if (!hasPlatinumLicenseOrGreater) {
+        throw Boom.forbidden(
+          'In order to restrict a case, you must be subscribed to an Elastic Platinum license'
+        );
+      }
+
+      licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
+
+      // The creator of a restricted case is added to its assignees so they
+      // cannot lock themselves out. A deliberate system action: it does not
+      // require the assign privilege, unlike caller-provided assignees.
+      const assignees = query.assignees ?? [];
+      if (user.profile_uid != null && !assignees.some(({ uid }) => uid === user.profile_uid)) {
+        if (assignees.length >= MAX_ASSIGNEES_PER_CASE) {
+          throw Boom.badRequest(
+            `Cannot create a restricted case: the assignees limit of ${MAX_ASSIGNEES_PER_CASE} prevents adding you as an assignee.`
+          );
+        }
+
+        query = { ...query, assignees: [...assignees, { uid: user.profile_uid }] };
+      }
+
+      // The assignees list is the visibility boundary of a restricted case: a
+      // caller without a user profile (e.g. background automation) must
+      // provide at least one assignee or nobody could ever see the case.
+      if ((query.assignees ?? []).length === 0) {
+        throw Boom.badRequest(
+          'A restricted case must have at least one assignee. Provide assignees or create the case with the default access mode.'
+        );
+      }
     }
 
     /**
@@ -472,6 +518,10 @@ export const create = async (
       persistedTemplateId ? CREATE_CASE_WITH_TEMPLATE_COUNTER : CREATE_CASE_WITHOUT_TEMPLATE_COUNTER
     );
 
+    if (isCaseRestricted(newCase.attributes)) {
+      incrementCasesClientCounter(clientArgs, CREATE_RESTRICTED_CASE_COUNTER);
+    }
+
     if (persistedTemplateId) {
       try {
         await templatesService.incrementUsageStats(persistedTemplateId);
@@ -488,10 +538,13 @@ export const create = async (
 
     const createdCase = decodeOrThrow(CaseRt)(res);
 
-    clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
-      caseId: createdCase.id,
-      owner: createdCase.owner as Owner,
-    });
+    // workflow triggers never fire for restricted cases
+    if (!isCaseRestricted(createdCase)) {
+      clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
+        caseId: createdCase.id,
+        owner: createdCase.owner as Owner,
+      });
+    }
 
     return createdCase;
   } catch (error) {

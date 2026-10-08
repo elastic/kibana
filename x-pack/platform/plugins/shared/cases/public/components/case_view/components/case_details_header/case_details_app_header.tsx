@@ -6,14 +6,18 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import type { CaseSeverity, CaseUI } from '../../../../../common';
+import { CaseAccessMode } from '../../../../../common/types/domain';
 import type { OnUpdateFields } from '../../types';
-import { PAGE_TITLE } from '../../../../common/translations';
+import { PAGE_TITLE, CANCEL } from '../../../../common/translations';
 import { useCasesContext } from '../../../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../../../common/use_cases_features';
+import { useAccessControlClickedEBT } from '../../../../analytics/use_access_control_ebt';
 import { ConfirmDeleteCaseModal } from '../../../confirm_delete_case';
 import { CasesAppHeader } from '../../../app/cases_app_header';
+import * as i18n from '../../translations';
 import { CaseSettingsPopover } from './case_settings_popover';
 import { useCaseViewHeader } from './hooks/use_case_view_header';
 import { useCloseCaseFlow } from './hooks/use_close_case_flow';
@@ -40,6 +44,35 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
     [onUpdateField]
   );
 
+  const [isRestrictModalVisible, setIsRestrictModalVisible] = useState(false);
+  const restrictModalTitleId = useGeneratedHtmlId();
+  const reportAccessControlClicked = useAccessControlClickedEBT('case_view');
+
+  const onAccessChanged = useCallback(
+    (mode: CaseAccessMode) => {
+      reportAccessControlClicked(mode);
+
+      if (mode === caseData.access?.mode || (mode === CaseAccessMode.DEFAULT && !caseData.access)) {
+        return;
+      }
+
+      if (mode === CaseAccessMode.RESTRICTED) {
+        // restricting narrows who can see the case and auto-assigns the actor —
+        // confirm before applying
+        setIsRestrictModalVisible(true);
+        return;
+      }
+
+      onUpdateField({ key: 'access', value: { mode } });
+    },
+    [caseData.access, onUpdateField, reportAccessControlClicked]
+  );
+
+  const onConfirmRestrict = useCallback(() => {
+    setIsRestrictModalVisible(false);
+    onUpdateField({ key: 'access', value: { mode: CaseAccessMode.RESTRICTED } });
+  }, [onUpdateField]);
+
   const {
     headerTitle,
     metadata,
@@ -53,7 +86,13 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
     isSettingsOpen,
     setIsSettingsOpen,
     settingsAnchor,
-  } = useCaseViewHeader({ caseData, onStatusChanged, onSeverityChanged, onUpdateField });
+  } = useCaseViewHeader({
+    caseData,
+    onStatusChanged,
+    onSeverityChanged,
+    onAccessChanged,
+    onUpdateField,
+  });
 
   const onSyncAlertsChanged = useCallback(
     (checked: boolean) =>
@@ -84,6 +123,21 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
       />
       {closeCaseModal}
       {runWorkflowModal}
+      {isRestrictModalVisible && (
+        <EuiConfirmModal
+          title={i18n.RESTRICT_CASE_MODAL_TITLE}
+          aria-labelledby={restrictModalTitleId}
+          titleProps={{ id: restrictModalTitleId }}
+          onCancel={() => setIsRestrictModalVisible(false)}
+          onConfirm={onConfirmRestrict}
+          cancelButtonText={CANCEL}
+          confirmButtonText={i18n.RESTRICT_CASE_MODAL_CONFIRM}
+          defaultFocusedButton="confirm"
+          data-test-subj="case-restrict-confirm-modal"
+        >
+          {i18n.RESTRICT_CASE_MODAL_BODY}
+        </EuiConfirmModal>
+      )}
       {isDeleteModalVisible && (
         <ConfirmDeleteCaseModal
           totalCasesToBeDeleted={1}

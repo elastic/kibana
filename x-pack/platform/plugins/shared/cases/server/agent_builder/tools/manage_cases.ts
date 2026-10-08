@@ -62,7 +62,11 @@ const BASE_MODE_DESCRIPTION =
   '- assign: case_id, assignees (ADDS users)\n' +
   '- unassign: case_id, assignees (REMOVES users; null/[] removes all)\n' +
   '- add_tags: case_id, tags_to_add (APPENDS to existing tags)\n' +
-  '- set_custom_field: case_id, owner, field_name, value';
+  '- set_custom_field: case_id, owner, field_name, value\n\n' +
+  'A case with `access.mode: "restricted"` is visible only to its assignees ' +
+  '(the actor is auto-assigned on restrict). Create or update may set ' +
+  '`access` to restrict or unrestrict a case; restricted cases do not appear ' +
+  'in search results for non-assignees.';
 
 const EXTENDED_FIELDS_MODE_DESCRIPTION =
   '- set_extended_fields: case_id, fields (map of `<name>_as_<type>` → value)';

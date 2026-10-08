@@ -24,6 +24,7 @@ import type {
   CaseSeverity,
   CaseStatuses,
   User,
+  CaseAccess,
   CaseAssignees,
   CaseCustomFields,
   ActionSource,
@@ -76,6 +77,9 @@ export interface BuilderParameters {
   };
   assignees: {
     parameters: { payload: { assignees: CaseAssignees } };
+  };
+  access: {
+    parameters: { payload: { access: CaseAccess } };
   };
   pushed: {
     parameters: {

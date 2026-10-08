@@ -6,6 +6,7 @@
  */
 
 import { partition } from 'lodash';
+import { CASE_SAVED_OBJECT } from '../../../common/constants';
 
 import type { CaseAttributes } from '../../../common/types/domain';
 import type { CasesBulkGetRequest, CasesBulkGetResponse } from '../../../common/types/api';
@@ -43,11 +44,17 @@ export const bulkGet = async (
       (caseInfo) => !isSOError(caseInfo)
     ) as [CaseSavedObjectTransformed[], CaseSavedObjectWithErrors];
 
-    const { authorized: authorizedCases, unauthorized: unauthorizedCases } =
+    const { authorized, unauthorized: unauthorizedCases } =
       await authorization.getAndEnsureAuthorizedEntities({
         savedObjects: validCases,
         operation: Operations.bulkGetCases,
       });
+
+    // Restricted cases the caller may not see are reported as not-found, not
+    // forbidden, so their existence is not revealed.
+    const [authorizedCases, invisibleCases] = partition(authorized, (theCase) =>
+      authorization.isCaseVisible(theCase.attributes)
+    );
 
     const commentTotals = await attachmentService.getter.getCaseAttatchmentStats({
       caseIds: authorizedCases.map((theCase) => theCase.id),
@@ -68,7 +75,7 @@ export const bulkGet = async (
       });
     });
 
-    const errors = constructErrors(soBulkGetErrors, unauthorizedCases);
+    const errors = constructErrors(soBulkGetErrors, unauthorizedCases, invisibleCases);
     const res = { cases: flattenedCases, errors };
 
     return decodeOrThrow(CasesBulkGetResponseRt)(res);
@@ -84,7 +91,8 @@ export const bulkGet = async (
 
 const constructErrors = (
   soBulkGetErrors: CaseSavedObjectWithErrors,
-  unauthorizedCases: CaseSavedObjectTransformed[]
+  unauthorizedCases: CaseSavedObjectTransformed[],
+  invisibleCases: CaseSavedObjectTransformed[]
 ): CasesBulkGetResponse['errors'] => {
   const errors: CasesBulkGetResponse['errors'] = [];
 
@@ -97,6 +105,15 @@ const constructErrors = (
       error: 'Forbidden',
       message: `Unauthorized to access case with owner: "${theCase.attributes.owner}"`,
       status: 403,
+      caseId: theCase.id,
+    });
+  }
+
+  for (const theCase of invisibleCases) {
+    errors.push({
+      error: 'Not Found',
+      message: `Saved object [${CASE_SAVED_OBJECT}/${theCase.id}] not found`,
+      status: 404,
       caseId: theCase.id,
     });
   }

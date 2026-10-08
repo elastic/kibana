@@ -14,6 +14,7 @@ import { getAlertInfoFromComments } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
+import { createCaseEntity } from '../../authorization/utils';
 import type { DeleteAllArgs, DeleteArgs } from './types';
 import type { AttachmentRequestV2 } from '../../../common/types/api';
 import { AttachmentRequestRtV2 } from '../../../common/types/api';
@@ -35,9 +36,14 @@ export async function deleteAll(
   } = clientArgs;
 
   try {
-    const comments = await caseService.getAllCaseComments({
-      id: caseID,
-    });
+    const [comments, theCase] = await Promise.all([
+      caseService.getAllCaseComments({
+        id: caseID,
+      }),
+      // the parent case is authorized alongside the attachments so a restricted
+      // case the caller may not see yields a not-found outcome
+      caseService.getCase({ id: caseID }),
+    ]);
 
     if (comments.total <= 0) {
       throw Boom.notFound(`No comments found for ${caseID}.`);
@@ -45,10 +51,13 @@ export async function deleteAll(
 
     await authorization.ensureAuthorized({
       operation: Operations.deleteAllComments,
-      entities: comments.saved_objects.map((comment) => ({
-        owner: comment.attributes.owner,
-        id: comment.id,
-      })),
+      entities: [
+        ...comments.saved_objects.map((comment) => ({
+          owner: comment.attributes.owner,
+          id: comment.id,
+        })),
+        createCaseEntity(theCase),
+      ],
     });
 
     const deletedIds = new Set(
@@ -82,7 +91,7 @@ export async function deleteAll(
 
     emitAttachmentsDeletedEvents(
       clientArgs,
-      caseID,
+      { id: caseID, access: theCase.attributes.access },
       comments.saved_objects.filter(({ id }) => deletedIds.has(id))
     );
   } catch (error) {
@@ -103,22 +112,30 @@ export async function deleteComment(
 ) {
   const {
     user,
-    services: { attachmentService, userActionService, alertsService },
+    services: { attachmentService, caseService, userActionService, alertsService },
     logger,
     authorization,
   } = clientArgs;
 
   try {
-    const attachment = await attachmentService.getter.get({
-      savedObjectId,
-    });
+    const [attachment, theCase] = await Promise.all([
+      attachmentService.getter.get({
+        savedObjectId,
+      }),
+      // the parent case is authorized alongside the attachment so a restricted
+      // case the caller may not see yields a not-found outcome
+      caseService.getCase({ id: caseID }),
+    ]);
 
     if (attachment == null) {
       throw Boom.notFound(`This comment ${savedObjectId} does not exist anymore.`);
     }
 
     await authorization.ensureAuthorized({
-      entities: [{ owner: attachment.attributes.owner, id: attachment.id }],
+      entities: [
+        { owner: attachment.attributes.owner, id: attachment.id },
+        createCaseEntity(theCase),
+      ],
       operation: Operations.deleteComment,
     });
 
@@ -163,7 +180,11 @@ export async function deleteComment(
     await handleAlerts({ alertsService, attachments: [attachment.attributes], caseId: id });
 
     if (deletedIds.includes(savedObjectId)) {
-      emitAttachmentsDeletedEvents(clientArgs, id, [attachment]);
+      emitAttachmentsDeletedEvents(
+        clientArgs,
+        { id, access: theCase.attributes.access },
+        [attachment]
+      );
     }
   } catch (error) {
     throw createCaseError({

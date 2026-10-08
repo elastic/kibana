@@ -48,6 +48,7 @@ import {
   RelatedCaseSchema,
   SimilarCaseSchema,
 } from '../../domain_zod/case/v1';
+import { CaseAccessModeSchema, CaseAccessSchema } from '../../domain_zod/case/v1';
 import { CaseConnectorSchema } from '../../domain_zod/connector/v1';
 import { CaseUserProfileSchema, UserSchema } from '../../domain_zod/user/v1';
 import { CasesStatusResponseSchema } from '../stats/v1';
@@ -115,6 +116,7 @@ export const CaseBaseOptionalFieldsRequestSchema = z.object({
   settings: CaseSettingsSchema.optional(),
   template: CaseTemplateSchema.nullable().optional(),
   [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
+  access: CaseAccessSchema.optional(),
 });
 
 export const CaseRequestFieldsSchema = CaseBaseOptionalFieldsRequestSchema.extend({
@@ -166,6 +168,7 @@ export const CasePostRequestSchema = z.object({
   customFields: CaseRequestCustomFieldsSchema.optional(),
   template: CaseRequestTemplateSchema.nullable().optional(),
   [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
+  access: CaseAccessSchema.optional(),
 });
 
 /**
@@ -258,6 +261,7 @@ const CasesFindRequestBaseFieldsSchema = paginationSchema({
       z.string(),
     ])
     .optional(),
+  access: z.union([CaseAccessModeSchema, z.array(CaseAccessModeSchema)]).optional(),
 });
 
 export const CasesFindRequestSchema = CasesFindRequestBaseFieldsSchema.extend({

@@ -421,6 +421,35 @@ export class AlertService {
     }
   }
 
+  /**
+   * Same as removeCaseIdFromAlerts but propagates failures. Used when
+   * restricting a case, which must not persist while any attached alert still
+   * references it.
+   */
+  public async removeCaseIdFromAlertsOrThrow({
+    alerts,
+    caseId,
+  }: RemoveCaseIdFromAlertsRequest): Promise<void> {
+    try {
+      const nonEmptyAlerts = this.getNonEmptyAlerts(alerts);
+
+      if (nonEmptyAlerts.length <= 0) {
+        return;
+      }
+
+      await this.alertsClient.removeCaseIdFromAlerts({
+        alerts: nonEmptyAlerts,
+        caseId,
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to remove case ${caseId} from alerts: ${error}`,
+        error,
+        logger: this.logger,
+      });
+    }
+  }
+
   public async removeCaseIdsFromAllAlerts({ caseIds }: { caseIds: string[] }): Promise<void> {
     try {
       if (caseIds.length <= 0) {

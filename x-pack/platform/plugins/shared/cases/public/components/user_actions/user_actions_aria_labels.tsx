@@ -10,6 +10,7 @@ import * as i18n from './translations';
 
 export const getUserActionAriaLabel = (type: keyof typeof UserActionTypes) => {
   const actionsMap: Record<keyof typeof UserActionTypes, string> = {
+    access: i18n.ACCESS,
     assignees: i18n.ASSIGNEES,
     comment: i18n.COMMENT,
     connector: i18n.CONNECTORS,

@@ -159,6 +159,28 @@ export interface HapiReadableStream extends Readable {
 }
 
 /**
+ * The arguments for listing the files of a case.
+ */
+export interface GetFilesArgs {
+  /**
+   * The case ID to list the files of
+   */
+  caseId: string;
+  /**
+   * The page of files to return, 1-based
+   */
+  page: number;
+  /**
+   * The number of files to return per page
+   */
+  perPage: number;
+  /**
+   * An optional search term matched against the file name
+   */
+  searchTerm?: string;
+}
+
+/**
  * The arguments needed for attaching a file to a case.
  */
 export interface AddFileArgs {

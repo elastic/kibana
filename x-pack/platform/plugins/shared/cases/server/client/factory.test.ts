@@ -13,6 +13,7 @@ import { createCasesClientFactoryMockArgs } from './mocks';
 import { createCasesClient } from './client';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { Authorization } from '../authorization/authorization';
 
 jest.mock('./client');
 
@@ -36,6 +37,36 @@ describe('CasesClientFactory', () => {
     casesClientFactory = new CasesClientFactory(logger);
     casesClientFactory.initialize(args);
     jest.clearAllMocks();
+  });
+
+  it('passes the profile uid and superuser detection to the authorization layer', async () => {
+    const createSpy = jest.spyOn(Authorization, 'create');
+    const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+
+    args.securityPluginStart.userProfiles.getCurrent.mockResolvedValueOnce({
+      uid: 'u_1',
+      // @ts-expect-error: not all fields are needed
+      user: { username: 'my_user' },
+    });
+    // @ts-expect-error: not all fields are needed
+    args.securityServiceStart.authc.getCurrentUser.mockReturnValueOnce({
+      roles: ['superuser'],
+    });
+
+    await casesClientFactory.create({
+      request,
+      savedObjectsService: coreStart.savedObjects,
+      scopedClusterClient,
+      clientSource: 'rest_api',
+    });
+
+    expect(createSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        profileUid: 'u_1',
+        isSuperuser: true,
+        restrictedCasesEnabled: false,
+      })
+    );
   });
 
   it('propagates the client source to the cases client', async () => {
@@ -89,7 +120,8 @@ describe('CasesClientFactory', () => {
       });
 
       expect(args.securityPluginStart.userProfiles.getCurrent).toHaveBeenCalled();
-      expect(args.securityServiceStart.authc.getCurrentUser).not.toHaveBeenCalled();
+      // getCurrentUser is still consulted for the superuser role check, but the
+      // user info must come from the profile, not the authc fallback
       expect(createCasesClientMocked.mock.calls[0][0].user).toEqual({
         username: 'my_user',
         full_name: 'My user',

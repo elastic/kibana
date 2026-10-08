@@ -25,6 +25,7 @@ import type {
   AttachmentAttributes,
   AttachmentAttributesV2,
   Case,
+  CaseAccess,
   EventAttachmentPayload,
   FileAttachmentMetadata,
   User,
@@ -35,6 +36,7 @@ import {
   AttachmentType,
   ExternalReferenceSOAttachmentPayloadRt,
   FileAttachmentMetadataRt,
+  CaseAccessMode,
   CaseSeverity,
   CaseStatuses,
   ConnectorTypes,
@@ -604,6 +606,13 @@ export const getOrUpdateLensReferences = (
 
   return currentNonLensReferences.concat(newCommentLensReferences);
 };
+
+/**
+ * Whether a case is restricted (visible only to its assignees). A missing
+ * access field means `default`.
+ */
+export const isCaseRestricted = (theCase: { access?: CaseAccess | null }): boolean =>
+  theCase.access?.mode === CaseAccessMode.RESTRICTED;
 
 export const asArray = <T>(field?: T | T[] | null): T[] => {
   if (field === undefined || field === null) {

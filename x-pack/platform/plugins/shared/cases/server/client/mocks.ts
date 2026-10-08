@@ -40,6 +40,7 @@ import type { MetricsSubClient } from './metrics/client';
 import type { TemplatesSubClient } from './templates/client';
 import type { FieldDefinitionsSubClient } from './field_definitions/client';
 import type { UserActionsSubClient } from './user_actions/client';
+import type { User } from '../common/types/user';
 
 import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
 import { SortFieldCase } from '../../public/containers/types';
@@ -136,6 +137,7 @@ const createAttachmentsSubClientMock = (): AttachmentsSubClientMock => {
     find: jest.fn(),
     getAll: jest.fn(),
     get: jest.fn(),
+    getFiles: jest.fn(),
     update: jest.fn(),
     getAllDocumentsAttachedToCase: jest.fn(),
   });
@@ -284,7 +286,7 @@ export const createCasesClientMockArgs = () => {
       email: 'damaged_raccoon@elastic.co',
       full_name: 'Damaged Raccoon',
       profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
-    },
+    } as User,
     spaceId: 'default',
     unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
     securityStartPlugin: securityMock.createStart(),

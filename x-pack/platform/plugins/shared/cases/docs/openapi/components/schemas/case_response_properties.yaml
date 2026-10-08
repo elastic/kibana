@@ -25,6 +25,8 @@ required:
   - updated_by
   - version
 properties:
+  access:
+    $ref: 'case_access.yaml'
   assignees:
     $ref: 'assignees.yaml'
   category:

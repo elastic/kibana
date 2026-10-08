@@ -229,6 +229,7 @@ describe('Cases API', () => {
           search: 'hello',
           owner: [SECURITY_SOLUTION_OWNER],
           category: [],
+          access: [],
           customFields: {},
           extendedFieldFilters: [],
           from: DEFAULT_FROM_DATE,

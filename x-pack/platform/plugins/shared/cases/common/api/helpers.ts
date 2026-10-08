@@ -19,6 +19,7 @@ import {
   INTERNAL_CONNECTORS_URL,
   INTERNAL_CASE_USERS_URL,
   INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
+  INTERNAL_CASE_FILES_URL,
   CASE_FIND_ATTACHMENTS_URL,
   INTERNAL_PUT_CUSTOM_FIELDS_URL,
   INTERNAL_CASE_OBSERVABLES_URL,
@@ -83,6 +84,10 @@ export const getCaseUsersUrl = (id: string): string => {
 
 export const getCasesDeleteFileAttachmentsUrl = (id: string): string => {
   return INTERNAL_DELETE_FILE_ATTACHMENTS_URL.replace('{case_id}', id);
+};
+
+export const getCaseFilesUrl = (id: string): string => {
+  return INTERNAL_CASE_FILES_URL.replace('{case_id}', id);
 };
 
 export const getCustomFieldReplaceUrl = (caseId: string, customFieldId: string): string => {

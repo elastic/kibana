@@ -130,6 +130,7 @@ describe('runAttachmentsReconciliation', () => {
 
   it('walks BOTH cases-comments and cases-attachments SOs in a single tick', async () => {
     const client = savedObjectsClientMock.create();
+    client.bulkGet.mockResolvedValue({ saved_objects: [] });
     const writer = makeAttachmentsWriterMock();
     stubDualSourceFinds(client, {
       legacy: [
@@ -172,6 +173,7 @@ describe('runAttachmentsReconciliation', () => {
 
   it('shared processed counter is monotonically cumulative across both walks', async () => {
     const client = savedObjectsClientMock.create();
+    client.bulkGet.mockResolvedValue({ saved_objects: [] });
     const writer = makeAttachmentsWriterMock();
     stubDualSourceFinds(client, {
       legacy: [
@@ -211,6 +213,7 @@ describe('runAttachmentsReconciliation', () => {
 
   it('serializes the OR-NULL filter for both source types (mutable surface)', async () => {
     const client = savedObjectsClientMock.create();
+    client.bulkGet.mockResolvedValue({ saved_objects: [] });
     const writer = makeAttachmentsWriterMock();
     stubDualSourceFinds(client, { legacy: [], unified: [] });
 
@@ -251,6 +254,7 @@ describe('runAttachmentsReconciliation', () => {
 
   it('walks every attachment when lastRunAt is undefined (post-reset / first-ever)', async () => {
     const client = savedObjectsClientMock.create();
+    client.bulkGet.mockResolvedValue({ saved_objects: [] });
     const writer = makeAttachmentsWriterMock();
     stubDualSourceFinds(client, {
       legacy: [makeAttachmentSO(CASE_COMMENT_SAVED_OBJECT, 'l-1')],
@@ -273,6 +277,7 @@ describe('runAttachmentsReconciliation', () => {
 
   it('closes BOTH PITs even if a per-source walk throws', async () => {
     const client = savedObjectsClientMock.create();
+    client.bulkGet.mockResolvedValue({ saved_objects: [] });
     const writer = makeAttachmentsWriterMock();
     // First find call (legacy walk) succeeds with one page; second
     // find (legacy walk's empty terminator) returns empty; third
@@ -325,6 +330,7 @@ describe('runAttachmentsReconciliation', () => {
    */
   it('always walks BOTH cases-comments and cases-attachments (ungated dual-source)', async () => {
     const client = savedObjectsClientMock.create();
+    client.bulkGet.mockResolvedValue({ saved_objects: [] });
     const writer = makeAttachmentsWriterMock();
     stubDualSourceFinds(client, {
       legacy: [makeAttachmentSO(CASE_COMMENT_SAVED_OBJECT, 'l-1')],
@@ -358,6 +364,7 @@ describe('runAttachmentsReconciliation', () => {
 
   it('throws before fetching a page when the abort signal is already tripped, closing the one open PIT and leaving the cursor to be pinned by the caller', async () => {
     const client = savedObjectsClientMock.create();
+    client.bulkGet.mockResolvedValue({ saved_objects: [] });
     const writer = makeAttachmentsWriterMock();
     stubDualSourceFinds(client, {
       legacy: [makeAttachmentSO(CASE_COMMENT_SAVED_OBJECT, 'l-1')],
@@ -388,6 +395,7 @@ describe('runAttachmentsReconciliation', () => {
 
   it('advances the cursor to tick start time on successful drain', async () => {
     const client = savedObjectsClientMock.create();
+    client.bulkGet.mockResolvedValue({ saved_objects: [] });
     const writer = makeAttachmentsWriterMock();
     stubDualSourceFinds(client, { legacy: [], unified: [] });
 

@@ -15,7 +15,7 @@
 
 import { omit, unset } from 'lodash';
 import type { CaseAttributes, ExternalService, CaseConnector } from '../../../common/types/domain';
-import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
+import { CaseSeverity, CaseStatuses, CaseAccessMode } from '../../../common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_EXTENDED_FIELDS,
@@ -2325,6 +2325,7 @@ describe('CasesService', () => {
       'time_to_resolve',
       'time_to_investigate',
       'template',
+      'access',
       CASE_EXTENDED_FIELDS,
       CASE_EXTENDED_FIELDS_LABELS
     );
@@ -3959,6 +3960,123 @@ describe('CasesService', () => {
         expect(dispatchedDoc.attributes.status).toBe(CasePersistedStatus.OPEN);
         expect(dispatchedDoc.attributes.severity).toBe(CasePersistedSeverity.LOW);
         expect(dispatchedDoc.attributes.external_service).not.toHaveProperty('connector_id');
+      });
+    });
+
+    describe('restricted cases', () => {
+      it('patchCase: cascades deletion across every analytics index when the case becomes restricted', async () => {
+        const persistedSO = createCaseSavedObjectResponse();
+        const externalModelOriginalCase = transformSavedObjectToExternalModel(persistedSO);
+
+        unsecuredSavedObjectsClient.update.mockResolvedValue({
+          id: persistedSO.id,
+          type: CASE_SAVED_OBJECT,
+          attributes: { access: { mode: CaseAccessMode.RESTRICTED } },
+          references: persistedSO.references,
+          version: 'WzEsMV0=',
+        });
+
+        const { svc, analyticsV2Writer, analyticsV2ActivityWriter, analyticsV2AttachmentsWriter } =
+          makeServiceWithMockWriter();
+        await svc.patchCase({
+          caseId: persistedSO.id,
+          updatedAttributes: { access: { mode: CaseAccessMode.RESTRICTED } },
+          originalCase: externalModelOriginalCase,
+          version: 'WzAsMV0=',
+          refresh: false,
+        });
+
+        expect(analyticsV2Writer.upsertCase).not.toHaveBeenCalled();
+        expect(analyticsV2Writer.deleteCase).toHaveBeenCalledWith(persistedSO.id);
+        expect(analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds).toHaveBeenCalledWith([
+          persistedSO.id,
+        ]);
+        expect(analyticsV2AttachmentsWriter.bulkDeleteAttachmentsByCaseIds).toHaveBeenCalledWith([
+          persistedSO.id,
+        ]);
+      });
+
+      it('patchCase: upserts normally when the case returns to default access', async () => {
+        const persistedSO = createCaseSavedObjectResponse();
+        persistedSO.attributes.access = { mode: CaseAccessMode.RESTRICTED };
+        const externalModelOriginalCase = transformSavedObjectToExternalModel(persistedSO);
+
+        unsecuredSavedObjectsClient.update.mockResolvedValue({
+          id: persistedSO.id,
+          type: CASE_SAVED_OBJECT,
+          attributes: { access: { mode: CaseAccessMode.DEFAULT } },
+          references: persistedSO.references,
+          version: 'WzEsMV0=',
+        });
+
+        const { svc, analyticsV2Writer } = makeServiceWithMockWriter();
+        await svc.patchCase({
+          caseId: persistedSO.id,
+          updatedAttributes: { access: { mode: CaseAccessMode.DEFAULT } },
+          originalCase: externalModelOriginalCase,
+          version: 'WzAsMV0=',
+          refresh: false,
+        });
+
+        expect(analyticsV2Writer.deleteCase).not.toHaveBeenCalled();
+        expect(analyticsV2Writer.upsertCase).toHaveBeenCalledTimes(1);
+        expect(analyticsV2Writer.upsertCase.mock.calls[0][0].attributes.access).toEqual({
+          mode: CaseAccessMode.DEFAULT,
+        });
+      });
+
+      it('patchCases: partitions restricted cases into deletions and the rest into upserts', async () => {
+        const defaultSO = createCaseSavedObjectResponse();
+        const restrictedSO = { ...createCaseSavedObjectResponse(), id: 'restricted-case' };
+
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [
+            {
+              id: defaultSO.id,
+              type: CASE_SAVED_OBJECT,
+              attributes: { title: 'Updated' },
+              references: defaultSO.references,
+              version: 'WzEsMV0=',
+            },
+            {
+              id: 'restricted-case',
+              type: CASE_SAVED_OBJECT,
+              attributes: { access: { mode: CaseAccessMode.RESTRICTED } },
+              references: restrictedSO.references,
+              version: 'WzEsMV0=',
+            },
+          ],
+        });
+
+        const { svc, analyticsV2Writer, analyticsV2ActivityWriter, analyticsV2AttachmentsWriter } =
+          makeServiceWithMockWriter();
+        await svc.patchCases({
+          cases: [
+            {
+              caseId: defaultSO.id,
+              updatedAttributes: { title: 'Updated' },
+              originalCase: transformSavedObjectToExternalModel(defaultSO),
+              version: 'WzAsMV0=',
+            },
+            {
+              caseId: 'restricted-case',
+              updatedAttributes: { access: { mode: CaseAccessMode.RESTRICTED } },
+              originalCase: transformSavedObjectToExternalModel(restrictedSO),
+              version: 'WzAsMV0=',
+            },
+          ],
+          refresh: false,
+        });
+
+        const [mirrors] = analyticsV2Writer.bulkUpsertCases.mock.calls[0];
+        expect(mirrors.map((so: { id: string }) => so.id)).toEqual([defaultSO.id]);
+        expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledWith(['restricted-case']);
+        expect(analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds).toHaveBeenCalledWith([
+          'restricted-case',
+        ]);
+        expect(analyticsV2AttachmentsWriter.bulkDeleteAttachmentsByCaseIds).toHaveBeenCalledWith([
+          'restricted-case',
+        ]);
       });
     });
   });

@@ -392,6 +392,7 @@ describe('getCasesTelemetryData', () => {
           totalUsers: 1,
           totalWithAlerts: 41,
           totalWithConnectors: 4,
+          totalRestrictedCases: 0,
           assignees: {
             total: 5,
             totalWithZero: 100,
@@ -422,6 +423,7 @@ describe('getCasesTelemetryData', () => {
             total: 1,
           },
           totalWithMaxObservables: 1,
+          totalRestrictedCases: 0,
         },
         obs: {
           assignees: {
@@ -435,6 +437,7 @@ describe('getCasesTelemetryData', () => {
             total: 1,
           },
           totalWithMaxObservables: 1,
+          totalRestrictedCases: 0,
           ...solutionAttachmentFrameworkStats,
           total: 1,
           daily: 3,
@@ -459,6 +462,7 @@ describe('getCasesTelemetryData', () => {
             total: 1,
           },
           totalWithMaxObservables: 1,
+          totalRestrictedCases: 0,
           ...solutionAttachmentFrameworkStats,
           total: 1,
           daily: 3,
@@ -569,6 +573,13 @@ describe('getCasesTelemetryData', () => {
                   },
                   "nested": Object {
                     "path": "cases.attributes.observables",
+                  },
+                },
+                "restrictedCases": Object {
+                  "filter": Object {
+                    "term": Object {
+                      "cases.attributes.access.mode": "restricted",
+                    },
                   },
                 },
                 "status": Object {
@@ -687,6 +698,13 @@ describe('getCasesTelemetryData', () => {
                     "path": "cases.attributes.observables",
                   },
                 },
+                "restrictedCases": Object {
+                  "filter": Object {
+                    "term": Object {
+                      "cases.attributes.access.mode": "restricted",
+                    },
+                  },
+                },
                 "status": Object {
                   "terms": Object {
                     "field": "cases.attributes.status",
@@ -730,6 +748,13 @@ describe('getCasesTelemetryData', () => {
               },
               "nested": Object {
                 "path": "cases.attributes.observables",
+              },
+            },
+            "restrictedCases": Object {
+              "filter": Object {
+                "term": Object {
+                  "cases.attributes.access.mode": "restricted",
+                },
               },
             },
             "securitySolution": Object {
@@ -795,6 +820,13 @@ describe('getCasesTelemetryData', () => {
                   },
                   "nested": Object {
                     "path": "cases.attributes.observables",
+                  },
+                },
+                "restrictedCases": Object {
+                  "filter": Object {
+                    "term": Object {
+                      "cases.attributes.access.mode": "restricted",
+                    },
                   },
                 },
                 "status": Object {

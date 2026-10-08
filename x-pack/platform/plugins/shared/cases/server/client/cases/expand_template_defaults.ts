@@ -163,6 +163,12 @@ export const applyTemplateDefaultsToCreateRequest = async <T extends CasePostReq
     }
   }
 
+  // Same license posture as template assignees: a restricted-access default is
+  // skipped silently without Platinum rather than failing the create.
+  if (query.access === undefined && definition.access !== undefined && hasPlatinumLicenseOrGreater) {
+    expanded.access = definition.access;
+  }
+
   if (query.tags.length === 0 && definition.tags !== undefined && definition.tags.length > 0) {
     expanded.tags = [...new Set(definition.tags)];
   }

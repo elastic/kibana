@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { CaseStatuses } from '../../../../common/types/domain';
+import { CaseAccessMode, CaseStatuses } from '../../../../common/types/domain';
 
 import { tableColumnPresetDateRelative } from '../../../utils/table_column_presets';
 import type { ActionConnector } from '../../../../common/types/domain';
@@ -138,6 +138,18 @@ export const useCasesColumns = ({
                   <TruncatedText text={theCase.title} />
                 </CaseDetailsLink>
               </EuiFlexItem>
+              {theCase.access?.mode === CaseAccessMode.RESTRICTED && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={i18n.ACCESS_RESTRICTED}>
+                    <EuiIcon
+                      type="lock"
+                      size="s"
+                      aria-label={i18n.ACCESS_RESTRICTED}
+                      data-test-subj={`case-table-column-restricted-${theCase.id}`}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           );
         },

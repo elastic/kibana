@@ -34,7 +34,7 @@ import type {
   User,
   AttachmentAttributesV2,
 } from '../../../common/types/domain';
-import { caseStatuses } from '../../../common/types/domain';
+import { caseStatuses, CaseAccessMode } from '../../../common/types/domain';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
@@ -1204,7 +1204,7 @@ export class CasesService {
       // external_service.connector_id). Convert to the persisted model first —
       // using it raw silently drops status/severity for untouched fields and
       // injects connector_id into the strict mapping.
-      this.analyticsV2Writer.upsertCase({
+      const postPatchCase = {
         ...originalCase,
         attributes: {
           ...transformAttributesToESModel(originalCase.attributes ?? {}).attributes,
@@ -1212,7 +1212,19 @@ export class CasesService {
         } as CasePersistedAttributes,
         version: updatedCase.version ?? originalCase.version,
         references: builtReferences ?? [],
-      });
+      };
+
+      if (postPatchCase.attributes.access?.mode === CaseAccessMode.RESTRICTED) {
+        // A restricted case is removed from every analytics index, reusing the
+        // same cascade the case-deletion path uses. Unrestricting re-projects:
+        // the upsert below covers the case doc and the client flow re-emits
+        // activity and attachments.
+        this.analyticsV2Writer.deleteCase(caseId);
+        this.analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds([caseId]);
+        this.analyticsV2AttachmentsWriter.bulkDeleteAttachmentsByCaseIds([caseId]);
+      } else {
+        this.analyticsV2Writer.upsertCase(postPatchCase);
+      }
 
       const res = transformUpdateResponseToExternalModel(updatedCase);
       const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(res.attributes);
@@ -1272,8 +1284,10 @@ export class CasesService {
       // Cases-as-data v2: synthesize the post-update SO for each
       // successfully-patched case (`originalCase + new attributes`) and
       // dispatch as one bulk write. Same fan-out-collapse rationale as
-      // `bulkCreateCases`.
+      // `bulkCreateCases`. Cases that are restricted post-update are removed
+      // from every analytics index instead (same cascade as case deletion).
       const analyticsV2Mirrors: Array<SavedObject<CasePersistedAttributes>> = [];
+      const restrictedCaseIds: string[] = [];
 
       const res = updatedCases.saved_objects.reduce((acc, theCase) => {
         if (isSavedObjectErrorResult(theCase)) {
@@ -1285,15 +1299,21 @@ export class CasesService {
         // external-model base to the persisted model before spreading the patch.
         const ctx = updateContextById.get(theCase.id);
         if (ctx) {
-          analyticsV2Mirrors.push({
-            ...ctx.originalCase,
-            attributes: {
-              ...transformAttributesToESModel(ctx.originalCase.attributes ?? {}).attributes,
-              ...ctx.esAttributes,
-            } as CasePersistedAttributes,
-            version: theCase.version ?? ctx.originalCase.version,
-            references: ctx.references ?? [],
-          });
+          const postPatchAttributes = {
+            ...transformAttributesToESModel(ctx.originalCase.attributes ?? {}).attributes,
+            ...ctx.esAttributes,
+          } as CasePersistedAttributes;
+
+          if (postPatchAttributes.access?.mode === CaseAccessMode.RESTRICTED) {
+            restrictedCaseIds.push(theCase.id);
+          } else {
+            analyticsV2Mirrors.push({
+              ...ctx.originalCase,
+              attributes: postPatchAttributes,
+              version: theCase.version ?? ctx.originalCase.version,
+              references: ctx.references ?? [],
+            });
+          }
         }
 
         const so = Object.assign(theCase, transformUpdateResponseToExternalModel(theCase));
@@ -1306,6 +1326,12 @@ export class CasesService {
       }, [] as Array<SavedObjectsUpdateResponse<CaseTransformedAttributes> | SOWithErrors<CaseTransformedAttributes>>);
 
       this.analyticsV2Writer.bulkUpsertCases(analyticsV2Mirrors);
+
+      if (restrictedCaseIds.length > 0) {
+        this.analyticsV2Writer.bulkDeleteCases(restrictedCaseIds);
+        this.analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds(restrictedCaseIds);
+        this.analyticsV2AttachmentsWriter.bulkDeleteAttachmentsByCaseIds(restrictedCaseIds);
+      }
 
       return Object.assign(updatedCases, {
         saved_objects: res,

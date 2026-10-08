@@ -22,6 +22,8 @@ export const createAuthorizationMock = () => {
       };
     }),
     getAndEnsureAuthorizedEntities: jest.fn(),
+    isCaseVisible: jest.fn().mockReturnValue(true),
+    isSuperuserRequest: jest.fn().mockReturnValue(false),
   };
   return mocked;
 };

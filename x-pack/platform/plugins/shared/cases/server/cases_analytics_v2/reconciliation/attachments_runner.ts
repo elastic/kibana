@@ -14,6 +14,7 @@ import type {
   UnifiedAttachmentAttributes,
 } from '../../common/types/attachments_v2';
 import type { AttachmentSource, CasesAttachmentsV2WriterContract } from '../writer/attachments';
+import { getParentCaseId, getRestrictedCaseIds } from '../restricted_cases';
 import {
   RECONCILIATION_NAMESPACES_ALL,
   RECONCILIATION_PAGE_SIZE,
@@ -187,12 +188,25 @@ export async function runAttachmentsReconciliation({
           break;
         }
 
+        // Attachments of restricted cases must not reach
+        // `.cases-attachments`. A lookup failure throws, pinning the cursor
+        // so the page is re-walked (consistent with the upsert semantics).
+        const restricted = await getRestrictedCaseIds(
+          savedObjectsClient,
+          page.saved_objects.flatMap((so) => {
+            const caseId = getParentCaseId(so);
+            return caseId != null ? [{ caseId, namespace: so.namespaces?.[0] }] : [];
+          })
+        );
+        const projectable = page.saved_objects.filter((so) => {
+          const caseId = getParentCaseId(so);
+          return caseId == null || !restricted.has(caseId);
+        });
+
         // Dispatch the page as a single `_bulk` request and await it
         // before fetching the next page. Same rationale as in the
         // other runners.
-        await attachmentsWriter.bulkUpsertAttachmentsAwait(
-          page.saved_objects as AttachmentSource[]
-        );
+        await attachmentsWriter.bulkUpsertAttachmentsAwait(projectable as AttachmentSource[]);
 
         for (const so of page.saved_objects) {
           processed++;

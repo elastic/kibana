@@ -1202,9 +1202,37 @@ describe('AttachmentService', () => {
           ],
         });
 
-        expect(writer.bulkUpsertAttachments).toHaveBeenCalledTimes(1);
-        const mirrored = writer.bulkUpsertAttachments.mock.calls[0][0];
-        expect(mirrored.map((so: { id: string }) => so.id)).toEqual(['1']);
+        // a single surviving entry dispatches through the singular upsert
+        expect(writer.upsertAttachment).toHaveBeenCalledTimes(1);
+        expect(writer.upsertAttachment.mock.calls[0][0].id).toBe('1');
+        expect(writer.bulkUpsertAttachments).not.toHaveBeenCalled();
+      });
+
+      it('does not mirror attachments whose parent case is restricted', async () => {
+        const writer = makeMirrorWriter();
+        const svc = makeService(writer);
+        unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          saved_objects: [
+            {
+              ...createUserAttachment(),
+              id: '1',
+              type: CASE_COMMENT_SAVED_OBJECT,
+              references: [{ id: 'restricted-case', type: 'cases', name: 'associated-cases' }],
+            },
+          ] as unknown as SavedObjectsBulkResponse['saved_objects'],
+        });
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            { id: 'restricted-case', attributes: { access: { mode: 'restricted' } } },
+          ] as never,
+        });
+
+        await svc.bulkCreate({
+          attachments: [{ attributes: createUserAttachment().attributes, references: [], id: '1' }],
+        });
+
+        expect(writer.upsertAttachment).not.toHaveBeenCalled();
+        expect(writer.bulkUpsertAttachments).not.toHaveBeenCalled();
       });
 
       it('does not call the mirror when every entry errored', async () => {
@@ -1365,13 +1393,14 @@ describe('AttachmentService', () => {
         // create still resolves with the persisted SO despite the writer throw.
         expect(res.id).toBe('1');
         expect(mockLogger.warn).toHaveBeenCalledWith(
-          expect.stringContaining('attachments mirror dispatch threw')
+          expect.stringContaining('attachments mirror failed')
         );
       });
 
       it('bulkCreate: swallows a synchronous writer throw and still returns the SO response', async () => {
         const writer = makeMirrorWriter();
-        writer.bulkUpsertAttachments.mockImplementation(() => {
+        // a single success dispatches through the singular upsert
+        writer.upsertAttachment.mockImplementation(() => {
           throw new Error('writer boom');
         });
         const svc = makeService(writer);
@@ -1385,7 +1414,7 @@ describe('AttachmentService', () => {
 
         expect(res.saved_objects[0].id).toBe('1');
         expect(mockLogger.warn).toHaveBeenCalledWith(
-          expect.stringContaining('attachments mirror dispatch threw')
+          expect.stringContaining('attachments mirror failed')
         );
       });
 

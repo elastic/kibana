@@ -48,6 +48,9 @@ describe('bulk_delete', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
+      casesClient.cases.resolve = jest
+        .fn()
+        .mockResolvedValue({ case: { id: 'mock-id-1' }, outcome: 'exactMatch' });
       clientArgs.services.attachmentService.getter.getFileAttachments.mockResolvedValue([
         fileAttachment,
       ]);

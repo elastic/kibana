@@ -20,7 +20,7 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { create } from './create';
-import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
+import { CaseSeverity, ConnectorTypes, CustomFieldTypes, CaseAccessMode } from '../../../common/types/domain';
 
 import type { CaseCustomFields } from '../../../common/types/domain';
 import { omit } from 'lodash';
@@ -58,6 +58,92 @@ describe('create', () => {
         caseId: caseSO.id,
         owner: caseSO.attributes.owner,
       });
+    });
+
+    it('does not emit a caseCreated event for a restricted case', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, restrictedCases: { enabled: true } };
+
+      clientArgs.services.caseService.createCase.mockResolvedValue({
+        ...caseSO,
+        attributes: { ...caseSO.attributes, access: { mode: CaseAccessMode.RESTRICTED } },
+      });
+
+      await create({ ...theCase, access: { mode: CaseAccessMode.RESTRICTED } }, clientArgs, casesClientMock);
+
+      expect(clientArgs.casesEventBus.emitCaseCreated).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('restricted case access', () => {
+    const actorUid = 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0';
+    let clientArgs: ReturnType<typeof createCasesClientMockArgs>;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, restrictedCases: { enabled: true } };
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+    });
+
+    it('persists the access field and auto-assigns the creator', async () => {
+      await create(
+        { ...theCase, assignees: [{ uid: 'someone-else' }], access: { mode: CaseAccessMode.RESTRICTED } },
+        clientArgs,
+        casesClientMock
+      );
+
+      const attributes = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(attributes.access).toEqual({ mode: CaseAccessMode.RESTRICTED });
+      expect(attributes.assignees).toEqual([{ uid: 'someone-else' }, { uid: actorUid }]);
+    });
+
+    it('throws when creating a restricted case without a platinum license', async () => {
+      clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(false);
+
+      await expect(
+        create(
+          // no assignees so the access license gate is the one that fires
+          { ...omit(theCase, 'assignees'), access: { mode: CaseAccessMode.RESTRICTED } },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow(
+        'In order to restrict a case, you must be subscribed to an Elastic Platinum license'
+      );
+    });
+
+    it('ignores the access field when the feature is disabled', async () => {
+      clientArgs.config = { ...clientArgs.config, restrictedCases: { enabled: false } };
+
+      await create({ ...theCase, access: { mode: CaseAccessMode.RESTRICTED } }, clientArgs, casesClientMock);
+
+      const attributes = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(attributes.access).toBeUndefined();
+    });
+
+    it('does not auto-assign the creator for a default access case', async () => {
+      await create(
+        { ...theCase, assignees: [], access: { mode: CaseAccessMode.DEFAULT } },
+        clientArgs,
+        casesClientMock
+      );
+
+      const attributes = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(attributes.access).toEqual({ mode: CaseAccessMode.DEFAULT });
+      expect(attributes.assignees).toEqual([]);
+    });
+
+    it('refuses a restricted case that would end without assignees when the creator has no profile', async () => {
+      clientArgs.user = { ...clientArgs.user, profile_uid: undefined };
+
+      await expect(
+        create(
+          { ...theCase, assignees: [], access: { mode: CaseAccessMode.RESTRICTED } },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('A restricted case must have at least one assignee');
     });
   });
 

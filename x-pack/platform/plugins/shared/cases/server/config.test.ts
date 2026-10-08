@@ -134,6 +134,9 @@ describe('config validation', () => {
           "markdownPlugins": Object {
             "lens": true,
           },
+          "restrictedCases": Object {
+            "enabled": true,
+          },
           "runWorkflows": Object {
             "enabled": false,
           },
@@ -205,6 +208,18 @@ describe('config validation', () => {
     it('allows runWorkflows.enabled to be set to true explicitly', () => {
       const config = ConfigSchema.validate({ runWorkflows: { enabled: true } });
       expect(config.runWorkflows.enabled).toBe(true);
+    });
+  });
+
+  describe('restrictedCases', () => {
+    it('sets restrictedCases.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.restrictedCases.enabled).toBe(true);
+    });
+
+    it('allows restrictedCases.enabled to be set to false explicitly', () => {
+      const config = ConfigSchema.validate({ restrictedCases: { enabled: false } });
+      expect(config.restrictedCases.enabled).toBe(false);
     });
   });
 });

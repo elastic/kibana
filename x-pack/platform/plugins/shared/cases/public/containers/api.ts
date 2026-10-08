@@ -8,6 +8,7 @@
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import type { CaseCustomField, User } from '../../common/types/domain';
+import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { AttachmentType } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
@@ -58,6 +59,7 @@ import {
   getCaseCommentDeleteUrl,
   getCaseConnectorsUrl,
   getCaseUsersUrl,
+  getCaseFilesUrl,
   getCaseUserActionStatsUrl,
   getCustomFieldReplaceUrl,
   getCaseCreateObservableUrl,
@@ -302,6 +304,7 @@ export const getCases = async ({
     tags: [],
     owner: [],
     category: [],
+    access: [],
     customFields: {},
     extendedFieldFilters: [],
     from: DEFAULT_FROM_DATE,
@@ -333,6 +336,7 @@ export const getCases = async ({
     ...(filterOptions.searchFields.length > 0 ? { searchFields: filterOptions.searchFields } : {}),
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...(filterOptions.category.length > 0 ? { category: filterOptions.category } : {}),
+    ...(filterOptions.access.length > 0 ? { access: filterOptions.access } : {}),
     ...constructCustomFieldsFilter(filterOptions.customFields),
     ...(filterOptions.extendedFieldFilters && filterOptions.extendedFieldFilters.length > 0
       ? { extendedFieldFilters: filterOptions.extendedFieldFilters }
@@ -394,6 +398,7 @@ export const patchCase = async ({
     | 'customFields'
     | 'extended_fields'
     | 'template'
+    | 'access'
   >;
   version: string;
   signal?: AbortSignal;
@@ -667,6 +672,29 @@ export const getCaseUsers = async ({
     method: 'GET',
     signal,
   });
+};
+
+export const getCaseFiles = async ({
+  caseId,
+  page,
+  perPage,
+  searchTerm,
+  signal,
+}: {
+  caseId: string;
+  page: number;
+  perPage: number;
+  searchTerm?: string;
+  signal?: AbortSignal;
+}): Promise<{ files: FileJSON[]; total: number }> => {
+  return KibanaServices.get().http.fetch<{ files: FileJSON[]; total: number }>(
+    getCaseFilesUrl(caseId),
+    {
+      method: 'GET',
+      query: { page, perPage, ...(searchTerm ? { searchTerm } : {}) },
+      signal,
+    }
+  );
 };
 
 export const postObservable = async (

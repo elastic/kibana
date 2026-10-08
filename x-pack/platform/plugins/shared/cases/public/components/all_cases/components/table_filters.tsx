@@ -86,7 +86,7 @@ const CasesTableFiltersComponent = ({
 }: CasesTableFiltersProps) => {
   const { data: tags = [], isLoading: isLoadingTags } = useGetTags();
   const { data: categories = [], isLoading: isLoadingCategories } = useGetCategories();
-  const { caseAssignmentAuthorized } = useCasesFeatures();
+  const { caseAssignmentAuthorized, restrictedCasesAuthorized } = useCasesFeatures();
   const {
     data: { customFields },
     isFetching: isLoadingCasesConfiguration,
@@ -131,6 +131,7 @@ const CasesTableFiltersComponent = ({
   const { systemFilterConfig } = useSystemFilterConfig({
     availableSolutions,
     caseAssignmentAuthorized,
+    restrictedCasesAuthorized,
     categories,
     countClosedCases,
     countInProgressCases,

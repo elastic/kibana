@@ -9,17 +9,14 @@ import type { UseQueryResult } from '@kbn/react-query';
 
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
-import { useFilesContext } from '@kbn/shared-ux-file-context';
 import { useQuery } from '@kbn/react-query';
 
-import type { Owner } from '../../common/constants/types';
 import type { ServerError } from '../types';
 
-import { constructFileKindIdByOwner } from '../../common/files';
 import { useCasesToast } from '../common/use_cases_toast';
-import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { casesQueriesKeys } from './constants';
 import * as i18n from './translations';
+import { getCaseFiles } from './api';
 
 const getTotalFromFileList = (data: { files: FileJSON[]; total: number }): { total: number } => ({
   total: data.total,
@@ -34,19 +31,17 @@ export const useGetCaseFileStats = ({
   caseId,
   searchTerm,
 }: GetCaseFileStatsParams): UseQueryResult<{ total: number }> => {
-  const { owner } = useCasesContext();
   const { showErrorToast } = useCasesToast();
-  const { client: filesClient } = useFilesContext();
 
   return useQuery(
     casesQueriesKeys.caseFileStats(caseId, { searchTerm }),
-    () => {
-      return filesClient.list({
-        kind: constructFileKindIdByOwner(owner[0] as Owner),
-        ...(searchTerm && { name: `*${searchTerm}*` }),
+    ({ signal }) => {
+      return getCaseFiles({
+        caseId,
         page: 1,
         perPage: 1,
-        meta: { caseIds: [caseId] },
+        searchTerm,
+        signal,
       });
     },
     {

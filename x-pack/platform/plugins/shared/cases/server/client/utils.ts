@@ -28,6 +28,7 @@ import type {
   TemplatesConfiguration,
   CustomFieldTypes,
 } from '../../common/types/domain';
+import { CaseAccessMode } from '../../common/types/domain';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesSearchParams } from './types';
 
@@ -82,6 +83,29 @@ const addSeverityFilter = (severity: CaseSeverity | CaseSeverity[]): KueryNode |
     `${CASE_SAVED_OBJECT}.attributes.severity`,
     `${SEVERITY_EXTERNAL_TO_ESMODEL[severity]}`
   );
+};
+
+const buildAccessFilter = (access: CasesSearchParams['access']): KueryNode | undefined => {
+  if (access === undefined) {
+    return;
+  }
+
+  const modes = Array.isArray(access) ? access : [access];
+
+  if (modes.length === 0) {
+    return;
+  }
+
+  const accessFilters = modes.map((mode) =>
+    mode === CaseAccessMode.DEFAULT
+      ? // a missing access field means default
+        fromKueryExpression(
+          `not ${CASE_SAVED_OBJECT}.attributes.access.mode: ${CaseAccessMode.RESTRICTED}`
+        )
+      : nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.access.mode`, mode)
+  );
+
+  return accessFilters.length === 1 ? accessFilters[0] : nodeBuilder.or(accessFilters);
 };
 
 const buildCategoryFilter = (categories: CasesSearchParams['category']): KueryNode | undefined => {
@@ -353,6 +377,7 @@ export const constructQueryOptions = ({
   category,
   customFields,
   customFieldsConfiguration,
+  access,
   searchType = 'find',
 }: CasesSearchParams & {
   customFieldsConfiguration?: CustomFieldsConfiguration;
@@ -368,6 +393,7 @@ export const constructQueryOptions = ({
   const assigneesFilter = buildAssigneesFilter({ assignees });
   const categoryFilter = buildCategoryFilter(category);
   const customFieldsFilter = buildCustomFieldsFilter({ customFields, customFieldsConfiguration });
+  const accessFilter = buildAccessFilter(access);
 
   const filters = combineFilters([
     statusFilter,
@@ -379,6 +405,7 @@ export const constructQueryOptions = ({
     assigneesFilter,
     categoryFilter,
     customFieldsFilter,
+    accessFilter,
   ]);
 
   const combinedFilter = combineFilterWithAuthorizationFilter(filters, authorizationFilter);

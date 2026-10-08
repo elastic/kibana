@@ -9,10 +9,14 @@ import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import { CaseDetailsAppHeader } from './case_details_app_header';
 import { renderWithTestingProviders } from '../../../../common/mock';
 import { basicCase } from '../../../../containers/mock';
+import { CaseAccessMode } from '../../../../../common/types/domain';
+import { useCasesConfig, useKibana } from '../../../../common/lib/kibana';
+import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import { useGetCaseConnectors } from '../../../../containers/use_get_case_connectors';
 import { useDeleteCases } from '../../../../containers/use_delete_cases';
 import { useShouldDisableStatus } from '../../../actions/status/use_should_disable_status';
@@ -164,5 +168,49 @@ describe('CaseDetailsAppHeader', () => {
 
     expect(await screen.findByTestId('case-chat-action-add-to-chat')).toBeInTheDocument();
     expect(screen.getByTestId('case-chat-action-summarize')).toBeInTheDocument();
+  });
+
+  describe('access control', () => {
+    const platinumLicense = licensingMock.createLicense({ license: { type: 'platinum' } });
+
+    const renderWithRestrictedCases = (caseData = basicCase) => {
+      (useCasesConfig as jest.Mock).mockReturnValue({ restrictedCasesEnabled: true });
+      (useKibana as jest.Mock).mockReturnValue({
+        services: createStartServicesMock({ license: platinumLicense }),
+      });
+      return renderWithTestingProviders(
+        <CaseDetailsAppHeader {...defaultProps} caseData={caseData} />,
+        { wrapperProps: { license: platinumLicense } }
+      );
+    };
+
+    afterEach(() => {
+      (useCasesConfig as jest.Mock).mockReturnValue({ restrictedCasesEnabled: false });
+      (useKibana as jest.Mock).mockReturnValue({ services: createStartServicesMock() });
+    });
+
+    it('does not render the access badge when restricted cases are unavailable', async () => {
+      renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
+
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.root);
+
+      expect(screen.queryByTestId('case-view-access-badge')).not.toBeInTheDocument();
+    });
+
+    it('renders the access badge for an unrestricted case', async () => {
+      renderWithRestrictedCases();
+
+      expect(await screen.findByTestId('case-view-access-badge')).toHaveTextContent('Everyone');
+    });
+
+    it('renders the access badge for a restricted case', async () => {
+      renderWithRestrictedCases({
+        ...basicCase,
+        access: { mode: CaseAccessMode.RESTRICTED },
+      });
+
+      expect(await screen.findByTestId('case-view-access-badge')).toHaveTextContent('Restricted');
+    });
+
   });
 });
