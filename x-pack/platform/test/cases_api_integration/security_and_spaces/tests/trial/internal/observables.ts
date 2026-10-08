@@ -193,8 +193,9 @@ export default ({ getService }: FtrProviderContext): void => {
           observableIds: [observableId1, observableId2],
         });
 
-        expect((updatedCase as Case).observables.length).to.be(1);
-        expect(updatedCase.observables[0].value).to.be('127.0.0.3');
+        const typedCase = updatedCase as Case;
+        expect(typedCase.observables.length).to.be(1);
+        expect(typedCase.observables[0].value).to.be('127.0.0.3');
       });
 
       it('returns 404 when any of the requested ids does not exist', async () => {
