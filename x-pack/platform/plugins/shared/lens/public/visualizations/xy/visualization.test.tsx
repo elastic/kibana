@@ -2008,6 +2008,25 @@ describe('xy_visualization', () => {
       };
     });
 
+    it('should return empty groups for a points layer (no datasource columns to configure)', () => {
+      const options = xyVisualization.getConfiguration({
+        state: {
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'points-1',
+              layerType: layerTypes.POINTS,
+              query: 'FROM metrics.exemplars-* | SORT @timestamp DESC | LIMIT 100',
+              yAccessor: 'system.cpu.total.norm.pct',
+            },
+          ],
+        },
+        frame,
+        layerId: 'points-1',
+      });
+      expect(options).toEqual({ groups: [], hidden: true });
+    });
+
     it('should return options for 3 dimensions', () => {
       const options = xyVisualization.getConfiguration({
         state: exampleState(),
