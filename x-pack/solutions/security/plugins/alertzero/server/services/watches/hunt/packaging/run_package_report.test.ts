@@ -412,6 +412,7 @@ describe('runPackageReport', () => {
         huntStatus: 'success',
         hasConfirmedHit: false,
         attachments: [],
+        expectedSseCount: 0,
         deps: deps({ hasOpenProposal }),
       });
 
@@ -455,6 +456,7 @@ describe('runPackageReport', () => {
         huntStatus: 'success',
         hasConfirmedHit: false,
         attachments: [sseAttachment({ hit: false })],
+        expectedSseCount: 1,
         deps: deps({ hasOpenProposal: async () => true }),
       });
       expect(result.status === 'packaged' && result.dismiss).toBe(false);
@@ -471,6 +473,7 @@ describe('runPackageReport', () => {
         huntStatus: 'success',
         hasConfirmedHit: true,
         attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+        expectedSseCount: 1,
         deps: deps({ hasOpenProposal }),
       });
       expect(hasOpenProposal).not.toHaveBeenCalled();

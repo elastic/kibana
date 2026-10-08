@@ -178,7 +178,7 @@ describe('Hunt Watch worker chain', () => {
       expect(summary).toContain("packaged.dismissHold == 'check_failed'");
       // Held branches must precede the benign-close branch, or they would never render.
       expect(summary.indexOf("dismissHold == 'open_proposal'")).toBeLessThan(
-        summary.indexOf('packaged.dismiss == true')
+        summary.indexOf('packaged.dismiss == true -%}')
       );
     });
 
