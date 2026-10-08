@@ -20,6 +20,7 @@ import { ERROR_STATE_TEST_SUBJECT } from './benchmarks_table';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { useKibana } from '../../common/hooks/use_kibana';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 jest.mock('./use_csp_benchmark_integrations');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
@@ -55,12 +56,12 @@ describe('<Benchmarks />', () => {
         cloudSecurityPosture: {
           isPrivileged: true,
         },
-        fleet: {
-          authz: {
-            integrations: {
-              installPackages: true,
-            },
-          },
+        application: {
+          capabilities: {},
+          getUrlForApp: jest.fn(),
+        },
+        docLinks: {
+          links: { securitySolution: {} },
         },
         http: {
           basePath: {
@@ -94,38 +95,7 @@ describe('<Benchmarks />', () => {
   it('renders the page header', () => {
     renderBenchmarks();
 
-    expect(screen.getByTestId(TEST_SUBJ.BENCHMARKS_PAGE_HEADER)).toBeInTheDocument();
-  });
-
-  it('renders the "add integration" button', () => {
-    renderBenchmarks();
-
-    expect(screen.getByTestId(TEST_SUBJ.ADD_INTEGRATION_TEST_SUBJ)).toBeInTheDocument();
-  });
-
-  it('does not render the "add integration" button if the user does not have canInstallPackages privilegs', () => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        cloudSecurityPosture: {
-          isPrivileged: true,
-        },
-        http: {
-          basePath: {
-            prepend: (path: string) => path,
-          },
-        },
-        fleet: {
-          authz: {
-            integrations: {
-              installPackages: false,
-            },
-          },
-        },
-      },
-    });
-    renderBenchmarks();
-
-    expect(screen.queryByTestId(TEST_SUBJ.ADD_INTEGRATION_TEST_SUBJ)).not.toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Benchmarks');
   });
 
   it('renders error state while there is an error', () => {

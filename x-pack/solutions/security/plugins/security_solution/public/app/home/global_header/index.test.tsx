@@ -7,6 +7,7 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
+import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-common';
 import { GlobalHeader } from '.';
 import {
   ADD_DATA_PATH,
@@ -108,6 +109,26 @@ describe('global header', () => {
       </TestProviders>
     );
     expect(queryByTestId('add-data')).not.toBeInTheDocument();
+  });
+
+  it('clears the legacy action menu on Cloud Security Posture pages', () => {
+    const setHeaderActionMenu = jest.fn();
+    (useKibana as jest.Mock).mockReturnValue({
+      ...mockUseKibana(),
+      services: { ...mockUseKibana().services, setHeaderActionMenu },
+    });
+    (useLocation as jest.Mock).mockReturnValue({
+      pathname: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/dashboard`,
+    });
+
+    render(
+      <TestProviders store={store}>
+        <GlobalHeader />
+      </TestProviders>
+    );
+
+    expect(setHeaderActionMenu).toHaveBeenCalledWith(undefined);
+    expect(setHeaderActionMenu).not.toHaveBeenCalledWith(expect.any(Function));
   });
 
   it('points to the threat_intel Add data URL for threat_intelligence url', () => {
