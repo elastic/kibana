@@ -71,8 +71,12 @@ describe('Connector type config checks', () => {
 
   test('ensure connector types list up to date', () => {
     const inboundEventsEnabled = actionTypeRegistry.getUtils().isInboundEventsEnabled();
+    const connectorSigningKeysEnabled = actionTypeRegistry
+      .getUtils()
+      .isConnectorSigningKeysEnabled();
     const connectorSpecIds = Object.values(connectorsSpecs)
       .filter((spec) => inboundEventsEnabled || !isInboundOnlyConnectorSpec(spec))
+      .filter((spec) => connectorSigningKeysEnabled || !spec.metadata.supportsPublicKeys)
       .map(({ metadata }) => metadata.id);
     expect([...connectorTypes, ...connectorSpecIds].sort()).toEqual(
       actionTypeRegistry.getAllTypes().sort()
