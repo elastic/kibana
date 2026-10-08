@@ -34,6 +34,7 @@ import { extractIngestToken, verifyIngestToken } from './verify_ingress_auth';
 import { loadIngressCredential, parseIngestToken } from './ingress_credential';
 import type { InboundEventRateLimiter } from './inbound_event_rate_limiter';
 import { loadInboundConnector } from './load_inbound_connector';
+import { readIngressQuery } from './read_ingress_query';
 import { validateSpokeHttpHeaders } from './spoke_http';
 
 export type IngestInboundEventResult =
@@ -262,6 +263,8 @@ export async function ingestInboundEvent({
     return rateLimited(connectorDecision.retryAfterSeconds);
   }
 
+  const ingressQuery = readIngressQuery(query);
+
   try {
     const parsed = parseHandleEventsResult(
       await spec.events.handleEvents({
@@ -271,6 +274,7 @@ export async function ingestInboundEvent({
         config: stripIngestTokenHash(connector.config),
         rawBody: body,
         log: logger,
+        ...(Object.keys(ingressQuery).length > 0 ? { query: ingressQuery } : {}),
       }),
       { maxEvents: maxEmitted, maxPayloadBytes: maxBodyBytes }
     );

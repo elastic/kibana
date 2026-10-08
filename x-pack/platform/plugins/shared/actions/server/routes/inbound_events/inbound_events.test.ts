@@ -56,6 +56,7 @@ describe('inboundEventsRoute', () => {
           },
           body: expect.objectContaining({
             maxBytes: 1024 * 1024,
+            accepts: ['application/json', 'application/*+json', 'text/plain', '*/*'],
           }),
         }),
       })
