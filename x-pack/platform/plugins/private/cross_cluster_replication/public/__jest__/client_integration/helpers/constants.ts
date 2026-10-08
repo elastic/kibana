@@ -12,6 +12,7 @@ export const AUTO_FOLLOW_PATTERN_EDIT = {
   active: true,
   remoteCluster: 'cluster-2',
   leaderIndexPatterns: ['my-pattern-*'],
+  leaderIndexExclusionPatterns: [],
   followIndexPattern: 'prefix_{{leader_index}}_suffix',
 };
 

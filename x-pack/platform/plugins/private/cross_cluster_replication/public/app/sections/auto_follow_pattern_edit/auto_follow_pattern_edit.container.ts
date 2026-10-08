@@ -52,11 +52,18 @@ export const mapDispatchToProps = (dispatch: CcrDispatch) => ({
     // of `autoFollowPattern` (selectors, reducers) may include extra fields
     // such as `name` or `errors`; forwarding those would produce a 400 at the
     // server boundary.
-    const { active, remoteCluster, leaderIndexPatterns, followIndexPattern } = autoFollowPattern;
+    const {
+      active,
+      remoteCluster,
+      leaderIndexPatterns,
+      leaderIndexExclusionPatterns,
+      followIndexPattern,
+    } = autoFollowPattern;
     const updatePayload: AutoFollowPatternConfig = {
       active,
       remoteCluster,
       leaderIndexPatterns,
+      leaderIndexExclusionPatterns,
       followIndexPattern,
     };
     return dispatch(updateAutoFollowPattern(id, updatePayload));
