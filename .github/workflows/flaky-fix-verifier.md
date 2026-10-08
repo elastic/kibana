@@ -119,14 +119,15 @@ network:
 sandbox:
   agent: awf
 
-# Check out the PR head by number (available for every trigger) so the
-# `push_to_pull_request_branch` handler's own branch fetch is a fast no-op
-# instead of an unbounded fetch that hangs on a repo Kibana's size.
+# Use the exact commit admitted by the eligibility check, even if the branch moves.
+# Keep a shallow checkout for the safe-output branch push handler.
 checkout:
-  ref: refs/pull/${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}/head
+  ref: ${{ needs.check_pr_eligibility.outputs.head_sha }}
   fetch-depth: 2
 
 jobs:
+  agent:
+    needs: [check_pr_eligibility]
   activation:
     needs: [check_pr_eligibility]
   check_pr_eligibility:
@@ -137,6 +138,7 @@ jobs:
       pull-requests: read
     outputs:
       pr_number: ${{ steps.check.outputs.pr_number }}
+      head_sha: ${{ steps.check.outputs.head_sha }}
     steps:
       # No checkout: validation must run before any PR code or agent tools.
       - name: Check flaky fix PR eligibility
@@ -163,9 +165,25 @@ jobs:
               throw new Error('The flaky fix verifier requires a PR opened by kibanamachine.');
             }
 
+            if (!/^[0-9a-f]{40}$/.test(pr.head.sha ?? '')) {
+              throw new Error('The PR head must be a full commit SHA.');
+            }
             core.setOutput('pr_number', String(prNumber));
+            core.setOutput('head_sha', pr.head.sha);
             core.info(`PR #${prNumber} by ${pr.user.login} is eligible.`);
+            const fs = require('node:fs');
+            const path = require('node:path');
+            const dir = path.join(process.env.RUNNER_TEMP, 'verified-pr-head');
+            fs.mkdirSync(dir, { recursive: true });
+            fs.writeFileSync(path.join(dir, 'head-sha.txt'), pr.head.sha);
+      - name: Save admitted PR head
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: verified-pr-head-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/verified-pr-head/head-sha.txt
+          retention-days: 1
   prefetch_pr_context:
+    needs: [activation, check_pr_eligibility]
     permissions:
       contents: read
       issues: read
@@ -175,6 +193,7 @@ jobs:
       pr_number: *pr_number
       repo: ${{ github.repository }}
       artifact_name: *pr_context_artifact_name
+      expected_head_sha: ${{ needs.check_pr_eligibility.outputs.head_sha }}
 
 steps:
   - name: Download prefetched PR context
@@ -219,6 +238,28 @@ steps:
         }
 
 safe-outputs:
+  needs: [check_pr_eligibility]
+  steps:
+    # Runs in the output job, outside the agent, before publishing any requested writes.
+    - name: Reject results for a changed PR head
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+      env:
+        PR_NUMBER: *pr_number
+        EXPECTED_HEAD_SHA: ${{ needs.check_pr_eligibility.outputs.head_sha }}
+      with:
+        script: |
+          const expectedHead = process.env.EXPECTED_HEAD_SHA;
+          if (!/^[0-9a-f]{40}$/.test(expectedHead ?? '')) {
+            throw new Error('Missing validated PR head SHA.');
+          }
+          const { owner, repo } = context.repo;
+          const { data: pr } = await github.rest.pulls.get({
+            owner, repo, pull_number: Number(process.env.PR_NUMBER),
+          });
+          if (pr.state !== 'open' || pr.head.repo?.full_name !== `${owner}/${repo}` ||
+              pr.user.login !== 'kibanamachine' || pr.head.sha !== expectedHead) {
+            throw new Error('The PR changed after verification started. Start a new verification run for its current head.');
+          }
   activation-comments: false
   report-failure-as-issue: false
   add-comment:
@@ -272,6 +313,7 @@ safe-outputs:
       description: 'Take the draft fix PR out of draft (mark it ready for review) and enable auto-merge (squash) so it merges once required CI is green and it has an approval. Call exactly once, and only after you have applied `flaky-fix-check:passed` or `flaky-fix-check:skipped`, completed release-note and backport labeling, and added the PR-body release note required by `release_note:fix`. Never call it for a `failed` or `inconclusive` verdict, and never while still iterating.'
       runs-on: ubuntu-latest
       needs: safe_outputs
+      if: needs.safe_outputs.result == 'success'
       permissions:
         pull-requests: write
       inputs:
@@ -282,6 +324,11 @@ safe-outputs:
       env:
         GH_AW_PR_NUMBER: *pr_number
       steps:
+        - name: Download admitted PR head
+          uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+          with:
+            name: verified-pr-head-${{ github.run_attempt }}
+            path: ${{ runner.temp }}/verified-pr-head
         - name: Mark the fix PR ready for review
           uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
           with:
@@ -294,6 +341,12 @@ safe-outputs:
               }
               const { owner, repo } = context.repo;
               const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+              const expectedHead = require('node:fs').readFileSync(
+                require('node:path').join(process.env.RUNNER_TEMP, 'verified-pr-head/head-sha.txt'), 'utf8'
+              );
+              if (!/^[0-9a-f]{40}$/.test(expectedHead) || pr.head.sha !== expectedHead) {
+                throw new Error('The PR head changed; start a new verification run before changing this PR.');
+              }
               // Only a verified or unverifiable fix goes to a human: a `failed` or `inconclusive`
               // verdict stays a draft. The labels are written by the safe_outputs job this one
               // depends on, so they are the authoritative verdict by the time we read them.
@@ -338,6 +391,7 @@ safe-outputs:
       description: 'Close THIS fix PR as a duplicate of an existing canonical fix PR and point to it. Call only in kickoff mode, only once, and only after confirming another `flaky-test-fixer` PR fixes the same root cause (same method/purpose) and is the canonical one to keep (see "Duplicate detection"). Pass the canonical PR number in `canonical_pr`. Never call it alongside `mark_pr_ready`, a `/flaky` run, or `flaky-fix-check:started`.'
       runs-on: ubuntu-latest
       needs: safe_outputs
+      if: needs.safe_outputs.result == 'success'
       permissions:
         contents: read
         pull-requests: write
@@ -350,6 +404,11 @@ safe-outputs:
       env:
         GH_AW_PR_NUMBER: *pr_number
       steps:
+        - name: Download admitted PR head
+          uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+          with:
+            name: verified-pr-head-${{ github.run_attempt }}
+            path: ${{ runner.temp }}/verified-pr-head
         - name: Close the duplicate fix PR
           uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
           with:
@@ -372,6 +431,12 @@ safe-outputs:
               const canonicalRef = /^\d+$/.test(canonical) ? `#${canonical}` : 'another open fix PR';
               const { owner, repo } = context.repo;
               const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+              const expectedHead = require('node:fs').readFileSync(
+                require('node:path').join(process.env.RUNNER_TEMP, 'verified-pr-head/head-sha.txt'), 'utf8'
+              );
+              if (!/^[0-9a-f]{40}$/.test(expectedHead) || pr.head.sha !== expectedHead) {
+                throw new Error('The PR head changed; start a new verification run before changing this PR.');
+              }
               if (pr.state !== 'open') {
                 core.info(`PR #${prNumber} is already ${pr.state}; nothing to do.`);
                 return;
@@ -406,6 +471,10 @@ You verify a flaky test fix PR by running the flaky test runner against it, revi
 
 - This flaky test PR was created by a separate workflow that looked at an investigation comment posted on a `failed-test` issue. Your goal is to ensure the fix is correct and final. You are allowed to make changes to ensure correctness.
 - The flaky test runner is an internal tool that you can trigger with the `/flaky` command (more info in this document). It runs both Scout and FTR test configs (our testing frameworks) on-demand. It then posts the results in the PR.
+
+## Commit used by this run
+
+This run checks out the exact PR head SHA recorded by the eligibility check. Developers can still push to the PR while it runs. If the head differs at the output check, the guard stops this run before publishing its verdict or revision; start a new verification run for the updated head. Do not switch to a newer branch head inside this run. A Buildkite result is evidence only for the commit that build actually tested, so compare its commit SHA with this checkout before using it as a passing result.
 
 ## Prefetched PR context
 
@@ -669,7 +738,7 @@ The `/flaky` trigger comment is not an update comment: it contains nothing but t
 
 When you iterate, you are editing a PR you did not open. This is allowed because the fixer creates in-repo (non-fork) branches. To push:
 
-- Check out the PR head branch (e.g. `gh pr checkout ${{ env.PR_NUMBER }}`), make the minimal edit, and commit it.
+- Work from the commit already checked out for this run. Do not fetch or check out the moving PR head. Make the minimal edit and commit it; the safe-output handler pushes the revision to the PR branch.
 - Emit a single `push-to-pull-request-branch` safe output targeting PR #${{ env.PR_NUMBER }}.
 - Keep the change minimal and focused on the root cause. Re-running `/flaky` after the push validates the new commit, since the runner builds from the updated PR head.
 - Re-enable the test suite(s) or test case(s) if they were skipped. Remove any stale flaky comments (e.g., `// FLAKY: <issue-url>` / `// Failing: See <issue-url>`, etc.) if they carry any.
