@@ -14,10 +14,10 @@ import { authFormatSettingsByDataSourceType } from './auth_format_settings';
 export type S3AuthenticationMode = 'anonymous' | 'access_and_secret_keys' | 'federated_identity';
 
 /** GCS authentication modes (UI-only). */
-export type GcsAuthenticationMode = 'anonymous' | 'access_and_secret_keys';
+export type GcsAuthenticationMode = 'anonymous' | 'access_and_secret_keys' | 'federated_identity';
 
 /** Azure authentication modes (UI-only). */
-export type AzureAuthenticationMode = 'anonymous' | 'credentials';
+export type AzureAuthenticationMode = 'anonymous' | 'credentials' | 'federated_identity';
 
 export type CreateDataSourceAuthenticationMode =
   | S3AuthenticationMode
@@ -75,8 +75,6 @@ export const applyAuthenticationModeToDataSource = (
   data: DataSourceWithSecrets,
   mode: CreateDataSourceAuthenticationMode
 ): DataSourceWithSecrets => {
-  const authSettings = mode === 'anonymous' ? { auth: 'anonymous' } : {};
-
   switch (data.type) {
     case 's3': {
       // Unregistering the last settings field (anonymous S3 has none left) can remove the
@@ -86,81 +84,14 @@ export const applyAuthenticationModeToDataSource = (
       return { ...data, settings};
     }
     case 'gcs': {
-      const settings = data.settings ?? {};
-      const {
-        credentials: _credentials,
-        jwt_audience: _jwtAudience,
-        sts_audience: _stsAudience,
-        service_account_impersonation_url: _serviceAccountImpersonationUrl,
-        auth: _auth,
-        ...rest
-      } = settings;
-      const credentialsText = settings.credentials?.trim();
+      const settings = authFormatSettingsByDataSourceType['gcs'][mode as GcsAuthenticationMode](data);
 
-      let applied: Record<string, unknown> = {};
-      if (mode === 'access_and_secret_keys' && credentialsText) {
-        applied = { credentials: credentialsText, auth: 'static_credentials' };
-      } else if (mode === 'federated_identity') {
-        applied = {
-          jwt_audience: settings.jwt_audience,
-          sts_audience: settings.sts_audience,
-          service_account_impersonation_url: settings.service_account_impersonation_url,
-          auth: 'federated_identity',
-        };
-      }
-      return {
-        ...data,
-        settings: {
-          ...rest,
-          ...authSettings,
-          ...applied,
-        },
-      };
+      return { ...data, settings };
     }
     case 'azure': {
-      const settings = data.settings ?? {};
-      const {
-        account: _account,
-        key: _key,
-        tenant_id: _tenantId,
-        client_id: _clientId,
-        jwt_audience: _jwtAudience,
-        auth: _auth,
-        ...rest
-      } = settings;
+      const settings = authFormatSettingsByDataSourceType['azure'][mode as AzureAuthenticationMode](data);
 
-      const base = { ...rest };
-
-      if (mode === 'credentials') {
-        return {
-          ...data,
-          settings: {
-            ...base,
-            account: settings.account,
-            key: settings.key,
-            auth: 'static_credentials',
-          },
-        };
-      }
-      if (mode === 'federated_identity') {
-        return {
-          ...data,
-          settings: {
-            ...base,
-            tenant_id: settings.tenant_id,
-            client_id: settings.client_id,
-            jwt_audience: settings.jwt_audience,
-            auth: 'federated_identity',
-          },
-        };
-      }
-      return {
-        ...data,
-        settings: {
-          ...base,
-          ...authSettings,
-        },
-      };
+      return { ...data, settings };
     }
     default:
       return data;

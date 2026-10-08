@@ -55,7 +55,7 @@ export const azureCredentialsSourceType: AuthOption = {
 
 const azureAuthOptions: AuthOption[] = [
   azureCredentialsSourceType,
-  accessAndSecretKeysSourceType('azure')
+  anonymousSourceType('azure')
 ];
 
 const s3AuthOptions: AuthOption[] = [
@@ -71,9 +71,10 @@ const gcsAuthOptions: AuthOption[] = [
 export function authOptionsByDataSourceType(federatedIdentity: boolean): Record<DataSourceType, AuthOption[]> {
   const s3Options = federatedIdentity ? [federatedIdentitySourceType('s3'), ...s3AuthOptions] : s3AuthOptions;
   const gcsOptions = federatedIdentity ? [federatedIdentitySourceType('gcs'), ...gcsAuthOptions] : gcsAuthOptions;
+  const azureOptions = federatedIdentity ? [federatedIdentitySourceType('azure'), ...azureAuthOptions] : azureAuthOptions;
 
  return {
-  azure: azureAuthOptions,
+  azure: azureOptions,
   s3: s3Options,
   gcs: gcsOptions,
  };
