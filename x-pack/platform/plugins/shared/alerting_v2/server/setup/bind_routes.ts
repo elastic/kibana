@@ -26,6 +26,7 @@ import { EnableRulesByQueryRoute } from '../routes/rules/enable_rules_by_query_r
 import { DisableRulesByQueryRoute } from '../routes/rules/disable_rules_by_query_route';
 import { UpdateApiKeyByQueryRoute } from '../routes/rules/update_api_key_by_query_route';
 import { GetRuleTagsRoute } from '../routes/rules/get_rule_tags_route';
+import { GetRuleRoutingTagsRoute } from '../routes/rules/get_rule_routing_tags_route';
 import { MatchRulesRoute } from '../routes/rules/match_rules_route';
 import { BulkTagEpisodeActionRoute } from '../routes/alert_actions/episodes/bulk_tag_episode_action_route';
 import { BulkSnoozeSeriesActionRoute } from '../routes/alert_actions/series/bulk_snooze_series_action_route';
@@ -69,6 +70,7 @@ import { SuggestUserProfilesRoute } from '../routes/suggestions/suggest_user_pro
 import { UpsertRuleRoute } from '../routes/rules/upsert_rule_route';
 import { UpsertActionPolicyRoute } from '../routes/action_policies/upsert_action_policy_route';
 import { MatchActionPoliciesRoute } from '../routes/action_policies/match_action_policies_route';
+import { GetActionPolicyRoutingTagsRoute } from '../routes/action_policies/get_action_policy_routing_tags_route';
 import { FindRuleTemplatesRoute } from '../routes/rule_templates/find_rule_templates_route';
 import { GetRuleTemplateTagsRoute } from '../routes/rule_templates/get_rule_template_tags_route';
 import { GetRuleTemplateRoute } from '../routes/rule_templates/get_rule_template_route';
@@ -93,6 +95,7 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(DisableRulesByQueryRoute);
   bind(Route).toConstantValue(UpdateApiKeyByQueryRoute);
   bind(Route).toConstantValue(GetRuleTagsRoute);
+  bind(Route).toConstantValue(GetRuleRoutingTagsRoute);
   bind(Route).toConstantValue(MatchRulesRoute);
   bind(Route).toConstantValue(CreateTagEpisodeActionRoute);
   bind(Route).toConstantValue(CreateSnoozeSeriesActionRoute);
@@ -137,6 +140,7 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(UpsertRuleRoute);
   bind(Route).toConstantValue(UpsertActionPolicyRoute);
   bind(Route).toConstantValue(MatchActionPoliciesRoute);
+  bind(Route).toConstantValue(GetActionPolicyRoutingTagsRoute);
   bind(Route).toConstantValue(FindRuleTemplatesRoute);
   bind(Route).toConstantValue(GetRuleTemplateTagsRoute);
   bind(Route).toConstantValue(GetRuleTemplateRoute);

@@ -13,7 +13,7 @@ import type {
 } from '../../../../../common/step_types/package_report';
 import type { ResolveHostEnrollment } from '../../../fleet/resolve_host_enrollment';
 import { buildHuntInvestigationConversationId } from '../common/hunt_investigation_id';
-import { decidePackageReport } from './decide_package_report';
+import { buildProposalSummaryBullets, decidePackageReport } from './decide_package_report';
 import { deriveCoverageSubjects } from './derive_coverage_subjects';
 import { readCurrentRunState } from './read_current_run_state';
 import type { RehydrateProcessSelectors } from './rehydrate_process_selectors';
@@ -91,7 +91,8 @@ export const computeExpectedProposalCount = ({
  * Orchestrates packaging for one Investigation run. Throws
  * {@link PackageReportIdentityError} when the conversation id does not match the report
  * binding; returns typed `run_incomplete` when the run claimed a hit whose current-run SSE
- * state cannot be read, and when a hunt that did not complete left nothing to package.
+ * state cannot be read, when fewer current-run SSEs were found than the hunt prepared (a
+ * partial `attach_sse` foreach), and when a hunt that did not complete left nothing to package.
  */
 export const runPackageReport = async ({
   spaceId,
@@ -100,6 +101,7 @@ export const runPackageReport = async ({
   runId,
   huntStatus,
   hasConfirmedHit,
+  expectedSseCount,
   attachments,
   deps,
 }: {
@@ -109,6 +111,20 @@ export const runPackageReport = async ({
   runId: string;
   huntStatus: PackageReportInput['huntStatus'];
   hasConfirmedHit: boolean;
+  /**
+   * Number of SSE attachments the hunt child prepared for this run (`hunt.yaml`'s `sse_count`
+   * output). Compared against what `readCurrentRunState` actually found: `attach_sse`'s
+   * `foreach` swallows a per-item attach failure with `continue`, so a shortfall here is
+   * otherwise invisible -- packaging would read the attachments that did land and proceed as
+   * if the run were complete, silently dropping whichever finding failed to attach.
+   *
+   * Undefined skips the check below rather than failing closed: an already-installed Worker
+   * that has not yet picked up the call site supplying this field (its `yamlTemplate` hash does
+   * not cover the imported YAML it renders, so it only updates when its own `version` bumps)
+   * must not have every packaging call start erroring just because this step's own schema
+   * changed out from under it -- that would turn a staleness gap into an outage.
+   */
+  expectedSseCount: number | undefined;
   attachments: VersionedAttachment[] | undefined;
   deps: RunPackageReportDeps;
 }): Promise<PackageReportOutput> => {
@@ -154,6 +170,8 @@ export const runPackageReport = async ({
         status: 'packaged',
         coverage,
         proposals: [],
+        proposalBullets: [],
+        omittedProposalCount: 0,
         dismiss: true,
         closureSummary: `Hunt for report ${reportId} found no confirmed hits. Closing: nothing in this environment matched the report at the confirming-index bar.`,
         expectedProposalCount: 0,
@@ -165,6 +183,17 @@ export const runPackageReport = async ({
       reason: hasConfirmedHit
         ? `No current-run SSE attachment for runId=${runId}`
         : `Hunt did not complete (status=${huntStatus}), so there is no verdict to record for runId=${runId}`,
+    };
+  }
+
+  // A partial `attach_sse` foreach (some items attached, some swallowed a failure via
+  // `continue`) leaves a non-empty but short current-run state -- the gap the `!state`
+  // branch above cannot see, since it only catches a total miss. Reported the same way as a
+  // total miss: `run_incomplete`, not packaged off an incomplete finding set.
+  if (expectedSseCount !== undefined && state.sseCount < expectedSseCount) {
+    return {
+      status: 'run_incomplete',
+      reason: `Hunt prepared ${expectedSseCount} significant security event attachment(s) but only ${state.sseCount} were found for runId=${runId}; the remainder failed to attach`,
     };
   }
 
@@ -212,10 +241,15 @@ export const runPackageReport = async ({
     newProposalCount: proposals.length,
   });
 
+  const { bullets: proposalBullets, omittedCount: omittedProposalCount } =
+    buildProposalSummaryBullets(proposals);
+
   return {
     status: 'packaged',
     coverage,
     proposals,
+    proposalBullets,
+    omittedProposalCount,
     // Not forced to `true`: a confirmed hit the guard suppressed is not benign. Accepted
     // consequence, not an oversight: `decidePackageReport` could not previously return
     // `dismiss: false` with an empty `proposals` (it always filled at least the

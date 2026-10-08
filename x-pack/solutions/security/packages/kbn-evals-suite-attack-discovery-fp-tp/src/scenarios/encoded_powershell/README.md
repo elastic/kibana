@@ -94,7 +94,7 @@ On the FP world, `entity.sub_type` is `mdm_management`. On the TP world it is `e
 
 ## Run from the Workflows UI
 
-Paste `../../sample_workflow/fp_tp_analysis.yaml` into a new workflow and run it with `attack_discovery_id: ad-fp-tp-encoded-powershell-attack` and the id of any existing Agent Builder conversation as `investigation_id`. The `alertzero_reasoning` inference feature needs AlertZero enabled and a connector assigned.
+Run the managed workflow `system-security-attack-discovery-fp-tp-analysis` in place (it ships with AlertZero; no workflow is installed by the suite) with `attack_discovery_id: ad-fp-tp-encoded-powershell-attack` and the id of any existing Agent Builder conversation as `investigation_id`. The `alertzero_reasoning` inference feature needs AlertZero enabled and a connector assigned.
 
 | Seeded variant | Expected `payload.verdict` | Why |
 | --- | --- | --- |

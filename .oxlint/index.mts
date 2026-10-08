@@ -28,6 +28,7 @@ import { licenseHeaderOverrides } from './license_headers.mts';
 import { scoutOverrides } from './scout.mts';
 import { i18nOverrides } from './i18n.mts';
 import { telemetryOverrides } from './telemetry.mts';
+import { securityImportsOverrides } from './security_imports.mts';
 
 export default defineConfig<OxlintConfig>({
   plugins: ['react', 'typescript', 'import', 'jsx-a11y', 'react-perf', 'node', 'jest'],
@@ -43,6 +44,10 @@ export default defineConfig<OxlintConfig>({
     {
       name: '@kbn/telemetry',
       specifier: './packages/kbn-eslint-plugin-telemetry/oxlint_plugin.js',
+    },
+    {
+      name: '@kbn/disable',
+      specifier: './packages/kbn-eslint-plugin-disable/oxlint_plugin.js',
     },
   ],
   categories: {
@@ -61,6 +66,7 @@ export default defineConfig<OxlintConfig>({
     ...scoutOverrides,
     ...i18nOverrides,
     ...telemetryOverrides,
+    ...securityImportsOverrides,
   ],
   // oxlint's parser rejects TypeScript grammar errors (TS1016: required parameter after an
   // optional one) that ESLint's parser and tsc's `skipLibCheck` let through in this declaration.

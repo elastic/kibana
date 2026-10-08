@@ -11,6 +11,7 @@ import {
   updateRuleDataSchema,
   ruleResponseSchema,
   findRulesResponseSchema,
+  ruleRoutingTagsResponseSchema,
   ruleTagsResponseSchema,
   bulkGetRulesResponseSchema,
   bulkCreateRuleItemSchema,
@@ -69,6 +70,7 @@ import {
   matchedActionPolicySchema,
   matchActionPoliciesResponseSchema,
 } from './match_action_policies_schema';
+import { actionPolicyRoutingTagsResponseSchema } from './action_policy_routing_tags_schema';
 import { matchRulesBodySchema } from './match_rules_schema';
 import {
   ruleExecutionViewSchema,
@@ -106,6 +108,7 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   [ruleResponseSchema, 'alerting_rule_response'],
   [findRulesResponseSchema, 'alerting_rule_list_response'],
   [ruleTagsResponseSchema, 'alerting_rule_tags_response'],
+  [ruleRoutingTagsResponseSchema, 'alerting_rule_routing_tags_response'],
   [bulkGetRulesResponseSchema, 'alerting_bulk_get_rules_response'],
   [bulkCreateRuleItemSchema, 'alerting_bulk_create_rule_item'],
   [bulkCreateRulesRequestSchema, 'alerting_bulk_create_rules_request'],
@@ -157,6 +160,7 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   [matchActionPoliciesBodySchema, 'alerting_match_action_policies_request'],
   [matchedActionPolicySchema, 'alerting_matched_action_policy'],
   [matchActionPoliciesResponseSchema, 'alerting_match_action_policies_response'],
+  [actionPolicyRoutingTagsResponseSchema, 'alerting_action_policy_routing_tags_response'],
   // matched rules
   [matchRulesBodySchema, 'alerting_match_rules_request'],
   // execution history

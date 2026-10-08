@@ -85,6 +85,13 @@ export const NO_USER_DEFINED_DESCRIPTION = i18n.translate(
       'Create an LLM judge to score traces against criteria you define, then test it before saving.',
   }
 );
+export const NO_USER_DEFINED_READ_ONLY_DESCRIPTION = i18n.translate(
+  'xpack.evals.evaluators.noUserDefinedReadOnlyDescription',
+  {
+    defaultMessage:
+      'Nobody has created an LLM judge in this space yet. Ask someone who can manage evaluations to add one.',
+  }
+);
 export const CLEAR_FILTERS_BUTTON = i18n.translate(
   'xpack.evals.evaluators.clearFiltersButtonLabel',
   { defaultMessage: 'Clear filters' }
@@ -110,6 +117,24 @@ export const DELETE_SUCCESS = (name: string) =>
 export const SAVE_ERROR_TITLE = i18n.translate('xpack.evals.evaluators.saveErrorTitle', {
   defaultMessage: 'Could not save this evaluator',
 });
+export const STALE_EDIT_ERROR_TITLE = i18n.translate('xpack.evals.evaluators.staleEditErrorTitle', {
+  defaultMessage: 'This evaluator changed while you were editing it',
+});
+export const STALE_EDIT_ERROR_DESCRIPTION = i18n.translate(
+  'xpack.evals.evaluators.staleEditErrorDescription',
+  {
+    defaultMessage:
+      'Your changes were not saved as the latest version. Loading the latest version replaces the changes in this form, so copy anything you want to keep first.',
+  }
+);
+export const LOAD_LATEST_BUTTON = i18n.translate('xpack.evals.evaluators.loadLatestButtonLabel', {
+  defaultMessage: 'Load latest version',
+});
+export const LOAD_LATEST_ERROR = (message: string) =>
+  i18n.translate('xpack.evals.evaluators.loadLatestErrorMessage', {
+    defaultMessage: 'Could not load the latest version: {message} Your changes are still here.',
+    values: { message },
+  });
 export const TEST_ERROR_TITLE = i18n.translate('xpack.evals.evaluators.testErrorTitle', {
   defaultMessage: 'Could not run this test',
 });
@@ -181,7 +206,19 @@ export const SCORES_TITLE = i18n.translate('xpack.evals.evaluators.scoresTitle',
 });
 export const SCORES_DESCRIPTION = i18n.translate('xpack.evals.evaluators.scoresDescription', {
   defaultMessage:
-    'Every score is read as higher is better, both for numbers and for the values given to labels. Phrase each one so that 1 is the best outcome, for example grounded rather than hallucinated.',
+    'Choose a direction for each score so comparisons read it the right way. It applies to numeric scores and to the values given to labels. For example, groundedness would be "Higher is better", a hallucination rate would be "Lower is better", and a "Neutral" score is recorded without being shown as an improvement or a regression.',
+});
+export const SCORE_DIRECTION_LABEL = i18n.translate('xpack.evals.evaluators.scoreDirectionLabel', {
+  defaultMessage: 'Direction',
+});
+export const MAXIMIZE_DIRECTION = i18n.translate('xpack.evals.evaluators.maximizeDirectionLabel', {
+  defaultMessage: 'Higher is better',
+});
+export const MINIMIZE_DIRECTION = i18n.translate('xpack.evals.evaluators.minimizeDirectionLabel', {
+  defaultMessage: 'Lower is better',
+});
+export const NEUTRAL_DIRECTION = i18n.translate('xpack.evals.evaluators.neutralDirectionLabel', {
+  defaultMessage: 'Neutral',
 });
 export const ADD_SCORE_BUTTON = i18n.translate('xpack.evals.evaluators.addScoreButtonLabel', {
   defaultMessage: 'Add score',
@@ -251,6 +288,11 @@ export const VERSION_HISTORY_HELP = i18n.translate(
       'Every saved change keeps its own version. Pick one to see how it was defined. A new major version means the scores or required inputs changed, so results from earlier versions no longer compare.',
   }
 );
+export const VERSION_LOAD_ERROR_TITLE = (version: string) =>
+  i18n.translate('xpack.evals.evaluators.versionLoadErrorTitle', {
+    defaultMessage: 'Could not load version {version}. Still showing the version below.',
+    values: { version },
+  });
 export const LOADING_VERSION = (version: string) =>
   i18n.translate('xpack.evals.evaluators.loadingVersionDescription', {
     defaultMessage: 'Loading {version}…',
