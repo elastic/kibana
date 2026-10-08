@@ -76,13 +76,13 @@ describe('createCriteriaEvaluator', () => {
       { id: 'fail-me', result: 'FAIL', reason: 'No signal present', weight: 3 },
       { id: 'na-me', result: 'N/A', reason: 'Feature not applicable', weight: 1 },
     ]);
-    expect(result.score).toBeCloseTo((2 + 1) / 6, 5);
+    expect(result.score).toBeCloseTo(2 / 5, 5);
     expect(result.explanation).toBe(
       '"pass-me": Detected the thing\n"fail-me": No signal present\n"na-me": Feature not applicable'
     );
   });
 
-  it('keeps N/A at full weight and the aggregate label unchanged', async () => {
+  it('excludes N/A from the score denominator', async () => {
     mockScoreWith(
       [{ id: 'pass-me', result: 'PASS' }].concat([
         { id: 'fail-me', result: 'FAIL' },
@@ -92,8 +92,25 @@ describe('createCriteriaEvaluator', () => {
 
     const result = await runEvaluation();
 
-    expect(result.score).toBeCloseTo((2 + 1) / 6, 5);
+    expect(result.score).toBeCloseTo(2 / 5, 5);
     expect((result.metadata as Record<string, unknown>).not_applicable).toBe(1);
+  });
+
+  it('returns a null score when every criterion is N/A', async () => {
+    mockScoreWith([
+      { id: 'pass-me', result: 'N/A' },
+      { id: 'fail-me', result: 'N/A' },
+      { id: 'na-me', result: 'N/A' },
+    ]);
+
+    const result = await runEvaluation();
+
+    expect(result.score).toBeNull();
+    expect(result.metadata).toMatchObject({
+      successful: 0,
+      failed: 0,
+      not_applicable: 6,
+    });
   });
 
   it('scores a full PASS as 1 and a full FAIL as 0', async () => {
