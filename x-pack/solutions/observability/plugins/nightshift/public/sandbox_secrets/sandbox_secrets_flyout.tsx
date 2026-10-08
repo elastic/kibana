@@ -111,16 +111,29 @@ const newValuePlaceholder = i18n.translate('xpack.nightshift.sandboxSecrets.newV
   defaultMessage: 'Secret value',
 });
 
+/** A button that adds rows with conventional secret names, e.g. `GITHUB_TOKEN`. */
+export interface SandboxSecretPreset {
+  id: string;
+  label: string;
+  iconType: string;
+  keys: readonly string[];
+}
+
 function SandboxSecretsForm({
   initialKeys,
   version,
   canEncrypt,
   onClose,
+  layout = 'flyout',
+  presets = [],
 }: {
   initialKeys: readonly string[];
   version?: string;
   canEncrypt: boolean;
-  onClose: () => void;
+  /** Closes the flyout; the inline layout stays open after saving. */
+  onClose?: () => void;
+  layout?: 'flyout' | 'inline';
+  presets?: readonly SandboxSecretPreset[];
 }): React.ReactElement {
   const nextRowId = useRef(0);
   const createRowId = () => `row-${nextRowId.current++}`;
@@ -129,6 +142,16 @@ function SandboxSecretsForm({
   );
   const [showErrors, setShowErrors] = useState(false);
   const { mutate: save, isLoading: isSaving } = useSaveSandboxSecrets({ onSuccess: onClose });
+  const isDirty =
+    rows.some(({ key, storedKey, value }) => key !== storedKey || value !== '') ||
+    rows.length !== initialKeys.length;
+  const addPreset = ({ keys }: SandboxSecretPreset) =>
+    setRows((current) => [
+      ...current,
+      ...keys
+        .filter((key) => !current.some((row) => row.key === key))
+        .map((key) => ({ id: createRowId(), key, value: '' })),
+    ]);
 
   const updateRow = useCallback((id: string, patch: Partial<Pick<SecretRow, 'key' | 'value'>>) => {
     setRows((current) => current.map((row) => (row.id === id ? { ...row, ...patch } : row)));
@@ -147,6 +170,147 @@ function SandboxSecretsForm({
 
   const isDisabled = !canEncrypt || isSaving;
 
+  const fields = (
+    <>
+      {!canEncrypt && (
+        <>
+          <KbnWarningCallout
+            size="s"
+            data-test-subj="nightshiftSandboxSecretsCannotEncrypt"
+            title={i18n.translate('xpack.nightshift.sandboxSecrets.cannotEncryptTitle', {
+              defaultMessage:
+                'Sandbox secrets require an encryption key. Set xpack.encryptedSavedObjects.encryptionKey to enable them.',
+            })}
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {rows.length === 0 && (
+        <EuiText size="s" data-test-subj="nightshiftSandboxSecretsEmpty">
+          <p>
+            {i18n.translate('xpack.nightshift.sandboxSecrets.empty', {
+              defaultMessage: 'No secrets are configured in this space.',
+            })}
+          </p>
+        </EuiText>
+      )}
+      <EuiFlexGroup direction="column" gutterSize="m">
+        {rows.map((row) => {
+          const keyError = showErrors ? getKeyError(row, rows) : undefined;
+          const valueError = showErrors ? getValueError(row) : undefined;
+          const removeLabel = i18n.translate('xpack.nightshift.sandboxSecrets.removeAriaLabel', {
+            defaultMessage: 'Remove secret {key}',
+            values: { key: row.key },
+          });
+          return (
+            <EuiFlexGroup
+              key={row.id}
+              gutterSize="s"
+              alignItems="flexStart"
+              data-test-subj="nightshiftSandboxSecretRow"
+            >
+              <EuiFlexItem>
+                <EuiFormRow label={keyLabel} isInvalid={!!keyError} error={keyError}>
+                  <EuiFieldText
+                    value={row.key}
+                    isInvalid={!!keyError}
+                    disabled={isDisabled}
+                    onChange={(e) => updateRow(row.id, { key: e.target.value })}
+                    data-test-subj="nightshiftSandboxSecretKey"
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow label={valueLabel} isInvalid={!!valueError} error={valueError}>
+                  <EuiFieldPassword
+                    type="dual"
+                    value={row.value}
+                    autoComplete="new-password"
+                    placeholder={hasStoredValue(row) ? storedValuePlaceholder : newValuePlaceholder}
+                    isInvalid={!!valueError}
+                    disabled={isDisabled}
+                    onChange={(e) => updateRow(row.id, { value: e.target.value })}
+                    data-test-subj="nightshiftSandboxSecretValue"
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormRow hasEmptyLabelSpace>
+                  <EuiToolTip content={removeLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="trash"
+                      color="danger"
+                      size="m"
+                      disabled={isDisabled}
+                      aria-label={removeLabel}
+                      onClick={() =>
+                        setRows((current) => current.filter(({ id }) => id !== row.id))
+                      }
+                      data-test-subj="nightshiftSandboxSecretRemove"
+                    />
+                  </EuiToolTip>
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        })}
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiButtonEmpty
+        iconType="plus"
+        size="s"
+        disabled={isDisabled || rows.length >= MAX_SANDBOX_SECRETS}
+        onClick={() =>
+          setRows((current) => [...current, { id: createRowId(), key: '', value: '' }])
+        }
+        data-test-subj="nightshiftSandboxSecretsAdd"
+      >
+        {i18n.translate('xpack.nightshift.sandboxSecrets.addButton', {
+          defaultMessage: 'Add secret',
+        })}
+      </EuiButtonEmpty>
+      {presets.map((preset) => (
+        <EuiButtonEmpty
+          key={preset.id}
+          iconType={preset.iconType}
+          size="s"
+          disabled={
+            isDisabled ||
+            preset.keys.every((key) => rows.some((row) => row.key === key)) ||
+            rows.length + preset.keys.length > MAX_SANDBOX_SECRETS
+          }
+          onClick={() => addPreset(preset)}
+          data-test-subj={`nightshiftSandboxSecretsPreset-${preset.id}`}
+        >
+          {preset.label}
+        </EuiButtonEmpty>
+      ))}
+    </>
+  );
+
+  if (layout === 'inline') {
+    return (
+      <div data-test-subj="nightshiftSandboxSecretsInline">
+        {fields}
+        <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              onClick={onSave}
+              isLoading={isSaving}
+              isDisabled={!canEncrypt || !isDirty || (showErrors && hasErrors)}
+              data-test-subj="nightshiftSandboxSecretsSave"
+            >
+              {i18n.translate('xpack.nightshift.sandboxSecrets.saveButton', {
+                defaultMessage: 'Save',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+    );
+  }
+
   return (
     <>
       <EuiFlyoutBody>
@@ -159,105 +323,7 @@ function SandboxSecretsForm({
           </p>
         </EuiText>
         <EuiSpacer size="m" />
-        {!canEncrypt && (
-          <>
-            <KbnWarningCallout
-              size="s"
-              data-test-subj="nightshiftSandboxSecretsCannotEncrypt"
-              title={i18n.translate('xpack.nightshift.sandboxSecrets.cannotEncryptTitle', {
-                defaultMessage:
-                  'Sandbox secrets require an encryption key. Set xpack.encryptedSavedObjects.encryptionKey to enable them.',
-              })}
-            />
-            <EuiSpacer size="m" />
-          </>
-        )}
-        {rows.length === 0 && (
-          <EuiText size="s" data-test-subj="nightshiftSandboxSecretsEmpty">
-            <p>
-              {i18n.translate('xpack.nightshift.sandboxSecrets.empty', {
-                defaultMessage: 'No secrets are configured in this space.',
-              })}
-            </p>
-          </EuiText>
-        )}
-        <EuiFlexGroup direction="column" gutterSize="m">
-          {rows.map((row) => {
-            const keyError = showErrors ? getKeyError(row, rows) : undefined;
-            const valueError = showErrors ? getValueError(row) : undefined;
-            const removeLabel = i18n.translate('xpack.nightshift.sandboxSecrets.removeAriaLabel', {
-              defaultMessage: 'Remove secret {key}',
-              values: { key: row.key },
-            });
-            return (
-              <EuiFlexGroup
-                key={row.id}
-                gutterSize="s"
-                alignItems="flexStart"
-                data-test-subj="nightshiftSandboxSecretRow"
-              >
-                <EuiFlexItem>
-                  <EuiFormRow label={keyLabel} isInvalid={!!keyError} error={keyError}>
-                    <EuiFieldText
-                      value={row.key}
-                      isInvalid={!!keyError}
-                      disabled={isDisabled}
-                      onChange={(e) => updateRow(row.id, { key: e.target.value })}
-                      data-test-subj="nightshiftSandboxSecretKey"
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFormRow label={valueLabel} isInvalid={!!valueError} error={valueError}>
-                    <EuiFieldPassword
-                      type="dual"
-                      value={row.value}
-                      autoComplete="new-password"
-                      placeholder={
-                        hasStoredValue(row) ? storedValuePlaceholder : newValuePlaceholder
-                      }
-                      isInvalid={!!valueError}
-                      disabled={isDisabled}
-                      onChange={(e) => updateRow(row.id, { value: e.target.value })}
-                      data-test-subj="nightshiftSandboxSecretValue"
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow hasEmptyLabelSpace>
-                    <EuiToolTip content={removeLabel} disableScreenReaderOutput>
-                      <EuiButtonIcon
-                        iconType="trash"
-                        color="danger"
-                        size="m"
-                        disabled={isDisabled}
-                        aria-label={removeLabel}
-                        onClick={() =>
-                          setRows((current) => current.filter(({ id }) => id !== row.id))
-                        }
-                        data-test-subj="nightshiftSandboxSecretRemove"
-                      />
-                    </EuiToolTip>
-                  </EuiFormRow>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            );
-          })}
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiButtonEmpty
-          iconType="plus"
-          size="s"
-          disabled={isDisabled || rows.length >= MAX_SANDBOX_SECRETS}
-          onClick={() =>
-            setRows((current) => [...current, { id: createRowId(), key: '', value: '' }])
-          }
-          data-test-subj="nightshiftSandboxSecretsAdd"
-        >
-          {i18n.translate('xpack.nightshift.sandboxSecrets.addButton', {
-            defaultMessage: 'Add secret',
-          })}
-        </EuiButtonEmpty>
+        {fields}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -336,5 +402,27 @@ export function SandboxSecretsFlyout({ onClose }: { onClose: () => void }): Reac
         />
       )}
     </EuiFlyout>
+  );
+}
+
+/** The sandbox secrets editor without the flyout, e.g. for onboarding. Hidden when unavailable. */
+export function SandboxSecretsPanel({
+  presets,
+}: {
+  presets?: readonly SandboxSecretPreset[];
+}): React.ReactElement | null {
+  const { data, error, isLoading } = useFetchSandboxSecrets();
+  if (isLoading) return <EuiLoadingSpinner size="m" />;
+  // The secrets API is off (404) without the nightshift.enabled flag.
+  if (error || !data) return null;
+  return (
+    <SandboxSecretsForm
+      key={data.version ?? 'empty'}
+      initialKeys={data.keys}
+      version={data.version}
+      canEncrypt={data.canEncrypt}
+      layout="inline"
+      presets={presets}
+    />
   );
 }

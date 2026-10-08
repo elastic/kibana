@@ -5,111 +5,49 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import {
   EuiBadge,
-  EuiButton,
-  EuiCheckbox,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../hooks/use_kibana';
 import { CustomContextSnippets } from '../custom_context/custom_context_flyout';
 import { useFetchCustomContext } from '../custom_context/use_fetch_custom_context';
-import { ONBOARDING_CONNECTOR_TYPES, type OnboardingConnector } from './use_onboarding';
+import {
+  SandboxSecretsPanel,
+  type SandboxSecretPreset,
+} from '../sandbox_secrets/sandbox_secrets_flyout';
 
-interface ConnectorTile {
-  connectorTypeId: string;
-  icon: string;
-  title: string;
-  category: string;
-  badge?: string;
-}
-
-const TILES: ConnectorTile[] = [
+/** Conventional secret names, so the agent recognizes the tool behind a secret. */
+const SECRET_PRESETS: SandboxSecretPreset[] = [
   {
-    connectorTypeId: ONBOARDING_CONNECTOR_TYPES.elasticsearch,
-    icon: 'logoElasticsearch',
-    title: i18n.translate('xpack.nightshift.onboarding.connect.elasticsearchTitle', {
-      defaultMessage: 'Elastic deployment',
+    id: 'github',
+    label: i18n.translate('xpack.nightshift.onboarding.connect.githubPreset', {
+      defaultMessage: 'GitHub token',
     }),
-    category: i18n.translate('xpack.nightshift.onboarding.connect.elasticsearchCategory', {
-      defaultMessage: 'Connector · Logs, metrics, traces and alerts',
-    }),
-    badge: i18n.translate('xpack.nightshift.onboarding.connect.requiredBadge', {
-      defaultMessage: 'Required',
-    }),
+    iconType: 'logoGithub',
+    keys: ['GITHUB_TOKEN'],
   },
   {
-    connectorTypeId: ONBOARDING_CONNECTOR_TYPES.slack,
-    icon: 'logoSlack',
-    title: i18n.translate('xpack.nightshift.onboarding.connect.slackTitle', {
-      defaultMessage: 'Slack',
+    id: 'elasticsearch',
+    label: i18n.translate('xpack.nightshift.onboarding.connect.elasticsearchPreset', {
+      defaultMessage: 'Another Elastic deployment',
     }),
-    category: i18n.translate('xpack.nightshift.onboarding.connect.slackCategory', {
-      defaultMessage: 'Connector · Messaging',
-    }),
-  },
-  {
-    connectorTypeId: ONBOARDING_CONNECTOR_TYPES.github,
-    icon: 'logoGithub',
-    title: i18n.translate('xpack.nightshift.onboarding.connect.githubTitle', {
-      defaultMessage: 'GitHub',
-    }),
-    category: i18n.translate('xpack.nightshift.onboarding.connect.githubCategory', {
-      defaultMessage: 'Connector · Code changes',
-    }),
+    iconType: 'logoElasticsearch',
+    keys: ['ELASTICSEARCH_URL', 'ELASTICSEARCH_API_KEY'],
   },
 ];
 
-const ICON_BY_TYPE: Record<string, string> = Object.fromEntries(
-  TILES.map(({ connectorTypeId, icon }) => [connectorTypeId, icon])
-);
-
-export const getConnectorIcon = (connectorTypeId: string): string =>
-  ICON_BY_TYPE[connectorTypeId] ?? 'plugs';
-
-/** Step 1: connect Elastic deployments, Slack and GitHub, and optionally describe the system. */
-export function OnboardingConnectStep({
-  connectors,
-  selectedIds,
-  onToggle,
-  onConnectorCreated,
-}: {
-  connectors: OnboardingConnector[] | undefined;
-  selectedIds: ReadonlySet<string>;
-  onToggle: (connectorId: string) => void;
-  onConnectorCreated: (connectorId: string) => void;
-}): React.ReactElement {
-  const { triggersActionsUi } = useKibana().services;
-  const [flyoutType, setFlyoutType] = useState<string | undefined>();
-
-  const flyout = useMemo(
-    () =>
-      flyoutType && triggersActionsUi
-        ? triggersActionsUi.getAddConnectorFlyout({
-            initialConnector: { actionTypeId: flyoutType },
-            onClose: () => setFlyoutType(undefined),
-            onConnectorCreated: (connector) => {
-              setFlyoutType(undefined);
-              onConnectorCreated(connector.id);
-            },
-          })
-        : null,
-    [flyoutType, onConnectorCreated, triggersActionsUi]
-  );
-
-  const countByType = (connectorTypeId: string) =>
-    (connectors ?? []).filter((connector) => connector.connectorTypeId === connectorTypeId).length;
+/** Step 1: connect Slack, give the sandbox credentials, and optionally describe the system. */
+export function OnboardingConnectStep(): React.ReactElement {
+  const { significantEventsApp } = useKibana().services;
+  const SlackAppCard = significantEventsApp?.SlackAppCard;
 
   return (
     <div data-test-subj="nightshiftOnboardingConnectStep">
@@ -124,143 +62,71 @@ export function OnboardingConnectStep({
         <p>
           {i18n.translate('xpack.nightshift.onboarding.connect.description', {
             defaultMessage:
-              'Nightshift explores everything you connect, read-only, to find your first investigations. Connect at least one Elastic deployment; Slack and GitHub add what your team discusses and what changed.',
+              "Nightshift already sees this deployment's telemetry. Everything below is optional: connect Slack to work with Nightshift from your channels, and add credentials for other tools it should look at.",
           })}
         </p>
       </EuiText>
-      <EuiSpacer size="m" />
-      <EuiFlexGrid columns={2} gutterSize="m">
-        {TILES.map((tile) => (
-          <EuiFlexItem key={tile.connectorTypeId}>
-            <ConnectorTileCard
-              tile={tile}
-              count={countByType(tile.connectorTypeId)}
-              isDisabled={!triggersActionsUi}
-              onConnect={() => setFlyoutType(tile.connectorTypeId)}
-            />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
 
-      {connectors && connectors.length > 0 && (
+      {SlackAppCard && (
         <>
-          <EuiSpacer size="l" />
-          <EuiTitle size="xxs">
-            <h4>
-              {i18n.translate('xpack.nightshift.onboarding.connect.connectedTitle', {
-                defaultMessage: 'Connected ({selected} of {total} selected)',
-                values: {
-                  selected: connectors.filter(({ id }) => selectedIds.has(id)).length,
-                  total: connectors.length,
-                },
+          <EuiSpacer size="m" />
+          <div data-test-subj="nightshiftOnboardingSlack">
+            <SlackAppCard
+              description={i18n.translate('xpack.nightshift.onboarding.connect.slackDescription', {
+                defaultMessage:
+                  'Get investigation updates in Slack and ask Nightshift for help from a channel.',
               })}
-            </h4>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiPanel hasBorder paddingSize="none">
-            {connectors.map((connector, index) => (
-              <ConnectedRow
-                key={connector.id}
-                connector={connector}
-                isSelected={selectedIds.has(connector.id)}
-                onToggle={() => onToggle(connector.id)}
-                hasDivider={index > 0}
-              />
-            ))}
-          </EuiPanel>
+            />
+          </div>
         </>
       )}
 
+      <EuiSpacer size="l" />
+      <OptionalSectionTitle
+        title={i18n.translate('xpack.nightshift.onboarding.secrets.title', {
+          defaultMessage: 'Credentials for your tools',
+        })}
+      />
+      <EuiText size="s" color="subdued">
+        <p>
+          {i18n.translate('xpack.nightshift.onboarding.secrets.description', {
+            defaultMessage:
+              "Nightshift works from a sandbox. Add a GitHub token, another Elastic deployment's URL and API key, or any other credential, and it can look there too. Values are stored encrypted and never shown again.",
+          })}
+        </p>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiPanel hasBorder paddingSize="m" data-test-subj="nightshiftOnboardingSecrets">
+        <SandboxSecretsPanel presets={SECRET_PRESETS} />
+      </EuiPanel>
+
       <OnboardingHintsSection />
-      {flyout}
     </div>
   );
 }
 
-function ConnectorTileCard({
-  tile,
-  count,
-  isDisabled,
-  onConnect,
-}: {
-  tile: ConnectorTile;
-  count: number;
-  isDisabled: boolean;
-  onConnect: () => void;
-}): React.ReactElement {
-  const { euiTheme } = useEuiTheme();
+function OptionalSectionTitle({ title }: { title: string }): React.ReactElement {
   return (
-    <EuiPanel
-      hasBorder
-      paddingSize="m"
-      data-test-subj={`nightshiftOnboardingTile-${tile.connectorTypeId}`}
-      css={css`
-        height: 100%;
-      `}
-    >
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <div
-            css={css`
-              align-items: center;
-              border: ${euiTheme.border.thin};
-              border-radius: ${euiTheme.border.radius.medium};
-              display: flex;
-              height: ${euiTheme.size.xxl};
-              justify-content: center;
-              width: ${euiTheme.size.xxl};
-            `}
-          >
-            <EuiIcon type={tile.icon} size="m" aria-hidden={true} />
-          </div>
-        </EuiFlexItem>
-        {count > 0 ? (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="success" iconType="check">
-              {i18n.translate('xpack.nightshift.onboarding.connect.connectedBadge', {
-                defaultMessage: '{count} connected',
-                values: { count },
-              })}
-            </EuiBadge>
-          </EuiFlexItem>
-        ) : (
-          tile.badge && (
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{tile.badge}</EuiBadge>
-            </EuiFlexItem>
-          )
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiText size="s">
-        <strong>{tile.title}</strong>
-      </EuiText>
-      <EuiText size="xs" color="subdued">
-        {tile.category}
-      </EuiText>
-      <EuiSpacer size="m" />
-      <EuiButton
-        size="s"
-        color="text"
-        isDisabled={isDisabled}
-        onClick={onConnect}
-        data-test-subj={`nightshiftOnboardingConnect-${tile.connectorTypeId}`}
-      >
-        {count > 0
-          ? i18n.translate('xpack.nightshift.onboarding.connect.addAnotherButton', {
-              defaultMessage: 'Add another',
-            })
-          : i18n.translate('xpack.nightshift.onboarding.connect.connectButton', {
-              defaultMessage: 'Connect',
-            })}
-      </EuiButton>
-    </EuiPanel>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xxs">
+          <h4>{title}</h4>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="hollow">
+          {i18n.translate('xpack.nightshift.onboarding.optionalBadge', {
+            defaultMessage: 'Optional',
+          })}
+        </EuiBadge>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 
 /**
- * Optional hints about the system. They are the space's custom context, so the exploration run
- * uses them and so does every investigation after it.
+ * Optional hints about the system. They are the space's custom context, which the investigation
+ * agent reads on every run: the exploration and every investigation after it.
  */
 function OnboardingHintsSection(): React.ReactElement | null {
   const { data, error } = useFetchCustomContext();
@@ -269,24 +135,11 @@ function OnboardingHintsSection(): React.ReactElement | null {
   return (
     <div data-test-subj="nightshiftOnboardingHints">
       <EuiSpacer size="l" />
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
-            <h4>
-              {i18n.translate('xpack.nightshift.onboarding.hints.title', {
-                defaultMessage: 'Tell Nightshift about your system',
-              })}
-            </h4>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">
-            {i18n.translate('xpack.nightshift.onboarding.hints.optionalBadge', {
-              defaultMessage: 'Optional',
-            })}
-          </EuiBadge>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <OptionalSectionTitle
+        title={i18n.translate('xpack.nightshift.onboarding.hints.title', {
+          defaultMessage: 'Tell Nightshift about your system',
+        })}
+      />
       <EuiText size="s" color="subdued">
         <p>
           {i18n.translate('xpack.nightshift.onboarding.hints.description', {
@@ -310,53 +163,5 @@ function OnboardingHintsSection(): React.ReactElement | null {
         })}
       />
     </div>
-  );
-}
-
-function ConnectedRow({
-  connector,
-  isSelected,
-  onToggle,
-  hasDivider,
-}: {
-  connector: OnboardingConnector;
-  isSelected: boolean;
-  onToggle: () => void;
-  hasDivider: boolean;
-}): React.ReactElement {
-  const { euiTheme } = useEuiTheme();
-  const details = [connector.url, connector.kibanaUrl].filter(Boolean).join(' · ');
-  const tile = TILES.find(({ connectorTypeId }) => connectorTypeId === connector.connectorTypeId);
-  return (
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="m"
-      responsive={false}
-      data-test-subj="nightshiftOnboardingConnectedRow"
-      css={css`
-        padding: ${euiTheme.size.s} ${euiTheme.size.base};
-        ${hasDivider ? `border-top: ${euiTheme.border.thin};` : ''}
-      `}
-    >
-      <EuiFlexItem grow={false}>
-        <EuiCheckbox
-          id={`nightshiftOnboardingConnector-${connector.id}`}
-          checked={isSelected}
-          onChange={onToggle}
-          aria-label={connector.name}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type={getConnectorIcon(connector.connectorTypeId)} size="m" aria-hidden={true} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText size="s">
-          <strong>{connector.name}</strong>
-        </EuiText>
-        <EuiText size="xs" color="subdued">
-          {details || tile?.title || connector.connectorTypeId}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
   );
 }

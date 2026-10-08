@@ -68,11 +68,7 @@ interface InvestigationAgentTypeOptions {
   cortexEnabled: boolean;
   memoryEnabled?: boolean;
   decisionTreesEnabled?: boolean;
-  /**
-   * Resolves the connectors the run may use: the space's telemetry connector (onboarding, else
-   * kibana.yml) plus the other tools connected during onboarding.
-   */
-  resolveConnectorIds?: (ctx: AgentConfigContext) => Promise<string[]>;
+  telemetryConnectorId?: string;
   /** Resolves the space's custom context block, appended to the instructions on every run. */
   getCustomContextInstructions?: (ctx: AgentConfigContext) => Promise<string>;
   logger?: Logger;
@@ -101,15 +97,15 @@ const appendCustomContext = async ({
 
 /**
  * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
- * standalone prompt and no Elastic tools. Telemetry is reached through the resolved telemetry
- * connector as described in `/workspace/elastic.md`.
+ * standalone prompt and no Elastic tools. Telemetry is reached through `telemetryConnectorId` as
+ * described in `/workspace/elastic.md`.
  */
 export const getInvestigationAgentType = ({
   sandboxEnabled,
   cortexEnabled,
   memoryEnabled = false,
   decisionTreesEnabled = false,
-  resolveConnectorIds,
+  telemetryConnectorId,
   getCustomContextInstructions,
   logger,
 }: InvestigationAgentTypeOptions): AgentTypeDefinition => {
@@ -128,7 +124,7 @@ export const getInvestigationAgentType = ({
       },
     ],
     enable_elastic_capabilities: false,
-    connector_ids: [] as string[],
+    connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
     ...(() => {
       // Decision trees are no longer a separate before-agent hook: they hydrate as a third
       // parallel branch of the combined materialize workflow, which already carries the
@@ -154,31 +150,17 @@ export const getInvestigationAgentType = ({
     name: INVESTIGATION_AGENT_NAME,
     description: INVESTIGATION_AGENT_DESCRIPTION,
     avatar_icon: 'logoElastic',
-    baseConfiguration:
-      !getCustomContextInstructions && !resolveConnectorIds
-        ? baseConfiguration
-        : async (ctx) => {
-            const [instructionsWithContext, connectorIds = []] = await Promise.all([
-              getCustomContextInstructions
-                ? appendCustomContext({
-                    instructions: baseConfiguration.instructions,
-                    ctx,
-                    getCustomContextInstructions,
-                    logger,
-                  })
-                : baseConfiguration.instructions,
-              resolveConnectorIds?.(ctx).catch((error): string[] => {
-                // Missing connectors only limit what the agent can query.
-                logger?.warn(`Failed to resolve the agent connectors: ${error.message}`);
-                return [];
-              }),
-            ]);
-            return {
-              ...baseConfiguration,
-              instructions: instructionsWithContext,
-              connector_ids: connectorIds,
-            };
-          },
+    baseConfiguration: getCustomContextInstructions
+      ? async (ctx) => ({
+          ...baseConfiguration,
+          instructions: await appendCustomContext({
+            instructions: baseConfiguration.instructions,
+            ctx,
+            getCustomContextInstructions,
+            logger,
+          }),
+        })
+      : baseConfiguration,
   };
 };
 
@@ -189,7 +171,7 @@ export const registerInvestigationAgentType = (
     cortexEnabled,
     memoryEnabled = false,
     decisionTreesEnabled = false,
-    resolveConnectorIds,
+    telemetryConnectorId,
     getCustomContextInstructions,
     logger,
   }: InvestigationAgentTypeOptions
@@ -200,7 +182,7 @@ export const registerInvestigationAgentType = (
       cortexEnabled,
       memoryEnabled,
       decisionTreesEnabled,
-      resolveConnectorIds,
+      telemetryConnectorId,
       getCustomContextInstructions,
       logger,
     })

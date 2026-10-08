@@ -41,11 +41,7 @@ export type {
   ConnectorType,
 } from './application/connector/types';
 
-export type {
-  PluginSetupContract,
-  PluginStartContract,
-  ConnectorWithDecryptedSecrets,
-} from './plugin';
+export type { PluginSetupContract, PluginStartContract } from './plugin';
 export { RelayRequestError } from './lib/relay';
 export type {
   RelayBinding,

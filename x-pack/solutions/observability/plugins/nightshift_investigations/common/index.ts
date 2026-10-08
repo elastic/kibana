@@ -231,18 +231,12 @@ export {
 } from './custom_context';
 
 export {
-  ONBOARDING_CONNECTOR_TYPE_ID,
-  ONBOARDING_CONNECTOR_TYPE_IDS,
-  MAX_ONBOARDING_CONNECTORS,
-  isOnboardingConnectorTypeId,
-  type OnboardingConnectorTypeId,
   ONBOARDING_SUGGESTION_SOURCES,
   ONBOARDING_SUGGESTION_SEVERITIES,
   MAX_ONBOARDING_SUGGESTIONS,
   MAX_ONBOARDING_SUGGESTION_TITLE_LENGTH,
   MAX_ONBOARDING_SUGGESTION_PROMPT_LENGTH,
   MAX_ONBOARDING_SUGGESTION_RATIONALE_LENGTH,
-  MAX_ONBOARDING_CONNECTOR_ID_LENGTH,
   MAX_ONBOARDING_ENTITIES,
   MAX_ONBOARDING_ENTITY_LENGTH,
   type OnboardingSuggestion,
@@ -250,7 +244,6 @@ export {
   type OnboardingSuggestionSeverity,
   type OnboardingSuggestionsStatus,
   type OnboardingSuggestionsExecution,
-  type OnboardingConnectorSummary,
   type GetOnboardingResponse,
   type StartOnboardingSuggestionsResponse,
 } from './onboarding';

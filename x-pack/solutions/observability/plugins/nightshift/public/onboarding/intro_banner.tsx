@@ -89,7 +89,7 @@ export function OnboardingIntroBanner(): React.ReactElement {
             <p>
               {i18n.translate('xpack.nightshift.onboarding.introDescription', {
                 defaultMessage:
-                  'Connect your Elastic deployments, Slack and GitHub, and Nightshift starts looking for problems worth investigating. Within about a minute it suggests your first investigations, based on the alerts, errors, discussions and recent changes it finds.',
+                  'Nightshift explores your telemetry, and any tool you give it credentials for, to find problems worth investigating. Within a few minutes it suggests your first investigations, based on the alerts, errors and recent changes it finds.',
               })}
             </p>
           </EuiText>

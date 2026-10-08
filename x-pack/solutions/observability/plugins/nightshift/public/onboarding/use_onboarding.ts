@@ -34,73 +34,28 @@ export const useOnboarding = () => {
   });
 };
 
-/** Starts the onboarding suggestions workflow for the given connectors. */
+/** Starts the investigation agent's exploration run that suggests first investigations. */
 export const useStartOnboardingSuggestions = () => {
   const { nightshiftInvestigations, notifications } = useKibana().services;
   const investigationsClient = nightshiftInvestigations?.investigationsClient;
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (connectorIds: string[]) => {
+    mutationFn: async () => {
       if (!investigationsClient) {
         throw new Error('Nightshift investigations plugin is unavailable');
       }
       return investigationsClient.fetch('POST /internal/nightshift/onboarding/suggestions', {
-        params: { body: { connector_ids: connectorIds } },
         signal: null,
       });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: NIGHTSHIFT_ONBOARDING_QUERY_KEY }),
     onError: (error: Error) => {
       notifications.toasts.addError(error, {
-        title: i18n.translate('xpack.nightshift.onboarding.connectErrorToastTitle', {
-          defaultMessage: 'Could not connect the deployment',
+        title: i18n.translate('xpack.nightshift.onboarding.startErrorToastTitle', {
+          defaultMessage: 'Could not start looking for first investigations',
         }),
       });
-    },
-  });
-};
-
-/** Connector types onboarding can connect; mirrors ONBOARDING_CONNECTOR_TYPE_IDS on the server. */
-export const ONBOARDING_CONNECTOR_TYPES = {
-  elasticsearch: '.elasticsearch',
-  slack: '.slack2',
-  github: '.github',
-} as const;
-
-const SUPPORTED_TYPES = new Set<string>(Object.values(ONBOARDING_CONNECTOR_TYPES));
-
-export interface OnboardingConnector {
-  id: string;
-  name: string;
-  connectorTypeId: string;
-  url?: string;
-  kibanaUrl?: string;
-}
-
-/** Connectors of the current space that onboarding can use (Elastic deployments, Slack, GitHub). */
-export const useOnboardingConnectors = () => {
-  const { http } = useKibana().services;
-  return useQuery<OnboardingConnector[]>({
-    queryKey: ['nightshift.onboarding.connectors'],
-    queryFn: async ({ signal }) => {
-      const connectors = await http.get<
-        Array<{
-          id: string;
-          name: string;
-          connector_type_id: string;
-          config?: { url?: string; kibanaUrl?: string };
-        }>
-      >('/api/actions/connectors', { signal });
-      return connectors
-        .filter(({ connector_type_id: typeId }) => SUPPORTED_TYPES.has(typeId))
-        .map(({ id, name, connector_type_id: connectorTypeId, config }) => ({
-          id,
-          name,
-          connectorTypeId,
-          url: config?.url,
-          kibanaUrl: config?.kibanaUrl,
-        }));
     },
   });
 };

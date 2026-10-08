@@ -44,8 +44,7 @@ interface AppsSectionProps {
  * (`xpack.actions.relay` unset, or Agent Builder absent).
  */
 export function AppsSection({ canEdit }: AppsSectionProps) {
-  const { isLoading, available, status, error, isMutating, connect, disconnect } =
-    useRelayAppConnection();
+  const { isLoading, available } = useRelayAppConnection();
 
   if (isLoading || !available) {
     return null;
@@ -67,38 +66,75 @@ export function AppsSection({ canEdit }: AppsSectionProps) {
         <EuiSplitPanel.Inner>
           <EuiFlexGroup gutterSize="l" wrap>
             <EuiFlexItem grow={false} css={{ minWidth: 320, maxWidth: 600 }}>
-              <EuiCard
-                display="subdued"
-                textAlign="left"
-                icon={<EuiIcon type="logoSlack" size="xl" aria-hidden={true} />}
-                data-test-subj="streamsSlackAppCard"
-                title={i18n.translate(
-                  'xpack.significantEventsApp.settings.apps.slackWorkspaceTitle',
-                  { defaultMessage: 'Elastic Slack App' }
-                )}
-                description={i18n.translate(
-                  'xpack.significantEventsApp.settings.apps.slackCardDescription',
-                  {
-                    defaultMessage:
-                      'Send Significant Event notifications to Slack and invoke Elastic agents from a channel.',
-                  }
-                )}
-                footer={
-                  <SlackCardFooter
-                    status={status}
-                    error={error}
-                    canEdit={canEdit}
-                    isMutating={isMutating}
-                    onConnect={connect}
-                    onDisconnect={disconnect}
-                  />
-                }
-              />
+              <SlackAppCard canEdit={canEdit} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
     </>
+  );
+}
+
+export interface SlackAppCardProps {
+  canEdit: boolean;
+  /** Replaces the Significant Events description. */
+  description?: string;
+  /** Shows the card with a note instead of nothing when the Slack App is unavailable. */
+  showWhenUnavailable?: boolean;
+  /** False when the Slack App feature flag is off: the card treats the app as unavailable. */
+  isEnabled?: boolean;
+}
+
+/** The Elastic Slack App card: connect or disconnect the workspace and manage its channels. */
+export function SlackAppCard({
+  canEdit,
+  description,
+  showWhenUnavailable = false,
+  isEnabled = true,
+}: SlackAppCardProps): React.ReactElement | null {
+  const connection = useRelayAppConnection();
+  const { status, error, isMutating, connect, disconnect } = connection;
+  const available = isEnabled && connection.available;
+
+  if ((isEnabled && connection.isLoading) || (!available && !showWhenUnavailable)) {
+    return null;
+  }
+
+  return (
+    <EuiCard
+      display="subdued"
+      textAlign="left"
+      icon={<EuiIcon type="logoSlack" size="xl" aria-hidden={true} />}
+      data-test-subj="streamsSlackAppCard"
+      title={i18n.translate('xpack.significantEventsApp.settings.apps.slackWorkspaceTitle', {
+        defaultMessage: 'Elastic Slack App',
+      })}
+      description={
+        description ??
+        i18n.translate('xpack.significantEventsApp.settings.apps.slackCardDescription', {
+          defaultMessage:
+            'Send Significant Event notifications to Slack and invoke Elastic agents from a channel.',
+        })
+      }
+      footer={
+        available ? (
+          <SlackCardFooter
+            status={status}
+            error={error}
+            canEdit={canEdit}
+            isMutating={isMutating}
+            onConnect={connect}
+            onDisconnect={disconnect}
+          />
+        ) : (
+          <EuiText size="s" color="subdued" data-test-subj="streamsSlackAppUnavailable">
+            {i18n.translate('xpack.significantEventsApp.settings.apps.slackUnavailable', {
+              defaultMessage: 'The Elastic Slack App is not available on this deployment.',
+            })}
+          </EuiText>
+        )
+      }
+    />
   );
 }
 

@@ -11,18 +11,16 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import { UISchemas } from '../../connector_spec_ui';
-import { callEsApi, callKibanaApi, getKibanaBaseUrl } from './elasticsearch_api';
+import { callEsApi } from './elasticsearch_api';
 import {
   EsqlInputSchema,
   GetClusterInfoInputSchema,
   GetMappingInputSchema,
-  KibanaRequestInputSchema,
   ListIndicesInputSchema,
   RequestInputSchema,
   SearchInputSchema,
   type EsqlInput,
   type GetMappingInput,
-  type KibanaRequestInput,
   type ListIndicesInput,
   type RequestInput,
   type SearchInput,
@@ -102,20 +100,10 @@ export const Elasticsearch: ConnectorSpec = {
             defaultMessage: 'Elasticsearch URL',
           }),
         }),
-      kibanaUrl: UISchemas.url('https://my-cluster.kb.us-east-1.aws.elastic.cloud')
-        .optional()
-        .describe(
-          'Optional Kibana URL of the same deployment. When set, agents can also read rules, alerts, SLOs and cases through the Kibana HTTP API with the same credentials.'
-        )
-        .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.elasticsearch.config.kibanaUrl.label', {
-            defaultMessage: 'Kibana URL',
-          }),
-        }),
     })
   ),
 
-  validateUrls: { fields: ['url', 'kibanaUrl'] },
+  validateUrls: { fields: ['url'] },
 
   actions: {
     search: {
@@ -148,14 +136,11 @@ export const Elasticsearch: ConnectorSpec = {
       input: EsqlInputSchema,
       handler: async (ctx, input: EsqlInput) => {
         const body: Record<string, unknown> = { query: input.query };
+        if (input.dropNullColumns) body.drop_null_columns = true;
         if (input.params) body.params = input.params;
         if (input.filter) body.filter = input.filter;
         if (input.locale) body.locale = input.locale;
-        // drop_null_columns is a query parameter of the ES|QL API, not a body field.
-        return callEsApi(ctx, 'POST', '/_query', {
-          body,
-          params: input.dropNullColumns ? { drop_null_columns: true } : undefined,
-        });
+        return callEsApi(ctx, 'POST', '/_query', { body });
       },
     },
 
@@ -206,19 +191,6 @@ export const Elasticsearch: ConnectorSpec = {
       },
     },
 
-    kibanaRequest: {
-      isTool: true,
-      scope: 'read',
-      description:
-        'Make a GET request to the Kibana HTTP API of the same deployment (requires the connector to have a Kibana URL). Use it to read alerting rules (/api/alerting/rules/_find), SLOs (/api/observability/slos), cases (/api/cases/_find) and other Kibana-managed objects. The Kibana base URL is prepended automatically — only provide the path.',
-      input: KibanaRequestInputSchema,
-      handler: async (ctx, input: KibanaRequestInput) => {
-        return callKibanaApi(ctx, input.path, {
-          params: input.queryParams as Record<string, unknown> | undefined,
-        });
-      },
-    },
-
     getClusterInfo: {
       isTool: true,
       scope: 'read',
@@ -248,10 +220,6 @@ export const Elasticsearch: ConnectorSpec = {
     '- Use `esql` for analytics and aggregations with the pipe-based ES|QL language (requires ES 8.11+).',
     '  Example: FROM logs-* | WHERE @timestamp > NOW() - 1 hour | STATS count = COUNT(*) BY service.name | SORT count DESC | LIMIT 10',
     '',
-    '### Kibana',
-    '- When the connector has a Kibana URL, use `kibanaRequest` for Kibana-managed objects: rules (/api/alerting/rules/_find), SLOs (/api/observability/slos), cases (/api/cases/_find).',
-    '- Alert documents themselves live in Elasticsearch: query `.alerts-*` with `esql` or `search`.',
-    '',
     '### Auth notes',
     '- API key auth is recommended. Enter the full "ApiKey encoded" value from the Elasticsearch create API key response (POST /_security/api_key).',
     '- The key must be granted read privilege on the indices you search.',
@@ -269,17 +237,10 @@ export const Elasticsearch: ConnectorSpec = {
         version?: { number?: string };
         cluster_name?: string;
       }>(ctx, 'GET', '/');
-      const esMessage = `Successfully connected to Elasticsearch cluster "${
-        info.cluster_name ?? info.name
-      }" (version: ${info.version?.number ?? 'unknown'}).`;
-      if (!getKibanaBaseUrl(ctx)) {
-        return { message: esMessage };
-      }
-      const status = await callKibanaApi<{ version?: { number?: string } }>(ctx, '/api/status');
       return {
-        message: `${esMessage} Successfully connected to Kibana (version: ${
-          status.version?.number ?? 'unknown'
-        }).`,
+        message: `Successfully connected to Elasticsearch cluster "${
+          info.cluster_name ?? info.name
+        }" (version: ${info.version?.number ?? 'unknown'}).`,
       };
     },
   },

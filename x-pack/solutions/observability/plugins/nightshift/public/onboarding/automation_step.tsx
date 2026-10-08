@@ -22,21 +22,18 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type {
-  ListInvestigationItem,
-  OnboardingConnectorSummary,
-} from '@kbn/nightshift-investigations-plugin/common';
+import type { ListInvestigationItem } from '@kbn/nightshift-investigations-plugin/common';
 import { useKibana } from '../hooks/use_kibana';
 import { InvestigationListItem } from '../investigation/investigation_list_item';
-import { ONBOARDING_CONNECTOR_TYPES } from './use_onboarding';
+import { useFetchSandboxSecrets } from '../sandbox_secrets/use_fetch_sandbox_secrets';
 
 interface SuggestedAutomation {
   id: string;
   icon: string;
   title: string;
   description: string;
-  /** Only suggested when a connector of this type is connected. */
-  requiresConnectorType?: string;
+  /** Only suggested when the space has this sandbox secret. */
+  requiresSecret?: string;
 }
 
 const SUGGESTED_AUTOMATIONS: SuggestedAutomation[] = [
@@ -71,7 +68,6 @@ const SUGGESTED_AUTOMATIONS: SuggestedAutomation[] = [
       defaultMessage:
         'Start from Slack messages that look like alerts, then reply in the same thread with findings.',
     }),
-    requiresConnectorType: ONBOARDING_CONNECTOR_TYPES.slack,
   },
   {
     id: 'review_changes',
@@ -83,27 +79,24 @@ const SUGGESTED_AUTOMATIONS: SuggestedAutomation[] = [
       defaultMessage:
         'After a release or merged pull request, check the affected services for new errors.',
     }),
-    requiresConnectorType: ONBOARDING_CONNECTOR_TYPES.github,
+    requiresSecret: 'GITHUB_TOKEN',
   },
 ];
 
 /** Step 3: the trial investigation keeps running while the user sets up a first automation. */
 export function OnboardingAutomationStep({
   investigation,
-  connectors,
   automationsHref,
   onInvestigationClick,
 }: {
   investigation: ListInvestigationItem;
-  connectors: OnboardingConnectorSummary[];
   /** Unset when automations are unavailable. */
   automationsHref?: string;
   onInvestigationClick: (investigation: ListInvestigationItem) => void;
 }): React.ReactElement {
-  const connectedTypes = new Set(connectors.map(({ connector_type_id: typeId }) => typeId));
+  const secretKeys = new Set(useFetchSandboxSecrets().data?.keys ?? []);
   const automations = SUGGESTED_AUTOMATIONS.filter(
-    ({ requiresConnectorType }) =>
-      !requiresConnectorType || connectedTypes.has(requiresConnectorType)
+    ({ requiresSecret }) => !requiresSecret || secretKeys.has(requiresSecret)
   );
 
   return (

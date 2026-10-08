@@ -157,29 +157,6 @@ export const RequestInputSchema = lazySchema(() =>
 export type RequestInput = z.infer<typeof RequestInputSchema>;
 
 // ============================================================================
-// kibanaRequest (generic GET against the deployment's Kibana)
-// ============================================================================
-
-export const KibanaRequestInputSchema = lazySchema(() =>
-  z.object({
-    path: z
-      .string()
-      .min(1)
-      .max(2048)
-      .regex(/^\//, 'Path must start with "/".')
-      .describe(
-        'Kibana HTTP API path, starting with /. E.g. "/api/alerting/rules/_find", "/api/observability/slos", "/api/cases/_find". The Kibana base URL is prepended automatically.'
-      ),
-    queryParams: z
-      .record(z.string().max(200), z.union([z.string().max(2048), z.number(), z.boolean()]))
-      .refine((v) => Object.keys(v).length <= 50, { message: 'At most 50 query parameters.' })
-      .optional()
-      .describe('Query string parameters as key-value pairs.'),
-  })
-);
-export type KibanaRequestInput = z.infer<typeof KibanaRequestInputSchema>;
-
-// ============================================================================
 // getClusterInfo
 // ============================================================================
 

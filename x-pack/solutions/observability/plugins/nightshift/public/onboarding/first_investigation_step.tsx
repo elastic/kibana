@@ -33,7 +33,7 @@ import type {
 } from '@kbn/nightshift-investigations-plugin/common';
 import { useStartInvestigation } from '../hooks/use_start_investigation';
 import { useStartOnboardingSuggestions } from './use_onboarding';
-import { getConnectorIcon } from './connect_step';
+import { useFetchCustomContext } from '../custom_context/use_fetch_custom_context';
 
 /** Generic prompts offered when the suggestion run failed; they work on any cluster. */
 const FALLBACK_SUGGESTIONS: OnboardingSuggestion[] = [
@@ -139,6 +139,7 @@ export function OnboardingFirstInvestigationStep({
   });
   const retry = useStartOnboardingSuggestions();
   const isRunning = execution.status === 'running';
+  const hintCount = useFetchCustomContext().data?.snippets.length ?? 0;
   const elapsedSeconds = useElapsedSeconds(execution.started_at, isRunning);
 
   const suggestions = useMemo(
@@ -180,7 +181,7 @@ export function OnboardingFirstInvestigationStep({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-            {execution.used_custom_context && (
+            {hintCount > 0 && (
               <EuiFlexItem grow={false}>
                 <EuiBadge
                   iconType="documentation"
@@ -188,22 +189,12 @@ export function OnboardingFirstInvestigationStep({
                   data-test-subj="nightshiftOnboardingUsedHintsBadge"
                 >
                   {i18n.translate('xpack.nightshift.onboarding.investigate.usedHintsBadge', {
-                    defaultMessage: 'Using your hints',
+                    defaultMessage: 'Using {count, plural, one {# hint} other {# hints}}',
+                    values: { count: hintCount },
                   })}
                 </EuiBadge>
               </EuiFlexItem>
             )}
-            {execution.connectors.map((connector) => (
-              <EuiFlexItem grow={false} key={connector.id}>
-                <EuiBadge
-                  iconType={getConnectorIcon(connector.connector_type_id)}
-                  color="hollow"
-                  data-test-subj="nightshiftOnboardingConnectedBadge"
-                >
-                  {connector.name}
-                </EuiBadge>
-              </EuiFlexItem>
-            ))}
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="xs"
@@ -211,7 +202,7 @@ export function OnboardingFirstInvestigationStep({
                 data-test-subj="nightshiftOnboardingChangeDeploymentButton"
               >
                 {i18n.translate('xpack.nightshift.onboarding.investigate.changeDeployment', {
-                  defaultMessage: 'Edit connections',
+                  defaultMessage: 'Edit setup',
                 })}
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -257,7 +248,7 @@ export function OnboardingFirstInvestigationStep({
                 {' · '}
                 {i18n.translate('xpack.nightshift.onboarding.investigate.analyzingDescription', {
                   defaultMessage:
-                    'Looking at your deployments, discussions and recent changes for what to investigate first. This takes about a minute.',
+                    'The investigation agent is looking at your telemetry and tools for what to investigate first. This takes a few minutes.',
                 })}
               </EuiText>
             </EuiFlexItem>
@@ -292,7 +283,7 @@ export function OnboardingFirstInvestigationStep({
               color="warning"
               iconType="refresh"
               isLoading={retry.isLoading}
-              onClick={() => retry.mutate(execution.connectors.map(({ id }) => id))}
+              onClick={() => retry.mutate()}
               data-test-subj="nightshiftOnboardingRetryButton"
             >
               {i18n.translate('xpack.nightshift.onboarding.investigate.retryButton', {

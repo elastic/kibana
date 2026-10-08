@@ -18,12 +18,6 @@ export function getBaseUrl(ctx: ActionContext): string {
   return url.replace(/\/+$/, '');
 }
 
-/** Returns the configured Kibana base URL without trailing slashes, or undefined when unset. */
-export function getKibanaBaseUrl(ctx: ActionContext): string | undefined {
-  const { kibanaUrl } = (ctx.config ?? {}) as { kibanaUrl?: string };
-  return kibanaUrl ? kibanaUrl.replace(/\/+$/, '') : undefined;
-}
-
 function readEsErrorBody(data: unknown): { type?: string; reason?: string } | null {
   if (!data || typeof data !== 'object') return null;
   const body = data as Record<string, unknown>;
@@ -91,54 +85,5 @@ export async function callEsApi<T = Record<string, unknown>>(
     return response.data as T;
   } catch (error: unknown) {
     throw createEsError(error);
-  }
-}
-
-function createKibanaError(error: unknown): Error {
-  const err = error as {
-    response?: { status?: number; statusText?: string; data?: unknown };
-    message?: string;
-  };
-  const data = err.response?.data as { message?: string; error?: string } | undefined;
-  if (err.response?.status === 401) {
-    return new Error('Kibana authentication failed. Check your API key or username/password.');
-  }
-  if (err.response?.status === 403) {
-    return new Error(
-      'Kibana access denied. The credentials lack the required privileges for this operation.'
-    );
-  }
-  return new Error(
-    `Kibana request failed: ${
-      data?.message ?? data?.error ?? err.response?.statusText ?? err.message ?? 'Unknown error'
-    }`
-  );
-}
-
-/**
- * Makes a GET request to the Kibana of the remote deployment, reusing the
- * connector's auth headers. Fails when the connector has no "kibanaUrl".
- */
-export async function callKibanaApi<T = Record<string, unknown>>(
-  ctx: ActionContext,
-  path: string,
-  options: { params?: Record<string, unknown> } = {}
-): Promise<T> {
-  const baseUrl = getKibanaBaseUrl(ctx);
-  if (!baseUrl) {
-    throw new Error(
-      'Connector has no "kibanaUrl" configured. Edit the connector and add the Kibana URL of the deployment.'
-    );
-  }
-  try {
-    const response = await ctx.client.request({
-      url: `${baseUrl}${path}`,
-      method: 'GET',
-      params: options.params,
-      headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'kibana' },
-    });
-    return response.data as T;
-  } catch (error: unknown) {
-    throw createKibanaError(error);
   }
 }

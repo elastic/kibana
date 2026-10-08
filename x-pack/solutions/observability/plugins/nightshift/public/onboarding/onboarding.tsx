@@ -34,12 +34,7 @@ import {
 import { OnboardingConnectStep } from './connect_step';
 import { OnboardingFirstInvestigationStep } from './first_investigation_step';
 import { OnboardingAutomationStep } from './automation_step';
-import {
-  ONBOARDING_CONNECTOR_TYPES,
-  useOnboarding,
-  useOnboardingConnectors,
-  useStartOnboardingSuggestions,
-} from './use_onboarding';
+import { useOnboarding, useStartOnboardingSuggestions } from './use_onboarding';
 
 /** A step the user went back to; otherwise the step follows from the onboarding state. */
 type StepOverride = 'connect' | 'investigate' | undefined;
@@ -79,20 +74,18 @@ export function NightshiftOnboarding({
   const history = useHistory();
   const { search } = useLocation();
   const { data, isInitialLoading } = useOnboarding();
-  const { data: connectors, refetch: refetchConnectors } = useOnboardingConnectors();
   const startSuggestions = useStartOnboardingSuggestions();
   const [stepOverride, setStepOverride] = useState<StepOverride>();
-  const [selectedIds, setSelectedIds] = useState<Set<string> | undefined>();
 
   const execution = data?.execution;
-  const isConnected = Boolean(execution && execution.connectors.length > 0);
+  // Step 1 is done once an exploration run exists.
+  const isConnected = execution != null;
 
-  // A new execution (connections changed, or a retry) ends any detour.
+  // A new execution (setup changed, or a retry) ends any detour.
   const [lastExecutionId, setLastExecutionId] = useState(execution?.execution_id);
   if (execution?.execution_id !== lastExecutionId) {
     setLastExecutionId(execution?.execution_id);
     setStepOverride(undefined);
-    setSelectedIds(undefined);
   }
 
   const step: OnboardingStepId =
@@ -101,45 +94,6 @@ export function NightshiftOnboarding({
       : latestInvestigation && stepOverride !== 'investigate'
       ? 'automate'
       : 'investigate';
-
-  // Until the user changes it, the selection is the current onboarding's tools, or all of them.
-  const effectiveSelectedIds = useMemo(
-    () =>
-      selectedIds ??
-      new Set(
-        isConnected
-          ? execution?.connectors.map(({ id }) => id)
-          : connectors?.map(({ id }) => id) ?? []
-      ),
-    [connectors, execution?.connectors, isConnected, selectedIds]
-  );
-  const selectedConnectors = (connectors ?? []).filter(({ id }) => effectiveSelectedIds.has(id));
-  const hasElasticDeployment = selectedConnectors.some(
-    ({ connectorTypeId }) => connectorTypeId === ONBOARDING_CONNECTOR_TYPES.elasticsearch
-  );
-  const hasContextTool = selectedConnectors.some(
-    ({ connectorTypeId }) => connectorTypeId !== ONBOARDING_CONNECTOR_TYPES.elasticsearch
-  );
-
-  const toggleConnector = useCallback(
-    (connectorId: string) => {
-      const next = new Set(effectiveSelectedIds);
-      if (next.has(connectorId)) {
-        next.delete(connectorId);
-      } else {
-        next.add(connectorId);
-      }
-      setSelectedIds(next);
-    },
-    [effectiveSelectedIds]
-  );
-  const addConnector = useCallback(
-    (connectorId: string) => {
-      setSelectedIds(new Set([...effectiveSelectedIds, connectorId]));
-      void refetchConnectors();
-    },
-    [effectiveSelectedIds, refetchConnectors]
-  );
 
   const selectedInvestigationId = useMemo(
     () => getNightshiftInvestigationIdFromSearch(search),
@@ -164,15 +118,9 @@ export function NightshiftOnboarding({
       status: step === 'connect' ? 'current' : 'complete',
       onClick: step !== 'connect' ? () => setStepOverride('connect') : undefined,
       hint:
-        step !== 'connect'
-          ? undefined
-          : !hasElasticDeployment
-          ? i18n.translate('xpack.nightshift.onboarding.steps.connectRequiredHint', {
-              defaultMessage: 'Connect an Elastic deployment',
-            })
-          : !hasContextTool
+        step === 'connect'
           ? i18n.translate('xpack.nightshift.onboarding.steps.connectOptionalHint', {
-              defaultMessage: 'Add Slack or GitHub (optional)',
+              defaultMessage: 'Slack, credentials and hints are optional',
             })
           : undefined,
     },
@@ -205,9 +153,8 @@ export function NightshiftOnboarding({
           size="s"
           iconType="sortRight"
           iconSide="right"
-          isDisabled={!hasElasticDeployment}
           isLoading={startSuggestions.isLoading}
-          onClick={() => startSuggestions.mutate(selectedConnectors.map(({ id }) => id))}
+          onClick={() => startSuggestions.mutate()}
           data-test-subj="nightshiftOnboardingContinueButton"
         >
           {PROCEED_LABEL}
@@ -215,14 +162,11 @@ export function NightshiftOnboarding({
         {isConnected && (
           <EuiButtonEmpty
             size="s"
-            onClick={() => {
-              setStepOverride(undefined);
-              setSelectedIds(undefined);
-            }}
+            onClick={() => setStepOverride(undefined)}
             data-test-subj="nightshiftOnboardingBackToSuggestionsButton"
           >
             {i18n.translate('xpack.nightshift.onboarding.cancelEditButton', {
-              defaultMessage: 'Keep current connections',
+              defaultMessage: 'Back to suggestions',
             })}
           </EuiButtonEmpty>
         )}
@@ -288,12 +232,7 @@ export function NightshiftOnboarding({
           {isInitialLoading ? (
             <EuiLoadingSpinner size="l" />
           ) : step === 'connect' || !execution ? (
-            <OnboardingConnectStep
-              connectors={connectors}
-              selectedIds={effectiveSelectedIds}
-              onToggle={toggleConnector}
-              onConnectorCreated={addConnector}
-            />
+            <OnboardingConnectStep />
           ) : step === 'investigate' || !latestInvestigation ? (
             <OnboardingFirstInvestigationStep
               execution={execution}
@@ -303,7 +242,6 @@ export function NightshiftOnboarding({
           ) : (
             <OnboardingAutomationStep
               investigation={latestInvestigation}
-              connectors={execution.connectors}
               automationsHref={automationsHref}
               onInvestigationClick={openInvestigation}
             />

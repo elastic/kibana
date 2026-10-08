@@ -6,7 +6,11 @@
  */
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import {
+  actionsMock,
+  actionsClientMock,
+  actionsAuthorizationMock,
+} from '@kbn/actions-plugin/server/mocks';
 import type { SandboxCallContext } from './tool_utils';
 import {
   buildConnectorEnv,
@@ -39,28 +43,28 @@ const createConnector = (overrides: Record<string, unknown> = {}) => ({
 const setup = ({
   connector = createConnector(),
   secrets = { token: TOKEN },
+  inMemory = true,
   withActions = true,
 }: {
   connector?: ReturnType<typeof createConnector>;
   secrets?: Record<string, unknown>;
+  inMemory?: boolean;
   withActions?: boolean;
 } = {}) => {
+  const actionsClient = actionsClientMock.create();
+  actionsClient.get.mockResolvedValue(connector as any);
+  const authorization = actionsAuthorizationMock.create();
   const actions = actionsMock.createStart();
-  actions.getConnectorWithDecryptedSecrets.mockResolvedValue({
-    id: connector.id,
-    name: connector.name,
-    actionTypeId: connector.actionTypeId,
-    isPreconfigured: connector.isPreconfigured,
-    config: connector.config,
-    secrets,
-  });
+  actions.getActionsClientWithRequest.mockResolvedValue(actionsClient);
+  actions.getActionsAuthorizationWithRequest.mockReturnValue(authorization);
+  actions.inMemoryConnectors = inMemory ? [{ ...connector, secrets } as any] : [];
 
   const resolve = createConnectorCredentialResolver({
     getDeps: () => ({ actions: withActions ? actions : undefined }),
     logger: loggingSystemMock.createLogger(),
   });
 
-  return { resolve, actions };
+  return { resolve, actions, actionsClient, authorization };
 };
 
 describe('buildConnectorEnv', () => {
@@ -157,11 +161,10 @@ describe('redactSecrets', () => {
 });
 
 describe('createConnectorCredentialResolver', () => {
-  it('injects the decrypted config and secrets of an allow-listed connector', async () => {
-    const { resolve, actions } = setup();
-    const callContext = createCallContext();
+  it('injects in-memory secrets and config for an allow-listed preconfigured connector', async () => {
+    const { resolve, authorization } = setup();
 
-    const result = await resolve(CONNECTOR_ID, callContext);
+    const result = await resolve(CONNECTOR_ID, createCallContext());
 
     expect(result).toEqual({
       env: {
@@ -173,37 +176,29 @@ describe('createConnectorCredentialResolver', () => {
       },
       secretValues: [TOKEN],
     });
-    expect(actions.getConnectorWithDecryptedSecrets).toHaveBeenCalledWith(
-      callContext.request,
-      CONNECTOR_ID
-    );
+    expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+      operation: 'execute',
+      actionTypeId: '.github',
+    });
   });
 
-  it('exposes the bare API key of a saved External Elasticsearch connector', async () => {
-    const apiKey = 'c29tZS1pZDpzb21lLXNlY3JldC1rZXk=';
+  it('rejects connectors that are not preconfigured', async () => {
     const { resolve } = setup({
-      connector: createConnector({
-        actionTypeId: '.elasticsearch',
-        isPreconfigured: false,
-        config: { url: 'https://es.example.com', kibanaUrl: 'https://kb.example.com' },
-      }),
-      secrets: { authType: 'api_key_header', Authorization: `ApiKey ${apiKey}` },
+      connector: createConnector({ isPreconfigured: false }),
+      inMemory: false,
     });
 
     const result = await resolve(CONNECTOR_ID, createCallContext());
 
-    expect(result).toMatchObject({
-      env: {
-        CONNECTOR_CONFIG_URL: 'https://es.example.com',
-        CONNECTOR_CONFIG_KIBANAURL: 'https://kb.example.com',
-        CONNECTOR_SECRET_PASSWORD: apiKey,
-      },
-      secretValues: expect.arrayContaining([apiKey]),
+    expect(result).toEqual({
+      errorMessage: expect.stringContaining(
+        `Connector '${CONNECTOR_ID}' is not a preconfigured connector`
+      ),
     });
   });
 
   it('denies connectors outside the agent allow-list before any lookup', async () => {
-    const { resolve, actions } = setup();
+    const { resolve, actionsClient } = setup();
 
     const result = await resolve('other-connector', createCallContext());
 
@@ -212,7 +207,7 @@ describe('createConnectorCredentialResolver', () => {
         "Connector 'other-connector' is not assigned to this agent"
       ),
     });
-    expect(actions.getConnectorWithDecryptedSecrets).not.toHaveBeenCalled();
+    expect(actionsClient.get).not.toHaveBeenCalled();
   });
 
   it('denies by default when the agent has no connectors', async () => {
@@ -223,17 +218,34 @@ describe('createConnectorCredentialResolver', () => {
     expect(result).toEqual({ errorMessage: expect.stringContaining('Assigned connectors: none') });
   });
 
-  it('fails when the user may not read or execute the connector', async () => {
-    const { resolve, actions } = setup();
-    actions.getConnectorWithDecryptedSecrets.mockRejectedValue(
-      new Error('Unauthorized to execute')
-    );
+  it('fails when the user cannot read the connector', async () => {
+    const { resolve, actionsClient } = setup();
+    actionsClient.get.mockRejectedValue(new Error('Unauthorized to get actions'));
+
+    const result = await resolve(CONNECTOR_ID, createCallContext());
+
+    expect(result).toEqual({
+      errorMessage: expect.stringContaining(`Failed to resolve connector '${CONNECTOR_ID}'`),
+    });
+  });
+
+  it('fails when the user is not allowed to execute the connector type', async () => {
+    const { resolve, authorization } = setup();
+    authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized to execute'));
 
     const result = await resolve(CONNECTOR_ID, createCallContext());
 
     expect(result).toEqual({
       errorMessage: expect.stringContaining(`Not authorized to use connector '${CONNECTOR_ID}'`),
     });
+  });
+
+  it('rejects system connectors', async () => {
+    const { resolve } = setup({ connector: createConnector({ isSystemAction: true }) });
+
+    const result = await resolve(CONNECTOR_ID, createCallContext());
+
+    expect(result).toEqual({ errorMessage: expect.stringContaining('system connector') });
   });
 
   it('fails when actions is unavailable', async () => {

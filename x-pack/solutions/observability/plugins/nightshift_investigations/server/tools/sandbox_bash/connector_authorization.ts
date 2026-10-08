@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import type {
-  ConnectorWithDecryptedSecrets,
-  PluginStartContract as ActionsPluginStart,
-} from '@kbn/actions-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { ActionsClient } from './agent_connectors';
 import type { SandboxCallContext } from './tool_utils';
 
 interface AuthorizedConnector {
-  connector: ConnectorWithDecryptedSecrets;
+  connector: Awaited<ReturnType<ActionsClient['get']>>;
+  inMemoryConnector: ActionsPluginStart['inMemoryConnectors'][number];
 }
 
-/**
- * Authorizes an agent's connector for reading and execution in the current space and returns it
- * with its decrypted config and secrets. Works for preconfigured (kibana.yml) and saved connectors.
- */
+/** Authorizes an agent's preconfigured connector for reading and execution in the current space. */
 export const authorizeConnector = async (
   connectorId: string,
   callContext: SandboxCallContext,
@@ -37,13 +33,41 @@ export const authorizeConnector = async (
     };
   }
 
+  const { request } = callContext;
+
+  let connector: Awaited<
+    ReturnType<Awaited<ReturnType<ActionsPluginStart['getActionsClientWithRequest']>>['get']>
+  >;
   try {
-    const connector = await actions.getConnectorWithDecryptedSecrets(
-      callContext.request,
-      connectorId
-    );
-    return { connector };
+    const actionsClient = await actions.getActionsClientWithRequest(request);
+    connector = await actionsClient.get({ id: connectorId });
+  } catch (err) {
+    return { errorMessage: `Failed to resolve connector '${connectorId}': ${err}` };
+  }
+
+  if (connector.isSystemAction) {
+    return {
+      errorMessage: `Connector '${connectorId}' is a system connector and cannot be used`,
+    };
+  }
+
+  try {
+    await actions.getActionsAuthorizationWithRequest(request).ensureAuthorized({
+      operation: 'execute',
+      actionTypeId: connector.actionTypeId,
+    });
   } catch (err) {
     return { errorMessage: `Not authorized to use connector '${connectorId}': ${err}` };
   }
+
+  const inMemoryConnector = actions.inMemoryConnectors.find(({ id }) => id === connectorId);
+  if (!inMemoryConnector) {
+    return {
+      errorMessage:
+        `Connector '${connectorId}' is not a preconfigured connector. Only connectors defined ` +
+        `in kibana.yml (xpack.actions.preconfigured) can be used from the sandbox.`,
+    };
+  }
+
+  return { connector, inMemoryConnector };
 };

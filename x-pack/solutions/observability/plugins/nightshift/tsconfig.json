@@ -43,10 +43,10 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-utility",
+    "@kbn/significant-events-app-plugin",
     "@kbn/significant-events-plugin",
     "@kbn/significant-events-schema",
     "@kbn/spaces-plugin",
-    "@kbn/triggers-actions-ui-plugin",
     "@kbn/ui-callout",
     "@kbn/unified-search-plugin"
   ]

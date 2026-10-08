@@ -192,41 +192,10 @@ describe('Elasticsearch connector', () => {
           data: expect.objectContaining({
             filter: { term: { 'host.name': 'server-1' } },
             locale: 'en-US',
+            drop_null_columns: true,
           }),
-          // ES|QL only accepts drop_null_columns as a query parameter.
-          params: { drop_null_columns: true },
         })
       );
-      expect(mockRequest.mock.calls[0][0].data).not.toHaveProperty('drop_null_columns');
-    });
-  });
-
-  // ============================================================================
-  // kibanaRequest
-  // ============================================================================
-
-  describe('kibanaRequest', () => {
-    it('sends a GET to the configured Kibana URL', async () => {
-      mockRequest.mockResolvedValue(jsonResponse({ data: [] }));
-
-      await Elasticsearch.actions.kibanaRequest.handler(
-        { ...mockContext, config: { ...mockContext.config, kibanaUrl: 'https://kb.example.com/' } },
-        { path: '/api/alerting/rules/_find', queryParams: { per_page: 5 } }
-      );
-
-      expect(mockRequest).toHaveBeenCalledWith(
-        expect.objectContaining({
-          url: 'https://kb.example.com/api/alerting/rules/_find',
-          method: 'GET',
-          params: { per_page: 5 },
-        })
-      );
-    });
-
-    it('fails when the connector has no Kibana URL', async () => {
-      await expect(
-        Elasticsearch.actions.kibanaRequest.handler(mockContext, { path: '/api/status' })
-      ).rejects.toThrow('kibanaUrl');
     });
   });
 

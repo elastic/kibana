@@ -75,7 +75,6 @@ import type {
   ActionsRequestHandlerContext,
   UnsecuredServices,
   ConnectorLifecycleListener,
-  RawAction,
 } from './types';
 
 import type { ActionsConfigurationUtilities } from './actions_config';
@@ -245,26 +244,6 @@ export interface PluginStartContract {
    */
   unregisterDynamicConnector: (connectorId: string) => boolean;
   getRelayClient: () => RelayClientContract | undefined;
-
-  /**
-   * Returns a connector together with its decrypted config and secrets, for consumers that must
-   * hand the raw credentials to an external runtime (e.g. a sandbox). The current user must be
-   * able to read the connector in the request's space and be authorized to execute its type.
-   * Works for saved and in-memory (preconfigured) connectors; system connectors are rejected.
-   */
-  getConnectorWithDecryptedSecrets: (
-    request: KibanaRequest,
-    connectorId: string
-  ) => Promise<ConnectorWithDecryptedSecrets>;
-}
-
-export interface ConnectorWithDecryptedSecrets {
-  id: string;
-  name: string;
-  actionTypeId: string;
-  isPreconfigured: boolean;
-  config: Record<string, unknown>;
-  secrets: Record<string, unknown>;
 }
 
 export interface ActionsPluginsSetup {
@@ -757,61 +736,6 @@ export class ActionsPlugin
     const secureGetActionsClientWithRequest = (request: KibanaRequest) =>
       getActionsClientWithRequest(request);
 
-    const getConnectorWithDecryptedSecrets = async (
-      request: KibanaRequest,
-      connectorId: string
-    ): Promise<ConnectorWithDecryptedSecrets> => {
-      // Reading through the user-scoped client enforces space visibility and read privileges.
-      const actionsClient = await getActionsClientWithRequest(request);
-      const connector = await actionsClient.get({ id: connectorId });
-      if (connector.isSystemAction) {
-        throw new Error(`Connector "${connectorId}" is a system connector`);
-      }
-      await instantiateAuthorization(request).ensureAuthorized({
-        operation: 'execute',
-        actionTypeId: connector.actionTypeId,
-      });
-
-      const inMemoryConnector = this.inMemoryConnectors.find(({ id }) => id === connectorId);
-      if (inMemoryConnector) {
-        return {
-          id: connectorId,
-          name: inMemoryConnector.name,
-          actionTypeId: inMemoryConnector.actionTypeId,
-          isPreconfigured: true,
-          config: inMemoryConnector.config ?? {},
-          secrets: inMemoryConnector.secrets ?? {},
-        };
-      }
-
-      throwIfCannotEncrypt();
-      const spaceId = plugins.spaces?.spacesService.getSpaceId(request);
-      const namespace = spaceIdToNamespace(plugins.spaces, spaceId);
-      const rawAction = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>(
-        ACTION_SAVED_OBJECT_TYPE,
-        connectorId,
-        { namespace }
-      );
-      const { name, actionTypeId, config, secrets } = rawAction.attributes;
-      this.security?.audit.asScoped(request).log({
-        message: `User has accessed decrypted secrets of connector [id=${connectorId}]`,
-        event: {
-          action: 'connector_get_decrypted_secrets',
-          category: ['database'],
-          type: ['access'],
-        },
-        kibana: { saved_object: { type: ACTION_SAVED_OBJECT_TYPE, id: connectorId } },
-      });
-      return {
-        id: connectorId,
-        name,
-        actionTypeId,
-        isPreconfigured: false,
-        config: (config ?? {}) as Record<string, unknown>,
-        secrets: (secrets ?? {}) as Record<string, unknown>,
-      };
-    };
-
     this.eventLogService!.registerSavedObjectProvider('action', (request) => {
       const client = secureGetActionsClientWithRequest(request);
       return (objects?: SavedObjectsBulkGetObject[]) =>
@@ -970,7 +894,6 @@ export class ActionsPlugin
       unregisterDynamicConnector: (connectorId: string) =>
         this.unregisterDynamicConnector(connectorId),
       getRelayClient: () => this.relayClient,
-      getConnectorWithDecryptedSecrets,
     };
   }
 

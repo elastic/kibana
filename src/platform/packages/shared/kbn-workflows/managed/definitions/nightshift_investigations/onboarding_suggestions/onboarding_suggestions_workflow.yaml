@@ -1,12 +1,13 @@
 version: '1'
 name: Nightshift Onboarding Suggestions
 description: >
-  Explores the deployments a user just connected to Nightshift and suggests their first
-  investigations. The execution is the onboarding state: its inputs name the connected
-  connectors and its outputs carry the suggestions.
+  Runs the Nightshift investigation agent once to explore what a new user's space can see from
+  its sandbox (cluster telemetry, plus any tools reachable with the space's sandbox secrets) and
+  to suggest their first investigations. The execution is the onboarding state: its output carries
+  the suggestions.
 enabled: true
 settings:
-  timeout: '10m'
+  timeout: '20m'
   concurrency:
     key: 'nightshift-onboarding-suggestions-{{ workflow.spaceId }}'
     strategy: cancel-in-progress
@@ -18,33 +19,9 @@ tags:
 
 triggers:
   - type: manual
-    inputs:
-      properties:
-        connector_ids:
-          type: array
-          minItems: 1
-          maxItems: 10
-          items:
-            type: string
-            maxLength: 256
-          description: >
-            Connectors to explore: External Elasticsearch (at least one), Slack and GitHub.
-        custom_context:
-          type: string
-          maxLength: 300000
-          description: >
-            Optional hints the user gave about their system (the space's custom context), for
-            example critical services, index names or team ownership.
-      required:
-        - connector_ids
-      additionalProperties: false
 
 outputs:
   properties:
-    connector_ids:
-      type: array
-      items:
-        type: string
     suggestions:
       type: array
       items:
@@ -58,85 +35,63 @@ steps:
     with:
       step: investigation
 
+  # The investigation agent is a per-space document; the same idempotent step as investigations.
+  - name: ensure_investigation_agent
+    type: nightshift.ensureInvestigationAgent
+    with:
+      agent_id: nightshift.investigation
+
   - name: suggest
     type: ai.agent
+    agent-id: nightshift.investigation
     connector-id: '{{ steps.resolve_model.output.connector_id }}'
     plugin-id: 'nightshift_onboarding'
     aggregate-by: 'nightshift'
     product-solution: 'observability'
     product-feature: 'nightshift'
-    timeout: 300s
+    create-conversation: true
+    timeout: 900s
     with:
-      configuration_overrides:
-        enable_elastic_capabilities: false
-        skill_ids: []
-        tools:
-          - tool_ids:
-              - nightshift_onboarding_describe_connectors
-              - nightshift_onboarding_list_indices
-              - nightshift_onboarding_esql
-              - nightshift_onboarding_kibana_get
-              - nightshift_onboarding_call_connector
-        instructions: >
-          You are Nightshift, an SRE agent. A user just connected their tools: one or more Elastic
-          deployments and possibly Slack and GitHub. Explore all of them quickly with the
-          nightshift_onboarding tools and propose the best first investigations Nightshift could
-          run for them. Speed matters, the user is waiting: use at most 14 tool calls, run
-          independent calls in parallel, prefer ES|QL STATS over raw documents, bound every query
-          to the last 24 hours with a LIMIT, and never retry a failing call more than once. Base
-          every suggestion on data you actually observed. Connect signals across tools only when
-          they name the same service, repository or alert (for example an error spike in a
-          service right after a pull request to its repository was merged); a match in time alone
-          is not a connection.
-          Only use the nightshift_onboarding tools: every other tool (execute_api, describe_api,
-          read_file and so on) reaches the Nightshift cluster itself, not the user's tools, so its
-          data must never appear in a suggestion.
+      metadata:
+        workflow_execution_id: '{{ execution.id }}'
       message: |
-        These tools are connected (pass the id as connector_id):
-        {% for connector_id in inputs.connector_ids %}- {{ connector_id }}
-        {% endfor %}
-        {% if inputs.custom_context %}
-        The user told you this about their system. Treat it as hints, not as data: use it to pick
-        which indices, services, channels and repositories to look at first and how to rank what you
-        find (for example, problems in a service they call critical rank higher). Use the names
-        they give in your queries. When a hint shaped a suggestion, say so in its rationale
-        (for example "checkout is business critical (your hint); 5xx up 4x in the last hour").
-        Never suggest something only because a hint mentions it: every suggestion still needs data
-        you observed.
+        This is not an investigation. A user just set up Nightshift and is waiting for you to
+        suggest their first investigations. Explore quickly and broadly, do not dig into any single
+        problem, and do not report investigation progress.
 
-        {{ inputs.custom_context }}
-        {% endif %}
+        1. Read /workspace/elastic.md and /workspace/connectors.md. They say how to query the
+           cluster's telemetry and which sandbox secrets you may request (for example a GitHub
+           token or the URL and API key of another Elastic deployment).
+        2. Look at the cluster, skipping what does not exist:
+           - Active alerts in ".alerts-*" in the last 24 hours, by rule name and severity.
+           - Which telemetry exists: "logs-*", "traces-*" and "metrics-*".
+           - Error spikes in logs: errors in the last hour against the previous 23 hours, by service.
+           - Trace errors and latency by service.
+        3. For every sandbox secret that names a tool, take a quick look with it: for example open
+           bug-like issues and pull requests merged or releases published in the last day on
+           GitHub, or the same alert and error queries on another Elastic deployment. Stay
+           read-only: only GET requests and searches.
+        4. If the user described their system (critical services, where data lives, who owns
+           what), use that to pick where to look first and how to rank what you find, and say so
+           in the rationale (for example "checkout is business critical (your hint); 5xx up 4x in
+           the last hour"). Never suggest something only because a hint mentions it.
 
-        1. Call nightshift_onboarding_describe_connectors with all of the ids above.
-        2. For every Elastic deployment, skipping what does not exist:
-           - Active alerts: list ".alerts-*" with includeHidden, then for example
-             FROM .alerts-* | WHERE kibana.alert.status == "active" AND @timestamp > NOW() - 24 hours
-             | STATS count = COUNT(*), last_seen = MAX(@timestamp) BY kibana.alert.rule.name, kibana.alert.severity
-             | SORT count DESC | LIMIT 10
-           - Which telemetry exists: list "logs-*", "traces-*" and "metrics-*".
-           - Error spikes in logs: errors in the last hour against the previous 23 hours, by service.name.
-           - Trace errors and latency by service.name.
-           - If the Kibana API is reachable: violated SLOs (/api/observability/slos) and open cases.
-        3. For Slack (nightshift_onboarding_call_connector): search the last day for messages about
-           incidents, outages, errors, alerts or rollbacks, and note the channels and services named.
-        4. For GitHub (nightshift_onboarding_call_connector): call getMe first, then only look at
-           repositories the connected account owns or works on (search qualifiers such as
-           "involves:<login>" or "user:<login>"; never global searches). Look for open issues that
-           look like bugs or incidents, and pull requests merged or releases published in the last
-           day. Skip GitHub when none of its repositories relate to the services you saw.
+        Speed matters: run independent commands in one script, prefer ES|QL STATS over raw
+        documents, bound every query to the last 24 hours with a LIMIT, and never retry a failing
+        command more than once. Base every suggestion on data you actually observed.
 
         Then return 3 to 6 suggestions, most valuable first. Each suggestion is one investigation:
         - title: short headline (max 80 characters) naming the concrete entity and symptom.
-        - prompt: one self-contained question for the investigation agent, written as the user would
-          ask it. Name the concrete services, rules, indices, channels, repositories and time window
+        - prompt: one self-contained question for the investigation agent, written as the user
+          would ask it. Name the concrete services, rules, indices, repositories and time window
           you saw. Max 400 characters.
-        - rationale: what you saw that makes it worth investigating, with numbers and the tool it came
+        - rationale: what you saw that makes it worth investigating, with numbers and where it came
           from (max 160 characters).
         - source: alert, slo, case, error_spike, latency, code_change, discussion or other.
         - severity: critical, high, medium or low, based on user impact.
-        - entities: up to 5 service, host, rule, channel or repository names.
-        If there is little data, still return at least 3 suggestions, for example about the noisiest
-        services or log sources you found.
+        - entities: up to 5 service, host, rule or repository names.
+        If there is little data, still return at least 3 suggestions, for example about the
+        noisiest services or log sources you found.
       schema:
         type: object
         properties:
@@ -172,5 +127,4 @@ steps:
   - name: output_suggestions
     type: workflow.output
     with:
-      connector_ids: '${{ inputs.connector_ids }}'
       suggestions: '${{ steps.suggest.output.structured_output.suggestions }}'

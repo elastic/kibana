@@ -28,34 +28,27 @@ const collectSecretLeaves = (value: unknown): string[] => {
 };
 
 /**
- * Builds the redactor for sandbox tool output: every sandbox secret stored in the request's space,
- * every in-memory connector secret and the secrets of the space's saved telemetry connector. Whether or not a call requested them, any of these may
+ * Builds the redactor for sandbox tool output: every sandbox secret stored in the request's space
+ * and every in-memory connector secret. Whether or not a call requested them, any of these may
  * have been written to a file or kept alive in a process by an earlier command.
  */
 export const createSandboxOutputRedactorProvider =
   ({
     getDeps,
-    getSavedConnectorSecrets,
   }: {
     getDeps: () => {
       actions?: ActionsPluginStart;
       sandboxSecretsClient?: Pick<SandboxSecretsClient, 'getRedactionValues'>;
     };
-    /** Secrets of saved (non in-memory) connectors the sandbox can reach for this request. */
-    getSavedConnectorSecrets?: (request: KibanaRequest) => Promise<Array<Record<string, unknown>>>;
   }): GetSandboxOutputRedactor =>
   async (request) => {
     const { actions, sandboxSecretsClient } = getDeps();
     const sandboxSecretValues = (await sandboxSecretsClient?.getRedactionValues(request)) ?? [];
-    const savedConnectorSecrets = (await getSavedConnectorSecrets?.(request)) ?? [];
     // Every raw secret leaf, plus any values a credential resolver derives from them (e.g. the
     // bare API key `deriveConnectorCredentialSecretValues` extracts out of an `Authorization`
     // header) — a value that never appears verbatim in `secrets` itself would otherwise round-trip
     // unredacted through a later tool call (e.g. reading back a file a bash command wrote it to).
-    const connectorSecretValues = [
-      ...(actions?.inMemoryConnectors ?? []).map(({ secrets }) => secrets),
-      ...savedConnectorSecrets,
-    ].flatMap((secrets) => [
+    const connectorSecretValues = (actions?.inMemoryConnectors ?? []).flatMap(({ secrets }) => [
       ...collectSecretLeaves(secrets),
       ...deriveConnectorCredentialSecretValues(secrets),
     ]);

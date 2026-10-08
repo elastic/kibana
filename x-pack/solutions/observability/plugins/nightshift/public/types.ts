@@ -14,9 +14,9 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SignificantEventsAppPublicStart } from '@kbn/significant-events-app-plugin/public';
 import type { SignificantEventsPublicPluginStart } from '@kbn/significant-events-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 /* eslint-disable-next-line @typescript-eslint/no-empty-interface */
@@ -34,8 +34,8 @@ export interface NightshiftStartDependencies {
   agentBuilder?: AgentBuilderPluginStart;
   nightshiftInvestigations?: NightshiftInvestigationsPublicStart;
   serverless?: ServerlessPluginStart;
+  significantEventsApp?: SignificantEventsAppPublicStart;
   spaces?: SpacesPluginStart;
-  triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
 }
 
 /* eslint-disable-next-line @typescript-eslint/no-empty-interface */

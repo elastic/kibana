@@ -5,25 +5,17 @@
  * 2.0.
  */
 
-import { badRequest, serverUnavailable } from '@hapi/boom';
+import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
-import {
-  MAX_ONBOARDING_CONNECTOR_ID_LENGTH,
-  MAX_ONBOARDING_CONNECTORS,
-  type GetOnboardingResponse,
-  type StartOnboardingSuggestionsResponse,
+import type {
+  GetOnboardingResponse,
+  StartOnboardingSuggestionsResponse,
 } from '../../common/onboarding';
-import {
-  OnboardingUnavailableError,
-  OnboardingValidationError,
-} from '../onboarding/onboarding_client';
+import { OnboardingUnavailableError } from '../onboarding/onboarding_client';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 const rethrowOnboardingError = (error: unknown): never => {
-  if (error instanceof OnboardingValidationError) {
-    throw badRequest(error.message);
-  }
   if (error instanceof OnboardingUnavailableError) {
     throw serverUnavailable(error.message);
   }
@@ -36,7 +28,7 @@ const getOnboardingRoute = createNightshiftInvestigationsServerRoute({
     access: 'internal',
     summary: 'Get onboarding state',
     description:
-      "Returns the space's latest onboarding suggestions workflow execution: the connected deployments and the suggested first investigations.",
+      "Returns the space's latest onboarding suggestions workflow execution and the first investigations it suggested.",
   },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read] } },
   params: z.object({}),
@@ -55,24 +47,13 @@ const startOnboardingSuggestionsRoute = createNightshiftInvestigationsServerRout
     access: 'internal',
     summary: 'Suggest first investigations',
     description:
-      'Validates the connected tools (at least one External Elasticsearch connector, optionally Slack and GitHub) and starts the onboarding suggestions workflow for them.',
+      'Starts the onboarding suggestions workflow: the investigation agent explores the space from its sandbox and suggests first investigations.',
   },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
-  params: z.object({
-    body: z.object({
-      connector_ids: z
-        .array(z.string().min(1).max(MAX_ONBOARDING_CONNECTOR_ID_LENGTH))
-        .min(1)
-        .max(MAX_ONBOARDING_CONNECTORS),
-    }),
-  }),
-  handler: async ({
-    request,
-    params,
-    onboardingClient,
-  }): Promise<StartOnboardingSuggestionsResponse> => {
+  params: z.object({}),
+  handler: async ({ request, onboardingClient }): Promise<StartOnboardingSuggestionsResponse> => {
     try {
-      return await onboardingClient.start(request, params.body.connector_ids);
+      return await onboardingClient.start(request);
     } catch (error) {
       return rethrowOnboardingError(error);
     }

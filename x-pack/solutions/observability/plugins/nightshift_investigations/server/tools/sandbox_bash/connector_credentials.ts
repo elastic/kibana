@@ -71,19 +71,12 @@ const readAuthorizationHeader = (secretHeaders: unknown): string | undefined => 
  * a bare derived value never appears verbatim in the raw `secrets` object, so a redactor built
  * only from `collectSecretLeaves`-style traversal of `secrets` would miss it.
  */
-/**
- * The `Authorization` header a connector authenticates with: HTTP ES connectors keep it in
- * `secretHeaders`, the External Elasticsearch connector (`api_key_header` auth) at the top level.
- */
-const readConnectorAuthorization = (secrets: Record<string, unknown>): string | undefined =>
-  readAuthorizationHeader(secrets.secretHeaders) ??
-  (typeof secrets.Authorization === 'string' ? secrets.Authorization : undefined);
-
 export const deriveConnectorCredentialSecretValues = (
   secrets: Record<string, unknown>
 ): string[] => {
   const secretValues: string[] = [];
-  const authorization = readConnectorAuthorization(secrets);
+  // HTTP ES connectors store `Authorization: ApiKey …` in secretHeaders, not `password`.
+  const authorization = readAuthorizationHeader(secrets.secretHeaders);
   if (authorization?.startsWith('ApiKey ')) {
     const apiKey = authorization.slice('ApiKey '.length);
     if (apiKey.length >= MIN_REDACTABLE_SECRET_LENGTH) secretValues.push(apiKey);
@@ -123,8 +116,8 @@ export const buildConnectorEnv = ({
     if (envValue.length >= MIN_REDACTABLE_SECRET_LENGTH) secretValues.push(envValue);
   }
 
-  // ES connectors store `Authorization: ApiKey …` as a header, not as `password`.
-  const authorization = readConnectorAuthorization(secrets);
+  // HTTP ES connectors store `Authorization: ApiKey …` in secretHeaders, not `password`.
+  const authorization = readAuthorizationHeader(secrets.secretHeaders);
   if (authorization?.startsWith('ApiKey ')) {
     const apiKey = authorization.slice('ApiKey '.length);
     if (env.CONNECTOR_SECRET_PASSWORD === undefined) {
@@ -143,7 +136,8 @@ export const redactSecrets = (text: string, secretValues: readonly string[]): st
 /**
  * Creates the resolver that turns a connector id into a one-command credential environment.
  * Deny by default: the connector must be on the agent allow-list and the current user must be
- * allowed to read and execute it in the current space.
+ * allowed to read and execute it in the current space. Only preconfigured (kibana.yml)
+ * connectors are supported: their secrets are held in memory by the actions plugin.
  */
 export const createConnectorCredentialResolver =
   ({
@@ -158,16 +152,19 @@ export const createConnectorCredentialResolver =
 
     const authorized = await authorizeConnector(connectorId, callContext, actions);
     if ('errorMessage' in authorized) return authorized;
-    const { connector } = authorized;
+    const { connector, inMemoryConnector } = authorized;
 
     logger.debug(
       `Injecting credentials for connector ${connectorId} into a single sandbox command`
     );
 
+    // Config comes from the in-memory connector, not from `get()`: the actions client omits
+    // config for preconfigured connectors unless they opt in with `exposeConfig`, which would
+    // also publish it over the HTTP API. Authorization above already gated this read.
     return buildConnectorEnv({
       connectorId,
       actionTypeId: connector.actionTypeId,
-      config: connector.config,
-      secrets: connector.secrets,
+      config: inMemoryConnector.config ?? connector.config ?? {},
+      secrets: inMemoryConnector.secrets ?? {},
     });
   };

@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-/** The request names a connector onboarding cannot use (wrong type, unreachable, missing). */
-export class OnboardingValidationError extends Error {}
+/** Onboarding needs workflows and the managed onboarding workflow. */
+export class OnboardingUnavailableError extends Error {}
