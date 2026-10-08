@@ -497,8 +497,12 @@ export class ActionPolicyClient {
     return this.getActionPolicy({ id });
   }
 
+  /**
+   * The new key and the AAD it is bound to have to land in one write, so this goes through the
+   * whole-document path: a partial update of either leaves the stored key undecryptable.
+   */
   private async rotateApiKey(id: string): Promise<void> {
-    const { attrs: existingPolicy } = await this.getExistingActionPolicy(id);
+    const { attrs: existingPolicy, version } = await this.getExistingActionPolicy(id);
 
     const oldAuth = await this.getDecryptedAuth(id);
     const actor = await this.userService.getCurrentActor();
@@ -508,13 +512,15 @@ export class ActionPolicyClient {
     );
 
     try {
-      await this.patchActionPolicyFields({
+      await this.writeActionPolicyAttrs({
         id,
         attrs: {
+          ...existingPolicy,
           ...toApiKeyAttributes(apiKeyAttrs),
           updatedBy: actor,
           updatedAt: now,
         },
+        version,
       });
     } catch (e) {
       this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, id);

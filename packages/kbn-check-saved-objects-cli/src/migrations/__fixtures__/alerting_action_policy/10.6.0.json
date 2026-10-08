@@ -152,7 +152,7 @@
     },
     {
       "name": "per-alert-policy",
-      "description": "An action policy whose grouping fields and throttle interval are both dead configuration",
+      "description": "An action policy carrying grouping fields and a throttle interval that nothing reads",
       "enabled": true,
       "destinations": [
         {
@@ -178,7 +178,7 @@
     },
     {
       "name": "per-alert-policy",
-      "description": "An action policy whose grouping fields and throttle interval are both dead configuration",
+      "description": "An action policy carrying grouping fields and a throttle interval that nothing reads",
       "enabled": true,
       "destinations": [
         {
@@ -200,13 +200,62 @@
       "updatedAt": "2025-01-01T00:00:00.000Z"
     },
     {
-      "name": "strategy-less-throttle-policy",
-      "description": "An action policy with a throttle that names no strategy",
+      "name": "legacy-digest-policy",
+      "description": "An action policy throttled by an interval its throttle never named a strategy for",
       "enabled": true,
       "destinations": [
         {
           "type": "workflow",
           "id": "workflow-5"
+        }
+      ],
+      "matcher": null,
+      "groupBy": null,
+      "tags": null,
+      "groupingMode": "all",
+      "throttle": {
+        "interval": "1h"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "legacy-digest-policy",
+      "description": "An action policy throttled by an interval its throttle never named a strategy for",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-5"
+        }
+      ],
+      "matcher": null,
+      "tags": null,
+      "throttle": {
+        "strategy": "time_interval",
+        "interval": "1h"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "legacy-per-alert-policy",
+      "description": "An action policy with a strategyless throttle and no grouping mode",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-6"
         }
       ],
       "matcher": null,
@@ -225,18 +274,20 @@
       "updatedAt": "2025-01-01T00:00:00.000Z"
     },
     {
-      "name": "strategy-less-throttle-policy",
-      "description": "An action policy with a throttle that names no strategy",
+      "name": "legacy-per-alert-policy",
+      "description": "An action policy with a strategyless throttle and no grouping mode",
       "enabled": true,
       "destinations": [
         {
           "type": "workflow",
-          "id": "workflow-5"
+          "id": "workflow-6"
         }
       ],
       "matcher": null,
       "tags": null,
-      "throttle": null,
+      "throttle": {
+        "strategy": "on_status_change"
+      },
       "snoozedUntil": null,
       "apiKeyOwner": "elastic",
       "apiKeyCreatedByUser": true,
@@ -400,7 +451,7 @@
     },
     {
       "name": "per-alert-policy",
-      "description": "An action policy whose grouping fields and throttle interval are both dead configuration",
+      "description": "An action policy carrying grouping fields and a throttle interval that nothing reads",
       "enabled": true,
       "destinations": [
         {
@@ -426,7 +477,7 @@
     },
     {
       "name": "per-alert-policy",
-      "description": "An action policy whose grouping fields and throttle interval are both dead configuration",
+      "description": "An action policy carrying grouping fields and a throttle interval that nothing reads",
       "enabled": true,
       "destinations": [
         {
@@ -448,8 +499,8 @@
       "updatedAt": "2025-01-01T00:00:00.000Z"
     },
     {
-      "name": "strategy-less-throttle-policy",
-      "description": "An action policy with a throttle that names no strategy",
+      "name": "legacy-digest-policy",
+      "description": "An action policy throttled by an interval its throttle never named a strategy for",
       "enabled": true,
       "destinations": [
         {
@@ -459,7 +510,13 @@
       ],
       "matcher": null,
       "tags": null,
-      "throttle": null,
+      "grouping": {
+        "mode": "all"
+      },
+      "throttle": {
+        "strategy": "time_interval",
+        "interval": "1h"
+      },
       "snoozedUntil": null,
       "apiKeyOwner": "elastic",
       "apiKeyCreatedByUser": true,
@@ -469,8 +526,8 @@
       "updatedAt": "2025-01-01T00:00:00.000Z"
     },
     {
-      "name": "strategy-less-throttle-policy",
-      "description": "An action policy with a throttle that names no strategy",
+      "name": "legacy-digest-policy",
+      "description": "An action policy throttled by an interval its throttle never named a strategy for",
       "enabled": true,
       "destinations": [
         {
@@ -480,7 +537,56 @@
       ],
       "matcher": null,
       "tags": null,
-      "throttle": null,
+      "throttle": {
+        "strategy": "time_interval",
+        "interval": "1h"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "legacy-per-alert-policy",
+      "description": "An action policy with a strategyless throttle and no grouping mode",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-6"
+        }
+      ],
+      "matcher": null,
+      "tags": null,
+      "throttle": {
+        "strategy": "on_status_change"
+      },
+      "snoozedUntil": null,
+      "apiKeyOwner": "elastic",
+      "apiKeyCreatedByUser": true,
+      "createdBy": null,
+      "updatedBy": null,
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "name": "legacy-per-alert-policy",
+      "description": "An action policy with a strategyless throttle and no grouping mode",
+      "enabled": true,
+      "destinations": [
+        {
+          "type": "workflow",
+          "id": "workflow-6"
+        }
+      ],
+      "matcher": null,
+      "tags": null,
+      "throttle": {
+        "strategy": "on_status_change"
+      },
       "snoozedUntil": null,
       "apiKeyOwner": "elastic",
       "apiKeyCreatedByUser": true,

@@ -10,7 +10,6 @@ import { actionPolicySavedObjectAttributesSchemaV4 } from './v4';
 
 export const actionPolicySavedObjectAttributesSchemaV5 =
   actionPolicySavedObjectAttributesSchemaV4.extends({
-    description: schema.maybe(schema.string()),
     groupingMode: schema.maybe(
       schema.nullable(
         schema.oneOf([

@@ -452,8 +452,30 @@ describe('actionPolicyModelVersions', () => {
       });
     });
 
-    it('clears a throttle that names no strategy', () => {
-      const document = createV5PolicyDocument({ throttle: { interval: '5m' } });
+    /**
+     * The dispatcher infers the strategy a strategyless throttle never stored, so these policies
+     * are throttling today. Writing the inference down is what keeps them doing it.
+     */
+    it.each([
+      ['per_alert', 'per_alert', { strategy: 'on_status_change' }],
+      ['all', 'all', { strategy: 'time_interval', interval: '5m' }],
+      ['per_field', 'per_field', { strategy: 'time_interval', interval: '5m' }],
+      ['an absent', null, { strategy: 'on_status_change' }],
+    ])(
+      'gives a strategyless throttle the strategy %s grouping implies',
+      (_label, groupingMode, expected) => {
+        const document = createV5PolicyDocument({
+          groupingMode,
+          groupBy: groupingMode === 'per_field' ? ['host.name'] : null,
+          throttle: { interval: '5m' },
+        });
+
+        expect(migrate(document).throttle).toEqual(expected);
+      }
+    );
+
+    it('clears a throttle that names neither a strategy nor an interval', () => {
+      const document = createV5PolicyDocument({ throttle: {} });
       expect(migrate(document).throttle).toBeNull();
     });
 

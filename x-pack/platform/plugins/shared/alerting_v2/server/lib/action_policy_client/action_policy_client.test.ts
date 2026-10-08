@@ -1930,7 +1930,11 @@ describe('ActionPolicyClient', () => {
       updatedAt: '2024-12-01T00:00:00.000Z',
     };
 
-    it('creates a new API key, updates only auth and updatedBy fields, and invalidates the old key', async () => {
+    /**
+     * The key and the AAD it is bound to have to be written together, so rotation writes the whole
+     * document: a partial update of either would leave the stored key undecryptable.
+     */
+    it('writes the whole document with the new key and invalidates the old one', async () => {
       mockSavedObjectsClient.get.mockResolvedValue({
         id: 'policy-id-update-key-1',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
@@ -1947,21 +1951,16 @@ describe('ActionPolicyClient', () => {
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
         ACTION_POLICY_SAVED_OBJECT_TYPE,
         'policy-id-update-key-1',
-        expect.objectContaining({
+        {
+          ...existingAttributes,
           apiKey: 'encoded-es-api-key',
           apiKeyOwner: 'test-user',
           apiKeyCreatedByUser: false,
           updatedBy: { profile_uid: 'elastic_profile_uid' },
           updatedAt: '2025-01-01T00:00:00.000Z',
-        })
+        },
+        { version: 'WzEsMV0=', mergeAttributes: false }
       );
-
-      // Should not include non-auth attributes in the update
-      const updateCallAttrs = mockSavedObjectsClient.update.mock.calls[0][2];
-      expect(updateCallAttrs).not.toHaveProperty('name');
-      expect(updateCallAttrs).not.toHaveProperty('description');
-      expect(updateCallAttrs).not.toHaveProperty('destinations');
-      expect(updateCallAttrs).not.toHaveProperty('enabled');
 
       expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['old-api-key']);
     });

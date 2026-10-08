@@ -223,10 +223,13 @@ export const actionPolicyModelVersions: SavedObjectsModelVersionMap = {
      * the dead configuration goes. `groupBy` on a mode that groups on no field is dropped, and
      * `per_field` with nothing to group by names a mode it cannot satisfy, so it loses the mode
      * too and falls back to `per_alert`. A throttle whose strategy takes no interval loses the
-     * stray interval, and one
-     * with no strategy at all names no behaviour, so it migrates to `null` and reads as unset.
+     * stray interval. One with no strategy at all is given the strategy the dispatcher has been
+     * inferring for it all along, so the throttling it performs today survives being written down;
+     * only a throttle with no interval either names nothing to keep, and becomes `null`.
+     *
      * Dropping a key off `throttle` needs `unsafe_transform`: a `data_backfill` result is merged
-     * into the document with a deep merge, which cannot remove anything.
+     * into the document with a deep merge, which cannot remove anything. It runs after the
+     * grouping backfill, so it reads the mode from the block that one just wrote.
      *
      * This reshapes existing attributes, so it is NOT rollback-compatible: the v1-v5 schemas have
      * no `grouping` key and require the two they replace. Accepted while alerting v2 is in
@@ -262,9 +265,11 @@ export const actionPolicyModelVersions: SavedObjectsModelVersionMap = {
         transformFn: (typeSafeGuard) =>
           typeSafeGuard((doc) => {
             const attributes = doc.attributes as Record<string, unknown> & {
+              grouping?: { mode?: string };
               throttle?: { strategy?: string; interval?: string | null } | null;
             };
-            const { throttle } = attributes;
+
+            const { grouping, throttle } = attributes;
             if (!throttle) return { document: doc };
 
             const { strategy, interval } = throttle;
@@ -272,11 +277,22 @@ export const actionPolicyModelVersions: SavedObjectsModelVersionMap = {
               return { document: doc };
             }
 
+            const inferred =
+              (grouping?.mode ?? 'per_alert') === 'per_alert'
+                ? 'on_status_change'
+                : 'time_interval';
+
+            const next =
+              strategy != null
+                ? { strategy }
+                : interval != null
+                ? needsInterval(inferred)
+                  ? { strategy: inferred, interval }
+                  : { strategy: inferred }
+                : null;
+
             return {
-              document: {
-                ...doc,
-                attributes: { ...attributes, throttle: strategy == null ? null : { strategy } },
-              },
+              document: { ...doc, attributes: { ...attributes, throttle: next } },
             };
           }),
       },

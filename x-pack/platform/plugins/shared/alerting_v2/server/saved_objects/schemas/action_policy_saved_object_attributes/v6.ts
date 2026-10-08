@@ -14,9 +14,12 @@ import { actionPolicySavedObjectAttributesSchemaV5 } from './v5';
  * of its keys, so a mode that reads no fields can no longer be stored alongside them. Absent means
  * `per_alert`, which is why the block is not nullable: there is nothing a `null` would say that
  * leaving it out does not.
+ *
+ * It also relaxes `description`, which the API has always allowed a policy to omit.
  */
 export const actionPolicySavedObjectAttributesSchemaV6 =
   actionPolicySavedObjectAttributesSchemaV5.extends({
+    description: schema.maybe(schema.string()),
     groupingMode: undefined,
     groupBy: undefined,
     grouping: schema.maybe(
