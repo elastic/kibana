@@ -12,12 +12,13 @@ import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../common/get_index_patterns';
 
-function formatNode(
-  nodes: NonNullable<NonNullable<ElasticsearchSource['cluster_state']>['nodes']> | undefined
-) {
-  if (!nodes) {
-    return [];
-  }
+type ClusterStateNodes = NonNullable<NonNullable<ElasticsearchSource['cluster_state']>['nodes']>;
+
+function getNodes(source: ElasticsearchSource | undefined): ClusterStateNodes | undefined {
+  return source?.cluster_state?.nodes || source?.elasticsearch?.cluster?.stats?.state?.nodes;
+}
+
+function formatNode(nodes: ClusterStateNodes) {
   return Object.keys(nodes).map((nodeUuid) => {
     return {
       nodeUuid,
@@ -120,17 +121,18 @@ export async function fetchNodesFromClusterStats(
     if (hits.length < 2) {
       continue;
     }
+    const recentNodes = getNodes(hits[0]._source);
+    const priorNodes = getNodes(hits[1]._source);
+    // A document without node data is not a cluster without nodes: comparing it
+    // against the other document would report every node as added or removed.
+    if (!recentNodes || !priorNodes) {
+      continue;
+    }
     const indexName = hits[0]._index;
     nodes.push({
       clusterUuid,
-      recentNodes: formatNode(
-        hits[0]._source?.cluster_state?.nodes ||
-          hits[0]._source?.elasticsearch?.cluster?.stats?.state?.nodes
-      ),
-      priorNodes: formatNode(
-        hits[1]._source?.cluster_state?.nodes ||
-          hits[1]._source?.elasticsearch?.cluster?.stats?.state?.nodes
-      ),
+      recentNodes: formatNode(recentNodes),
+      priorNodes: formatNode(priorNodes),
       ccs: indexName.includes(':') ? indexName.split(':')[0] : undefined,
     });
   }
