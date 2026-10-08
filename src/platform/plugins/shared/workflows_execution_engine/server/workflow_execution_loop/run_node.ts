@@ -110,6 +110,15 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     // (e.g. workflow.execute holding a child execution) still get their onCancel hook.
     nodeImplementation = params.nodesFactory.create(stepExecutionRuntime);
 
+    if (params.workflowExecutionState.getWorkflowExecution().cancelRequested) {
+      await cancelWorkflowIfRequested(
+        params.workflowExecutionState,
+        stepExecutionRuntime,
+        workflowExecutionCursor,
+        stepExecutionRuntime.abortController
+      );
+    }
+
     /**
      * Check in-memory workflow state to skip execution if workflow is no longer running.
      * This is instant (no ES call) and catches cancellations that were already detected.

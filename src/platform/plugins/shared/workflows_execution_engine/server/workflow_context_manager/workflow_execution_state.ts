@@ -309,6 +309,21 @@ export class WorkflowExecutionState {
       },
       refreshForQueueDrainAfterTerminal ? { refresh: 'wait_for' } : {}
     );
+
+    // the execution doc must be always up to date.
+    // It's possible that execution doc was updated outside of this state (cancelation)
+    const updated = await this.workflowExecutionRepository.getWorkflowExecutionById(
+      this.workflowExecution.id,
+      this.workflowExecution.spaceId
+    );
+
+    if (!updated) {
+      throw new Error(
+        `WorkflowExecutionState: Failed to update workflow execution ${this.workflowExecution.id}`
+      );
+    }
+
+    this.workflowExecution = updated;
   }
 
   private createStep(step: CreateStepInput) {
