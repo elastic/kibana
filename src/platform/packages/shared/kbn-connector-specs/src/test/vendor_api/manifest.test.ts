@@ -55,8 +55,8 @@ describe('fixtures', () => {
   it('converts response overrides to mock fixtures', () => {
     const fixtures = vendorApiFixturesSchema.parse({
       getCard: {
-        readOnly: true,
         input: { cardId: '5f0c1e2d3b4a596877665544' },
+        queries: [{ method: 'POST', path: '/cards/search' }],
         responses: [{ source: 'v1', method: 'GET', path: '/cards/{id}', status: 200, body: {} }],
       },
     });
@@ -70,6 +70,6 @@ describe('fixtures', () => {
   });
 
   it('rejects unknown fields', () => {
-    expect(() => vendorApiFixturesSchema.parse({ getCard: { readonly: true } })).toThrow();
+    expect(() => vendorApiFixturesSchema.parse({ getCard: { readOnly: true } })).toThrow();
   });
 });

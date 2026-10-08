@@ -101,8 +101,10 @@ const describeFinding = (finding: RecordingFinding): string => {
       return `${finding.action}: ${finding.request} breaks the spec: ${finding.violations
         .map(({ message }) => message)
         .join('; ')}`;
-    case 'read-only':
-      return `${finding.action}: marked readOnly but sent ${finding.request}`;
+    case 'read-scope':
+      return `${finding.action}: has scope 'read' but sent ${finding.request}; if the operation only queries, add it to the action's "queries" in ${FIXTURES}, otherwise correct the scope`;
+    case 'unused-query':
+      return `${finding.action}: lists ${finding.operation} in "queries" in ${FIXTURES}, but no request of a 'read' scoped run needed it; remove it`;
     case 'rejected-response':
       return `${finding.action}: the response override for ${
         finding.operation
@@ -111,7 +113,7 @@ const describeFinding = (finding: RecordingFinding): string => {
 };
 
 const isProblem = ({ kind }: RecordingFinding): boolean =>
-  kind === 'read-only' || kind === 'rejected-response';
+  kind === 'read-scope' || kind === 'unused-query' || kind === 'rejected-response';
 
 /**
  * Regenerates a connector's `vendor_api` artifacts: records its actions against the vendor
