@@ -49,12 +49,12 @@ export const setupWorker = (
       return;
     }
 
-    const { dispose } = model.onDidChangeContent(async () => {
+    const contentChangeListener = model.onDidChangeContent(async () => {
       updateAnnotations(model);
     });
 
     model.onWillDispose(() => {
-      dispose();
+      contentChangeListener.dispose();
     });
 
     updateAnnotations(model);

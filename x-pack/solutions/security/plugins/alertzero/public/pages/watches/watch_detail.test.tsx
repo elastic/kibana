@@ -122,6 +122,8 @@ jest.mock('./components/watches_section_layout', () => ({
   },
 }));
 
+const renderWithI18n = (ui: React.ReactElement) => render(ui, { wrapper: I18nProvider });
+
 const mockUseWatch = jest.mocked(useWatch);
 const mockUseWorkers = jest.mocked(useWorkers);
 const mockUseUpdateWorker = jest.mocked(useUpdateWorker);
@@ -144,7 +146,7 @@ const createWorker = (
   };
   return {
     ...worker,
-    // Turning a worker on requires an account. Tests that click the switch start from one.
+    // Workers that already have an account skip prebuilt account setup on save.
     settings: { ...worker.settings, serviceAccountId: 'kibana/az-worker-1' },
   };
 };
@@ -358,6 +360,11 @@ describe('WatchDetailPage', () => {
       )
     ).toBeInTheDocument();
     expect(within(section).getByTestId('alertZeroAutonomyLevelControl')).toBeInTheDocument();
+    expect(
+      within(section).getByTestId(
+        `alertZeroModelsRow-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
+      )
+    ).toBeInTheDocument();
     expect(screen.queryByTestId('alertZeroCandidateLimit')).not.toBeInTheDocument();
   });
 
@@ -366,6 +373,7 @@ describe('WatchDetailPage', () => {
 
     for (const worker of floorWorkers) {
       expect(screen.getByTestId(`alertZeroWatchWorkerAccordion-${worker.id}`)).toBeInTheDocument();
+      expect(screen.getByTestId(`alertZeroModelsRow-${worker.id}`)).toBeInTheDocument();
     }
 
     // A Watch with exactly one Worker has no accordion chrome — its settings are a static panel.
@@ -478,7 +486,7 @@ describe('WatchDetailPage', () => {
     } as never);
     mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
 
-    render(
+    renderWithI18n(
       <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -533,7 +541,7 @@ describe('WatchDetailPage', () => {
     } as never);
     mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
 
-    const { rerender } = render(
+    const { rerender } = renderWithI18n(
       <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -728,7 +736,7 @@ describe('WatchDetailPage', () => {
         </Route>
       </MemoryRouter>
     );
-    const { rerender } = render(tree());
+    const { rerender } = renderWithI18n(tree());
 
     const field = screen.getByTestId('alertZeroAnalysisWindowDays');
     fireEvent.change(field, { target: { value: '7' } });
@@ -1033,7 +1041,7 @@ describe('WatchDetailPage', () => {
     const history = createMemoryHistory({
       initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
     });
-    render(
+    renderWithI18n(
       <Router history={history}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -1115,7 +1123,7 @@ describe('WatchDetailPage', () => {
     const history = createMemoryHistory({
       initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
     });
-    render(
+    renderWithI18n(
       <Router history={history}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -1180,7 +1188,7 @@ describe('WatchDetailPage', () => {
     const history = createMemoryHistory({
       initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
     });
-    render(
+    renderWithI18n(
       <Router history={history}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
@@ -1233,7 +1241,7 @@ describe('WatchDetailPage', () => {
     const mutateAsync = jest.fn().mockRejectedValue(new Error('patch failed'));
     mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync } as never);
 
-    render(
+    renderWithI18n(
       <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />

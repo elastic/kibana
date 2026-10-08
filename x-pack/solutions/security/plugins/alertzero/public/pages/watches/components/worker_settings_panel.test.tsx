@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
+import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID } from '@kbn/workflows';
 import { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
@@ -40,17 +41,17 @@ const createWorker = (workflowId: string | null): Worker => ({
   },
 });
 
+const FEATURE_SETTINGS_URL = '/app/management/modelManagement/model_settings';
+
 const renderPanel = (
   workflowId: string | null,
   isAccordion: boolean,
   {
     enabled = true,
-    serviceAccountId,
     showManagedWorkflows = true,
     canChangeAdvancedSettings = true,
   }: {
     enabled?: boolean;
-    serviceAccountId?: string;
     showManagedWorkflows?: boolean;
     canChangeAdvancedSettings?: boolean;
   } = {}
@@ -58,12 +59,11 @@ const renderPanel = (
   const core = coreMock.createStart();
   core.http.get.mockResolvedValue(undefined);
   core.application.getUrlForApp.mockImplementation(
-    (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path ?? ''}`
+    (appId: string, options?: { path?: string; deepLinkId?: string }) =>
+      options?.deepLinkId === 'model_settings'
+        ? FEATURE_SETTINGS_URL
+        : `/app/${appId}${options?.path ?? ''}`
   );
-  const settings = {
-    ...createWorker(workflowId).settings,
-    ...(serviceAccountId ? { serviceAccountId } : {}),
-  };
   core.settings.client.get.mockReturnValue(showManagedWorkflows);
   core.settings.client.get$.mockReturnValue(of(showManagedWorkflows));
   core.application.capabilities = {
@@ -73,22 +73,24 @@ const renderPanel = (
   };
 
   render(
-    <KibanaContextProvider services={core}>
-      <WorkerSettingsPanel
-        worker={createWorker(workflowId)}
-        isAccordion={isAccordion}
-        isExpanded
-        onToggle={jest.fn()}
-        enabled={enabled}
-        settings={settings}
-        warningReasons={[]}
-        settingsLocked={false}
-        isSaving={false}
-        canWrite
-        onEnabledChange={jest.fn()}
-        onSettingsChange={jest.fn()}
-      />
-    </KibanaContextProvider>
+    <I18nProvider>
+      <KibanaContextProvider services={core}>
+        <WorkerSettingsPanel
+          worker={createWorker(workflowId)}
+          isAccordion={isAccordion}
+          isExpanded
+          onToggle={jest.fn()}
+          enabled={enabled}
+          settings={createWorker(workflowId).settings}
+          warningReasons={[]}
+          settingsLocked={false}
+          isSaving={false}
+          canWrite
+          onEnabledChange={jest.fn()}
+          onSettingsChange={jest.fn()}
+        />
+      </KibanaContextProvider>
+    </I18nProvider>
   );
 
   return core;
@@ -162,29 +164,31 @@ describe('WorkerSettingsPanel view executions link', () => {
   });
 });
 
-describe('WorkerSettingsPanel service account', () => {
-  it('shows that saving an enabled worker requires a service account', () => {
-    renderPanel(WORKFLOW_ID, false);
+describe('WorkerSettingsPanel models', () => {
+  it.each([
+    ['accordion', true],
+    ['single-Worker', false],
+  ])('points the Models row at Feature settings in a new tab (%s)', (_layout, isAccordion) => {
+    const core = renderPanel(WORKFLOW_ID, isAccordion);
 
-    expect(screen.getByTestId(`alertZeroServiceAccountRequired-${WORKER_ID}`)).toHaveTextContent(
-      'Select a service account to save while this worker stays on. You can turn it off without one.'
+    expect(screen.getByTestId(`alertZeroModelsRow-${WORKER_ID}`)).toHaveTextContent(
+      'This Worker uses models configured in Feature settings'
     );
+    const link = screen.getByTestId(`alertZeroModelsLink-${WORKER_ID}`);
+    expect(link).toHaveAttribute('href', FEATURE_SETTINGS_URL);
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(core.application.getUrlForApp).toHaveBeenCalledWith('management', {
+      deepLinkId: 'model_settings',
+    });
   });
+});
 
-  it('hides that notice when the worker is off', () => {
+describe('WorkerSettingsPanel service account', () => {
+  it('lets a worker without an account be turned on and shows no Run as control', () => {
     renderPanel(WORKFLOW_ID, false, { enabled: false });
 
-    expect(
-      screen.queryByTestId(`alertZeroServiceAccountRequired-${WORKER_ID}`)
-    ).not.toBeInTheDocument();
-  });
-
-  it('hides that notice when an account is selected', () => {
-    renderPanel(WORKFLOW_ID, false, { serviceAccountId: 'kibana/az-worker-1' });
-
-    expect(
-      screen.queryByTestId(`alertZeroServiceAccountRequired-${WORKER_ID}`)
-    ).not.toBeInTheDocument();
+    expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`)).not.toBeDisabled();
+    expect(screen.queryByTestId(`alertZeroServiceAccountRow-${WORKER_ID}`)).not.toBeInTheDocument();
   });
 });
 
