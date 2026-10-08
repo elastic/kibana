@@ -1287,7 +1287,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.utilization_limits.cpu',
       {
         defaultMessage:
-          'Restrict Endpoint CPU usage to a percentage of the total system CPU. For 9.5 and earlier, the range is 20-100%. For 9.6 and later, the range is 1-100%; on hosts with more than 32 logical CPUs the effective limit is never below 6.4 CPUs, and on smaller hosts never below 20% of the host. Values outside the range are ignored and trigger a policy warning. Default: 100.',
+          'Restrict Endpoint CPU usage to a percentage of the total system CPU. For 9.5 and earlier, the range is 20-100%. For 9.6 and later, the range is 1-100%, but the effective limit is never below 20% of the first 32 CPUs. Values outside the range are ignored and trigger a policy warning. Default: 100.',
       }
     ),
   },
@@ -1298,7 +1298,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.utilization_limits.cpu',
       {
         defaultMessage:
-          'Restrict Endpoint CPU usage to a percentage of the total system CPU. For 9.5 and earlier, the range is 20-100%. For 9.6 and later, the range is 1-100%; on hosts with more than 32 logical CPUs the effective limit is never below 6.4 CPUs, and on smaller hosts never below 20% of the host. Values outside the range are ignored and trigger a policy warning. Default: 50.',
+          'Restrict Endpoint CPU usage to a percentage of the total system CPU. For 9.5 and earlier, the range is 20-100%. For 9.6 and later, the range is 1-100%, but the effective limit is never below 20% of the first 32 CPUs. Values outside the range are ignored and trigger a policy warning. Default: 50.',
       }
     ),
   },
