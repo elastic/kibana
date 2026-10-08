@@ -68,7 +68,7 @@ const CREATE_POLICY_OPTION_TITLE = i18n.translate(
 );
 const CREATE_POLICY_OPTION_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.actionPolicyCreateOptionsPanel.createPolicyDescription',
-  { defaultMessage: 'Match alert episodes and send them to destinations.' }
+  { defaultMessage: 'Match alerts and send them to destinations.' }
 );
 const CREATE_WITH_AGENT_OPTION_TITLE = i18n.translate(
   'xpack.alertingV2.actionPolicyCreateOptionsPanel.createWithAiAgentTitle',

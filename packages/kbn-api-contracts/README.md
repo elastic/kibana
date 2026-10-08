@@ -97,10 +97,10 @@ For approved breaking changes, add entries to `allowlist.json`. **Always prefer 
 
 ### Granular form (recommended)
 
-Use `oasdiffId` together with `source` to suppress exactly one breaking change. These fields are AND'd with `path` and `method`: the entry only matches changes for which all four fields agree.
+Use `oasdiffId` to suppress only the changes for one rule, plus `source` for `kbn:` rules. These fields are AND'd with `path` and `method`: the entry only matches changes for which all of them agree.
 
 - `oasdiffId` — matches the oasdiff rule ID (e.g. `request-property-removed`, `kbn:request-additional-properties-tightened`). See the [Breaking Change Rules](#breaking-change-rules) table for known IDs.
-- `source` — matches the JSON pointer / source location reported by oasdiff (e.g. `/components/schemas/Output/properties/name`).
+- `source` — `kbn:` rules only. Matches the JSON pointer the rule reports (e.g. `/components/schemas/Data_views_create_data_view_request_object`). For its own rules, oasdiff reports the path of the spec file it read, which differs per CI run, so the check ignores it and rejects allowlist entries that set it.
 
 ```json
 {
@@ -108,12 +108,11 @@ Use `oasdiffId` together with `source` to suppress exactly one breaking change. 
   "method": "post",
   "reason": "Approved removal of deprecated 'name' field from request body",
   "approvedBy": "@elastic/fleet",
-  "oasdiffId": "request-property-removed",
-  "source": "/components/schemas/Output/properties/name"
+  "oasdiffId": "request-property-removed"
 }
 ```
 
-Example targeting the new request-body tightening rule:
+Example targeting the request-body tightening rule, scoped to one schema:
 
 ```json
 {
@@ -126,7 +125,7 @@ Example targeting the new request-body tightening rule:
 }
 ```
 
-**Required fields:** `path`, `method`, `reason`, `approvedBy`, `oasdiffId`, `source` (the last two only required for granular suppression).
+**Required fields:** `path`, `method`, `reason`, `approvedBy`, and `oasdiffId` for granular suppression. `source` is optional and only valid with a `kbn:` rule.
 **Optional fields:** `prUrl`, `expiresAt`.
 
 ### Coarse form (⚠️ avoid unless absolutely necessary — this masks all future breaking changes on the endpoint)
@@ -159,7 +158,7 @@ Tier and rule policy are independent. A stable-tier change still doesn't gate wh
 
 ### CI notifications
 
-CI posts (or updates) a PR comment whenever there is anything to report, **regardless of whether the check fails** (the check can exit 0 with nothing gating, e.g. when every gating break is allowlisted, only experimental changes were found, or only report-only rules matched). The comment groups gating changes by stability tier. Allowlisted stable and Technical Preview changes, experimental changes, and report-only rules each appear in their own non-blocking section. Allowlisted experimental and report-only changes are left out. When there is nothing to report, no comment is posted.
+CI posts (or updates) a PR comment whenever there is anything to report, **regardless of whether the check fails** (the check can exit 0 with nothing gating, e.g. when every gating break is allowlisted, only experimental changes were found, or only report-only rules matched). The comment groups gating changes by stability tier. Allowlisted stable and Technical Preview changes, experimental changes, and report-only rules each appear in their own non-blocking section. Allowlisted experimental and report-only changes are left out. When there is nothing to report, no new comment is posted. If an earlier comment exists, it's updated to say the latest run found nothing to report. If either check was skipped or didn't finish, the earlier comment is left as it was.
 
 When the change list would make the comment too long for GitHub, the comment still carries what the author has to act on: release note guidance when a breaking change ships, and the note that nothing blocks merge when it does not. Rows that do not fit are left out, with a count of how many. The full list stays in the CI log.
 
