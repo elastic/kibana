@@ -16,6 +16,7 @@ import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import type { AgentClient } from '../../services/agents';
 import type { AgentPolicy } from '../../types';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
+import { updateAgentPolicySpaces } from '../../services/spaces/agent_policy';
 
 import {
   bulkGetAgentPoliciesHandler,
@@ -26,6 +27,7 @@ import {
   GetListAgentPolicyOutputsHandler,
   getAgentPoliciesHandler,
   populateAssignedAgentsCount,
+  updateAgentPolicyHandler,
 } from './handlers';
 
 jest.mock('../../services/agent_policy', () => {
@@ -35,6 +37,7 @@ jest.mock('../../services/agent_policy', () => {
       list: jest.fn(),
       getByIds: jest.fn(),
       copy: jest.fn(),
+      update: jest.fn(),
       listAllOutputsForPolicies: jest.fn(),
       getFullAgentPolicy: jest.fn(),
       getFleetServerPolicy: jest.fn(),
@@ -48,6 +51,10 @@ jest.mock('../../services/agent_policy_create', () => {
     createAgentPolicyWithPackages: jest.fn(),
   };
 });
+
+jest.mock('../../services/spaces/agent_policy', () => ({
+  updateAgentPolicySpaces: jest.fn(),
+}));
 
 jest.mock('../../services/fleet_proxies', () => ({
   listFleetProxies: jest.fn().mockResolvedValue({ items: [] }),
@@ -183,6 +190,53 @@ describe('Agent policy API handlers', () => {
         body: { item: copiedAgentPolicy },
       });
       expect(agentPolicyServiceMock.get).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('updateAgentPolicyHandler', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appContextService.start(createAppContextStartContractMock());
+    });
+
+    afterEach(() => {
+      appContextService.stop();
+    });
+
+    it('should reject updating an agentless agent policy before applying any space change', async () => {
+      agentPolicyServiceMock.get.mockResolvedValue({
+        id: 'agentless-policy',
+        supports_agentless: true,
+      } as AgentPolicy);
+      const request = httpServerMock.createKibanaRequest({
+        params: { agentPolicyId: 'agentless-policy' },
+        body: { name: 'Agentless policy', namespace: 'default', space_ids: ['*'] },
+      });
+
+      await expect(updateAgentPolicyHandler(context, request, response)).rejects.toThrow(
+        /To update managed integrations/
+      );
+      expect(updateAgentPolicySpaces).not.toHaveBeenCalled();
+      expect(agentPolicyServiceMock.update).not.toHaveBeenCalled();
+    });
+
+    it('should reject setting supports_agentless on update before applying any space change', async () => {
+      agentPolicyServiceMock.get.mockResolvedValue({ id: 'policy' } as AgentPolicy);
+      const request = httpServerMock.createKibanaRequest({
+        params: { agentPolicyId: 'policy' },
+        body: {
+          name: 'Policy',
+          namespace: 'default',
+          supports_agentless: true,
+          space_ids: ['*'],
+        },
+      });
+
+      await expect(updateAgentPolicyHandler(context, request, response)).rejects.toThrow(
+        /To update managed integrations/
+      );
+      expect(updateAgentPolicySpaces).not.toHaveBeenCalled();
+      expect(agentPolicyServiceMock.update).not.toHaveBeenCalled();
     });
   });
 
