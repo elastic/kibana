@@ -72,7 +72,7 @@ export const EisSelfManagedEmptyPrompt = ({ onConnectCluster }: EisSelfManagedEm
             ),
             i18n.translate(
               'xpack.searchInferenceEndpoints.eisModelsPage.selfManagedEmpty.readyEndpoints',
-              { defaultMessage: 'Ready-to-use endpoints or customize your own' }
+              { defaultMessage: 'Use ready-to-use endpoints or create custom endpoints' }
             ),
           ].map((feature) => (
             <EuiFlexItem key={feature} grow={false}>
