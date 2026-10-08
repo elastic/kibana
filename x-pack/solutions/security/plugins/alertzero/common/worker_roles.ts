@@ -86,7 +86,13 @@ const COMMON_FEATURES: Record<string, string[]> = {
 const COMMON_INDICES: IndexPrivileges[] = [
   {
     names: ['ai-index-idx-security-investigations'],
-    privileges: ['read', 'index', 'auto_configure'],
+    privileges: ['read', 'view_index_metadata', 'index', 'auto_configure'],
+  },
+  // Agent Builder's own AI index. Agents query and describe AI indices as the worker, and
+  // describing one reads its mappings.
+  {
+    names: ['.ai-index-idx-elastic-index'],
+    privileges: ['read', 'view_index_metadata'],
   },
 ];
 const ENDPOINT_RESPONSE_ACTIONS = [

@@ -122,6 +122,7 @@ Real data is served by default. Keep these in mind when running AlertZero in sha
 - Settings writes (autonomy, schedule, extras) require `alertzero_write`; managed install is requestless, so the AlertZero route is the authorization boundary for those fields.
 - Enable/disable also requires Workflows `workflowsManagement:update` **and** `workflowsManagement:managed:update`. `workflows:all` does **not** include `workflow_update_managed` — that sub-feature must be granted explicitly.
 - Autonomy and enablement are durable per Worker. There is no Watch-owned settings write path.
+- Enabling a Worker is refused while the space has no AI model to run it on: no LLM connector and no Elastic Managed LLM (EIS), or "use only the default connector" is on with no default set. Every Worker then reports `blockingReasons: ['no_model']`, its switch can't be turned on, and `PATCH enabled: true` returns a 400. The stored `enabled` value is never changed, and switching a Worker off or saving its settings still works. Adding any chat connector, or running `node scripts/eis.js` against a running stack, unblocks it.
 
 ### Skills projection
 
@@ -301,7 +302,7 @@ Adding a field to an existing Worker touches only Watch-owned code (Rule Tuning'
 
 The shared Watch page renders the interval control from the presence of `scheduleInterval`, offers only the Worker's `allowedAutonomyLevels` (one level renders as a fixed value), and mounts the registered custom component. Every card also carries a Models row linking to Stack Management → Feature Settings, where models are picked per space for each AlertZero tier; a Worker has no model setting of its own, so don't add one to `extras`. Every edit, including Enabled, changes a draft. Save validates all dirty Workers, then writes Worker by Worker with the revision each draft started from; failed Workers keep draft and error; Discard drops unsaved edits without undoing successful writes.
 
-Hard Worker dependencies (`WORKER_DEPENDENCIES`) are judged client-side against every Worker's saved enabled state, with this page's draft on top, so they work across Watches. Turning off a Worker that an enabled Worker depends on asks for confirmation before the draft changes; turning a Worker on never asks. Each Worker header carries one warning icon listing its reasons. After Save, a Worker the save turned on that is still blocked gets an acknowledge-only notice; settings-only saves get none, and the notice never blocks the save.
+Hard Worker dependencies (`WORKER_DEPENDENCIES`) are judged client-side against every Worker's saved enabled state, with this page's draft on top, so they work across Watches. Turning off a Worker that an enabled Worker depends on asks for confirmation before the draft changes; turning a Worker on never asks. Each Worker header carries one warning icon listing its reasons. After Save, an acknowledge-only notice lists why a saved Worker that is on can't do its work: a missing model after every save, a disabled provider only after the save that turned the Worker on. The notice never blocks the save.
 
 ### Pre-customer state
 
