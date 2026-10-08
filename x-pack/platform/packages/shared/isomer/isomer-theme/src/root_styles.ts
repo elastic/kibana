@@ -11,7 +11,7 @@ import { ISOMER_ROOT_CLASS, isomerDistillery } from './distillery';
 
 const ROOT_SELECTOR = `.${ISOMER_ROOT_CLASS}`;
 
-/** EUI's base text style and color scheme for the `section` every Isomer surface wraps content in. */
+/** EUI's base text style for the `section` every Isomer surface wraps content in; without `data-theme` it inherits the host's color scheme. */
 export const rootStyles = isomerDistillery.createStyleModule(
   'isomerRoot',
   ({ decls, tokens: { color, font } }) => ({
@@ -21,8 +21,7 @@ export const rootStyles = isomerDistillery.createStyleModule(
         color: ${color.text.paragraph};
         font-family: ${font.family.sans};
         font-size: ${font.size.s};
-        line-height: 1.5;
-        color-scheme: light dark;
+        line-height: ${font.lineHeight.s};
       `,
       { auto: false }
     ),

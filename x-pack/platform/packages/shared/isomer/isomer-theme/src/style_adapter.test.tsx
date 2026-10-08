@@ -46,10 +46,17 @@ describe('isomerStyleAdapter', () => {
     expect(css).toContain(".isomer[data-theme='dark']{color-scheme:dark}");
   });
 
+  it('inherits the host color scheme without data-theme', () => {
+    const { css } = renderStyles();
+
+    expect(css).not.toMatch(/\.isomer\{[^}]*color-scheme/);
+  });
+
   it('gives the wrapper EUI base typography', () => {
     const { css } = renderStyles();
 
     expect(css).toMatch(/\.isomer\{[^}]*font-family:var\(--isomer-font-family-sans\)/);
+    expect(css).toMatch(/\.isomer\{[^}]*line-height:var\(--isomer-font-lineHeight-s\)/);
     expect(css).toContain('--isomer-font-family-sans:');
   });
 
