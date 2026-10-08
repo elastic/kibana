@@ -13,7 +13,7 @@ import {
   getTotalIndicesStats,
 } from './indices_stats_helpers';
 
-describe('storage explorer with no APM indices', () => {
+describe('storage explorer with missing APM indices', () => {
   const apmEventClient = {
     indices: {
       transaction: 'traces-apm-missing',
@@ -31,28 +31,40 @@ describe('storage explorer with no APM indices', () => {
     } as unknown as ApmPluginRequestHandlerContext;
   }
 
-  it('returns empty index statistics when APM indices have not been created', async () => {
-    const get = jest.fn().mockResolvedValue({});
-    const stats = jest.fn();
-    const context = contextFor({ indices: { get, stats } });
+  it('returns empty index statistics when all configured APM indices are missing', async () => {
+    const stats = jest.fn().mockRejectedValue(missingIndex);
+    const context = contextFor({ indices: { stats } });
 
     await expect(getTotalIndicesStats({ context, apmEventClient })).resolves.toEqual({
       _all: { total: { store: { size_in_bytes: 0 } } },
       indices: {},
     });
-    expect(stats).not.toHaveBeenCalled();
+    expect(stats).toHaveBeenCalledTimes(3);
   });
 
   it('does not hide unrelated index statistics errors', async () => {
     const securityError = new Error('security_exception: missing monitor privilege');
-    const get = jest.fn().mockResolvedValue({ 'traces-apm-000001': {} });
-    const stats = jest.fn().mockRejectedValue(securityError);
-    const context = contextFor({ indices: { get, stats } });
+    const stats = jest.fn(async ({ index }: { index: string }) => {
+      if (index === 'traces-apm-missing') {
+        throw securityError;
+      }
+      throw missingIndex;
+    });
+    const context = contextFor({ indices: { stats } });
 
     await expect(getTotalIndicesStats({ context, apmEventClient })).rejects.toBe(securityError);
   });
 
-  it('keeps normal index statistics unchanged when indices exist', async () => {
+  it('keeps normal index statistics unchanged when an index pattern resolves', async () => {
+    const onePatternClient = {
+      indices: {
+        transaction: 'traces-apm-*',
+        span: 'traces-apm-*',
+        metric: 'traces-apm-*',
+        error: 'traces-apm-*',
+      },
+    } as unknown as APMEventClient;
+
     const normalStats = {
       _all: { total: { store: { size_in_bytes: 42 } } },
       indices: {
@@ -61,24 +73,24 @@ describe('storage explorer with no APM indices', () => {
         },
       },
     };
-    const get = jest.fn().mockResolvedValue({ 'traces-apm-000001': {} });
     const stats = jest.fn().mockResolvedValue(normalStats);
-    const context = contextFor({ indices: { get, stats } });
+    const context = contextFor({ indices: { stats } });
 
-    await expect(getTotalIndicesStats({ context, apmEventClient })).resolves.toBe(normalStats);
+    await expect(getTotalIndicesStats({ context, apmEventClient: onePatternClient })).resolves.toEqual(
+      normalStats
+    );
     expect(stats).toHaveBeenCalledWith({
-      index: 'traces-apm-000001',
+      index: 'traces-apm-*',
       expand_wildcards: 'all',
     });
   });
 
-  it('returns an empty lifecycle map when APM indices have not been created', async () => {
-    const get = jest.fn().mockResolvedValue({});
-    const explainLifecycle = jest.fn();
-    const context = contextFor({ indices: { get }, ilm: { explainLifecycle } });
+  it('returns an empty lifecycle map when all configured APM indices are missing', async () => {
+    const explainLifecycle = jest.fn().mockRejectedValue(missingIndex);
+    const context = contextFor({ ilm: { explainLifecycle } });
 
     await expect(getIndicesLifecycleStatus({ context, apmEventClient })).resolves.toEqual({});
-    expect(explainLifecycle).not.toHaveBeenCalled();
+    expect(explainLifecycle).toHaveBeenCalledTimes(3);
   });
 
   it('returns empty index information when APM indices have not been created', async () => {
@@ -95,92 +107,110 @@ describe('storage explorer with no APM indices', () => {
 
   it('does not hide unrelated lifecycle errors', async () => {
     const securityError = new Error('security_exception: missing view_index_metadata privilege');
-    const get = jest.fn().mockResolvedValue({ 'traces-apm-000001': {} });
-    const explainLifecycle = jest.fn().mockRejectedValue(securityError);
-    const context = contextFor({ indices: { get }, ilm: { explainLifecycle } });
+    const explainLifecycle = jest.fn(async ({ index }: { index: string }) => {
+      if (index === 'traces-apm-missing') {
+        throw securityError;
+      }
+      throw missingIndex;
+    });
+    const context = contextFor({ ilm: { explainLifecycle } });
 
     await expect(getIndicesLifecycleStatus({ context, apmEventClient })).rejects.toBe(securityError);
   });
 
-  it('keeps lifecycle information for existing APM indices', async () => {
-    const phases = { 'traces-apm-000001': { phase: 'hot' } };
-    const get = jest.fn().mockResolvedValue({ 'traces-apm-000001': {} });
-    const explainLifecycle = jest.fn().mockResolvedValue({ indices: phases });
-    const context = contextFor({ indices: { get }, ilm: { explainLifecycle } });
+  it('keeps lifecycle information for an existing APM index pattern', async () => {
+    const onePatternClient = {
+      indices: {
+        transaction: 'traces-apm-*',
+        span: 'traces-apm-*',
+        metric: 'traces-apm-*',
+        error: 'traces-apm-*',
+      },
+    } as unknown as APMEventClient;
 
-    await expect(getIndicesLifecycleStatus({ context, apmEventClient })).resolves.toEqual(phases);
+    const phases = { 'traces-apm-000001': { phase: 'hot' } };
+    const explainLifecycle = jest.fn().mockResolvedValue({ indices: phases });
+    const context = contextFor({ ilm: { explainLifecycle } });
+
+    await expect(
+      getIndicesLifecycleStatus({ context, apmEventClient: onePatternClient })
+    ).resolves.toEqual(phases);
     expect(explainLifecycle).toHaveBeenCalledWith({
-      index: 'traces-apm-000001',
+      index: 'traces-apm-*',
       filter_path: 'indices.*.phase',
     });
   });
 
-  it('preserves statistics for existing APM indices when only some configured indices are missing', async () => {
+  it('preserves statistics for existing APM indices when only some configured patterns are missing', async () => {
     const partialApmEventClient = {
       indices: {
-        transaction: 'traces-apm-existing',
-        span: 'traces-apm-missing',
-        metric: 'metrics-apm-existing',
-        error: 'logs-apm-missing',
+        transaction: 'traces-apm-existing-*',
+        span: 'traces-apm-missing-*',
+        metric: 'metrics-apm-existing-*',
+        error: 'logs-apm-missing-*',
       },
     } as unknown as APMEventClient;
 
-    const survivingStats = {
-      _all: { total: { store: { size_in_bytes: 42 } } },
-      indices: {
-        'traces-apm-existing': {
-          total: { store: { size_in_bytes: 40 } },
+    const stats = jest.fn(async ({ index }: { index: string }) => {
+      if (index.includes('missing')) {
+        throw missingIndex;
+      }
+      const size = index.startsWith('traces') ? 40 : 2;
+      const concreteIndex = index.replace('*', '000001');
+      return {
+        _all: { total: { store: { size_in_bytes: size } } },
+        indices: {
+          [concreteIndex]: {
+            total: { store: { size_in_bytes: size } },
+          },
         },
-        'metrics-apm-existing': {
-          total: { store: { size_in_bytes: 2 } },
-        },
-      },
-    };
-
-    const get = jest.fn().mockResolvedValue({
-      'traces-apm-existing': {},
-      'metrics-apm-existing': {},
+      };
     });
-    const stats = jest.fn().mockResolvedValue(survivingStats);
-    const context = contextFor({ indices: { get, stats } });
+    const context = contextFor({ indices: { stats } });
 
     await expect(
       getTotalIndicesStats({ context, apmEventClient: partialApmEventClient })
-    ).resolves.toBe(survivingStats);
-    expect(stats).toHaveBeenCalledWith({
-      index: 'traces-apm-existing,metrics-apm-existing',
-      expand_wildcards: 'all',
+    ).resolves.toEqual({
+      _all: { total: { store: { size_in_bytes: 42 } } },
+      indices: {
+        'traces-apm-existing-000001': {
+          total: { store: { size_in_bytes: 40 } },
+        },
+        'metrics-apm-existing-000001': {
+          total: { store: { size_in_bytes: 2 } },
+        },
+      },
     });
   });
 
-  it('preserves lifecycle phases for existing APM indices when only some configured indices are missing', async () => {
+  it('preserves lifecycle phases for existing APM indices when only some configured patterns are missing', async () => {
     const partialApmEventClient = {
       indices: {
-        transaction: 'traces-apm-existing',
-        span: 'traces-apm-missing',
-        metric: 'metrics-apm-existing',
-        error: 'logs-apm-missing',
+        transaction: 'traces-apm-existing-*',
+        span: 'traces-apm-missing-*',
+        metric: 'metrics-apm-existing-*',
+        error: 'logs-apm-missing-*',
       },
     } as unknown as APMEventClient;
 
-    const phases = {
-      'traces-apm-existing': { phase: 'hot' },
-      'metrics-apm-existing': { phase: 'warm' },
-    };
-
-    const get = jest.fn().mockResolvedValue({
-      'traces-apm-existing': {},
-      'metrics-apm-existing': {},
+    const explainLifecycle = jest.fn(async ({ index }: { index: string }) => {
+      if (index.includes('missing')) {
+        throw missingIndex;
+      }
+      const concreteIndex = index.replace('*', '000001');
+      return {
+        indices: {
+          [concreteIndex]: { phase: index.startsWith('traces') ? 'hot' : 'warm' },
+        },
+      };
     });
-    const explainLifecycle = jest.fn().mockResolvedValue({ indices: phases });
-    const context = contextFor({ indices: { get }, ilm: { explainLifecycle } });
+    const context = contextFor({ ilm: { explainLifecycle } });
 
     await expect(
       getIndicesLifecycleStatus({ context, apmEventClient: partialApmEventClient })
-    ).resolves.toEqual(phases);
-    expect(explainLifecycle).toHaveBeenCalledWith({
-      index: 'traces-apm-existing,metrics-apm-existing',
-      filter_path: 'indices.*.phase',
+    ).resolves.toEqual({
+      'traces-apm-existing-000001': { phase: 'hot' },
+      'metrics-apm-existing-000001': { phase: 'warm' },
     });
   });
 
@@ -248,5 +278,4 @@ describe('storage explorer with no APM indices', () => {
       filter_path: 'indices.*.phase',
     });
   });
-
 });
