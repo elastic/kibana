@@ -72,10 +72,10 @@ describe('utils', () => {
       expect(result.metadata.description).toBeUndefined();
     });
 
-    it('passes metadata.builder_type through to SO attributes', () => {
+    it('maps metadata.builder.type to metadata.builder_type in SO attributes', () => {
       const data: CreateRuleData = {
         ...baseCreateData,
-        metadata: { name: 'test-rule', builder_type: 'threshold' },
+        metadata: { name: 'test-rule', builder: { type: 'threshold' } },
       };
 
       const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
@@ -389,13 +389,13 @@ describe('utils', () => {
       ).toThrow(/Cannot update the query on a builder rule/);
     });
 
-    it('clears builder_type when query changes and explicit builder_type: null is sent', () => {
+    it('clears builder_type when query changes and explicit builder: null is sent', () => {
       const existing = createRuleSoAttributes({
         metadata: { name: 'test-rule', builder_type: 'threshold' },
       });
       const updateData: UpdateRuleData = {
         query: { base: 'FROM new-index | LIMIT 1' },
-        metadata: { builder_type: null },
+        metadata: { builder: null },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
@@ -508,13 +508,13 @@ describe('utils', () => {
       expect(result.metadata.builder_type).toBe('threshold');
     });
 
-    it('keeps metadata.builder_type when query is changed with explicit builder_type', () => {
+    it('keeps metadata.builder_type when query is changed with explicit builder metadata', () => {
       const existing = createRuleSoAttributes({
         metadata: { name: 'test-rule', builder_type: 'threshold' },
       });
       const updateData: UpdateRuleData = {
         query: { base: 'FROM new-index | LIMIT 1' },
-        metadata: { builder_type: 'threshold' },
+        metadata: { builder: { type: 'threshold' } },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
@@ -526,12 +526,12 @@ describe('utils', () => {
       expect(result.metadata.builder_type).toBe('threshold');
     });
 
-    it('clears metadata.builder_type when explicitly set to null', () => {
+    it('clears metadata.builder_type when builder metadata is explicitly set to null', () => {
       const existing = createRuleSoAttributes({
         metadata: { name: 'test-rule', builder_type: 'threshold' },
       });
       const updateData: UpdateRuleData = {
-        metadata: { builder_type: null },
+        metadata: { builder: null },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
@@ -814,22 +814,34 @@ describe('utils', () => {
       expect(response.query).toEqual(createData.query);
     });
 
-    it('includes metadata.builder_type in API response', () => {
+    it('maps metadata.builder_type to metadata.builder in the API response', () => {
       const attrs = createRuleSoAttributes({
         metadata: { name: 'test-rule', builder_type: 'threshold' },
       });
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
-      expect(result.metadata.builder_type).toBe('threshold');
+      expect(result.metadata).toEqual({
+        name: 'test-rule',
+        description: undefined,
+        tags: undefined,
+        routing_tags: undefined,
+        builder: { type: 'threshold' },
+      });
     });
 
-    it('sets metadata.builder_type to undefined when absent from SO attributes', () => {
+    it('sets metadata.builder to undefined when builder_type is absent from SO attributes', () => {
       const attrs = createRuleSoAttributes({});
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
-      expect(result.metadata.builder_type).toBeUndefined();
+      expect(result.metadata).toEqual({
+        name: 'test-rule',
+        description: undefined,
+        tags: undefined,
+        routing_tags: undefined,
+        builder: undefined,
+      });
     });
 
     it('exposes the persisted version counter on the rule', () => {

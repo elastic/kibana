@@ -221,6 +221,25 @@ export class SubjectsService {
     return this.deps.claims.claim({ ...params, subjects });
   }
 
+  /** Maintenance: removes every subject and subject claim in the space. */
+  async deleteAllInSpace(spaceId: string): Promise<{ subjects: number; claims: number }> {
+    assertBoundedId(spaceId, 'spaceId');
+    const subjects = await this.deps.documents.deleteAllInSpace(spaceId);
+    const claims = await this.deps.claims.deleteAllInSpace(spaceId);
+    return { subjects, claims };
+  }
+
+  /** Maintenance: removes the subject claims the given investigations hold in the space. */
+  async deleteClaimsByConversationIds(conversationIds: string[], spaceId: string): Promise<number> {
+    assertBoundedId(spaceId, 'spaceId');
+    return this.deps.claims.deleteByConversationIds(conversationIds, spaceId);
+  }
+
+  /** Maintenance: removes every subject claim in every space. Callers authorize this themselves. */
+  async deleteAllClaimsAcrossSpaces(): Promise<number> {
+    return this.deps.claims.deleteAllAcrossSpaces();
+  }
+
   private async assertSubjectCeiling(
     conversationId: string,
     spaceId: string,
