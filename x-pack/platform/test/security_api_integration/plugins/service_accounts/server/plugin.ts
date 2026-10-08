@@ -79,7 +79,10 @@ export class ServiceAccountsTestPlugin implements Plugin<void, void, SetupDepend
               schema.literal('execute'),
             ]),
             serviceAccountId: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
-            waitMs: schema.number({ min: 0, max: 20000, defaultValue: 0 }),
+            // Long enough to outlive the shortest token each backend issues, so a test can check
+            // renewal. UIAM exchange tokens live at least one minute (PT1M, plus 2s of clock skew),
+            // and the stateful config set expires Elasticsearch tokens after 15s.
+            waitMs: schema.number({ min: 0, max: 70000, defaultValue: 0 }),
             action: schema.oneOf([schema.literal('authenticate'), schema.literal('read_role')], {
               defaultValue: 'authenticate',
             }),
@@ -123,8 +126,10 @@ export class ServiceAccountsTestPlugin implements Plugin<void, void, SetupDepend
               const initialAuthorization = fakeRequest.headers.authorization;
               const principal = start.security.authc.getPrincipal(fakeRequest);
               const initial = await client.security.authenticate();
-              await client.cluster.health();
-              if (action === 'read_role') await client.security.getRole({ name: 'superuser' });
+              // Both calls are available in serverless mode, unlike cluster health or a lookup of
+              // the `superuser` role. Listing roles needs `read_security`.
+              await client.info();
+              if (action === 'read_role') await client.security.getRole();
               if (revoke === 'unbind') await api.unbindWorkload(request, workload);
               if (revoke === 'disable' || revoke === 'delete_token') {
                 const [namespace, name] = initial.username.split('/');
