@@ -214,26 +214,42 @@ export interface PositionedEntity {
   y: number;
 }
 
-/** Keeps dependency layers stable, with a separate row for entities without known relationships. */
-export const positionDetectionEntities = (
-  model: DetectionModel,
-  preferredColumns = 3
-): { nodes: PositionedEntity[]; width: number; height: number } => {
-  const connected = new Set(model.relationships.flatMap((edge) => [edge.source, edge.target]));
-  const depth = new Map(model.entities.map((entity) => [entity.id, 0]));
+export interface DetectionIsland {
+  namespace: string;
+  entityIds: string[];
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface DetectionTopologyLayout {
+  nodes: PositionedEntity[];
+  islands: DetectionIsland[];
+  width: number;
+  height: number;
+}
+
+const positionNamespaceEntities = (
+  entities: DetectionEntity[],
+  relationships: DetectionRelationship[],
+  preferredColumns: number
+): DetectionTopologyLayout => {
+  const connected = new Set(relationships.flatMap((edge) => [edge.source, edge.target]));
+  const depth = new Map(entities.map((entity) => [entity.id, 0]));
   const indegree = new Map(
-    model.entities.map((entity) => [
+    entities.map((entity) => [
       entity.id,
-      model.relationships.filter((edge) => edge.target === entity.id).length,
+      relationships.filter((edge) => edge.target === entity.id).length,
     ])
   );
-  const queue = model.entities
+  const queue = entities
     .filter((entity) => indegree.get(entity.id) === 0)
     .map((entity) => entity.id);
   while (queue.length) {
     const id = queue.shift();
     if (!id) continue;
-    for (const edge of model.relationships.filter((relationship) => relationship.source === id)) {
+    for (const edge of relationships.filter((relationship) => relationship.source === id)) {
       depth.set(edge.target, Math.max(depth.get(edge.target) ?? 0, (depth.get(id) ?? 0) + 1));
       const remaining = (indegree.get(edge.target) ?? 1) - 1;
       indegree.set(edge.target, remaining);
@@ -241,34 +257,116 @@ export const positionDetectionEntities = (
     }
   }
   const layers = new Map<number, DetectionEntity[]>();
-  for (const entity of model.entities.filter((item) => connected.has(item.id))) {
+  for (const entity of entities.filter((item) => connected.has(item.id))) {
     const layer = Math.min(depth.get(entity.id) ?? 0, 4);
     layers.set(layer, [...(layers.get(layer) ?? []), entity]);
   }
-  const columns = Math.max(3, layers.size, preferredColumns);
-  const width = columns * 240;
   const rows = Math.max(1, ...[...layers.values()].map((layer) => layer.length));
-  const connectedHeight = rows * 96 + 70;
   const nodes = [...layers.entries()].flatMap(([layer, items]) =>
     items.map((entity, index) => ({
       entity,
-      x: 28 + layer * 240,
-      y: 54 + index * 96 + (rows - items.length) * 48,
+      x: 28 + layer * 232,
+      y: 76 + index * 96 + (rows - items.length) * 48,
     }))
   );
-  const isolated = model.entities.filter((entity) => !connected.has(entity.id));
+  const isolated = entities.filter((entity) => !connected.has(entity.id));
+  const columns = Math.max(1, Math.min(preferredColumns, Math.ceil(Math.sqrt(isolated.length))));
+  const isolatedTop = nodes.length ? Math.max(...nodes.map((node) => node.y)) + 112 : 76;
   nodes.push(
     ...isolated.map((entity, index) => ({
       entity,
-      x: 28 + (index % columns) * 240,
-      y: connectedHeight + 28 + Math.floor(index / columns) * 96,
+      x: 28 + (index % columns) * 232,
+      y: isolatedTop + Math.floor(index / columns) * 96,
     }))
   );
   return {
     nodes,
-    width,
-    height: Math.max(300, connectedHeight + Math.ceil(isolated.length / columns) * 96 + 38),
+    islands: [],
+    width: Math.max(...nodes.map((node) => node.x + 184)) + 28,
+    height: Math.max(...nodes.map((node) => node.y + 64)) + 28,
   };
+};
+
+/** Packs namespace islands independently, preserving learned dependencies between their services. */
+export const positionDetectionEntities = (
+  model: DetectionModel,
+  preferredColumns = 3,
+  viewportAspectRatio = 1.6
+): DetectionTopologyLayout => {
+  if (!model.entities.length) return { nodes: [], islands: [], width: 300, height: 200 };
+  const namespaces = new Map<string, DetectionEntity[]>();
+  for (const entity of model.entities) {
+    const group = namespaces.get(entity.namespace) ?? [];
+    group.push(entity);
+    namespaces.set(entity.namespace, group);
+  }
+  const groups = [...namespaces.entries()]
+    .map(([namespace, entities]) => {
+      const ids = new Set(entities.map((entity) => entity.id));
+      const layout = positionNamespaceEntities(
+        [...entities].sort(
+          (left, right) => left.label.localeCompare(right.label) || left.id.localeCompare(right.id)
+        ),
+        model.relationships.filter((edge) => ids.has(edge.source) && ids.has(edge.target)),
+        preferredColumns
+      );
+      return { namespace, ...layout };
+    })
+    .sort(
+      (left, right) => right.height - left.height || left.namespace.localeCompare(right.namespace)
+    );
+  const gap = 64;
+  const widest = Math.max(...groups.map((group) => group.width));
+  const totalWidth = groups.reduce((sum, group) => sum + group.width + gap, -gap);
+  const aspectRatio =
+    Number.isFinite(viewportAspectRatio) && viewportAspectRatio > 0 ? viewportAspectRatio : 1.6;
+  let best: DetectionTopologyLayout | undefined;
+  let bestScale = 0;
+  // Compare compact arrangements against the actual viewport rather than leaving a long strip of islands.
+  for (let attempt = 0; attempt <= 16; attempt++) {
+    const limit = widest + ((totalWidth - widest) * attempt) / 16;
+    const islands: DetectionIsland[] = [];
+    const nodes: PositionedEntity[] = [];
+    for (const group of groups) {
+      const candidates = [0, ...islands.map((island) => island.x + island.width + gap)];
+      const placement = candidates
+        .filter((x) => x + group.width <= limit)
+        .map((x) => ({
+          x,
+          y: Math.max(
+            0,
+            ...islands
+              .filter(
+                (island) => x < island.x + island.width + gap && x + group.width + gap > island.x
+              )
+              .map((island) => island.y + island.height + gap)
+          ),
+        }))
+        .sort((left, right) => left.y - right.y || left.x - right.x)[0];
+      islands.push({
+        namespace: group.namespace,
+        entityIds: group.nodes.map((node) => node.entity.id),
+        ...placement,
+        width: group.width,
+        height: group.height,
+      });
+      nodes.push(
+        ...group.nodes.map((node) => ({
+          ...node,
+          x: node.x + placement.x,
+          y: node.y + placement.y,
+        }))
+      );
+    }
+    const width = Math.max(...islands.map((island) => island.x + island.width));
+    const height = Math.max(...islands.map((island) => island.y + island.height));
+    const scale = Math.min(aspectRatio / (width + 96), 1 / (height + 96));
+    if (scale > bestScale) {
+      bestScale = scale;
+      best = { nodes, islands, width, height };
+    }
+  }
+  return best ?? { nodes: [], islands: [], width: 300, height: 200 };
 };
 
 export const aggregateOccurrences = (

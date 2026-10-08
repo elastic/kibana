@@ -19,6 +19,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { Feature } from '@kbn/significant-events-schema';
 import { positionDetectionEntities, type DetectionModel } from './model';
 import { labels } from './translations';
@@ -97,7 +98,10 @@ export const DetectionTopology = ({
   }, [camera]);
   useEffect(() => cancelCameraAnimation, [cancelCameraAnimation]);
   const columns = Math.max(3, Math.min(8, Math.floor(viewport.width / 220)));
-  const layout = useMemo(() => positionDetectionEntities(model, columns), [model, columns]);
+  const layout = useMemo(
+    () => positionDetectionEntities(model, columns, viewport.width / viewport.height),
+    [model, columns, viewport.width, viewport.height]
+  );
   const neighbors = new Set([
     ...selection,
     ...model.relationships
@@ -113,10 +117,10 @@ export const DetectionTopology = ({
         ? layout.nodes.filter((node) => ids.includes(node.entity.id))
         : layout.nodes;
       if (!nodes.length) return { zoom: 1, x: 0, y: 0 };
-      const left = Math.min(...nodes.map((node) => node.x));
-      const right = Math.max(...nodes.map((node) => node.x + 184));
-      const top = Math.min(...nodes.map((node) => node.y));
-      const bottom = Math.max(...nodes.map((node) => node.y + 64));
+      const left = ids.length ? Math.min(...nodes.map((node) => node.x)) : 0;
+      const right = ids.length ? Math.max(...nodes.map((node) => node.x + 184)) : layout.width;
+      const top = ids.length ? Math.min(...nodes.map((node) => node.y)) : 0;
+      const bottom = ids.length ? Math.max(...nodes.map((node) => node.y + 64)) : layout.height;
       return {
         zoom: Math.max(
           MIN_ZOOM,
@@ -381,6 +385,115 @@ export const DetectionTopology = ({
               <path d="M 0 0 L 10 5 L 0 10 z" fill={euiTheme.colors.primary} />
             </marker>
           </defs>
+          {layout.islands.map((island) => {
+            const namespace = island.namespace || labels.unknownNamespace;
+            const related = !selection.size || island.entityIds.some((id) => neighbors.has(id));
+            const accent =
+              euiTheme.colors.vis[
+                `euiColorVis${
+                  [...namespace].reduce(
+                    (hash, letter) => (hash * 31 + letter.charCodeAt(0)) % 65536,
+                    0
+                  ) % 8
+                }` as keyof typeof euiTheme.colors.vis
+              ];
+            const namespaceCharacters = Math.max(8, Math.floor((island.width - 140) / 9));
+            const serviceCount = i18n.translate(
+              'xpack.significantEventsApp.detection.islandServices',
+              {
+                defaultMessage: '{count, plural, one {# service} other {# services}}',
+                values: { count: island.entityIds.length },
+              }
+            );
+            const focusLabel = i18n.translate(
+              'xpack.significantEventsApp.detection.focusNamespace',
+              {
+                defaultMessage: 'Focus namespace {namespace}',
+                values: { namespace },
+              }
+            );
+            const focusIsland = (): void => {
+              cancelCameraAnimation();
+              setCamera(fitCamera(island.entityIds));
+            };
+            return (
+              <g
+                key={island.namespace}
+                transform={`translate(${island.x}, ${island.y})`}
+                opacity={focus && !related ? 0.3 : 1}
+                data-test-subj="detectionTopologyNamespaceIsland"
+              >
+                <rect
+                  width={island.width}
+                  height={island.height}
+                  rx="22"
+                  fill={euiTheme.colors.backgroundBasePlain}
+                  fillOpacity="0.7"
+                  stroke={accent}
+                  strokeOpacity="0.3"
+                />
+                <rect
+                  width={island.width}
+                  height={island.height}
+                  rx="22"
+                  fill={accent}
+                  fillOpacity="0.025"
+                />
+                <path d={`M 24 54 H ${island.width - 24}`} stroke={accent} strokeOpacity="0.16" />
+                <g
+                  role="button"
+                  tabIndex={0}
+                  aria-label={focusLabel}
+                  onClick={focusIsland}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      focusIsland();
+                    }
+                  }}
+                  css={css`
+                    cursor: pointer;
+                    &:focus-visible {
+                      outline: 2px solid ${euiTheme.colors.primary};
+                    }
+                  `}
+                >
+                  <title>{focusLabel}</title>
+                  <rect
+                    x="16"
+                    y="12"
+                    width={island.width - 32}
+                    height="34"
+                    rx="8"
+                    fill="transparent"
+                  />
+                  <circle cx="28" cy="31" r="4" fill={accent} />
+                  <text
+                    x="42"
+                    y="36"
+                    fontSize="16"
+                    fontWeight="600"
+                    fill={euiTheme.colors.text}
+                    fontFamily={euiTheme.font.family}
+                  >
+                    {namespace.length > namespaceCharacters
+                      ? `${namespace.slice(0, namespaceCharacters - 1)}…`
+                      : namespace}
+                  </text>
+                  <text
+                    x={island.width - 28}
+                    y="35"
+                    textAnchor="end"
+                    fontSize="11"
+                    fill={euiTheme.colors.textSubdued}
+                    fontFamily={euiTheme.font.family}
+                  >
+                    {serviceCount}
+                  </text>
+                </g>
+              </g>
+            );
+          })}
           {model.relationships.map((edge) => {
             const source = positions.get(edge.source);
             const target = positions.get(edge.target);
@@ -444,7 +557,9 @@ export const DetectionTopology = ({
                 key={entity.id}
                 role="button"
                 tabIndex={0}
-                aria-label={`${entity.label}, ${activeRules} ${labels.nodeRules}, ${openEvents} ${labels.nodeEvents}`}
+                aria-label={`${entity.label}, ${
+                  entity.namespace || labels.unknownNamespace
+                }, ${activeRules} ${labels.nodeRules}, ${openEvents} ${labels.nodeEvents}`}
                 aria-pressed={selected}
                 transform={`translate(${x}, ${y})`}
                 onClick={() => {
@@ -472,7 +587,7 @@ export const DetectionTopology = ({
                   }
                 `}
               >
-                <title>{entity.label}</title>
+                <title>{`${entity.label} · ${entity.namespace || labels.unknownNamespace}`}</title>
                 {selected && (
                   <rect
                     x="-5"

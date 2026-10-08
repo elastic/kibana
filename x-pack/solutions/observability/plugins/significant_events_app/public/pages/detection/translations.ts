@@ -184,8 +184,12 @@ export const labels = {
   topology: i18n.translate('xpack.significantEventsApp.detection.topology', {
     defaultMessage: 'Your system, connected',
   }),
+  unknownNamespace: i18n.translate('xpack.significantEventsApp.detection.unknownNamespace', {
+    defaultMessage: 'No namespace',
+  }),
   topologyDescription: i18n.translate('xpack.significantEventsApp.detection.topologyDescription', {
-    defaultMessage: 'Learned from your data. Select a service to explore.',
+    defaultMessage:
+      'Services are grouped into namespace islands. Select a service to explore, or select an island heading to focus.',
   }),
   dependency: i18n.translate('xpack.significantEventsApp.detection.dependency', {
     defaultMessage: 'Learned dependency',
