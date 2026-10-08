@@ -15,7 +15,6 @@ import { AlertZeroPlugin } from './plugin';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { registerOwner } from './managed_workflows/register_owner';
 import { registerRoutes } from './routes/register_routes';
-import { WorkersService } from './services/workers/workers_service';
 import { ensureAgentSafe, registerAgentType } from './agent';
 import { registerAlertZeroInferenceFeatures } from './inference_features';
 
@@ -40,8 +39,6 @@ jest.mock('./agent', () => ({
 jest.mock('./routes/register_routes', () => ({
   registerRoutes: jest.fn(),
 }));
-
-jest.mock('./services/workers/workers_service');
 
 const createConfig = (overrides: Partial<AlertZeroConfig> = {}): AlertZeroConfig => ({
   enabled: false,
@@ -453,147 +450,5 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         })
       );
     });
-  });
-});
-
-describe('AlertZeroPlugin Alert Triage Worker start contract', () => {
-  const isWorkerEnabled = jest.fn();
-  const update = jest.fn();
-  const request = {} as never;
-
-  const startPlugin = ({
-    alertZeroEnabledInSpace = true,
-    hasAllRequested = true,
-    hasManageSecurity = true,
-  }: {
-    alertZeroEnabledInSpace?: boolean;
-    hasAllRequested?: boolean;
-    hasManageSecurity?: boolean;
-  } = {}) => {
-    const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
-    const coreStart = coreMock.createStart();
-    // The plugin only builds its Workers service when service accounts are enabled.
-    jest.spyOn(coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
-    coreStart.uiSettings.asScopedToClient.mockReturnValue({
-      get: jest.fn().mockResolvedValue(alertZeroEnabledInSpace),
-    } as never);
-    // The Workers update route also requires the manage_security cluster privilege.
-    const hasPrivileges = jest.fn().mockResolvedValue({ has_all_requested: hasManageSecurity });
-    jest.spyOn(coreStart.elasticsearch.client, 'asScoped').mockReturnValue({
-      asCurrentUser: { security: { hasPrivileges } },
-    } as never);
-    const checkPrivileges = jest.fn().mockResolvedValue({ hasAllRequested });
-    const security = {
-      authz: {
-        actions: { api: { get: (privilege: string) => `api:${privilege}` } },
-        checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(checkPrivileges),
-      },
-    };
-    return {
-      checkPrivileges,
-      contract: plugin.start(coreStart, {
-        security,
-        spaces: undefined,
-        workflowsExtensions: { initManagedWorkflowsClient: jest.fn() },
-        agentBuilder: { agents: { ensure: jest.fn() } },
-        proposals: { getProposalsService: jest.fn().mockReturnValue({}) },
-        agenticInvestigations: { getImpactClient: jest.fn() },
-        inference: {},
-      } as never),
-    };
-  };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    (WorkersService as jest.Mock).mockImplementation(() => ({ isWorkerEnabled, update }));
-    update.mockResolvedValue({ outcome: 'updated', response: {} });
-  });
-
-  it('reports the worker as not enabled when AlertZero is off for the space', async () => {
-    isWorkerEnabled.mockResolvedValue(true);
-    const { contract } = startPlugin({ alertZeroEnabledInSpace: false });
-
-    await expect(contract.isAlertTriageWorkerEnabled(request)).resolves.toBe(false);
-  });
-
-  it('reports the saved enabled state of the worker', async () => {
-    isWorkerEnabled.mockResolvedValue(true);
-    const { contract } = startPlugin();
-
-    await expect(contract.isAlertTriageWorkerEnabled(request)).resolves.toBe(true);
-  });
-
-  // Reporting "off" for an unreadable state would let a running Worker go unreported.
-  it('rejects instead of reporting the worker as off when its state cannot be read', async () => {
-    isWorkerEnabled.mockRejectedValue(new Error('status unavailable'));
-    const { contract } = startPlugin();
-
-    await expect(contract.isAlertTriageWorkerEnabled(request)).rejects.toThrow(
-      'status unavailable'
-    );
-  });
-
-  it('disables an enabled worker for a caller with the route privileges', async () => {
-    isWorkerEnabled.mockResolvedValue(true);
-    const { contract, checkPrivileges } = startPlugin();
-
-    await expect(contract.disableAlertTriageWorker(request)).resolves.toEqual({ disabled: true });
-
-    expect(checkPrivileges).toHaveBeenCalledWith({
-      kibana: expect.arrayContaining([`api:${ALERTZERO_API_PRIVILEGE_WRITE}`]),
-    });
-    expect(update).toHaveBeenCalledWith(expect.any(String), { enabled: false }, 'default', request);
-  });
-
-  // This path bypasses the Workers update route, so the route's privilege check must be
-  // repeated here or anyone who can edit alert analysis settings could switch workers off.
-  it('leaves the worker on when the caller lacks the route privileges', async () => {
-    isWorkerEnabled.mockResolvedValue(true);
-    const { contract } = startPlugin({ hasAllRequested: false });
-
-    await expect(contract.disableAlertTriageWorker(request)).resolves.toEqual({ disabled: false });
-
-    expect(update).not.toHaveBeenCalled();
-  });
-
-  // The Workers update route returns 403 without manage_security, which no Kibana privilege
-  // can express, so the settings PUT must not be a way around it.
-  it('leaves the worker on when the caller lacks the manage_security cluster privilege', async () => {
-    isWorkerEnabled.mockResolvedValue(true);
-    const { contract } = startPlugin({ hasManageSecurity: false });
-
-    await expect(contract.disableAlertTriageWorker(request)).resolves.toEqual({ disabled: false });
-
-    expect(update).not.toHaveBeenCalled();
-  });
-
-  it('does nothing when the worker is already off', async () => {
-    isWorkerEnabled.mockResolvedValue(false);
-    const { contract } = startPlugin();
-
-    await expect(contract.disableAlertTriageWorker(request)).resolves.toEqual({ disabled: true });
-
-    expect(update).not.toHaveBeenCalled();
-  });
-
-  // The caller may lack permission to edit some attached ML rules; the settings page must be
-  // able to tell them the Worker is off but still referenced by those rules.
-  it('reports how many rules still carry the action when the disable skipped some', async () => {
-    isWorkerEnabled.mockResolvedValue(true);
-    update.mockResolvedValue({ outcome: 'updated', response: { skippedRuleCount: 3 } });
-    const { contract } = startPlugin();
-
-    await expect(contract.disableAlertTriageWorker(request)).resolves.toEqual({
-      disabled: true,
-      skippedRuleCount: 3,
-    });
-  });
-
-  it('reports the worker as still on when the update fails', async () => {
-    isWorkerEnabled.mockResolvedValue(true);
-    update.mockResolvedValue({ outcome: 'failed' });
-    const { contract } = startPlugin();
-
-    await expect(contract.disableAlertTriageWorker(request)).resolves.toEqual({ disabled: false });
   });
 });

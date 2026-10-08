@@ -241,20 +241,6 @@ export class WorkersService {
     return this.projectWorker(registration, spaceId, request, agentLookup);
   }
 
-  /** Cheap enabled-state read (no skills, executions or preflight), for callers outside the Workers API. */
-  async isWorkerEnabled(workerId: string, spaceId: string): Promise<boolean> {
-    const registration = workerRegistry.get(workerId);
-    if (!registration) return false;
-    const managedWorkflows = await this.requireManagedWorkflows();
-    const status = await managedWorkflows.getWorkflowStatus(registration.id, {
-      spaceId,
-      workflowIdSuffix: spaceId,
-    });
-    // An unmanaged document squatting on the Worker's id is not the Worker, and `update` must
-    // not be pointed at it.
-    return Boolean(status.installed && status.status !== 'not_managed' && status.enabled);
-  }
-
   async update(
     workerId: string,
     patch: UpdateWorkerRequestBody,

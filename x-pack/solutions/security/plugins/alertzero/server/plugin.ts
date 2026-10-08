@@ -18,11 +18,6 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentService } from '@kbn/fleet-plugin/server';
 import { SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED } from '@kbn/management-settings-ids';
-import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
-import {
-  ALERTZERO_ENABLED_SETTING_ID,
-  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
-} from '@kbn/alertzero-common';
 import { getSubscriptionAvailability } from '../common/availability';
 import {
   ALERTZERO_API_PRIVILEGE_READ,
@@ -61,11 +56,7 @@ import { ScanFailuresService } from './services/scan_failures/scan_failures_serv
 import { ActionsService } from './services/actions/actions_service';
 import type { HuntServices } from './services/watches/hunt';
 import { listActionsTool } from './agent_builder_tools/list_actions_tool';
-import {
-  assertAlertZeroEnabled,
-  createAssertAlertZeroAccess,
-} from './agent_builder_tools/assert_alertzero_access';
-import { hasManageSecurityPrivilege } from './routes/workers/has_manage_security';
+import { createAssertAlertZeroAccess } from './agent_builder_tools/assert_alertzero_access';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 import { createActionDiscoverySkill } from './agent_builder/skills/action_discovery';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
@@ -260,17 +251,11 @@ export class AlertZeroPlugin
     this.proposals = plugins.proposals;
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;
 
-    const alertTriageWorkerContract = {
-      registerAlertTriageAttachmentServiceProvider:
-        this.registerAlertTriageAttachmentServiceProvider,
-      isAlertTriageWorkerEnabled: (request: KibanaRequest) =>
-        this.isAlertTriageWorkerEnabled(core, request),
-      disableAlertTriageWorker: (request: KibanaRequest) =>
-        this.disableAlertTriageWorker(core, plugins.security, request),
-    };
-
     if (!this.config.enabled) {
-      return alertTriageWorkerContract;
+      return {
+        registerAlertTriageAttachmentServiceProvider:
+          this.registerAlertTriageAttachmentServiceProvider,
+      };
     }
 
     this.serviceAccountsEnabled = core.security.serviceAccounts.isEnabled();
@@ -280,7 +265,10 @@ export class AlertZeroPlugin
     // Service accounts are required the same way: with the flag off the plugin stays mounted
     // for the unavailable screen and does not install or schedule workers.
     if (!agentBuilder || !proposals || !agenticInvestigations || !this.serviceAccountsEnabled) {
-      return alertTriageWorkerContract;
+      return {
+        registerAlertTriageAttachmentServiceProvider:
+          this.registerAlertTriageAttachmentServiceProvider,
+      };
     }
     void ensureAgentSafe({ agentBuilder, spaceId: DEFAULT_SPACE_ID, logger: this.logger });
 
@@ -355,92 +343,10 @@ export class AlertZeroPlugin
       getSearchInferenceEndpoints: () => plugins.searchInferenceEndpoints,
     };
 
-    return alertTriageWorkerContract;
-  }
-
-  private async isAlertTriageWorkerEnabled(
-    core: CoreStart,
-    request: KibanaRequest
-  ): Promise<boolean> {
-    // Without the service (plugin disabled or its dependencies missing) there is no Worker.
-    if (!this.workersService) return false;
-    const uiSettingsClient = core.uiSettings.asScopedToClient(
-      core.savedObjects.getScopedClient(request)
-    );
-    // AlertZero off for the space is a real "no Worker"; any other failure propagates so the
-    // caller cannot mistake an unreadable state for a Worker that is off.
-    if (!(await uiSettingsClient.get<boolean>(ALERTZERO_ENABLED_SETTING_ID))) return false;
-    return this.workersService.isWorkerEnabled(
-      SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
-      this.getSpaceId(request)
-    );
-  }
-
-  private async disableAlertTriageWorker(
-    core: CoreStart,
-    security: AlertZeroStartDependencies['security'],
-    request: KibanaRequest
-  ): Promise<{ disabled: boolean; skippedRuleCount?: number }> {
-    if (!this.workersService) return { disabled: true };
-    try {
-      await assertAlertZeroEnabled(core, request);
-      const spaceId = this.getSpaceId(request);
-      if (
-        !(await this.workersService.isWorkerEnabled(
-          SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
-          spaceId
-        ))
-      ) {
-        return { disabled: true };
-      }
-
-      // Mirrors the Workers update route, which this call bypasses: AlertZero write access,
-      // update access to managed workflows, and the manage_security cluster privilege.
-      if (!security) return { disabled: false };
-      const { actions } = security.authz;
-      const { hasAllRequested } = await security.authz.checkPrivilegesDynamicallyWithRequest(
-        request
-      )({
-        kibana: [
-          ALERTZERO_API_PRIVILEGE_WRITE,
-          ...WorkflowsManagementOperationPrivileges.updateManaged,
-        ].map((privilege) => actions.api.get(privilege)),
-      });
-      if (!hasAllRequested) {
-        this.logger.debug(
-          'Not disabling the Alert Triage Worker: caller lacks the required privileges'
-        );
-        return { disabled: false };
-      }
-      // Not expressible as a Kibana privilege, so the route checks it against Elasticsearch.
-      if (
-        !(await hasManageSecurityPrivilege(
-          core.elasticsearch.client.asScoped(request).asCurrentUser
-        ))
-      ) {
-        this.logger.debug(
-          'Not disabling the Alert Triage Worker: caller lacks the manage_security cluster privilege'
-        );
-        return { disabled: false };
-      }
-
-      const result = await this.workersService.update(
-        SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
-        { enabled: false },
-        spaceId,
-        request
-      );
-      if (result.outcome !== 'updated') return { disabled: false };
-      const { skippedRuleCount } = result.response;
-      return { disabled: true, ...(skippedRuleCount ? { skippedRuleCount } : {}) };
-    } catch (error) {
-      this.logger.warn(
-        `Failed to disable the Alert Triage Worker: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-      return { disabled: false };
-    }
+    return {
+      registerAlertTriageAttachmentServiceProvider:
+        this.registerAlertTriageAttachmentServiceProvider,
+    };
   }
 
   private requireStarted<T>(value: T | undefined, name: string): T {

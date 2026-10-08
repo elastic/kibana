@@ -48,7 +48,7 @@ export const saveWorkerRulesLeftAttachedMessage = (count: number): string =>
     'xpack.securitySolution.alertAnalysisWorkflow.saveWorkerRulesLeftAttachedMessage',
     {
       defaultMessage:
-        'The Alert Triage Worker was turned off, but {count, plural, one {# machine learning rule still has} other {# machine learning rules still have}} its action attached because you do not have the machine learning permissions needed to edit {count, plural, one {it} other {them}}. Someone with machine learning permissions must turn the Worker off again on the AlertZero Watches page to detach {count, plural, one {it} other {them}}.',
+        'The Alert Triage Worker was turned off, but {count, plural, one {# machine learning rule still has} other {# machine learning rules still have}} its action attached because you do not have the machine learning permissions needed to edit {count, plural, one {it} other {them}}. To detach {count, plural, one {it} other {them}}, turn alert analysis back on, then have someone with machine learning permissions turn the Worker on and off again on the AlertZero Watches page.',
       values: { count },
     }
   );
@@ -58,6 +58,22 @@ export const SAVE_WORKER_STILL_ENABLED_MESSAGE = i18n.translate(
   {
     defaultMessage:
       'The Alert Triage Worker could not be turned off and cannot triage alerts while alert analysis is off. Turn it off on the AlertZero Watches page.',
+  }
+);
+
+export const SAVE_WORKER_STATE_UNKNOWN_MESSAGE = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.saveWorkerStateUnknownMessage',
+  {
+    defaultMessage:
+      'The Alert Triage Worker state could not be checked. If it is on, it cannot triage alerts while alert analysis is off. Check it on the AlertZero Watches page.',
+  }
+);
+
+export const SAVE_ERROR_WORKER_DISABLED_MESSAGE = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.saveErrorWorkerDisabledMessage',
+  {
+    defaultMessage:
+      'The Alert Triage Worker was turned off, but the settings were not saved, so alert analysis is still on. You can turn the Worker back on from the AlertZero Watches page.',
   }
 );
 

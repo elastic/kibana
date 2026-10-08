@@ -138,19 +138,6 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
     });
   });
 
-  const useAlertzero = (alertzero: {
-    isAlertTriageWorkerEnabled?: jest.Mock;
-    disableAlertTriageWorker?: jest.Mock;
-  }) => {
-    const workflowsExtensions = workflowsExtensionsMock.createStart();
-    workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managedWorkflowsClient);
-    getStartServices.mockResolvedValue([
-      coreStart,
-      { workflowsExtensions, alertzero } as unknown as StartPlugins,
-      undefined,
-    ] as unknown as Awaited<ReturnType<StartServicesAccessor<StartPlugins>>>);
-  };
-
   describe('GET', () => {
     const mockSettings = () => {
       uiSettingsClient.get
@@ -185,39 +172,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
             tagPrefix: 'alert-analysis',
           },
           workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
-          alertTriageWorkerEnabled: false,
         },
-      });
-    });
-
-    it.each([true, false])(
-      'reports whether the Alert Triage Worker is enabled (%s)',
-      async (workerEnabled) => {
-        mockSettings();
-        useAlertzero({ isAlertTriageWorkerEnabled: jest.fn().mockResolvedValue(workerEnabled) });
-
-        const handler = router.versioned.getRoute('get', ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE)
-          .versions['1'].handler;
-
-        await handler(createContext(), createRequest(), mockResponse);
-
-        expect(mockResponse.ok).toHaveBeenCalledWith({
-          body: expect.objectContaining({ alertTriageWorkerEnabled: workerEnabled }),
-        });
-      }
-    );
-
-    it('omits the Worker state when it cannot be read, without failing the page', async () => {
-      mockSettings();
-      useAlertzero({ isAlertTriageWorkerEnabled: jest.fn().mockRejectedValue(new Error('boom')) });
-
-      const handler = router.versioned.getRoute('get', ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE)
-        .versions['1'].handler;
-
-      await handler(createContext(), createRequest(), mockResponse);
-
-      expect(mockResponse.ok).toHaveBeenCalledWith({
-        body: { settings: expect.any(Object), workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID },
       });
     });
 
@@ -285,129 +240,6 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
           settings,
           workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
         },
-      });
-    });
-
-    // The Alert Triage Worker only works while alert analysis is on, so turning analysis off
-    // must not leave it running without being able to triage.
-    describe('turning alert analysis off', () => {
-      const off = { ...settings, workflowEnabled: false };
-      const putHandler = () =>
-        router.versioned.getRoute('put', ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE).versions['1']
-          .handler;
-
-      it('disables a running Alert Triage Worker after saving and reports it', async () => {
-        const disableAlertTriageWorker = jest.fn().mockResolvedValue({ disabled: true });
-        useAlertzero({
-          isAlertTriageWorkerEnabled: jest.fn().mockResolvedValue(true),
-          disableAlertTriageWorker,
-        });
-
-        await putHandler()(createContext(), createRequest(off), mockResponse);
-
-        expect(disableAlertTriageWorker).toHaveBeenCalledTimes(1);
-        expect(uiSettingsClient.setMany.mock.invocationCallOrder[0]).toBeLessThan(
-          disableAlertTriageWorker.mock.invocationCallOrder[0]
-        );
-        expect(mockResponse.ok).toHaveBeenCalledWith({
-          body: expect.objectContaining({ alertTriageWorkerDisabled: true }),
-        });
-      });
-
-      it('still succeeds and reports false when the Worker could not be disabled', async () => {
-        useAlertzero({
-          isAlertTriageWorkerEnabled: jest.fn().mockResolvedValue(true),
-          disableAlertTriageWorker: jest.fn().mockResolvedValue({ disabled: false }),
-        });
-
-        await putHandler()(createContext(), createRequest(off), mockResponse);
-
-        expect(mockResponse.ok).toHaveBeenCalledWith({
-          body: expect.objectContaining({ alertTriageWorkerDisabled: false }),
-        });
-      });
-
-      it('still succeeds when disabling the Worker throws', async () => {
-        useAlertzero({
-          isAlertTriageWorkerEnabled: jest.fn().mockResolvedValue(true),
-          disableAlertTriageWorker: jest.fn().mockRejectedValue(new Error('boom')),
-        });
-
-        await putHandler()(createContext(), createRequest(off), mockResponse);
-
-        expect(mockResponse.ok).toHaveBeenCalledWith({
-          body: expect.objectContaining({ alertTriageWorkerDisabled: false }),
-        });
-      });
-
-      it('reports rules that still carry the Worker action after it was turned off', async () => {
-        useAlertzero({
-          isAlertTriageWorkerEnabled: jest.fn().mockResolvedValue(true),
-          disableAlertTriageWorker: jest
-            .fn()
-            .mockResolvedValue({ disabled: true, skippedRuleCount: 2 }),
-        });
-
-        await putHandler()(createContext(), createRequest(off), mockResponse);
-
-        expect(mockResponse.ok).toHaveBeenCalledWith({
-          body: expect.objectContaining({
-            alertTriageWorkerDisabled: true,
-            alertTriageWorkerSkippedRuleCount: 2,
-          }),
-        });
-      });
-
-      it('leaves the response untouched when the Worker is not enabled', async () => {
-        const disableAlertTriageWorker = jest.fn();
-        useAlertzero({
-          isAlertTriageWorkerEnabled: jest.fn().mockResolvedValue(false),
-          disableAlertTriageWorker,
-        });
-
-        await putHandler()(createContext(), createRequest(off), mockResponse);
-
-        expect(disableAlertTriageWorker).not.toHaveBeenCalled();
-        expect(mockResponse.ok).toHaveBeenCalledWith({
-          body: { settings: off, workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID },
-        });
-      });
-
-      // An unreadable state must not look like "Worker off": the user has to be told it may
-      // still be running without alert analysis.
-      it('reports the Worker as not disabled when its state cannot be read', async () => {
-        const disableAlertTriageWorker = jest.fn();
-        useAlertzero({
-          isAlertTriageWorkerEnabled: jest.fn().mockRejectedValue(new Error('boom')),
-          disableAlertTriageWorker,
-        });
-
-        await putHandler()(createContext(), createRequest(off), mockResponse);
-
-        expect(disableAlertTriageWorker).not.toHaveBeenCalled();
-        expect(mockResponse.ok).toHaveBeenCalledWith({
-          body: expect.objectContaining({ alertTriageWorkerDisabled: false }),
-        });
-      });
-
-      it('does not touch the Worker when alert analysis stays on', async () => {
-        const disableAlertTriageWorker = jest.fn();
-        useAlertzero({
-          isAlertTriageWorkerEnabled: jest.fn().mockResolvedValue(true),
-          disableAlertTriageWorker,
-        });
-
-        await putHandler()(createContext(), createRequest(settings), mockResponse);
-
-        expect(disableAlertTriageWorker).not.toHaveBeenCalled();
-      });
-
-      it('saves without error when the alertzero plugin is not present', async () => {
-        await putHandler()(createContext(), createRequest(off), mockResponse);
-
-        expect(mockResponse.ok).toHaveBeenCalledWith({
-          body: { settings: off, workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID },
-        });
       });
     });
 

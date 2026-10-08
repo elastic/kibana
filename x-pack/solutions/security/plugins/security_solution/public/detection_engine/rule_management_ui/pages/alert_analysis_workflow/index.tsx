@@ -43,9 +43,10 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import {
   fetchAlertAnalysisWorkflowSettings,
+  fetchAlertTriageWorkerEnabled,
   saveAlertAnalysisWorkflowSettings,
+  turnOffAlertTriageWorker,
   type AlertAnalysisWorkflowSettingsWithConnector,
-  type AlertAnalysisWorkflowSettingsWithConnectorResponse,
 } from './api';
 import { AlertAnalysisWorkflowRuleAttachmentSection } from './rule_attachment_section';
 import { useAlertAnalysisWorkflowAgents } from './use_alert_analysis_workflow_agents';
@@ -54,6 +55,11 @@ import * as translations from './translations';
 const ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY = [
   'alertAnalysisWorkflow',
   'alertAnalysisWorkflowSettings',
+] as const;
+
+const ALERT_TRIAGE_WORKER_QUERY_KEY = [
+  'alertAnalysisWorkflow',
+  'alertTriageWorkerEnabled',
 ] as const;
 
 type AlertAnalysisWorkflowSettingsError = Error & { body?: { message?: string } };
@@ -102,6 +108,13 @@ const AlertAnalysisWorkflowContent: React.FC = () => {
       return fetchAlertAnalysisWorkflowSettings({ http });
     },
   });
+  // Only drives the confirmation: the save re-reads the Worker itself, so a stale value here
+  // can at worst skip or show the prompt, never leave the Worker running without analysis.
+  const { data: isAlertTriageWorkerEnabled } = useQuery({
+    queryKey: ALERT_TRIAGE_WORKER_QUERY_KEY,
+    retry: false,
+    queryFn: () => fetchAlertTriageWorkerEnabled({ http }),
+  });
   const savedSettings = savedSettingsResponse?.settings;
   const workflowHref = savedSettingsResponse?.workflowId
     ? application.getUrlForApp('workflows', { path: `/${savedSettingsResponse.workflowId}` })
@@ -139,45 +152,53 @@ const AlertAnalysisWorkflowContent: React.FC = () => {
   }, [agents, selectedAgentId]);
   const saveSettingsMutation = useMutation({
     mutationFn: async (settingsToSave: AlertAnalysisWorkflowSettingsWithConnector) => {
-      return saveAlertAnalysisWorkflowSettings({ http, settings: settingsToSave });
+      // The Alert Triage Worker needs alert analysis, so it goes off first: if the save then
+      // fails the Worker is off with analysis on, which is harmless, unlike the reverse.
+      const isTurningOff =
+        (savedSettings?.workflowEnabled ?? true) && settingsToSave.workflowEnabled === false;
+      const worker = isTurningOff ? await turnOffAlertTriageWorker({ http }) : undefined;
+      try {
+        const response = await saveAlertAnalysisWorkflowSettings({
+          http,
+          settings: settingsToSave,
+        });
+        return { response, worker };
+      } catch (error) {
+        if (worker?.outcome === 'disabled') {
+          notifications.toasts.addWarning(translations.SAVE_ERROR_WORKER_DISABLED_MESSAGE);
+        }
+        throw error;
+      }
     },
-    onSuccess: (response) => {
+    onSuccess: ({ response, worker }) => {
       setPageSettings(response.settings);
-      // The PUT only reports the Worker when it was on, so carry the previous value forward
-      // otherwise; the next page load re-reads it.
-      const previous = queryClient.getQueryData<AlertAnalysisWorkflowSettingsWithConnectorResponse>(
-        ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY
-      );
-      queryClient.setQueryData(ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY, {
-        ...response,
-        alertTriageWorkerEnabled:
-          response.alertTriageWorkerDisabled === undefined
-            ? previous?.alertTriageWorkerEnabled
-            : !response.alertTriageWorkerDisabled,
-      });
-      if (
-        response.alertTriageWorkerDisabled === true &&
-        response.alertTriageWorkerSkippedRuleCount
-      ) {
+      queryClient.setQueryData(ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY, response);
+      if (worker?.outcome === 'disabled' && worker.skippedRuleCount > 0) {
         notifications.toasts.addWarning({
           title: translations.SAVE_SUCCESS_MESSAGE,
-          text: translations.saveWorkerRulesLeftAttachedMessage(
-            response.alertTriageWorkerSkippedRuleCount
-          ),
+          text: translations.saveWorkerRulesLeftAttachedMessage(worker.skippedRuleCount),
         });
-      } else if (response.alertTriageWorkerDisabled === true) {
+      } else if (worker?.outcome === 'disabled') {
         notifications.toasts.addSuccess({
           title: translations.SAVE_SUCCESS_MESSAGE,
           text: translations.SAVE_SUCCESS_WORKER_DISABLED_MESSAGE,
         });
-      } else if (response.alertTriageWorkerDisabled === false) {
+      } else if (worker?.outcome === 'failed') {
         notifications.toasts.addWarning({
           title: translations.SAVE_SUCCESS_MESSAGE,
           text: translations.SAVE_WORKER_STILL_ENABLED_MESSAGE,
         });
+      } else if (worker?.outcome === 'unknown') {
+        notifications.toasts.addWarning({
+          title: translations.SAVE_SUCCESS_MESSAGE,
+          text: translations.SAVE_WORKER_STATE_UNKNOWN_MESSAGE,
+        });
       } else {
         notifications.toasts.addSuccess(translations.SAVE_SUCCESS_MESSAGE);
       }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries(ALERT_TRIAGE_WORKER_QUERY_KEY);
     },
     onError: (error: AlertAnalysisWorkflowSettingsError) => {
       notifications.toasts.addDanger({
@@ -561,7 +582,7 @@ const AlertAnalysisWorkflowContent: React.FC = () => {
                 const isTurningOff =
                   (savedSettings?.workflowEnabled ?? true) &&
                   pageSettings.workflowEnabled === false;
-                if (isTurningOff && savedSettingsResponse?.alertTriageWorkerEnabled) {
+                if (isTurningOff && isAlertTriageWorkerEnabled) {
                   setIsDisableConfirmOpen(true);
                   return;
                 }

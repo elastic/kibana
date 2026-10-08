@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import type { HttpStart } from '@kbn/core/public';
+import type { HttpStart, IHttpFetchError } from '@kbn/core/public';
+import {
+  API_VERSIONS,
+  ALERTZERO_WORKERS_URL,
+  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  buildWorkerUrl,
+  type ListWorkersResponse,
+  type UpdateWorkerResponse,
+} from '@kbn/alertzero-common';
 import {
   ALERT_ANALYSIS_WORKFLOW_API_VERSION,
   ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE,
@@ -51,13 +59,64 @@ export type AlertAnalysisWorkflowSettingsWithConnector = AlertAnalysisWorkflowSe
 export interface AlertAnalysisWorkflowSettingsWithConnectorResponse {
   settings: AlertAnalysisWorkflowSettingsWithConnector;
   workflowId: string;
-  /** GET only: the Alert Triage Worker is on and stops triaging when alert analysis is turned off. */
-  alertTriageWorkerEnabled?: boolean;
-  /** PUT only, present when the Worker was on: whether it was turned off along with alert analysis. */
-  alertTriageWorkerDisabled?: boolean;
-  /** PUT only: rules still carrying the Worker's action because the caller cannot edit them. */
-  alertTriageWorkerSkippedRuleCount?: number;
 }
+
+/**
+ * Whether the AlertZero Alert Triage Worker is on, which needs alert analysis. A caller without
+ * AlertZero access, or a space where AlertZero is off, has no Worker to turn off, so that is
+ * `false`. `undefined` means the state could not be read, which must not be treated as "off".
+ */
+export const fetchAlertTriageWorkerEnabled = async ({
+  http,
+}: {
+  http: HttpStart;
+}): Promise<boolean | undefined> => {
+  try {
+    const { workers } = await http.fetch<ListWorkersResponse>(ALERTZERO_WORKERS_URL, {
+      method: 'GET',
+      version: API_VERSIONS.internal.v1,
+    });
+    return workers.some(
+      ({ id, enabled }) => id === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID && enabled
+    );
+  } catch (error) {
+    const { response } = error as IHttpFetchError;
+    return response?.status === 403 || response?.status === 404 ? false : undefined;
+  }
+};
+
+export type AlertTriageWorkerShutdown =
+  | { outcome: 'disabled'; skippedRuleCount: number }
+  | { outcome: 'failed' }
+  | { outcome: 'unknown' };
+
+/**
+ * Turns the Alert Triage Worker off through the same route the Workers page uses, so its
+ * privilege checks and rule detachment apply unchanged. Resolves to `undefined` when the Worker
+ * is already off. Never rejects: the caller still has to save the setting either way.
+ */
+export const turnOffAlertTriageWorker = async ({
+  http,
+}: {
+  http: HttpStart;
+}): Promise<AlertTriageWorkerShutdown | undefined> => {
+  const enabled = await fetchAlertTriageWorkerEnabled({ http });
+  if (enabled === undefined) return { outcome: 'unknown' };
+  if (!enabled) return undefined;
+  try {
+    const { skippedRuleCount } = await http.fetch<UpdateWorkerResponse>(
+      buildWorkerUrl(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID),
+      {
+        method: 'PATCH',
+        version: API_VERSIONS.internal.v1,
+        body: JSON.stringify({ enabled: false }),
+      }
+    );
+    return { outcome: 'disabled', skippedRuleCount: skippedRuleCount ?? 0 };
+  } catch {
+    return { outcome: 'failed' };
+  }
+};
 
 export const fetchAlertAnalysisWorkflowSettings = ({
   http,

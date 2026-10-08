@@ -5,20 +5,15 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AlertZeroRequestHandlerContext } from '../../types';
 
 /** Cluster privilege required to modify a worker. It cannot be expressed as a Kibana route privilege. */
-export const hasManageSecurityPrivilege = async (
-  esClient: ElasticsearchClient
-): Promise<boolean> => {
-  const privileges = await esClient.security.hasPrivileges({ cluster: ['manage_security'] });
-  return privileges.has_all_requested === true;
-};
-
 export const hasManageSecurity = async (
   context: AlertZeroRequestHandlerContext
 ): Promise<boolean> => {
   const { elasticsearch } = await context.core;
-  return hasManageSecurityPrivilege(elasticsearch.client.asCurrentUser);
+  const privileges = await elasticsearch.client.asCurrentUser.security.hasPrivileges({
+    cluster: ['manage_security'],
+  });
+  return privileges.has_all_requested === true;
 };
