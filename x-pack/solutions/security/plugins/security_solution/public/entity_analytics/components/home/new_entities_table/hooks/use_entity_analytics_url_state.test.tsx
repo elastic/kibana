@@ -37,8 +37,6 @@ describe('useEntityAnalyticsUrlState', () => {
         rowsMode: 'resolved',
         sortField: 'entity.risk.calculated_score_norm',
         sortDirection: 'desc',
-        pageIndex: 0,
-        pageSize: 10,
         expandedIds: [],
         activeTile: null,
         entityFilters: {
@@ -56,7 +54,7 @@ describe('useEntityAnalyticsUrlState', () => {
 
   it('reads valid params', () => {
     const { result } = renderUrlState(
-      '?eaTimeRange=7d&eaRowsMode=individual&eaSortField=alert_count&eaSortDir=asc&eaPage=3&eaPageSize=25&eaActiveTile=riskMovers&eaEntityTypes=host,user&eaRiskLevels=Critical'
+      '?eaTimeRange=7d&eaRowsMode=individual&eaSortField=alert_count&eaSortDir=asc&eaActiveTile=riskMovers&eaEntityTypes=host,user&eaRiskLevels=Critical'
     );
 
     expect(result.current).toEqual(
@@ -65,8 +63,6 @@ describe('useEntityAnalyticsUrlState', () => {
         rowsMode: 'individual',
         sortField: 'alert_count',
         sortDirection: 'asc',
-        pageIndex: 3,
-        pageSize: 25,
         activeTile: 'riskMovers',
         entityFilters: expect.objectContaining({
           entityTypes: ['host', 'user'],
@@ -78,7 +74,7 @@ describe('useEntityAnalyticsUrlState', () => {
 
   it('reads invalid params as defaults without rewriting the URL', () => {
     const search =
-      '?eaTimeRange=1y&eaRowsMode=x&eaSortField=nope&eaSortDir=asc&eaPage=-1&eaPageSize=7&eaActiveTile=nope&eaEntityTypes=host,bogus';
+      '?eaTimeRange=1y&eaRowsMode=x&eaSortField=nope&eaSortDir=asc&eaActiveTile=nope&eaEntityTypes=host,bogus';
     const { result, history } = renderUrlState(search);
 
     expect(result.current).toEqual(
@@ -88,8 +84,6 @@ describe('useEntityAnalyticsUrlState', () => {
         sortField: 'entity.risk.calculated_score_norm',
         // The direction of an invalid sort field reads as the default too.
         sortDirection: 'desc',
-        pageIndex: 0,
-        pageSize: 10,
         activeTile: null,
         entityFilters: expect.objectContaining({ entityTypes: ['host'] }),
       })
@@ -106,8 +100,8 @@ describe('useEntityAnalyticsUrlState', () => {
     expect(result.current.sortDirection).toBe('desc');
   });
 
-  it('pushes a sort change and goes back to the first page', () => {
-    const { result, history, params } = renderUrlState('?eaPage=2');
+  it('pushes a sort change', () => {
+    const { result, history, params } = renderUrlState();
 
     act(() => result.current.setSort('anomaly_count', 'asc'));
 
@@ -124,9 +118,9 @@ describe('useEntityAnalyticsUrlState', () => {
     expect(history.length).toBe(1);
   });
 
-  it('switches to individual rows without the Records sort, the page or expanded rows', () => {
+  it('switches to individual rows without the Records sort or expanded rows', () => {
     const { result, params } = renderUrlState(
-      '?eaSortField=group_size&eaSortDir=asc&eaPage=2&eaExpanded=host%3Aa'
+      '?eaSortField=group_size&eaSortDir=asc&eaExpanded=host%3Aa'
     );
 
     act(() => result.current.setRowsMode('individual'));
@@ -139,7 +133,7 @@ describe('useEntityAnalyticsUrlState', () => {
   });
 
   it('writes entity filters and drops empty ones', () => {
-    const { result, params } = renderUrlState('?eaWatchlists=w1&eaPage=4');
+    const { result, params } = renderUrlState('?eaWatchlists=w1');
 
     act(() =>
       result.current.setEntityFilters({
@@ -156,7 +150,7 @@ describe('useEntityAnalyticsUrlState', () => {
 
   it('clears the filters, the tile and the sort on reset', () => {
     const { result, params } = renderUrlState(
-      '?eaEntityTypes=host&eaActiveTile=riskMovers&eaSortField=alert_count&eaSortDir=asc&eaPage=2&eaTimeRange=7d'
+      '?eaEntityTypes=host&eaActiveTile=riskMovers&eaSortField=alert_count&eaSortDir=asc&eaTimeRange=7d'
     );
 
     act(() => result.current.resetGridQuery());
@@ -166,15 +160,6 @@ describe('useEntityAnalyticsUrlState', () => {
       eaSortField: 'entity.risk.calculated_score_norm',
       eaSortDir: 'desc',
     });
-  });
-
-  it('resets the page without a new history entry', () => {
-    const { result, history, params } = renderUrlState('?eaPage=2');
-
-    act(() => result.current.resetPage());
-
-    expect(params()).toEqual({});
-    expect(history.length).toBe(1);
   });
 
   it('toggles expanded ids that contain commas, without new history entries', () => {

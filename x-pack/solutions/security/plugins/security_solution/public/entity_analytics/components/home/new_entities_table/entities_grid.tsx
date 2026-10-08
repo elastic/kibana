@@ -11,8 +11,10 @@ import {
   EuiButtonIcon,
   EuiDataGrid,
   EuiEmptyPrompt,
+  EuiFlexGroup,
   EuiProgress,
   EuiScreenReaderOnly,
+  EuiText,
   EuiToolTip,
   useEuiFontSize,
   useEuiTheme,
@@ -31,10 +33,10 @@ import { useIsFetching } from '@kbn/react-query';
 import { useResetEntityGridFilters } from './hooks/use_entity_grid_filters';
 import {
   ENTITY_GRID_CHILDREN_QUERY_KEY,
+  MAX_LOADED_ROWS,
   useEntityGridData,
-  usePrefetchEntityGridPage,
 } from './hooks/use_entity_grid_data';
-import { GROUP_SIZE_FIELD, PAGE_SIZE_OPTIONS, getEntityId, getNumber } from './common';
+import { GROUP_SIZE_FIELD, getEntityId, getNumber } from './common';
 import { renderEntityCell, RowActionsCell } from './entities_cell_renderer';
 import { ExpandedEntityGroup, groupRecordsOptions } from './entities_expanded_row';
 import { AdditionalControls } from '../entities_table/additional_controls';
@@ -100,8 +102,6 @@ const expandRowLabel = (isExpanded: boolean) =>
 /** EUI `cellContext` — must stay stable on expand or every cell remounts. */
 interface EntityGridCellContext {
   rows: Row[];
-  pageIndex: number;
-  pageSize: number;
   watchlistNames: Map<string, string>;
   euiTheme: EuiThemeComputed;
   cellHandlers?: CellHandlers;
@@ -122,6 +122,12 @@ interface EntityGridView extends EntityGridCellContext {
   isFetching: boolean;
   /** Grid density from the display selector; expanded child rows match it. */
   cellPadding: EuiDataGridStyleCellPaddings;
+  /** Entities in view, for "Showing N of M". */
+  total: number;
+  canLoadMore: boolean;
+  isAtLoadLimit: boolean;
+  isLoadingMore: boolean;
+  loadMore: () => void;
 }
 
 const EntityGridBodyContext = createContext<EntityGridView | null>(null);
@@ -136,9 +142,9 @@ const useEntityGridView = (): EntityGridView => {
 
 const RenderEntityGridCell: RenderCellValue = (cellProps) => {
   const { rowIndex, columnId } = cellProps;
-  const { rows, pageIndex, pageSize, watchlistNames, euiTheme, cellHandlers, isEnriching } =
+  const { rows, watchlistNames, euiTheme, cellHandlers, isEnriching } =
     cellProps as typeof cellProps & EntityGridCellContext;
-  const row = rows[rowIndex - pageIndex * pageSize];
+  const row = rows[rowIndex];
   if (!row) return null;
   return renderEntityCell(
     columnId,
@@ -158,9 +164,8 @@ const EntityGridExpanderHeader = () => (
 );
 
 const EntityGridExpanderCell = ({ rowIndex }: EuiDataGridCellValueElementProps) => {
-  const { rows, pageIndex, pageSize, expandedIds, prefetchChildren, toggleExpandedId } =
-    useEntityGridView();
-  const row = rows[rowIndex - pageIndex * pageSize];
+  const { rows, expandedIds, prefetchChildren, toggleExpandedId } = useEntityGridView();
+  const row = rows[rowIndex];
   if (!row) return null;
   const entityId = getEntityId(row);
   const groupSize = getNumber(row, GROUP_SIZE_FIELD) ?? 1;
@@ -197,8 +202,8 @@ const ACTIONS_HEADER_LABEL = i18n.translate(
 const EntityGridActionsHeader = () => <>{ACTIONS_HEADER_LABEL}</>;
 
 const EntityGridActionsCell = ({ rowIndex }: EuiDataGridCellValueElementProps) => {
-  const { rows, pageIndex, pageSize, rowActions } = useEntityGridView();
-  const row = rows[rowIndex - pageIndex * pageSize];
+  const { rows, rowActions } = useEntityGridView();
+  const row = rows[rowIndex];
   if (!row || !rowActions) return null;
   return (
     <RowActionsCell
@@ -220,6 +225,55 @@ const RESOLVED_LEADING_CONTROL_COLUMNS: EuiDataGridControlColumn[] = [
   EXPANDER_COLUMN,
   ACTIONS_COLUMN,
 ];
+
+/** Rows per Load More. */
+const ROWS_PER_LOAD = 10;
+
+const LOAD_MORE_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.grid.loadMoreLabel',
+  { defaultMessage: 'Load more' }
+);
+
+const shownCountLabel = (shown: number, total: number) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.home.grid.shownCountLabel', {
+    defaultMessage: 'Showing {shown, number} of {total, number}',
+    values: { shown, total },
+  });
+
+const LOAD_LIMIT_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.grid.loadLimitLabel',
+  {
+    defaultMessage:
+      'The table shows up to {max, number} rows. Narrow the search or filters to see the others.',
+    values: { max: MAX_LOADED_ROWS },
+  }
+);
+
+/** Under the rows: how many are shown, and Load More while more can load. */
+const EntityGridLoadMore = () => {
+  const { euiTheme } = useEuiTheme();
+  const { rows, total, canLoadMore, isAtLoadLimit, isLoadingMore, loadMore } = useEntityGridView();
+  if (!rows.length || (!canLoadMore && !isAtLoadLimit)) return null;
+  return (
+    <EuiFlexGroup
+      direction="column"
+      alignItems="center"
+      gutterSize="s"
+      css={css`
+        padding: ${euiTheme.size.m};
+      `}
+    >
+      <EuiText size="xs" color="subdued">
+        {isAtLoadLimit ? LOAD_LIMIT_LABEL : shownCountLabel(rows.length, total)}
+      </EuiText>
+      {canLoadMore && (
+        <EuiButton size="s" onClick={loadMore} isLoading={isLoadingMore}>
+          {LOAD_MORE_LABEL}
+        </EuiButton>
+      )}
+    </EuiFlexGroup>
+  );
+};
 
 const EntityGridCustomBody = memo(
   ({
@@ -300,6 +354,7 @@ const EntityGridCustomBody = memo(
             );
           })
         )}
+        <EntityGridLoadMore />
         {footerRow}
       </>
     );
@@ -315,17 +370,14 @@ export interface EntitiesGridProps {
   sortField: string;
   sortDirection: SortDir;
   onSortChange: (field: string, direction: SortDir) => void;
-  pageIndex: number;
-  pageSize: number;
-  onPageChange: (index: number) => void;
-  onPageSizeChange: (size: number) => void;
+  /** Rows per load. */
+  pageSize?: number;
   searchExpression?: string;
   entityExpression?: string;
   cellHandlers?: CellHandlers;
   rowActions?: RowActions;
   /** When provided, shows the full toolbar with controls. */
   groupSelectorComponent?: React.ReactNode;
-  pageSizeOptions?: number[];
   /** Called when the grid enters or leaves full screen. */
   onFullScreenChange?: (isFullScreen: boolean) => void;
 }
@@ -338,16 +390,12 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   sortField,
   sortDirection,
   onSortChange,
-  pageIndex,
-  pageSize,
-  onPageChange,
-  onPageSizeChange,
+  pageSize = ROWS_PER_LOAD,
   searchExpression,
   entityExpression,
   cellHandlers,
   rowActions,
   groupSelectorComponent,
-  pageSizeOptions = PAGE_SIZE_OPTIONS,
   onFullScreenChange,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -390,10 +438,20 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     [visibleColumns]
   );
 
-  const { rows, isEnriching, total, updatedAt, isFetching } = useEntityGridData({
+  const {
+    rows,
+    isEnriching,
+    total,
+    updatedAt,
+    isFetching,
+    canLoadMore,
+    isAtLoadLimit,
+    isLoadingMore,
+    loadMore,
+    prefetch,
+  } = useEntityGridData({
     sortField,
     sortDirection,
-    pageIndex,
     pageSize,
     searchExpression,
     entityExpression,
@@ -427,10 +485,9 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
 
   // Expanded groups on this page read their records; the URL can hold more expanded ids.
   const isChildrenFetching = useIsFetching({ queryKey: ENTITY_GRID_CHILDREN_QUERY_KEY }) > 0;
-  const prefetchGridPage = usePrefetchEntityGridPage();
   const prefetchChildren = useCallback(
-    (entityId: string) => prefetchGridPage(groupRecordsOptions(entityId, timeRange, keepFields)),
-    [prefetchGridPage, timeRange, keepFields]
+    (entityId: string) => prefetch(groupRecordsOptions(entityId, timeRange, keepFields)),
+    [prefetch, timeRange, keepFields]
   );
 
   const extraColumns = useMemo(
@@ -448,18 +505,11 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
 
   const gridColumns = useMemo(() => [...columns, ...extraColumns], [columns, extraColumns]);
 
-  const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns }), [visibleColumns]);
+  const onLoadMore = useCallback(() => {
+    void loadMore();
+  }, [loadMore]);
 
-  const pagination = useMemo(
-    () => ({
-      pageIndex,
-      pageSize,
-      pageSizeOptions,
-      onChangePage: onPageChange,
-      onChangeItemsPerPage: onPageSizeChange,
-    }),
-    [pageIndex, pageSize, pageSizeOptions, onPageChange, onPageSizeChange]
-  );
+  const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns }), [visibleColumns]);
 
   const toolbarVisibility = useMemo(
     () =>
@@ -535,14 +585,12 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   const cellContext = useMemo(
     (): EntityGridCellContext => ({
       rows,
-      pageIndex,
-      pageSize,
       watchlistNames,
       euiTheme,
       cellHandlers,
       isEnriching,
     }),
-    [rows, pageIndex, pageSize, watchlistNames, euiTheme, cellHandlers, isEnriching]
+    [rows, watchlistNames, euiTheme, cellHandlers, isEnriching]
   );
 
   const gridView = useMemo(
@@ -557,6 +605,11 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       rowActions,
       isFetching,
       cellPadding,
+      total,
+      canLoadMore,
+      isAtLoadLimit,
+      isLoadingMore,
+      loadMore: onLoadMore,
     }),
     [
       cellContext,
@@ -569,6 +622,11 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       rowActions,
       isFetching,
       cellPadding,
+      total,
+      canLoadMore,
+      isAtLoadLimit,
+      isLoadingMore,
+      onLoadMore,
     ]
   );
 
@@ -590,12 +648,11 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
           }
           columns={gridColumns}
           columnVisibility={columnVisibility}
-          rowCount={total}
+          rowCount={rows.length}
           renderCellValue={RenderEntityGridCell}
           cellContext={cellContext}
           renderCustomGridBody={EntityGridCustomBody}
           sorting={sorting}
-          pagination={pagination}
           toolbarVisibility={toolbarVisibility}
           gridStyle={gridStyle}
           onFullScreenChange={onFullScreenChange}

@@ -12,12 +12,7 @@ import { getEntityAnalyticsEntityTypes } from '../../../../../../common/entity_a
 import type { RiskSeverity } from '../../../../../../common/search_strategy';
 import { SEVERITY_UI_SORT_ORDER } from '../../../../common/utils';
 import { ValidCriticalityLevels } from '../../../../../../common/entity_analytics/asset_criticality/constants';
-import {
-  GROUP_SIZE_FIELD,
-  RISK_SCORE_NORM_FIELD,
-  PAGE_SIZE_OPTIONS,
-  TIME_RANGE_OPTIONS,
-} from '../common';
+import { GROUP_SIZE_FIELD, RISK_SCORE_NORM_FIELD, TIME_RANGE_OPTIONS } from '../common';
 import type { RowsMode, SortDir, TimeRange } from '../common';
 import { findSortQuerySpec } from '../grid_columns';
 import { isSignalCardId, type SignalCardId } from '../../needs_attention_tiles/data';
@@ -48,8 +43,6 @@ const PARAM = {
   ROWS_MODE: 'eaRowsMode',
   SORT_FIELD: 'eaSortField',
   SORT_DIR: 'eaSortDir',
-  PAGE: 'eaPage',
-  PAGE_SIZE: 'eaPageSize',
   EXPANDED: 'eaExpanded',
   ACTIVE_TILE: 'eaActiveTile',
   ENTITY_TYPES: 'eaEntityTypes',
@@ -69,15 +62,11 @@ const DEFAULTS = {
   rowsMode: 'resolved',
   sortField: RISK_SCORE_NORM_FIELD,
   sortDirection: 'desc',
-  pageIndex: 0,
-  pageSize: PAGE_SIZE_OPTIONS[0],
 } as const satisfies {
   timeRange: TimeRange;
   rowsMode: RowsMode;
   sortField: string;
   sortDirection: SortDir;
-  pageIndex: number;
-  pageSize: number;
 };
 
 // ── validators ────────────────────────────────────────────────────────────────
@@ -95,10 +84,6 @@ const isValidSortField = (field: string | null, rowsMode: RowsMode): field is st
   field != null &&
   findSortQuerySpec(field) != null &&
   !(rowsMode === 'individual' && field === GROUP_SIZE_FIELD);
-const isNonNegativeInt = (v: string | null): boolean =>
-  v != null && /^\d+$/.test(v) && Number(v) >= 0;
-const isPageSize = (v: string | null): boolean =>
-  v != null && (PAGE_SIZE_OPTIONS as readonly number[]).includes(Number(v));
 
 const isEntityType = (v: string): v is EntityType => VALID_ENTITY_TYPES.has(v);
 const isRiskSeverity = (v: string): v is RiskSeverity => VALID_RISK_LEVELS.has(v);
@@ -122,8 +107,6 @@ export interface EntityAnalyticsUrlState {
   rowsMode: RowsMode;
   sortField: string;
   sortDirection: SortDir;
-  pageIndex: number;
-  pageSize: number;
   entityFilters: EntityFilters;
   /** Entity ids with expanded child rows (persisted across filter/pagination). */
   expandedIds: string[];
@@ -134,18 +117,12 @@ export interface EntityAnalyticsUrlState {
 export interface EntityAnalyticsUrlStateResult extends EntityAnalyticsUrlState {
   setTimeRange: (val: TimeRange) => void;
   setRowsMode: (val: RowsMode) => void;
-  /** Resets page to 0. */
   setSort: (field: string, direction: SortDir) => void;
-  setPage: (index: number) => void;
-  /** Resets page to 0. */
-  setPageSize: (size: number) => void;
-  /** Resets page to 0. */
   setEntityFilters: (filters: EntityFilters) => void;
-  /** Resets page to 0. Pass null to clear. */
+  /** Pass null to clear. */
   setActiveTile: (tile: SignalCardId | null) => void;
   /** Clears entity filters, active tile, and sort (foreign sorts can yield 0 rows). */
   resetGridQuery: () => void;
-  resetPage: () => void;
   /** Toggles an entity id in `eaExpanded` without pushing history. */
   toggleExpandedId: (entityId: string) => void;
   /** Clears all expanded rows (e.g. on rows-mode switch). */
@@ -188,18 +165,6 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     (): SortDir =>
       isSortFieldValid && isSortDir(rawSortDir) ? rawSortDir : DEFAULTS.sortDirection,
     [isSortFieldValid, rawSortDir]
-  );
-
-  const rawPage = p.get(PARAM.PAGE);
-  const pageIndex = useMemo(
-    () => (rawPage && isNonNegativeInt(rawPage) ? Number(rawPage) : DEFAULTS.pageIndex),
-    [rawPage]
-  );
-
-  const rawPageSize = p.get(PARAM.PAGE_SIZE);
-  const pageSize = useMemo(
-    () => (rawPageSize && isPageSize(rawPageSize) ? Number(rawPageSize) : DEFAULTS.pageSize),
-    [rawPageSize]
   );
 
   const rawEntityTypes = p.get(PARAM.ENTITY_TYPES) ?? '';
@@ -246,7 +211,6 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     (val: TimeRange) =>
       update((params) => {
         params.set(PARAM.TIME_RANGE, val);
-        params.delete(PARAM.PAGE);
       }),
     [update]
   );
@@ -254,7 +218,6 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     (val: RowsMode) =>
       update((params) => {
         params.set(PARAM.ROWS_MODE, val);
-        params.delete(PARAM.PAGE);
         params.delete(PARAM.EXPANDED);
         if (val === 'individual' && params.get(PARAM.SORT_FIELD) === GROUP_SIZE_FIELD) {
           params.set(PARAM.SORT_FIELD, DEFAULTS.sortField);
@@ -268,23 +231,6 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
       update((params) => {
         params.set(PARAM.SORT_FIELD, field);
         params.set(PARAM.SORT_DIR, direction);
-        params.delete(PARAM.PAGE);
-      }),
-    [update]
-  );
-  const setPage = useCallback(
-    (index: number) =>
-      update((params) => {
-        if (index === 0) params.delete(PARAM.PAGE);
-        else params.set(PARAM.PAGE, String(index));
-      }),
-    [update]
-  );
-  const setPageSize = useCallback(
-    (size: number) =>
-      update((params) => {
-        params.set(PARAM.PAGE_SIZE, String(size));
-        params.delete(PARAM.PAGE);
       }),
     [update]
   );
@@ -301,7 +247,6 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
           if (arr.length) params.set(key, arr.join(','));
           else params.delete(key);
         }
-        params.delete(PARAM.PAGE);
       }),
     [update]
   );
@@ -310,7 +255,6 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
       update((params) => {
         if (tile == null) params.delete(PARAM.ACTIVE_TILE);
         else params.set(PARAM.ACTIVE_TILE, tile);
-        params.delete(PARAM.PAGE);
       }),
     [update]
   );
@@ -325,12 +269,7 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
         params.delete(PARAM.ACTIVE_TILE);
         params.set(PARAM.SORT_FIELD, DEFAULTS.sortField);
         params.set(PARAM.SORT_DIR, DEFAULTS.sortDirection);
-        params.delete(PARAM.PAGE);
       }),
-    [update]
-  );
-  const resetPage = useCallback(
-    () => update((params) => params.delete(PARAM.PAGE), { replace: true }),
     [update]
   );
 
@@ -359,20 +298,15 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     rowsMode,
     sortField,
     sortDirection,
-    pageIndex,
-    pageSize,
     entityFilters,
     expandedIds,
     activeTile,
     setTimeRange,
     setRowsMode,
     setSort,
-    setPage,
-    setPageSize,
     setEntityFilters,
     setActiveTile,
     resetGridQuery,
-    resetPage,
     toggleExpandedId,
     clearExpandedIds,
   };

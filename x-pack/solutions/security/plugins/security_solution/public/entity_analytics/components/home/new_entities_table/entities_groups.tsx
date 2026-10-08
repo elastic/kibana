@@ -116,8 +116,6 @@ interface GroupContentProps extends GroupLevelProps {
   parentGroupFilters?: ParentGroupFilters;
 }
 
-const LEAF_PAGE_SIZE_OPTIONS = [5, 10, 25];
-
 const mergeFilters = (current: Filter[], parentJson: ParentGroupFilters): Filter[] => [
   ...current,
   ...(parentJson ? (JSON.parse(parentJson) as Filter[]) : []),
@@ -226,18 +224,10 @@ const LeafGrid: React.FC<LeafGridProps> = ({
 }) => {
   const [sortField, setSortField] = useState(RISK_SCORE_NORM_FIELD);
   const [sortDirection, setSortDirection] = useState<SortDir>('desc');
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(5);
 
   const handleSortChange = useCallback((field: string, dir: SortDir) => {
     setSortField(field);
     setSortDirection(dir);
-    setPageIndex(0);
-  }, []);
-
-  const handlePageSizeChange = useCallback((size: number) => {
-    setPageSize(size);
-    setPageIndex(0);
   }, []);
 
   const leafSearchExpression = useMemo(() => {
@@ -249,7 +239,6 @@ const LeafGrid: React.FC<LeafGridProps> = ({
   return (
     <EntitiesGrid
       columns={CHILD_ROWS_COLUMNS}
-      pageSizeOptions={LEAF_PAGE_SIZE_OPTIONS}
       searchExpression={leafSearchExpression}
       entityExpression={entityExpression}
       timeRange={timeRange}
@@ -258,10 +247,6 @@ const LeafGrid: React.FC<LeafGridProps> = ({
       sortField={sortField}
       sortDirection={sortDirection}
       onSortChange={handleSortChange}
-      pageIndex={pageIndex}
-      pageSize={pageSize}
-      onPageChange={setPageIndex}
-      onPageSizeChange={handlePageSizeChange}
       cellHandlers={cellHandlers}
       rowActions={rowActions}
     />

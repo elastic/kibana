@@ -5,83 +5,45 @@
  * 2.0.
  */
 
-import { selectPageRows } from './use_entity_grid_data';
+import { mergeBatchRows } from './use_entity_grid_data';
 
-const shellRows = [{ 'entity.id': 'host:new' }];
-const enrichedRows = [{ 'entity.id': 'host:new', alert_count: 3 }];
-const previousEnrichedRows = [{ 'entity.id': 'host:old', alert_count: 1 }];
-
-describe('selectPageRows', () => {
-  it('keeps painting the previous enriched page while the new shell loads', () => {
+describe('mergeBatchRows', () => {
+  it('shows the rows of every batch in order', () => {
     expect(
-      selectPageRows({
-        shellRows: [{ 'entity.id': 'host:old' }],
-        isShellPrevious: true,
-        enrichedRows: previousEnrichedRows,
-        isEnrichPrevious: false,
-        isEnrichFetching: false,
-      })
-    ).toEqual({ rows: previousEnrichedRows, isEnriching: false });
+      mergeBatchRows([
+        { rows: [{ 'entity.id': 'a' }, { 'entity.id': 'b' }] },
+        { rows: [{ 'entity.id': 'c' }] },
+      ])
+    ).toEqual([{ 'entity.id': 'a' }, { 'entity.id': 'b' }, { 'entity.id': 'c' }]);
   });
 
-  it('paints the new shell and marks it enriching while enrich is in flight', () => {
+  it("adds a batch's computed columns once its enrich data arrives", () => {
     expect(
-      selectPageRows({
-        shellRows,
-        isShellPrevious: false,
-        enrichedRows: previousEnrichedRows,
-        isEnrichPrevious: true,
-        isEnrichFetching: true,
-      })
-    ).toEqual({ rows: shellRows, isEnriching: true });
+      mergeBatchRows([
+        {
+          rows: [{ 'entity.id': 'a' }, { 'entity.id': 'b' }],
+          enriched: [
+            { 'entity.id': 'a', alert_count: 3 },
+            { 'entity.id': 'b', alert_count: 0 },
+          ],
+        },
+        { rows: [{ 'entity.id': 'c' }] },
+      ])
+    ).toEqual([
+      { 'entity.id': 'a', alert_count: 3 },
+      { 'entity.id': 'b', alert_count: 0 },
+      { 'entity.id': 'c' },
+    ]);
   });
 
-  it('keeps the previous enriched rows when a refetched shell has the same entities', () => {
-    const sameEntitiesEnriched = [{ 'entity.id': 'host:new', alert_count: 2 }];
+  it('keeps the fresh entity fields of a refetched batch over its earlier enrich data', () => {
     expect(
-      selectPageRows({
-        shellRows,
-        isShellPrevious: false,
-        enrichedRows: sameEntitiesEnriched,
-        isEnrichPrevious: true,
-        isEnrichFetching: true,
-      })
-    ).toEqual({ rows: sameEntitiesEnriched, isEnriching: false });
-  });
-
-  it('stops marking the shell as enriching when enrich is no longer fetching', () => {
-    expect(
-      selectPageRows({
-        shellRows,
-        isShellPrevious: false,
-        enrichedRows: undefined,
-        isEnrichPrevious: false,
-        isEnrichFetching: false,
-      })
-    ).toEqual({ rows: shellRows, isEnriching: false });
-  });
-
-  it('paints the enriched rows once enrich has data for the current shell', () => {
-    expect(
-      selectPageRows({
-        shellRows,
-        isShellPrevious: false,
-        enrichedRows,
-        isEnrichPrevious: false,
-        isEnrichFetching: false,
-      })
-    ).toEqual({ rows: enrichedRows, isEnriching: false });
-  });
-
-  it('returns no rows and is not enriching before the first shell', () => {
-    expect(
-      selectPageRows({
-        shellRows: undefined,
-        isShellPrevious: false,
-        enrichedRows: undefined,
-        isEnrichPrevious: false,
-        isEnrichFetching: true,
-      })
-    ).toEqual({ rows: [], isEnriching: false });
+      mergeBatchRows([
+        {
+          rows: [{ 'entity.id': 'a', 'entity.risk.calculated_score_norm': 80 }],
+          enriched: [{ 'entity.id': 'a', 'entity.risk.calculated_score_norm': 70, alert_count: 3 }],
+        },
+      ])
+    ).toEqual([{ 'entity.id': 'a', 'entity.risk.calculated_score_norm': 80, alert_count: 3 }]);
   });
 });

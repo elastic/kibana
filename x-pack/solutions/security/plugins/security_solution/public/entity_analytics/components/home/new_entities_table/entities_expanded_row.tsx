@@ -54,7 +54,6 @@ export const groupRecordsOptions = (
   )})`,
   sortField: RISK_SCORE_NORM_FIELD,
   sortDirection: 'desc',
-  pageIndex: 0,
   pageSize: MAX_GROUP_RECORDS,
   timeRange,
   keepFields,

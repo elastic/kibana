@@ -180,11 +180,6 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     sortField,
     sortDirection,
     setSort,
-    pageIndex,
-    pageSize,
-    setPage,
-    setPageSize,
-    resetPage,
     activeTile,
     setActiveTile,
   } = useEntityAnalyticsUrlState();
@@ -456,12 +451,6 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     }),
     [groupingQuery, groupingPageSize, groupingPageIndex]
   );
-
-  // Query bar changes do not go through the URL setters, so reset the page here.
-  // resetPage replaces the entry and skips no-op updates, so Back still works.
-  useUpdateEffect(() => {
-    resetPage();
-  }, [gridSearchExpression, gridEntityExpression, resetPage]);
 
   useUpdateEffect(() => {
     setGroupingPageIndex(0);
@@ -861,10 +850,6 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
                 sortField={sortField}
                 sortDirection={sortDirection}
                 onSortChange={setSort}
-                pageIndex={pageIndex}
-                pageSize={pageSize}
-                onPageChange={setPage}
-                onPageSizeChange={setPageSize}
                 onFullScreenChange={setIsGridFullScreen}
               />
             )}

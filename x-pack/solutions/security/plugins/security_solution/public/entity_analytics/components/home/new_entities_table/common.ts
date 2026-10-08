@@ -217,15 +217,7 @@ export const nullOnFailure = <T>(request: Promise<T>): Promise<T | null> =>
 
 // ── grid config ───────────────────────────────────────────────────────────────
 
-export const PAGE_SIZE_OPTIONS = [10, 25, 50];
-
 export const RESOLUTION_GROUPING_ID = 'ea-new-home-resolution';
-
-export interface EntityGridResponse {
-  entities: Array<Record<string, unknown>>;
-  next_cursor: PageCursor | null;
-  total: number | null;
-}
 
 /** A sort query may already have read an enricher's fields, e.g. the alert sort its counts. */
 const lacksFields = (rows: readonly Row[], { fields }: PageEnricher): boolean =>
