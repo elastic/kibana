@@ -15,6 +15,8 @@ import type { ResolveHostEnrollment } from '../../../fleet/resolve_host_enrollme
 import { buildHuntInvestigationConversationId } from '../common/hunt_investigation_id';
 import { buildProposalSummaryBullets, decidePackageReport } from './decide_package_report';
 import { deriveCoverageSubjects } from './derive_coverage_subjects';
+import type { EsReportContextClient } from './load_report_hunt_context';
+import { loadReportHuntContext } from './load_report_hunt_context';
 import { readCurrentRunState } from './read_current_run_state';
 import type { RehydrateProcessSelectors } from './rehydrate_process_selectors';
 import type { CoverageSubject, CoverageWriteResult } from './types';
@@ -54,6 +56,16 @@ export interface RunPackageReportDeps {
   resolveHostEnrollment: ResolveHostEnrollment;
   rehydrateProcessSelectors: RehydrateProcessSelectors;
   countExistingProposals: CountExistingProposals;
+  /**
+   * *Internal*-user ES client for the no-hit coverage `threat_summary` / severity preference
+   * (`loadReportHuntContext`). Only read on the no-hit branch, which has no current-run SSE to
+   * fall back to from this helper's own failure; a thin synthetic string stands in instead.
+   * Optional so a caller without the threat-reports index wired up still packages. Must not be
+   * the step's scoped client: the hunt worker's service-account role has no grant at all on
+   * `.kibana-threat-reports`, so a scoped search there silently returns zero hits rather than
+   * erroring (see `loadReportHuntContext`'s doc comment).
+   */
+  getEsReportContextClient?: () => EsReportContextClient;
 }
 
 /**
@@ -160,9 +172,29 @@ export const runPackageReport = async ({
       // No SSE means no technique-level detail either, so this writes the same report-scoped
       // fallback subject `deriveCoverageSubjects` already emits when a run's SSE names no
       // techniques -- the one piece of "we looked" this run can honestly claim is the reportId.
+      //
+      // No-hit prefers the threat report for `threatSummary` / severity (no SSE exists here to
+      // fall back to); a failed or missing load degrades to a thin synthetic string instead of
+      // failing packaging.
+      const reportContext = deps.getEsReportContextClient
+        ? await loadReportHuntContext({
+            esClient: deps.getEsReportContextClient(),
+            spaceId,
+            reportId,
+          })
+        : undefined;
+      const closureSummary = `Hunt for report ${reportId} found no confirmed hits. Closing: nothing in this environment matched the report at the confirming-index bar.`;
       const subjects = deriveCoverageSubjects({
         spaceId,
-        state: { reportId, techniques: [], hasConfirmedHit: false, corroboratedTechniques: [] },
+        state: {
+          reportId,
+          techniques: [],
+          hasConfirmedHit: false,
+          corroboratedTechniques: [],
+          threatSummary: reportContext?.title ?? `No confirmed hits for report ${reportId}.`,
+          severity: reportContext?.severity,
+          investigationSummary: closureSummary,
+        },
         investigationConversationId,
       });
       const coverage = await deps.writeCoverageKis(subjects);
@@ -173,7 +205,7 @@ export const runPackageReport = async ({
         proposalBullets: [],
         omittedProposalCount: 0,
         dismiss: true,
-        closureSummary: `Hunt for report ${reportId} found no confirmed hits. Closing: nothing in this environment matched the report at the confirming-index bar.`,
+        closureSummary,
         expectedProposalCount: 0,
         mintSuppression: 'none',
       };
@@ -204,9 +236,15 @@ export const runPackageReport = async ({
     catalog,
   });
 
+  // Hit path: threat text is SSE-only (the finding's own title / hypothesis), never a report
+  // re-fetch -- the report load above is a no-hit-only concern.
   const subjects = deriveCoverageSubjects({
     spaceId,
-    state,
+    state: {
+      ...state,
+      threatSummary: state.titles[0],
+      investigationSummary: decided.closureSummary,
+    },
     investigationConversationId,
   });
   const coverage = await deps.writeCoverageKis(subjects);

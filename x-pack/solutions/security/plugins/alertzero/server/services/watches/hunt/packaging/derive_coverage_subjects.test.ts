@@ -92,4 +92,52 @@ describe('deriveCoverageSubjects', () => {
     });
     expect(clean[0].content).toBe('Hunt swept report on report rpt-1 with no confirmed hit.');
   });
+
+  it('carries the caller-resolved threatSummary, dataSources, severity, and investigationSummary onto every subject', () => {
+    const subjects = deriveCoverageSubjects({
+      spaceId: 'default',
+      investigationConversationId: 'conv-1',
+      state: baseState({
+        hasConfirmedHit: true,
+        techniques: ['T1078.004'],
+        corroboratedTechniques: ['T1078.004'],
+        threatSummary: 'Shadow admin AssumeRole',
+        dataSources: ['aws-cloudtrail'],
+        severity: 'high',
+        investigationSummary: 'Confirmed hit; host-a isolated.',
+      }),
+    });
+
+    expect(subjects[0]).toMatchObject({
+      threatSummary: 'Shadow admin AssumeRole',
+      dataSources: ['aws-cloudtrail'],
+      severity: 'high',
+      investigationSummary: 'Confirmed hit; host-a isolated.',
+    });
+  });
+
+  it('defaults dataSources to an empty array when the caller supplies none', () => {
+    const subjects = deriveCoverageSubjects({
+      spaceId: 'default',
+      investigationConversationId: 'conv-1',
+      state: baseState(),
+    });
+
+    expect(subjects[0].dataSources).toEqual([]);
+  });
+
+  it('sets hasConfirmedHit per subject from the same corroboration rule as content', () => {
+    const subjects = deriveCoverageSubjects({
+      spaceId: 'default',
+      investigationConversationId: 'conv-1',
+      state: baseState({
+        hasConfirmedHit: true,
+        techniques: ['T1078.004', 'T1021.001'],
+        corroboratedTechniques: ['T1078.004'],
+      }),
+    });
+
+    expect(subjects.find((s) => s.technique === 'T1078.004')?.hasConfirmedHit).toBe(true);
+    expect(subjects.find((s) => s.technique === 'T1021.001')?.hasConfirmedHit).toBe(false);
+  });
 });

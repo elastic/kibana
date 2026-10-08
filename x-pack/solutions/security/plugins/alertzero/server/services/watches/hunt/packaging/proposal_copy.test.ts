@@ -67,6 +67,7 @@ const baseState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState =>
   titles: ['Hunt: PowerShell (T1059.001) [ti-repor]'],
   evidenceLines: [],
   techniques: ['T1059.001'],
+  dataSources: [],
   corroboratedTechniques: ['T1059.001'],
   hosts: [host],
   processSelectors: [],

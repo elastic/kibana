@@ -51,6 +51,15 @@ export interface PackageReportStepDependencies {
     esClient: ElasticsearchClient,
     logger?: Logger
   ) => RunPackageReportDeps['rehydrateProcessSelectors'];
+  /**
+   * Kibana's internal-user ES client, for `loadReportHuntContext`'s read of
+   * `.kibana-threat-reports`. The hunt worker's service-account role grants it no privilege on
+   * that index at all (not even via an exact-name grant), so the step's own scoped client cannot
+   * read it: a wildcard search there resolves to zero matched indices and returns an empty,
+   * error-free result rather than a 403, which is indistinguishable from a genuinely missing
+   * report. Optional so a caller without CoreStart wired up still packages (no enrichment).
+   */
+  getInternalEsClient?: () => ElasticsearchClient;
   logger?: Logger;
 }
 
@@ -70,6 +79,7 @@ export const getPackageReportStepDefinition = ({
   isContextEngineEnabled,
   getResolveHostEnrollment = () => defaultResolveHostEnrollment,
   getRehydrateProcessSelectors = makeRehydrateProcessSelectors,
+  getInternalEsClient,
   logger,
 }: PackageReportStepDependencies) =>
   createServerStepDefinition({
@@ -107,6 +117,10 @@ export const getPackageReportStepDefinition = ({
           isContextEngineEnabled: () => isContextEngineEnabled(request),
         });
 
+        const getEsReportContextClient = getInternalEsClient
+          ? () => getInternalEsClient()
+          : undefined;
+
         const rehydrateProcessSelectors = getRehydrateProcessSelectors(
           context.contextManager.getScopedEsClient(),
           logger
@@ -134,6 +148,7 @@ export const getPackageReportStepDefinition = ({
             resolveHostEnrollment: getResolveHostEnrollment(spaceId),
             rehydrateProcessSelectors,
             countExistingProposals,
+            getEsReportContextClient,
           },
         });
 

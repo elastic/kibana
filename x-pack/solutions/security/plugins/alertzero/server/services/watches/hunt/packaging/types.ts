@@ -76,6 +76,13 @@ export interface CurrentRunState {
   evidenceLines: string[];
   /** Technique ids from current-run SKIs (`type: technique`), proposed or corroborated. */
   techniques: string[];
+  /** Hunted technology / telemetry labels from current-run SKIs (`type: technology`), deduped. */
+  dataSources: string[];
+  /**
+   * Highest current-run SSE `severity` (critical > high > medium > low), or undefined when
+   * there is no current-run SSE at all (the report-scoped clean/no-SSE packaging branch).
+   */
+  severity?: string;
   /**
    * Subset of `techniques` this run actually corroborated (the SSE entry naming it carried
    * `corroborated_technique_id`), as opposed to one merely named on the report-scoped
@@ -116,6 +123,16 @@ export interface CoverageSubject {
   title: string;
   description: string;
   content: string;
+  /** Short threat / finding description; hit prefers SSE, no-hit prefers the threat report. */
+  threatSummary?: string;
+  /** Hunted technologies / telemetry labels (SSE SKI `type: technology`), not intel-feed source. */
+  dataSources: string[];
+  /** Report severity when known, else SSE finding severity; omitted when neither exists. */
+  severity?: string;
+  /** Short packaging-built synopsis, mirroring the run's closure summary. */
+  investigationSummary?: string;
+  /** Explicit hit/clean flag so a consumer does not have to parse prose. */
+  hasConfirmedHit: boolean;
 }
 
 export interface CoverageWriteResult {

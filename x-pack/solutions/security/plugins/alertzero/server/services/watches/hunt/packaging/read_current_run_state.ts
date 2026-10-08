@@ -18,6 +18,18 @@ import type {
   HuntEvidenceTechnique,
 } from './types';
 
+/** Rank order for picking the single most severe current-run SSE severity. Higher wins. */
+const SEVERITY_RANK: Record<string, number> = { low: 0, medium: 1, high: 2, critical: 3 };
+
+/** Highest-ranked severity across current-run SSEs; every SSE carries one, so this is never empty. */
+const pickHighestSeverity = (severities: string[]): string | undefined =>
+  severities.reduce<string | undefined>((highest, candidate) => {
+    if (highest === undefined) {
+      return candidate;
+    }
+    return (SEVERITY_RANK[candidate] ?? 0) > (SEVERITY_RANK[highest] ?? 0) ? candidate : highest;
+  }, undefined);
+
 const SSE_ATTACHMENT_TYPE = 'security.significant_security_event';
 
 const currentVersionData = (attachment: VersionedAttachment): unknown => {
@@ -120,6 +132,18 @@ export const readCurrentRunState = async ({
     ),
   ];
 
+  const dataSources = [
+    ...new Set(
+      currentRun.flatMap((sse) =>
+        sse.security_knowledge_indicators
+          .filter((ski) => ski.type === 'technology')
+          .map((ski) => ski.value)
+      )
+    ),
+  ];
+
+  const severity = pickHighestSeverity(currentRun.map((sse) => sse.severity));
+
   const corroboratedTechniques = [
     ...new Set(
       currentRun
@@ -187,6 +211,8 @@ export const readCurrentRunState = async ({
     titles,
     evidenceLines,
     techniques,
+    dataSources,
+    severity,
     corroboratedTechniques,
     hasNonHostEntity,
     hasIocIndicator,

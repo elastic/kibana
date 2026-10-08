@@ -13,11 +13,20 @@ import type { CoverageSubject, CurrentRunState } from './types';
  * with no current-run SSE at all -- a real clean run -- can still derive a report-scoped
  * subject without fabricating fields it has no data for. `corroboratedTechniques` defaults to
  * empty for that same caller: a run with no SSE at all corroborated nothing.
+ *
+ * `threatSummary`, `dataSources`, `severity`, and `investigationSummary` are resolved by the
+ * caller before this call (SSE-sourced on hit, report-sourced with SSE fallback on no-hit; see
+ * `run_package_report.ts`), so this function stays pure and run-scoped: the same resolved
+ * values apply to every subject this run derives, there is no per-technique source rule.
  */
 export type CoverageSubjectState = Pick<
   CurrentRunState,
   'reportId' | 'techniques' | 'hasConfirmedHit' | 'corroboratedTechniques'
->;
+> &
+  Partial<Pick<CurrentRunState, 'dataSources' | 'severity'>> & {
+    threatSummary?: string;
+    investigationSummary?: string;
+  };
 
 /**
  * One coverage subject per technique on the current run; report-scoped when the
@@ -60,6 +69,11 @@ export const deriveCoverageSubjects = ({
       content: confirmedHitForSubject
         ? `Hunt confirmed a hit for ${techniqueLabel} on report ${state.reportId}.`
         : `Hunt swept ${techniqueLabel} on report ${state.reportId} with no confirmed hit.`,
+      threatSummary: state.threatSummary,
+      dataSources: state.dataSources ?? [],
+      severity: state.severity,
+      investigationSummary: state.investigationSummary,
+      hasConfirmedHit: confirmedHitForSubject,
     };
   });
 };

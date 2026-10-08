@@ -27,6 +27,8 @@ describe('createCoverageWriter', () => {
         title: 't',
         description: 'd',
         content: 'c',
+        dataSources: [],
+        hasConfirmedHit: false,
       },
     ]);
     expect(disabledResult.skipped[0].reason).toBe('disabled');
@@ -47,6 +49,8 @@ describe('createCoverageWriter', () => {
         title: 't',
         description: 'd',
         content: 'c',
+        dataSources: [],
+        hasConfirmedHit: false,
       },
     ]);
     expect(deniedResult.skipped[0].reason).toBe('denied');
@@ -67,6 +71,8 @@ describe('createCoverageWriter', () => {
         title: 't',
         description: 'd',
         content: 'c',
+        dataSources: [],
+        hasConfirmedHit: false,
       },
     ]);
     expect(storageResult.skipped[0].reason).toBe('storage_failure');
@@ -79,6 +85,8 @@ describe('createCoverageWriter', () => {
     title: 't',
     description: 'd',
     content: 'c',
+    dataSources: [],
+    hasConfirmedHit: false,
   };
 
   it('skips an already-processed item rather than rewriting it', async () => {
@@ -152,6 +160,76 @@ describe('createCoverageWriter', () => {
 
     expect(get).toHaveBeenCalledWith(expect.objectContaining({ index: dest }));
     expect(index).toHaveBeenCalledWith(expect.objectContaining({ index: dest }));
+  });
+
+  it('writes producer v2', async () => {
+    const index = jest.fn().mockResolvedValue({});
+    const write = createCoverageWriter({
+      spaceId: 'default',
+      isContextEngineEnabled: async () => true,
+      getEsClient: () => ({ get: jest.fn().mockRejectedValue({ statusCode: 404 }), index }),
+    });
+
+    await write([coverageSubject]);
+
+    expect(index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          attributes: expect.objectContaining({ producer: 'hunt.packageReport.v2' }),
+        }),
+      })
+    );
+  });
+
+  it('writes the enriched attributes when the subject carries them', async () => {
+    const index = jest.fn().mockResolvedValue({});
+    const write = createCoverageWriter({
+      spaceId: 'default',
+      isContextEngineEnabled: async () => true,
+      getEsClient: () => ({ get: jest.fn().mockRejectedValue({ statusCode: 404 }), index }),
+    });
+
+    await write([
+      {
+        ...coverageSubject,
+        threatSummary: 'Shadow admin AssumeRole',
+        dataSources: ['aws-cloudtrail'],
+        severity: 'high',
+        investigationSummary: 'Confirmed hit; host-a isolated.',
+        hasConfirmedHit: true,
+      },
+    ]);
+
+    expect(index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          attributes: expect.objectContaining({
+            threat_summary: 'Shadow admin AssumeRole',
+            data_sources: ['aws-cloudtrail'],
+            severity: 'high',
+            investigation_summary: 'Confirmed hit; host-a isolated.',
+            has_confirmed_hit: true,
+          }),
+        }),
+      })
+    );
+  });
+
+  it('omits enriched attributes rather than writing them empty when the subject has no value', async () => {
+    const index = jest.fn().mockResolvedValue({});
+    const write = createCoverageWriter({
+      spaceId: 'default',
+      isContextEngineEnabled: async () => true,
+      getEsClient: () => ({ get: jest.fn().mockRejectedValue({ statusCode: 404 }), index }),
+    });
+
+    await write([coverageSubject]);
+
+    const written = index.mock.calls[0][0].document.attributes;
+    expect(written).not.toHaveProperty('threat_summary');
+    expect(written).not.toHaveProperty('data_sources');
+    expect(written).not.toHaveProperty('severity');
+    expect(written).not.toHaveProperty('investigation_summary');
   });
 
   // The gate is a saved objects read, so it can fail on its own. Throwing out of here would

@@ -152,8 +152,20 @@ export const createCoverageWriter = ({
               report_id: subject.reportId,
               investigation_id: subject.investigationConversationId,
               watch_id: 'hunt',
-              producer: 'hunt.packageReport.v1',
+              // Bumped from v1: this write adds threat_summary / data_sources / severity /
+              // investigation_summary / has_confirmed_hit, so Detection can tell an enriched
+              // KI apart from a lean v1 KI still pending from before this change.
+              producer: 'hunt.packageReport.v2',
               space_id: spaceId,
+              // Omitted rather than written empty: a reader should see a missing field, not an
+              // empty string or an empty array, when this run had nothing to say.
+              ...(subject.threatSummary ? { threat_summary: subject.threatSummary } : {}),
+              ...(subject.dataSources.length > 0 ? { data_sources: subject.dataSources } : {}),
+              ...(subject.severity ? { severity: subject.severity } : {}),
+              ...(subject.investigationSummary
+                ? { investigation_summary: subject.investigationSummary }
+                : {}),
+              has_confirmed_hit: subject.hasConfirmedHit,
             },
           },
           refresh: 'wait_for',

@@ -20,6 +20,8 @@ const sseAttachment = ({
   tier1TotalHits = 1,
   tier2Behaviors = [],
   techniqueIds = ['T1078.004'],
+  technologyIds = [],
+  severity = 'high',
   corroboratedTechniqueId,
 }: {
   actionableIndices?: string[];
@@ -36,6 +38,9 @@ const sseAttachment = ({
   }>;
   /** Technique SKIs this entry lists, proposed or corroborated. */
   techniqueIds?: string[];
+  /** Technology SKIs this entry lists (`type: technology`), the `dataSources` source. */
+  technologyIds?: string[];
+  severity?: 'low' | 'medium' | 'high' | 'critical';
   /**
    * Mirrors `sse_mapper`'s `corroborated_technique_id`: set only on an entry scoped to a
    * technique the run actually corroborated, never on the report-scoped fallback entry.
@@ -52,7 +57,7 @@ const sseAttachment = ({
       content_hash: 'abc',
       data: {
         title,
-        severity: 'high',
+        severity,
         confidence: 0.9,
         status: 'open',
         source_watch: 'system-security-hunt-continuous-threat-hunt',
@@ -60,11 +65,17 @@ const sseAttachment = ({
         run_id: runId,
         report_id: reportId,
         ...(corroboratedTechniqueId ? { corroborated_technique_id: corroboratedTechniqueId } : {}),
-        security_knowledge_indicators: techniqueIds.map((techniqueId) => ({
-          type: 'technique' as const,
-          value: techniqueId,
-          technique_id: techniqueId,
-        })),
+        security_knowledge_indicators: [
+          ...techniqueIds.map((techniqueId) => ({
+            type: 'technique' as const,
+            value: techniqueId,
+            technique_id: techniqueId,
+          })),
+          ...technologyIds.map((technologyId) => ({
+            type: 'technology' as const,
+            value: technologyId,
+          })),
+        ],
         entities: [{ field: 'host.name', value: 'host-a' }],
         events: events ?? [
           {
@@ -363,4 +374,53 @@ describe('readCurrentRunState', () => {
     expect(state?.techniques.sort()).toEqual(['T1021.001', 'T1078.004']);
     expect(state?.corroboratedTechniques).toEqual(['T1078.004']);
   });
+
+  it('collects technology SKIs across attachments into dataSources, deduped', async () => {
+    const state = await readCurrentRunState({
+      attachments: [
+        sseAttachment({ attachmentId: 'sse-1', technologyIds: ['aws-cloudtrail', 'okta'] }),
+        sseAttachment({ attachmentId: 'sse-2', technologyIds: ['okta'] }),
+      ],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.dataSources.sort()).toEqual(['aws-cloudtrail', 'okta']);
+  });
+
+  it('defaults dataSources to an empty array when no attachment lists technology SKIs', async () => {
+    const state = await readCurrentRunState({
+      attachments: [sseAttachment({ technologyIds: [] })],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.dataSources).toEqual([]);
+  });
+
+  it.each([
+    ['critical', 'high', 'critical'],
+    ['high', 'critical', 'critical'],
+    ['low', 'medium', 'medium'],
+  ] as const)(
+    'picks the highest severity across attachments (%s vs %s -> %s)',
+    async (severityA, severityB, expected) => {
+      const state = await readCurrentRunState({
+        attachments: [
+          sseAttachment({ attachmentId: 'sse-1', severity: severityA }),
+          sseAttachment({ attachmentId: 'sse-2', severity: severityB }),
+        ],
+        reportId,
+        runId,
+        resolveHostEnrollment,
+        rehydrateProcessSelectors,
+      });
+
+      expect(state?.severity).toBe(expected);
+    }
+  );
 });

@@ -99,6 +99,7 @@ const baseHitState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState
   titles: ['Shadow admin AssumeRole'],
   evidenceLines: ['Tier 1 hits in cloudtrail'],
   techniques: ['T1078.004'],
+  dataSources: [],
   corroboratedTechniques: ['T1078.004'],
   hosts: [{ name: 'host-a', enrolled: true, agentId: 'agent-a' }],
   processSelectors: [],
