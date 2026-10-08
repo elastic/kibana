@@ -91,5 +91,11 @@ function resolveToolSchema(schema: unknown): ToolSchema {
     ]) as ToolSchema;
   }
   // Plain JSON Schema object
-  return pick(schema as JsonSchema7Type, ['type', 'properties', 'required']) as ToolSchema;
+  return pick(schema as JsonSchema7Type, [
+    'type',
+    'properties',
+    'required',
+    '$defs',
+    'definitions',
+  ]) as ToolSchema;
 }

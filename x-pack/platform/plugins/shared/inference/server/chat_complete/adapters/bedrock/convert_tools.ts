@@ -95,6 +95,23 @@ function stripUnsupportedSchemaKeywords<T extends ToolSchemaType>(schemaPart: T)
 }
 
 /**
+ * Applies `fixSchemaArrayProperties` to every entry of a `$defs` /
+ * `definitions` block so unsupported keywords are stripped from
+ * referenced sub-schemas too, not just from the top-level schema.
+ */
+function mapDefs(
+  defs: Record<string, ToolSchemaType> | undefined
+): Record<string, ToolSchemaType> | undefined {
+  return defs
+    ? Object.fromEntries(
+        Object.entries(defs as Record<string, ToolSchemaType>).map(([key, def]) => {
+          return [key, fixSchemaArrayProperties(def)];
+        })
+      )
+    : undefined;
+}
+
+/**
  * Claude is prone to ignoring the "array" part of an array type,
  * so this function patches it to add a message on each
  * array property to explicitly state that the value should
@@ -114,6 +131,10 @@ export function fixSchemaArrayProperties<T extends ToolSchemaType>(schemaPart: T
           return [key, fixSchemaArrayProperties(childSchemaPart)];
         })
       ),
+      ...('$defs' in cleaned && cleaned.$defs ? { $defs: mapDefs(cleaned.$defs) } : {}),
+      ...('definitions' in cleaned && cleaned.definitions
+        ? { definitions: mapDefs(cleaned.definitions) }
+        : {}),
     };
   }
 
