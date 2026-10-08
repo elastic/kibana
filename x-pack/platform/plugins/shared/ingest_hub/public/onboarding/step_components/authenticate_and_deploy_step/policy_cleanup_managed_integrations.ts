@@ -14,13 +14,23 @@ import {
 
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
-import { detectSecretRefs } from './secret_refs';
+import {
+  detectSecretRefs,
+  fetchAgentlessSecretRefs,
+  withoutCoveredCredentials,
+} from './secret_refs';
+import type { ExistingSecretRefs } from './secret_refs';
+import { runWithSharedSecrets } from './shared_secrets';
 import { computePolicyCleanupOps, resolveSurvivingMembers } from './policy_cleanup';
 import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
 
 export interface CleanupManagedIntegrationsOpts extends BuildPolicyBodyOpts {
   pendingCleanupPolicyIds: Record<string, string>;
   currentPolicyIdsByInstance: Record<string, string>;
+  /** Instances joining a policy in this run: written with its surviving members, in one PUT. */
+  extraMembersByPolicy?: Record<string, string[]>;
+  /** Policies already written this run with the surviving members: counted as updated, not PUT again. */
+  skipUpdatePolicyIds?: ReadonlySet<string>;
 }
 
 /**
@@ -31,15 +41,33 @@ export interface CleanupManagedIntegrationsOpts extends BuildPolicyBodyOpts {
  */
 export async function cleanupManagedIntegrationsPolicies(
   opts: CleanupManagedIntegrationsOpts
-): Promise<PolicyCleanupOps> {
-  const { pendingCleanupPolicyIds, currentPolicyIdsByInstance } = opts;
+): Promise<PolicyCleanupOps & { sharedRefs?: ExistingSecretRefs }> {
+  const {
+    pendingCleanupPolicyIds,
+    currentPolicyIdsByInstance,
+    authenticateAndDeployStep,
+    extraMembersByPolicy,
+    skipUpdatePolicyIds,
+  } = opts;
   const planned = computePolicyCleanupOps(pendingCleanupPolicyIds, currentPolicyIdsByInstance);
 
   const succeededDeletes: string[] = [];
   const succeededUpdates: Array<{ policyId: string; survivingInstanceIds: string[] }> = [];
+  const alreadyUpdated = planned.toUpdate.filter(({ policyId }) =>
+    skipUpdatePolicyIds?.has(policyId)
+  );
+  const toRun = planned.toUpdate.filter(({ policyId }) => !skipUpdatePolicyIds?.has(policyId));
 
-  await Promise.allSettled([
-    ...planned.toDelete.map((policyId) =>
+  const { connectorId, staticKeys, existingSecretRefs } = authenticateAndDeployStep;
+  // Typed keys become a new Fleet secret on every policy they are sent to: store them once and
+  // have the remaining updates (and the caller's later ones) use that secret.
+  const hasTypedSecrets =
+    !connectorId &&
+    !existingSecretRefs?.size &&
+    Boolean(staticKeys?.access_key_id || staticKeys?.secret_access_key);
+
+  const deletes = Promise.allSettled(
+    planned.toDelete.map((policyId) =>
       sendDeleteAgentlessPolicy(policyId)
         .then(() => {
           succeededDeletes.push(policyId);
@@ -48,20 +76,45 @@ export async function cleanupManagedIntegrationsPolicies(
           // eslint-disable-next-line no-console
           console.error(`Failed to delete managed-integrations policy ${policyId}:`, err);
         })
-    ),
-    ...planned.toUpdate.map(({ policyId, survivingInstanceIds }) =>
-      updateManagedIntegrationsPolicy(policyId, survivingInstanceIds, opts)
-        .then(() => {
-          succeededUpdates.push({ policyId, survivingInstanceIds });
-        })
-        .catch((err) => {
-          // eslint-disable-next-line no-console
-          console.error(`Failed to update managed-integrations policy ${policyId}:`, err);
-        })
-    ),
-  ]);
+    )
+  );
+  const updates = runWithSharedSecrets({
+    items: toRun,
+    hasTypedSecrets,
+    // An update can delete the secret it replaced: finish one before starting the next.
+    sequential: true,
+    run: ({ policyId, survivingInstanceIds }, sharedRefs) =>
+      updateManagedIntegrationsPolicy(
+        policyId,
+        [...survivingInstanceIds, ...(extraMembersByPolicy?.[policyId] ?? [])],
+        sharedRefs
+          ? {
+              ...opts,
+              authenticateAndDeployStep: {
+                ...authenticateAndDeployStep,
+                staticKeys: staticKeys && withoutCoveredCredentials(staticKeys, sharedRefs),
+                existingSecretRefs: sharedRefs,
+              },
+            }
+          : opts
+      ),
+    getPolicyId: ({ policyId }) => policyId,
+    fetchRefs: fetchAgentlessSecretRefs,
+  });
 
-  return { toDelete: succeededDeletes, toUpdate: succeededUpdates };
+  const [, { results, sharedRefs }] = await Promise.all([deletes, updates]);
+  succeededUpdates.push(...alreadyUpdated);
+  results.forEach((result, i) => {
+    const { policyId, survivingInstanceIds } = toRun[i];
+    if (result.status === 'fulfilled') {
+      succeededUpdates.push({ policyId, survivingInstanceIds });
+    } else {
+      // eslint-disable-next-line no-console
+      console.error(`Failed to update managed-integrations policy ${policyId}:`, result.reason);
+    }
+  });
+
+  return { toDelete: succeededDeletes, toUpdate: succeededUpdates, sharedRefs };
 }
 
 export async function updateManagedIntegrationsPolicy(
