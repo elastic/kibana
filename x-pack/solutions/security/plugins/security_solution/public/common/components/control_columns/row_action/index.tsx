@@ -22,7 +22,7 @@ import {
   rulePreviewCellActionRenderer,
 } from '../../../../flyout_v2/shared/components/cell_actions';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
-import { getAlertIndexAlias } from '../../../../flyout/document_details/shared/hooks/use_event_details';
+import { getAlertIndexAlias } from '../../../../flyout_v2/shared/utils/alert_index_alias';
 import { useSpaceId } from '../../../hooks/use_space_id';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
 import { useKibana } from '../../../lib/kibana';

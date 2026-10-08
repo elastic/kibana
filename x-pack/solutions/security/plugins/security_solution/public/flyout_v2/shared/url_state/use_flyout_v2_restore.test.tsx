@@ -1038,6 +1038,24 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     );
   });
 
+  it('opens [analyzer, documentFromPattern] — document child restores via openDocumentFlyoutFromPatternAsChild', () => {
+    withHit(docSearchHit);
+    renderRestore(
+      buildUrl([
+        { kind: 'analyzer', documentId: 'doc-1', indexName: 'logs-*' },
+        { kind: 'documentFromPattern', documentId: 'doc-2', indexName: '.siem-signals-*' },
+      ])
+    );
+    act(() => {
+      jest.runAllTimers();
+    });
+    expect(mockFlyoutApi.openDocumentFlyoutFromPatternAsChild).toHaveBeenCalledWith(
+      expect.objectContaining({ documentId: 'doc-2', indexName: '.siem-signals-*' })
+    );
+    // The main (non-child) variant must not be used for a child descriptor.
+    expect(mockFlyoutApi.openDocumentFlyoutFromPattern).not.toHaveBeenCalled();
+  });
+
   it('opens [cspMisconfiguration, attack] — second entry via openAttackFlyoutAsChild', () => {
     renderRestore(
       buildUrl([

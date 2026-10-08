@@ -146,7 +146,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     } = services;
 
     const enableNewFlyout = useIsNewFlyoutEnabled();
-    const { openAttackFlyout, openDocumentFlyoutFromIndex } = useFlyoutApi();
+    const { openAttackFlyout, openDocumentFlyoutFromPattern } = useFlyoutApi();
 
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
 
@@ -211,7 +211,14 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
               attackTitle: getAttackTitleValue(eventData),
             });
           } else {
-            openDocumentFlyoutFromIndex({
+            // Resolve the document by *pattern* (routing the search at the index) rather than by
+            // concrete `_index`: the from-index path pins the lookup with a `term` filter on
+            // `_index`, which never matches a cross-cluster document (on the remote the stored
+            // `_index` is bare, while the resolved index carries the `cluster:` alias). Routing at
+            // the index reaches the document, like the legacy flyout. Alert backing indices are
+            // resolved to their public alias inside the wrapper. See
+            // https://github.com/elastic/kibana/issues/286323.
+            openDocumentFlyoutFromPattern({
               documentId: eventData._id,
               indexName: eventData.ecs._index,
               renderCellActions: timelineCellActionRenderer,
@@ -251,7 +258,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [
         enableNewFlyout,
         openAttackFlyout,
-        openDocumentFlyoutFromIndex,
+        openDocumentFlyoutFromPattern,
         timelineCellActionRenderer,
         refetch,
         timelineId,

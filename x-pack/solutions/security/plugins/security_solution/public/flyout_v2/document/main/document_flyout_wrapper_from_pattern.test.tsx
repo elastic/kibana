@@ -12,10 +12,12 @@ import { DocumentFlyoutWrapperFromPattern } from './document_flyout_wrapper_from
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useTimelineEventsDetails } from '../../../timelines/containers/details';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 
 jest.mock('../../../data_view_manager/hooks/use_data_view');
 jest.mock('../../../timelines/containers/details');
 jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+jest.mock('../../../common/hooks/use_space_id');
 jest.mock('@kbn/discover-utils', () => ({
   buildDataTableRecord: jest.fn(() => ({ id: '1', raw: { _id: '1' }, flattened: {} })),
   getFieldValue: jest.fn(() => 'event'),
@@ -54,6 +56,7 @@ describe('DocumentFlyoutWrapperFromPattern', () => {
       status: 'ready',
     });
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+    (useSpaceId as jest.Mock).mockReturnValue('default');
     // [loading, dataFormattedForFieldBrowser, searchHit, dataAsNestedObject, refetch]
     setEventsDetails([false, [], { _id: '1', _index: 'x', fields: {} }, {}, jest.fn()]);
   });
@@ -114,5 +117,33 @@ describe('DocumentFlyoutWrapperFromPattern', () => {
     );
     expect(getByTestId('document-from-pattern-wrapper-data-view-degraded')).toBeInTheDocument();
     expect(getByTestId('document-flyout')).toBeInTheDocument();
+  });
+
+  it('resolves a hidden alert backing index to its space-scoped alias before searching', () => {
+    (useSpaceId as jest.Mock).mockReturnValue('custom');
+    render(
+      <I18nProvider>
+        <DocumentFlyoutWrapperFromPattern
+          {...props}
+          indexName=".internal.alerts-security.alerts-custom-000001"
+        />
+      </I18nProvider>
+    );
+
+    expect(useTimelineEventsDetails).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexName: '.alerts-security.alerts-custom',
+      })
+    );
+  });
+
+  it('passes a non-alert index through unchanged', () => {
+    renderFromPattern();
+
+    expect(useTimelineEventsDetails).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexName: props.indexName,
+      })
+    );
   });
 });

@@ -69,11 +69,15 @@ export const SessionViewDetails = memo(
     onJumpToEvent,
     onAlertUpdated,
   }: SessionViewDetailsProps) => {
-    const { openDocumentFlyoutFromIndexAsChild } = useFlyoutApi();
+    const { openDocumentFlyoutFromPatternAsChild } = useFlyoutApi();
 
+    // Resolve the document by *pattern* (routing the search at the index) rather than by concrete
+    // `_index`, so cross-cluster / outside-data-view process events resolve. Alert backing indices
+    // are converted to their alias inside the wrapper. See
+    // https://github.com/elastic/kibana/issues/286323.
     const onShowAlertDetails = useCallback(
       (alertId: string, alertIndex: string) => {
-        openDocumentFlyoutFromIndexAsChild({
+        openDocumentFlyoutFromPatternAsChild({
           documentId: alertId,
           indexName: alertIndex,
           renderCellActions,
@@ -81,7 +85,7 @@ export const SessionViewDetails = memo(
           origin: FLYOUT_ORIGIN.SESSION_VIEW_ALERT,
         });
       },
-      [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
+      [openDocumentFlyoutFromPatternAsChild, renderCellActions, onAlertUpdated]
     );
 
     const handleJumpToEvent = useCallback(
