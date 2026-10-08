@@ -9,7 +9,6 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { consumeRunQuota, createRunQuotaInternalRepository } from './lib/run_quotas';
 import { knowledgeIndicatorsDataStream } from './lib/knowledge_indicators';
 import { detectionsDataStream } from './lib/significant_events/detections';
-import { eventsDataStream } from './lib/significant_events/events';
 import type { SignificantEventsPluginSetupDependencies } from './types';
 import { SignificantEventsPlugin } from './plugin';
 
@@ -85,7 +84,7 @@ describe('SignificantEventsPlugin setup', () => {
 
     expect(
       core.dataStreams.registerDataStream.mock.calls.map(([definition]) => definition)
-    ).toEqual([detectionsDataStream, eventsDataStream, knowledgeIndicatorsDataStream]);
+    ).toEqual([detectionsDataStream, knowledgeIndicatorsDataStream]);
   });
 
   it('registers a callback without accessing start services', () => {

@@ -1,5 +1,5 @@
 {
-  "sha1": "e855465e57b01d5e315e314aba91ae86cfd4620b",
+  "sha1": "802654afbce6290cd000224f6170eb36dc35483c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -600,7 +600,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram_session.spec.ts",
-        "line": 57,
+        "line": 62,
         "column": 5
       }
     },
@@ -620,7 +620,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram_session.spec.ts",
-        "line": 75,
+        "line": 80,
         "column": 24
       }
     },
@@ -640,7 +640,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram_session.spec.ts",
-        "line": 96,
+        "line": 101,
         "column": 25
       }
     },
@@ -660,7 +660,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram_session.spec.ts",
-        "line": 120,
+        "line": 125,
         "column": 25
       }
     },
@@ -680,7 +680,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/histogram_session.spec.ts",
-        "line": 127,
+        "line": 132,
         "column": 22
       }
     },
@@ -900,8 +900,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/query_and_session.spec.ts",
-        "line": 67,
-        "column": 9
+        "line": 79,
+        "column": 13
       }
     },
     {
@@ -920,8 +920,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/query_and_session.spec.ts",
-        "line": 76,
-        "column": 98
+        "line": 83,
+        "column": 62
       }
     },
     {
@@ -940,8 +940,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/query_and_session.spec.ts",
-        "line": 88,
-        "column": 18
+        "line": 96,
+        "column": 22
       }
     },
     {
@@ -960,8 +960,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/query_and_session.spec.ts",
-        "line": 100,
-        "column": 20
+        "line": 109,
+        "column": 22
       }
     },
     {
@@ -980,8 +980,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/query_and_session.spec.ts",
-        "line": 106,
-        "column": 44
+        "line": 117,
+        "column": 5
       }
     },
     {

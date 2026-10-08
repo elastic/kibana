@@ -301,6 +301,7 @@ export class WorkflowsPlugin
 
     const additionalServices: WorkflowsPublicPluginStartAdditionalServices = {
       storage: new Storage(localStorage),
+      securityUi: depsStart.security.uiApi,
       workflowsManagement: {
         availability: this.availabilityService,
         telemetry: this.telemetryService.getClient(),

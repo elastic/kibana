@@ -33,14 +33,31 @@ RuleTester.describe = (_, fn) => fn();
 RuleTester.it = (_, fn) => fn();
 eslint.RuleTester = RuleTester;
 
+// Jest globals used by the test files. `jest.mock` is not hoisted outside Jest, so the factory
+// seeds the module cache; the rules load mocked modules lazily, after the test file calls it.
+Object.assign(global, {
+  describe: (_, fn) => fn(),
+  it: (_, fn) => fn(),
+  expect: require('expect').expect,
+  jest: {
+    mock: (moduleName, factory) => {
+      require.cache[require.resolve(moduleName)] = { exports: factory(), loaded: true };
+    },
+  },
+});
+
 const parityTests = {
+  'disallow-license-headers': () => require('../disallow_license_headers.test.js'),
+  'require-license-header': () => require('../require_license_header.test.js'),
   deployment_agnostic_test_context: () => require('../deployment_agnostic_test_context.test.js'),
+  module_migration: () => require('../module_migration.test.js'),
   no_async_foreach: () => require('../no_async_foreach.test.js'),
   no_async_promise_body: () => require('../no_async_promise_body.test.js'),
   no_conditional_saved_object_type_registration: () =>
     require('../no_conditional_saved_object_type_registration.test.js'),
   no_constructor_args_in_property_initializers: () =>
     require('../no_constructor_args_in_property_initializers.test.js'),
+  no_export_all: () => require('../no_export_all.test.js'),
   no_npx_playwright: () => require('../no_npx_playwright.test.js'),
   no_sync_import_from_plugin: () => require('../no_sync_import_from_plugin.test.js'),
   no_this_in_property_initializers: () => require('../no_this_in_property_initializers.test.js'),
@@ -66,16 +83,23 @@ const parityTests = {
   scout_no_locators: () => require('../scout_no_locators.test.js'),
   scout_no_promise_all_with_playwright_apis: () =>
     require('../scout_no_promise_all_with_playwright_apis.test.js'),
+  scout_no_raw_eui_selectors: () => require('../scout_no_raw_eui_selectors.test.js'),
   scout_require_api_client_in_api_test: () =>
     require('../scout_require_api_client_in_api_test.test.js'),
   scout_require_global_setup_hook_in_parallel_tests: () =>
     require('../scout_require_global_setup_hook_in_parallel_tests.test.js'),
   scout_test_file_naming: () => require('../scout_test_file_naming.test.js'),
+  security_imports_restriction: () => require('../security_imports_restriction.test.js'),
 };
 
+// Rules that alias an existing ESLint `create` rule instead of being reimplemented with `createOnce`.
+// Oxlint runs them through its ESLint-compatible API, which re-runs `create` for every file.
+const CREATE_API_RULES = new Set(['security_imports_restriction']);
+
 for (const [ruleName, rule] of Object.entries(oxlintPlugin.rules)) {
-  if (typeof rule.createOnce !== 'function') {
-    throw new Error(`Oxlint plugin rule '${ruleName}' must use createOnce.`);
+  const api = CREATE_API_RULES.has(ruleName) ? 'create' : 'createOnce';
+  if (typeof rule[api] !== 'function') {
+    throw new Error(`Oxlint plugin rule '${ruleName}' must use ${api}.`);
   }
 
   const runParityTest = parityTests[ruleName];

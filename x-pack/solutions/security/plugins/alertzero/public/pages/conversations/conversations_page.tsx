@@ -22,7 +22,7 @@ import {
   InvestigationActionModals,
   type EscalationModalRenderProps,
   Impact,
-  impactPills,
+  useEntityFilter,
 } from '@kbn/agentic-investigations-common';
 import {
   useApproveProposal,
@@ -32,40 +32,38 @@ import {
   useProposal,
   queryKeys as platformQueryKeys,
 } from '@kbn/proposals-plugin/public';
-import { useCurrentUserProfile } from '@kbn/agentic-investigations-plugin/public';
+import {
+  useAssignInvestigation,
+  useCurrentUserProfile,
+  useStatusSignal,
+  useOpenInChat,
+  decisionErrorMessage,
+  EscalationModalBoundary,
+  LazyConnectedCloseInvestigationModal,
+  LazyConnectedEscalationModal,
+} from '@kbn/agentic-investigations-plugin/public';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { useAssignInvestigation } from '@kbn/agentic-investigations-plugin/public';
 import type { DeclineParams } from '@kbn/proposals-ui';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
-import { useStatusSignal } from '../../components/connected_status/use_status_signal';
-import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
+import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
-import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { useConversationsUrlParams } from './conversations_url_params';
 import { useInvestigationDetails } from './use_investigation_details';
-import { QUEUE_PAGE_INFO } from './translations';
-import { decisionErrorMessage } from './decision_errors';
+import { useCopyInvestigationLink } from './use_copy_investigation_link';
+import { COPY_LINK_TOASTS, QUEUE_PAGE_INFO } from './translations';
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
 import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
-import { EscalationModalBoundary } from './escalation_modal_boundary';
 import { InFlightProposalBadge } from './in_flight_proposal_badge';
 import { useQueueSections } from './queue/use_queue_sections';
 import { useDropDecidedProposal } from './queue/use_drop_decided_proposal';
 import { QueueSection } from './queue/queue_section';
-import { ConnectedCloseInvestigationModal } from '../../components/connected_status/connected_close_investigation_modal';
 import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
-
-// Lazy-loaded so that the escalation modal tree (React Query hooks, form components,
-// translations, and user-profile API) stays out of alertzero's main chunk.
-const LazyConnectedEscalationModal = React.lazy(() =>
-  import('./connected_escalation_modal').then((m) => ({ default: m.ConnectedEscalationModal }))
-);
 
 export const ConversationsPage: React.FC = () => {
   const {
@@ -119,20 +117,7 @@ const ConversationsPageContent: React.FC = () => {
   const currentActorName = currentUserProfile
     ? getUserDisplayName(currentUserProfile.user)
     : undefined;
-  const [entityFilter, setEntityFilter] = useState<string | null>(null);
-  const availableEntityIds = useMemo(
-    () => new Set(impactPills(conversations).map((pill) => pill.entityId)),
-    [conversations]
-  );
-  // A poll or a collapsed section can drop the selected entity from the loaded
-  // rows. Keep filtering only while that pill is still there to clear.
-  const effectiveEntityFilter =
-    entityFilter !== null && availableEntityIds.has(entityFilter) ? entityFilter : null;
-  useEffect(() => {
-    if (entityFilter !== effectiveEntityFilter) {
-      setEntityFilter(effectiveEntityFilter);
-    }
-  }, [entityFilter, effectiveEntityFilter]);
+  const { entityFilter: effectiveEntityFilter, setEntityFilter } = useEntityFilter(conversations);
   useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
 
   const [selectedIdForRecommendedAction, setSelectedIdForRecommendedAction] = useState<
@@ -204,7 +189,7 @@ const ConversationsPageContent: React.FC = () => {
 
   const canDecide = application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] === true;
   const { manageEscalations: canManageEscalations, manageInvestigations: canManageInvestigations } =
-    useAgenticInvestigationsCapabilities();
+    useAlertZeroInvestigationsCapabilities();
 
   // ---------------------------------------------------------------------------
   // Assignee picker — shared across all non-closed investigation cards
@@ -273,9 +258,15 @@ const ConversationsPageContent: React.FC = () => {
 
   const renderCloseModal = useCallback(
     ({ investigation, onClose }: { investigation: Investigation; onClose: () => void }) => (
-      <ConnectedCloseInvestigationModal investigation={investigation} onClose={onClose} />
+      <EscalationModalBoundary>
+        <LazyConnectedCloseInvestigationModal
+          investigation={investigation}
+          onClose={onClose}
+          dropDecidedProposal={dropDecided}
+        />
+      </EscalationModalBoundary>
     ),
-    []
+    [dropDecided]
   );
 
   const renderDismissModal = useCallback(
@@ -321,9 +312,22 @@ const ConversationsPageContent: React.FC = () => {
   // Agent Builder owns the flyout: it loads the conversation and renders the slots this solution
   // registered for the `investigation` template. Closing it clears the URL, which is what closes
   // the flyout on the next pass — the URL stays the single source of truth.
+  const copyInvestigationLink = useCopyInvestigationLink();
+  // Cards are keyed by proposal id, but the link and the flyout are keyed by its conversation.
+  const copyLinkForProposal = useCallback(
+    (proposalId: Investigation['id']) => {
+      const conversationId = proposalsById.get(proposalId)?.conversationId;
+      // The card menu closes on click, so there is no tooltip to confirm in: use a toast.
+      if (conversationId && copyInvestigationLink(conversationId)) {
+        notifications?.toasts.addSuccess(COPY_LINK_TOASTS.copied);
+      }
+    },
+    [proposalsById, copyInvestigationLink, notifications]
+  );
   useInvestigationDetails({
     conversationId: selectedConversationId,
     onClose: clearSelectedConversation,
+    onCopyLink: copyInvestigationLink,
   });
 
   const actionInvestigation = useMemo(
@@ -395,7 +399,9 @@ const ConversationsPageContent: React.FC = () => {
         renderEscalationModal={renderEscalationModal}
       />
 
-      <EuiFlexGroup gutterSize="l" direction="column" wrap>
+      {/* No `wrap`: a wrapping column sizes each line to its widest content, which let a
+          long row title push the queue past the viewport instead of truncating. */}
+      <EuiFlexGroup gutterSize="l" direction="column">
         <EuiFlexItem grow={false}>
           <AlertZeroPageHeader
             // The header renders the charts-summary count, so it tracks that query
@@ -415,7 +421,7 @@ const ConversationsPageContent: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <Impact
-            investigations={conversations}
+            items={conversations}
             entityFilter={effectiveEntityFilter}
             onEntityFilterChange={setEntityFilter}
           />
@@ -436,6 +442,7 @@ const ConversationsPageContent: React.FC = () => {
               getChatHref={getChatHrefForProposal}
               canManageEscalations={canManageEscalations}
               canCloseInvestigation={canManageInvestigations}
+              onCopyLink={copyLinkForProposal}
               renderAssignees={renderAssignees}
               renderInFlightStatus={renderInFlightStatus}
             />

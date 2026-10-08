@@ -68,7 +68,7 @@ apiTest.describe('Create tag episode action API', { tag: '@local-stateful-classi
     expect(actions[0]).toMatchObject({
       action_type: 'tag',
       group_hash: groupHash,
-      episode_id: episodeId,
+      alert_id: episodeId,
       rule_id: ruleId,
       space_id: 'default',
       tags,
@@ -104,7 +104,7 @@ apiTest.describe('Create tag episode action API', { tag: '@local-stateful-classi
       expect(actions[0]).toMatchObject({
         action_type: 'tag',
         group_hash: groupHash,
-        episode_id: episodeId,
+        alert_id: episodeId,
         rule_id: ruleId,
       });
     }
@@ -152,7 +152,7 @@ apiTest.describe('Create tag episode action API', { tag: '@local-stateful-classi
       expect(actions[0]).toMatchObject({
         action_type: 'tag',
         group_hash: groupHash,
-        episode_id: olderEpisodeId,
+        alert_id: olderEpisodeId,
         tags: ['archived'],
       });
     }

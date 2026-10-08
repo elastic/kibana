@@ -169,6 +169,7 @@ describe('collectFullWorkflowYamlValidationResults', () => {
       graphBuildError: computed.graphBuildError,
       context: {
         registry: emptyRegistry,
+        isManaged: false,
         connectorTypes: { status: 'ready', value: {} },
         connectorsManagementUrl: 'http://test/connectors',
         workflows: { workflows: {}, totalWorkflows: 0 },
@@ -201,6 +202,7 @@ describe('collectFullWorkflowYamlValidationResults', () => {
     {
       label: 'failed',
       registry: emptyRegistry,
+      isManaged: false,
       connectorTypes: { status: 'failed' as const, error: 'Connector request failed' },
     },
   ])('defers connector checks when metadata is $label', async ({ connectorTypes }) => {
@@ -217,6 +219,7 @@ describe('collectFullWorkflowYamlValidationResults', () => {
       graphBuildError: computed.graphBuildError,
       context: {
         registry: emptyRegistry,
+        isManaged: false,
         connectorTypes,
         connectorsManagementUrl: 'http://test/connectors',
         workflows: { workflows: {}, totalWorkflows: 0 },
@@ -248,6 +251,7 @@ describe('collectFullWorkflowYamlValidationResults', () => {
       graphBuildError: computed.graphBuildError,
       context: {
         registry: emptyRegistry,
+        isManaged: false,
         connectorTypes: { status: 'ready', value: {} },
         connectorsManagementUrl: 'http://test/connectors',
         workflows: { workflows: {}, totalWorkflows: 0 },
@@ -279,6 +283,7 @@ describe('collectFullWorkflowYamlValidationResults', () => {
       graphBuildError: computed.graphBuildError,
       context: {
         registry: emptyRegistry,
+        isManaged: false,
         connectorTypes: { status: 'ready', value: {} },
         connectorsManagementUrl: 'http://test/connectors',
         workflows: { workflows: {}, totalWorkflows: 0 },
@@ -312,6 +317,7 @@ describe('collectFullWorkflowYamlValidationResults', () => {
       graphBuildError: computed.graphBuildError,
       context: {
         registry: emptyRegistry,
+        isManaged: false,
         connectorTypes: { status: 'ready', value: {} },
         connectorsManagementUrl: 'http://test/connectors',
         workflows: { workflows: {}, totalWorkflows: 0 },

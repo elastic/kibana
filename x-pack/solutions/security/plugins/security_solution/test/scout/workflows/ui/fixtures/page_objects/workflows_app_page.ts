@@ -32,7 +32,7 @@ export class WorkflowsAppPage {
   constructor(private readonly page: ScoutPage) {
     this.yamlEditor = this.page.testSubj.locator('workflowYamlEditor');
     this.saveButton = this.page.testSubj.locator('saveWorkflowHeaderButton');
-    this.runButton = this.page.testSubj.locator('runWorkflowHeaderButton');
+    this.runButton = this.page.testSubj.locator('workflowBottomBarRunButton');
     this.executionPanel = this.page.testSubj.locator('workflowExecutionPanel');
   }
 

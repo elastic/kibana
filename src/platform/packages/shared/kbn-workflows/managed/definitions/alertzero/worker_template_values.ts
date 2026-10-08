@@ -12,13 +12,36 @@ import type { ManagedWorkflowTemplateValues } from '../../types';
 export interface CommonWorkerTemplateValues extends ManagedWorkflowTemplateValues {
   settingsVersion: number;
   autonomyLevel: 'manual' | 'assisted' | 'supervised';
+  /** Absent until an admin selects an account. Omitted from YAML rather than written empty. */
+  serviceAccountId?: string;
 }
+
+const RUN_AS_LINE_TOKEN = '  __WORKER_RUN_AS_LINE__:\n';
+
+/**
+ * Workers enabled before a service account was required have no account id stored. Upgrade and
+ * boot re-render their YAML from those stored values, and they must stay valid so they keep
+ * running until an admin selects an account. Alert Triage, Rule Tuning, and Rule Coverage have
+ * no other settings key, so omitting `run_as` would leave a bare `settings:`. That parses as
+ * null and fails workflow validation, which would mark the worker unavailable. `settings: {}`
+ * is valid because every settings field is optional.
+ */
+const EMPTY_ONLY_RUN_AS_SETTINGS = /settings:\n {2}__WORKER_RUN_AS_LINE__:\n(?=\S|$)/g;
+
+const renderRunAs = (yaml: string, serviceAccountId: string | undefined): string => {
+  if (serviceAccountId) {
+    return yaml.replaceAll(RUN_AS_LINE_TOKEN, `  run_as: ${JSON.stringify(serviceAccountId)}\n`);
+  }
+  return yaml
+    .replaceAll(EMPTY_ONLY_RUN_AS_SETTINGS, 'settings: {}\n')
+    .replaceAll(RUN_AS_LINE_TOKEN, '');
+};
 
 export const renderCommonWorkerYaml = (
   yaml: string,
-  { settingsVersion, autonomyLevel }: CommonWorkerTemplateValues
+  { settingsVersion, autonomyLevel, serviceAccountId }: CommonWorkerTemplateValues
 ): string =>
-  yaml
+  renderRunAs(yaml, serviceAccountId)
     .replaceAll('__WORKER_SETTINGS_VERSION__', String(settingsVersion))
     .replaceAll('__WORKER_AUTONOMY_LEVEL__', autonomyLevel);
 

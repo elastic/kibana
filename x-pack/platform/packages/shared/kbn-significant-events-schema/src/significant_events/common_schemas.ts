@@ -6,6 +6,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { alertEventSeveritySchema } from '@kbn/alerting-v2-schemas';
+import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import dedent from 'dedent';
 import {
@@ -289,8 +291,13 @@ const detectionSignalSchema = signalBaseSchema
 export const signalEntrySchema = z.discriminatedUnion('type', [detectionSignalSchema]);
 export type SignalEntry = z.infer<typeof signalEntrySchema>;
 
-/** Canonical severity values in descending severity order (critical → low). */
-export const SEVERITY_OPTIONS = ['critical', 'high', 'medium', 'low'] as const;
+/** Canonical severity values in descending severity order (critical → low). info is not supported yet */
+export const SEVERITY_OPTIONS = [
+  'critical',
+  'high',
+  'medium',
+  'low',
+] as const satisfies readonly AlertEventSeverity[];
 
 /**
  * Severity field contract — single source of truth for schema `.describe()` and eval judges.
@@ -313,7 +320,9 @@ export const SEVERITY_CONTRACT_RULE = dedent`
   `;
 
 /** Canonical severity used by storage, APIs, and tools. */
-export const severitySchema = z.enum(SEVERITY_OPTIONS).describe(SEVERITY_CONTRACT_RULE);
+export const severitySchema = alertEventSeveritySchema
+  .exclude(['info'])
+  .describe(SEVERITY_CONTRACT_RULE);
 
 export type Severity = z.infer<typeof severitySchema>;
 

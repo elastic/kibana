@@ -59,8 +59,8 @@ jest.mock('../pages/rule_library_page/rule_library_page', () => ({
   RuleLibraryPage: () => <div data-test-subj="ruleLibraryPage">library</div>,
 }));
 
-jest.mock('../pages/alert_episodes_list_page/alert_episodes_list_page', () => ({
-  AlertEpisodesListPage: () => <div data-test-subj="episodesListPage">episodes</div>,
+jest.mock('../pages/alert_episodes_list_page/alerts_list_page', () => ({
+  AlertsListPage: () => <div data-test-subj="episodesListPage">episodes</div>,
 }));
 
 jest.mock('../pages/episode_details_page/episode_details_page', () => ({

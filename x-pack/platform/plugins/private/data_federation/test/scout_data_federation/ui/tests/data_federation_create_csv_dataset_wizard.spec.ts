@@ -12,6 +12,22 @@ import type { ScoutPage } from '@kbn/scout';
 import { getDataSetByIdApiPath, getDataSourceByIdApiPath } from '../fixtures/api_paths';
 import { test, CUSTOM_ROLES } from '../fixtures';
 
+interface DatasetMappingProperty {
+  type: string;
+  path?: string;
+  format?: string;
+}
+
+interface GetDataSetResponse {
+  datasets: Array<{
+    description?: string;
+    mappings?: {
+      dynamic?: string;
+      properties: Record<string, DatasetMappingProperty>;
+    };
+  }>;
+}
+
 const S3_ACCESS_KEY = 'AKIAIOSFODNN7EXAMPLE';
 const S3_SECRET_KEY = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY';
 
@@ -134,6 +150,7 @@ test.describe(
       dataSetName = createdDataSetName;
 
       const resource = 's3://scout-bucket/path/**/*.csv';
+      const updatedDescription = 'Updated in the edit wizard';
 
       // Choose values that force settings into the request payload (non-default / non-empty).
       const settings = {
@@ -434,6 +451,54 @@ test.describe(
         const row = pageObjects.dataFederation.getDataSetRow(createdDataSetName);
         await expect(row).toBeVisible();
         await expect(row).toContainText(resource);
+      });
+
+      const expectedMappings = {
+        dynamic: 'false',
+        properties: mappingFields.reduce<Record<string, DatasetMappingProperty>>(
+          (acc, { name, ...property }) => ({ ...acc, [name]: property }),
+          { '@timestamp': timestamp }
+        ),
+      };
+
+      const getSavedDataSet = async () => {
+        const { data } = await kbnClient.request<GetDataSetResponse>({
+          method: 'GET',
+          path: getDataSetByIdApiPath(createdDataSetName),
+        });
+        const [savedDataSet] = data.datasets;
+        return savedDataSet;
+      };
+
+      await test.step('the created dataset has the declared mappings', async () => {
+        const savedDataSet = await getSavedDataSet();
+        expect(savedDataSet.mappings).toStrictEqual(expectedMappings);
+      });
+
+      await test.step('edit only the description and save', async () => {
+        await pageObjects.dataFederation.openEditDataSetWizard(createdDataSetName);
+
+        await page.getByTestId('createDatasetDescription').fill(updatedDescription);
+        await pageObjects.dataFederation.wizardNextButton.click();
+        await pageObjects.dataFederation.createDatasetWizardAdditionalStep.waitFor({
+          state: 'visible',
+        });
+        await pageObjects.dataFederation.wizardNextButton.click();
+        await pageObjects.dataFederation.createDatasetWizardMappingStep.waitFor({
+          state: 'visible',
+        });
+        await pageObjects.dataFederation.wizardNextButton.click();
+        await pageObjects.dataFederation.createDatasetWizardReviewStep.waitFor({
+          state: 'visible',
+        });
+        await pageObjects.dataFederation.wizardNextButton.click();
+        await pageObjects.dataFederation.createDatasetWizard.waitFor({ state: 'hidden' });
+      });
+
+      await test.step('the edited dataset keeps the original mappings', async () => {
+        const savedDataSet = await getSavedDataSet();
+        expect(savedDataSet.description).toBe(updatedDescription);
+        expect(savedDataSet.mappings).toStrictEqual(expectedMappings);
       });
     });
   }

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
-import { SIGNIFICANT_EVENT_STATUS_OPTIONS, SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
+import { SIGNIFICANT_EVENT_STATUS_OPTIONS, severitySchema } from '@kbn/significant-events-schema';
 
 // Trigger ids: kebab-case namespace, camelCase event.
 export const EVENT_CREATED_TRIGGER_ID = 'significant-events.eventCreated' as const;
@@ -23,7 +23,7 @@ const baseEventSchema = z.object({
   status: z
     .enum(SIGNIFICANT_EVENT_STATUS_OPTIONS)
     .describe('Current lifecycle status: "active" or "inactive".'),
-  severity: z.enum(SEVERITY_OPTIONS).describe('Severity: "critical", "high", "medium", or "low".'),
+  severity: severitySchema.describe('Severity: "critical", "high", "medium", or "low".'),
   stream_names: z.array(z.string()).describe('Data streams associated with this event.'),
   occurred_at: z.string().describe('When the triggered event happened (ISO 8601 timestamp).'),
 });
