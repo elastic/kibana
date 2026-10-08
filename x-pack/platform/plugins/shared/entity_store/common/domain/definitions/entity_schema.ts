@@ -54,14 +54,12 @@ const MAX_DEFINITION_ID_LENGTH = 512;
 const MAX_DEFINITION_NAME_LENGTH = 256;
 
 const entityDefinitionTypeSchema = lazySchema(() =>
-  z
-    .string()
-    .max(ENTITY_DEFINITION_TYPE_MAX_LENGTH, {
-      message: `type name exceeds the maximum length of ${ENTITY_DEFINITION_TYPE_MAX_LENGTH}`,
-    })
-    .regex(ENTITY_DEFINITION_TYPE_PATTERN, {
-      message: `type name does not match pattern ${ENTITY_DEFINITION_TYPE_PATTERN}`,
-    })
+  z.string().superRefine((type, ctx) => {
+    const reason = validateEntityDefinitionType(type);
+    if (reason) {
+      ctx.addIssue({ code: 'custom', message: reason });
+    }
+  })
 );
 
 const mappingSchema = lazySchema(() => z.any());
@@ -370,20 +368,6 @@ export function isSingleFieldIdentity(identity: EntityIdentity): identity is Sin
 }
 
 type DefinitionWithOptionalExtraction = Pick<EntityDefinitionWithoutId, 'extraction'>;
-
-/** Returns the definition's extraction block, or `undefined` when it has none. */
-export const getExtraction = (
-  definition: DefinitionWithOptionalExtraction
-): ExtractionBlock | undefined => definition.extraction;
-
-/** Whether the definition carries an extraction block. */
-export const isExtractedDefinition = <T extends DefinitionWithOptionalExtraction>(
-  definition: T
-): definition is T & { extraction: ExtractionBlock } => definition.extraction !== undefined;
-
-/** Returns the extracted fields, or `[]` when the definition has no extraction block. */
-export const getEntityFields = (definition: DefinitionWithOptionalExtraction): EntityField[] =>
-  definition.extraction?.fields ?? [];
 
 /** Returns the post-aggregation filter, if the definition declares one. */
 export const getPostAggFilter = (

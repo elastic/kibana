@@ -10,12 +10,9 @@ import {
   entitySchema,
   euidRankingSchema,
   extractionBlockSchema,
-  getEntityFields,
-  getExtraction,
   getPostAggFilter,
   getPostStatsFieldOverrides,
   getPreAggFieldOverrides,
-  isExtractedDefinition,
   setFieldsByConditionSchema,
   validateEntityDefinitionType,
 } from './entity_schema';
@@ -228,18 +225,12 @@ describe('extraction accessors', () => {
   const coreOnly = { extraction: undefined };
 
   it('read the extraction block when present', () => {
-    expect(getExtraction(extracted)).toBe(extracted.extraction);
-    expect(isExtractedDefinition(extracted)).toBe(true);
-    expect(getEntityFields(extracted)).toBe(fields);
     expect(getPostAggFilter(extracted)).toBe(postAggFilter);
     expect(getPreAggFieldOverrides(extracted)).toBe(overrides);
     expect(getPostStatsFieldOverrides(extracted)).toBe(overrides);
   });
 
-  it('return empty defaults when the block is absent', () => {
-    expect(getExtraction(coreOnly)).toBeUndefined();
-    expect(isExtractedDefinition(coreOnly)).toBe(false);
-    expect(getEntityFields(coreOnly)).toEqual([]);
+  it('return undefined when the block is absent', () => {
     expect(getPostAggFilter(coreOnly)).toBeUndefined();
     expect(getPreAggFieldOverrides(coreOnly)).toBeUndefined();
     expect(getPostStatsFieldOverrides(coreOnly)).toBeUndefined();

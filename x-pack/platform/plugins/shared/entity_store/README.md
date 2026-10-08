@@ -181,7 +181,7 @@ A definition is an identity core plus an optional `extraction` block:
 - There is no `indexPatterns` key. Source indices for extraction are API configuration (global state and per-engine overrides), not part of a definition.
 - Unknown keys are rejected, at the top level and inside `extraction`.
 
-Types: `EntityDefinitionWithoutId` (as registered), `ExtractionBlock` and its schema `extractionBlockSchema`, and `ExtractedEntityDefinition` for code that requires the block.
+`@kbn/entity-store/common` exports the types `EntityDefinitionWithoutId` (a definition as registered), `ExtractionBlock` and `ExtractedEntityDefinition` (a definition with the block required), and the block's zod schema `extractionBlockSchema`. `EntityDefinitionOfAnyType` remains as a deprecated alias of `EntityDefinitionWithoutId`.
 
 ### Type names
 
