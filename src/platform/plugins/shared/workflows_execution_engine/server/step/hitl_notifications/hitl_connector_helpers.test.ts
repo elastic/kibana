@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { assertConnectorSucceeded, slackApiChannelTarget } from './hitl_connector_helpers';
+import {
+  assertConnectorSucceeded,
+  fitHitlRenderedTextPreservingLink,
+  fitHitlTextPreservingSuffix,
+  SERVICENOW_COMMENT_MAX_LENGTH,
+  slackApiChannelTarget,
+} from './hitl_connector_helpers';
 
 describe('assertConnectorSucceeded', () => {
   it('does not throw when status is ok', () => {
@@ -42,5 +48,37 @@ describe('slackApiChannelTarget', () => {
 
   it('routes other values to channelIds', () => {
     expect(slackApiChannelTarget('C0123456789')).toEqual({ channelIds: ['C0123456789'] });
+  });
+});
+
+describe('fitHitlTextPreservingSuffix', () => {
+  const suffix = 'Approve: https://kibana.example/approve\nDecline: https://kibana.example/reject';
+
+  it('shortens the prompt so the links still fit the ServiceNow comment limit', () => {
+    const comment = fitHitlTextPreservingSuffix(
+      'a'.repeat(SERVICENOW_COMMENT_MAX_LENGTH),
+      suffix,
+      SERVICENOW_COMMENT_MAX_LENGTH
+    );
+
+    expect(comment.length).toBe(SERVICENOW_COMMENT_MAX_LENGTH);
+    expect(comment.endsWith(suffix)).toBe(true);
+  });
+
+  it('throws when the links alone exceed the limit', () => {
+    expect(() => fitHitlTextPreservingSuffix('prompt', 'x'.repeat(11), 10)).toThrow(
+      'exceed the 10 character connector limit'
+    );
+  });
+});
+
+describe('fitHitlRenderedTextPreservingLink', () => {
+  it('keeps the form link when the rendered message is too long', () => {
+    const link = 'https://kibana.example/form';
+    const text = `${'a'.repeat(SERVICENOW_COMMENT_MAX_LENGTH)}${link}${'b'.repeat(20)}`;
+    const fitted = fitHitlRenderedTextPreservingLink(text, link, SERVICENOW_COMMENT_MAX_LENGTH);
+
+    expect(fitted.length).toBe(SERVICENOW_COMMENT_MAX_LENGTH);
+    expect(fitted.includes(link)).toBe(true);
   });
 });

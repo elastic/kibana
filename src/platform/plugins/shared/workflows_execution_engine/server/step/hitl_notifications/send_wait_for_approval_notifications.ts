@@ -13,6 +13,8 @@ import {
   assertConnectorSucceeded,
   buildServiceNowAddCommentInput,
   buildSlack2SendMessageInput,
+  fitHitlTextPreservingSuffix,
+  SERVICENOW_COMMENT_MAX_LENGTH,
   slackApiChannelTarget,
 } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
@@ -62,8 +64,11 @@ function buildServiceNowApprovalComment({
   approveUrl: string;
   rejectUrl: string;
 }): string {
-  const prompt = message.length > 0 ? `${message}\n\n` : '';
-  return `${prompt}${approveLabel}: ${approveUrl}\n${rejectLabel}: ${rejectUrl}`;
+  return fitHitlTextPreservingSuffix(
+    message,
+    `${approveLabel}: ${approveUrl}\n${rejectLabel}: ${rejectUrl}`,
+    SERVICENOW_COMMENT_MAX_LENGTH
+  );
 }
 
 function buildSlackMessage({

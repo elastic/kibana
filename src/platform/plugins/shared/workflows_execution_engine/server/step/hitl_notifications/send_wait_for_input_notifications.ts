@@ -17,6 +17,9 @@ import {
   assertConnectorSucceeded,
   buildServiceNowAddCommentInput,
   buildSlack2SendMessageInput,
+  fitHitlRenderedTextPreservingLink,
+  fitHitlTextPreservingSuffix,
+  SERVICENOW_COMMENT_MAX_LENGTH,
   slackApiChannelTarget,
 } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
@@ -34,8 +37,11 @@ function buildDefaultInputServiceNowComment({
   stepMessage: string;
   formUrl: string;
 }): string {
-  const prompt = stepMessage.length > 0 ? `${stepMessage}\n\n` : '';
-  return `${prompt}Open form: ${formUrl}`;
+  return fitHitlTextPreservingSuffix(
+    stepMessage,
+    `Open form: ${formUrl}`,
+    SERVICENOW_COMMENT_MAX_LENGTH
+  );
 }
 
 function buildDefaultInputSlackMessage({
@@ -221,12 +227,16 @@ export async function sendWaitForInputNotifications({
   if (serviceNowConnectorId && serviceNowTable && serviceNowSysId) {
     const comment =
       serviceNowConfig.message != null
-        ? resolveWaitForInputChannelMessage({
-            channelMessageTemplate: serviceNowConfig.message,
-            stepMessage,
+        ? fitHitlRenderedTextPreservingLink(
+            resolveWaitForInputChannelMessage({
+              channelMessageTemplate: serviceNowConfig.message,
+              stepMessage,
+              formUrl,
+              renderTemplate,
+            }),
             formUrl,
-            renderTemplate,
-          })
+            SERVICENOW_COMMENT_MAX_LENGTH
+          )
         : buildDefaultInputServiceNowComment({ stepMessage, formUrl });
 
     const result = await connectorExecutor.execute({
