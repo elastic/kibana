@@ -53,6 +53,8 @@ export interface SyncTaskState extends Record<string, unknown> {
   /** Agent policy the location just moved away from; its revision is bumped after the sync. */
   previousAgentPolicyId?: string;
   failedRunCount?: number;
+  /** Start of the last run that completed without error; failed and skipped runs keep the previous value. */
+  lastSuccessfulSyncAt?: string;
 }
 
 export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
@@ -122,6 +124,10 @@ export class SyncPrivateLocationMonitorsTask {
       lastStartedAt = moment().subtract(10, 'minute').toISOString();
     }
     const taskState = this.getNewTaskState({ taskInstance });
+    const syncedState: SyncTaskState = {
+      ...taskState,
+      lastSuccessfulSyncAt: taskState.lastStartedAt,
+    };
     const schedule = { interval: DEFAULT_TASK_SCHEDULE };
 
     try {
@@ -178,19 +184,14 @@ export class SyncPrivateLocationMonitorsTask {
         return { state: doneState };
       }
 
-      const defaultState = {
-        state: taskState,
-        schedule,
-      };
-
       if (allPrivateLocations.length === 0) {
         this.debugLog(`No private locations found, skipping sync of private location monitors`);
-        return { state: taskState, schedule };
+        return { state: syncedState, schedule };
       }
 
       if (taskState.disableAutoSync) {
         this.debugLog(`Auto sync is disabled, skipping sync of private location monitors`);
-        return defaultState;
+        return { state: taskState, schedule };
       }
 
       const monitorMwsIds = await this.fetchMonitorMwsIds(soClient);
@@ -198,7 +199,7 @@ export class SyncPrivateLocationMonitorsTask {
         this.debugLog(
           `No monitors with maintenance windows found, skipping sync of private location monitors`
         );
-        return defaultState;
+        return { state: syncedState, schedule };
       }
 
       const { hasMWsChanged, updatedMWs, missingMWIds, maintenanceWindows } =
@@ -239,7 +240,7 @@ export class SyncPrivateLocationMonitorsTask {
         this.debugLog(
           `Maintenance windows changed during this run; scheduling an immediate follow-up`
         );
-        return { state: taskState, runAt: new Date() };
+        return { state: syncedState, runAt: new Date() };
       }
     } catch (error) {
       logger.error(`Sync of private location monitors failed: ${error.message}`);
@@ -262,7 +263,7 @@ export class SyncPrivateLocationMonitorsTask {
       };
     }
 
-    return { state: taskState, schedule };
+    return { state: syncedState, schedule };
   }
 
   getNewTaskState({ taskInstance }: { taskInstance: CustomTaskInstance }): SyncTaskState {
@@ -271,6 +272,7 @@ export class SyncPrivateLocationMonitorsTask {
     return {
       lastStartedAt: startedAt.toISOString(),
       disableAutoSync: taskInstance.state.disableAutoSync ?? false,
+      lastSuccessfulSyncAt: taskInstance.state.lastSuccessfulSyncAt,
     };
   }
 

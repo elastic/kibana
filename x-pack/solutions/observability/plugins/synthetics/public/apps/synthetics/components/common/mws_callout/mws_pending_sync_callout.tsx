@@ -11,12 +11,15 @@ import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SyncNowLink } from './sync_now_link';
+import { MwsSyncOverdueNote } from './mws_sync_overdue_note';
 import { MwsAgentVersionWarningLine } from './mws_agent_version_warning_line';
 
 export const MwsPendingSyncCallout = ({
   hasOutdatedAgent = false,
+  isSyncOverdue = false,
 }: {
   hasOutdatedAgent?: boolean;
+  isSyncOverdue?: boolean;
 }) => {
   return (
     <>
@@ -31,13 +34,17 @@ export const MwsPendingSyncCallout = ({
           defaultMessage="One or more maintenance windows have been recently modified or deleted."
         />
         <EuiSpacer size="s" />
-        <EuiText size="xs" color="subdued">
-          <FormattedMessage
-            id="xpack.synthetics.maintenanceWindowCallout.pendingSync.syncNote"
-            defaultMessage="Private location monitors will update shortly. {syncNowLink}"
-            values={{ syncNowLink: <SyncNowLink /> }}
-          />
-        </EuiText>
+        {isSyncOverdue ? (
+          <MwsSyncOverdueNote />
+        ) : (
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage
+              id="xpack.synthetics.maintenanceWindowCallout.pendingSync.syncNote"
+              defaultMessage="Private location monitors will update shortly. {syncNowLink}"
+              values={{ syncNowLink: <SyncNowLink /> }}
+            />
+          </EuiText>
+        )}
         {hasOutdatedAgent && <MwsAgentVersionWarningLine />}
       </KbnWarningCallout>
       <EuiSpacer size="s" />

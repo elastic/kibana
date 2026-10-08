@@ -8,6 +8,9 @@
 import { useMemo } from 'react';
 import { getActiveMaintenanceWindows, useFetchMaintenanceWindows } from '../../../hooks';
 
+// An MW write wakes the sync task right away; past this the sync is considered overdue.
+const SYNC_GRACE_MS = 5 * 60 * 1000;
+
 export const useHasPendingMwChanges = (monitorMWIds: string[]) => {
   const { data } = useFetchMaintenanceWindows();
 
@@ -22,7 +25,19 @@ export const useHasPendingMwChanges = (monitorMWIds: string[]) => {
 
   const needsPendingCheck = hasMonitorMWs && activeMWs.length === 0;
 
-  const hasPendingChanges = (() => {
+  const isSyncOverdue = (() => {
+    if (!data?.lastSuccessfulSyncAt || data.autoSyncDisabled) return false;
+
+    const lastSyncedAt = Date.parse(data.lastSuccessfulSyncAt);
+    const now = Date.now();
+    return allMWs.some((mw) => {
+      if (!monitorMWIds.includes(mw.id)) return false;
+      const updatedAt = Date.parse(mw.updatedAt);
+      return updatedAt > lastSyncedAt && now - updatedAt > SYNC_GRACE_MS;
+    });
+  })();
+
+  const hasDeletedMWs = (() => {
     // Only skip the pending check while the data has not loaded yet; an empty (but loaded)
     // list is a valid state where every referenced MW would be treated as missing/pending.
     if (!needsPendingCheck || data == null) return false;
@@ -33,5 +48,5 @@ export const useHasPendingMwChanges = (monitorMWIds: string[]) => {
     return monitorMWIds.some((id) => !knownIds.has(id));
   })();
 
-  return { activeMWs, hasPendingChanges };
+  return { activeMWs, hasPendingChanges: hasDeletedMWs || isSyncOverdue, isSyncOverdue };
 };

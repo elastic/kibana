@@ -196,6 +196,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(result.state).toEqual({
         disableAutoSync: false,
         lastStartedAt: expect.anything(),
+        lastSuccessfulSyncAt: expect.anything(),
       });
     });
 
@@ -232,6 +233,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(result.state).toEqual({
         disableAutoSync: false,
         lastStartedAt: expect.anything(),
+        lastSuccessfulSyncAt: expect.anything(),
       });
     });
 
@@ -349,6 +351,86 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         );
 
         expect(new Date(lookback).getTime()).toBeGreaterThanOrEqual(before - 10 * 60 * 1000);
+      });
+    });
+
+    describe('lastSuccessfulSyncAt', () => {
+      const previousSuccess = '2024-05-01T00:00:00.000Z';
+      const startedAt = new Date('2024-06-01T10:00:00.000Z');
+      const privateLocation = {
+        id: 'pl-1',
+        label: 'Private Location 1',
+        isServiceManaged: false,
+        agentPolicyId: 'policy-1',
+      };
+
+      const getInstance = (state: Record<string, unknown> = {}) => ({
+        ...getMockTaskInstance({ lastSuccessfulSyncAt: previousSuccess, ...state }),
+        startedAt,
+      });
+
+      it('records this run start when the run completes', async () => {
+        jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+        jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({
+          hasMWsChanged: false,
+          updatedMWs: [],
+          missingMWIds: [],
+          maintenanceWindows: [],
+        });
+        jest.spyOn(task, 'haveMWsUpdatedSince').mockResolvedValue(false);
+        jest
+          .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
+          .mockResolvedValue([privateLocation]);
+
+        const result = await task.runTask({ taskInstance: getInstance() });
+
+        expect(result.state.lastSuccessfulSyncAt).toBe(startedAt.toISOString());
+      });
+
+      it('records this run start when there is nothing to sync', async () => {
+        jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([]);
+
+        const result = await task.runTask({ taskInstance: getInstance() });
+
+        expect(result.state.lastSuccessfulSyncAt).toBe(startedAt.toISOString());
+      });
+
+      it('keeps the previous value when the run fails', async () => {
+        jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+        jest.spyOn(task, 'hasMWsChanged').mockRejectedValue(new Error('Sync failed'));
+        jest
+          .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
+          .mockResolvedValue([privateLocation]);
+
+        const result = await task.runTask({ taskInstance: getInstance() });
+
+        expect(result.state.lastSuccessfulSyncAt).toBe(previousSuccess);
+      });
+
+      it('keeps the previous value once the retry budget is spent', async () => {
+        jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+        jest.spyOn(task, 'hasMWsChanged').mockRejectedValue(new Error('Sync failed'));
+        jest
+          .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
+          .mockResolvedValue([privateLocation]);
+
+        const result = await task.runTask({
+          taskInstance: getInstance({ failedRunCount: MAX_FAILED_RUN_RETRIES }),
+        });
+
+        expect(result.state.lastSuccessfulSyncAt).toBe(previousSuccess);
+      });
+
+      it('keeps the previous value while auto sync is disabled', async () => {
+        jest
+          .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
+          .mockResolvedValue([privateLocation]);
+
+        const result = await task.runTask({
+          taskInstance: getInstance({ disableAutoSync: true }),
+        });
+
+        expect(result.state.lastSuccessfulSyncAt).toBe(previousSuccess);
       });
     });
 
