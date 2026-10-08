@@ -33,8 +33,8 @@ export function AppRoot({
   // Flat shape so `useKibana().services` destructures the same way it did while
   // this app lived inside the observability plugin.
   const services = useMemo(
-    () => ({ ...coreStart, ...pluginsStart, isServerless }),
-    [coreStart, pluginsStart, isServerless]
+    () => ({ ...coreStart, ...pluginsStart, isServerless, appParams: { history } }),
+    [coreStart, history, pluginsStart, isServerless]
   );
 
   return (
