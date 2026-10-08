@@ -2,18 +2,22 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["jest", "node"]
+    "types": [
+      "jest",
+      "node"
+    ]
   },
-  "include": ["**/*.ts"],
-  "exclude": ["target/**/*"],
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "target/**/*",
+    "evals/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/dev-cli-runner",
     "@kbn/evals",
-    "@kbn/evals-suite-attack-discovery-agent-builder",
-    "@kbn/scout",
     "@kbn/security-evals-chain-safety",
-    "@kbn/security-evals-workflow-traces",
     "@kbn/tooling-log",
     "@kbn/workflows"
   ]

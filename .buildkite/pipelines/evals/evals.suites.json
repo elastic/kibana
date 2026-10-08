@@ -521,6 +521,20 @@
       "serverConfigSet": "evals_attack_discovery_fp_tp"
     },
     {
+      "id": "security-alertzero-worker-chain",
+      "name": "AlertZero Worker Chain (L4)",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-alertzero-worker-chain/playwright.config.ts",
+      "tags": [
+        "security",
+        "alertzero"
+      ],
+      "ciLabels": [
+        "evals:security-alertzero-worker-chain"
+      ],
+      "serverConfigSet": "evals_attack_discovery_fp_tp"
+    },
+    {
       "id": "skill-selection-benchmark",
       "name": "Skill Selection Benchmark",
       "slackChannel": "#agent-builder-alerts",
