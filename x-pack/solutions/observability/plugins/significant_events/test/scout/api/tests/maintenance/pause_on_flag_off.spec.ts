@@ -153,15 +153,7 @@ apiTest.describe(
       await Promise.all(
         spaceIds
           .filter((id) => id !== 'default')
-          .map((id) =>
-            kbnClient.request({
-              description: `resume Significant Events in space ${id}`,
-              method: 'POST',
-              path: `/s/${id}/internal/significant_events/maintenance/_resume`,
-              headers: COMMON_API_HEADERS,
-              ignoreErrors: [403, 404],
-            })
-          )
+          .map((id) => apiServices.significantEventsTest.resumeSignificantEvents({ spaceId: id }))
       );
       if (queryId !== undefined) {
         await createClient(apiClient, cookieHeader, engineAdminCookieHeader).deleteQuery(queryId);

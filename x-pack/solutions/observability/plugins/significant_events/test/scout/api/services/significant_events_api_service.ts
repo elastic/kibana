@@ -24,7 +24,7 @@ export interface SignificantEventsTestApiService {
   }>;
   enableSignificantEvents: () => Promise<void>;
   disableSignificantEvents: () => Promise<void>;
-  resumeSignificantEvents: () => Promise<void>;
+  resumeSignificantEvents: (params?: { spaceId?: string }) => Promise<void>;
 }
 
 export function getSignificantEventsTestApiService({
@@ -76,7 +76,7 @@ export function getSignificantEventsTestApiService({
     // not resume, so suites that flip the flag resume here to leave the space running.
     // Resume is gated by the flag, so it retries while a just-enabled override is still
     // propagating to every Cloud node.
-    async resumeSignificantEvents() {
+    async resumeSignificantEvents({ spaceId }: { spaceId?: string } = {}) {
       await measurePerformanceAsync(
         log,
         'significantEventsTestApi.resumeSignificantEvents',
@@ -85,9 +85,12 @@ export function getSignificantEventsTestApiService({
           while (true) {
             const { status } = await kbnClient.request({
               method: 'POST',
-              path: '/internal/significant_events/maintenance/_resume',
+              path: `${
+                spaceId ? `/s/${spaceId}` : ''
+              }/internal/significant_events/maintenance/_resume`,
               headers: COMMON_API_HEADERS,
-              ignoreErrors: [403],
+              // A space that no longer exists answers 404 and has nothing to resume.
+              ignoreErrors: [403, 404],
             });
             if (status !== 403) {
               return;
