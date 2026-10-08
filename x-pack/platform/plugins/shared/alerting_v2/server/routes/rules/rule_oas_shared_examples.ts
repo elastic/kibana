@@ -32,6 +32,7 @@ const SAMPLE_RULE_DATA = {
     name: 'Host CPU high',
     description: 'Alerts when average CPU usage exceeds a threshold.',
     tags: ['production', 'infra'],
+    routing_tags: ['sre-oncall'],
   },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
