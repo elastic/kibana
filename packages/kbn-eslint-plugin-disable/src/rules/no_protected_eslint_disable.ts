@@ -32,17 +32,12 @@ export const NoProtectedESLintDisableRule: CreateOnceRule = {
     Program(node) {
       for (const comment of context.sourceCode.getAllComments()) {
         const parsedDisable = parseDisableComment(comment);
+        const disabledProtectedRule = parsedDisable?.rules.find((rule) =>
+          PROTECTED_RULES.has(rule)
+        );
 
-        // no regex match or no rule block, exit early
-        if (!parsedDisable || parsedDisable.rules.length === 0) {
-          continue;
-        }
-
-        const disabledRules = parsedDisable.rules;
-        const disabledProtectedRule = disabledRules.find((r) => PROTECTED_RULES.has(r));
-
-        // no protected rule was disabled, exit early
-        if (!disabledProtectedRule) {
+        // not a disable comment, or no protected rule was disabled
+        if (!parsedDisable || !disabledProtectedRule) {
           continue;
         }
 
@@ -54,21 +49,19 @@ export const NoProtectedESLintDisableRule: CreateOnceRule = {
             disabledRuleName: disabledProtectedRule,
           },
           fix(fixer) {
-            const { range } = parsedDisable;
+            const { directive, range, rules, type } = parsedDisable;
+            const remainingRules = rules.filter((rule) => !PROTECTED_RULES.has(rule));
 
-            // if we only have a single disabled rule and that is protected, we can remove the entire comment
-            if (disabledRules.length === 1) {
+            // every disabled rule is protected, so the whole comment goes
+            if (remainingRules.length === 0) {
               return fixer.removeRange(range);
             }
 
-            const remainingRules = disabledRules.filter((rule) => !PROTECTED_RULES.has(rule));
-            const fixedComment = ` ${parsedDisable.directive} ${remainingRules.join(', ')}${
-              parsedDisable.type === 'Block' ? ' ' : ''
+            const fixedComment = ` ${directive} ${remainingRules.join(', ')}${
+              type === 'Block' ? ' ' : ''
             }`;
             const rangeToFix: Range =
-              parsedDisable.type === 'Line'
-                ? [range[0] + 2, range[1]]
-                : [range[0] + 2, range[1] - 2];
+              type === 'Line' ? [range[0] + 2, range[1]] : [range[0] + 2, range[1] - 2];
 
             return fixer.replaceTextRange(rangeToFix, fixedComment);
           },

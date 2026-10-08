@@ -512,5 +512,22 @@ export const noProtectedESLintDisableCases = {
       ],
       output: `\nconst a = 1;`,
     },
+    {
+      filename: 'foo.ts',
+      code: dedent`
+        // eslint-disable-next-line @kbn/eslint/no_unsafe_hash, @kbn/imports/no_unused_imports
+        const a = 1;
+      `,
+      errors: [
+        {
+          line: 1,
+          messageId: PROTECTED_DISABLE_MSG_ID,
+          data: {
+            disabledRuleName: '@kbn/eslint/no_unsafe_hash',
+          },
+        },
+      ],
+      output: `\nconst a = 1;`,
+    },
   ],
 };

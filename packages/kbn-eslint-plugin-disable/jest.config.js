@@ -11,7 +11,4 @@ module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../..',
   roots: ['<rootDir>/packages/kbn-eslint-plugin-disable'],
-  moduleNameMapper: {
-    '^@oxlint/plugins$': '<rootDir>/node_modules/@oxlint/plugins/index.cjs',
-  },
 };

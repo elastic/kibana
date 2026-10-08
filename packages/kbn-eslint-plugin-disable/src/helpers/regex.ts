@@ -10,22 +10,14 @@
 import type { Comment } from '@oxlint/plugins';
 
 const DISABLE_DIRECTIVE_RE =
-  /^(?<directive>(?:eslint|oxlint)-disable(?:-next-line|-line)?)(?<rulesBlock>.*)/;
+  /^(?<directive>(?:eslint|oxlint)-(?<disableValueType>disable(?:-next-line|-line)?))(?<rulesBlock>.*)/;
 
-export enum DISABLE_VALUE {
-  DISABLE = 'disable',
-  DISABLE_NEXT_LINE = 'disable-next-line',
-  DISABLE_LINE = 'disable-line',
-}
+export type DisableValueType = 'disable' | 'disable-line' | 'disable-next-line';
 
-export interface ParsedDisableComment {
-  type: Comment['type'];
-  range: Comment['range'];
-  loc: Comment['loc'];
-  value: Comment['value'];
+export interface ParsedDisableComment extends Pick<Comment, 'type' | 'range' | 'loc'> {
   /** The directive as written, e.g. `eslint-disable-next-line` or `oxlint-disable`. */
   directive: string;
-  disableValueType: DISABLE_VALUE;
+  disableValueType: DisableValueType;
   rules: string[];
 }
 
@@ -39,12 +31,7 @@ export function parseDisableComment(comment: Comment): ParsedDisableComment | un
     return;
   }
 
-  const { directive, rulesBlock } = regexResult.groups;
-  const disableValueType = directive.endsWith(DISABLE_VALUE.DISABLE_NEXT_LINE)
-    ? DISABLE_VALUE.DISABLE_NEXT_LINE
-    : directive.endsWith(DISABLE_VALUE.DISABLE_LINE)
-    ? DISABLE_VALUE.DISABLE_LINE
-    : DISABLE_VALUE.DISABLE;
+  const { directive, disableValueType, rulesBlock } = regexResult.groups;
 
   const rules = rulesBlock
     ? rulesBlock
@@ -57,9 +44,9 @@ export function parseDisableComment(comment: Comment): ParsedDisableComment | un
     type: comment.type,
     range: comment.range,
     loc: comment.loc,
-    value: comment.value,
     directive,
-    disableValueType,
+    // DISABLE_DIRECTIVE_RE only captures the three DisableValueType values
+    disableValueType: disableValueType as DisableValueType,
     rules,
   };
 }

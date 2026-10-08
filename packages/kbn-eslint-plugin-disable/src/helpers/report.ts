@@ -9,7 +9,6 @@
 
 import type { Location } from '@oxlint/plugins';
 import type { ParsedDisableComment } from './regex';
-import { DISABLE_VALUE } from './regex';
 
 /**
  * Returns where to report a disable comment so the comment cannot suppress its own report, which
@@ -19,11 +18,11 @@ import { DISABLE_VALUE } from './regex';
  */
 export function getReportLocFromComment({ disableValueType, loc }: ParsedDisableComment): Location {
   switch (disableValueType) {
-    case DISABLE_VALUE.DISABLE_NEXT_LINE:
+    case 'disable-next-line':
       return loc;
-    case DISABLE_VALUE.DISABLE_LINE:
+    case 'disable-line':
       return { start: loc.end, end: loc.end };
-    case DISABLE_VALUE.DISABLE:
+    case 'disable':
       return { start: loc.start, end: loc.start };
   }
 }
