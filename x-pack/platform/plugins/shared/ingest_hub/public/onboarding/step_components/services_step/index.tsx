@@ -60,9 +60,17 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
     setDataFormat,
     agentBasedOnlySelected,
     ecfOnlySelected,
+    isUnavailableForMethod,
   } = useServicesStep({ onContinue });
 
   const { detectAndReviewStep } = useOnboardingFlow();
+  const unavailableForMethodReason = i18n.translate(
+    'xpack.ingestHub.servicesStep.ecfOnlyDisabledTooltip',
+    {
+      defaultMessage:
+        "Agent-based deployment doesn't support this service. Switch to Elastic Managed Integrations to select it.",
+    }
+  );
   const location = useLocation();
   // Lock format when in edit mode (SO persisted) OR when deploy has started without a persisted SO
   // (SO create is best-effort — policies may exist even if ?deploymentId= was never added to URL).
@@ -271,6 +279,9 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
                           service={service}
                           isSelected={selectedSet.has(service.id)}
                           onToggle={handleToggle}
+                          disabledReason={
+                            isUnavailableForMethod(service) ? unavailableForMethodReason : undefined
+                          }
                           displayName={
                             duplicateNamesInCategory.has(service.name)
                               ? `${service.name} ${service.signalTypes
