@@ -12,8 +12,8 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '@kbn/scout';
-import { testData } from '../fixtures';
+
+import { spaceTest, testData } from '../fixtures';
 
 spaceTest.describe('Discover data grid in-table search', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
