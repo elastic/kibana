@@ -17,6 +17,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import {
@@ -101,6 +102,20 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       ? workerScheduleCadenceLabel(settings.scheduleInterval)
       : undefined;
   const controlsDisabled = settingsLocked || isSaving || !canWrite;
+  // Gated on the saved state, not the draft, so toggling an enabled Worker off can still be
+  // undone before saving. An enabled-but-blocked Worker is left switchable and warned about.
+  const { enableBlockedReason } = worker;
+  const enableBlocked = !worker.enabled && Boolean(enableBlockedReason);
+  const headerWarningReasons: WorkerWarningReason[] =
+    worker.enabled && enableBlockedReason
+      ? [
+          ...warningReasons,
+          {
+            id: 'alertAnalysisUnavailable',
+            message: settingsI18n.ENABLE_BLOCKED_ALERT_ANALYSIS_ACTIVE_WARNING,
+          },
+        ]
+      : warningReasons;
   const executionsHref = worker.workflowId
     ? application.getUrlForApp(WORKFLOWS_APP_ID, {
         path: `/${encodeURIComponent(worker.workflowId)}?tab=executions`,
@@ -230,10 +245,14 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
               </EuiBadge>
             </EuiFlexItem>
           ) : null}
-          {warningReasons.length > 0 ? (
+          {headerWarningReasons.length > 0 ? (
             // The band is the accordion's click target; clicking the icon must not collapse it.
             <EuiFlexItem grow={false} onClick={stopAccordionToggle}>
-              <WorkerWarningIcon workerId={worker.id} workerName={name} reasons={warningReasons} />
+              <WorkerWarningIcon
+                workerId={worker.id}
+                workerName={name}
+                reasons={headerWarningReasons}
+              />
             </EuiFlexItem>
           ) : null}
           {/* Carried on the band itself so a collapsed Worker still reports a failed save. */}
@@ -266,11 +285,26 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       compressed
       label={settingsI18n.ENABLED_SWITCH_LABEL}
       checked={enabled}
-      disabled={controlsDisabled}
+      disabled={controlsDisabled || enableBlocked}
       onChange={(event) => onEnabledChange(event.target.checked)}
       data-test-subj={`alertZeroWorkerEnabledSwitch-${worker.id}`}
     />
   );
+  const enabledControl =
+    enableBlocked && !controlsDisabled ? (
+      <EuiToolTip
+        content={
+          enableBlockedReason === 'alertAnalysisWorkflowDisabled'
+            ? settingsI18n.ENABLE_BLOCKED_ALERT_ANALYSIS_WORKFLOW_DISABLED
+            : settingsI18n.ENABLE_BLOCKED_ALERT_ANALYSIS_RUNTIME_DISABLED
+        }
+        data-test-subj={`alertZeroWorkerEnableBlockedTooltip-${worker.id}`}
+      >
+        {enabledSwitch}
+      </EuiToolTip>
+    ) : (
+      enabledSwitch
+    );
 
   const headerActions = (
     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap={false}>
@@ -283,7 +317,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           />
         </EuiFlexItem>
       ) : null}
-      <EuiFlexItem grow={false}>{enabledSwitch}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{enabledControl}</EuiFlexItem>
     </EuiFlexGroup>
   );
 

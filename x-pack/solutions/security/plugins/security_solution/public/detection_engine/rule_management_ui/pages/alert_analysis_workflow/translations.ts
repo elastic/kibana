@@ -36,6 +36,76 @@ export const SAVE_SUCCESS_MESSAGE = i18n.translate(
   }
 );
 
+export const SAVE_SUCCESS_WORKER_DISABLED_MESSAGE = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.saveSuccessWorkerDisabledMessage',
+  {
+    defaultMessage: 'The Alert Triage Worker was turned off because it requires alert analysis.',
+  }
+);
+
+export const saveWorkerRulesLeftAttachedMessage = (count: number): string =>
+  i18n.translate(
+    'xpack.securitySolution.alertAnalysisWorkflow.saveWorkerRulesLeftAttachedMessage',
+    {
+      defaultMessage:
+        'The Alert Triage Worker was turned off, but {count, plural, one {# machine learning rule still has} other {# machine learning rules still have}} its action attached because you do not have the machine learning permissions needed to edit {count, plural, one {it} other {them}}. To detach {count, plural, one {it} other {them}}, turn alert analysis back on, then have someone with machine learning permissions turn the Worker on and off again on the AlertZero Watches page.',
+      values: { count },
+    }
+  );
+
+export const SAVE_WORKER_STILL_ENABLED_MESSAGE = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.saveWorkerStillEnabledMessage',
+  {
+    defaultMessage:
+      'The Alert Triage Worker could not be turned off and cannot triage alerts while alert analysis is off. Turn it off on the AlertZero Watches page.',
+  }
+);
+
+export const SAVE_WORKER_STATE_UNKNOWN_MESSAGE = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.saveWorkerStateUnknownMessage',
+  {
+    defaultMessage:
+      'The Alert Triage Worker state could not be checked. If it is on, it cannot triage alerts while alert analysis is off. Check it on the AlertZero Watches page.',
+  }
+);
+
+export const SAVE_ERROR_WORKER_DISABLED_MESSAGE = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.saveErrorWorkerDisabledMessage',
+  {
+    defaultMessage:
+      'The Alert Triage Worker was turned off, but the settings were not saved, so alert analysis is still on. You can turn the Worker back on from the AlertZero Watches page.',
+  }
+);
+
+export const DISABLE_WORKER_CONFIRM_TITLE = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.disableWorkerConfirmTitle',
+  {
+    defaultMessage: 'Turn off alert analysis and the Alert Triage Worker?',
+  }
+);
+
+export const DISABLE_WORKER_CONFIRM_BODY = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.disableWorkerConfirmBody',
+  {
+    defaultMessage:
+      'The AlertZero Alert Triage Worker requires alert analysis. If you continue, the Worker will also be turned off and detached from rules. You can turn it back on from the AlertZero Watches page once alert analysis is on again.',
+  }
+);
+
+export const DISABLE_WORKER_CONFIRM_BUTTON = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.disableWorkerConfirmButton',
+  {
+    defaultMessage: 'Turn off both',
+  }
+);
+
+export const DISABLE_WORKER_CANCEL_BUTTON = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.disableWorkerCancelButton',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
 export const SAVE_ERROR_MESSAGE = i18n.translate(
   'xpack.securitySolution.alertAnalysisWorkflow.saveErrorMessage',
   {

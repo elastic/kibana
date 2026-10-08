@@ -15,8 +15,9 @@ type WorkerToggleState = Record<string, boolean>;
 export type CatalogWorker = (typeof SYSTEM_SECURITY_WORKER_CATALOG)[number];
 export type ServerWorker = ListWorkersResponse['workers'][number];
 
-const initialToggleState = (): WorkerToggleState =>
-  Object.fromEntries(SYSTEM_SECURITY_WORKER_CATALOG.map(({ id }) => [id, true]));
+/** The server says this worker cannot be switched on yet, e.g. Alert Triage without alert analysis. */
+export const isEnableBlocked = (worker?: ServerWorker): boolean =>
+  Boolean(worker && !worker.enabled && worker.enableBlockedReason);
 
 /**
  * Owns the worker-selection state: which catalog workers the server exposes, which are toggled
@@ -37,13 +38,25 @@ export const useWorkerSelection = () => {
   );
   const availableWorkerIds = useMemo(() => workers.map(({ id }) => id), [workers]);
 
-  const [workerEnabled, setWorkerEnabled] = useState<WorkerToggleState>(initialToggleState);
+  // Only what the user chose is stored. Every worker defaults to on, except one the server says
+  // cannot be enabled, which is forced off rather than sent a PATCH that fails with a generic toast.
+  const [userEnabled, setUserEnabled] = useState<Partial<WorkerToggleState>>({});
+  const workerEnabled = useMemo<WorkerToggleState>(
+    () =>
+      Object.fromEntries(
+        availableWorkerIds.map((id) => [
+          id,
+          !isEnableBlocked(serverWorkers.get(id)) && (userEnabled[id] ?? true),
+        ])
+      ),
+    [availableWorkerIds, serverWorkers, userEnabled]
+  );
 
   const enabledCount = availableWorkerIds.filter((id) => workerEnabled[id]).length;
 
   const toggleWorker = (workerId: string, checked: boolean) => {
     if (!checked && enabledCount <= 1) return;
-    setWorkerEnabled((prev) => ({ ...prev, [workerId]: checked }));
+    setUserEnabled((prev) => ({ ...prev, [workerId]: checked }));
   };
 
   return {

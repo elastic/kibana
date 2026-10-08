@@ -8,6 +8,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
+  EuiConfirmModal,
   EuiDescribedFormGroup,
   EuiEmptyPrompt,
   EuiFieldNumber,
@@ -42,7 +43,9 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import {
   fetchAlertAnalysisWorkflowSettings,
+  fetchAlertTriageWorkerEnabled,
   saveAlertAnalysisWorkflowSettings,
+  turnOffAlertTriageWorker,
   type AlertAnalysisWorkflowSettingsWithConnector,
 } from './api';
 import { AlertAnalysisWorkflowRuleAttachmentSection } from './rule_attachment_section';
@@ -52,6 +55,11 @@ import * as translations from './translations';
 const ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY = [
   'alertAnalysisWorkflow',
   'alertAnalysisWorkflowSettings',
+] as const;
+
+const ALERT_TRIAGE_WORKER_QUERY_KEY = [
+  'alertAnalysisWorkflow',
+  'alertTriageWorkerEnabled',
 ] as const;
 
 type AlertAnalysisWorkflowSettingsError = Error & { body?: { message?: string } };
@@ -100,6 +108,13 @@ const AlertAnalysisWorkflowContent: React.FC = () => {
       return fetchAlertAnalysisWorkflowSettings({ http });
     },
   });
+  // Only drives the confirmation: the save re-reads the Worker itself, so a stale value here
+  // can at worst skip or show the prompt, never leave the Worker running without analysis.
+  const { data: isAlertTriageWorkerEnabled } = useQuery({
+    queryKey: ALERT_TRIAGE_WORKER_QUERY_KEY,
+    retry: false,
+    queryFn: () => fetchAlertTriageWorkerEnabled({ http }),
+  });
   const savedSettings = savedSettingsResponse?.settings;
   const workflowHref = savedSettingsResponse?.workflowId
     ? application.getUrlForApp('workflows', { path: `/${savedSettingsResponse.workflowId}` })
@@ -107,6 +122,7 @@ const AlertAnalysisWorkflowContent: React.FC = () => {
   const [pageSettings, setPageSettings] = useState<
     AlertAnalysisWorkflowSettingsWithConnector | undefined
   >();
+  const [isDisableConfirmOpen, setIsDisableConfirmOpen] = useState(false);
   const isDirty = !isEqual(pageSettings, savedSettings);
   const isWorkflowEnabled = pageSettings?.workflowEnabled ?? true;
   // The confidence thresholds only apply to auto-close, so their range is only validated (and only
@@ -136,12 +152,53 @@ const AlertAnalysisWorkflowContent: React.FC = () => {
   }, [agents, selectedAgentId]);
   const saveSettingsMutation = useMutation({
     mutationFn: async (settingsToSave: AlertAnalysisWorkflowSettingsWithConnector) => {
-      return saveAlertAnalysisWorkflowSettings({ http, settings: settingsToSave });
+      // The Alert Triage Worker needs alert analysis, so it goes off first: if the save then
+      // fails the Worker is off with analysis on, which is harmless, unlike the reverse.
+      const isTurningOff =
+        (savedSettings?.workflowEnabled ?? true) && settingsToSave.workflowEnabled === false;
+      const worker = isTurningOff ? await turnOffAlertTriageWorker({ http }) : undefined;
+      try {
+        const response = await saveAlertAnalysisWorkflowSettings({
+          http,
+          settings: settingsToSave,
+        });
+        return { response, worker };
+      } catch (error) {
+        if (worker?.outcome === 'disabled') {
+          notifications.toasts.addWarning(translations.SAVE_ERROR_WORKER_DISABLED_MESSAGE);
+        }
+        throw error;
+      }
     },
-    onSuccess: (response) => {
+    onSuccess: ({ response, worker }) => {
       setPageSettings(response.settings);
       queryClient.setQueryData(ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY, response);
-      notifications.toasts.addSuccess(translations.SAVE_SUCCESS_MESSAGE);
+      if (worker?.outcome === 'disabled' && worker.skippedRuleCount > 0) {
+        notifications.toasts.addWarning({
+          title: translations.SAVE_SUCCESS_MESSAGE,
+          text: translations.saveWorkerRulesLeftAttachedMessage(worker.skippedRuleCount),
+        });
+      } else if (worker?.outcome === 'disabled') {
+        notifications.toasts.addSuccess({
+          title: translations.SAVE_SUCCESS_MESSAGE,
+          text: translations.SAVE_SUCCESS_WORKER_DISABLED_MESSAGE,
+        });
+      } else if (worker?.outcome === 'failed') {
+        notifications.toasts.addWarning({
+          title: translations.SAVE_SUCCESS_MESSAGE,
+          text: translations.SAVE_WORKER_STILL_ENABLED_MESSAGE,
+        });
+      } else if (worker?.outcome === 'unknown') {
+        notifications.toasts.addWarning({
+          title: translations.SAVE_SUCCESS_MESSAGE,
+          text: translations.SAVE_WORKER_STATE_UNKNOWN_MESSAGE,
+        });
+      } else {
+        notifications.toasts.addSuccess(translations.SAVE_SUCCESS_MESSAGE);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries(ALERT_TRIAGE_WORKER_QUERY_KEY);
     },
     onError: (error: AlertAnalysisWorkflowSettingsError) => {
       notifications.toasts.addDanger({
@@ -519,9 +576,17 @@ const AlertAnalysisWorkflowContent: React.FC = () => {
               disabled={!isDirty || isThresholdRangeInvalid || isTagPrefixInvalid}
               isLoading={saveSettingsMutation.isLoading}
               onClick={() => {
-                if (pageSettings) {
-                  saveSettingsMutation.mutate(pageSettings);
+                if (!pageSettings) return;
+                // The Alert Triage Worker requires alert analysis and is turned off with it, so
+                // confirm first rather than silently switching off a running Worker.
+                const isTurningOff =
+                  (savedSettings?.workflowEnabled ?? true) &&
+                  pageSettings.workflowEnabled === false;
+                if (isTurningOff && isAlertTriageWorkerEnabled) {
+                  setIsDisableConfirmOpen(true);
+                  return;
                 }
+                saveSettingsMutation.mutate(pageSettings);
               }}
             >
               <FormattedMessage
@@ -531,6 +596,24 @@ const AlertAnalysisWorkflowContent: React.FC = () => {
             </EuiButton>
             <EuiSpacer size="l" />
             <AlertAnalysisWorkflowRuleAttachmentSection />
+            {isDisableConfirmOpen ? (
+              <EuiConfirmModal
+                data-test-subj="alertAnalysisWorkflowDisableConfirmModal"
+                aria-label={translations.DISABLE_WORKER_CONFIRM_TITLE}
+                title={translations.DISABLE_WORKER_CONFIRM_TITLE}
+                buttonColor="warning"
+                defaultFocusedButton="cancel"
+                cancelButtonText={translations.DISABLE_WORKER_CANCEL_BUTTON}
+                confirmButtonText={translations.DISABLE_WORKER_CONFIRM_BUTTON}
+                onCancel={() => setIsDisableConfirmOpen(false)}
+                onConfirm={() => {
+                  setIsDisableConfirmOpen(false);
+                  saveSettingsMutation.mutate(pageSettings);
+                }}
+              >
+                <p>{translations.DISABLE_WORKER_CONFIRM_BODY}</p>
+              </EuiConfirmModal>
+            ) : null}
           </>
         )}
       </SecuritySolutionPageWrapper>

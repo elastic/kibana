@@ -93,6 +93,30 @@ export const MANAGED_WORKFLOW_EXECUTIONS_PERMISSION_TOOLTIP = i18n.translate(
   { defaultMessage: 'Requires permission to view managed workflow executions.' }
 );
 
+export const ENABLE_BLOCKED_ALERT_ANALYSIS_RUNTIME_DISABLED = i18n.translate(
+  'xpack.alertzero.watches.settings.enableBlocked.alertAnalysisRuntimeDisabled',
+  {
+    defaultMessage:
+      'Requires alert analysis. Turn it on in Rules > Alert analysis settings to enable this Worker.',
+  }
+);
+
+export const ENABLE_BLOCKED_ALERT_ANALYSIS_WORKFLOW_DISABLED = i18n.translate(
+  'xpack.alertzero.watches.settings.enableBlocked.alertAnalysisWorkflowDisabled',
+  {
+    defaultMessage:
+      'Requires the Alert Analysis workflow, which is disabled or missing. Enable it to turn on this Worker.',
+  }
+);
+
+export const ENABLE_BLOCKED_ALERT_ANALYSIS_ACTIVE_WARNING = i18n.translate(
+  'xpack.alertzero.watches.settings.enableBlocked.activeWarning',
+  {
+    defaultMessage:
+      'Alert analysis is unavailable, so this Worker is enabled but cannot triage alerts. Turn alert analysis back on or disable this Worker.',
+  }
+);
+
 export const SAVE_WATCH_SETTINGS = i18n.translate(
   'xpack.alertzero.watches.settings.saveWatchSettings',
   { defaultMessage: 'Save' }

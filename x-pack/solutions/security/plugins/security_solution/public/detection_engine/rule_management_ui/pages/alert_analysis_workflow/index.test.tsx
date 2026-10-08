@@ -10,6 +10,11 @@ import { MemoryRouter } from 'react-router-dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { focusManager } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
+import {
+  ALERTZERO_WORKERS_URL,
+  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  buildWorkerUrl,
+} from '@kbn/alertzero-common';
 import { useLoadConnectors, type AIConnector } from '@kbn/inference-connectors';
 import { TestProviders } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
@@ -79,9 +84,13 @@ describe('AlertAnalysisWorkflowPage', () => {
     tagPrefix: 'alert-analysis',
   };
 
-  const settingsGetResponse = (settings: Record<string, unknown> = defaultSettings) => ({
+  const settingsGetResponse = (
+    settings: Record<string, unknown> = defaultSettings,
+    extra: Record<string, unknown> = {}
+  ) => ({
     settings,
     workflowId: 'system-security-alert-analysis-default',
+    ...extra,
   });
 
   const renderComponent = ({
@@ -90,13 +99,30 @@ describe('AlertAnalysisWorkflowPage', () => {
     canSaveAdvancedSettings = true,
     isEnterprise = true,
     settingsRequest,
+    alertTriageWorkerEnabled,
+    workersListStatus,
+    workerPatchExtra,
+    workerPatchStatus,
+    putStatus,
   }: {
     canEditRules?: boolean;
     canReadRules?: boolean;
     canSaveAdvancedSettings?: boolean;
     isEnterprise?: boolean;
     settingsRequest?: jest.Mock;
+    /** Alert Triage's `enabled` in the Workers list. */
+    alertTriageWorkerEnabled?: boolean;
+    /** Makes the Workers list request fail with this HTTP status. */
+    workersListStatus?: number;
+    /** Extra fields on a successful Worker PATCH response, e.g. `skippedRuleCount`. */
+    workerPatchExtra?: Record<string, unknown>;
+    /** Makes the Worker PATCH fail with this HTTP status. */
+    workerPatchStatus?: number;
+    /** Makes the settings PUT fail with this HTTP status. */
+    putStatus?: number;
   } = {}) => {
+    const httpError = (status: number) =>
+      Object.assign(new Error(`HTTP ${status}`), { response: { status } });
     (licenseService.isEnterprise as jest.Mock).mockReturnValue(isEnterprise);
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
@@ -117,9 +143,36 @@ describe('AlertAnalysisWorkflowPage', () => {
         if (options?.method !== 'PUT' && settingsRequest) {
           return settingsRequest();
         }
+        if (options?.method === 'PUT' && putStatus) {
+          throw httpError(putStatus);
+        }
         return options?.method === 'PUT'
           ? settingsGetResponse(JSON.parse(options.body as string))
-          : settingsGetResponse();
+          : settingsGetResponse(defaultSettings);
+      }
+
+      if (path === ALERTZERO_WORKERS_URL) {
+        if (workersListStatus || alertTriageWorkerEnabled === undefined) {
+          throw httpError(workersListStatus ?? 500);
+        }
+        return {
+          workers: [
+            {
+              id: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+              enabled: alertTriageWorkerEnabled,
+            },
+          ],
+        };
+      }
+
+      if (path === buildWorkerUrl(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID)) {
+        if (workerPatchStatus) {
+          throw httpError(workerPatchStatus);
+        }
+        return {
+          worker: { id: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID, enabled: false },
+          ...workerPatchExtra,
+        };
       }
 
       return {
@@ -386,5 +439,180 @@ describe('AlertAnalysisWorkflowPage', () => {
     fireEvent.click(autoCloseSwitch);
 
     expect(saveButton).not.toBeDisabled();
+  });
+
+  describe('turning alert analysis off while the Alert Triage Worker is on', () => {
+    type FetchCall = [string, { method?: string; body: string }];
+    const fetchCalls = () => coreStart.http.fetch.mock.calls as unknown as FetchCall[];
+    const putCalls = () =>
+      fetchCalls().filter(
+        ([path, options]) =>
+          path === ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE && options?.method === 'PUT'
+      );
+    const workerPatchCalls = () =>
+      fetchCalls().filter(
+        ([path, options]) =>
+          path === buildWorkerUrl(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID) &&
+          options?.method === 'PATCH'
+      );
+
+    const turnOffAndSave = async () => {
+      const workflowSwitch = await screen.findByTestId('alertAnalysisWorkflowEnabled');
+      await waitFor(() => expect(workflowSwitch).toBeChecked());
+      fireEvent.click(workflowSwitch);
+      fireEvent.click(screen.getByTestId('alertAnalysisWorkflowSaveButton'));
+    };
+
+    const confirmModal = () => screen.queryByTestId('alertAnalysisWorkflowDisableConfirmModal');
+
+    it('asks for confirmation instead of saving straight away', async () => {
+      renderComponent({ alertTriageWorkerEnabled: true });
+
+      await turnOffAndSave();
+
+      expect(await screen.findByTestId('alertAnalysisWorkflowDisableConfirmModal')).toBeVisible();
+      expect(putCalls()).toHaveLength(0);
+      expect(workerPatchCalls()).toHaveLength(0);
+    });
+
+    // The Worker needs alert analysis, so a failed save must leave "Worker off, analysis on",
+    // which is harmless, never "analysis off, Worker on".
+    it('turns the Worker off before it saves the setting', async () => {
+      renderComponent({ alertTriageWorkerEnabled: true });
+
+      await turnOffAndSave();
+      fireEvent.click(await screen.findByText('Turn off both'));
+
+      await waitFor(() => expect(putCalls()).toHaveLength(1));
+      expect(workerPatchCalls()).toHaveLength(1);
+      expect(JSON.parse(workerPatchCalls()[0][1].body)).toEqual({ enabled: false });
+      expect(JSON.parse(putCalls()[0][1].body).workflowEnabled).toBe(false);
+      const order = (call: FetchCall) =>
+        coreStart.http.fetch.mock.invocationCallOrder[fetchCalls().indexOf(call)];
+      expect(order(workerPatchCalls()[0])).toBeLessThan(order(putCalls()[0]));
+      await waitFor(() =>
+        expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+          expect.objectContaining({
+            text: 'The Alert Triage Worker was turned off because it requires alert analysis.',
+          })
+        )
+      );
+      expect(confirmModal()).not.toBeInTheDocument();
+    });
+
+    it('warns that rules still carry the Worker action when some could not be detached', async () => {
+      renderComponent({
+        alertTriageWorkerEnabled: true,
+        workerPatchExtra: { skippedRuleCount: 2 },
+      });
+
+      await turnOffAndSave();
+      fireEvent.click(await screen.findByText('Turn off both'));
+
+      await waitFor(() =>
+        expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledWith(
+          expect.objectContaining({
+            text: expect.stringContaining('2 machine learning rules still have'),
+          })
+        )
+      );
+      expect(coreStart.notifications.toasts.addSuccess).not.toHaveBeenCalledWith(
+        expect.objectContaining({ text: expect.stringContaining('was turned off because') })
+      );
+    });
+
+    it('does not turn anything off when the user cancels', async () => {
+      renderComponent({ alertTriageWorkerEnabled: true });
+
+      await turnOffAndSave();
+      fireEvent.click(await screen.findByText('Cancel'));
+
+      await waitFor(() => expect(confirmModal()).not.toBeInTheDocument());
+      expect(putCalls()).toHaveLength(0);
+      expect(workerPatchCalls()).toHaveLength(0);
+    });
+
+    // The Workers route refuses callers without manage_security or managed-workflow access. That
+    // must not stop the setting from being saved, but the user has to be told the Worker is on.
+    it('still saves and warns when the Worker could not be turned off', async () => {
+      renderComponent({ alertTriageWorkerEnabled: true, workerPatchStatus: 403 });
+
+      await turnOffAndSave();
+      fireEvent.click(await screen.findByText('Turn off both'));
+
+      await waitFor(() => expect(putCalls()).toHaveLength(1));
+      await waitFor(() =>
+        expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledWith(
+          expect.objectContaining({
+            text: expect.stringContaining('could not be turned off'),
+          })
+        )
+      );
+    });
+
+    it('tells the user the Worker is already off when the save then fails', async () => {
+      renderComponent({ alertTriageWorkerEnabled: true, putStatus: 500 });
+
+      await turnOffAndSave();
+      fireEvent.click(await screen.findByText('Turn off both'));
+
+      await waitFor(() =>
+        expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledWith(
+          expect.stringContaining('was turned off, but the settings were not saved')
+        )
+      );
+      expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalled();
+    });
+
+    // Without a running Worker the confirmation would be noise, and nothing is sent to it.
+    it.each([
+      { description: 'the Worker is off', alertTriageWorkerEnabled: false },
+      {
+        description: 'the caller has no AlertZero access',
+        alertTriageWorkerEnabled: true,
+        workersListStatus: 403,
+      },
+      {
+        description: 'AlertZero is off for the space',
+        alertTriageWorkerEnabled: true,
+        workersListStatus: 404,
+      },
+    ])('saves without confirmation when $description', async (params) => {
+      renderComponent(params);
+
+      await turnOffAndSave();
+
+      await waitFor(() => expect(putCalls()).toHaveLength(1));
+      expect(confirmModal()).not.toBeInTheDocument();
+      expect(workerPatchCalls()).toHaveLength(0);
+      expect(coreStart.notifications.toasts.addWarning).not.toHaveBeenCalled();
+    });
+
+    // An unreadable state is not "off": the user must be told the Worker may still be running.
+    it('saves and warns when the Worker state cannot be read', async () => {
+      renderComponent({ workersListStatus: 500 });
+
+      await turnOffAndSave();
+
+      await waitFor(() => expect(putCalls()).toHaveLength(1));
+      expect(confirmModal()).not.toBeInTheDocument();
+      expect(workerPatchCalls()).toHaveLength(0);
+      await waitFor(() =>
+        expect(coreStart.notifications.toasts.addWarning).toHaveBeenCalledWith(
+          expect.objectContaining({ text: expect.stringContaining('could not be checked') })
+        )
+      );
+    });
+
+    it('saves without confirmation when alert analysis stays on', async () => {
+      renderComponent({ alertTriageWorkerEnabled: true });
+
+      fireEvent.click(await screen.findByTestId('alertAnalysisWorkflowAutoCloseEnabled'));
+      fireEvent.click(screen.getByTestId('alertAnalysisWorkflowSaveButton'));
+
+      await waitFor(() => expect(putCalls()).toHaveLength(1));
+      expect(confirmModal()).not.toBeInTheDocument();
+      expect(workerPatchCalls()).toHaveLength(0);
+    });
   });
 });

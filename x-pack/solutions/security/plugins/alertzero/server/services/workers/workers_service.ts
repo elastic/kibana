@@ -85,9 +85,10 @@ const templateValuesEqual = (
   Object.keys(right).every((key) => Object.hasOwn(left, key) && isEqual(left[key], right[key]));
 
 /** Why an Alert Triage Worker enable was refused before anything was written. */
+type AlertAnalysisBlockedReason = NonNullable<Worker['enableBlockedReason']>;
+
 export type AlertTriageEnableBlockedReason =
-  | 'alertAnalysisWorkflowDisabled'
-  | 'alertAnalysisRuntimeDisabled'
+  | AlertAnalysisBlockedReason
   | 'ruleAttachmentUnavailable';
 
 const readServiceAccountId = (
@@ -472,7 +473,7 @@ export class WorkersService {
    */
   private async checkAlertAnalysisPreflight(
     request: KibanaRequest
-  ): Promise<AlertTriageEnableBlockedReason | null> {
+  ): Promise<AlertAnalysisBlockedReason | null> {
     const management = this.management;
     if (!management) return null;
     try {
@@ -590,6 +591,13 @@ export class WorkersService {
       definition = getDefinitionFromTemplate(registration);
     }
 
+    // Reported even while enabled so the client can warn about a worker that is on but cannot
+    // triage; only the toggle is gated by it when the worker is off.
+    const enableBlockedReason =
+      registration.id === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
+        ? await this.checkAlertAnalysisPreflight(request)
+        : null;
+
     return {
       id: registration.id,
       name: registration.catalog.name,
@@ -604,6 +612,7 @@ export class WorkersService {
       settingsRevision,
       // `installed` is any document at this id, including a user workflow that is not ours.
       workflowId: status.installed && status.status !== 'not_managed' ? status.workflowId : null,
+      ...(enableBlockedReason ? { enableBlockedReason } : {}),
       skills: projectSkillsFromDefinition(definition, agentLookupCallback),
     };
   }
