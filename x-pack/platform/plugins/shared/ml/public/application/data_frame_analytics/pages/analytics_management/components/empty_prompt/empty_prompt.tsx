@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
+import type { EuiEmptyPromptProps } from '@elastic/eui';
 import { EuiButton, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,7 +35,7 @@ export const AnalyticsEmptyPrompt: FC<{
   centered?: boolean;
   customCss?: SerializedStyles;
   iconSize?: 'fullWidth' | 'original' | 's' | 'm' | 'l' | 'xl';
-  titleSize?: 'xs' | 's' | 'm' | 'l';
+  titleSize?: EuiEmptyPromptProps['titleSize'];
 }> = ({ showDocsLink = false, centered = false, customCss, iconSize, titleSize }) => {
   const {
     services: { docLinks },
