@@ -165,7 +165,10 @@ export const useTopNavLinks = ({
     hasUnsavedChanges,
   });
 
-  const solutionNavId = useObservable(services.core.chrome.getActiveSolutionNavId$(), null);
+  const solutionNavId = useObservable(
+    services.core.chrome.getActiveSolutionNavId$(),
+    services.core.chrome.getActiveSolutionNavId()
+  );
   const showCreateRuleV2 =
     isEsqlMode &&
     isAlertingV2AvailableInSolution(solutionNavId) &&

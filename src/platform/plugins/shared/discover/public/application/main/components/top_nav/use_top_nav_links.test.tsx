@@ -50,6 +50,7 @@ const setSolutionNavId = (services: DiscoverServices, solutionNavId: SolutionId 
   jest
     .mocked(services.core.chrome.getActiveSolutionNavId$)
     .mockReturnValue(new BehaviorSubject<SolutionId | null>(solutionNavId));
+  jest.mocked(services.core.chrome.getActiveSolutionNavId).mockReturnValue(solutionNavId);
 };
 
 const createTestServices = (overrides: Partial<DiscoverServices> = {}): DiscoverServices => {
