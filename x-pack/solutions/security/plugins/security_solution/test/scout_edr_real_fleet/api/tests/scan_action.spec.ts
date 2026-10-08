@@ -64,25 +64,8 @@ const endpointOperationsAnalystRole = (): KibanaRole => {
 const actionDetailsPath = (actionId: string): string =>
   ACTION_DETAILS_ROUTE.replace('{action_id}', encodeURIComponent(actionId));
 
-const shellQuote = (value: string): string => `'${value.replaceAll("'", `'\\''`)}'`;
-
-/**
- * Build the guest command for `getHostVmClient().exec`.
- * execa 5 splits on spaces and does not honor quotes. Multipass passes that
- * argv through, so `bash -lc` must receive the script as one argument.
- * Vagrant joins the argv and runs it in the guest shell, where JSON quotes work.
- * `getHostVmClient` uses this same `CI` check to pick the client.
- */
-const guestShellCommand = (script: string): string => {
-  if (process.env.CI) {
-    return `bash -lc ${JSON.stringify(script)}`;
-  }
-  return `bash -lc ${script.replaceAll(' ', '\\ ')}`;
-};
-
-const runOnHost = async (hostname: string, script: string): Promise<string> => {
-  const result = await getHostVmClient(hostname).exec(guestShellCommand(script));
-  return result.stdout.trim();
+const runOnHost = async (hostname: string, command: string): Promise<void> => {
+  await getHostVmClient(hostname).exec(command);
 };
 
 const sendScan = async (
@@ -110,12 +93,10 @@ const sendScan = async (
   return action.id;
 };
 
-const waitForOutputCode = async (
+const waitForCompletedAction = async (
   apiClient: ApiClientFixture,
   headers: Record<string, string>,
-  agentId: string,
-  actionId: string,
-  expectedCode: string
+  actionId: string
 ): Promise<ScanActionDetails> => {
   let completed: ScanActionDetails | undefined;
 
@@ -136,11 +117,11 @@ const waitForOutputCode = async (
         }
 
         completed = action;
-        return action.outputs?.[agentId]?.content.code;
+        return 'completed';
       },
       { timeout: ACTION_TIMEOUT_MS, intervals: [2_000] }
     )
-    .toBe(expectedCode);
+    .toBe('completed');
 
   expect(completed, `Action ${actionId} completed without a stored response`).toBeDefined();
   return completed as ScanActionDetails;
@@ -166,27 +147,18 @@ apiTest.describe('Real agent scan response action', { tag: SCAN_ACTION_TAGS }, (
     async ({ apiClient, enrolledEndpoint }) => {
       apiTest.setTimeout(TEST_TIMEOUT_MS);
       const { agentId, hostname } = enrolledEndpoint;
-      const home = await runOnHost(hostname, 'printf %s "$HOME"');
-      const filePath = `${home}/scan-target-${Date.now()}.txt`;
+      const filePath = `/tmp/scan-target-${Date.now()}.txt`;
 
       try {
-        await runOnHost(
-          hostname,
-          `printf '%s\\n' 'This is a test file for the scan command.' > ${shellQuote(filePath)}`
-        );
+        await runOnHost(hostname, `touch ${filePath}`);
         const actionId = await sendScan(apiClient, requestHeaders, agentId, filePath);
-        const action = await waitForOutputCode(
-          apiClient,
-          requestHeaders,
-          agentId,
-          actionId,
-          SCAN_SUCCESS_CODE
-        );
+        const action = await waitForCompletedAction(apiClient, requestHeaders, actionId);
+        expect(action.outputs?.[agentId]?.content.code).toBe(SCAN_SUCCESS_CODE);
         expect(action.status).toBe('successful');
         expect(action.wasSuccessful).toBe(true);
         expect(action.errors ?? []).toStrictEqual([]);
       } finally {
-        await runOnHost(hostname, `rm -f ${shellQuote(filePath)}`).catch(() => undefined);
+        await runOnHost(hostname, `rm -f ${filePath}`).catch(() => undefined);
       }
     }
   );
@@ -195,18 +167,12 @@ apiTest.describe('Real agent scan response action', { tag: SCAN_ACTION_TAGS }, (
     'returns ra_scan_error_not-found for a missing path',
     async ({ apiClient, enrolledEndpoint }) => {
       apiTest.setTimeout(TEST_TIMEOUT_MS);
-      const { agentId, hostname } = enrolledEndpoint;
-      const home = await runOnHost(hostname, 'printf %s "$HOME"');
-      const missingPath = `${home}/scan-missing-${Date.now()}`;
+      const { agentId } = enrolledEndpoint;
+      const missingPath = `/tmp/scan-missing-${Date.now()}`;
 
       const actionId = await sendScan(apiClient, requestHeaders, agentId, missingPath);
-      const action = await waitForOutputCode(
-        apiClient,
-        requestHeaders,
-        agentId,
-        actionId,
-        SCAN_NOT_FOUND_CODE
-      );
+      const action = await waitForCompletedAction(apiClient, requestHeaders, actionId);
+      expect(action.outputs?.[agentId]?.content.code).toBe(SCAN_NOT_FOUND_CODE);
       expect(action.status).toBe('failed');
       expect(action.wasSuccessful).toBe(false);
       expect(action.errors?.length ?? 0).toBeGreaterThan(0);
