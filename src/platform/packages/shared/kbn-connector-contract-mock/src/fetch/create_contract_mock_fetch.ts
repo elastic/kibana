@@ -27,6 +27,8 @@ import { withPagination } from '../engine/paginate';
 import { sampleResponse } from '../engine/sample_response';
 import type { GraphQLSpec } from '../graphql/graphql_protocol';
 import { createGraphQLProtocol, isGraphQLSpec, toEndpoint } from '../graphql/graphql_protocol';
+import type { McpSpec } from '../mcp/mcp_protocol';
+import { createMcpProtocol, isMcpSpec } from '../mcp/mcp_protocol';
 import type { ContractOperation, OpenApiDocument } from '../openapi';
 import { loadContractOperations } from '../openapi';
 import { createOpenApiAdapter } from '../openapi/openapi_adapter';
@@ -45,6 +47,11 @@ export interface ContractCall {
   readonly matched?: OperationRef | NamedOperationRef;
   /** Set for named operations: whether the operation only reads, e.g. a GraphQL query. */
   readonly readOnly?: boolean;
+  /**
+   * Set for protocol messages that call no vendor operation, such as MCP's `initialize`;
+   * `operation` names the message.
+   */
+  readonly protocolMessage?: true;
   /** Set for requests to the token URL of an OAuth 2 flow, which the mock answers itself. */
   readonly token?: true;
   readonly status: number;
@@ -52,8 +59,8 @@ export interface ContractCall {
   readonly responseViolations: readonly Violation[];
 }
 
-/** An OpenAPI document, or a spec of a protocol with its own endpoints, such as GraphQL. */
-export type ContractMockSpec = OpenApiDocument | GraphQLSpec;
+/** An OpenAPI document, or a spec of a protocol with its own endpoints: GraphQL or MCP. */
+export type ContractMockSpec = OpenApiDocument | GraphQLSpec | McpSpec;
 
 export interface ContractMockOptions extends PaginationOptions {
   /**
@@ -138,16 +145,18 @@ const loadSpec = (document: OpenApiDocument, source?: string): ContractOperation
 
 const loadSpecs = (specs: ContractMockOptions['specs']): ContractOperation[] =>
   toNamedSpecs(specs).flatMap(([source, spec]) =>
-    isGraphQLSpec(spec) ? [] : loadSpec(spec, source)
+    isGraphQLSpec(spec) || isMcpSpec(spec) ? [] : loadSpec(spec, source)
   );
 
 const loadProtocols = (specs: ContractMockOptions['specs']): Map<string, ContractProtocol> => {
   const protocols = new Map<string, ContractProtocol>();
   for (const [source, spec] of toNamedSpecs(specs)) {
-    if (isGraphQLSpec(spec)) {
-      const protocol = createGraphQLProtocol(spec, source);
-      protocol.endpoints.forEach((endpoint) => protocols.set(endpoint, protocol));
-    }
+    const protocol = isGraphQLSpec(spec)
+      ? createGraphQLProtocol(spec, source)
+      : isMcpSpec(spec)
+      ? createMcpProtocol(spec, source)
+      : undefined;
+    protocol?.endpoints.forEach((endpoint) => protocols.set(endpoint, protocol));
   }
   return protocols;
 };
@@ -175,8 +184,8 @@ const toResponse = ({ statusCode, headers, body }: ContractResponse): Response =
  * Creates a `fetch` that answers requests in-process from a vendor spec. Unmatched requests
  * get 404, requests without the credentials the operation requires get 401, and requests that
  * break the spec get 422 listing the violations; every request is recorded in `calls`. The
- * token URLs of the specs' OAuth 2 flows issue stub tokens, and GraphQL specs answer at their
- * endpoints. Axios clients can use it with `{ adapter: 'fetch', env: { fetch } }`.
+ * token URLs of the specs' OAuth 2 flows issue stub tokens, and GraphQL and MCP specs answer at
+ * their endpoints. Axios clients can use it with `{ adapter: 'fetch', env: { fetch } }`.
  */
 export const createContractMockFetch = ({
   specs,
@@ -206,10 +215,18 @@ export const createContractMockFetch = ({
     }`;
     const protocol = protocols.get(toEndpoint(request.url));
     if (protocol) {
-      const { response, operations: called, requestViolations } = await protocol.handle(request);
+      const {
+        response,
+        operations: called,
+        messages = [],
+        requestViolations,
+      } = await protocol.handle(request);
       const base = { request: description, status: response.statusCode, requestViolations };
-      if (called.length === 0) {
+      if (called.length === 0 && messages.length === 0) {
         calls.push({ ...base, responseViolations: [] });
+      }
+      for (const message of messages) {
+        calls.push({ ...base, operation: message, protocolMessage: true, responseViolations: [] });
       }
       for (const { name, source, readOnly } of called) {
         const matched = { name, ...(source === undefined ? {} : { source }) };

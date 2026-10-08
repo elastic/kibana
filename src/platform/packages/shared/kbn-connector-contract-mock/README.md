@@ -63,6 +63,24 @@ Requests to an endpoint (`GET` with `query`, `operationName` and `variables` in 
 
 Each root field a request selects is recorded in `calls` as its own operation, named by the operation type and field, such as `query items`. Its `matched` has that `name` instead of a method and path, and `readOnly` is `true` for queries.
 
+## MCP
+
+MCP servers are specs too: the tools their `tools/list` describes, and the URLs of their Streamable HTTP endpoint.
+
+```ts
+const { fetch, calls } = createContractMockFetch({
+  specs: {
+    mcp: { format: 'mcp', tools: githubTools, endpoints: ['https://api.githubcopilot.com/mcp/'] },
+  },
+});
+```
+
+The mock answers as a stateless server that replies with JSON: `POST`s must name both `application/json` and `text/event-stream` in `Accept`, and carry a JSON-RPC message or batch; `GET` (the event stream) and `DELETE` (ending a session) get **405**. Specs whose tools have no `inputSchema` object, or list a tool twice, are refused.
+
+`tools/call` arguments are validated against the tool's `inputSchema`, and arguments it doesn't declare are reported when it declares its `properties` and doesn't allow others, as servers ignore them. Calls that break the schema, or name a tool the spec doesn't list, get a JSON-RPC `InvalidParams` error. Valid calls answer a sample of the tool's `outputSchema` as JSON text, and as `structuredContent` when the sample is an object; tools without one answer `{}`.
+
+`tools/list` and each `tools/call` are recorded in `calls` as operations named by the method and tool, such as `tools/call get_me`, with `readOnly` from the tool's `readOnlyHint` annotation. The other messages, such as `initialize`, are recorded with `protocolMessage: true`.
+
 ## Credentials
 
 Requests need the credentials of one of the operation's `security` requirements (or the document's), in the place each scheme declares: the `apiKey` header, query parameter or cookie, or an `Authorization` header with the `http` scheme (`Basic`, `Bearer`, …), and `Bearer` for `oauth2` and `openIdConnect`. Any value is accepted. A request without them gets **401** listing what the operation expects, which catches connectors that forget a credential or send it in the wrong place. Schemes that can't be checked on a request, such as `mutualTLS`, count as present, and API keys in the query string aren't reported as undeclared parameters.
