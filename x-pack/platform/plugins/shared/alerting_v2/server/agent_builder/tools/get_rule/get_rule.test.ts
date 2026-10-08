@@ -141,7 +141,7 @@ describe('getRuleTool', () => {
         expect.objectContaining({
           labels: {
             rule_id: 'rule-1',
-            episode_id: 'ep-1',
+            alert_id: 'ep-1',
             space_id: 'default',
             code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_GET_RULE_FAILED,
           },
