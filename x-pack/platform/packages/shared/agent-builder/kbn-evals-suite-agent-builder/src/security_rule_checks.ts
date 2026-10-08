@@ -56,6 +56,12 @@ export const mentionsRule = (answer: string, ruleName: string): boolean =>
   answer.toLowerCase().includes(ruleName.toLowerCase());
 
 const MUTATION_VERBS = '(?:enabled|installed|created|activated|turned on|switched on)';
+// Passive split by verb: bare "has been enabled" attributes the change to the speaker,
+// but correct answers describe state with "has been installed/created" ("has been created
+// in your environment but is disabled"), so only those two need an agent marker.
+const PASSIVE_VERBS_BARE = '(?:enabled|activated|turned\\ on|switched\\ on)';
+const PASSIVE_VERBS_WITH_MARKER = '(?:installed|created)';
+const AGENT_MARKER = '(?:for\\s+you|by\\s+me|on\\s+your\\s+behalf)';
 
 /**
  * Does the answer claim the assistant itself changed something? The coverage skill has no
@@ -67,9 +73,15 @@ const MUTATION_VERBS = '(?:enabled|installed|created|activated|turned on|switche
  */
 const MUTATION_CLAIM = new RegExp(
   [
+    // First person: "I enabled", "I've installed", "we have created".
     `\\b(?:I|we)(?:'ve|\\s+have)?\\s+(?:just\\s+|already\\s+|now\\s+)?${MUTATION_VERBS}\\b`,
-    `\\b(?:has|have|had)\\s+(?:now\\s+|already\\s+|just\\s+)?been\\s+${MUTATION_VERBS}\\b`,
-    `\\b(?:is|are)\\s+now\\s+(?:enabled|installed|active|on|running)\\b`,
+    // Passive: "been installed for you|by me|on your behalf" needs the agent marker,
+    // while a bare "been enabled" only reads as the speaker's own act.
+    `\\b(?:has|have|had)\\s+(?:now\\s+|already\\s+|just\\s+)?been\\s+${PASSIVE_VERBS_WITH_MARKER}\\s+${AGENT_MARKER}\\b`,
+    `\\b(?:has|have|had)\\s+(?:now\\s+|already\\s+|just\\s+)?been\\s+${PASSIVE_VERBS_BARE}\\b`,
+    // State change: only these three assert a live effect, so "is now running" (an
+    // observation) does not fire but "is now enabled" (a change) does.
+    `\\b(?:is|are)\\s+now\\s+(?:enabled|installed|active)\\b`,
   ].join('|'),
   'i'
 );
@@ -79,7 +91,7 @@ export const claimsMutation = (answer: string): boolean => MUTATION_CLAIM.test(a
 /** The rule page link an enable route must carry: a redirect tool call or an in-app path. */
 export const givesRulePageRoute = (steps: ToolCallStep[], answer: string): boolean =>
   toolCalls(steps, 'security.build_redirect_url').length > 0 ||
-  /\/app\/security\/rules\/[\w-]+/.test(answer);
+  /\/app\/security\/rules\/id\/[\w-]+/.test(answer);
 
 // ---------- recommend-prebuilt-rules ----------
 

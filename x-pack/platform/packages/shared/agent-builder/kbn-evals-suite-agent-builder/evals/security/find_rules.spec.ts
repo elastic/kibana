@@ -542,8 +542,8 @@ evaluate.describe(
         const findCalls = toolCalls((turn2.steps ?? []) as ToolCallStep[], 'security.find_rules');
         expect(findCalls.length).toBeGreaterThan(0);
 
-        // Turn 2 asked only for medium. A call that re-ran the critical query or filtered on
-        // anything other than the `severity` parameter is a stale reuse of turn 1, not a new query.
+        // Turn 2 asked only for medium, so a find_rules call that still filters on
+        // critical (or on anything besides severity) is a stale reuse of turn 1.
         expect(
           findCalls.some((step) => queriesOnlySeverity(step, 'medium')),
           'no turn-2 find_rules call filtered on severity=medium alone'

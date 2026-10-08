@@ -67,7 +67,8 @@ describe('claimsMutation', () => {
     'I have just created a new rule.',
     'We have already activated it.',
     'The rule has been enabled.',
-    'The rule has now been installed.',
+    'The rule has now been installed for you.',
+    'The rule has been enabled on your behalf.',
     'The rule is now active.',
   ])('flags a fabricated change: %s', (answer) => {
     expect(claimsMutation(answer)).toBe(true);
@@ -78,6 +79,10 @@ describe('claimsMutation', () => {
     'I have not enabled anything; open the rule page to switch it on.',
     'The rule is disabled. Enable it to get coverage.',
     'Install it from the prebuilt rules page.',
+    'Lateral Movement via SMB has been created in your environment but is disabled.',
+    'The rule exists and has already been installed, but it is disabled.',
+    'The security_detection_engine package has been installed, but this rule is not.',
+    'it is now running on your endpoints.',
   ])('allows a recommendation: %s', (answer) => {
     expect(claimsMutation(answer)).toBe(false);
   });
@@ -89,11 +94,15 @@ describe('givesRulePageRoute', () => {
   });
 
   it('accepts a concrete rule page path', () => {
-    expect(givesRulePageRoute([], 'Open /app/security/rules/abc-123 and enable it.')).toBe(true);
+    expect(givesRulePageRoute([], 'Open /app/security/rules/id/abc-123 and enable it.')).toBe(true);
   });
 
   it('rejects the bare rules list path, which names no rule', () => {
     expect(givesRulePageRoute([], 'Go to /app/security/rules and look around.')).toBe(false);
+  });
+
+  it('rejects the rules management page, which is no rule page', () => {
+    expect(givesRulePageRoute([], 'Go to /app/security/rules/management.')).toBe(false);
   });
 
   it('rejects an answer with no route', () => {
@@ -183,6 +192,30 @@ describe('prebuilt tactic checks', () => {
 });
 
 describe('isCanonicalTactic', () => {
+  // A literal id list: deleting an entry from CANONICAL_TACTICS must turn this red,
+  // because the loop above vacuously accepts whatever survives the deletion.
+  const EXPECTED_TACTIC_IDS = [
+    'TA0001',
+    'TA0002',
+    'TA0003',
+    'TA0004',
+    'TA0005',
+    'TA0006',
+    'TA0007',
+    'TA0008',
+    'TA0009',
+    'TA0010',
+    'TA0011',
+    'TA0040',
+    'TA0042',
+    'TA0043',
+    'TA0112',
+  ];
+
+  it('carries exactly the canonical tactic ids', () => {
+    expect(CANONICAL_TACTICS.map(({ id }) => id)).toEqual(EXPECTED_TACTIC_IDS);
+  });
+
   it('accepts every canonical id and name', () => {
     for (const { id, name } of CANONICAL_TACTICS) {
       expect(isCanonicalTactic(id)).toBe(true);
@@ -277,5 +310,11 @@ describe('find_rules second-turn checks', () => {
         'Anomalous DNS Activity',
       ])
     ).toEqual(['Brute Force Detection']);
+  });
+
+  it('matches a rule name in any case', () => {
+    expect(namesMentioned('medium: BRUTE FORCE DETECTION', ['Brute Force Detection'])).toEqual([
+      'Brute Force Detection',
+    ]);
   });
 });
