@@ -43,7 +43,7 @@ export function DiagnosticsIndexPatternSettings() {
           <h4>{indexPattern}</h4>
         </EuiTitle>
 
-        {!indexTemplates?.length && <em>{i18n.translate('xpack.apm.elms.em.noMatchingIndexTemplatesLabel', { defaultMessage: 'No matching index templates' })}</em>}
+        {!indexTemplates?.length && <em>No matching index templates</em>}
 
         {indexTemplates?.map(({ templateName, templateIndexPatterns, priority, isNonStandard }) => {
           const text = priority
@@ -72,14 +72,16 @@ export function DiagnosticsIndexPatternSettings() {
   return (
     <>
       <EuiText>
-        {i18n.translate('xpack.apm.diagnosticsIndexPatternSettings.thisSectionListsTheTextLabel', { defaultMessage: 'This section lists the index patterns specified in' })}{' '}
+        This section lists the index patterns specified in{' '}
         <EuiLink
           data-test-subj="apmMatchingIndexTemplatesSeeDetailsLink"
           href={router.link('/settings/apm-indices')}
         >
-          {i18n.translate('xpack.apm.diagnosticsIndexPatternSettings.apmIndexSettingsLinkLabel', { defaultMessage: 'APM Index Settings' })}</EuiLink>{' '}
-        {i18n.translate('xpack.apm.diagnosticsIndexPatternSettings.andWhichIndexTemplatesTextLabel', { defaultMessage: 'and which index templates they match. The priority and index pattern of each index template
-        can be seen by hovering over the item.' })}</EuiText>
+          APM Index Settings
+        </EuiLink>{' '}
+        and which index templates they match. The priority and index pattern of each index template
+        can be seen by hovering over the item.
+      </EuiText>
       <EuiSpacer />
       {elms}
     </>

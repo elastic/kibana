@@ -34,9 +34,7 @@ export function DataStreamsStatus() {
         data-test-subj="apmDataStreamsStatusSeeDetailsLink"
         href={router.link('/diagnostics/data-streams', { query })}
       >
-        {i18n.translate('xpack.apm.dataStreamsStatus.seeDetailsLinkLabel', {
-          defaultMessage: 'See details',
-        })}
+        See details
       </EuiLink>
     </TabStatus>
   );

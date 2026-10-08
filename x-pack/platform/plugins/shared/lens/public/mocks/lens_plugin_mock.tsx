@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { createFormulaPublicApi } from '../async_services';
 import type { LensPublicStart } from '..';
@@ -29,22 +28,11 @@ export const lensPluginMock = {
         );
       }),
       SaveModalComponent: jest.fn(() => {
-        return (
-          <span>
-            {i18n.translate('xpack.lens.startContract.span.lensSaveModalComponentLabel', {
-              defaultMessage: 'Lens Save Modal Component',
-            })}
-          </span>
-        );
+        return <span>Lens Save Modal Component</span>;
       }),
-      EditLensConfigPanelApi: jest.fn().mockResolvedValue(() => (
-        <span>
-          <FormattedMessage
-            id="xpack.lens.startContract.span.lensConfigPanelComponentLabel"
-            defaultMessage="Lens Config Panel Component"
-          />
-        </span>
-      )),
+      EditLensConfigPanelApi: jest
+        .fn()
+        .mockResolvedValue(() => <span>Lens Config Panel Component</span>),
       canUseEditor: jest.fn(() => true),
       navigateToPrefilledEditor: jest.fn(),
       getXyVisTypes: jest

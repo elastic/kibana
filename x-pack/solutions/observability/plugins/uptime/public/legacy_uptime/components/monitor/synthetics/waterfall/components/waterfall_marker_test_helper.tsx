@@ -34,13 +34,7 @@ const EmbeddableMock = ({
       {appendTitle}
     </div>
     <div>{reportType}</div>
-    <div
-      aria-label={i18n.translate('xpack.uptime.embeddableMock.div.attributesLabel', {
-        defaultMessage: 'attributes',
-      })}
-    >
-      {JSON.stringify(attributes)}
-    </div>
+    <div aria-label="attributes">{JSON.stringify(attributes)}</div>
   </div>
 );
 
