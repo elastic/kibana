@@ -5517,6 +5517,9 @@ importers:
       '@kbn/evals-suite-entity-analytics':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics
+      '@kbn/evals-suite-escalation-grounding':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-evals-suite-escalation-grounding
       '@kbn/evals-suite-lead-generation':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-lead-generation
@@ -9746,6 +9749,8 @@ importers:
   x-pack/solutions/security/packages/kbn-evals-suite-endpoint: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics: {}
+
+  x-pack/solutions/security/packages/kbn-evals-suite-escalation-grounding: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-lead-generation: {}
 
@@ -20972,8 +20977,8 @@ packages:
     resolution: {integrity: sha512-DpMa59o5uGUWWjruMp71e6knmwKU3jRBBn1kjuLWN9EeIOxNeSAwvHf03WIl8g/ZMR2oSQC9ej3yeLBwdDc/pg==}
     engines: {node: '>=10.13.0'}
 
-  legacy-javascript@0.0.1:
-    resolution: {integrity: sha512-lPyntS4/aS7jpuvOlitZDFifBCb4W8L/3QU0PLbUTUj+zYah8rfVjYic88yG7ZKTxhS5h9iz7duT8oUXKszLhg==}
+  legacy-javascript@0.0.2:
+    resolution: {integrity: sha512-6cMw8OPPX9VOgnWwL6Y7vbNCpd45/RmGMrcSJGaOF4FZfTdEbtlSDUs2ZvHleTUsqSDuKthzHvD6C//jW8ETBA==}
 
   leven@2.1.0:
     resolution: {integrity: sha512-nvVPLpIHUxCUoRLrFqTgSxXJ614d8AgQoWl7zPe/2VadE8+1dpU3LBhowRuBAcuwruWtOdD8oYC9jDNJjXDPyA==}
@@ -31411,7 +31416,7 @@ snapshots:
 
   '@paulirish/trace_engine@0.0.65':
     dependencies:
-      legacy-javascript: 0.0.1
+      legacy-javascript: 0.0.2
       third-party-web: 0.30.0
 
   '@pdf-lib/standard-fonts@1.0.0':
@@ -39722,7 +39727,7 @@ snapshots:
 
   lead@4.0.0: {}
 
-  legacy-javascript@0.0.1: {}
+  legacy-javascript@0.0.2: {}
 
   leven@2.1.0: {}
 

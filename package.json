@@ -1867,6 +1867,7 @@
     "@kbn/evals-suite-detection-watch-rule-creation": "workspace:*",
     "@kbn/evals-suite-endpoint": "workspace:*",
     "@kbn/evals-suite-entity-analytics": "workspace:*",
+    "@kbn/evals-suite-escalation-grounding": "workspace:*",
     "@kbn/evals-suite-lead-generation": "workspace:*",
     "@kbn/evals-suite-llm-tasks": "workspace:*",
     "@kbn/evals-suite-ml": "workspace:*",
