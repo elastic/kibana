@@ -14,9 +14,17 @@ describe('convertKqlToEsqlExpression', () => {
     ['data.host.name: web-01', 'JSON_EXTRACT(episode_data, "host.name") == "web-01"'],
     ['data.host.name: *', 'JSON_EXTRACT(episode_data, "host.name") IS NOT NULL'],
     ['data.host.name: web-*', 'JSON_EXTRACT(episode_data, "host.name") LIKE "web-*"'],
+    ['data.enabled: true', 'JSON_EXTRACT(episode_data, "enabled") == "true"'],
+    ['data.enabled: false', 'JSON_EXTRACT(episode_data, "enabled") == "false"'],
     ['duration >= 5000', 'duration >= 5000'],
   ])('converts %s', (kql, expected) => {
     expect(convertKqlToEsqlExpression(kql)).toBe(expected);
+  });
+
+  it('preserves KQL negation semantics for missing fields', () => {
+    expect(convertKqlToEsqlExpression('NOT severity: critical')).toBe(
+      'COALESCE(NOT (severity == "critical"), true)'
+    );
   });
 
   it('converts boolean expressions', () => {
@@ -25,7 +33,7 @@ describe('convertKqlToEsqlExpression', () => {
         'episode.status: active AND (severity: critical OR NOT data.host.name: web-*)'
       )
     ).toBe(
-      '(`episode.status` == "active" AND (severity == "critical" OR NOT (JSON_EXTRACT(episode_data, "host.name") LIKE "web-*")))'
+      '(`episode.status` == "active" AND (severity == "critical" OR COALESCE(NOT (JSON_EXTRACT(episode_data, "host.name") LIKE "web-*"), true)))'
     );
   });
 

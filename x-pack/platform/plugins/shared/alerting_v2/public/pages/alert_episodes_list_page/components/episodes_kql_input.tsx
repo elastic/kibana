@@ -40,11 +40,6 @@ const EPISODE_BASE_FIELDS: EpisodeSearchField[] = [
   aggregatable: true,
 }));
 
-const episodesSearchSuggestionsAbstraction: SuggestionsAbstraction = {
-  type: 'alerting/v2',
-  fields: {},
-};
-
 export const EpisodesKqlInput = ({
   value,
   onChange,
@@ -99,6 +94,17 @@ export const EpisodesKqlInput = ({
     ] as unknown as DataView[];
   }, [additionalSourceFields, dataFieldNames]);
 
+  const suggestionsAbstraction = useMemo<SuggestionsAbstraction>(
+    () => ({
+      type: 'alerting/v2',
+      fields: {},
+      valueSuggestionTypeByField: Object.fromEntries(
+        additionalSourceFields.map(({ name }) => [name, 'alerts' as const])
+      ),
+    }),
+    [additionalSourceFields]
+  );
+
   const query: Query = useMemo(() => ({ query: value, language: 'kuery' }), [value]);
   const isInvalid = !isValidKql(value);
   const handleChange = useCallback(
@@ -124,7 +130,7 @@ export const EpisodesKqlInput = ({
       dataTestSubj={dataTestSubj}
       size="s"
       className="euiFieldText--fullWidth"
-      suggestionsAbstraction={episodesSearchSuggestionsAbstraction}
+      suggestionsAbstraction={suggestionsAbstraction}
       suggestionsDebounceMs={300}
     />
   );

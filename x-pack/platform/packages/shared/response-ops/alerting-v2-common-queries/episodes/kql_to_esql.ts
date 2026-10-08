@@ -102,7 +102,7 @@ const convertNode = (node: KueryNode): string => {
       return `(${(node.arguments as KueryNode[]).map(convertNode).join(` ${operator} `)})`;
     }
     case 'not':
-      return `NOT (${convertNode(firstArgument as KueryNode)})`;
+      return `COALESCE(NOT (${convertNode(firstArgument as KueryNode)}), true)`;
     case 'exists': {
       const field = getFieldExpression(firstArgument as KueryNode);
       return field ? `${field} IS NOT NULL` : 'false';
@@ -121,6 +121,10 @@ const convertNode = (node: KueryNode): string => {
         return `${field} LIKE ${escapeStringValue(pattern)}`;
       }
       const value = getLiteralValue(valueNode);
+      const fieldName = getLiteralValue(firstArgument as KueryNode);
+      if (typeof value === 'boolean' && String(fieldName).startsWith(DATA_FIELD_PREFIX)) {
+        return `${field} == ${escapeStringValue(String(value))}`;
+      }
       return value === null ? `${field} IS NULL` : `${field} == ${getValueExpression(value)}`;
     }
     case 'range': {

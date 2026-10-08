@@ -72,8 +72,8 @@ describe('buildEpisodesKpisQuery', () => {
   });
 
   it('applies queryString filter when provided', () => {
-    const output = buildEpisodesKpisQuery(SPACE, UID, { queryString: 'alert.name: "cpu"' });
-    expect(output).toContain('KQL(');
+    const output = buildEpisodesKpisQuery(SPACE, UID, { queryString: 'severity: critical' });
+    expect(output).toContain('| WHERE severity == "critical"');
   });
 
   it('does not include SORT or LIMIT', () => {

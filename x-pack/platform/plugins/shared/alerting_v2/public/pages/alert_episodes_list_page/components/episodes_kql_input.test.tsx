@@ -102,6 +102,9 @@ describe('EpisodesKqlInput', () => {
     await waitFor(() => {
       const latestProps = mockQueryStringInput.mock.calls.at(-1)?.[0] as {
         indexPatterns: Array<{ fields: Array<{ name: string }> }>;
+        suggestionsAbstraction: {
+          valueSuggestionTypeByField: Record<string, string>;
+        };
       };
       expect(latestProps.indexPatterns[0].fields.map(({ name }) => name)).toEqual(
         expect.arrayContaining([
@@ -111,6 +114,9 @@ describe('EpisodesKqlInput', () => {
           'kibana.alert.rule.name',
         ])
       );
+      expect(latestProps.suggestionsAbstraction.valueSuggestionTypeByField).toEqual({
+        'kibana.alert.rule.name': 'alerts',
+      });
     });
   });
 });
