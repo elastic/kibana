@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/std'
   - '@kbn/zod'
+  - '@kbn/streamlang'
 tags:
   - shared-common
   - package

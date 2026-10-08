@@ -6,7 +6,7 @@
  */
 
 import { Builder } from '@elastic/esql';
-import type { ESQLSingleAstItem } from '@elastic/esql/types';
+import type { ESQLAstItem, ESQLSingleAstItem } from '@elastic/esql/types';
 import {
   type Condition,
   type FilterCondition,
@@ -16,8 +16,27 @@ import {
   isNeverCondition,
   isNotCondition,
   isOrCondition,
-} from '../../../types/conditions';
-import { esqlLiteralFromAny } from './condition_to_esql';
+} from '@kbn/streamlang';
+
+const esqlLiteralFromAny = (value: unknown): ESQLAstItem => {
+  if (Array.isArray(value)) {
+    return Builder.expression.list.literal({
+      values: value.map((item) => esqlLiteralFromAny(item)) as ESQLSingleAstItem[],
+    });
+  }
+  if (typeof value === 'string') {
+    return Builder.expression.literal.string(value);
+  }
+  if (typeof value === 'number') {
+    return Number.isInteger(value)
+      ? Builder.expression.literal.integer(value)
+      : Builder.expression.literal.decimal(value);
+  }
+  if (typeof value === 'boolean') {
+    return Builder.expression.literal.boolean(value);
+  }
+  return Builder.expression.literal.nil();
+};
 
 type ComparisonOperator = '==' | '!=' | '>' | '>=' | '<' | '<=';
 

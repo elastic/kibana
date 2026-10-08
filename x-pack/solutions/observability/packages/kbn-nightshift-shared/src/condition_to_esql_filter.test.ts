@@ -7,7 +7,7 @@
 
 import { BasicPrettyPrinter, esql } from '@elastic/esql';
 import { conditionToESQLFilterAst } from './condition_to_esql_filter';
-import type { Condition } from '../../../types/conditions';
+import type { Condition } from '@kbn/streamlang';
 
 const print = (condition: Condition): string =>
   BasicPrettyPrinter.print(conditionToESQLFilterAst(condition));

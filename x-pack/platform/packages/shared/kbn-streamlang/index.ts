@@ -22,7 +22,6 @@ export {
   transpile as transpileEsql,
   conditionToESQL,
   conditionToESQLAst,
-  conditionToESQLFilterAst,
 } from './src/transpilers/esql';
 export * from './types/processors';
 export { URI_PARTS_DEFAULT_TARGET } from './types/processors/uri_parts';

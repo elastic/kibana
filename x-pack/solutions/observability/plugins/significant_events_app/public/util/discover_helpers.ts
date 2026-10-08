@@ -8,7 +8,8 @@
 import { esql } from '@elastic/esql';
 import type { TimeState } from '@kbn/es-query';
 import { getSourcesForStream, type Streams } from '@kbn/streams-schema';
-import { conditionToESQLFilterAst, type Condition } from '@kbn/streamlang';
+import { conditionToESQLFilterAst } from '@kbn/nightshift-shared';
+import type { Condition } from '@kbn/streamlang';
 import type { TimeRange } from '@kbn/es-query';
 
 export function buildDiscoverParams(esqlQuery: string, timeRange: TimeRange) {
