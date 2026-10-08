@@ -330,7 +330,7 @@ describe('AgentBuilder runner', () => {
       {
         experimentalEnabled: false,
         contextEngineEnabled: true,
-        expectedAiIndices: false,
+        expectedAiIndices: true,
       },
       {
         experimentalEnabled: true,
@@ -343,7 +343,7 @@ describe('AgentBuilder runner', () => {
         expectedAiIndices: true,
       },
     ])(
-      'sets AI index instructions to $expectedAiIndices when experimental=$experimentalEnabled and contextEngine=$contextEngineEnabled',
+      'sets AI index instructions to $expectedAiIndices from contextEngine=$contextEngineEnabled (experimental=$experimentalEnabled)',
       async ({ experimentalEnabled, contextEngineEnabled, expectedAiIndices }) => {
         const runnerDeps = createRunnerDepsMock();
         runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
