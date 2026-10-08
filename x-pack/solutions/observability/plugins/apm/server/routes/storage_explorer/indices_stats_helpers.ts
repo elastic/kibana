@@ -9,6 +9,11 @@ import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/ty
 import type { ApmPluginRequestHandlerContext } from '../typings';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
+const EMPTY_INDICES_STATS = {
+  _all: { total: { store: { size_in_bytes: 0 } } },
+  indices: {},
+};
+
 export async function getTotalIndicesStats({
   context,
   apmEventClient,
@@ -16,19 +21,21 @@ export async function getTotalIndicesStats({
   context: ApmPluginRequestHandlerContext;
   apmEventClient: APMEventClient;
 }) {
-  const index = getApmIndicesCombined(apmEventClient);
+  const existingIndices = await getExistingApmIndices({ context, apmEventClient });
+  if (!existingIndices.length) {
+    return EMPTY_INDICES_STATS;
+  }
+
   const esClient = (await context.core).elasticsearch.client;
   try {
     return await esClient.asCurrentUser.indices.stats({
-      index,
+      index: existingIndices.join(),
       expand_wildcards: 'all',
     });
   } catch (error) {
+    // An index can disappear between resolution and the stats request.
     if (isIndexNotFoundError(error)) {
-      return {
-        _all: { total: { store: { size_in_bytes: 0 } } },
-        indices: {},
-      };
+      return EMPTY_INDICES_STATS;
     }
     throw error;
   }
@@ -76,17 +83,22 @@ export async function getIndicesLifecycleStatus({
   context: ApmPluginRequestHandlerContext;
   apmEventClient: APMEventClient;
 }) {
-  const index = getApmIndicesCombined(apmEventClient);
+  const existingIndices = await getExistingApmIndices({ context, apmEventClient });
+  if (!existingIndices.length) {
+    return {};
+  }
+
   const esClient = (await context.core).elasticsearch.client;
   try {
     const { indices } = await esClient.asCurrentUser.ilm.explainLifecycle({
-      index,
+      index: existingIndices.join(),
       filter_path: 'indices.*.phase',
     });
 
     return indices || {};
   } catch (error) {
-    // Unlike the indices APIs above, ILM explain does not accept ignore_unavailable.
+    // ILM explain does not accept ignore_unavailable, and an index can
+    // disappear between resolution and this request.
     if (isIndexNotFoundError(error)) {
       return {};
     }
@@ -116,6 +128,16 @@ export async function getIndicesInfo({
   });
 
   return indicesInfo;
+}
+
+async function getExistingApmIndices({
+  context,
+  apmEventClient,
+}: {
+  context: ApmPluginRequestHandlerContext;
+  apmEventClient: APMEventClient;
+}) {
+  return Object.keys(await getIndicesInfo({ context, apmEventClient }));
 }
 
 export function getApmIndicesCombined(apmEventClient: APMEventClient) {
