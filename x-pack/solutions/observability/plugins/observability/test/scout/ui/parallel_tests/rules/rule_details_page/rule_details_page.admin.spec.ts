@@ -189,33 +189,10 @@ test.describe(
       await pageObjects.ruleDetailsPage.openRuleEditForm();
 
       // Verify dashboard selector is visible
-      await expect(pageObjects.ruleDetailsPage.dashboardsSelector).toBeVisible();
+      await expect(pageObjects.ruleDetailsPage.dashboardsSelector.locator).toBeVisible();
 
-      // Click to open the dropdown — triggers handleComboBoxFocus → initial loadDashboards
-      await pageObjects.ruleDetailsPage.dashboardsSelector.click();
-      await expect(pageObjects.ruleDetailsPage.comboboxOptionsList).toBeAttached({
-        timeout: 20000,
-      });
-
-      const input = pageObjects.ruleDetailsPage.dashboardsSelector.locator('input');
-      const optionsLocator =
-        pageObjects.ruleDetailsPage.comboboxOptionsList.locator('[role="option"]');
-
-      // Alternate between two search values so searchValue changes on every poll iteration.
-      // Using the same value each time would leave React state unchanged → loadDashboards
-      // would not re-fire → options would never update. Alternating ensures a new
-      // loadDashboards call on every attempt, handling ES near-real-time indexing delay.
-      let toggle = false;
-      await expect
-        .poll(
-          async () => {
-            toggle = !toggle;
-            await input.fill(toggle ? testDashboardTitle : testDashboardTitle.slice(0, -1));
-            return optionsLocator.count();
-          },
-          { timeout: 30000, intervals: [1000] }
-        )
-        .toBeGreaterThan(0);
+      // Verify the dashboard the test created is offered and selectable
+      await pageObjects.ruleDetailsPage.selectRelatedDashboard(testDashboardTitle);
     });
   }
 );
