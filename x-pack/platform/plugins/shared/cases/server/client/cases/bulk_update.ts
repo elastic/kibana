@@ -41,6 +41,7 @@ import {
 } from '../../../common/constants';
 import type { Owner } from '../../../common/constants/types';
 import { Operations } from '../../authorization';
+import { createCaseEntity } from '../../authorization/utils';
 import { createCaseError, isSOError } from '../../common/error';
 import { createAlertUpdateStatusRequest, flattenCaseSavedObject } from '../../common/utils';
 import {
@@ -379,7 +380,7 @@ function partitionPatchRequest(
     } else if (foundCase.version !== reqCase.version) {
       conflictedCases.push(reqCase);
       // let's try to authorize the conflicted case even though we'll fail after afterwards just in case
-      casesToAuthorize.set(foundCase.id, { id: foundCase.id, owner: foundCase.attributes.owner });
+      casesToAuthorize.set(foundCase.id, createCaseEntity(foundCase));
     } else if (
       reqCase.status != null &&
       foundCase.attributes.status !== reqCase.status &&
@@ -387,9 +388,9 @@ function partitionPatchRequest(
     ) {
       // Track cases that are closed and a user is attempting to reopen
       reopenedCases.push(reqCase);
-      casesToAuthorize.set(foundCase.id, { id: foundCase.id, owner: foundCase.attributes.owner });
+      casesToAuthorize.set(foundCase.id, createCaseEntity(foundCase));
     } else {
-      casesToAuthorize.set(foundCase.id, { id: foundCase.id, owner: foundCase.attributes.owner });
+      casesToAuthorize.set(foundCase.id, createCaseEntity(foundCase));
     }
     if (reqCase.assignees) {
       if (

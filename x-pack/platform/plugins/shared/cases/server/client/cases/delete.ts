@@ -22,6 +22,7 @@ import type { CasesClientArgs } from '..';
 import { createCaseError, createCaseErrorFromSOError, isSOError } from '../../common/error';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
+import { createCaseEntity } from '../../authorization/utils';
 import { createFileEntities, deleteFiles } from '../files';
 
 /**
@@ -52,7 +53,7 @@ export async function deleteCases(
         );
       }
 
-      entities.set(theCase.id, { id: theCase.id, owner: theCase.attributes.owner });
+      entities.set(theCase.id, createCaseEntity(theCase));
     }
 
     const fileEntities = await getFileEntities(ids, fileService);

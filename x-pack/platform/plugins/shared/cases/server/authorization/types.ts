@@ -9,6 +9,7 @@ import type { EcsEvent } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import type { CasesSupportedOperations } from '@kbn/security-plugin/server';
 import type { ArrayElement } from '@kbn/utility-types';
+import type { CaseAccess, CaseAssignees } from '../../common/types/domain';
 
 /**
  * The tenses for describing the action performed by a API route
@@ -112,6 +113,13 @@ export interface OperationDetails {
 export interface OwnerEntity {
   owner: string;
   id: string;
+  /**
+   * The access control and assignees of the entity's case. When provided,
+   * restricted-case visibility is enforced: a restricted case produces a
+   * not-found outcome for callers that are not assignees (or superusers).
+   */
+  access?: CaseAccess;
+  assignees?: CaseAssignees;
 }
 
 /**

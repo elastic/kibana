@@ -22,6 +22,7 @@ export const createAuthorizationMock = () => {
       };
     }),
     getAndEnsureAuthorizedEntities: jest.fn(),
+    isCaseVisible: jest.fn().mockReturnValue(true),
   };
   return mocked;
 };

@@ -2629,7 +2629,9 @@ describe('update', () => {
         );
 
         expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
-          entities: [{ id: mockCases[0].id, owner: mockCases[0].attributes.owner }],
+          entities: [
+            expect.objectContaining({ id: mockCases[0].id, owner: mockCases[0].attributes.owner }),
+          ],
           operation: [Operations.updateCase],
         });
       });
@@ -2665,7 +2667,9 @@ describe('update', () => {
         );
 
         expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
-          entities: [{ id: closedCase.id, owner: closedCase.attributes.owner }],
+          entities: [
+            expect.objectContaining({ id: closedCase.id, owner: closedCase.attributes.owner }),
+          ],
           operation: [Operations.reopenCase],
         });
       });
@@ -2701,7 +2705,9 @@ describe('update', () => {
         );
 
         expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
-          entities: [{ id: closedCase.id, owner: closedCase.attributes.owner }],
+          entities: [
+            expect.objectContaining({ id: closedCase.id, owner: closedCase.attributes.owner }),
+          ],
           operation: [Operations.reopenCase, Operations.updateCase],
         });
       });
