@@ -683,7 +683,8 @@ export const OnlineEvalDetailPage: React.FC = () => {
                 }
               )}
               actionProps={
-                canManage
+                // With unsaved edits, the regular Save regenerates the workflow and keeps them.
+                canManage && !draftState.hasChanged
                   ? {
                       primary: {
                         children: i18n.translate(

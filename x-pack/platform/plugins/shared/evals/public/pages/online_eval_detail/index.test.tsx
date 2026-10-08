@@ -376,6 +376,24 @@ describe('OnlineEvalDetailPage', () => {
         screen.queryByTestId('onlineEvalDetailLegacyWorkflowUpdateButton')
       ).not.toBeInTheDocument();
     });
+
+    it('hides the update button while there are unsaved edits', async () => {
+      mockLegacyWorkflow();
+
+      renderPage();
+
+      expect(
+        await screen.findByTestId('onlineEvalDetailLegacyWorkflowUpdateButton')
+      ).toBeInTheDocument();
+      fireEvent.change(screen.getByTestId('onlineEvalDetailWindowInput'), {
+        target: { value: '90' },
+      });
+
+      expect(await screen.findByTestId('onlineEvalDetailBottomBar')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('onlineEvalDetailLegacyWorkflowUpdateButton')
+      ).not.toBeInTheDocument();
+    });
   });
 
   it('keeps the configured connector selected when it is no longer selectable', async () => {
