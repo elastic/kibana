@@ -85,6 +85,16 @@ describe('InstanceNamespaceField', () => {
     expect(screen.getByTestId('serviceSettings-namespaceField-locked')).toHaveValue('prod');
   });
 
+  it('shows the namespace an empty value resolves to when it is known', () => {
+    renderField({ namespace: '', isLocked: true, resolvedEmptyNamespace: 'default' });
+    expect(screen.getByTestId('serviceSettings-namespaceField-locked')).toHaveValue('default');
+  });
+
+  it('keeps the explicit namespace over the resolved one', () => {
+    renderField({ namespace: 'prod', isLocked: true, resolvedEmptyNamespace: 'default' });
+    expect(screen.getByTestId('serviceSettings-namespaceField-locked')).toHaveValue('prod');
+  });
+
   it('says the namespace is inherited when locked with no namespace', () => {
     renderField({ namespace: '', isLocked: true });
     expect(screen.getByTestId('serviceSettings-namespaceField-locked')).toHaveAttribute(
