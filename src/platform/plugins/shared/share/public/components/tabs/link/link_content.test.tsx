@@ -315,4 +315,30 @@ describe('LinkContent', () => {
     expect(screen.queryByTestId('timeRangeSwitch')).not.toBeInTheDocument();
     expect(screen.queryByTestId('relativeTimeCallout')).toBeInTheDocument();
   });
+
+  it('should render the help text contributed by the object type', () => {
+    renderComponent({
+      objectType: 'search',
+      objectConfig: { helpText: <span>Use an absolute time range</span> },
+      isDirty: false,
+      shareableUrl,
+      shortUrlService,
+      allowShortUrl: false,
+    });
+
+    expect(screen.getByTestId('shareLinkHelpText')).toHaveTextContent('Use an absolute time range');
+  });
+
+  it('should not render help text when the object type does not contribute any', () => {
+    renderComponent({
+      objectType: 'search',
+      objectConfig: {},
+      isDirty: false,
+      shareableUrl,
+      shortUrlService,
+      allowShortUrl: false,
+    });
+
+    expect(screen.queryByTestId('shareLinkHelpText')).not.toBeInTheDocument();
+  });
 });

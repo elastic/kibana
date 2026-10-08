@@ -84,6 +84,7 @@ const skillIsPresent = (skillName: string, loadedNames: string[]): boolean => {
 export const createExpectedSkillEvaluator = (skillName: string): Evaluator => ({
   name: `Expected Skill (${skillName})`,
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output }): Promise<EvaluationResult> => {
     const loadedNames = getSkillsLoadedFromSteps(output);
     const loaded = skillIsPresent(skillName, loadedNames);
@@ -109,6 +110,7 @@ export const createExpectedSkillEvaluator = (skillName: string): Evaluator => ({
 export const createShouldNotActivateSkillEvaluator = (skillName: string): Evaluator => ({
   name: `Skill Not Activated (${skillName})`,
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output }): Promise<EvaluationResult> => {
     const loadedNames = getSkillsLoadedFromSteps(output);
     const loaded = skillIsPresent(skillName, loadedNames);
@@ -127,6 +129,89 @@ export const createShouldNotActivateSkillEvaluator = (skillName: string): Evalua
 });
 
 /**
+ * Evaluates whether the implicit `<relevant_skills>` pre-selection surfaced the correct skill
+ * before the agent acts.
+ *
+ * Checks the `relevant_skills` step with `source: 'implicit'` in the output steps (the fast-model
+ * call that runs at the start of each round when the `relevantSkills` experiment flag is on).
+ * Returns `score: null / label: 'SKIP'` when the step is absent — meaning the feature is
+ * disabled or the skill list was below the threshold that bypasses the model call.
+ *
+ * Ground truth keys (same as {@link skillSelectionEvaluator}):
+ * - `expectedSkill` — must appear in the pre-selected list. Score 1 if found.
+ * - `shouldNotActivateSkill` — must NOT appear in the pre-selected list. Score 1 if absent.
+ */
+export const preSelectionEvaluator: Evaluator = {
+  name: 'Pre-Selection Recall',
+  kind: 'CODE',
+  direction: 'maximize',
+  evaluate: async ({ output, expected }): Promise<EvaluationResult> => {
+    const { expectedSkill, shouldNotActivateSkill } =
+      (expected as BenchmarkExample['output']) ?? {};
+
+    if (!expectedSkill && !shouldNotActivateSkill) {
+      return {
+        score: 1,
+        label: 'SKIP',
+        explanation: 'No skill routing assertion in expected output',
+      };
+    }
+
+    const steps = (output as { steps?: Array<Record<string, unknown>> })?.steps ?? [];
+    const preSelectStep = steps.find(
+      (s) => s.type === 'relevant_skills' && s.source === 'implicit'
+    );
+
+    if (!preSelectStep) {
+      return {
+        score: null,
+        label: 'SKIP',
+        explanation:
+          'No implicit relevant_skills step — feature disabled, or skill list below threshold',
+      };
+    }
+
+    const surfaced =
+      (preSelectStep.skills as Array<{ id?: string; name?: string; path?: string }>) ?? [];
+    const surfacedNames = surfaced.flatMap((s) =>
+      [s.id, s.name, s.path].filter((v): v is string => typeof v === 'string')
+    );
+    const surfacedIds = surfaced.map((s) => s.id).filter(Boolean);
+
+    if (expectedSkill) {
+      const found = skillIsPresent(expectedSkill, surfacedNames);
+      return {
+        score: found ? 1 : 0,
+        label: found ? 'PASS' : 'FAIL',
+        explanation: found
+          ? `Skill '${expectedSkill}' was surfaced in pre-selection. Skills shown: ${surfacedIds.join(
+              ', '
+            )}`
+          : `Skill '${expectedSkill}' was NOT surfaced in pre-selection. Skills shown: ${
+              surfacedIds.join(', ') || 'none'
+            }`,
+        metadata: { expectedSkill, surfacedSkillIds: surfacedIds, found },
+      };
+    }
+
+    const activated = skillIsPresent(shouldNotActivateSkill!, surfacedNames);
+    const passed = !activated;
+    return {
+      score: passed ? 1 : 0,
+      label: passed ? 'PASS' : 'FAIL',
+      explanation: passed
+        ? `Skill '${shouldNotActivateSkill}' correctly absent from pre-selection. Skills shown: ${
+            surfacedIds.join(', ') || 'none'
+          }`
+        : `Skill '${shouldNotActivateSkill}' incorrectly surfaced in pre-selection. Skills shown: ${surfacedIds.join(
+            ', '
+          )}`,
+      metadata: { shouldNotActivateSkill, surfacedSkillIds: surfacedIds, activated },
+    };
+  },
+};
+
+/**
  * A single generic evaluator that reads routing assertions from example ground truth
  * (`expected`, i.e. `example.output`) and evaluates the conversation against them.
  *
@@ -139,6 +224,7 @@ export const createShouldNotActivateSkillEvaluator = (skillName: string): Evalua
 export const skillSelectionEvaluator: Evaluator = {
   name: 'Skill Selection',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, expected }): Promise<EvaluationResult> => {
     const { expectedSkill, shouldNotActivateSkill } =
       (expected as BenchmarkExample['output']) ?? {};

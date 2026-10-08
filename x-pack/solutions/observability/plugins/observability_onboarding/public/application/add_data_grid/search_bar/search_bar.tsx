@@ -28,6 +28,5 @@ export const AddDataSearchBar = ({
     value={value}
     onChange={(event) => onChange(event.target.value)}
     fullWidth
-    compressed
   />
 );

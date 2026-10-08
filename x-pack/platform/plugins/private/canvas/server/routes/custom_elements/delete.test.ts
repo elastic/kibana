@@ -50,7 +50,7 @@ describe('DELETE custom element', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({ ok: true });
-    expect(mockRouteContext.core.savedObjects.client.delete).toBeCalledWith(
+    expect(mockRouteContext.core.savedObjects.client.delete).toHaveBeenCalledWith(
       CUSTOM_ELEMENT_TYPE,
       id
     );

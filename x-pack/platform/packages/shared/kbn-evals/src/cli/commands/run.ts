@@ -8,20 +8,23 @@
 import { spawn } from 'child_process';
 import type { Command } from '@kbn/dev-cli-runner';
 import {
+  readConcurrencyFlag,
+  readSpaceIdsFlag,
   resolveEvalSuite,
   resolveEvaluationConnectorId,
   resolveProfileEnvOverrides,
 } from '../run_helpers';
 import { buildPlaywrightArgs } from './playwright_args';
 
-const formatEnvPrefix = (overrides: Record<string, string>) =>
+const formatEnvPrefix = (overrides: Record<string, string>, redactedKeys: ReadonlySet<string>) =>
   Object.entries(overrides)
     .map(([key, value]) => {
       const isSensitive =
+        redactedKeys.has(key) ||
         key.includes('API_KEY') ||
         key.includes('CREDENTIALS') ||
         key.includes('TOKEN') ||
-        key === 'GCS_CREDENTIALS';
+        key === 'TRACING_EXPORTERS';
       return `${key}=${isSensitive ? '[redacted]' : value}`;
     })
     .join(' ');
@@ -33,10 +36,11 @@ export const runSuiteCmd: Command<void> = {
 
   Examples:
     node scripts/evals run --suite agent-builder --judge bedrock-claude
-    node scripts/evals run --suite obs-ai-assistant --model azure-gpt4o --repetitions 3
     node scripts/evals run --suite agent-builder --grep "product documentation"
     node scripts/evals run --suite significant-events --grep-invert "KI query generation"
     node scripts/evals run --suite streams --dry-run
+    node scripts/evals run --suite streams --space-ids marketing,sales
+    node scripts/evals run --suite agent-builder --concurrency 8
   `,
   flags: {
     string: [
@@ -45,6 +49,8 @@ export const runSuiteCmd: Command<void> = {
       'project',
       'evaluation-connector-id',
       'repetitions',
+      'concurrency',
+      'space-ids',
       'grep',
       'grep-invert',
       'profile',
@@ -74,20 +80,31 @@ export const runSuiteCmd: Command<void> = {
       envOverrides.EVAL_SUITE_ID = suite.id;
     }
 
-    const { datasetsProfile, exportProfile, profileEnvOverrides } =
+    const { datasetsProfile, exportProfile, profileEnvOverrides, suiteScoutEnv } =
       await resolveProfileEnvOverrides({
         repoRoot,
         log,
         flagsReader,
         profile: flagsReader.string('profile') ?? undefined,
+        suite,
       });
-    Object.assign(envOverrides, profileEnvOverrides);
+    Object.assign(envOverrides, profileEnvOverrides, suiteScoutEnv);
 
     log.info(`Profiles: datasets=${datasetsProfile ?? 'config'} export=${exportProfile ?? 'none'}`);
 
     const repetitions = flagsReader.string('repetitions');
     if (repetitions) {
       envOverrides.EVAL_REPETITIONS = repetitions;
+    }
+
+    const concurrency = readConcurrencyFlag(flagsReader);
+    if (concurrency) {
+      envOverrides.EVAL_CONCURRENCY = concurrency;
+    }
+
+    const spaceIds = readSpaceIdsFlag(flagsReader);
+    if (spaceIds) {
+      envOverrides.EVAL_SPACE_IDS = spaceIds.join(',');
     }
 
     const traceEsUrl = flagsReader.string('trace-es-url');
@@ -118,7 +135,10 @@ export const runSuiteCmd: Command<void> = {
       grepInvert: flagsReader.string('grep-invert'),
     });
 
-    const commandPreview = `${formatEnvPrefix(envOverrides)} node ${args.join(' ')}`.trim();
+    const commandPreview = `${formatEnvPrefix(
+      envOverrides,
+      new Set(Object.keys(suiteScoutEnv))
+    )} node ${args.join(' ')}`.trim();
     log.info(`Running: ${commandPreview}`);
 
     if (flagsReader.boolean('dry-run')) {

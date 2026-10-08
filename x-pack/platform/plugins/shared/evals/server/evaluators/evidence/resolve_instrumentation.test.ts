@@ -6,7 +6,6 @@
  */
 
 import { getInstrumentationProfile } from './resolve_instrumentation';
-import { INSTRUMENTATION_PROFILES } from './profiles';
 
 describe('getInstrumentationProfile', () => {
   it('resolves elastic-inference to the current Kibana field paths and filters', () => {
@@ -76,10 +75,5 @@ describe('getInstrumentationProfile', () => {
         result: 'attributes.new_context',
       },
     });
-  });
-
-  it('keeps claude-code as the last profile key', () => {
-    const profileKeys = Object.keys(INSTRUMENTATION_PROFILES);
-    expect(profileKeys.at(-1)).toBe('claude-code');
   });
 });

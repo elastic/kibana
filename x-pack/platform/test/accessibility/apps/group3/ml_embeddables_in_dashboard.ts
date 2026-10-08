@@ -92,9 +92,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         after(async () => {
-          // Exit the dashboard's edit mode so the unsaved-changes `beforeunload`
-          // handler doesn't block the next suite's navigation in the shared session.
-          await PageObjects.dashboard.clickCancelOutOfEditMode();
+          // Leave the unsaved new dashboard via in-app navigation to unmount the editor and remove its `beforeunload` handler before the next suite navigates (discard and view-mode are disabled on a never-saved dashboard).
+          await PageObjects.dashboard.gotoDashboardLandingPage();
           await ml.api.cleanMlIndices();
         });
 

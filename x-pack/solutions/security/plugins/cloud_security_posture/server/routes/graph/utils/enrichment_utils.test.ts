@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { rebuildDocData, addValuesToSet } from './enrichment_utils';
+import {
+  rebuildDocData,
+  addValuesToSet,
+  aggregateRiskScore,
+  aggregateAssetCriticality,
+} from './enrichment_utils';
 import type { EntityEnrichmentFields } from '../fetch_entity_enrichment';
 
 describe('addValuesToSet', () => {
@@ -176,7 +181,8 @@ describe('rebuildDocData', () => {
   });
 
   it('prefers input sourceFields over enrichment sourceFields', () => {
-    // Events docData has sourceFields from the event row — those take precedence
+    // sourceFields must describe the event fields that pointed at the entity, since consumers use
+    // them to query logs-*. Entity-store values may not exist in the events at all.
     const item = JSON.stringify({
       id: 'user:alice',
       type: 'entity',
@@ -199,7 +205,53 @@ describe('rebuildDocData', () => {
     const result = rebuildDocData([item], enrichmentMap);
 
     const doc = JSON.parse(result[0]);
-    expect(doc.entity.sourceFields?.['user.id']).toBe('from-event');
+    expect(doc.entity.sourceFields).toEqual({ 'user.id': 'from-event' });
+  });
+
+  it('unions event sourceFields for an enriched entity without substituting entity-store fields', () => {
+    // The entity store carries only user.name / user.id, but the events also matched on
+    // user.email — the field the EUID was composed from. All event identifiers must survive so
+    // the follow-up ranking work (#262882) can pick among them.
+    const makeEntry = (userName: string, userId: string) =>
+      JSON.stringify({
+        id: 'user:multi-actor-2@example.com@gcp',
+        type: 'entity',
+        sourceFields: {
+          'user.name': userName,
+          'user.email': 'multi-actor-2@example.com',
+          'user.id': userId,
+        },
+      });
+    const items = [
+      makeEntry('Multi Actor 1', 'multi-actor-1@example.com'),
+      makeEntry('Multi Actor 2', 'multi-actor-2@example.com'),
+    ];
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      [
+        'user:multi-actor-2@example.com@gcp',
+        {
+          name: 'MultiActor2',
+          type: 'Identity',
+          subType: 'GCP IAM User',
+          engineType: 'user',
+          hostIps: [],
+          sourceFields: { 'user.name': 'MultiActor2', 'user.id': 'multi-actor-2@example.com' },
+        },
+      ],
+    ]);
+
+    const result = rebuildDocData(items, enrichmentMap);
+
+    expect(result).toHaveLength(1);
+    const doc = JSON.parse(result[0]);
+    expect(doc.entity.sourceFields).toEqual({
+      'user.name': ['Multi Actor 1', 'Multi Actor 2'],
+      'user.email': 'multi-actor-2@example.com',
+      'user.id': ['multi-actor-1@example.com', 'multi-actor-2@example.com'],
+    });
+    // Enrichment still supplies entity metadata.
+    expect(doc.entity.name).toBe('MultiActor2');
+    expect(doc.entity.engine_type).toBe('user');
   });
 
   it('handles host.ip array in enrichment', () => {
@@ -222,5 +274,293 @@ describe('rebuildDocData', () => {
     expect(result).toHaveLength(1);
     const doc = JSON.parse(result[0]);
     expect(doc.entity.host).toEqual({ ip: ['192.168.1.1', '10.0.0.1'] });
+  });
+
+  it('deduplicates entries with the same entity id and unions their sourceFields', () => {
+    // Simulates two actorDocData strings produced for the same entity id when
+    // MV_EXPAND user.email × MV_EXPAND user.id creates cross-product rows.
+    const makeEntry = (email: string, userId: string) =>
+      JSON.stringify({
+        id: 'user:actor@example.com@gcp',
+        type: 'entity',
+        sourceFields: { 'user.email': email, 'user.id': userId },
+      });
+
+    const items = [
+      makeEntry('actor@example.com', 'actor@example.com'),
+      makeEntry('actor@example.com', 'other@example.com'), // cross-product duplicate
+    ];
+
+    const result = rebuildDocData(items, new Map());
+
+    expect(result).toHaveLength(1);
+    const doc = JSON.parse(result[0]);
+    expect(doc.id).toBe('user:actor@example.com@gcp');
+    // user.email resolved to a single value, so it stays a scalar; user.id keeps both values.
+    expect(doc.entity.sourceFields).toEqual({
+      'user.email': 'actor@example.com',
+      'user.id': ['actor@example.com', 'other@example.com'],
+    });
+  });
+
+  it('collapses a full Cartesian product to one entry per entity id', () => {
+    // A single event with user.name × user.email × user.id (2 values each) produces 8 rows
+    // spanning 2 real entity ids. Each id must yield one entry carrying all values seen for it.
+    const makeEntry = (id: string, userName: string, email: string, userId: string) =>
+      JSON.stringify({
+        id,
+        type: 'entity',
+        sourceFields: { 'user.name': userName, 'user.email': email, 'user.id': userId },
+      });
+    const ID_1 = 'user:multi-actor-1@example.com@gcp';
+    const ID_2 = 'user:multi-actor-2@example.com@gcp';
+    const NAME_1 = 'Multi Actor 1';
+    const NAME_2 = 'Multi Actor 2';
+    const EMAIL_1 = 'multi-actor-1@example.com';
+    const EMAIL_2 = 'multi-actor-2@example.com';
+
+    const items = [
+      makeEntry(ID_1, NAME_1, EMAIL_1, EMAIL_1),
+      makeEntry(ID_1, NAME_1, EMAIL_1, EMAIL_2),
+      makeEntry(ID_2, NAME_1, EMAIL_2, EMAIL_1),
+      makeEntry(ID_2, NAME_1, EMAIL_2, EMAIL_2),
+      makeEntry(ID_1, NAME_2, EMAIL_1, EMAIL_1),
+      makeEntry(ID_1, NAME_2, EMAIL_1, EMAIL_2),
+      makeEntry(ID_2, NAME_2, EMAIL_2, EMAIL_1),
+      makeEntry(ID_2, NAME_2, EMAIL_2, EMAIL_2),
+    ];
+
+    const result = rebuildDocData(items, new Map());
+
+    expect(result).toHaveLength(2);
+    const docs = result.map((r) => JSON.parse(r));
+    expect(docs.map((d) => d.id)).toEqual([ID_1, ID_2]);
+    expect(docs[0].entity.sourceFields).toEqual({
+      'user.name': [NAME_1, NAME_2],
+      'user.email': EMAIL_1,
+      'user.id': [EMAIL_1, EMAIL_2],
+    });
+    expect(docs[1].entity.sourceFields).toEqual({
+      'user.name': [NAME_1, NAME_2],
+      'user.email': EMAIL_2,
+      'user.id': [EMAIL_1, EMAIL_2],
+    });
+  });
+
+  it('keeps doc-level fields from the grouped entries', () => {
+    const makeEntry = (userId: string) =>
+      JSON.stringify({
+        id: 'user:alice',
+        type: 'entity',
+        index: '.ds-logs-gcp.audit-default-000001',
+        sourceFields: { 'user.id': userId },
+      });
+
+    const result = rebuildDocData([makeEntry('alice'), makeEntry('alice2')], new Map());
+
+    expect(result).toHaveLength(1);
+    const doc = JSON.parse(result[0]);
+    expect(doc.id).toBe('user:alice');
+    expect(doc.type).toBe('entity');
+    expect(doc.index).toBe('.ds-logs-gcp.audit-default-000001');
+    // sourceFields moved from the top level into the entity object, and both entries' values
+    // survived the grouping.
+    expect(doc.sourceFields).toBeUndefined();
+    expect(doc.entity.sourceFields).toEqual({ 'user.id': ['alice', 'alice2'] });
+  });
+
+  it('passes through unparseable and id-less entries alongside grouped ones', () => {
+    const invalid = 'not-valid-json';
+    const noId = JSON.stringify({ type: 'entity', sourceFields: {} });
+    const withId = JSON.stringify({
+      id: 'user:alice',
+      type: 'entity',
+      sourceFields: { 'user.id': 'alice' },
+    });
+
+    const result = rebuildDocData([invalid, withId, noId, withId], new Map());
+
+    expect(result).toHaveLength(3);
+    expect(result[0]).toBe(invalid);
+    expect(JSON.parse(result[1]).id).toBe('user:alice');
+    expect(result[2]).toBe(noId);
+  });
+
+  it('adds riskScore and assetCriticality when the entity store has them', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice', { name: 'Alice', riskScore: 78.13, assetCriticality: 'extreme_impact' }],
+    ]);
+    const entry = JSON.stringify({ id: 'user:alice', type: 'entity' });
+
+    const doc = JSON.parse(rebuildDocData([entry], enrichmentMap)[0]);
+
+    expect(doc.entity.riskScore).toBe(78.13);
+    expect(doc.entity.assetCriticality).toBe('extreme_impact');
+  });
+
+  it('omits riskScore and assetCriticality entirely when the entity has neither', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice', { name: 'Alice', riskScore: null, assetCriticality: null }],
+    ]);
+    const entry = JSON.stringify({ id: 'user:alice', type: 'entity' });
+
+    const doc = JSON.parse(rebuildDocData([entry], enrichmentMap)[0]);
+
+    // Absent rather than null: the client must not have to tell "unscored" from a real value.
+    expect(doc.entity).not.toHaveProperty('riskScore');
+    expect(doc.entity).not.toHaveProperty('assetCriticality');
+  });
+
+  it('adds sources from the entity store, keeping them distinct from sourceFields', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['host:ea-endpoint-1', { sources: ['endpoint', 'system'] }],
+    ]);
+    const entry = JSON.stringify({
+      id: 'host:ea-endpoint-1',
+      type: 'entity',
+      sourceFields: { 'host.id': '1f2a4026' },
+    });
+
+    const doc = JSON.parse(rebuildDocData([entry], enrichmentMap)[0]);
+
+    // `sources` = integrations the entity came from; `sourceFields` = event field values
+    // that pointed at it. They must both survive, independently.
+    expect(doc.entity.sources).toEqual(['endpoint', 'system']);
+    expect(doc.entity.sourceFields).toEqual({ 'host.id': '1f2a4026' });
+  });
+
+  it('omits sources when the entity has none', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice', { name: 'Alice', sources: [] }],
+    ]);
+    const entry = JSON.stringify({ id: 'user:alice', type: 'entity' });
+
+    const doc = JSON.parse(rebuildDocData([entry], enrichmentMap)[0]);
+
+    expect(doc.entity).not.toHaveProperty('sources');
+  });
+
+  it('keeps a zero risk score, which is a real score rather than a missing one', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice', { riskScore: 0 }],
+    ]);
+    const entry = JSON.stringify({ id: 'user:alice', type: 'entity' });
+
+    const doc = JSON.parse(rebuildDocData([entry], enrichmentMap)[0]);
+
+    expect(doc.entity.riskScore).toBe(0);
+  });
+});
+
+describe('aggregateRiskScore', () => {
+  it('reports the spread across several entities', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['a', { riskScore: 12.4 }],
+      ['b', { riskScore: 94.1 }],
+      ['c', { riskScore: 50 }],
+    ]);
+
+    expect(aggregateRiskScore(['a', 'b', 'c'], enrichmentMap)).toEqual({ min: 12.4, max: 94.1 });
+  });
+
+  it('reports min === max for a single entity', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([['a', { riskScore: 78.13 }]]);
+
+    expect(aggregateRiskScore(['a'], enrichmentMap)).toEqual({ min: 78.13, max: 78.13 });
+  });
+
+  it('ignores entities without a score but keeps the ones that have it', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['a', { riskScore: null }],
+      ['b', { riskScore: 30 }],
+      ['c', {}],
+    ]);
+
+    expect(aggregateRiskScore(['a', 'b', 'c', 'missing'], enrichmentMap)).toEqual({
+      min: 30,
+      max: 30,
+    });
+  });
+
+  it('returns undefined when no entity has a score', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([['a', { riskScore: null }]]);
+
+    expect(aggregateRiskScore(['a'], enrichmentMap)).toBeUndefined();
+    expect(aggregateRiskScore([], enrichmentMap)).toBeUndefined();
+  });
+
+  it('treats a zero score as a value rather than as missing', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['a', { riskScore: 0 }],
+      ['b', { riskScore: 40 }],
+    ]);
+
+    expect(aggregateRiskScore(['a', 'b'], enrichmentMap)).toEqual({ min: 0, max: 40 });
+  });
+});
+
+describe('aggregateAssetCriticality', () => {
+  it('counts how many entities carry each level', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['a', { assetCriticality: 'low_impact' }],
+      ['b', { assetCriticality: 'extreme_impact' }],
+      ['c', { assetCriticality: 'low_impact' }],
+    ]);
+
+    expect(aggregateAssetCriticality(['a', 'b', 'c'], enrichmentMap)).toEqual([
+      { level: 'extreme_impact', count: 1 },
+      { level: 'low_impact', count: 2 },
+    ]);
+  });
+
+  it('orders entries most to least severe regardless of input order', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['a', { assetCriticality: 'low_impact' }],
+      ['b', { assetCriticality: 'medium_impact' }],
+      ['c', { assetCriticality: 'high_impact' }],
+      ['d', { assetCriticality: 'extreme_impact' }],
+    ]);
+
+    expect(
+      aggregateAssetCriticality(['a', 'b', 'c', 'd'], enrichmentMap)?.map(({ level }) => level)
+    ).toEqual(['extreme_impact', 'high_impact', 'medium_impact', 'low_impact']);
+  });
+
+  it('returns a single entry for a single entity', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['a', { assetCriticality: 'extreme_impact' }],
+    ]);
+
+    expect(aggregateAssetCriticality(['a'], enrichmentMap)).toEqual([
+      { level: 'extreme_impact', count: 1 },
+    ]);
+  });
+
+  it('returns undefined when no entity has a criticality', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['a', { assetCriticality: null }],
+      ['b', {}],
+    ]);
+
+    expect(aggregateAssetCriticality(['a', 'b'], enrichmentMap)).toBeUndefined();
+  });
+
+  it('skips levels the graph does not model', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['a', { assetCriticality: 'some_future_level' }],
+      ['b', { assetCriticality: 'high_impact' }],
+    ]);
+
+    expect(aggregateAssetCriticality(['a', 'b'], enrichmentMap)).toEqual([
+      { level: 'high_impact', count: 1 },
+    ]);
+  });
+
+  it('returns undefined when every value is unmodeled', () => {
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['a', { assetCriticality: 'some_future_level' }],
+    ]);
+
+    expect(aggregateAssetCriticality(['a'], enrichmentMap)).toBeUndefined();
   });
 });

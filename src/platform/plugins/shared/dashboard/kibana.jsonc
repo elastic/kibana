@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/dashboard-plugin",
-  "owner": ["@elastic/kibana-presentation"],
+  "owner": ["@elastic/kibana-dashboards"],
   "group": "platform",
   "visibility": "shared",
   "description": "Adds the Dashboard app to Kibana",
@@ -39,7 +39,8 @@
       "observabilityAIAssistant",
       "lens",
       "security",
-      "cps"
+      "cps",
+      "searchSessionsManagement"
     ],
     "requiredBundles": [
       "kibanaReact",

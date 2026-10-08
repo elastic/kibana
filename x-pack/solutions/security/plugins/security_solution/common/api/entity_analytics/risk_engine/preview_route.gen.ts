@@ -32,37 +32,62 @@ export const RiskScoresPreviewRequest = lazySchema(() =>
     /**
      * The identifier of the Kibana data view to be used when generating risk scores. If a data view is not found, the provided ID will be used as the query's index pattern instead.
      */
-    data_view_id: DataViewId,
+    data_view_id: DataViewId.describe(
+      "The identifier of the Kibana data view to be used when generating risk scores. If a data view is not found, the provided ID will be used as the query's index pattern instead."
+    ),
     /**
      * Used to retrieve a specific "page" of risk scores. If unspecified, the first "page" of scores is returned. See also the `after_keys` key in a risk scores response.
      */
-    after_keys: AfterKeys.optional(),
+    after_keys: AfterKeys.optional().describe(
+      'Used to retrieve a specific "page" of risk scores. If unspecified, the first "page" of scores is returned. See also the `after_keys` key in a risk scores response.'
+    ),
     /**
      * If set to `true`, a `debug` key is added to the response, containing both the internal request and response with elasticsearch.
      */
-    debug: z.boolean().optional(),
+    debug: z
+      .boolean()
+      .optional()
+      .describe(
+        'If set to `true`, a `debug` key is added to the response, containing both the internal request and response with elasticsearch.'
+      ),
     /**
      * An elasticsearch DSL filter object. Used to filter the data being scored, which implicitly filters the risk scores returned.
      */
-    filter: Filter.optional(),
+    filter: Filter.optional().describe(
+      'An elasticsearch DSL filter object. Used to filter the data being scored, which implicitly filters the risk scores returned.'
+    ),
     page_size: PageSize.optional(),
     /**
      * Used to restrict the type of risk scores involved. If unspecified, both `host` and `user` scores will be returned.
      */
-    identifier_type: IdentifierType.optional(),
+    identifier_type: IdentifierType.optional().describe(
+      'Used to restrict the type of risk scores involved. If unspecified, both `host` and `user` scores will be returned.'
+    ),
     /**
      * Defines the time period over which scores will be evaluated. If unspecified, a range of `[now, now-30d]` will be used.
      */
-    range: DateRange.optional(),
+    range: DateRange.optional().describe(
+      'Defines the time period over which scores will be evaluated. If unspecified, a range of `[now, now-30d]` will be used.'
+    ),
     weights: RiskScoreWeights.optional(),
     /**
      * A list of alert statuses to exclude from the risk score calculation. If unspecified, all alert statuses are included.
      */
-    exclude_alert_statuses: z.array(z.string()).optional(),
+    exclude_alert_statuses: z
+      .array(z.string())
+      .optional()
+      .describe(
+        'A list of alert statuses to exclude from the risk score calculation. If unspecified, all alert statuses are included.'
+      ),
     /**
      * A list of alert tags to exclude from the risk score calculation. If unspecified, all alert tags are included.
      */
-    exclude_alert_tags: z.array(z.string()).optional(),
+    exclude_alert_tags: z
+      .array(z.string())
+      .optional()
+      .describe(
+        'A list of alert tags to exclude from the risk score calculation. If unspecified, all alert tags are included.'
+      ),
     /**
      * Custom KQL filters to exclude from risk scoring queries, allowing more targeted risk analysis by filtering out specific alerts.
      */
@@ -72,14 +97,23 @@ export const RiskScoresPreviewRequest = lazySchema(() =>
           /**
            * The entity types this filter applies to
            */
-          entity_types: z.array(z.enum(['host', 'user', 'service'])),
+          entity_types: z
+            .array(z.enum(['host', 'user', 'service']))
+            .describe('The entity types this filter applies to'),
           /**
            * KQL filter expression to exclude (alerts matching this filter will be excluded from risk score calculation)
            */
-          filter: z.string(),
+          filter: z
+            .string()
+            .describe(
+              'KQL filter expression to exclude (alerts matching this filter will be excluded from risk score calculation)'
+            ),
         })
       )
-      .optional(),
+      .optional()
+      .describe(
+        'Custom KQL filters to exclude from risk scoring queries, allowing more targeted risk analysis by filtering out specific alerts.'
+      ),
   })
 );
 export type RiskScoresPreviewRequest = z.infer<typeof RiskScoresPreviewRequest>;
@@ -89,7 +123,9 @@ export const RiskScoresPreviewResponse = lazySchema(() =>
     /**
      * Used to obtain the next "page" of risk scores. See also the `after_keys` key in a risk scores request. If this key is empty, the calculation is complete.
      */
-    after_keys: AfterKeys,
+    after_keys: AfterKeys.describe(
+      'Used to obtain the next "page" of risk scores. See also the `after_keys` key in a risk scores request. If this key is empty, the calculation is complete.'
+    ),
     /**
      * Object containing debug information, particularly the internal request and response from elasticsearch
      */
@@ -98,24 +134,30 @@ export const RiskScoresPreviewResponse = lazySchema(() =>
         request: z.string().optional(),
         response: z.string().optional(),
       })
-      .optional(),
+      .optional()
+      .describe(
+        'Object containing debug information, particularly the internal request and response from elasticsearch'
+      ),
     scores: z.object({
       /**
        * A list of host risk scores
        */
-      host: z.array(EntityRiskScoreRecord).optional(),
+      host: z.array(EntityRiskScoreRecord).optional().describe('A list of host risk scores'),
       /**
        * A list of user risk scores
        */
-      user: z.array(EntityRiskScoreRecord).optional(),
+      user: z.array(EntityRiskScoreRecord).optional().describe('A list of user risk scores'),
       /**
        * A list of service risk scores
        */
-      service: z.array(EntityRiskScoreRecord).optional(),
+      service: z.array(EntityRiskScoreRecord).optional().describe('A list of service risk scores'),
       /**
        * A list of generic entities risk scores
        */
-      generic: z.array(EntityRiskScoreRecord).optional(),
+      generic: z
+        .array(EntityRiskScoreRecord)
+        .optional()
+        .describe('A list of generic entities risk scores'),
     }),
   })
 );

@@ -22,6 +22,7 @@ import type {
   ESQLFunction,
   ESQLSingleAstItem,
   ESQLSource,
+  ESQLStringLiteral,
 } from '@elastic/esql/types';
 
 // ---------------------------------------------------------------------------
@@ -554,6 +555,95 @@ export function getStatsQueryHints(esql: string): string[] {
   }
 
   return hints;
+}
+
+export interface OverBroadMatchPredicate {
+  field: string;
+  value: string;
+  operator: ':' | 'MATCH';
+}
+
+function isKeywordLiteral(node: ESQLAstItem | undefined): node is ESQLStringLiteral {
+  return (
+    !!node &&
+    !Array.isArray(node) &&
+    'type' in node &&
+    node.type === 'literal' &&
+    node.literalType === 'keyword'
+  );
+}
+
+function getUnquotedLiteral(node: ESQLAstItem | undefined): string | null {
+  return isKeywordLiteral(node) ? node.valueUnquoted : null;
+}
+
+function matchOptionsForceAndOperator(node: ESQLAstItem | undefined): boolean {
+  if (!node || Array.isArray(node) || !('type' in node) || node.type !== 'map') return false;
+  return node.entries.some(
+    (entry) =>
+      getUnquotedLiteral(entry.key)?.toLowerCase() === 'operator' &&
+      getUnquotedLiteral(entry.value)?.toLowerCase() === 'and'
+  );
+}
+
+function getColumnName(node: ESQLAstItem | undefined): string {
+  if (!node || Array.isArray(node)) return '<field>';
+  return BasicPrettyPrinter.expression(node as ESQLSingleAstItem);
+}
+
+/**
+ * Finds multi-word `:` / `MATCH` predicates - ORed term-by-term on text, an over-match.
+ * Mapping-blind on purpose: a field's type is ambiguous across backing indices, and the fix
+ * `MATCH_PHRASE` is safe either way.
+ */
+export function findOverBroadMatchPredicates(esql: string): OverBroadMatchPredicate[] {
+  const { root, parsed } = tryParseEsql(esql);
+  if (!parsed) return [];
+
+  const issues: OverBroadMatchPredicate[] = [];
+  walk(root, {
+    visitFunction: (fn) => {
+      const isColon = fn.name === ':' && fn.subtype === 'binary-expression';
+      const isMatch = fn.name === 'match' && fn.subtype === 'variadic-call';
+      if (!isColon && !isMatch) return;
+
+      const value = getUnquotedLiteral(fn.args[1]);
+      if (value === null) return;
+      if (isMatch && matchOptionsForceAndOperator(fn.args[2])) return;
+      if (!/\s/.test(value.trim())) return;
+
+      issues.push({ field: getColumnName(fn.args[0]), value, operator: isColon ? ':' : 'MATCH' });
+    },
+  });
+  return issues;
+}
+
+/**
+ * Every column identifier in the query (field references, output aliases, and `*`),
+ * de-duplicated; empty when it does not parse.
+ */
+export function extractReferencedColumns(esql: string): string[] {
+  const { root, parsed } = tryParseEsql(esql);
+  if (!parsed) return [];
+
+  const names = new Set<string>();
+  walk(root, { visitColumn: (node) => names.add(node.name) });
+  return [...names];
+}
+
+/** Shared rejection message for {@link findOverBroadMatchPredicates} results, so callers stay identical. */
+export function renderOverBroadMatchError(predicates: OverBroadMatchPredicate[]): string {
+  const rendered = predicates
+    .map((p) =>
+      p.operator === ':' ? `${p.field} : "${p.value}"` : `MATCH(${p.field}, "${p.value}")`
+    )
+    .join(', ');
+  return (
+    `Full-text predicate(s) match ANY word rather than the whole value - a multi-word ":" or ` +
+    `MATCH value is ORed term-by-term, which is far too broad: ${rendered}. Replace each with ` +
+    `MATCH_PHRASE(field, "a b") for an exact phrase, or MATCH(field, "a b", {"operator": "AND"}) ` +
+    `to require all terms in any order; both match exactly on keyword fields.`
+  );
 }
 
 type ByArg = ESQLCommand['args'][number];

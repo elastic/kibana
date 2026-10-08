@@ -1,6 +1,6 @@
 ---
 name: kbn-github
-description: GitHub interactions via gh CLI for the Kibana repo. Use when performing any GitHub interaction — creating, viewing, or modifying PRs or issues, posting comments or reviews, checking CI status, applying labels, creating releases, or making any gh/API call.
+description: GitHub interactions via gh CLI for the Kibana repo. Use when performing any GitHub interaction — creating, viewing, or modifying PRs or issues, reviewing or evaluating a PR, posting comments or reviews, checking CI status, applying labels, creating releases, or making any gh/API call.
 ---
 
 # GitHub (gh CLI)
@@ -21,6 +21,7 @@ description: GitHub interactions via gh CLI for the Kibana repo. Use when perfor
 
 - If the user uses implicit-current phrasing ("this PR", "current PR", "PR for this branch") and does not specify a PR URL/number, resolve the PR for the current branch: `gh pr view --json number -q .number`.
 - Do not assume an unspecified GitHub task targets the current branch PR unless the wording clearly implies the current PR.
+- When asked to review a PR, verify the local checkout matches the PR head. If it doesn't match, fetch that PR from GitHub first.
 
 ## PR Workflow
 
@@ -33,9 +34,6 @@ description: GitHub interactions via gh CLI for the Kibana repo. Use when perfor
 
 ## PR Creation
 
-- Always ask which existing issue the PR should reference (do not invent issue numbers).
-- Ask the user whether the PR should `Closes #X` or `Addresses #X` before creating the PR.
-- If there is no existing issue, stop and ask whether to create one; do NOT create issues unless the user explicitly instructs you to.
 - PR title is a human-readable change summary (not necessarily the Conventional Commit header).
 
 ## Issue Workflow

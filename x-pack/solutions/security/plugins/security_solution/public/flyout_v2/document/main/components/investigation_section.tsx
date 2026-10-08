@@ -29,9 +29,16 @@ import {
   LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
+import {
+  CustomYaraSignatureHighlightedFieldLink,
+  isCustomYaraSignatureHighlightedField,
+} from './custom_yara_signature_highlighted_field_link';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { INVESTIGATION_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
 import { isRulePreviewDocument } from '../../../shared/utils/is_rule_preview_document';
+import { getNonLocalQualifiedIndex } from '../../../shared/utils/non_local_index';
+import { getAncestorsIndexById } from '../utils/get_ancestors_index_by_id';
+import { LEGACY_ANCESTOR_INDEX } from '../constants/field_names';
 
 export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
 
@@ -55,15 +62,16 @@ export interface InvestigationSectionProps {
  */
 export const InvestigationSection = memo(
   ({ hit, renderCellActions }: InvestigationSectionProps) => {
-    const { openDocumentInvestigationGuide, openDocumentFlyoutFromIndex } = useFlyoutApi();
+    const { openDocumentInvestigationGuide, openDocumentFlyoutFromPattern } = useFlyoutApi();
 
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
     );
+    const documentIndexName = hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? '';
     const isRemoteDocument = useMemo(
-      () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
-      [hit]
+      () => isNonLocalIndexName(documentIndexName),
+      [documentIndexName]
     );
     const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
     const ruleId = useMemo(
@@ -78,9 +86,21 @@ export const InvestigationSection = memo(
       () => rule?.investigation_fields?.field_names ?? [],
       [rule?.investigation_fields?.field_names]
     );
+
     const ancestorsIndexName = useMemo(
-      () => (getFieldValue(hit, 'signal.ancestors.index') as string) ?? '',
-      [hit]
+      () =>
+        getNonLocalQualifiedIndex(
+          (getFieldValue(hit, LEGACY_ANCESTOR_INDEX) as string) ?? '',
+          documentIndexName
+        ),
+      [hit, documentIndexName]
+    );
+
+    // Maps each ancestor id to its own index, so a "Source event" value resolves to the index that
+    // specific ancestor lives in — not the first ancestor's. See getAncestorsIndexById / #288207.
+    const ancestorsIndexById = useMemo(
+      () => getAncestorsIndexById(hit, documentIndexName),
+      [hit, documentIndexName]
     );
 
     const expanded = useExpandSection({
@@ -96,19 +116,27 @@ export const InvestigationSection = memo(
     const renderFlyoutLink = useCallback(
       (props: OpenFlyoutLinkProps) => {
         // Source event: open the ancestor document in a new flyout. The value is the ancestor
-        // document id and the index comes from `signal.ancestors.index`. Uses the same open method
-        // as the sibling host/user/rule links in this table so the navigation behaves consistently.
-        // Render plain text when either piece is missing.
+        // document id; its index is looked up per-id from `ancestorsIndexById` (each ancestor keeps
+        // its own index — using a single shared index mis-pairs source events for EQL sequence
+        // alerts). Render plain text when either piece is missing.
+        //
+        // We resolve the ancestor by *pattern* (routing the search at its index) rather than by
+        // concrete `_index`. The from-index path pins the lookup with a `term` filter on `_index`,
+        // which never matches a cross-cluster document: on the remote cluster the stored `_index` is
+        // the bare name, while the resolved index carries the `cluster:` alias. Routing at the index
+        // instead lets cross-cluster search reach the document (matching the legacy flyout's
+        // behavior). See SDH https://github.com/elastic/sdh-security-team/issues/1666.
         if (props.field === EVENT_SOURCE_FIELD_DESCRIPTOR) {
-          if (!props.value || !ancestorsIndexName) {
+          const indexName = ancestorsIndexById[props.value];
+          if (!props.value || !indexName) {
             return <>{props.children}</>;
           }
           return (
             <EuiLink
               onClick={() =>
-                openDocumentFlyoutFromIndex({
+                openDocumentFlyoutFromPattern({
                   documentId: props.value,
-                  indexName: ancestorsIndexName,
+                  indexName,
                   origin: FLYOUT_ORIGIN.FLYOUT_FIELD_LINK,
                 })
               }
@@ -130,9 +158,17 @@ export const InvestigationSection = memo(
           }
           return <OpenFlyoutLink {...props} value={ruleId} />;
         }
+        // Custom YARA Signature fields: navigate to the CYS management page for the matching artifact
+        if (isCustomYaraSignatureHighlightedField(props.field)) {
+          return (
+            <CustomYaraSignatureHighlightedFieldLink hit={props.hit}>
+              {props.children}
+            </CustomYaraSignatureHighlightedFieldLink>
+          );
+        }
         return <OpenFlyoutLink {...props} />;
       },
-      [ruleId, isRulePreview, ancestorsIndexName, openDocumentFlyoutFromIndex]
+      [ruleId, isRulePreview, ancestorsIndexById, openDocumentFlyoutFromPattern]
     );
 
     return (

@@ -5,30 +5,19 @@
  * 2.0.
  */
 
-import type { UiamOAuthProjectType } from '@kbn/core-security-server';
-import {
-  KIBANA_OBSERVABILITY_SOLUTION,
-  KIBANA_SEARCH_SOLUTION,
-  KIBANA_SECURITY_SOLUTION,
-  KIBANA_VECTORDB_SOLUTION,
-  type KibanaSolution,
-} from '@kbn/projects-solutions-groups';
-
 import { createClientBodySchema } from './schemas';
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
+import {
+  getProtectedResource,
+  getRequestSpacePrefix,
+  KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE,
+} from '../../uiam';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
-
-const KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE: Partial<Record<KibanaSolution, UiamOAuthProjectType>> =
-  {
-    [KIBANA_SEARCH_SOLUTION]: 'elasticsearch',
-    [KIBANA_OBSERVABILITY_SOLUTION]: 'observability',
-    [KIBANA_SECURITY_SOLUTION]: 'security',
-    [KIBANA_VECTORDB_SOLUTION]: 'vectordb',
-  };
 
 export function defineCreateOAuthClientRoute({
   router,
+  basePath,
   config,
   getAuthenticationService,
   serverlessProjectId,
@@ -60,8 +49,8 @@ export function defineCreateOAuthClientRoute({
           });
         }
 
-        const resource = config.mcp?.oauth2?.metadata?.resource;
-        if (!resource) {
+        const configuredResource = config.mcp?.oauth2?.metadata?.resource;
+        if (!configuredResource) {
           return response.notFound({
             body: {
               message:
@@ -69,6 +58,11 @@ export function defineCreateOAuthClientRoute({
             },
           });
         }
+
+        const resource = getProtectedResource(
+          configuredResource,
+          getRequestSpacePrefix(basePath, request)
+        );
 
         if (!serverlessProjectId) {
           return response.notFound({

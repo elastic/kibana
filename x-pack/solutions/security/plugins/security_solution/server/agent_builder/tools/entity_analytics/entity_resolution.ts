@@ -7,6 +7,8 @@
 
 import type { z } from '@kbn/zod/v4';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
+import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/server';
 import type { IdentifierType } from '../../../../common/api/entity_analytics/common/common.gen';
@@ -19,6 +21,7 @@ import type { IdentifierType } from '../../../../common/api/entity_analytics/com
 export const ENTITY_STORE_ENTITY_TYPE_FIELD = 'entity.EngineMetadata.Type';
 export const ENTITY_STORE_ENTITY_ID_FIELD = 'entity.id';
 export const ENTITY_STORE_ENTITY_NAME_FIELD = 'entity.name';
+export const ENTITY_STORE_RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 
 export type EntityType = z.infer<typeof IdentifierType>;
 export const ENTITY_IDENTIFIER_TYPES = ['host', 'user', 'service', 'generic'] as const;
@@ -206,13 +209,18 @@ export interface EntityIdentity {
   identifier: string;
   /** Canonical `entity.id` (EUID); absent when the row did not project it. */
   entityStoreId?: string;
+  /**
+   * Target EUID this entity is an alias of. Absent when the entity is standalone or
+   * is itself a group target
+   */
+  resolvedTo?: string;
 }
 
 /**
  * Extracts the entity identity from a resolved row: the type, the bare
- * identifier (`entity.name`, falling back to the stripped `entity.id`), and the
- * canonical `entity.id`. Returns `null` when the row lacks a usable type or
- * identifier.
+ * identifier (`entity.name`, falling back to the stripped `entity.id`), the
+ * canonical `entity.id`, and the resolution target when the entity is an alias.
+ * Returns `null` when the row lacks a usable type or identifier.
  */
 export const describeEntityRow = ({
   columns,
@@ -228,10 +236,13 @@ export const describeEntityRow = ({
 
   const rawId = getRowValue(columns, row, ENTITY_STORE_ENTITY_ID_FIELD);
   const rawName = getRowValue(columns, row, ENTITY_STORE_ENTITY_NAME_FIELD);
+  const rawResolvedTo = getRowValue(columns, row, ENTITY_STORE_RESOLVED_TO_FIELD);
 
   const entityStoreId = typeof rawId === 'string' && rawId.length > 0 ? rawId : undefined;
   const bareFromId = entityStoreId ? stripEntityIdPrefix(entityStoreId, rawType) : undefined;
   const bareName = typeof rawName === 'string' && rawName.length > 0 ? rawName : undefined;
+  const resolvedTo =
+    typeof rawResolvedTo === 'string' && rawResolvedTo.length > 0 ? rawResolvedTo : undefined;
 
   const identifier = bareName ?? bareFromId;
   if (!identifier) {
@@ -242,6 +253,7 @@ export const describeEntityRow = ({
     identifierType: rawType,
     identifier,
     ...(entityStoreId ? { entityStoreId } : {}),
+    ...(resolvedTo ? { resolvedTo } : {}),
   };
 };
 
@@ -260,13 +272,13 @@ interface EntityResolutionBase {
  *                   type/identifier (cannot build an identity).
  * - `resolved`    — a single high-confidence row with a usable `identity`.
  */
+export interface AmbiguousEntityResult {
+  matchCount: number;
+  candidateEntityIds: string[];
+}
 export type ResolveSingleEntityResult =
   | (EntityResolutionBase & { status: 'not_found' })
-  | (EntityResolutionBase & {
-      status: 'ambiguous';
-      matchCount: number;
-      candidateEntityIds: string[];
-    })
+  | (EntityResolutionBase & { status: 'ambiguous' } & AmbiguousEntityResult)
   | (EntityResolutionBase & { status: 'no_identity' })
   | (EntityResolutionBase & { status: 'resolved'; identity: EntityIdentity });
 
@@ -279,7 +291,7 @@ export interface ResolveSingleEntityParams {
 
 /**
  * Resolves an `entityId` and classifies the outcome. Wraps `findEntityById` +
- * `isHighConfidenceSingleMatch` + `describeEntityRow` so both entity tools share
+ * `isHighConfidenceSingleMatch` + `describeEntityRow` so entity tools share
  * one resolution path; each branches on the returned `status`.
  */
 export const resolveSingleEntity = async ({
@@ -318,4 +330,68 @@ export const resolveSingleEntity = async ({
   }
 
   return { ...base, status: 'resolved', identity };
+};
+
+type RequireResolvedEntityResult =
+  | { ok: true; identity: EntityIdentity & { entityStoreId: string } }
+  | { ok: false; result: ErrorResult | OtherResult };
+
+/**
+ * Resolves an entity and returns either a canonical identity (with EUID) or
+ * ready-to-return tool results for not_found / ambiguous / no_identity.
+ */
+export const requireResolvedEntity = async ({
+  esClient,
+  spaceId,
+  entityId,
+  entityType,
+}: ResolveSingleEntityParams): Promise<RequireResolvedEntityResult> => {
+  const resolved = await resolveSingleEntity({ esClient, spaceId, entityId, entityType });
+
+  if (resolved.status === 'not_found') {
+    return {
+      ok: false,
+      result: {
+        tool_result_id: getToolResultId(),
+        type: ToolResultType.error,
+        data: { message: `No entity found for id: ${entityId}` },
+      },
+    };
+  }
+
+  if (resolved.status === 'ambiguous') {
+    return {
+      ok: false,
+      result: {
+        tool_result_id: getToolResultId(),
+        type: ToolResultType.other,
+        data: {
+          message: `Multiple entities matched "${entityId}". Ask the user to provide the exact entity id (EUID), then call this tool again.`,
+          candidateEntityIds: resolved.candidateEntityIds,
+        },
+      },
+    };
+  }
+
+  if (resolved.status === 'no_identity' || !resolved.identity.entityStoreId) {
+    return {
+      ok: false,
+      result: {
+        tool_result_id: getToolResultId(),
+        type: ToolResultType.error,
+        data: {
+          message: `Resolved an entity for "${entityId}" but it has no canonical entity.id.`,
+        },
+      },
+    };
+  }
+
+  return {
+    ok: true,
+    // Re-declare entityStoreId so the success type has it as required (not optional).
+    identity: {
+      ...resolved.identity,
+      entityStoreId: resolved.identity.entityStoreId,
+    },
+  };
 };

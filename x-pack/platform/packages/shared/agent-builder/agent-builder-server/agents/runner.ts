@@ -6,9 +6,16 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
-import type { ChatAgentEvent, AgentExecutionMode } from '@kbn/agent-builder-common';
-import type { AgentParams, AgentResponse } from './provider';
+import type {
+  ChatCompletionReasoningEffort,
+  ConnectorTelemetryMetadata,
+} from '@kbn/inference-common';
+import type {
+  ChatAgentEvent,
+  AgentExecutionMode,
+  InteractivityConfigInput,
+} from '@kbn/agent-builder-common';
+import type { AgentParams, AgentResponse, ExecutionConversationAccess } from './provider';
 
 export interface RunAgentReturn {
   /** return from the agent */
@@ -20,9 +27,22 @@ export interface RunAgentReturn {
  */
 export interface RunAgentParams {
   /**
-   * Execution mode for this run. When 'standalone', HITL is disabled.
+   * Execution mode for this run. When 'standalone', HITL is disabled by default.
    **/
   executionMode?: AgentExecutionMode;
+  /**
+   * Interactivity configuration for this run,
+   */
+  interactive?: InteractivityConfigInput;
+  /**
+   * The id of the parent execution that spawned this one, when applicable.
+   */
+  parentExecutionId?: string;
+  /**
+   * How this run relates to its conversation, see {@link ExecutionConversationAccess}. Defaults to
+   * `readWrite`.
+   */
+  conversationAccess?: ExecutionConversationAccess;
   /**
    * ID of the agent to call.
    */
@@ -61,6 +81,14 @@ export interface RunAgentParams {
    * Optional connector response content length override for buffered LLM calls.
    */
   maxContentLength?: number;
+  /**
+   * Optional reasoning level forwarded to the inference plugin.
+   */
+  reasoningLevel?: ChatCompletionReasoningEffort;
+  /**
+   * Optional CPS project routing expression to scope this run's search tools to a specific projects
+   */
+  projectRouting?: string;
 }
 
 export type RunAgentOnEventFn = (event: ChatAgentEvent) => void;

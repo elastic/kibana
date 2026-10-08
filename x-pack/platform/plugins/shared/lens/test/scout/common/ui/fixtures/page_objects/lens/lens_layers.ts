@@ -15,9 +15,11 @@ export class LensLayers {
   // Tab `data-test-subj` values use layer ids (not numeric indices); this only ever
   // resolves to elements when there are 2+ layers (EUI hides the tab strip for one).
   private readonly layerTabsLocator;
+  private readonly layerTabButtonsLocator;
 
   constructor(private readonly page: ScoutPage) {
     this.layerTabsLocator = this.page.testSubj.locator('^unifiedTabs_tab_');
+    this.layerTabButtonsLocator = this.page.testSubj.locator('^unifiedTabs_selectTabBtn_');
   }
 
   /**
@@ -68,8 +70,7 @@ export class LensLayers {
       throw new Error(`Layer tab not found at index ${index}`);
     }
 
-    await tab.click();
-    await this.page.testSubj.locator(`lns-layerPanel-${index}`).waitFor({ state: 'visible' });
+    await this.activateTab(index);
   }
 
   /**
@@ -83,15 +84,40 @@ export class LensLayers {
     if (tabs.length === 0) {
       return;
     }
-    const tab = tabs[index];
-    if (!tab) {
-      throw new Error(`Layer tab not found at index ${index}`);
+    const tabButton = (await this.layerTabButtonsLocator.all())[index];
+    if (!tabButton) {
+      throw new Error(`Layer tab button not found at index ${index}`);
     }
-    if ((await tab.getAttribute('aria-selected')) === 'true') {
+    if ((await tabButton.getAttribute('aria-selected')) === 'true') {
       return;
     }
-    await tab.click();
+    await this.activateTab(index);
+  }
+
+  private async activateTab(index: number) {
+    const tabButton = (await this.layerTabButtonsLocator.all())[index];
+    if (!tabButton) {
+      throw new Error(`Layer tab button not found at index ${index}`);
+    }
+    // Layer actions overlap the tab control when they appear on hover. Clicking the label follows
+    // the existing Unified Tabs/FTR locator pattern without relying on pointer coordinates.
+    await tabButton.locator('[data-test-subj="fullText"]').click();
     await this.page.testSubj.locator(`lns-layerPanel-${index}`).waitFor({ state: 'visible' });
+  }
+
+  /** Opens the layer-actions popover for the layer at `index`. */
+  async openLayerActions(layerIndex = 0) {
+    await this.hoverLayerTab(layerIndex);
+    // The layer actions mount after the hover, so wait for the popover trigger to render
+    // instead of clicking straight away.
+    const splitButton = this.page.testSubj.locator(`lnsLayerSplitButton--${layerIndex}`);
+    await splitButton.waitFor({ state: 'visible' });
+    await splitButton.click();
+  }
+
+  /** Closes the open layer-actions popover. */
+  async closeLayerActions() {
+    await this.page.keyboard.press('Escape');
   }
 
   /**
@@ -99,13 +125,53 @@ export class LensLayers {
    * (e.g. `lnsXY_annotationLayer_saveToLibrary`).
    */
   async performLayerAction(testSubject: string, layerIndex = 0) {
-    await this.hoverLayerTab(layerIndex);
-    // The layer actions mount after the hover, so wait for the popover trigger to render
-    // instead of clicking straight away.
-    const splitButton = this.page.testSubj.locator(`lnsLayerSplitButton--${layerIndex}`);
-    await splitButton.waitFor({ state: 'visible' });
-    await splitButton.click();
+    await this.openLayerActions(layerIndex);
     await this.page.testSubj.click(testSubject);
+  }
+
+  /**
+   * Duplicates the layer at `index` via the layer-actions clone control (FTR `duplicateLayer`).
+   * Returns once a new layer tab is present.
+   */
+  async duplicateLayer(index = 0) {
+    const tabsBefore = await this.getLayerCount();
+    await this.hoverLayerTab(index);
+
+    const splitButton = this.page.testSubj.locator(`lnsLayerSplitButton--${index}`);
+    const cloneButton = this.page.testSubj.locator(`lnsLayerClone--${index}`);
+    await splitButton.or(cloneButton).waitFor({ state: 'visible' });
+    if (await splitButton.isVisible()) {
+      await splitButton.click();
+    }
+    await cloneButton.click();
+
+    await this.page.waitForFunction(
+      (before) => {
+        const tabs = document.querySelectorAll('[data-test-subj^="unifiedTabs_tab_"]').length;
+        const count = tabs === 0 ? 1 : tabs;
+        return count > before;
+      },
+      tabsBefore,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
+  }
+
+  /**
+   * Switches the XY stacking subtype for the layer at `layerIndex`
+   * Caller must have a chart that exposes lnsStackingOptionsButton` (e.g. bar/area).
+   * Returns once the overlay is gone and the stacking trigger label matches `subType`.
+   */
+  async switchToVisualizationSubtype(subType: string, layerIndex = 0) {
+    const stackingButton = this.page.testSubj.locator(
+      `lns-layerPanel-${layerIndex} > lnsStackingOptionsButton`
+    );
+    await stackingButton.waitFor({ state: 'visible' });
+    await stackingButton.click();
+    const option = this.page.testSubj.locator(`lnsStackingOptionsButton${subType}`);
+    await option.click();
+    await option.waitFor({ state: 'hidden' });
+    // exact: true — "Stacked" is a substring of "Unstacked"
+    await stackingButton.getByText(subType, { exact: true }).waitFor({ state: 'visible' });
   }
 
   /**
@@ -139,12 +205,22 @@ export class LensLayers {
    */
   async createLayer(
     layerType: 'data' | 'referenceLine' | 'annotations',
-    annotationFromLibraryTitle?: string
+    annotationFromLibraryTitle?: string,
+    options: {
+      /**
+       * ES|QL charts hide the annotation library, so the annotations menu item adds the
+       * layer directly instead of opening the "Select annotation method" submenu.
+       * The caller must state which flow to expect: auto-detecting the submenu would
+       * be a timing race (a slow render could show it after the check concluded).
+       * Defaults to the DSL submenu flow, keeping existing call sites unchanged.
+       */
+      annotationsAddDirectly?: boolean;
+    } = {}
   ) {
     const tabsBefore = await this.getLayerCount();
     await this.page.testSubj.click('lnsLayerAddButton');
     await this.page.testSubj.click(`lnsLayerAddButton-${layerType}`);
-    if (layerType === 'annotations') {
+    if (layerType === 'annotations' && !options.annotationsAddDirectly) {
       if (annotationFromLibraryTitle) {
         await this.page.testSubj.click('lnsAnnotationLayer_addFromLibrary');
         await this.page.testSubj.click(

@@ -94,6 +94,7 @@ steps:
                 streamName: '${{ foreach.item.streamName }}'
                 skipFeatures: false
                 skipQueries: false
+                rootTriggeredBy: '${{ execution.triggeredBy }}'
                 # Align the feature-recency guard with the user's onboarding
                 # interval so features refresh on the same cadence eligibility uses.
                 featuresRecencyThresholdHours: '${{ steps.get_eligible.output.settings.intervalHours }}'

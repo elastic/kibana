@@ -18,13 +18,17 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/notification_center
 dependsOn:
   - '@kbn/core'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/dev-cli-runner'
   - '@kbn/config-schema'
   - '@kbn/zod'
+  - '@kbn/zod-helpers'
   - '@kbn/std'
   - '@kbn/core-data-streams-server'
   - '@kbn/core-data-streams-server-mocks'
   - '@kbn/core-user-storage-server'
   - '@kbn/core-user-storage-server-mocks'
+  - '@kbn/core-user-storage-common'
   - '@kbn/data-streams'
   - '@kbn/es-mappings'
   - '@kbn/task-manager-plugin'
@@ -41,8 +45,10 @@ fileGroups:
   src:
     - common/**/*
     - public/**/*
+    - scripts/**/*
     - server/**/*
     - '!target/**/*'
+    - '!scripts/*.js'
   jest-config:
     - jest.config.js
 tasks: {}

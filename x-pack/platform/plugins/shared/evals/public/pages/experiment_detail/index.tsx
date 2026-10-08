@@ -27,7 +27,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutResizable,
   EuiTitle,
-  useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -36,12 +35,14 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { EvaluatorStats } from '@kbn/evals-common';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { useQueryClient } from '@kbn/react-query';
 import {
   useDatasets,
   useEvaluationExperiment,
   useEvalsTraceFetcher,
   useExperimentDatasetExamples,
 } from '../../hooks/use_evals_api';
+import { queryKeys } from '../../query_keys';
 import type {
   LaunchedExperimentConfig,
   RunExperimentRequest,
@@ -79,7 +80,7 @@ interface DatasetStatsAccordionProps {
   onDatasetToggle: (datasetId: string, isOpen: boolean) => void;
 }
 
-const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
+export const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
   experimentId,
   executionId,
   group,
@@ -93,6 +94,7 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
   onDatasetToggle,
 }) => {
   const history = useHistory();
+  const queryClient = useQueryClient();
   const {
     data: datasetExamples,
     isLoading: examplesLoading,
@@ -102,16 +104,47 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
     refetchInterval: isRunning ? RUN_POLL_INTERVAL_MS : false,
     staleTime: isRunning ? 0 : undefined,
   });
+  const { data: datasetExamplePreviews } = useExperimentDatasetExamples(
+    experimentId,
+    isOpen ? group.datasetId : '',
+    executionId,
+    { includePreviews: true }
+  );
+
+  const examplesWithPreviews = useMemo(() => {
+    const previewsByExampleId = new Map(
+      (datasetExamplePreviews?.examples ?? []).map(({ example_id: exampleId, previews }) => [
+        exampleId,
+        previews,
+      ])
+    );
+    return (datasetExamples?.examples ?? []).map((example) => {
+      const previews = previewsByExampleId.get(example.example_id);
+      return previews ? { ...example, previews } : example;
+    });
+  }, [datasetExamplePreviews?.examples, datasetExamples?.examples]);
 
   // When the run settles and polling stops, pull the final example set once in case the last poll
-  // fired just before the last example's scores were indexed.
+  // fired just before the last example's scores were indexed. Previews are not polled, so invalidate
+  // that cache too — including while the accordion is collapsed, where the hook's refetch targets a
+  // disabled query.
   const wasRunningRef = useRef(isRunning);
   useEffect(() => {
-    if (wasRunningRef.current && !isRunning && isOpen) {
-      refetchExamples();
+    if (wasRunningRef.current && !isRunning) {
+      if (isOpen) {
+        refetchExamples();
+      }
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.experiments.datasetExamples(
+          experimentId,
+          group.datasetId,
+          executionId,
+          true
+        ),
+      });
     }
     wasRunningRef.current = isRunning;
-  }, [isRunning, isOpen, refetchExamples]);
+  }, [isRunning, isOpen, refetchExamples, queryClient, experimentId, executionId, group.datasetId]);
 
   return (
     <>
@@ -166,7 +199,10 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
           <EuiLoadingSpinner size="m" />
         ) : (
           <ExampleScoresTable
-            examples={datasetExamples?.examples ?? []}
+            experimentId={experimentId}
+            datasetId={group.datasetId}
+            executionId={executionId}
+            examples={examplesWithPreviews}
             selectedExampleId={selectedExampleId}
             onTraceClick={onTraceClick}
           />
@@ -198,7 +234,6 @@ export const ExperimentDetailPage: React.FC = () => {
   const { experimentId } = useParams<{ experimentId: string }>();
   const history = useHistory();
   const location = useLocation();
-  const { euiTheme } = useEuiTheme();
 
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const executionId = searchParams.get('execution_id') ?? undefined;
@@ -361,6 +396,15 @@ export const ExperimentDetailPage: React.FC = () => {
     );
   }, [experimentDetail?.stats]);
 
+  // Evaluators can each judge with their own model, so the experiment-level card reports the
+  // distinct set rather than one value, and stays empty for experiments only code evaluators
+  // scored. Sorted so the tooltip reads the same here as everywhere else the set is listed;
+  // the response orders them by how many evaluators used each.
+  const evaluatorModelIds = useMemo(
+    () => (experimentDetail?.evaluator_models ?? []).map(({ id }) => id).sort(),
+    [experimentDetail?.evaluator_models]
+  );
+
   // Live progress derived from the scores already aggregated in Elasticsearch —
   // the same source the results table streams from. The workflow step's own
   // counters advance only per batch (and read 0 during a single in-flight batch),
@@ -398,6 +442,20 @@ export const ExperimentDetailPage: React.FC = () => {
         ),
       },
       {
+        field: 'evaluator_model',
+        name: i18n.COLUMN_EVALUATOR_MODEL,
+        render: (model: EvaluatorStats['evaluator_model']) =>
+          model ? (
+            <EuiBadge color="hollow">{model.id}</EuiBadge>
+          ) : (
+            <EuiToolTip content={i18n.EVALUATOR_MODEL_NOT_APPLICABLE_TOOLTIP}>
+              <EuiText size="s" color="subdued" tabIndex={0}>
+                {i18n.EVALUATOR_MODEL_NOT_APPLICABLE}
+              </EuiText>
+            </EuiToolTip>
+          ),
+      },
+      {
         field: 'stats.mean',
         name: i18n.COLUMN_MEAN,
         sortable: true,
@@ -429,7 +487,7 @@ export const ExperimentDetailPage: React.FC = () => {
 
   if (experimentLoading && !isLaunching) {
     return (
-      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiPageSection paddingSize="none">
         <EuiLoadingSpinner size="xl" />
       </EuiPageSection>
     );
@@ -440,7 +498,7 @@ export const ExperimentDetailPage: React.FC = () => {
 
   if (experimentError && !showLaunchView) {
     return (
-      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiPageSection paddingSize="none">
         <EuiEmptyPrompt
           color={isNotFound ? 'subdued' : 'danger'}
           iconType={isNotFound ? 'magnify' : 'warning'}
@@ -466,7 +524,7 @@ export const ExperimentDetailPage: React.FC = () => {
 
   return (
     <>
-      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+      <EuiPageSection paddingSize="none">
         <EuiTitle size="m">
           <h2>{pageTitle}</h2>
         </EuiTitle>
@@ -496,7 +554,17 @@ export const ExperimentDetailPage: React.FC = () => {
               <EuiFlexItem>
                 <EuiPanel hasShadow={false} hasBorder>
                   <EuiStat
-                    title={experimentDetail.evaluator_model?.id ?? '-'}
+                    title={
+                      evaluatorModelIds.length > 1 ? (
+                        <EuiToolTip content={evaluatorModelIds.join(', ')}>
+                          <span tabIndex={0}>
+                            {i18n.getEvaluatorModelsDifferLabel(evaluatorModelIds.length)}
+                          </span>
+                        </EuiToolTip>
+                      ) : (
+                        evaluatorModelIds[0] ?? '-'
+                      )
+                    }
                     description={i18n.STAT_EVALUATOR_MODEL}
                     titleSize="xs"
                   />

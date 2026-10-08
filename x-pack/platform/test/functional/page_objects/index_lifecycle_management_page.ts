@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 interface Policy {
@@ -22,7 +23,7 @@ export function IndexLifecycleManagementPageProvider({ getService }: FtrProvider
 
   return {
     async pageHeaderText() {
-      return await testSubjects.getVisibleText('ilmPageHeader');
+      return await testSubjects.getVisibleText(APP_HEADER_TEST_SUBJECTS.title);
     },
     async createPolicyButton() {
       return await testSubjects.find('createPolicyButton');

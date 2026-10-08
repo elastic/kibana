@@ -128,6 +128,14 @@ export default function ServiceAlerts({ getService }: DeploymentAgnosticFtrProvi
       let alerts: ApmAlertFields[];
 
       before(async () => {
+        // The alerts_count endpoint aggregates every active synth-go/testing alert, so wipe the
+        // alert index first to drop any alert leaked by an earlier suite creating an identical rule.
+        await alertingApi.cleanUpAlerts({
+          roleAuthc,
+          alertIndexName: APM_ALERTS_INDEX,
+          connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+          consumer: 'apm',
+        });
         const createdRule = await createRule();
         ruleId = createdRule.id;
         alerts = (

@@ -18,7 +18,7 @@ const renderWithIntl = (ui: React.ReactElement) =>
 
 describe('PluginAddMenuPanel', () => {
   it('calls onInstallFromUrlOrZip when the URL/ZIP item is clicked', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const onInstallFromUrlOrZip = jest.fn();
     const onAddFromLibrary = jest.fn();
 
@@ -35,7 +35,7 @@ describe('PluginAddMenuPanel', () => {
   });
 
   it('calls onAddFromLibrary when the library item is clicked', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const onInstallFromUrlOrZip = jest.fn();
     const onAddFromLibrary = jest.fn();
 

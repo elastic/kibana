@@ -48,7 +48,7 @@ export const useColumns = ({
     }
     setUsedColumns(nextColumns);
   }, [columns, usedColumns]);
-  const { onAddColumn, onRemoveColumn, onSetColumns, onMoveColumn } = useMemo(
+  const { onAddColumn, onRemoveColumn, onRemoveColumns, onSetColumns, onMoveColumn } = useMemo(
     () =>
       getStateColumnActions({
         capabilities,
@@ -67,14 +67,12 @@ export const useColumns = ({
     columns: usedColumns,
     onAddColumn,
     onRemoveColumn,
+    onRemoveColumns,
     onMoveColumn,
     onSetColumns,
   };
 };
 
 function getColumns(columns: string[] | undefined) {
-  if (!columns) {
-    return [];
-  }
-  return columns.filter((col) => col !== '_source');
+  return columns ?? [];
 }

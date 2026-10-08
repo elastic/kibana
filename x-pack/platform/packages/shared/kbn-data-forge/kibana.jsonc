@@ -2,7 +2,8 @@
   "type": "shared-common",
   "id": "@kbn/data-forge",
   "owner": [
-    "@elastic/actionable-obs-team"
+    "@elastic/nightshift-sre-agent-team", 
+    "@elastic/obs-signals-logs-team"
   ],
   "group": "platform",
   "visibility": "shared"

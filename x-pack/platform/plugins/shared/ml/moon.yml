@@ -98,7 +98,7 @@ dependsOn:
   - '@kbn/ml-url-state'
   - '@kbn/ml-validators'
   - '@kbn/ml-cps'
-  - '@kbn/monaco'
+  - '@kbn/ml-cps-common'
   - '@kbn/observability-ai-assistant-plugin'
   - '@kbn/presentation-publishing'
   - '@kbn/presentation-util-plugin'
@@ -153,6 +153,8 @@ dependsOn:
   - '@kbn/as-code-filters-transforms'
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/agent-builder-visualizations'
   - '@kbn/zod'
   - '@kbn/cps'
   - '@kbn/cps-utils'
@@ -161,6 +163,7 @@ dependsOn:
   - '@kbn/core-http-common'
   - '@kbn/core-rendering-browser'
   - '@kbn/app-header'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

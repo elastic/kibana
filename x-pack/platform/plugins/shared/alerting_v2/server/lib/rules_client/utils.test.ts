@@ -7,7 +7,7 @@
 
 import type { CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { ruleResponseSchema } from '@kbn/alerting-v2-schemas';
+import { ROUTING_TAGS_SIGNAL_RULE_MESSAGE, ruleResponseSchema } from '@kbn/alerting-v2-schemas';
 import { createRuleSoAttributes } from '../test_utils';
 import type { RotationCandidate } from './types';
 import {
@@ -15,6 +15,7 @@ import {
   transformRuleSoAttributesToRuleApiResponse,
   buildUpdateRuleAttributes,
   assertImmutableUnchanged,
+  validateMergedRuleAttributes,
   pickImmutable,
   bulkErrorCodeForStatus,
   toBulkError,
@@ -27,9 +28,9 @@ import {
 
 const serverFields = {
   enabled: true,
-  createdBy: 'user-1',
+  createdBy: { profile_uid: 'user-1' },
   createdAt: '2025-01-01T00:00:00.000Z',
-  updatedBy: 'user-1',
+  updatedBy: { profile_uid: 'user-1' },
   updatedAt: '2025-01-01T00:00:00.000Z',
   version: 1,
 };
@@ -39,14 +40,16 @@ const baseCreateData: CreateRuleData = {
   metadata: { name: 'test-rule' },
   time_field: '@timestamp',
   schedule: { every: '5m' },
-  query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+  query: { base: 'FROM logs-* | LIMIT 1' },
+  recovery: { strategy: 'no_breach' },
+  no_data: { strategy: 'ignore' },
 };
 
 const createRuleSoAttributesWithArtifacts = () =>
   createRuleSoAttributes({
     artifacts: [
       { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
-      { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+      { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
     ],
   });
 
@@ -69,10 +72,10 @@ describe('utils', () => {
       expect(result.metadata.description).toBeUndefined();
     });
 
-    it('passes metadata.builder_type through to SO attributes', () => {
+    it('maps metadata.builder.type to metadata.builder_type in SO attributes', () => {
       const data: CreateRuleData = {
         ...baseCreateData,
-        metadata: { name: 'test-rule', builder_type: 'threshold' },
+        metadata: { name: 'test-rule', builder: { type: 'threshold' } },
       };
 
       const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
@@ -80,10 +83,99 @@ describe('utils', () => {
       expect(result.metadata.builder_type).toBe('threshold');
     });
 
+    it('maps routing tags into saved object attributes', () => {
+      const data: CreateRuleData = {
+        ...baseCreateData,
+        metadata: { name: 'test-rule', routing_tags: ['sre'] },
+      };
+
+      const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
+
+      expect(result.metadata.routing_tags).toEqual(['sre']);
+    });
+
     it('sets metadata.builder_type to undefined when not provided', () => {
       const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, serverFields);
 
       expect(result.metadata.builder_type).toBeUndefined();
+    });
+
+    it('stores the query exactly as sent', () => {
+      const data: CreateRuleData = {
+        ...baseCreateData,
+        query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
+      };
+
+      const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
+
+      expect(result.query).toEqual({
+        base: 'FROM metrics-*',
+        breach: { segment: 'WHERE cpu > 0.9' },
+      });
+    });
+
+    it('stores a breach-less query without inventing a breach block', () => {
+      const data: CreateRuleData = { ...baseCreateData, query: { base: 'FROM metrics-*' } };
+
+      const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
+
+      expect(result.query).toEqual({ base: 'FROM metrics-*' });
+    });
+
+    it('stores the lifecycle an alert rule was created with', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, serverFields);
+
+      expect(result.recovery).toEqual({ strategy: 'no_breach' });
+      expect(result.no_data).toEqual({ strategy: 'ignore' });
+    });
+
+    it('stores the lifecycle objects the request provided', () => {
+      const data: CreateRuleData = {
+        ...baseCreateData,
+        query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
+        recovery: { strategy: 'condition', segment: 'WHERE cpu < 0.5' },
+        no_data: { strategy: 'alert', query: 'FROM heartbeat-*' },
+      };
+
+      const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
+
+      expect(result.recovery).toEqual({ strategy: 'condition', segment: 'WHERE cpu < 0.5' });
+      expect(result.no_data).toEqual({ strategy: 'alert', query: 'FROM heartbeat-*' });
+    });
+
+    it('stores no lifecycle objects for a signal rule', () => {
+      const data: CreateRuleData = {
+        ...baseCreateData,
+        kind: 'signal',
+        recovery: undefined,
+        no_data: undefined,
+      };
+
+      const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
+
+      expect(result).not.toHaveProperty('recovery');
+      expect(result).not.toHaveProperty('no_data');
+    });
+
+    it('normalises a null state_transition to an absent one', () => {
+      const data: CreateRuleData = { ...baseCreateData, state_transition: null };
+
+      const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
+
+      expect(result.state_transition).toBeUndefined();
+    });
+
+    it('stores the state_transition phases the request provided', () => {
+      const data: CreateRuleData = {
+        ...baseCreateData,
+        state_transition: { pending: { count: 3, timeframe: '5m', operator: 'and' } },
+      };
+
+      const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
+
+      expect(result.state_transition).toEqual({
+        pending: { count: 3, timeframe: '5m', operator: 'and' },
+      });
     });
   });
 
@@ -95,7 +187,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -113,7 +205,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -122,51 +214,145 @@ describe('utils', () => {
       expect(result.metadata.description).toBe('Existing desc');
     });
 
+    it('clears tags when update sends null', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', tags: ['prod', 'infra'] },
+      });
+      const updateData: UpdateRuleData = {
+        metadata: { tags: null },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: { profile_uid: 'user-2' },
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.tags).toBeUndefined();
+    });
+
+    it('preserves existing tags when update omits them', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', tags: ['prod', 'infra'] },
+      });
+      const updateData: UpdateRuleData = {
+        metadata: { name: 'renamed' },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: { profile_uid: 'user-2' },
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.tags).toEqual(['prod', 'infra']);
+    });
+
+    it('sets tags when update provides a value', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', tags: ['old'] },
+      });
+      const updateData: UpdateRuleData = {
+        metadata: { tags: ['prod', 'infra'] },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: { profile_uid: 'user-2' },
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.tags).toEqual(['prod', 'infra']);
+    });
+
+    it('clears routing tags when update sends null', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', routing_tags: ['sre'] },
+      });
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { routing_tags: null } },
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
+      );
+
+      expect(result.metadata.routing_tags).toBeUndefined();
+    });
+
+    it('preserves existing routing tags when update omits them', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', routing_tags: ['sre'] },
+      });
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { name: 'renamed' } },
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
+      );
+
+      expect(result.metadata.routing_tags).toEqual(['sre']);
+    });
+
+    it('sets routing tags independently of tags', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', tags: ['prod'], routing_tags: ['old'] },
+      });
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { routing_tags: ['sre', 'payments'] } },
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
+      );
+
+      expect(result.metadata.routing_tags).toEqual(['sre', 'payments']);
+      expect(result.metadata.tags).toEqual(['prod']);
+    });
+
     it('clears state_transition when update sends null (immediate mode)', () => {
       const existing = createRuleSoAttributes({
-        state_transition: { pending_count: 3 },
+        state_transition: { pending: { count: 3 } },
       });
       const updateData: UpdateRuleData = {
         state_transition: null,
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
 
-      expect(result.state_transition).toBeNull();
+      expect(result.state_transition).toBeUndefined();
     });
 
     it('preserves existing state_transition when update omits it', () => {
       const existing = createRuleSoAttributes({
-        state_transition: { pending_count: 3 },
+        state_transition: { pending: { count: 3 } },
       });
       const updateData: UpdateRuleData = {};
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
 
-      expect(result.state_transition).toEqual({ pending_count: 3 });
+      expect(result.state_transition).toEqual({ pending: { count: 3 } });
     });
 
     it('sets state_transition when update provides a value', () => {
       const existing = createRuleSoAttributes({});
       const updateData: UpdateRuleData = {
-        state_transition: { pending_count: 5 },
+        state_transition: { pending: { count: 5 } },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
 
-      expect(result.state_transition).toEqual({ pending_count: 5 });
+      expect(result.state_transition).toEqual({ pending: { count: 5 } });
     });
 
     it('preserves metadata.builder_type when query is not changed', () => {
@@ -178,7 +364,7 @@ describe('utils', () => {
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -186,16 +372,34 @@ describe('utils', () => {
       expect(result.metadata.builder_type).toBe('threshold');
     });
 
-    it('auto-clears metadata.builder_type when query is changed without explicit builder_type', () => {
+    it('rejects query change on a builder rule without explicit builder_type clear', () => {
       const existing = createRuleSoAttributes({
         metadata: { name: 'test-rule', builder_type: 'threshold' },
       });
       const updateData: UpdateRuleData = {
-        query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
+        query: { base: 'FROM new-index | LIMIT 1' },
+      };
+
+      expect(() =>
+        buildUpdateRuleAttributes(existing, updateData, {
+          updatedBy: { profile_uid: 'user-2' },
+          updatedAt: '2025-01-02T00:00:00.000Z',
+          version: 2,
+        })
+      ).toThrow(/Cannot update the query on a builder rule/);
+    });
+
+    it('clears builder_type when query changes and explicit builder: null is sent', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'test-rule', builder_type: 'threshold' },
+      });
+      const updateData: UpdateRuleData = {
+        query: { base: 'FROM new-index | LIMIT 1' },
+        metadata: { builder: null },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -203,17 +407,38 @@ describe('utils', () => {
       expect(result.metadata.builder_type).toBeUndefined();
     });
 
-    it('keeps metadata.builder_type when query is changed with explicit builder_type', () => {
+    it('allows query change on a non-builder rule without explicit builder_type', () => {
       const existing = createRuleSoAttributes({
-        metadata: { name: 'test-rule', builder_type: 'threshold' },
+        metadata: { name: 'test-rule' },
       });
       const updateData: UpdateRuleData = {
-        query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
-        metadata: { builder_type: 'threshold' },
+        query: { base: 'FROM new-index | LIMIT 1' },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.builder_type).toBeUndefined();
+    });
+
+    it('preserves metadata.builder_type when a migrated composed rule resends its query', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'test-rule', builder_type: 'threshold' },
+        query: {
+          base: 'FROM logs-* | LIMIT 10',
+          breach: { segment: 'WHERE value > 80' },
+          format: 'composed',
+        },
+      });
+      const updateData: UpdateRuleData = {
+        query: { base: 'FROM logs-* | LIMIT 10', breach: { segment: 'WHERE value > 80' } },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -221,16 +446,96 @@ describe('utils', () => {
       expect(result.metadata.builder_type).toBe('threshold');
     });
 
-    it('clears metadata.builder_type when explicitly set to null', () => {
+    it('preserves metadata.builder_type when a migrated standalone rule resends its query', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'test-rule', builder_type: 'threshold' },
+        query: {
+          base: 'FROM logs-* | WHERE value > 80',
+          breach: { query: 'FROM logs-* | WHERE value > 80' },
+          format: 'standalone',
+        },
+      });
+      const updateData: UpdateRuleData = {
+        query: { base: 'FROM logs-* | WHERE value > 80' },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: { profile_uid: 'user-2' },
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.builder_type).toBe('threshold');
+    });
+
+    it('rejects a query change on a migrated builder rule without an explicit clear', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'test-rule', builder_type: 'threshold' },
+        query: {
+          base: 'FROM logs-* | LIMIT 10',
+          breach: { segment: 'WHERE value > 80' },
+          format: 'composed',
+        },
+      });
+      const updateData: UpdateRuleData = {
+        query: { base: 'FROM logs-* | LIMIT 10', breach: { segment: 'WHERE value > 90' } },
+      };
+
+      expect(() =>
+        buildUpdateRuleAttributes(existing, updateData, {
+          updatedBy: { profile_uid: 'user-2' },
+          updatedAt: '2025-01-02T00:00:00.000Z',
+          version: 2,
+        })
+      ).toThrow(/Cannot update the query on a builder rule/);
+    });
+
+    it('allows strategy change on a builder rule without clearing builder_type', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'test-rule', builder_type: 'threshold' },
+        recovery: { strategy: 'no_breach' },
+      });
+      const updateData: UpdateRuleData = {
+        recovery: { strategy: 'manual' },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: { profile_uid: 'user-2' },
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.builder_type).toBe('threshold');
+    });
+
+    it('keeps metadata.builder_type when query is changed with explicit builder metadata', () => {
       const existing = createRuleSoAttributes({
         metadata: { name: 'test-rule', builder_type: 'threshold' },
       });
       const updateData: UpdateRuleData = {
-        metadata: { builder_type: null },
+        query: { base: 'FROM new-index | LIMIT 1' },
+        metadata: { builder: { type: 'threshold' } },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.builder_type).toBe('threshold');
+    });
+
+    it('clears metadata.builder_type when builder metadata is explicitly set to null', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'test-rule', builder_type: 'threshold' },
+      });
+      const updateData: UpdateRuleData = {
+        metadata: { builder: null },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
@@ -241,19 +546,115 @@ describe('utils', () => {
     it('does not auto-clear metadata.builder_type when same query is sent', () => {
       const existing = createRuleSoAttributes({
         metadata: { name: 'test-rule', builder_type: 'threshold' },
-        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+        query: { base: 'FROM logs-* | LIMIT 10' },
       });
       const updateData: UpdateRuleData = {
-        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+        query: { base: 'FROM logs-* | LIMIT 10' },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
-        updatedBy: 'user-2',
+        updatedBy: { profile_uid: 'user-2' },
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
 
       expect(result.metadata.builder_type).toBe('threshold');
+    });
+
+    it('does not auto-clear metadata.builder_type when the same breach-less query is resent', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'test-rule', builder_type: 'threshold' },
+        query: { base: 'FROM metrics-*' },
+      });
+      const updateData: UpdateRuleData = {
+        query: { base: 'FROM metrics-*' },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: { profile_uid: 'user-2' },
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.builder_type).toBe('threshold');
+      expect(result.query).toEqual({ base: 'FROM metrics-*' });
+    });
+
+    it('replaces the query wholesale, dropping a breach block the update omits', () => {
+      const existing = createRuleSoAttributes({
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
+      });
+      const updateData: UpdateRuleData = {
+        query: { base: 'FROM logs-*' },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: { profile_uid: 'user-2' },
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.query).toEqual({ base: 'FROM logs-*' });
+    });
+
+    it('preserves the stored query when the update omits it', () => {
+      const existing = createRuleSoAttributes({
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
+      });
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        {},
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
+      );
+
+      expect(result.query).toEqual({ base: 'FROM logs-*', breach: { segment: 'WHERE error' } });
+    });
+
+    it('replaces recovery wholesale rather than merging the stored member', () => {
+      const existing = createRuleSoAttributes({
+        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE ok' },
+      });
+      const updateData: UpdateRuleData = { recovery: { strategy: 'no_breach' } };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: { profile_uid: 'user-2' },
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.recovery).toEqual({ strategy: 'no_breach' });
+    });
+
+    it('replaces no_data wholesale, dropping the presence query of the stored member', () => {
+      const existing = createRuleSoAttributes({
+        no_data: { strategy: 'alert', query: 'FROM heartbeat-*' },
+      });
+      const updateData: UpdateRuleData = { no_data: { strategy: 'keep_last' } };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: { profile_uid: 'user-2' },
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.no_data).toEqual({ strategy: 'keep_last' });
+    });
+
+    it('preserves the stored recovery and no_data when the update omits them', () => {
+      const existing = createRuleSoAttributes({
+        recovery: { strategy: 'condition', segment: 'WHERE cpu < 0.5' },
+        no_data: { strategy: 'resolve', query: 'FROM heartbeat-*' },
+      });
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        {},
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
+      );
+
+      expect(result.recovery).toEqual({ strategy: 'condition', segment: 'WHERE cpu < 0.5' });
+      expect(result.no_data).toEqual({ strategy: 'resolve', query: 'FROM heartbeat-*' });
     });
 
     it('preserves stored artifacts when the update does not touch them', () => {
@@ -263,7 +664,7 @@ describe('utils', () => {
         existing,
         {},
         {
-          updatedBy: 'user-2',
+          updatedBy: { profile_uid: 'user-2' },
           updatedAt: '2025-01-02T00:00:00.000Z',
           version: 2,
         }
@@ -271,12 +672,23 @@ describe('utils', () => {
 
       expect(result.artifacts).toEqual([
         { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
-        { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
       ]);
     });
   });
 
   describe('transformRuleSoAttributesToRuleApiResponse', () => {
+    it('returns routing tags alongside tags in a response that satisfies the schema', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: { name: 'test-rule', tags: ['prod'], routing_tags: ['sre'] },
+      });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.metadata).toMatchObject({ tags: ['prod'], routing_tags: ['sre'] });
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+    });
+
     it('returns artifacts that satisfy the strict response schema', () => {
       const attrs = createRuleSoAttributesWithArtifacts();
 
@@ -284,7 +696,36 @@ describe('utils', () => {
 
       expect(result.artifacts).toEqual([
         { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
-        { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
+      ]);
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+    });
+
+    it('strips legacy artifact value left on disk after model-version migration', () => {
+      const attrs = createRuleSoAttributes({
+        artifacts: [
+          {
+            id: 'runbook-1',
+            type: 'runbook',
+            data: { content: 'steps' },
+            // @ts-expect-error legacy key retained on disk for rollback
+            value: 'steps',
+          },
+          {
+            id: 'dashboard-1',
+            type: 'dashboard',
+            data: { dashboard_id: 'dash-1' },
+            // @ts-expect-error legacy key retained on disk for rollback
+            value: 'dash-1',
+          },
+        ],
+      });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.artifacts).toEqual([
+        { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
       ]);
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
@@ -319,50 +760,113 @@ describe('utils', () => {
       expect(response.metadata.description).toBe('Round-trip desc');
     });
 
-    it('includes metadata.builder_type in API response', () => {
+    it('returns the stored query unchanged', () => {
+      const attrs = createRuleSoAttributes({
+        query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
+      });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.query).toEqual({
+        base: 'FROM metrics-*',
+        breach: { segment: 'WHERE cpu > 0.9' },
+      });
+    });
+
+    it('exposes the stored recovery and no_data objects', () => {
+      const attrs = createRuleSoAttributes({
+        query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
+        recovery: { strategy: 'condition', segment: 'WHERE cpu < 0.5' },
+        no_data: { strategy: 'alert', query: 'FROM heartbeat-*' },
+      });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.recovery).toEqual({ strategy: 'condition', segment: 'WHERE cpu < 0.5' });
+      expect(result.no_data).toEqual({ strategy: 'alert', query: 'FROM heartbeat-*' });
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+    });
+
+    it('leaves a signal rule without lifecycle objects', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'signal',
+        recovery: undefined,
+        no_data: undefined,
+      });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.recovery).toBeUndefined();
+      expect(result.no_data).toBeUndefined();
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+    });
+
+    it('round-trips a breach-less query through create → transform', () => {
+      const createData: CreateRuleData = {
+        ...baseCreateData,
+        query: { base: 'FROM metrics-*' },
+      };
+
+      const soAttrs = transformCreateRuleBodyToRuleSoAttributes(createData, serverFields);
+      const response = transformRuleSoAttributesToRuleApiResponse('rule-rt-2', soAttrs);
+
+      expect(soAttrs.query).toEqual({ base: 'FROM metrics-*' });
+      expect(response.query).toEqual(createData.query);
+    });
+
+    it('maps metadata.builder_type to metadata.builder in the API response', () => {
       const attrs = createRuleSoAttributes({
         metadata: { name: 'test-rule', builder_type: 'threshold' },
       });
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
-      expect(result.metadata.builder_type).toBe('threshold');
+      expect(result.metadata).toEqual({
+        name: 'test-rule',
+        description: undefined,
+        tags: undefined,
+        routing_tags: undefined,
+        builder: { type: 'threshold' },
+      });
     });
 
-    it('sets metadata.builder_type to undefined when absent from SO attributes', () => {
+    it('sets metadata.builder to undefined when builder_type is absent from SO attributes', () => {
       const attrs = createRuleSoAttributes({});
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
-      expect(result.metadata.builder_type).toBeUndefined();
+      expect(result.metadata).toEqual({
+        name: 'test-rule',
+        description: undefined,
+        tags: undefined,
+        routing_tags: undefined,
+        builder: undefined,
+      });
     });
 
-    it('includes the version when provided', () => {
-      const attrs = createRuleSoAttributes({ metadata: { name: 'rule-1' } });
-
-      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs, 'WzNEW=');
-      expect(result.version).toBe('WzNEW=');
-    });
-
-    it('omits the version when not provided', () => {
-      const attrs = createRuleSoAttributes({ metadata: { name: 'rule-1' } });
+    it('exposes the persisted version counter on the rule', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'test-rule' }, version: 7 });
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
-      expect(result.version).toBeUndefined();
-    });
-
-    it('exposes the persisted version as metadata.version on the API response', () => {
-      const attrs = createRuleSoAttributes({ metadata: { name: 'test-rule', version: 7 } });
-
-      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
-      expect(result.metadata.version).toBe(7);
+      expect(result.version).toBe(7);
     });
 
     it('falls back to the baseline version when the rule has no version yet', () => {
-      const attrs = createRuleSoAttributes({ metadata: { name: 'test-rule', version: undefined } });
+      const attrs = createRuleSoAttributes({ metadata: { name: 'test-rule' }, version: undefined });
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
-      expect(result.metadata.version).toBe(1);
+      expect(result.version).toBe(1);
+    });
+  });
+
+  describe('transformRuleSoAttributesToRuleApiResponse version counter', () => {
+    it('exposes the version counter and satisfies the strict API schema', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'rule-1' }, version: 7 });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.version).toBe(7);
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
   });
 
@@ -402,6 +906,247 @@ describe('utils', () => {
           },
         })
       );
+    });
+  });
+
+  describe('validateMergedRuleAttributes', () => {
+    it('does not throw for a valid alert rule', () => {
+      const attrs = createRuleSoAttributes({ kind: 'alert' });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('does not throw for a valid signal rule, which carries no lifecycle objects', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'signal',
+        recovery: undefined,
+        no_data: undefined,
+        query: { base: 'FROM logs-* | LIMIT 1' },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('throws INVALID_SIGNAL_RULE (400) when a signal rule sets recovery', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'signal',
+        recovery: { strategy: 'no_breach' },
+        no_data: undefined,
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 400 }),
+          message: 'Signal rules cannot set recovery or no_data.',
+          data: {
+            code: 'INVALID_SIGNAL_RULE',
+            details: { rule_id: 'rule-1', rule_kind: 'signal' },
+          },
+        })
+      );
+    });
+
+    it('throws INVALID_SIGNAL_RULE when a signal rule sets no_data', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'signal',
+        recovery: undefined,
+        no_data: { strategy: 'keep_last' },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          message: 'Signal rules cannot set recovery or no_data.',
+          data: {
+            code: 'INVALID_SIGNAL_RULE',
+            details: { rule_id: 'rule-1', rule_kind: 'signal' },
+          },
+        })
+      );
+    });
+
+    it('throws INVALID_SIGNAL_RULE when a signal rule sets routing tags', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'signal',
+        recovery: undefined,
+        no_data: undefined,
+        metadata: { name: 'signal-rule', routing_tags: ['sre'] },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          message: ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
+          data: {
+            code: 'INVALID_SIGNAL_RULE',
+            details: { rule_id: 'rule-1', rule_kind: 'signal' },
+          },
+        })
+      );
+    });
+
+    it('throws INVALID_RULE_QUERY_CONFIG (400) when a "condition" recovery has no breach to contrast with', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        query: { base: 'FROM logs-*' },
+        recovery: { strategy: 'condition', segment: 'WHERE NOT error' },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 400 }),
+          message: 'recovery.strategy "condition" requires query.breach.',
+          data: { code: 'INVALID_RULE_QUERY_CONFIG', details: { rule_id: 'rule-1' } },
+        })
+      );
+    });
+
+    it('does not throw for a "condition" recovery alongside a breach segment', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
+        recovery: { strategy: 'condition', segment: 'WHERE NOT error' },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('throws INVALID_RULE_QUERY_CONFIG when the recovery segment does not compose onto the base', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
+        recovery: { strategy: 'condition', segment: 'WHERE (' },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 400 }),
+          message: 'recovery.segment does not compose into a valid ES|QL query with query.base.',
+          data: { code: 'INVALID_RULE_QUERY_CONFIG', details: { rule_id: 'rule-1' } },
+        })
+      );
+    });
+
+    it('does not check composition for recovery strategies that carry no segment', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
+        recovery: { strategy: 'query', query: 'FROM logs-* | WHERE NOT error' },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('does not require a presence query when the breach segment already marks presence', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
+        no_data: { strategy: 'keep_last' },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('throws INVALID_RULE_QUERY_CONFIG when a classifying no-data strategy has neither a breach segment nor a presence query', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        query: { base: 'FROM logs-* | WHERE error' },
+        no_data: { strategy: 'keep_last' },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 400 }),
+          message: 'A no_data strategy other than "ignore" requires query.breach or no_data.query.',
+          data: { code: 'INVALID_RULE_QUERY_CONFIG', details: { rule_id: 'rule-1' } },
+        })
+      );
+    });
+
+    it('does not require a breach segment when a presence query is set', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        query: { base: 'FROM logs-* | WHERE error' },
+        no_data: { strategy: 'keep_last', query: 'FROM logs-*' },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('accepts the "alert" no-data strategy', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        no_data: { strategy: 'alert', query: 'FROM heartbeat-*' },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('throws INVALID_STATE_TRANSITION_CONFIG (400) when a recovering delay is set under manual recovery', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery: { strategy: 'manual' },
+        state_transition: { recovering: { count: 3 } },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 400 }),
+          message: 'state_transition.recovering has no effect when recovery.strategy is "manual".',
+          data: { code: 'INVALID_STATE_TRANSITION_CONFIG', details: { rule_id: 'rule-1' } },
+        })
+      );
+    });
+
+    it('throws INVALID_STATE_TRANSITION_CONFIG when only a recovering timeframe is set under manual recovery', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery: { strategy: 'manual' },
+        state_transition: { recovering: { timeframe: '5m' } },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          data: { code: 'INVALID_STATE_TRANSITION_CONFIG', details: { rule_id: 'rule-1' } },
+        })
+      );
+    });
+
+    it('does not throw for a recovering delay when recovery can happen', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery: { strategy: 'no_breach' },
+        state_transition: { recovering: { count: 3, timeframe: '5m' } },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('throws INVALID_STATE_TRANSITION_CONFIG for a recovering count of 0 under manual recovery', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery: { strategy: 'manual' },
+        state_transition: { pending: { count: 0 }, recovering: { count: 0 } },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          data: { code: 'INVALID_STATE_TRANSITION_CONFIG', details: { rule_id: 'rule-1' } },
+        })
+      );
+    });
+
+    it('does not throw for a pending delay under manual recovery', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery: { strategy: 'manual' },
+        state_transition: { pending: { count: 3 } },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
     });
   });
 
@@ -455,6 +1200,7 @@ describe('groupCandidatesByInterval', () => {
     taskId: `task:${id}`,
     attrs: createRuleSoAttributes({ schedule: { every, lookback: '1m' } }),
     version: 'v1',
+    references: [],
   });
 
   it('groups candidates by their schedule interval, preserving order', () => {

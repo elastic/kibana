@@ -6,11 +6,13 @@
  */
 
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { stableStringify } from '@kbn/std';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { getNoDataEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { isEsqlUserError } from '../errors/esql_user_error';
+import { toQueryResponseSizeExceededError } from '../errors/query_response_size_exceeded_error';
+import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import type { RuleExecutionInput } from './types';
-import { buildExecutionUuid, buildGroupHash } from './build_alert_events';
+import { buildGroupHash } from './build_alert_events';
 import { getQueryPayload } from './get_query_payload';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../services/query_service/query_service';
@@ -23,21 +25,22 @@ import type { RuleResponse } from '../rules_client';
  * Pure, single-query helper lifted from the former `DetectDataPresenceStep` so
  * the end-of-stream classifier can run data-presence detection exactly once per
  * run (rather than once per streamed batch). Returns an empty set when the rule
- * has no resolvable no_data query (e.g. `no_data_strategy: 'none'`, or a stale
- * standalone saved object with no `query.no_data` block).
+ * does not classify absence (`no_data.strategy: 'ignore'`).
  */
 export const detectDataPresence = async ({
   queryService,
   rule,
   input,
   logger,
+  maxResponseSize,
 }: {
   queryService: QueryServiceContract;
   rule: RuleResponse;
   input: RuleExecutionInput;
   logger: LoggerServiceContract;
+  maxResponseSize?: number;
 }): Promise<Set<string>> => {
-  const noDataQuery = getNoDataEsqlQuery(rule.query, rule.no_data_strategy);
+  const noDataQuery = getNoDataEsqlQuery(rule.query, rule.no_data);
 
   if (!noDataQuery) {
     return new Set();
@@ -61,10 +64,20 @@ export const detectDataPresence = async ({
       filter: queryPayload.filter,
       params: queryPayload.params,
       abortSignal: input.executionContext.signal,
+      maxResponseSize,
     });
 
-    return collectGroupHashesFromRows({ rule, rows, input });
+    return collectGroupHashesFromRows({ rule, rows });
   } catch (error) {
+    if (isMaximumResponseSizeExceededError(error)) {
+      const sizeError = toQueryResponseSizeExceededError(error, 'data_presence', maxResponseSize);
+      logger.warn({
+        message: `Data-presence query: ${sizeError.message}`,
+        code: ALERTING_LOG_CODES.RULE_EXECUTION_QUERY_RESPONSE_SIZE_EXCEEDED,
+        labels: { rule_id: input.ruleId, space_id: input.spaceId },
+      });
+      throw createTaskRunError(sizeError, TaskErrorSource.USER);
+    }
     if (isEsqlUserError(error)) {
       throw createTaskRunError(error as Error, TaskErrorSource.USER);
     }
@@ -75,39 +88,19 @@ export const detectDataPresence = async ({
 function collectGroupHashesFromRows({
   rule,
   rows,
-  input,
 }: {
   rule: RuleResponse;
   rows: Array<Record<string, unknown>>;
-  input: RuleExecutionInput;
 }): Set<string> {
-  const { ruleId, spaceId, scheduledAt } = input;
-
   if (rows.length === 0) {
     return new Set();
   }
 
   const groupingFields = rule.grouping?.fields ?? [];
-  const executionUuid = buildExecutionUuid({
-    ruleId,
-    spaceId,
-    scheduledTimestamp: scheduledAt,
-    suffix: 'no_data',
-  });
   const groupHashes = new Set<string>();
 
-  for (let i = 0; i < rows.length; i++) {
-    const rowDoc = rows[i];
-
-    const hash = buildGroupHash({
-      rowDoc,
-      groupKeyFields: groupingFields,
-      get fallbackSeed(): string {
-        return `${executionUuid}|row:${i}|${stableStringify(rowDoc)}`;
-      },
-    });
-
-    groupHashes.add(hash);
+  for (const rowDoc of rows) {
+    groupHashes.add(buildGroupHash({ rowDoc, groupKeyFields: groupingFields }));
   }
 
   return groupHashes;

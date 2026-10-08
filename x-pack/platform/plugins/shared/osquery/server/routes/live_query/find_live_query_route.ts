@@ -70,6 +70,7 @@ export const findLiveQueryRoute = (
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
+          const cpsActive = await osqueryContext.isCpsActive(request);
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
@@ -77,7 +78,7 @@ export const findLiveQueryRoute = (
           const search = await getScopedSearch(
             context,
             request,
-            osqueryContext.cpsEnabled,
+            cpsActive,
             osqueryContext.getStartServices
           );
           const res = await lastValueFrom(
@@ -108,9 +109,10 @@ export const findLiveQueryRoute = (
               const readEsClient = getReadEsClient(
                 coreStartServices.elasticsearch.client,
                 request,
-                osqueryContext.cpsEnabled
+                cpsActive
               );
-              const ccsEnabled = await hasConnectedRemoteClusters(internalEsClient);
+              // A fanned-out CPS read does not also add CCS `*:` remote expressions.
+              const ccsEnabled = !cpsActive && (await hasConnectedRemoteClusters(internalEsClient));
               let integrationNamespaces: string[] | undefined;
 
               if (osqueryContext?.service?.getIntegrationNamespaces) {
@@ -146,7 +148,6 @@ export const findLiveQueryRoute = (
               const resultCountsMap = await getResultCountsForActions(
                 readEsClient,
                 allActionIds,
-                spaceId,
                 integrationNamespaces,
                 ccsEnabled
               );

@@ -29,6 +29,7 @@ jest.mock('../../application/breadcrumb_context', () => ({
 
 let mockAgentBuilderShow = true;
 let mockExperimentalFeaturesEnabled = true;
+let mockAlertingV2ExperimentalFeaturesEnabled = true;
 let mockCanWriteRules = true;
 
 jest.mock('@kbn/core-di-browser', () => {
@@ -39,7 +40,10 @@ jest.mock('@kbn/core-di-browser', () => {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
         return {
-          canWrite: (feature: string) => (feature === 'rules' ? mockCanWriteRules : true),
+          canWrite: (feature: string) => {
+            if (feature === 'rules') return mockCanWriteRules;
+            return true;
+          },
           canRead: () => true,
           can: () => mockCanWriteRules,
         };
@@ -58,11 +62,15 @@ jest.mock('@kbn/core-di-browser', () => {
           get: (id: string) =>
             id === 'agentBuilder:experimentalFeatures'
               ? mockExperimentalFeaturesEnabled
+              : id === 'alerting:v2:experimentalFeatures'
+              ? mockAlertingV2ExperimentalFeaturesEnabled
               : undefined,
         },
         chrome: { docTitle: { change: mockDocTitleChange } },
         http: { basePath: { prepend: (p: string) => p } },
-        notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
+        notifications: {
+          toasts: { addSuccess: jest.fn(), addError: jest.fn() },
+        },
       };
 
       return services[token as string] ?? {};
@@ -70,10 +78,6 @@ jest.mock('@kbn/core-di-browser', () => {
     CoreStart: (key: string) => key,
   };
 });
-
-jest.mock('@kbn/core-di', () => ({
-  PluginStart: (key: string) => key,
-}));
 
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   ComposeDiscoverFlyout: ({ onCreateRule }: { onCreateRule: (payload: unknown) => void }) => (
@@ -105,9 +109,8 @@ const mockUpdateRuleMutate = jest.fn();
 jest.mock('../../hooks/use_update_rule', () => ({
   useUpdateRule: () => ({ mutate: mockUpdateRuleMutate, isLoading: false }),
 }));
-
-jest.mock('../../hooks/use_setup_rule_notifications', () => ({
-  useSetupRuleNotifications: () => ({ mutate: jest.fn(), isLoading: false }),
+jest.mock('../../hooks/use_is_action_policies_license_valid', () => ({
+  useIsActionPoliciesLicenseValid: () => true,
 }));
 
 const mockDeleteMutate = jest.fn();
@@ -150,7 +153,7 @@ const createRule = (overrides: Partial<RuleApiResponse> = {}): RuleApiResponse =
       tags: ['prod'],
     },
     schedule: { every: '1m' },
-    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    query: { base: 'FROM logs-* | LIMIT 1' },
     time_field: '@timestamp',
     createdBy: 'elastic',
     createdAt: '2026-01-01T00:00:00.000Z',
@@ -164,9 +167,9 @@ const mockRules: RuleApiResponse[] = [
   createRule({
     id: 'rule-2',
     enabled: false,
-    metadata: { name: 'Rule Two', tags: [] as string[], version: 1 },
+    metadata: { name: 'Rule Two', tags: [] as string[] },
     schedule: { every: '5m' },
-    query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
+    query: { base: 'FROM metrics-*' },
   }),
 ];
 
@@ -210,8 +213,10 @@ describe('RulesListPage', () => {
     jest.clearAllMocks();
     // Content List uses a shared QueryClient; clear cached pages between tests.
     contentListQueryClient.clear();
+    window.localStorage.clear();
     mockAgentBuilderShow = true;
     mockExperimentalFeaturesEnabled = true;
+    mockAlertingV2ExperimentalFeaturesEnabled = true;
     mockCanWriteRules = true;
     mockUseDeleteRule.mockReturnValue({
       mutate: mockDeleteMutate,
@@ -230,6 +235,30 @@ describe('RulesListPage', () => {
     await waitForRules();
 
     expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+  });
+
+  it('marks the sequence builder entry point as experimental', async () => {
+    renderPage();
+    await waitForRules();
+
+    const overflowButton = screen.queryByTestId('app-menu-overflow-button');
+    if (overflowButton) {
+      fireEvent.click(overflowButton);
+    }
+
+    await waitFor(() =>
+      expect(screen.getByTestId('createSequenceRuleButton')).toHaveTextContent(
+        'Build a sequence (Experimental)'
+      )
+    );
+  });
+
+  it('hides the sequence builder entry point when Alerting V2 experimental features are disabled', async () => {
+    mockAlertingV2ExperimentalFeaturesEnabled = false;
+    renderPage();
+    await waitForRules();
+
+    expect(screen.queryByTestId('createSequenceRuleButton')).not.toBeInTheDocument();
   });
 
   it('renders loading state', async () => {
@@ -409,7 +438,7 @@ describe('RulesListPage', () => {
 
     expect(screen.getByTestId('rulesListStatusFilter')).toBeInTheDocument();
     expect(screen.getByTestId('rulesListTagsFilter')).toBeInTheDocument();
-    expect(screen.getByTestId('rulesListModeFilter')).toBeInTheDocument();
+    expect(screen.getByTestId('rulesListKindFilter')).toBeInTheDocument();
   });
 
   it('does not show an active count on the status filter when nothing is selected', async () => {
@@ -445,13 +474,13 @@ describe('RulesListPage', () => {
     });
   });
 
-  it('passes mode filters to findItems', async () => {
+  it('passes kind filters to findItems', async () => {
     renderPage();
     await waitForRules();
 
-    fireEvent.click(screen.getByTestId('rulesListModeFilter'));
-    const list = await screen.findByTestId('rulesListModeFilter-list');
-    fireEvent.click(within(list).getByText('Signal'));
+    fireEvent.click(screen.getByTestId('rulesListKindFilter'));
+    const list = await screen.findByTestId('rulesListKindFilter-list');
+    fireEvent.click(within(list).getByText('Events'));
 
     await waitFor(() => {
       expect(lastFindItemsArgs().filters.kind).toMatchObject({ include: ['signal'] });
@@ -477,12 +506,12 @@ describe('RulesListPage', () => {
     });
   });
 
-  it('sorts by kind when the Mode header is clicked', async () => {
+  it('sorts by kind when the Outcome header is clicked', async () => {
     renderPage();
     await waitForRules();
 
-    const modeHeader = screen.getByRole('columnheader', { name: /^mode$/i });
-    fireEvent.click(within(modeHeader).getByRole('button'));
+    const kindHeader = screen.getByRole('columnheader', { name: /^outcome$/i });
+    fireEvent.click(within(kindHeader).getByRole('button'));
 
     await waitFor(() => {
       expect(lastFindItemsArgs().sort).toEqual({ field: 'kind', direction: 'asc' });
@@ -526,7 +555,7 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('createRuleButton'));
 
     expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
-    expect(screen.getByText('Create ES|QL rule')).toBeInTheDocument();
+    expect(screen.getByText('ES|QL rule')).toBeInTheDocument();
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
   });
 
@@ -547,7 +576,7 @@ describe('RulesListPage', () => {
     await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('createRuleButton'));
-    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
 
     expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
     expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
@@ -563,11 +592,11 @@ describe('RulesListPage', () => {
     await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('createRuleButton'));
-    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
     fireEvent.click(screen.getByTestId('composeDiscoverFlyout'));
 
     expect(mockCreateRuleMutate).toHaveBeenCalledWith(
-      {},
+      { payload: {} },
       expect.objectContaining({ onSuccess: expect.any(Function) })
     );
     expect(screen.queryByTestId('composeDiscoverFlyout')).not.toBeInTheDocument();
@@ -603,6 +632,12 @@ describe('RulesListPage', () => {
     await waitFor(() => {
       expect(screen.getByTestId('createWithAgentButton')).toBeInTheDocument();
     });
+    expect(
+      screen.getByTestId('createWithAgentButton').querySelector('[data-euiicon-type="sparkles"]')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('createWithAgentButton')).toHaveTextContent(
+      'Create with agent (Experimental)'
+    );
 
     fireEvent.click(screen.getByTestId('createWithAgentButton'));
 
@@ -610,6 +645,30 @@ describe('RulesListPage', () => {
       path: '/agents/elastic-ai-agent/conversations/new',
       state: { initialMessage: CREATE_WITH_AGENT_INITIAL_PROMPT },
     });
+  });
+
+  it('hides all Create with AI Agent entry points when Alerting V2 experimental features are disabled', async () => {
+    mockAlertingV2ExperimentalFeaturesEnabled = false;
+    resolveRules([], 0);
+
+    renderPage();
+
+    await waitFor(() => expect(screen.getByTestId('createEsqlRuleCard')).toBeInTheDocument());
+    expect(screen.queryByTestId('createWithAgentCard')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('createWithAgentExperimentalBadge')).not.toBeInTheDocument();
+  });
+
+  it('hides the populated-list Create with AI Agent menu option when Alerting V2 experimental features are disabled', async () => {
+    mockAlertingV2ExperimentalFeaturesEnabled = false;
+    renderPage();
+
+    await waitFor(() =>
+      expect(screen.getByTestId('createRuleButton-secondary-button')).toBeInTheDocument()
+    );
+    fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
+
+    await waitFor(() => expect(screen.getByTestId('createEsqlRuleButton')).toBeInTheDocument());
+    expect(screen.queryByTestId('createWithAgentButton')).not.toBeInTheDocument();
   });
 
   it('disables the split button agent option (does not hide it) when agent builder is not available', async () => {
@@ -836,11 +895,11 @@ describe('RulesListPage', () => {
       const page2 = [
         createRule({
           id: 'rule-3',
-          metadata: { name: 'Rule Three', tags: [] as string[], version: 1 },
+          metadata: { name: 'Rule Three', tags: [] as string[] },
         }),
         createRule({
           id: 'rule-4',
-          metadata: { name: 'Rule Four', tags: [] as string[], version: 1 },
+          metadata: { name: 'Rule Four', tags: [] as string[] },
         }),
       ];
 
@@ -894,14 +953,13 @@ describe('RulesListPage', () => {
       expect(screen.queryByTestId('createEsqlRuleCard')).not.toBeInTheDocument();
     });
 
-    it('hides row selection, quick edit, and actions menu affordances', async () => {
+    it('hides row selection and quick edit', async () => {
       renderPage();
       await waitForRules();
 
       expect(screen.queryByTestId('selectAllRulesOnPage')).not.toBeInTheDocument();
       expect(screen.queryByTestId('checkboxSelectRow-rule-1')).not.toBeInTheDocument();
       expect(screen.queryByTestId('quickEditRule-rule-1')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('ruleActionsButton-rule-1')).not.toBeInTheDocument();
     });
 
     it('hides the enabled switch and shows a read-only status badge instead', async () => {

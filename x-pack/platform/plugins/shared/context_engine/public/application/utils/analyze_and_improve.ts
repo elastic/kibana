@@ -7,11 +7,7 @@
 
 import type { AnalyzeAndImproveContext, ChatOpener } from '../../types';
 
-/**
- * Invokes the registered "Analyze & improve" chat opener. Resolves the opener via `getChatOpener`
- * at call time (so a late-registered opener still fires) and is a no-op when none is registered
- * (the button that triggers this is hidden in that case).
- */
+/** Invokes the Analyze & improve chat opener, or no-ops when none is available. */
 export const analyzeAndImprove = (
   getChatOpener: (() => ChatOpener | undefined) | undefined,
   context: AnalyzeAndImproveContext

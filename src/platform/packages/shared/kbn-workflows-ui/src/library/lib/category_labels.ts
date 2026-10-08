@@ -62,7 +62,7 @@ const CATEGORY_NAMES: Record<string, () => string> = {
     i18n.translate('workflows.library.category.reporting', { defaultMessage: 'Reporting' }),
   search: () => i18n.translate('workflows.library.category.search', { defaultMessage: 'Search' }),
   'ai-agent': () =>
-    i18n.translate('workflows.library.category.aiAgent', { defaultMessage: 'AI agent' }),
+    i18n.translate('workflows.library.category.aiAgent', { defaultMessage: 'Agent Builder' }),
   integration: () =>
     i18n.translate('workflows.library.category.integration', { defaultMessage: 'Integration' }),
   utility: () =>

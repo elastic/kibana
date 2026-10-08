@@ -36,10 +36,6 @@ const CasesAppComponent: React.FC<CasesAppProps> = ({
         owner: [APP_OWNER],
         permissions: userCapabilities.generalCasesV3,
         basePath: '/',
-        features: {
-          alerts: { enabled: true, sync: false },
-          observables: { enabled: true, autoExtract: false },
-        },
       })}
     </div>
   );

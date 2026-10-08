@@ -9,8 +9,9 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: ScheduleMonitoringEngine
+      deprecated: true
       summary: Schedule the Privilege Monitoring Engine
-      description: Schedules the Privilege Monitoring Engine to run as soon as possible, triggering an immediate monitoring cycle.
+      description: '**Deprecated in 9.4.0.** Schedules the Privilege Monitoring Engine to run as soon as possible, triggering an immediate monitoring cycle.'
 
       responses:
         "200":

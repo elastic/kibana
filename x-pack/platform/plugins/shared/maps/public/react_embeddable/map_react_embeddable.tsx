@@ -15,7 +15,6 @@ import {
   initializeTitleManager,
   timeRangeComparators,
   titleComparators,
-  useBatchedPublishingSubjects,
   apiPublishesSettings,
   initializeStateApi,
 } from '@kbn/presentation-publishing';
@@ -44,6 +43,7 @@ import {
 } from './initialize_cross_panel_actions';
 import { cancelAllInFlightRequests } from '../actions';
 import { initializeDataViews } from './initialize_data_views';
+import { initializeEsql } from './initialize_esql';
 import { initializeFetch } from './initialize_fetch';
 import { initializeEditApi } from './initialize_edit_api';
 import { isMapRendererApi } from './map_renderer/types';
@@ -98,6 +98,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
       uuid,
     });
     const projectRoutingManager = await initializeProjectRoutingManager(savedMap);
+    const esqlManager = initializeEsql(savedMap.getStore());
 
     function getLatestState() {
       return {
@@ -149,7 +150,8 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
         timeRangeManager.reinitializeState(nextState);
         titleManager.reinitializeState(nextState);
 
-        await savedMap.reset(nextState);
+        savedMap.reset(nextState);
+        reduxSync.internalApi.syncWithStore();
       },
     });
 
@@ -182,6 +184,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
         serializeByValue
       ),
       ...initializeDataViews(savedMap.getStore()),
+      ...esqlManager.api,
       ...projectRoutingManager.api,
       supportedTriggers: () => {
         return [ON_OPEN_PANEL_MENU, ON_APPLY_FILTER, ON_CLICK_VALUE];
@@ -199,17 +202,11 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
     return {
       api,
       Component: () => {
-        const [defaultTitle, title, defaultDescription, description] = useBatchedPublishingSubjects(
-          defaultTitle$,
-          titleManager.api.title$,
-          defaultDescription$,
-          titleManager.api.description$
-        );
-
         useEffect(() => {
           return () => {
             crossPanelActions.cleanup();
             drilldownsManager.cleanup();
+            esqlManager.cleanup();
             reduxSync.cleanup();
             unsubscribeFromFetch();
             projectRoutingManager.cleanup();
@@ -249,14 +246,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
                   ? parentApi.getTooltipRenderer()
                   : undefined
               }
-              title={title ?? defaultTitle}
-              description={description ?? defaultDescription}
               waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(savedMap.getStore())}
-              isSharable={
-                isMapRendererApi(parentApi) && typeof parentApi.isSharable === 'boolean'
-                  ? parentApi.isSharable
-                  : true
-              }
             />
           </Provider>
         );

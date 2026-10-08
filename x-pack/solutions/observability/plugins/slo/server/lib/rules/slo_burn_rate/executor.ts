@@ -102,9 +102,12 @@ export const getRuleExecutor = (basePath: IBasePath, isCpsEnabled: boolean = fal
         () => sloRepository.findById(params.sloId)
       );
     } catch (err) {
+      // Preserve the original failure as `cause` so callers can still inspect why the lookup failed
+      // (for example a 401) rather than only seeing a missing-SLO message.
       throw createTaskRunError(
         new Error(
-          `Rule "${options.rule.name}" ${options.rule.id} is referencing an SLO which cannot be found: "${params.sloId}": ${err.message}`
+          `Rule "${options.rule.name}" ${options.rule.id} is referencing an SLO which cannot be found: "${params.sloId}": ${err.message}`,
+          { cause: err }
         ),
         TaskErrorSource.USER
       );

@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/share-plugin'
   - '@kbn/index-management-shared-types'
+  - '@kbn/context-engine-plugin'
 tags:
   - plugin
   - prod

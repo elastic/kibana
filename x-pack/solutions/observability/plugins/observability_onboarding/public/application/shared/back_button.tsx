@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom-v5-compat';
+import { useHistory, useLocation } from 'react-router-dom';
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
 export const BackButton: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
-  const navigate = useNavigate();
+  const history = useHistory();
   const location = useLocation();
 
   return (
@@ -20,7 +20,12 @@ export const BackButton: React.FC<React.PropsWithChildren<{}>> = ({ children }) 
         data-test-subj="observabilityOnboardingFlowBackToSelectionButton"
         iconType="chevronSingleLeft"
         flush="left"
-        onClick={() => navigate(`../${location.search}`)}
+        onClick={() => {
+          history.push({
+            pathname: '/',
+            search: location.search,
+          });
+        }}
       >
         {children
           ? children

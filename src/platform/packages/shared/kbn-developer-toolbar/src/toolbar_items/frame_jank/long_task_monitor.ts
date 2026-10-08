@@ -10,9 +10,9 @@
 import type { Monitor } from '../monitor';
 
 export interface LongTaskInfo {
-  duration: number; // last task duration (ms)
+  worstTaskDuration: number; // largest retained task duration (ms)
   totalBlockingTime: number; // sum over window of max(0, duration - 50)
-  tasksInLast30Seconds: number; // number of long tasks in the window
+  tasksInLast30Seconds: number; // number of tasks >= 100ms in the window
 }
 
 // Long Task entries are PerformanceEntry with startTime/duration (+ optional attribution)
@@ -24,16 +24,20 @@ export type PerformanceLongTaskTiming = PerformanceEntry & {
 export class LongTaskMonitor implements Monitor<LongTaskInfo> {
   // Good defaults
   private static readonly HISTORY_DURATION = 30_000; // 30s sliding window
-  private static readonly SEVERE_THRESHOLD = 100; // only emit tasks >= 100ms
+  private static readonly SLOW_TASK_THRESHOLD = 100;
   private static readonly TBT_BASELINE = 50; // TBT counts duration beyond 50ms
   private static readonly MAX_TASKS = 500; // soft cap to bound memory
 
   private callbacks: Array<(info: LongTaskInfo) => void> = [];
   private observer?: PerformanceObserver;
   private supportedFlag: boolean;
+  private expiryTimer?: ReturnType<typeof setTimeout>;
+  private isMonitoring = false;
+  private sessionStartedAt = 0;
 
   private taskHistory: Array<{ duration: number; startTime: number }> = [];
-  private lastTaskDuration = 0;
+
+  private worstTaskDuration = 0;
 
   constructor() {
     this.supportedFlag = this.checkLongTaskSupport();
@@ -55,43 +59,32 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
     if (!this.supportedFlag) return;
     if (this.observer) return; // idempotent
 
+    this.resetSessionState();
+    this.sessionStartedAt = performance.now();
+
     try {
       this.observer = new PerformanceObserver((list) => {
         const entries = list.getEntries() as PerformanceLongTaskTiming[];
         for (const entry of entries) this.handleLongTask(entry);
       });
 
-      // Prefer single-type API to get buffered entries when available.
-      // Fallback to entryTypes for older browsers.
-      try {
-        this.observer.observe({ type: 'longtask', buffered: true });
-      } catch {
-        this.observer.observe({ entryTypes: ['longtask'] });
-      }
+      this.observer.observe({ type: 'longtask' });
+      this.isMonitoring = true;
+      this.publishCurrentStats();
     } catch (error) {
+      this.stopMonitoring();
       // eslint-disable-next-line no-console
       console.warn('Failed to start long task monitoring:', error);
     }
   }
 
-  private handleLongTask(entry: PerformanceLongTaskTiming) {
-    const { duration, startTime } = entry;
-    if (duration < LongTaskMonitor.SEVERE_THRESHOLD) return;
-
-    // Record
-    this.pushTask({ duration, startTime });
-    this.lastTaskDuration = duration;
-
-    // Maintain window
-    this.cleanupHistory();
-
-    // Emit snapshot
-    const info: LongTaskInfo = {
-      duration: this.lastTaskDuration,
-      totalBlockingTime: this.calculateTotalBlockingTime(),
-      tasksInLast30Seconds: this.taskHistory.length,
-    };
-    for (const cb of this.callbacks) cb(info);
+  private resetSessionState() {
+    if (this.expiryTimer != null) {
+      clearTimeout(this.expiryTimer);
+      this.expiryTimer = undefined;
+    }
+    this.taskHistory = [];
+    this.worstTaskDuration = 0;
   }
 
   private pushTask(task: { duration: number; startTime: number }) {
@@ -108,8 +101,10 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
     const cutoff = performance.now() - LongTaskMonitor.HISTORY_DURATION;
     // Entries arrive roughly in time order; filter is still safe if they don't.
     if (this.taskHistory.length) {
-      this.taskHistory = this.taskHistory.filter((t) => t.startTime >= cutoff);
+      this.taskHistory = this.taskHistory.filter((task) => task.startTime > cutoff);
     }
+
+    this.worstTaskDuration = Math.max(0, ...this.taskHistory.map(({ duration }) => duration));
   }
 
   private calculateTotalBlockingTime(): number {
@@ -123,7 +118,44 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
     return total;
   }
 
+  private publishCurrentStats() {
+    if (!this.isMonitoring) return;
+    const info = this.getCurrentStats();
+    for (const cb of this.callbacks) cb(info);
+    this.scheduleExpiry();
+  }
+
+  private scheduleExpiry() {
+    if (this.expiryTimer != null) {
+      clearTimeout(this.expiryTimer);
+      this.expiryTimer = undefined;
+    }
+    if (!this.isMonitoring || this.taskHistory.length === 0) return;
+
+    const oldestStartTime = Math.min(...this.taskHistory.map(({ startTime }) => startTime));
+    const delay = Math.max(
+      1,
+      oldestStartTime + LongTaskMonitor.HISTORY_DURATION - performance.now()
+    );
+    this.expiryTimer = setTimeout(() => this.publishCurrentStats(), delay);
+  }
+
+  private handleLongTask(entry: PerformanceLongTaskTiming) {
+    if (!this.isMonitoring) return;
+    const { duration, startTime } = entry;
+    if (startTime < this.sessionStartedAt) return;
+    if (duration <= LongTaskMonitor.TBT_BASELINE) return;
+
+    this.pushTask({ duration, startTime });
+    this.publishCurrentStats();
+  }
+
   stopMonitoring() {
+    this.isMonitoring = false;
+    if (this.expiryTimer != null) {
+      clearTimeout(this.expiryTimer);
+      this.expiryTimer = undefined;
+    }
     if (this.observer) {
       try {
         this.observer.disconnect();
@@ -137,9 +169,8 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
 
   destroy() {
     this.stopMonitoring();
+    this.resetSessionState();
     this.callbacks = [];
-    this.taskHistory = [];
-    this.lastTaskDuration = 0;
   }
 
   subscribe(callback: (info: LongTaskInfo) => void) {
@@ -153,9 +184,11 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
   getCurrentStats(): LongTaskInfo {
     this.cleanupHistory();
     return {
-      duration: this.lastTaskDuration,
       totalBlockingTime: this.calculateTotalBlockingTime(),
-      tasksInLast30Seconds: this.taskHistory.length,
+      worstTaskDuration: this.worstTaskDuration,
+      tasksInLast30Seconds: this.taskHistory.filter(
+        ({ duration }) => duration >= LongTaskMonitor.SLOW_TASK_THRESHOLD
+      ).length,
     };
   }
 }

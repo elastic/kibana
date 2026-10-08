@@ -20,7 +20,7 @@ describe('useManagedOtlpServiceAvailability', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         featureFlags: {
-          getBooleanValue: () => false,
+          useBooleanValue: () => false,
         },
         observability: { config: { managedOtlpServiceUrl: 'https://example.com' } },
         context: { isServerless: true },
@@ -36,7 +36,7 @@ describe('useManagedOtlpServiceAvailability', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         featureFlags: {
-          getBooleanValue: () => false,
+          useBooleanValue: () => false,
         },
         observability: { config: { managedOtlpServiceUrl: 'https://example.com' } },
         context: { isServerless: false },
@@ -52,7 +52,7 @@ describe('useManagedOtlpServiceAvailability', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         featureFlags: {
-          getBooleanValue: () => true,
+          useBooleanValue: () => true,
         },
         observability: { config: { managedOtlpServiceUrl: '' } },
         context: { isServerless: false },
@@ -68,7 +68,7 @@ describe('useManagedOtlpServiceAvailability', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         featureFlags: {
-          getBooleanValue: () => true,
+          useBooleanValue: () => true,
         },
         observability: { config: { managedOtlpServiceUrl: 'https://example.com' } },
         context: { isServerless: false },
@@ -84,7 +84,7 @@ describe('useManagedOtlpServiceAvailability', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         featureFlags: {
-          getBooleanValue: () => true,
+          useBooleanValue: () => true,
         },
         cloud: { managedOtlp: { url: 'https://from-cloud.example.com' } },
         observability: { config: { managedOtlpServiceUrl: '' } },

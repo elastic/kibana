@@ -29,7 +29,9 @@ export const useAttackAlertIds = (hit: DataTableRecord): string[] => {
 
   const replacements = useMemo(() => {
     const value = hit.flattened[FIELD_REPLACEMENTS];
-    if (!value || typeof value === 'string' || Array.isArray(value)) {
+    // Guard against all non-object primitives (strings, numbers, booleans) and arrays —
+    // typeof !== 'object' catches every primitive type, making the intent explicit.
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
       return EMPTY_REPLACEMENTS;
     }
     return value as Record<string, string>;

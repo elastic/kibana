@@ -1,0 +1,851 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+// eslint-disable-next-line @kbn/imports/no_direct_monaco_import -- we need to import monaco directly for this service
+import type { monaco } from '@kbn/monaco';
+import type { Locator, ScoutPage } from '@kbn/scout';
+import { PLUGIN_ID } from '../../../../../common';
+
+declare global {
+  interface Window {
+    MonacoEnvironment?: monaco.Environment;
+  }
+}
+
+export class WorkflowEditorPage {
+  public yamlEditor: Locator;
+  public saveButton: Locator;
+  public runButton: Locator;
+  public validationErrorsAccordion: Locator;
+  public proposalAcceptButton: Locator;
+  public proposalDeclineButton: Locator;
+  public acceptAllButton: Locator;
+  public declineAllButton: Locator;
+  public bulkBar: Locator;
+  public graphCanvas: Locator;
+  public graphYamlErrorCallout: Locator;
+  public actionsMenuButton: Locator;
+  public actionsMenuSearch: Locator;
+  public readOnlyBadge: Locator;
+  public readonly accessMode: Locator;
+  public readonly serviceAccountBadges: Locator;
+  public readonly serviceAccountPopup: Locator;
+
+  constructor(private readonly page: ScoutPage) {
+    this.yamlEditor = this.page.testSubj.locator('workflowYamlEditor');
+    this.saveButton = this.page.testSubj.locator('saveWorkflowHeaderButton');
+    this.runButton = this.page.testSubj.locator('workflowBottomBarRunButton');
+    this.validationErrorsAccordion = this.page.testSubj.locator(
+      'workflowYamlEditorValidationErrorsList'
+    );
+    this.proposalAcceptButton = this.page.locator('[data-test-subj="wfDiffAcceptButton"]:visible');
+    this.proposalDeclineButton = this.page.locator(
+      '[data-test-subj="wfDiffDeclineButton"]:visible'
+    );
+    this.acceptAllButton = this.page.testSubj.locator('wfDiffAcceptAllButton');
+    this.declineAllButton = this.page.testSubj.locator('wfDiffDeclineAllButton');
+    this.bulkBar = this.page.testSubj.locator('wfDiffBulkBar');
+    this.graphCanvas = this.page.testSubj.locator('workflowGraphCanvas');
+    this.graphYamlErrorCallout = this.page.testSubj.locator('workflowGraphYamlErrorCallout');
+    this.actionsMenuButton = this.page.testSubj.locator('workflowBottomBarActionsMenu');
+    this.actionsMenuSearch = this.page.locator('#actions-menu-search');
+    this.readOnlyBadge = this.page.testSubj.locator('workflowEditorReadOnlyBadge');
+    this.serviceAccountBadges = this.yamlEditor.locator(
+      '.service-account-name-badge, .service-account-name-badge-unavailable'
+    );
+    this.serviceAccountPopup = this.page.testSubj.locator('serviceAccountEditorPopup');
+    this.accessMode = this.page.testSubj.locator('entityAccessControlMode');
+  }
+
+  async openAccessDialog(): Promise<void> {
+    await this.page.testSubj.locator('appHeader').hover();
+    await this.page.testSubj.click('~shareTopNavButton');
+    await this.accessMode.waitFor({ state: 'visible' });
+  }
+
+  async hoverDisabledAccessButton(): Promise<void> {
+    await this.page.testSubj.locator('appHeader').hover();
+    await this.page.testSubj.locator('~shareTopNavButton').hover({ force: true });
+  }
+
+  async setAccessMode(mode: 'private' | 'public'): Promise<void> {
+    await this.page.components.superSelect('entityAccessControlMode').selectOptionByValue(mode);
+  }
+
+  async addAccessUser(name: string): Promise<void> {
+    await this.page.testSubj
+      .locator('entityAccessControlUserSearch')
+      .getByRole('combobox')
+      .fill(name);
+    await this.page.getByRole('option', { name }).click();
+  }
+
+  accessRole(username: string): Locator {
+    return this.page.getByLabel(`Role for ${username}`, { exact: true });
+  }
+
+  async setAccessRole(username: string, role: 'viewer' | 'executor' | 'editor'): Promise<void> {
+    await this.page.components
+      .superSelect(`entityAccessControlRole-${username}`)
+      .selectOptionByValue(role);
+  }
+
+  async saveAccess(): Promise<void> {
+    await this.page.testSubj.click('workflowAccessSave');
+    await this.accessMode.waitFor({ state: 'hidden' });
+  }
+
+  /**
+   * Navigate to the workflow editor for a new workflow
+   */
+  async gotoNewWorkflow() {
+    await this.page.gotoApp(PLUGIN_ID);
+    await this.page.testSubj.click('createWorkflowButton');
+    await this.waitForEditorToLoad();
+  }
+
+  /**
+   * Navigate to the workflow editor for an existing workflow by ID
+   */
+  async gotoWorkflow(workflowId: string) {
+    await this.page.gotoApp(`${PLUGIN_ID}/${workflowId}`);
+    await this.waitForEditorToLoad();
+  }
+
+  /**
+   * Navigate directly to the executions tab for a workflow.
+   */
+  async gotoWorkflowExecutions(workflowId: string) {
+    await this.page.gotoApp(`${PLUGIN_ID}/${workflowId}`, {
+      params: { tab: 'executions' },
+    });
+    await this.page.testSubj.waitForSelector('workflowExecutionList', { state: 'visible' });
+  }
+
+  /**
+   * Wait for navigation to the editor page and the YAML editor to be visible.
+   * Useful after triggering navigation from an external entry point (e.g. workflow list actions).
+   */
+  async waitForEditorView() {
+    await this.page.waitForURL('**/workflows/*');
+    await this.waitForEditorToLoad();
+  }
+
+  /**
+   * Wait for the YAML editor to be visible and ready
+   */
+  async waitForEditorToLoad() {
+    await this.yamlEditor.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Switch to the graph view by clicking the bottom bar toggle.
+   * Waits for the graph canvas to become visible.
+   */
+  async switchToGraphView(): Promise<void> {
+    await this.page.testSubj.click('workflowEditorViewToggle-graph');
+    await this.graphCanvas.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Switch back to the YAML view by clicking the bottom bar toggle.
+   */
+  async switchToYamlView(): Promise<void> {
+    await this.page.testSubj.click('workflowEditorViewToggle-yaml');
+  }
+
+  /**
+   * Expand the floating bottom toolbar if it has auto-collapsed to the pill.
+   */
+  async expandBottomBar(): Promise<void> {
+    const yamlViewToggle = this.page.testSubj.locator('workflowEditorViewToggle-yaml');
+    if (!(await yamlViewToggle.isVisible())) {
+      await this.page.getByRole('button', { name: 'Show toolbar' }).hover();
+    }
+    await yamlViewToggle.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Open the actions menu from the bottom bar.
+   */
+  async openActionsMenu(): Promise<void> {
+    await this.expandBottomBar();
+    await this.actionsMenuButton.click();
+  }
+
+  /**
+   * Resolves the Monaco `data-uri` attribute from an editor container locator.
+   */
+  private async getEditorUri(editor: Locator): Promise<string> {
+    const uri = await editor.locator('.monaco-editor[data-uri]').getAttribute('data-uri');
+    if (!uri) {
+      throw new Error('Editor data-uri not found');
+    }
+    return uri;
+  }
+
+  /**
+   * Set the value of the main workflow YAML editor
+   */
+  async setYamlEditorValue(value: string): Promise<void> {
+    await this.setEditorValue(this.yamlEditor, value);
+  }
+
+  /**
+   * Set the value of any Monaco editor by its container locator.
+   * Uses the Monaco model API directly for reliable, non-flaky value setting.
+   */
+  async setEditorValue(editor: Locator, value: string): Promise<void> {
+    const uri = await this.getEditorUri(editor);
+    await this.page.evaluate(
+      ({ modelUri, editorValue }) => {
+        const monacoEnv = window.MonacoEnvironment;
+
+        if (!monacoEnv?.monaco?.editor) {
+          throw new Error('MonacoEnvironment.monaco.editor is not available');
+        }
+        const editorModel = monacoEnv.monaco.editor.getModel(monacoEnv.monaco.Uri.parse(modelUri));
+        if (!editorModel) {
+          throw new Error('Editor not found');
+        }
+        editorModel.setValue(editorValue);
+      },
+      { modelUri: uri, editorValue: value }
+    );
+  }
+
+  /**
+   * Open the test step modal for a given step: wait for the step to be in the YAML editor,
+   * move the cursor to it so the run button appears, then click run and wait for the modal.
+   */
+  async openStepRunModal(stepId: string) {
+    const searchText = `name: ${stepId}`;
+    await this.setCursorToText(searchText);
+    await this.page.testSubj
+      .locator(`workflowStepActionsContainer-${stepId}`)
+      .waitFor({ state: 'visible', timeout: 10_000 });
+    await this.page.testSubj.click('workflowRunStep');
+    await this.page.testSubj.waitForSelector('workflowTestStepModal', { state: 'visible' });
+  }
+
+  /**
+   * Set the Monaco cursor to the Nth occurrence of `searchText` in the YAML
+   * editor and scroll it into view.
+   */
+  async setCursorToText(searchText: string, occurrence: number = 1): Promise<void> {
+    const uri = await this.getEditorUri(this.yamlEditor);
+    await this.page.evaluate(
+      ({ modelUri, text, occ }) => {
+        const monacoEnv = window.MonacoEnvironment;
+        if (!monacoEnv?.monaco?.editor) {
+          throw new Error('MonacoEnvironment.monaco.editor is not available');
+        }
+
+        const model = monacoEnv.monaco.editor.getModel(monacoEnv.monaco.Uri.parse(modelUri));
+        if (!model) {
+          throw new Error('Editor model not found');
+        }
+
+        const fullText = model.getValue();
+        let matchIndex = -1;
+        let found = 0;
+        let searchFrom = 0;
+        while (found < occ) {
+          matchIndex = fullText.indexOf(text, searchFrom);
+          if (matchIndex === -1) {
+            break;
+          }
+          found++;
+          searchFrom = matchIndex + 1;
+        }
+
+        if (matchIndex === -1) {
+          throw new Error(`Text "${text}" not found in editor (occurrence ${occ})`);
+        }
+
+        const position = model.getPositionAt(matchIndex);
+
+        const editors = monacoEnv.monaco.editor.getEditors();
+        const editorInstance = editors.find(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Monaco editor instances are untyped in the browser context
+          (e: any) => e.getModel()?.uri?.toString() === model.uri.toString()
+        );
+
+        if (editorInstance) {
+          editorInstance.setPosition(position);
+          editorInstance.revealLineInCenter(position.lineNumber);
+          editorInstance.focus();
+        } else {
+          throw new Error('No editor instance found for the YAML model');
+        }
+      },
+      { modelUri: uri, text: searchText, occ: occurrence }
+    );
+  }
+
+  /**
+   * Read the current value of the YAML editor model.
+   */
+  async getYamlEditorValue(): Promise<string> {
+    const uri = await this.getEditorUri(this.yamlEditor);
+    return this.page.evaluate((modelUri) => {
+      const monacoEnv = window.MonacoEnvironment;
+      if (!monacoEnv?.monaco?.editor) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
+      const model = monacoEnv.monaco.editor.getModel(monacoEnv.monaco.Uri.parse(modelUri));
+      if (!model) {
+        throw new Error('Editor model not found');
+      }
+      return model.getValue();
+    }, uri);
+  }
+
+  /**
+   * Simulate an LLM-proposed YAML change through the test bridge.
+   * This triggers the same diff → ProposalManager pipeline that real
+   * tool UI events follow.
+   */
+  async simulateProposedChanges(afterYaml: string): Promise<void> {
+    await this.page.evaluate((yaml: string) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const bridge = (window as any).__wfTestBridge;
+      if (!bridge) {
+        throw new Error(
+          '__wfTestBridge is not available. ' +
+            'Ensure agentBuilder is enabled and the editor is mounted.'
+        );
+      }
+      bridge.injectYamlChange(yaml);
+    }, afterYaml);
+  }
+
+  /**
+   * Move the cursor to the first pending proposal and scroll it into view.
+   * Setting the cursor position triggers onDidChangeCursorPosition, which
+   * focuses the proposal and makes the pill (accept/decline buttons) visible.
+   */
+  async revealNextProposal(): Promise<void> {
+    await this.page.evaluate(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const bridge = (window as any).__wfTestBridge;
+      if (bridge?.revealNextProposal) {
+        bridge.revealNextProposal();
+      }
+    });
+  }
+
+  /**
+   * Wait for the test bridge to be available (set by useAgentBuilderIntegration
+   * when experimental features are enabled and embeddable chat access resolves).
+   */
+  async waitForTestBridge(): Promise<void> {
+    await this.page.waitForFunction(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      () => !!(window as any).__wfTestBridge,
+      null,
+      { timeout: 15_000 }
+    );
+  }
+
+  async acceptYamlSuggestion(name: string): Promise<void> {
+    await this.getYamlEditorSuggestionItem(name).dblclick();
+  }
+
+  async dismissYamlSuggestions(): Promise<void> {
+    await this.page.keyboard.press('Escape');
+  }
+
+  serviceAccountOption(name: string): Locator {
+    return this.serviceAccountPopup.getByRole('option', { name, exact: true });
+  }
+
+  async focusServiceAccountSetting(
+    yaml: string,
+    format: 'block' | 'inline' = 'block'
+  ): Promise<void> {
+    if (format === 'inline') {
+      await this.setYamlEditorValue(`${yaml}\nsettings: { run_as: , timezone: UTC }`);
+      await this.setCursorToText(', timezone:');
+    } else {
+      await this.setYamlEditorValue(`${yaml}\nsettings:\n  run_as: `);
+      await this.setCursorToText('run_as: ');
+      await this.page.keyboard.press('End');
+    }
+    await this.page.keyboard.press('Control+Space');
+  }
+
+  async openServiceAccountPicker(
+    yaml: string,
+    format: 'block' | 'inline' = 'block'
+  ): Promise<void> {
+    await this.focusServiceAccountSetting(yaml, format);
+    await this.serviceAccountPopup.getByRole('listbox', { name: 'Service accounts' }).waitFor();
+  }
+
+  async openCreateServiceAccount(): Promise<void> {
+    await this.serviceAccountPopup.getByRole('button', { name: 'Create account' }).click();
+    await this.page.testSubj.locator('createServiceAccountFlyout').waitFor();
+  }
+
+  async openServiceAccountRoles(): Promise<void> {
+    await this.page.testSubj.locator('serviceAccountRolesSelector').click();
+  }
+
+  async closeServiceAccountRoles(): Promise<void> {
+    await this.page.getByRole('listbox', { name: 'Select roles' }).press('Escape');
+    await this.page.getByRole('listbox', { name: 'Select roles' }).waitFor({ state: 'hidden' });
+  }
+
+  async fillServiceAccount(name: string, description: string): Promise<void> {
+    const flyout = this.page.testSubj.locator('createServiceAccountFlyout');
+    await this.page.testSubj.locator('serviceAccountNameInput').fill(name);
+    await this.page.testSubj.locator('createServiceAccountDescription').fill(description);
+    await flyout.getByRole('button', { name: 'Set privileges' }).click();
+    await this.page.getByRole('listbox', { name: 'Select roles' }).press('End');
+    await this.page.testSubj.locator('roleOption-viewer').click();
+    await this.closeServiceAccountRoles();
+  }
+
+  async submitServiceAccount(): Promise<void> {
+    await this.page.testSubj.locator('createServiceAccountSubmit').click();
+  }
+
+  async waitForCreateServiceAccountClosed(): Promise<void> {
+    await this.page.testSubj.locator('createServiceAccountFlyout').waitFor({ state: 'hidden' });
+  }
+
+  async cancelCreateServiceAccount(): Promise<void> {
+    await this.page.testSubj
+      .locator('createServiceAccountFlyout')
+      .getByRole('button', { name: 'Cancel' })
+      .click();
+  }
+
+  async focusServiceAccountControls(): Promise<void> {
+    await this.page.keyboard.press('Shift+Tab');
+  }
+
+  async retryServiceAccounts(): Promise<void> {
+    await this.serviceAccountPopup.getByRole('button', { name: 'Try again' }).click();
+  }
+
+  async clickServiceAccountPlaceholder(): Promise<void> {
+    const activateEditor = this.yamlEditor.getByRole('button', {
+      name: 'Code Editor, activate edit mode',
+    });
+    if (await activateEditor.isVisible()) {
+      await activateEditor.focus();
+      await this.page.keyboard.press('Enter');
+    }
+    await this.yamlEditor.getByText('Select service account', { exact: true }).click();
+  }
+
+  async openExistingServiceAccountPicker(id: string): Promise<void> {
+    await this.setCursorToText(id);
+    await this.page.keyboard.press('Control+Space');
+    await this.serviceAccountPopup.getByRole('listbox', { name: 'Service accounts' }).waitFor();
+  }
+
+  async typeServiceAccountSearch(query: string): Promise<void> {
+    await this.page.keyboard.type(query);
+  }
+
+  async selectServiceAccount(name: string): Promise<void> {
+    await this.serviceAccountOption(name).click();
+  }
+
+  async highlightNextServiceAccount(): Promise<void> {
+    await this.page.keyboard.press('ArrowDown');
+  }
+
+  async acceptSelectedServiceAccount(): Promise<void> {
+    await this.page.keyboard.press('Enter');
+  }
+
+  async getServiceAccountBadgeText(): Promise<string> {
+    return (await this.serviceAccountBadges.allTextContents()).join('').replaceAll('\u00a0', ' ');
+  }
+
+  async hoverServiceAccountBadge(): Promise<void> {
+    await this.serviceAccountBadges.filter({ hasText: /^[✓○]/ }).hover();
+  }
+
+  async hoverServiceAccountId(id: string): Promise<void> {
+    const activateEditor = this.yamlEditor.getByRole('button', {
+      name: 'Code Editor, activate edit mode',
+    });
+    if (await activateEditor.isVisible()) {
+      await activateEditor.focus();
+      await this.page.keyboard.press('Enter');
+    }
+    await this.yamlEditor.getByText(id, { exact: true }).hover();
+  }
+
+  public getYamlEditorSuggestWidget() {
+    return this.page.locator(
+      '[data-test-subj="kbnCodeEditorEditorOverflowWidgetsContainer"] .suggest-widget'
+    );
+  }
+
+  /**
+   * Wait until the step type's inline decoration renders its icon in the ::after box.
+   *
+   * Scrolls the step's `type:` line into the Monaco viewport first — Monaco virtualizes
+   * off-screen lines, so the decoration span may not exist in the DOM until revealed.
+   * Then polls the computed ::after style via page.waitForFunction until the icon URL
+   * is applied via mask-image (the correct routing for monochrome step-type glyphs).
+   *
+   * This approach is deterministic: waitForFunction retries internally until the condition
+   * holds or the timeout fires, so it does not compete with a separate waitFor budget and
+   * does not depend on a fixed sleep.
+   */
+  async waitForStepTypeIconStyled(
+    stepType: string,
+    timeout = 15_000
+  ): Promise<{ backgroundImage: string; maskImage: string }> {
+    // Reveal the step's type: line so Monaco renders the decoration span into the DOM.
+    await this.setCursorToText(`type: ${stepType}`);
+    const typeClass = stepType.replaceAll('.', '-');
+    const selector = `.monaco-editor .view-line span.type-inline-highlight.type-${typeClass}`;
+    const handle = await this.page.waitForFunction(
+      (sel: string) => {
+        const element = document.querySelector(sel);
+        if (!element) return null;
+        const s = getComputedStyle(element, '::after');
+        // Chromium may populate only the vendor-prefixed property — coalesce both.
+        const unprefixed = s.getPropertyValue('mask-image');
+        const maskImage =
+          unprefixed && unprefixed !== 'none'
+            ? unprefixed
+            : s.getPropertyValue('-webkit-mask-image') || 'none';
+        const backgroundImage = s.backgroundImage;
+        const hasImage = (v: string) => v.includes('data:image') || v.includes('.svg');
+        // Return non-null only once the icon is actually applied to the ::after box.
+        if (!hasImage(maskImage) && !hasImage(backgroundImage)) return null;
+        return { backgroundImage, maskImage };
+      },
+      selector,
+      { timeout }
+    );
+    return handle.jsonValue() as Promise<{ backgroundImage: string; maskImage: string }>;
+  }
+
+  /** Returns a locator for a suggestion item by its label text.
+   * Monaco's suggest widget list rows are exposed with role="option" in some
+   * environments and role="listitem" in others (observed on Linux CI, where a captured
+   * failure snapshot showed `listbox "Suggest"` containing `listitem "consts, Property"`
+   * rows rather than `option` ones) — the ARIA role monaco applies isn't a stable
+   * cross-environment contract, so match either role to stay resilient to it.
+   */
+  public getYamlEditorSuggestionItem(name: string) {
+    const widget = this.getYamlEditorSuggestWidget();
+    return widget.getByRole('option', { name }).or(widget.getByRole('listitem', { name }));
+  }
+
+  /**
+   * Types text into the YAML editor at the current cursor position, character by character.
+   * Unlike `setYamlEditorValue`, this simulates typing so language-aware editor features
+   * such as autocomplete suggestions are triggered.
+   */
+  async typeInYamlEditor(text: string): Promise<void> {
+    await this.waitForEditorToLoad();
+    await this.page.evaluate((textToType: string) => {
+      const container = document.querySelector('[data-test-subj="workflowYamlEditor"]');
+      const editor = window.MonacoEnvironment?.monaco?.editor
+        ?.getEditors()
+        ?.find((e) => container?.contains(e.getDomNode()));
+      if (editor) {
+        editor.focus();
+        for (let i = 0; i < textToType.length; i++) {
+          editor.trigger('keyboard', 'type', { text: textToType[i] });
+        }
+      }
+    }, text);
+  }
+
+  /**
+   * Save the workflow
+   */
+  async saveWorkflow() {
+    await this.saveButton.click();
+    await this.page.testSubj.waitForSelector('workflowSavedChangesBadge');
+  }
+
+  /**
+   * Click the run button (opens execute modal or unsaved changes confirmation)
+   */
+  async clickRunButton() {
+    await this.runButton.click();
+  }
+
+  /**
+   * Run the workflow and confirm if there are unsaved changes
+   */
+  async runWorkflowWithUnsavedChanges() {
+    await this.clickRunButton();
+    await this.page.testSubj.waitForSelector('runWorkflowWithUnsavedChangesConfirmationModal', {
+      state: 'visible',
+    });
+    await this.page.testSubj.click('confirmModalConfirmButton');
+  }
+
+  async executeWorkflowFromBottomBar(inputs: Record<string, unknown>): Promise<void> {
+    await this.page.testSubj.click('workflowBottomBarRunButton');
+    await this.setExecuteModalInputs(inputs);
+    await this.page.testSubj.click('executeWorkflowButton');
+  }
+
+  /**
+   * Execute the workflow from the execute modal with the given inputs.
+   * Assumes the run button has already been clicked or the execute modal is about to appear.
+   */
+  async executeWorkflowWithInputs(inputs: Record<string, unknown>) {
+    await this.clickRunButton();
+    await this.setExecuteModalInputs(inputs);
+    await this.page.testSubj.click('executeWorkflowButton');
+  }
+
+  /**
+   * Wait for the test step modal to be visible
+   */
+  async waitForTestStepModal() {
+    await this.page.testSubj.waitForSelector('workflowTestStepModal', { state: 'visible' });
+  }
+
+  /**
+   * Set the step inputs in the test step modal
+   * @param inputs - The JSON object to set as step inputs
+   */
+  async setTestStepInputs(inputs: Record<string, unknown>) {
+    await this.waitForTestStepModal();
+    const stepInputsEditor = this.page.testSubj.locator('workflow-event-manual-json-editor');
+    await stepInputsEditor.waitFor({ state: 'visible' });
+    await this.setEditorValue(stepInputsEditor, JSON.stringify(inputs, null, 2));
+  }
+
+  /**
+   * Set the inputs in the execute workflow modal
+   */
+  async setExecuteModalInputs(inputs: Record<string, unknown>) {
+    await this.page.testSubj.waitForSelector('workflowExecuteModal', { state: 'visible' });
+    const executeModalInputsEditor = this.page.testSubj.locator('workflow-manual-json-editor');
+    await executeModalInputsEditor.waitFor({ state: 'visible' });
+    await this.setEditorValue(executeModalInputsEditor, JSON.stringify(inputs, null, 2));
+  }
+
+  /**
+   * Trigger autocomplete at a specific text position using the Monaco API.
+   * Finds the first occurrence of `searchText` in the editor and places the cursor
+   * at the end of it, then triggers autocomplete via Ctrl+Space.
+   */
+  async triggerAutocompleteAfter(
+    yamlContent: string,
+    searchText: string,
+    textToInsert: string = ''
+  ): Promise<void> {
+    await this.setYamlEditorValue(yamlContent);
+
+    // Wait for the workflow definition to be parsed after setting the YAML.
+    // The autocomplete context schema depends on the parsed definition (e.g., triggers).
+    await this.page.waitForTimeout(1000);
+
+    // Use Monaco API to find the text and position cursor right after it
+    const uri = await this.getEditorUri(this.yamlEditor);
+    await this.page.evaluate(
+      ({ modelUri, text, insertion }) => {
+        const monacoEnv = window.MonacoEnvironment;
+        if (!monacoEnv?.monaco?.editor) {
+          throw new Error('MonacoEnvironment.monaco.editor is not available');
+        }
+        const model = monacoEnv.monaco.editor.getModel(monacoEnv.monaco.Uri.parse(modelUri));
+        if (!model) {
+          throw new Error('Editor model not found');
+        }
+
+        // Find the text in the model
+        const content = model.getValue();
+        const offset = content.indexOf(text);
+        if (offset === -1) {
+          throw new Error(`Text "${text}" not found in editor`);
+        }
+
+        // Position cursor right after the search text
+        const endOffset = offset + text.length;
+        const position = model.getPositionAt(endOffset);
+
+        // Get the editor instance by matching the model URI (avoids picking the wrong
+        // editor when multiple editors exist on the page, e.g. JSON input editors).
+        const editors = monacoEnv.monaco.editor.getEditors();
+        const editor = editors.find((e) => e.getModel()?.uri?.toString() === model.uri.toString());
+
+        if (!editor) {
+          throw new Error('No editor instance found for the YAML model');
+        }
+
+        editor.setPosition(position);
+        editor.focus();
+        if (insertion) {
+          editor.trigger('autocomplete-test', 'type', { text: insertion });
+        }
+
+        // Trigger suggest directly via the editor command
+        editor.trigger('autocomplete-test', 'editor.action.triggerSuggest', {});
+      },
+      { modelUri: uri, text: searchText, insertion: textToInsert }
+    );
+  }
+
+  /**
+   * Returns a locator for the current Monaco error markers inside the given
+   * editor container.
+   *
+   * @param testSubjId - `data-test-subj` of the editor container.
+   *   Defaults to `'kibanaCodeEditor'`.
+   * @returns A Playwright `Locator` for the current error markers.
+   */
+  getCurrentMarkers(testSubjId: string = 'kibanaCodeEditor'): Locator {
+    const selector = `[data-test-subj="${testSubjId}"] .cdr.squiggly-error`;
+    return this.page.locator(selector);
+  }
+
+  /**
+   * Returns the range of line numbers currently visible in the YAML editor viewport.
+   */
+  async getEditorVisibleLineRange(): Promise<{ startLine: number; endLine: number }> {
+    const uri = await this.getEditorUri(this.yamlEditor);
+    return this.page.evaluate((modelUri) => {
+      const monacoEnv = window.MonacoEnvironment;
+      if (!monacoEnv?.monaco?.editor) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
+
+      const editors = monacoEnv.monaco.editor.getEditors();
+      const editorInstance = editors.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Monaco editor instances are untyped in the browser context
+        (e: any) => e.getModel()?.uri?.toString() === modelUri
+      );
+      if (!editorInstance) {
+        throw new Error('No editor instance found for the YAML model');
+      }
+
+      const ranges = editorInstance.getVisibleRanges();
+      if (ranges.length === 0) {
+        throw new Error('Editor returned no visible ranges');
+      }
+      return {
+        startLine: ranges[0].startLineNumber,
+        endLine: ranges[ranges.length - 1].endLineNumber,
+      };
+    }, uri);
+  }
+
+  /**
+   * Returns the line number where `searchText` first appears in the YAML editor.
+   */
+  async getLineOfText(searchText: string): Promise<number> {
+    const uri = await this.getEditorUri(this.yamlEditor);
+    return this.page.evaluate(
+      ({ modelUri, text }) => {
+        const monacoEnv = window.MonacoEnvironment;
+        if (!monacoEnv?.monaco?.editor) {
+          throw new Error('MonacoEnvironment.monaco.editor is not available');
+        }
+
+        const model = monacoEnv.monaco.editor.getModel(monacoEnv.monaco.Uri.parse(modelUri));
+        if (!model) {
+          throw new Error('Editor model not found');
+        }
+
+        const content = model.getValue();
+        const offset = content.indexOf(text);
+        if (offset === -1) {
+          throw new Error(`Text "${text}" not found in editor`);
+        }
+        return model.getPositionAt(offset).lineNumber;
+      },
+      { modelUri: uri, text: searchText }
+    );
+  }
+
+  async acceptCurrentProposal(): Promise<void> {
+    await this.proposalAcceptButton.click();
+  }
+
+  async declineCurrentProposal(): Promise<void> {
+    await this.proposalDeclineButton.click();
+  }
+
+  async acceptAllProposals(): Promise<void> {
+    await this.acceptAllButton.click();
+  }
+
+  async declineAllProposals(): Promise<void> {
+    await this.declineAllButton.click();
+  }
+
+  async focusYamlEditor(): Promise<void> {
+    const uri = await this.getEditorUri(this.yamlEditor);
+    await this.page.evaluate((modelUri) => {
+      const monacoEnv = window.MonacoEnvironment;
+      if (!monacoEnv?.monaco?.editor) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
+      const editors = monacoEnv.monaco.editor.getEditors();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const editor = editors.find((e: any) => e.getModel()?.uri?.toString() === modelUri);
+      if (!editor) {
+        throw new Error('No editor instance found for the YAML model');
+      }
+      editor.focus();
+    }, uri);
+  }
+
+  /**
+   * Move the pointer over the Monaco surface. Proposal bulk hotkeys (accept all / decline all)
+   * only run while the pointer is inside the editor or bulk bar.
+   */
+  async hoverYamlEditorSurface(): Promise<void> {
+    await this.yamlEditor.locator('.monaco-editor').hover();
+  }
+
+  async triggerUndoInYamlEditor(): Promise<void> {
+    const uri = await this.getEditorUri(this.yamlEditor);
+    await this.page.evaluate((modelUri) => {
+      const monacoEnv = window.MonacoEnvironment;
+      if (!monacoEnv?.monaco?.editor) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
+      const editors = monacoEnv.monaco.editor.getEditors();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const editor = editors.find((e: any) => e.getModel()?.uri?.toString() === modelUri);
+      if (!editor) {
+        throw new Error('No editor instance found for the YAML model');
+      }
+      editor.trigger('test', 'undo', null);
+    }, uri);
+  }
+
+  async triggerRedoInYamlEditor(): Promise<void> {
+    const uri = await this.getEditorUri(this.yamlEditor);
+    await this.page.evaluate((modelUri) => {
+      const monacoEnv = window.MonacoEnvironment;
+      if (!monacoEnv?.monaco?.editor) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
+      const editors = monacoEnv.monaco.editor.getEditors();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const editor = editors.find((e: any) => e.getModel()?.uri?.toString() === modelUri);
+      if (!editor) {
+        throw new Error('No editor instance found for the YAML model');
+      }
+      editor.trigger('test', 'redo', null);
+    }, uri);
+  }
+}
