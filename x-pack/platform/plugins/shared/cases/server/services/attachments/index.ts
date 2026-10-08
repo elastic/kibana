@@ -36,7 +36,9 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   LEGACY_FILE_ATTACHMENT_TYPE,
+  MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
+import { getParentCaseId, getRestrictedCaseIds } from '../../cases_analytics_v2/restricted_cases';
 import {
   FILE_ATTACHMENT_TYPE,
   PERSISTABLE_ATTACHMENT_TYPES,
@@ -503,14 +505,11 @@ export class AttachmentService {
         const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
           injectedAttachment.attributes
         );
-        // analyticsV2 mirror to `.cases-attachments`. Fire-and-forget and
-        // guarded (`mirrorSafely`) so it can't fail the create that already
-        // persisted the SO; reconciliation backstops any failure.
-        this.mirrorSafely(() =>
-          this.context.analyticsV2AttachmentsWriter.upsertAttachment(
-            unifiedAttachment as unknown as SavedObject<UnifiedAttachmentAttributes>
-          )
-        );
+        // analyticsV2 mirror to `.cases-attachments`, gated on the parent case
+        // not being restricted; reconciliation backstops any failure.
+        await this.mirrorAttachmentsUnlessRestricted([
+          unifiedAttachment as unknown as SavedObject<UnifiedAttachmentAttributes>,
+        ]);
         return Object.assign(injectedAttachment, {
           attributes: validatedAttributes,
         }) as unknown as UnifiedAttachmentSavedObjectTransformed;
@@ -541,9 +540,7 @@ export class AttachmentService {
 
       // analyticsV2 mirror — same writer for both source types; see the
       // unified branch above.
-      this.mirrorSafely(() =>
-        this.context.analyticsV2AttachmentsWriter.upsertAttachment(attachment)
-      );
+      await this.mirrorAttachmentsUnlessRestricted([attachment]);
 
       return Object.assign(transformedAttachment, { attributes: validatedAttributes });
     } catch (error) {
@@ -618,16 +615,16 @@ export class AttachmentService {
           }),
           { refresh }
         );
-      return this.transformAndDecodeBulkCreateResponse(res);
+      return await this.transformAndDecodeBulkCreateResponse(res);
     } catch (error) {
       this.context.log.error(`Error on bulk create attachments: ${error}`);
       throw error;
     }
   }
 
-  private transformAndDecodeBulkCreateResponse(
+  private async transformAndDecodeBulkCreateResponse(
     res: SavedObjectsBulkResponse<AttachmentPersistedAttributes | UnifiedAttachmentAttributes>
-  ): SavedObjectsBulkResponse<AttachmentAttributesV2> {
+  ): Promise<SavedObjectsBulkResponse<AttachmentAttributesV2>> {
     const validatedAttachments: Array<
       | AttachmentSavedObjectTransformed
       | UnifiedAttachmentSavedObjectTransformed
@@ -672,13 +669,9 @@ export class AttachmentService {
       }
     }
 
-    // analyticsV2 mirror to `.cases-attachments` — one guarded, fire-and-
-    // forget bulk request for the successes; reconciliation backstops the rest.
-    if (successesToMirror.length > 0) {
-      this.mirrorSafely(() =>
-        this.context.analyticsV2AttachmentsWriter.bulkUpsertAttachments(successesToMirror)
-      );
-    }
+    // analyticsV2 mirror to `.cases-attachments` — one gated bulk request for
+    // the successes; reconciliation backstops the rest.
+    await this.mirrorAttachmentsUnlessRestricted(successesToMirror);
 
     return Object.assign(res, { saved_objects: validatedAttachments });
   }
@@ -1033,6 +1026,77 @@ export class AttachmentService {
   }
 
   /**
+   * Analytics mirror that drops attachments whose parent case is restricted —
+   * those must never reach `.cases-attachments`. Never throws: the SO write is
+   * the source of truth and reconciliation repairs skips caused by transient
+   * lookup failures.
+   */
+  private async mirrorAttachmentsUnlessRestricted(
+    sos: Array<SavedObject<UnifiedAttachmentAttributes | AttachmentPersistedAttributes>>
+  ): Promise<void> {
+    if (sos.length === 0) {
+      return;
+    }
+
+    try {
+      const withCaseIds = sos.map((so) => ({ so, caseId: getParentCaseId(so) }));
+      const restricted = await getRestrictedCaseIds(
+        this.context.unsecuredSavedObjectsClient,
+        withCaseIds.flatMap(({ caseId }) => (caseId != null ? [{ caseId }] : []))
+      );
+      // a doc without a case reference belongs to no case and cannot be restricted
+      const toMirror = withCaseIds
+        .filter(({ caseId }) => caseId == null || !restricted.has(caseId))
+        .map(({ so }) => so);
+
+      if (toMirror.length === 1) {
+        this.context.analyticsV2AttachmentsWriter.upsertAttachment(toMirror[0]);
+      } else if (toMirror.length > 1) {
+        this.context.analyticsV2AttachmentsWriter.bulkUpsertAttachments(toMirror);
+      }
+    } catch (error) {
+      this.context.log.warn(
+        `cases-analyticsV2: attachments mirror failed (non-fatal, reconciliation will repair): ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
+  /**
+   * Re-emits every attachment doc of a case into `.cases-attachments`. Used
+   * when a case is unrestricted: its attachment docs were deleted on restrict
+   * and the reconciliation runners only walk recent writes, so they would
+   * never return on their own. Fire-and-forget, mirroring the write hooks.
+   */
+  public reprojectCaseAttachments(caseId: string): void {
+    void (async () => {
+      try {
+        const attachments = await this.context.unsecuredSavedObjectsClient.find<
+          UnifiedAttachmentAttributes | AttachmentPersistedAttributes
+        >({
+          type: [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT],
+          hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+          page: 1,
+          perPage: MAX_DOCS_PER_PAGE,
+        });
+
+        if (attachments.saved_objects.length > 0) {
+          this.context.analyticsV2AttachmentsWriter.bulkUpsertAttachments(
+            attachments.saved_objects
+          );
+        }
+      } catch (error) {
+        this.context.log.warn(
+          `cases-analyticsV2: failed to re-project attachments for case ${caseId}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    })();
+  }
+
+  /**
    * Mirror updated attachment SOs to the `.cases-attachments` analytics
    * index by re-reading their full persisted shape.
    *
@@ -1062,16 +1126,12 @@ export class AttachmentService {
 
     void this.context.unsecuredSavedObjectsClient
       .bulkGet<UnifiedAttachmentAttributes | AttachmentPersistedAttributes>(refs)
-      .then(({ saved_objects: savedObjects }) => {
+      .then(async ({ saved_objects: savedObjects }) => {
         const sos = savedObjects.filter(
           (so): so is SavedObject<UnifiedAttachmentAttributes | AttachmentPersistedAttributes> =>
             !isSOError(so)
         );
-        if (sos.length === 1) {
-          this.context.analyticsV2AttachmentsWriter.upsertAttachment(sos[0]);
-        } else if (sos.length > 1) {
-          this.context.analyticsV2AttachmentsWriter.bulkUpsertAttachments(sos);
-        }
+        await this.mirrorAttachmentsUnlessRestricted(sos);
       })
       .catch((error) => {
         this.context.log.warn(

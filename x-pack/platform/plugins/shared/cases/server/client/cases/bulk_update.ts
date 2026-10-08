@@ -1182,6 +1182,16 @@ export const bulkUpdate = async (
       builtUserActions,
     });
 
+    // Re-project analytics for cases that returned to default access: their
+    // analytics docs were deleted on restrict, and the reconciliation runners
+    // only walk recent writes, so the history would never return on its own.
+    for (const { updateReq } of casesToUpdate) {
+      if (updateReq.access?.mode === CaseAccessMode.DEFAULT) {
+        userActionService.reprojectCaseActivity(updateReq.id);
+        attachmentService.reprojectCaseAttachments(updateReq.id);
+      }
+    }
+
     const casesAndAssigneesToNotifyForAssignment = getCasesAndAssigneesToNotifyForAssignment(
       updatedCases,
       casesMap,

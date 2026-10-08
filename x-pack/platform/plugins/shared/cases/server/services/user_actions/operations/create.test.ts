@@ -138,6 +138,25 @@ describe('UserActionPersister', () => {
       );
     });
 
+    it('does not mirror a user action whose parent case is restricted', async () => {
+      unsecuredSavedObjectsClient.create.mockResolvedValue({
+        attributes: createUserActionSO(),
+        id: 'ua-1',
+        type: CASE_USER_ACTION_SAVED_OBJECT,
+        references: [{ id: 'restricted-case', type: 'cases', name: 'associated-cases' }],
+      });
+      unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          { id: 'restricted-case', attributes: { access: { mode: 'restricted' } } },
+        ] as never,
+      });
+
+      await persister.createUserAction(getRequest());
+
+      expect(analyticsV2ActivityWriter.upsertAction).not.toHaveBeenCalled();
+      expect(analyticsV2ActivityWriter.bulkUpsertActions).not.toHaveBeenCalled();
+    });
+
     it('mirrors only the successfully-persisted entries on bulk create', async () => {
       // One success, one per-item failure (409). The failed entry must be
       // excluded so we never mirror a doc that wasn't actually persisted —
@@ -164,9 +183,10 @@ describe('UserActionPersister', () => {
 
       await persister.bulkCreateUserAction({ userActions: [getRequest().userAction] });
 
-      expect(analyticsV2ActivityWriter.bulkUpsertActions).toHaveBeenCalledTimes(1);
-      const mirrored = analyticsV2ActivityWriter.bulkUpsertActions.mock.calls[0][0];
-      expect(mirrored.map((so: { id: string }) => so.id)).toEqual(['ua-ok']);
+      // a single surviving entry dispatches through the singular upsert
+      expect(analyticsV2ActivityWriter.upsertAction).toHaveBeenCalledTimes(1);
+      expect(analyticsV2ActivityWriter.upsertAction.mock.calls[0][0].id).toBe('ua-ok');
+      expect(analyticsV2ActivityWriter.bulkUpsertActions).not.toHaveBeenCalled();
     });
 
     it('does not dispatch to the activity writer when every bulk entry errored', async () => {

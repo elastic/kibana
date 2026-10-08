@@ -28,9 +28,48 @@ const buildWriterUnderTest = () => {
   return { writer, esClient, logger };
 };
 
+const makeRestrictedCase = (id: string) => {
+  const so = makeCase(id);
+  return {
+    ...so,
+    attributes: { ...so.attributes, access: { mode: 'restricted' as const } },
+  };
+};
+
 describe('CasesAnalyticsV2Writer', () => {
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('restricted cases', () => {
+    it('never indexes a restricted case on single upsert', async () => {
+      const { writer, esClient } = buildWriterUnderTest();
+
+      writer.upsertCase(makeRestrictedCase('case-restricted'));
+      await new Promise((r) => setImmediate(r));
+
+      expect(esClient.index).not.toHaveBeenCalled();
+    });
+
+    it('filters restricted cases out of bulk upserts', async () => {
+      const { writer, esClient } = buildWriterUnderTest();
+      (esClient.bulk as unknown as jest.Mock).mockResolvedValue({ errors: false, items: [] });
+
+      writer.bulkUpsertCases([makeCase('case-A'), makeRestrictedCase('case-restricted')]);
+      await new Promise((r) => setImmediate(r));
+
+      const operations = (esClient.bulk as unknown as jest.Mock).mock.calls[0][0].operations;
+      expect(operations).toHaveLength(2);
+      expect(operations[0]).toEqual({ index: { _index: CASE_INDEX_NAME, _id: 'case-A' } });
+    });
+
+    it('does not dispatch a bulk when every case is restricted', async () => {
+      const { writer, esClient } = buildWriterUnderTest();
+
+      await writer.bulkUpsertCasesAwait([makeRestrictedCase('case-restricted')]);
+
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
   });
 
   describe('bulkUpsertCases', () => {

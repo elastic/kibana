@@ -6,10 +6,19 @@
  */
 
 import type { ElasticsearchClient, Logger, SavedObject } from '@kbn/core/server';
+import { CaseAccessMode } from '../../../common/types/domain';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { CASE_INDEX_NAME } from '../constants';
 import { buildCaseDoc } from './case_doc_builder';
 import { withRetry } from './retry';
+
+/**
+ * Restricted cases are never projected into the analytics indices — anyone
+ * with index read on `.cases` would otherwise see them regardless of the
+ * Cases authorization layer.
+ */
+const isRestrictedCase = (so: SavedObject<CasePersistedAttributes>): boolean =>
+  so.attributes.access?.mode === CaseAccessMode.RESTRICTED;
 
 /**
  * Default retry budget for analytics writes. A handful of attempts is
@@ -149,6 +158,10 @@ export class CasesAnalyticsV2Writer implements CasesAnalyticsV2WriterContract {
   // ----- Private "do" methods. Throw on failure so the retry wrapper can see. -----
 
   private async doUpsertCase(so: SavedObject<CasePersistedAttributes>): Promise<void> {
+    if (isRestrictedCase(so)) {
+      return;
+    }
+
     const doc = buildCaseDoc(so);
     await this.esClient.index({
       index: CASE_INDEX_NAME,
@@ -184,12 +197,15 @@ export class CasesAnalyticsV2Writer implements CasesAnalyticsV2WriterContract {
     sos: Array<SavedObject<CasePersistedAttributes>>,
     opts?: { throwOnRetryableItemFailures?: boolean }
   ): Promise<void> {
+    const projectableSos = sos.filter((so) => !isRestrictedCase(so));
+    if (projectableSos.length === 0) return;
+
     // The ES `_bulk` API takes a flat array alternating between operation
     // headers and document bodies. `operations` accepts arbitrary header
     // shapes; plain object literals avoid pulling in estypes for one line
     // each.
     const operations: object[] = [];
-    for (const so of sos) {
+    for (const so of projectableSos) {
       operations.push({ index: { _index: CASE_INDEX_NAME, _id: so.id } });
       operations.push(buildCaseDoc(so));
     }
@@ -197,12 +213,12 @@ export class CasesAnalyticsV2Writer implements CasesAnalyticsV2WriterContract {
     if (!response.errors) return;
 
     const ids: string[] = [];
-    for (const so of sos) ids.push(so.id);
+    for (const so of projectableSos) ids.push(so.id);
     const { retryableCount } = this.logBulkItemErrors('upsert', ids, response.items, 'index');
 
     if (opts?.throwOnRetryableItemFailures && retryableCount > 0) {
       throw new Error(
-        `cases-analyticsV2: bulk upsert had ${retryableCount}/${sos.length} retryable item failure(s)`
+        `cases-analyticsV2: bulk upsert had ${retryableCount}/${projectableSos.length} retryable item failure(s)`
       );
     }
   }
