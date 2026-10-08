@@ -27,6 +27,8 @@ import { useDiscoverServices } from '../../../../../../hooks/use_discover_servic
 import { getCustomCascadeGridBodyStyle } from './cascade_leaf_component.styles';
 import type { ESQLDataGroupNode } from './types';
 import { useCascadedDocumentsContext } from '../cascaded_documents_provider';
+import { TanStackDataGrid } from '../../../../../../components/discover_grid/tanstack_data_grid/tanstack_data_grid';
+import type { DiscoverGridImplementation } from '../../../../../../components/discover_grid/discover_grid_implementation';
 
 interface ESQLDataCascadeLeafCellProps
   extends Pick<
@@ -45,6 +47,7 @@ interface ESQLDataCascadeLeafCellProps
   cellData: DataTableRecord[];
   cellId: string;
   rowIndex: number;
+  gridImplementation?: DiscoverGridImplementation;
 }
 
 interface CustomCascadeGridBodyProps
@@ -168,6 +171,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
     onUpdateDataGridDensity,
     nodePath,
     nodePathMap,
+    gridImplementation,
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
     const {
@@ -220,22 +224,24 @@ export const ESQLDataCascadeLeafCell = React.memo(
 
     const [isCellInFullScreenMode, setIsCellInFullScreenMode] = useState(false);
 
-    const renderCustomToolbarWithElements = useMemo(
-      () =>
-        getRenderCustomToolbarWithElements({
-          leftSide: (
-            <EuiText size="s">
-              <b>
-                <FormattedMessage
-                  id="discover.dataCascade.row.cell.toolbar.heading"
-                  defaultMessage="{count, plural, =0 {no results} =1 {1 result} other {# results}}"
-                  values={{ count: cellData.length }}
-                />
-              </b>
-            </EuiText>
-          ),
-        }),
+    const documentCountLabel = useMemo(
+      () => (
+        <EuiText size="s">
+          <b>
+            <FormattedMessage
+              id="discover.dataCascade.row.cell.toolbar.heading"
+              defaultMessage="{count, plural, =0 {no results} =1 {1 result} other {# results}}"
+              values={{ count: cellData.length }}
+            />
+          </b>
+        </EuiText>
+      ),
       [cellData.length]
+    );
+
+    const renderCustomToolbarWithElements = useMemo(
+      () => getRenderCustomToolbarWithElements({ leftSide: documentCountLabel }),
+      [documentCountLabel]
     );
 
     const renderCustomCascadeGridBodyCallback = useCallback<
@@ -268,6 +274,35 @@ export const ESQLDataCascadeLeafCell = React.memo(
       ),
       [virtualizerController, isCellInFullScreenMode, cellId, cellData, rowIndex]
     );
+
+    if (gridImplementation !== 'unified') {
+      return (
+        <TanStackDataGrid
+          rows={cellData}
+          columns={selectedColumns}
+          columnsMeta={cascadedColumnsMeta}
+          dataView={dataView}
+          showTimeCol={showTimeCol ?? false}
+          isPlainRecord
+          sort={EMPTY_SORT}
+          isSortEnabled={false}
+          loadingState={DataLoadingState.loaded}
+          services={services}
+          dataGridDensityState={cascadeDataGridDensityState}
+          onUpdateDataGridDensity={setCascadeDataGridDensityState}
+          expandedDoc={expandedDocOwner === cellId ? expandedDoc : undefined}
+          setExpandedDoc={setExpandedDoc}
+          renderDocumentView="external"
+          setRenderDocumentViewMeta={setRenderDocumentViewMeta}
+          ariaLabelledBy="data-cascade-leaf-cell"
+          onSetColumns={setSelectedColumns}
+          isPaginationEnabled={false}
+          showFullScreenButton={false}
+          toolbarLeftSide={documentCountLabel}
+        />
+      );
+    }
+
     return (
       <UnifiedDataTable
         isPlainRecord

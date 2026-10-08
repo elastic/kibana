@@ -71,6 +71,7 @@ export interface UnifiedDocViewerFlyoutProps
   hits?: DataTableRecord[];
   dataView: DataView;
   hideFilteringOnComputedColumns?: boolean;
+  gridImplementation?: DocViewRenderProps['gridImplementation'];
   initialDocViewerState?: DocViewerProps['initialState'];
   onInitialDocViewerStateChange?: DocViewerProps['onInitialStateChange'];
   renderCustomHeader?: (props: DocViewRenderProps) => React.ReactElement;
@@ -118,6 +119,7 @@ export function UnifiedDocViewerFlyout({
   hits,
   dataView,
   hideFilteringOnComputedColumns,
+  gridImplementation,
   initialTabId,
   initialDocViewerState,
   renderCustomHeader,
@@ -222,6 +224,7 @@ export function UnifiedDocViewerFlyout({
           ? euiTheme.base + PROJECT_VIEW_MARGIN_BOTTOM
           : euiTheme.base,
         hideFilteringOnComputedColumns,
+        gridImplementation,
       },
     [
       actualHit,
@@ -237,6 +240,7 @@ export function UnifiedDocViewerFlyout({
       isProjectStyle,
       euiTheme.base,
       hideFilteringOnComputedColumns,
+      gridImplementation,
     ]
   );
 

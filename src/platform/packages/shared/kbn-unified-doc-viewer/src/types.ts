@@ -13,5 +13,6 @@ export type {
   DocViewFilterFn,
   DocViewRenderProps,
   DocViewerComponent,
+  DocViewerGridImplementation,
   DocViewerRestorableState,
 } from './services/types';

@@ -26,6 +26,7 @@ import { getStatsCommandToOperateOn } from '@kbn/esql-utils/src/utils/cascaded_d
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { throttle } from 'lodash';
 import useLatest from 'react-use/lib/useLatest';
+import type { DiscoverGridImplementation } from '../../../../../components/discover_grid/discover_grid_implementation';
 import {
   useEsqlDataCascadeRowHeaderComponents,
   useEsqlDataCascadeHeaderComponent,
@@ -52,6 +53,7 @@ export interface ESQLDataCascadeProps
   > {
   togglePopover: ReturnType<typeof useEsqlDataCascadeRowActionHelpers>['togglePopover'];
   queryMeta: ESQLStatsQueryMeta;
+  gridImplementation?: DiscoverGridImplementation;
 }
 
 type EsqlDataCascade = typeof DataCascade<ESQLDataGroupNode>;

@@ -44,6 +44,7 @@ import { unregisterFromDataViewsCache, type EsqlSource } from '@kbn/data-source'
 import type { DiscoverServices } from '../build_services';
 import { resolveEsqlSource } from '../application/main/data_fetching/resolve_esql_source';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
+import type { DiscoverGridImplementation } from '../components/discover_grid/discover_grid_implementation';
 import type {
   PublishesWritableSavedSearch,
   SearchEmbeddableSerializedAttributes,
@@ -173,6 +174,9 @@ export const initializeSearchEmbeddableApi = async ({
   const jsonModeSettings$ = new BehaviorSubject<JsonModeSettings | undefined>(
     initialState.jsonModeSettings
   );
+  const gridImplementation$ = new BehaviorSubject<DiscoverGridImplementation | undefined>(
+    initialState.gridImplementation
+  );
   const sort$ = new BehaviorSubject<SortOrder[] | undefined>(initialState.sort);
   const savedSearchViewMode$ = new BehaviorSubject<VIEW_MODE | undefined>(initialState.viewMode);
 
@@ -224,6 +228,7 @@ export const initializeSearchEmbeddableApi = async ({
     density: density$,
     documentsDisplayMode: documentsDisplayMode$,
     jsonModeSettings: jsonModeSettings$,
+    gridImplementation: gridImplementation$,
     inspectorAdapters: inspectorAdapters$,
   };
 
@@ -299,6 +304,7 @@ export const initializeSearchEmbeddableApi = async ({
     density$.next(state.density);
     documentsDisplayMode$.next(state.documentsDisplayMode);
     jsonModeSettings$.next(state.jsonModeSettings);
+    gridImplementation$.next(state.gridImplementation);
   };
 
   /** Keep the saved search in sync with any state changes */

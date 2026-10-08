@@ -21,6 +21,13 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 
+jest.mock('../../components/discover_grid/use_discover_grid_implementation', () => ({
+  useDiscoverGridImplementation: () => ({
+    implementation: 'unified',
+    onChangeImplementation: () => {},
+  }),
+}));
+
 const dataViewMock = buildDataViewMock({
   name: 'the-data-view',
   fields: deepMockedFields,

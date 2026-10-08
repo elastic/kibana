@@ -253,6 +253,20 @@ const SCHEMA_DISCOVER_SESSION_V17 = SCHEMA_DISCOVER_SESSION_V16.extends({
   tabs: schema.arrayOf(SCHEMA_TAB_V17, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
 });
 
+const SCHEMA_TAB_ATTRIBUTES_V18 = SCHEMA_TAB_ATTRIBUTES_V17.extends({
+  gridImplementation: schema.maybe(
+    schema.oneOf([schema.literal('tanstack'), schema.literal('unified')])
+  ),
+});
+
+const SCHEMA_TAB_V18 = SCHEMA_TAB_V17.extends({
+  attributes: SCHEMA_TAB_ATTRIBUTES_V18,
+});
+
+const SCHEMA_DISCOVER_SESSION_V18 = SCHEMA_DISCOVER_SESSION_V17.extends({
+  tabs: schema.arrayOf(SCHEMA_TAB_V18, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
+});
+
 // Add new model versions here, which automatically registers them
 export const DISCOVER_SESSION_MODEL_VERSIONS: SavedObjectsModelVersionMap = {
   13: {
@@ -299,11 +313,18 @@ export const DISCOVER_SESSION_MODEL_VERSIONS: SavedObjectsModelVersionMap = {
       create: SCHEMA_DISCOVER_SESSION_V17,
     },
   },
+  18: {
+    changes: [],
+    schemas: {
+      forwardCompatibility: SCHEMA_DISCOVER_SESSION_V18.extends({}, { unknowns: 'ignore' }),
+      create: SCHEMA_DISCOVER_SESSION_V18,
+    },
+  },
 };
 
 // Set constants to the latest schemas, which updates derived types and content management
-export const SCHEMA_TAB_LATEST = SCHEMA_TAB_V17;
-export const SCHEMA_DISCOVER_SESSION_LATEST = SCHEMA_DISCOVER_SESSION_V17;
+export const SCHEMA_TAB_LATEST = SCHEMA_TAB_V18;
+export const SCHEMA_DISCOVER_SESSION_LATEST = SCHEMA_DISCOVER_SESSION_V18;
 
 export type DiscoverSessionTabAttributes = TypeOf<typeof SCHEMA_TAB_LATEST>['attributes'];
 export type DiscoverSessionTab = TypeOf<typeof SCHEMA_TAB_LATEST>;

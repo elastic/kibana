@@ -161900,6 +161900,15 @@ components:
                               $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeFilterSchema'
                             maxItems: 100
                             type: array
+                          grid_implementation:
+                            anyOf:
+                              - enum:
+                                  - tanstack
+                                type: string
+                              - enum:
+                                  - unified
+                                type: string
+                            description: 'Discover display option: controls which grid implementation renders the documents table. Use "tanstack" for the TanStack Grid or "unified" for the EUI data grid. If omitted, defaults to the TanStack Grid.'
                           header_row_height:
                             anyOf:
                               - maximum: 5
@@ -162028,6 +162037,15 @@ components:
                                   - json
                                 type: string
                             description: 'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json").'
+                          grid_implementation:
+                            anyOf:
+                              - enum:
+                                  - tanstack
+                                type: string
+                              - enum:
+                                  - unified
+                                type: string
+                            description: 'Discover display option: controls which grid implementation renders the documents table. Use "tanstack" for the TanStack Grid or "unified" for the EUI data grid. If omitted, defaults to the TanStack Grid.'
                           header_row_height:
                             anyOf:
                               - maximum: 5
@@ -162163,6 +162181,15 @@ components:
                               - min
                               - max
                             type: string
+                          grid_implementation:
+                            anyOf:
+                              - enum:
+                                  - tanstack
+                                type: string
+                              - enum:
+                                  - unified
+                                type: string
+                            description: 'Discover display option: controls which grid implementation renders the documents table. Use "tanstack" for the TanStack Grid or "unified" for the EUI data grid. If omitted, defaults to the TanStack Grid.'
                           header_row_height:
                             anyOf:
                               - maximum: 5
@@ -162358,6 +162385,15 @@ components:
                             - json
                           type: string
                       description: 'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json"). When set, overrides the referenced saved object or the inline tab config in `tabs`.'
+                    grid_implementation:
+                      anyOf:
+                        - enum:
+                            - tanstack
+                          type: string
+                        - enum:
+                            - unified
+                          type: string
+                      description: 'Discover display option: controls which grid implementation renders the documents table ("tanstack" or "unified"). When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
                     header_row_height:
                       anyOf:
                         - maximum: 5

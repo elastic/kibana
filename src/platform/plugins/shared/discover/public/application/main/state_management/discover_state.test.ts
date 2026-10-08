@@ -1289,6 +1289,7 @@ describe('Discover state', () => {
           "description": undefined,
           "documentsDisplayMode": undefined,
           "grid": Object {},
+          "gridImplementation": undefined,
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": false,

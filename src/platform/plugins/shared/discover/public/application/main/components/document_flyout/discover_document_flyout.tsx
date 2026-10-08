@@ -41,6 +41,7 @@ import { useDataState } from '../../hooks/use_data_state';
 import { ExpandedDocNotice, useExpandedDocSync } from './use_expanded_doc_sync';
 import { useCopyExpandedDocLink } from './use_copy_expanded_doc_link';
 import { getExpandedDocLinkability } from '../../utils/expanded_doc';
+import { resolveDiscoverGridImplementation } from '../../../../components/discover_grid/discover_grid_implementation';
 import { columnsToColumnsMeta } from '../../../../utils/columns_to_columns_meta';
 
 export interface DiscoverDocumentFlyoutProps {
@@ -65,6 +66,10 @@ export const DiscoverDocumentFlyout = memo(
   }: DiscoverDocumentFlyoutProps) => {
     const dispatch = useInternalStateDispatch();
     const query = useAppStateSelector((state) => state.query);
+    // Keep the fields table on the same grid implementation as the main documents table.
+    const gridImplementation = useAppStateSelector((state) =>
+      resolveDiscoverGridImplementation(state.gridImplementation)
+    );
     const persistedDiscoverSession = useInternalStateSelector(
       (state) => state.persistedDiscoverSession
     );
@@ -193,6 +198,7 @@ export const DiscoverDocumentFlyout = memo(
         onUpdateSelectedTabId={onUpdateSelectedTabId}
         initialDocViewerState={docViewerUiState}
         onInitialDocViewerStateChange={onInitialDocViewerStateChange}
+        gridImplementation={gridImplementation}
       />
     );
   }
