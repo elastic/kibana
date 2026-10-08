@@ -44,11 +44,13 @@ export interface ExceptionEntry {
 
 /**
  * Structured output the diagnose step is schema-constrained to return. The review
- * workflow declares a root `oneOf` of four const-branched objects (upstream
- * #288807), so only the fields of the emitted branch are populated: `exception`
- * carries `exception_entries`, `query` carries `proposed_query`, `risk_score`
- * carries `proposed_risk_score` + `proposed_severity`, and `manual` carries
- * nothing but the `summary` every branch requires.
+ * workflow declares a root `oneOf` of six const-branched objects (upstream
+ * #288807, extended by #291874/#294332), so only the fields of the emitted
+ * branch are populated: `exception` carries `exception_entries`, `query`
+ * carries `proposed_query`, `risk_score` carries `proposed_risk_score` +
+ * `proposed_severity`, `threshold` carries the three proposed_threshold_* fields,
+ * `schedule` carries `proposed_interval` + `proposed_from`, and `manual` carries
+ * nothing but the shared proposal-text fields.
  */
 export interface RuleTuningProposal {
   change_type?: ChangeType;
@@ -57,6 +59,15 @@ export interface RuleTuningProposal {
   proposed_query?: string;
   proposed_risk_score?: number;
   proposed_severity?: string;
+  /** `threshold` branch: minimum count. */
+  proposed_threshold_value?: number;
+  /** `threshold` branch: grouping fields (the rule's current threshold.field). */
+  proposed_threshold_field?: string[];
+  /** `threshold` branch: cardinality limits, or [] when the rule has none. */
+  proposed_threshold_cardinality?: Array<{ field: string; value: number }>;
+  /** `schedule` branch: both fields are always populated (the patch is atomic). */
+  proposed_interval?: string;
+  proposed_from?: string;
 }
 
 /** Verdict graded by the suite's evaluators: the diagnose proposal plus run metadata. */
@@ -257,47 +268,95 @@ const getExecution = async (
   })) as unknown as WorkflowExecutionDto;
 
 /**
- * Respond to one review child's gate with the given decision, retrying the 409
- * waiting-step race.
+ * Answer one review child's gate with the given decision.
  *
- * The child reaching `waiting_for_input` does not guarantee its waiting STEP row is
- * queryable yet; `resumeWorkflowExecution` then rejects with 409 `waiting step not
- * found` — a read-after-write race, not a real conflict. Re-poll through it. A genuine
- * double-approval 409 does not match `isWaitingStepNotReady` and still throws.
+ * Post-#294745 the review no longer parks on its own waitForApproval step: its
+ * `propose_tuning` arm executes `system-create-alertzero-proposal`, and THAT
+ * workflow parks on the proposals plugin's human gate. The review child surfaces
+ * it as `waiting_for_input` exactly like before, but an external
+ * `/api/workflows/executions/<id>/resume` with `{ approved }` is now REJECTED by
+ * `check_decide_privileges_step` (the responder would be the workflow runner,
+ * not a human). The analyst path is the proposals routes — so the harness takes
+ * the same path the UI does:
  *
- * `approved` is the arm under test: the review's apply steps interpolate the same payload
- * (`steps.review_tuning.output.response.approved`) that an analyst's inbox decision sends,
- * so a reject here is byte-identical to a user clicking Dismiss.
+ *  1. read the review's `create_investigation` step output for its
+ *     `conversation_id` (each review owns one investigation, so this joins the
+ *     child to exactly its own proposals),
+ *  2. list that conversation's `pending` proposals (the gate may take a moment
+ *     to appear after the child reports waiting — poll),
+ *  3. POST `/internal/proposals/{id}/approve` or `/dismiss` — the same bridge
+ *     the analyst's buttons use.
+ *
+ * `approved` is the arm under test: approving releases the gate's action
+ * (edit-rule patch), dismissing walks it down the no-action branch, which is
+ * what the approval spec's engine-side assertions observe.
  */
-const resumeApprovalGate = async (
-  fetch: HttpHandler,
-  log: ToolingLog,
-  executionId: string,
-  pollIntervalMs: number,
-  approved: boolean
-): Promise<boolean> => {
-  try {
-    await fetch(`/api/workflows/executions/${executionId}/resume`, {
-      method: 'POST',
-      version: WORKFLOWS_API_VERSION,
-      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-      body: JSON.stringify({ input: { approved } }),
-    });
-    log.info(
-      `Responded approved=${approved} to the review_tuning gate of review execution ${executionId}`
+const decideReviewProposal = async ({
+  fetch,
+  log,
+  stepExecutions,
+  executionId,
+  approved,
+  pollIntervalMs,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+  stepExecutions: WorkflowStepExecutionDto[];
+  executionId: string;
+  approved: boolean;
+  pollIntervalMs: number;
+}): Promise<boolean> => {
+  const investigation = stepExecutions.find((s) => s.stepId === 'create_investigation');
+  const conversationId = (investigation?.output as { conversation_id?: string } | null | undefined)
+    ?.conversation_id;
+  if (!conversationId) {
+    throw new Error(
+      `Review execution ${executionId} is waiting but carries no create_investigation ` +
+        `conversation_id — cannot join it to its proposal. Steps: ` +
+        `${stepExecutions.map((s) => s.stepId).join(', ')}`
     );
-    return true;
-  } catch (error) {
-    if (!isWaitingStepNotReady(error)) {
-      throw error;
-    }
+  }
+
+  const listPending = async (): Promise<Array<{ id: string }>> =>
+    (
+      (await fetch(`/internal/proposals`, {
+        method: 'GET',
+        headers: { 'elastic-api-version': '1' },
+        query: { conversationId, status: 'pending' },
+      })) as { proposals?: Array<{ id: string }> }
+    ).proposals ?? [];
+
+  let proposals = await listPending();
+  if (proposals.length === 0) {
+    // The child reports waiting once the proposal workflow parks, but the
+    // proposal record lands via its own task — poll through the gap.
     log.info(
-      `Approval gate for review execution ${executionId} is not resumable yet ` +
-        `(waiting step not persisted); retrying after ${pollIntervalMs}ms`
+      `No pending proposal yet for conversation ${conversationId}; retrying after ${pollIntervalMs}ms`
     );
     await sleep(pollIntervalMs);
+    proposals = await listPending();
+  }
+  if (proposals.length === 0) {
     return false;
   }
+
+  const proposalId = proposals[0].id;
+  await fetch(
+    approved
+      ? `/internal/proposals/${proposalId}/approve`
+      : `/internal/proposals/${proposalId}/dismiss`,
+    {
+      method: 'POST',
+      headers: { 'elastic-api-version': '1', 'kbn-xsrf': 'true' },
+      body: JSON.stringify(approved ? {} : { dismissReason: 'no_reason' }),
+    }
+  );
+  log.info(
+    `${
+      approved ? 'Approved' : 'Dismissed'
+    } proposal ${proposalId} of review execution ${executionId}`
+  );
+  return true;
 };
 
 /**
@@ -542,8 +601,18 @@ export const runRuleTuningWorkflow = async ({
     const activeReviews = await listActiveExecutions(fetch, RULE_TUNING_REVIEW_WORKFLOW_ID);
     for (const review of activeReviews.results ?? []) {
       if (!approvedReviews.has(review.id) && isAwaitingApproval(review.status)) {
-        const resumed = await resumeApprovalGate(fetch, log, review.id, pollIntervalMs, true);
-        if (resumed) approvedReviews.add(review.id);
+        // Step executions carry the create_investigation conversation_id the
+        // proposals join below needs.
+        const withSteps = await getExecution(fetch, review.id);
+        const decided = await decideReviewProposal({
+          fetch,
+          log,
+          stepExecutions: withSteps.stepExecutions ?? [],
+          executionId: review.id,
+          approved: true,
+          pollIntervalMs,
+        });
+        if (decided) approvedReviews.add(review.id);
       }
     }
 
@@ -728,10 +797,10 @@ export const runRuleTuningToApprovalGate = async ({
 /**
  * Answer a parked review's gate with `approved` and wait for the review to settle.
  *
- * Posts the same payload an analyst's inbox decision sends, on the workflow's own resume
- * route, and retries the 409 `waiting step not found` read-after-write race (see
- * `resumeApprovalGate`). Returns the terminal review execution so the caller can read the
- * apply steps' outcomes out of it.
+ * Approves/dismisses the review's pending proposal through the proposals routes —
+ * the same bridge the analyst's UI buttons use (see `decideReviewProposal`). Returns
+ * the terminal review execution so the caller can read the apply steps' outcomes
+ * out of it.
  */
 export const respondToReviewGate = async ({
   fetch,
@@ -752,12 +821,20 @@ export const respondToReviewGate = async ({
 
   let answered = false;
   while (!answered && Date.now() < deadline) {
-    answered = await resumeApprovalGate(fetch, log, reviewExecutionId, pollIntervalMs, approved);
+    const withSteps = await getExecution(fetch, reviewExecutionId);
+    answered = await decideReviewProposal({
+      fetch,
+      log,
+      stepExecutions: withSteps.stepExecutions ?? [],
+      executionId: reviewExecutionId,
+      approved,
+      pollIntervalMs,
+    });
   }
   if (!answered) {
     throw new Error(
       `Could not answer the approval gate of review execution ${reviewExecutionId} within ` +
-        `${maxWaitMs}ms — the waiting step never became resumable.`
+        `${maxWaitMs}ms — its proposal never appeared as pending.`
     );
   }
 

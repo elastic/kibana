@@ -123,7 +123,7 @@ describe('rule-tuning evaluators', () => {
       expect((result.metadata as { payloadValid: boolean }).payloadValid).toBe(false);
     });
 
-    it('rejects a change_type outside the four-branch union', async () => {
+    it('rejects a change_type outside the six-branch union', async () => {
       const result = await validProposal.evaluate!({
         output: { ...base, change_type: 'delete_rule' as ChangeType },
       } as never);
@@ -131,17 +131,17 @@ describe('rule-tuning evaluators', () => {
       expect((result.metadata as { changeTypeValid: boolean }).changeTypeValid).toBe(false);
     });
 
-    it('rejects the pre-#288807 labels the workflow can no longer emit', async () => {
+    it('rejects the pre-#288807 label the workflow can no longer emit', async () => {
       // #288807 replaced the flat `enum: [exception, suppression, query, threshold]`
-      // with a oneOf of four consts. A proposal still using the old vocabulary is
-      // schema drift, not a tuning decision — score it invalid, not merely wrong.
-      for (const legacy of ['suppression', 'threshold'] as const) {
-        const result = await validProposal.evaluate!({
-          output: { ...base, change_type: legacy },
-        } as never);
-        expect(result.score).toBe(0);
-        expect((result.metadata as { changeTypeValid: boolean }).changeTypeValid).toBe(false);
-      }
+      // with a oneOf of consts. A proposal still using `suppression` is schema
+      // drift, not a tuning decision — score it invalid, not merely wrong. Note
+      // `threshold` is a REAL branch again since #291874, so only `suppression`
+      // is legacy.
+      const result = await validProposal.evaluate!({
+        output: { ...base, change_type: 'suppression' },
+      } as never);
+      expect(result.score).toBe(0);
+      expect((result.metadata as { changeTypeValid: boolean }).changeTypeValid).toBe(false);
     });
 
     it('accepts a query proposal on a query rule', async () => {
@@ -184,6 +184,58 @@ describe('rule-tuning evaluators', () => {
         metadata: {},
       } as never);
       expect(result.score).toBe(0);
+      expect((result.metadata as { payloadValid: boolean }).payloadValid).toBe(false);
+    });
+
+    it('accepts a threshold proposal only on a threshold rule with all three fields', async () => {
+      const thresholdProposal = {
+        ...base,
+        change_type: 'threshold',
+        proposed_threshold_value: 6,
+        proposed_threshold_field: ['host.name'],
+        proposed_threshold_cardinality: [],
+      };
+      const ok = await validProposal.evaluate!({
+        output: thresholdProposal,
+        metadata: { ruleType: 'threshold' },
+      } as never);
+      expect(ok.score).toBe(1);
+
+      // Not on a query rule: the threshold arm's preview path is closed there.
+      const wrongType = await validProposal.evaluate!({
+        output: thresholdProposal,
+        metadata: { ruleType: 'query' },
+      } as never);
+      expect(wrongType.score).toBe(0);
+
+      // A threshold below the schema's minimum 1 is invalid.
+      const badValue = await validProposal.evaluate!({
+        output: { ...thresholdProposal, proposed_threshold_value: 0 },
+        metadata: { ruleType: 'threshold' },
+      } as never);
+      expect(badValue.score).toBe(0);
+      expect((badValue.metadata as { payloadValid: boolean }).payloadValid).toBe(false);
+    });
+
+    it('accepts a schedule proposal only with both timing fields populated', async () => {
+      const ok = await validProposal.evaluate!({
+        output: {
+          ...base,
+          change_type: 'schedule',
+          proposed_interval: '10m',
+          proposed_from: 'now-11m',
+        },
+        metadata: { ruleType: 'query' },
+      } as never);
+      expect(ok.score).toBe(1);
+
+      // The patch is atomic, so one field alone is invalid.
+      const half = await validProposal.evaluate!({
+        output: { ...base, change_type: 'schedule', proposed_interval: '10m' },
+        metadata: { ruleType: 'query' },
+      } as never);
+      expect(half.score).toBe(0);
+      expect((half.metadata as { payloadValid: boolean }).payloadValid).toBe(false);
     });
 
     it('accepts a well-formed risk_score proposal', async () => {

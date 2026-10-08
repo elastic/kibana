@@ -311,6 +311,41 @@ const ENTITY_PROFILES: Record<
     { host: 'nt-ntp-04', user: 'svc_ntp', ip: '10.70.3.4', process: 'chronyd' },
     { host: 'nt-ntp-04', user: 'svc_ntp', ip: '10.70.3.4', process: 'chronyd' },
   ],
+  // Threshold-labeled fixtures: threshold rules whose count is too low, so a
+  // single host's benign burst trips it. Same benign single-entity shape as the
+  // exception fixtures, but on a `threshold` rule the tightest fix is the count,
+  // and the threshold branch only exists on this rule type.
+  'fp-threshold-bruteforce-burst': [
+    { host: 'bastion-01', user: 'svc_sshd', ip: '10.80.0.1', process: 'sshd' },
+    { host: 'bastion-01', user: 'svc_sshd', ip: '10.80.0.1', process: 'sshd' },
+    { host: 'bastion-01', user: 'svc_sshd', ip: '10.80.0.1', process: 'sshd' },
+    { host: 'bastion-01', user: 'svc_sshd', ip: '10.80.0.1', process: 'sshd' },
+    { host: 'bastion-01', user: 'svc_sshd', ip: '10.80.0.1', process: 'sshd' },
+  ],
+  'fp-threshold-auditflood': [
+    { host: 'loghost-02', user: 'svc_auditd', ip: '10.80.1.2', process: 'auditd' },
+    { host: 'loghost-02', user: 'svc_auditd', ip: '10.80.1.2', process: 'auditd' },
+    { host: 'loghost-02', user: 'svc_auditd', ip: '10.80.1.2', process: 'auditd' },
+    { host: 'loghost-02', user: 'svc_auditd', ip: '10.80.1.2', process: 'auditd' },
+    { host: 'loghost-02', user: 'svc_auditd', ip: '10.80.1.2', process: 'auditd' },
+  ],
+  // Schedule-labeled fixtures: the FPs are real-but-stale events a shorter
+  // lookback would never see, spread across entities (an exception cannot cover
+  // them and the query itself is fine — only the sweep window is wrong).
+  'fp-schedule-stale-logins': [
+    { host: 'web-11', user: 'svc_batch', ip: '10.81.0.1', process: 'cron' },
+    { host: 'api-12', user: 'svc_report', ip: '10.81.1.2', process: 'at' },
+    { host: 'db-13', user: 'svc_backup', ip: '10.81.2.3', process: 'pg_dump' },
+    { host: 'cache-14', user: 'svc_maint', ip: '10.81.3.4', process: 'redis-cli' },
+    { host: 'worker-15', user: 'svc_job', ip: '10.81.4.5', process: 'systemd' },
+  ],
+  'fp-schedule-offhours-batch': [
+    { host: 'etl-21', user: 'svc_etl', ip: '10.81.5.6', process: 'spark' },
+    { host: 'etl-22', user: 'svc_etl', ip: '10.81.5.7', process: 'spark' },
+    { host: 'etl-23', user: 'svc_etl', ip: '10.81.5.8', process: 'airflow' },
+    { host: 'etl-24', user: 'svc_etl', ip: '10.81.5.9', process: 'airflow' },
+    { host: 'etl-25', user: 'svc_etl', ip: '10.81.5.10', process: 'dbt' },
+  ],
 };
 
 /** Query text per fixture: only the over-broad fixture is meant to be narrowed. */
@@ -341,6 +376,10 @@ const FIXTURE_QUERIES: Record<string, string> = {
   'fp-low-value-remote-support': 'process.name:(teamviewer or anydesk or vncviewer)',
   'fp-low-value-archive': 'process.name:(7z or zip or tar or gzip)',
   'fp-low-value-scripting': 'process.name:(python3 or perl or awk or sed)',
+  'fp-threshold-bruteforce-burst': 'event.action:ssh_login',
+  'fp-threshold-auditflood': 'event.action:auditd_flush',
+  'fp-schedule-stale-logins': 'event.category:authentication',
+  'fp-schedule-offhours-batch': 'process.name:(spark or airflow or dbt)',
   'fp-unfixable-telemetry': 'process.name:otelcol',
   'fp-unfixable-agentmesh': 'process.name:consul',
   'fp-unfixable-buildfarm': 'process.name:bazel',
@@ -364,6 +403,18 @@ const typeSpecificCreateFields = (ruleType: string): Record<string, unknown> => 
       return {
         new_terms_fields: ['user.name'],
         history_window_start: 'now-7d',
+      };
+    case 'threshold':
+      // ThresholdRuleRequiredFields: threshold { field[], value, cardinality[] }.
+      // The seeded clusters that target the `threshold` label fire from one benign
+      // host grouping, so the current count (3) is deliberately below what a real
+      // attack needs — the diagnosis worth making is raising it.
+      return {
+        threshold: {
+          field: ['host.name'],
+          value: 3,
+          cardinality: [],
+        },
       };
     default:
       return {};

@@ -37,16 +37,24 @@ export const RULE_TUNING_REVIEW_WORKFLOW_ID = 'system-security-rule-tuning-revie
 export const WORKFLOWS_API_VERSION = '2023-10-31';
 
 /**
- * The four branches the review workflow's `diagnose_rule` step can emit, in the
+ * The six branches the review workflow's `diagnose_rule` step can emit, in the
  * preference order its prompt declares (rule_tuning_review.yaml, root `oneOf`
- * since upstream #288807).
+ * since upstream #288807, extended with `threshold` and `schedule` by #291874
+ * and #294332).
  *
- * `suppression` and `threshold` — the previous flat-enum values — are NOT
- * emittable: the workflow's apply steps only exist for exception, query and
- * risk_score, and everything else is a `manual` hand-off. A volume-only fix has
- * no in-band branch, so it has to be recommended through `manual`.
+ * `suppression` — the previous flat-enum value — is NOT emittable: there is no
+ * suppression branch, so a volume-only fix has to be recommended through
+ * `manual`. `threshold` and `schedule` carry extra required payload fields
+ * (see RuleTuningProposal and the evaluators).
  */
-export const CHANGE_TYPES = ['exception', 'query', 'risk_score', 'manual'] as const;
+export const CHANGE_TYPES = [
+  'exception',
+  'query',
+  'risk_score',
+  'threshold',
+  'schedule',
+  'manual',
+] as const;
 
 export type ChangeType = (typeof CHANGE_TYPES)[number];
 
@@ -120,13 +128,13 @@ export const RULE_TUNING_INVESTIGATE_SKILL_ID = 'investigate-rule';
  * Whether the eval stack under test is *supposed* to carry the investigate-rule
  * skill.
  *
- * `false` today: enabling it in the Scout config set is a separate change owned
- * by the config-set owner (see the follow-up card), and until it lands the
- * honest answer for Tool Routing is UNMEASURED, not 0. Flip this to `true` in
- * the same change that enables the skill — the suite then fails loudly when the
- * catalog does not carry it (src/agent_builder_catalog.ts).
+ * `true` since the Scout config set for this suite now enables
+ * `investigateRuleSkill` (classic.stateful.config.ts in
+ * kbn-scout's evals_detection_watch_rule_tuning set): the suite fails loudly
+ * when the catalog does not carry the skill (src/agent_builder_catalog.ts)
+ * instead of silently reporting UNMEASURED.
  */
-export const INVESTIGATE_RULE_SKILL_EXPECTED_IN_EVAL_STACK = false;
+export const INVESTIGATE_RULE_SKILL_EXPECTED_IN_EVAL_STACK = true;
 
 /**
  * Alerts index the suite seeds into and the worker's harvest step reads.

@@ -122,6 +122,41 @@ const TUNING_FIXTURES: Array<{
     description: 'Alerts are real but low-value — downgrade risk score and severity',
   },
   {
+    id: 'fp-low-value-scripting',
+    expected: 'risk_score',
+    ruleType: 'query',
+    description: 'Benign scripting tooling - real detections but low-value, downgrade',
+  },
+  // Threshold/schedule labels exist only since #291874/#294332 added those
+  // branches. Threshold fixtures run on `threshold` rules (the only type whose
+  // threshold can be previewed and patched); schedule fixtures run on `query`
+  // rules whose only defect is the sweep window.
+  {
+    id: 'fp-threshold-bruteforce-burst',
+    expected: 'threshold',
+    ruleType: 'threshold',
+    description: 'Benign single-host bursts trip a threshold count set too low - raise the count',
+  },
+  {
+    id: 'fp-threshold-auditflood',
+    expected: 'threshold',
+    ruleType: 'threshold',
+    description: 'Log host audit floods trip a low threshold - raise the count',
+  },
+  {
+    id: 'fp-schedule-stale-logins',
+    expected: 'schedule',
+    ruleType: 'query',
+    description:
+      'Routine service logins only land inside the rule because its lookback is too wide - tighten interval and from',
+  },
+  {
+    id: 'fp-schedule-offhours-batch',
+    expected: 'schedule',
+    ruleType: 'query',
+    description: 'Nightly batch jobs sweep into the rule window - tighten interval and from',
+  },
+  {
     id: 'fp-unfixable-noise',
     expected: 'manual',
     ruleType: 'query',

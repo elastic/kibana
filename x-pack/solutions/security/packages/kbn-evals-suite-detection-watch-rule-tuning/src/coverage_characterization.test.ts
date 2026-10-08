@@ -113,13 +113,14 @@ describe('rule-tuning coverage characterization', () => {
     expect(diagnose).toMatch(/timeout: "10m"/);
   });
 
-  it('characterizes the diagnose schema as the post-#288807 oneOf of four const branches', () => {
+  it('characterizes the diagnose schema as the post-#288807 oneOf of const branches', () => {
     // The fork's review step declared a flat enum of six tunings; the port pinned
     // [exception, suppression, query, threshold]; upstream #288807 replaced both with a
-    // root `oneOf` of four const-branched objects. Pin the branch SET (not the yaml's
-    // branch order, which is a formatting choice) against the suite's own CHANGE_TYPES,
-    // so re-adding or renaming a branch is a deliberate, reviewed change and the fixture
-    // labels can never silently include an unemittable one again.
+    // root `oneOf` of const-branched objects (six branches since #291874/#294332).
+    // Pin the branch SET (not the yaml's branch order, which is a formatting choice)
+    // against the suite's own CHANGE_TYPES, so re-adding or renaming a branch is a
+    // deliberate, reviewed change and the fixture labels can never silently include
+    // an unemittable one again.
     const branches = schemaBranches();
     expect(new Set(branches.keys())).toEqual(new Set(CHANGE_TYPES));
 
@@ -129,29 +130,54 @@ describe('rule-tuning coverage characterization', () => {
     expect(schema).not.toMatch(/enum:\s*\[\s*exception/);
   });
 
-  it('characterizes the payload field every oneOf branch requires', () => {
+  it('characterizes the payload fields every oneOf branch requires', () => {
     // The per-branch payload is the contract validProposal enforces: an exception
     // without entries, a query without a query, or a risk_score without a score and
-    // severity can never be rendered by the gate or applied by the apply steps.
+    // severity can never be rendered by the gate or applied by the action. Since
+    // #291874/#294332 every branch additionally requires the proposal-text fields
+    // (title, fp_pattern, reasoning, confidence) the analyst's proposal card shows.
     const branches = schemaBranches();
+    const shared = ['title', 'fp_pattern', 'reasoning', 'confidence'];
     expect(requiredFields(branches.get('exception') ?? '')).toEqual([
       'change_type',
       'summary',
       'exception_entries',
+      ...shared,
     ]);
     expect(requiredFields(branches.get('query') ?? '')).toEqual([
       'change_type',
       'summary',
       'proposed_query',
+      ...shared,
     ]);
     expect(requiredFields(branches.get('risk_score') ?? '')).toEqual([
       'change_type',
       'summary',
       'proposed_risk_score',
       'proposed_severity',
+      ...shared,
     ]);
-    // `manual` carries no payload beyond the summary every branch requires.
-    expect(requiredFields(branches.get('manual') ?? '')).toEqual(['change_type', 'summary']);
+    expect(requiredFields(branches.get('threshold') ?? '')).toEqual([
+      'change_type',
+      'summary',
+      'proposed_threshold_value',
+      'proposed_threshold_field',
+      'proposed_threshold_cardinality',
+      ...shared,
+    ]);
+    expect(requiredFields(branches.get('schedule') ?? '')).toEqual([
+      'change_type',
+      'summary',
+      ...shared,
+      'proposed_interval',
+      'proposed_from',
+    ]);
+    // `manual` carries no payload beyond the shared proposal text.
+    expect(requiredFields(branches.get('manual') ?? '')).toEqual([
+      'change_type',
+      'summary',
+      ...shared,
+    ]);
   });
 
   it('characterizes the exception operator vocabulary validProposal mirrors', () => {
@@ -159,10 +185,13 @@ describe('rule-tuning coverage characterization', () => {
     // adds or removes an operator, an entry the workflow could apply would score
     // invalid (or vice versa), so the two lists must stay identical.
     const exception = schemaBranches().get('exception') ?? '';
+    const enums = [...exception.matchAll(/enum:\s*\[([^\]]+)\]/g)].map((match) => match[1]);
+    // Every branch carries the confidence enum ([low, medium, high]); the operators
+    // are the enums that do not.
     const operators = new Set(
-      [...exception.matchAll(/enum:\s*\[([^\]]+)\]/g)].flatMap((match) =>
-        match[1].split(',').map((operator) => operator.trim())
-      )
+      enums
+        .filter((body) => !body.split(',').some((value) => value.trim() === 'low'))
+        .flatMap((body) => body.split(',').map((operator) => operator.trim()))
     );
     expect(operators).toEqual(new Set(Object.keys(EXCEPTION_OPERATOR_PAYLOAD)));
   });
@@ -170,9 +199,9 @@ describe('rule-tuning coverage characterization', () => {
   it('characterizes the golden label contract of all fixtures', () => {
     // Labels are PRELIMINARY until validated on the live stack; pin the mapping so any
     // further relabel is a deliberate, reviewed decision. `manual` is the majority class
-    // at 17/35 — one fixture below the 0.5 guard in eval_budget.test.ts.
+    // at 17/39 — comfortably below the 0.5 guard in eval_budget.test.ts.
     const labels = goldenLabels();
-    expect(labels.size).toBe(35);
+    expect(labels.size).toBe(39);
 
     const counts = new Map<string, number>();
     for (const label of labels.values()) counts.set(label, (counts.get(label) ?? 0) + 1);
@@ -180,6 +209,8 @@ describe('rule-tuning coverage characterization', () => {
       exception: 6,
       query: 6,
       risk_score: 6,
+      threshold: 2,
+      schedule: 2,
       manual: 17,
     });
 

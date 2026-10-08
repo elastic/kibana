@@ -118,6 +118,28 @@ export const validProposal: Evaluator = {
           (proposal.proposed_risk_score as number) <= 100 &&
           (PROPOSED_SEVERITIES as readonly string[]).includes(String(proposal.proposed_severity));
         break;
+      case 'threshold':
+        // Mirrors the threshold branch (#291874): integer minimum 1, grouping
+        // fields, cardinality array ([] allowed). Only a `threshold` rule can
+        // have its threshold previewed and patched.
+        payloadValid =
+          ruleType === 'threshold' &&
+          Number.isInteger(proposal.proposed_threshold_value) &&
+          (proposal.proposed_threshold_value as number) >= 1 &&
+          Array.isArray(proposal.proposed_threshold_field) &&
+          proposal.proposed_threshold_field.length > 0 &&
+          proposal.proposed_threshold_field.every((f) => typeof f === 'string' && f !== '') &&
+          Array.isArray(proposal.proposed_threshold_cardinality);
+        break;
+      case 'schedule':
+        // Mirrors the schedule branch (#294332): both fields are always
+        // populated because the patch replaces them atomically.
+        payloadValid =
+          typeof proposal.proposed_interval === 'string' &&
+          proposal.proposed_interval !== '' &&
+          typeof proposal.proposed_from === 'string' &&
+          proposal.proposed_from !== '';
+        break;
       case 'manual':
         // The hand-off branch's whole content IS the summary, checked below.
         payloadValid = true;

@@ -42,6 +42,18 @@ describe('evals_detection_watch_rule_tuning Scout config set', () => {
     expect(serverArgs).toContain('--xpack.evals.enabled=true');
   });
 
+  it('enables the investigate-rule skill while keeping the inherited experimental features', () => {
+    const experimentalArgs = serverArgs.filter((arg) =>
+      arg.startsWith('--xpack.securitySolution.enableExperimental=')
+    );
+    // Exactly one: Kibana does not merge repeated values, so a second arg would drop the first.
+    expect(experimentalArgs).toHaveLength(1);
+    const features = JSON.parse(experimentalArgs[0].split('=').slice(1).join('=')) as string[];
+    expect(features).toEqual(
+      expect.arrayContaining(['investigateRuleSkill', 'rulePreviewAttachmentEnabled'])
+    );
+  });
+
   it('declares each of those flags exactly once', () => {
     // A duplicated flag is ignored by Kibana, but here it would mean the flag was added to both
     // this set and the rule-creation set it derives from — the drift this file exists to avoid.

@@ -150,156 +150,180 @@ const fires = (stepName: string, context: Record<string, unknown>): boolean =>
   evaluates(conditionOf(stepName), context, stepName);
 
 /**
- * The review context for the approval spec's fixture: a `query` change on a plain query rule
- * whose two backtest previews both succeeded, i.e. every non-gate precondition of
- * `apply_query_tuning` is met. Only the decision differs between the arms.
+ * The review context for the approval spec's fixture: a `query` change whose
+ * proposal workflow recorded the given outcome. Post-#294745 the decision lives
+ * in the propose_* step outputs (status/decision) and the tag steps read the
+ * aggregated flags from `record_proposal_action_decision`, so that is the shape
+ * the contexts below carry.
  */
 const gateContext = ({
   approved,
+  applied,
   changeType = 'query',
-  supported = true,
-  queryApplied = false,
-  rulePatched = false,
+  manualDecision,
   response = true,
 }: {
-  approved: boolean;
+  /** propose_* output.decision. */
+  approved?: boolean;
+  /** propose_* output.status (only `succeeded` counts as applied). */
+  applied?: 'succeeded' | 'failed';
   changeType?: string;
-  supported?: boolean;
-  /** Whether `apply_query_tuning` ran and returned the patched rule's id. */
-  queryApplied?: boolean;
-  rulePatched?: boolean;
+  /** propose_manual.output.decision for the acknowledged-tag path. */
+  manualDecision?: string;
   /** false reproduces a gate whose response was never recorded (missing path). */
   response?: boolean;
-}): Record<string, unknown> => ({
-  steps: {
-    review_tuning: response ? { output: { response: { approved } } } : { output: {} },
-    diagnose_rule: { output: { structured_output: { change_type: changeType } } },
-    can_preview_query_change: { output: { supported } },
-    record_preview_outcome: {
-      output: {
-        current_succeeded: true,
-        current_is_aborted: false,
-        proposed_succeeded: true,
-        proposed_is_aborted: false,
+}): Record<string, unknown> => {
+  const proposeStep = (status?: string, decision?: string) =>
+    response
+      ? {
+          error: null,
+          output: {
+            ...(status != null ? { status } : {}),
+            ...(decision != null ? { decision } : {}),
+          },
+        }
+      : undefined;
+
+  const proposeOutputs: Record<string, unknown> = {
+    propose_query:
+      changeType === 'query'
+        ? proposeStep(applied, approved ? 'approved' : 'dismissed')
+        : undefined,
+    propose_exception:
+      changeType === 'exception'
+        ? proposeStep(applied, approved ? 'approved' : 'dismissed')
+        : undefined,
+    propose_risk_score:
+      changeType === 'risk_score'
+        ? proposeStep(applied, approved ? 'approved' : 'dismissed')
+        : undefined,
+    propose_threshold:
+      changeType === 'threshold'
+        ? proposeStep(applied, approved ? 'approved' : 'dismissed')
+        : undefined,
+    propose_schedule:
+      changeType === 'schedule'
+        ? proposeStep(applied, approved ? 'approved' : 'dismissed')
+        : undefined,
+    propose_manual: changeType === 'manual' ? proposeStep('succeeded', manualDecision) : undefined,
+  };
+
+  return {
+    steps: {
+      ...proposeOutputs,
+      // The tag steps read the aggregated flags, not the propose outputs
+      // directly — reproduce what record_proposal_action_decision computes.
+      record_proposal_action_decision: {
+        output: {
+          applied: changeType !== 'manual' && applied === 'succeeded' && response,
+          approved:
+            response && approved === true && changeType !== 'manual'
+              ? true
+              : response && manualDecision === 'approved',
+          dismissed: response && approved === false && changeType !== 'manual',
+        },
       },
+      create_investigation: { output: { conversation_id: 'conv-1' } },
+      diagnose_rule: { output: { structured_output: { change_type: changeType } } },
     },
-    fetch_rule: { output: { updated_at: 'original' } },
-    refetch_rule: { error: null, output: { updated_at: 'original' } },
-    // A skipped step leaves no execution record: the key resolves to nothing, which is what
-    // `undefined` reproduces here (see the plugin's own matrix in
-    // alertzero/server/managed_workflows/detection_rule_workflows.test.ts).
-    apply_query_tuning: queryApplied ? { error: null, output: { id: 'rule-id' } } : undefined,
-    record_outcome: { output: { rule_patched: rulePatched } },
-  },
-});
+  };
+};
+
+/**
+ * The aggregated flags `record_proposal_action_decision` computes, evaluated with
+ * the engine exactly as the workflow does.
+ */
+const aggregate = (
+  key: 'applied' | 'approved' | 'dismissed',
+  context: Record<string, unknown>
+): boolean =>
+  evaluates(
+    withValueOf('record_proposal_action_decision', key),
+    context,
+    `record_proposal_action_decision.${key}`
+  );
 
 describe('rule-tuning approval gate contract', () => {
-  describe('the reject arm (approved: false)', () => {
+  describe('the reject arm (dismissed)', () => {
     const context = gateContext({ approved: false });
 
-    it('does not apply or even re-read the rule for a query change', () => {
-      // The reject arm's engine assertion is "query byte-identical / updated_at unchanged".
-      // Both hold only because these steps do not fire; an inverted gate flips them.
-      expect(fires('apply_query_tuning', context)).toBe(false);
+    it('aggregates the dismissal and marks the alerts dismissed', () => {
+      // The reject arm's engine assertion is "query byte-identical". That only
+      // holds when the aggregated decision flags route it to the dismiss branch.
+      expect(aggregate('dismissed', context)).toBe(true);
+      expect(aggregate('applied', context)).toBe(false);
+      expect(fires('mark_alerts_dismissed', context)).toBe(true);
       expect(fires('refetch_rule', context)).toBe(false);
     });
 
-    it('does not apply an exception or a risk score either', () => {
-      // The approved flag gates all three apply steps. A rejection that still patched the
-      // rule through one of the other branches would equally break the reject arm.
-      expect(fires('apply_exception_tuning', context)).toBe(false);
-      expect(fires('apply_risk_score_tuning', context)).toBe(false);
-
-      expect(
-        fires('apply_exception_tuning', gateContext({ approved: false, changeType: 'exception' }))
-      ).toBe(false);
-      expect(
-        fires('apply_risk_score_tuning', gateContext({ approved: false, changeType: 'risk_score' }))
-      ).toBe(false);
-    });
-
-    it('dismisses the harvested alerts and marks them reviewed', () => {
-      expect(fires('mark_alerts_dismissed', context)).toBe(true);
-    });
-
     it('never tags the alerts as applied or acknowledged', () => {
-      // `applied` is what the approve arm asserts, and it is gated on record_outcome
-      // .rule_patched — false whenever no apply step ran.
       expect(fires('mark_alerts_applied', context)).toBe(false);
-      // A rejected query change on a supported rule is neither the manual hand-off nor the
+      // A dismissed query proposal is neither the manual hand-off nor the
       // unsupported-query path the acknowledged tag exists for.
       expect(fires('mark_alerts_acknowledged', context)).toBe(false);
-      expect(fires('mark_alerts_acknowledged', gateContext({ approved: true }))).toBe(false);
-      expect(
-        fires('mark_alerts_acknowledged', gateContext({ approved: true, changeType: 'manual' }))
-      ).toBe(true);
     });
 
     it('the tag steps read the same flags the arms assert on', () => {
-      // The eval spec treats a landed `applied` tag as proof the rule was patched, so pin
-      // the wiring rather than trusting the tag name.
+      // The eval spec treats a landed `applied` tag as proof the rule was patched,
+      // so pin the wiring rather than trusting the tag name.
       expect(conditionOf('mark_alerts_applied')).toContain(
-        'steps.record_outcome.output.rule_patched == true'
+        'steps.record_proposal_action_decision.output.applied == true'
       );
       expect(conditionOf('mark_alerts_dismissed')).toContain(
-        'steps.review_tuning.output.response.approved == false'
+        'steps.record_proposal_action_decision.output.dismissed == true'
+      );
+      expect(conditionOf('mark_alerts_acknowledged')).toContain(
+        "steps.propose_manual.output.decision == 'approved'"
       );
     });
   });
 
-  describe('the approve arm (approved: true)', () => {
-    const context = gateContext({ approved: true });
+  describe('the approve arm (approved)', () => {
+    const context = gateContext({ approved: true, applied: 'succeeded' });
 
-    it('applies the proposed query once both previews succeeded on an unedited rule', () => {
-      expect(fires('apply_query_tuning', context)).toBe(true);
+    it('aggregates the approval as applied once the action workflow succeeded', () => {
+      expect(aggregate('approved', context)).toBe(true);
+      expect(aggregate('applied', context)).toBe(true);
+      expect(aggregate('dismissed', context)).toBe(false);
+      expect(fires('mark_alerts_applied', context)).toBe(true);
+      expect(fires('mark_alerts_dismissed', context)).toBe(false);
+      // The rule is re-read only after a patch, to refresh the attachment.
       expect(fires('refetch_rule', context)).toBe(true);
     });
 
-    it('still refuses to apply when a preview failed or the rule was edited during the gate', () => {
-      // The approve arm asserts the rule query equals the persisted proposed_query; that only
-      // holds when every one of these is true, so each one is worth pinning.
-      const withPreview = (overrides: Record<string, unknown>) => {
-        const base = gateContext({ approved: true }) as {
-          steps: { record_preview_outcome: { output: Record<string, unknown> } };
-        };
-        base.steps.record_preview_outcome.output = {
-          ...base.steps.record_preview_outcome.output,
-          ...overrides,
-        };
-        return base;
-      };
-
-      expect(fires('apply_query_tuning', withPreview({ current_succeeded: false }))).toBe(false);
-      expect(fires('apply_query_tuning', withPreview({ proposed_is_aborted: true }))).toBe(false);
+    it('an approved-but-failed action is neither applied nor dismissed', () => {
+      // `applied` keys on status == 'succeeded': an approval whose edit-rule
+      // action errored (e.g. the rule was edited mid-gate and the revision
+      // conflict fired) must not land the applied tag.
+      const failed = gateContext({ approved: true, applied: 'failed' });
+      expect(aggregate('applied', failed)).toBe(false);
+      expect(aggregate('approved', failed)).toBe(true);
+      expect(fires('mark_alerts_applied', failed)).toBe(false);
+      expect(fires('refetch_rule', failed)).toBe(false);
     });
 
-    it('does not dismiss the alerts and does tag them applied', () => {
-      expect(fires('mark_alerts_dismissed', context)).toBe(false);
-      expect(fires('mark_alerts_applied', gateContext({ approved: true, rulePatched: true }))).toBe(
-        true
-      );
-    });
-
-    it('applies only when the preview path is supported for this rule', () => {
-      expect(fires('apply_query_tuning', gateContext({ approved: true, supported: false }))).toBe(
-        false
-      );
+    it('a manual approval acknowledges instead of applying', () => {
+      const manual = gateContext({ changeType: 'manual', manualDecision: 'approved' });
+      expect(fires('mark_alerts_acknowledged', manual)).toBe(true);
+      expect(fires('mark_alerts_applied', manual)).toBe(false);
+      expect(fires('mark_alerts_dismissed', manual)).toBe(false);
     });
   });
 
-  describe("the approve arm's precondition", () => {
+  describe('the preview path the approve arm depends on', () => {
     /**
-     * `apply_query_tuning` never tests the rule shape itself — it tests
-     * `can_preview_query_change.output.supported`, so that computed flag is what decides
-     * whether an approval can patch anything. The approval spec's approve arm asserts a patch,
-     * which is vacuous unless the seeded fixture really satisfies this.
+     * `propose_tuning` only raises a proposal for change types whose patch the
+     * preview API can simulate (`can_preview_query_change.supported`), so that
+     * computed flag decides whether an approval can patch anything. The approval
+     * spec's approve arm asserts a patch, which is vacuous unless the seeded
+     * fixture really satisfies this.
      */
-    const supported = (fetchRule: Record<string, unknown>) =>
+    const supported = (fetchRule: Record<string, unknown>, changeType = 'query') =>
       evaluates(
         withValueOf('can_preview_query_change', 'supported'),
         {
           steps: {
-            diagnose_rule: { output: { structured_output: { change_type: 'query' } } },
+            diagnose_rule: { output: { structured_output: { change_type: changeType } } },
             fetch_rule: { error: null, output: { enabled: true, ...fetchRule } },
           },
         },
@@ -319,12 +343,20 @@ describe('rule-tuning approval gate contract', () => {
 
     it('refuses a rule type whose query is never previewed or applied', () => {
       expect(supported({ ...plainQueryRule, type: 'new_terms' })).toBe(false);
-      expect(supported({ ...plainQueryRule, type: 'threshold' })).toBe(false);
+    });
+
+    it('supports threshold and schedule changes on both query and threshold rules', () => {
+      // #291874/#294332: the second clause only narrows THRESHOLD rules to the
+      // threshold/schedule arms; a query rule passes for every previewable type.
+      expect(supported({ ...plainQueryRule, type: 'threshold' }, 'threshold')).toBe(true);
+      expect(supported({ ...plainQueryRule, type: 'threshold' }, 'schedule')).toBe(true);
+      expect(supported(plainQueryRule, 'threshold')).toBe(true);
+      expect(supported(plainQueryRule, 'schedule')).toBe(true);
+      // A threshold rule cannot take a query/exception proposal.
+      expect(supported({ ...plainQueryRule, type: 'threshold' }, 'query')).toBe(false);
     });
 
     it('refuses the rule modes whose preview fields cannot be omitted', () => {
-      // The preview API cannot conditionally omit these, so the apply path is closed for
-      // them — an approve arm on such a rule would assert a patch that never happens.
       expect(supported({ ...plainQueryRule, data_view_id: 'logs-view' })).toBe(false);
       expect(supported({ ...plainQueryRule, timestamp_override: '@timestamp' })).toBe(false);
       expect(supported({ ...plainQueryRule, alert_suppression: { group_by: ['host.name'] } })).toBe(
@@ -332,34 +364,22 @@ describe('rule-tuning approval gate contract', () => {
       );
     });
 
-    it('refuses a non-query recommendation', () => {
-      expect(
-        evaluates(
-          withValueOf('can_preview_query_change', 'supported'),
-          {
-            steps: {
-              diagnose_rule: { output: { structured_output: { change_type: 'exception' } } },
-              fetch_rule: { error: null, output: { enabled: true, ...plainQueryRule } },
-            },
-          },
-          'can_preview_query_change.supported'
-        )
-      ).toBe(false);
+    it('refuses a non-previewable recommendation', () => {
+      expect(supported(plainQueryRule, 'risk_score')).toBe(false);
     });
   });
 
   describe('the gate is fail-closed', () => {
-    it('does not apply when the gate recorded no response', () => {
-      // `strictVariables: false` renders the missing path as undefined and KQL term
-      // evaluation is false for it, so an unrecorded decision cannot be read as approval.
-      // This case is also what fails if the condition is ever rewritten as
-      // `approved != false` (undefined != false is true — a fail-open gate).
-      expect(fires('apply_query_tuning', gateContext({ approved: true, response: false }))).toBe(
-        false
-      );
-      expect(
-        fires('apply_exception_tuning', gateContext({ approved: true, response: false }))
-      ).toBe(false);
+    it('does not apply when the proposal never recorded an outcome', () => {
+      // `strictVariables: false` renders the missing step as undefined and KQL
+      // equality is false for it, so an unrecorded decision cannot be read as
+      // approval. This case is also what fails if the condition is ever rewritten
+      // as `approved != false` (undefined != false is true — a fail-open gate).
+      const unanswered = gateContext({ approved: true, response: false });
+      expect(aggregate('applied', unanswered)).toBe(false);
+      expect(aggregate('approved', unanswered)).toBe(false);
+      expect(aggregate('dismissed', unanswered)).toBe(false);
+      expect(fires('mark_alerts_applied', unanswered)).toBe(false);
     });
   });
 
