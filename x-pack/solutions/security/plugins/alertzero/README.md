@@ -78,6 +78,10 @@ Managed-workflow ownership remains registered when optional runtime dependencies
 
 Each Worker runs as its own `alertzero_<worker>` service account, with a role of the same name. AlertZero creates both from the browser, with the admin's privileges, when a Worker is turned on without an account, and reuses existing ones without changing them.
 
+The Worker's child workflows run as the same account. Every `workflow.execute` and `workflow.executeAsync` call in a Worker's chain sets `run-as-mode: inherit` and names the child by a literal `workflow-id`. Inheritance requires a literal id, and the step input schema ignores unknown keys, so a misspelled `run-as-mode` silently runs the child as the original caller. Action workflows are the exception: proposals start them by a templated id, so they keep the default identity. `service_account_inheritance.test.ts` enforces both rules.
+
+Inheritance needs a parent that runs as a service account. Running a child workflow such as a review or sweep by hand fails at its first child call, so run the Worker instead. The Attack Discovery pipeline that `security.attack-discovery.run` starts is a known gap: it still runs as the user who enabled the Worker.
+
 **Known limitation (MVP):** AlertZero does not detect or repair a Worker whose role or service account was deleted. If the role is deleted, the Worker's runs fail with authorization errors until the role is re-created with the same name and privileges. If the account is deleted (Kibana only allows this with force while Workers are bound to it), the Worker's runs fail until it is re-bound to a new account through the worker API (`PATCH /internal/alertzero/workers/{workerId}` with a new `settings.serviceAccountId` and the Worker's current `settingsRevision`). Detecting and repairing both cases is planned post-MVP.
 
 To inspect a Worker's installed managed workflow — its rendered YAML, triggers, and executions — in the Workflows UI, also set:
@@ -115,6 +119,7 @@ Real data is served by default. Keep these in mind when running AlertZero in sha
 - Settings writes (autonomy, schedule, extras) require `alertzero_write`; managed install is requestless, so the AlertZero route is the authorization boundary for those fields.
 - Enable/disable also requires Workflows `workflowsManagement:update` **and** `workflowsManagement:managed:update`. `workflows:all` does **not** include `workflow_update_managed` — that sub-feature must be granted explicitly.
 - Autonomy and enablement are durable per Worker. There is no Watch-owned settings write path.
+- Enabling a Worker is refused while the space has no AI model to run it on: no LLM connector and no Elastic Managed LLM (EIS), or "use only the default connector" is on with no default set. Every Worker then reports `blockingReasons: ['no_model']`, its switch can't be turned on, and `PATCH enabled: true` returns a 400. The stored `enabled` value is never changed, and switching a Worker off or saving its settings still works. Adding any chat connector, or running `node scripts/eis.js` against a running stack, unblocks it.
 
 ### Skills projection
 
@@ -227,6 +232,7 @@ The current YAML files are Worker stubs rather than final Watch-team definitions
 7. `toSettings` projects stored values into `WorkerSettings`: `workerId`, `autonomy`, `scheduleInterval` for schedule-driven Workers, `extras` for Workers that declare them. Read and PATCH use the same names and nesting.
 8. Add settings-module tests for defaults, patches, and that projected keys are not stripped. Add managed-definition tests for valid rendered YAML and registry tests for catalog/settings wiring. Imported YAML changes require an explicit managed-definition version decision.
 9. If the Worker only acts on records another Worker writes, so it has nothing to do while that Worker is off, add an entry to `WORKER_DEPENDENCIES` in `public/pages/watches/worker_dependencies/worker_dependencies.tsx`. The entry carries its own dialog and warning copy. Workers that merely get fewer inputs do not belong there.
+10. Every child workflow the Worker calls with `workflow.execute` or `workflow.executeAsync`, directly or through another child, sets `run-as-mode: inherit` with a literal `workflow-id` (see [Worker lifecycle](#worker-lifecycle)). Action workflows keep the default identity.
 
 The Workers service owns per-space installation, reading persisted values, enable/disable, and upgrades. Settings responses carry a logical revision (`settingsRevision`, `null` before the per-space document exists). A settings PATCH sends the revision its draft was built from; the server returns 409 when the stored revision differs and the client keeps the draft. Compare-then-write, not an atomic guard.
 
@@ -293,7 +299,7 @@ Adding a field to an existing Worker touches only Watch-owned code (Rule Tuning'
 
 The shared Watch page renders the interval control from the presence of `scheduleInterval`, offers only the Worker's `allowedAutonomyLevels` (one level renders as a fixed value), and mounts the registered custom component. Every card also carries a Models row linking to Stack Management → Feature Settings, where models are picked per space for each AlertZero tier; a Worker has no model setting of its own, so don't add one to `extras`. Every edit, including Enabled, changes a draft. Save validates all dirty Workers, then writes Worker by Worker with the revision each draft started from; failed Workers keep draft and error; Discard drops unsaved edits without undoing successful writes.
 
-Hard Worker dependencies (`WORKER_DEPENDENCIES`) are judged client-side against every Worker's saved enabled state, with this page's draft on top, so they work across Watches. Turning off a Worker that an enabled Worker depends on asks for confirmation before the draft changes; turning a Worker on never asks. Each Worker header carries one warning icon listing its reasons. After Save, a Worker the save turned on that is still blocked gets an acknowledge-only notice; settings-only saves get none, and the notice never blocks the save.
+Hard Worker dependencies (`WORKER_DEPENDENCIES`) are judged client-side against every Worker's saved enabled state, with this page's draft on top, so they work across Watches. Turning off a Worker that an enabled Worker depends on asks for confirmation before the draft changes; turning a Worker on never asks. Each Worker header carries one warning icon listing its reasons. After Save, an acknowledge-only notice lists why a saved Worker that is on can't do its work: a missing model after every save, a disabled provider only after the save that turned the Worker on. The notice never blocks the save.
 
 ### Pre-customer state
 

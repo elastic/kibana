@@ -8,7 +8,7 @@
 import type * as H from 'history';
 import type React from 'react';
 
-import type { AllRulesTabs } from '../../../detection_engine/rule_management_ui/components/rules_table/rules_table_toolbar';
+import type { AllRulesTabs } from '../../../detection_engine/rule_management_ui/components/rules_table/constants';
 import type { HostsTableType } from '../../../explore/hosts/store/model';
 import type { NetworkRouteType } from '../../../explore/network/pages/navigation/types';
 import type { AdministrationSubTab as AdministrationType } from '../../../management/types';
