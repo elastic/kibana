@@ -107,7 +107,7 @@ test.describe('Field Level Security', { tag: tags.stateful.classic }, () => {
         await pageObjects.discover.goto({ queryMode: 'classic' });
         await pageObjects.discover.selectDataView(dataViewName, { createAdHocIfMissing: false });
         await expect(pageObjects.discover.getHitCountLocator()).toHaveText('2');
-        const rowData = await pageObjects.discover.getDocTableIndex(1);
+        const rowData = await pageObjects.dataGrid.getCell(0, '_source').innerText();
         expect(rowData.includes('ssn')).toBe(scenario.seesSsn);
       } finally {
         await esClient.security.deleteUser({ username }, { ignore: [404] });

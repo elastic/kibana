@@ -96,7 +96,7 @@ test.describe('Document Level Security', { tag: tags.stateful.classic }, () => {
     await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.discover.selectDataView(dataViewName, { createAdHocIfMissing: false });
     await expect(pageObjects.discover.getHitCountLocator()).toHaveText('1');
-    const rowData = await pageObjects.discover.getDocTableIndex(1);
+    const rowData = await pageObjects.dataGrid.getCell(0, '_source').innerText();
     expect(rowData).toContain('EAST');
   });
 });
