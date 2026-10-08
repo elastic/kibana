@@ -1,0 +1,99 @@
+---
+id: elasticsearchHome
+slug: /elasticsearch-home
+title: Elasticsearch Home
+description: The shared Elasticsearch home page, rendered by the plugins that host it.
+tags: ['elasticsearch', 'home', 'shared']
+---
+
+## Overview
+
+This plugin owns the Elasticsearch home page: the welcome header with its connection details, the
+Data, Dashboards, Workflows and API Keys stat cards, the new-index footer, the "Add data" list, and
+the "Build in your IDE" section. It also owns the `deployment_stats` and `starred_dashboards_count`
+endpoints and the Elasticsearch feature that exposes the index `monitor` privilege as a UI
+capability. The workflows counts are read from the workflows plugin's own `/api/workflows/stats`.
+
+It does not register an application. Hosting plugins render the page inside their own app and route,
+so the page can be the home of more than one product without any of them changing URL.
+
+`features`, `share` and `agentBuilder` are required plugins; `cloud` is optional, and the connection
+details group is hidden where cloud reports no endpoint. The whole plugin can be switched off with
+`xpack.elasticsearchHome.enabled: false`.
+
+## Rendering it from a host plugin
+
+Add `elasticsearchHome` to `requiredPlugins` and render `HomePage` from the start contract. The
+component brings its own Kibana services and query client, so it only needs the host's product
+identity as props.
+
+Only the two namespace prefixes are required. Everything else falls back to generic Elasticsearch
+content, so a host that wants the plain page passes just these:
+
+```tsx
+const { HomePage } = elasticsearchHome;
+
+<HomePage telemetryPrefix="myProduct-home" storageKeyPrefix="myProduct.home" />;
+```
+
+A host that wants its own product identity passes the rest:
+
+```tsx
+<HomePage
+  telemetryPrefix="serverlessVectordb-home"
+  storageKeyPrefix="vectordb.home"
+  docsLink={{ href: docsUrl, label: 'Learn more about Elasticsearch Vector Database' }}
+  ideSetup={{ prompt, agentInitialMessage: '/elasticsearch-onboarding', agentSessionTag: 'vectordb-home' }}
+  banner={{ title, description, buttonLabel, onGetStarted }}
+  primaryAddDataLink={{ key: 'embeddings', iconType: 'rocket', label, onClick, telemetryId }}
+/>;
+```
+
+Keep that props object stable across renders — `serverless_vectordb` builds it with `useMemo` in
+`public/home_page.tsx` — so host re-renders do not re-render the page.
+
+### Why these are props
+
+Anything that names a product is injected rather than imported:
+
+| Prop | Required | Why the host owns it |
+| --- | --- | --- |
+| `telemetryPrefix` | yes | Each host keeps its existing telemetry ids, so dashboards built on them stay valid. |
+| `storageKeyPrefix` | yes | Hosts must not share banner or new-index dismissal state. |
+| `docsLink`, `ideSetup` | no | Product-specific copy. Default to the Elasticsearch getting-started docs and a neutral prompt. |
+| `banner`, `primaryAddDataLink` | no | Product-specific navigation targets. Omit them to render neither. |
+
+Elements this plugin owns namespace their own telemetry ids under `telemetryPrefix`. A
+`primaryAddDataLink` carries a complete `telemetryId`, because the host already knows its prefix.
+
+### Connection details
+
+The header shows the deployment's Elasticsearch endpoint with a copy button, plus buttons that open
+the cloud connection details flyout — which owns API key creation — so no host has to supply this.
+The endpoint comes from `cloud.fetchElasticsearchConfig()`. Where cloud reports none, as on a
+self-managed deployment, the whole group is hidden rather than left blank. The URL panel itself is
+`EndpointUrl` from `@kbn/shared-components`, shared with the vectordb onboarding wizard.
+
+## Public API
+
+`public/index.ts` is the whole browser-facing surface. `HomePage` reaches a host through the start
+contract, so nothing needs importing to render the page, and beyond the plugin initializer the barrel
+exports only types: `ElasticsearchHomePageProps`, `ElasticsearchHomePublicStart`,
+`HomeAddDataLink`, `HomeBannerConfig`, `HomeDocsLink` and `HomeIdeSetup`. Those are what let a host
+declare its props in a helper rather than inline.
+
+## Server
+
+`setup` registers:
+
+- `GET /internal/elasticsearch_home/deployment_stats` — index, document, size, dashboard and API key
+  counts, plus the newest index created in the last 24 hours. Each stat is read independently and
+  reported as `null` on failure, so "unavailable" stays distinguishable from a genuine `0`.
+- `POST /internal/elasticsearch_home/starred_dashboards_count` — resolves favorited dashboard ids
+  against the dashboards that still exist.
+- An Elasticsearch feature registered under the plugin id, which surfaces index `monitor` as the
+  `capabilities.elasticsearchHome.canMonitorAllIndices` UI capability.
+
+The `Vectors` tile that capability guards is currently suppressed by `VECTOR_COUNT_ENABLED` in
+`common/constants.ts`. Elasticsearch reports dense vector `value_count` as 0 on stateless, so the
+fetch and render paths are kept intact but disabled until there is a replacement.

@@ -8,6 +8,8 @@ xpack.securitySolutionEss.enabled: false
 
 ## Disable plugins
 xpack.observabilityAIAssistant.enabled: false
+# Defaults enabled so stack can host it; nothing in security renders the shared home page.
+xpack.elasticsearchHome.enabled: false
 
 ## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:

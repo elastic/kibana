@@ -22,6 +22,9 @@ xpack.agenticInvestigations.escalations.enabled: false
 xpack.ux.enabled: false
 xpack.legacy_uptime.enabled: false
 
+# Defaults enabled so stack can host it; nothing in observability renders the shared home page.
+xpack.elasticsearchHome.enabled: false
+
 ## Cloud settings
 xpack.cloud.serverless.project_type: observability
 
