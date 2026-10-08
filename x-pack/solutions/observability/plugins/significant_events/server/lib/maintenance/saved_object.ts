@@ -96,9 +96,6 @@ const maintenanceStateAttributesV2 = maintenanceStateAttributesV1.extends({
   lastSummary: schema.maybe(maintenanceSummarySchemaV2),
 });
 
-/** Rules are recorded with the same `{ id, spaceId }` shape as workflows. */
-const disabledRuleSchema = disabledWorkflowSchemaV1;
-
 const maintenanceStateAttributesV3 = schema.object({
   state: schema.string(),
   updatedAt: schema.maybe(schema.string()),
@@ -106,7 +103,8 @@ const maintenanceStateAttributesV3 = schema.object({
   disabledWorkflows: schema.arrayOf(disabledWorkflowSchemaV1, {
     maxSize: MAINTENANCE_STATE_ARRAY_MAX_SIZE,
   }),
-  disabledRules: schema.arrayOf(disabledRuleSchema, {
+  // Rules are recorded with the same `{ id, spaceId }` shape as workflows.
+  disabledRules: schema.arrayOf(disabledWorkflowSchemaV1, {
     maxSize: MAINTENANCE_STATE_ARRAY_MAX_SIZE,
   }),
   lastSummary: schema.maybe(maintenanceSummarySchemaV2),

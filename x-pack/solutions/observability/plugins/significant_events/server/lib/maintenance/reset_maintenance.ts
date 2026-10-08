@@ -15,6 +15,7 @@ import type { GetScopedClients } from '../../routes/types';
 import type { SignificantEventsServer } from '../../types';
 import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
 import {
+  emptyStillOn,
   isContinuousOnboardingWorkflowId,
   isScheduledDiscoveryWorkflowId,
   requestForSpace,
@@ -50,6 +51,30 @@ const failuresOfSpace = (
   spaceId: SpaceId
 ): SignificantEventsMaintenanceFailure[] =>
   failures.filter((failure) => failure.spaceId === undefined || failure.spaceId === spaceId);
+
+/** The toggles of `toggles` that belong to spaces `keep` accepts. */
+const keepSpaces = (
+  toggles: StillOnFeatureSettings,
+  keep: (spaceId: SpaceId) => boolean
+): StillOnFeatureSettings => ({
+  ...toggles,
+  continuousOnboardingSpaceIds: toggles.continuousOnboardingSpaceIds.filter(keep),
+  scheduledDiscoveryEnabledSpaceIds: toggles.scheduledDiscoveryEnabledSpaceIds.filter(keep),
+});
+
+/** The toggles of `toggles` that `removed` does not list, per toggle kind. */
+const subtractToggles = (
+  toggles: StillOnFeatureSettings,
+  removed: StillOnFeatureSettings
+): StillOnFeatureSettings => ({
+  ...toggles,
+  continuousOnboardingSpaceIds: toggles.continuousOnboardingSpaceIds.filter(
+    (spaceId) => !removed.continuousOnboardingSpaceIds.includes(spaceId)
+  ),
+  scheduledDiscoveryEnabledSpaceIds: toggles.scheduledDiscoveryEnabledSpaceIds.filter(
+    (spaceId) => !removed.scheduledDiscoveryEnabledSpaceIds.includes(spaceId)
+  ),
+});
 
 /** What reset needs from the maintenance service, which owns the pause bookkeeping. */
 export interface IResetMaintenanceDeps {
@@ -217,26 +242,14 @@ export const createResetRunner = ({
     // keeps its pause and its disabled workflows.
     const pausedByReset = new Set<SpaceId>();
     let newlyDisabled: MaintenanceWorkflowTarget[] = [];
-    let togglesBefore: StillOnFeatureSettings = {
-      continuousOnboardingWasEnabled: false,
-      continuousOnboardingSpaceIds: [],
-      scheduledDiscoveryEnabledSpaceIds: [],
-    };
+    let togglesBefore = emptyStillOn();
     let settingsStillOn = togglesBefore;
     let recoveryWorkflows: MaintenanceWorkflowTarget[] = [];
 
     /** Phase 1 and 2 undo: toggles and workflows first, then each space's document. */
     const rollback = async (): Promise<void> => {
       const releasedSpaces = [...pausedByReset];
-      const toggles: StillOnFeatureSettings = {
-        ...togglesBefore,
-        continuousOnboardingSpaceIds: togglesBefore.continuousOnboardingSpaceIds.filter((id) =>
-          pausedByReset.has(id)
-        ),
-        scheduledDiscoveryEnabledSpaceIds: togglesBefore.scheduledDiscoveryEnabledSpaceIds.filter(
-          (id) => pausedByReset.has(id)
-        ),
-      };
+      const toggles = keepSpaces(togglesBefore, (spaceId) => pausedByReset.has(spaceId));
       const togglesNotRestored = await featureSettings.restoreTogglesOn({
         request,
         toggles,
@@ -247,15 +260,7 @@ export const createResetRunner = ({
         mgmt,
         workflows: toRestore,
         // A settings-backed workflow comes back only where its toggle is back on.
-        settingsStillOn: {
-          ...toggles,
-          continuousOnboardingSpaceIds: toggles.continuousOnboardingSpaceIds.filter(
-            (id) => !togglesNotRestored.continuousOnboardingSpaceIds.includes(id)
-          ),
-          scheduledDiscoveryEnabledSpaceIds: toggles.scheduledDiscoveryEnabledSpaceIds.filter(
-            (id) => !togglesNotRestored.scheduledDiscoveryEnabledSpaceIds.includes(id)
-          ),
-        },
+        settingsStillOn: subtractToggles(toggles, togglesNotRestored),
         request,
         failures,
       });

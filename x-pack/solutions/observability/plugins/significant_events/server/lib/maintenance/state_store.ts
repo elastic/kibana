@@ -94,7 +94,7 @@ export const buildPausedIntent = ({
 }: {
   existing: LoadedMaintenanceState | undefined;
   actor: string | undefined;
-}): SignificantEventsMaintenanceStateAttributes => ({
+}): LoadedMaintenanceState => ({
   state: 'paused',
   updatedAt: new Date().toISOString(),
   updatedBy: actor,
@@ -242,14 +242,7 @@ export const createMaintenanceStateStore = (
     current: VersionedMaintenanceState | undefined;
     updatedBy: string;
   }): Promise<LoadedMaintenanceState | undefined> => {
-    const claimed: LoadedMaintenanceState = {
-      ...buildPausedIntent({ existing: current?.attributes, actor: updatedBy }),
-      // The builder returns raw SO attributes, whose space ids are plain strings, so the
-      // branded inventory is carried over from the loaded state.
-      disabledWorkflows: current?.attributes.disabledWorkflows ?? [],
-      disabledRules: current?.attributes.disabledRules ?? [],
-      pausedSettings: current?.attributes.pausedSettings,
-    };
+    const claimed = buildPausedIntent({ existing: current?.attributes, actor: updatedBy });
     try {
       if (current) {
         await getSoClient(spaceId).update<SignificantEventsMaintenanceStateAttributes>(
