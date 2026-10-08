@@ -34,7 +34,8 @@ export const AnalyticsEmptyPrompt: FC<{
   centered?: boolean;
   customCss?: SerializedStyles;
   iconSize?: 'fullWidth' | 'original' | 's' | 'm' | 'l' | 'xl';
-}> = ({ showDocsLink = false, centered = false, customCss, iconSize }) => {
+  titleSize?: 'xs' | 's' | 'm' | 'l';
+}> = ({ showDocsLink = false, centered = false, customCss, iconSize, titleSize }) => {
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -66,6 +67,7 @@ export const AnalyticsEmptyPrompt: FC<{
         defaultMessage: 'Tailored predictive models',
       })}
       iconSize={iconSize}
+      titleSize={titleSize}
       title={i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
         defaultMessage: 'Tailored predictive models',
       })}

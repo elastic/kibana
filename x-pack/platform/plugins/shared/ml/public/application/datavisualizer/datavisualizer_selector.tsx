@@ -83,7 +83,7 @@ export const DatavisualizerSelector: FC = () => {
           )}
         />
 
-        <DataVisualizerGrid isEsqlEnabled={isEsqlEnabled} />
+        <DataVisualizerGrid isEsqlEnabled={isEsqlEnabled} cardTitleSize="xs" />
         {startTrialVisible === true && (
           <Fragment>
             <EuiSpacer size="xxl" />

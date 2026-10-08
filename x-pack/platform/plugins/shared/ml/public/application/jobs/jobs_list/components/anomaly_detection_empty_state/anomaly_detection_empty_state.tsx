@@ -24,7 +24,8 @@ export const AnomalyDetectionEmptyState: FC<{
   centered?: boolean;
   customCss?: SerializedStyles;
   iconSize?: 'fullWidth' | 'original' | 's' | 'm' | 'l' | 'xl';
-}> = ({ showDocsLink = false, centered = false, customCss, iconSize }) => {
+  titleSize?: 'xs' | 's' | 'm' | 'l';
+}> = ({ showDocsLink = false, centered = false, customCss, iconSize, titleSize }) => {
   const canCreateJob = usePermissionCheck('canCreateJob');
   const disableCreateAnomalyDetectionJob = !canCreateJob || !mlNodesAvailable();
 
@@ -45,6 +46,7 @@ export const AnomalyDetectionEmptyState: FC<{
         defaultMessage: 'Anomaly detection',
       })}
       iconSize={iconSize}
+      titleSize={titleSize}
       title={i18n.translate('xpack.ml.overview.anomalyDetection.createFirstJobMessage', {
         defaultMessage: 'Anomaly detection',
       })}
