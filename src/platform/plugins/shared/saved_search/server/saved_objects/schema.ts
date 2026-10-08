@@ -275,8 +275,8 @@ const SCHEMA_TAB_TYPE_STATE_V18 = schema.oneOf([
     counterAggregation: SCHEMA_SIMPLE_AGGREGATION,
     gaugeAggregation: SCHEMA_SIMPLE_AGGREGATION,
     histogramPercentile: SCHEMA_HISTOGRAM_PERCENTILE,
-    sortField: schema.maybe(SCHEMA_METRICS_GRID_SORT_FIELD),
-    sortDirection: schema.maybe(SCHEMA_METRICS_GRID_SORT_DIRECTION),
+    gridSortField: schema.maybe(SCHEMA_METRICS_GRID_SORT_FIELD),
+    gridSortDirection: schema.maybe(SCHEMA_METRICS_GRID_SORT_DIRECTION),
   }),
 ]);
 

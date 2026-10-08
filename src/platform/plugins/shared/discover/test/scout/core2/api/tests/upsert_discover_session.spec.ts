@@ -378,8 +378,8 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
         counterAggregation: 'max',
         gaugeAggregation: 'min',
         histogramPercentile: 'p99',
-        sortField: 'recency',
-        sortDirection: 'desc',
+        gridSortField: 'recency',
+        gridSortDirection: 'desc',
       };
 
       const attributes: DiscoverSessionAttributes = {

@@ -19,9 +19,16 @@ import {
 import { METRICS_STATE_DEF } from './profile_state_definitions/metrics_grid_profile_state';
 import { METRICS_GRID_SAVED_STATE_TRANSFORM } from './profile_state_transforms/metrics_grid_saved_state_transform';
 
-const createSavedMetricsSettings = (dimensions: string[]) => ({
+const createMetricsSettings = (dimensions: string[]) => ({
   ...METRICS_GRID_SETTINGS_DEFAULTS,
   ...METRICS_GRID_SORT_DEFAULTS,
+  dimensions,
+});
+
+const createSavedMetricsSettings = (dimensions: string[]) => ({
+  ...METRICS_GRID_SETTINGS_DEFAULTS,
+  gridSortField: METRICS_GRID_SORT_DEFAULTS.sortField,
+  gridSortDirection: METRICS_GRID_SORT_DEFAULTS.sortDirection,
   dimensions,
 });
 
@@ -107,7 +114,7 @@ describe('ProfileStateRegistry', () => {
         ...createSavedMetricsSettings(['host.name']),
       });
       expect(registry.fromSavedState(savedState)).toEqual({
-        metricsState: createSavedMetricsSettings(['host.name']),
+        metricsState: createMetricsSettings(['host.name']),
       });
     });
 

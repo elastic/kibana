@@ -21,16 +21,16 @@ export const METRICS_GRID_SAVED_STATE_TRANSFORM = createProfileSavedStateTransfo
     counterAggregation: settings.counterAggregation,
     gaugeAggregation: settings.gaugeAggregation,
     histogramPercentile: settings.histogramPercentile,
-    sortField: settings.sortField,
-    sortDirection: settings.sortDirection,
+    gridSortField: settings.sortField,
+    gridSortDirection: settings.sortDirection,
   }),
   // Sessions saved before sort was persisted omit the sort fields. Fill in the defaults so a reset
   // replaces the current sort instead of keeping it.
-  fromSavedState: ({ sortField, sortDirection, ...settings }) => [
+  fromSavedState: ({ gridSortField, gridSortDirection, ...settings }) => [
     {
       ...settings,
-      sortField: sortField ?? METRICS_GRID_SORT_DEFAULTS.sortField,
-      sortDirection: sortDirection ?? METRICS_GRID_SORT_DEFAULTS.sortDirection,
+      sortField: gridSortField ?? METRICS_GRID_SORT_DEFAULTS.sortField,
+      sortDirection: gridSortDirection ?? METRICS_GRID_SORT_DEFAULTS.sortDirection,
     },
   ],
 });

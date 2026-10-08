@@ -466,8 +466,8 @@ describe('Discover session conversion and UI preparation', () => {
       counterAggregation: 'max',
       gaugeAggregation: 'min',
       histogramPercentile: 'p99',
-      sortField: 'recency',
-      sortDirection: 'desc',
+      gridSortField: 'recency',
+      gridSortDirection: 'desc',
     });
     expect(toDiscoverSessionApiData(session)).toStrictEqual(metricsResponse.data);
   });

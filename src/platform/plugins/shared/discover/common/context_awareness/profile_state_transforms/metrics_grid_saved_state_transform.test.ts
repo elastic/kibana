@@ -41,8 +41,8 @@ describe('METRICS_GRID_SAVED_STATE_TRANSFORM', () => {
       histogramPercentile: 'p50',
       dimensions: ['host.name'],
       searchTerm: 'bytes',
-      sortField: 'recency',
-      sortDirection: 'desc',
+      gridSortField: 'recency',
+      gridSortDirection: 'desc',
     });
     expect(registry.fromSavedState(savedState)).toEqual({
       metricsState: {
@@ -108,8 +108,8 @@ describe('METRICS_GRID_SAVED_STATE_TRANSFORM', () => {
       histogramPercentile: 'p95',
       dimensions: [],
       searchTerm: '',
-      sortField: 'alphabetically',
-      sortDirection: 'asc',
+      gridSortField: 'alphabetically',
+      gridSortDirection: 'asc',
     });
   });
 });

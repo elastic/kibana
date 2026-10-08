@@ -744,8 +744,8 @@ describe('discover session API transforms', () => {
                 counterAggregation: 'max',
                 gaugeAggregation: 'min',
                 histogramPercentile: 'p99',
-                sortField: 'recency',
-                sortDirection: 'desc',
+                gridSortField: 'recency',
+                gridSortDirection: 'desc',
               },
             },
           },
@@ -1216,8 +1216,8 @@ describe('discover session API transforms', () => {
         counterAggregation: 'max',
         gaugeAggregation: 'min',
         histogramPercentile: 'p99',
-        sortField: 'recency',
-        sortDirection: 'desc',
+        gridSortField: 'recency',
+        gridSortDirection: 'desc',
       };
       const savedMetricsSession = {
         ...discoverSessionAttributes,
