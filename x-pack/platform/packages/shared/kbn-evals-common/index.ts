@@ -47,3 +47,7 @@ export {
   isImproved,
 } from './impl/statistical_analysis';
 export type { PairedScore } from './impl/statistical_analysis';
+export {
+  DEFAULT_JUDGE_SCORE_DIRECTION,
+  getJudgeScoreDirection,
+} from './impl/judge_score_direction';

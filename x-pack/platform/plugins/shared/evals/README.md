@@ -246,7 +246,17 @@ The plugin UI is organized into five navigation tabs:
 
 #### Score direction
 
-A user-defined judge is compiled with `direction: 'maximize'`, and direction is set once per evaluator, so every score it emits is read as higher is better. That covers both numeric scores and the values assigned to categorical labels. Comparisons depend on it: a judge whose score falls as quality improves, such as a hallucination rate, shows improvements as regressions. Phrase rubrics so that 1 is the best outcome, for example scoring groundedness rather than hallucination. The editor says the same above its score list.
+Each score a user-defined judge declares carries its own `direction`, so one judge can maximize groundedness while minimizing a hallucination rate:
+
+| Direction | Editor label | Comparisons read it as |
+| --- | --- | --- |
+| `maximize` | Higher is better | An increase is an improvement |
+| `minimize` | Lower is better | A decrease is an improvement |
+| `neutral` | Neutral | Informational; never an improvement or a regression |
+
+Direction covers both numeric scores and the values assigned to categorical labels. A score that omits it is `maximize`, which is how every score was read before scores could declare one, so existing versions behave exactly as before. A numeric score's direction is also stated to the judge, so a lower-is-better score is not reported on an inverted scale.
+
+`_evaluate` and `_test` return the direction on each score, and every score document is stamped with it. Experiment comparison reads it per score, so improvements and regressions are colored correctly even when one evaluator's scores point different ways. The evaluator-level `direction` remains the fallback for scores that do not set one, which is how built-in evaluators and older score documents are read. For a user-defined judge it is the direction its scores share, or `maximize` when they point different ways.
 
 #### Evaluator versions
 
@@ -256,9 +266,9 @@ Every saved change writes a new immutable version; saving without changing anyth
 | --- | --- | --- |
 | `patch` | Only the catalog description, which the judge never sees | Still comparable |
 | `minor` | The judge's instructions: prompts, or the criteria attached to a score | Scores may shift, but still line up |
-| `major` | The scores themselves (added, removed, renamed, retyped, or relabelled) or the required evidence and reference data keys | Earlier runs no longer line up |
+| `major` | The scores themselves (added, removed, renamed, retyped, relabelled, or given a different direction) or the required evidence and reference data keys | Earlier runs no longer line up |
 
-A major is therefore a mechanical statement that results before and after cannot be compared, not an opinion about how large the edit was.
+A major is therefore a mechanical statement that results before and after cannot be compared, not an opinion about how large the edit was. Changing a score's direction is a major because the same movement would read the opposite way: when two experiments straddle the change, comparison uses the target experiment's direction for both sides. Re-saving a version that predates per-score direction, with every score left at Higher is better, is not a change and writes no version.
 
 Order matters in one place only. Evidence and reference data keys are sets of requirements, so their order is normalized and reordering them alone writes no version at all. Score order is part of the definition a reader sees and the order the judge is asked for them, so reordering scores is a `minor` — the set of scores is unchanged, which is why it is not a `major`.
 - **Tracing** — browse tracing projects with metrics, drill into individual traces with a waterfall view

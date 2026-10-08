@@ -389,6 +389,41 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
     }
   );
 
+  apiTest(
+    'update: should set, keep and clear routing tags independently of tags',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-routing', tags: ['prod'] } })
+      );
+
+      const setResponse = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { routing_tags: ['sre', 'payments'] } },
+      });
+      expect(setResponse).toHaveStatusCode(200);
+      expect(setResponse.body.metadata.routing_tags).toStrictEqual(['sre', 'payments']);
+      expect(setResponse.body.metadata.tags).toStrictEqual(['prod']);
+
+      const renameResponse = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { name: 'rule-routing-renamed' } },
+      });
+      expect(renameResponse).toHaveStatusCode(200);
+      expect(renameResponse.body.metadata.routing_tags).toStrictEqual(['sre', 'payments']);
+
+      const clearResponse = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { routing_tags: null } },
+      });
+      expect(clearResponse).toHaveStatusCode(200);
+      expect(clearResponse.body.metadata.routing_tags).toBeUndefined();
+
+      const persisted = await apiServices.alertingV2.rules.get(created.id);
+      expect(persisted.metadata.routing_tags).toBeUndefined();
+      expect(persisted.metadata.tags).toStrictEqual(['prod']);
+    }
+  );
+
   apiTest('status: should return 404 when the rule does not exist', async ({ apiClient }) => {
     const response = await apiClient.patch(getRuleUrl('does-not-exist'), {
       headers: writerHeaders,
@@ -596,6 +631,24 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
+    'validation: should reject setting routing tags on a signal rule',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildSignalRuleData('signal-with-routing-tags')
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { routing_tags: ['sre'] } },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_SIGNAL_RULE');
+
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(stored.metadata.routing_tags).toBeUndefined();
+    }
+  );
+
+  apiTest(
     'validation: should reject recovery.strategy "condition" on a rule whose query has no breach',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
@@ -716,11 +769,11 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
-    'builder_type: should reject query change on a builder rule without explicit builder_type clear',
+    'builder: should reject query change on a builder rule without explicit builder clear',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
-          metadata: { name: 'builder-rule', builder_type: 'threshold' },
+          metadata: { name: 'builder-rule', builder: { type: 'threshold' } },
         })
       );
       const response = await apiClient.patch(getRuleUrl(created.id), {
@@ -733,27 +786,27 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.code).toBe('BUILDER_TYPE_NOT_CLEARED');
       // Rule should remain unchanged
       const stored = await apiServices.alertingV2.rules.get(created.id);
-      expect(stored.metadata.builder_type).toBe('threshold');
+      expect(stored.metadata.builder).toStrictEqual({ type: 'threshold' });
     }
   );
 
   apiTest(
-    'builder_type: should allow query change on a builder rule when builder_type is explicitly cleared',
+    'builder: should allow query change on a builder rule when builder is explicitly cleared',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
-          metadata: { name: 'builder-rule-clear', builder_type: 'threshold' },
+          metadata: { name: 'builder-rule-clear', builder: { type: 'threshold' } },
         })
       );
       const response = await apiClient.patch(getRuleUrl(created.id), {
         headers: writerHeaders,
         body: {
           query: { base: 'FROM new-index | LIMIT 1' },
-          metadata: { builder_type: null },
+          metadata: { builder: null },
         },
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body.metadata.builder_type).toBeUndefined();
+      expect(response.body.metadata.builder).toBeUndefined();
     }
   );
 });

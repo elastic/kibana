@@ -47,11 +47,28 @@ describe('config validation', () => {
           "*",
         ],
         "inboundEvents": Object {
+          "admission": Object {
+            "enabled": true,
+            "maxInFlight": 50,
+            "maxInFlightPerConnector": 10,
+          },
           "enabled": false,
           "maxBodyBytes": ByteSizeValue {
             "valueInBytes": 1048576,
           },
           "maxEmitted": 25,
+          "rateLimit": Object {
+            "connector": Object {
+              "limit": 300,
+              "window": "1m",
+            },
+            "enabled": true,
+            "maxKeys": 10000,
+            "remoteAddress": Object {
+              "limit": 10,
+              "window": "1m",
+            },
+          },
         },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
@@ -105,11 +122,28 @@ describe('config validation', () => {
           "*",
         ],
         "inboundEvents": Object {
+          "admission": Object {
+            "enabled": true,
+            "maxInFlight": 50,
+            "maxInFlightPerConnector": 10,
+          },
           "enabled": false,
           "maxBodyBytes": ByteSizeValue {
             "valueInBytes": 1048576,
           },
           "maxEmitted": 25,
+          "rateLimit": Object {
+            "connector": Object {
+              "limit": 300,
+              "window": "1m",
+            },
+            "enabled": true,
+            "maxKeys": 10000,
+            "remoteAddress": Object {
+              "limit": 10,
+              "window": "1m",
+            },
+          },
         },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
@@ -272,11 +306,28 @@ describe('config validation', () => {
           "*",
         ],
         "inboundEvents": Object {
+          "admission": Object {
+            "enabled": true,
+            "maxInFlight": 50,
+            "maxInFlightPerConnector": 10,
+          },
           "enabled": false,
           "maxBodyBytes": ByteSizeValue {
             "valueInBytes": 1048576,
           },
           "maxEmitted": 25,
+          "rateLimit": Object {
+            "connector": Object {
+              "limit": 300,
+              "window": "1m",
+            },
+            "enabled": true,
+            "maxKeys": 10000,
+            "remoteAddress": Object {
+              "limit": 10,
+              "window": "1m",
+            },
+          },
         },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
@@ -466,11 +517,28 @@ describe('config validation', () => {
           "*",
         ],
         "inboundEvents": Object {
+          "admission": Object {
+            "enabled": true,
+            "maxInFlight": 50,
+            "maxInFlightPerConnector": 10,
+          },
           "enabled": false,
           "maxBodyBytes": ByteSizeValue {
             "valueInBytes": 1048576,
           },
           "maxEmitted": 25,
+          "rateLimit": Object {
+            "connector": Object {
+              "limit": 300,
+              "window": "1m",
+            },
+            "enabled": true,
+            "maxKeys": 10000,
+            "remoteAddress": Object {
+              "limit": 10,
+              "window": "1m",
+            },
+          },
         },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
@@ -545,6 +613,60 @@ describe('config validation', () => {
     ).toThrowErrorMatchingInlineSnapshot(
       `"[inboundEvents.maxEmitted]: Value must be equal to or lower than [250]."`
     );
+
+    expect(empty.inboundEvents.admission).toEqual({
+      enabled: true,
+      maxInFlight: 50,
+      maxInFlightPerConnector: 10,
+    });
+    expect(empty.inboundEvents.rateLimit).toEqual({
+      enabled: true,
+      maxKeys: 10000,
+      remoteAddress: { limit: 10, window: '1m' },
+      connector: { limit: 300, window: '1m' },
+    });
+
+    expect(() =>
+      configSchema.validate({
+        inboundEvents: { rateLimit: { remoteAddress: { window: 'nope' } } },
+      })
+    ).toThrow(/string is not a valid duration/);
+
+    expect(() =>
+      configSchema.validate({
+        inboundEvents: { rateLimit: { remoteAddress: { limit: 0 } } },
+      })
+    ).toThrow(/greater than \[1\]/);
+
+    expect(() =>
+      configSchema.validate({
+        inboundEvents: { rateLimit: { connector: { limit: 1501 } } },
+      })
+    ).toThrow(/lower than \[1500\]/);
+
+    expect(() =>
+      configSchema.validate({
+        inboundEvents: { rateLimit: { maxKeys: 10001 } },
+      })
+    ).toThrow(/lower than \[10000\]/);
+
+    expect(() =>
+      configSchema.validate({
+        inboundEvents: { admission: { maxInFlight: 0 } },
+      })
+    ).toThrow(/greater than \[1\]/);
+
+    expect(() =>
+      configSchema.validate({
+        inboundEvents: { admission: { maxInFlight: 101 } },
+      })
+    ).toThrow(/lower than \[100\]/);
+
+    expect(() =>
+      configSchema.validate({
+        inboundEvents: { admission: { maxInFlight: 5, maxInFlightPerConnector: 10 } },
+      })
+    ).toThrow(/maxInFlightPerConnector/);
   });
 
   describe('email.services.ses', () => {

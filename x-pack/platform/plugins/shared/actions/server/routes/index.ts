@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { IRouter, KibanaRequest } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { Logger, CoreSetup } from '@kbn/core/server';
+import type { KibanaRequest, Logger, CoreSetup } from '@kbn/core/server';
 import { getAllConnectorsRoute } from './connector/get_all';
 import { getAllConnectorsIncludingSystemRoute } from './connector/get_all_system';
 import { connectorAuthStatusRoute } from './connector/auth_status';
@@ -35,7 +35,7 @@ import { inboundEventsRoute } from './inbound_events';
 
 import type { ActionsPluginsStart } from '../plugin';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
-import type { InboundEventsClient } from '../inbound/client';
+import type { InboundEventsSetup } from '../inbound/setup_inbound_events';
 
 export interface RouteOptions {
   getSpaceId?: (request: KibanaRequest) => string;
@@ -46,11 +46,7 @@ export interface RouteOptions {
   logger: Logger;
   core: CoreSetup<ActionsPluginsStart>;
   oauthRateLimiter: OAuthRateLimiter;
-  inboundEvents?: {
-    maxBodyBytes: number;
-    client: InboundEventsClient;
-    getSpaceId: (request: KibanaRequest) => string;
-  };
+  inboundEvents?: InboundEventsSetup;
 }
 
 export function defineRoutes(opts: RouteOptions) {

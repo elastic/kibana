@@ -69,7 +69,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
       expect(actions[0]).toMatchObject({
         action_type: 'activate',
         group_hash: groupHash,
-        episode_id: episodeId,
+        alert_id: episodeId,
         rule_id: ruleId,
         space_id: 'default',
         reason,
@@ -370,7 +370,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
       expect(activateActions[0]).toMatchObject({
         action_type: 'activate',
         group_hash: groupHash,
-        episode_id: episodeId,
+        alert_id: episodeId,
       });
 
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);

@@ -74,6 +74,90 @@ function relayUiamRequiresMtlsValidator(rawConfig: {
 const MIN_QUEUED_MAX = 1;
 export const DEFAULT_QUEUED_MAX = 1000000;
 
+const INBOUND_EVENTS_LIMIT_MIN = 1;
+const INBOUND_EVENTS_IN_FLIGHT_MAX = 100;
+// 50 slots at the same 2s point where 10 slots sustain 300/min: 50 / 2 * 60.
+const INBOUND_EVENTS_PER_MINUTE_MAX = 1500;
+const INBOUND_EVENTS_MAX_KEYS = 10000;
+
+export const defaultInboundEventsAdmissionConfig = {
+  enabled: true,
+  maxInFlight: 50,
+  maxInFlightPerConnector: 10,
+};
+
+export const defaultInboundEventsRateLimitConfig = {
+  enabled: true,
+  maxKeys: INBOUND_EVENTS_MAX_KEYS,
+  remoteAddress: {
+    limit: 10,
+    window: '1m',
+  },
+  connector: {
+    limit: 300,
+    window: '1m',
+  },
+};
+
+export const defaultInboundEventsLimitConfigs = {
+  admission: defaultInboundEventsAdmissionConfig,
+  rateLimit: defaultInboundEventsRateLimitConfig,
+};
+
+const inboundEventsAdmissionSchema = schema.object(
+  {
+    enabled: schema.boolean({ defaultValue: defaultInboundEventsAdmissionConfig.enabled }),
+    maxInFlight: schema.number({
+      defaultValue: defaultInboundEventsAdmissionConfig.maxInFlight,
+      min: INBOUND_EVENTS_LIMIT_MIN,
+      max: INBOUND_EVENTS_IN_FLIGHT_MAX,
+    }),
+    maxInFlightPerConnector: schema.number({
+      defaultValue: defaultInboundEventsAdmissionConfig.maxInFlightPerConnector,
+      min: INBOUND_EVENTS_LIMIT_MIN,
+      max: INBOUND_EVENTS_IN_FLIGHT_MAX,
+    }),
+  },
+  {
+    validate(value) {
+      if (value.maxInFlightPerConnector > value.maxInFlight) {
+        return '[maxInFlightPerConnector] must be less than or equal to [maxInFlight]';
+      }
+    },
+  }
+);
+
+const inboundEventsRateLimitSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: defaultInboundEventsRateLimitConfig.enabled }),
+  maxKeys: schema.number({
+    defaultValue: defaultInboundEventsRateLimitConfig.maxKeys,
+    min: INBOUND_EVENTS_LIMIT_MIN,
+    max: INBOUND_EVENTS_MAX_KEYS,
+  }),
+  remoteAddress: schema.object({
+    limit: schema.number({
+      defaultValue: defaultInboundEventsRateLimitConfig.remoteAddress.limit,
+      min: INBOUND_EVENTS_LIMIT_MIN,
+      max: INBOUND_EVENTS_PER_MINUTE_MAX,
+    }),
+    window: schema.string({
+      defaultValue: defaultInboundEventsRateLimitConfig.remoteAddress.window,
+      validate: validateDuration,
+    }),
+  }),
+  connector: schema.object({
+    limit: schema.number({
+      defaultValue: defaultInboundEventsRateLimitConfig.connector.limit,
+      min: INBOUND_EVENTS_LIMIT_MIN,
+      max: INBOUND_EVENTS_PER_MINUTE_MAX,
+    }),
+    window: schema.string({
+      defaultValue: defaultInboundEventsRateLimitConfig.connector.window,
+      validate: validateDuration,
+    }),
+  }),
+});
+
 const validRateLimiterConnectorTypeIds = new Set(['email']);
 
 const preconfiguredActionSchema = schema.object({
@@ -304,6 +388,9 @@ export const configSchema = schema.object({
       min: 1,
       max: INBOUND_EVENTS_MAX_EMITTED_LIMIT,
     }),
+    // maxInFlight * maxBodyBytes is the raw-body budget for this route.
+    admission: inboundEventsAdmissionSchema,
+    rateLimit: inboundEventsRateLimitSchema,
   }),
   connectorSigningKeys: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
