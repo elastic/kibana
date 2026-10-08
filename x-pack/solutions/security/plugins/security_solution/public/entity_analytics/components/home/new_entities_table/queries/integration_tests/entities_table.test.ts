@@ -100,22 +100,17 @@ const NO_FILTERS: ActiveFilters = {
   rowsMode: 'resolved',
 };
 
-/** Rows a filter keeps, in each sort's order, compiled by the grid's own `toEsql`. */
-const FILTER_CASES: ReadonlyArray<[string, Partial<ActiveFilters>, string, SortDir, string[]]> = [
-  [
-    'a search',
-    { search: { esql: 'KQL("""entity.name: web*""")' } },
-    'alert_count',
-    'desc',
-    ['host:h1', 'host:h2', 'host:h3'],
-  ],
-  [
-    'a search',
-    { search: { esql: 'KQL("""entity.name: web*""")' } },
-    'group_size',
-    'desc',
-    ['host:h1', 'host:h2', 'host:h3'],
-  ],
+/** A filter case: what it sets, the sort it runs with and the rows it keeps in order. */
+type FilterCase = [name: string, Partial<ActiveFilters>, field: string, SortDir, string[]];
+
+const WEB_SEARCH = { search: { esql: 'KQL("""entity.name: web*""")' } };
+
+const SEARCH_CASES: readonly FilterCase[] = [
+  ['a name search', WEB_SEARCH, 'alert_count', 'desc', ['host:h1', 'host:h2', 'host:h3']],
+  ['a name search', WEB_SEARCH, 'group_size', 'desc', ['host:h1', 'host:h2', 'host:h3']],
+];
+
+const FILTER_CASES: readonly FilterCase[] = [
   [
     'an entity type filter',
     { entityFilters: { ...EMPTY_ENTITY_FILTERS, entityTypes: [EntityType.user] } },
@@ -144,6 +139,9 @@ const FILTER_CASES: ReadonlyArray<[string, Partial<ActiveFilters>, string, SortD
     'desc',
     ['user:alice@okta', 'host:h2'],
   ],
+];
+
+const VIEW_BY_CASES: readonly FilterCase[] = [
   [
     'individual rows',
     { rowsMode: 'individual' },
@@ -163,7 +161,7 @@ const FILTER_CASES: ReadonlyArray<[string, Partial<ActiveFilters>, string, SortD
   ],
 ];
 
-describe('entities grid sort pages on Elasticsearch', () => {
+describe('entities table on Elasticsearch', () => {
   let cluster: FixtureCluster;
 
   beforeAll(async () => {
@@ -175,46 +173,56 @@ describe('entities grid sort pages on Elasticsearch', () => {
   });
 
   describe.each(Object.entries(VIEW_SIZES))('on %s', (_view, viewSize) => {
-    it.each(EXPECTED_ORDERS)('sorts by %s %s', async (field, direction, expected) => {
-      const rows = await fetchPage(
+    /** The page of a filter case, its filters compiled by the grid's own `toEsql`. */
+    const fetchFilteredPage = ([, filters, field, direction]: FilterCase): Promise<Row[]> => {
+      const activeFilters = { ...NO_FILTERS, ...filters };
+      return fetchPage(
         cluster.runQuery,
-        { ...BASE_ARGS, sort: { field, direction } },
+        {
+          ...BASE_ARGS,
+          ...toEsql(activeFilters),
+          rowsMode: activeFilters.rowsMode,
+          sort: { field, direction },
+        },
         viewSize
       );
+    };
 
-      expect(getIds(rows)).toEqual(expected);
-    });
-
-    it.each(EXPECTED_ORDERS)(
-      'reads the same %s %s order two rows at a time',
-      async (field, direction, expected) => {
-        const rows = await fetchAllPages(
-          cluster.runQuery,
-          { ...BASE_ARGS, sort: { field, direction }, pageSize: 2 },
-          viewSize
-        );
-
-        expect(getIds(rows)).toEqual(expected);
-      }
-    );
-
-    it.each(FILTER_CASES)(
-      'keeps the rows of %s, sorted by %s %s',
-      async (_name, filters, field, direction, expected) => {
-        const activeFilters = { ...NO_FILTERS, ...filters };
+    describe('sorts', () => {
+      it.each(EXPECTED_ORDERS)('sorts by %s %s', async (field, direction, expected) => {
         const rows = await fetchPage(
           cluster.runQuery,
-          {
-            ...BASE_ARGS,
-            ...toEsql(activeFilters),
-            rowsMode: activeFilters.rowsMode,
-            sort: { field, direction },
-          },
+          { ...BASE_ARGS, sort: { field, direction } },
           viewSize
         );
 
         expect(getIds(rows)).toEqual(expected);
-      }
-    );
+      });
+
+      it.each(EXPECTED_ORDERS)(
+        'reads the same %s %s order two rows at a time',
+        async (field, direction, expected) => {
+          const rows = await fetchAllPages(
+            cluster.runQuery,
+            { ...BASE_ARGS, sort: { field, direction }, pageSize: 2 },
+            viewSize
+          );
+
+          expect(getIds(rows)).toEqual(expected);
+        }
+      );
+    });
+
+    describe.each([
+      ['search', SEARCH_CASES],
+      ['filters', FILTER_CASES],
+      ['view by', VIEW_BY_CASES],
+    ] as const)('%s', (_name, cases) => {
+      it.each(cases)('keeps the rows of %s, sorted by %s %s', async (...filterCase) => {
+        const rows = await fetchFilteredPage(filterCase);
+
+        expect(getIds(rows)).toEqual(filterCase[4]);
+      });
+    });
   });
 });
