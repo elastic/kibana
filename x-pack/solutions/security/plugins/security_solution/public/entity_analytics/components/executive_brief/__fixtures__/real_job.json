@@ -1,0 +1,2644 @@
+{
+ "id": "0abfa6f4-d3a4-413c-80d0-d5ae0e5dc4ff",
+ "spaceId": "default",
+ "status": "succeeded",
+ "createdAt": "2026-10-08T22:21:51.693Z",
+ "updatedAt": "2026-10-08T22:21:58.968Z",
+ "createdBy": {
+  "username": "elastic"
+ },
+ "params": {
+  "timeRange": {
+   "from": "2026-10-01T22:21:51Z",
+   "to": "2026-10-08T22:21:51Z",
+   "range": "7d"
+  },
+  "generator": "template",
+  "mode": "names"
+ },
+ "stage": "persist",
+ "startedAt": "2026-10-08T22:21:52.467Z",
+ "timings": {
+  "snapshot": 62,
+  "storylines": 57,
+  "blind_spots": 854,
+  "generate": 0,
+  "validate": 2,
+  "persist": 1017
+ },
+ "snapshot": {
+  "spaceId": "default",
+  "blindSpots": {
+   "attackStages": {
+    "stages": [
+     {
+      "coverage": {
+       "effective": 1,
+       "enabled": 1
+      },
+      "tacticName": "Initial Access",
+      "flag": "limited_coverage",
+      "topRuleEvidenceIds": [
+       "RULE-1"
+      ],
+      "evidenceId": "TAC-TA0001",
+      "tacticId": "TA0001",
+      "position": 2,
+      "topTechnique": {
+       "name": "Spearphishing Attachment",
+       "id": "T1566.001"
+      },
+      "observed": {
+       "alerts": 3,
+       "mlAnomalies": 0,
+       "attackDiscoveries": 2
+      }
+     },
+     {
+      "coverage": {
+       "effective": 2,
+       "enabled": 2
+      },
+      "tacticName": "Execution",
+      "flag": "limited_coverage",
+      "topRuleEvidenceIds": [
+       "RULE-2",
+       "RULE-10"
+      ],
+      "evidenceId": "TAC-TA0002",
+      "tacticId": "TA0002",
+      "position": 3,
+      "topTechnique": {
+       "name": "Deploy Container",
+       "id": "T1610"
+      },
+      "observed": {
+       "alerts": 4,
+       "mlAnomalies": 0,
+       "attackDiscoveries": 2
+      }
+     },
+     {
+      "coverage": {
+       "effective": 1,
+       "enabled": 1
+      },
+      "tacticName": "Privilege Escalation",
+      "flag": "limited_coverage",
+      "topRuleEvidenceIds": [
+       "RULE-3"
+      ],
+      "evidenceId": "TAC-TA0004",
+      "tacticId": "TA0004",
+      "position": 5,
+      "topTechnique": {
+       "name": "Sudo and Sudo Caching",
+       "id": "T1548.003"
+      },
+      "observed": {
+       "alerts": 2,
+       "mlAnomalies": 0,
+       "attackDiscoveries": 1
+      }
+     },
+     {
+      "coverage": {
+       "effective": 2,
+       "enabled": 2
+      },
+      "tacticName": "Stealth",
+      "flag": "limited_coverage",
+      "topRuleEvidenceIds": [
+       "RULE-11"
+      ],
+      "evidenceId": "TAC-TA0005",
+      "tacticId": "TA0005",
+      "position": 6,
+      "topTechnique": {
+       "name": "System Binary Proxy Execution",
+       "id": "T1218"
+      },
+      "observed": {
+       "alerts": 1,
+       "mlAnomalies": 0,
+       "attackDiscoveries": 0
+      }
+     },
+     {
+      "coverage": {
+       "effective": 4,
+       "enabled": 4
+      },
+      "tacticName": "Credential Access",
+      "flag": "none",
+      "topRuleEvidenceIds": [
+       "RULE-7",
+       "RULE-4",
+       "RULE-12"
+      ],
+      "evidenceId": "TAC-TA0006",
+      "tacticId": "TA0006",
+      "position": 8,
+      "topTechnique": {
+       "name": "Multi-Factor Authentication Request Generation",
+       "id": "T1621"
+      },
+      "observed": {
+       "alerts": 8,
+       "mlAnomalies": 0,
+       "attackDiscoveries": 2
+      }
+     },
+     {
+      "coverage": {
+       "effective": 2,
+       "enabled": 2
+      },
+      "tacticName": "Discovery",
+      "flag": "limited_coverage",
+      "topRuleEvidenceIds": [
+       "RULE-13"
+      ],
+      "evidenceId": "TAC-TA0007",
+      "tacticId": "TA0007",
+      "position": 9,
+      "topTechnique": {
+       "name": "Account Discovery",
+       "id": "T1087"
+      },
+      "observed": {
+       "alerts": 1,
+       "mlAnomalies": 0,
+       "attackDiscoveries": 0
+      }
+     },
+     {
+      "coverage": {
+       "effective": 1,
+       "enabled": 2
+      },
+      "tacticName": "Lateral Movement",
+      "flag": "limited_coverage",
+      "topRuleEvidenceIds": [
+       "RULE-5",
+       "RULE-6"
+      ],
+      "evidenceId": "TAC-TA0008",
+      "tacticId": "TA0008",
+      "position": 10,
+      "topTechnique": {
+       "name": "Remote Desktop Protocol",
+       "id": "T1021.001"
+      },
+      "observed": {
+       "alerts": 4,
+       "mlAnomalies": 0,
+       "attackDiscoveries": 1
+      }
+     },
+     {
+      "coverage": {
+       "effective": 1,
+       "enabled": 1
+      },
+      "tacticName": "Exfiltration",
+      "flag": "limited_coverage",
+      "topRuleEvidenceIds": [
+       "RULE-9"
+      ],
+      "evidenceId": "TAC-TA0010",
+      "tacticId": "TA0010",
+      "position": 13,
+      "topTechnique": {
+       "name": "Exfiltration Over Alternative Protocol",
+       "id": "T1048"
+      },
+      "observed": {
+       "alerts": 1,
+       "mlAnomalies": 0,
+       "attackDiscoveries": 0
+      }
+     }
+    ],
+    "unmapped": {
+     "alerts": 0,
+     "topRuleEvidenceIds": [],
+     "share": 0
+    }
+   },
+   "gaps": [
+    {
+     "severity": "warning",
+     "entityEuids": [
+      "user:a.rodriguez@acme.example@okta"
+     ],
+     "fixHref": "/app/security/entity_analytics_asset_criticality",
+     "evidenceId": "GAP-B6",
+     "fixLabel": "Assign criticality",
+     "title": "No asset criticality on 1 material-risk entity",
+     "signal": "B6",
+     "value": 1,
+     "group": "context_missing"
+    },
+    {
+     "severity": "warning",
+     "entityEuids": [
+      "user:a.rodriguez@acme.example@okta",
+      "host:2528d2a4-bab4-5027-95ea-2b43632c165d",
+      "host:230a0eef-f3e5-54df-89d5-facf17d5453d",
+      "host:3e751925-2b1c-5e66-969b-d8c23136e00d"
+     ],
+     "fixHref": "/app/security/alerts",
+     "evidenceId": "GAP-B17",
+     "fixLabel": "Review alerts",
+     "title": "9 open High/Critical alerts in storylines have no case",
+     "signal": "B17",
+     "value": 9,
+     "group": "response_gap"
+    },
+    {
+     "severity": "info",
+     "fixHref": "/app/security/entity_analytics_entity_store",
+     "evidenceId": "GAP-B5",
+     "fixLabel": "Review resolution",
+     "title": "173 local user accounts are not resolved to an identity",
+     "signal": "B5",
+     "value": 173,
+     "group": "context_missing"
+    },
+    {
+     "severity": "info",
+     "fixHref": "/app/ml/jobs",
+     "evidenceId": "GAP-B12",
+     "fixLabel": "Set up ML",
+     "title": "No security ML jobs are running",
+     "signal": "B12",
+     "group": "analytics_not_running"
+    }
+   ]
+  },
+  "sources": {
+   "needsAttention": {
+    "status": "ok",
+    "tookMs": 42
+   },
+   "storylines.leads": {
+    "status": "ok",
+    "tookMs": 3
+   },
+   "entityStoreIndex": {
+    "status": "ok",
+    "tookMs": 8
+   },
+   "gap_B17": {
+    "status": "ok",
+    "tookMs": 3
+   },
+   "gap_B13": {
+    "status": "ok",
+    "tookMs": 37
+   },
+   "gap_B10": {
+    "status": "ok",
+    "tookMs": 29
+   },
+   "gap_B11": {
+    "status": "ok",
+    "tookMs": 18
+   },
+   "mitre_tactics": {
+    "status": "ok",
+    "tookMs": 31
+   },
+   "entity_docs": {
+    "status": "ok",
+    "tookMs": 25
+   },
+   "storylines.riskTrend": {
+    "status": "ok",
+    "tookMs": 3
+   },
+   "alerts_by_tactic": {
+    "status": "ok",
+    "tookMs": 28
+   },
+   "storylines.firstAlerts": {
+    "status": "ok",
+    "tookMs": 6
+   },
+   "gap_B9": {
+    "status": "ok",
+    "tookMs": 17
+   },
+   "storylines.discoveryEntities": {
+    "status": "ok",
+    "tookMs": 5
+   },
+   "storylines.response": {
+    "status": "ok",
+    "tookMs": 5
+   },
+   "storylines.attackDiscoveries": {
+    "status": "ok",
+    "tookMs": 3
+   },
+   "storylines.hubDegree": {
+    "status": "ok",
+    "tookMs": 1
+   },
+   "needsAttention.entitiesWithAlerts": {
+    "status": "ok",
+    "tookMs": 42
+   },
+   "posture": {
+    "status": "ok",
+    "tookMs": 15
+   },
+   "storylines.relationshipHistory": {
+    "status": "ok",
+    "tookMs": 2
+   },
+   "attack_discovery_tactics": {
+    "status": "ok",
+    "tookMs": 20
+   },
+   "storylines.relationships": {
+    "status": "ok",
+    "tookMs": 4
+   },
+   "storylines.cases": {
+    "status": "ok",
+    "tookMs": 16
+   },
+   "anomalies": {
+    "message": "No security ML jobs installed",
+    "status": "disabled",
+    "tookMs": 810
+   },
+   "gap_B8": {
+    "status": "ok",
+    "tookMs": 23
+   },
+   "needsAttention.riskMovers": {
+    "status": "ok",
+    "tookMs": 35
+   },
+   "gap_B5": {
+    "status": "ok",
+    "tookMs": 24
+   },
+   "detection_coverage": {
+    "status": "ok",
+    "tookMs": 800
+   },
+   "exposureLeaders": {
+    "status": "ok",
+    "tookMs": 19
+   },
+   "needsAttention.newlyHighCritical": {
+    "status": "ok",
+    "tookMs": 34
+   },
+   "storylines.coAlerts": {
+    "status": "ok",
+    "tookMs": 7
+   },
+   "gap_B1": {
+    "status": "ok",
+    "tookMs": 19
+   },
+   "storylines.riskHistory": {
+    "status": "ok",
+    "tookMs": 3
+   },
+   "storylines.entityResolution": {
+    "status": "ok",
+    "tookMs": 2
+   }
+  },
+  "entities": {
+   "host:e3ff494f-eecd-5732-93ae-720cb5b45e0f": {
+    "riskLevel": "Unknown",
+    "isPrivileged": false,
+    "aliases": [],
+    "riskTrend": [
+     {
+      "t": "2026-10-06T00:00:00.000Z",
+      "v": 13.99
+     },
+     {
+      "t": "2026-10-07T00:00:00.000Z",
+      "v": 13.99
+     },
+     {
+      "t": "2026-10-08T00:00:00.000Z",
+      "v": 13.99
+     }
+    ],
+    "euid": "host:e3ff494f-eecd-5732-93ae-720cb5b45e0f",
+    "riskScoreNorm": 13.9859717468,
+    "evidenceId": "ENT-12",
+    "name": "LAPTOP-MKT07",
+    "criticality": "low_impact",
+    "watchlists": [],
+    "type": "host"
+   },
+   "host:230a0eef-f3e5-54df-89d5-facf17d5453d": {
+    "riskLevel": "Moderate",
+    "isPrivileged": false,
+    "aliases": [],
+    "riskTrend": [
+     {
+      "t": "2026-10-03T00:00:00.000Z",
+      "v": 18.13
+     },
+     {
+      "t": "2026-10-04T00:00:00.000Z",
+      "v": 41.6
+     },
+     {
+      "t": "2026-10-05T00:00:00.000Z",
+      "v": 41.6
+     },
+     {
+      "t": "2026-10-06T00:00:00.000Z",
+      "v": 41.6
+     },
+     {
+      "t": "2026-10-07T00:00:00.000Z",
+      "v": 41.6
+     },
+     {
+      "t": "2026-10-08T00:00:00.000Z",
+      "v": 41.6
+     }
+    ],
+    "euid": "host:230a0eef-f3e5-54df-89d5-facf17d5453d",
+    "riskScoreNorm": 41.6041319745,
+    "evidenceId": "ENT-5",
+    "name": "LAPTOP-FIN03",
+    "criticality": "medium_impact",
+    "watchlists": [],
+    "type": "host"
+   },
+   "host:74099126-5a94-5179-be73-1c04a67e70b6": {
+    "riskLevel": "Unknown",
+    "isPrivileged": false,
+    "aliases": [],
+    "riskTrend": [
+     {
+      "t": "2026-10-06T00:00:00.000Z",
+      "v": 18.13
+     },
+     {
+      "t": "2026-10-07T00:00:00.000Z",
+      "v": 18.13
+     },
+     {
+      "t": "2026-10-08T00:00:00.000Z",
+      "v": 18.13
+     }
+    ],
+    "euid": "host:74099126-5a94-5179-be73-1c04a67e70b6",
+    "riskScoreNorm": 18.1299182225,
+    "evidenceId": "ENT-8",
+    "name": "LAPTOP-NZ18",
+    "watchlists": [],
+    "type": "host"
+   },
+   "host:933ec835-0993-5c05-a570-887a7697d324": {
+    "riskLevel": "Unknown",
+    "isPrivileged": false,
+    "aliases": [],
+    "riskTrend": [
+     {
+      "t": "2026-10-04T00:00:00.000Z",
+      "v": 8.1
+     },
+     {
+      "t": "2026-10-05T00:00:00.000Z",
+      "v": 8.1
+     },
+     {
+      "t": "2026-10-06T00:00:00.000Z",
+      "v": 8.1
+     },
+     {
+      "t": "2026-10-07T00:00:00.000Z",
+      "v": 8.1
+     },
+     {
+      "t": "2026-10-08T00:00:00.000Z",
+      "v": 8.1
+     }
+    ],
+    "euid": "host:933ec835-0993-5c05-a570-887a7697d324",
+    "riskScoreNorm": 8.100601759,
+    "evidenceId": "ENT-13",
+    "name": "LAPTOP-NZ17",
+    "watchlists": [],
+    "type": "host"
+   },
+   "user:b.wright@a027e9fb-217e-524d-b22f-33d387f03682@local": {
+    "riskLevel": "Unknown",
+    "isPrivileged": false,
+    "aliases": [],
+    "riskTrend": [
+     {
+      "t": "2026-10-03T00:00:00.000Z",
+      "v": 8.1
+     },
+     {
+      "t": "2026-10-04T00:00:00.000Z",
+      "v": 8.1
+     },
+     {
+      "t": "2026-10-05T00:00:00.000Z",
+      "v": 8.1
+     },
+     {
+      "t": "2026-10-06T00:00:00.000Z",
+      "v": 8.1
+     },
+     {
+      "t": "2026-10-07T00:00:00.000Z",
+      "v": 8.1
+     },
+     {
+      "t": "2026-10-08T00:00:00.000Z",
+      "v": 8.1
+     }
+    ],
+    "euid": "user:b.wright@a027e9fb-217e-524d-b22f-33d387f03682@local",
+    "riskScoreNorm": 8.100601759,
+    "evidenceId": "ENT-15",
+    "name": "b.wright@LAPTOP-NZ16",
+    "watchlists": [],
+    "type": "user"
+   },
+   "host:9a6bfc78-3216-51cd-8716-8921c37af8b2": {
+    "riskLevel": "Low",
+    "isPrivileged": false,
+    "aliases": [],
+    "riskTrend": [
+     {
+      "t": "2026-10-04T00:00:00.000Z",
+      "v": 8.1
+     },
+     {
+      "t": "2026-10-05T00:00:00.000Z",
+      "v": 8.1
+     },
+     {
+      "t": "2026-10-06T00:00:00.000Z",
+      "v": 20.99
+     },
+     {
+      "t": "2026-10-07T00:00:00.000Z",
+      "v": 20.99
+     },
+     {
+      "t": "2026-10-08T00:00:00.000Z",
+      "v": 20.99
+     }
+    ],
+    "euid": "host:9a6bfc78-3216-51cd-8716-8921c37af8b2",
+    "riskScoreNorm": 20.9939134402,
+    "evidenceId": "ENT-6",
+    "name": "build-runner-02",
+    "watchlists": [],
+    "type": "host"
+   },
+   "host:f3ec667c-f39f-59c6-b62c-03dd81c63e80": {
+    "riskLevel": "Unknown",
+    "isPrivileged": false,
+    "aliases": [],
+    "riskTrend": [
+     {
+      "t": "2026-10-03T00:00:00.000Z",
+      "v": 18.13
+     },
+     {
+      "t": "2026-10-04T00:00:00.000Z",
+      "v": 18.13
+     },
+     {
+      "t": "2026-10-05T00:00:00.000Z",
+      "v": 18.13
+     },
+     {
+      "t": "2026-10-06T00:00:00.000Z",
+      "v": 18.13
+     },
+     {
+      "t": "2026-10-07T00:00:00.000Z",
+      "v": 18.13
+     },
+     {
+      "t": "2026-10-08T00:00:00.000Z",
+      "v": 18.13
+     }
+    ],
+    "euid": "host:f3ec667c-f39f-59c6-b62c-03dd81c63e80",
+    "riskScoreNorm": 18.1299182225,
+    "evidenceId": "ENT-10",
+    "name": "LAPTOP-NZ09",
+    "watchlists": [],
+    "type": "host"
+   },
+   "host:a027e9fb-217e-524d-b22f-33d387f03682": {
+    "riskLevel": "Unknown",
+    "isPrivileged": false,
+    "aliases": [],
+    "riskTrend": [
+     {
+      "t": "2026-10-03T00:00:00.000Z",
+      "v": 8.1
+     },
+     {
+      "t": "2026-10-04T00:00:00.000Z",
+      "v": 8.1
+     },
+     {
+      "t": "2026-10-05T00:00:00.000Z",
+      "v": 8.1
+     },
+     {
+      "t": "2026-10-06T00:00:00.000Z",
+      "v": 8.1
+     },
+     {
+      "t": "2026-10-07T00:00:00.000Z",
+      "v": 8.1
+     },
+     {
+      "t": "2026-10-08T00:00:00.000Z",
+      "v": 8.1
+     }
+    ],
+    "euid": "host:a027e9fb-217e-524d-b22f-33d387f03682",
+    "riskScoreNorm": 8.100601759,
+    "evidenceId": "ENT-14",
+    "name": "LAPTOP-NZ16",
+    "watchlists": [],
+    "type": "host"
+   },
+   "user:svc-build@acme.example@okta": {
+    "riskLevel": "Low",
+    "isPrivileged": false,
+    "aliases": [
+     "user:svc-build@3b484791-f027-5682-8119-88943f7e3603@local",
+     "user:svc-build@9a6bfc78-3216-51cd-8716-8921c37af8b2@local"
+    ],
+    "riskTrend": [
+     {
+      "t": "2026-10-04T00:00:00.000Z",
+      "v": 8.1
+     },
+     {
+      "t": "2026-10-05T00:00:00.000Z",
+      "v": 8.1
+     },
+     {
+      "t": "2026-10-06T00:00:00.000Z",
+      "v": 20.99
+     },
+     {
+      "t": "2026-10-07T00:00:00.000Z",
+      "v": 20.99
+     },
+     {
+      "t": "2026-10-08T00:00:00.000Z",
+      "v": 20.99
+     }
+    ],
+    "euid": "user:svc-build@acme.example@okta",
+    "riskScoreNorm": 20.9939134402,
+    "evidenceId": "ENT-7",
+    "name": "svc-build",
+    "watchlists": [],
+    "type": "user"
+   },
+   "host:b10efa22-d7b6-5288-83d4-23c875ed0c18": {
+    "riskLevel": "Unknown",
+    "isPrivileged": false,
+    "aliases": [],
+    "riskTrend": [
+     {
+      "t": "2026-10-03T00:00:00.000Z",
+      "v": 18.13
+     },
+     {
+      "t": "2026-10-04T00:00:00.000Z",
+      "v": 18.13
+     },
+     {
+      "t": "2026-10-05T00:00:00.000Z",
+      "v": 18.13
+     },
+     {
+      "t": "2026-10-06T00:00:00.000Z",
+      "v": 18.13
+     },
+     {
+      "t": "2026-10-07T00:00:00.000Z",
+      "v": 18.13
+     },
+     {
+      "t": "2026-10-08T00:00:00.000Z",
+      "v": 18.13
+     }
+    ],
+    "euid": "host:b10efa22-d7b6-5288-83d4-23c875ed0c18",
+    "riskScoreNorm": 18.1299182225,
+    "evidenceId": "ENT-9",
+    "name": "LAPTOP-NZ14",
+    "watchlists": [],
+    "type": "host"
+   },
+   "host:3b484791-f027-5682-8119-88943f7e3603": {
+    "isPrivileged": false,
+    "aliases": [],
+    "euid": "host:3b484791-f027-5682-8119-88943f7e3603",
+    "evidenceId": "ENT-17",
+    "name": "fileserver-03",
+    "watchlists": [],
+    "type": "host"
+   },
+   "user:j.chen@acme.example@okta": {
+    "riskLevel": "Moderate",
+    "isPrivileged": false,
+    "aliases": [
+     "user:j.chen@e3ff494f-eecd-5732-93ae-720cb5b45e0f@local"
+    ],
+    "riskTrend": [
+     {
+      "t": "2026-10-05T00:00:00.000Z",
+      "v": 49.57
+     },
+     {
+      "t": "2026-10-06T00:00:00.000Z",
+      "v": 51.79
+     },
+     {
+      "t": "2026-10-07T00:00:00.000Z",
+      "v": 51.79
+     },
+     {
+      "t": "2026-10-08T00:00:00.000Z",
+      "v": 51.79
+     }
+    ],
+    "euid": "user:j.chen@acme.example@okta",
+    "riskScoreNorm": 51.7853259379,
+    "evidenceId": "ENT-4",
+    "name": "j.chen",
+    "watchlists": [],
+    "type": "user"
+   },
+   "user:z.ahmed@74099126-5a94-5179-be73-1c04a67e70b6@local": {
+    "riskLevel": "Unknown",
+    "isPrivileged": false,
+    "aliases": [],
+    "riskTrend": [
+     {
+      "t": "2026-10-06T00:00:00.000Z",
+      "v": 18.13
+     },
+     {
+      "t": "2026-10-07T00:00:00.000Z",
+      "v": 18.13
+     },
+     {
+      "t": "2026-10-08T00:00:00.000Z",
+      "v": 18.13
+     }
+    ],
+    "euid": "user:z.ahmed@74099126-5a94-5179-be73-1c04a67e70b6@local",
+    "riskScoreNorm": 18.1299182225,
+    "evidenceId": "ENT-11",
+    "name": "z.ahmed@LAPTOP-NZ18",
+    "watchlists": [],
+    "type": "user"
+   },
+   "host:2528d2a4-bab4-5027-95ea-2b43632c165d": {
+    "riskLevel": "Moderate",
+    "isPrivileged": false,
+    "aliases": [],
+    "riskTrend": [
+     {
+      "t": "2026-10-06T00:00:00.000Z",
+      "v": 39.41
+     },
+     {
+      "t": "2026-10-07T00:00:00.000Z",
+      "v": 64.34
+     },
+     {
+      "t": "2026-10-08T00:00:00.000Z",
+      "v": 64.34
+     }
+    ],
+    "euid": "host:2528d2a4-bab4-5027-95ea-2b43632c165d",
+    "riskScoreNorm": 64.3351337009,
+    "evidenceId": "ENT-2",
+    "name": "docker-host-prod-01",
+    "criticality": "extreme_impact",
+    "watchlists": [],
+    "type": "host"
+   },
+   "user:a.rodriguez@acme.example@okta": {
+    "riskLevel": "High",
+    "isPrivileged": true,
+    "aliases": [
+     "user:a.rodriguez@230a0eef-f3e5-54df-89d5-facf17d5453d@local",
+     "user:a.rodriguez@2528d2a4-bab4-5027-95ea-2b43632c165d@local",
+     "user:a.rodriguez@3e751925-2b1c-5e66-969b-d8c23136e00d@local"
+    ],
+    "riskTrend": [
+     {
+      "t": "2026-10-03T00:00:00.000Z",
+      "v": 33.26
+     },
+     {
+      "t": "2026-10-04T00:00:00.000Z",
+      "v": 61.58
+     },
+     {
+      "t": "2026-10-05T00:00:00.000Z",
+      "v": 69.91
+     },
+     {
+      "t": "2026-10-06T00:00:00.000Z",
+      "v": 72.49
+     },
+     {
+      "t": "2026-10-07T00:00:00.000Z",
+      "v": 74.74
+     },
+     {
+      "t": "2026-10-08T00:00:00.000Z",
+      "v": 74.74
+     }
+    ],
+    "euid": "user:a.rodriguez@acme.example@okta",
+    "riskScoreNorm": 74.7392082285,
+    "evidenceId": "ENT-1",
+    "name": "a.rodriguez",
+    "criticality": "high_impact",
+    "watchlists": [
+     "Privileged Users"
+    ],
+    "type": "user"
+   },
+   "host:3e751925-2b1c-5e66-969b-d8c23136e00d": {
+    "riskLevel": "Moderate",
+    "isPrivileged": false,
+    "aliases": [],
+    "riskTrend": [
+     {
+      "t": "2026-10-05T00:00:00.000Z",
+      "v": 53.63
+     },
+     {
+      "t": "2026-10-06T00:00:00.000Z",
+      "v": 57.14
+     },
+     {
+      "t": "2026-10-07T00:00:00.000Z",
+      "v": 57.14
+     },
+     {
+      "t": "2026-10-08T00:00:00.000Z",
+      "v": 57.14
+     }
+    ],
+    "euid": "host:3e751925-2b1c-5e66-969b-d8c23136e00d",
+    "riskScoreNorm": 57.138291677,
+    "evidenceId": "ENT-3",
+    "name": "jump-box-01",
+    "criticality": "high_impact",
+    "watchlists": [],
+    "type": "host"
+   },
+   "user:i.petrov@933ec835-0993-5c05-a570-887a7697d324@local": {
+    "riskLevel": "Unknown",
+    "isPrivileged": false,
+    "aliases": [],
+    "riskTrend": [
+     {
+      "t": "2026-10-04T00:00:00.000Z",
+      "v": 8.1
+     },
+     {
+      "t": "2026-10-05T00:00:00.000Z",
+      "v": 8.1
+     },
+     {
+      "t": "2026-10-06T00:00:00.000Z",
+      "v": 8.1
+     },
+     {
+      "t": "2026-10-07T00:00:00.000Z",
+      "v": 8.1
+     },
+     {
+      "t": "2026-10-08T00:00:00.000Z",
+      "v": 8.1
+     }
+    ],
+    "euid": "user:i.petrov@933ec835-0993-5c05-a570-887a7697d324@local",
+    "riskScoreNorm": 8.100601759,
+    "evidenceId": "ENT-16",
+    "name": "i.petrov@LAPTOP-NZ17",
+    "watchlists": [],
+    "type": "user"
+   }
+  },
+  "glance": {
+   "needsAttention": [
+    {
+     "trend": [
+      {
+       "t": "2026-10-02T04:21:51.000Z",
+       "v": 8
+      },
+      {
+       "t": "2026-10-02T10:21:51.000Z",
+       "v": 8
+      },
+      {
+       "t": "2026-10-02T16:21:51.000Z",
+       "v": 8
+      },
+      {
+       "t": "2026-10-02T22:21:51.000Z",
+       "v": 8
+      },
+      {
+       "t": "2026-10-03T04:21:51.000Z",
+       "v": 8
+      },
+      {
+       "t": "2026-10-03T10:21:51.000Z",
+       "v": 8
+      },
+      {
+       "t": "2026-10-03T16:21:51.000Z",
+       "v": 10
+      },
+      {
+       "t": "2026-10-03T22:21:51.000Z",
+       "v": 10
+      },
+      {
+       "t": "2026-10-04T04:21:51.000Z",
+       "v": 12
+      },
+      {
+       "t": "2026-10-04T10:21:51.000Z",
+       "v": 12
+      },
+      {
+       "t": "2026-10-04T16:21:51.000Z",
+       "v": 14
+      },
+      {
+       "t": "2026-10-04T22:21:51.000Z",
+       "v": 14
+      },
+      {
+       "t": "2026-10-05T04:21:51.000Z",
+       "v": 14
+      },
+      {
+       "t": "2026-10-05T10:21:51.000Z",
+       "v": 12
+      },
+      {
+       "t": "2026-10-05T16:21:51.000Z",
+       "v": 13
+      },
+      {
+       "t": "2026-10-05T22:21:51.000Z",
+       "v": 14
+      },
+      {
+       "t": "2026-10-06T04:21:51.000Z",
+       "v": 14
+      },
+      {
+       "t": "2026-10-06T10:21:51.000Z",
+       "v": 14
+      },
+      {
+       "t": "2026-10-06T16:21:51.000Z",
+       "v": 17
+      },
+      {
+       "t": "2026-10-06T22:21:51.000Z",
+       "v": 18
+      },
+      {
+       "t": "2026-10-07T04:21:51.000Z",
+       "v": 18
+      },
+      {
+       "t": "2026-10-07T10:21:51.000Z",
+       "v": 18
+      },
+      {
+       "t": "2026-10-07T16:21:51.000Z",
+       "v": 16
+      },
+      {
+       "t": "2026-10-07T22:21:51.000Z",
+       "v": 16
+      },
+      {
+       "t": "2026-10-08T04:21:51.000Z",
+       "v": 16
+      },
+      {
+       "t": "2026-10-08T10:21:51.000Z",
+       "v": 16
+      },
+      {
+       "t": "2026-10-08T16:21:51.000Z",
+       "v": 14
+      },
+      {
+       "t": "2026-10-08T22:21:51.000Z",
+       "v": 14
+      }
+     ],
+     "count": 14,
+     "delta": 6,
+     "previousCount": 8,
+     "id": "entitiesWithAlerts",
+     "sample": [
+      "host:2528d2a4-bab4-5027-95ea-2b43632c165d",
+      "user:a.rodriguez@acme.example@okta",
+      "host:3e751925-2b1c-5e66-969b-d8c23136e00d",
+      "user:j.chen@acme.example@okta",
+      "host:230a0eef-f3e5-54df-89d5-facf17d5453d",
+      "host:9a6bfc78-3216-51cd-8716-8921c37af8b2",
+      "user:svc-build@acme.example@okta",
+      "host:74099126-5a94-5179-be73-1c04a67e70b6",
+      "user:z.ahmed@74099126-5a94-5179-be73-1c04a67e70b6@local",
+      "host:e3ff494f-eecd-5732-93ae-720cb5b45e0f",
+      "host:933ec835-0993-5c05-a570-887a7697d324",
+      "host:a027e9fb-217e-524d-b22f-33d387f03682",
+      "user:b.wright@a027e9fb-217e-524d-b22f-33d387f03682@local",
+      "user:i.petrov@933ec835-0993-5c05-a570-887a7697d324@local"
+     ],
+     "sampleTruncated": false,
+     "status": "ok",
+     "deltaPct": 75
+    },
+    {
+     "trend": [
+      {
+       "t": "2026-10-02T04:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-02T10:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-02T16:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-02T22:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-03T04:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-03T10:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-03T16:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-03T22:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-04T04:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-04T10:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-04T16:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-04T22:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-05T04:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-05T10:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-05T16:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-05T22:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-06T04:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-06T10:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-06T16:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-06T22:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-07T04:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-07T10:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-07T16:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-07T22:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-08T04:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-08T10:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-08T16:21:51.000Z",
+       "v": 0
+      },
+      {
+       "t": "2026-10-08T22:21:51.000Z",
+       "v": 0
+      }
+     ],
+     "count": 5,
+     "delta": 5,
+     "previousCount": 0,
+     "id": "riskMovers",
+     "sample": [
+      "user:a.rodriguez@acme.example@okta",
+      "host:2528d2a4-bab4-5027-95ea-2b43632c165d",
+      "host:230a0eef-f3e5-54df-89d5-facf17d5453d",
+      "host:9a6bfc78-3216-51cd-8716-8921c37af8b2",
+      "user:svc-build@acme.example@okta"
+     ],
+     "sampleTruncated": false,
+     "status": "ok"
+    },
+    {
+     "trend": [],
+     "count": 1,
+     "delta": 1,
+     "previousCount": 0,
+     "id": "newlyHighCritical",
+     "sample": [
+      "user:a.rodriguez@acme.example@okta"
+     ],
+     "sampleTruncated": false,
+     "status": "ok"
+    }
+   ],
+   "exposureLeaders": [
+    "user:a.rodriguez@acme.example@okta",
+    "host:2528d2a4-bab4-5027-95ea-2b43632c165d",
+    "host:3e751925-2b1c-5e66-969b-d8c23136e00d",
+    "user:j.chen@acme.example@okta",
+    "host:230a0eef-f3e5-54df-89d5-facf17d5453d",
+    "host:9a6bfc78-3216-51cd-8716-8921c37af8b2",
+    "user:svc-build@acme.example@okta",
+    "host:74099126-5a94-5179-be73-1c04a67e70b6",
+    "host:b10efa22-d7b6-5288-83d4-23c875ed0c18",
+    "host:f3ec667c-f39f-59c6-b62c-03dd81c63e80"
+   ],
+   "stats": [
+    {
+     "upIsBad": true,
+     "id": "postureScore",
+     "value": 20
+    },
+    {
+     "upIsBad": true,
+     "id": "materialRiskEntities",
+     "value": 1
+    },
+    {
+     "upIsBad": true,
+     "previous": 8,
+     "delta": 12,
+     "id": "activeSignals",
+     "value": 20
+    },
+    {
+     "upIsBad": true,
+     "id": "stagesWithActivity",
+     "value": 8
+    }
+   ],
+   "concentration": [
+    {
+     "level": "High",
+     "count": 1,
+     "type": "user"
+    },
+    {
+     "level": "Moderate",
+     "count": 1,
+     "type": "user"
+    },
+    {
+     "level": "Low",
+     "count": 1,
+     "type": "user"
+    },
+    {
+     "level": "Unknown",
+     "count": 10,
+     "type": "user"
+    },
+    {
+     "level": "Moderate",
+     "count": 3,
+     "type": "host"
+    },
+    {
+     "level": "Low",
+     "count": 1,
+     "type": "host"
+    },
+    {
+     "level": "Unknown",
+     "count": 11,
+     "type": "host"
+    }
+   ]
+  },
+  "catalog": {
+   "EVT-1-1": {
+    "kind": "event",
+    "storyEvidenceId": "STORY-1"
+   },
+   "RULE-11": {
+    "severity": "low",
+    "alertCount": 1,
+    "tacticIds": [
+     "TA0005"
+    ],
+    "kind": "rule",
+    "name": "Network Connection via Signed Binary",
+    "techniqueIds": [
+     "T1218"
+    ],
+    "ruleId": "94af9394-b476-42b1-8505-93de9088475a"
+   },
+   "RULE-10": {
+    "severity": "medium",
+    "alertCount": 1,
+    "tacticIds": [
+     "TA0002"
+    ],
+    "kind": "rule",
+    "name": "Suspicious PowerShell Engine ImageLoad",
+    "techniqueIds": [
+     "T1059",
+     "T1059.001"
+    ],
+    "ruleId": "6a19b6a6-46ec-4436-b364-20c4ab8b1666"
+   },
+   "RULE-13": {
+    "severity": "low",
+    "alertCount": 1,
+    "tacticIds": [
+     "TA0007"
+    ],
+    "kind": "rule",
+    "name": "Enumeration of Administrator Accounts",
+    "techniqueIds": [
+     "T1087"
+    ],
+    "ruleId": "f120fbe4-50c3-4f47-a38b-40da2a9c9c26"
+   },
+   "RULE-12": {
+    "severity": "high",
+    "alertCount": 2,
+    "tacticIds": [
+     "TA0006"
+    ],
+    "kind": "rule",
+    "name": "Okta User Session Impersonation",
+    "techniqueIds": [
+     "T1550"
+    ],
+    "ruleId": "f6adc6bb-74ec-4e8e-bfe0-a97f08e44760"
+   },
+   "EVT-1-5": {
+    "kind": "event",
+    "storyEvidenceId": "STORY-1"
+   },
+   "EVT-3-3": {
+    "kind": "event",
+    "storyEvidenceId": "STORY-3"
+   },
+   "EVT-1-4": {
+    "kind": "event",
+    "storyEvidenceId": "STORY-1"
+   },
+   "EVT-3-2": {
+    "kind": "event",
+    "storyEvidenceId": "STORY-3"
+   },
+   "EVT-1-3": {
+    "kind": "event",
+    "storyEvidenceId": "STORY-1"
+   },
+   "EVT-3-1": {
+    "kind": "event",
+    "storyEvidenceId": "STORY-3"
+   },
+   "GAP-B12": {
+    "kind": "gap",
+    "signal": "B12"
+   },
+   "EVT-1-2": {
+    "kind": "event",
+    "storyEvidenceId": "STORY-1"
+   },
+   "EVT-1-9": {
+    "kind": "event",
+    "storyEvidenceId": "STORY-1"
+   },
+   "EVT-1-8": {
+    "kind": "event",
+    "storyEvidenceId": "STORY-1"
+   },
+   "EVT-3-6": {
+    "kind": "event",
+    "storyEvidenceId": "STORY-3"
+   },
+   "EVT-1-7": {
+    "kind": "event",
+    "storyEvidenceId": "STORY-1"
+   },
+   "EVT-3-5": {
+    "kind": "event",
+    "storyEvidenceId": "STORY-3"
+   },
+   "EVT-1-6": {
+    "kind": "event",
+    "storyEvidenceId": "STORY-1"
+   },
+   "EVT-3-4": {
+    "kind": "event",
+    "storyEvidenceId": "STORY-3"
+   },
+   "GAP-B17": {
+    "kind": "gap",
+    "signal": "B17"
+   },
+   "AD-2": {
+    "alertCount": 7,
+    "tacticIds": [
+     "TA0001",
+     "TA0002",
+     "TA0006"
+    ],
+    "kind": "attack_discovery",
+    "workflowStatus": "open",
+    "id": "b8c551fc-3b94-485c-ab00-9272c004502d",
+    "title": "MFA fatigue followed by session hijack of a marketing account"
+   },
+   "RULE-9": {
+    "severity": "medium",
+    "alertCount": 1,
+    "tacticIds": [
+     "TA0010"
+    ],
+    "kind": "rule",
+    "name": "Potential Data Exfiltration Through Curl",
+    "techniqueIds": [
+     "T1048"
+    ],
+    "ruleId": "4a3e8900-4a23-47df-a838-fb6f6ae109f8"
+   },
+   "RULE-7": {
+    "severity": "high",
+    "alertCount": 3,
+    "tacticIds": [
+     "TA0006"
+    ],
+    "kind": "rule",
+    "name": "Potential Okta MFA Bombing via Push Notifications",
+    "techniqueIds": [
+     "T1621"
+    ],
+    "ruleId": "f02aed2f-a60c-4514-87c1-256e529e567d"
+   },
+   "AD-1": {
+    "alertCount": 12,
+    "tacticIds": [
+     "TA0001",
+     "TA0002",
+     "TA0004",
+     "TA0006",
+     "TA0008"
+    ],
+    "kind": "attack_discovery",
+    "workflowStatus": "open",
+    "id": "2ac34749-ad66-49eb-b463-4c44381c4b13",
+    "title": "Stolen privileged credentials used to reach a production container host"
+   },
+   "RULE-8": {
+    "severity": "low",
+    "alertCount": 1,
+    "tacticIds": [
+     "TA0006"
+    ],
+    "kind": "rule",
+    "name": "Potential Password Spraying Attack via SSH",
+    "techniqueIds": [
+     "T1110"
+    ],
+    "ruleId": "7a68940a-26ed-4949-b0ff-00c754850ed5"
+   },
+   "RULE-5": {
+    "severity": "high",
+    "alertCount": 3,
+    "tacticIds": [
+     "TA0008"
+    ],
+    "kind": "rule",
+    "name": "Potential SharpRDP Behavior",
+    "techniqueIds": [
+     "T1021"
+    ],
+    "ruleId": "c40243b0-8f2e-4c89-9f13-7ecb3a81b2b7"
+   },
+   "LEAD-1": {
+    "kind": "lead",
+    "id": "06d900671650270fb01fd9299cc6d010ef5cdbeca987f4ceef2175a4407f3d41",
+    "title": "Potential credential theft with lateral movement to production by a.rodriguez",
+    "priority": 9,
+    "status": "active"
+   },
+   "RULE-6": {
+    "severity": "high",
+    "alertCount": 1,
+    "tacticIds": [],
+    "kind": "rule",
+    "name": "External Alerts",
+    "techniqueIds": [],
+    "ruleId": "5be4365d-bc6d-46d2-8b1d-e875f4c1dd1f"
+   },
+   "RULE-3": {
+    "severity": "medium",
+    "alertCount": 2,
+    "tacticIds": [
+     "TA0004"
+    ],
+    "kind": "rule",
+    "name": "Sudoers File Activity",
+    "techniqueIds": [
+     "T1548"
+    ],
+    "ruleId": "8cf6cc45-4b28-47c2-8f03-ee8a8dd9e264"
+   },
+   "RULE-4": {
+    "severity": "high",
+    "alertCount": 2,
+    "tacticIds": [
+     "TA0006"
+    ],
+    "kind": "rule",
+    "name": "Potential Credential Access via LSASS Memory Dump",
+    "techniqueIds": [
+     "T1003"
+    ],
+    "ruleId": "339701f1-6457-48be-a087-011bf2fbb357"
+   },
+   "RULE-1": {
+    "severity": "medium",
+    "alertCount": 1,
+    "tacticIds": [
+     "TA0001"
+    ],
+    "kind": "rule",
+    "name": "Suspicious MS Office Child Process",
+    "techniqueIds": [
+     "T1566"
+    ],
+    "ruleId": "73865d3a-65ca-4d34-a4ca-87e89b3aaebf"
+   },
+   "RULE-2": {
+    "severity": "high",
+    "alertCount": 3,
+    "tacticIds": [
+     "TA0002"
+    ],
+    "kind": "rule",
+    "name": "Privileged Container Creation with Host Directory Mount",
+    "techniqueIds": [
+     "T1610"
+    ],
+    "ruleId": "25ff859a-759b-4d71-8468-a20421a75799"
+   },
+   "TAC-TA0010": {
+    "kind": "tactic",
+    "tacticId": "TA0010"
+   },
+   "ENT-3": {
+    "euid": "host:3e751925-2b1c-5e66-969b-d8c23136e00d",
+    "kind": "entity"
+   },
+   "ENT-2": {
+    "euid": "host:2528d2a4-bab4-5027-95ea-2b43632c165d",
+    "kind": "entity"
+   },
+   "ENT-5": {
+    "euid": "host:230a0eef-f3e5-54df-89d5-facf17d5453d",
+    "kind": "entity"
+   },
+   "ENT-4": {
+    "euid": "user:j.chen@acme.example@okta",
+    "kind": "entity"
+   },
+   "ENT-7": {
+    "euid": "user:svc-build@acme.example@okta",
+    "kind": "entity"
+   },
+   "TAC-TA0002": {
+    "kind": "tactic",
+    "tacticId": "TA0002"
+   },
+   "ENT-6": {
+    "euid": "host:9a6bfc78-3216-51cd-8716-8921c37af8b2",
+    "kind": "entity"
+   },
+   "STORY-1": {
+    "kind": "story",
+    "rank": 1
+   },
+   "ENT-9": {
+    "euid": "host:b10efa22-d7b6-5288-83d4-23c875ed0c18",
+    "kind": "entity"
+   },
+   "STORY-2": {
+    "kind": "story",
+    "rank": 2
+   },
+   "ENT-8": {
+    "euid": "host:74099126-5a94-5179-be73-1c04a67e70b6",
+    "kind": "entity"
+   },
+   "STORY-3": {
+    "kind": "story",
+    "rank": 3
+   },
+   "TAC-TA0001": {
+    "kind": "tactic",
+    "tacticId": "TA0001"
+   },
+   "TAC-TA0006": {
+    "kind": "tactic",
+    "tacticId": "TA0006"
+   },
+   "TAC-TA0007": {
+    "kind": "tactic",
+    "tacticId": "TA0007"
+   },
+   "TAC-TA0004": {
+    "kind": "tactic",
+    "tacticId": "TA0004"
+   },
+   "GAP-B6": {
+    "kind": "gap",
+    "signal": "B6"
+   },
+   "TAC-TA0005": {
+    "kind": "tactic",
+    "tacticId": "TA0005"
+   },
+   "GAP-B5": {
+    "kind": "gap",
+    "signal": "B5"
+   },
+   "EVT-2-4": {
+    "kind": "event",
+    "storyEvidenceId": "STORY-2"
+   },
+   "EVT-2-3": {
+    "kind": "event",
+    "storyEvidenceId": "STORY-2"
+   },
+   "EVT-2-2": {
+    "kind": "event",
+    "storyEvidenceId": "STORY-2"
+   },
+   "TAC-TA0008": {
+    "kind": "tactic",
+    "tacticId": "TA0008"
+   },
+   "EVT-2-1": {
+    "kind": "event",
+    "storyEvidenceId": "STORY-2"
+   },
+   "ENT-10": {
+    "euid": "host:f3ec667c-f39f-59c6-b62c-03dd81c63e80",
+    "kind": "entity"
+   },
+   "ENT-11": {
+    "euid": "user:z.ahmed@74099126-5a94-5179-be73-1c04a67e70b6@local",
+    "kind": "entity"
+   },
+   "ENT-12": {
+    "euid": "host:e3ff494f-eecd-5732-93ae-720cb5b45e0f",
+    "kind": "entity"
+   },
+   "ENT-13": {
+    "euid": "host:933ec835-0993-5c05-a570-887a7697d324",
+    "kind": "entity"
+   },
+   "ENT-14": {
+    "euid": "host:a027e9fb-217e-524d-b22f-33d387f03682",
+    "kind": "entity"
+   },
+   "ENT-15": {
+    "euid": "user:b.wright@a027e9fb-217e-524d-b22f-33d387f03682@local",
+    "kind": "entity"
+   },
+   "ENT-16": {
+    "euid": "user:i.petrov@933ec835-0993-5c05-a570-887a7697d324@local",
+    "kind": "entity"
+   },
+   "ENT-17": {
+    "euid": "host:3b484791-f027-5682-8119-88943f7e3603",
+    "kind": "entity"
+   },
+   "CASE-1": {
+    "kind": "case",
+    "caseId": "6ac716c0-7062-4941-a710-3ad055ef71db",
+    "title": "Marketing account takeover: j.chen",
+    "status": "open"
+   },
+   "ENT-1": {
+    "euid": "user:a.rodriguez@acme.example@okta",
+    "kind": "entity"
+   },
+   "EVT-1-10": {
+    "kind": "event",
+    "storyEvidenceId": "STORY-1"
+   },
+   "EVT-1-12": {
+    "kind": "event",
+    "storyEvidenceId": "STORY-1"
+   },
+   "EVT-1-11": {
+    "kind": "event",
+    "storyEvidenceId": "STORY-1"
+   }
+  },
+  "generatedAt": "2026-10-08T22:21:51Z",
+  "storylines": {
+   "trace": [
+    {
+     "action": "union",
+     "detail": "host:230a0eef-f3e5-54df-89d5-facf17d5453d \u222a host:2528d2a4-bab4-5027-95ea-2b43632c165d via seed ad:2ac34749-ad66-49eb-b463-4c44381c4b13"
+    },
+    {
+     "action": "union",
+     "detail": "host:230a0eef-f3e5-54df-89d5-facf17d5453d \u222a host:3e751925-2b1c-5e66-969b-d8c23136e00d via seed ad:2ac34749-ad66-49eb-b463-4c44381c4b13"
+    },
+    {
+     "action": "union",
+     "detail": "host:230a0eef-f3e5-54df-89d5-facf17d5453d \u222a user:a.rodriguez@acme.example@okta via seed ad:2ac34749-ad66-49eb-b463-4c44381c4b13"
+    },
+    {
+     "action": "union",
+     "detail": "host:e3ff494f-eecd-5732-93ae-720cb5b45e0f \u222a user:j.chen@acme.example@okta via seed ad:b8c551fc-3b94-485c-ab00-9272c004502d"
+    },
+    {
+     "action": "union",
+     "detail": "host:9a6bfc78-3216-51cd-8716-8921c37af8b2 \u222a user:svc-build@acme.example@okta via co_alert edge"
+    },
+    {
+     "action": "union",
+     "detail": "host:3b484791-f027-5682-8119-88943f7e3603 \u222a host:9a6bfc78-3216-51cd-8716-8921c37af8b2 via accesses_infrequently edge to host:3b484791-f027-5682-8119-88943f7e3603"
+    }
+   ],
+   "otherNotableEntities": [],
+   "storylines": [
+    {
+     "severity": "critical",
+     "hubEuids": [],
+     "tacticIds": [
+      "TA0001",
+      "TA0002",
+      "TA0004",
+      "TA0006",
+      "TA0008"
+     ],
+     "seeds": [
+      {
+       "severity": 0.9,
+       "entityEuids": [
+        "user:a.rodriguez@acme.example@okta"
+       ],
+       "at": "2026-10-08T22:16:04.690Z",
+       "kind": "lead",
+       "evidenceId": "LEAD-1"
+      },
+      {
+       "severity": 0.85,
+       "entityEuids": [
+        "user:a.rodriguez@acme.example@okta"
+       ],
+       "at": "2026-10-08T00:00:00.000Z",
+       "kind": "risk_mover",
+       "evidenceId": "ENT-1"
+      },
+      {
+       "severity": 0.75,
+       "entityEuids": [
+        "user:a.rodriguez@acme.example@okta"
+       ],
+       "at": "2026-10-08T00:00:00.000Z",
+       "kind": "material_risk",
+       "evidenceId": "ENT-1"
+      },
+      {
+       "severity": 0.74,
+       "entityEuids": [
+        "host:2528d2a4-bab4-5027-95ea-2b43632c165d"
+       ],
+       "at": "2026-10-08T00:00:00.000Z",
+       "kind": "risk_mover",
+       "evidenceId": "ENT-2"
+      },
+      {
+       "severity": 0.52,
+       "entityEuids": [
+        "host:230a0eef-f3e5-54df-89d5-facf17d5453d"
+       ],
+       "at": "2026-10-08T00:00:00.000Z",
+       "kind": "risk_mover",
+       "evidenceId": "ENT-5"
+      },
+      {
+       "severity": 0.5,
+       "entityEuids": [
+        "host:230a0eef-f3e5-54df-89d5-facf17d5453d",
+        "host:2528d2a4-bab4-5027-95ea-2b43632c165d",
+        "host:3e751925-2b1c-5e66-969b-d8c23136e00d",
+        "user:a.rodriguez@acme.example@okta"
+       ],
+       "at": "2026-10-07T10:00:00.000Z",
+       "kind": "attack_discovery",
+       "evidenceId": "AD-1"
+      }
+     ],
+     "edges": [
+      {
+       "weight": 1,
+       "evidenceIds": [
+        "AD-1"
+       ],
+       "from": "host:230a0eef-f3e5-54df-89d5-facf17d5453d",
+       "to": "user:a.rodriguez@acme.example@okta",
+       "type": "same_ad"
+      },
+      {
+       "weight": 1,
+       "evidenceIds": [
+        "AD-1"
+       ],
+       "from": "host:2528d2a4-bab4-5027-95ea-2b43632c165d",
+       "to": "user:a.rodriguez@acme.example@okta",
+       "type": "same_ad"
+      },
+      {
+       "weight": 1,
+       "evidenceIds": [
+        "AD-1"
+       ],
+       "from": "host:3e751925-2b1c-5e66-969b-d8c23136e00d",
+       "to": "user:a.rodriguez@acme.example@okta",
+       "type": "same_ad"
+      },
+      {
+       "weight": 0.8,
+       "evidenceIds": [
+        "RULE-4",
+        "RULE-1"
+       ],
+       "from": "host:230a0eef-f3e5-54df-89d5-facf17d5453d",
+       "to": "user:a.rodriguez@acme.example@okta",
+       "type": "co_alert"
+      },
+      {
+       "weight": 0.8,
+       "evidenceIds": [
+        "RULE-2",
+        "RULE-3"
+       ],
+       "from": "host:2528d2a4-bab4-5027-95ea-2b43632c165d",
+       "to": "user:a.rodriguez@acme.example@okta",
+       "type": "co_alert"
+      },
+      {
+       "weight": 0.8,
+       "evidenceIds": [
+        "RULE-6",
+        "RULE-5"
+       ],
+       "from": "host:3e751925-2b1c-5e66-969b-d8c23136e00d",
+       "to": "user:a.rodriguez@acme.example@okta",
+       "type": "co_alert"
+      },
+      {
+       "weight": 0.6,
+       "evidenceIds": [],
+       "from": "user:a.rodriguez@acme.example@okta",
+       "to": "host:230a0eef-f3e5-54df-89d5-facf17d5453d",
+       "type": "owns"
+      },
+      {
+       "weight": 0.6,
+       "evidenceIds": [
+        "EVT-1-8"
+       ],
+       "from": "user:a.rodriguez@acme.example@okta",
+       "to": "host:2528d2a4-bab4-5027-95ea-2b43632c165d",
+       "type": "accesses_infrequently"
+      },
+      {
+       "weight": 0.6,
+       "evidenceIds": [
+        "EVT-1-5"
+       ],
+       "from": "user:a.rodriguez@acme.example@okta",
+       "to": "host:3e751925-2b1c-5e66-969b-d8c23136e00d",
+       "type": "accesses_infrequently"
+      },
+      {
+       "weight": 0.4,
+       "evidenceIds": [
+        "LEAD-1"
+       ],
+       "from": "user:a.rodriguez@acme.example@okta",
+       "to": "host:230a0eef-f3e5-54df-89d5-facf17d5453d",
+       "type": "lead_related"
+      },
+      {
+       "weight": 0.4,
+       "evidenceIds": [
+        "LEAD-1"
+       ],
+       "from": "user:a.rodriguez@acme.example@okta",
+       "to": "host:2528d2a4-bab4-5027-95ea-2b43632c165d",
+       "type": "lead_related"
+      },
+      {
+       "weight": 0.4,
+       "evidenceIds": [
+        "LEAD-1"
+       ],
+       "from": "user:a.rodriguez@acme.example@okta",
+       "to": "host:3e751925-2b1c-5e66-969b-d8c23136e00d",
+       "type": "lead_related"
+      },
+      {
+       "weight": 0.3,
+       "evidenceIds": [],
+       "from": "user:a.rodriguez@acme.example@okta",
+       "to": "host:230a0eef-f3e5-54df-89d5-facf17d5453d",
+       "type": "accesses_frequently"
+      },
+      {
+       "weight": 0.3,
+       "evidenceIds": [],
+       "from": "user:a.rodriguez@acme.example@okta",
+       "to": "host:230a0eef-f3e5-54df-89d5-facf17d5453d",
+       "type": "communicates_with"
+      },
+      {
+       "weight": 0.3,
+       "evidenceIds": [
+        "EVT-1-9"
+       ],
+       "from": "user:a.rodriguez@acme.example@okta",
+       "to": "host:2528d2a4-bab4-5027-95ea-2b43632c165d",
+       "type": "communicates_with"
+      },
+      {
+       "weight": 0.3,
+       "evidenceIds": [
+        "EVT-1-6"
+       ],
+       "from": "user:a.rodriguez@acme.example@okta",
+       "to": "host:3e751925-2b1c-5e66-969b-d8c23136e00d",
+       "type": "communicates_with"
+      }
+     ],
+     "score": 1.754,
+     "entityEuids": [
+      "user:a.rodriguez@acme.example@okta",
+      "host:2528d2a4-bab4-5027-95ea-2b43632c165d",
+      "host:230a0eef-f3e5-54df-89d5-facf17d5453d",
+      "host:3e751925-2b1c-5e66-969b-d8c23136e00d"
+     ],
+     "response": {
+      "alerts": {
+       "acknowledged": 0,
+       "closed": 0,
+       "open": 12
+      },
+      "cases": [],
+      "state": "unaddressed"
+     },
+     "evidenceId": "STORY-1",
+     "rank": 1,
+     "linkStrength": "strong",
+     "events": [
+      {
+       "summary": "First Initial Access alert: \"Suspicious MS Office Child Process\" on LAPTOP-FIN03",
+       "entityEuids": [
+        "host:230a0eef-f3e5-54df-89d5-facf17d5453d",
+        "user:a.rodriguez@acme.example@okta"
+       ],
+       "at": "2026-10-03T14:22:00.000Z",
+       "evidenceId": "EVT-1-1",
+       "sourceEvidenceIds": [
+        "RULE-1"
+       ],
+       "tacticId": "TA0001",
+       "type": "alert_first"
+      },
+      {
+       "summary": "LAPTOP-FIN03 risk 18 \u2192 42 (Moderate)",
+       "entityEuids": [
+        "host:230a0eef-f3e5-54df-89d5-facf17d5453d"
+       ],
+       "at": "2026-10-04T00:00:00.000Z",
+       "evidenceId": "EVT-1-2",
+       "sourceEvidenceIds": [
+        "ENT-5"
+       ],
+       "type": "risk_jump"
+      },
+      {
+       "summary": "a.rodriguez risk 33 \u2192 62 (Moderate)",
+       "entityEuids": [
+        "user:a.rodriguez@acme.example@okta"
+       ],
+       "at": "2026-10-04T00:00:00.000Z",
+       "evidenceId": "EVT-1-3",
+       "sourceEvidenceIds": [
+        "ENT-1"
+       ],
+       "type": "risk_jump"
+      },
+      {
+       "summary": "First Credential Access alert: \"Potential Credential Access via LSASS Memory Dump\" on LAPTOP-FIN03",
+       "entityEuids": [
+        "host:230a0eef-f3e5-54df-89d5-facf17d5453d",
+        "user:a.rodriguez@acme.example@okta"
+       ],
+       "at": "2026-10-04T10:08:00.000Z",
+       "evidenceId": "EVT-1-4",
+       "sourceEvidenceIds": [
+        "RULE-4"
+       ],
+       "tacticId": "TA0006",
+       "type": "alert_first"
+      },
+      {
+       "summary": "New relationship: a.rodriguez logged on to (rarely) jump-box-01 (first observed on or around 2026-10-05)",
+       "entityEuids": [
+        "user:a.rodriguez@acme.example@okta",
+        "host:3e751925-2b1c-5e66-969b-d8c23136e00d"
+       ],
+       "at": "2026-10-05T23:00:00.000Z",
+       "evidenceId": "EVT-1-5",
+       "sourceEvidenceIds": [],
+       "type": "relationship_first_seen"
+      },
+      {
+       "summary": "New relationship: a.rodriguez regularly logs on to jump-box-01 (first observed on or around 2026-10-05)",
+       "entityEuids": [
+        "user:a.rodriguez@acme.example@okta",
+        "host:3e751925-2b1c-5e66-969b-d8c23136e00d"
+       ],
+       "at": "2026-10-05T23:00:00.000Z",
+       "evidenceId": "EVT-1-6",
+       "sourceEvidenceIds": [],
+       "type": "relationship_first_seen"
+      },
+      {
+       "summary": "a.rodriguez risk 70 \u2192 72 (High)",
+       "entityEuids": [
+        "user:a.rodriguez@acme.example@okta"
+       ],
+       "at": "2026-10-06T00:00:00.000Z",
+       "evidenceId": "EVT-1-7",
+       "sourceEvidenceIds": [
+        "ENT-1"
+       ],
+       "type": "risk_jump"
+      },
+      {
+       "summary": "New relationship: a.rodriguez logged on to (rarely) docker-host-prod-01 (first observed on or around 2026-10-06)",
+       "entityEuids": [
+        "user:a.rodriguez@acme.example@okta",
+        "host:2528d2a4-bab4-5027-95ea-2b43632c165d"
+       ],
+       "at": "2026-10-06T23:00:00.000Z",
+       "evidenceId": "EVT-1-8",
+       "sourceEvidenceIds": [],
+       "type": "relationship_first_seen"
+      },
+      {
+       "summary": "New relationship: a.rodriguez regularly logs on to docker-host-prod-01 (first observed on or around 2026-10-06)",
+       "entityEuids": [
+        "user:a.rodriguez@acme.example@okta",
+        "host:2528d2a4-bab4-5027-95ea-2b43632c165d"
+       ],
+       "at": "2026-10-06T23:00:00.000Z",
+       "evidenceId": "EVT-1-9",
+       "sourceEvidenceIds": [],
+       "type": "relationship_first_seen"
+      },
+      {
+       "summary": "docker-host-prod-01 risk 39 \u2192 64 (Moderate)",
+       "entityEuids": [
+        "host:2528d2a4-bab4-5027-95ea-2b43632c165d"
+       ],
+       "at": "2026-10-07T00:00:00.000Z",
+       "evidenceId": "EVT-1-10",
+       "sourceEvidenceIds": [
+        "ENT-2"
+       ],
+       "type": "risk_jump"
+      },
+      {
+       "summary": "Attack Discovery: \"Stolen privileged credentials used to reach a production container host\"",
+       "entityEuids": [
+        "host:230a0eef-f3e5-54df-89d5-facf17d5453d",
+        "host:2528d2a4-bab4-5027-95ea-2b43632c165d",
+        "host:3e751925-2b1c-5e66-969b-d8c23136e00d",
+        "user:a.rodriguez@acme.example@okta"
+       ],
+       "at": "2026-10-07T10:00:00.000Z",
+       "evidenceId": "EVT-1-11",
+       "sourceEvidenceIds": [
+        "AD-1"
+       ],
+       "type": "ad_generated"
+      },
+      {
+       "summary": "Hunting lead created: \"Potential credential theft with lateral movement to production by a.rodriguez\"",
+       "entityEuids": [
+        "user:a.rodriguez@acme.example@okta"
+       ],
+       "at": "2026-10-08T22:16:04.690Z",
+       "evidenceId": "EVT-1-12",
+       "sourceEvidenceIds": [
+        "LEAD-1"
+       ],
+       "type": "lead_created"
+      }
+     ],
+     "eventsTruncated": 3
+    },
+    {
+     "severity": "medium",
+     "hubEuids": [],
+     "tacticIds": [
+      "TA0001",
+      "TA0006"
+     ],
+     "seeds": [
+      {
+       "severity": 0.5,
+       "entityEuids": [
+        "host:e3ff494f-eecd-5732-93ae-720cb5b45e0f",
+        "user:j.chen@acme.example@okta"
+       ],
+       "at": "2026-10-06T18:00:00.000Z",
+       "kind": "attack_discovery",
+       "evidenceId": "AD-2"
+      }
+     ],
+     "edges": [
+      {
+       "weight": 1,
+       "evidenceIds": [
+        "AD-2"
+       ],
+       "from": "host:e3ff494f-eecd-5732-93ae-720cb5b45e0f",
+       "to": "user:j.chen@acme.example@okta",
+       "type": "same_ad"
+      },
+      {
+       "weight": 0.8,
+       "evidenceIds": [
+        "RULE-1"
+       ],
+       "from": "host:e3ff494f-eecd-5732-93ae-720cb5b45e0f",
+       "to": "user:j.chen@acme.example@okta",
+       "type": "co_alert"
+      },
+      {
+       "weight": 0.6,
+       "evidenceIds": [],
+       "from": "user:j.chen@acme.example@okta",
+       "to": "host:e3ff494f-eecd-5732-93ae-720cb5b45e0f",
+       "type": "owns"
+      },
+      {
+       "weight": 0.3,
+       "evidenceIds": [],
+       "from": "user:j.chen@acme.example@okta",
+       "to": "host:e3ff494f-eecd-5732-93ae-720cb5b45e0f",
+       "type": "accesses_frequently"
+      },
+      {
+       "weight": 0.3,
+       "evidenceIds": [],
+       "from": "user:j.chen@acme.example@okta",
+       "to": "host:e3ff494f-eecd-5732-93ae-720cb5b45e0f",
+       "type": "communicates_with"
+      }
+     ],
+     "score": 0.329,
+     "entityEuids": [
+      "user:j.chen@acme.example@okta",
+      "host:e3ff494f-eecd-5732-93ae-720cb5b45e0f"
+     ],
+     "response": {
+      "alerts": {
+       "acknowledged": 7,
+       "closed": 0,
+       "open": 0
+      },
+      "cases": [
+       {
+        "evidenceId": "CASE-1",
+        "caseId": "6ac716c0-7062-4941-a710-3ad055ef71db",
+        "title": "Marketing account takeover: j.chen",
+        "status": "open"
+       }
+      ],
+      "state": "in_progress"
+     },
+     "evidenceId": "STORY-2",
+     "rank": 2,
+     "linkStrength": "strong",
+     "events": [
+      {
+       "summary": "First Credential Access alert: \"Potential Okta MFA Bombing via Push Notifications\" on j.chen",
+       "entityEuids": [
+        "user:j.chen@acme.example@okta"
+       ],
+       "at": "2026-10-05T11:02:00.000Z",
+       "evidenceId": "EVT-2-1",
+       "sourceEvidenceIds": [
+        "RULE-7"
+       ],
+       "tacticId": "TA0006",
+       "type": "alert_first"
+      },
+      {
+       "summary": "First Initial Access alert: \"Suspicious MS Office Child Process\" on LAPTOP-MKT07",
+       "entityEuids": [
+        "host:e3ff494f-eecd-5732-93ae-720cb5b45e0f",
+        "user:j.chen@acme.example@okta"
+       ],
+       "at": "2026-10-06T15:11:00.000Z",
+       "evidenceId": "EVT-2-2",
+       "sourceEvidenceIds": [
+        "RULE-1"
+       ],
+       "tacticId": "TA0001",
+       "type": "alert_first"
+      },
+      {
+       "summary": "Attack Discovery: \"MFA fatigue followed by session hijack of a marketing account\"",
+       "entityEuids": [
+        "host:e3ff494f-eecd-5732-93ae-720cb5b45e0f",
+        "user:j.chen@acme.example@okta"
+       ],
+       "at": "2026-10-06T18:00:00.000Z",
+       "evidenceId": "EVT-2-3",
+       "sourceEvidenceIds": [
+        "AD-2"
+       ],
+       "type": "ad_generated"
+      },
+      {
+       "summary": "Case opened: \"Marketing account takeover: j.chen\"",
+       "entityEuids": [
+        "user:j.chen@acme.example@okta",
+        "host:e3ff494f-eecd-5732-93ae-720cb5b45e0f"
+       ],
+       "at": "2026-10-07T09:00:00.000Z",
+       "evidenceId": "EVT-2-4",
+       "sourceEvidenceIds": [
+        "CASE-1"
+       ],
+       "type": "case_opened"
+      }
+     ],
+     "eventsTruncated": 0
+    },
+    {
+     "severity": "low",
+     "hubEuids": [],
+     "tacticIds": [
+      "TA0006",
+      "TA0010"
+     ],
+     "seeds": [
+      {
+       "severity": 0.27,
+       "entityEuids": [
+        "host:9a6bfc78-3216-51cd-8716-8921c37af8b2"
+       ],
+       "at": "2026-10-08T00:00:00.000Z",
+       "kind": "risk_mover",
+       "evidenceId": "ENT-6"
+      },
+      {
+       "severity": 0.27,
+       "entityEuids": [
+        "user:svc-build@acme.example@okta"
+       ],
+       "at": "2026-10-08T00:00:00.000Z",
+       "kind": "risk_mover",
+       "evidenceId": "ENT-7"
+      }
+     ],
+     "edges": [
+      {
+       "weight": 0.8,
+       "evidenceIds": [
+        "RULE-9",
+        "RULE-8"
+       ],
+       "from": "host:9a6bfc78-3216-51cd-8716-8921c37af8b2",
+       "to": "user:svc-build@acme.example@okta",
+       "type": "co_alert"
+      },
+      {
+       "weight": 0.6,
+       "evidenceIds": [
+        "EVT-3-2"
+       ],
+       "from": "user:svc-build@acme.example@okta",
+       "to": "host:3b484791-f027-5682-8119-88943f7e3603",
+       "type": "accesses_infrequently"
+      },
+      {
+       "weight": 0.3,
+       "evidenceIds": [],
+       "from": "user:svc-build@acme.example@okta",
+       "to": "host:9a6bfc78-3216-51cd-8716-8921c37af8b2",
+       "type": "accesses_frequently"
+      },
+      {
+       "weight": 0.3,
+       "evidenceIds": [
+        "EVT-3-3"
+       ],
+       "from": "user:svc-build@acme.example@okta",
+       "to": "host:3b484791-f027-5682-8119-88943f7e3603",
+       "type": "communicates_with"
+      },
+      {
+       "weight": 0.3,
+       "evidenceIds": [],
+       "from": "user:svc-build@acme.example@okta",
+       "to": "host:9a6bfc78-3216-51cd-8716-8921c37af8b2",
+       "type": "communicates_with"
+      }
+     ],
+     "score": 0.24,
+     "entityEuids": [
+      "user:svc-build@acme.example@okta",
+      "host:9a6bfc78-3216-51cd-8716-8921c37af8b2",
+      "host:3b484791-f027-5682-8119-88943f7e3603"
+     ],
+     "response": {
+      "alerts": {
+       "acknowledged": 0,
+       "closed": 0,
+       "open": 2
+      },
+      "cases": [],
+      "state": "unaddressed"
+     },
+     "evidenceId": "STORY-3",
+     "rank": 3,
+     "linkStrength": "strong",
+     "events": [
+      {
+       "summary": "First Credential Access alert: \"Potential Password Spraying Attack via SSH\" on build-runner-02",
+       "entityEuids": [
+        "host:9a6bfc78-3216-51cd-8716-8921c37af8b2",
+        "user:svc-build@acme.example@okta"
+       ],
+       "at": "2026-10-04T03:12:00.000Z",
+       "evidenceId": "EVT-3-1",
+       "sourceEvidenceIds": [
+        "RULE-8"
+       ],
+       "tacticId": "TA0006",
+       "type": "alert_first"
+      },
+      {
+       "summary": "New relationship: svc-build logged on to (rarely) fileserver-03 (first observed on or around 2026-10-05)",
+       "entityEuids": [
+        "user:svc-build@acme.example@okta",
+        "host:3b484791-f027-5682-8119-88943f7e3603"
+       ],
+       "at": "2026-10-05T23:00:00.000Z",
+       "evidenceId": "EVT-3-2",
+       "sourceEvidenceIds": [],
+       "type": "relationship_first_seen"
+      },
+      {
+       "summary": "New relationship: svc-build regularly logs on to fileserver-03 (first observed on or around 2026-10-05)",
+       "entityEuids": [
+        "user:svc-build@acme.example@okta",
+        "host:3b484791-f027-5682-8119-88943f7e3603"
+       ],
+       "at": "2026-10-05T23:00:00.000Z",
+       "evidenceId": "EVT-3-3",
+       "sourceEvidenceIds": [],
+       "type": "relationship_first_seen"
+      },
+      {
+       "summary": "build-runner-02 risk 8 \u2192 21 (Low)",
+       "entityEuids": [
+        "host:9a6bfc78-3216-51cd-8716-8921c37af8b2"
+       ],
+       "at": "2026-10-06T00:00:00.000Z",
+       "evidenceId": "EVT-3-4",
+       "sourceEvidenceIds": [
+        "ENT-6"
+       ],
+       "type": "risk_jump"
+      },
+      {
+       "summary": "svc-build risk 8 \u2192 21 (Low)",
+       "entityEuids": [
+        "user:svc-build@acme.example@okta"
+       ],
+       "at": "2026-10-06T00:00:00.000Z",
+       "evidenceId": "EVT-3-5",
+       "sourceEvidenceIds": [
+        "ENT-7"
+       ],
+       "type": "risk_jump"
+      },
+      {
+       "summary": "First Exfiltration alert: \"Potential Data Exfiltration Through Curl\" on build-runner-02",
+       "entityEuids": [
+        "host:9a6bfc78-3216-51cd-8716-8921c37af8b2",
+        "user:svc-build@acme.example@okta"
+       ],
+       "at": "2026-10-06T02:51:00.000Z",
+       "evidenceId": "EVT-3-6",
+       "sourceEvidenceIds": [
+        "RULE-9"
+       ],
+       "tacticId": "TA0010",
+       "type": "alert_first"
+      }
+     ],
+     "eventsTruncated": 0
+    }
+   ]
+  },
+  "timeRange": {
+   "range": "7d",
+   "from": "2026-10-01T22:21:51Z",
+   "to": "2026-10-08T22:21:51Z"
+  }
+ },
+ "brief": {
+  "blindSpots": {
+   "summary": "Initial Access has activity but only 1 of 1 enabled detection rules are working. Execution has activity but only 2 of 2 enabled detection rules are working. Privilege Escalation has activity but only 1 of 1 enabled detection rules are working. No asset criticality on 1 material-risk entity. 9 open High/Critical alerts in storylines have no case. 173 local user accounts are not resolved to an identity.",
+   "evidence": [
+    "TAC-TA0001",
+    "TAC-TA0002",
+    "TAC-TA0004",
+    "GAP-B6",
+    "GAP-B17",
+    "GAP-B5"
+   ]
+  },
+  "glance": {
+   "threatNarrative": "Three connected storylines are active in the last 7 days. The first storyline (critical) centres on a.rodriguez and no one is working this yet. The second storyline (medium) centres on j.chen and it is already being handled. The third storyline (low) centres on svc-build and no one is working this yet. 1 entity carries material risk. 20 signals are active, up 12 from 8.",
+   "evidence": [
+    "STORY-1",
+    "STORY-2",
+    "STORY-3"
+   ],
+   "headline": "The most serious storyline centres on a.rodriguez and no one is working this yet"
+  },
+  "crossStorylineConclusion": {
+   "evidence": [
+    "STORY-1",
+    "TAC-TA0001"
+   ],
+   "confidence": "medium",
+   "statement": "The most serious storyline passes through Initial Access, a stage with limited detection coverage."
+  },
+  "decisions": [
+   {
+    "owner": "soc",
+    "evidence": [
+     "STORY-1",
+     "LEAD-1",
+     "ENT-1",
+     "ENT-2",
+     "ENT-5",
+     "AD-1"
+    ],
+    "urgency": "now",
+    "action": "Contain activity centred on a.rodriguez and open a case",
+    "relatesTo": "STORY-1",
+    "rationale": "No one is working this storyline yet, and it is ranked first. a.rodriguez is privileged, on the Privileged Users watchlist and high impact. docker-host-prod-01 is extreme impact.",
+    "targets": [
+     "ENT-1",
+     "ENT-2"
+    ],
+    "agentPrompt": "Investigate activity involving a.rodriguez over the last 7 days and propose containment steps."
+   },
+   {
+    "owner": "soc",
+    "evidence": [
+     "STORY-3",
+     "ENT-6",
+     "ENT-7",
+     "RULE-9",
+     "RULE-8"
+    ],
+    "urgency": "this_week",
+    "action": "Contain activity centred on svc-build and open a case",
+    "relatesTo": "STORY-3",
+    "rationale": "No one is working this storyline yet, and it is ranked third.",
+    "targets": [
+     "ENT-7"
+    ],
+    "agentPrompt": "Investigate activity involving svc-build over the last 7 days and propose containment steps."
+   },
+   {
+    "owner": "detection_engineering",
+    "evidence": [
+     "TAC-TA0001",
+     "RULE-1"
+    ],
+    "urgency": "this_week",
+    "action": "Review detection coverage for Initial Access",
+    "relatesTo": "TAC-TA0001",
+    "rationale": "Activity was seen in a stage where only 1 of 1 enabled detection rules are working.",
+    "targets": [
+     "TAC-TA0001"
+    ],
+    "agentPrompt": "Which Initial Access detection rules are enabled but not working, and which available prebuilt rules would close the gap?"
+   },
+   {
+    "owner": "detection_engineering",
+    "evidence": [
+     "TAC-TA0002",
+     "RULE-2",
+     "RULE-10"
+    ],
+    "urgency": "this_week",
+    "action": "Review detection coverage for Execution",
+    "relatesTo": "TAC-TA0002",
+    "rationale": "Activity was seen in a stage where only 2 of 2 enabled detection rules are working.",
+    "targets": [
+     "TAC-TA0002"
+    ],
+    "agentPrompt": "Which Execution detection rules are enabled but not working, and which available prebuilt rules would close the gap?"
+   }
+  ],
+  "storylines": [
+   {
+    "whyItMatters": "a.rodriguez is privileged, on the Privileged Users watchlist and high impact. docker-host-prod-01 is extreme impact. jump-box-01 is high impact. No case is open and no one is working this yet. 12 alerts are still open. The link is strong: it is backed by a discovered attack or by alerts the entities share.",
+    "evidence": [
+     "STORY-1",
+     "ENT-1",
+     "ENT-2",
+     "ENT-5",
+     "ENT-3",
+     "AD-1",
+     "RULE-4",
+     "RULE-1",
+     "RULE-2",
+     "RULE-3",
+     "RULE-6",
+     "RULE-5",
+     "EVT-1-8",
+     "EVT-1-5",
+     "LEAD-1",
+     "EVT-1-9",
+     "EVT-1-6",
+     "TAC-TA0001",
+     "TAC-TA0002",
+     "TAC-TA0004",
+     "TAC-TA0006",
+     "TAC-TA0008"
+    ],
+    "narrative": "LAPTOP-FIN03 and a.rodriguez were part of the same discovered attack; LAPTOP-FIN03 and a.rodriguez appeared together in alerts; a.rodriguez owns LAPTOP-FIN03; a.rodriguez and LAPTOP-FIN03 were related in a hunting lead; a.rodriguez regularly logs on to LAPTOP-FIN03; a.rodriguez regularly logs on to LAPTOP-FIN03. docker-host-prod-01 and a.rodriguez were part of the same discovered attack; docker-host-prod-01 and a.rodriguez appeared together in alerts; a.rodriguez logged on to (rarely) docker-host-prod-01; a.rodriguez and docker-host-prod-01 were related in a hunting lead; a.rodriguez regularly logs on to docker-host-prod-01. jump-box-01 and a.rodriguez were part of the same discovered attack; jump-box-01 and a.rodriguez appeared together in alerts; a.rodriguez logged on to (rarely) jump-box-01; a.rodriguez and jump-box-01 were related in a hunting lead; a.rodriguez regularly logs on to jump-box-01. Activity progressed through Initial Access, Execution, Privilege Escalation, Credential Access and Lateral Movement.",
+    "confidence": "high",
+    "storylineId": "STORY-1",
+    "title": "Initial Access to Lateral Movement activity centred on a.rodriguez (unaddressed)"
+   },
+   {
+    "whyItMatters": "No criticality, privilege or vulnerability context is available for these entities. A case is already in progress for this storyline. 7 alerts are acknowledged. The link is strong: it is backed by a discovered attack or by alerts the entities share.",
+    "evidence": [
+     "STORY-2",
+     "ENT-4",
+     "ENT-12",
+     "AD-2",
+     "RULE-1",
+     "CASE-1",
+     "TAC-TA0001",
+     "TAC-TA0006"
+    ],
+    "narrative": "LAPTOP-MKT07 and j.chen were part of the same discovered attack; LAPTOP-MKT07 and j.chen appeared together in alerts; j.chen owns LAPTOP-MKT07; j.chen regularly logs on to LAPTOP-MKT07; j.chen regularly logs on to LAPTOP-MKT07. Activity progressed through Initial Access and Credential Access.",
+    "confidence": "high",
+    "storylineId": "STORY-2",
+    "title": "Initial Access to Credential Access activity centred on j.chen (being handled)"
+   },
+   {
+    "whyItMatters": "No criticality, privilege or vulnerability context is available for these entities. No case is open and no one is working this yet. 2 alerts are still open. The link is strong: it is backed by a discovered attack or by alerts the entities share.",
+    "evidence": [
+     "STORY-3",
+     "ENT-7",
+     "ENT-6",
+     "ENT-17",
+     "RULE-9",
+     "RULE-8",
+     "EVT-3-2",
+     "EVT-3-3",
+     "TAC-TA0006",
+     "TAC-TA0010"
+    ],
+    "narrative": "build-runner-02 and svc-build appeared together in alerts; svc-build regularly logs on to build-runner-02; svc-build regularly logs on to build-runner-02. svc-build logged on to (rarely) fileserver-03; svc-build regularly logs on to fileserver-03. Activity progressed through Credential Access and Exfiltration.",
+    "confidence": "high",
+    "storylineId": "STORY-3",
+    "title": "Credential Access to Exfiltration activity centred on svc-build (unaddressed)"
+   }
+  ]
+ },
+ "validation": {
+  "unbackedRelations": [],
+  "inventedNumbers": [],
+  "droppedClaims": 0,
+  "totalClaims": 14,
+  "invalidEvidenceIds": []
+ },
+ "completedAt": "2026-10-08T22:21:58.968Z"
+}

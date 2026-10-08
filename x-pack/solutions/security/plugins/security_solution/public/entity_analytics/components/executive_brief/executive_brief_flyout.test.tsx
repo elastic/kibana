@@ -10,6 +10,8 @@ import { EuiProvider, useEuiTheme } from '@elastic/eui';
 import { ThemeProvider } from '@emotion/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FIXTURE_JOB_SUCCEEDED } from '../../../../common/entity_analytics/executive_brief/__fixtures__/brief';
+import type { ExecutiveBriefJob } from '../../../../common/entity_analytics/executive_brief/types';
+import realJob from './__fixtures__/real_job.json';
 import type { UseExecutiveBriefResult } from './hooks/use_executive_brief';
 import { ExecutiveBriefFlyout } from './executive_brief_flyout';
 import { TEST_IDS } from './test_ids';
@@ -235,5 +237,32 @@ describe('ExecutiveBriefFlyout', () => {
     expect(screen.getByTestId(TEST_IDS.copyMarkdown)).toBeEnabled();
     expect(screen.getByTestId(TEST_IDS.exportPdf)).toBeDisabled();
     expect(screen.getByTestId(TEST_IDS.regenerate)).toBeEnabled();
+  });
+
+  it('renders a real generated job with Export PDF enabled', () => {
+    mockUseExecutiveBrief.mockReturnValue({
+      ...baseResult,
+      job: realJob as unknown as ExecutiveBriefJob,
+    });
+    render(<ExecutiveBriefFlyout timeRange="7d" onClose={jest.fn()} onExportPdf={jest.fn()} />);
+
+    expect(screen.queryByTestId(TEST_IDS.progress)).not.toBeInTheDocument();
+    expect(screen.getByTestId('executiveBriefAtAGlance')).toBeInTheDocument();
+    expect(screen.getByTestId('executiveBriefStorylines')).toBeInTheDocument();
+    expect(screen.getByTestId('executiveBriefBlindSpots')).toBeInTheDocument();
+    expect(screen.getByTestId(TEST_IDS.exportPdf)).toBeEnabled();
+  });
+
+  it('shows a fallback instead of breaking the flyout when a storyline graph throws', () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.requireMock('../../../flyout_v2/shared/components/graph_preview').GraphPreview = () => {
+      throw new Error('CycleException');
+    };
+    render(<ExecutiveBriefFlyout timeRange="7d" onClose={jest.fn()} />);
+
+    expect(screen.getAllByText('Graph unavailable').length).toBeGreaterThan(0);
+    expect(screen.getByTestId('executiveBriefBlindSpots')).toBeInTheDocument();
+    expect(screen.getByTestId(TEST_IDS.exportPdf)).toBeInTheDocument();
+    consoleError.mockRestore();
   });
 });

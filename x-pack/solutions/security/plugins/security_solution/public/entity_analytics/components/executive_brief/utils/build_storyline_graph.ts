@@ -76,35 +76,40 @@ export const buildStorylineGraph = (
     return true;
   };
 
+  // The layout (dagre) throws on cycles, so the graph must be a DAG: collapse every edge between
+  // the same unordered pair into one connector, oriented by entity order (earlier -> later).
+  const order = new Map(storyline.entityEuids.map((euid, index) => [euid, index]));
+  const rank = (euid: string): number => order.get(euid) ?? Number.MAX_SAFE_INTEGER;
+  const pairs = new Map<string, { from: string; to: string; verbs: string[]; dashed: boolean }>();
+
   // Display-only edges (supervises) are skipped to keep the preview legible.
   storyline.edges
-    .filter((edge) => STORY_EDGE_CONFIG[edge.type].role !== 'context')
-    .forEach((edge, index) => {
-      if (!addEntity(edge.from) || !addEntity(edge.to)) return;
-      const connectorId = `${storyline.evidenceId}-rel-${index}`;
-      const dashed = STORY_EDGE_CONFIG[edge.type].role === 'attach';
-      nodes.push({
-        id: connectorId,
-        label: STORY_EDGE_CONFIG[edge.type].verb,
-        shape: 'relationship',
-      });
-      edges.push(
-        {
-          id: `${connectorId}-a`,
-          source: edge.from,
-          target: connectorId,
-          color: dashed ? 'subdued' : 'primary',
-          type: dashed ? 'dashed' : 'solid',
-        },
-        {
-          id: `${connectorId}-b`,
-          source: connectorId,
-          target: edge.to,
-          color: dashed ? 'subdued' : 'primary',
-          type: dashed ? 'dashed' : 'solid',
-        }
-      );
+    .filter((edge) => STORY_EDGE_CONFIG[edge.type].role !== 'context' && edge.from !== edge.to)
+    .forEach((edge) => {
+      const [from, to] =
+        rank(edge.from) < rank(edge.to) ||
+        (rank(edge.from) === rank(edge.to) && edge.from < edge.to)
+          ? [edge.from, edge.to]
+          : [edge.to, edge.from];
+      const key = `${from}\u0000${to}`;
+      const { verb, role } = STORY_EDGE_CONFIG[edge.type];
+      const existing = pairs.get(key) ?? { from, to, verbs: [], dashed: true };
+      if (!existing.verbs.includes(verb)) existing.verbs.push(verb);
+      existing.dashed = existing.dashed && role === 'attach';
+      pairs.set(key, existing);
     });
+
+  Array.from(pairs.values()).forEach((pair, index) => {
+    if (!addEntity(pair.from) || !addEntity(pair.to)) return;
+    const connectorId = `${storyline.evidenceId}-rel-${index}`;
+    const color = pair.dashed ? 'subdued' : 'primary';
+    const type = pair.dashed ? 'dashed' : 'solid';
+    nodes.push({ id: connectorId, label: pair.verbs.join(' / '), shape: 'relationship' });
+    edges.push(
+      { id: `${connectorId}-a`, source: pair.from, target: connectorId, color, type },
+      { id: `${connectorId}-b`, source: connectorId, target: pair.to, color, type }
+    );
+  });
 
   // Entities with no edge still appear (isolated seeds).
   storyline.entityEuids.forEach(addEntity);

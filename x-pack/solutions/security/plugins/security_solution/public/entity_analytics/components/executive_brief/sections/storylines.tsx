@@ -11,6 +11,7 @@ import type {
   ExecutiveBrief,
 } from '../../../../../common/entity_analytics/executive_brief/types';
 import { EntityBadge } from '../../entity_badge';
+import { SectionErrorBoundary } from '../components/section_error_boundary';
 import { SectionTitle } from '../components/section_title';
 import { StorylineCard } from './storyline_card';
 import { EXECUTIVE_BRIEF_SCOPE_ID, EXECUTIVE_BRIEF_SECTION_IDS } from '../constants';
@@ -46,14 +47,18 @@ export const Storylines: React.FC<StorylinesProps> = ({ snapshot, brief }) => {
         <EuiFlexGroup direction="column" gutterSize="l">
           {rendered.map(({ narrative, storyline }) => (
             <EuiFlexItem key={storyline.evidenceId}>
-              <StorylineCard
-                snapshot={snapshot}
-                storyline={storyline}
-                narrative={narrative}
-                decisions={brief.decisions
-                  .map((decision, index) => ({ decision, index }))
-                  .filter(({ decision }) => decision.relatesTo === storyline.evidenceId)}
-              />
+              <SectionErrorBoundary
+                fallbackText={`Storyline ${storyline.rank} could not be displayed`}
+              >
+                <StorylineCard
+                  snapshot={snapshot}
+                  storyline={storyline}
+                  narrative={narrative}
+                  decisions={brief.decisions
+                    .map((decision, index) => ({ decision, index }))
+                    .filter(({ decision }) => decision.relatesTo === storyline.evidenceId)}
+                />
+              </SectionErrorBoundary>
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>

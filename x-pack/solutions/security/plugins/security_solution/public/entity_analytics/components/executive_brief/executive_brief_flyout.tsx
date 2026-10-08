@@ -31,6 +31,7 @@ import type {
   ExecutiveBriefJob,
 } from '../../../../common/entity_analytics/executive_brief/types';
 import { documentFlyoutHistoryKey } from '../../../flyout_v2/shared/constants/flyout_history';
+import { SectionErrorBoundary } from './components/section_error_boundary';
 import { BriefContextProvider } from './components/brief_context';
 import { EXECUTIVE_BRIEF_BODY_ID, EXECUTIVE_BRIEF_SECTION_IDS } from './constants';
 import { useExecutiveBrief } from './hooks/use_executive_brief';
@@ -189,15 +190,25 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
           {!hasFailed && !succeeded && isGenerating && <Progress job={job} />}
           {succeeded?.snapshot && succeeded.brief && (
             <BriefContextProvider snapshot={succeeded.snapshot}>
-              <AtAGlance snapshot={succeeded.snapshot} glance={succeeded.brief.glance} />
+              <SectionErrorBoundary fallbackText="AtAGlance could not be displayed">
+                <AtAGlance snapshot={succeeded.snapshot} glance={succeeded.brief.glance} />
+              </SectionErrorBoundary>
               <EuiSpacer size="xl" />
-              <Storylines snapshot={succeeded.snapshot} brief={succeeded.brief} />
+              <SectionErrorBoundary fallbackText="Storylines could not be displayed">
+                <Storylines snapshot={succeeded.snapshot} brief={succeeded.brief} />
+              </SectionErrorBoundary>
               <EuiSpacer size="xl" />
-              <BlindSpots snapshot={succeeded.snapshot} blindSpots={succeeded.brief.blindSpots} />
+              <SectionErrorBoundary fallbackText="BlindSpots could not be displayed">
+                <BlindSpots snapshot={succeeded.snapshot} blindSpots={succeeded.brief.blindSpots} />
+              </SectionErrorBoundary>
               <EuiSpacer size="xl" />
-              <Decisions decisions={succeeded.brief.decisions} />
+              <SectionErrorBoundary fallbackText="Decisions could not be displayed">
+                <Decisions decisions={succeeded.brief.decisions} />
+              </SectionErrorBoundary>
               <EuiSpacer size="xl" />
-              <Details snapshot={succeeded.snapshot} />
+              <SectionErrorBoundary fallbackText="Details could not be displayed">
+                <Details snapshot={succeeded.snapshot} />
+              </SectionErrorBoundary>
               <EuiSpacer size="m" />
               <DebugPanel job={succeeded} mode={mode} onModeChange={(next) => regenerate(next)} />
             </BriefContextProvider>

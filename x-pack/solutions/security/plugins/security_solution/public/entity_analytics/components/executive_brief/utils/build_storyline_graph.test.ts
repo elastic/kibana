@@ -8,6 +8,8 @@ import {
   FIXTURE_SNAPSHOT,
   EUID,
 } from '../../../../../common/entity_analytics/executive_brief/__fixtures__/snapshot';
+import type { BriefSnapshot } from '../../../../../common/entity_analytics/executive_brief/types';
+import realJob from '../__fixtures__/real_job.json';
 import { buildStorylineGraph } from './build_storyline_graph';
 
 describe('buildStorylineGraph', () => {
@@ -31,6 +33,48 @@ describe('buildStorylineGraph', () => {
     edges.forEach(({ source, target }) => {
       expect(ids).toContain(source);
       expect(ids).toContain(target);
+    });
+  });
+
+  describe('with the real S1 edge set (bidirectional and parallel edges)', () => {
+    const snapshot = realJob.snapshot as unknown as BriefSnapshot;
+    const real = snapshot.storylines.storylines[0];
+
+    const hasCycle = (nodeIds: string[], edgeList: Array<{ source: string; target: string }>) => {
+      const adjacency = new Map<string, string[]>(nodeIds.map((id) => [id, []]));
+      edgeList.forEach(({ source, target }) => adjacency.get(source)?.push(target));
+      const state = new Map<string, 'visiting' | 'done'>();
+      const visit = (id: string): boolean => {
+        if (state.get(id) === 'visiting') return true;
+        if (state.get(id) === 'done') return false;
+        state.set(id, 'visiting');
+        const cyclic = (adjacency.get(id) ?? []).some(visit);
+        state.set(id, 'done');
+        return cyclic;
+      };
+      return nodeIds.some(visit);
+    };
+
+    it('produces an acyclic graph with one connector per entity pair', () => {
+      const { nodes, edges } = buildStorylineGraph(real, snapshot);
+      expect(
+        hasCycle(
+          nodes.map(({ id }) => id),
+          edges
+        )
+      ).toBe(false);
+      const connectors = nodes.filter(({ shape }) => shape === 'relationship');
+      const pairs = new Set(real.edges.map(({ from, to }) => [from, to].sort().join('|')));
+      expect(connectors.length).toBeLessThanOrEqual(pairs.size);
+      expect(edges).toHaveLength(connectors.length * 2);
+    });
+
+    it('lists the collapsed edge verbs in the connector label', () => {
+      const { nodes } = buildStorylineGraph(real, snapshot);
+      const labels = nodes
+        .filter(({ shape }) => shape === 'relationship')
+        .map(({ label }) => label);
+      expect(labels.some((label) => label?.includes(' / '))).toBe(true);
     });
   });
 });
