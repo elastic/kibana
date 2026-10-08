@@ -10,20 +10,18 @@
 import { create as monarchCreate } from '@elastic/monaco-esql';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
 import type { UseEuiTheme } from '@elastic/eui';
-import { monaco } from './monaco_imports';
-import { scopeLanguageTheme } from './language_theme_scope';
-import { defineCodeEditorThemes } from './code_editor/define_themes';
-import { CODE_EDITOR_DEFAULT_THEME_ID } from './code_editor/constants';
-import { buildEsqlTheme } from './languages/definitions/esql/lib/theme';
-import { ESQL_LANG_ID } from './languages/definitions/esql/lib/constants';
-import { buildConsoleTheme } from './languages/definitions/console/theme';
-import { CONSOLE_LANG_ID } from './languages/definitions/console/constants';
-import { lexerRules as consoleLexerRules } from './languages/definitions/console/lexer_rules';
-import { XJsonLang } from './languages/definitions/xjson';
+import { monaco } from '../../monaco_imports';
+import { scopeLanguageTheme, CODE_EDITOR_DEFAULT_THEME_ID, initializeCodeEditorThemes } from '.';
+import { buildEsqlTheme } from '../definitions/esql/lib/theme';
+import { ESQL_LANG_ID } from '../definitions/esql/lib/constants';
+import { buildConsoleTheme } from '../definitions/console/theme';
+import { CONSOLE_LANG_ID } from '../definitions/console/constants';
+import { lexerRules as consoleLexerRules } from '../definitions/console/lexer_rules';
+import { XJsonLang } from '../definitions/xjson';
 
 // `registerLanguageThemeResolver` — and with it the scoping this suite exercises — is installed
 // onto `monaco.editor` as a side effect of loading the package globals.
-jest.mock('./languages/worker_factory', () => ({ getWorker: jest.fn() }));
+jest.mock('../worker_factory', () => ({ getWorker: jest.fn() }));
 
 const ESQL_QUERY = 'FROM idx | EVAL x = "s" | WHERE n > 1 AND p == ?param';
 const JSON_DOCUMENT = '{"a": "s", "b": 1, "c": true}';
@@ -66,7 +64,7 @@ const colorizedClassesOf = async (text: string, languageId: string) => {
 
 describe('language scoped editor themes', () => {
   beforeAll(async () => {
-    await import('./register_globals');
+    await import('../../register_globals');
 
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
@@ -97,14 +95,14 @@ describe('language scoped editor themes', () => {
     monaco.languages.setMonarchTokensProvider(CONSOLE_LANG_ID, consoleLexerRules);
     monaco.editor.registerLanguageThemeResolver(CONSOLE_LANG_ID, buildConsoleTheme, true);
 
-    defineCodeEditorThemes(createMockEuiTheme());
+    initializeCodeEditorThemes(createMockEuiTheme());
   });
 
-  describe('defineCodeEditorThemes', () => {
+  describe('initializeCodeEditorThemes', () => {
     it('namespaces a language theme to its own tokens and leaves shared rules alone', () => {
       const defineTheme = jest.spyOn(monaco.editor, 'defineTheme');
 
-      defineCodeEditorThemes(createMockEuiTheme());
+      initializeCodeEditorThemes(createMockEuiTheme());
 
       const [, themeData] = defineTheme.mock.calls.find(
         ([themeId]) => themeId === CODE_EDITOR_DEFAULT_THEME_ID
@@ -131,7 +129,7 @@ describe('language scoped editor themes', () => {
     it('gives every registered theme the same rule set, so only colors differ', () => {
       const defineTheme = jest.spyOn(monaco.editor, 'defineTheme');
 
-      defineCodeEditorThemes(createMockEuiTheme());
+      initializeCodeEditorThemes(createMockEuiTheme());
 
       const ruleSets = defineTheme.mock.calls.map(([, themeData]) =>
         themeData.rules.map(({ token }) => token).join()
