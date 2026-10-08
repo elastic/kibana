@@ -7,6 +7,7 @@
 
 import React from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { createFlyoutGroupedAttachmentsRegistry } from '@kbn/agentic-investigations-common';
 import { registerEscalationConversationEventUiDefinitions } from './escalations/conversation_events';
 import { registerImpactAttachmentTypes } from './impact/attachments';
 import { registerSubjectAttachmentTypes } from './subjects/attachments';
@@ -57,6 +58,7 @@ export class AgenticInvestigationsPublicPlugin
     >
 {
   private readonly escalationsEnabled: boolean;
+  private readonly groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
 
   constructor(context: PluginInitializerContext<AgenticInvestigationsPublicConfig>) {
     this.escalationsEnabled = context.config.get().escalations.enabled;
@@ -69,7 +71,7 @@ export class AgenticInvestigationsPublicPlugin
     registerImpactPublicStepDefinitions(workflowsExtensions);
     registerInvestigationPublicStepDefinitions(workflowsExtensions);
     registerWorkflowExecutionPublicStepDefinitions(workflowsExtensions);
-    return {};
+    return { registerFlyoutGroupedAttachment: this.groupedAttachments.register };
   }
 
   start(
@@ -93,6 +95,7 @@ export class AgenticInvestigationsPublicPlugin
         // Escalations are AlertZero-only for now: without them there is no escalation template,
         // and the investigation template has no escalate action.
         escalationsEnabled: this.escalationsEnabled,
+        groupedAttachments: this.groupedAttachments,
         templates: this.escalationsEnabled
           ? [investigationTemplate, escalationTemplate]
           : [investigationTemplate],

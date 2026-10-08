@@ -23,6 +23,7 @@ import {
 } from './register';
 import type { RenderAssignees, RenderLinkedInvestigations } from './types';
 import { ACTIONS_TRANSLATIONS } from '../components/actions/translations';
+import { createFlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
 
 const conversation: Conversation = {
   id: 'conversation-1',
@@ -106,6 +107,7 @@ const register = (
   registerAgenticInvestigationTemplateUI({
     conversationTemplates: contract,
     templateId: 'investigation',
+    groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
     name: 'Investigation',
     icon: 'securitySignalDetected',
     onCopyLink: () => true,
@@ -182,7 +184,9 @@ describe('registerAgenticInvestigationTemplateUI', () => {
         </div>
       )
     );
+    const groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
     register(contract, {
+      groupedAttachments,
       renderOverview,
       renderProposedActions: () => <span>proposals</span>,
       renderProposedActionsCount: () => <span>3 proposals</span>,
@@ -200,7 +204,7 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     expect(screen.getByText('proposals')).toBeInTheDocument();
     expect(screen.getByText('3 proposals')).toBeInTheDocument();
     expect(renderOverview).toHaveBeenCalledWith(
-      expect.objectContaining({ conversation, attachmentsService })
+      expect.objectContaining({ conversation, groupedAttachments })
     );
   });
 

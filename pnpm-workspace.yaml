@@ -698,6 +698,7 @@ packages:
   - 'src/platform/packages/shared/controls/control-group-renderer'
   - 'src/platform/packages/shared/controls/controls-constants'
   - 'src/platform/packages/shared/controls/controls-schemas'
+  - 'src/platform/packages/shared/dashboard-markdown-schemas'
   - 'src/platform/packages/shared/dashboards/dashboards-selector'
   - 'src/platform/packages/shared/deeplinks/agent_builder'
   - 'src/platform/packages/shared/deeplinks/analytics'

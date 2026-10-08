@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RegisterFlyoutGroupedAttachment } from '@kbn/agentic-investigations-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { ComponentType } from 'react';
@@ -26,7 +27,9 @@ export interface AgenticInvestigationsPublicConfig {
   escalations: { enabled: boolean };
 }
 
-export type AgenticInvestigationsPublicPluginSetup = Record<string, never>;
+export interface AgenticInvestigationsPublicPluginSetup {
+  registerFlyoutGroupedAttachment: RegisterFlyoutGroupedAttachment;
+}
 export interface AgenticInvestigationsPublicPluginStart {
   /**
    * The investigation card the `investigation` template's brief card renders, for a solution
