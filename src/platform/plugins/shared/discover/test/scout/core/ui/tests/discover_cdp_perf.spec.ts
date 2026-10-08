@@ -100,6 +100,7 @@ test.describe(
       perfTracker.captureBundleResponses(cdp); // Start tracking
 
       // Navigate to Discover app
+      await pageObjects.discover.setQueryMode('classic');
       await pageObjects.collapsibleNav.clickItem('Discover');
       await pageObjects.discover.waitUntilTabIsLoaded();
 

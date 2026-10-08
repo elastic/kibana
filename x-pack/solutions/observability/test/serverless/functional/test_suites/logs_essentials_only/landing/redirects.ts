@@ -13,7 +13,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'svlCommonPage', 'discover']);
   const testSubjects = getService('testSubjects');
   const synthtrace = getService('svlLogsSynthtraceClient');
-  const dataViews = getService('dataViews');
   const browser = getService('browser');
   const retry = getService('retry');
 
@@ -48,7 +47,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ]);
 
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
-      await PageObjects.discover.setQueryMode('classic');
       await PageObjects.common.navigateToApp('landingPage');
 
       await retry.tryForTime(60 * 1000, async () => {
@@ -56,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         if (!url.includes('/app/discover')) {
           throw new Error('Not yet redirected to Discover');
         }
-        await dataViews.switchTo('All logs');
+        await PageObjects.discover.expectOnDiscover();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await testSubjects.existOrFail('discoverQueryTotalHits');
       });
