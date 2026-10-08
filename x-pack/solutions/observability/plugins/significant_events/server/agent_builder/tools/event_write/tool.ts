@@ -256,7 +256,7 @@ const enrichCausalFeatures = async (
         return feature
           ? {
               ...causalFeature,
-              feature_id: feature.id,
+              feature_id: feature.uuid,
               type: feature.type,
               subtype: feature.subtype,
             }
@@ -269,7 +269,7 @@ const enrichCausalFeatures = async (
         return feature
           ? {
               ...entry,
-              feature_id: feature.id,
+              feature_id: feature.uuid,
               subtype: feature.subtype,
             }
           : entry;

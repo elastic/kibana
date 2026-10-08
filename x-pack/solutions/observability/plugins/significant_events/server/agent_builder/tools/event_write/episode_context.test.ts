@@ -215,6 +215,27 @@ describe('mergeEpisodeContext', () => {
     expect(blastRadius[0].feature_id).toBe('feat-1');
   });
 
+  it('dedupes a canonical KI UUID across a continuation', () => {
+    const { blastRadius } = mergeEpisodeContext(
+      [
+        {
+          '@timestamp': TS_EARLIER,
+          stream_names: ['logs.app'],
+          blast_radius: [makeBlast('a1b2-uuid')],
+          causal_features: [] as CausalFeature[],
+        },
+      ],
+      {
+        stream_names: ['logs.app'],
+        causal_features: [],
+        blast_radius: [makeBlast('a1b2-uuid')],
+      },
+      TS_SUBMITTED
+    );
+
+    expect(blastRadius).toEqual([makeBlast('a1b2-uuid')]);
+  });
+
   // Dedup is keyed on feature_id alone, so when two episodes disagree about a feature's
   // classification the newest document silently wins. Deliberate: the copied type/subtype is a
   // point-in-time snapshot of the knowledge indicator, so the latest write is the freshest read.

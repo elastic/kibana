@@ -371,19 +371,19 @@ describe('events_write tool', () => {
           expect.objectContaining({
             causal_features: [
               expect.objectContaining({
-                feature_id: 'checkout-api',
+                feature_id: 'uuid-checkout',
                 type: 'entity',
                 subtype: 'service',
               }),
               expect.objectContaining({
-                feature_id: 'other-api',
+                feature_id: 'other-feature-uuid',
                 type: 'technology',
                 subtype: 'web_server',
               }),
             ],
             blast_radius: [
               expect.objectContaining({
-                feature_id: 'checkout-api',
+                feature_id: 'uuid-checkout',
                 type: 'entity',
                 subtype: 'service',
               }),
