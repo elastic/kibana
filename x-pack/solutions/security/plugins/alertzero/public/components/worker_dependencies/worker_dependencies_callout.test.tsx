@@ -498,7 +498,7 @@ describe('WorkerDependenciesCallout', () => {
       expect(screen.queryByTestId('alertZeroWorkerDependency-attackDiscoveryWorkflows')).toBeNull();
     });
     expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-      expect.stringContaining('Refresh this page')
+      'Attack Discovery workflows enabled'
     );
   });
 

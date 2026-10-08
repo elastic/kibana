@@ -214,11 +214,7 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
       });
     },
     onSuccess: async (_, id) => {
-      notifications.toasts.addSuccess(
-        id === 'attackDiscoveryWorkflows'
-          ? i18n.ATTACK_DISCOVERY_RELOAD_NOTE
-          : i18n.dependencyEnabledTitle(enableableDependencyLabel(id))
-      );
+      notifications.toasts.addSuccess(i18n.dependencyEnabledTitle(enableableDependencyLabel(id)));
       if (id === 'threatIngest' || id === 'threatEnrich') {
         await queryClient.invalidateQueries({
           queryKey: queryKeys.workerDependencies.threatReportWorkflows(http.basePath.get()),

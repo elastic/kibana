@@ -128,14 +128,6 @@ export const ATTACK_DISCOVERY_DEPLOYMENT_DESCRIPTION = i18n.translate(
   }
 );
 
-export const ATTACK_DISCOVERY_RELOAD_NOTE = i18n.translate(
-  'xpack.alertzero.workerDependencies.attackDiscoveryReloadNote',
-  {
-    defaultMessage:
-      'Attack Discovery workflows are enabled. Refresh this page when convenient to update other Attack Discovery controls.',
-  }
-);
-
 export const DEFEND_LABEL = i18n.translate('xpack.alertzero.workerDependencies.defendLabel', {
   defaultMessage: 'Elastic Defend',
 });
