@@ -52,6 +52,34 @@ const sanitizeLabel = (label: string): string => label.replace(/["\\\n\r]/g, '')
 const labelClass = (label: string): string =>
   `${BASE_CLASS}-l-${Array.from(label, (c) => (c.codePointAt(0) ?? 0).toString(16)).join('')}`;
 
+/** Fills the tooltip element with the run count/total headline and the avg/min/max breakdown. */
+const renderTooltipContent = (tipEl: HTMLElement, duration: StepDuration): void => {
+  const total = formatDuration(duration.totalMs).trim();
+  const avg = formatDuration(Math.round(duration.totalMs / duration.runCount)).trim();
+  const minStr = formatDuration(duration.minMs).trim();
+  const maxStr = formatDuration(duration.maxMs).trim();
+
+  const runsLabel = i18n.translate('workflows.workflowYamlEditor.stepDurationGutter.tooltip.runs', {
+    defaultMessage: '{count} completed {count, plural, one {run} other {runs}} · Total {total}',
+    values: { count: duration.runCount, total },
+  });
+  const breakdownLabel = i18n.translate(
+    'workflows.workflowYamlEditor.stepDurationGutter.tooltip.breakdown',
+    {
+      defaultMessage: 'Avg {avg} · Min {min} · Max {max}',
+      values: { avg, min: minStr, max: maxStr },
+    }
+  );
+
+  const bold = document.createElement('strong');
+  bold.textContent = runsLabel;
+  tipEl.replaceChildren(
+    bold,
+    document.createElement('br'),
+    document.createTextNode(breakdownLabel)
+  );
+};
+
 /**
  * Shows a per-step duration chip in the Monaco lines-decorations gutter lane while an execution
  * is open (executions tab, or after running a test from the workflow tab while the YAML still
@@ -130,6 +158,8 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
   // Refs used by Effect 3 (tooltip). Declared here so cleanup across re-runs can clear them.
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tooltipLineRef = useRef<number | null>(null);
+  const tipElRef = useRef<HTMLDivElement | null>(null);
+  const lineTooltipRef = useRef<Map<number, StepDuration>>(new Map());
 
   useEffect(() => {
     if (!editor) return;
@@ -170,19 +200,11 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
   // `overflow: hidden`, so CSS ::after tooltips don't work there. Instead we use Monaco's own
   // mouse-move event (which fires even through pointer-events:none children) to detect when the
   // cursor is over the GUTTER_LINE_DECORATIONS area and show a position:fixed div on document.body.
+  //
+  // The element and listeners live for as long as the chips are active (not per data refresh), so
+  // a poll does not tear down a tooltip the user is hovering. Effect 3b feeds them fresh data.
   useEffect(() => {
     if (!editor || !isActive) return;
-
-    // Build a lineStart → StepDuration map for the steps that need a tooltip.
-    const lineTooltip = new Map<number, StepDuration>();
-    for (const [stepId, duration] of stepDurations) {
-      if (duration.runCount > 1 && duration.hasDuration) {
-        const stepInfo = workflowLookup?.steps[stepId];
-        if (stepInfo) lineTooltip.set(stepInfo.lineStart, duration);
-      }
-    }
-
-    if (!lineTooltip.size) return;
 
     const tipEl = document.createElement('div');
     // position:fixed escapes Monaco's overflow:hidden margin container.
@@ -202,6 +224,7 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
       boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
     });
     document.body.appendChild(tipEl);
+    tipElRef.current = tipEl;
 
     const scheduleHide = () => {
       if (hideTimerRef.current === null) {
@@ -229,7 +252,7 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
     const moveDisposable = editor.onMouseMove((e) => {
       const isGutter = e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_DECORATIONS;
       const line = e.target.position?.lineNumber;
-      const duration = isGutter && line != null ? lineTooltip.get(line) : undefined;
+      const duration = isGutter && line != null ? lineTooltipRef.current.get(line) : undefined;
 
       if (duration) {
         cancelHide();
@@ -237,34 +260,7 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
         // Rebuild content only when the hovered line changes, not on every pixel of movement.
         if (tooltipLineRef.current !== line) {
           tooltipLineRef.current = line ?? null;
-          const total = formatDuration(duration.totalMs).trim();
-          const avg = formatDuration(Math.round(duration.totalMs / duration.runCount)).trim();
-          const minStr = formatDuration(duration.minMs).trim();
-          const maxStr = formatDuration(duration.maxMs).trim();
-
-          const runsLabel = i18n.translate(
-            'workflows.workflowYamlEditor.stepDurationGutter.tooltip.runs',
-            {
-              defaultMessage:
-                '{count} completed {count, plural, one {run} other {runs}} · Total {total}',
-              values: { count: duration.runCount, total },
-            }
-          );
-          const breakdownLabel = i18n.translate(
-            'workflows.workflowYamlEditor.stepDurationGutter.tooltip.breakdown',
-            {
-              defaultMessage: 'Avg {avg} · Min {min} · Max {max}',
-              values: { avg, min: minStr, max: maxStr },
-            }
-          );
-
-          const bold = document.createElement('strong');
-          bold.textContent = runsLabel;
-          tipEl.replaceChildren(
-            bold,
-            document.createElement('br'),
-            document.createTextNode(breakdownLabel)
-          );
+          renderTooltipContent(tipEl, duration);
         }
 
         tipEl.style.display = 'block';
@@ -301,9 +297,35 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
       scrollDisposable.dispose();
       cancelHide();
       tooltipLineRef.current = null;
+      tipElRef.current = null;
       if (document.body.contains(tipEl)) document.body.removeChild(tipEl);
     };
-  }, [editor, isActive, stepDurations, workflowLookup, colors, border]);
+  }, [editor, isActive, colors, border]);
+
+  // Effect 3b — refresh the tooltip's data on every poll without remounting it. If the hovered
+  // step is still a repeated step, re-render in place; otherwise hide.
+  useEffect(() => {
+    const lineTooltip = new Map<number, StepDuration>();
+    for (const [stepId, duration] of stepDurations) {
+      if (duration.runCount > 1 && duration.hasDuration) {
+        const stepInfo = workflowLookup?.steps[stepId];
+        if (stepInfo) lineTooltip.set(stepInfo.lineStart, duration);
+      }
+    }
+    lineTooltipRef.current = lineTooltip;
+
+    const tipEl = tipElRef.current;
+    const hoveredLine = tooltipLineRef.current;
+    if (!tipEl || hoveredLine === null) return;
+
+    const hovered = lineTooltip.get(hoveredLine);
+    if (hovered) {
+      renderTooltipContent(tipEl, hovered);
+    } else {
+      tipEl.style.display = 'none';
+      tooltipLineRef.current = null;
+    }
+  }, [stepDurations, workflowLookup]);
 
   // Build styles: one rule for each distinct label present (content injection),
   // plus the shared layout and tone modifiers.

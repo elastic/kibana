@@ -19,9 +19,11 @@ import {
   setActiveTab,
   setExecution,
   setHighlightedStepId,
+  setIsYamlSynced,
   setYamlString,
 } from '../../../../entities/workflows/store/workflow_detail/slice';
 import type { ComputedData } from '../../../../entities/workflows/store/workflow_detail/types';
+import * as buildStepDurationsModule from '../../../../shared/lib/build_step_durations';
 import {
   createMockStepExecutionDto,
   createMockWorkflowExecutionDto,
@@ -63,24 +65,33 @@ jest.mock('@kbn/monaco', () => {
   };
 });
 
+// Stable reference, like the real memoized `useEuiTheme`: a fresh object per render would re-run
+// every effect that depends on `colors`/`border`.
+const mockEuiTheme = {
+  colors: {
+    backgroundBaseHighlighted: '#f5f5f5',
+    backgroundLightWarning: '#fff3cd',
+    backgroundLightDanger: '#f8d7da',
+    textParagraph: '#333',
+    textSubdued: '#666',
+    textWarning: '#856404',
+    textDanger: '#842029',
+    borderBasePlain: '#ccc',
+  },
+  border: { radius: { small: '4px' } },
+};
+
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
-  useEuiTheme: jest.fn(() => ({
-    euiTheme: {
-      colors: {
-        backgroundBaseHighlighted: '#f5f5f5',
-        backgroundLightWarning: '#fff3cd',
-        backgroundLightDanger: '#f8d7da',
-        textParagraph: '#333',
-        textSubdued: '#666',
-        textWarning: '#856404',
-        textDanger: '#842029',
-        borderBasePlain: '#ccc',
-      },
-      border: { radius: { small: '4px' } },
-    },
-  })),
+  useEuiTheme: jest.fn(() => ({ euiTheme: mockEuiTheme })),
 }));
+
+// Only `formatStepDurationLabel` is replaced (passthrough by default) so a test can force two
+// distinct step durations to render labels that collide under a punctuation-stripping class name.
+jest.mock('../../../../shared/lib/build_step_durations', () => {
+  const actual = jest.requireActual('../../../../shared/lib/build_step_durations');
+  return { ...actual, formatStepDurationLabel: jest.fn(actual.formatStepDurationLabel) };
+});
 
 // ---------------------------------------------------------------------------
 // Mock editor factory
@@ -209,6 +220,9 @@ const makeExecution = (
 describe('useStepDurationDecorations', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (buildStepDurationsModule.formatStepDurationLabel as jest.Mock).mockImplementation(
+      jest.requireActual('../../../../shared/lib/build_step_durations').formatStepDurationLabel
+    );
   });
 
   // ── null editor ───────────────────────────────────────────────────────────
@@ -302,12 +316,17 @@ describe('useStepDurationDecorations', () => {
       expect(stepADec?.options.linesDecorationsClassName).toContain('dimmed');
     });
 
-    it('gives steps with different labels distinct classes and content rules', () => {
+    it('gives steps whose labels differ only by punctuation distinct classes and content rules', () => {
       const editor = createMockEditor();
       const { result, store } = renderHookWithProviders(editor);
 
-      // '<1ms' and '1ms' differ only by a punctuation character, which a lossy label-to-class
-      // conversion would drop, letting one chip render the other's text.
+      // `<1ms` and `~1ms` both collapse to `step-duration-gutter-l--1ms` under a lossy
+      // label-to-class conversion (`replace(/[^a-z0-9]/gi, '-')`), which would let one chip
+      // render the other's text. Force that pair through the hook.
+      (buildStepDurationsModule.formatStepDurationLabel as jest.Mock).mockImplementation(
+        ({ totalMs }: { totalMs: number }) => (totalMs < 1 ? '<1ms' : '~1ms')
+      );
+
       act(() => {
         store.dispatch(
           setExecution(
@@ -343,7 +362,7 @@ describe('useStepDurationDecorations', () => {
 
       const { styles } = result.current.styles;
       expect(styles).toContain(`.${stepAClass}::before{content:"<1ms";}`);
-      expect(styles).toContain(`.${stepCClass}::before{content:"1ms";}`);
+      expect(styles).toContain(`.${stepCClass}::before{content:"~1ms";}`);
     });
   });
 
@@ -423,6 +442,29 @@ describe('useStepDurationDecorations', () => {
       const lastCall: [monaco.editor.IModelDeltaDecoration[]] | undefined = set.mock.calls.at(-1);
       const decorations = lastCall?.[0] ?? [];
       expect(decorations.length).toBe(0);
+    });
+
+    it('suppresses chips as soon as an edit is pending, before the debounced YAML reaches the store', () => {
+      const editor = createMockEditor();
+      const { store } = renderHookWithProviders(editor, { activeTab: 'workflow' });
+
+      act(() => {
+        store.dispatch(setYamlString(EXEC_YAML));
+        store.dispatch(setExecution(makeExecution()));
+      });
+
+      const { set, clear } = (editor as ReturnType<typeof createMockEditor>)._decorationsCollection;
+      expect(set.mock.calls.at(-1)?.[0].length).toBeGreaterThan(0);
+
+      // YamlEditor flips this synchronously on the first keystroke; `setYamlString` follows 200ms later.
+      act(() => {
+        store.dispatch(setIsYamlSynced(false));
+      });
+
+      // Inactive chips are removed with `clear()` and nothing is set afterwards.
+      expect(clear.mock.invocationCallOrder.at(-1)).toBeGreaterThan(
+        set.mock.invocationCallOrder.at(-1) as number
+      );
     });
 
     it('shows chips on workflow tab when draft still matches execution snapshot', () => {
@@ -510,6 +552,80 @@ describe('useStepDurationDecorations', () => {
       });
 
       expect(tipEl?.style.display).toBe('none');
+    });
+
+    const hoverStepA = (extEditor: ReturnType<typeof createMockEditor>) =>
+      act(() => {
+        extEditor._fireMouseMove({
+          target: { type: GUTTER_LINE_DECORATIONS_TYPE, position: { lineNumber: 5 } },
+          event: { browserEvent: { clientX: 100, clientY: 100 } },
+        });
+      });
+
+    it('keeps the hovered tooltip mounted and refreshes its numbers when a poll updates the data', () => {
+      const editor = createMockEditor();
+      const extEditor = editor as ReturnType<typeof createMockEditor>;
+      const { store } = renderHookWithProviders(editor);
+
+      act(() => {
+        store.dispatch(setExecution(makeMultiRunExecution()));
+      });
+      hoverStepA(extEditor);
+
+      const tipEl = document.body.querySelector('div[style*="position: fixed"]') as HTMLElement;
+      expect(tipEl.style.display).toBe('block');
+      expect(tipEl.textContent).toContain('2 completed runs');
+
+      // A poll yields a new stepExecutions array (new durations map) with one more completed run.
+      act(() => {
+        store.dispatch(
+          setExecution(
+            makeExecution([
+              createMockStepExecutionDto({
+                stepId: 'step-a',
+                stepType: 'action',
+                executionTimeMs: 400,
+              }),
+              createMockStepExecutionDto({
+                id: 'doc-2',
+                stepId: 'step-a',
+                stepType: 'action',
+                executionTimeMs: 600,
+              }),
+              createMockStepExecutionDto({
+                id: 'doc-3',
+                stepId: 'step-a',
+                stepType: 'action',
+                executionTimeMs: 800,
+              }),
+            ])
+          )
+        );
+      });
+
+      expect(document.body.querySelector('div[style*="position: fixed"]')).toBe(tipEl);
+      expect(tipEl.style.display).toBe('block');
+      expect(tipEl.textContent).toContain('3 completed runs');
+    });
+
+    it('hides the hovered tooltip when a poll leaves its step with a single run', () => {
+      const editor = createMockEditor();
+      const extEditor = editor as ReturnType<typeof createMockEditor>;
+      const { store } = renderHookWithProviders(editor);
+
+      act(() => {
+        store.dispatch(setExecution(makeMultiRunExecution()));
+      });
+      hoverStepA(extEditor);
+
+      const tipEl = document.body.querySelector('div[style*="position: fixed"]') as HTMLElement;
+      expect(tipEl.style.display).toBe('block');
+
+      act(() => {
+        store.dispatch(setExecution(makeExecution()));
+      });
+
+      expect(tipEl.style.display).toBe('none');
     });
 
     it('does not show a tooltip for single-run steps', () => {

@@ -241,11 +241,16 @@ export const selectEditorYamlLineCounter = createSelector(
  * - Executions tab: `selectEditorYaml` returns `execution.yaml` by construction → always true.
  * - Workflow tab after a test run: true while the draft still matches what ran; false the moment the
  *   user makes an edit — at which point chips would be mispositioned anyway.
+ *
+ * `isYamlSynced` is false from the first keystroke, while the editor's debounced `setYamlString`
+ * has not reached the store yet, so chips disappear without waiting for that debounce.
  */
 export const selectIsEditorYamlExecutionSnapshot = createSelector(
   selectEditorYaml,
   selectExecution,
-  (editorYaml, execution) => execution?.yaml != null && editorYaml === execution.yaml
+  selectIsYamlSynced,
+  (editorYaml, execution, isYamlSynced) =>
+    isYamlSynced && execution?.yaml != null && editorYaml === execution.yaml
 );
 
 /**
