@@ -292,8 +292,12 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     });
 
     it('stops retrying once the retry budget is spent and falls back to the safety net', async () => {
+      const previousLastStartedAt = new Date(Date.now() - 60 * 60 * 1000).toISOString();
       const taskInstance = {
-        ...getMockTaskInstance({ failedRunCount: MAX_FAILED_RUN_RETRIES }),
+        ...getMockTaskInstance({
+          failedRunCount: MAX_FAILED_RUN_RETRIES,
+          lastStartedAt: previousLastStartedAt,
+        }),
         startedAt: new Date(),
       };
       jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
@@ -312,6 +316,8 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(scheduleOf(result)).toEqual({ interval: DEFAULT_TASK_SCHEDULE });
       expect(runAtOf(result)).toBeUndefined();
       expect(result.state.failedRunCount).toBeUndefined();
+      // the safety-net run must still see the edits the failed runs missed
+      expect(result.state.lastStartedAt).toBe(previousLastStartedAt);
     });
 
     describe('lookback window', () => {

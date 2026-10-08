@@ -253,7 +253,8 @@ export class SyncPrivateLocationMonitorsTask {
         logger.error(
           `Giving up retrying the sync of private location monitors after ${MAX_FAILED_RUN_RETRIES} retries`
         );
-        return { error, state: taskState, schedule };
+        // Keep the window start: advancing it would hide the edits these runs failed to apply.
+        return { error, state: { ...taskState, lastStartedAt }, schedule };
       }
       // Keep the window start so the retry still sees the MW edits this run missed.
       return {
