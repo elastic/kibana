@@ -17,7 +17,7 @@ import { getEntityIds, getEntityId, getNumber, ANOMALY_COUNT_FIELD } from '../co
 import { buildEuidStages } from './euid_pipeline';
 import { buildMergedForeignSortQuery } from './foreign_sort';
 import type { QueryArgs, PageEnricher, Row, ColumnQuerySpec } from '../common';
-import { buildEntityListSortPlan, buildSplitSortSpec } from './split_sort';
+import { buildEntityListSortPlan, fetchSplitSortPage } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
 
 /** ML anomaly indices have different mappings; unmapped fields read as null, not as errors. */
@@ -92,6 +92,6 @@ const anomalyCountEnricher: PageEnricher = {
 // ── query spec ────────────────────────────────────────────────────────────────
 
 export const anomalyCountQuerySpec = {
-  sort: buildSplitSortSpec(anomalySplitSortPlan),
+  fetchSortPage: (args, ctx) => fetchSplitSortPage(anomalySplitSortPlan, args, ctx),
   enricher: anomalyCountEnricher,
 } satisfies ColumnQuerySpec;

@@ -6,11 +6,7 @@
  */
 
 import { ENTITY_ID_FIELD, getEntityIds } from '../common';
-import {
-  buildEntitiesInViewConditions,
-  buildEntitiesInViewCountQuery,
-  buildEntitiesInViewSteps,
-} from './entities_in_view';
+import { buildEntitiesInViewConditions, buildEntitiesInViewSteps } from './entities_in_view';
 import {
   buildAfterIdClause,
   buildAfterValuePredicate,
@@ -18,14 +14,7 @@ import {
   buildLookupJoinClause,
   toList,
 } from './esql';
-import type {
-  EsqlRunner,
-  PageCursor,
-  QueryArgs,
-  Row,
-  SortPageContext,
-  SortQuerySpec,
-} from '../common';
+import type { EsqlRunner, PageCursor, QueryArgs, Row, SortPageContext } from '../common';
 
 /*
  * Split sort: a foreign sort that reads its two kinds of rows separately.
@@ -79,9 +68,6 @@ export interface SplitSortPlan {
     limit: number
   ) => Promise<Row[] | null>;
 }
-
-export const isLargeView = (args: QueryArgs, viewSize: number): boolean =>
-  !args.searchExpression && viewSize >= SPLIT_SORT_MIN_VIEW_SIZE;
 
 /**
  * Keeps the value rows after the cursor in `SORT field <dir>, entity.id ASC` order. Unlike
@@ -213,10 +199,13 @@ export const buildEntityListSortPlan = ({
 export const fetchSplitSortPage = async (
   plan: SplitSortPlan,
   args: QueryArgs,
-  { runQuery, viewSize }: SortPageContext
+  { runQuery, fetchViewSize }: SortPageContext
 ): Promise<Row[]> => {
   const general = () => runQuery(plan.buildSortQuery(args));
-  if (!isLargeView(args, viewSize)) return general();
+  // Search keeps the general query: KQL can't run after the LOOKUP JOIN of the value rows.
+  if (args.searchExpression || (await fetchViewSize()) < SPLIT_SORT_MIN_VIEW_SIZE) {
+    return general();
+  }
 
   const limit = args.pageSize + 1;
   const { cursor } = args;
@@ -246,10 +235,3 @@ export const fetchSplitSortPage = async (
   const empty = await emptyRows(null, limit - values.length);
   return empty == null ? general() : [...values, ...empty];
 };
-
-/** Sort spec of a column with a split sort plan: the plan's general query or its split pages. */
-export const buildSplitSortSpec = (plan: SplitSortPlan): SortQuerySpec => ({
-  buildSortQuery: plan.buildSortQuery,
-  buildCountQuery: buildEntitiesInViewCountQuery,
-  fetchSortPage: (args, ctx) => fetchSplitSortPage(plan, args, ctx),
-});

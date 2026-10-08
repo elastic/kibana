@@ -127,26 +127,16 @@ export interface PageEnricher {
 
 export interface SortPageContext {
   runQuery: EsqlRunner;
-  /** Number of entities in view, from the count query. */
-  viewSize: number;
+  /** Number of entities in view, from the cached count query. Only large-view plans ask. */
+  fetchViewSize: () => Promise<number>;
 }
 
-/** How the grid sorts by a column. */
-export interface SortQuerySpec {
-  /** Builds the query for one page of rows plus one, sorted by this column. */
-  buildSortQuery: (args: QueryArgs) => string;
-  /** Builds the query for the total row count when this column is the sort. */
-  buildCountQuery: (args: QueryArgs) => string;
-  /**
-   * Loads one page of rows plus one with more than one query, for views where that is
-   * cheaper than `buildSortQuery`. Returns the same rows as `buildSortQuery`.
-   */
-  fetchSortPage?: (args: QueryArgs, ctx: SortPageContext) => Promise<Row[]>;
-}
+/** Fetches one page of rows plus one, sorted by a column. */
+export type SortPageFetcher = (args: QueryArgs, ctx: SortPageContext) => Promise<Row[]>;
 
 /** How the grid reads a column: its sort, if it has one, and the enricher of its values. */
 export interface ColumnQuerySpec {
-  sort?: SortQuerySpec;
+  fetchSortPage?: SortPageFetcher;
   enricher?: PageEnricher;
 }
 

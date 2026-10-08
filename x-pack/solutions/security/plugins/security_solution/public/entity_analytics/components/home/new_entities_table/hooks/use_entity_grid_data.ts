@@ -35,7 +35,8 @@ import {
   nullOnFailure,
   toSortValue,
 } from '../common';
-import { PAGE_ENRICHERS, findSortQuerySpec } from '../grid_columns';
+import { PAGE_ENRICHERS, findSortPageFetcher } from '../grid_columns';
+import { buildEntitiesInViewCountQuery } from '../queries/entities_in_view';
 
 const GRID_QUERY_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.entitiesGrid.queryError',
@@ -181,9 +182,8 @@ const buildQueryArgs = (
 
 /** The count query of the view, or `null` until the index resolves. */
 const buildCountQuery = (context: GridContext, options: UseEntityGridDataOptions) => {
-  const sortSpec = findSortQuerySpec(options.sortField);
-  if (!context.concreteEntityIndexName || !sortSpec) return null;
-  return sortSpec.buildCountQuery(
+  if (!context.concreteEntityIndexName) return null;
+  return buildEntitiesInViewCountQuery(
     buildQueryArgs(context, options, context.concreteEntityIndexName, null)
   );
 };
@@ -221,13 +221,11 @@ const fetchSortRows = async (
   args: QueryArgs,
   signal?: AbortSignal
 ): Promise<Row[]> => {
-  const sortSpec = findSortQuerySpec(options.sortField);
-  if (!sortSpec) throw new Error(`Column ${options.sortField} is not sortable`);
-  const runQuery = createEsqlRunner(context.searchService, signal);
-  if (!sortSpec.fetchSortPage) return runQuery(sortSpec.buildSortQuery(args));
-  return sortSpec.fetchSortPage(args, {
-    runQuery,
-    viewSize: await fetchViewSize(context, options),
+  const fetchSortPage = findSortPageFetcher(options.sortField);
+  if (!fetchSortPage) throw new Error(`Column ${options.sortField} is not sortable`);
+  return fetchSortPage(args, {
+    runQuery: createEsqlRunner(context.searchService, signal),
+    fetchViewSize: () => fetchViewSize(context, options),
   });
 };
 

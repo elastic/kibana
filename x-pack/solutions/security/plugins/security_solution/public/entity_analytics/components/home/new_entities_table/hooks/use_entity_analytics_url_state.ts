@@ -14,7 +14,7 @@ import { SEVERITY_UI_SORT_ORDER } from '../../../../common/utils';
 import { ValidCriticalityLevels } from '../../../../../../common/entity_analytics/asset_criticality/constants';
 import { GROUP_SIZE_FIELD, RISK_SCORE_NORM_FIELD, TIME_RANGE_OPTIONS } from '../common';
 import type { RowsMode, SortDir, TimeRange } from '../common';
-import { findSortQuerySpec } from '../grid_columns';
+import { findSortPageFetcher } from '../grid_columns';
 import { isSignalCardId, type SignalCardId } from '../../needs_attention_tiles/data';
 
 export { TIME_RANGE_OPTIONS };
@@ -91,7 +91,7 @@ const isSortDir = (v: string | null): v is SortDir => v === 'asc' || v === 'desc
 /** Group size has no meaning for individual rows, so it is not a valid sort there. */
 const isValidSortField = (field: string | null, rowsMode: RowsMode): field is string =>
   field != null &&
-  findSortQuerySpec(field) != null &&
+  findSortPageFetcher(field) != null &&
   !(rowsMode === 'individual' && field === GROUP_SIZE_FIELD);
 
 const isEntityType = (v: string): v is EntityType => VALID_ENTITY_TYPES.has(v);

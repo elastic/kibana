@@ -8,8 +8,9 @@
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { buildKeepClause } from './esql';
 import { fetchEnrichedRows } from '../common';
-import type { PageCursor, QueryArgs, Row, RunContext } from '../common';
-import { COLUMN_ENRICHERS, SORT_QUERY_SPECS } from '../grid_columns';
+import type { PageCursor, QueryArgs, Row, RunContext, SortPageFetcher } from '../common';
+import { COLUMN_ENRICHERS, SORT_PAGE_FETCHERS } from '../grid_columns';
+import { buildEntitiesInViewCountQuery } from './entities_in_view';
 import { alertCountQuerySpec } from './alerts';
 import { anomalyCountQuerySpec } from './anomalies';
 import { SPLIT_SORT_MIN_VIEW_SIZE } from './split_sort';
@@ -37,6 +38,13 @@ const FILTERED_ARGS: Partial<QueryArgs> = {
 };
 
 const LARGE_VIEW_SIZE = SPLIT_SORT_MIN_VIEW_SIZE;
+
+/** Sorts that read a large view in parts; the others run the same query on every view. */
+const LARGE_VIEW_FETCHERS = SORT_PAGE_FETCHERS.filter(([id]) =>
+  ['group_size', 'risk_score_change', 'alert_count', 'last_seen_alert', 'anomaly_count'].includes(
+    id
+  )
+);
 
 /** Sort value of the rows without a value, per sort page column; null when not listed. */
 const EMPTY_SORT_VALUES: Readonly<Record<string, number>> = { alert_count: 0, group_size: 1 };
@@ -77,6 +85,23 @@ const createRunContext = (runQuery: RunContext['runQuery']): RunContext => {
   return { runQuery, http };
 };
 
+/** The queries a sort page runs, joined; one query on a small view. */
+const recordSortQueries = async (
+  fetchSortPage: SortPageFetcher,
+  args: QueryArgs,
+  viewSize: number
+): Promise<string> => {
+  const queries: string[] = [];
+  await fetchSortPage(args, {
+    runQuery: async (query) => {
+      queries.push(query);
+      return [];
+    },
+    fetchViewSize: async () => viewSize,
+  });
+  return queries.join('\n\n');
+};
+
 const cursorFor = (sortField: string): PageCursor => ({
   sortField,
   sortDirection: 'desc',
@@ -85,93 +110,99 @@ const cursorFor = (sortField: string): PageCursor => ({
 });
 
 describe('entities grid query builders', () => {
-  describe.each(SORT_QUERY_SPECS)(
-    'sort by %s',
-    (sortField, { buildSortQuery, buildCountQuery }) => {
-      it('builds the sort and count queries', () => {
-        const args: QueryArgs = { ...BASE_ARGS, sort: { field: sortField, direction: 'desc' } };
+  describe('count', () => {
+    it.each([
+      ['no filters', {}],
+      ['filters', FILTERED_ARGS],
+      ['entity filters and no search', { entityExpression: ENTITY_EXPRESSION }],
+    ] as const)('builds the count query with %s', (_name, overrides) => {
+      expect(buildEntitiesInViewCountQuery({ ...BASE_ARGS, ...overrides })).toMatchSnapshot();
+    });
+  });
 
-        expect(buildSortQuery(args)).toMatchSnapshot('sort');
-        expect(buildCountQuery(args)).toMatchSnapshot('count');
-      });
+  describe.each(SORT_PAGE_FETCHERS)('sort by %s', (sortField, fetchSortPage) => {
+    it('builds the sort query', async () => {
+      const args: QueryArgs = { ...BASE_ARGS, sort: { field: sortField, direction: 'desc' } };
 
-      it('builds the sort and count queries with filters and a cursor', () => {
-        const args: QueryArgs = {
-          ...BASE_ARGS,
-          ...FILTERED_ARGS,
-          sort: { field: sortField, direction: 'asc' },
-          cursor: cursorFor(sortField),
-        };
+      expect(await recordSortQueries(fetchSortPage, args, 0)).toMatchSnapshot();
+    });
 
-        expect(buildSortQuery(args)).toMatchSnapshot('sort');
-        expect(buildCountQuery(args)).toMatchSnapshot('count');
-      });
+    it('builds the sort query with filters and a cursor', async () => {
+      const args: QueryArgs = {
+        ...BASE_ARGS,
+        ...FILTERED_ARGS,
+        sort: { field: sortField, direction: 'asc' },
+        cursor: cursorFor(sortField),
+      };
 
-      it('builds the sort and count queries with entity filters and no search', () => {
-        const args: QueryArgs = {
-          ...BASE_ARGS,
-          entityExpression: ENTITY_EXPRESSION,
-          sort: { field: sortField, direction: 'desc' },
-        };
+      expect(await recordSortQueries(fetchSortPage, args, 0)).toMatchSnapshot();
+    });
 
-        expect(buildSortQuery(args)).toMatchSnapshot('sort');
-        expect(buildCountQuery(args)).toMatchSnapshot('count');
-      });
+    it('builds the sort query with entity filters and no search', async () => {
+      const args: QueryArgs = {
+        ...BASE_ARGS,
+        entityExpression: ENTITY_EXPRESSION,
+        sort: { field: sortField, direction: 'desc' },
+      };
 
-      it('builds the sort query with a cursor on an empty value', () => {
-        const args: QueryArgs = {
-          ...BASE_ARGS,
-          cursor: { ...cursorFor(sortField), sortValue: null },
-          sort: { field: sortField, direction: 'desc' },
-        };
+      expect(await recordSortQueries(fetchSortPage, args, 0)).toMatchSnapshot();
+    });
 
-        expect(buildSortQuery(args)).toMatchSnapshot('sort');
+    it('builds the sort query with a cursor on an empty value', async () => {
+      const args: QueryArgs = {
+        ...BASE_ARGS,
+        cursor: { ...cursorFor(sortField), sortValue: null },
+        sort: { field: sortField, direction: 'desc' },
+      };
+
+      expect(await recordSortQueries(fetchSortPage, args, 0)).toMatchSnapshot();
+    });
+  });
+
+  describe.each(LARGE_VIEW_FETCHERS)(
+    'sort page by %s on a large view',
+    (sortField, fetchSortPage) => {
+      const emptyCursor: PageCursor = {
+        ...cursorFor(sortField),
+        sortValue: EMPTY_SORT_VALUES[sortField] ?? null,
+      };
+
+      it.each([
+        ['the first page descending', { sort: { field: sortField, direction: 'desc' } }],
+        ['the first page ascending', { sort: { field: sortField, direction: 'asc' } }],
+        [
+          'a page after a value with entity filters',
+          {
+            sort: { field: sortField, direction: 'desc' },
+            entityExpression: ENTITY_EXPRESSION,
+            cursor: cursorFor(sortField),
+          },
+        ],
+        [
+          'a page after an empty value',
+          { sort: { field: sortField, direction: 'desc' }, cursor: emptyCursor },
+        ],
+        [
+          'the first page with a search',
+          {
+            sort: { field: sortField, direction: 'desc' },
+            searchExpression: 'KQL("""entity.name: host-001-payments-db""")',
+          },
+        ],
+      ] as const)('runs the queries of %s', async (_name, overrides) => {
+        const runQuery = jest.fn(
+          async (_query: string): Promise<Row[]> => [{ 'entity.id': 'host:h-1', [sortField]: 3 }]
+        );
+
+        await fetchSortPage(
+          { ...BASE_ARGS, ...overrides },
+          { runQuery, fetchViewSize: async () => LARGE_VIEW_SIZE }
+        );
+
+        expect(runQuery.mock.calls.map(([query]) => query)).toMatchSnapshot();
       });
     }
   );
-
-  describe.each(
-    SORT_QUERY_SPECS.flatMap(([id, { fetchSortPage }]) =>
-      fetchSortPage ? [[id, fetchSortPage] as const] : []
-    )
-  )('sort page by %s on a large view', (sortField, fetchSortPage) => {
-    const emptyCursor: PageCursor = {
-      ...cursorFor(sortField),
-      sortValue: EMPTY_SORT_VALUES[sortField] ?? null,
-    };
-
-    it.each([
-      ['the first page descending', { sort: { field: sortField, direction: 'desc' } }],
-      ['the first page ascending', { sort: { field: sortField, direction: 'asc' } }],
-      [
-        'a page after a value with entity filters',
-        {
-          sort: { field: sortField, direction: 'desc' },
-          entityExpression: ENTITY_EXPRESSION,
-          cursor: cursorFor(sortField),
-        },
-      ],
-      [
-        'a page after an empty value',
-        { sort: { field: sortField, direction: 'desc' }, cursor: emptyCursor },
-      ],
-      [
-        'the first page with a search',
-        {
-          sort: { field: sortField, direction: 'desc' },
-          searchExpression: 'KQL("""entity.name: host-001-payments-db""")',
-        },
-      ],
-    ] as const)('runs the queries of %s', async (_name, overrides) => {
-      const runQuery = jest.fn(
-        async (_query: string): Promise<Row[]> => [{ 'entity.id': 'host:h-1', [sortField]: 3 }]
-      );
-
-      await fetchSortPage({ ...BASE_ARGS, ...overrides }, { runQuery, viewSize: LARGE_VIEW_SIZE });
-
-      expect(runQuery.mock.calls.map(([query]) => query)).toMatchSnapshot();
-    });
-  });
 
   it('quotes the KEEP fields that are not plain names', () => {
     expect(

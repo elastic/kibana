@@ -11,7 +11,6 @@ import {
   buildEmptyRowsQuery,
   buildValueCursorClause,
   fetchSplitSortPage,
-  isLargeView,
 } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
 
@@ -57,26 +56,27 @@ const runner = (calls: string[], valueRows: Row[]) => async (query: string) => {
   return valueRows.slice(0, limit);
 };
 
-describe('isLargeView', () => {
-  it('splits large views without search', () => {
-    expect(isLargeView(baseArgs, LARGE_VIEW)).toBe(true);
-  });
-
-  it('keeps the general query for small views and for search', () => {
-    expect(isLargeView(baseArgs, LARGE_VIEW - 1)).toBe(false);
-    expect(isLargeView({ ...baseArgs, searchExpression: 'KQL("""x""")' }, LARGE_VIEW)).toBe(false);
-  });
-});
-
 describe('fetchSplitSortPage', () => {
-  it('runs the general query for small views', async () => {
+  it('runs the general query for views below the threshold', async () => {
     const { plan, calls } = fakePlan(0, [row('a', 3)], []);
     const rows = await fetchSplitSortPage(plan, baseArgs, {
       runQuery: runner(calls, []),
-      viewSize: 10,
+      fetchViewSize: async () => LARGE_VIEW - 1,
     });
     expect(rows).toEqual([row('general', 1)]);
     expect(calls).toEqual(['general']);
+  });
+
+  it('runs the general query for a search without waiting for the view size', async () => {
+    const { plan, calls } = fakePlan(0, [row('a', 3)], []);
+    const fetchViewSize = jest.fn(async () => LARGE_VIEW);
+    await fetchSplitSortPage(
+      plan,
+      { ...baseArgs, searchExpression: 'KQL("""x""")' },
+      { runQuery: runner(calls, []), fetchViewSize }
+    );
+    expect(calls).toEqual(['general']);
+    expect(fetchViewSize).not.toHaveBeenCalled();
   });
 
   it('reads only value rows when they fill the page', async () => {
@@ -84,7 +84,7 @@ describe('fetchSplitSortPage', () => {
     const { plan, calls } = fakePlan(0, values, []);
     const rows = await fetchSplitSortPage(plan, baseArgs, {
       runQuery: runner(calls, values),
-      viewSize: LARGE_VIEW,
+      fetchViewSize: async () => LARGE_VIEW,
     });
     expect(rows).toEqual(values);
     expect(calls).toEqual(['values cursor=- limit=3']);
@@ -95,7 +95,7 @@ describe('fetchSplitSortPage', () => {
     const { plan, calls } = fakePlan(0, values, [row('x', 0), row('y', 0)]);
     const rows = await fetchSplitSortPage(plan, baseArgs, {
       runQuery: runner(calls, values),
-      viewSize: LARGE_VIEW,
+      fetchViewSize: async () => LARGE_VIEW,
     });
     expect(rows).toEqual([row('a', 3), row('x', 0), row('y', 0)]);
     expect(calls).toEqual(['values cursor=- limit=3', 'empty after=- limit=2']);
@@ -114,7 +114,7 @@ describe('fetchSplitSortPage', () => {
       { ...baseArgs, cursor },
       {
         runQuery: runner(calls, []),
-        viewSize: LARGE_VIEW,
+        fetchViewSize: async () => LARGE_VIEW,
       }
     );
     expect(calls).toEqual(['empty after=w limit=3']);
@@ -126,7 +126,7 @@ describe('fetchSplitSortPage', () => {
     const rows = await fetchSplitSortPage(
       plan,
       { ...baseArgs, sort: { field: 'alert_count', direction: 'asc' } },
-      { runQuery: runner(calls, values), viewSize: LARGE_VIEW }
+      { runQuery: runner(calls, values), fetchViewSize: async () => LARGE_VIEW }
     );
     expect(rows).toEqual([row('x', 0), row('a', 1), row('b', 2)]);
     expect(calls).toEqual(['empty after=- limit=3', 'values cursor=- limit=2']);
@@ -138,7 +138,7 @@ describe('fetchSplitSortPage', () => {
     const rows = await fetchSplitSortPage(
       plan,
       { ...baseArgs, sort: { field: 'alert_count', direction: 'asc' } },
-      { runQuery: runner(calls, values), viewSize: LARGE_VIEW }
+      { runQuery: runner(calls, values), fetchViewSize: async () => LARGE_VIEW }
     );
     expect(rows).toEqual([row('a', 1), row('x', null), row('y', null)]);
   });
@@ -147,7 +147,7 @@ describe('fetchSplitSortPage', () => {
     const { plan, calls } = fakePlan(0, [row('a', 3)], null);
     const rows = await fetchSplitSortPage(plan, baseArgs, {
       runQuery: runner(calls, [row('a', 3)]),
-      viewSize: LARGE_VIEW,
+      fetchViewSize: async () => LARGE_VIEW,
     });
     expect(rows).toEqual([row('general', 1)]);
     expect(calls[calls.length - 1]).toBe('general');

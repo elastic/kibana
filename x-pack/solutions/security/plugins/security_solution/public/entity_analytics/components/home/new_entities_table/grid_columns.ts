@@ -12,7 +12,7 @@ import { riskScoreChangeQuerySpec } from './queries/risk_score_change';
 import { groupSizeQuerySpec } from './queries/group_size';
 import { caseCountQuerySpec } from './queries/cases';
 import { nativeSortQuerySpec } from './queries/native';
-import type { ColumnQuerySpec, PageEnricher, RowsMode, SortQuerySpec } from './common';
+import type { ColumnQuerySpec, PageEnricher, RowsMode, SortPageFetcher } from './common';
 
 // Which query each column runs, and why: see queries/README.md.
 
@@ -64,13 +64,14 @@ export const isGridColumnId = (id: string): id is GridColumnId => GRID_COLUMN_ID
 const getQuerySpec = (id: string): ColumnQuerySpec | undefined =>
   isGridColumnId(id) ? QUERY_SPECS[id] : undefined;
 
-export const findSortQuerySpec = (id: string): SortQuerySpec | undefined => getQuerySpec(id)?.sort;
+export const findSortPageFetcher = (id: string): SortPageFetcher | undefined =>
+  getQuerySpec(id)?.fetchSortPage;
 
-/** Sortable columns with their sort, in grid order. */
-export const SORT_QUERY_SPECS: ReadonlyArray<[GridColumnId, SortQuerySpec]> = COLUMNS.flatMap(
+/** Sortable columns with their sort page fetcher, in grid order. */
+export const SORT_PAGE_FETCHERS: ReadonlyArray<[GridColumnId, SortPageFetcher]> = COLUMNS.flatMap(
   ({ id }) => {
-    const sort = QUERY_SPECS[id]?.sort;
-    return sort ? [[id, sort] as [GridColumnId, SortQuerySpec]] : [];
+    const fetchSortPage = QUERY_SPECS[id]?.fetchSortPage;
+    return fetchSortPage ? [[id, fetchSortPage] as [GridColumnId, SortPageFetcher]] : [];
   }
 );
 
@@ -89,7 +90,7 @@ export const ENRICHED_FIELDS: ReadonlySet<string> = new Set(
 
 const ALL_COLUMNS: readonly EuiDataGridColumn[] = COLUMNS.map((column) => ({
   ...column,
-  isSortable: QUERY_SPECS[column.id]?.sort != null,
+  isSortable: QUERY_SPECS[column.id]?.fetchSortPage != null,
   isExpandable: false,
   isResizable: false,
 }));

@@ -25,7 +25,7 @@ import {
 import { buildAlertEuidPipeline } from './euid_pipeline';
 import { buildEntitiesInViewConditions, IN_VIEW_FIELD } from './entities_in_view';
 import type { QueryArgs, Row, PageEnricher, ColumnQuerySpec } from '../common';
-import { buildEntityListSortPlan, buildSplitSortSpec } from './split_sort';
+import { buildEntityListSortPlan, fetchSplitSortPage } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
 
 const ALERT_OPEN_STATUS_FILTER =
@@ -208,12 +208,15 @@ const alertsEnricher: PageEnricher = {
 
 // ── query specs ───────────────────────────────────────────────────────────────
 
+const alertCountSplitSortPlan = getAlertSplitSortPlan(ALERT_COUNT_FIELD);
+const lastSeenAlertSplitSortPlan = getAlertSplitSortPlan(LAST_SEEN_ALERT_FIELD);
+
 export const alertCountQuerySpec = {
-  sort: buildSplitSortSpec(getAlertSplitSortPlan(ALERT_COUNT_FIELD)),
+  fetchSortPage: (args, ctx) => fetchSplitSortPage(alertCountSplitSortPlan, args, ctx),
   enricher: alertsEnricher,
 } satisfies ColumnQuerySpec;
 
 export const lastSeenAlertQuerySpec = {
-  sort: buildSplitSortSpec(getAlertSplitSortPlan(LAST_SEEN_ALERT_FIELD)),
+  fetchSortPage: (args, ctx) => fetchSplitSortPage(lastSeenAlertSplitSortPlan, args, ctx),
   // No enricher: the alerts enricher of the alert count reads this field too.
 } satisfies ColumnQuerySpec;

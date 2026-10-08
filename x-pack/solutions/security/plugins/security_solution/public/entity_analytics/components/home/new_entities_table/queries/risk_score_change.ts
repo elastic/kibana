@@ -29,7 +29,7 @@ import {
   buildEmptyRowsQuery,
   buildValueCursorClause,
   buildValueSortSuffix,
-  buildSplitSortSpec,
+  fetchSplitSortPage,
 } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
 
@@ -188,6 +188,6 @@ const riskScoreChangeEnricher: PageEnricher = {
 // ── query spec ────────────────────────────────────────────────────────────────
 
 export const riskScoreChangeQuerySpec = {
-  sort: buildSplitSortSpec(riskScoreChangeSplitSortPlan),
+  fetchSortPage: (args, ctx) => fetchSplitSortPage(riskScoreChangeSplitSortPlan, args, ctx),
   enricher: riskScoreChangeEnricher,
 } satisfies ColumnQuerySpec;

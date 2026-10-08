@@ -25,8 +25,7 @@ import {
   buildCursorClause,
   buildJoinedPageSteps,
 } from './esql';
-import { buildEntitiesInViewCountQuery, buildEntitiesInViewSteps } from './entities_in_view';
-import { buildMergedForeignSortQuery } from './foreign_sort';
+import { buildEntitiesInViewSteps } from './entities_in_view';
 import type {
   EsqlRunner,
   QueryArgs,
@@ -111,29 +110,11 @@ const buildAliasFirstGroupSizeSortQuery = (args: QueryArgs): string => {
   ].join('\n');
 };
 
-/**
- * A search picks the rows, like it does for every sort: the targets that match. It doesn't
- * change their values, so each row keeps the size of its whole group and stays expandable.
- * KQL can't run after a join, so the targets in view merge with the sizes of every group.
- */
-const buildSearchGroupSizeSortQuery = (args: QueryArgs): string =>
-  buildMergedForeignSortQuery(args, {
-    foreignRows: [
-      `FROM ${getEntityAlias(args.namespace)}`,
-      `| WHERE ${ENTITY_TYPE_FILTER}`,
-      `| EVAL group_key = ${GROUP_KEY}`,
-      `| STATS ${GROUP_SIZE_FIELD} = COUNT(*) BY group_key`,
-      '| RENAME group_key AS `entity.id`',
-    ],
-    mergeAggregations: [`${GROUP_SIZE_FIELD} = MAX(${GROUP_SIZE_FIELD})`],
-    sortField: GROUP_SIZE_FIELD,
-  });
-
-const buildGroupSizeSortQuery = (args: QueryArgs): string => {
-  if (args.searchExpression) return buildSearchGroupSizeSortQuery(args);
-  if (args.entityExpression) return buildAliasFirstGroupSizeSortQuery(args);
-  return buildUnfilteredGroupSizeSortQuery(args);
-};
+/** The single query of a view without a search (searches read their targets directly). */
+const buildGroupSizeSortQuery = (args: QueryArgs): string =>
+  args.entityExpression
+    ? buildAliasFirstGroupSizeSortQuery(args)
+    : buildUnfilteredGroupSizeSortQuery(args);
 
 // ── large views ───────────────────────────────────────────────────────────────
 
@@ -357,12 +338,14 @@ const fetchAliasGroupsPage = async (args: QueryArgs, runQuery: EsqlRunner): Prom
  */
 const fetchGroupSizeSortPage = async (
   args: QueryArgs,
-  { runQuery, viewSize }: SortPageContext
+  { runQuery, fetchViewSize }: SortPageContext
 ): Promise<Row[]> => {
   if (args.searchExpression) {
     return (await fetchSearchedTargetsPage(args, runQuery)) ?? fetchAliasGroupsPage(args, runQuery);
   }
-  if (viewSize < SPLIT_SORT_MIN_VIEW_SIZE) return runQuery(buildGroupSizeSortQuery(args));
+  if ((await fetchViewSize()) < SPLIT_SORT_MIN_VIEW_SIZE) {
+    return runQuery(buildGroupSizeSortQuery(args));
+  }
   return fetchAliasGroupsPage(args, runQuery);
 };
 
@@ -404,11 +387,6 @@ const groupSizeEnricher: PageEnricher = {
 // ── query spec ────────────────────────────────────────────────────────────────
 
 export const groupSizeQuerySpec = {
-  sort: {
-    buildSortQuery: buildGroupSizeSortQuery,
-    // One row per target in view, like every other sort.
-    buildCountQuery: buildEntitiesInViewCountQuery,
-    fetchSortPage: fetchGroupSizeSortPage,
-  },
+  fetchSortPage: fetchGroupSizeSortPage,
   enricher: groupSizeEnricher,
 } satisfies ColumnQuerySpec;

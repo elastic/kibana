@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildEntitiesInViewCountQuery, buildEntitiesInViewSteps } from './entities_in_view';
+import { buildEntitiesInViewSteps } from './entities_in_view';
 import { buildKeepClause, buildCursorClause } from './esql';
 import { ENTITY_ID_FIELD } from '../common';
 import type { ColumnQuerySpec, QueryArgs } from '../common';
@@ -27,8 +27,5 @@ const buildNativeEntitySortQuery = (args: QueryArgs): string => {
 
 /** Sort of a column whose value is on the entity doc. */
 export const nativeSortQuerySpec = {
-  sort: {
-    buildSortQuery: buildNativeEntitySortQuery,
-    buildCountQuery: buildEntitiesInViewCountQuery,
-  },
+  fetchSortPage: (args, { runQuery }) => runQuery(buildNativeEntitySortQuery(args)),
 } satisfies ColumnQuerySpec;
