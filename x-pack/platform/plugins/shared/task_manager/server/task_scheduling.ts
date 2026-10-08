@@ -30,6 +30,11 @@ import { calculateNextRunAtFromSchedule } from './lib/get_next_run_at';
 import { TaskAlreadyRunningError } from './lib/errors';
 import type { TaskPollingLifecycle } from './polling_lifecycle';
 import { getExecutionId } from './lib/get_execution_id';
+import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
+import {
+  taskManagerClaimNudgeTelemetry,
+  type ClaimNudgeSource,
+} from './otel/claim_nudge_telemetry';
 
 const scheduleOptionsToStoreApiKeyOptions = (
   options?: ScheduleOptions
@@ -62,6 +67,7 @@ export interface TaskSchedulingOpts {
   middleware: Middleware;
   taskManagerId: string;
   taskPollingLifecycle?: TaskPollingLifecycle; // subscribe to task lifecycle events
+  claimNudgeService?: TaskManagerClaimNudgeService;
 }
 
 /**
@@ -78,6 +84,22 @@ export interface BulkUpdateTaskResult {
    */
   errors: ErrorOutput[];
 }
+
+export interface BulkUpdateSchedulesOptions extends ApiKeyOptions {
+  /** When true, also update tasks that are currently running or claiming, not just idle ones. */
+  includeRunningTasks?: boolean;
+}
+
+export interface RunSoonOptions {
+  /** Run even when the task is already running on another node. */
+  force?: boolean;
+  /**
+   * Also requests a best-effort extra claim cycle on background nodes. The cycle may claim other
+   * eligible tasks too, so any required delay must be part of a task's eligibility.
+   */
+  requestImmediateClaim?: boolean;
+}
+
 export interface RunSoonResult {
   id: ConcreteTaskInstance['id'];
   forced: boolean;
@@ -102,6 +124,7 @@ export class TaskScheduling {
   private logger: Logger;
   private middleware: Middleware;
   private readonly taskPolling: TaskPollingLifecycle | undefined;
+  private readonly claimNudgeService: TaskManagerClaimNudgeService | undefined;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -113,6 +136,27 @@ export class TaskScheduling {
     this.middleware = opts.middleware;
     this.store = opts.taskStore;
     this.taskPolling = opts.taskPollingLifecycle;
+    this.claimNudgeService = opts.claimNudgeService;
+  }
+
+  private get claimNudgeEnabled(): boolean {
+    return this.claimNudgeService !== undefined;
+  }
+
+  private async notifyClaimNudge(taskId: string, source: ClaimNudgeSource) {
+    if (!this.claimNudgeService) {
+      return;
+    }
+    try {
+      taskManagerClaimNudgeTelemetry.recordClaimNudge(source);
+      await this.claimNudgeService.notify();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      // Not "failed": a timed-out write may still have been applied.
+      this.logger.warn(
+        `Could not confirm the Task Manager claim nudge for task ${taskId}; it will run on the next poll cycle: ${message}`
+      );
+    }
   }
 
   /**
@@ -255,30 +299,41 @@ export class TaskScheduling {
 
   /**
    * Bulk updates schedules for tasks by ids.
-   * Only tasks with `idle` status will be updated. Running tasks are skipped even when
-   * `regenerateApiKey` is provided, because their `schedule` and `runAt` are recalculated after
-   * the task run finishes.
+   * By default only tasks with `idle` status are updated. Pass `includeRunningTasks: true` to also
+   * update running/claiming tasks; for those only `schedule` (and API keys) are written, and the
+   * next `runAt` is derived from the new schedule when the current run finishes.
    * @param {string[]} taskIds  - list of task ids
    * @param {IntervalSchedule | RruleSchedule} schedule  - new schedule
+   * @param {BulkUpdateSchedulesOptions} options  - API key options and `includeRunningTasks` flag
    * @returns {Promise<BulkUpdateTaskResult>}
    */
   public async bulkUpdateSchedules(
     taskIds: string[],
     schedule: IntervalSchedule | RruleSchedule,
-    options?: ApiKeyOptions
+    options?: BulkUpdateSchedulesOptions
   ): Promise<BulkUpdateTaskResult> {
-    const shouldRegenerateApiKey = options?.regenerateApiKey === true;
+    const { includeRunningTasks = false, ...apiKeyOptions } = options ?? {};
+    const shouldRegenerateApiKey = apiKeyOptions.regenerateApiKey === true;
+    const updatableStatuses = includeRunningTasks
+      ? new Set([TaskStatus.Idle, TaskStatus.Running, TaskStatus.Claiming])
+      : new Set([TaskStatus.Idle]);
 
     return retryableBulkUpdate({
       taskIds,
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
       filter: (task) =>
-        task.status === TaskStatus.Idle &&
+        updatableStatuses.has(task.status) &&
         (shouldRegenerateApiKey || !isEqual(task.schedule, schedule)),
       map: (task) => {
         if (isEqual(task.schedule, schedule)) {
           return task;
+        }
+
+        // For a running/claiming task `runAt` is the time the current execution was due; the task
+        // runner computes the next `runAt` from it and the new schedule once the run completes.
+        if (task.status !== TaskStatus.Idle) {
+          return { ...task, schedule };
         }
 
         const newRunAtInMs = calculateNextRunAtFromSchedule({
@@ -294,7 +349,7 @@ export class TaskScheduling {
        * where both are defined by passing mergeAttributes: false here.
        */
       mergeAttributes: false,
-      options,
+      options: apiKeyOptions,
     });
   }
 
@@ -311,9 +366,19 @@ export class TaskScheduling {
    * Run task.
    *
    * @param taskId - The task being scheduled.
+   * @param forceOrOptions - Legacy positional `force`, or the options bag. Set
+   * `requestImmediateClaim` to also request a best-effort extra claim cycle.
    * @returns {Promise<RunSoonResult>}
    */
-  public async runSoon(taskId: string, force: boolean = false): Promise<RunSoonResult> {
+  public async runSoon(
+    taskId: string,
+    forceOrOptions?: boolean | RunSoonOptions
+  ): Promise<RunSoonResult> {
+    const options: RunSoonOptions =
+      typeof forceOrOptions === 'boolean' ? { force: forceOrOptions } : forceOrOptions ?? {};
+    const force = options.force === true;
+    // The refresh only serves the nudge, so both are skipped together.
+    const nudge = options.requestImmediateClaim === true && this.claimNudgeEnabled;
     let forced: boolean = false;
     let conflict: boolean = false;
     const task = await this.store.get(taskId);
@@ -350,7 +415,7 @@ export class TaskScheduling {
           scheduledAt: new Date(),
           runAt: new Date(),
         },
-        { validate: false }
+        { validate: false, refresh: nudge }
       );
     } catch (e) {
       if (e.statusCode === 409) {
@@ -363,6 +428,11 @@ export class TaskScheduling {
         throw e;
       }
     }
+
+    if (!conflict && nudge) {
+      void this.notifyClaimNudge(taskId, 'run_soon');
+    }
+
     return conflict ? { id: task.id, forced, conflict: true } : { id: task.id, forced };
   }
 

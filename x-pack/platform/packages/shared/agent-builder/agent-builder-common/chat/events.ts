@@ -8,20 +8,27 @@
 import type { AgentBuilderEvent } from '../base/events';
 import type {
   AttachmentTimelineEvent,
+  ExecutionAbortedEvent,
+  ExecutionFailedEvent,
+  ExecutionPartialRunSummary,
   ExecutionStartedEvent,
   ExecutionTerminatedEvent,
 } from './timeline_events';
 import { TimelineEventType } from './timeline_events';
+import type { ExecutionAbortReason, SerializedExecutionError } from '../agents/execution_status';
 import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
 import type {
+  CompactionSummary,
   ConversationInternalState,
   ConversationRound,
   ConversationRoundAuthor,
   ConversationRoundOrigin,
+  ConversationRoundStep,
   RoundInput,
   BackgroundExecutionState,
   SubagentRosterEntry,
+  SubstitutionStepData,
   TodoItem,
 } from './conversation';
 import type {
@@ -47,6 +54,7 @@ export enum ChatEventType {
   promptRequest = 'prompt_request',
   roundStarted = 'round_started',
   roundComplete = 'round_complete',
+  roundInterrupted = 'round_interrupted',
   conversationCreated = 'conversation_created',
   conversationUpdated = 'conversation_updated',
   conversationIdSet = 'conversation_id_set',
@@ -56,6 +64,7 @@ export enum ChatEventType {
   subagentRosterUpdated = 'subagent_roster_updated',
   userQuestionAsked = 'user_question_asked',
   userQuestionAnswered = 'user_question_answered',
+  substitutionApplied = 'substitution_applied',
 }
 
 export type ChatEventBase<
@@ -362,6 +371,65 @@ export const isRoundCompleteEvent = (
   return event.type === ChatEventType.roundComplete;
 };
 
+// Round interrupted
+
+/** The two ways an execution can end without an outcome. */
+export type ExecutionInterruptionType = 'failed' | 'aborted';
+
+/** The run errored; `error` is exactly what the client received. */
+export interface ExecutionFailedInterruption {
+  type: 'failed';
+  error: SerializedExecutionError;
+}
+
+/** The run was cancelled; `aborted_by` tells where the abort came from, when known. */
+export interface ExecutionAbortedInterruption {
+  type: 'aborted';
+  aborted_by?: ExecutionAbortReason;
+}
+
+/** How an execution was interrupted. */
+export type ExecutionInterruption = ExecutionFailedInterruption | ExecutionAbortedInterruption;
+
+/**
+ * Emitted by the agent handler when the run errors (or is cancelled) after it started: what is
+ * known about the partial run, so the runner can persist it as a failed / aborted execution.
+ * Internal plumbing — stripped from consumer-facing streams like `round_started`.
+ */
+export interface RoundInterruptedEventData {
+  /** The runner's round id (the persisted id differs for a HITL resume). */
+  round_id: string;
+  started_at: string;
+  /**
+   * The processed round input, as the success path stores it on the round: inline attachments
+   * replaced by refs, refs accessed during the run merged in, `attachment_context` rendered.
+   */
+  input: RoundInput;
+  /** Steps completed before the interruption, in order. */
+  steps: ConversationRoundStep[];
+  summary: ExecutionPartialRunSummary;
+  /** Full attachment state at interruption time, same source as `RoundCompleteEventData.attachments`. */
+  attachments: VersionedAttachment[];
+  /** `chat_input` and `execution` attachment changes, built as for `round_complete`. */
+  attachment_events?: AttachmentTimelineEvent[];
+  workspace_id?: string;
+  /** True when the interrupted run was a HITL resume of a paused round. */
+  resumed?: boolean;
+  /** Compaction summary at interruption time, when the run compacted its context. */
+  compaction_summary?: CompactionSummary;
+}
+
+export type RoundInterruptedEvent = ChatEventBase<
+  ChatEventType.roundInterrupted,
+  RoundInterruptedEventData
+>;
+
+export const isRoundInterruptedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is RoundInterruptedEvent => {
+  return event.type === ChatEventType.roundInterrupted;
+};
+
 // conversation created
 
 export interface ConversationCreatedEventData {
@@ -439,10 +507,12 @@ export const isCompactionStartedEvent = (
 // Compaction completed
 
 export interface CompactionCompletedEventData {
+  /** Estimated token count before compaction */
+  token_count_before: number;
   /** Estimated token count after compaction */
   token_count_after: number;
-  /** Number of rounds that were summarized */
-  summarized_round_count: number;
+  /** Number of cycles that were summarized */
+  summarized_cycle_count: number;
 }
 
 export type CompactionCompletedEvent = ChatEventBase<
@@ -494,6 +564,28 @@ export const isSubagentRosterUpdatedEvent = (
   return event.type === ChatEventType.subagentRosterUpdated;
 };
 
+// Substitution applied
+
+export type SubstitutionAppliedEventData = SubstitutionStepData;
+
+export type SubstitutionAppliedEvent = ChatEventBase<
+  ChatEventType.substitutionApplied,
+  SubstitutionAppliedEventData
+>;
+
+export const createSubstitutionAppliedEvent = (
+  data: SubstitutionAppliedEventData
+): SubstitutionAppliedEvent => ({
+  type: ChatEventType.substitutionApplied,
+  data,
+});
+
+export const isSubstitutionAppliedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is SubstitutionAppliedEvent => {
+  return event.type === ChatEventType.substitutionApplied;
+};
+
 export const TODOS_UPDATED_UI_EVENT = 'todos_updated' as const;
 
 export interface TodosUpdatedUiEventData {
@@ -523,10 +615,12 @@ export type ChatAgentEvent =
   | ThinkingCompleteEvent
   | RoundStartedEvent
   | RoundCompleteEvent
+  | RoundInterruptedEvent
   | CompactionStartedEvent
   | CompactionCompletedEvent
   | BackgroundAgentCompleteEvent
   | SubagentRosterUpdatedEvent
+  | SubstitutionAppliedEvent
   | UserQuestionAskedEvent
   | UserQuestionAnsweredEvent;
 
@@ -542,6 +636,18 @@ export const isExecutionTerminatedEvent = (
   return event.type === TimelineEventType.executionTerminated;
 };
 
+export const isExecutionFailedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is ExecutionFailedEvent => {
+  return event.type === TimelineEventType.executionFailed;
+};
+
+export const isExecutionAbortedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is ExecutionAbortedEvent => {
+  return event.type === TimelineEventType.executionAborted;
+};
+
 /**
  * All types of events that can be emitted from the chat API.
  */
@@ -551,4 +657,6 @@ export type ChatEvent =
   | ConversationUpdatedEvent
   | ConversationIdSetEvent
   | ExecutionStartedEvent
-  | ExecutionTerminatedEvent;
+  | ExecutionTerminatedEvent
+  | ExecutionFailedEvent
+  | ExecutionAbortedEvent;

@@ -176,6 +176,7 @@ export class SecurityPlugin
         fatalErrors: core.fatalErrors,
         getStartServices: core.getStartServices,
         buildFlavor: this.buildFlavor,
+        serviceAccountsAPIClient: this.serviceAccountsApiClient,
       });
     }
 
@@ -249,7 +250,11 @@ export class SecurityPlugin
     this.analyticsService.start({ http: core.http });
 
     return {
-      uiApi: getUiApi({ core }),
+      uiApi: getUiApi({
+        core,
+        isServerless: this.buildFlavor === 'serverless',
+        roleManagementEnabled: this.config.roleManagementEnabled !== false,
+      }),
       navControlService: this.navControlService.start({ core, authc: this.authc }),
       authc: this.authc as AuthenticationServiceStart,
       authz: this.authz as AuthorizationServiceStart,

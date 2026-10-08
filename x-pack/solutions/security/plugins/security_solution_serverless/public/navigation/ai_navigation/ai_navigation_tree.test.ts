@@ -8,7 +8,14 @@
 import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { createAiNavigationTree } from './ai_navigation_tree';
+
+const containsLink = (nodes: NavigationTreeDefinition['body'], link: string): boolean =>
+  nodes.some(
+    (node) =>
+      node.link === link || (node.children !== undefined && containsLink(node.children, link))
+  );
 
 describe('createAiNavigationTree', () => {
   let core: CoreStart;
@@ -66,5 +73,11 @@ describe('createAiNavigationTree', () => {
     );
 
     expect(agentBuilderIndex).toBeGreaterThan(0);
+  });
+
+  it('includes service accounts in Admin and Settings', () => {
+    const navigationTree = createAiNavigationTree(core, AIChatExperience.Agent, true, false);
+
+    expect(containsLink(navigationTree.footer ?? [], 'management:service_accounts')).toBe(true);
   });
 });

@@ -59,9 +59,9 @@ import type {
   PartialConcreteTaskInstance,
   PartialSerializedConcreteTaskInstance,
   ApiKeyOptions,
+  TaskClaimCandidate,
 } from './task';
 import { TaskStatus, TaskLifecycleResult } from './task';
-
 import type { TaskTypeDictionary } from './task_type_dictionary';
 import type { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { TaskValidator } from './task_validator';
@@ -112,6 +112,21 @@ export interface FetchResult {
   docs: ConcreteTaskInstance[];
   versionMap: Map<string, ConcreteTaskInstanceVersion>;
 }
+
+export interface ClaimCandidateFetchResult {
+  docs: TaskClaimCandidate[];
+  versionMap: Map<string, ConcreteTaskInstanceVersion>;
+}
+
+// The claim phase only needs metadata to version-check, cost and select candidates, and the
+// winners are hydrated again by bulkGet afterwards. Excluding the API key fields also keeps
+// decryption off the candidate path entirely.
+const CLAIM_CANDIDATE_SOURCE_EXCLUDES = [
+  'task.state',
+  'task.params',
+  'task.apiKey',
+  'task.uiamApiKey',
+];
 
 export interface BulkUpdateOpts {
   validate: boolean;
@@ -246,7 +261,17 @@ export class TaskStore {
           docsWithApiKeys.push(taskInstance);
           const targets = this.apiKeyStrategy.getApiKeyIdsForInvalidation(taskInstance);
           if (targets.length > 0) {
-            invalidationTargets.push({ taskId: taskInstance.id, targets });
+            const { id, status, startedAt } = taskInstance;
+            const runningTask =
+              status === TaskStatus.Running && startedAt
+                ? // Set when replacing the key while the task is running. Together they
+                  // identify that run, so invalidation can wait until the task finishes.
+                  { taskId: id, taskStartedAt: startedAt.toISOString() }
+                : {};
+            invalidationTargets.push({
+              taskId: id,
+              targets: targets.map((target) => ({ ...target, ...runningTask })),
+            });
           }
         }
       });
@@ -686,7 +711,7 @@ export class TaskStore {
    */
   public async update(
     doc: ConcreteTaskInstance,
-    options: { validate: boolean }
+    options: { validate: boolean; refresh?: boolean }
   ): Promise<ConcreteTaskInstance> {
     return this.executionContextRunner.run(() => this._update(doc, options), {
       id: 'update',
@@ -695,7 +720,7 @@ export class TaskStore {
 
   private async _update(
     doc: ConcreteTaskInstance,
-    options: { validate: boolean }
+    options: { validate: boolean; refresh?: boolean }
   ): Promise<ConcreteTaskInstance> {
     let updatedSavedObject;
     let attributes;
@@ -709,7 +734,7 @@ export class TaskStore {
         doc.id,
         attributes,
         {
-          refresh: false,
+          refresh: options.refresh ?? false,
           version: doc.version,
         }
       );
@@ -768,6 +793,18 @@ export class TaskStore {
           const apiKey = updatedFields?.apiKey || doc?.apiKey;
           const uiamApiKey = updatedFields?.uiamApiKey || doc?.uiamApiKey;
           const userScope = updatedFields?.userScope || doc?.userScope;
+          const { credential, encryptedCredential } = doc;
+          // The encryption-aware client can't rewrite such a task: a merged update re-encrypts the
+          // API key without credential in its AAD, and a full replace encrypts encryptedCredential
+          // twice.
+          if (
+            (credential !== undefined || encryptedCredential !== undefined) &&
+            (apiKey || uiamApiKey)
+          ) {
+            throw new Error(
+              'Task has both a credential and an API key, which this version of Kibana cannot update'
+            );
+          }
 
           acc.set(doc.id, {
             type: 'task',
@@ -778,6 +815,12 @@ export class TaskStore {
               ...(apiKey ? { apiKey } : {}),
               ...(uiamApiKey ? { uiamApiKey } : {}),
               ...(userScope ? { userScope } : {}),
+              // A full replace drops every attribute it doesn't send. credential is in the AAD, so it
+              // and encryptedCredential must be copied unchanged or decryption fails.
+              ...(!mergeAttributes && credential !== undefined ? { credential } : {}),
+              ...(!mergeAttributes && encryptedCredential !== undefined
+                ? { encryptedCredential }
+                : {}),
             },
             mergeAttributes,
           });
@@ -792,17 +835,36 @@ export class TaskStore {
       new Map()
     );
 
+    // The encryption-aware client would encrypt the stored encryptedCredential ciphertext again,
+    // so those tasks are written through the plain repository.
+    const objectsToUpdate = Array.from(newDocs.values());
+    const plainRepositoryObjects =
+      soClientToUpdate === this.savedObjectsRepository
+        ? []
+        : objectsToUpdate.filter(({ attributes }) => attributes.encryptedCredential !== undefined);
+    const soClientObjects = objectsToUpdate.filter(
+      (object) => !plainRepositoryObjects.includes(object)
+    );
+
     let updatedSavedObjects: Awaited<
       ReturnType<typeof soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>>
     >['saved_objects'];
     try {
-      ({ saved_objects: updatedSavedObjects } =
-        await soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>(
-          Array.from(newDocs.values()),
-          {
-            refresh: false,
-          }
-        ));
+      const [soClientResult, plainRepositoryResult] = await Promise.all([
+        soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>(soClientObjects, {
+          refresh: false,
+        }),
+        plainRepositoryObjects.length
+          ? this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
+              plainRepositoryObjects,
+              { refresh: false }
+            )
+          : { saved_objects: [] },
+      ]);
+      updatedSavedObjects = [
+        ...soClientResult.saved_objects,
+        ...plainRepositoryResult.saved_objects,
+      ];
     } catch (e) {
       await this.invalidateUnpersistedApiKeys([...apiKeySOFieldsMap.values()]);
       this.errors$.next(e);
@@ -1201,17 +1263,21 @@ export class TaskStore {
     }
   }
 
-  // like search(), only runs multiple searches in parallel returning the combined results
-  async msearch(opts: SearchOpts[] = []): Promise<FetchResult> {
+  /**
+   * Like search(), only runs multiple searches in parallel and returns the combined results as
+   * claim candidates, without the task state, params or API keys.
+   */
+  async msearch(opts: SearchOpts[] = []): Promise<ClaimCandidateFetchResult> {
     return this.executionContextRunner.run(() => this._msearch(opts), {
       id: 'msearch',
     });
   }
 
-  private async _msearch(opts: SearchOpts[] = []): Promise<FetchResult> {
-    const queries = opts.map(({ sort = [{ 'task.runAt': 'asc' }], ...opt }) =>
-      ensureQueryOnlyReturnsTaskObjects({ sort, ...opt })
-    );
+  private async _msearch(opts: SearchOpts[] = []): Promise<ClaimCandidateFetchResult> {
+    const queries = opts.map(({ sort = [{ 'task.runAt': 'asc' }], ...opt }) => ({
+      ...ensureQueryOnlyReturnsTaskObjects({ sort, ...opt }),
+      _source: { excludes: CLAIM_CANDIDATE_SOURCE_EXCLUDES },
+    }));
     const searches = queries.flatMap((query) => [{}, query]);
 
     const result = await this.esClient.msearch<SavedObjectsRawDoc['_source']>(
@@ -1225,7 +1291,7 @@ export class TaskStore {
     const { responses } = result;
 
     const versionMap = this.createVersionMap([]);
-    let allTasks = new Array<ConcreteTaskInstance>();
+    let allTasks = new Array<TaskClaimCandidate>();
 
     for (const response of responses) {
       if (response.status !== 200) {
@@ -1237,14 +1303,10 @@ export class TaskStore {
       const { hits } = response as estypes.MsearchMultiSearchItem<SavedObjectsRawDoc['_source']>;
       const { hits: tasks } = hits;
       this.addTasksToVersionMap(versionMap, tasks);
-      allTasks = allTasks.concat(this.filterTasks(tasks));
+      allTasks = allTasks.concat(this.filterClaimCandidates(tasks));
     }
 
-    const allSortedTasks = claimSort(this.definitions, allTasks);
-    const tasksWithDecryptedApiKeys = await this.bulkGetAndMergeTasksWithDecryptedApiKey(
-      allSortedTasks
-    );
-    return { docs: tasksWithDecryptedApiKeys, versionMap };
+    return { docs: claimSort(this.definitions, allTasks), versionMap };
   }
 
   public async search(opts: SearchOpts = {}, limitResponse: boolean = false): Promise<FetchResult> {
@@ -1303,6 +1365,20 @@ export class TaskStore {
         .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
         .map((doc) => savedObjectToConcreteTaskInstance(doc))
         .filter((doc): doc is ConcreteTaskInstance => !!doc)
+    );
+  }
+
+  private filterClaimCandidates(
+    tasks: Array<estypes.SearchHit<SavedObjectsRawDoc['_source']>>
+  ): TaskClaimCandidate[] {
+    return (
+      tasks
+        // @ts-expect-error @elastic/elasticsearch _source is optional
+        .filter((doc) => this.serializer.isRawSavedObject(doc))
+        // @ts-expect-error @elastic/elasticsearch _source is optional
+        .map((doc) => this.serializer.rawToSavedObject(doc))
+        .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
+        .map((doc) => savedObjectToTaskClaimCandidate(doc))
     );
   }
 
@@ -1387,7 +1463,8 @@ export class TaskStore {
  * Returns true when a task document holds an encrypted API key credential
  * (either an ES API key or a UIAM API key) together with the `userScope`
  * metadata required to process it. Must be kept in sync with every credential
- * field registered for ESO encryption on the `task` saved object type.
+ * field registered for ESO encryption on the `task` saved object type, except
+ * `encryptedCredential`, which is never decrypted or re-encrypted on update.
  */
 export function docHasEncryptedApiKey(
   doc: Pick<ConcreteTaskInstance, 'apiKey' | 'uiamApiKey' | 'userScope'>
@@ -1400,7 +1477,16 @@ export function taskInstanceToAttributes(
   id: string
 ): SerializedConcreteTaskInstance {
   return {
-    ...omit(doc, 'id', 'version', 'userScope', 'apiKey', 'uiamApiKey'),
+    ...omit(
+      doc,
+      'id',
+      'version',
+      'userScope',
+      'apiKey',
+      'uiamApiKey',
+      'credential',
+      'encryptedCredential'
+    ),
     params: JSON.stringify(doc.params || {}),
     state: JSON.stringify(doc.state || {}),
     attempts: (doc as ConcreteTaskInstance).attempts || 0,
@@ -1417,7 +1503,16 @@ export function partialTaskInstanceToAttributes(
   doc: PartialConcreteTaskInstance
 ): PartialSerializedConcreteTaskInstance {
   return {
-    ...omit(doc, 'id', 'version', 'userScope', 'apiKey', 'uiamApiKey'),
+    ...omit(
+      doc,
+      'id',
+      'version',
+      'userScope',
+      'apiKey',
+      'uiamApiKey',
+      'credential',
+      'encryptedCredential'
+    ),
     ...(doc.params ? { params: JSON.stringify(doc.params) } : {}),
     ...(doc.state ? { state: JSON.stringify(doc.state) } : {}),
     ...(doc.scheduledAt ? { scheduledAt: doc.scheduledAt.toISOString() } : {}),
@@ -1449,6 +1544,33 @@ export function savedObjectToConcreteTaskInstance(
     retryAt: savedObject.attributes.retryAt ? new Date(savedObject.attributes.retryAt) : null,
     state: parseJSONField(savedObject.attributes.state, 'state', savedObject.id),
     params: parseJSONField(savedObject.attributes.params, 'params', savedObject.id),
+  };
+}
+
+/**
+ * Converts a slimmed saved object from the claim candidate search into a TaskClaimCandidate,
+ * dropping rather than parsing the fields excluded from the search source.
+ */
+export function savedObjectToTaskClaimCandidate(
+  savedObject: Omit<SavedObject<SerializedConcreteTaskInstance>, 'references'>
+): TaskClaimCandidate {
+  const { userScope } = savedObject.attributes;
+  return {
+    ...omit(savedObject.attributes, 'state', 'params', 'apiKey', 'uiamApiKey', 'userScope'),
+    ...(userScope
+      ? {
+          userScope: {
+            ...userScope,
+            ...(userScope.spaceId ? { spaceId: brandSpaceId(userScope.spaceId) } : {}),
+          },
+        }
+      : {}),
+    id: savedObject.id,
+    version: savedObject.version,
+    scheduledAt: new Date(savedObject.attributes.scheduledAt),
+    runAt: new Date(savedObject.attributes.runAt),
+    startedAt: savedObject.attributes.startedAt ? new Date(savedObject.attributes.startedAt) : null,
+    retryAt: savedObject.attributes.retryAt ? new Date(savedObject.attributes.retryAt) : null,
   };
 }
 

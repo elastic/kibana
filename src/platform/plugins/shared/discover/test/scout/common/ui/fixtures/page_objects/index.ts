@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { LookupIndexEditor } from './lookup_index_editor';
+export { InsightsAndAlerting } from './insights_and_alerting';
+export { DiscoverPage } from './discover_page';

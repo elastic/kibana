@@ -34,6 +34,9 @@ dependsOn:
   - '@kbn/workflows-yaml'
   - '@kbn/agent-builder-plugin'
   - '@kbn/spaces-plugin'
+  - '@kbn/search-inference-endpoints'
+  - '@kbn/scout'
+  - '@kbn/core-logging-server-mocks'
 tags:
   - plugin
   - prod
@@ -45,6 +48,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

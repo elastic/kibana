@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NULL_LABEL } from '@kbn/field-formats-common';
+import { NULL_PLACEHOLDER } from '@kbn/field-formats-common';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, tags } from '../fixtures';
 
@@ -40,7 +40,7 @@ spaceTest.describe('Discover ES|QL view data', { tag: tags.deploymentAgnostic },
       await expect(dataGrid.getColumnHeader('machine.ram_range')).toBeVisible();
 
       // machine.ram_range has no value in this data, so it renders the null placeholder.
-      await expect(dataGrid.getCellValue(0, 'machine.ram_range')).toHaveText(NULL_LABEL);
+      await expect(dataGrid.getCellValue(0, 'machine.ram_range')).toHaveText(NULL_PLACEHOLDER);
 
       // bytes should appear to the left of machine.ram_range in the grid
       const bytesBox = await dataGrid.getColumnHeader('bytes').boundingBox();

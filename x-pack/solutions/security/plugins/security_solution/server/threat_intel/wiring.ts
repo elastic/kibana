@@ -10,14 +10,12 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { ExperimentalFeatures } from '../../common';
 import type {
   SecuritySolutionPluginCoreSetupDependencies,
   SecuritySolutionPluginCoreStartDependencies,
   SecuritySolutionPluginSetupDependencies,
   SecuritySolutionPluginStartDependencies,
 } from '../plugin_contract';
-import { registerThreatIntelInferenceFeatures } from './inference_features';
 import { registerRoutes as registerThreatIntelRoutes } from './routes';
 import { ensureThreatIntelBootstrap } from './setup/bootstrap_threat_intel';
 import { ensureIndicatorAliasForSpace } from './setup/indicator_alias';
@@ -30,7 +28,19 @@ import {
   scheduleScrubReportContentTask,
 } from './tasks';
 import { registerThreatIntelWorkflowSteps } from './workflows/step_types';
-import { reconcileThreatIntelAttributeWorkflowsForSpaces } from '../workflows/security_managed_workflows';
+import {
+  installThreatIntelManagedWorkflowsForSpaces,
+  reconcileThreatIntelAttributeWorkflowsForSpaces,
+} from '../workflows/security_managed_workflows';
+
+/**
+ * After the bounded first-boot bootstrap budget is exhausted, keep retrying at
+ * this interval so late ML / inference availability can recover without a Kibana
+ * restart. Kept on the runtime so unit tests can shorten it.
+ */
+export const THREAT_INTEL_BOOTSTRAP_BACKGROUND_RETRY_MS = 30_000;
+
+const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * Cross-lifecycle state the pipeline needs. Setup registers routes that only
@@ -44,32 +54,44 @@ export interface ThreatIntelRuntime {
   taskManager?: TaskManagerStartContract;
   bootstrapReady: Promise<void>;
   /**
-   * Set in start when the flag is on. The promote task calls this every run to
+   * Set in start when AlertZero is on. The promote task calls this every run to
    * install `attribute_alerts_to_reports` into spaces created since boot.
    */
   reconcileAttributeWorkflows?: () => Promise<void>;
+  /**
+   * Delay between background bootstrap retries after the first bounded failure.
+   * Defaults to {@link THREAT_INTEL_BOOTSTRAP_BACKGROUND_RETRY_MS}.
+   */
+  bootstrapBackgroundRetryMs?: number;
 }
 
 export const createThreatIntelRuntime = (): ThreatIntelRuntime => ({
   bootstrapReady: Promise.resolve(),
 });
 
+/**
+ * Threat-intel supply shares AlertZero's soft-enable switch
+ * (`xpack.alertzero.enabled`). Missing or disabled AlertZero means supply stays off.
+ */
+export const isThreatIntelSupplyEnabled = (alertzero?: { isEnabled: boolean }): boolean =>
+  alertzero?.isEnabled === true;
+
 export const setupThreatIntel = ({
-  experimentalFeatures,
+  alertZeroEnabled,
   plugins,
   core,
   logger,
   runtime,
 }: {
-  experimentalFeatures: ExperimentalFeatures;
+  alertZeroEnabled: boolean;
   plugins: SecuritySolutionPluginSetupDependencies;
   core: SecuritySolutionPluginCoreSetupDependencies;
   logger: Logger;
   runtime: ThreatIntelRuntime;
 }): void => {
-  if (!experimentalFeatures.threatIntelSupplyEnabled) {
+  if (!alertZeroEnabled) {
     logger.debug(
-      'Threat Intelligence supply not registered. Enable via xpack.securitySolution.enableExperimental: ["threatIntelSupplyEnabled"]'
+      'Threat Intelligence supply not registered. Enable via xpack.alertzero.enabled: true'
     );
     return;
   }
@@ -92,8 +114,6 @@ export const setupThreatIntel = ({
   );
   runtime.bootstrapReady.catch(() => {});
 
-  registerThreatIntelInferenceFeatures(plugins.searchInferenceEndpoints, logger.get('threatIntel'));
-
   const router = core.http.createRouter();
   registerThreatIntelRoutes({
     router,
@@ -104,7 +124,7 @@ export const setupThreatIntel = ({
     getTaskManager: () => runtime.taskManager,
     getBootstrapReady: () => runtime.bootstrapReady,
   });
-  logger.info('Threat Intelligence supply routes registered (threatIntelSupplyEnabled is on)');
+  logger.info('Threat Intelligence supply routes registered (xpack.alertzero.enabled is on)');
 
   if (plugins.workflowsExtensions) {
     registerThreatIntelWorkflowSteps({
@@ -135,23 +155,23 @@ export const setupThreatIntel = ({
       logger: logger.get('threatIntel', 'contentRetention'),
     });
     logger.info(
-      'Threat Intelligence IOC indicator-sync and content-retention tasks registered (threatIntelSupplyEnabled is on)'
+      'Threat Intelligence IOC indicator-sync and content-retention tasks registered (xpack.alertzero.enabled is on)'
     );
   } else {
     logger.warn(
-      'threatIntelSupplyEnabled is set but the optional `taskManager` plugin is not available, skipping promote task registration.'
+      'xpack.alertzero.enabled is set but the optional `taskManager` plugin is not available, skipping promote task registration.'
     );
   }
 };
 
 export const startThreatIntel = ({
-  experimentalFeatures,
+  alertZeroEnabled,
   plugins,
   core,
   logger,
   runtime,
 }: {
-  experimentalFeatures: ExperimentalFeatures;
+  alertZeroEnabled: boolean;
   plugins: SecuritySolutionPluginStartDependencies;
   core: SecuritySolutionPluginCoreStartDependencies;
   logger: Logger;
@@ -162,9 +182,9 @@ export const startThreatIntel = ({
   runtime.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
   runtime.taskManager = plugins.taskManager;
 
-  if (!experimentalFeatures.threatIntelSupplyEnabled) {
-    // The task definition is only registered when the flag is on, so a task
-    // scheduled during an earlier flag-on boot would otherwise sit in the
+  if (!alertZeroEnabled) {
+    // The task definition is only registered when AlertZero is on, so a task
+    // scheduled during an earlier enabled boot would otherwise sit in the
     // Task Manager index forever, un-runnable and invisible.
     if (plugins.taskManager) {
       for (const taskId of [PROMOTE_THREAT_INDICATORS_TASK_ID, SCRUB_REPORT_CONTENT_TASK_ID]) {
@@ -178,25 +198,15 @@ export const startThreatIntel = ({
 
   const esClient = core.elasticsearch.client.asInternalUser;
   const tiLogger = logger.get('threatIntel');
+  const workflowsExtensions = plugins.workflowsExtensions;
+  const taskManager = plugins.taskManager;
+  const retryDelayMs =
+    runtime.bootstrapBackgroundRetryMs ?? THREAT_INTEL_BOOTSTRAP_BACKGROUND_RETRY_MS;
 
-  // Bootstrap stays detached so a slow or retrying Elasticsearch cannot block
-  // Kibana startup, but the promise is retained: route handlers await it
-  // before touching the plugin-owned indices, so a request cannot auto-create
-  // an index before its template applies (which would leave it permanently
-  // mis-mapped). The catch is attached separately so awaiting handlers still
-  // observe the rejection while the failure is logged exactly once.
-  runtime.bootstrapReady = ensureThreatIntelBootstrap({ esClient, logger: tiLogger }).then(
-    () => undefined
-  );
-  runtime.bootstrapReady.catch((err) => {
-    tiLogger.error(`Failed to ensure threat intel bootstrap on start: ${(err as Error).message}`);
-  });
-
-  // Managed-workflow install moved to `installSecurityManagedWorkflowsAndMarkReady`
-  // in plugin start so alert_analysis and TI share one `ready()` call. This
-  // callback is what the promote task uses to catch spaces created after boot.
-  if (plugins.workflowsExtensions) {
-    const workflowsExtensions = plugins.workflowsExtensions;
+  // Managed-workflow install at boot moved to `installSecurityManagedWorkflowsAndMarkReady`
+  // so alert_analysis and TI share one `ready()` call. The promote task uses this
+  // callback to catch spaces created after boot.
+  if (workflowsExtensions) {
     runtime.reconcileAttributeWorkflows = () =>
       reconcileThreatIntelAttributeWorkflowsForSpaces({
         workflowsExtensions,
@@ -205,36 +215,96 @@ export const startThreatIntel = ({
       });
   }
 
-  if (plugins.taskManager) {
-    const taskManager = plugins.taskManager;
-    // Scheduling waits on bootstrap: the promote and retention tasks read and
-    // write the same indices, so starting them alongside the migrations races
-    // template installation for no benefit. A bootstrap failure means the
-    // pipeline has no schema to work against, so the tasks stay unscheduled.
-    void runtime.bootstrapReady
-      .then(async () => {
-        await ensureIndicatorAliasForSpace({
-          esClient,
-          spaceId: 'default',
-          logger: tiLogger,
-        }).catch(() => {});
+  const scheduleThreatIntelTasks = async (): Promise<void> => {
+    await ensureIndicatorAliasForSpace({
+      esClient,
+      spaceId: 'default',
+      logger: tiLogger,
+    }).catch(() => {});
 
-        await schedulePromoteThreatIndicatorsTask({
-          taskManager,
-          logger: logger.get('threatIntel', 'iocIndicatorSync'),
-        }).catch((err) => {
-          tiLogger.error(`Failed to schedule Promote threat indicators task: ${err.message}`);
-        });
+    if (!taskManager) {
+      return;
+    }
 
-        await scheduleScrubReportContentTask({
-          taskManager,
-          logger: logger.get('threatIntel', 'contentRetention'),
-        }).catch((err) => {
-          tiLogger.error(`Failed to schedule threat report content retention task: ${err.message}`);
-        });
-      })
-      .catch(() => {
-        tiLogger.error('Threat intel tasks were not scheduled because bootstrap did not complete');
-      });
-  }
+    await schedulePromoteThreatIndicatorsTask({
+      taskManager,
+      logger: logger.get('threatIntel', 'iocIndicatorSync'),
+    }).catch((err) => {
+      tiLogger.error(`Failed to schedule Promote threat indicators task: ${err.message}`);
+    });
+
+    await scheduleScrubReportContentTask({
+      taskManager,
+      logger: logger.get('threatIntel', 'contentRetention'),
+    }).catch((err) => {
+      tiLogger.error(`Failed to schedule threat report content retention task: ${err.message}`);
+    });
+  };
+
+  const installThreatIntelWorkflowsAfterRecovery = async (): Promise<void> => {
+    if (!workflowsExtensions) {
+      return;
+    }
+    await installThreatIntelManagedWorkflowsForSpaces({
+      workflowsExtensions,
+      core,
+      logger: tiLogger,
+    });
+  };
+
+  /**
+   * Bootstrap stays detached so a slow or retrying Elasticsearch cannot block
+   * Kibana startup. Route handlers await `bootstrapReady` before touching
+   * plugin-owned indices (fail-closed).
+   *
+   * The first call uses the bounded retry budget inside `ensureThreatIntelBootstrap`.
+   * If that rejects, readiness stays rejected (routes answer 503) and a background
+   * loop keeps retrying at a longer interval. On late success we replace
+   * `bootstrapReady` with a resolved promise, schedule TI tasks, and install TI
+   * managed workflows that the boot installer skipped when bootstrap first failed.
+   */
+  const firstBootstrap = ensureThreatIntelBootstrap({ esClient, logger: tiLogger }).then(
+    () => undefined
+  );
+  runtime.bootstrapReady = firstBootstrap;
+  runtime.bootstrapReady.catch((err) => {
+    tiLogger.error(`Failed to ensure threat intel bootstrap on start: ${(err as Error).message}`);
+  });
+
+  void firstBootstrap
+    .then(async () => {
+      await scheduleThreatIntelTasks();
+    })
+    .catch(() => {
+      tiLogger.error(
+        'Threat intel tasks were not scheduled because bootstrap did not complete; retrying bootstrap in the background'
+      );
+      void (async () => {
+        let bootstrapRecovered = false;
+        for (;;) {
+          await sleep(retryDelayMs);
+          try {
+            if (!bootstrapRecovered) {
+              await ensureThreatIntelBootstrap({ esClient, logger: tiLogger });
+              runtime.bootstrapReady = Promise.resolve();
+              bootstrapRecovered = true;
+              tiLogger.info(
+                'Threat intel bootstrap recovered after a late retry; installing managed workflows and scheduling tasks'
+              );
+              await scheduleThreatIntelTasks();
+            }
+            await installThreatIntelWorkflowsAfterRecovery();
+            return;
+          } catch (err) {
+            tiLogger.warn(
+              bootstrapRecovered
+                ? `Threat intel managed-workflow install after recovery failed; will retry: ${
+                    (err as Error).message
+                  }`
+                : `Threat intel background bootstrap retry failed: ${(err as Error).message}`
+            );
+          }
+        }
+      })();
+    });
 };

@@ -20,7 +20,7 @@ import type { EncryptedSavedObjectsService } from '../../server/crypto';
 import * as EncryptedSavedObjectsModule from '../../server/saved_objects';
 
 // This will only change if new ESOs are introduced. This number should never get smaller.
-export const ESO_TYPES_COUNT = 25 as const;
+export const ESO_TYPES_COUNT = 27 as const;
 
 describe('checking changes on all registered encrypted SO types', () => {
   let esServer: TestElasticsearchUtils;
@@ -79,13 +79,15 @@ describe('checking changes on all registered encrypted SO types', () => {
         "fleet-uninstall-tokens": "6e7d75921dcce46e566f175eab1b0e3825fe565f20cdb3c984e7037934d61e23",
         "ingest-download-sources": "b3740796eab0a91736e43bd22f7489cbf6f2ad0241ae370d1c8195b6a8d8ad52",
         "ingest-outputs": "d66716d5333484a25c57f7917bead5ac2576ec57a4b9eb61701b573f35ab62ad",
+        "nightshift-secrets": "dda5d9c34f2dfad530fd3ce2f7d30aa1b626e925ba8da6469f7da62136e2d8aa",
         "oauth_state": "b01289e5c133db9d4d802a2b838e43cce4a8399566dedb21de551da57c88894a",
         "privmon-api-key": "7d7b76b3bc5287a784518731ba66d4f761052177fc04b1a85e5605846ab9de42",
+        "service-account-credential": "5d9f328d92718249b324fbd5d01332bcef80be980003d510a3bd24af230244ff",
         "service-account-workload-binding": "bdac5e0e6513a9644fcd9e2195d0fe3a105629dd798f2b23fe7d8b33d2d41d2b",
-        "synthetics-monitor": "f1c060b7be3b30187c4adcb35d74f1fa8a4290bd7faf04fec869de2aa387e21b",
-        "synthetics-monitor-multi-space": "39c4c6abd28c4173f77c1c89306e92b6b92492c0029274e10620a170be4d4a67",
+        "synthetics-monitor": "de18413761b36881d871e677c248336a70c90f0508e58f4162ee4cd579be2148",
+        "synthetics-monitor-multi-space": "c05bd0271eb934cef46af2fc32591ac6ed10b20ac34e049fd0d3ca1362fd4136",
         "synthetics-param": "747ba9d1b7addf5b131713abe7868bd767af6ce0cf8b6b0f335f4ef34b280c7e",
-        "task": "d6cc30871dc78caf3f451de1275a3803879ec9935b4a2e34076dee56878c228f",
+        "task": "bba5345e2443d1dd107d1f9de8810cbfbfe74941bc6d1b1dbe8c61e175f57b75",
         "uptime-synthetics-api-key": "5ca81f180763e85397fa8c6508adcd60efd0f916e29bac6dcd5b4564f1db7375",
         "user_connector_token": "7f818fe3827daa31d23b874e480176d105e629cf5da88f5f4e56033e78c3acca",
         "watchlist-entity-source": "9e6445feba401a9b6d44c412d8fe9a069e051ea2483570c03ef17b5cf5e718d7",
@@ -115,6 +117,7 @@ describe('checking changes on all registered encrypted SO types', () => {
 
     expect(modelVersionMap).toMatchInlineSnapshot(`
       Array [
+        "action|4",
         "action|3",
         "action|2",
         "action|1",
@@ -136,6 +139,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "alert|4",
         "alert|3",
         "alert|2",
+        "alert|16",
         "alert|15",
         "alert|14",
         "alert|13",
@@ -143,12 +147,15 @@ describe('checking changes on all registered encrypted SO types', () => {
         "alert|11",
         "alert|10",
         "alert|1",
+        "alerting_action_policy|5",
+        "alerting_action_policy|4",
         "alerting_action_policy|3",
         "alerting_action_policy|2",
         "alerting_action_policy|1",
         "anonymization-salt|1",
         "api_key_pending_invalidation|2",
         "api_key_pending_invalidation|1",
+        "api_key_to_invalidate|3",
         "api_key_to_invalidate|2",
         "api_key_to_invalidate|1",
         "cloud-connect-api-key|1",
@@ -170,7 +177,9 @@ describe('checking changes on all registered encrypted SO types', () => {
         "ingest-outputs|11",
         "ingest-outputs|10",
         "ingest-outputs|1",
+        "nightshift-secrets|1",
         "oauth_state|1",
+        "service-account-credential|1",
         "service-account-workload-binding|1",
         "synthetics-monitor|2",
         "synthetics-monitor|1",
@@ -182,6 +191,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "task|4",
         "task|3",
         "task|2",
+        "task|14",
         "task|13",
         "task|12",
         "task|11",

@@ -65,7 +65,7 @@ export function registerExportWorkflowsRoute(deps: RouteDependencies) {
           const spaceId = spaces.getSpaceId(request);
           const { ids } = request.body;
 
-          const workflows = await api.getWorkflowsByIds(ids, spaceId);
+          const workflows = await api.getWorkflowsByIds(ids, spaceId, request);
           workflows.forEach((workflow) => assertCanReadManagedWorkflow(request, workflow));
 
           const entries: WorkflowExportEntry[] = workflows.map((workflow) => {

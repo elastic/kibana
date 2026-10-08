@@ -130,20 +130,21 @@ export const registerInternalTools = async ({
     tools.push(createTodoTool({ todoStateManager }));
   }
 
-  // HTTP API introspection/invocation — FF-gated.
-  if (experimentalFeatures.apiTools) {
+  // HTTP API introspection/invocation — always on, except discovery, which is FF-gated.
+  const discoveryEnabled = experimentalFeatures.apiDiscovery;
+  tools.push(createDescribeApiTool({ discoveryEnabled }));
+  tools.push(createDescribeApiTypeTool({ discoveryEnabled }));
+  tools.push(createExecuteApiTool({ selfClient, discoveryEnabled }));
+  if (discoveryEnabled) {
     tools.push(createDiscoverApisTool());
-    tools.push(createDescribeApiTool());
-    tools.push(createDescribeApiTypeTool());
-    tools.push(createExecuteApiTool({ selfClient }));
   }
 
-  // run_subagent + send_message + sleep — experimental; reserved for top-level
-  // runs (see `canSpawnSubagents` above for why sub-agents can't nest-spawn).
+  // run_subagent + send_message + sleep — reserved for top-level runs (see
+  // `canSpawnSubagents` above for why sub-agents can't nest-spawn).
   // All three share the same registration gate: the parent agent's resolved
   // `subagent_ids` allowlist must be non-empty. Per-call reachability for
   // `send_message` is enforced in the handler (§3.5 of the design).
-  if (experimentalFeatures.subagents && canSpawnSubagents) {
+  if (canSpawnSubagents) {
     const allowedSubagents = await resolveAllowedSubagents({
       configuredIds: agentConfiguration.subagent_ids ?? [],
       agentRegistry,
@@ -152,6 +153,9 @@ export const registerInternalTools = async ({
 
     if (allowedSubagents.length > 0) {
       const allowedIds = new Set(allowedSubagents.map((a) => a.id));
+      const inferenceFeatureIdBySubagent = new Map(
+        allowedSubagents.map(({ id, inferenceFeatureId }) => [id, inferenceFeatureId])
+      );
       const ownerAgentId = agentId ?? agentBuilderDefaultAgentId;
 
       tools.push(
@@ -177,6 +181,7 @@ export const registerInternalTools = async ({
           backgroundExecutionService,
           subagentTracker,
           allowedIds,
+          inferenceFeatureIdBySubagent,
         })
       );
       tools.push(createSleepTool());

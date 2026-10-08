@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { pick } from 'lodash';
+import { omit, pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, map, skip } from 'rxjs';
@@ -40,8 +40,9 @@ import {
 import { getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
 import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import { getEsqlDataView } from '@kbn/discover-utils';
+import { unregisterFromDataViewsCache, type EsqlSource } from '@kbn/data-source';
 import type { DiscoverServices } from '../build_services';
+import { resolveEsqlSource } from '../application/main/data_fetching/resolve_esql_source';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
 import type {
   PublishesWritableSavedSearch,
@@ -51,14 +52,20 @@ import type {
 
 const initializeSearchSource = async (
   discoverServices: DiscoverServices,
-  serializedSearchSource?: SerializedSearchSourceFields
+  serializedSearchSource?: SerializedSearchSourceFields,
+  previousSourceId?: string
 ) => {
   let searchSource: ISearchSource;
   let parentSearchSource: ISearchSource;
+  // The ES|QL data view is resolved from the query below; hydrating the saved one would only
+  // cost a field caps request and cache a DataView under the id the ES|QL shim uses.
+  const searchSourceFields = isOfAggregateQueryType(serializedSearchSource?.query)
+    ? omit(serializedSearchSource, 'index')
+    : serializedSearchSource;
 
   try {
     [searchSource, parentSearchSource] = await Promise.all([
-      discoverServices.data.search.searchSource.create(serializedSearchSource),
+      discoverServices.data.search.searchSource.create(searchSourceFields),
       discoverServices.data.search.searchSource.create(),
     ]);
   } catch (error) {
@@ -75,19 +82,31 @@ const initializeSearchSource = async (
   searchSource.setParent(parentSearchSource);
 
   const query = searchSource.getField('query');
-  let dataView = searchSource.getField('index');
+  const dataView = searchSource.getField('index');
 
   if (isOfAggregateQueryType(query)) {
-    dataView = await getEsqlDataView(query, dataView, discoverServices);
+    const { esqlSource, dataView: esqlDataView } = await resolveEsqlSource({
+      esql: query.esql,
+      services: discoverServices,
+      previousSourceId,
+    });
+    searchSource.setField('index', esqlDataView);
+    return { searchSource, dataView: esqlDataView, esqlSource };
   }
 
-  return { searchSource, dataView };
+  if (previousSourceId) {
+    discoverServices.dataSourceService.unregisterEsqlSource(previousSourceId);
+    unregisterFromDataViewsCache(previousSourceId);
+  }
+
+  return { searchSource, dataView, esqlSource: undefined };
 };
 
 const initializedSavedSearch = (
   stateManager: SearchEmbeddableStateManager,
   searchSource: ISearchSource,
-  discoverServices: DiscoverServices
+  discoverServices: DiscoverServices,
+  tabTypeState: SavedSearch['tabTypeState']
 ): SavedSearch => {
   return {
     ...Object.keys(stateManager).reduce((prev, key) => {
@@ -97,6 +116,7 @@ const initializedSavedSearch = (
       };
     }, discoverServices.savedSearch.getNew()),
     searchSource,
+    tabTypeState,
   };
 };
 
@@ -128,14 +148,16 @@ export const initializeSearchEmbeddableApi = async ({
   anyStateChange$: Observable<void>;
   cleanup: () => void;
   reinitializeState: (lastSaved: SearchEmbeddableSerializedAttributes) => Promise<void>;
+  esqlSource$: BehaviorSubject<EsqlSource | undefined>;
 }> => {
   /** We **must** have a search source, so start by initializing it  */
-  const { searchSource, dataView } = await initializeSearchSource(
+  const { searchSource, dataView, esqlSource } = await initializeSearchSource(
     discoverServices,
     initialState.serializedSearchSource
   );
   const searchSource$ = new BehaviorSubject<ISearchSource>(searchSource);
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(dataView ? [dataView] : undefined);
+  const esqlSource$ = new BehaviorSubject<EsqlSource | undefined>(esqlSource);
 
   /** This is the state that can be initialized from the saved initial state */
   const columns$ = new BehaviorSubject<string[] | undefined>(initialState.columns);
@@ -207,7 +229,7 @@ export const initializeSearchEmbeddableApi = async ({
 
   /** The saved search should be the source of truth for all state  */
   const savedSearch$ = new BehaviorSubject(
-    initializedSavedSearch(stateManager, searchSource, discoverServices)
+    initializedSavedSearch(stateManager, searchSource, discoverServices, initialState.tabTypeState)
   );
 
   /** This will fire when any of the **editable** state changes */
@@ -243,15 +265,23 @@ export const initializeSearchEmbeddableApi = async ({
     dataLoading$.next(true);
     rows$.next([]);
 
-    const { searchSource: newSearchSource, dataView: newDataView } = await initializeSearchSource(
+    const previousSourceId = esqlSource$.getValue()?.id;
+    const {
+      searchSource: newSearchSource,
+      dataView: newDataView,
+      esqlSource: newEsqlSource,
+    } = await initializeSearchSource(
       discoverServices,
-      state.serializedSearchSource
+      state.serializedSearchSource,
+      previousSourceId
     );
 
     // Ensure all state updates happen synchronously to prevent multiple reloads
+    savedSearch$.next({ ...savedSearch$.getValue(), tabTypeState: state.tabTypeState });
     searchSource$.next(newSearchSource);
 
     dataViews$.next(newDataView ? [newDataView] : undefined);
+    esqlSource$.next(newEsqlSource);
 
     const newQuery = newSearchSource.getField('query');
     const newFilters = newSearchSource.getField('filter') as Filter[] | undefined;
@@ -311,7 +341,13 @@ export const initializeSearchEmbeddableApi = async ({
     cleanup: () => {
       syncSavedSearch.unsubscribe();
       syncProjectRoutingOverrides.unsubscribe();
+      const sourceId = esqlSource$.getValue()?.id;
+      if (sourceId) {
+        discoverServices.dataSourceService.unregisterEsqlSource(sourceId);
+        unregisterFromDataViewsCache(sourceId);
+      }
     },
+    esqlSource$,
     internalApi: {
       setApproximationApplied,
     },

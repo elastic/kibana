@@ -158,14 +158,24 @@ export interface AgentConfiguration {
    * Must use SELF_AGENT_ID (_self) to reference itself.
    */
   subagent_ids?: string[];
+
+  /**
+   * Optional ID of the inference feature whose first model this agent runs on.
+   */
+  inference_feature_id?: string;
 }
+
+/**
+ * Agent configuration without the fields that only built-in agents can declare.
+ */
+export type AgentConfigurationInput = Omit<AgentConfiguration, 'inference_feature_id'>;
 
 /**
  * Runtime configuration overrides for agent execution.
  * These override the stored agent configuration for a single execution instance.
  * Each field, if provided, completely replaces the corresponding field in the stored configuration.
  */
-export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
+export type AgentConfigurationOverrides = Partial<AgentConfigurationInput>;
 
 /**
  * Runtime configuration overrides exposed via the public API and persisted on conversation rounds.

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
@@ -15,7 +15,6 @@ import {
   EuiFlexGroup,
   EuiLoadingSpinner,
   EuiScreenReaderOnly,
-  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import type {
@@ -26,10 +25,15 @@ import type {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
+import { ROW_ACTIONS_COLUMN_WIDTH, RowActionsMenu } from '../row_actions_menu';
 import type { SourceViewModel } from './types';
-import { SourceGridCell, SourceRowActions } from './source_grid_cell';
+import { SourceGridCell } from './source_grid_cell';
 
 export type SourcesGridStatus = 'loading' | 'ready' | 'unavailable';
+
+const SOURCE_ACTIONS_LABEL = i18n.translate('xpack.streams.sources.table.rowActionsTitle', {
+  defaultMessage: 'Source actions',
+});
 
 export const SOURCE_GRID_COLUMNS: EuiDataGridColumn[] = [
   {
@@ -85,6 +89,7 @@ interface SourcesGridProps {
   onSortingChange: (columns: EuiDataGridSorting['columns']) => void;
   onSelectionChange: (sources: SourceViewModel[]) => void;
   onOpenSource: (sourceId: string) => void;
+  onShowOnCanvas: (source: SourceViewModel) => void;
   onRequestDelete: (sources: SourceViewModel[]) => void;
 }
 
@@ -101,15 +106,16 @@ export const SourcesGrid = ({
   onSortingChange,
   onSelectionChange,
   onOpenSource,
+  onShowOnCanvas,
   onRequestDelete,
 }: SourcesGridProps) => {
-  const selectedSourceIds = React.useMemo(
+  const selectedSourceIds = useMemo(
     () => new Set(selectedSources.map(({ id }) => id)),
     [selectedSources]
   );
   const allSourcesSelected =
     sources.length > 0 && sources.every(({ id }) => selectedSourceIds.has(id));
-  const setSelectedSource = React.useCallback(
+  const setSelectedSource = useCallback(
     (source: SourceViewModel, checked: boolean) => {
       onSelectionChange(
         checked
@@ -119,7 +125,7 @@ export const SourcesGrid = ({
     },
     [onSelectionChange, selectedSources]
   );
-  const leadingControlColumns = React.useMemo<EuiDataGridControlColumn[]>(
+  const leadingControlColumns = useMemo<EuiDataGridControlColumn[]>(
     () => [
       {
         id: 'select',
@@ -152,34 +158,34 @@ export const SourcesGrid = ({
     ],
     [allSourcesSelected, onSelectionChange, selectedSourceIds, setSelectedSource, sources]
   );
-  const trailingControlColumns = React.useMemo<EuiDataGridControlColumn[]>(
+  const trailingControlColumns = useMemo<EuiDataGridControlColumn[]>(
     () => [
       {
         id: 'rowActions',
-        width: 40,
+        width: ROW_ACTIONS_COLUMN_WIDTH,
         headerCellRender: () => (
           <EuiScreenReaderOnly>
-            <span>
-              {i18n.translate('xpack.streams.sources.table.rowActionsTitle', {
-                defaultMessage: 'Source actions',
-              })}
-            </span>
+            <span>{SOURCE_ACTIONS_LABEL}</span>
           </EuiScreenReaderOnly>
         ),
         rowCellRender: ({ rowIndex }) => {
           const source = sources[rowIndex];
           return source ? (
-            <SourceRowActions
-              source={source}
-              onRequestDelete={(sourceToDelete) => onRequestDelete([sourceToDelete])}
+            <RowActionsMenu
+              entityName={source.name ?? source.id}
+              tooltip={SOURCE_ACTIONS_LABEL}
+              buttonTestSubj="streamsSourceRowActionsButton"
+              deleteTestSubj="streamsSourceDeleteAction"
+              onShowOnCanvas={() => onShowOnCanvas(source)}
+              onDelete={() => onRequestDelete([source])}
             />
           ) : null;
         },
       },
     ],
-    [onRequestDelete, sources]
+    [onRequestDelete, onShowOnCanvas, sources]
   );
-  const renderCellValue = React.useCallback<NonNullable<EuiDataGridProps['renderCellValue']>>(
+  const renderCellValue = useCallback<NonNullable<EuiDataGridProps['renderCellValue']>>(
     ({ rowIndex, columnId }) => {
       const source = sources[rowIndex];
       return source ? (
@@ -188,7 +194,7 @@ export const SourcesGrid = ({
     },
     [onOpenSource, sources]
   );
-  const toolbarVisibility = React.useMemo<EuiDataGridProps['toolbarVisibility']>(
+  const toolbarVisibility = useMemo<EuiDataGridProps['toolbarVisibility']>(
     () => ({
       showColumnSelector: true,
       showDisplaySelector: false,
@@ -252,9 +258,18 @@ export const SourcesGrid = ({
     );
   }
 
+  const isEmpty = sources.length === 0;
+
   return (
-    <>
+    <div
+      css={css`
+        position: relative;
+        block-size: 100%;
+        min-block-size: 0;
+      `}
+    >
       <EuiDataGrid
+        height={isEmpty ? 'auto' : undefined}
         aria-label={i18n.translate('xpack.streams.sources.tableCaption', {
           defaultMessage: 'Configured stream sources',
         })}
@@ -279,9 +294,17 @@ export const SourcesGrid = ({
           onChangePage: (pageIndex) => onPaginationChange({ ...pagination, pageIndex }),
         }}
       />
-      {sources.length === 0 && (
-        <>
-          <EuiSpacer size="m" />
+      {isEmpty && (
+        <div
+          css={css`
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+          `}
+        >
           <EuiEmptyPrompt
             iconType={hasActiveFilters ? 'search' : 'database'}
             title={
@@ -304,9 +327,12 @@ export const SourcesGrid = ({
                     defaultMessage: 'Add a source to start sending data to this stream.',
                   })
             }
+            css={css`
+              pointer-events: auto;
+            `}
           />
-        </>
+        </div>
       )}
-    </>
+    </div>
   );
 };

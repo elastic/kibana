@@ -17,7 +17,10 @@ import type { OverlayFlyoutOpenOptions } from './flyout';
  *
  * @deprecated Use {@link OverlayFlyoutTemplateOpenOptions} with `openFlyoutTemplate` instead.
  */
-export type OverlaySystemFlyoutOpenOptions = Omit<OverlayFlyoutOpenOptions, 'session'> & {
+export type OverlaySystemFlyoutOpenOptions = Omit<
+  OverlayFlyoutOpenOptions,
+  'session' | 'onClose'
+> & {
   /**
    * Control the flyout session behavior. See {@link EuiFlyoutProps.session}
    * @default "start"
@@ -32,6 +35,22 @@ export type OverlaySystemFlyoutOpenOptions = Omit<OverlayFlyoutOpenOptions, 'ses
    * If `title` is provided here, it takes precedence over the top-level `title`.
    */
   flyoutMenuProps?: EuiFlyoutProps['flyoutMenuProps'];
+  /**
+   * Notifies that the flyout was dismissed. The returned {@link OverlayRef} is closed
+   * afterwards, without waiting on the handler.
+   */
+  onClose?: () => void;
+  /**
+   * Fires with the new pixel width when the user finishes resizing a `resizable` flyout. Use it to
+   * persist the width and reopen the flyout at that size (as a numeric `size`).
+   */
+  onResize?: (width: number) => void;
+  /**
+   * The size the flyout resets back to when `resetSize` is called on {@link SystemFlyoutSizeContext}.
+   * Defaults to `size`. Set this to the flyout's default named size when opening at a persisted
+   * pixel width, so a reset can return to the default.
+   */
+  defaultSize?: EuiFlyoutProps['size'];
 };
 
 /**

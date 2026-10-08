@@ -20,7 +20,7 @@ const buildEvent = ({
   policyId,
   ruleIds = [],
   workflowIds = [],
-  episodeCount = 1,
+  alertCount = 1,
   actionGroupCount = 1,
   action = ACTION_POLICY_EVENT_ACTIONS.DISPATCHED,
   timestamp = '2026-05-05T10:00:00.000Z',
@@ -28,7 +28,7 @@ const buildEvent = ({
   policyId: string;
   ruleIds?: string[];
   workflowIds?: string[];
-  episodeCount?: number;
+  alertCount?: number;
   actionGroupCount?: number;
   action?: 'dispatched' | 'throttled';
   timestamp?: string;
@@ -42,7 +42,7 @@ const buildEvent = ({
     ],
     alerting_v2: {
       dispatcher: {
-        episode_count: episodeCount,
+        alert_count: alertCount,
         action_group_count: actionGroupCount,
         workflow_ids: workflowIds,
       },
@@ -74,8 +74,10 @@ const createMocks = () => {
   const rulesClient = {
     findRules: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 0 }),
   } as unknown as jest.Mocked<RulesClient>;
+  const getWorkflowsByIds = jest.fn().mockResolvedValue([]);
   const workflowsManagement = {
-    getWorkflowsByIds: jest.fn().mockResolvedValue([]),
+    getWorkflowsByIds,
+    getClient: jest.fn(() => ({ getWorkflowsByIds })),
   };
   const spaces = {
     spacesService: {
@@ -116,6 +118,8 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith({
         spaceId: 'default',
         startDate: '2026-10-10T11:00:00.000Z',
+        endDate: undefined,
+        sortOrder: undefined,
         page: 2,
         perPage: 25,
         outcomes: undefined,
@@ -126,15 +130,38 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       jest.useRealTimers();
     });
 
-    it('uses the provided startDate as the startDate lower bound', async () => {
+    it('uses the provided `from` as the startDate lower bound', async () => {
       const { client, eventLogService } = createMocks();
       const request = httpServerMock.createKibanaRequest();
-      const startDate = '2026-05-05T10:00:00.000Z';
+      const from = '2026-05-05T10:00:00.000Z';
 
-      await client.listExecutionHistory({ request, startDate });
+      await client.listExecutionHistory({ request, from });
 
       expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-        expect.objectContaining({ startDate })
+        expect.objectContaining({ startDate: from })
+      );
+    });
+
+    it('forwards `to` as the endDate upper bound', async () => {
+      const { client, eventLogService } = createMocks();
+      const request = httpServerMock.createKibanaRequest();
+      const to = '2026-05-06T10:00:00.000Z';
+
+      await client.listExecutionHistory({ request, to });
+
+      expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
+        expect.objectContaining({ endDate: to })
+      );
+    });
+
+    it('forwards sortOrder to the event log service', async () => {
+      const { client, eventLogService } = createMocks();
+      const request = httpServerMock.createKibanaRequest();
+
+      await client.listExecutionHistory({ request, sortField: 'dispatched_at', sortOrder: 'asc' });
+
+      expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
+        expect.objectContaining({ sortOrder: 'asc' })
       );
     });
 
@@ -166,6 +193,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
         expect.objectContaining({ spaceId: 'my-space' })
       );
+      expect(workflowsManagement.getClient).toHaveBeenCalledWith(request);
       expect(workflowsManagement.getWorkflowsByIds).toHaveBeenCalledWith(['w-1'], 'my-space');
     });
 
@@ -187,6 +215,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         filter: expect.stringContaining(`id: "r-1"`),
         perPage: 1000,
       });
+      expect(workflowsManagement.getClient).toHaveBeenCalledWith(request);
       expect(workflowsManagement.getWorkflowsByIds).toHaveBeenCalledWith(['w-1'], 'default');
     });
 
@@ -198,6 +227,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
       expect(actionPolicyClient.getActionPolicies).toHaveBeenCalledWith({ ids: [] });
       expect(rulesClient.findRules).not.toHaveBeenCalled();
+      expect(workflowsManagement.getClient).toHaveBeenCalledWith(request);
       expect(workflowsManagement.getWorkflowsByIds).toHaveBeenCalledWith([], 'default');
     });
 
@@ -227,7 +257,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       });
     });
 
-    it('returns the page/perPage/totalEvents from the service', async () => {
+    it('returns the page/perPage/total from the service', async () => {
       const { client, eventLogService } = createMocks();
       eventLogService.findActionPolicyExecutionEvents.mockResolvedValue({
         events: [],
@@ -239,7 +269,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
       const result = await client.listExecutionHistory({ request });
 
-      expect(result).toMatchObject({ page: 4, perPage: 25, totalEvents: 137, items: [] });
+      expect(result).toMatchObject({ page: 4, perPage: 25, total: 137, items: [] });
     });
 
     it('propagates errors from the underlying service', async () => {
@@ -250,68 +280,68 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       await expect(client.listExecutionHistory({ request })).rejects.toThrow('boom');
     });
 
-    describe('outcome filter', () => {
-      it('passes the explicit outcome array through to the event log service', async () => {
+    describe('outcomes filter', () => {
+      it('resolves the outcomes to the event actions they select', async () => {
         const { client, eventLogService } = createMocks();
         const request = httpServerMock.createKibanaRequest();
 
-        await client.listExecutionHistory({ request, outcome: ['throttled'] });
+        await client.listExecutionHistory({ request, outcomes: ['throttled', 'failure'] });
 
         expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-          expect.objectContaining({ outcomes: ['throttled'] })
+          expect.objectContaining({ actions: ['throttled', 'dispatch_failed'] })
         );
       });
 
-      it('passes undefined outcomes to the service (no narrowing) when not provided', async () => {
-        const { client, eventLogService } = createMocks();
-        const request = httpServerMock.createKibanaRequest();
-
-        await client.listExecutionHistory({ request });
-
-        expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-          expect.objectContaining({ outcomes: undefined })
-        );
-      });
-    });
-
-    describe('episodeIds filter', () => {
-      it('forwards the episodeIds through to the event log service', async () => {
-        const { client, eventLogService } = createMocks();
-        const request = httpServerMock.createKibanaRequest();
-
-        await client.listExecutionHistory({ request, episodeIds: ['ep-1', 'ep-2'] });
-
-        expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-          expect.objectContaining({ episodeIds: ['ep-1', 'ep-2'] })
-        );
-      });
-
-      it('forwards episodeIds as undefined when not provided', async () => {
+      it('leaves the action filter unset (no narrowing) when no outcome is provided', async () => {
         const { client, eventLogService } = createMocks();
         const request = httpServerMock.createKibanaRequest();
 
         await client.listExecutionHistory({ request });
 
         expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-          expect.objectContaining({ episodeIds: undefined })
+          expect.objectContaining({ actions: undefined })
         );
       });
     });
 
-    describe('startDate override', () => {
-      it('uses the provided startDate instead of the default 24h window', async () => {
+    describe('alertIds filter', () => {
+      it('forwards the alertIds through to the event log service', async () => {
         const { client, eventLogService } = createMocks();
         const request = httpServerMock.createKibanaRequest();
-        const startDate = '2026-01-01T00:00:00.000Z';
 
-        await client.listExecutionHistory({ request, episodeIds: ['ep-1'], startDate });
+        await client.listExecutionHistory({ request, alertIds: ['ep-1', 'ep-2'] });
 
         expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-          expect.objectContaining({ startDate, episodeIds: ['ep-1'] })
+          expect.objectContaining({ alertIds: ['ep-1', 'ep-2'] })
         );
       });
 
-      it('falls back to the default 24h window when startDate is not provided', async () => {
+      it('forwards alertIds as undefined when not provided', async () => {
+        const { client, eventLogService } = createMocks();
+        const request = httpServerMock.createKibanaRequest();
+
+        await client.listExecutionHistory({ request });
+
+        expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
+          expect.objectContaining({ alertIds: undefined })
+        );
+      });
+    });
+
+    describe('from override', () => {
+      it('uses the provided `from` instead of the default 24h window', async () => {
+        const { client, eventLogService } = createMocks();
+        const request = httpServerMock.createKibanaRequest();
+        const from = '2026-01-01T00:00:00.000Z';
+
+        await client.listExecutionHistory({ request, alertIds: ['ep-1'], from });
+
+        expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
+          expect.objectContaining({ startDate: from, alertIds: ['ep-1'] })
+        );
+      });
+
+      it('falls back to the default 24h window when `from` is not provided', async () => {
         jest.useFakeTimers().setSystemTime(new Date('2026-10-11T11:00:00.000Z'));
         const { client, eventLogService } = createMocks();
         const request = httpServerMock.createKibanaRequest();
@@ -323,6 +353,19 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         );
 
         jest.useRealTimers();
+      });
+    });
+
+    describe('to', () => {
+      it('forwards endDate as undefined when `to` is not provided', async () => {
+        const { client, eventLogService } = createMocks();
+        const request = httpServerMock.createKibanaRequest();
+
+        await client.listExecutionHistory({ request });
+
+        expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
+          expect.objectContaining({ endDate: undefined })
+        );
       });
     });
 
@@ -421,12 +464,12 @@ describe('ActionPolicyExecutionHistoryClient', () => {
           items: [],
           page: 1,
           perPage: EXECUTION_HISTORY_DEFAULT_PER_PAGE,
-          totalEvents: 0,
-          searchMatches: { policies: 0, rules: 0, cap: 500 },
+          total: 0,
+          searchMatches: { policies: 0, rules: 0, is_truncated: false },
         });
       });
 
-      it('reports the policy total when matches exceed the cap', async () => {
+      it('flags truncation and reports the policy total when matches exceed the cap', async () => {
         const { client, actionPolicyClient } = createMocks();
         (actionPolicyClient.findActionPolicies as jest.Mock).mockResolvedValue({
           items: [{ id: 'p-1' } as any],
@@ -438,10 +481,10 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
         const result = await client.listExecutionHistory({ request, search: 'something' });
 
-        expect(result.searchMatches).toEqual({ policies: 823, rules: 0, cap: 500 });
+        expect(result.searchMatches).toEqual({ policies: 823, rules: 0, is_truncated: true });
       });
 
-      it('reports the rule total when matches exceed the cap', async () => {
+      it('flags truncation and reports the rule total when matches exceed the cap', async () => {
         const { client, rulesClient } = createMocks();
         (rulesClient.findRules as jest.Mock).mockResolvedValue({
           items: [{ id: 'r-1' } as any],
@@ -453,10 +496,10 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
         const result = await client.listExecutionHistory({ request, search: 'something' });
 
-        expect(result.searchMatches).toEqual({ policies: 0, rules: 612, cap: 500 });
+        expect(result.searchMatches).toEqual({ policies: 0, rules: 612, is_truncated: true });
       });
 
-      it('reports counts within the cap (no truncation derived)', async () => {
+      it('reports counts within the cap without flagging truncation', async () => {
         const { client, actionPolicyClient, rulesClient } = createMocks();
         (actionPolicyClient.findActionPolicies as jest.Mock).mockResolvedValue({
           items: [{ id: 'p-1' } as any],
@@ -474,7 +517,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
         const result = await client.listExecutionHistory({ request, search: 'something' });
 
-        expect(result.searchMatches).toEqual({ policies: 1, rules: 500, cap: 500 });
+        expect(result.searchMatches).toEqual({ policies: 1, rules: 500, is_truncated: false });
       });
 
       it('returns searchMatches=null when no search is provided', async () => {
