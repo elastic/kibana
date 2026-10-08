@@ -19,7 +19,6 @@ const suggestion = {
   prompt: 'Why did checkout start returning 5xx in the last hour?',
   rationale: '5xx up 4x in the last hour',
   source: 'error_spike',
-  severity: 'high',
 };
 
 const setup = ({
@@ -63,7 +62,8 @@ describe('createOnboardingClient', () => {
         status: 'completed',
         startedAt: '2026-10-08T09:00:00.000Z',
         finishedAt: '2026-10-08T09:03:00.000Z',
-        context: { output: { suggestions: [suggestion] } },
+        // Fields the UI does not render (such as severity from older runs) are dropped.
+        context: { output: { suggestions: [{ ...suggestion, severity: 'high' }] } },
       },
     });
 

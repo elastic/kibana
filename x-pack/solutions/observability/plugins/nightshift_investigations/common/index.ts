@@ -232,16 +232,12 @@ export {
 
 export {
   ONBOARDING_SUGGESTION_SOURCES,
-  ONBOARDING_SUGGESTION_SEVERITIES,
   MAX_ONBOARDING_SUGGESTIONS,
   MAX_ONBOARDING_SUGGESTION_TITLE_LENGTH,
   MAX_ONBOARDING_SUGGESTION_PROMPT_LENGTH,
   MAX_ONBOARDING_SUGGESTION_RATIONALE_LENGTH,
-  MAX_ONBOARDING_ENTITIES,
-  MAX_ONBOARDING_ENTITY_LENGTH,
   type OnboardingSuggestion,
   type OnboardingSuggestionSource,
-  type OnboardingSuggestionSeverity,
   type OnboardingSuggestionsStatus,
   type OnboardingSuggestionsExecution,
   type GetOnboardingResponse,

@@ -6,16 +6,12 @@
  */
 
 import {
-  MAX_ONBOARDING_ENTITIES,
-  MAX_ONBOARDING_ENTITY_LENGTH,
   MAX_ONBOARDING_SUGGESTIONS,
   MAX_ONBOARDING_SUGGESTION_PROMPT_LENGTH,
   MAX_ONBOARDING_SUGGESTION_RATIONALE_LENGTH,
   MAX_ONBOARDING_SUGGESTION_TITLE_LENGTH,
-  ONBOARDING_SUGGESTION_SEVERITIES,
   ONBOARDING_SUGGESTION_SOURCES,
   type OnboardingSuggestion,
-  type OnboardingSuggestionSeverity,
   type OnboardingSuggestionSource,
 } from '../../common/onboarding';
 
@@ -40,25 +36,11 @@ export const parseSuggestions = (output: { suggestions?: unknown }): OnboardingS
       )
         ? item.source
         : 'other';
-      const severity: OnboardingSuggestionSeverity | undefined = isOneOf(
-        ONBOARDING_SUGGESTION_SEVERITIES,
-        item?.severity
-      )
-        ? item.severity
-        : undefined;
-      const entities = Array.isArray(item?.entities)
-        ? item.entities
-            .map((entity: unknown) => clip(entity, MAX_ONBOARDING_ENTITY_LENGTH))
-            .filter(Boolean)
-            .slice(0, MAX_ONBOARDING_ENTITIES)
-        : [];
       return {
         title,
         prompt,
         rationale: clip(item?.rationale, MAX_ONBOARDING_SUGGESTION_RATIONALE_LENGTH),
         source,
-        ...(severity ? { severity } : {}),
-        ...(entities.length ? { entities } : {}),
       };
     })
     .filter((suggestion): suggestion is OnboardingSuggestion => Boolean(suggestion))

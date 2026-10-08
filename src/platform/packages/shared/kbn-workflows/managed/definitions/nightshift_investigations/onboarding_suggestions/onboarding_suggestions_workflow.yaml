@@ -88,8 +88,6 @@ steps:
         - rationale: what you saw that makes it worth investigating, with numbers and where it came
           from (max 160 characters).
         - source: alert, slo, case, error_spike, latency, code_change, discussion or other.
-        - severity: critical, high, medium or low, based on user impact.
-        - entities: up to 5 service, host, rule or repository names.
         If there is little data, still return at least 3 suggestions, for example about the
         noisiest services or log sources you found.
       schema:
@@ -113,14 +111,6 @@ steps:
                 source:
                   type: string
                   enum: [alert, slo, case, error_spike, latency, code_change, discussion, other]
-                severity:
-                  type: string
-                  enum: [critical, high, medium, low]
-                entities:
-                  type: array
-                  maxItems: 5
-                  items:
-                    type: string
               required: [title, prompt, rationale, source]
         required: [suggestions]
 

@@ -94,24 +94,6 @@ const SOURCE_ICONS: Record<OnboardingSuggestion['source'], string> = {
   other: 'sparkles',
 };
 
-const SEVERITY_COLORS: Record<NonNullable<OnboardingSuggestion['severity']>, string> = {
-  critical: 'danger',
-  high: 'warning',
-  medium: 'primary',
-  low: 'default',
-};
-
-const SEVERITY_LABELS: Record<NonNullable<OnboardingSuggestion['severity']>, string> = {
-  critical: i18n.translate('xpack.nightshift.onboarding.severity.critical', {
-    defaultMessage: 'Critical',
-  }),
-  high: i18n.translate('xpack.nightshift.onboarding.severity.high', { defaultMessage: 'High' }),
-  medium: i18n.translate('xpack.nightshift.onboarding.severity.medium', {
-    defaultMessage: 'Medium',
-  }),
-  low: i18n.translate('xpack.nightshift.onboarding.severity.low', { defaultMessage: 'Low' }),
-};
-
 const useElapsedSeconds = (startedAt: string | undefined, isRunning: boolean): number => {
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
@@ -404,29 +386,11 @@ function SuggestionCard({
           <EuiText size="s">
             <strong>{suggestion.title}</strong>
           </EuiText>
-          {(suggestion.rationale || suggestion.prompt) && (
-            <EuiText size="xs" color="subdued">
-              {suggestion.rationale || suggestion.prompt}
-            </EuiText>
-          )}
-          <EuiSpacer size="xs" />
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{SOURCE_LABELS[suggestion.source]}</EuiBadge>
-            </EuiFlexItem>
-            {suggestion.severity && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color={SEVERITY_COLORS[suggestion.severity]}>
-                  {SEVERITY_LABELS[suggestion.severity]}
-                </EuiBadge>
-              </EuiFlexItem>
-            )}
-            {suggestion.entities?.slice(0, 3).map((entity) => (
-              <EuiFlexItem grow={false} key={entity}>
-                <EuiBadge color="default">{entity}</EuiBadge>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
+          <EuiText size="xs" color="subdued" data-test-subj="nightshiftOnboardingSuggestionDetails">
+            <strong>{SOURCE_LABELS[suggestion.source]}</strong>
+            {(suggestion.rationale || suggestion.prompt) &&
+              ` · ${suggestion.rationale || suggestion.prompt}`}
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
