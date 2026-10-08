@@ -184,9 +184,6 @@ apiTest.describe('Create assign episode action API', { tag: '@local-stateful-cla
   apiTest(
     'assign: reinstating a cleared assignee returns 204',
     async ({ apiClient, apiServices }) => {
-      // The clearing action carries no assignee_uid to index, so the state
-      // read has to tell "cleared" apart from "still assigned to u_x" or
-      // this request would be mistaken for a repeat.
       const ruleId = 'assign-reinstate-rule';
       const groupHash = 'assign-reinstate-group';
       const episodeId = 'assign-reinstate-episode';

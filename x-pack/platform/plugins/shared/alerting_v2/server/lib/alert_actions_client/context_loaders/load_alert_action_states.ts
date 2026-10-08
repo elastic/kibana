@@ -38,29 +38,14 @@ export const EMPTY_ALERT_ACTION_STATE: AlertActionState = {
 interface RawAlertActionStateRow {
   alert_id: string;
   last_ack_action?: string | null;
-  last_assign_at?: string | null;
-  last_assignee_at?: string | null;
   last_assignee_uid?: string | null;
-  last_tag_at?: string | null;
-  last_tagged_at?: string | null;
   last_tags?: string | string[] | null;
 }
 
-/**
- * Elasticsearch does not index `null` or `[]`, so `LAST(assignee_uid …)` and
- * `LAST(tags …)` skip the action that cleared the value and keep returning
- * the superseded one. An action newer than the last action that carried a
- * value is therefore a clear.
- */
-const isCleared = (lastActionAt?: string | null, lastValueAt?: string | null): boolean =>
-  lastActionAt != null && lastActionAt !== lastValueAt;
-
 const toAlertActionState = (row: RawAlertActionStateRow): AlertActionState => ({
   acknowledged: row.last_ack_action === ALERT_EPISODE_ACTION_TYPE.ACK,
-  assignee_uid: isCleared(row.last_assign_at, row.last_assignee_at)
-    ? null
-    : row.last_assignee_uid ?? null,
-  tags: isCleared(row.last_tag_at, row.last_tagged_at) ? [] : normalizeTags(row.last_tags),
+  assignee_uid: row.last_assignee_uid ?? null,
+  tags: normalizeTags(row.last_tags),
 });
 
 interface LoadAlertActionStatesParams {
@@ -97,14 +82,10 @@ export const loadAlertActionStatesByEpisodeId = async ({
         AND action_type IN ("ack", "unack", "assign", "tag")
     | STATS
         last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
-        last_assign_at = MAX(@timestamp) WHERE action_type == "assign",
-        last_assignee_at = MAX(@timestamp) WHERE action_type == "assign" AND assignee_uid IS NOT NULL,
         last_assignee_uid = LAST(assignee_uid, @timestamp) WHERE action_type == "assign",
-        last_tag_at = MAX(@timestamp) WHERE action_type == "tag",
-        last_tagged_at = MAX(@timestamp) WHERE action_type == "tag" AND tags IS NOT NULL,
         last_tags = LAST(tags, @timestamp) WHERE action_type == "tag"
       BY alert_id
-    | KEEP alert_id, last_ack_action, last_assign_at, last_assignee_at, last_assignee_uid, last_tag_at, last_tagged_at, last_tags
+    | KEEP alert_id, last_ack_action, last_assignee_uid, last_tags
   `.toRequest();
 
   const rows = queryResponseToRecords<RawAlertActionStateRow>(

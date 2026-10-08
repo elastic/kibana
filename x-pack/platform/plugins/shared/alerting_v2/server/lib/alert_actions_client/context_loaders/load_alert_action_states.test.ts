@@ -108,50 +108,6 @@ describe('loadAlertActionStatesByEpisodeId', () => {
     expect(states.get('ep-1')?.tags).toEqual(['prod']);
   });
 
-  it('reads a cleared assignee as unassigned, even though the uid is still the last indexed value', async () => {
-    const { queryService, mockEsClient } = setup();
-    mockEsClient.esql.query.mockResolvedValueOnce(
-      getAlertActionStateESQLResponse([
-        {
-          alert_id: 'ep-1',
-          last_assignee_uid: 'user-1',
-          last_assignee_at: '2025-01-01T00:00:00.000Z',
-          last_assign_at: '2025-01-02T00:00:00.000Z',
-        },
-      ])
-    );
-
-    const states = await loadAlertActionStatesByEpisodeId({
-      queryService,
-      spaceId: SPACE_ID,
-      episodeIds: ['ep-1'],
-    });
-
-    expect(states.get('ep-1')?.assignee_uid).toBeNull();
-  });
-
-  it('reads cleared tags as empty, even though the tags are still the last indexed value', async () => {
-    const { queryService, mockEsClient } = setup();
-    mockEsClient.esql.query.mockResolvedValueOnce(
-      getAlertActionStateESQLResponse([
-        {
-          alert_id: 'ep-1',
-          last_tags: ['prod'],
-          last_tagged_at: '2025-01-01T00:00:00.000Z',
-          last_tag_at: '2025-01-02T00:00:00.000Z',
-        },
-      ])
-    );
-
-    const states = await loadAlertActionStatesByEpisodeId({
-      queryService,
-      spaceId: SPACE_ID,
-      episodeIds: ['ep-1'],
-    });
-
-    expect(states.get('ep-1')?.tags).toEqual([]);
-  });
-
   it('returns an empty map when the alerts have no recorded actions', async () => {
     const { queryService, mockEsClient } = setup();
     mockEsClient.esql.query.mockResolvedValueOnce(getEmptyESQLResponse());

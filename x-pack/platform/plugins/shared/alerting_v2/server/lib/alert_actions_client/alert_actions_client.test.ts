@@ -279,36 +279,6 @@ describe('AlertActionsClient', () => {
       expect(emitEpisodeActionsSpy).not.toHaveBeenCalled();
     });
 
-    it('accepts an assign that reinstates a previously cleared assignee', async () => {
-      // The clearing action supersedes the uid without indexing one of its
-      // own, so the state loader has to read the pair of timestamps to tell
-      // this apart from a repeated assign.
-      queryServiceEsClient.esql.query
-        .mockResolvedValueOnce(
-          getAlertEventESQLResponse([{ episode_id: 'episode-3', group_hash: 'group-1' }])
-        )
-        .mockResolvedValueOnce(
-          getAlertActionStateESQLResponse([
-            {
-              alert_id: 'episode-3',
-              last_assignee_uid: 'assignee-1',
-              last_assignee_at: '2025-01-01T00:00:00.000Z',
-              last_assign_at: '2025-01-02T00:00:00.000Z',
-            },
-          ])
-        );
-
-      await client.createEpisodeAction({
-        episodeId: 'episode-3',
-        action: { action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN, assignee_uid: 'assignee-1' },
-      });
-
-      expect(getDocs()[0]).toMatchObject({
-        action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
-        assignee_uid: 'assignee-1',
-      });
-    });
-
     it('rejects a tag request that repeats the current set regardless of order', async () => {
       queryServiceEsClient.esql.query
         .mockResolvedValueOnce(

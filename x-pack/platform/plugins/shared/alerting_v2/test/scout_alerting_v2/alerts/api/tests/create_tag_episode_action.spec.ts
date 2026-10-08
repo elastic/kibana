@@ -155,8 +155,6 @@ apiTest.describe('Create tag episode action API', { tag: '@local-stateful-classi
   );
 
   apiTest('tag: re-applying a cleared set returns 204', async ({ apiClient, apiServices }) => {
-    // The clearing action carries no tags to index, so the state read has
-    // to tell "cleared" apart from "still tagged production".
     const ruleId = 'tag-reapply-rule';
     const groupHash = 'tag-reapply-group';
     const episodeId = 'tag-reapply-episode';
