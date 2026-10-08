@@ -114,7 +114,7 @@ spaceTest.describe(
           await expect(page.testSubj.locator('globalToastList')).toBeHidden();
           // The cancelled query is limit 5, so a count of 10 means the previous results are kept
           await expect(discover.getHitCountLocator()).toHaveText('10');
-          expect(await discover.getDataGridRows()).toEqual(previousRows);
+          expect(await discover.getDataGridRows()).toStrictEqual(previousRows);
         } finally {
           releaseSearch();
         }
