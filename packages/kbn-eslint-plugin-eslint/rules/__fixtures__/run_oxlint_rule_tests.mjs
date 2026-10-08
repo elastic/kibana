@@ -64,6 +64,7 @@ const parityTests = {
   no_trailing_import_slash: () => require('../no_trailing_import_slash.test.js'),
   no_unsafe_console: () => require('../no_unsafe_console.test.js'),
   no_unsafe_dynamic_http_path: () => require('../no_unsafe_dynamic_http_path.test.js'),
+  no_unsafe_hash: () => require('../no_unsafe_hash.test.js'),
   no_viz_naming: () => require('../no_viz_naming.test.js'),
   no_wrapped_error_in_logger: () => require('../no_wrapped_error_in_logger.test.js'),
   require_include_in_check_a11y: () => require('../require_include_in_check_a11y.test.js'),

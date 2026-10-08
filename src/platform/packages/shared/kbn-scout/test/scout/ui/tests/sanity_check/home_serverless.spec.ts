@@ -13,11 +13,7 @@ import { expect } from '../../../../../ui';
 test.describe(
   `Serverless project`,
   {
-    tag: [
-      ...tags.serverless.observability.all,
-      ...tags.serverless.security.all,
-      ...tags.serverless.search,
-    ],
+    tag: [...tags.serverless.all],
   },
   () => {
     test(`should successfully load home page`, async ({ browserAuth, page }) => {
