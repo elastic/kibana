@@ -13,7 +13,7 @@
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
  * Registry groups: 145
- * Metric groups: 564
+ * Metric groups: 566
  * Hardcoded fields: 34
  * Total fields: 1237
  *
@@ -3043,31 +3043,33 @@ export const semconvFlat = {
   },
   'log.file.name': {
     name: 'log.file.name',
-    description: 'The basename of the file.',
+    description: 'The basename of the file to which the log record was emitted.',
     type: 'keyword',
     example: 'audit.log',
   },
   'log.file.name_resolved': {
     name: 'log.file.name_resolved',
-    description: 'The basename of the file, with symlinks resolved.',
+    description:
+      'The basename of the file to which the log record was emitted, with symlinks resolved.',
     type: 'keyword',
     example: 'uuid.log',
   },
   'log.file.path': {
     name: 'log.file.path',
-    description: 'The full path to the file.',
+    description: 'The full path to the file to which the log record was emitted.',
     type: 'keyword',
     example: '/var/log/mysql/audit.log',
   },
   'log.file.path_resolved': {
     name: 'log.file.path_resolved',
-    description: 'The full path to the file, with symlinks resolved.',
+    description:
+      'The full path to the file to which the log record was emitted, with symlinks resolved.',
     type: 'keyword',
     example: '/var/lib/docker/uuid.log',
   },
   'log.iostream': {
     name: 'log.iostream',
-    description: 'The stream associated with the log. See below for a list of well-known values.',
+    description: 'The stream the log record was emitted to.',
     type: 'keyword',
   },
   'log.record.original': {
@@ -3607,8 +3609,8 @@ export const semconvFlat = {
     description: 'The minimum number of idle open connections allowed.',
     type: 'double',
   },
-  'metrics.db.client.connection.max': {
-    name: 'metrics.db.client.connection.max',
+  'metrics.db.client.connection.limit': {
+    name: 'metrics.db.client.connection.limit',
     description: 'The maximum number of open connections allowed.',
     type: 'double',
   },
@@ -4943,6 +4945,12 @@ export const semconvFlat = {
       'Number of load balancer ingress points (external IPs/hostnames) assigned to the service.',
     type: 'double',
   },
+  'metrics.k8s.statefulset.pod.available': {
+    name: 'metrics.k8s.statefulset.pod.available',
+    description:
+      'Total number of available replica pods (ready for at least minReadySeconds) targeted by this statefulset.',
+    type: 'double',
+  },
   'metrics.k8s.statefulset.pod.current': {
     name: 'metrics.k8s.statefulset.pod.current',
     description:
@@ -5925,11 +5933,6 @@ export const semconvFlat = {
     description: 'The UID of the cluster quota.',
     type: 'keyword',
     example: '275ecb36-5aa8-4c2a-9c47-d8bb681b9aff',
-  },
-  'opentracing.ref_type': {
-    name: 'opentracing.ref_type',
-    description: 'Parent-child Reference type',
-    type: 'keyword',
   },
   'oracle.db.domain': {
     name: 'oracle.db.domain',

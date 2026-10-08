@@ -35,6 +35,7 @@ import type { AlertSnoozePayload } from '@kbn/response-ops-alert-snooze';
 import { useAlertFieldNames } from '@kbn/alerts-ui-shared/src/common/hooks/use_alert_field_names';
 
 import { useKibana } from '../../../utils/kibana_react';
+import { useInvestigateAlert } from '../../../hooks/use_investigate_alert';
 import type { TopAlert } from '../../../typings/alerts';
 import { useAuthorizedToReadRuleType } from '../../../hooks/use_authorized_to_read_rule_type';
 import { observabilityFeatureId } from '../../../../common';
@@ -101,6 +102,7 @@ export function HeaderActions({
     http,
     notifications,
   } = services;
+  const alertId = alert?.fields[ALERT_UUID];
 
   const { authorizedToReadRuleType } = useAuthorizedToReadRuleType();
 
@@ -170,6 +172,24 @@ export function HeaderActions({
     }
   }, [alert, alertIndex, untrackAlerts, onUntrackAlert]);
 
+  const {
+    showInvestigateButton,
+    showViewInvestigation,
+    handleInvestigate,
+    isInvestigating,
+    investigateActionLabel,
+    investigateEbtProps,
+    viewInvestigationUrl,
+    viewInvestigationActionLabel,
+    viewInvestigationEbtProps,
+    markInvestigationViewed,
+  } = useInvestigateAlert({
+    alertId,
+    ebtElement: 'alertDetailsPageActions',
+    enabled: isPopoverOpen,
+    onInvestigate: () => setIsPopoverOpen(false),
+  });
+
   const [alertDetailsRuleFormFlyoutOpen, setAlertDetailsRuleFormFlyoutOpen] = useState(false);
 
   const handleTogglePopover = () => setIsPopoverOpen(!isPopoverOpen);
@@ -237,6 +257,52 @@ export function HeaderActions({
                   <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
                     <div />
 
+                    {isInvestigating && (
+                      <EuiButtonEmpty
+                        size="s"
+                        color="text"
+                        isLoading
+                        disabled
+                        data-test-subj="alertDetailsInvestigate"
+                      >
+                        <EuiText size="s">{investigateActionLabel}</EuiText>
+                      </EuiButtonEmpty>
+                    )}
+
+                    {!isInvestigating && (
+                      <>
+                        {showViewInvestigation && (
+                          <EuiButtonEmpty
+                            size="s"
+                            color="text"
+                            iconType="eye"
+                            href={viewInvestigationUrl}
+                            onClick={() => {
+                              markInvestigationViewed();
+                              handleClosePopover();
+                            }}
+                            data-test-subj="alertDetailsViewInvestigation"
+                            {...viewInvestigationEbtProps}
+                          >
+                            <EuiText size="s">{viewInvestigationActionLabel}</EuiText>
+                          </EuiButtonEmpty>
+                        )}
+
+                        {showInvestigateButton && (
+                          <EuiButtonEmpty
+                            size="s"
+                            color="text"
+                            iconType="inspect"
+                            onClick={handleInvestigate}
+                            data-test-subj="alertDetailsInvestigate"
+                            {...investigateEbtProps}
+                          >
+                            <EuiText size="s">{investigateActionLabel}</EuiText>
+                          </EuiButtonEmpty>
+                        )}
+                      </>
+                    )}
+
                     {cases && canAddToCase && (
                       <AddToCaseButton
                         alert={alert}
@@ -251,7 +317,7 @@ export function HeaderActions({
                         size="s"
                         color="text"
                         href={discoverUrl}
-                        iconType="discoverApp"
+                        iconType="productDiscover"
                         target="_blank"
                         onClick={handleClosePopover}
                         data-test-subj={`alertDetailsPage_viewInDiscover${

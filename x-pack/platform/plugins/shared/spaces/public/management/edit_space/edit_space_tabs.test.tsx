@@ -69,39 +69,12 @@ describe('Edit Space Tabs: getTabs', () => {
     ]);
   });
 
-  it('can include count of roles as a badge for Permissions tab', () => {
-    const isRoleManagementEnabled = true;
-    const isSecurityEnabled = true;
-    const capabilities = getCapabilities();
-
-    const rolesTab = getTabs({
-      rolesCount: 42,
-      isRoleManagementEnabled,
-      capabilities,
-      space,
-      features,
-      history,
-      allowFeatureVisibility,
-      allowSolutionVisibility,
-      isSecurityEnabled,
-      enableSecurityLink: '',
-    }).find((tab) => tab.id === 'roles');
-
-    if (!rolesTab?.append) {
-      throw new Error('roles tab did not exist or did not have a badge!');
-    }
-    const { getByText } = render(rolesTab.append);
-
-    expect(getByText('42')).toBeInTheDocument();
-  });
-
   it('should show a warning callout when security is disabled', () => {
     const isRoleManagementEnabled = true;
     const isSecurityEnabled = false;
     const capabilities = getCapabilities();
 
     const rolesTab = getTabs({
-      rolesCount: 0,
       isRoleManagementEnabled,
       capabilities,
       space,

@@ -1,9 +1,51 @@
 {
-  "sha1": "7fc7574c64c4200e6d623df3f874843b657f411a",
+  "sha1": "ace4503f78b1c287dd57b749d5fb94259aa961f9",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "a8b69efd19fc2c2-67fc0a7e5a14a6e",
+      "title": "Alert Analysis managed workflow — caller alerts gates skip-path run without calledByWorker completes and does not hit the empty-alerts fail gate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/alert_analysis_worker_caller_alerts_gates.spec.ts",
+        "line": 68,
+        "column": 28
+      }
+    },
+    {
+      "id": "a8b69efd19fc2c2-2ac6b734ad21d94",
+      "title": "Alert Analysis managed workflow — caller alerts gates fails when calledByWorker is true and alerts is empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/alert_analysis_worker_caller_alerts_gates.spec.ts",
+        "line": 99,
+        "column": 30
+      }
+    },
+    {
+      "id": "a8b69efd19fc2c2-1424d20806a0604",
+      "title": "Alert Analysis managed workflow — caller alerts gates fails when alerts are supplied without calledByWorker",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/alert_analysis_worker_caller_alerts_gates.spec.ts",
+        "line": 114,
+        "column": 25
+      }
+    },
     {
       "id": "68c20e17ad478b8-1cd9661fc0b30ba",
       "title": "security.createRule workflow step creates a real, disabled-by-default rule when \"enabled\" is omitted",
@@ -30,6 +72,34 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/create_rule_step.spec.ts",
         "line": 122,
         "column": 61
+      }
+    },
+    {
+      "id": "5a232f71bd152f7-1c8a48f6e9e3b2b",
+      "title": "security.patchRule workflow step patches only the provided fields of an existing rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/patch_rule_step.spec.ts",
+        "line": 108,
+        "column": 5
+      }
+    },
+    {
+      "id": "5a232f71bd152f7-00dc7b076afda15",
+      "title": "security.patchRule workflow step fails the step when the rule does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/patch_rule_step.spec.ts",
+        "line": 139,
+        "column": 22
       }
     },
     {

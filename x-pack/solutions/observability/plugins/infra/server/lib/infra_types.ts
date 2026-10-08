@@ -49,6 +49,8 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   getAlertDetailsConfig: () => ObservabilityConfig['unsafe']['alertDetails'];
   getStartServices: InfraPluginStartServicesAccessor;
   handleEsError: typeof handleEsError;
+  isCpsPlatformGateEnabled: () => Promise<boolean>;
+  isPodSchemaSelectorEnabled: () => Promise<boolean>;
   logger: Logger;
   plugins: Plugins;
   serverless: ServerlessInfo;

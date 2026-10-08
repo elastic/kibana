@@ -11,8 +11,10 @@ import {
   EuiButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
   EuiPopover,
@@ -22,9 +24,14 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  EuiSplitPanel,
 } from '@elastic/eui';
+import type { EuiFlexGridProps } from '@elastic/eui';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { i18n } from '@kbn/i18n';
+import type { NewIndexDetails } from '../../common/types';
+import { useNewIndexDismissal } from '../hooks/use_new_index_dismissal';
+import { NewIndexPanel } from './new_index_panel';
 
 export interface HomePageStatPanelMetric {
   key: string;
@@ -49,8 +56,8 @@ export interface HomePageStatPanelProps {
   metrics: HomePageStatPanelMetric[];
   showPrimary?: boolean;
   actions: HomePageStatPanelAction[];
-  /** Tracks opening the overflow menu, which only renders when it has items of its own. */
   actionsMenuTelemetryId?: string;
+  newIndex?: NewIndexDetails | null;
 }
 
 export const HomePageStatPanel = ({
@@ -61,8 +68,13 @@ export const HomePageStatPanel = ({
   actions,
   showPrimary = false,
   actionsMenuTelemetryId,
+  newIndex,
 }: HomePageStatPanelProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { isNewIndexDismissed, dismissNewIndex } = useNewIndexDismissal(
+    newIndex?.indexName,
+    newIndex?.createdAt
+  );
   const closePopover = () => setIsPopoverOpen(false);
 
   const primaryAction = showPrimary ? actions[0] : undefined;
@@ -89,104 +101,121 @@ export const HomePageStatPanel = ({
   ));
 
   return (
-    <EuiPanel color="subdued" paddingSize="m" data-test-subj={testSubj}>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={iconType} size="m" aria-hidden={true} />
-        </EuiFlexItem>
-        <EuiFlexItem grow>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xxxs" css={{ whiteSpace: 'nowrap' }}>
-                <h3>{title}</h3>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        {actions.length > 0 && (
+    <EuiSplitPanel.Outer hasShadow={false} hasBorder={true}>
+      <EuiSplitPanel.Inner color="subdued" paddingSize="m" data-test-subj={testSubj}>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              {primaryAction && (
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    color="text"
-                    size="s"
-                    iconType={primaryAction.iconType}
-                    onClick={primaryAction.onClick}
-                    data-test-subj={primaryAction.testSubj}
-                    data-telemetry-id={primaryAction.telemetryId}
-                  >
-                    {primaryAction.label}
-                  </EuiButton>
-                </EuiFlexItem>
-              )}
-              {menuActions.length > 0 && (
-                <EuiFlexItem grow={false}>
-                  <EuiPopover
-                    aria-label={actionsMenuLabel}
-                    button={
-                      <EuiToolTip content={actionsMenuLabel} disableScreenReaderOutput>
-                        <EuiButtonIcon
-                          iconType="ellipsis"
-                          aria-label={actionsMenuLabel}
-                          aria-haspopup="menu"
-                          onClick={() => setIsPopoverOpen((open) => !open)}
-                          size="s"
-                          color="text"
-                          data-test-subj={`${testSubj}ActionsButton`}
-                          data-telemetry-id={actionsMenuTelemetryId}
-                        />
-                      </EuiToolTip>
-                    }
-                    isOpen={isPopoverOpen}
-                    closePopover={closePopover}
-                    panelPaddingSize="none"
-                    anchorPosition="downRight"
-                  >
-                    <EuiContextMenuPanel items={menuItems} />
-                  </EuiPopover>
-                </EuiFlexItem>
-              )}
+            <EuiIcon type={iconType} size="m" aria-hidden={true} />
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xxxs" css={{ whiteSpace: 'nowrap' }}>
+                  <h3>{title}</h3>
+                </EuiTitle>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="m" responsive={false} wrap justifyContent="spaceBetween">
-        {metrics.map(({ key, label, value, isLoading }) => (
-          <EuiFlexItem key={key} grow>
-            <EuiPanel color="plain" paddingSize="m" hasBorder={true}>
-              <EuiStat
-                data-test-subj={`${testSubj}-${key}`}
-                title={
-                  isLoading ? (
-                    <EuiSkeletonText
-                      size="m"
-                      lines={1}
-                      data-test-subj={`${testSubj}-${key}-loading`}
-                    />
-                  ) : (
-                    <span data-test-subj={`${testSubj}-${key}-value`}>{value}</span>
-                  )
-                }
-                titleColor="text"
-                titleElement="div"
-                description={
-                  <>
-                    <EuiText size="xs" color="subdued" data-test-subj={`${testSubj}-${key}-label`}>
-                      {label}
-                    </EuiText>
-                    <EuiSpacer size="xs" />
-                  </>
-                }
-                descriptionElement="div"
-                titleSize="s"
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-      <EuiSpacer size="xs" />
-    </EuiPanel>
+          {actions.length > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" responsive={false}>
+                {primaryAction && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      color="text"
+                      size="s"
+                      iconType={primaryAction.iconType}
+                      onClick={primaryAction.onClick}
+                      data-test-subj={primaryAction.testSubj}
+                      data-telemetry-id={primaryAction.telemetryId}
+                    >
+                      {primaryAction.label}
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
+                {menuActions.length > 0 && (
+                  <EuiFlexItem grow={false}>
+                    <EuiPopover
+                      aria-label={actionsMenuLabel}
+                      button={
+                        <EuiToolTip content={actionsMenuLabel} disableScreenReaderOutput>
+                          <EuiButtonIcon
+                            iconType="ellipsis"
+                            aria-label={actionsMenuLabel}
+                            aria-haspopup="menu"
+                            onClick={() => setIsPopoverOpen((open) => !open)}
+                            size="s"
+                            color="text"
+                            data-test-subj={`${testSubj}ActionsButton`}
+                            data-telemetry-id={actionsMenuTelemetryId}
+                          />
+                        </EuiToolTip>
+                      }
+                      isOpen={isPopoverOpen}
+                      closePopover={closePopover}
+                      panelPaddingSize="none"
+                      anchorPosition="downRight"
+                    >
+                      <EuiContextMenuPanel items={menuItems} />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        {/* EuiFlexGrid only accepts 1-4 columns, which TS can't infer from `metrics.length`.
+            Every card defines at most 4 metrics so we are safe to cast. If in future a card with more 
+            than 4 metrics was added, the count would need to be clamped. */}
+        <EuiFlexGrid columns={metrics.length as EuiFlexGridProps['columns']} gutterSize="m">
+          {metrics.map(({ key, label, value, isLoading }) => (
+            <EuiFlexItem key={key}>
+              <EuiPanel color="plain" paddingSize="m" hasBorder={true}>
+                <EuiStat
+                  data-test-subj={`${testSubj}-${key}`}
+                  title={
+                    isLoading ? (
+                      <EuiSkeletonText
+                        size="m"
+                        lines={1}
+                        data-test-subj={`${testSubj}-${key}-loading`}
+                      />
+                    ) : (
+                      <span data-test-subj={`${testSubj}-${key}-value`}>{value}</span>
+                    )
+                  }
+                  titleColor="text"
+                  titleElement="div"
+                  description={
+                    <>
+                      <EuiText
+                        size="xs"
+                        color="subdued"
+                        data-test-subj={`${testSubj}-${key}-label`}
+                      >
+                        {label}
+                      </EuiText>
+                      <EuiSpacer size="xs" />
+                    </>
+                  }
+                  descriptionElement="div"
+                  titleSize="s"
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGrid>
+        <EuiSpacer size="xs" />
+      </EuiSplitPanel.Inner>
+      {newIndex && !isNewIndexDismissed && (
+        <>
+          <EuiHorizontalRule margin="none" />
+          <EuiSplitPanel.Inner paddingSize="s">
+            <NewIndexPanel index={newIndex} onDismiss={dismissNewIndex} />
+          </EuiSplitPanel.Inner>
+        </>
+      )}
+    </EuiSplitPanel.Outer>
   );
 };

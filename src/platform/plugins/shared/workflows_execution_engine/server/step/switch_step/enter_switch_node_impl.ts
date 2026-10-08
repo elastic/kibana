@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnterCaseBranchNode, EnterSwitchNode, WorkflowGraph } from '@kbn/workflows/graph';
+import type { EnterCaseBranchNode, EnterSwitchNode, GraphNodeUnion } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { RuntimeGraphView } from '../../workflow_context_manager/workflow_runtime_graph';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { NodeImplementation } from '../node_implementation';
 
@@ -17,7 +18,7 @@ export class EnterSwitchNodeImpl implements NodeImplementation {
   constructor(
     private node: EnterSwitchNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
-    private workflowGraph: WorkflowGraph,
+    private workflowGraph: RuntimeGraphView,
     private stepExecutionRuntime: StepExecutionRuntime,
     private workflowContextLogger: IWorkflowEventLogger
   ) {}
@@ -51,7 +52,7 @@ export class EnterSwitchNodeImpl implements NodeImplementation {
     );
   }
 
-  private getValidatedSuccessors(): ReturnType<WorkflowGraph['getDirectSuccessors']> {
+  private getValidatedSuccessors(): GraphNodeUnion[] {
     const successors = this.workflowGraph.getDirectSuccessors(this.node.id);
     const allowedTypes = new Set(['enter-case-branch', 'enter-default-branch']);
     const invalidSuccessors = successors.filter((s: { type: string }) => !allowedTypes.has(s.type));
@@ -78,9 +79,7 @@ export class EnterSwitchNodeImpl implements NodeImplementation {
     return renderedExpression;
   }
 
-  private getCaseBranches(
-    successors: ReturnType<WorkflowGraph['getDirectSuccessors']>
-  ): EnterCaseBranchNode[] {
+  private getCaseBranches(successors: GraphNodeUnion[]): EnterCaseBranchNode[] {
     return successors
       .filter((s): s is EnterCaseBranchNode => s.type === 'enter-case-branch')
       .sort((a, b) => a.index - b.index);
@@ -99,9 +98,7 @@ export class EnterSwitchNodeImpl implements NodeImplementation {
     });
   }
 
-  private getDefaultBranch(
-    successors: ReturnType<WorkflowGraph['getDirectSuccessors']>
-  ): { id: string } | undefined {
+  private getDefaultBranch(successors: GraphNodeUnion[]): { id: string } | undefined {
     return successors.find((s: { type: string }) => s.type === 'enter-default-branch') as
       | { id: string }
       | undefined;

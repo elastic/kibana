@@ -11,6 +11,7 @@ import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 import { isErr, tryAsResult } from './lib/result_type';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
@@ -18,11 +19,55 @@ import type { DecoratedError } from './task_running';
 
 export const DEFAULT_TIMEOUT = '5m';
 
+/**
+ * Task claim ordering tier, named after what the task is for. Tasks are sorted by
+ * priority descending before claiming, so a higher value is claimed first.
+ *
+ * The numeric values of the pre-existing tiers are unchanged; only the names describe
+ * intent now. Pick the tier from the name — see the task-registration guidance in the
+ * Task Manager README for when each one applies.
+ */
 export enum TaskPriority {
+  /**
+   * Background bookkeeping and housekeeping that may be deferred under load —
+   * cleanup, telemetry rollups, backfills.
+   */
+  Maintenance = 1,
+  /**
+   * Long-running work that should yield to `Standard` tasks rather than hold the
+   * regular pool while it grinds through a large workload.
+   */
+  Deferrable = 40,
+  /**
+   * The default tier, applied when a task type or instance does not set a priority.
+   * Correct for almost every task.
+   */
+  Standard = 50,
+  /**
+   * Work a user is directly waiting on, or work with a tight latency budget. Claimed
+   * ahead of every other tier, so reserve it for tasks where the delay is user-visible.
+   */
+  UserInteractive = 100,
+
+  /** @deprecated Use {@link TaskPriority.Maintenance} instead. */
   Low = 1,
+  /** @deprecated Use {@link TaskPriority.Deferrable} instead. */
   NormalLongRunning = 40,
+  /** @deprecated Use {@link TaskPriority.Standard} instead. */
   Normal = 50,
 }
+
+/**
+ * The non-deprecated `TaskPriority` members, ascending. Kept explicit because the
+ * deprecated aliases share numeric values with their replacements, so the enum's
+ * reverse mapping cannot distinguish them.
+ */
+const CANONICAL_TASK_PRIORITY_NAMES: ReadonlyArray<keyof typeof TaskPriority> = [
+  'Maintenance',
+  'Deferrable',
+  'Standard',
+  'UserInteractive',
+];
 
 export enum TaskTypeGroup {
   Alerting = 'alerting',
@@ -134,6 +179,8 @@ export interface RunContext {
  */
 
 export type SuccessfulRunResult = {
+  /** Overrides the task priority when rescheduling after a successful run. */
+  priority?: TaskPriority;
   /**
    * The state which will be passed to the next run of this task (if this is a
    * recurring task). See the RunContext type definition for more details.
@@ -215,6 +262,10 @@ export const taskDefinitionSchema = schema.object(
      */
     priority: schema.maybe(schema.number()),
     /**
+     * Allows `runSoon({ priority })` and a successful run result to change the stored priority.
+     */
+    allowPriorityOverride: schema.maybe(schema.boolean()),
+    /**
      * Cost to run this task type. Defaults to "Normal".
      */
     cost: schema.number({ defaultValue: TaskCost.Normal }),
@@ -278,9 +329,9 @@ export const taskDefinitionSchema = schema.object(
       }
 
       if (priority && (!isNumber(priority) || !(priority in TaskPriority))) {
-        return `Invalid priority "${priority}". Priority must be one of ${Object.keys(TaskPriority)
-          .filter((key) => isNaN(Number(key)))
-          .map((key) => `${key} => ${TaskPriority[key as keyof typeof TaskPriority]}`)}`;
+        return `Invalid priority "${priority}". Priority must be one of ${CANONICAL_TASK_PRIORITY_NAMES.map(
+          (key) => `${key} => ${TaskPriority[key]}`
+        )}`;
       }
 
       if (cost && (!isNumber(cost) || !(cost in TaskCost))) {
@@ -337,7 +388,7 @@ export type { IntervalSchedule, Rrule, RruleSchedule } from '@kbn/response-ops-s
 export interface TaskUserScope {
   apiKeyId: string;
   uiamApiKeyId?: string;
-  spaceId?: string;
+  spaceId?: SpaceId;
   /**
    * True when the credentials were supplied by the caller (a scheduling request already
    * authenticated with an ES or UIAM API key — not necessarily a human, e.g. a service account)
@@ -356,6 +407,18 @@ export interface TaskUserScope {
   uiamApiKeyExternal?: boolean;
   userProfileId?: string;
   userName?: string;
+}
+
+/**
+ * How a task authenticates when it runs. The fields other than `type` depend on the type: a
+ * `service_account` credential names the workload the task runs as.
+ */
+export interface TaskCredential {
+  type: string;
+  workloadType?: string;
+  workloadId?: string;
+  spaceId?: string;
+  expectedServiceAccountId?: string | null;
 }
 
 /*
@@ -594,11 +657,32 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * Used to break up tasks so each Kibana node can claim tasks on a subset of the partitions
    */
   partition?: number;
+
+  /**
+   * How the task authenticates when it runs. Part of the AAD, so it is only written when the task is created.
+   */
+  credential?: TaskCredential;
+
+  /**
+   * Encrypted secret material for `credential`. For a service account it holds no secret, only a
+   * value whose decryption fails if `credential` was changed. Only written when the task is created.
+   */
+  encryptedCredential?: string;
 }
 
 export type PartialConcreteTaskInstance = Partial<ConcreteTaskInstance> & {
   id: ConcreteTaskInstance['id'];
 };
+
+/**
+ * A task as returned by the claim candidate search, carrying only the metadata the claim
+ * phase needs. The omitted fields are loaded for the winners of the claim instead, so the
+ * missing type members keep a candidate from being mistaken for a runnable task.
+ */
+export type TaskClaimCandidate = Omit<
+  ConcreteTaskInstance,
+  'state' | 'params' | 'apiKey' | 'uiamApiKey'
+>;
 
 export interface ConcreteTaskInstanceVersion {
   /** The _id of the the document (not the SO id) */
@@ -644,8 +728,7 @@ export interface ApiKeyOptions {
   cloneApiKey?: boolean;
   /**
    * When true with a request, grant only the Elasticsearch API key (skip UIAM). Intended for
-   * tests and narrow internal flows (e.g. exercising UIAM provisioning on tasks that have ES
-   * credentials only).
+   * tests and narrow internal flows that need tasks with ES credentials only.
    */
   onEsKey?: boolean;
 }

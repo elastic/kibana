@@ -21,7 +21,7 @@ interface SetupDeps {
 export class CustomContentPlugin implements Plugin<void, void, SetupDeps> {
   setup(_core: CoreSetup, { embeddable, agentBuilder }: SetupDeps) {
     embeddable.registerEmbeddableServerDefinition(CUSTOM_CONTENT_EMBEDDABLE_TYPE, {
-      title: 'Custom content',
+      title: 'Custom panel',
       getSchema: () => customContentEmbeddableSchema,
     });
 

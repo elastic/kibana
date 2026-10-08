@@ -9,9 +9,11 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGrid } from '@elastic/eui';
+import { AppHeader, type AppHeaderTab } from '@kbn/app-header';
+import { i18n } from '@kbn/i18n';
 import type { InjectedIntl } from '@kbn/i18n-react';
-import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
+import { injectI18n } from '@kbn/i18n-react';
 import { SampleDataTab } from '@kbn/home-sample-data-tab';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { TutorialsCategory } from '../../../common/constants';
@@ -20,10 +22,20 @@ import type { HomeKibanaServices } from '../kibana_services';
 import { getServices } from '../kibana_services';
 import { getTutorials } from '../load_tutorials';
 import type { TutorialType } from '../../services/tutorials/types';
-import { getTutorialDirectoryFirstCrumb } from './tutorial_directory_return_crumb';
-import { TutorialDirectoryBackLink } from './tutorial_directory_back_link';
+import {
+  getTutorialDirectoryAppHeaderBack,
+  getTutorialDirectoryFirstCrumb,
+} from './tutorial_directory_return_crumb';
 
 const SAMPLE_DATA_TAB_ID = 'sampleData';
+
+const addDataTitle = i18n.translate('home.tutorial.addDataToKibanaTitle', {
+  defaultMessage: 'Add data',
+});
+
+const addDataDescription = i18n.translate('home.tutorial.addDataToKibanaDescription', {
+  defaultMessage: 'Try our sample data or upload your own data.',
+});
 
 interface TutorialDirectoryUiProps {
   addBasePath: HomeKibanaServices['addBasePath'];
@@ -206,8 +218,9 @@ class TutorialDirectoryUi extends React.Component<
     getServices().history.push(`#/tutorial_directory/${id}`);
   };
 
-  getTabs = () => {
+  getTabs = (): AppHeaderTab[] => {
     return this.tabs.map((tab) => ({
+      id: tab.id,
       label: tab.name,
       onClick: () => this.onSelectedTabChanged(tab.id),
       isSelected: tab.id === this.state.selectedTabId,
@@ -256,15 +269,10 @@ class TutorialDirectoryUi extends React.Component<
 
   renderHeaderLinks = () => {
     const headerLinks = getServices().tutorialService.getDirectoryHeaderLinks();
-    return headerLinks.length ? (
-      <EuiFlexGroup gutterSize="m" alignItems="center">
-        {headerLinks.map((HeaderLink, index) => (
-          <EuiFlexItem key={index}>
-            <HeaderLink />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    ) : null;
+    if (!headerLinks.length) {
+      return null;
+    }
+    return headerLinks.map((HeaderLink, index) => <HeaderLink key={index} />);
   };
 
   render() {
@@ -274,29 +282,19 @@ class TutorialDirectoryUi extends React.Component<
     const hash =
       history.location.hash || (typeof window !== 'undefined' ? window.location.hash : '');
 
+    const back = getTutorialDirectoryAppHeaderBack({
+      hash,
+      addBasePath: this.props.addBasePath,
+      getUrlForApp: application.getUrlForApp,
+    });
+
     return (
-      <KibanaPageTemplate restrictWidth={1200}>
-        <KibanaPageTemplate.Header
-          pageTitle={
-            <>
-              <TutorialDirectoryBackLink
-                hash={hash}
-                addBasePath={this.props.addBasePath}
-                getUrlForApp={application.getUrlForApp}
-              />
-              <FormattedMessage id="home.tutorial.addDataToKibanaTitle" defaultMessage="Add data" />
-            </>
-          }
-          description={
-            <FormattedMessage
-              id="home.tutorial.addDataToKibanaDescription"
-              defaultMessage="Try our sample data or upload your own data."
-            />
-          }
-          tabs={tabs}
-          rightSideItems={headerLinks ? [headerLinks] : []}
-        />
-        <KibanaPageTemplate.Section>{this.renderTabContent()}</KibanaPageTemplate.Section>
+      <KibanaPageTemplate>
+        <AppHeader title={addDataTitle} description={addDataDescription} back={back} tabs={tabs} />
+        {headerLinks}
+        <KibanaPageTemplate.Section restrictWidth={1200}>
+          {this.renderTabContent()}
+        </KibanaPageTemplate.Section>
       </KibanaPageTemplate>
     );
   }

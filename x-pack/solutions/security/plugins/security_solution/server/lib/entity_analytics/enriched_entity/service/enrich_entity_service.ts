@@ -19,6 +19,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import type { Entity } from '@kbn/entity-store/common';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { EntityRiskScoreRecord } from '../../../../../common/api/entity_analytics/common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { ExperimentalFeatures } from '../../../../../common';
@@ -53,6 +54,7 @@ interface EnrichedEntityServiceOpts {
   esClient: ElasticsearchClient;
   experimentalFeatures: ExperimentalFeatures;
   logger: Logger;
+  mitreDataClient?: MitreAttackDataClient;
   ml: EntityAnalyticsRoutesDeps['ml'];
   request: KibanaRequest;
   soClient: SavedObjectsClientContract;
@@ -100,6 +102,7 @@ export class EnrichEntityService {
         ...sharedOpts,
         experimentalFeatures: this.opts.experimentalFeatures,
         fromDate: anomalyFromDate,
+        mitreDataClient: this.opts.mitreDataClient,
         toDate: anomalyToDate,
         ml: this.opts.ml,
         request: this.opts.request,

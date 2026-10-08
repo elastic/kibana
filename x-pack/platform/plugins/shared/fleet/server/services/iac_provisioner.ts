@@ -12,10 +12,14 @@ import type { Logger } from '@kbn/logging';
 import apm from 'elastic-apm-node';
 
 import type { AWS_CLOUD_PROVIDER } from '../../common/types/models/cloud_connector';
+import type {
+  IacPolicyTemplateSelection,
+  IAC_FEDERATED_IDENTITY_WORKFLOW,
+} from '../../common/types/rest_spec/iac_provisioner';
 
 import {
   IacProvisionerConfigError,
-  IacProvisionerRenderError,
+  IacProvisionerRequestError,
   IacProvisionerUnavailableError,
 } from '../errors';
 
@@ -24,7 +28,7 @@ import type { IacProvisionerConfig } from './utils/iac_provisioner';
 import { isIacProvisionerEnabled } from './utils/iac_provisioner';
 
 const RENDER_ENDPOINT = '/api/v1/render';
-const RENDER_TIMEOUT_MS = 30_000;
+const REQUEST_TIMEOUT_MS = 30_000;
 
 /** undici reports TLS failures as `TypeError: fetch failed` with the OpenSSL reason on `cause`. */
 const formatIacProvisionerNetworkError = (error: unknown): string => {
@@ -35,10 +39,7 @@ const formatIacProvisionerNetworkError = (error: unknown): string => {
   return causeMessage ? `${error.message}: ${causeMessage}` : error.message;
 };
 
-export interface IacProvisionerRenderPolicyTemplate {
-  name: string;
-  enabledInputs: string[];
-}
+export type IacProvisionerRenderPolicyTemplate = IacPolicyTemplateSelection;
 
 export interface IacProvisionerRenderIntegration {
   name: string;
@@ -51,12 +52,22 @@ export interface IacProvisionerRenderRequest {
   // Only AWS is supported today; typed off the shared constant so the value
   // and type can't drift and adding a provider is a one-line change.
   provider: typeof AWS_CLOUD_PROVIDER;
+  workflow: typeof IAC_FEDERATED_IDENTITY_WORKFLOW;
   integrations: IacProvisionerRenderIntegration[];
+  templateSha?: string;
 }
 
 export interface IacProvisionerRenderResponse {
-  artifactUrl: string;
-  expiresAt: string;
+  /**
+   * Pre-signed URL of the rendered template. Present only when `render` is
+   * true. Embeds signing credentials — never log or cache.
+   */
+  artifactUrl?: string;
+  /** ISO 8601 UTC timestamp when the pre-signed URL expires. Present with artifactUrl. */
+  expiresAt?: string;
+  templateSha: string;
+  render: boolean;
+  blueprint: { id: string; version: string };
 }
 
 interface IacProvisionerErrorBody {
@@ -68,6 +79,22 @@ interface IacProvisionerErrorBody {
 export interface IacProvisionerService {
   renderTemplate(request: IacProvisionerRenderRequest): Promise<IacProvisionerRenderResponse>;
 }
+
+const isIacProvisionerRenderResponse = (value: unknown): value is IacProvisionerRenderResponse => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  const body = value as Record<string, unknown>;
+  const blueprint = body.blueprint;
+  return (
+    typeof body.templateSha === 'string' &&
+    typeof body.render === 'boolean' &&
+    !!blueprint &&
+    typeof blueprint === 'object' &&
+    typeof (blueprint as { id?: unknown }).id === 'string' &&
+    typeof (blueprint as { version?: unknown }).version === 'string'
+  );
+};
 
 /**
  * Extracts the provider's error codes/messages, tolerating both the single
@@ -95,10 +122,40 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
     request: IacProvisionerRenderRequest
   ): Promise<IacProvisionerRenderResponse> {
     const logger = appContextService.getLogger().get('IacProvisionerService');
+    // The response's artifactUrl embeds signing credentials and must never be
+    // logged; the request body contains only safe-to-log fields.
+    logger.info(
+      `[IaC Provisioner] Rendering template for provider ${request.provider}, workflow ${
+        request.workflow
+      }, integrations: ${JSON.stringify(request.integrations)}`
+    );
+
+    const rendered = await this.request<IacProvisionerRenderResponse>(
+      RENDER_ENDPOINT,
+      request,
+      logger
+    );
+    if (!isIacProvisionerRenderResponse(rendered)) {
+      throw new IacProvisionerUnavailableError('provider returned an invalid render body');
+    }
+    // artifactUrl embeds signing credentials — only the expiry (when present)
+    // and blueprint identity are loggable.
+    const expiry = rendered.expiresAt ? `, artifact expires at ${rendered.expiresAt}` : '';
+    logger.debug(
+      `[IaC Provisioner] Render response: blueprint ${rendered.blueprint.id}@${rendered.blueprint.version}${expiry}`
+    );
+    return rendered;
+  }
+
+  /**
+   * Shared POST with mTLS, timeout, and error mapping. Callers own
+   * request/response logging so render can omit the signed artifact URL.
+   */
+  private async request<T>(endpoint: string, body: unknown, logger: Logger): Promise<T> {
     const traceId = apm.currentTransaction?.traceparent;
     const iacProvisionerConfig = appContextService.getConfig()?.iacProvisioner;
 
-    if (!isIacProvisionerEnabled()) {
+    if (!(await isIacProvisionerEnabled())) {
       throw new IacProvisionerConfigError('IaC Provisioner is not enabled');
     }
     if (!iacProvisionerConfig?.api?.url) {
@@ -107,14 +164,6 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
       );
     }
 
-    // The response's artifactUrl embeds signing credentials and must never be
-    // logged; the request body contains only safe-to-log fields.
-    logger.info(
-      `[IaC Provisioner] Rendering template for provider ${
-        request.provider
-      }, integrations: ${JSON.stringify(request.integrations)}`
-    );
-
     let dispatcher;
     try {
       dispatcher = this.createDispatcher(iacProvisionerConfig);
@@ -122,17 +171,17 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
       throw new IacProvisionerConfigError(`invalid TLS configuration: ${error.message}`);
     }
 
-    const url = `${iacProvisionerConfig.api.url}${RENDER_ENDPOINT}`;
+    const url = `${iacProvisionerConfig.api.url}${endpoint}`;
     const headers = {
       'Content-type': 'application/json',
       ...(traceId ? { 'X-Request-ID': traceId } : {}),
       'x-elastic-internal-origin': 'Kibana',
     };
     logger.debug(
-      `[IaC Provisioner] Render request config ${this.createRequestConfigDebug(
+      `[IaC Provisioner] Request config ${this.createRequestConfigDebug(
         url,
         headers,
-        request,
+        body,
         iacProvisionerConfig
       )}`
     );
@@ -142,12 +191,12 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
     // The timeout must cover reading the body too, not just the response
     // headers — a provider that stalls mid-body would otherwise hang the
     // request handler indefinitely.
-    const timeout = setTimeout(() => abortController.abort(), RENDER_TIMEOUT_MS);
+    const timeout = setTimeout(() => abortController.abort(), REQUEST_TIMEOUT_MS);
     try {
       const response = await undiciFetch(url, {
         method: 'POST',
         headers,
-        body: JSON.stringify(request),
+        body: JSON.stringify(body),
         signal: abortController.signal,
         dispatcher,
       });
@@ -157,18 +206,12 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
         throw await this.responseToError(response, logger, latencyMs, traceId);
       }
 
-      const rendered = (await response.json()) as IacProvisionerRenderResponse;
-      logger.info(
-        `[IaC Provisioner] Render succeeded for provider ${request.provider} in ${latencyMs}ms`
-      );
-      // artifactUrl embeds signing credentials — only the expiry is loggable.
-      logger.debug(
-        `[IaC Provisioner] Render response: status ${response.status}, artifact expires at ${rendered.expiresAt} [Request Id: ${traceId}]`
-      );
-      return rendered;
+      const parsed = (await response.json()) as T;
+      logger.info(`[IaC Provisioner] ${endpoint} succeeded in ${latencyMs}ms`);
+      return parsed;
     } catch (error) {
       if (
-        error instanceof IacProvisionerRenderError ||
+        error instanceof IacProvisionerRequestError ||
         error instanceof IacProvisionerUnavailableError
       ) {
         throw error;
@@ -198,16 +241,13 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
     const codes = providerErrors.map(({ code }) => code);
     const details = providerErrors.map(({ code, message }) => `${code}: ${message}`).join('; ');
     logger.error(
-      `[IaC Provisioner] Render failed with status ${status} after ${latencyMs}ms, errors: [${details}] [Request Id: ${traceId}]`
+      `[IaC Provisioner] Request failed with status ${status} after ${latencyMs}ms, errors: [${details}] [Request Id: ${traceId}]`
     );
     if (status >= 500) {
-      return new IacProvisionerUnavailableError(
-        `render request failed with status ${status}`,
-        status
-      );
+      return new IacProvisionerUnavailableError(`request failed with status ${status}`, status);
     }
-    return new IacProvisionerRenderError(
-      `render request rejected with status ${status}${details ? `, ${details}` : ''}`,
+    return new IacProvisionerRequestError(
+      `request rejected with status ${status}${details ? `, ${details}` : ''}`,
       status,
       codes
     );
@@ -223,7 +263,7 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
   private createRequestConfigDebug(
     url: string,
     headers: Record<string, string>,
-    request: IacProvisionerRenderRequest,
+    request: unknown,
     iacProvisionerConfig: IacProvisionerConfig | undefined
   ) {
     const tls = iacProvisionerConfig?.api?.tls;
@@ -231,7 +271,7 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
       url,
       method: 'POST',
       headers,
-      timeoutMs: RENDER_TIMEOUT_MS,
+      timeoutMs: REQUEST_TIMEOUT_MS,
       body: request,
       tls: {
         certificate: tls?.certificate ? 'REDACTED' : undefined,

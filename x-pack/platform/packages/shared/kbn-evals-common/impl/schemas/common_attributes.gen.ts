@@ -33,6 +33,24 @@ export const DatasetTags = lazySchema(() =>
 export type DatasetTags = z.infer<typeof DatasetTags>;
 
 /**
+ * Metric polarity. `maximize` means a higher score is better (e.g. faithfulness, accuracy). `minimize` means a lower score is better (e.g. latency, token count). `neutral` means the metric is informational only and has no improvement direction.
+ */
+export const Direction = lazySchema(() => z.enum(['maximize', 'minimize', 'neutral']));
+export type Direction = z.infer<typeof Direction>;
+export type DirectionEnum = typeof Direction.enum;
+export const DirectionEnum = Direction.enum;
+
+/**
+ * Telemetry convention used to reconstruct normalized evaluator evidence.
+ */
+export const InstrumentationProfile = lazySchema(() =>
+  z.enum(['elastic-inference', 'otel-genai-events', 'otel-genai-attributes', 'claude-code'])
+);
+export type InstrumentationProfile = z.infer<typeof InstrumentationProfile>;
+export type InstrumentationProfileEnum = typeof InstrumentationProfile.enum;
+export const InstrumentationProfileEnum = InstrumentationProfile.enum;
+
+/**
  * How curated the dataset is, from raw captures through cleaned data to "golden" reference datasets. Absent when a dataset has no maturity set.
  */
 export const DatasetMaturity = lazySchema(() => z.enum(['raw', 'cleaned', 'golden']));
@@ -110,21 +128,29 @@ export const EvaluatorInfo = lazySchema(() =>
     /**
      * The evaluator version that produced the score, so a run stays reproducible after the definition moves on. Absent on documents written before the version was recorded.
      */
-    version: z.string().max(64).optional(),
+    version: z
+      .string()
+      .max(64)
+      .optional()
+      .describe(
+        'The evaluator version that produced the score, so a run stays reproducible after the definition moves on. Absent on documents written before the version was recorded.'
+      ),
     score: z.number().nullable().optional(),
     label: z.string().max(256).nullable().optional(),
     explanation: z.string().max(4096).nullable().optional(),
     metadata: z.object({}).catchall(z.unknown()).nullable().optional(),
     trace_id: z.string().max(256).nullable().optional(),
-    /**
-     * Whether a higher score is an improvement (`maximize`), a lower score is an improvement (`minimize`), or the score cannot be compared across arms at all (`neutral`).
-     */
-    direction: z.enum(['maximize', 'minimize', 'neutral']).optional(),
+    direction: Direction.optional(),
     model: Model.optional(),
     /**
      * Whether the evaluator invoked a model. Absent on documents written before per-evaluator attribution was introduced.
      */
-    kind: z.enum(['llm', 'code']).optional(),
+    kind: z
+      .enum(['llm', 'code'])
+      .optional()
+      .describe(
+        'Whether the evaluator invoked a model. Absent on documents written before per-evaluator attribution was introduced.'
+      ),
   })
 );
 export type EvaluatorInfo = z.infer<typeof EvaluatorInfo>;
@@ -167,7 +193,14 @@ export const EvaluationScoreDocument = lazySchema(() =>
     /**
      * Spaces this score belongs to. Absent on documents created before space-awareness was introduced (those are treated as the default space).
      */
-    space_ids: z.array(z.string().max(256)).max(100).nullable().optional(),
+    space_ids: z
+      .array(z.string().max(256))
+      .max(100)
+      .nullable()
+      .optional()
+      .describe(
+        'Spaces this score belongs to. Absent on documents created before space-awareness was introduced (those are treated as the default space).'
+      ),
     example: ExampleInfo,
     task: TaskInfo,
     evaluator: EvaluatorInfo,
@@ -184,11 +217,19 @@ export const EvaluatorStats = lazySchema(() =>
     /**
      * Number of unique examples evaluated in this dataset
      */
-    example_count: z.number().int().min(0).optional().default(0),
+    example_count: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .default(0)
+      .describe('Number of unique examples evaluated in this dataset'),
     /**
      * Model this evaluator judged with. Absent for code evaluators, which invoke no model.
      */
-    evaluator_model: Model.optional(),
+    evaluator_model: Model.optional().describe(
+      'Model this evaluator judged with. Absent for code evaluators, which invoke no model.'
+    ),
     stats: z.object({
       mean: z.number(),
       median: z.number(),
@@ -222,6 +263,51 @@ export type EvaluatorOriginEnum = typeof EvaluatorOrigin.enum;
 export const EvaluatorOriginEnum = EvaluatorOrigin.enum;
 
 /**
+ * A 128-bit OpenTelemetry trace identifier encoded as 32 hexadecimal characters.
+ */
+export const EvaluationTraceId = lazySchema(() =>
+  z
+    .string()
+    .max(32)
+    .regex(/^[0-9a-fA-F]{32}$/)
+);
+export type EvaluationTraceId = z.infer<typeof EvaluationTraceId>;
+
+export const EvaluationInstrumentationProfile = lazySchema(() =>
+  z.enum(['elastic-inference', 'otel-genai-events', 'otel-genai-attributes', 'claude-code'])
+);
+export type EvaluationInstrumentationProfile = z.infer<typeof EvaluationInstrumentationProfile>;
+export type EvaluationInstrumentationProfileEnum = typeof EvaluationInstrumentationProfile.enum;
+export const EvaluationInstrumentationProfileEnum = EvaluationInstrumentationProfile.enum;
+
+export const EvaluationSubject = lazySchema(() =>
+  z.object({
+    mode: z.enum(['single-turn', 'multi-turn']).optional().default('single-turn'),
+    traces: z
+      .array(
+        z.object({
+          trace_id: EvaluationTraceId,
+          reference_data: z.object({}).catchall(z.unknown()).optional(),
+        })
+      )
+      .min(1)
+      .max(1),
+    /**
+     * Optional instrumentation profile selection. When omitted, the elastic-inference profile is used.
+     */
+    instrumentation: z
+      .object({
+        profile: EvaluationInstrumentationProfile.default('elastic-inference'),
+      })
+      .optional()
+      .describe(
+        'Optional instrumentation profile selection. When omitted, the elastic-inference profile is used.'
+      ),
+  })
+);
+export type EvaluationSubject = z.infer<typeof EvaluationSubject>;
+
+/**
  * Which parts of the normalized trace the judge is shown, and therefore requires: the user query (`input`), the agent response (`response`), and the tool calls (`steps`). Rendered into the prompt as `user_query`, `agent_response`, and `tool_calls`. A trace missing any of them is reported as unmet rather than judged.
  */
 export const JudgeEvidence = lazySchema(() =>
@@ -237,11 +323,21 @@ export const JudgeScore = lazySchema(() =>
     /**
      * Score name. Limited so `evaluator.score` fits the score document's evaluator-name field even when the evaluator name is at its limit.
      */
-    name: z.string().min(1).max(127),
+    name: z
+      .string()
+      .min(1)
+      .max(127)
+      .describe(
+        "Score name. Limited so `evaluator.score` fits the score document's evaluator-name field even when the evaluator name is at its limit."
+      ),
     /**
      * `number` asks the judge for a value between 0 and 1. `categorical` asks it to pick one of `labels`, which carry the numeric value each label is worth.
      */
-    type: z.enum(['number', 'categorical']),
+    type: z
+      .enum(['number', 'categorical'])
+      .describe(
+        '`number` asks the judge for a value between 0 and 1. `categorical` asks it to pick one of `labels`, which carry the numeric value each label is worth.'
+      ),
     labels: z
       .array(
         z.object({
@@ -253,6 +349,12 @@ export const JudgeScore = lazySchema(() =>
       .max(20)
       .optional(),
     description: z.string().max(2048).optional(),
+    /**
+     * How comparisons read this score: `maximize` when a higher value is better, `minimize` when a lower value is better, and `neutral` when it is informational only. Applies to numeric values and to the values assigned to labels. Absent means `maximize`.
+     */
+    direction: Direction.optional().describe(
+      'How comparisons read this score: `maximize` when a higher value is better, `minimize` when a lower value is better, and `neutral` when it is informational only. Applies to numeric values and to the values assigned to labels. Absent means `maximize`.'
+    ),
   })
 );
 export type JudgeScore = z.infer<typeof JudgeScore>;
@@ -265,11 +367,23 @@ export const LlmJudgeConfig = lazySchema(() =>
     /**
      * Mustache template for the evaluation request. Use unescaped interpolation (`{{{variable}}}` or `{{& variable}}`) for evidence and reference data so their contents are not HTML-escaped.
      */
-    prompt: z.string().min(1).max(32768),
+    prompt: z
+      .string()
+      .min(1)
+      .max(32768)
+      .describe(
+        'Mustache template for the evaluation request. Use unescaped interpolation (`{{{variable}}}` or `{{& variable}}`) for evidence and reference data so their contents are not HTML-escaped.'
+      ),
     /**
      * System instructions for the judge. Required so every immutable evaluator version contains its complete prompt configuration. Use unescaped Mustache interpolation (`{{{variable}}}` or `{{& variable}}`) when inserting evidence or reference data.
      */
-    system_prompt: z.string().min(1).max(32768),
+    system_prompt: z
+      .string()
+      .min(1)
+      .max(32768)
+      .describe(
+        'System instructions for the judge. Required so every immutable evaluator version contains its complete prompt configuration. Use unescaped Mustache interpolation (`{{{variable}}}` or `{{& variable}}`) when inserting evidence or reference data.'
+      ),
     evidence: JudgeEvidence,
     /**
      * Keys the example's reference data must supply, each exposed to the prompt under its own name. An example missing one is refused before a model is called.
@@ -283,13 +397,25 @@ export const LlmJudgeConfig = lazySchema(() =>
           .regex(/^[a-zA-Z_][a-zA-Z0-9_-]*$/)
       )
       .max(20)
-      .optional(),
+      .optional()
+      .describe(
+        "Keys the example's reference data must supply, each exposed to the prompt under its own name. An example missing one is refused before a model is called."
+      ),
     output: z.object({
       scores: z.array(JudgeScore).min(1).max(10),
     }),
   })
 );
 export type LlmJudgeConfig = z.infer<typeof LlmJudgeConfig>;
+
+export const UserDefinedEvaluatorDraft = lazySchema(() =>
+  z.object({
+    name: EvaluatorName,
+    description: z.string().min(1).max(2048),
+    judge: LlmJudgeConfig,
+  })
+);
+export type UserDefinedEvaluatorDraft = z.infer<typeof UserDefinedEvaluatorDraft>;
 
 /**
  * A persisted evaluator definition.
@@ -307,7 +433,7 @@ export const PersistedEvaluator = lazySchema(() =>
     /**
      * User who created this immutable version.
      */
-    created_by: z.string().max(256).optional(),
+    created_by: z.string().max(256).optional().describe('User who created this immutable version.'),
   })
 );
 export type PersistedEvaluator = z.infer<typeof PersistedEvaluator>;

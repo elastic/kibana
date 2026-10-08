@@ -61,6 +61,41 @@ describe('performMatchSearch', () => {
       expect(searchCall.query.bool.minimum_should_match).toBe(1);
     });
 
+    it('excludes frozen tier indices through the bool query by default', async () => {
+      const esClient = createMockEsClient();
+      const logger = createMockLogger();
+
+      await performMatchSearch({
+        term: 'test query',
+        index: 'remote:my-index',
+        fields: [textField('title')],
+        size: 10,
+        esClient,
+        logger,
+      });
+
+      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      expect(searchCall.query.bool.must_not).toEqual([{ term: { _tier: 'data_frozen' } }]);
+    });
+
+    it('omits the exclusion when frozen tier indices are included', async () => {
+      const esClient = createMockEsClient();
+      const logger = createMockLogger();
+
+      await performMatchSearch({
+        term: 'test query',
+        index: 'remote:my-index',
+        fields: [textField('title')],
+        size: 10,
+        includeFrozen: true,
+        esClient,
+        logger,
+      });
+
+      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      expect(searchCall.query.bool).not.toHaveProperty('must_not');
+    });
+
     it('does not use multi_match even when all fields are regular text', async () => {
       const esClient = createMockEsClient();
       const logger = createMockLogger();
@@ -118,6 +153,43 @@ describe('performMatchSearch', () => {
       expect(Object.keys(searchCall.highlight.fields)).toEqual(
         expect.arrayContaining(['title', 'body'])
       );
+    });
+
+    it('excludes frozen tier indices through the retriever filter by default', async () => {
+      const esClient = createMockEsClient();
+      const logger = createMockLogger();
+
+      await performMatchSearch({
+        term: 'test query',
+        index: 'my-local-index',
+        fields: [textField('title')],
+        size: 10,
+        esClient,
+        logger,
+      });
+
+      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      expect(searchCall.retriever.rrf.filter).toEqual({
+        bool: { must_not: [{ term: { _tier: 'data_frozen' } }] },
+      });
+    });
+
+    it('omits the retriever filter when frozen tier indices are included', async () => {
+      const esClient = createMockEsClient();
+      const logger = createMockLogger();
+
+      await performMatchSearch({
+        term: 'test query',
+        index: 'my-local-index',
+        fields: [textField('title')],
+        size: 10,
+        includeFrozen: true,
+        esClient,
+        logger,
+      });
+
+      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      expect(searchCall.retriever.rrf).not.toHaveProperty('filter');
     });
   });
 
@@ -277,6 +349,7 @@ describe('performMatchSearch', () => {
         term: 'test query',
         fields,
         config: topSnippetsConfig,
+        includeFrozen: false,
         esClient,
         logger,
       });

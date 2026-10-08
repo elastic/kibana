@@ -18,6 +18,7 @@ import {
 import type { EuiStepsProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { WizardStep, VectorPath } from '../types';
+import { getWizardTelemetryPrefix } from '../utils/wizard_telemetry_prefix';
 import { stepsStyle } from './step_rail.styles';
 
 interface StepConfig {
@@ -61,7 +62,7 @@ export interface StepRailProps {
 export const StepRail = ({ currentStep, stepName, path, onNext, onComplete }: StepRailProps) => {
   const { euiTheme } = useEuiTheme();
   const isLargeScreen = useIsWithinMinBreakpoint('m');
-  const telemetryPrefix = `vectordbOnboarding-${stepName}-${path}`;
+  const telemetryPrefix = getWizardTelemetryPrefix(path, stepName);
   const steps: EuiStepsProps['steps'] = useMemo(
     () =>
       STEPS.map((step, i) => {
@@ -88,7 +89,7 @@ export const StepRail = ({ currentStep, stepName, path, onNext, onComplete }: St
       paddingSize="none"
       css={{ maxWidth: isLargeScreen ? euiTheme.base * 20 : undefined }}
     >
-      <EuiPanel paddingSize="m" color="transparent">
+      <EuiPanel paddingSize="m" color="transparent" hasBorder={false}>
         <EuiSteps
           steps={steps}
           titleSize="xxs"
@@ -97,7 +98,7 @@ export const StepRail = ({ currentStep, stepName, path, onNext, onComplete }: St
         />
       </EuiPanel>
       <EuiHorizontalRule margin="none" />
-      <EuiPanel paddingSize="m" color="transparent">
+      <EuiPanel paddingSize="m" color="transparent" hasBorder={false}>
         {currentStep === 1 ? (
           <EuiButton
             fill

@@ -361,10 +361,13 @@ interface WorkflowsExecutionEnginePluginStart {
    * index with search_after (fixed internal batch size). Uses cancelWorkflowExecution per id;
    * failures are logged and do not stop the rest. Pagination is not point-in-time: under
    * concurrent index updates, duplicates or gaps across pages are possible.
+   * Optionally supply `onCancelled` to observe each successful id without retaining the full list.
    */
   cancelAllActiveWorkflowExecutions(params: {
     spaceId: string;
     workflowId: string;
+    schedulingRequest: KibanaRequest;
+    onCancelled?: (executionId: string) => void;
   }): Promise<void>;
 }
 
@@ -751,13 +754,13 @@ workflows_execution_engine/
 
 ```bash
 # Run unit tests
-yarn test:jest src/platform/plugins/shared/workflows_execution_engine
+pnpm test:jest src/platform/plugins/shared/workflows_execution_engine
 
 # Run integration tests
-yarn test:jest_integration src/platform/plugins/shared/workflows_execution_engine
+pnpm test:jest_integration src/platform/plugins/shared/workflows_execution_engine
 
 # Run with watch mode for development
-yarn test:jest --watch src/platform/plugins/shared/workflows_execution_engine
+pnpm test:jest --watch src/platform/plugins/shared/workflows_execution_engine
 ```
 
 ### Debugging

@@ -33,7 +33,7 @@ export const MAX_SEARCH_REVEAL = 100;
 
 // Safety budget for bulk expansion (Expand all / recursive Cmd-click)
 // indices-stats is a good index to test this limit.
-export const MAX_EXPANDED_ROWS = 500;
+export const MAX_RENDERED_NODES = 1000;
 
 export const ROOT_ID = 'json-viewer-$root';
 
@@ -90,7 +90,7 @@ export type GetLeafActions = (leaf: {
  */
 export const buildNodes = (json: JsonValue): JsonNode[] => {
   if (Array.isArray(json)) {
-    return json.map((value, index) =>
+    return Array.from(json, (value, index) =>
       buildNode({ key: String(index), path: [String(index)], value, isArrayItem: true })
     );
   }
@@ -120,7 +120,7 @@ const buildNode = ({
       isArrayItem,
       kind: 'collection',
       collectionType: 'array',
-      children: value.map((child, index) =>
+      children: Array.from(value, (child, index) =>
         buildNode({
           key: String(index),
           path: [...path, String(index)],
@@ -312,13 +312,13 @@ export const getNodeId = (path: readonly string[]): string =>
   path.reduce((id, key) => `${id}/${key.length}:${key}`, 'json-viewer');
 
 /**
- * Collects the ids of collections to expand, breadth-first, until expanding one more would exceed
- * the rendered-row budget. Empty collections can't be expanded. Breadth-first so the first levels
+ * Collects the ids of collections to expand, breadth-first, until expanding one more would render
+ * more than `budget` rows. Empty collections can't be expanded. Breadth-first so the first levels
  * expand first; deeper nodes stay collapsed and can be expanded on demand.
  */
 export const collectExpandableIds = (
   roots: JsonNode[],
-  budget: number = MAX_EXPANDED_ROWS
+  budget: number = MAX_RENDERED_NODES
 ): string[] => {
   const ids: string[] = [];
   let remaining = budget;
@@ -346,6 +346,64 @@ export const collectExpandableIds = (
   }
 
   return ids;
+};
+
+export interface DefaultExpansionSeed {
+  expanded: Set<string>;
+  revealed: Map<string, number>;
+}
+
+/**
+ * Builds the initial expand/reveal state: opens collections and lifts pagers, breadth-first,
+ * until about `rowBudget` rows are rendered. Children are revealed in
+ * INITIAL_CHILDREN-sized chunks that interleave across arrays/objects using a round-robin approach.
+ *
+ * This prevents a gigant array/object to eat all the budget leaving other collections hidden,
+ * instead the budget is splitted between the collections.
+ *
+ */
+export const collectDefaultExpansionSeed = (
+  roots: JsonNode[],
+  rowBudget: number
+): DefaultExpansionSeed => {
+  const expanded = new Set<string>();
+  const revealed = new Map<string, number>();
+  let rows = 0;
+
+  const queue: Array<{
+    listId: string;
+    collectionId?: string;
+    nodes: JsonNode[];
+    offset: number;
+  }> = [{ listId: ROOT_ID, nodes: roots, offset: 0 }];
+
+  for (let head = 0; head < queue.length; head++) {
+    if (rows >= rowBudget) break;
+    const { listId, collectionId, nodes, offset } = queue[head];
+    if (collectionId) {
+      expanded.add(collectionId); // reaching a collection with budget left is what opens it
+    }
+    const end = Math.min(offset + INITIAL_CHILDREN, nodes.length);
+    let shown = offset;
+    for (let i = offset; i < end && rows < rowBudget; i++) {
+      const node = nodes[i];
+      shown = i + 1;
+      rows += 1; // every shown child renders one row
+      if (node.kind === 'collection' && node.children.length > 0) {
+        queue.push({ listId: node.id, collectionId: node.id, nodes: node.children, offset: 0 });
+      }
+    }
+    // Lift this list's pager only when we revealed past the default window.
+    if (shown > INITIAL_CHILDREN) {
+      revealed.set(listId, shown);
+    }
+    // More hidden children remain — revisit this list later (round-robin) if budget allows.
+    if (end < nodes.length && rows < rowBudget) {
+      queue.push({ listId, collectionId, nodes, offset: end });
+    }
+  }
+
+  return { expanded, revealed };
 };
 
 /** Serialize a subtree back to JSON (used by the copy-value / copy-subtree features) */

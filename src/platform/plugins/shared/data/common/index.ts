@@ -9,6 +9,7 @@
 
 export type { RefreshInterval } from '@kbn/data-service-server';
 export {
+  DEFAULT_HISTOGRAM_BAR_TARGET,
   DEFAULT_QUERY_LANGUAGE,
   KIBANA_USER_QUERY_LANGUAGE_KEY,
   KQL_TELEMETRY_ROUTE_LATEST_VERSION,
@@ -572,7 +573,6 @@ export type {
 } from '@kbn/data-views-plugin/common';
 export type { DataViewsContract, DataViewListItem } from '@kbn/data-views-plugin/common';
 export {
-  RUNTIME_FIELD_TYPES,
   DEFAULT_ASSETS_TO_IGNORE,
   META_FIELDS,
   DATA_VIEW_SAVED_OBJECT_TYPE,

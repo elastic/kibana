@@ -296,7 +296,6 @@ describe('applyCustomization', () => {
           id: 'home_node',
           title: 'My solution',
           icon: 'logoElastic',
-          renderAs: 'home' as const,
           href: 'https://localhost/app/home',
         },
         { id: 'a', title: 'A', href: 'https://localhost/app/a' },
@@ -321,16 +320,16 @@ describe('applyCustomization', () => {
       expect(renderableIds(applyHome())).toEqual(['home_node', 'a', 'b']);
     });
 
-    it('normalizes the home node title and icon to "Home"/"home" in both treeUI and renderableNodes', () => {
+    it('preserves the authored title and icon', () => {
       const result = applyHome();
 
       const homeRenderable = result.renderableNodes.find((n) => n.id === 'home_node');
-      expect(homeRenderable?.title).toBe('Home');
-      expect(homeRenderable?.icon).toBe('home');
+      expect(homeRenderable?.title).toBe('My solution');
+      expect(homeRenderable?.icon).toBe('logoElastic');
 
       const homeInTree = result.treeUI.body.find((n) => n.id === 'home_node');
-      expect(homeInTree?.title).toBe('Home');
-      expect(homeInTree?.icon).toBe('home');
+      expect(homeInTree?.title).toBe('My solution');
+      expect(homeInTree?.icon).toBe('logoElastic');
     });
 
     it('allows hiding the home node (signalled via overflowItemIds, still present in renderableNodes)', () => {

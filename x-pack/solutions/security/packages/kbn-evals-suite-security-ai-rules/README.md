@@ -45,7 +45,7 @@ kbn-evals-suite-security-ai-rules/
 1. **Elasticsearch running locally**:
 
    ```bash
-   yarn es snapshot
+   pnpm es snapshot
    ```
 
 2. **Kibana with AI rule creation enabled**:
@@ -374,7 +374,7 @@ export const sampleRules: ReferenceRule[] = [
 ### Running Unit Tests
 
 ```bash
-yarn test:jest x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules/src/helpers.test.ts
+pnpm test:jest x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules/src/helpers.test.ts
 ```
 
 ### Type Checking

@@ -12,8 +12,9 @@ import { createCasesClientMockArgs, createCasesClientMock } from '../mocks';
 import { bulkGet } from './bulk_get';
 
 describe('bulkGet', () => {
-  const attachmentSO = mockCaseComments[0];
+  const attachmentSO = mockCaseUnifiedAttachments[0];
   const unifiedAttachmentSO = mockCaseUnifiedAttachments[0];
+  const legacyAttachmentSO = mockCaseComments[0];
 
   describe('errors', () => {
     const casesClient = createCasesClientMock();
@@ -34,7 +35,6 @@ describe('bulkGet', () => {
           {
             savedObjectIds: Array(MAX_BULK_GET_ATTACHMENTS + 1).fill('foobar'),
             caseID: '123',
-            mode: 'legacy',
           },
           clientArgs,
           casesClient
@@ -46,7 +46,7 @@ describe('bulkGet', () => {
 
     it('throws when trying to fetch zero attachments', async () => {
       await expect(
-        bulkGet({ savedObjectIds: [], caseID: '123', mode: 'legacy' }, clientArgs, casesClient)
+        bulkGet({ savedObjectIds: [], caseID: '123' }, clientArgs, casesClient)
       ).rejects.toThrow(
         'Error: The length of the field ids is too short. Array must be of length >= 1.'
       );
@@ -70,7 +70,7 @@ describe('bulkGet', () => {
       });
 
       const res = await bulkGet(
-        { savedObjectIds: ['my-case-1'], caseID: 'mock-id-1', mode: 'legacy' },
+        { savedObjectIds: ['my-case-1'], caseID: 'mock-id-1' },
         clientArgs,
         casesClient
       );
@@ -105,7 +105,7 @@ describe('bulkGet', () => {
       });
 
       const res = await bulkGet(
-        { savedObjectIds: ['my-case-1'], caseID: 'mock-id-1', mode: 'legacy' },
+        { savedObjectIds: ['my-case-1'], caseID: 'mock-id-1' },
         clientArgs,
         casesClient
       );
@@ -122,7 +122,7 @@ describe('bulkGet', () => {
     });
   });
 
-  describe('unified mode', () => {
+  describe('returns unified attachments', () => {
     const casesClient = createCasesClientMock();
     const clientArgs = createCasesClientMockArgs();
 
@@ -137,22 +137,53 @@ describe('bulkGet', () => {
       });
     });
 
-    it('uses unified mode and returns attachments', async () => {
+    it('returns unified attachments', async () => {
       const res = await bulkGet(
-        { savedObjectIds: ['my-case-1'], caseID: 'mock-id-1', mode: 'unified' },
+        { savedObjectIds: ['my-case-1'], caseID: 'mock-id-1' },
         clientArgs,
         casesClient
       );
 
-      expect(clientArgs.services.attachmentService.getter.bulkGet).toHaveBeenCalledWith(
-        ['my-case-1'],
-        'unified'
-      );
+      expect(clientArgs.services.attachmentService.getter.bulkGet).toHaveBeenCalledWith([
+        'my-case-1',
+      ]);
       expect(res.attachments[0]).toEqual(
         expect.objectContaining({
           id: unifiedAttachmentSO.id,
           type: 'comment',
           data: { content: 'test' },
+        })
+      );
+    });
+  });
+
+  describe('returns a legacy attachment as unified', () => {
+    const casesClient = createCasesClientMock();
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.authorization.getAndEnsureAuthorizedEntities.mockResolvedValue({
+        authorized: [legacyAttachmentSO],
+        unauthorized: [],
+      });
+      clientArgs.services.attachmentService.getter.bulkGet.mockResolvedValue({
+        saved_objects: [legacyAttachmentSO],
+      });
+    });
+
+    it('returns a legacy attachment as unified', async () => {
+      const res = await bulkGet(
+        { savedObjectIds: [legacyAttachmentSO.id], caseID: 'mock-id-1' },
+        clientArgs,
+        casesClient
+      );
+
+      expect(res.attachments[0]).toEqual(
+        expect.objectContaining({
+          id: legacyAttachmentSO.id,
+          type: 'comment',
+          data: { content: 'Wow, good luck catching that bad meanie!' },
         })
       );
     });

@@ -6,16 +6,15 @@
  */
 
 import type { MatcherContext } from '@kbn/alerting-v2-schemas';
-import type { AlertEpisode, Rule } from '../../types';
+import type { Alert } from '../../types';
 
-export function createMatcherContext(episode: AlertEpisode, rule?: Rule): MatcherContext {
+export function createMatcherContext(alert: Alert): MatcherContext {
   return {
-    last_event_timestamp: episode.last_event_timestamp,
-    group_hash: episode.group_hash,
-    episode_id: episode.episode_id,
-    episode_status: episode.episode_status,
-    ...(episode.severity ? { severity: episode.severity } : {}),
-    ...(episode.data ? { data: episode.data } : {}),
-    ...(rule ? { rule: { id: rule.id, name: rule.name, tags: rule.tags } } : {}),
+    last_event_timestamp: alert.last_event_timestamp,
+    group_hash: alert.group_hash,
+    alert_id: alert.alert_id,
+    alert_status: alert.alert_status,
+    ...(alert.severity ? { severity: alert.severity } : {}),
+    ...(alert.data ? { data: alert.data } : {}),
   };
 }

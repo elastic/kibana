@@ -12,6 +12,7 @@ import type {
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
+import type { ChangeHistoryActionId } from '@kbn/change-history';
 import type { Filter } from '@kbn/es-query';
 import type { RuleNotifyWhenType, RRuleParams } from '.';
 
@@ -58,12 +59,11 @@ export interface RuleChangeTrackingMetadata {
  * Rule change tracking context.
  * Contains information to be logged when change tracking functionality is active.
  */
-export interface RuleChangeTracking<ChangeAction extends string = string> {
+export interface RuleChangeTracking<ChangeAction extends string = ChangeHistoryActionId> {
   /**
-   * Change action to be logged. RulesClient supports RuleChangeTrackingAction while
-   * consumers may use much wider actions spectrum. The action is indexed and searchable.
-   *
-   * Will use the default action for the current operation when omitted.
+   * Change action to be logged. Must be a {@link ChangeHistoryActionId}.
+   * RulesClient defaults to a {@link RuleChangeTrackingAction} for the current operation when omitted.
+   * The action is indexed and searchable.
    */
   action?: ChangeAction;
   /**
@@ -305,10 +305,16 @@ export interface Rule<Params extends RuleTypeParams = never> {
   scheduledTaskId?: string | null;
   createdBy: string | null;
   updatedBy: string | null;
+  /** Elasticsearch user profile UID of the creator, when available (e.g. not populated for API key-authenticated actions). */
+  createdByProfileUid?: string | null;
+  /** Elasticsearch user profile UID of the last updater, when available (e.g. not populated for API key-authenticated actions). */
+  updatedByProfileUid?: string | null;
   createdAt: Date;
   updatedAt: Date;
   apiKey: string | null;
   apiKeyOwner: string | null;
+  /** Elasticsearch user profile UID of the API key owner, when available (e.g. not populated for API key-authenticated actions). */
+  apiKeyOwnerProfileUid?: string | null;
   apiKeyCreatedByUser?: boolean | null;
   uiamApiKey?: string | null;
   throttle?: string | null;

@@ -9,18 +9,16 @@ import { PluginStart } from '@kbn/core-di';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsUtils } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { KueryNode } from '@kbn/es-query';
-import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
 import type { ActionPolicySavedObjectAttributes } from '../../../saved_objects';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
 import { EncryptedSavedObjectsClientToken } from '../../dispatcher/steps/dispatch_step_tokens';
-import { escapeTermsInclude } from '../../escape_terms_include';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
 import { ActionPolicySavedObjectsClientToken } from './tokens';
 import type {
+  ActionPolicyRoutingTagSource,
   ActionPolicySavedObjectBulkDeleteItem,
   ActionPolicySavedObjectBulkGetItem,
   ActionPolicySavedObjectBulkUpdateItem,
@@ -28,11 +26,14 @@ import type {
 } from './types';
 
 export type {
+  ActionPolicyRoutingTagSource,
   ActionPolicySavedObjectBulkDeleteItem,
   ActionPolicySavedObjectBulkGetItem,
   ActionPolicySavedObjectBulkUpdateItem,
   ActionPolicySavedObjectServiceContract,
 };
+
+const ROUTING_TAG_SOURCES_PER_PAGE = 1000;
 
 @injectable()
 export class ActionPolicySavedObjectService implements ActionPolicySavedObjectServiceContract {
@@ -191,6 +192,42 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
     return results;
   }
 
+  public async findRoutingTagSources({ maxPolicies }: { maxPolicies: number }): Promise<{
+    policies: ActionPolicyRoutingTagSource[];
+    isTruncated: boolean;
+  }> {
+    const finder = await this.client.createPointInTimeFinder<ActionPolicySavedObjectAttributes>({
+      type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+      perPage: ROUTING_TAG_SOURCES_PER_PAGE,
+      fields: ['name', 'enabled', 'matcher'],
+    });
+
+    const policies: ActionPolicyRoutingTagSource[] = [];
+    let isTruncated = false;
+
+    try {
+      for await (const { saved_objects: savedObjects, total } of finder.find()) {
+        for (const { id, attributes } of savedObjects) {
+          policies.push({
+            id,
+            name: attributes.name,
+            enabled: attributes.enabled,
+            matcher: attributes.matcher,
+          });
+        }
+
+        if (policies.length >= maxPolicies) {
+          isTruncated = total > maxPolicies;
+          break;
+        }
+      }
+    } finally {
+      await finder.close();
+    }
+
+    return { policies: policies.slice(0, maxPolicies), isTruncated };
+  }
+
   public async delete({ id }: { id: string }): Promise<void> {
     await this.client.delete(ACTION_POLICY_SAVED_OBJECT_TYPE, id);
   }
@@ -227,7 +264,7 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
     page: number;
     perPage: number;
     search?: string;
-    filter?: KueryNode;
+    filter?: string;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
   }) {
@@ -246,32 +283,5 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
       sortField,
       sortOrder,
     });
-  }
-
-  public async findTags(params?: { search?: string }): Promise<string[]> {
-    const search = params?.search;
-    const result = await this.client.find<
-      ActionPolicySavedObjectAttributes,
-      { tags: { buckets: Array<{ key: string }> } }
-    >({
-      type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-      perPage: 0,
-      aggs: {
-        tags: {
-          terms: {
-            field: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.tags`,
-            size: TAGS_RESPONSE_LIMIT,
-            order: { _count: 'desc' },
-            ...(search ? { include: `${escapeTermsInclude(search)}.*` } : {}),
-          },
-        },
-      },
-    });
-
-    return (
-      result.aggregations?.tags.buckets
-        .map((bucket) => bucket.key)
-        .filter((key) => key.length > 0) ?? []
-    );
   }
 }

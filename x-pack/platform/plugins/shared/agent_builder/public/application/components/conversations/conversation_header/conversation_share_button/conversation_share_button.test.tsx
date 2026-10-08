@@ -6,62 +6,45 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
 } from '@kbn/agent-builder-common';
 import type { ConversationWithPermissions } from '../../../../../../common/http_api/conversations';
-import {
-  useConversation,
-  useConversationPermissions,
-  useIsUnpersistedConversation,
-} from '../../../../hooks/use_conversation';
+import { useConversation, useConversationPermissions } from '../../../../hooks/use_conversation';
 import { useSuggestUsers } from '../../../../hooks/use_suggest_users';
-import {
-  useInviteMembersSummary,
-  useUpdateConversationAccessControl,
-} from '../../../../hooks/use_conversation_access_control';
-import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
+import { useUpdateConversationAccessControl } from '../../../../hooks/use_conversation_access_control';
 import { useUserProfiles } from '../../../../hooks/use_user_profiles';
 import { ConversationShareButton } from './conversation_share_button';
 
 jest.mock('../../../../hooks/use_conversation', () => ({
   useConversation: jest.fn(),
   useConversationPermissions: jest.fn(),
-  useIsUnpersistedConversation: jest.fn(),
 }));
 
 jest.mock('../../../../hooks/use_suggest_users', () => ({
   useSuggestUsers: jest.fn(),
 }));
 
-jest.mock('../../../../hooks/use_conversation_access_control', () => {
-  const actual = jest.requireActual('../../../../hooks/use_conversation_access_control');
-
-  return {
-    hasInviteMembersSummary: actual.hasInviteMembersSummary,
-    useInviteMembersSummary: jest.fn(),
-    useUpdateConversationAccessControl: jest.fn(),
-  };
-});
+jest.mock('../../../../hooks/use_conversation_access_control', () => ({
+  useUpdateConversationAccessControl: jest.fn(),
+}));
 
 jest.mock('../../../../hooks/use_user_profiles', () => ({
   useUserProfiles: jest.fn(),
 }));
 
-jest.mock('../../../../hooks/use_experimental_features', () => ({
-  useExperimentalFeatures: jest.fn(),
+jest.mock('../../../../hooks/agents/use_agent_by_id', () => ({
+  useAgentBuilderAgentById: () => ({ agent: null, isLoading: false, error: null }),
 }));
 
 const mockUseConversation = jest.mocked(useConversation);
 const mockUseConversationPermissions = jest.mocked(useConversationPermissions);
-const mockUseIsUnpersistedConversation = jest.mocked(useIsUnpersistedConversation);
 const mockUseSuggestUsers = jest.mocked(useSuggestUsers);
-const mockUseInviteMembersSummary = jest.mocked(useInviteMembersSummary);
 const mockUseUpdateConversationAccessControl = jest.mocked(useUpdateConversationAccessControl);
-const mockUseExperimentalFeatures = jest.mocked(useExperimentalFeatures);
 const mockUseUserProfiles = jest.mocked(useUserProfiles);
 
 const mutate = jest.fn();
@@ -117,15 +100,9 @@ const baseConversation = {
 const renderShareButton = ({
   conversation = baseConversation,
   canUpdateAccessControl = true,
-  isUnpersistedConversation = false,
-  isExperimentalFeaturesEnabled = true,
-  inviteMembersSummary = { profiles: [], extraCount: 0, shouldShowSummary: false },
 }: {
   conversation?: ConversationWithPermissions;
   canUpdateAccessControl?: boolean;
-  isUnpersistedConversation?: boolean;
-  isExperimentalFeaturesEnabled?: boolean;
-  inviteMembersSummary?: ReturnType<typeof useInviteMembersSummary>;
 } = {}) => {
   mockUseConversation.mockReturnValue({
     conversation,
@@ -135,15 +112,12 @@ const renderShareButton = ({
     isError: false,
     error: null,
   });
-  mockUseIsUnpersistedConversation.mockReturnValue(isUnpersistedConversation);
   mockUseConversationPermissions.mockReturnValue({
     rename: false,
     delete: false,
     update_access_control: canUpdateAccessControl,
   });
-  mockUseExperimentalFeatures.mockReturnValue(isExperimentalFeaturesEnabled);
   mockUseSuggestUsers.mockReturnValue({ data: [], isFetching: false } as never);
-  mockUseInviteMembersSummary.mockReturnValue(inviteMembersSummary);
   mockUseUserProfiles.mockReturnValue({
     data: [ownerProfile, memberProfile, secondMemberProfile, thirdMemberProfile],
   } as never);
@@ -153,9 +127,11 @@ const renderShareButton = ({
   });
 
   render(
-    <IntlProvider locale="en">
-      <ConversationShareButton />
-    </IntlProvider>
+    <EuiThemeProvider>
+      <IntlProvider locale="en">
+        <ConversationShareButton />
+      </IntlProvider>
+    </EuiThemeProvider>
   );
 };
 
@@ -176,20 +152,9 @@ describe('ConversationShareButton', () => {
     expect(screen.queryByTestId('agentBuilderConversationInviteButton')).not.toBeInTheDocument();
   });
 
-  it('does not render while the conversation is unpersisted', () => {
-    renderShareButton({ isUnpersistedConversation: true });
-
-    expect(screen.queryByTestId('agentBuilderConversationInviteButton')).not.toBeInTheDocument();
-  });
-
   it('opens a read-only members popover without access-control update permission', async () => {
     renderShareButton({
       canUpdateAccessControl: false,
-      inviteMembersSummary: {
-        profiles: [memberProfile],
-        extraCount: 0,
-        shouldShowSummary: true,
-      },
       conversation: {
         ...baseConversation,
         access_control: {
@@ -206,8 +171,7 @@ describe('ConversationShareButton', () => {
       },
     });
 
-    expect(screen.getByTestId('agentBuilderConversationInviteMembersSummary')).toBeInTheDocument();
-    expect(screen.queryByText('Invite')).not.toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderConversationInviteButton')).toHaveTextContent('2');
 
     await openPopover();
 
@@ -226,12 +190,6 @@ describe('ConversationShareButton', () => {
     expect(
       screen.queryByTestId('agentBuilderConversationShareRemoveMember')
     ).not.toBeInTheDocument();
-  });
-
-  it('does not render when experimental features are disabled', () => {
-    renderShareButton({ isExperimentalFeaturesEnabled: false });
-
-    expect(screen.queryByTestId('agentBuilderConversationInviteButton')).not.toBeInTheDocument();
   });
 
   it('opens the sharing popover with owner and current members', async () => {
@@ -305,13 +263,17 @@ describe('ConversationShareButton', () => {
     ]);
   });
 
-  it('shows the latest shared member avatars in the invite trigger', () => {
+  it('counts only the author while the conversation is private to the owner', () => {
+    renderShareButton();
+
+    const trigger = screen.getByTestId('agentBuilderConversationInviteButton');
+
+    expect(trigger).toHaveTextContent('1');
+    expect(trigger).toHaveAccessibleName('Sharing, 1 user has access');
+  });
+
+  it('counts the author and every invited member in the trigger', () => {
     renderShareButton({
-      inviteMembersSummary: {
-        profiles: [thirdMemberProfile, secondMemberProfile],
-        extraCount: 1,
-        shouldShowSummary: true,
-      },
       conversation: {
         ...baseConversation,
         access_control: {
@@ -340,32 +302,39 @@ describe('ConversationShareButton', () => {
       },
     });
 
-    const membersSummary = screen.getByTestId('agentBuilderConversationInviteMembersSummary');
-    const visibleMemberAvatars = within(membersSummary).getAllByTestId(
-      /agentBuilderConversationInviteMemberAvatar-/
-    );
+    const trigger = screen.getByTestId('agentBuilderConversationInviteButton');
 
-    expect(membersSummary).toBeInTheDocument();
-    expect(mockUseInviteMembersSummary).toHaveBeenCalledWith();
-    expect(
-      screen.queryByTestId('agentBuilderConversationInviteMemberAvatar-member-1')
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByTestId('agentBuilderConversationInviteMemberAvatar-member-2')
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId('agentBuilderConversationInviteMemberAvatar-member-3')
-    ).toBeInTheDocument();
-    expect(screen.getByTestId('agentBuilderConversationInviteMembersExtraCount')).toHaveTextContent(
-      '+1'
-    );
-    expect(
-      screen.getByTestId('agentBuilderConversationInviteMembersExtraCount')
-    ).toHaveAccessibleName('1 more member');
-    expect(visibleMemberAvatars.map((avatar) => avatar.getAttribute('data-test-subj'))).toEqual([
-      'agentBuilderConversationInviteMemberAvatar-member-3',
-      'agentBuilderConversationInviteMemberAvatar-member-2',
-    ]);
+    expect(trigger).toHaveTextContent('4');
+    expect(trigger).toHaveAccessibleName('Sharing, 4 users have access');
+  });
+
+  it('shows the public label instead of a count while the conversation is public', () => {
+    renderShareButton({
+      conversation: {
+        ...baseConversation,
+        access_control: {
+          access_mode: ConversationAccessControlMode.Public,
+          entries: [],
+        },
+      },
+    });
+
+    const trigger = screen.getByTestId('agentBuilderConversationInviteButton');
+
+    expect(trigger).toHaveTextContent('Public');
+    expect(trigger).toHaveAccessibleName('Sharing, public');
+  });
+
+  it('shows the author in the sharing popover before anyone is invited', async () => {
+    renderShareButton();
+
+    await openPopover();
+
+    const memberRows = screen.getAllByTestId('agentBuilderConversationShareMemberRow');
+
+    expect(memberRows).toHaveLength(1);
+    expect(memberRows[0]).toHaveTextContent('Ethan Smith');
+    expect(memberRows[0]).toHaveTextContent('Author');
   });
 
   it('saves public access with no ACL entries', async () => {

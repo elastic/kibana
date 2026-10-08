@@ -26,8 +26,10 @@ import type {
   AttachmentAttributesV2,
   Case,
   EventAttachmentPayload,
+  FileAttachmentMetadata,
   User,
   UserCommentAttachmentPayload,
+  UnifiedReferenceAttachmentPayload,
 } from '../../common/types/domain';
 import {
   AttachmentType,
@@ -42,8 +44,11 @@ import {
   CASE_VIEW_COMMENT_PATH,
   CASE_VIEW_PATH,
   CASE_VIEW_TAB_PATH,
+  FILE_ATTACHMENT_TYPE,
   GENERAL_CASES_OWNER,
   OWNER_INFO,
+  PERSISTABLE_ATTACHMENT_TYPES,
+  UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP,
 } from '../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
 import type { AlertInfo, FileAttachmentRequest } from './types';
@@ -65,9 +70,14 @@ import type {
 import {
   isEventAttachmentType,
   isAlertAttachmentType,
+  isCommentAttachmentType,
+  isUnifiedReferenceAttachmentRequest,
   getIndexFromMetadata,
   toStringArray,
 } from '../../common/utils/attachments';
+import { toUnifiedAttributes } from '../services/attachments/operations/utils';
+import { AttachmentTransformedAttributesRt } from './types/attachments_v1';
+import { decodeOrThrow } from './runtime_types';
 
 /**
  * Default sort field for querying saved objects.
@@ -203,13 +213,24 @@ export const flattenAttachmentSavedObjects = (
     return acc;
   }, []);
 
+/**
+ * Folds mapped types to unified in memory (SO never rewritten); unrecognized types keep the
+ * legacy shape — no errors channel here, unlike bulkGet. Public routes re-project via `toLegacyCaseResponse`.
+ */
 export const flattenAttachmentSavedObject = (
   savedObject: SavedObject<AttachmentAttributesV2>
-): AttachmentV2 => ({
-  id: savedObject.id,
-  version: savedObject.version ?? '0',
-  ...savedObject.attributes,
-});
+): AttachmentV2 => {
+  const transformed = toUnifiedAttributes({ attributes: savedObject.attributes });
+  const attributes = transformed.isUnified
+    ? transformed.attributes
+    : decodeOrThrow(AttachmentTransformedAttributesRt)(transformed.attributes);
+
+  return {
+    id: savedObject.id,
+    version: savedObject.version ?? '0',
+    ...attributes,
+  };
+};
 
 /**
  * Filters out alerts whose index belongs to a linked project (`cluster:index`),
@@ -237,10 +258,17 @@ export const getIDsAndIndicesAsArrays = (
 
   if ('attachmentId' in comment) {
     const metadataIndex = getIndexFromMetadata(comment.metadata);
-    return {
-      ids: toStringArray(comment.attachmentId),
-      indices: toStringArray(metadataIndex),
-    };
+    const ids = toStringArray(comment.attachmentId);
+    // A scalar metadata.index broadcasts to every id; only an array is paired 1-to-1.
+    // Previously toStringArray converted a scalar to a 1-element array, so a scalar 'i1'
+    // against ids ['a','b'] produced a mismatched-length pair and was dropped by callers.
+    // The broadcast is the intentional semantic — match the behaviour of
+    // `getAndValidateIndexedAttachmentInfo` in validate_attachment_ids.ts.
+    const isBroadcast = typeof metadataIndex === 'string' && metadataIndex.length > 0;
+    const indices = isBroadcast
+      ? ids.map(() => metadataIndex as string)
+      : toStringArray(metadataIndex);
+    return { ids, indices };
   }
 
   return {
@@ -386,6 +414,34 @@ export const isFileAttachmentRequest = (
 };
 
 /**
+ * A type narrowing function for unified file attachments (`type: 'file'`), the
+ * counterpart of {@link isFileAttachmentRequest} for the legacy `.files` shape.
+ */
+export const isUnifiedFileAttachmentRequest = (
+  context: AttachmentRequestV2
+): context is UnifiedReferenceAttachmentPayload & { metadata: FileAttachmentMetadata } => {
+  return (
+    isUnifiedReferenceAttachmentRequest(context) &&
+    context.type === FILE_ATTACHMENT_TYPE &&
+    FileAttachmentMetadataRt.is(context.metadata)
+  );
+};
+
+/**
+ * True for a unified persistable-state or external-reference request, excluding `file`.
+ * Counterpart of {@link isPersistableStateOrExternalReference}.
+ */
+export const isUnifiedPersistableStateOrExternalReference = (
+  context: AttachmentRequestV2
+): boolean => {
+  return (
+    PERSISTABLE_ATTACHMENT_TYPES.has(context.type) ||
+    (context.type in UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP &&
+      context.type !== FILE_ATTACHMENT_TYPE)
+  );
+};
+
+/**
  * Adds the ids and indices to a map of statuses
  */
 export function createAlertUpdateStatusRequest({
@@ -521,7 +577,9 @@ export const extractLensReferencesFromCommentString = (
 export const getOrUpdateLensReferences = (
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'],
   newComment: string,
-  currentComment?: SavedObject<UserCommentAttachmentPayload>
+  currentComment?: Pick<SavedObject<UserCommentAttachmentPayload>, 'references'> & {
+    attributes: { comment: string };
+  }
 ) => {
   if (!currentComment) {
     return extractLensReferencesFromCommentString(lensEmbeddableFactory, newComment);
@@ -614,7 +672,7 @@ export const countUserAttachments = (
   let total = 0;
 
   for (const attachment of attachments) {
-    if (attachment.attributes.type === AttachmentType.user) {
+    if (isCommentAttachmentType(attachment.attributes.type)) {
       total += 1;
     }
   }

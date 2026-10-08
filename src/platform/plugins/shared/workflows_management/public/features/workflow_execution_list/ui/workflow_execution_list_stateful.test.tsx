@@ -12,11 +12,17 @@ import React from 'react';
 import { ExecutionStatus, type WorkflowExecutionListDto } from '@kbn/workflows';
 import { createMockWorkflowApi, createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowExecutionList } from './workflow_execution_list_stateful';
+import {
+  WORKFLOW_EXECUTIONS_LIST_POLL_ACTIVE_INTERVAL_MS,
+  WORKFLOW_EXECUTIONS_LIST_POLL_INTERVAL_MS,
+} from '../../../hooks/polling_constants';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useSerialPolling } from '../../../hooks/use_serial_polling';
 import { createUseKibanaMockValue } from '../../../mocks';
 import { TestProvider } from '../../../shared/mocks/test_providers';
 
 const mockSetSelectedExecution = jest.fn();
+const mockUpdateUrlState = jest.fn();
 const mockRefetch = jest.fn().mockResolvedValue(undefined);
 
 const mockWorkflowApi = createMockWorkflowApi();
@@ -44,10 +50,17 @@ jest.mock('../../../hooks/use_telemetry', () => ({
   }),
 }));
 
+jest.mock('../../../hooks/use_serial_polling', () => ({
+  useSerialPolling: jest.fn(),
+}));
+
+const mockUseSerialPolling = jest.mocked(useSerialPolling);
+
 jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => ({
     selectedExecutionId: null,
     setSelectedExecution: mockSetSelectedExecution,
+    updateUrlState: mockUpdateUrlState,
   }),
 }));
 
@@ -165,10 +178,58 @@ describe('WorkflowExecutionList (stateful)', () => {
     );
   });
 
-  it('calls setSelectedExecution when an execution item is clicked', () => {
+  it('configures polling for the selected workflow', async () => {
+    renderComponent('wf-123');
+
+    expect(mockUseSerialPolling).toHaveBeenCalledWith(
+      expect.objectContaining({
+        enabled: true,
+        immediate: false,
+        pollKey: 'wf-123',
+        poll: expect.any(Function),
+        intervalMs: expect.any(Function),
+      })
+    );
+    const { intervalMs, poll } = mockUseSerialPolling.mock.calls[0][0];
+    if (typeof intervalMs !== 'function') {
+      throw new Error('Expected a dynamic polling interval');
+    }
+
+    expect(intervalMs()).toBe(WORKFLOW_EXECUTIONS_LIST_POLL_INTERVAL_MS);
+    await poll();
+    expect(mockRefetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses the active polling interval while an execution is running', () => {
+    mockUseWorkflowExecutions.mockReturnValue({
+      data: mockWorkflowExecutionsWithRunning,
+      isInitialLoading: false,
+      isLoadingMore: false,
+      error: null,
+      setPaginationObserver: jest.fn(),
+      refetch: mockRefetch,
+    });
+    renderComponent();
+
+    const { intervalMs } = mockUseSerialPolling.mock.calls[0][0];
+    if (typeof intervalMs !== 'function') {
+      throw new Error('Expected a dynamic polling interval');
+    }
+    expect(intervalMs()).toBe(WORKFLOW_EXECUTIONS_LIST_POLL_ACTIVE_INTERVAL_MS);
+  });
+
+  it('opens the execution on the executions tab when an item is clicked', () => {
     renderComponent();
     fireEvent.click(screen.getByTestId('workflowExecutionListItem'));
-    expect(mockSetSelectedExecution).toHaveBeenCalledWith('exec-1');
+    expect(mockUpdateUrlState).toHaveBeenCalledWith(
+      {
+        tab: 'executions',
+        executionId: 'exec-1',
+        stepExecutionId: undefined,
+        stepId: undefined,
+      },
+      { replace: false }
+    );
   });
 
   it('footer cancel calls the bulk cancel API and refetches executions', async () => {
@@ -187,7 +248,7 @@ describe('WorkflowExecutionList (stateful)', () => {
     await waitFor(() =>
       expect(mockWorkflowApi.cancelAllWorkflowExecutions).toHaveBeenCalledWith('wf-1')
     );
-    await waitFor(() => expect(mockRefetch).toHaveBeenCalled());
+    await waitFor(() => expect(mockRefetch).toHaveBeenCalledTimes(1));
   });
 
   it('disables bulk cancel when the user lacks cancel capability', () => {

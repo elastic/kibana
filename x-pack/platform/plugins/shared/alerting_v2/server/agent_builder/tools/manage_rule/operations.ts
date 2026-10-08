@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { omit } from 'lodash';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import {
   isSavedObjectErrorResult,
@@ -24,30 +25,32 @@ import {
   ruleKindSchema,
   scheduleSchema,
   querySchema,
-  recoveryStrategySchema,
-  noDataStrategySchema,
+  recoverySchema,
+  recoveryStrategy,
+  noDataSchema,
   getRootEsqlQuery,
   groupingSchema,
   stateTransitionSchema,
+  isAbsenceDistinguishableFromBreach,
   isStateTransitionAllowed,
-  isSignalUsingStandaloneFormat,
-  isSignalQueryBreachOnly,
-  isRecoveryQueryConsistentWithStrategy,
-  isRecoveryQueryProvidedForStrategy,
-  isNoDataQueryConsistentWithStrategy,
-  isNoDataQueryProvidedForStrategy,
+  isLifecycleConfigAllowedForKind,
+  isRecoveryConditionUsableWithBreach,
+  isRecoveryTransitionConsistentWithStrategy,
+  isRoutingTagsAllowedForKind,
+  REQUIRE_DISTINGUISHABLE_ABSENCE_MESSAGE,
+  ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
 } from '@kbn/alerting-v2-schemas';
 import { resolveArtifactId } from '@kbn/alerting-v2-utils';
+import { buildRulePayload } from '@kbn/alerting-v2-utils';
 import { dashboardIdSchema } from '../../../lib/artifact_types';
-import { buildRulePayload } from '../../../../common/agent_builder/rule_mappers';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
-import { resolveTimeFieldForQuery } from './resolve_time_field';
+import { getDateFieldsForQuery, resolveTimeFieldForQuery } from './resolve_time_field';
 
 type RuleArtifact = NonNullable<RuleAttachmentData['artifacts']>[number];
 
 type DashboardArtifact = RuleArtifact & {
   type: typeof DASHBOARD_ARTIFACT_TYPE;
-  data: { dashboardId: string };
+  data: { dashboard_id: string };
 };
 
 type RunbookArtifact = RuleArtifact & {
@@ -96,7 +99,7 @@ const toDashboardArtifacts = (
 ): DashboardArtifact[] => {
   const existingIdByDashboardId = new Map<string, string>();
   for (const artifact of existingArtifacts) {
-    existingIdByDashboardId.set(artifact.data.dashboardId, artifact.id);
+    existingIdByDashboardId.set(artifact.data.dashboard_id, artifact.id);
   }
 
   const seen = new Set<string>();
@@ -109,7 +112,7 @@ const toDashboardArtifacts = (
     dashboards.push({
       id: resolveArtifactId(DASHBOARD_ARTIFACT_TYPE, existingIdByDashboardId.get(dashboardId)),
       type: DASHBOARD_ARTIFACT_TYPE,
-      data: { dashboardId },
+      data: { dashboard_id: dashboardId },
     });
   }
   return dashboards;
@@ -139,10 +142,9 @@ const toRunbookArtifact = (
 
 export const setMetadataOperationSchema = metadataSchema
   .partial()
-  .omit({ owner: true })
   .extend({ operation: z.literal('set_metadata') })
   .describe(
-    'Use `set_metadata` to name the rule and add a description or tags so the user can filter by it later.'
+    'Use `set_metadata` to name the rule and add a description or `tags` so the user can filter by it later. `tags` do not link action policies: to link this rule to an action policy, set `routing_tags` to values in the policy `matcher.tags`. `routing_tags` is only allowed on `alert` rules.'
   );
 
 export const setKindOperationSchema = z
@@ -151,7 +153,7 @@ export const setKindOperationSchema = z
     kind: ruleKindSchema,
   })
   .describe(
-    "Use `set_kind` to choose a rule kind matching the user's goal: detect and respond (`alert`) or collect evidence (`signal`)."
+    "Use `set_kind` to choose a rule kind matching the user's goal: detect and respond (`alert`) or collect evidence (`signal`). Switching to `signal` drops the alert-only `recovery`, `no_data`, `state_transition` and `metadata.routing_tags` settings."
   );
 
 export const setScheduleOperationSchema = scheduleSchema
@@ -165,11 +167,38 @@ export const setQueryOperationSchema = z
   .object({
     operation: z.literal('set_query'),
     query: querySchema,
-    recovery_strategy: recoveryStrategySchema.optional(),
-    no_data_strategy: noDataStrategySchema.optional(),
+  })
+  .describe('Use `set_query` to define the ES|QL condition that should fire the rule.');
+
+export const setRecoveryOperationSchema = z
+  .object({
+    operation: z.literal('set_recovery'),
+    recovery: recoverySchema,
+  })
+  .describe('Use `set_recovery` to control how alerts recover. Requires `kind: alert`.');
+
+export const setNoDataOperationSchema = z
+  .object({
+    operation: z.literal('set_no_data'),
+    no_data: noDataSchema,
   })
   .describe(
-    'Use `set_query` to define the ES|QL condition that should fire the rule. Optionally set how recovery is detected and what happens when data stops arriving.'
+    'Use `set_no_data` to control what happens when data stops arriving. Requires `kind: alert`.'
+  );
+
+export const setTimeFieldOperationSchema = z
+  .object({
+    operation: z.literal('set_time_field'),
+    time_field: z
+      .string()
+      .min(1)
+      .max(128)
+      .describe(
+        'The date field used for the lookback window range filter. Auto-detected from the index during `set_query` when not set; use this operation to override when auto-detection fails or picks the wrong field.'
+      ),
+  })
+  .describe(
+    'Use `set_time_field` to explicitly set the date field for the lookback window. Use after `set_query` fails to auto-detect a time field, or when the index has multiple date fields and the wrong one was chosen.'
   );
 
 export const setGroupingOperationSchema = groupingSchema
@@ -177,13 +206,10 @@ export const setGroupingOperationSchema = groupingSchema
     operation: z.literal('set_grouping'),
   })
   .describe(
-    'Use `set_grouping` to split alerts by entity (host, service, etc.) so each group has its own episode instead of one combined alert.'
+    'Use `set_grouping` to split alerts by entity (host, service, etc.) so each group has its own alert instead of one combined alert.'
   );
 
 export const setStateTransitionOperationSchema = stateTransitionSchema
-  .unwrap()
-  .unwrap()
-  .omit({ pending_operator: true, recovering_operator: true })
   .extend({ operation: z.literal('set_state_transition') })
   .describe(
     'Use `set_state_transition` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes. State transition is only allowed on `kind: alert` rules.'
@@ -200,7 +226,7 @@ export const setDashboardsOperationSchema = z
       ),
   })
   .describe(
-    'Use `set_dashboards` to link investigation dashboards to the rule by saved-object ID. Each ID is stored as a `dashboard` artifact (`{ id, type: "dashboard", data: { dashboardId } }`), matching the create/update API. Replaces any previously linked dashboards; other artifacts (e.g. runbooks) are preserved. Pass an empty array to unlink all dashboards.'
+    'Use `set_dashboards` to link investigation dashboards to the rule by saved-object ID. Each ID is stored as a `dashboard` artifact (`{ id, type: "dashboard", data: { dashboard_id } }`), matching the create/update API. Replaces any previously linked dashboards; other artifacts (e.g. runbooks) are preserved. Pass an empty array to unlink all dashboards.'
   );
 
 export const setRunbookOperationSchema = z
@@ -233,6 +259,9 @@ export const ruleOperationSchema = z.discriminatedUnion('operation', [
   setKindOperationSchema,
   setScheduleOperationSchema,
   setQueryOperationSchema,
+  setTimeFieldOperationSchema,
+  setRecoveryOperationSchema,
+  setNoDataOperationSchema,
   setGroupingOperationSchema,
   setStateTransitionOperationSchema,
   setDashboardsOperationSchema,
@@ -301,6 +330,7 @@ export interface EsqlColumn {
 export interface RuleOperationsResult {
   data: Partial<RuleAttachmentData>;
   queryColumns?: EsqlColumn[];
+  warnings?: string[];
 }
 
 /**
@@ -336,6 +366,7 @@ export const executeRuleOperations = async (
 ): Promise<RuleOperationsResult> => {
   let next = { ...data };
   let lastQueryColumns: EsqlColumn[] | undefined;
+  const warnings: string[] = [];
 
   for (const op of operations) {
     switch (op.operation) {
@@ -348,13 +379,26 @@ export const executeRuleOperations = async (
             name: mergedName,
             ...(op.description !== undefined ? { description: op.description } : {}),
             ...(op.tags !== undefined ? { tags: op.tags } : {}),
+            ...(op.routing_tags !== undefined ? { routing_tags: op.routing_tags } : {}),
           },
         };
         break;
       }
 
       case 'set_kind':
-        next = { ...next, kind: op.kind };
+        /*
+         * No operation can remove the alert-only fields once set, so converting
+         * to a signal has to clear them here.
+         */
+        next =
+          op.kind === 'signal'
+            ? omit({ ...next, kind: op.kind }, [
+                'recovery',
+                'no_data',
+                'state_transition',
+                'metadata.routing_tags',
+              ])
+            : { ...next, kind: op.kind };
         break;
 
       case 'set_schedule': {
@@ -375,27 +419,48 @@ export const executeRuleOperations = async (
         let resolvedTimeField: string | null | undefined;
         if (esClient) {
           lastQueryColumns = await validateEsqlQuery(esClient, rootQuery);
-          // Resolve the time field from the index.
+
           resolvedTimeField = await resolveTimeFieldForQuery(esClient, rootQuery, next.time_field);
-          // `null` means the index has no usable date field.
-          if (resolvedTimeField === null) {
-            const sourceIndex = getIndexPatternFromESQLQuery(rootQuery);
-            throw new RuleOperationValidationError(
-              `Could not determine a time field for the query: the source index ` +
-                `${
-                  sourceIndex ? `"${sourceIndex}"` : ''
-                } has no \`date\` or \`date_nanos\` field ` +
-                `(and no \`@timestamp\`), which is required for the rule's lookback window. ` +
-                `Add a date field to the data, or query an index that has one.`
+          const sourceIndex = getIndexPatternFromESQLQuery(rootQuery);
+          const wasTimeFieldReplaced =
+            Boolean(next.time_field) &&
+            Boolean(resolvedTimeField) &&
+            resolvedTimeField !== next.time_field;
+          if (wasTimeFieldReplaced) {
+            warnings.push(
+              `The current time_field "${next.time_field}" was not found as a \`date\` or ` +
+                `\`date_nanos\` field on ${
+                  sourceIndex ? `"${sourceIndex}"` : 'the source index'
+                }, so "${resolvedTimeField}" was auto-selected instead. ` +
+                `Use \`set_time_field\` if a different date field is needed.`
             );
           }
-          // `undefined` means we couldn't look up the index (non-FROM query, or
-          // fieldCaps failed). Fall back to any existing time field; if there is
-          // none, fail rather than let the schema silently default to @timestamp.
+          if (resolvedTimeField === null) {
+            if (next.time_field) {
+              warnings.push(
+                `The current time_field "${next.time_field}" was not found as a \`date\` or ` +
+                  `\`date_nanos\` field on ${
+                    sourceIndex ? `"${sourceIndex}"` : 'the source index'
+                  }. ` +
+                  `The rule may fail at execution time. Use \`set_time_field\` to correct it, ` +
+                  `or verify the field exists on the target index.`
+              );
+            } else {
+              throw new RuleOperationValidationError(
+                `Could not determine a time field for the query: the source index ` +
+                  `${
+                    sourceIndex ? `"${sourceIndex}"` : ''
+                  } has no \`date\` or \`date_nanos\` field ` +
+                  `(and no \`@timestamp\`), which is required for the rule's lookback window. ` +
+                  `Add a date field to the data, or use \`set_time_field\` to specify one.`
+              );
+            }
+          }
           if (resolvedTimeField === undefined && !next.time_field) {
             throw new RuleOperationValidationError(
               `Could not determine a time field for the query and none is set. A \`date\` or ` +
-                `\`date_nanos\` field is required for the rule's lookback window; set one explicitly.`
+                `\`date_nanos\` field is required for the rule's lookback window; use ` +
+                `\`set_time_field\` to specify one.`
             );
           }
         }
@@ -403,36 +468,50 @@ export const executeRuleOperations = async (
           ...next,
           query: op.query,
           ...(resolvedTimeField ? { time_field: resolvedTimeField } : {}),
-          ...(op.recovery_strategy !== undefined
-            ? { recovery_strategy: op.recovery_strategy }
-            : {}),
-          ...(op.no_data_strategy !== undefined ? { no_data_strategy: op.no_data_strategy } : {}),
         };
+        break;
+      }
 
-        if (!isRecoveryQueryConsistentWithStrategy(next)) {
-          throw new RuleOperationValidationError(
-            'query.recovery is only allowed when recovery_strategy is "query".'
-          );
-        }
-        if (!isRecoveryQueryProvidedForStrategy(next)) {
-          throw new RuleOperationValidationError(
-            'recovery_strategy "query" requires a recovery block in the query ' +
-              '(recovery: { segment } for composed, recovery: { query } for standalone).'
-          );
-        }
-        if (!isNoDataQueryConsistentWithStrategy(next)) {
-          throw new RuleOperationValidationError(
-            'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.'
-          );
-        }
-        if (!isNoDataQueryProvidedForStrategy(next)) {
-          throw new RuleOperationValidationError(
-            'no_data_strategy (other than "none") requires a no_data block in the query ' +
-              'for standalone-format rules.'
-          );
+      case 'set_recovery': {
+        next = { ...next, recovery: op.recovery };
+
+        // A recovering delay is inert under `manual` and the write API rejects
+        // the pair, and no operation can remove a phase, so switching to manual
+        // has to clear it here.
+        if (
+          next.recovery?.strategy === recoveryStrategy.manual &&
+          next.state_transition?.recovering
+        ) {
+          const stateTransition = omit(next.state_transition, 'recovering');
+          next = Object.keys(stateTransition).length
+            ? { ...next, state_transition: stateTransition }
+            : omit(next, 'state_transition');
         }
         break;
       }
+
+      case 'set_time_field': {
+        // Without a query there is no index to check; `set_query` re-checks it later.
+        if (esClient && next.query) {
+          const dateFields = await getDateFieldsForQuery(esClient, getRootEsqlQuery(next.query));
+          // Only reject when the index reports date fields and this isn't one of them;
+          // lookups that fail or return nothing (federated sources, views) can't be verified.
+          if (dateFields && dateFields.length > 0 && !dateFields.includes(op.time_field)) {
+            throw new RuleOperationValidationError(
+              `The field "${op.time_field}" is not a \`date\` or \`date_nanos\` field on the ` +
+                `query's source index. Available date fields: ${dateFields
+                  .sort()
+                  .map((field) => `"${field}"`)
+                  .join(', ')}.`
+            );
+          }
+        }
+        next = { ...next, time_field: op.time_field };
+        break;
+      }
+      case 'set_no_data':
+        next = { ...next, no_data: op.no_data };
+        break;
 
       case 'set_grouping': {
         if (lastQueryColumns && lastQueryColumns.length > 0) {
@@ -457,14 +536,8 @@ export const executeRuleOperations = async (
           ...next,
           state_transition: {
             ...next.state_transition,
-            ...(op.pending_count !== undefined ? { pending_count: op.pending_count } : {}),
-            ...(op.pending_timeframe !== undefined
-              ? { pending_timeframe: op.pending_timeframe }
-              : {}),
-            ...(op.recovering_count !== undefined ? { recovering_count: op.recovering_count } : {}),
-            ...(op.recovering_timeframe !== undefined
-              ? { recovering_timeframe: op.recovering_timeframe }
-              : {}),
+            ...(op.pending !== undefined ? { pending: op.pending } : {}),
+            ...(op.recovering !== undefined ? { recovering: op.recovering } : {}),
           },
         };
         break;
@@ -560,18 +633,41 @@ export const executeRuleOperations = async (
     );
   }
 
-  if (!isSignalUsingStandaloneFormat(next)) {
-    throw new RuleOperationValidationError('kind "signal" requires query.format "standalone".');
+  if (!isLifecycleConfigAllowedForKind(next)) {
+    throw new RuleOperationValidationError('Signal rules cannot set recovery or no_data.');
   }
 
-  if (!isSignalQueryBreachOnly(next)) {
+  if (!isRoutingTagsAllowedForKind(next)) {
+    throw new RuleOperationValidationError(ROUTING_TAGS_SIGNAL_RULE_MESSAGE);
+  }
+
+  // `set_query` replaces the query and `set_recovery` replaces the strategy, so
+  // either one can leave `condition` with nothing to contrast against. Judge
+  // the combination after both have been applied — a query-only edit never
+  // enters `set_recovery`.
+  if (!isRecoveryConditionUsableWithBreach(next)) {
     throw new RuleOperationValidationError(
-      'Signal rules cannot set recovery_strategy or no_data_strategy.'
+      'recovery.strategy "condition" requires query.breach. Without a breach segment ' +
+        'every row of the base query breaches, so the rule could never recover.'
+    );
+  }
+
+  if (!isAbsenceDistinguishableFromBreach(next)) {
+    throw new RuleOperationValidationError(
+      `${REQUIRE_DISTINGUISHABLE_ABSENCE_MESSAGE} Without one, a group that stops breaching ` +
+        'disappears from both queries and is read as no data rather than recovered.'
+    );
+  }
+
+  if (!isRecoveryTransitionConsistentWithStrategy(next)) {
+    throw new RuleOperationValidationError(
+      'state_transition.recovering has no effect when recovery.strategy is "manual".'
     );
   }
 
   return {
     data: next,
     ...(lastQueryColumns ? { queryColumns: lastQueryColumns } : {}),
+    ...(warnings.length > 0 ? { warnings } : {}),
   };
 };

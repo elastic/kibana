@@ -14,6 +14,7 @@ import type {
 } from '../../types';
 import type { UseUnifiedHistogramProps } from '../../hooks/use_unified_histogram';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
+import { DataViewSource } from '@kbn/data-source';
 import { of } from 'rxjs';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -63,7 +64,7 @@ describe('Layout', () => {
 
     const fetchParamsExternal: UnifiedHistogramFetchParamsExternal = {
       searchSessionId: 'session-id',
-      dataView: dataViewWithTimefieldMock,
+      dataSource: new DataViewSource(dataViewWithTimefieldMock),
       query: {
         language: 'kuery',
         query: '',

@@ -111,8 +111,9 @@ describe('useGetGenerateDiscoverLink', () => {
     expect(url).toBe(DISCOVER_URL);
     const esqlQuery = (mockGetRedirectUrl.mock.calls[0] as any)?.[0]?.query?.esql;
 
-    expect(esqlQuery).toBe(`SET unmapped_fields = "NULLIFY"; FROM traces-*
-  | WHERE trace.id == "abc123"`);
+    expect(esqlQuery).toBe(
+      `SET unmapped_fields = "NULLIFY";\nFROM traces-*\n  | WHERE trace.id == "abc123"`
+    );
   });
 
   it('nullifies unmapped error.* columns in the Discover href (#281060)', () => {
@@ -131,8 +132,9 @@ describe('useGetGenerateDiscoverLink', () => {
 
     const esqlQuery = (mockGetRedirectUrl.mock.calls[0] as any)?.[0]?.query?.esql;
 
-    expect(esqlQuery).toBe(`SET unmapped_fields = "NULLIFY"; FROM logs-*
-  | WHERE service.name == "payment" AND error.culprit == "charge"`);
+    expect(esqlQuery).toBe(
+      `SET unmapped_fields = "NULLIFY";\nFROM logs-*\n  | WHERE service.name == "payment" AND error.culprit == "charge"`
+    );
   });
 
   it('preserves backslashes in the Discover href query without double-escaping', () => {

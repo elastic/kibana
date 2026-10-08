@@ -50,7 +50,11 @@ export const RuleExecutionEvent = lazySchema(() =>
     /**
      * Event details. The details vary per event type.
      */
-    details: z.object({}).catchall(z.unknown()).optional(),
+    details: z
+      .object({})
+      .catchall(z.unknown())
+      .optional()
+      .describe('Event details. The details vary per event type.'),
   })
 );
 export type RuleExecutionEvent = z.infer<typeof RuleExecutionEvent>;
