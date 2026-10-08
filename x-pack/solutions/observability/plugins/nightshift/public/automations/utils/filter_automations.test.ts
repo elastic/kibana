@@ -37,6 +37,7 @@ describe('filter automations', () => {
     expect(isAutomationRateLimited(buildAutomation(), 5)).toBe(true);
     expect(isAutomationRateLimited(buildAutomation(), 4)).toBe(false);
     expect(isAutomationRateLimited(buildAutomation({ runtime: {} }), 100)).toBe(false);
+    expect(isAutomationRateLimited(buildAutomation({ isEnabled: false }), 5)).toBe(false);
   });
 
   it('describes an automation with statuses, tags, author, and triggers', () => {
@@ -50,7 +51,7 @@ describe('filter automations', () => {
     });
     expect(
       getAutomationFacets(buildAutomation({ isEnabled: false }), { isRateLimited: false })
-    ).toMatchObject({ statuses: ['Disabled'], author: 'elastic' });
+    ).toMatchObject({ statuses: ['Paused'], author: 'elastic' });
   });
 
   it('counts values once per automation and sorts them', () => {
@@ -58,9 +59,9 @@ describe('filter automations', () => {
       { label: 'a', count: 2 },
       { label: 'b', count: 1 },
     ]);
-    expect(countFilterValues([['Rate limited'], ['Disabled'], ['Enabled']], STATUS_ORDER)).toEqual([
+    expect(countFilterValues([['Rate limited'], ['Paused'], ['Enabled']], STATUS_ORDER)).toEqual([
       { label: 'Enabled', count: 1 },
-      { label: 'Disabled', count: 1 },
+      { label: 'Paused', count: 1 },
       { label: 'Rate limited', count: 1 },
     ]);
   });
@@ -73,7 +74,7 @@ describe('filter automations', () => {
     expect(matchesFilters(automation, facets, EMPTY_FILTERS)).toBe(true);
     expect(matchesFilters(automation, facets, { ...EMPTY_FILTERS, search: 'ON-CALL' })).toBe(true);
     expect(matchesFilters(automation, facets, { ...EMPTY_FILTERS, search: 'report' })).toBe(false);
-    expect(matchesFilters(automation, facets, { ...EMPTY_FILTERS, statuses: ['Disabled'] })).toBe(
+    expect(matchesFilters(automation, facets, { ...EMPTY_FILTERS, statuses: ['Paused'] })).toBe(
       false
     );
     expect(

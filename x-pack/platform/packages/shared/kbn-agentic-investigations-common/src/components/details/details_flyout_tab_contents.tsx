@@ -7,19 +7,27 @@
 
 import React, { memo, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
-import { AttachmentSummarySection } from '../attachment_summary';
+import { FlyoutGroupedAttachments, GroupedAttachmentsSection } from '../grouped_attachments';
+import type { FlyoutGroupedAttachmentsRegistry } from '../grouped_attachments';
 import { DetailsBlock } from './detail_block';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 
 const SUMMARY_LIMIT = 120;
 
+const GROUPED_ATTACHMENTS_ORDER: readonly FlyoutGroupedAttachments[] = [
+  FlyoutGroupedAttachments.ALERTS,
+  FlyoutGroupedAttachments.ATTACKS,
+  FlyoutGroupedAttachments.RULES,
+  FlyoutGroupedAttachments.TIMELINE,
+  FlyoutGroupedAttachments.IOCS,
+];
+
 export interface OverviewTabProps {
   investigation: Investigation;
   attachments: VersionedAttachment[] | undefined;
-  attachmentsService: AttachmentServiceStartContract;
+  groupedAttachments: FlyoutGroupedAttachmentsRegistry;
   /**
    * Rendered under a "Proposed actions" heading when supplied. Omitted entirely otherwise: this
    * package cannot fetch a conversation's proposals itself, so a host that can (see
@@ -27,16 +35,32 @@ export interface OverviewTabProps {
    * what appears while it is empty or loading.
    */
   proposedActionsContent?: React.ReactNode;
+  /** Shown beside the "Proposed actions" heading; owned by the same host as the content. */
+  proposedActionsCount?: React.ReactNode;
 }
 
 export const OverviewTab = memo<OverviewTabProps>(
-  ({ investigation, attachments, attachmentsService, proposedActionsContent }) => {
+  ({
+    investigation,
+    attachments,
+    groupedAttachments,
+    proposedActionsContent,
+    proposedActionsCount,
+  }) => {
     const { summary } = investigation;
     const [expanded, setExpanded] = useState(false);
 
     const isCondensed = summary != null && summary.length > SUMMARY_LIMIT;
     const displayedSummary =
       isCondensed && !expanded ? `${summary.slice(0, SUMMARY_LIMIT)}...` : summary;
+
+    const attachmentsSection = (
+      <GroupedAttachmentsSection
+        attachments={attachments}
+        registry={groupedAttachments}
+        order={GROUPED_ATTACHMENTS_ORDER}
+      />
+    );
 
     return (
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -59,20 +83,19 @@ export const OverviewTab = memo<OverviewTabProps>(
                   </EuiButtonEmpty>
                 </div>
               )}
+              {attachmentsSection}
             </DetailsBlock>
           </EuiFlexItem>
         )}
 
-        {/* Not wrapped in an EuiFlexItem: the section renders nothing when the investigation has
-            no listable attachment, and an empty item would still take a gutter. */}
-        <AttachmentSummarySection
-          attachments={attachments}
-          attachmentsService={attachmentsService}
-        />
+        {!summary && attachmentsSection}
 
         {proposedActionsContent && (
           <EuiFlexItem>
-            <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.proposedActions}>
+            <DetailsBlock
+              title={DETAILS_FLYOUT_LABELS.sections.proposedActions}
+              titleAppend={proposedActionsCount}
+            >
               {proposedActionsContent}
             </DetailsBlock>
           </EuiFlexItem>

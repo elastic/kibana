@@ -50,6 +50,7 @@ import { initializeManagedWorkflows } from './managed_workflows/initialize_manag
 import { installRegisteredWorkerForRequest } from './managed_workflows/worker_registry';
 import { WatchesService } from './services/watches/watches_service';
 import { WorkersService } from './services/workers/workers_service';
+import { createGetWorkerBlockingReasons } from './services/workers/worker_blocking_reasons';
 import { ConversationProposalsService } from './services/conversation_proposals/conversation_proposals_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
 import { ScanFailuresService } from './services/scan_failures/scan_failures_service';
@@ -332,7 +333,8 @@ export class AlertZeroPlugin
       async (request, registration, options) => {
         const client = await plugins.workflowsExtensions.getClient(request);
         await installRegisteredWorkerForRequest(client.managedWorkflows, registration, options);
-      }
+      },
+      createGetWorkerBlockingReasons(plugins.searchInferenceEndpoints, this.logger.get('workers'))
     );
 
     this.scanFailuresService = new ScanFailuresService(management, this.logger);
