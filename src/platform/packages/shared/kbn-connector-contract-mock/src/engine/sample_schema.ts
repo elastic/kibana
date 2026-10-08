@@ -322,6 +322,8 @@ export interface SampleJsonSchemaOptions {
    * ones are generated; `required` leaves them out at every depth.
    */
   readonly optional?: 'all' | 'required';
+  /** Samples at the schema's upper bounds, as `SampleOptions.boundary` does. */
+  readonly boundary?: boolean;
 }
 
 /**
@@ -330,5 +332,5 @@ export interface SampleJsonSchemaOptions {
  */
 export const sampleJsonSchema = (
   schema: JsonSchema,
-  { optional = 'all' }: SampleJsonSchemaOptions = {}
-): unknown => sampleSchema(schema, schema, { requiredOnly: optional === 'required' });
+  { optional = 'all', boundary = false }: SampleJsonSchemaOptions = {}
+): unknown => sampleSchema(schema, schema, { requiredOnly: optional === 'required', boundary });
