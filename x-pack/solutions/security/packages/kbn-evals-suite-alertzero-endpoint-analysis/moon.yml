@@ -22,20 +22,19 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/evals'
   - '@kbn/proposals-common'
-  - '@kbn/scout'
   - '@kbn/security-evals-workflow-traces'
   - '@kbn/workflows'
-  - '@kbn/zod'
 tags:
-  - shared-common
+  - functional-tests
   - package
-  - dev
+  - prod
   - group-security
   - private
   - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
+    - '!target/**/*'
   jest-config:
     - jest.config.js
 tasks: {}
