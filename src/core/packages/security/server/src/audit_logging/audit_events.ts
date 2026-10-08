@@ -37,6 +37,8 @@ export interface AuditKibana {
     plugin_id: string;
     type: string;
     id: string;
+    /** The run of the workload, when the plugin executing it supplied one. */
+    execution_id?: string;
   };
   /**
    * Name of authentication provider associated with a login event.

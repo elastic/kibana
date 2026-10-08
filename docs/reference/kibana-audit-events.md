@@ -431,6 +431,7 @@ Audit logs are written in JSON using the [Elastic Common Schema (ECS)](ecs://ref
 | `kibana.workload.plugin_id` | ID of the plugin that owns the workload a service account is bound to, or is executing for, as part of the event.<br>Example: `workflowsManagement` |
 | `kibana.workload.type` | Type of the workload.<br>Example: `workflow` |
 | `kibana.workload.id` | ID of the workload. |
+| `kibana.workload.execution_id` | ID of the run of the workload, when the plugin executing it supplied one. Recorded on `service_account_assume` events.<br>Example: the workflow execution ID |
 | `kibana.authentication_provider` | Name of the authentication provider associated with the event.<br>Example: `my-saml-provider` |
 | `kibana.authentication_type` | Type of the authentication provider associated with the event.<br>Example: `saml` |
 | `kibana.authentication_realm` | Name of the Elasticsearch realm that has authenticated the user.<br>Example: `native` |

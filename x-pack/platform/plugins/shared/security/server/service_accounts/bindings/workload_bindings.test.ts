@@ -756,6 +756,32 @@ describe('ServiceAccountWorkloadBindings', () => {
         expect(audit.withoutRequest.log).not.toHaveBeenCalled();
       });
 
+      it('names the run on every event when the caller supplies an execution id', async () => {
+        const params = { ...WORKLOAD_IN_SPACE, executionId: 'execution-id' };
+        const workload = { ...AUDIT_WORKLOAD, execution_id: 'execution-id' };
+
+        await bindings.withScopedRequest(PLUGIN_ID, params, async () => undefined);
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...assumeEvent('success'),
+            message:
+              'Workload [alerting/rule/rule-id] [executionId=execution-id] is executing as service account [id=service-account-id]',
+            kibana: { workload },
+          })
+        );
+
+        backend.createFakeRequest.mockRejectedValueOnce(Boom.notFound('missing stored credential'));
+        await expect(
+          bindings.withScopedRequest(PLUGIN_ID, params, async () => undefined)
+        ).rejects.toMatchObject({ output: { statusCode: 404 } });
+        expect(audit.withoutRequest.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...assumeEvent('failure'),
+            kibana: { workload, space_id: 'default' },
+          })
+        );
+      });
+
       it('logs no second event when the callback throws', async () => {
         await expect(
           bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => {

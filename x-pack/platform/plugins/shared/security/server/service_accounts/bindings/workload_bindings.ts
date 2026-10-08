@@ -265,7 +265,7 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
     this.ensureAvailable();
 
     const coordinates = this.toCoordinates(pluginId, params);
-    const executionAudit = this.executionAudit(coordinates);
+    const executionAudit = this.executionAudit(coordinates, params.executionId);
 
     const binding = await this.resolveExecutionBinding(
       coordinates,
@@ -287,13 +287,18 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
   /**
    * The `service_account_assume` events of one workload execution. Until the fake request exists,
    * a failure is logged without one, so the event carries the space itself. Once it exists, events
-   * are logged on it, and share its `trace.id` with every event the workload causes.
+   * are logged on it, and share its `trace.id` with every event the workload causes. Every event
+   * names the run by `executionId` when the caller supplied one.
    */
-  private executionAudit(coordinates: WorkloadBindingCoordinates): ExecutionAudit {
+  private executionAudit(
+    coordinates: WorkloadBindingCoordinates,
+    executionId: string | undefined
+  ): ExecutionAudit {
     const workload = {
       plugin_id: coordinates.pluginId,
       type: coordinates.workloadType,
       id: coordinates.workloadId,
+      ...(executionId !== undefined ? { execution_id: executionId } : {}),
     };
     const log = (
       auditLogger: AuditLogger,

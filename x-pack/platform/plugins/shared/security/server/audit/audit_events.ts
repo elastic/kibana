@@ -549,8 +549,11 @@ const serviceAccountAssumeEvent = ({
   spaceId?: string;
   error?: Error;
 }): AuditEvent => {
+  // Same form as the run events of Workflows, so a search on the message finds both.
+  const executionDoc =
+    workload?.execution_id !== undefined ? ` [executionId=${workload.execution_id}]` : '';
   const workloadDoc = workload
-    ? `Workload [${workload.plugin_id}/${workload.type}/${workload.id}]`
+    ? `Workload [${workload.plugin_id}/${workload.type}/${workload.id}]${executionDoc}`
     : 'Workload';
   const accountDoc = serviceAccountId
     ? `service account [id=${serviceAccountId}]`

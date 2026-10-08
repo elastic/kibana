@@ -1087,6 +1087,25 @@ describe('#serviceAccountAuditEvent', () => {
     );
   });
 
+  test('names the run of the workload when it has an execution id', () => {
+    const workload = {
+      plugin_id: 'workflowsManagement',
+      type: 'workflow',
+      id: 'WORKFLOW_ID',
+      execution_id: 'EXECUTION_ID',
+    };
+    const event = serviceAccountAuditEvent({
+      action: ServiceAccountAuditAction.ASSUME,
+      serviceAccount: { id: 'kibana/nightshift-relay' },
+      workload,
+    });
+
+    expect(event.kibana).toEqual({ workload });
+    expect(event.message).toBe(
+      'Workload [workflowsManagement/workflow/WORKFLOW_ID] [executionId=EXECUTION_ID] is executing as service account [id=kibana/nightshift-relay]'
+    );
+  });
+
   test('creates an `unknown` delete event', () => {
     expect(
       serviceAccountAuditEvent({
