@@ -328,6 +328,33 @@ steps:
             - exit_status: '-1'
               limit: 3
 
+      # G10: security-persona-matrix-attack-discovery drives the production attack-discovery
+      # _generate API end to end (Chrysalis 95-alert snapshot). The attack_discovery_runner
+      # and attack_discovery_review managed workflows are enabled shipped AlertZero workers,
+      # so this suite gates shipped behavior and belongs in the weekly signal.
+      - label: 'Evals: Security Persona Matrix (Attack Discovery)'
+        key: kbn-evals-weekly-security-persona-matrix-attack-discovery
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          EVAL_SUITE_ID: 'security-persona-matrix-attack-discovery'
+          EVAL_FANOUT: '1'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+        timeout_in_minutes: 120
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          diskSizeGb: 130
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
       - label: 'Evals: Endpoint'
         key: kbn-evals-weekly-endpoint
         command: bash .buildkite/scripts/steps/evals/run_suite.sh

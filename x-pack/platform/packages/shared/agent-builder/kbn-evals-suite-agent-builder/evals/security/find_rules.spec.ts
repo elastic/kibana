@@ -10,6 +10,12 @@ import { tags } from '@kbn/scout';
 import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateDataset } from '../../src/evaluate_dataset';
 import { createEvaluateDataset } from '../../src/evaluate_dataset';
+import {
+  namesMentioned,
+  queriesOnlySeverity,
+  toolCalls,
+  type ToolCallStep,
+} from '../../src/security_rule_checks';
 import { seedFindRulesFixtures } from './find_rules_fixtures';
 
 const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
@@ -533,26 +539,29 @@ evaluate.describe(
 
         expect(turn2.errors).toEqual([]);
 
-        const turn2ToolCalls = (turn2.steps ?? []).filter(
-          (step: { type?: string; tool_id?: string }) =>
-            step.type === 'tool_call' && step.tool_id === 'security.find_rules'
-        );
-        expect(turn2ToolCalls.length).toBeGreaterThan(0);
+        const findCalls = toolCalls((turn2.steps ?? []) as ToolCallStep[], 'security.find_rules');
+        expect(findCalls.length).toBeGreaterThan(0);
 
-        const turn2CallArgs = turn2ToolCalls.map((step: { params?: unknown }) =>
-          JSON.stringify(step.params ?? {})
-        );
-        const hasMediumFilter = turn2CallArgs.some((args: string) => args.includes('"medium"'));
-        expect(hasMediumFilter).toBe(true);
+        // Turn 2 asked only for medium. A call that re-ran the critical query or filtered on
+        // anything other than the `severity` parameter is a stale reuse of turn 1, not a new query.
+        expect(
+          findCalls.some((step) => queriesOnlySeverity(step, 'medium')),
+          'no turn-2 find_rules call filtered on severity=medium alone'
+        ).toBe(true);
 
         const lastMessage = turn2.messages[turn2.messages.length - 1]?.message ?? '';
         const mediumRuleNames = [
           'Brute Force Detection',
           'Anomalous DNS Activity',
           'PowerShell Network Scan',
+          'Spear Phishing Email Detection',
         ];
-        const mentionedMedium = mediumRuleNames.some((n) => lastMessage.includes(n));
-        expect(mentionedMedium).toBe(true);
+
+        // The answer is an inventory of every medium rule, not a sample of them.
+        const missing = mediumRuleNames.filter(
+          (name) => !namesMentioned(lastMessage, [name]).length
+        );
+        expect(missing, 'medium rules missing from the turn-2 answer').toEqual([]);
       }
     );
   }

@@ -10,6 +10,18 @@ import { tags } from '@kbn/scout';
 import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateDataset } from '../../src/evaluate_dataset';
 import { createEvaluateDataset } from '../../src/evaluate_dataset';
+import {
+  catalogTagsFromStep,
+  coversTactic as ruleCoversTactic,
+  filterValues,
+  isCanonicalTactic,
+  relatesToIntegration,
+  routedToTactic as stepRoutedToTactic,
+  rulesFromStep,
+  toolCalls,
+  type CatalogRule,
+  type ToolCallStep,
+} from '../../src/security_rule_checks';
 
 /**
  * Evals for the `recommend-prebuilt-rules` skill. Two kinds live in this file:
@@ -89,132 +101,23 @@ const INTEGRATION_PACKAGE = 'okta';
 // security evals also rely on, and leaving it installed is harmless.
 const FLEET_BULK_INSTALL_PATH = '/api/fleet/epm/packages/_bulk';
 
-interface ToolCallStep {
-  type?: string;
-  tool_id?: string;
-  params?: { filter?: { mitreTactic?: unknown; tags?: unknown; relatedIntegrations?: unknown } };
-  results?: unknown[];
-}
-
-interface CatalogRule {
-  name?: string;
-  threat?: Array<{ tactic?: { id?: string; name?: string } }>;
-  related_integrations?: Array<{ package?: string }>;
-}
-
 const getFindPrebuiltRulesCalls = (steps: ToolCallStep[]): ToolCallStep[] =>
-  steps.filter(
-    (step) => step?.type === 'tool_call' && step.tool_id === FIND_PREBUILT_RULES_TOOL_ID
-  );
-
-// Did this search route the tactic through the structured `mitreTactic` filter
-// (the documented path), rather than falling back to keywords/tags?
-const routedToTactic = (step: ToolCallStep): boolean => {
-  const mitreTactic = step?.params?.filter?.mitreTactic;
-  if (!Array.isArray(mitreTactic)) return false;
-  return mitreTactic.some(
-    (value) => value === TACTIC_ID || String(value).toLowerCase() === TACTIC_NAME.toLowerCase()
-  );
-};
-
-// The tool result is `[{ type, data: { total, rules } }]`. Pull the rules array
-// out without assuming more about the wrapper than `data.rules`.
-const rulesFromStep = (step: ToolCallStep): CatalogRule[] => {
-  const results = Array.isArray(step?.results) ? step.results : [];
-  for (const result of results) {
-    const rules = (result as { data?: { rules?: unknown } })?.data?.rules;
-    if (Array.isArray(rules)) return rules as CatalogRule[];
-  }
-  return [];
-};
-
-// A rule covers the tactic if any of its MITRE threat entries names it. Rules are
-// multi-tactic, so this is "includes the tactic", not "sole tactic". Works on both
-// the triage shape (`threat: [{ tactic: { id, name } }]`) and the full threat shape.
-const coversTactic = (rule: CatalogRule): boolean =>
-  Array.isArray(rule?.threat) &&
-  rule.threat.some(
-    (entry) => entry?.tactic?.id === TACTIC_ID || entry?.tactic?.name === TACTIC_NAME
-  );
+  toolCalls(steps, FIND_PREBUILT_RULES_TOOL_ID);
 
 const getCatalogOverviewCalls = (steps: ToolCallStep[]): ToolCallStep[] =>
-  steps.filter(
-    (step) => step?.type === 'tool_call' && step.tool_id === GET_CATALOG_OVERVIEW_TOOL_ID
-  );
+  toolCalls(steps, GET_CATALOG_OVERVIEW_TOOL_ID);
 
-// The overview result is `[{ type, data: { total_installable_count, tags: [{ value, count }] } }]`.
-// Its tag values are the only legitimate source the skill may draw `tags` filters from.
-const catalogTagsFromStep = (step: ToolCallStep): string[] => {
-  const results = Array.isArray(step?.results) ? step.results : [];
-  for (const result of results) {
-    const tagBuckets = (result as { data?: { tags?: unknown } })?.data?.tags;
-    if (Array.isArray(tagBuckets)) {
-      return tagBuckets
-        .map((tag) => (tag as { value?: unknown })?.value)
-        .filter((value): value is string => typeof value === 'string');
-    }
-  }
-  return [];
-};
+const routedToTactic = (step: ToolCallStep): boolean =>
+  stepRoutedToTactic(step, TACTIC_ID, TACTIC_NAME);
 
-// Tag values the agent passed to a `find_prebuilt_rules` `tags` filter.
-const tagsFromFilter = (step: ToolCallStep): string[] => {
-  const filterTags = step?.params?.filter?.tags;
-  return Array.isArray(filterTags)
-    ? filterTags.filter((tag): tag is string => typeof tag === 'string')
-    : [];
-};
+const coversTactic = (rule: CatalogRule): boolean => ruleCoversTactic(rule, TACTIC_ID, TACTIC_NAME);
 
-// The 15 canonical MITRE ATT&CK Enterprise tactics the skill routes to (its prompt table).
-// Unlike tags, tactics are NOT discovered from a tool — they are a fixed set — so the grounding
-// source of truth is this constant, and the schema accepts any string, so this guard is real.
-const CANONICAL_TACTICS: ReadonlyArray<{ id: string; name: string }> = [
-  { id: 'TA0001', name: 'Initial Access' },
-  { id: 'TA0002', name: 'Execution' },
-  { id: 'TA0003', name: 'Persistence' },
-  { id: 'TA0004', name: 'Privilege Escalation' },
-  { id: 'TA0005', name: 'Stealth' },
-  { id: 'TA0006', name: 'Credential Access' },
-  { id: 'TA0007', name: 'Discovery' },
-  { id: 'TA0008', name: 'Lateral Movement' },
-  { id: 'TA0009', name: 'Collection' },
-  { id: 'TA0010', name: 'Exfiltration' },
-  { id: 'TA0011', name: 'Command and Control' },
-  { id: 'TA0040', name: 'Impact' },
-  { id: 'TA0042', name: 'Resource Development' },
-  { id: 'TA0043', name: 'Reconnaissance' },
-  { id: 'TA0112', name: 'Defense Impairment' },
-];
+const tagsFromFilter = (step: ToolCallStep): string[] => filterValues(step, 'tags');
 
-const CANONICAL_TACTIC_IDS = new Set(CANONICAL_TACTICS.map((tactic) => tactic.id));
-const CANONICAL_TACTIC_NAMES = new Set(
-  CANONICAL_TACTICS.map((tactic) => tactic.name.toLowerCase())
-);
+const tacticsFromFilter = (step: ToolCallStep): string[] => filterValues(step, 'mitreTactic');
 
-// A `mitreTactic` value is grounded if it is a canonical TA-ID or a canonical tactic name.
-const isCanonicalTactic = (value: string): boolean =>
-  CANONICAL_TACTIC_IDS.has(value) || CANONICAL_TACTIC_NAMES.has(value.toLowerCase());
-
-// Tactic values the agent passed to a `find_prebuilt_rules` `mitreTactic` filter.
-const tacticsFromFilter = (step: ToolCallStep): string[] => {
-  const mitreTactic = step?.params?.filter?.mitreTactic;
-  return Array.isArray(mitreTactic)
-    ? mitreTactic.filter((value): value is string => typeof value === 'string')
-    : [];
-};
-
-// Integration package names the agent passed to a `find_prebuilt_rules` `relatedIntegrations` filter.
-const relatedIntegrationsFromFilter = (step: ToolCallStep): string[] => {
-  const relatedIntegrations = step?.params?.filter?.relatedIntegrations;
-  return Array.isArray(relatedIntegrations)
-    ? relatedIntegrations.filter((value): value is string => typeof value === 'string')
-    : [];
-};
-
-// A rule relates to the integration if any of its related_integrations names that package.
-const relatesToIntegration = (rule: CatalogRule, pkg: string): boolean =>
-  Array.isArray(rule?.related_integrations) &&
-  rule.related_integrations.some((integration) => integration?.package === pkg);
+const relatedIntegrationsFromFilter = (step: ToolCallStep): string[] =>
+  filterValues(step, 'relatedIntegrations');
 
 evaluate.describe(
   'Security Skills - Recommend Prebuilt Rules',
