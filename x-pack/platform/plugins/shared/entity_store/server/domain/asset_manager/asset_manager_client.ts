@@ -804,6 +804,7 @@ export class AssetManagerClient {
         id: taskId,
         installed: true,
         resource: 'task',
+        extractionMode,
         status: task.state.status ?? null,
         runs: task.state.runs ?? 0,
         lastError: task.state.lastError ?? null,
@@ -814,6 +815,7 @@ export class AssetManagerClient {
           id: taskId,
           installed: false,
           resource: 'task',
+          extractionMode,
         };
       }
       throw e;

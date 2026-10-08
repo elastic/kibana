@@ -9,6 +9,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { EngineDescriptor, LogExtractionConfig, HistorySnapshotState } from './saved_objects';
 import type { EntityStoreStatus, EntityType } from '../../common';
 import type { ENTITY_STORE_STATUS } from './constants';
+import { ExtractionMode } from '../../common/domain/definitions/entity_schema';
 
 export type { EntityStoreStatus };
 
@@ -37,6 +38,7 @@ export type TaskComponentStatus = z.infer<typeof TaskComponentStatus>;
 export const TaskComponentStatus = lazySchema(() =>
   BaseComponentStatus.merge(
     z.object({
+      extractionMode: ExtractionMode,
       status: z.string(),
       runs: z.number(),
       lastError: z.string(),

@@ -24,6 +24,7 @@ import {
   type EngineComponentStatus,
 } from '../../../../../../../common/api/entity_analytics';
 import { useKibana } from '../../../../../../common/lib/kibana';
+import { getComponentErrors } from '../helpers';
 
 type TableColumn = EuiBasicTableColumn<EngineComponentStatus>;
 
@@ -49,6 +50,14 @@ const RESOURCE_TO_TEXT: Record<EngineComponentResource, string> = {
   data_stream: 'Data stream',
 };
 
+// The flag-off task runs in `single` mode and keeps the plain label.
+const EXTRACTION_MODE_TO_TEXT: Partial<
+  Record<NonNullable<EngineComponentStatus['extractionMode']>, string>
+> = {
+  priority: 'Task (priority)',
+  nonPriority: 'Task (non-priority)',
+};
+
 export const useColumns = (
   onToggleExpandedItem: (item: EngineComponentStatus) => void,
   expandedItems: EngineComponentStatus[]
@@ -66,7 +75,8 @@ export const useColumns = (
           />
         ),
         width: '12em',
-        render: (resource: EngineComponentStatus['resource']) => RESOURCE_TO_TEXT[resource],
+        render: (resource: EngineComponentStatus['resource'], { extractionMode }) =>
+          (extractionMode && EXTRACTION_MODE_TO_TEXT[extractionMode]) ?? RESOURCE_TO_TEXT[resource],
       },
       {
         field: 'id',
@@ -133,12 +143,13 @@ export const useColumns = (
         ),
         width: '6em',
         align: 'center',
-        render: ({ installed, resource, health }: EngineComponentStatus) => {
+        render: ({ installed, health, status }: EngineComponentStatus) => {
           if (!installed) {
             return null;
           }
 
-          return <EuiHealth color={HEALTH_COLOR[health ?? 'green']} />;
+          // Task components report the outcome of their last run as `status`, not `health`.
+          return <EuiHealth color={HEALTH_COLOR[status === 'error' ? 'red' : health ?? 'green']} />;
         },
       },
       {
@@ -169,7 +180,7 @@ export const useColumns = (
           );
           const label = isItemExpanded ? collapseLabel : expandLabel;
 
-          return component.errors && component.errors.length > 0 ? (
+          return getComponentErrors(component).length > 0 ? (
             <EuiToolTip content={label} disableScreenReaderOutput>
               <EuiButtonIcon
                 onClick={() => onToggleExpandedItem(component)}

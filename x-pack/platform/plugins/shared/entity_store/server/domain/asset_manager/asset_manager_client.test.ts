@@ -852,6 +852,7 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
     legacyLatestComponentTemplateExists,
     updatesComponentTemplateExists,
     legacyUpdatesComponentTemplateExists,
+    dualProcess = false,
   }: {
     latestTemplateExists: boolean;
     legacyLatestTemplateExists: boolean;
@@ -861,6 +862,7 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
     legacyLatestComponentTemplateExists: boolean;
     updatesComponentTemplateExists: boolean;
     legacyUpdatesComponentTemplateExists: boolean;
+    dualProcess?: boolean;
   }) => {
     const getIndexTemplate = jest.fn().mockImplementation(async ({ name }: { name: string }) => {
       const exists =
@@ -944,6 +946,7 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
         reportEvent: jest.fn(),
       } as unknown as import('../../telemetry/events').TelemetryReporter,
       savedObjectsClient: {} as SavedObjectsClientContract,
+      isDualProcessEnabled: async () => dualProcess,
     });
   };
 
@@ -1053,6 +1056,34 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
       expect(templates.every((t) => !t.installed)).toBe(true);
       expect(componentTemplates.every((t) => !t.installed)).toBe(true);
+    });
+  });
+
+  describe('extraction task components', () => {
+    const allTemplatesExist = {
+      latestTemplateExists: true,
+      legacyLatestTemplateExists: false,
+      updatesTemplateExists: true,
+      legacyUpdatesTemplateExists: false,
+      latestComponentTemplateExists: true,
+      legacyLatestComponentTemplateExists: false,
+      updatesComponentTemplateExists: true,
+      legacyUpdatesComponentTemplateExists: false,
+    };
+
+    const getTaskModes = async (client: AssetManagerClient) =>
+      (await getComponentsByResource(client, 'task')).map(
+        (component) => (component as { extractionMode?: string }).extractionMode
+      );
+
+    it('reports one single-mode task with the dual-process flag off', async () => {
+      const client = buildClient(allTemplatesExist);
+      expect(await getTaskModes(client)).toEqual(['single']);
+    });
+
+    it('reports the priority and non-priority tasks with the dual-process flag on', async () => {
+      const client = buildClient({ ...allTemplatesExist, dualProcess: true });
+      expect(await getTaskModes(client)).toEqual(['priority', 'nonPriority']);
     });
   });
 });

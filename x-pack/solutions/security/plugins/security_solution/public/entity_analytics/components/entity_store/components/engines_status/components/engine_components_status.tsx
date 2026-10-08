@@ -9,6 +9,7 @@ import React, { useState, useMemo, useCallback, Fragment } from 'react';
 import { EuiSpacer, EuiHealth, EuiCodeBlock } from '@elastic/eui';
 import { BasicTable } from '../../../../../../common/components/ml/tables/basic_table';
 import { useColumns } from '../hooks/use_columns';
+import { getComponentErrors } from '../helpers';
 import type { EngineComponentStatus } from '../../../../../../../common/api/entity_analytics';
 
 type ExpandedRowMap = Record<string, ReactNode>;
@@ -24,10 +25,9 @@ export const EngineComponentsStatusTable = ({
 
   const itemIdToExpandedRowMap: ExpandedRowMap = useMemo(() => {
     return expandedItems.reduce<ExpandedRowMap>((acc, componentStatus) => {
-      if (componentStatus.errors && componentStatus.errors.length > 0) {
-        acc[componentToId(componentStatus)] = (
-          <TransformExtendedData errors={componentStatus.errors} />
-        );
+      const errors = getComponentErrors(componentStatus);
+      if (errors.length > 0) {
+        acc[componentToId(componentStatus)] = <TransformExtendedData errors={errors} />;
       }
       return acc;
     }, {});
