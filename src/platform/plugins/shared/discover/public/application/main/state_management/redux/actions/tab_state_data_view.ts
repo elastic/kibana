@@ -62,9 +62,15 @@ export const setDataSource: InternalStateThunkActionCreator<
 
     const previousDataView = getDataViewOfSource(currentSource);
     assertDataViewOfSource(dataSource);
-    // Publish again when the same source got a new DataView, so readers of the stream see it
-    if (dataSource !== currentSource || getDataViewOfSource(dataSource) !== previousDataView) {
+
+    if (dataSource !== currentSource) {
       currentDataSource$.next(dataSource);
+    } else if (dataSource.kind === 'esql' && getDataViewOfSource(dataSource) !== previousDataView) {
+      // The same source got a new DataView. A new reference, so consumers keyed on the source
+      // (React context, memos) pick the new DataView up.
+      const republishedSource = dataSource.withColumns(dataSource.resultColumns);
+      pinDataViewOfSource(republishedSource);
+      currentDataSource$.next(republishedSource);
     }
   };
 

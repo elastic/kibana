@@ -132,6 +132,12 @@ describe('tab_state_data_view actions', () => {
       internalState.dispatch(internalStateActions.setDataSource({ tabId, dataSource: esqlSource }));
 
       expect(emissions).toHaveBeenCalledTimes(1);
+      const republishedSource = currentDataSource$.getValue();
+      expect(republishedSource).not.toBe(esqlSource);
+      expect(republishedSource).toMatchObject({
+        id: esqlSource.id,
+        datasetId: esqlSource.datasetId,
+      });
       expect(getTabDataView(selectTabRuntimeState(runtimeStateManager, tabId))).toBe(nextShim);
     });
 
