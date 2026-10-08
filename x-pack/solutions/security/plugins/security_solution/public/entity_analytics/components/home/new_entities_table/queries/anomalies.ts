@@ -16,9 +16,10 @@ import {
 import { getEntityIds, getEntityId, getNumber, ANOMALY_COUNT_FIELD } from '../common';
 import { buildEuidStages } from './euid_pipeline';
 import { buildMergedForeignSortQuery } from './foreign_sort';
-import type { QueryArgs, PageEnricher, Row, ColumnQuerySpec } from '../common';
+import type { QueryArgs, Row } from '../common';
 import { buildEntityListSortPlan, fetchSplitSortPage } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
+import type { ColumnQuerySpec, PageEnricher } from './types';
 
 /** ML anomaly indices have different mappings; unmapped fields read as null, not as errors. */
 const SET_UNMAPPED_NULLIFY = 'SET unmapped_fields="nullify";';

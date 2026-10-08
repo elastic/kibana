@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  compareEntityIds,
-  getEntityIds,
-  getEntityId,
-  getNumber,
-  getString,
-  RISK_SCORE_CHANGE_FIELD,
-  RISK_SCORE_NORM_FIELD,
-} from '../common';
+import { getEntityIds, getEntityId, getNumber, getString, RISK_SCORE_NORM_FIELD } from '../common';
 import {
   buildAfterIdClause,
   buildKeepClause,
@@ -22,12 +14,16 @@ import {
   buildLookback,
   getRiskScoreIndex,
   toList,
+  compareEntityIds,
 } from './esql';
 import { buildMergedForeignRows, buildMergedForeignSortQuery } from './foreign_sort';
-import type { QueryArgs, PageEnricher, ColumnQuerySpec } from '../common';
+import type { QueryArgs } from '../common';
 import type { MergedForeignRowsOptions } from './foreign_sort';
 import { buildEmptyRowsQuery, buildValueCursorClause, fetchSplitSortPage } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
+import type { ColumnQuerySpec, PageEnricher } from './types';
+
+const RISK_SCORE_CHANGE_FIELD = 'risk_score_change';
 
 /** Width of the reference window before the time range, as in the risk movers tile. */
 const REFERENCE_WINDOW_HOURS = 2;

@@ -7,6 +7,10 @@
 
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import { getEuidSourceFields } from '@kbn/entity-store/common/domain/euid';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
+import { lastValueFrom } from 'rxjs';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../../common/constants';
 import { getRiskScoreTimeSeriesIndex } from '../../../../../../common/entity_analytics/risk_engine';
 import {
@@ -14,9 +18,10 @@ import {
   ENTITY_FIELDS,
   ENTITY_ID_FIELD,
   ENTITY_TYPE_FIELD,
-  TIME_RANGE_DAYS,
+  getEntityId,
 } from '../common';
 import type { PageCursor, QueryArgs, Row, SortDir, TimeRange } from '../common';
+import type { EsqlRunner } from './types';
 
 // ── index name helpers ────────────────────────────────────────────────────────
 
@@ -105,6 +110,8 @@ export const joinAnd = (...parts: Array<string | undefined | null | false>): str
 export const buildLookupJoinClause = (concreteEntityIndexName: string): string =>
   `| LOOKUP JOIN ${concreteEntityIndexName} ON \`entity.id\``;
 
+const TIME_RANGE_DAYS = { '24h': 1, '7d': 7, '30d': 30 } as const;
+
 /**
  * Start of the time range as ES|QL date math, e.g. `NOW() - 30 days`. Every grid and tile
  * query filters on it, so they agree on the window, and ES|QL folds it into a constant that
@@ -175,3 +182,34 @@ export const indentForkBranch = (esql: string): string =>
     .split('\n')
     .map((line) => `    ${line}`)
     .join('\n');
+
+// ── running queries ──────────────────────────────────────────────────────────
+
+const toRows = ({ columns, values }: Pick<ESQLSearchResponse, 'columns' | 'values'>): Row[] =>
+  values.map((row) => Object.fromEntries(columns.map((col, i) => [col.name, row[i]])));
+
+/** Pin ES|QL to the current project; CPS space default is often `_alias:*`. */
+const ESQL_PROJECT_ROUTING = '_alias:_origin' as const;
+
+export const createEsqlRunner =
+  (searchService: DataPublicPluginStart['search'], signal?: AbortSignal): EsqlRunner =>
+  async (query) => {
+    const { rawResponse } = await lastValueFrom(
+      searchService.search<
+        IKibanaSearchRequest<{ query: string }>,
+        IKibanaSearchResponse<ESQLSearchResponse>
+      >(
+        { params: { query } },
+        {
+          abortSignal: signal,
+          strategy: 'esql_async',
+          projectRouting: ESQL_PROJECT_ROUTING,
+        }
+      )
+    );
+    return toRows(rawResponse);
+  };
+
+/** `entity.id ASC` order. */
+export const compareEntityIds = (a: Row, b: Row): number =>
+  (getEntityId(a) ?? '') < (getEntityId(b) ?? '') ? -1 : 1;

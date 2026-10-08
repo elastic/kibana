@@ -17,17 +17,19 @@ import {
 import {
   getEntityIds,
   getEntityId,
-  ALERT_COUNT_FIELD,
   ALLOWED_ENTITY_TYPES,
   ENTITY_TYPE_FIELD,
-  LAST_SEEN_ALERT_FIELD,
   SEVERITY_COUNT_FIELDS,
 } from '../common';
 import { buildAlertEuidPipeline } from './euid_pipeline';
 import { buildEntitiesInViewConditions, IN_VIEW_FIELD } from './entities_in_view';
-import type { QueryArgs, Row, PageEnricher, ColumnQuerySpec } from '../common';
+import type { QueryArgs, Row } from '../common';
 import { buildEntityListSortPlan, fetchSplitSortPage } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
+import type { ColumnQuerySpec, PageEnricher } from './types';
+
+const ALERT_COUNT_FIELD = 'alert_count';
+const LAST_SEEN_ALERT_FIELD = 'last_seen_alert';
 
 const ALERT_OPEN_STATUS_FILTER =
   'kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != "closed"';

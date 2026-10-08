@@ -15,7 +15,8 @@ import {
   buildSortSuffix,
   toList,
 } from './esql';
-import type { EsqlRunner, PageCursor, QueryArgs, Row, SortPageContext } from '../common';
+import type { PageCursor, QueryArgs, Row } from '../common';
+import type { EsqlRunner, SortPageContext } from './types';
 
 /*
  * Split sort: a foreign sort that reads its two kinds of rows separately.

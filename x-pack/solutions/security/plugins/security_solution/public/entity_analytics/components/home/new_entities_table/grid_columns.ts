@@ -12,7 +12,8 @@ import { riskScoreChangeQuerySpec } from './queries/risk_score_change';
 import { groupSizeQuerySpec } from './queries/group_size';
 import { caseCountQuerySpec } from './queries/cases';
 import { nativeSortQuerySpec } from './queries/native';
-import type { ColumnQuerySpec, PageEnricher, RowsMode, SortPageFetcher } from './common';
+import type { RowsMode } from './common';
+import type { ColumnQuerySpec, PageEnricher, SortPageFetcher } from './queries/types';
 
 // Which query each column runs, and why: see queries/README.md.
 

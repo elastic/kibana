@@ -7,7 +7,7 @@
 
 import { ENTITY_GRID_CASES_INTERNAL_URL } from '../../../../../../common/entity_analytics/entity_analytics/constants';
 import { getEntityIds } from '../common';
-import type { RunContext, PageEnricher, ColumnQuerySpec } from '../common';
+import type { ColumnQuerySpec, PageEnricher, RunContext } from './types';
 
 const CASE_COUNT_FIELD = 'case_count';
 

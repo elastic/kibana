@@ -17,26 +17,20 @@ import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import type {
-  EnrichedRows,
   PageCursor,
   QueryArgs,
   Row,
   RowsMode,
   SortDir,
+  SortValue,
   TimeRange,
 } from '../common';
-import {
-  ANOMALY_COUNT_FIELD,
-  createEsqlRunner,
-  fetchEnrichedRows,
-  getEntityIds,
-  getEntityId,
-  getNumber,
-  nullOnFailure,
-  toSortValue,
-} from '../common';
+import { ANOMALY_COUNT_FIELD, getEntityIds, getEntityId, getNumber } from '../common';
 import { PAGE_ENRICHERS, findSortPageFetcher } from '../grid_columns';
 import { buildEntitiesInViewCountQuery } from '../queries/entities_in_view';
+import { createEsqlRunner } from '../queries/esql';
+import type { EnrichedFields, PageEnricher, RunContext } from '../queries/types';
+import { isAbortError } from '../../../../../common/utils/exceptions';
 
 const GRID_QUERY_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.entitiesGrid.queryError',
@@ -102,6 +96,67 @@ interface GridContext {
 
 const isAnomalySort = ({ sortField }: UseEntityGridDataOptions) =>
   sortField === ANOMALY_COUNT_FIELD;
+
+// ── enrichment ───────────────────────────────────────────────────────────────
+
+/** A sort query may already have read an enricher's fields, e.g. the alert sort its counts. */
+const isMissingFields = (rows: readonly Row[], { fields }: PageEnricher): boolean =>
+  fields.some((field) => rows.some((row) => !(field in row)));
+
+interface EnrichedRows {
+  rows: Row[];
+  /** Errors of the enrichers that failed. Their fields stay unset, so they read as unknown. */
+  errors: unknown[];
+}
+
+/**
+ * Copies of `rows` with the fields of every enricher they lack. One enricher failing doesn't
+ * fail the page: its error is returned with the rows. An abort still rejects: the query key
+ * changed and the caller drops the result.
+ */
+export const fetchEnrichedRows = async (
+  rows: readonly Row[],
+  args: QueryArgs,
+  ctx: RunContext,
+  enrichers: readonly PageEnricher[]
+): Promise<EnrichedRows> => {
+  const settled = await Promise.allSettled(
+    enrichers
+      .filter((enricher) => isMissingFields(rows, enricher))
+      .map(({ fetch }) => fetch(rows, args, ctx))
+  );
+  const results: EnrichedFields[] = [];
+  const errors: unknown[] = [];
+  for (const result of settled) {
+    if (result.status === 'fulfilled') results.push(result.value);
+    else if (isAbortError(result.reason)) throw result.reason;
+    else errors.push(result.reason);
+  }
+  return {
+    rows: rows.map((row) => {
+      const id = getEntityId(row);
+      return results.reduce<Row>(
+        (merged, fields) => ({ ...merged, ...(id != null ? fields.get(id) : undefined) }),
+        { ...row }
+      );
+    }),
+    errors,
+  };
+};
+
+/**
+ * Resolves to `null` when the request fails, so the caller can fall back instead of failing.
+ * An abort still rejects: the query key changed and the caller drops the result.
+ */
+const nullOnFailure = <T>(request: Promise<T>): Promise<T | null> =>
+  request.catch((err) => {
+    if (isAbortError(err)) throw err;
+    return null;
+  });
+
+/** Narrows a sort column value for a cursor. */
+const toSortValue = (value: unknown): SortValue =>
+  typeof value === 'string' || typeof value === 'number' ? value : null;
 
 // ── query keys ────────────────────────────────────────────────────────────────
 

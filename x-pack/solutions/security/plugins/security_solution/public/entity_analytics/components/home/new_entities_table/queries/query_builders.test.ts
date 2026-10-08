@@ -7,13 +7,12 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { buildKeepClause } from './esql';
-import { fetchEnrichedRows } from '../common';
-import type { PageCursor, QueryArgs, Row, RunContext, SortPageFetcher } from '../common';
+import type { PageCursor, QueryArgs, Row } from '../common';
 import { COLUMN_ENRICHERS, SORT_PAGE_FETCHERS } from '../grid_columns';
 import { buildEntitiesInViewCountQuery } from './entities_in_view';
 import { alertCountQuerySpec } from './alerts';
-import { anomalyCountQuerySpec } from './anomalies';
 import { SPLIT_SORT_MIN_VIEW_SIZE } from './split_sort';
+import type { RunContext, SortPageFetcher } from './types';
 
 const { enricher: alertsEnricher } = alertCountQuerySpec;
 
@@ -229,8 +228,7 @@ describe('entities grid query builders', () => {
       expect(runQuery).not.toHaveBeenCalled();
     });
 
-    it('copies the alert counts per entity onto copies of the page rows', async () => {
-      const rows = PAGE_ROWS.slice(0, 2);
+    it('sets every alert field per entity, 0 or null for entities without alerts', async () => {
       const runQuery = jest.fn(async (_query: string) => [
         {
           'entity.id': 'host:h-1',
@@ -243,86 +241,30 @@ describe('entities grid query builders', () => {
         },
       ]);
 
-      const { rows: enriched, errors } = await fetchEnrichedRows(
-        rows,
+      const fields = await alertsEnricher.fetch(
+        PAGE_ROWS.slice(0, 2),
         BASE_ARGS,
-        createRunContext(runQuery),
-        [alertsEnricher]
+        createRunContext(runQuery)
       );
 
-      expect(errors).toEqual([]);
-      expect(enriched.map(({ 'entity.id': id, ...rest }) => [id, rest])).toEqual([
-        [
-          'host:h-1',
-          expect.objectContaining({
-            last_seen_alert: '2026-10-04T11:00:00.000Z',
-            alert_count: 7,
-            alert_critical: 1,
-            alert_high: 2,
-            alert_medium: 3,
-            alert_low: 1,
-          }),
-        ],
-        [
-          'host:web-2',
-          expect.objectContaining({
-            last_seen_alert: null,
-            alert_count: 0,
-            alert_critical: 0,
-            alert_high: 0,
-            alert_medium: 0,
-            alert_low: 0,
-          }),
-        ],
-      ]);
-      expect(rows[0]).not.toHaveProperty('alert_count');
-    });
-
-    it('skips an enricher whose fields the sort query already read', async () => {
-      const runQuery = jest.fn(async (_query: string) => []);
-      const sortedRows = PAGE_ROWS.map((row) => ({
-        ...row,
-        last_seen_alert: null,
-        alert_count: 0,
-        alert_critical: 0,
-        alert_high: 0,
-        alert_medium: 0,
-        alert_low: 0,
-      }));
-
-      await fetchEnrichedRows(sortedRows, BASE_ARGS, createRunContext(runQuery), [alertsEnricher]);
-
-      expect(runQuery).not.toHaveBeenCalled();
-    });
-
-    it('leaves the fields of a failed enricher unset and returns its error', async () => {
-      const error = new Error('boom');
-      const runQuery = jest.fn(async (query: string): Promise<Row[]> => {
-        if (query.includes('alerts-security')) throw error;
-        return [{ 'entity.id': 'host:h-1', anomaly_count: 2 }];
+      expect(Object.fromEntries(fields)).toEqual({
+        'host:h-1': {
+          last_seen_alert: '2026-10-04T11:00:00.000Z',
+          alert_count: 7,
+          alert_critical: 1,
+          alert_high: 2,
+          alert_medium: 3,
+          alert_low: 1,
+        },
+        'host:web-2': {
+          last_seen_alert: null,
+          alert_count: 0,
+          alert_critical: 0,
+          alert_high: 0,
+          alert_medium: 0,
+          alert_low: 0,
+        },
       });
-
-      const { rows, errors } = await fetchEnrichedRows(
-        PAGE_ROWS,
-        BASE_ARGS,
-        createRunContext(runQuery),
-        [alertsEnricher, anomalyCountQuerySpec.enricher]
-      );
-
-      expect(errors).toEqual([error]);
-      expect(rows[0]).not.toHaveProperty('alert_count');
-      expect(rows[0]).toHaveProperty('anomaly_count', 2);
-    });
-
-    it('rejects when the enrichers are aborted', async () => {
-      const abort = Object.assign(new Error('aborted'), { name: 'AbortError' });
-      const runQuery = jest.fn(async (_query: string): Promise<Row[]> => {
-        throw abort;
-      });
-
-      await expect(
-        fetchEnrichedRows(PAGE_ROWS, BASE_ARGS, createRunContext(runQuery), [alertsEnricher])
-      ).rejects.toBe(abort);
     });
   });
 });

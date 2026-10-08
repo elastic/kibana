@@ -7,7 +7,8 @@
 
 import { buildEntitiesInViewSteps } from './entities_in_view';
 import { buildKeepClause, buildCursorClause, buildSortSuffix } from './esql';
-import type { ColumnQuerySpec, QueryArgs } from '../common';
+import type { QueryArgs } from '../common';
+import type { ColumnQuerySpec } from './types';
 
 const buildNativeEntitySortQuery = (args: QueryArgs): string => {
   const {

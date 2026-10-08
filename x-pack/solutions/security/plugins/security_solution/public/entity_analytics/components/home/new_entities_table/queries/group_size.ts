@@ -6,7 +6,6 @@
  */
 
 import {
-  compareEntityIds,
   getEntityIds,
   getEntityId,
   getNumber,
@@ -24,20 +23,13 @@ import {
   toList,
   buildCursorClause,
   buildJoinedPageSteps,
+  compareEntityIds,
 } from './esql';
 import { buildEntitiesInViewSteps } from './entities_in_view';
 import { buildMergedForeignSortQuery } from './foreign_sort';
-import type {
-  EsqlRunner,
-  QueryArgs,
-  PageEnricher,
-  Row,
-  ColumnQuerySpec,
-  PageCursor,
-  SortDir,
-  SortPageContext,
-} from '../common';
+import type { QueryArgs, Row, PageCursor, SortDir } from '../common';
 import { SPLIT_SORT_MIN_VIEW_SIZE, buildEmptyRowsQuery } from './split_sort';
+import type { ColumnQuerySpec, EsqlRunner, PageEnricher, SortPageContext } from './types';
 
 const GROUP_KEY = `COALESCE(${RESOLVED_TO_FIELD}, ${ENTITY_ID_FIELD})`;
 
