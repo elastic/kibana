@@ -136,14 +136,14 @@ describe('buildClassicAlertsQuery', () => {
   });
 
   it('translates KQL search text to Elasticsearch DSL', () => {
-    const query = buildClassicAlertsQuery({ queryString: 'some.number >= 10' });
+    const query = buildClassicAlertsQuery({ queryString: 'kibana.alert.rule.name: test' });
 
     expect(getFilters(query)).toEqual(
       expect.arrayContaining([
         {
           bool: {
             minimum_should_match: 1,
-            should: [{ range: { 'some.number': { gte: '10' } } }],
+            should: [{ match: { 'kibana.alert.rule.name': 'test' } }],
           },
         },
       ])

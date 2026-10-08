@@ -21,6 +21,22 @@ describe('episodes query filter', () => {
     });
   });
 
+  it('preserves valid KQL that only applies to classic alerts', () => {
+    expect(
+      getQueryFilterState({
+        status: ['active'],
+        queryString: 'kibana.alert.rule.name: test',
+      })
+    ).toEqual({
+      status: ['active'],
+      queryString: 'kibana.alert.rule.name: test',
+    });
+  });
+
+  it('accepts valid KQL without a v2 episode field', () => {
+    expect(isValidKql('searching')).toBe(true);
+  });
+
   it('treats an empty query as valid', () => {
     expect(isValidKql('')).toBe(true);
   });

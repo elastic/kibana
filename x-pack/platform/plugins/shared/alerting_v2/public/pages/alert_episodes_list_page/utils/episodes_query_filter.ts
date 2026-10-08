@@ -9,6 +9,10 @@ import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import { fromKueryExpression } from '@kbn/es-query';
 
 export const isValidKql = (value: string): boolean => {
+  if (!value.trim()) {
+    return true;
+  }
+
   try {
     fromKueryExpression(value);
     return true;
