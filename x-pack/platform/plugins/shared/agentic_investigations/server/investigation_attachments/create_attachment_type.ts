@@ -13,6 +13,7 @@ import type {
   InvestigationAttachmentDocument,
   StoredInvestigationAttachment,
 } from '../../common/investigation_attachments';
+import type { AssertCanReadConversation } from './assert_can_read_conversation';
 import type { InvestigationAttachmentDocService } from './attachment_doc_service';
 import { sameInvestigationAttachmentDocument } from './same_document';
 
@@ -30,11 +31,12 @@ export interface InvestigationAttachmentTypeOptions<
    * origin without data), so they check it before reading.
    */
   assertCanRead: (request: KibanaRequest) => Promise<void>;
-  /** Applies the entity's existing read authorization to the resolved document. */
-  assertCanReadDocument?: (
-    request: KibanaRequest,
-    document: InvestigationAttachmentDocument<TStored>
-  ) => Promise<void>;
+  /**
+   * Throws when the caller may not read the conversation a document belongs to. Document ids are
+   * derived from the conversation id, so without it an origin could expose another
+   * conversation's document.
+   */
+  assertCanReadConversation: AssertCanReadConversation;
   logger: Logger;
   /** Text the LLM sees for this attachment. */
   format: (document: InvestigationAttachmentDocument<TStored>) => string;
@@ -71,7 +73,7 @@ export const createInvestigationAttachmentType = <
   schema,
   getService,
   assertCanRead,
-  assertCanReadDocument,
+  assertCanReadConversation,
   logger,
   format,
   agentDescription,
@@ -95,9 +97,10 @@ export const createInvestigationAttachmentType = <
     try {
       await assertCanRead(context.request);
       const document = await getService().get(origin, context.spaceId);
-      if (document) {
-        await assertCanReadDocument?.(context.request, document);
+      if (!document) {
+        return undefined;
       }
+      await assertCanReadConversation(context.request, document.conversationId);
       return document;
     } catch (error) {
       logger.warn(`Failed to resolve ${type} for origin "${origin}": ${error}`);
@@ -115,7 +118,7 @@ export const createInvestigationAttachmentType = <
       if (!current) {
         return false;
       }
-      await assertCanReadDocument?.(context.request, current);
+      await assertCanReadConversation(context.request, current.conversationId);
       return isStale(latest.data, current);
     } catch (error) {
       logger.warn(`Failed to check staleness for ${type} "${attachment.origin}": ${error}`);

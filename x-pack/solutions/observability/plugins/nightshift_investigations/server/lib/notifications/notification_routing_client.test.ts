@@ -133,6 +133,7 @@ describe('notification routing attachments', () => {
     ).notificationRoutingAttachment.createAttachmentType({
       getService: () => service,
       assertCanRead: async () => {},
+      assertCanReadConversation: async () => {},
       logger: { warn: jest.fn() } as never,
     });
     expect(type.isReadonly).toBe(true);

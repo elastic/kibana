@@ -106,12 +106,18 @@ const setup = () => {
 
 const registeredType = (
   service: ReturnType<typeof setup>['service'],
-  assertCanRead: jest.Mock = jest.fn().mockResolvedValue(undefined)
+  assertCanRead: jest.Mock = jest.fn().mockResolvedValue(undefined),
+  assertCanReadConversation: jest.Mock = jest.fn().mockResolvedValue(undefined)
 ) => {
   const registerType = jest.fn();
   note.registerAttachmentType(
     { attachments: { registerType } } as unknown as AgentBuilderPluginSetup,
-    { getService: () => service, assertCanRead, logger: loggerMock.create() }
+    {
+      getService: () => service,
+      assertCanRead,
+      assertCanReadConversation,
+      logger: loggerMock.create(),
+    }
   );
   return registerType.mock.calls[0][0] as AttachmentTypeDefinition;
 };
@@ -307,8 +313,9 @@ describe('InvestigationAttachmentDocService', () => {
     await expect(service.listByConversationIds(ids, SPACE_ID)).rejects.toBeInstanceOf(
       InvestigationAttachmentInvalidRequestError
     );
+    // Candidate searches may return up to Elasticsearch's result window of conversations.
     await expect(
-      service.searchConversationIds({ spaceId: SPACE_ID, filter: [], size: 1001 })
+      service.searchConversationIds({ spaceId: SPACE_ID, filter: [], size: 10_001 })
     ).rejects.toBeInstanceOf(InvestigationAttachmentInvalidRequestError);
   });
 
@@ -367,6 +374,18 @@ describe('InvestigationAttachmentDocService', () => {
     }
   });
 
+  it('finds the conversations holding documents across spaces, once each', async () => {
+    const { storage, service } = setup();
+    storage.put('a', body({ conversationId: 'conv-1' }));
+    storage.put('b', body({ conversationId: 'conv-1' }));
+    storage.put('c', body({ conversationId: 'conv-1', spaceId: 'other' }));
+
+    await expect(service.findConversationsAcrossSpaces()).resolves.toEqual([
+      { spaceId: SPACE_ID, conversationId: 'conv-1' },
+      { spaceId: 'other', conversationId: 'conv-1' },
+    ]);
+  });
+
   it('deletes by conversation and by space for maintenance', async () => {
     const { storage, service } = setup();
     storage.put('a', body({ conversationId: 'conv-1' }));
@@ -398,15 +417,17 @@ describe('investigation attachment type', () => {
     );
   });
 
-  it('applies document read authorization to resolution and staleness without exposing unreadable data', async () => {
+  it('applies conversation read authorization to resolution and staleness without exposing unreadable data', async () => {
     const storage = createInMemoryStorage<NoteDocument>();
     const service = note.createServiceFromStorage(storage);
     storage.put(noteId(), body());
-    const assertCanReadDocument = jest.fn().mockRejectedValue(new Error('Conversation unreadable'));
+    const assertCanReadConversation = jest
+      .fn()
+      .mockRejectedValue(new Error('Conversation unreadable'));
     const definition = note.createAttachmentType({
       getService: () => service,
       assertCanRead: async () => {},
-      assertCanReadDocument,
+      assertCanReadConversation,
       logger: loggerMock.create(),
     });
     await expect(definition.resolve?.(noteId(), resolveContext)).resolves.toBeUndefined();
@@ -431,11 +452,11 @@ describe('investigation attachment type', () => {
         resolveContext
       )
     ).resolves.toBe(false);
-    expect(assertCanReadDocument).toHaveBeenCalledWith(resolveContext.request, {
-      id: noteId(),
-      ...body(),
-    });
-    assertCanReadDocument.mockResolvedValue(undefined);
+    expect(assertCanReadConversation).toHaveBeenCalledWith(
+      resolveContext.request,
+      body().conversationId
+    );
+    assertCanReadConversation.mockResolvedValue(undefined);
     await expect(definition.resolve?.(noteId(), resolveContext)).resolves.toEqual({
       id: noteId(),
       ...body(),
@@ -486,6 +507,46 @@ describe('investigation attachment type', () => {
     ).resolves.toBe(false);
     expect(assertCanRead).toHaveBeenCalledWith(resolveContext.request);
     expect(storage.search).not.toHaveBeenCalled();
+  });
+
+  it('resolves and checks staleness only for a caller who can read the document conversation', async () => {
+    const { storage, service } = setup();
+    storage.put(noteId(), body());
+    const assertCanReadConversation = jest
+      .fn()
+      .mockRejectedValue(new Error('Conversation is not readable'));
+    const definition = registeredType(
+      service,
+      jest.fn().mockResolvedValue(undefined),
+      assertCanReadConversation
+    );
+
+    await expect(definition.resolve?.(noteId(), resolveContext)).resolves.toBeUndefined();
+    await expect(
+      definition.isStale?.(
+        {
+          id: noteId(),
+          type: TYPE,
+          origin: noteId(),
+          current_version: 1,
+          active: true,
+          versions: [
+            {
+              version: 1,
+              data: { id: noteId(), ...body({ count: 9 }) },
+              created_at: '',
+              content_hash: '',
+              estimated_tokens: 1,
+            },
+          ],
+        },
+        resolveContext
+      )
+    ).resolves.toBe(false);
+    expect(assertCanReadConversation).toHaveBeenCalledWith(
+      resolveContext.request,
+      body().conversationId
+    );
   });
 
   it('is stale when the index changed beyond a timestamp', async () => {

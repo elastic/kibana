@@ -220,12 +220,12 @@ export class NightshiftInvestigationsPlugin
       notificationRoutingAttachment.registerAttachmentType(plugins.agentBuilder, {
         getService: () => this.getNotificationRoutingService(),
         assertCanRead: async () => {},
-        assertCanReadDocument: async (request, document) => {
+        assertCanReadConversation: async (request, conversationId) => {
           if (!this.agentBuilder) {
             throw new Error('agentBuilder is not available');
           }
           const conversations = await this.agentBuilder.conversations.getScopedClient({ request });
-          await conversations.get(document.conversationId);
+          await conversations.get(conversationId);
         },
         logger: this.logger,
       });

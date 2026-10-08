@@ -27,6 +27,7 @@ import {
 } from './attachment_doc_service';
 import { attachFromTool, type AttachedFromTool } from './attach_from_tool';
 import { attachWithPublicClient } from './attach_with_public_client';
+import type { AssertCanReadConversation } from './assert_can_read_conversation';
 import { createInvestigationAttachmentType } from './create_attachment_type';
 import { hashInvestigationAttachmentId } from './doc_id';
 
@@ -76,11 +77,8 @@ export interface InvestigationAttachmentTypeDeps<TStored extends StoredInvestiga
   getService: () => InvestigationAttachmentDocService<TStored>;
   /** Checked before `resolve` and `isStale` read the index by a caller-supplied origin. */
   assertCanRead: (request: KibanaRequest) => Promise<void>;
-  /** Applies the entity's existing read authorization to the resolved document. */
-  assertCanReadDocument?: (
-    request: KibanaRequest,
-    document: InvestigationAttachmentDocument<TStored>
-  ) => Promise<void>;
+  /** Checked against the document's conversation before `resolve` or `isStale` use it. */
+  assertCanReadConversation: AssertCanReadConversation;
   logger: Logger;
 }
 
@@ -166,7 +164,7 @@ export const defineInvestigationAttachment = <
     {
       getService,
       assertCanRead,
-      assertCanReadDocument,
+      assertCanReadConversation,
       logger,
     }: InvestigationAttachmentTypeDeps<TStored>
   ) =>
@@ -175,7 +173,7 @@ export const defineInvestigationAttachment = <
       schema: config.schema,
       getService,
       assertCanRead,
-      assertCanReadDocument,
+      assertCanReadConversation,
       logger,
       format: config.format,
       agentDescription: config.agentDescription,

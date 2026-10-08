@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
 import classnames from 'classnames';
 import throttle from 'lodash/throttle';
@@ -178,6 +178,11 @@ export interface WorkflowYAMLEditorProps {
    * control bar (e.g. WorkflowDetailBottomBar) already owns those buttons.
    */
   hideEditorTools?: boolean;
+  /**
+   * Reports the height (px) of the validation panel docked below the editor, so an overlay
+   * floating over the editor (e.g. WorkflowDetailBottomBar) can sit above it.
+   */
+  onValidationPanelHeightChange?: (height: number) => void;
 }
 
 export const WorkflowYAMLEditor = ({
@@ -188,13 +193,14 @@ export const WorkflowYAMLEditor = ({
   openActionsRef,
   onToggleEditorMode,
   hideEditorTools = false,
+  onValidationPanelHeightChange,
 }: WorkflowYAMLEditorProps) => {
   const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
     WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
     false
   );
-  // The step minimap ships under the same Workflows experimental-features
-  // Advanced Setting as the graph visualization — use isVisualEditorEnabled directly.
+  // Currently gates only the step minimap (and the hidden Monaco scrollbar it replaces); the
+  // read-only graph view is GA. The setting is expected to gate the authoring graph view later.
   const { notifications, http } = useKibana().services;
   const euiThemeContext = useEuiTheme();
 
@@ -272,6 +278,12 @@ export const WorkflowYAMLEditor = ({
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const focusedStepInfoRef = useRef<StepInfo | undefined>(focusedStepInfo);
   focusedStepInfoRef.current = focusedStepInfo;
+  const [validationPanel, setValidationPanel] = useState<HTMLDivElement | null>(null);
+  const { height: validationPanelHeight } = useResizeObserver(validationPanel);
+  useEffect(() => {
+    onValidationPanelHeightChange?.(validationPanel ? validationPanelHeight : 0);
+  }, [onValidationPanelHeightChange, validationPanel, validationPanelHeight]);
+
   const [insertedStepRange, setInsertedStepRange] = useState<StepLineRange | null>(null);
 
   const highlightedStepId = useSelector(selectHighlightedStepId);
@@ -749,7 +761,7 @@ export const WorkflowYAMLEditor = ({
         shortcut: [isMac ? '⌘' : 'Ctrl', 'Shift', 'F'],
       },
     ];
-    if (isVisualEditorEnabled && onToggleEditorMode) {
+    if (onToggleEditorMode) {
       cmds.push({
         id: 'toggleEditorMode',
         label: i18n.translate('workflows.yamlEditor.commands.toggleEditorMode', {
@@ -762,7 +774,7 @@ export const WorkflowYAMLEditor = ({
       });
     }
     return cmds;
-  }, [isVisualEditorEnabled, onToggleEditorMode]);
+  }, [onToggleEditorMode]);
 
   const jumpToStepEntries: JumpToStepEntry[] = useMemo(() => {
     if (!workflowLookup) return [];
@@ -920,7 +932,11 @@ export const WorkflowYAMLEditor = ({
       <div css={styles.editorAreaWrapper}>
         {/* Step minimap — experimental; hidden with the editor body in graph view. */}
         {isVisualEditorEnabled && isActive ? (
-          <div css={styles.minimapContainer} ref={minimapContainerRef}>
+          <div
+            css={styles.minimapContainer}
+            ref={minimapContainerRef}
+            data-test-subj="workflowYamlEditorMinimapContainer"
+          >
             <WorkflowStepMinimap
               editor={mountedEditor}
               validationErrors={validationErrors}
@@ -949,7 +965,7 @@ export const WorkflowYAMLEditor = ({
         </div>
       </div>
       {isActive && (
-        <div css={styles.validationErrorsContainer}>
+        <div css={styles.validationErrorsContainer} ref={setValidationPanel}>
           <WorkflowYamlValidationAccordion
             isMounted={isEditorMounted}
             isLoading={isLoadingValidation}
