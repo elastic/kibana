@@ -80,7 +80,6 @@ export const toTokenValues = (theme: EuiThemeComputed) => {
       vis: {
         ...byVisIndex('series', (index) => vis[`euiColorVis${index}`]),
         ...byVisIndex('text', (index) => vis[`euiColorVisText${index}`]),
-        ...byVisIndex('behindText', (index) => vis[`euiColorVisBehindText${index}`]),
       },
       severity: byKey(SEVERITIES, (level) => severity[level]),
     },
