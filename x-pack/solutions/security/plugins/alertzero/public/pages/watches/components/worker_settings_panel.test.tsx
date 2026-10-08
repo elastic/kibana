@@ -51,11 +51,9 @@ const renderPanel = (
   {
     blockingReasons = [],
     enabled = true,
-    serviceAccountId,
     showManagedWorkflows = true,
     canChangeAdvancedSettings = true,
   }: Pick<Partial<Worker>, 'blockingReasons' | 'enabled'> & {
-    serviceAccountId?: string;
     showManagedWorkflows?: boolean;
     canChangeAdvancedSettings?: boolean;
   } = {}
@@ -69,10 +67,6 @@ const renderPanel = (
         ? FEATURE_SETTINGS_URL
         : `/app/${appId}${options?.path ?? ''}`
   );
-  const settings = {
-    ...createWorker(workflowId).settings,
-    ...(serviceAccountId ? { serviceAccountId } : {}),
-  };
   core.settings.client.get.mockReturnValue(showManagedWorkflows);
   core.settings.client.get$.mockReturnValue(of(showManagedWorkflows));
   core.application.capabilities = {
@@ -90,7 +84,7 @@ const renderPanel = (
           isExpanded
           onToggle={jest.fn()}
           enabled={enabled}
-          settings={settings}
+          settings={worker.settings}
           warningReasons={getBlockingWarningReasons(worker, { withLink: false })}
           settingsLocked={false}
           isSaving={false}
@@ -192,7 +186,7 @@ describe('WorkerSettingsPanel models and no-model block', () => {
   });
 
   it('leaves the switch usable and shows no warning when nothing blocks the Worker', () => {
-    renderPanel(WORKFLOW_ID, false, { enabled: false, serviceAccountId: 'kibana/az-worker-1' });
+    renderPanel(WORKFLOW_ID, false, { enabled: false });
 
     expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`)).toBeEnabled();
     expect(screen.queryByTestId(`alertZeroWorkerWarningIcon-${WORKER_ID}`)).not.toBeInTheDocument();
@@ -204,12 +198,7 @@ describe('WorkerSettingsPanel models and no-model block', () => {
   ])(
     'locks the switch of a blocked Worker that is off and explains why (%s)',
     async (_layout, isAccordion) => {
-      // An account is picked, so the lock can only come from the missing model.
-      renderPanel(WORKFLOW_ID, isAccordion, {
-        blockingReasons: ['no_model'],
-        enabled: false,
-        serviceAccountId: 'kibana/az-worker-1',
-      });
+      renderPanel(WORKFLOW_ID, isAccordion, { blockingReasons: ['no_model'], enabled: false });
 
       const enabledSwitch = screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`);
       expect(enabledSwitch).toBeDisabled();
@@ -235,28 +224,11 @@ describe('WorkerSettingsPanel models and no-model block', () => {
 });
 
 describe('WorkerSettingsPanel service account', () => {
-  it('shows that saving an enabled worker requires a service account', () => {
-    renderPanel(WORKFLOW_ID, false);
-
-    expect(screen.getByTestId(`alertZeroServiceAccountRequired-${WORKER_ID}`)).toHaveTextContent(
-      'Select a service account to save while this worker stays on. You can turn it off without one.'
-    );
-  });
-
-  it('hides that notice when the worker is off', () => {
+  it('lets a worker without an account be turned on and shows no Run as control', () => {
     renderPanel(WORKFLOW_ID, false, { enabled: false });
 
-    expect(
-      screen.queryByTestId(`alertZeroServiceAccountRequired-${WORKER_ID}`)
-    ).not.toBeInTheDocument();
-  });
-
-  it('hides that notice when an account is selected', () => {
-    renderPanel(WORKFLOW_ID, false, { serviceAccountId: 'kibana/az-worker-1' });
-
-    expect(
-      screen.queryByTestId(`alertZeroServiceAccountRequired-${WORKER_ID}`)
-    ).not.toBeInTheDocument();
+    expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`)).not.toBeDisabled();
+    expect(screen.queryByTestId(`alertZeroServiceAccountRow-${WORKER_ID}`)).not.toBeInTheDocument();
   });
 });
 

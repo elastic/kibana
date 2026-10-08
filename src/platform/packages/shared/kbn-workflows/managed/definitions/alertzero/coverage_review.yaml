@@ -145,7 +145,7 @@ steps:
       metadata:
         status: open
         description: "{{ steps.gap.output.description }}"
-        workflow_execution_id: "{{ execution.id }}"
+        workflow_execution_ids: ["{{ execution.id }}"]
 
   # Manual mode only: ask the analyst before any work on this gap starts. Assisted mode
   # skips this step and goes directly to the check.
@@ -243,6 +243,7 @@ steps:
   # reported gap is often covered by a rule that is disabled or not installed.
   - name: coverage_check
     type: ai.agent
+    agent-id: alertzero-thin-agent
     # Keep in sync with ALERTZERO_FAST_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
     connector-id-by-feature: alertzero_fast
     # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
@@ -257,6 +258,17 @@ steps:
       continue: true
     create-conversation: true
     with:
+      # The thin agent has no skills or tools of its own. List every skill the
+      # step needs, including the skills those skills load.
+      configuration_overrides:
+        enable_elastic_capabilities: false
+        tools: []
+        # detection-coverage loads find-security-rules and recommend-prebuilt-rules
+        # with load_skill, which fails for a skill that is not in this list.
+        skill_ids:
+          - detection-coverage
+          - find-security-rules
+          - recommend-prebuilt-rules
       message: |-
         Use the [/detection-coverage](skill://detection-coverage) skill to decide
         whether this detection gap is already covered. The supplied context is

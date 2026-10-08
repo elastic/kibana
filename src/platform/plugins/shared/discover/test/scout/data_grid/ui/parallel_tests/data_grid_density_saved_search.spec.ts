@@ -14,8 +14,8 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '@kbn/scout';
-import { testData } from '../fixtures';
+
+import { spaceTest, testData } from '../fixtures';
 
 spaceTest.describe(
   'Discover data grid density - saved search',
