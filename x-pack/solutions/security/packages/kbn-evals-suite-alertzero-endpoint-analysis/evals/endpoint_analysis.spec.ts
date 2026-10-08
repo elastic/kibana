@@ -15,6 +15,8 @@ import {
 } from '@kbn/security-evals-workflow-traces';
 import {
   AlertZeroRuntime,
+  deleteDataStreamQuietly,
+  ignore404,
   pinAgenticConnector,
   runAllCleanups,
   seedAlertZeroEndpoint,
@@ -25,10 +27,31 @@ import { analysisWorkflowId, proposalWorkflowId, workerWorkflowId } from '../src
 evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.classic }, () => {
   evaluate('L1 endpoint forensic skill routing', async ({ esClient, agentBuilderClient }) => {
     const index = `logs-endpoint.events.process-alertzero-routing-${Date.now()}`;
+    // `logs-*` names match the logs index template, which only creates data streams —
+    // seed through a data stream (template for mappings + create + op_type create).
+    const template = `${index}-tpl`;
     try {
-      await esClient.indices.create({ index });
+      await esClient.indices.putIndexTemplate({
+        name: template,
+        index_patterns: [index],
+        data_stream: {},
+        template: {
+          mappings: {
+            properties: {
+              '@timestamp': { type: 'date' },
+              host: { properties: { name: { type: 'keyword' } } },
+              event: { properties: { category: { type: 'keyword' } } },
+              process: {
+                properties: { name: { type: 'keyword' }, command_line: { type: 'keyword' } },
+              },
+            },
+          },
+        },
+      });
+      await esClient.indices.createDataStream({ name: index });
       await esClient.index({
         index,
+        op_type: 'create',
         refresh: 'wait_for',
         document: {
           '@timestamp': new Date().toISOString(),
@@ -50,7 +73,8 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
         'No successful production endpoint forensic tool call'
       );
     } finally {
-      await esClient.indices.delete({ index, ignore_unavailable: true });
+      await deleteDataStreamQuietly(esClient, index);
+      await ignore404(() => esClient.indices.deleteIndexTemplate({ name: template }));
     }
   });
 
@@ -58,6 +82,7 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
     'L2 structured worker output and L3 real sweep composition',
     async ({ esClient, traceEsClient, fetch, log, connector }) => {
       const runtime = new AlertZeroRuntime(fetch);
+      await runtime.installWorker(workerWorkflowId);
       await runtime.assertInstalled();
       const restoreInference = await pinAgenticConnector(fetch, connector.id);
       let seededFixture: Awaited<ReturnType<typeof seedAlertZeroEndpoint>> | undefined;

@@ -17,7 +17,14 @@ import {
 
 const createEs = () => {
   const es = {
-    indices: { create: jest.fn(async () => ({})), delete: jest.fn(async () => ({})) },
+    indices: {
+      create: jest.fn(async () => ({})),
+      delete: jest.fn(async () => ({})),
+      putIndexTemplate: jest.fn(async () => ({})),
+      createDataStream: jest.fn(async () => ({})),
+      deleteDataStream: jest.fn(async () => ({})),
+      deleteIndexTemplate: jest.fn(async () => ({})),
+    },
     index: jest.fn(async () => ({})),
     delete: jest.fn(async () => ({})),
   };
@@ -56,7 +63,45 @@ describe('AlertZeroRuntime.read', () => {
   });
 });
 
+describe('AlertZeroRuntime.installWorker', () => {
+  it('enables the worker through the internal workers API, installing its per-space document', async () => {
+    const fetch = createFetch(() => ({}));
+    await new AlertZeroRuntime(fetch).installWorker('worker-id');
+
+    expect(fetch).toHaveBeenCalledWith(
+      '/internal/alertzero/workers/worker-id',
+      expect.objectContaining({
+        method: 'PATCH',
+        body: JSON.stringify({ enabled: true }),
+        headers: expect.objectContaining({ 'elastic-api-version': '1' }),
+      })
+    );
+  });
+});
+
 describe('seedAlertZeroEndpoint', () => {
+  it('seeds the logs-* fixture as a data stream, not a plain index', async () => {
+    const es = createEs();
+    const fixture = await seedAlertZeroEndpoint(es, createFetch());
+
+    expect(es.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index_patterns: [fixture.index],
+        data_stream: {},
+      })
+    );
+    expect(es.indices.createDataStream).toHaveBeenCalledWith({ name: fixture.index });
+    expect(es.indices.create).not.toHaveBeenCalledWith(
+      expect.objectContaining({ index: fixture.index })
+    );
+    // Data-stream appends must be creates so re-seeding a UUID-scoped name never
+    // overwrites silently.
+    for (const params of es.index.mock.calls as unknown[][]) {
+      const { index, op_type: opType } = params[0] as { index: string; op_type?: string };
+      if (index === fixture.index) expect(opType).toBe('create');
+    }
+  });
+
   it('creates and cleans up the AI index through the registered context_engine route', async () => {
     const fetch = createFetch();
     const es = createEs();

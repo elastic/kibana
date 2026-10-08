@@ -12,9 +12,11 @@ IDs are imported or inherited from production, not renamed by this suite.
 | L3 | Installed worker sweep executes through the real workflow test API, dispatches the installed analysis child, observes a completed real `ai.agent`, successful OTEL tool calls joined by conversation ID, and both persisted finding attachments |
 | L4 | Real AlertZero proposal bridge and generic proposal gate; proposals API reads pending persistence, then dismisses and rereads durable `no_action` / `dismissed` state |
 
-L3/L4 do not inject workflow executors or synthetic output. The sweep test API
-runs the installed production definition even when its scheduled worker is disabled;
-no managed definition is installed or edited by this suite. L4 uses a non-action
+L3/L4 do not inject workflow executors or synthetic output. The per-space Worker
+document is not installed by the stack: the suite enables it first via the internal
+workers API (`PATCH /internal/alertzero/workers/{workerId}` with
+`{"enabled":true}`), which installs the production defaults, then runs the sweep
+test API against the installed production definition. L4 uses a non-action
 endpoint-analysis proposal, so it does not isolate or kill a real endpoint. It
 proves the persistence/gate contract, not model containment-choice quality.
 

@@ -17,10 +17,29 @@ import {
   PROPOSAL_DISMISS_URL,
   proposalSchema,
 } from '@kbn/proposals-common';
-import { ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
+import {
+  ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID,
+  ALERTZERO_WORKER_URL_TEMPLATE,
+  API_VERSIONS,
+  INTERNAL_API_ACCESS,
+} from '@kbn/alertzero-common';
 import { analysisWorkflowId, workerWorkflowId, proposalWorkflowId } from './contracts';
 
 const workflowHeaders = { 'elastic-api-version': '2023-10-31', 'kbn-xsrf': 'true' };
+
+// Neither deleteDataStream nor deleteIndexTemplate accepts ignore_unavailable; 404s on
+// cleanup (nothing was seeded, or a retry after a partial teardown) are fine.
+export const ignore404 = async (step: () => Promise<unknown>) => {
+  try {
+    await step();
+  } catch (error) {
+    if ((error as { statusCode?: number }).statusCode !== 404) throw error;
+  }
+};
+export const deleteDataStreamQuietly = (
+  es: { indices: { deleteDataStream: (params: { name: string }) => Promise<unknown> } },
+  name: string
+) => ignore404(() => es.indices.deleteDataStream({ name }));
 const proposalHeaders = {
   'elastic-api-version': PROPOSALS_API_VERSION,
   'kbn-xsrf': 'true',
@@ -111,6 +130,26 @@ export class AlertZeroRuntime {
         throw new Error(`Required production workflow unavailable: ${id}`);
     }
   }
+
+  /**
+   * Global AlertZero workflows install at plugin start, but each Worker is a per-space
+   * managed document (yamlTemplate) that installs only on its first save/enable via
+   * PATCH /internal/alertzero/workers/{workerId}. Enabling installs the defaults and
+   * leaves the scheduled worker running; the suite uses the workflow test API, which
+   * executes the installed definition regardless of the enabled flag, so the schedule
+   * stays on. Idempotent: a second PATCH with the same body is a no-op revision bump.
+   */
+  async installWorker(id: string): Promise<void> {
+    await this.fetch(ALERTZERO_WORKER_URL_TEMPLATE.replace('{workerId}', encodeURIComponent(id)), {
+      method: 'PATCH',
+      headers: {
+        'elastic-api-version': API_VERSIONS.internal.v1,
+        'kbn-xsrf': 'true',
+        'x-elastic-internal-origin': INTERNAL_API_ACCESS,
+      },
+      body: JSON.stringify({ enabled: true }),
+    });
+  }
 }
 
 const AI_INDEX_ROUTE = '/api/context_engine/ai_index';
@@ -143,7 +182,12 @@ export const seedAlertZeroEndpoint = async (es: Client, fetch: HttpHandler) => {
           method: 'DELETE',
           headers: workflowHeaders,
         }),
-      async () => es.indices.delete({ index: [index, aiIndexDest], ignore_unavailable: true }),
+      async () =>
+        Promise.all([
+          deleteDataStreamQuietly(es, index),
+          ignore404(() => es.indices.delete({ index: aiIndexDest, ignore_unavailable: true })),
+          ignore404(() => es.indices.deleteIndexTemplate({ name: `${index}-tpl` })),
+        ]),
       async () =>
         es.delete(
           {
@@ -169,30 +213,40 @@ export const seedAlertZeroEndpoint = async (es: Client, fetch: HttpHandler) => {
       }),
     });
     conversationId = conversation.id;
-    await es.indices.create({
-      index,
-      mappings: {
-        properties: {
-          '@timestamp': { type: 'date' },
-          event: {
-            properties: {
-              id: { type: 'keyword' },
-              category: { type: 'keyword' },
-              type: { type: 'keyword' },
+    // `logs-*` names can only be data streams (the logs index template matches): install an
+    // index template carrying the mappings, create the data stream, then append with
+    // op_type create so every write lands on a fresh backing index.
+    await es.indices.putIndexTemplate({
+      name: `${index}-tpl`,
+      index_patterns: [index],
+      data_stream: {},
+      template: {
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            event: {
+              properties: {
+                id: { type: 'keyword' },
+                category: { type: 'keyword' },
+                type: { type: 'keyword' },
+              },
             },
-          },
-          host: { properties: { name: { type: 'keyword' } } },
-          process: {
-            properties: {
-              name: { type: 'keyword' },
-              command_line: { type: 'keyword' },
-              entity_id: { type: 'keyword' },
-              parent: { properties: { name: { type: 'keyword' }, entity_id: { type: 'keyword' } } },
+            host: { properties: { name: { type: 'keyword' } } },
+            process: {
+              properties: {
+                name: { type: 'keyword' },
+                command_line: { type: 'keyword' },
+                entity_id: { type: 'keyword' },
+                parent: {
+                  properties: { name: { type: 'keyword' }, entity_id: { type: 'keyword' } },
+                },
+              },
             },
           },
         },
       },
     });
+    await es.indices.createDataStream({ name: index });
     const now = Date.now();
     const events = [
       { name: 'WINWORD.EXE', command_line: 'WINWORD.EXE invoice.docm', parent: 'explorer.exe' },
@@ -203,6 +257,7 @@ export const seedAlertZeroEndpoint = async (es: Client, fetch: HttpHandler) => {
       await es.index({
         index,
         id: eventIds[i],
+        op_type: 'create',
         document: {
           '@timestamp': new Date(now - (2 - i) * 60_000).toISOString(),
           event: { id: eventIds[i], category: ['process'], type: ['start'], kind: 'event' },
