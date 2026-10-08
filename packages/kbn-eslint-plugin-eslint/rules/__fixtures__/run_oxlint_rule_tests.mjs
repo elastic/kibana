@@ -34,7 +34,10 @@ RuleTester.it = (_, fn) => fn();
 eslint.RuleTester = RuleTester;
 
 const parityTests = {
+  'disallow-license-headers': () => require('../disallow_license_headers.test.js'),
+  'require-license-header': () => require('../require_license_header.test.js'),
   deployment_agnostic_test_context: () => require('../deployment_agnostic_test_context.test.js'),
+  module_migration: () => require('../module_migration.test.js'),
   no_async_foreach: () => require('../no_async_foreach.test.js'),
   no_async_promise_body: () => require('../no_async_promise_body.test.js'),
   no_conditional_saved_object_type_registration: () =>

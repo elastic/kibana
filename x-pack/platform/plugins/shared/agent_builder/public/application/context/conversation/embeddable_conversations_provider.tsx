@@ -92,6 +92,11 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     () => new ConversationStreamService(services.eventsService),
     [services.eventsService]
   );
+  useEffect(() => {
+    return () => {
+      conversationStreamService.dispose();
+    };
+  }, [conversationStreamService]);
 
   const kibanaServices = useMemo(
     () => ({

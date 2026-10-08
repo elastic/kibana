@@ -46,8 +46,15 @@ interface TriggerInputSchema {
 interface YamlStep {
   name: string;
   type?: string;
-  with?: { 'workflow-id'?: string; inputs?: Record<string, unknown>; path?: string };
+  with?: {
+    'workflow-id'?: string;
+    inputs?: Record<string, unknown>;
+    path?: string;
+    method?: string;
+    body?: Record<string, unknown>;
+  };
   if?: string;
+  'on-failure'?: { continue?: boolean };
   steps?: YamlStep[];
 }
 
@@ -76,6 +83,7 @@ const packageReport = parse(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW.yaml) as Yaml
 const proposalGate = parse(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW.yaml) as YamlWorkflow;
 
 const workerSteps = flatten(worker.steps);
+const huntSteps = flatten(hunt.steps);
 const packageReportSteps = flatten(packageReport.steps);
 const proposalGateSteps = flatten(proposalGate.steps);
 
@@ -93,6 +101,42 @@ const evaluateExpression = (expression: string, context: Record<string, unknown>
 };
 
 describe('Hunt Watch worker chain', () => {
+  it('records the hunt run on both new and reused investigations before attaching findings', () => {
+    const append = stepIn(findOrCreateInvestigation.steps, 'append_workflow_execution');
+    expect(append?.type).toBe('investigations.appendWorkflowExecutionId');
+    expect(append?.['on-failure']).toEqual({ continue: true });
+    expect(append?.with).toEqual({
+      conversationId: '{{ steps.find_or_create.output.investigationConversationId }}',
+      workflowExecutionId: '{{ inputs.runId }}',
+    });
+    const names = findOrCreateInvestigation.steps.map(({ name }) => name);
+    expect(names.indexOf('find_or_create')).toBeLessThan(
+      names.indexOf('append_workflow_execution')
+    );
+    expect(names.indexOf('append_workflow_execution')).toBeLessThan(
+      names.indexOf('attach_threat_report')
+    );
+  });
+
+  it.each([
+    ['conv-1', 'exec-1', true],
+    ['conv-1', '', false],
+    ['', 'exec-1', false],
+    [undefined, 'exec-1', false],
+  ])(
+    'only appends when a hunt conversation and run ID exist: %p, %p',
+    (conversationId, runId, expected) => {
+      const condition =
+        stepIn(findOrCreateInvestigation.steps, 'append_workflow_execution')?.if ?? '';
+      expect(
+        evaluateExpression(condition, {
+          inputs: { runId },
+          steps: { find_or_create: { output: { investigationConversationId: conversationId } } },
+        })
+      ).toBe(expected);
+    }
+  );
+
   // 1b: the two feature children carry exactly the shared tag pair, and neither the
   // Worker-only watch tags.
   it.each([
@@ -386,6 +430,201 @@ describe('Hunt Watch worker chain', () => {
         settled: true,
         closes: true,
       });
+    });
+  });
+
+  describe('hunt — attach_impact', () => {
+    const attachImpact = stepIn(huntSteps, 'attach_impact');
+    const coordinatorOutput = (impactedEntities: unknown) => ({
+      steps: { run_hunt_coordinator: { output: { impacted_entities: impactedEntities } } },
+    });
+
+    // Over HTTP, not the `investigations.attachImpact` step: impact is owner-only, and the
+    // step's in-process request does not resolve to the profile uid find_or_create's HTTP
+    // request recorded as the Investigation's owner.
+    it("records impact through the internal impact route on the run's Investigation", () => {
+      expect(attachImpact?.type).toBe('kibana.request');
+      expect(attachImpact?.with?.method).toBe('POST');
+      expect(attachImpact?.with?.path).toBe(
+        '/s/{{ workflow.spaceId }}/internal/investigations/impact'
+      );
+      expect(attachImpact?.with?.body).toEqual({
+        conversationId: '{{ inputs.investigationConversationId }}',
+        entities: '${{ steps.run_hunt_coordinator.output.impacted_entities }}',
+      });
+      expect(JSON.stringify(hunt)).not.toContain('investigations.attachImpact');
+    });
+
+    it('does not fail the hunt when impact cannot be recorded', () => {
+      expect(attachImpact?.['on-failure']).toEqual({ continue: true });
+    });
+
+    // The shared step rejects an empty list, and the coordinator only sends one on a confirmed hit.
+    it.each([
+      ['absent (no confirmed hit)', undefined, false],
+      ['empty (hit named no host or user)', [], false],
+      ['non-empty', [{ id: 'host:a', name: 'a', type: 'host' }], true],
+    ])('runs only when the coordinator sent entities: %s', (_label, entities, expected) => {
+      expect(evaluateExpression(attachImpact!.if!, coordinatorOutput(entities))).toBe(expected);
+    });
+
+    // The results message reports the impact outcome, so it has to run after the attach.
+    it('runs after the SSE attachments and before the results message', () => {
+      const names = hunt.steps.map((step) => step.name);
+      expect(names.indexOf('attach_impact')).toBeGreaterThan(names.indexOf('attach_sse'));
+      expect(names.indexOf('attach_impact')).toBeLessThan(
+        names.indexOf('write_hunt_results_message')
+      );
+    });
+
+    describe('results message impact line', () => {
+      const template = String(
+        stepIn(huntSteps, 'write_hunt_results_message')?.with?.inputs?.message
+      );
+      const render = (context: Record<string, unknown>): string =>
+        createWorkflowLiquidEngine().parseAndRenderSync(template, {
+          execution: { id: 'exec-1' },
+          ...context,
+        });
+      const hitOutput = (impactedEntities: unknown[]) => ({
+        narrative: 'Narrative.',
+        sse: [{ attachment_id: 'a' }],
+        impacted_entities: impactedEntities,
+      });
+      const twoEntities = [
+        { id: 'host:a', name: 'a', type: 'host' },
+        { id: 'user:b', name: 'b', type: 'user' },
+      ];
+
+      it('counts the entities this run recorded', () => {
+        const message = render({
+          steps: {
+            run_hunt_coordinator: { output: hitOutput(twoEntities) },
+            attach_impact: { output: { id: 'impact-1', entities: twoEntities } },
+          },
+        });
+        expect(message).toContain('_Recorded impact: 2 host(s) and user(s)._');
+      });
+
+      // `kibana.request` failures carry the status only as an `HTTP <status>:` message prefix.
+      it.each([
+        ['403', "the Worker's identity lacks the Manage investigations privilege."],
+        ['404', "the Worker's identity does not own this Investigation, or it no longer exists."],
+        ['400', "an Investigation's impact holds at most 100 hosts and users"],
+        ['409', 'another writer updated it at the same time.'],
+        ['500', 'See hunt execution exec-1.'],
+      ])('explains an HTTP %s by its status', (status, expected) => {
+        const message = render({
+          steps: {
+            run_hunt_coordinator: { output: hitOutput(twoEntities) },
+            attach_impact: {
+              error: { type: 'Error', message: `HTTP ${status}: {"message":"internal detail"}` },
+            },
+          },
+        });
+        expect(message).toContain('_Could not record impact');
+        expect(message).toContain(expected);
+        // A raw response body would reach every later agent round as user input.
+        expect(message).not.toContain('internal detail');
+      });
+
+      it('says why nothing was recorded when the hit named no host or user', () => {
+        const message = render({
+          steps: { run_hunt_coordinator: { output: hitOutput([]) } },
+        });
+        expect(message).toContain('_No impact recorded: the confirmed hits name no host or user._');
+      });
+
+      it('adds no impact line to a run that confirmed nothing', () => {
+        const message = render({
+          steps: { run_hunt_coordinator: { output: { narrative: 'Narrative.' } } },
+        });
+        expect(message.trim()).toBe('Narrative.');
+      });
+    });
+  });
+
+  describe('package report benign-close outcome', () => {
+    const statusWith = stepIn(packageReportSteps, 'resolve_package_status')?.with as Record<
+      string,
+      string
+    >;
+    const summaryWith = stepIn(packageReportSteps, 'resolve_package_summary')?.with as Record<
+      string,
+      string
+    >;
+    const liquid = createWorkflowLiquidEngine();
+    const render = (template: string, context: Record<string, unknown>) =>
+      liquid.parseAndRenderSync(template, context).trim();
+
+    const dismissOutcomeWith = stepIn(packageReportSteps, 'resolve_dismiss_outcome')
+      ?.with as Record<string, string>;
+
+    const dismissCase = (dismissStep: Record<string, unknown> | undefined) => {
+      const base = {
+        inputs: { investigationConversationId: 'conv-1' },
+        steps: {
+          decide_and_package: { output: { status: 'packaged', dismiss: true, proposals: [] } },
+          // A skipped step has no entry at all; a continued failure has an `error` and no `output`.
+          ...(dismissStep ? { dismiss_investigation_if_clean: dismissStep } : {}),
+        },
+      };
+      return {
+        ...base,
+        variables: {
+          dispatch_failed_count: 0,
+          dismiss_close_failed: evaluateExpression(dismissOutcomeWith.dismiss_close_failed, base),
+        },
+      };
+    };
+
+    it('resolves the dismiss attempt before the status and summary read it', () => {
+      const order = packageReport.steps.map((step) => step.name);
+      const dismissIdx = order.indexOf('dismiss_investigation_if_clean');
+
+      expect(dismissIdx).toBeGreaterThan(-1);
+      expect(dismissIdx).toBeLessThan(order.indexOf('resolve_package_status'));
+      expect(dismissIdx).toBeLessThan(order.indexOf('resolve_package_summary'));
+    });
+
+    it('reports run_incomplete and an open Investigation when the close patch failed', () => {
+      const ctx = dismissCase({ error: { message: 'patch rejected' } });
+      const status = render(statusWith.package_status, ctx);
+      const reason = render(statusWith.package_reason, ctx);
+      const summary = render(summaryWith.package_summary, {
+        ...ctx,
+        variables: { ...ctx.variables, package_status: status, package_reason: reason },
+      });
+
+      expect(ctx.variables.dismiss_close_failed).toBe(true);
+      expect(status).toBe('run_incomplete');
+      expect(reason).toContain('patch rejected');
+      // The Worker journal shows only `reason` on a run_incomplete packaging, so the
+      // retry guidance has to live here and not just in the summary.
+      expect(reason).toContain('still open');
+      expect(reason).toContain('manual run');
+      expect(summary).toContain('still open');
+      expect(summary).not.toContain('closed this Investigation as benign');
+    });
+
+    it('is unchanged when the close succeeded', () => {
+      const ctx = dismissCase({ output: {} });
+      const status = render(statusWith.package_status, ctx);
+      const summary = render(summaryWith.package_summary, {
+        ...ctx,
+        variables: { ...ctx.variables, package_status: status },
+      });
+
+      expect(ctx.variables.dismiss_close_failed).toBe(false);
+      expect(status).toBe('success');
+      expect(summary).toContain('closed this Investigation as benign');
+    });
+
+    it('is unchanged when the dismiss step never ran', () => {
+      const ctx = dismissCase(undefined);
+
+      expect(ctx.variables.dismiss_close_failed).toBe(false);
+      expect(render(statusWith.package_status, ctx)).toBe('success');
     });
   });
 });

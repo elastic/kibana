@@ -15,8 +15,12 @@ import {
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
 } from '@kbn/alertzero-common';
 
+export const ONBOARDING_GREETING = i18n.translate('xpack.alertzero.onboarding.greeting', {
+  defaultMessage: 'Your data is coming in.',
+});
+
 export const ONBOARDING_TITLE = i18n.translate('xpack.alertzero.onboarding.title', {
-  defaultMessage: 'Enable your workers',
+  defaultMessage: "Let's turn on the Watches?",
 });
 
 export const ONBOARDING_INTRO_GREETING = i18n.translate(
@@ -28,10 +32,21 @@ export const ONBOARDING_INTRO_HEADING = i18n.translate('xpack.alertzero.onboardi
   defaultMessage: "Let's add your data?",
 });
 
-export const ONBOARDING_SUBTITLE = i18n.translate('xpack.alertzero.onboarding.subtitle', {
-  defaultMessage:
-    'Choose the workers you need — each covers a job. New workers default to the lowest autonomy; previously configured workers keep their saved settings.',
+export const ONBOARDING_WATCHES_HEADING = i18n.translate(
+  'xpack.alertzero.onboarding.introHeading',
+  {
+    defaultMessage: 'Watches are how AlertZero works for you',
+  }
+);
+
+export const WATCH_SETTINGS = i18n.translate('xpack.alertzero.onboarding.watchSettings', {
+  defaultMessage: 'Watch settings',
 });
+
+export const ONBOARDING_KEEP_ALL_ENABLED_NOTE = i18n.translate(
+  'xpack.alertzero.onboarding.keepAllEnabledNote',
+  { defaultMessage: 'We recommend keeping all Watches enabled.' }
+);
 
 export const ONBOARDING_WORKERS_FOOTNOTE = i18n.translate(
   'xpack.alertzero.onboarding.workersFootnote',
@@ -48,50 +63,52 @@ export const ONBOARDING_NO_WORKERS_AVAILABLE = i18n.translate(
   }
 );
 
-export const BEFORE_YOU_ENABLE_TITLE = i18n.translate(
-  'xpack.alertzero.onboarding.beforeYouEnable.title',
-  { defaultMessage: 'Before you enable' }
-);
+export const ENABLE_AND_RUN = i18n.translate('xpack.alertzero.onboarding.enableAndRun', {
+  defaultMessage: 'Enable and run',
+});
 
-export const beforeYouEnableRunsAs = (email: string | undefined) =>
-  i18n.translate('xpack.alertzero.onboarding.beforeYouEnable.runsAs', {
-    defaultMessage:
-      'Workers run as you{emailSuffix}. Anything they do is attributed to this account.',
-    values: {
-      emailSuffix: email ? ` ( ${email} )` : '',
-    },
+export const READ_MORE = i18n.translate('xpack.alertzero.onboarding.readMore', {
+  defaultMessage: 'Read more about Watches in the documentation',
+});
+
+export const workersSelectedCount = (selected: number, total: number) =>
+  i18n.translate('xpack.alertzero.onboarding.workersSelectedCount', {
+    defaultMessage: '{selected} of {total} Workers selected',
+    values: { selected, total },
   });
 
-export const BEFORE_YOU_ENABLE_LLM = i18n.translate(
-  'xpack.alertzero.onboarding.beforeYouEnable.llm',
+export const SERVICE_ACCOUNT_SETUP_FAILED_TITLE = i18n.translate(
+  'xpack.alertzero.onboarding.serviceAccountSetupFailedTitle',
   {
+    defaultMessage: "Some Workers weren't turned on",
+  }
+);
+
+export const serviceAccountSetupFailedText = (failures: string) =>
+  i18n.translate('xpack.alertzero.onboarding.serviceAccountSetupFailedText', {
     defaultMessage:
-      'Workers use your configured LLM connector. Usage scales with the number of workers and data volume.',
-  }
-);
+      "AlertZero couldn't set up their service accounts. {failures}. Select Enable and run to try again.",
+    values: { failures },
+  });
 
-export const BEFORE_YOU_ENABLE_PRIVILEGE = i18n.translate(
-  'xpack.alertzero.onboarding.beforeYouEnable.privilege',
-  {
-    defaultMessage: 'Requires the manage AlertZero privilege.',
-  }
-);
-
-export const BEFORE_YOU_ENABLE_AUTONOMY = i18n.translate(
-  'xpack.alertzero.onboarding.beforeYouEnable.autonomy',
-  {
-    defaultMessage:
-      'Workers keep their existing autonomy settings. New workers default to the lowest level — investigates and proposes only; nothing runs without your approval. Adjust any time on Watches.',
-  }
-);
-
-export const ENABLE_AND_CONTINUE = i18n.translate('xpack.alertzero.onboarding.enableAndContinue', {
-  defaultMessage: 'Enable and continue',
+export const BACK = i18n.translate('xpack.alertzero.onboarding.back', {
+  defaultMessage: 'Back',
 });
 
-export const NOT_NOW = i18n.translate('xpack.alertzero.onboarding.notNow', {
-  defaultMessage: 'Not now — explore Security without AlertZero',
-});
+export const ATTACK_DISCOVERY_WORKFLOWS_NOTE = i18n.translate(
+  'xpack.alertzero.onboarding.attackDiscoveryWorkflowsNote',
+  {
+    defaultMessage: 'Turning this on also enables the Attack Discovery workflows in Settings.',
+  }
+);
+
+export const ONBOARDING_MODIFY_FORBIDDEN = i18n.translate(
+  'xpack.alertzero.onboarding.modifyForbiddenCallout',
+  {
+    defaultMessage:
+      'You need the manage_security cluster privilege to enable workers. Ask an administrator.',
+  }
+);
 
 export const ONBOARDING_READ_ONLY_BODY = i18n.translate('xpack.alertzero.onboarding.readOnlyBody', {
   defaultMessage:
@@ -103,36 +120,65 @@ export const ONBOARDING_READ_ONLY_BODY = i18n.translate('xpack.alertzero.onboard
 const ONBOARDING_WORKER_DESCRIPTIONS: Record<string, string> = {
   [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.attackDiscovery',
-    { defaultMessage: 'Correlates alerts into candidate attacks and opens investigations' }
+    {
+      defaultMessage:
+        'Finds candidate attacks on its schedule, opens an Investigation for each, and sends true positives to forensics.',
+    }
   ),
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.alertTriage',
-    { defaultMessage: 'Investigates each alert; recommends close or escalate' }
+    {
+      defaultMessage:
+        'Classifies each batch of alerts a rule execution generates, and reduces the noise Attack Discovery has to analyze.',
+    }
   ),
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.ruleTuning',
-    { defaultMessage: 'Learns from your close decisions; proposes rule tuning' }
+    {
+      defaultMessage:
+        'Diagnoses noisy or under-covering rules and produces a tuning proposal with a backtest.',
+    }
   ),
   [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.endpointAnalysis',
-    { defaultMessage: 'Drafts response actions for your approval' }
+    {
+      defaultMessage:
+        'Runs deeper forensics on the hosts from a promoted attack and proposes response actions.',
+    }
   ),
   [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.continuousThreatHunt',
-    { defaultMessage: 'Scheduled hunts against your data; surfaces leads' }
+    {
+      defaultMessage:
+        'Hunts previously ingested threat reports for matching and related activity, and opens an Investigation for anything it finds.',
+    }
   ),
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.ruleCoverage',
-    { defaultMessage: 'Finds coverage gaps; drafts, installs or enables rules on approval' }
+    {
+      defaultMessage:
+        'Assesses detection gaps surfaced by Hunt Watch and proposes new or existing rules to close them.',
+    }
   ),
 };
 
 export const onboardingWorkerDescription = (workerId: string): string | undefined =>
   ONBOARDING_WORKER_DESCRIPTIONS[workerId];
 
-export const INTRO_TITLE = i18n.translate('xpack.alertzero.onboarding.intro.title', {
-  defaultMessage: 'AlertZero in 90 seconds',
-});
+// Workers without a schedule interval are event-driven; schedule-driven ones use the cadence label.
+const ONBOARDING_WORKER_EVENT_TRIGGERS: Record<string, string> = {
+  [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: i18n.translate(
+    'xpack.alertzero.onboarding.workerTrigger.alertTriage',
+    { defaultMessage: 'On new alerts' }
+  ),
+  [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: i18n.translate(
+    'xpack.alertzero.onboarding.workerTrigger.endpointAnalysis',
+    { defaultMessage: 'On Attack Discovery promotion' }
+  ),
+};
+
+export const onboardingWorkerEventTrigger = (workerId: string): string | undefined =>
+  ONBOARDING_WORKER_EVENT_TRIGGERS[workerId];
 
 export const INTRO_PROMO_LEAD = i18n.translate('xpack.alertzero.onboarding.intro.promoLead', {
   defaultMessage: 'AlertZero is a coworker that is always there — always working for you.',
@@ -143,7 +189,7 @@ export const INTRO_PROMO_BODY = i18n.translate('xpack.alertzero.onboarding.intro
     'Once your data is in, its Watches triage alerts, hunt for threats, tune noisy rules, and investigate on their own — around the clock. You only see the actions that need a human.',
 });
 
-export const READ_MORE = i18n.translate('xpack.alertzero.onboarding.readMore', {
+export const INTRO_READ_MORE = i18n.translate('xpack.alertzero.onboarding.intro.readMore', {
   defaultMessage: 'Read more about AlertZero',
 });
 

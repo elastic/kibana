@@ -61,7 +61,7 @@ describe('conversationToInvestigation', () => {
           status: 'open',
           severity: 'high',
           summary: 'A second sign-in replayed the same session cookie.',
-          workflow_execution_id: 'exec-77',
+          workflow_execution_ids: ['exec-77', 'exec-88'],
         },
       })
     );
@@ -69,7 +69,7 @@ describe('conversationToInvestigation', () => {
     expect(result.status).toBe('open');
     expect(result.severity).toBe('high');
     expect(result.summary).toBe('A second sign-in replayed the same session cookie.');
-    expect(result.watch_execution_id).toBe('exec-77');
+    expect(result.worker_execution_ids).toEqual(['exec-77', 'exec-88']);
   });
 
   it('falls back to the single-line description when there is no summary', () => {
@@ -78,6 +78,14 @@ describe('conversationToInvestigation', () => {
     );
 
     expect(result.summary).toBe('One line about the incident.');
+  });
+
+  it('returns an empty execution list when the metadata contains no IDs', () => {
+    const result = conversationToInvestigation(
+      conversation({ metadata: { workflow_execution_ids: [] } })
+    );
+
+    expect(result.worker_execution_ids).toEqual([]);
   });
 
   it('prefers the long summary over the description when both are set', () => {
@@ -118,9 +126,7 @@ describe('conversationToInvestigation', () => {
     expect(result.severity).toBeUndefined();
     expect(result.summary).toBeUndefined();
     expect(result.assignee).toBeNull();
-    // No metadata field declares a watch, so this stays empty rather than guessing one.
-    expect(result.watch_id).toBe('');
-    expect(result.watch_execution_id).toBe('');
+    expect(result.worker_execution_ids).toEqual([]);
     // Proposal-queue concepts a conversation cannot answer.
     expect(result.affectedSurface).toBeUndefined();
     expect(result.recommendedAction).toBeUndefined();

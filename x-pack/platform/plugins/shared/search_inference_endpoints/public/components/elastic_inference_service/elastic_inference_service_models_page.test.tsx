@@ -169,6 +169,57 @@ describe('ElasticInferenceServiceModelsPage', () => {
     expect(getByTestId('modelFamilyFilterMultiselect')).toBeInTheDocument();
   });
 
+  it('filters models by region and clears the selection', async () => {
+    mockUseEisModels.mockReturnValue({
+      data: [
+        {
+          inference_id: '.us-model',
+          task_type: 'chat_completion',
+          service: 'elastic',
+          service_settings: { model_id: 'us-model' },
+          metadata: {
+            heuristics: { status: 'ga' },
+            display: { name: 'US Model', model_creator: 'Anthropic' },
+            regions: [{ csp: 'aws', region: 'us-east-1', geo: 'us' }],
+          },
+        },
+        {
+          inference_id: '.eu-model',
+          task_type: 'chat_completion',
+          service: 'elastic',
+          service_settings: { model_id: 'eu-model' },
+          metadata: {
+            heuristics: { status: 'ga' },
+            display: { name: 'EU Model', model_creator: 'OpenRouter' },
+            regions: [{ geo: 'eu' }],
+          },
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    const { getByTestId, queryByTestId } = renderPage();
+    await waitFor(() => expect(getByTestId('eisModelCard-US Model')).toBeInTheDocument());
+    expect(getByTestId('regionFilterMultiselect')).toHaveTextContent('Region');
+
+    fireEvent.click(getByTestId('regionFilterMultiselect'));
+    fireEvent.click(await waitFor(() => getByTestId('regionFilterOption-geo-us')));
+    await waitFor(() => expect(queryByTestId('eisModelCard-EU Model')).not.toBeInTheDocument());
+    expect(getByTestId('eisModelCard-US Model')).toBeInTheDocument();
+
+    fireEvent.click(getByTestId('regionFilterOption-geo-eu'));
+    await waitFor(() => expect(getByTestId('eisModelCard-EU Model')).toBeInTheDocument());
+    expect(getByTestId('eisModelCard-US Model')).toBeInTheDocument();
+
+    fireEvent.click(getByTestId('regionFilterOption-geo-us'));
+    fireEvent.click(getByTestId('regionFilterOption-geo-eu'));
+    await waitFor(() => expect(getByTestId('eisModelCard-EU Model')).toBeInTheDocument());
+
+    fireEvent.click(getByTestId('regionFilterOption-region-aws-us-east-1'));
+    await waitFor(() => expect(queryByTestId('eisModelCard-EU Model')).not.toBeInTheDocument());
+    expect(getByTestId('eisModelCard-US Model')).toBeInTheDocument();
+  });
+
   it('filters models by provider via model family filter', async () => {
     const { container, getByTestId, getByText } = await renderPopulatedPage();
     const allCards = countCards(container);

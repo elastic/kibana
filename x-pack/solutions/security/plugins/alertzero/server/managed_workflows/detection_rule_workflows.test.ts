@@ -387,17 +387,57 @@ describe('detection rule workflows', () => {
 
       // Manual autonomy stops once for permission to do the work; the entry gate
       // carries no action and a dismissal terminates the run before diagnosis.
-      expect(entry.if).toContain("inputs.autonomy_level == 'manual'");
+      const gate = all.find(({ name }) => name === 'entry_gate')!;
+      expect(gate.type).toBe('if');
+      expect(gate.condition).toContain("inputs.autonomy_level == 'manual'");
+      expect(gate.condition).toContain('steps.create_investigation.output.conversation_id != null');
+      expect((gate.steps ?? []).map(({ name }) => name)).toEqual([
+        'propose_entry',
+        'entry_decision',
+      ]);
+      expect(gate).not.toHaveProperty('else');
       expect(entryInputs).not.toHaveProperty('actionWorkflowId');
       expect(entryInputs).not.toHaveProperty('actionInput');
       // No action, so no inherited category; the queue drops an uncategorised proposal.
       expect(entryInputs.category).toBe('configure');
+      // Only an approval continues: it matches no case and falls through to diagnosis.
+      // A gate nobody answered reports an empty decision and must stop, not pass as an
+      // approval.
+      const entryDecision = all.find(({ name }) => name === 'entry_decision')!;
+      expect(entryDecision.type).toBe('switch');
+      expect(
+        (entryDecision.cases ?? []).map(({ match, steps: caseSteps }) => [
+          match,
+          caseSteps.map(({ name }) => name),
+        ])
+      ).toEqual([
+        ['dismissed', ['mark_alerts_declined', 'close_investigation_declined', 'stop_declined']],
+        ['expired', ['stop_expired']],
+      ]);
+      expect(entryDecision.default).toBeUndefined();
+      for (const [decision, routed] of [
+        ['approved', ''],
+        ['dismissed', 'dismissed'],
+        ['', 'expired'],
+      ]) {
+        expect(
+          createWorkflowLiquidEngine().parseAndRenderSync(String(entryDecision.expression), {
+            steps: { propose_entry: { output: { decision } } },
+          })
+        ).toBe(routed);
+      }
+      const stopExpired = all.find(({ name }) => name === 'stop_expired')!;
+      expect(stopExpired.type).toBe('workflow.output');
+      expect(stopExpired.with).toEqual({
+        rule_uuid: '{{ inputs.rule_uuid }}',
+        approved: false,
+        applied: false,
+      });
       const diagnoseIndex = all.findIndex(({ name }) => name === 'diagnose_rule');
       const stopIndex = all.findIndex(({ name }) => name === 'stop_declined');
       expect(all.findIndex(({ name }) => name === 'propose_entry')).toBeLessThan(stopIndex);
       expect(stopIndex).toBeLessThan(diagnoseIndex);
       expect(all[stopIndex].type).toBe('workflow.output');
-      expect(all[stopIndex].if).toContain('steps.record_entry.output.declined == true');
 
       expect(actionInputs.actionWorkflowId).toBe(ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID);
       expect(actionInputs.actionInput).toEqual({
@@ -445,7 +485,7 @@ describe('detection rule workflows', () => {
       ).toEqual([
         ['propose_query'],
         ['propose_risk_score'],
-        ['propose_exception'],
+        ['attach_exception', 'propose_exception'],
         ['incomplete_threshold_output', 'propose_threshold'],
         ['propose_schedule'],
       ]);
@@ -453,10 +493,10 @@ describe('detection rule workflows', () => {
       // still reaches the analyst.
       expect((fork.default ?? []).map(({ name }) => name)).toEqual(['propose_manual']);
 
-      expect(entry.if).toContain('steps.create_investigation.output.conversation_id != null');
-      // The switch already guards the arms; propose_threshold also has a step-level
-      // guard (incomplete_threshold_output) verified by the case-arm assertion above.
-      for (const proposal of [action, settings, exception, threshold, schedule, manual]) {
+      // The `entry_gate` if-step guards the entry proposal and the switch guards the
+      // arms; propose_threshold also has a step-level guard (incomplete_threshold_output)
+      // verified by the case-arm assertion above.
+      for (const proposal of [entry, action, settings, exception, threshold, schedule, manual]) {
         expect(proposal).not.toHaveProperty('if');
       }
       for (const proposal of proposals) {
@@ -493,7 +533,7 @@ describe('detection rule workflows', () => {
       // starts asking for its own deadline has to be checked against the
       // ceiling here.
       //
-      // Flattened, not top-level: only `propose_entry` sits at the top, and
+      // Flattened, not top-level: `propose_entry` sits inside `entry_gate`, and
       // the other six hang off `propose_tuning`'s switch cases and default.
       const proposals = flattenSteps(review.steps as NestedStep[]).filter(
         (step) => step.with?.['workflow-id'] === ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID
@@ -711,7 +751,12 @@ describe('detection rule workflows', () => {
 
         const [declined, dismissed, applied, acknowledged] = tagSteps;
         // A declined entry gate retires the alerts too, or the next sweep re-opens it.
-        expect(declined.if).toContain('steps.record_entry.output.declined == true');
+        const entryDecision = reviewSteps.find(({ name }) => name === 'entry_decision')!;
+        expect(
+          entryDecision.cases
+            ?.find(({ match }) => match === 'dismissed')
+            ?.steps.map(({ name }) => name)
+        ).toContain(declined.name);
         expect(declined.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
           '{{ consts.dismissed_tag }}',
@@ -913,6 +958,77 @@ describe('detection rule workflows', () => {
         expect(JSON.stringify(refresh.with)).toContain('steps.refetch_rule.output | json');
       });
 
+      // The rule card reads `origin` as the saved-object id, and the agent's edits keep
+      // `origin` but drop the ids from `text`. Resolving by origin looks the rule up by
+      // rule_id, so the content comes by value from the same fetch.
+      it('links the rule attachment by saved-object id and snapshots fetch_rule', () => {
+        const attach = reviewSteps.find(({ name }) => name === 'attach_rule')!;
+
+        expect(attach.with?.type).toBe('security.rule');
+        expect(attach.with?.origin).toBe('{{ inputs.rule_uuid }}');
+        expect(attach.with?.data).toEqual({
+          text: '{{ steps.fetch_rule.output | json }}',
+          attachmentLabel: '{{ steps.fetch_rule.output.name }}',
+        });
+      });
+
+      // No agent runs in the investigation to reference an attachment, so without
+      // `render_inline` the analyst only finds these in the attachment list.
+      it.each(['attach_rule', 'refresh_rule_attachment', 'attach_exception', 'attach_alerts'])(
+        'renders %s inline in the investigation',
+        (stepName) => {
+          const step = reviewSteps.find(({ name }) => name === stepName)!;
+
+          expect(step.with?.render_inline).toBe(true);
+          expect(step.with?.conversation_id).toBe(
+            '{{ steps.create_investigation.output.conversation_id }}'
+          );
+          expect(step['on-failure']).toEqual({ continue: true });
+        }
+      );
+
+      // The card previews the same item the action creates, but its historical
+      // description must not claim that a still-pending or dismissed item was added.
+      it('attaches the proposed exception with lifecycle-neutral wording', () => {
+        const attach = reviewSteps.find(({ name }) => name === 'attach_exception')!;
+        const propose = reviewSteps.find(({ name }) => name === 'propose_exception')!;
+        const {
+          rule_id: ruleId,
+          description: actionDescription,
+          ...exceptionItem
+        } = (propose.with?.inputs as { actionInput: Record<string, unknown> }).actionInput;
+
+        expect(attach.type).toBe('ai.attachment.add');
+        expect(attach.with?.type).toBe('security.exception');
+        expect(attach.with?.data).toEqual({
+          ...exceptionItem,
+          description:
+            'Exception proposed by the rule tuning workflow after reviewing {{ inputs.fp_count }} false-positive alerts.',
+        });
+        expect(ruleId).toBe('{{ inputs.rule_uuid }}');
+        expect(actionDescription).toBe(
+          'Added by the rule tuning workflow after {{ inputs.fp_count }} false positives were reviewed.'
+        );
+        expect(reviewSteps.indexOf(attach)).toBeLessThan(reviewSteps.indexOf(propose));
+      });
+
+      // The proposal text no longer links alert ids. The attachment takes the
+      // first 20, which is the most `security.alerts` accepts.
+      it('attaches the first 20 false-positive alerts', () => {
+        const attach = reviewSteps.find(({ name }) => name === 'attach_alerts')!;
+
+        expect(review.consts?.alerts_per_attachment).toBe(20);
+        expect(attach.type).toBe('ai.attachment.add');
+        expect(attach.with?.type).toBe('security.alerts');
+        expect(attach.with?.id).toBe('fp-alerts');
+        expect((attach.with?.data as { alertIds?: string }).alertIds).toBe(
+          '${{ inputs.alert_ids | slice: 0, consts.alerts_per_attachment }}'
+        );
+        expect(reviewSteps.indexOf(attach)).toBeGreaterThan(
+          reviewSteps.findIndex(({ name }) => name === 'attach_rule')
+        );
+      });
+
       // Both backtests run inside one preview worker execution, and the proposal
       // gates are the only other children: one synchronous child per wake-up cycle
       // is safe, while two consecutive child calls share one immediate-resume slot
@@ -938,12 +1054,22 @@ describe('detection rule workflows', () => {
           string,
           Record<string, string> | string
         >;
-        expect((previewInputs.preview_body as Record<string, string>).query).toBe(
-          '{{ steps.fetch_rule.output.query }}'
+        const previewBody = previewInputs.preview_body as Record<string, string>;
+        const proposedBody = previewInputs.proposed_body as Record<string, string>;
+        expect(previewBody.query).toBe('{{ steps.fetch_rule.output.query }}');
+        expect(previewBody.filters).toBe(
+          '${{ steps.fetch_rule.output.filters | default: consts.no_items }}'
         );
-        expect((previewInputs.proposed_body as Record<string, string>).query).toBe(
-          '{{ steps.diagnose_rule.output.structured_output.proposed_query }}'
+        // The query arm previews the proposed query; the exception arm keeps the rule's
+        // own query and differs only in the filters the exception step built.
+        expect(proposedBody.query).toContain(
+          "{% if steps.diagnose_rule.output.structured_output.change_type == 'exception' %}{{ steps.fetch_rule.output.query }}"
         );
+        expect(proposedBody.query).toContain(
+          '{% else %}{{ steps.diagnose_rule.output.structured_output.proposed_query }}{% endif %}'
+        );
+        expect(proposedBody.filters).toContain('steps.build_exception_filter.output.filters');
+        expect(proposedBody.filters).toContain('| default: steps.fetch_rule.output.filters');
       });
 
       // The backtest informs the analyst but never decides whether the edit-rule
@@ -959,7 +1085,7 @@ describe('detection rule workflows', () => {
         // The unbacktested branch must not promise a manual handoff. The query arm
         // carries the edit-rule action whether or not the preview ran, so approving
         // applies the change and the alerts are tagged applied, not acknowledged.
-        expect(comment).toContain('Approving still applies the proposed query');
+        expect(comment).toContain('Approving still applies the proposed change');
         expect(comment).not.toContain('not previewed or applied automatically');
         expect(comment).not.toContain('marks these alerts acknowledged');
       });
@@ -977,6 +1103,79 @@ describe('detection rule workflows', () => {
         });
 
         expect(rendered.length).toBeLessThanOrEqual(MAX_TITLE_LENGTH);
+      });
+
+      // Appended with `trigger_mode: never` so the note does not run the investigation
+      // agent. A direct request rather than the journal note workflow keeps the
+      // proposal gate the only synchronous child in its wake-up cycle.
+      it.each([
+        ['post_fp_pattern', '{{ steps.diagnose_rule.output.structured_output.fp_pattern }}'],
+        ['post_reasoning', '{{ steps.diagnose_rule.output.structured_output.reasoning }}'],
+      ])('posts %s to the investigation without running the agent', (stepName, field) => {
+        const note = reviewSteps.find(({ name }) => name === stepName)!;
+        const body = note.with?.body as Record<string, string>;
+
+        expect(note.type).toBe('kibana.request');
+        expect(note.with?.method).toBe('POST');
+        expect(note.with?.path).toBe('/s/{{ workflow.spaceId }}/api/chat/converse');
+        expect(note.if).toContain('steps.create_investigation.output.conversation_id != null');
+        expect(note['on-failure']).toEqual({ continue: true });
+        expect(body.conversation_id).toBe(
+          '{{ steps.create_investigation.output.conversation_id }}'
+        );
+        expect(body.trigger_mode).toBe('never');
+        expect(body.input).toContain(field);
+        expect(reviewSteps.indexOf(note)).toBeLessThan(
+          reviewSteps.findIndex(({ name }) => name === 'compose_proposal')
+        );
+      });
+
+      // The proposal only carries a note when that post did not land, so a failed
+      // post cannot drop it from everything the analyst sees.
+      it.each([
+        ['reasoning', 'post_reasoning', '**Reasoning**', '1. Unique reasoning', 'reasoning'],
+        [
+          'false positive pattern',
+          'post_fp_pattern',
+          '**False positive pattern**',
+          'svc_backup on backup-01',
+          'fp_pattern',
+        ],
+      ])(
+        'keeps the %s in the proposal only when the note failed',
+        (_label, stepName, heading, text, field) => {
+          const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
+          const commentTemplate = String((compose.with as Record<string, string>).comment);
+          const render = (step: Record<string, unknown>) =>
+            createWorkflowLiquidEngine().parseAndRenderSync(commentTemplate, {
+              inputs: { fp_count: 2, alert_ids: ['a', 'b'] },
+              steps: {
+                diagnose_rule: {
+                  output: { structured_output: { change_type: 'manual', [field]: text } },
+                },
+                [stepName]: step,
+              },
+            });
+
+          const landed = render({});
+          const failed = render({ error: { message: 'boom' } });
+
+          expect(landed.includes(heading)).toBe(false);
+          expect(landed.includes(text)).toBe(false);
+          expect(failed.includes(heading)).toBe(true);
+          expect(failed.includes(text)).toBe(true);
+        }
+      );
+
+      it('leaves the investigation link and the recommended action out of the proposals', () => {
+        const entry = reviewSteps.find(({ name }) => name === 'propose_entry')!;
+        const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
+        const entryComment = String((entry.with?.inputs as { comment: string }).comment);
+        const proposalComment = String((compose.with as Record<string, string>).comment);
+
+        expect(entryComment).not.toContain('investigation_line');
+        expect(proposalComment).not.toContain('investigation_line');
+        expect(proposalComment).not.toContain('Recommended action');
       });
 
       // A skipped step renders as nil, so `nil == 'succeeded'` is false and the
