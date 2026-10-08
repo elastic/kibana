@@ -43,6 +43,12 @@ export class LensMetric {
     this.trendline = this.metricRoot().locator('.echSingleMetricSparkline');
   }
 
+  async setBackgroundChart(type: 'none' | 'bar' | 'line'): Promise<void> {
+    const button = this.page.testSubj.locator(`lnsMetric_background_chart_${type}`);
+    await button.click();
+    await button.and(this.page.locator('[aria-pressed="true"]')).waitFor({ state: 'visible' });
+  }
+
   /** Root `[data-test-subj="mtrVis"]` locator, optionally limited to a dashboard panel. */
   private metricRoot(scope?: Locator): Locator {
     return (scope ?? this.page).locator('[data-test-subj="mtrVis"]');
