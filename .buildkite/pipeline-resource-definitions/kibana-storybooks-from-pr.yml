@@ -18,6 +18,9 @@ spec:
       description: 'Builds Storybooks from a PR.'
     spec:
       repository: elastic/kibana
+      vault_secret_paths:
+        - common/*
+        - pr/*
       pipeline_file: .buildkite/pipelines/storybooks_from_pr.yml
       initial_step_plugins:
         - sparse-checkout#v1.6.0:

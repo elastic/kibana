@@ -25,6 +25,9 @@ spec:
       branch_configuration: main
       default_branch: main
       repository: elastic/kibana
+      vault_secret_paths:
+        - common/*
+        - pr/*
       pipeline_file: .buildkite/pipelines/build_pr_and_test_entity_store_performance.yml
       initial_step_plugins:
         - sparse-checkout#v1.6.0:

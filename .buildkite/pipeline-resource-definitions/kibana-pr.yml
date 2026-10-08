@@ -28,6 +28,9 @@ spec:
       cancel_intermediate_builds: true
       default_branch: main
       repository: elastic/kibana
+      vault_secret_paths:
+        - common/*
+        - pr/*
       pipeline_file: .buildkite/scripts/pipelines/pull_request/pipeline.sh
       initial_step_plugins:
         - sparse-checkout#v1.6.0:

@@ -26,6 +26,9 @@ spec:
         SCOUT_REPORTER_ENABLED: 'true'
         FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE: 'docker.elastic.co/package-registry/distribution:lite'
       repository: elastic/kibana
+      vault_secret_paths:
+        - common/*
+        - restricted/publish/*
       branch_configuration: main
       default_branch: main
       pipeline_file: '.buildkite/pipelines/fleet/package_registry.yml'

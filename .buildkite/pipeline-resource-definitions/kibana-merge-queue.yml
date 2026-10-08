@@ -30,6 +30,9 @@ spec:
       branch_configuration: gh-readonly-queue/* gh-readonly-queue/*/*
       default_branch: main
       repository: elastic/kibana
+      vault_secret_paths:
+        - common/*
+        - pr/*
       pipeline_file: .buildkite/pipelines/merge_queue.yml
       initial_step_plugins:
         - sparse-checkout#v1.6.0:

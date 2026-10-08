@@ -28,6 +28,9 @@ spec:
       branch_configuration: main
       default_branch: main
       repository: elastic/kibana
+      vault_secret_paths:
+        - common/*
+        - restricted/publish/*
       pipeline_file: .buildkite/pipelines/uiam/verify_and_promote_cosmos_db_emulator.yml
       initial_step_plugins:
         - sparse-checkout#v1.6.0:

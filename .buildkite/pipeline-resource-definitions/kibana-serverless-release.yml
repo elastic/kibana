@@ -24,6 +24,9 @@ spec:
       default_branch: main
       allow_rebuilds: false
       repository: elastic/kibana
+      vault_secret_paths:
+        - common/*
+        - restricted/publish/*
       pipeline_file: .buildkite/pipelines/serverless_deployment/run_serverless_release_assistant.yml
       initial_step_plugins:
         - sparse-checkout#v1.6.0:

@@ -30,6 +30,9 @@ spec:
       branch_configuration: main 9.5 9.4 8.19
       default_branch: main
       repository: elastic/kibana
+      vault_secret_paths:
+        - common/*
+        - restricted/publish/*
       pipeline_file: .buildkite/pipelines/on_merge.yml
       initial_step_plugins:
         - sparse-checkout#v1.6.0:
