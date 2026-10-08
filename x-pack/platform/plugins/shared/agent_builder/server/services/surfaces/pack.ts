@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Composition, PrimitiveNode } from '@elastic/isomer-sdk';
-import type { IsomerMarkdownNode } from '@kbn/agent-builder-server/attachments';
+import type { IsomerNode, MarkdownNode } from '@kbn/agent-builder-server/attachments';
 import {
   composePacks,
   createPrimitiveDispatcher,
@@ -16,21 +15,7 @@ import {
   z,
 } from '@elastic/isomer-sdk';
 
-/**
- * A `<render_attachment>` tag of the response message. `version` is absent when the tag has none.
- */
-export interface AttachmentNode extends PrimitiveNode {
-  type: 'attachment';
-  attachmentId: string;
-  version?: number;
-}
-
-export type CompositionNode = IsomerMarkdownNode | AttachmentNode;
-
-/** A response message as an Isomer composition. */
-export type MessageComposition = Composition<CompositionNode>;
-
-const markdown = definePrimitive<IsomerMarkdownNode>({
+const markdown = definePrimitive<MarkdownNode>({
   type: 'markdown',
   schema: z.object({
     type: z.literal('markdown'),
@@ -51,41 +36,13 @@ const markdown = definePrimitive<IsomerMarkdownNode>({
   },
 });
 
-const describeAttachment = ({ attachmentId }: AttachmentNode) => `Attachment ${attachmentId}`;
-
-/**
- * Attachment nodes are resolved by `buildComposition` before rendering, so these renderers only name
- * the attachment.
- */
-const attachment = definePrimitive<AttachmentNode>({
-  type: 'attachment',
-  schema: z.object({
-    type: z.literal('attachment'),
-    attachmentId: requiredString().describe('Id of the conversation attachment'),
-    version: z.number().int().positive().optional().describe('Version of the attachment'),
-  }),
-  catalog: {
-    type: 'attachment',
-    purpose: 'A conversation attachment, rendered through its type.',
-    useWhen: ['The message shows an attachment.'],
-    avoidWhen: [],
-    example: { type: 'attachment', attachmentId: 'attachment-1', version: 1 },
-  },
-  examples: [{ type: 'attachment', attachmentId: 'attachment-1', version: 1 }],
-  renderers: {
-    react: describeAttachment,
-    text: describeAttachment,
-    markdown: describeAttachment,
-  },
-});
-
 /** The node types of an Agent Builder composition. */
 export const agentBuilderPack = definePrimitivePack({
   id: 'agent-builder',
-  primitives: [markdown, attachment],
+  primitives: [markdown],
 });
 
 /** Renders compositions on any surface. */
-export const compositionDispatcher = createPrimitiveDispatcher<CompositionNode>(
+export const compositionDispatcher = createPrimitiveDispatcher<IsomerNode>(
   composePacks([agentBuilderPack]).definitions
 );

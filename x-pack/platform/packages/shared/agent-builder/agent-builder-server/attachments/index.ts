@@ -15,9 +15,10 @@ export type {
   AttachmentFormatContext,
   AttachmentResolveContext,
   AttachmentValidateContext,
-  AttachmentIsomerComposition,
+  IsomerComposition,
+  IsomerNode,
   AttachmentIsomerCompositionContext,
-  IsomerMarkdownNode,
+  MarkdownNode,
 } from './type_definition';
 export type {
   AttachmentBoundedTool,

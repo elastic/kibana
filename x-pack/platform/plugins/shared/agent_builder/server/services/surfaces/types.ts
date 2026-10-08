@@ -6,12 +6,12 @@
  */
 
 import type { ConversationOriginType, SurfacePayload } from '@kbn/agent-builder-common';
-import type { MessageComposition } from './pack';
+import type { IsomerComposition } from '@kbn/agent-builder-server/attachments';
 
 /** Renders the response message for the surface rounds from one origin type came from. */
 export interface SurfaceRenderer {
   /** Origin type whose rounds this surface renders. */
   id: ConversationOriginType;
   /** Renders the message's composition, with its attachments resolved, for the surface. */
-  render: (composition: MessageComposition) => SurfacePayload;
+  render: (composition: IsomerComposition) => SurfacePayload;
 }

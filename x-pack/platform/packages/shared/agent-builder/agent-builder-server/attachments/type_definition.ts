@@ -98,7 +98,7 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
   toIsomerComposition?: (
     data: TContent,
     context: AttachmentIsomerCompositionContext
-  ) => AttachmentIsomerComposition;
+  ) => IsomerComposition;
 }
 
 /**
@@ -128,16 +128,19 @@ export interface AttachmentIsomerCompositionContext {
 }
 
 /** A block of GitHub-flavored markdown in an Isomer composition. */
-export interface IsomerMarkdownNode extends PrimitiveNode {
+export interface MarkdownNode extends PrimitiveNode {
   type: 'markdown';
   text: string;
 }
 
+/** The node types of an {@link IsomerComposition}, the ones Agent Builder's Isomer pack renders. */
+export type IsomerNode = MarkdownNode;
+
 /**
- * Return type of {@link AttachmentTypeDefinition.toIsomerComposition}: the Isomer composition
- * shown in place of the attachment.
+ * An Isomer composition built from Agent Builder's node types, the ones its pack renders. What
+ * an attachment type's `toIsomerComposition` returns, and what a response message becomes.
  */
-export type AttachmentIsomerComposition = Composition<IsomerMarkdownNode>;
+export type IsomerComposition = Composition<IsomerNode>;
 
 /**
  * Return type for attachment's validation handlers.

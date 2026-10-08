@@ -18,14 +18,24 @@ import {
   splitCustomElements,
 } from '@kbn/agent-builder-common/tools/custom_rendering';
 import type {
-  AttachmentIsomerComposition,
-  IsomerMarkdownNode,
+  IsomerComposition,
+  IsomerNode,
+  MarkdownNode,
 } from '@kbn/agent-builder-server/attachments';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
-import type { AttachmentNode, CompositionNode, MessageComposition } from './pack';
 
 const { tagName, attributes } = renderAttachmentElement;
+
+/** A `<render_attachment>` tag of the response message. `version` is absent when the tag has none. */
+interface AttachmentNode {
+  type: 'attachment';
+  attachmentId: string;
+  version?: number;
+}
+
+/** The response message split into its markdown and its attachment tags, in order. */
+type MessageNode = IsomerNode | AttachmentNode;
 
 const toAttachmentNode = (tag: string): AttachmentNode | undefined => {
   const attachmentId = getCustomElementAttribute(tag, attributes.attachmentId);
@@ -46,9 +56,19 @@ const toAttachmentNode = (tag: string): AttachmentNode | undefined => {
  * Splits a message into nodes: its markdown becomes `markdown` nodes, and each
  * `<render_attachment>` tag becomes an `attachment` node at the same position. Tags without an
  * id are dropped.
+ *
+ * For example, `Here is the note: <render_attachment id="a1" /> Anything else?` splits into:
+ *
+ * ```ts
+ * [
+ *   { type: 'markdown', text: 'Here is the note:' },
+ *   { type: 'attachment', attachmentId: 'a1' },
+ *   { type: 'markdown', text: 'Anything else?' },
+ * ]
+ * ```
  */
-const toCompositionNodes = (message: string): CompositionNode[] =>
-  splitCustomElements(message, tagName).flatMap((segment): CompositionNode[] => {
+const toMessageNodes = (message: string): MessageNode[] =>
+  splitCustomElements(message, tagName).flatMap((segment): MessageNode[] => {
     if (segment.type === 'text') {
       return [{ type: 'markdown', text: segment.text.trim() }];
     }
@@ -63,7 +83,7 @@ const toCompositionNodes = (message: string): CompositionNode[] =>
  * and the subtitle in italics, placed before the body. Returns nothing when the mapping sets
  * neither, so it's `toIsomerComposition` that decides whether an attachment has a heading.
  */
-const toHeadingNode = ({ title, subtitle }: AttachmentIsomerComposition): IsomerMarkdownNode[] => {
+const toHeadingNode = ({ title, subtitle }: IsomerComposition): MarkdownNode[] => {
   const heading = [title && `**${title}**`, subtitle && `_${subtitle}_`].filter(Boolean).join('\n');
   return heading ? [{ type: 'markdown', text: heading }] : [];
 };
@@ -88,7 +108,7 @@ const resolveAttachmentNode = (
     attachmentsService: AttachmentServiceStart;
     logger: Logger;
   }
-): IsomerMarkdownNode[] => {
+): IsomerNode[] => {
   const attachment = attachments.find(({ id }) => id === node.attachmentId);
 
   if (!attachment) {
@@ -154,9 +174,9 @@ export const buildComposition = ({
   attachments: VersionedAttachment[];
   attachmentsService: AttachmentServiceStart;
   logger: Logger;
-}): MessageComposition => ({
+}): IsomerComposition => ({
   type: 'view',
-  body: toCompositionNodes(response.message).flatMap((node): CompositionNode[] =>
+  body: toMessageNodes(response.message).flatMap((node): IsomerNode[] =>
     node.type === 'attachment'
       ? resolveAttachmentNode(node, {
           attachments,
