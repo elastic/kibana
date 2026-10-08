@@ -7,6 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { createContractMockFetch } from './src/fetch/create_contract_mock_fetch';
+export type {
+  ContractCall,
+  ContractMock,
+  ContractMockOptions,
+} from './src/fetch/create_contract_mock_fetch';
+export type {
+  ContractAdapter,
+  ContractRequest,
+  ContractResponse,
+  Responder,
+  Violation,
+} from './src/contract/types';
 export { InvalidSchemaError, loadContractOperations } from './src/openapi';
 export type {
   ContractOperation,
