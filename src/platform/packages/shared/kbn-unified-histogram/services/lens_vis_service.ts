@@ -44,7 +44,7 @@ import type { XYVisualizationState as XYConfiguration } from '@kbn/lens-common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
-import { DataViewSource, getRegisteredEsqlDataView, type DataSource } from '@kbn/data-source';
+import { getRegisteredEsqlDataView, type DataSource } from '@kbn/data-source';
 import type {
   UnifiedHistogramSuggestionContext,
   UnifiedHistogramVisContext,
@@ -70,7 +70,7 @@ const ESQL_HISTOGRAM_RESULT_LIMIT = 10000;
 
 /** Lens suggestions still take a DataView. Classic unwraps it; ES|QL uses the registered shim. */
 function resolveLensDataView(dataSource: DataSource): DataView | undefined {
-  return dataSource instanceof DataViewSource
+  return dataSource.kind === 'index-pattern'
     ? dataSource.getDataView()
     : getRegisteredEsqlDataView(dataSource);
 }

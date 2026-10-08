@@ -277,17 +277,16 @@ export const useDiscoverHistogram = (
 
   const triggerUnifiedHistogramFetch = useLatest(
     (latestFetchDetails: DiscoverLatestFetchDetails | undefined) => {
-      const dataSourceForColumns =
-        currentDataSource?.kind === 'esql' ? currentDataSource : undefined;
+      const esqlSource = currentDataSource?.kind === 'esql' ? currentDataSource : undefined;
       const table = getUnifiedHistogramTableForEsql({
         documentsValue: documents$.getValue(),
-        currentDataSource: dataSourceForColumns,
+        currentDataSource: esqlSource,
       });
 
       const nextFetchParams = {
         ...collectedFetchParams,
         abortController: latestFetchDetails?.abortController ?? getAbortController(),
-        table: dataSourceForColumns && !latestFetchDetails ? table : undefined,
+        table: esqlSource && !latestFetchDetails ? table : undefined,
       };
       previousFetchParamsRef.current = nextFetchParams;
       unifiedHistogramApi?.fetch(nextFetchParams);

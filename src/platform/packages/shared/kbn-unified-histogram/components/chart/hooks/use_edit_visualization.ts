@@ -8,7 +8,6 @@
  */
 
 import type { DataSource } from '@kbn/data-source';
-import { DataViewSource } from '@kbn/data-source';
 import type { TimeRange } from '@kbn/es-query';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -36,7 +35,7 @@ export const useEditVisualization = ({
       return false;
     }
 
-    if (!(dataSource instanceof DataViewSource)) {
+    if (dataSource.kind !== 'index-pattern') {
       return false;
     }
 

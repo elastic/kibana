@@ -14,7 +14,7 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { DataViewField, getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
-import { DataViewSource, EsqlSource, getOrRegisterEsqlDataView } from '@kbn/data-source';
+import { getOrRegisterEsqlDataView } from '@kbn/data-source';
 import type {
   UnifiedHistogramFetchParams,
   UnifiedHistogramFetchParamsExternal,
@@ -84,7 +84,7 @@ export const processFetchParams = async ({
   const fetchParams = buildFetchParams({ params, services, initialBreakdownField });
 
   // The Lens suggestions API still takes a DataView, which LensVisService looks up synchronously
-  if (dataSource instanceof EsqlSource) {
+  if (dataSource.kind === 'esql') {
     await getOrRegisterEsqlDataView(services.dataViews, dataSource);
   }
 
@@ -123,7 +123,7 @@ function getProcessedBreakdownField({
     };
   }
 
-  const dvs = dataSource instanceof DataViewSource ? dataSource.getDataView() : undefined;
+  const dvs = dataSource.kind === 'index-pattern' ? dataSource.getDataView() : undefined;
   return {
     field: breakdownField ? dvs?.getFieldByName(breakdownField) : undefined,
   };

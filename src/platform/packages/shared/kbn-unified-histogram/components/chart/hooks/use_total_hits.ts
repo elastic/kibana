@@ -13,7 +13,6 @@ import type { MutableRefObject } from 'react';
 import { useEffect, useRef, useCallback } from 'react';
 import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 import { useStableCallback } from '@kbn/react-hooks';
-import { DataViewSource } from '@kbn/data-source';
 import type {
   UnifiedHistogramFetch$,
   UnifiedHistogramFetch$Arguments,
@@ -145,7 +144,7 @@ const fetchTotalHitsSearchSource = async ({
   services: UnifiedHistogramServices;
   abortController: AbortController;
 }) => {
-  if (!(dataSource instanceof DataViewSource)) {
+  if (dataSource.kind !== 'index-pattern') {
     return undefined;
   }
 
