@@ -10,6 +10,14 @@ import type { ConversationWithPermissions } from '@kbn/agent-builder-common';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentPublicClient, BulkCreateAttachmentInput } from '@kbn/agent-builder-server';
 
+/** The id a copied attachment gets in the escalation. */
+export const toCopiedAttachmentId = (investigationId: string, attachmentId: string): string =>
+  `${investigationId}:${attachmentId}`;
+
+/** Whether an investigation attachment is eligible to be copied into an escalation. */
+export const isCopyableAttachment = (att: { active?: boolean; type: string }): boolean =>
+  att.active !== false && att.type !== 'screen_context';
+
 /**
  * Copies active, non-screen_context attachments from `investigation` to `escalation`.
  *
@@ -29,14 +37,19 @@ export const copyInvestigationAttachments = async ({
   escalation,
   investigation,
   logger,
+  existingAttachmentIds,
 }: {
   attachmentsClient: AttachmentPublicClient;
   escalation: ConversationWithPermissions;
   investigation: ConversationWithPermissions;
   logger: Logger;
+  /** Ids already present in the escalation; matching copies are left out of the write. */
+  existingAttachmentIds?: ReadonlySet<string>;
 }): Promise<{ copied: number; failed: number }> => {
   const source = (investigation.attachments ?? []).filter(
-    (att) => att.active !== false && att.type !== 'screen_context'
+    (att) =>
+      isCopyableAttachment(att) &&
+      !existingAttachmentIds?.has(toCopiedAttachmentId(investigation.id, att.id))
   );
 
   if (source.length === 0) {
@@ -46,7 +59,7 @@ export const copyInvestigationAttachments = async ({
   const inputs: BulkCreateAttachmentInput[] = source.map((att) => ({
     // Namespace the id so copies from two investigations that happen to share an attachment id
     // are stored as separate documents and don't collide.
-    id: `${investigation.id}:${att.id}`,
+    id: toCopiedAttachmentId(investigation.id, att.id),
     type: att.type,
     data: getLatestVersion(att)?.data,
     // Carry the origin reference when present so the copied attachment stays by-reference

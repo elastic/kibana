@@ -26,6 +26,7 @@ import type {
   ListEscalationsQuery,
   ListEscalationsResponse,
   ListLinkedInvestigationsResponse,
+  SyncEscalationResponse,
 } from '../../../common/escalations/escalation';
 import type {
   EscalationClosePreviewResponse,
@@ -57,7 +58,10 @@ import {
   type EscalationInvestigationEventData,
 } from '../../../common/escalations/conversation_events';
 import { filterMetadataToTemplateFields } from './filter_template_metadata';
-import { copyInvestigationAttachments } from './copy_investigation_attachments';
+import {
+  copyInvestigationAttachments,
+  isCopyableAttachment,
+} from './copy_investigation_attachments';
 
 /** Agent Builder rejects `addEvents` calls with more events than this. */
 const MAX_EVENTS_PER_REQUEST = 10;
@@ -360,6 +364,79 @@ export class EscalationsService {
     }
 
     return { copied: totalCopied, failed: totalFailed };
+  }
+
+  /**
+   * Brings the escalation's attachments up to date with its linked investigations.
+   *
+   * An investigation needs syncing when it changed after the escalation (`updated_at`) or when
+   * the escalation holds fewer of its copies than it has copyable attachments. The count catches
+   * what the timestamp can miss: escalation edits (assignees, status) also advance the
+   * escalation's `updated_at`. Copied ids are `${investigationId}:${attachmentId}`, so the
+   * per-investigation count is read off the id prefix. Changes to attachments that were already
+   * copied are not propagated.
+   *
+   * Linked investigations the user cannot access are skipped. Like `addAttachments` it is
+   * idempotent and never throws for individual attachment failures.
+   */
+  async sync(request: KibanaRequest, escalationId: string): Promise<SyncEscalationResponse> {
+    const client = await this.getConversationClient(request);
+    const escalation = await client.get(escalationId);
+    if (escalation.template_id !== ESCALATION_TEMPLATE_ID) {
+      throw new NotAnEscalationError(escalationId);
+    }
+
+    const linkedIds = (
+      (escalation.metadata?.[ESCALATION_LINKED_INVESTIGATIONS_FIELD] ?? []) as unknown[]
+    ).filter((v): v is string => typeof v === 'string' && v.length > 0);
+    if (linkedIds.length === 0) {
+      return { copied: 0, failed: 0 };
+    }
+
+    // Includes inactive attachments so a copy the user removed is not written again.
+    const existingIds = new Set((escalation.attachments ?? []).map((att) => att.id));
+    const copiedCounts = new Map<string, number>();
+    for (const id of existingIds) {
+      const separator = id.indexOf(':');
+      if (separator > 0) {
+        const investigationId = id.slice(0, separator);
+        copiedCounts.set(investigationId, (copiedCounts.get(investigationId) ?? 0) + 1);
+      }
+    }
+
+    // `bulkGet` omits inaccessible / non-existent ids and returns attachment summaries (id and
+    // type), which is all the checks below need.
+    const resolved = await client.bulkGet(linkedIds);
+    const escalationUpdatedAt = Date.parse(escalation.updated_at);
+    const staleIds = linkedIds.filter((id) => {
+      const investigation = resolved.get(id);
+      if (!investigation || investigation.template_id !== INVESTIGATION_TEMPLATE_ID) return false;
+      const sourceCount = (investigation.attachments ?? []).filter(isCopyableAttachment).length;
+      return (
+        Date.parse(investigation.updated_at) > escalationUpdatedAt ||
+        (copiedCounts.get(id) ?? 0) < sourceCount
+      );
+    });
+
+    const attachmentsClient = await this.getAttachmentsClient(request);
+    let copied = 0;
+    let failed = 0;
+
+    // Sequential: all copies target the same escalation document.
+    for (const investigationId of staleIds) {
+      const investigation = await client.get(investigationId);
+      const result = await copyInvestigationAttachments({
+        attachmentsClient,
+        escalation,
+        investigation,
+        logger: this.logger,
+        existingAttachmentIds: existingIds,
+      });
+      copied += result.copied;
+      failed += result.failed;
+    }
+
+    return { copied, failed };
   }
 
   async getClosePreview(
