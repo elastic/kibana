@@ -21,12 +21,6 @@ const REVIEWERS = Object.freeze({
     label: 'reviewer:codex',
     workflowId: 'reviewer-codex.lock.yml',
   }),
-  scout: Object.freeze({
-    id: 'scout',
-    command: '@scout',
-    label: 'reviewer:scout',
-    workflowId: 'reviewer-scout.lock.yml',
-  }),
 });
 
 const allowedPermissions = new Set(['admin', 'write']);
