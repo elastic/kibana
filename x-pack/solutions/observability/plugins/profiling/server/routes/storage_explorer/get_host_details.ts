@@ -14,7 +14,7 @@ import {
   indexLifeCyclePhaseToDataTier,
 } from '../../../common/storage_explorer';
 import { getEstimatedSizeForDocumentsInIndex } from './get_daily_data_generation.size';
-import { allIndices, getIndicesStats } from './get_indices_stats';
+import { allIndices, getIndicesStats, universalProfilingEventsIndices } from './get_indices_stats';
 import { getProfilingHostsDetailsById } from './get_profiling_hosts_details_by_id';
 
 const perIndexInitialSize = { events: 0, metrics: 0 };
@@ -35,7 +35,7 @@ export async function getHostDetails({
   const [{ indices: allIndicesStats }, response] = await Promise.all([
     getIndicesStats({ client: client.getEsClient(), indices: allIndices }),
     client.search('profiling_events_metrics_details', {
-      index: ['profiling-events-*', 'profiling-metrics'],
+      index: [...universalProfilingEventsIndices, 'profiling-metrics'],
       query: {
         bool: {
           filter: [
