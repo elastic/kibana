@@ -42,6 +42,10 @@ import { getSpanIcon } from './get_span_icon';
 import { getCountryFlag } from './country_flags/country_codes';
 import { showStackedShape } from '../utils';
 import type { EntityNodeViewModel, NodeProps, NodeToolbarItem } from '../types';
+import {
+  GraphDisplayOptionsContext,
+  useGraphDisplayOptions,
+} from '../graph/graph_display_options_context';
 
 /** Converts an ISO 3166-1 alpha-2 country code to its flag emoji. */
 const countryCodeToFlag = (code: string): string =>
@@ -507,51 +511,6 @@ const MetadataLabel = ({ children }: { children: React.ReactNode }) => (
   </EuiText>
 );
 
-/** Metadata panel for grouped entity nodes (count > 1). */
-const GroupedMetadataPanel = memo<{
-  ips?: string[];
-  countryCodes?: string[];
-  sources?: string[];
-  assetCriticality?: Array<{ level: string; count: number }>;
-  euiTheme: EuiThemeComputed;
-  onIpClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-}>(({ ips, countryCodes, sources, assetCriticality, euiTheme, onIpClick }) => (
-  <>
-    {/* Row 1: Asset Criticality | Source */}
-    <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{ASSET_CRITICALITY_LABEL}</MetadataLabel>
-      {assetCriticality?.length ? (
-        <CriticalityDistribution levels={assetCriticality} euiTheme={euiTheme} />
-      ) : (
-        <DashValue euiTheme={euiTheme} />
-      )}
-    </MetadataItem>
-    <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{SOURCE_LABEL}</MetadataLabel>
-      {sources?.length ? <SourcesCell sources={sources} /> : <DashValue euiTheme={euiTheme} />}
-    </MetadataItem>
-
-    {/* Row 2: IP Address | Geolocation */}
-    <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{IP_ADDRESS_LABEL}</MetadataLabel>
-      {ips?.length ? (
-        <IpsCell ips={ips} onIpClick={onIpClick} />
-      ) : (
-        <DashValue euiTheme={euiTheme} />
-      )}
-    </MetadataItem>
-    <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{GEOLOCATION_LABEL}</MetadataLabel>
-      {countryCodes?.length ? (
-        <GeoCell countryCodes={countryCodes} />
-      ) : (
-        <DashValue euiTheme={euiTheme} />
-      )}
-    </MetadataItem>
-  </>
-));
-GroupedMetadataPanel.displayName = 'GroupedMetadataPanel';
-
 /** Metadata panel for single-entity nodes (full redesign). */
 const SingleEntityMetadataPanel = memo<{
   ips?: string[];
@@ -561,49 +520,65 @@ const SingleEntityMetadataPanel = memo<{
   assetCriticality?: Array<{ level: string; count: number }>;
   euiTheme: EuiThemeComputed;
   onIpClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-}>(({ ips, countryCodes, sources, subType, assetCriticality, euiTheme, onIpClick }) => (
-  <>
-    {/* Row 1: Sub Type | Source */}
-    <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{SUB_TYPE_LABEL}</MetadataLabel>
-      {subType ? <EuiText size="xs">{subType}</EuiText> : <DashValue euiTheme={euiTheme} />}
-    </MetadataItem>
-    <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{SOURCE_LABEL}</MetadataLabel>
-      {sources?.length ? <SourcesCell sources={sources} /> : <DashValue euiTheme={euiTheme} />}
-    </MetadataItem>
-
-    {/* Row 2: IP Address | Geolocation */}
-    <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{IP_ADDRESS_LABEL}</MetadataLabel>
-      {ips?.length ? (
-        <IpsCell ips={ips} onIpClick={onIpClick} />
-      ) : (
-        <DashValue euiTheme={euiTheme} />
+}>(({ ips, countryCodes, sources, subType, assetCriticality, euiTheme, onIpClick }) => {
+  const { entity: opts } = useGraphDisplayOptions();
+  return (
+    <>
+      {/* Sub Type — hidden when toggled off */}
+      {opts.subType && (
+        <MetadataItem euiTheme={euiTheme}>
+          <MetadataLabel>{SUB_TYPE_LABEL}</MetadataLabel>
+          {subType ? <EuiText size="xs">{subType}</EuiText> : <DashValue euiTheme={euiTheme} />}
+        </MetadataItem>
       )}
-    </MetadataItem>
-    <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{GEOLOCATION_LABEL}</MetadataLabel>
-      {countryCodes?.length ? (
-        <GeoCell countryCodes={countryCodes} />
-      ) : (
-        <DashValue euiTheme={euiTheme} />
+      {/* Data Source — hidden when toggled off */}
+      {opts.dataSource && (
+        <MetadataItem euiTheme={euiTheme}>
+          <MetadataLabel>{SOURCE_LABEL}</MetadataLabel>
+          {sources?.length ? <SourcesCell sources={sources} /> : <DashValue euiTheme={euiTheme} />}
+        </MetadataItem>
       )}
-    </MetadataItem>
-
-    {/* Row 3: Asset Criticality */}
-    <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{ASSET_CRITICALITY_LABEL}</MetadataLabel>
-      {assetCriticality?.length ? (
-        <EuiHealth color={getCriticalityColor(assetCriticality[0].level, euiTheme)} textSize="xs">
-          {formatCriticalityLevel(assetCriticality[0].level)}
-        </EuiHealth>
-      ) : (
-        <DashValue euiTheme={euiTheme} />
+      {/* IP Address — hidden when toggled off */}
+      {opts.ipAddress && (
+        <MetadataItem euiTheme={euiTheme}>
+          <MetadataLabel>{IP_ADDRESS_LABEL}</MetadataLabel>
+          {ips?.length ? (
+            <IpsCell ips={ips} onIpClick={onIpClick} />
+          ) : (
+            <DashValue euiTheme={euiTheme} />
+          )}
+        </MetadataItem>
       )}
-    </MetadataItem>
-  </>
-));
+      {/* Geolocation — hidden when toggled off */}
+      {opts.geolocation && (
+        <MetadataItem euiTheme={euiTheme}>
+          <MetadataLabel>{GEOLOCATION_LABEL}</MetadataLabel>
+          {countryCodes?.length ? (
+            <GeoCell countryCodes={countryCodes} />
+          ) : (
+            <DashValue euiTheme={euiTheme} />
+          )}
+        </MetadataItem>
+      )}
+      {/* Asset Criticality — hidden when toggled off */}
+      {opts.assetCriticality && (
+        <MetadataItem euiTheme={euiTheme}>
+          <MetadataLabel>{ASSET_CRITICALITY_LABEL}</MetadataLabel>
+          {assetCriticality?.length ? (
+            <EuiHealth
+              color={getCriticalityColor(assetCriticality[0].level, euiTheme)}
+              textSize="xs"
+            >
+              {formatCriticalityLevel(assetCriticality[0].level)}
+            </EuiHealth>
+          ) : (
+            <DashValue euiTheme={euiTheme} />
+          )}
+        </MetadataItem>
+      )}
+    </>
+  );
+});
 SingleEntityMetadataPanel.displayName = 'SingleEntityMetadataPanel';
 
 interface RiskBadgeEntry {
@@ -787,87 +762,51 @@ const ToolbarButtonRow: React.FC<ToolbarButtonRowProps> = ({
   onMouseLeave,
   style,
   extraCss,
-}) => (
-  <div
-    onMouseEnter={onMouseEnter}
-    onMouseLeave={onMouseLeave}
-    style={style}
-    css={[
-      css`
-        display: flex;
-        align-items: center;
-        gap: 2px;
-        opacity: ${isHovered ? 1 : 0};
-        pointer-events: ${isHovered ? 'auto' : 'none'};
-        transition: opacity 150ms ease;
-      `,
-      extraCss,
-    ]}
-  >
-    {items.map((item, idx) => (
-      <EuiToolTip
-        key={idx}
-        content={item.toolTipText ?? item.label}
-        data-test-subj={item.toolTipTestSubj}
-        disableScreenReaderOutput={!item.toolTipText}
-      >
-        <EuiButtonIcon
-          data-test-subj={item.testSubject}
-          iconType={item.iconType}
-          iconSize="m"
-          color="text"
-          size="s"
-          aria-label={item.label}
-          disabled={item.disabled}
-          onClick={item.onClick}
-        />
-      </EuiToolTip>
-    ))}
-  </div>
-);
-
-interface EntityMetadataContentProps {
-  isGrouped: boolean;
-  ips?: string[];
-  countryCodes?: string[];
-  sources?: string[];
-  subType?: string;
-  assetCriticality?: Array<{ level: string; count: number }>;
-  euiTheme: EuiThemeComputed;
-  onIpClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-}
-
-/** Renders the appropriate metadata panel based on whether the node is grouped or single. */
-const EntityMetadataContent: React.FC<EntityMetadataContentProps> = ({
-  isGrouped,
-  ips,
-  countryCodes,
-  sources,
-  subType,
-  assetCriticality,
-  euiTheme,
-  onIpClick,
-}) =>
-  isGrouped ? (
-    <GroupedMetadataPanel
-      ips={ips}
-      countryCodes={countryCodes}
-      sources={sources}
-      assetCriticality={assetCriticality}
-      euiTheme={euiTheme}
-      onIpClick={onIpClick}
-    />
-  ) : (
-    <SingleEntityMetadataPanel
-      ips={ips}
-      countryCodes={countryCodes}
-      sources={sources}
-      subType={subType}
-      assetCriticality={assetCriticality}
-      euiTheme={euiTheme}
-      onIpClick={onIpClick}
-    />
+}) => {
+  return (
+    <div
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      style={style}
+      css={[
+        css`
+          display: flex;
+          align-items: center;
+          gap: 2px;
+          opacity: ${isHovered ? 1 : 0};
+          pointer-events: ${isHovered ? 'auto' : 'none'};
+          transition: opacity 150ms ease;
+          /* Show toolbar when any child receives keyboard focus */
+          &:focus-within {
+            opacity: 1;
+            pointer-events: auto;
+          }
+        `,
+        extraCss,
+      ]}
+    >
+      {items.map((item, idx) => (
+        <EuiToolTip
+          key={idx}
+          content={item.toolTipText ?? item.label}
+          data-test-subj={item.toolTipTestSubj}
+          disableScreenReaderOutput={!item.toolTipText}
+        >
+          <EuiButtonIcon
+            data-test-subj={item.testSubject}
+            iconType={item.iconType}
+            iconSize="m"
+            color="text"
+            size="s"
+            aria-label={item.label}
+            disabled={item.disabled}
+            onClick={item.onClick}
+          />
+        </EuiToolTip>
+      ))}
+    </div>
   );
+};
 
 /**
  * Shared horizontal card node rendered by all entity node shape types
@@ -895,6 +834,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
 
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m');
+  const globalOpts = useGraphDisplayOptions();
   // Hover state for toolbar visibility.
   // A generous hide-delay keeps the toolbar alive while the mouse travels from
   // the card into the toolbar, which lives in a separate DOM subtree (portal).
@@ -982,7 +922,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
               above the card for both single and grouped nodes.  This avoids
               using ReactFlow's NodeToolbar portal (which positions relative to
               the full 240px NodeShapeContainer, not the card). */}
-          {interactive && toolbarItems.length > 0 && (
+          {interactive && (toolbarItems.length > 0 || !isGrouped) && (
             <ToolbarButtonRow
               items={toolbarItems}
               isHovered={isHovered}
@@ -1015,23 +955,26 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
 
             {/* Metadata panel — hidden in preview (non-interactive) mode and for grouped nodes */}
             {interactive && !isGrouped && (
-              <EntityCardMetadata
-                data-test-subj={GRAPH_ENTITY_NODE_LAYERS_PANEL_ID}
-                euiTheme={euiTheme}
-              >
-                <EntityMetadataContent
-                  isGrouped={isGrouped}
-                  ips={ips}
-                  countryCodes={countryCodes}
-                  sources={entitySources}
-                  subType={subType}
-                  assetCriticality={assetCriticality}
+              <GraphDisplayOptionsContext.Provider value={globalOpts}>
+                <EntityCardMetadata
+                  data-test-subj={GRAPH_ENTITY_NODE_LAYERS_PANEL_ID}
                   euiTheme={euiTheme}
-                  onIpClick={
-                    ipClickHandler as ((e: React.MouseEvent<HTMLButtonElement>) => void) | undefined
-                  }
-                />
-              </EntityCardMetadata>
+                >
+                  <SingleEntityMetadataPanel
+                    ips={ips}
+                    countryCodes={countryCodes}
+                    sources={entitySources}
+                    subType={subType}
+                    assetCriticality={assetCriticality}
+                    euiTheme={euiTheme}
+                    onIpClick={
+                      ipClickHandler as
+                        | ((e: React.MouseEvent<HTMLButtonElement>) => void)
+                        | undefined
+                    }
+                  />
+                </EntityCardMetadata>
+              </GraphDisplayOptionsContext.Provider>
             )}
           </EntityCardWrapper>
 
