@@ -382,6 +382,9 @@ export class APIKeys implements NativeAPIKeysType {
           ...(cloneParams.metadata ? { metadata: cloneParams.metadata } : {}),
           expiration: null,
         },
+        ...(cloneParams.refresh !== undefined
+          ? { querystring: { refresh: cloneParams.refresh } }
+          : {}),
       });
 
       this.logger.debug('API key was cloned successfully');

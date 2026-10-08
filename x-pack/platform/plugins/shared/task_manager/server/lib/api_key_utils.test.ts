@@ -140,11 +140,15 @@ describe('api_key_utils', () => {
 
       expect(coreStart.security.authc.apiKeys.areAPIKeysEnabled).toHaveBeenCalled();
       expect(coreStart.security.authc.getCurrentUser).toHaveBeenCalledWith(request);
-      expect(coreStart.security.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(request, {
-        name: 'TaskManager: report - testUser',
-        role_descriptors: {},
-        metadata: { managed: true },
-      });
+      expect(coreStart.security.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(
+        request,
+        {
+          name: 'TaskManager: report - testUser',
+          role_descriptors: {},
+          metadata: { managed: true },
+        },
+        { refresh: false }
+      );
     });
 
     test('should return the API key if the request was made by API key', async () => {
@@ -233,6 +237,7 @@ describe('api_key_utils', () => {
         {
           name: 'TaskManager: report - testUser',
           metadata: { managed: true },
+          refresh: false,
         }
       );
       expect(coreStart.security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
@@ -270,6 +275,7 @@ describe('api_key_utils', () => {
       expect(coreStart.security.authc.apiKeys.cloneAsInternalUser).toHaveBeenCalledWith(request, {
         name: 'TaskManager: report - testUser',
         metadata: { managed: true },
+        refresh: false,
       });
       expect(coreStart.security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
     });
