@@ -92,9 +92,12 @@ export const getLegendActions = (
     const column = columnIndex !== -1 ? visData.columns[columnIndex] : undefined;
     // isComputedColumnFilterable gates the disabled state below; warningMessage is
     // display-only and can be suppressed (e.g. for dates) without affecting it.
-    const isComputedColumnFilterable = !isEsqlMode || !column || isFilterableColumnSet([column]);
+    const isComputedColumnFilterable =
+      !isEsqlMode || !column || isFilterableColumnSet([column], [pieSeries.key]);
     const warningMessage =
-      isEsqlMode && column ? getFilterDrilldownWarningMessage([column]) : undefined;
+      isEsqlMode && column
+        ? getFilterDrilldownWarningMessage([column], [pieSeries.key])
+        : undefined;
 
     useEffect(() => {
       if (!canFilter || !filterData || !isComputedColumnFilterable) {
