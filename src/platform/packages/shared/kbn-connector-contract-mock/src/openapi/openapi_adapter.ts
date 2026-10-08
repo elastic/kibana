@@ -12,6 +12,7 @@ import { createOperationMatcher } from './match_operation';
 import type { ContractOperation } from './types';
 import { validateRequest } from './validate_request';
 import { validateResponse } from './validate_response';
+import { validateSecurity } from './validate_security';
 
 /** Implements the contract steps for OpenAPI specs. */
 export const createOpenApiAdapter = (
@@ -21,6 +22,8 @@ export const createOpenApiAdapter = (
   const match = createOperationMatcher(operations);
   return {
     route: ({ method, url }) => match(method, url),
+    authenticate: ({ operation }, { query, headers }) =>
+      validateSecurity(operation, { query, headers }),
     validateRequest: ({ operation, pathParameters }, { query, headers, body }) =>
       validateRequest(operation, { query, headers, pathParameters, body }),
     respond,

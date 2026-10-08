@@ -22,6 +22,20 @@ For every request, the mock:
 
 Each request is recorded in `calls` with its operation, status, and request and response violations, so tests can assert that a connector stays within the contract.
 
+## Credentials
+
+Requests need the credentials of one of the operation's `security` requirements (or the document's), in the place each scheme declares: the `apiKey` header, query parameter or cookie, or an `Authorization` header with the `http` scheme (`Basic`, `Bearer`, …), and `Bearer` for `oauth2` and `openIdConnect`. Any value is accepted. A request without them gets **401** listing what the operation expects, which catches connectors that forget a credential or send it in the wrong place. Schemes that can't be checked on a request, such as `mutualTLS`, count as present, and API keys in the query string aren't reported as undeclared parameters.
+
+Vendor specs are sometimes wrong about authentication too. Trello's declares only OAuth2 for most operations, while the API also takes `key` and `token` query parameters; an overlay can add the missing requirement:
+
+```yaml
+- target: $.paths.*.*.security
+  description: Trello also accepts the API key and token as query parameters.
+  update:
+    - APIKey: []
+      APIToken: []
+```
+
 ## Responses
 
 Responses come from, in order of preference:

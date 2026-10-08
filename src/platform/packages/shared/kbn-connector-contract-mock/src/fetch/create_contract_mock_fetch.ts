@@ -101,8 +101,8 @@ const toResponse = ({ statusCode, headers, body }: ContractResponse): Response =
 
 /**
  * Creates a `fetch` that answers requests in-process from a vendor spec. Unmatched requests
- * get 404 and requests that break the spec get 422 listing the violations; every request is
- * recorded in `calls`. Axios clients can use it with `{ adapter: 'fetch', env: { fetch } }`.
+ * get 404, requests without the credentials the operation requires get 401, and requests that
+ * break the spec get 422 listing the violations; every request is recorded in `calls`. Axios clients can use it with `{ adapter: 'fetch', env: { fetch } }`.
  */
 export const createContractMockFetch = ({
   specs,
@@ -142,17 +142,20 @@ export const createContractMockFetch = ({
 
     const { operation } = routed;
     const name = operation.id;
-    const requestViolations = contract.validateRequest(routed, request);
+    const authViolations = contract.authenticate(routed, request);
+    const requestViolations =
+      authViolations.length > 0 ? authViolations : contract.validateRequest(routed, request);
     if (requestViolations.length > 0) {
+      const statusCode = authViolations.length > 0 ? 401 : 422;
       calls.push({
         request: description,
         operation: name,
-        status: 422,
+        status: statusCode,
         requestViolations,
         responseViolations: [],
       });
       return {
-        statusCode: 422,
+        statusCode,
         headers: JSON_HEADERS,
         body: { operation: name, violations: requestViolations },
       };
