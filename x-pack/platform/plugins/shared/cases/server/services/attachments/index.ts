@@ -696,7 +696,7 @@ export class AttachmentService {
         [savedObjectId]
       );
       if (soType === null) {
-        throw new Error(`Attachment ${savedObjectId} not found`);
+        throw Boom.notFound(`Attachment ${savedObjectId} not found`);
       }
 
       const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(updatedAttributes);

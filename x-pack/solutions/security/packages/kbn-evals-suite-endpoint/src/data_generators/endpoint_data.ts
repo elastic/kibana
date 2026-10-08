@@ -173,6 +173,10 @@ interface EndpointScenario {
   endpointStatus?: string;
   agentVersion?: string;
   extraDocuments?: ExtraDocument[];
+  /** Fleet package names written to the `.fleet-agents` doc (`packages` field). */
+  agentPackages?: string[];
+  /** Overrides `last_checkin` on the Fleet agent doc (ISO timestamp). */
+  lastCheckin?: string;
 }
 
 const DEFAULT_POLICY_NAME = 'manual eval policy';
@@ -188,6 +192,18 @@ const createPolicyResponseDocument = ({
   endpointStatus = 'enrolled',
   agentVersion = DEFAULT_AGENT_VERSION,
   message = 'agent_connectivity: Successfully connected to Agent; workflow: Successfully executed all workflows',
+  actions = [
+    {
+      name: 'agent_connectivity',
+      status: 'success',
+      message: 'Successfully connected to Agent',
+    },
+    {
+      name: 'workflow',
+      status: 'success',
+      message: 'Successfully executed all workflows',
+    },
+  ],
   scenario,
 }: Pick<EndpointScenario, 'agentId' | 'hostName' | 'os'> & {
   policyId: string;
@@ -196,6 +212,8 @@ const createPolicyResponseDocument = ({
   endpointStatus?: string;
   agentVersion?: string;
   message?: string;
+  /** Overrides the applied-policy actions; defaults to fully successful actions. */
+  actions?: Array<{ name: string; status: string; message: string }>;
   scenario: string;
 }): ExtraDocument => ({
   index: 'metrics-endpoint.policy-default',
@@ -234,18 +252,7 @@ const createPolicyResponseDocument = ({
           name: policyName,
           endpoint_policy_version: '1',
           status: policyStatus,
-          actions: [
-            {
-              name: 'agent_connectivity',
-              status: 'success',
-              message: 'Successfully connected to Agent',
-            },
-            {
-              name: 'workflow',
-              status: 'success',
-              message: 'Successfully executed all workflows',
-            },
-          ],
+          actions,
           response: {
             configurations: {
               manual_eval: {
@@ -281,6 +288,66 @@ const createEndpointSecurityLogDocument = ({
   },
 });
 
+const ISOLATION_FAILURE_MESSAGE =
+  'isolate action failed: agent unreachable - endpoint has not checked in recently';
+
+/** Failed isolate action request in the response-actions index the troubleshooting skill reads. */
+const createIsolationActionDocument = ({
+  agentId,
+  actionId,
+}: {
+  agentId: string;
+  actionId: string;
+}): ExtraDocument => ({
+  index: '.logs-endpoint.actions-default',
+  document: {
+    agent: {
+      id: agentId,
+      policy: [{ agentId, elasticAgentId: agentId }],
+    },
+    originSpaceId: 'default',
+    tags: [],
+    EndpointActions: {
+      action_id: actionId,
+      expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
+      type: 'INPUT_ACTION',
+      input_type: 'endpoint',
+      data: {
+        command: 'isolate',
+        comment: 'isolate eval-routing-unhealthy',
+        parameters: undefined,
+      },
+    },
+    error: { message: ISOLATION_FAILURE_MESSAGE },
+    user: { id: 'eval' },
+  },
+});
+
+/** Failed isolate action response carrying the error the troubleshooting skill should find. */
+const createIsolationActionResponseDocument = ({
+  agentId,
+  actionId,
+}: {
+  agentId: string;
+  actionId: string;
+}): ExtraDocument => ({
+  index: '.logs-endpoint.action.responses-default',
+  document: {
+    agent: { id: agentId },
+    EndpointActions: {
+      action_id: actionId,
+      completed_at: new Date().toISOString(),
+      started_at: new Date().toISOString(),
+      data: {
+        command: 'isolate',
+        comment: '',
+        output: undefined,
+      },
+    },
+    error: { message: ISOLATION_FAILURE_MESSAGE },
+  },
+});
+
 export async function seedScenario(clients: SeedClients, scenario: EndpointScenario) {
   const now = new Date().toISOString();
   const {
@@ -293,6 +360,8 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
     endpointStatus = 'enrolled',
     agentVersion = DEFAULT_AGENT_VERSION,
     extraDocuments = [],
+    agentPackages,
+    lastCheckin,
   } = scenario;
 
   await clients.esClient.create({
@@ -323,7 +392,11 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
   });
 
   const agentStatus =
-    endpointStatus === 'failed' ? 'error' : endpointStatus === 'degraded' ? 'degraded' : 'online';
+    endpointStatus === 'failed' || endpointStatus === 'unhealthy'
+      ? 'error'
+      : endpointStatus === 'degraded'
+      ? 'degraded'
+      : 'online';
 
   await clients.internalEsClient.index({
     index: '.fleet-agents',
@@ -335,10 +408,11 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
       local_metadata: { host: { name: hostName } },
       active: true,
       enrolled_at: now,
-      last_checkin: now,
+      last_checkin: lastCheckin ?? now,
       status: agentStatus,
       last_known_status: agentStatus,
       last_checkin_status: agentStatus,
+      ...(agentPackages ? { packages: agentPackages } : {}),
       policy_revision_idx: 1,
       policy_id: policyId,
     },
@@ -412,6 +486,51 @@ export const SCENARIOS = {
           message: 'Endpoint policy application failed: kernel extension could not be loaded',
         },
       },
+    ],
+  },
+
+  routingUnhealthyHost: {
+    agentId: 'eval-agent-ts-routing-unhealthy-001',
+    hostName: 'eval-routing-unhealthy',
+    os: { name: 'Windows', version: '10', type: 'windows', full: 'Windows 10' },
+    policyName: 'eval-policy-routing-unhealthy',
+    policyStatus: 'success',
+    endpointStatus: 'unhealthy',
+    agentPackages: ['endpoint'],
+    // Stale check-in so the seeded data agrees with "offline / missed check-ins"
+    // questions asked about this host.
+    lastCheckin: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+    extraDocuments: [
+      createPolicyResponseDocument({
+        agentId: 'eval-agent-ts-routing-unhealthy-001',
+        hostName: 'eval-routing-unhealthy',
+        os: { name: 'Windows', version: '10', type: 'windows', full: 'Windows 10' },
+        policyId: 'eval-policy-routing-unhealthy',
+        policyName: 'eval-policy-routing-unhealthy',
+        endpointStatus: 'unhealthy',
+        message: 'agent_connectivity: missed check-ins; endpoint has not checked in with the agent',
+        actions: [
+          {
+            name: 'agent_connectivity',
+            status: 'warning',
+            message: 'Endpoint has not checked in recently',
+          },
+          {
+            name: 'workflow',
+            status: 'success',
+            message: 'Successfully executed all workflows',
+          },
+        ],
+        scenario: 'routing_unhealthy_host',
+      }),
+      createIsolationActionDocument({
+        agentId: 'eval-agent-ts-routing-unhealthy-001',
+        actionId: 'eval-routing-unhealthy-isolate-001',
+      }),
+      createIsolationActionResponseDocument({
+        agentId: 'eval-agent-ts-routing-unhealthy-001',
+        actionId: 'eval-routing-unhealthy-isolate-001',
+      }),
     ],
   },
 
