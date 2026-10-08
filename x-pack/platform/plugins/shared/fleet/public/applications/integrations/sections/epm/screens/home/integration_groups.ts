@@ -22,16 +22,7 @@ export interface IntegrationGroup {
  * group requires a matching elastic/integrations PR tagging the members.
  */
 export const INTEGRATION_GROUPS: Record<string, IntegrationGroup> = {
-  nginx: {
-    title: i18n.translate('xpack.fleet.integrationGroups.nginx.title', {
-      defaultMessage: 'Nginx',
-    }),
-    description: i18n.translate('xpack.fleet.integrationGroups.nginx.description', {
-      defaultMessage:
-        'Collect logs and metrics from Nginx web servers using Elastic Agent. Choose from ECS-based, OTel-based, or Nginx Ingress Controller collection.',
-    }),
-    icons: [],
-  },
+  // PROTOTYPE: nginx is now a root package (`nginx_group`), see hooks/apply_root_packages.tsx
   redis: {
     title: i18n.translate('xpack.fleet.integrationGroups.redis.title', {
       defaultMessage: 'Redis',

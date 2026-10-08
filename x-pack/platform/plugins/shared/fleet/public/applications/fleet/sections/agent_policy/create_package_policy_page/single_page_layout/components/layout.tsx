@@ -29,6 +29,8 @@ import type {
   RegistryPolicyTemplate,
 } from '../../../../../types';
 import { PackageIcon } from '../../../../../components';
+import { useRootPackage } from '../../../../../../../hooks/use_root_package';
+import { ROOT_QUERYPARAM } from '../../../../../../../../common/services';
 import type { EditPackagePolicyFrom } from '../../types';
 
 const AgentPolicyName = styled(EuiDescriptionListDescription)`
@@ -91,6 +93,11 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
       [from]
     );
 
+    // PROTOTYPE: when coming from a root package (`?root=<name>`), show the root's title + icon.
+    // Read window.location directly: this layout is also rendered outside a router.
+    const rootName = new URLSearchParams(window.location.search).get(ROOT_QUERYPARAM) ?? undefined;
+    const { root } = useRootPackage(isAdd ? rootName : undefined);
+
     const pageTitle = useMemo(() => {
       if ((isAdd || isEdit || isUpgrade) && packageInfo) {
         let pageTitleText = (
@@ -98,7 +105,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
             id="xpack.fleet.createPackagePolicy.pageTitleWithPackageName"
             defaultMessage="Add {packageName} integration"
             values={{
-              packageName: integrationInfo?.title || packageInfo.title,
+              packageName: root?.title || integrationInfo?.title || packageInfo.title,
             }}
           />
         );
@@ -128,13 +135,22 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
         return (
           <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
-              <PackageIcon
-                packageName={packageInfo?.name || ''}
-                integrationName={integrationInfo?.name}
-                version={packageInfo?.version || ''}
-                icons={integrationInfo?.icons || packageInfo?.icons}
-                size="xl"
-              />
+              {root ? (
+                <PackageIcon
+                  packageName={root.name}
+                  version={root.version}
+                  icons={root.icons}
+                  size="xl"
+                />
+              ) : (
+                <PackageIcon
+                  packageName={packageInfo?.name || ''}
+                  integrationName={integrationInfo?.name}
+                  version={packageInfo?.version || ''}
+                  icons={integrationInfo?.icons || packageInfo?.icons}
+                  size="xl"
+                />
+              )}
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
@@ -203,6 +219,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
       integrationInfo?.name,
       integrationInfo?.title,
       packageInfo,
+      root,
       defaultPolicyData?.name,
       isAdd,
       isEdit,

@@ -37,6 +37,10 @@ jest.mock('../../../../../layouts', () => ({
   ),
 }));
 
+jest.mock('../../../../../../../hooks/use_root_package', () => ({
+  useRootPackage: () => ({ root: undefined }),
+}));
+
 jest.mock('../../../../../components', () => ({
   PackageIcon: () => null,
 }));
