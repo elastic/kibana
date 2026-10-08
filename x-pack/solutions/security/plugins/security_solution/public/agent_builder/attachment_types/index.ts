@@ -13,7 +13,7 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import type { OverlaySystemFlyoutStart } from '@kbn/core-overlays-browser';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart, ISessionService } from '@kbn/data-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -21,7 +21,10 @@ import type { Subscription } from 'rxjs';
 import { registerImpactEntityOpener } from '@kbn/agentic-investigations-common';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
-import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import {
+  ENABLE_NEW_FLYOUT_SETTING,
+  SecurityAgentBuilderAttachments,
+} from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_embedded_provider';
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
@@ -166,7 +169,7 @@ export const registerEntityAttachment = ({
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
   experimentalFeatures: ExperimentalFeatures;
-  overlays: OverlaySystemFlyoutStart;
+  overlays: Pick<OverlayStart, 'openFlyoutTemplate'>;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
   searchSession?: ISessionService;
   uiSettings: IUiSettingsClient;
@@ -179,7 +182,14 @@ export const registerEntityAttachment = ({
       openImpactEntityFlyout({
         entity,
         overlays,
+        application,
+        agentBuilder,
+        chrome,
+        isNewFlyoutEnabled:
+          !experimentalFeatures.newFlyoutSystemDisabled &&
+          (uiSettings.get<boolean>(ENABLE_NEW_FLYOUT_SETTING, true) ?? false),
         resolveSecurityCanvasContext,
+        searchSession,
       })
     );
   });
