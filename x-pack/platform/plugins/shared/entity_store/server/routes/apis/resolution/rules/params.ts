@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-export const ruleIdParamsSchema = z.object({
-  id: z.string().max(100).describe('The stable identifier of the entity resolution rule.'),
-});
+export const ruleIdParamsSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(100).describe('The stable identifier of the entity resolution rule.'),
+  })
+);
