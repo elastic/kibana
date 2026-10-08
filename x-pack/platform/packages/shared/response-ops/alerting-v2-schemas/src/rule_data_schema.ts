@@ -762,6 +762,27 @@ export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 export type CreateRuleDataInput = z.input<typeof createRuleDataSchema>;
 
 /**
+ * Request body schema for `PUT /api/alerting/v2/rules/{id}`. Adds an optional
+ * `enabled` on top of the create-rule data. Left as a plain optional (no
+ * schema-level default) because the meaning of "omitted" differs by outcome:
+ * on create it defaults to `true`, on replace it preserves the existing
+ * stored value — both handled in application code, not here.
+ */
+export const putRuleDataSchema = applyCreateRuleRefinements(
+  createRuleDataBaseSchema.extend({
+    enabled: z
+      .boolean()
+      .optional()
+      .describe(
+        'Whether the rule is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state; otherwise it becomes the new stored value.'
+      ),
+  })
+).meta({ id: 'alerting_put_rule' });
+
+export type PutRuleData = z.infer<typeof putRuleDataSchema>;
+export type PutRuleDataInput = z.input<typeof putRuleDataSchema>;
+
+/**
  * Top-level fields of the create-rule schema that cannot be changed after the
  * rule has been created. Every other field of {@link createRuleDataBaseSchema}
  * is implicitly mutable.

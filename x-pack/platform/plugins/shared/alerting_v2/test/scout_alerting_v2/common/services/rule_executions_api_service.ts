@@ -34,7 +34,8 @@ interface WaitForRunsParams {
   spaceId?: string;
 }
 
-interface WaitForTaskDrainedParams {
+/** Shared shape for lookups keyed by the rule's executor task (`taskType:spaceId:ruleId`). */
+interface RuleTaskParams {
   ruleId: string;
   spaceId?: string;
 }
@@ -48,13 +49,18 @@ interface WaitForTaskDrainedParams {
  *   - `waitForTaskDrained` — polls `.kibana_task_manager` until the executor
  *     task is no longer in `claiming`/`running` status (or until the document
  *     is gone, e.g. after rule delete).
+ *   - `waitForTaskScheduled` / `waitForTaskRemoved` — poll `.kibana_task_manager`
+ *     until the executor task document exists / no longer exists, so tests can
+ *     assert the real scheduling side effect, not just the stored `enabled` flag.
  *
  * The underlying `kibana.task.id` construction (`taskType:spaceId:ruleId`) is
  * an implementation detail; tests pass `ruleId` (and optionally `spaceId`).
  */
 export interface RuleExecutionsApiService {
   waitForRuns: (params: WaitForRunsParams) => Promise<void>;
-  waitForTaskDrained: (params: WaitForTaskDrainedParams) => Promise<void>;
+  waitForTaskDrained: (params: RuleTaskParams) => Promise<void>;
+  waitForTaskScheduled: (params: RuleTaskParams) => Promise<void>;
+  waitForTaskRemoved: (params: RuleTaskParams) => Promise<void>;
 }
 
 const buildExecutorTaskId = (ruleId: string, spaceId: string): string =>
@@ -87,6 +93,17 @@ export const getRuleExecutionsApiService = ({
     return !status || !RUNNING_TASK_STATUSES.includes(status);
   };
 
+  const executorTaskExists = async (taskId: string): Promise<boolean> => {
+    const result = await esClient.search({
+      index: TASK_MANAGER_INDEX,
+      query: { term: { _id: `task:${taskId}` } },
+      size: 1,
+      _source: false,
+    });
+
+    return result.hits.hits.length > 0;
+  };
+
   return {
     waitForRuns: ({ ruleId, runs, since, spaceId = DEFAULT_SPACE_ID }) =>
       measurePerformanceAsync(log, 'ruleExecutions.waitForRuns', async () => {
@@ -111,6 +128,30 @@ export const getRuleExecutionsApiService = ({
             intervals: [POLL_INTERVAL_MS],
           })
           .toBe(true);
+      }),
+
+    waitForTaskScheduled: ({ ruleId, spaceId = DEFAULT_SPACE_ID }) =>
+      measurePerformanceAsync(log, 'ruleExecutions.waitForTaskScheduled', async () => {
+        const taskId = buildExecutorTaskId(ruleId, spaceId);
+
+        await expect
+          .poll(() => executorTaskExists(taskId), {
+            timeout: POLL_TIMEOUT_MS,
+            intervals: [POLL_INTERVAL_MS],
+          })
+          .toBe(true);
+      }),
+
+    waitForTaskRemoved: ({ ruleId, spaceId = DEFAULT_SPACE_ID }) =>
+      measurePerformanceAsync(log, 'ruleExecutions.waitForTaskRemoved', async () => {
+        const taskId = buildExecutorTaskId(ruleId, spaceId);
+
+        await expect
+          .poll(() => executorTaskExists(taskId), {
+            timeout: POLL_TIMEOUT_MS,
+            intervals: [POLL_INTERVAL_MS],
+          })
+          .toBe(false);
       }),
   };
 };

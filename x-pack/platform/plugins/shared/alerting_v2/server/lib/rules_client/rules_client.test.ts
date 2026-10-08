@@ -214,6 +214,37 @@ describe('RulesClient', () => {
       );
     });
 
+    it('creates a disabled rule SO and does not schedule a task when options.enabled is false', async () => {
+      const client = createClient();
+
+      const res = await client.createRule({
+        data: baseCreateData,
+        options: { id: 'rule-id-disabled', enabled: false },
+      });
+
+      expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
+        expect.objectContaining({
+          id: 'rule-id-disabled',
+          attrs: expect.objectContaining({ enabled: false }),
+        }),
+      ]);
+      expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+      expect(res).toEqual(expect.objectContaining({ id: 'rule-id-disabled', enabled: false }));
+    });
+
+    it('defaults to an enabled rule when options.enabled is omitted', async () => {
+      const client = createClient();
+
+      const res = await client.createRule({
+        data: baseCreateData,
+        options: { id: 'rule-id-default-enabled' },
+      });
+
+      expect(res).toEqual(
+        expect.objectContaining({ id: 'rule-id-default-enabled', enabled: true })
+      );
+    });
+
     it('writes dashboard artifact references and rejects invalid registered artifact data', async () => {
       const client = createClient();
 
@@ -1499,6 +1530,27 @@ describe('RulesClient', () => {
 
         expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
       });
+
+      it('creates the rule SO with enabled=false and does not schedule the task when the body disables it', async () => {
+        const client = createClient();
+
+        const res = await client.upsertRule({
+          id: 'rule-id-1',
+          data: { ...baseCreateData, enabled: false },
+        });
+
+        expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
+          expect.objectContaining({
+            id: 'rule-id-1',
+            attrs: expect.objectContaining({ enabled: false }),
+          }),
+        ]);
+        expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+        expect(res).toEqual({
+          created: true,
+          rule: expect.objectContaining({ id: 'rule-id-1', enabled: false }),
+        });
+      });
     });
 
     describe('replace rule (id exists)', () => {
@@ -1540,6 +1592,78 @@ describe('RulesClient', () => {
           references: [],
         });
         expect(res.created).toBe(false);
+      });
+
+      it('preserves the existing enabled value when the body omits enabled, and still self-heals by removing any leftover task', async () => {
+        const client = createClient();
+        const existingDoc = {
+          id: 'rule-id-1',
+          attributes: { ...baseSoAttrs, enabled: false },
+          version: 'WzEsMV0=',
+        };
+        rulesSavedObjectService.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-1' });
+        getRuleExecutorTaskIdMock.mockReturnValue('task:rule-id-1');
+
+        await client.upsertRule({ id: 'rule-id-1', data: baseCreateData });
+
+        expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
+          expect.objectContaining({ attrs: expect.objectContaining({ enabled: false }) })
+        );
+        expect(ensureRuleExecutorTaskScheduledMock).not.toHaveBeenCalled();
+        // Not a transition (it was already disabled), but still removed
+        // unconditionally — same self-heal behavior as `disableRule`, in case
+        // a leftover task exists from a prior bug or failed write.
+        expect(taskManager.removeIfExists).toHaveBeenCalledWith('task:rule-id-1');
+      });
+
+      it('enables the rule and schedules the task when the body sets enabled=true on a disabled rule', async () => {
+        const client = createClient();
+        const existingDoc = {
+          id: 'rule-id-1',
+          attributes: { ...baseSoAttrs, enabled: false },
+          version: 'WzEsMV0=',
+        };
+        rulesSavedObjectService.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-1' });
+
+        await client.upsertRule({ id: 'rule-id-1', data: { ...baseCreateData, enabled: true } });
+
+        expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
+          expect.objectContaining({ attrs: expect.objectContaining({ enabled: true }) })
+        );
+        expect(ensureRuleExecutorTaskScheduledMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            input: expect.objectContaining({ ruleId: 'rule-id-1' }),
+          })
+        );
+        expect(taskManager.removeIfExists).not.toHaveBeenCalled();
+      });
+
+      it('disables the rule and removes the task when the body sets enabled=false on an enabled rule', async () => {
+        const client = createClient();
+        const existingDoc = {
+          id: 'rule-id-1',
+          attributes: baseSoAttrs,
+          version: 'WzEsMV0=',
+        };
+        rulesSavedObjectService.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-1' });
+        getRuleExecutorTaskIdMock.mockReturnValue('task:rule-id-1');
+
+        await client.upsertRule({ id: 'rule-id-1', data: { ...baseCreateData, enabled: false } });
+
+        expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
+          expect.objectContaining({ attrs: expect.objectContaining({ enabled: false }) })
+        );
+        expect(ensureRuleExecutorTaskScheduledMock).not.toHaveBeenCalled();
+        expect(taskManager.removeIfExists).toHaveBeenCalledWith('task:rule-id-1');
       });
 
       it('reschedules the task with the new interval', async () => {
@@ -1587,6 +1711,33 @@ describe('RulesClient', () => {
         ).rejects.toMatchObject({
           output: { statusCode: 409 },
         });
+      });
+
+      it('does not touch the executor task when the saved-object write fails on a disable transition', async () => {
+        const client = createClient();
+        const existingDoc = {
+          id: 'rule-id-1',
+          // enabled: true, so this PUT attempts an enabled -> disabled transition.
+          attributes: baseSoAttrs,
+          version: 'WzEsMV0=',
+        };
+        rulesSavedObjectService.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+        rulesSavedObjectService.update.mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, 'rule-id-1')
+        );
+
+        await expect(
+          client.upsertRule({ id: 'rule-id-1', data: { ...baseCreateData, enabled: false } })
+        ).rejects.toMatchObject({
+          output: { statusCode: 409 },
+        });
+
+        // The write failed, so the stored rule is still enabled with its task
+        // in place — removing the task here would have left that task-less
+        // despite the saved object still claiming the rule is enabled.
+        expect(taskManager.removeIfExists).not.toHaveBeenCalled();
       });
 
       it('throws 409 when the request body changes the rule kind', async () => {
@@ -4000,6 +4151,88 @@ describe('RulesClient', () => {
           [expect.objectContaining({ ruleId: 'rule-id-wf-upsert-replace', spaceId: 'space-1' })]
         );
       });
+
+      it('emits both ruleUpdated and ruleEnabled when the replace body enables a disabled rule', async () => {
+        const client = createClient();
+        const existingDoc = {
+          id: 'rule-id-wf-upsert-enable',
+          attributes: { ...workflowSoAttrs, enabled: false },
+          version: 'v1',
+        };
+        rulesSavedObjectService.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+        rulesSavedObjectService.update.mockResolvedValueOnce({
+          id: 'rule-id-wf-upsert-enable',
+        });
+
+        await client.upsertRule({
+          id: 'rule-id-wf-upsert-enable',
+          data: { ...workflowCreateData, enabled: true },
+        });
+
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
+          expect.objectContaining({ ruleId: 'rule-id-wf-upsert-enable', spaceId: 'space-1' }),
+        ]);
+        expect(ruleEventPublisher.emitRuleEnabled).toHaveBeenCalledWith(request, [
+          expect.objectContaining({ ruleId: 'rule-id-wf-upsert-enable', spaceId: 'space-1' }),
+        ]);
+        expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
+      });
+
+      it('emits both ruleUpdated and ruleDisabled when the replace body disables an enabled rule', async () => {
+        const client = createClient();
+        const existingDoc = {
+          id: 'rule-id-wf-upsert-disable',
+          attributes: workflowSoAttrs,
+          version: 'v1',
+        };
+        rulesSavedObjectService.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+        rulesSavedObjectService.update.mockResolvedValueOnce({
+          id: 'rule-id-wf-upsert-disable',
+        });
+
+        await client.upsertRule({
+          id: 'rule-id-wf-upsert-disable',
+          data: { ...workflowCreateData, enabled: false },
+        });
+
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
+          expect.objectContaining({ ruleId: 'rule-id-wf-upsert-disable', spaceId: 'space-1' }),
+        ]);
+        expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(request, [
+          expect.objectContaining({ ruleId: 'rule-id-wf-upsert-disable', spaceId: 'space-1' }),
+        ]);
+        expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
+      });
+
+      it('emits only ruleUpdated when the replace body omits enabled (no transition)', async () => {
+        const client = createClient();
+        const existingDoc = {
+          id: 'rule-id-wf-upsert-noop',
+          attributes: { ...workflowSoAttrs, enabled: false },
+          version: 'v1',
+        };
+        rulesSavedObjectService.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+        rulesSavedObjectService.update.mockResolvedValueOnce({
+          id: 'rule-id-wf-upsert-noop',
+        });
+
+        await client.upsertRule({
+          id: 'rule-id-wf-upsert-noop',
+          data: workflowCreateData,
+        });
+
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
+          expect.objectContaining({ ruleId: 'rule-id-wf-upsert-noop', spaceId: 'space-1' }),
+        ]);
+        expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
+        expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
+      });
     });
 
     describe('deleteRule', () => {
@@ -4370,6 +4603,18 @@ describe('RulesClient', () => {
         expect(rulesSavedObjectService.bulkCreate).not.toHaveBeenCalled();
       });
 
+      it('allows creating a disabled rule even when the limit is already reached', async () => {
+        const client = createClient({ maxScheduledPerMinute: 1 });
+        rulesSavedObjectService.getTotalScheduledPerMinute.mockResolvedValueOnce(1);
+
+        await expect(
+          client.createRule({ data: baseCreateData, options: { enabled: false } })
+        ).resolves.toBeDefined();
+
+        expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalled();
+        expect(rulesSavedObjectService.getTotalScheduledPerMinute).not.toHaveBeenCalled();
+      });
+
       it('allows creating a rule when there is remaining capacity', async () => {
         const client = createClient({ maxScheduledPerMinute: 400 });
         rulesSavedObjectService.getTotalScheduledPerMinute.mockResolvedValueOnce(10);
@@ -4427,6 +4672,32 @@ describe('RulesClient', () => {
         });
 
         await expect(client.enableRule({ id: 'rule-id-1' })).rejects.toMatchObject({
+          output: { statusCode: 400 },
+          data: { code: 'MAX_SCHEDULES_PER_MINUTE_EXCEEDED' },
+        });
+
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      });
+
+      it('rejects enabling a disabled rule via PUT at an unchanged interval when the limit is already reached', async () => {
+        const client = createClient({ maxScheduledPerMinute: 1 });
+        // The disabled rule's stored 1m schedule is not actually running, so
+        // the cluster is already full from other rules alone.
+        rulesSavedObjectService.getTotalScheduledPerMinute.mockResolvedValueOnce(1);
+
+        const existingDoc = {
+          id: 'rule-id-1',
+          attributes: { ...baseSoAttrs, enabled: false },
+          version: 'WzEsMV0=',
+        };
+        rulesSavedObjectService.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+
+        // Same 1m interval as before — only `enabled` changes to true.
+        await expect(
+          client.upsertRule({ id: 'rule-id-1', data: { ...baseCreateData, enabled: true } })
+        ).rejects.toMatchObject({
           output: { statusCode: 400 },
           data: { code: 'MAX_SCHEDULES_PER_MINUTE_EXCEEDED' },
         });

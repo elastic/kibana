@@ -14,7 +14,9 @@ import {
   createRuleDataSchema,
   FIND_DEFAULT_PER_PAGE,
   isStateTransitionAllowed,
+  putRuleDataSchema,
   updateRuleDataSchema,
+  type PutRuleData,
   type RuleKind,
 } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
@@ -621,14 +623,14 @@ export class RulesClient {
     const prepared = this.prepareRuleForCreate({
       data: parsed,
       id: params.options?.id,
-      enabled: true,
+      enabled: params.options?.enabled ?? true,
       actor,
       nowIso,
       version: this.getNextVersion(),
     });
 
     await this.validateSchedule([
-      { updatedEvery: prepared.attrs.schedule.every, checkLimit: true },
+      { updatedEvery: prepared.attrs.schedule.every, checkLimit: prepared.enabled },
     ]);
 
     const { created, errors } = await this.persistPreparedRules([prepared]);
@@ -1793,15 +1795,16 @@ export class RulesClient {
     data,
   }: {
     id: string;
-    data: CreateRuleData;
+    data: PutRuleData;
   }): Promise<{ rule: RuleResponse; created: boolean }> {
-    const parsed = this.parseRuleData(createRuleDataSchema, data, 'upsert');
+    const parsed = this.parseRuleData(putRuleDataSchema, data, 'upsert');
     this.artifactTypeRegistry.validate(parsed.artifacts);
 
     const exists = await this.ruleExists({ id });
 
     if (!exists) {
-      const rule = await this.createRule({ data, options: { id } });
+      const { enabled, ...createData } = parsed;
+      const rule = await this.createRule({ data: createData, options: { id, enabled } });
       return { rule, created: true };
     }
 
@@ -1817,8 +1820,11 @@ export class RulesClient {
 
     assertImmutableUnchanged(parsed, existingAttrs);
 
+    const wasEnabled = existingAttrs.enabled;
+    const nextEnabled = parsed.enabled ?? wasEnabled;
+
     const nextAttrs = transformCreateRuleBodyToRuleSoAttributes(parsed, {
-      enabled: existingAttrs.enabled,
+      enabled: nextEnabled,
       createdBy: existingAttrs.createdBy,
       createdAt: existingAttrs.createdAt,
       updatedBy: actor,
@@ -1829,16 +1835,13 @@ export class RulesClient {
     await this.validateSchedule([
       {
         updatedEvery: nextAttrs.schedule.every,
-        prevEvery: existingAttrs.schedule.every,
-        checkLimit: existingAttrs.enabled,
+        // A disabled rule has no running task, so its stored schedule is not
+        // consuming capacity — only count it as "previous" when it was
+        // actually enabled, same as `enableRule`.
+        prevEvery: wasEnabled ? existingAttrs.schedule.every : undefined,
+        checkLimit: nextEnabled,
       },
     ]);
-
-    await this.scheduleRuleExecutorTask({
-      ruleId: id,
-      spaceId,
-      scheduleEvery: nextAttrs.schedule.every,
-    });
 
     const references = rebuildArtifactReferences({
       artifacts: nextAttrs.artifacts,
@@ -1846,12 +1849,29 @@ export class RulesClient {
       registry: this.artifactTypeRegistry,
     });
 
+    // Write the saved object first: if this throws (e.g. a version conflict),
+    // the task is left untouched, so a disabled rule never loses a task that
+    // the stored (unchanged) attrs still expect to be running.
     await this.writeRuleAttrs({
       id,
       attrs: nextAttrs,
       version: existingVersion,
       references,
     });
+
+    // Self-heal, like `enableRule`/`disableRule`: always reapply the task
+    // state for `nextEnabled`, not just on a transition, so a leftover task
+    // from a prior bug or failed write also gets cleaned up.
+    if (nextEnabled) {
+      await this.scheduleRuleExecutorTask({
+        ruleId: id,
+        spaceId,
+        scheduleEvery: nextAttrs.schedule.every,
+      });
+    } else {
+      const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
+      await this.taskManager.removeIfExists(taskId);
+    }
 
     const rule = this.toRuleApiResponse({
       id,
@@ -1861,6 +1881,14 @@ export class RulesClient {
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
       { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
+    if (nextEnabled !== wasEnabled) {
+      const eventRule = { ruleId: rule.id, spaceId: this.spaceId, rule };
+      if (nextEnabled) {
+        this.ruleEventPublisher.emitRuleEnabled(this.request, [eventRule]);
+      } else {
+        this.ruleEventPublisher.emitRuleDisabled(this.request, [eventRule]);
+      }
+    }
     return { rule, created: false };
   }
 }
