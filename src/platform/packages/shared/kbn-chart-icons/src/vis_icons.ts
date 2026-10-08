@@ -12,100 +12,71 @@ import { IconCircle, IconTriangle } from './assets';
 
 export type VisIcon = EuiIconType | typeof IconCircle | typeof IconTriangle;
 
-interface VisIconDefinition {
-  readonly icon: VisIcon;
-  /**
-   * Identifiers written by older versions, as saved objects may still have them. Only additive, never remove one.
-   */
-  readonly aliases?: readonly string[];
-}
-
 /**
- * Icons available to visualization editors, keyed by the identifier persisted in saved objects.
- * Keys can be Kibana-owned identifiers, not EUI icon names, and `icon` is what gets rendered.
- * To rename an identifier, rename the key and move the old one into `aliases`.
- *
- * @TODO: some keys here still use legacy EUI names. This is to be rollback safe until all versions that may read the saved object
- * can resolve them. Once it is, rename those keys to their current names and move the old names into `aliases`.
+ * Icon to render for each persisted identifier in visualization saved objects (annotations, reference lines, metric, Graph).
+ * Keys are Kibana-owned identifiers, not EUI icon names, so when EUI renames an icon only the value changes.
+ * Don't remove keys, as older saved objects may still have it.
  */
 export const VIS_ICONS = {
   // annotations, reference lines and metric
-  empty: { icon: 'empty' },
-  alert: { icon: 'warning' },
-  asterisk: { icon: 'asterisk' },
-  bell: { icon: 'bell' },
-  bolt: { icon: 'bolt' },
-  bug: { icon: 'bug' },
-  editorComment: { icon: 'comment' },
-  flag: { icon: 'flag' },
-  heart: { icon: 'heart' },
-  mapMarker: { icon: 'waypoint' },
-  starEmpty: { icon: 'star' },
-  tag: { icon: 'tag' },
-  circle: { icon: IconCircle },
-  pinFilled: { icon: 'pinFill' },
-  starFilled: { icon: 'starFill' },
-  triangle: { icon: IconTriangle },
-  compute: { icon: 'processor' },
-  globe: { icon: 'globe' },
-  pin: { icon: 'pin' },
-  popout: { icon: 'external' },
-  sortDown: { icon: 'sortDown' },
-  sortUp: { icon: 'sortUp' },
-  temperature: { icon: 'thermometer' },
+  empty: 'empty',
+  alert: 'warning',
+  asterisk: 'asterisk',
+  bell: 'bell',
+  bolt: 'bolt',
+  bug: 'bug',
+  editorComment: 'comment',
+  flag: 'flag',
+  heart: 'heart',
+  mapMarker: 'waypoint',
+  starEmpty: 'star',
+  tag: 'tag',
+  circle: IconCircle,
+  pinFilled: 'pinFill',
+  starFilled: 'starFill',
+  triangle: IconTriangle,
+  compute: 'processor',
+  globe: 'globe',
+  pin: 'pin',
+  popout: 'external',
+  sortDown: 'sortDown',
+  sortUp: 'sortUp',
+  temperature: 'thermometer',
   // TSVB
-  warning: { icon: 'warning' },
+  warning: 'warning',
   // Graph icons
-  at: { icon: 'at' },
-  display: { icon: 'display', aliases: ['desktop'] },
-  document: { icon: 'document' },
-  folderOpen: { icon: 'folderOpen' },
-  home: { icon: 'home' },
-  key: { icon: 'key' },
-  kubernetesPod: { icon: 'cube' },
-  question: { icon: 'question' },
-  text: { icon: 'text', aliases: ['lettering'] },
-  user: { icon: 'user' },
-  users: { icon: 'users' },
-  cluster: { icon: 'cluster' },
-  eye: { icon: 'eye' },
-  info: { icon: 'info' },
-  link: { icon: 'link' },
-  list: { icon: 'listBullet' },
-  search: { icon: 'magnify' },
-  visArea: { icon: 'chartArea' },
-  visBarVertical: { icon: 'chartBarVertical' },
-  visGauge: { icon: 'chartGauge' },
-  visLine: { icon: 'chartLine' },
-  visPie: { icon: 'chartPie' },
-  visTable: { icon: 'table' },
-} as const satisfies Record<string, VisIconDefinition>;
+  at: 'at',
+  display: 'display',
+  document: 'document',
+  folderOpen: 'folderOpen',
+  home: 'home',
+  key: 'key',
+  kubernetesPod: 'cube',
+  question: 'question',
+  text: 'text',
+  user: 'user',
+  users: 'users',
+  cluster: 'cluster',
+  eye: 'eye',
+  info: 'info',
+  link: 'link',
+  list: 'listBullet',
+  search: 'magnify',
+  visArea: 'chartArea',
+  visBarVertical: 'chartBarVertical',
+  visGauge: 'chartGauge',
+  visLine: 'chartLine',
+  visPie: 'chartPie',
+  visTable: 'table',
+} as const satisfies Record<string, VisIcon>;
 
 export type VisIconType = keyof typeof VIS_ICONS;
 
-const VIS_ICON_BY_ALIAS = new Map(
-  (Object.entries(VIS_ICONS) as Array<[VisIconType, VisIconDefinition]>).flatMap(
-    ([id, { icon, aliases = [] }]) =>
-      [id, ...aliases].map((alias) => [alias, { id, icon }] as const)
-  )
-);
+export const isVisIconType = (iconId: string | undefined): iconId is VisIconType =>
+  iconId !== undefined && Object.hasOwn(VIS_ICONS, iconId);
 
 /**
- * Resolves a persisted icon identifier, including legacy aliases, to its current identifier and the
- * icon to render. Unknown identifiers resolve to the `empty` icon without an identifier.
+ * Returns the icon to render for a persisted icon identifier. Unknown identifiers render the `empty` icon.
  */
-export const resolveVisIcon = (
-  iconId: string | undefined
-): {
-  id: VisIconType | undefined;
-  icon: VisIcon;
-} => {
-  const visIcon = iconId ? VIS_ICON_BY_ALIAS.get(iconId) : undefined;
-
-  if (!visIcon) {
-    return { id: undefined, icon: 'empty' };
-  }
-  return visIcon;
-};
-
-export type ResolvedVisIcon = ReturnType<typeof resolveVisIcon>;
+export const resolveVisIcon = (iconId: string | undefined): VisIcon =>
+  isVisIconType(iconId) ? VIS_ICONS[iconId] : 'empty';

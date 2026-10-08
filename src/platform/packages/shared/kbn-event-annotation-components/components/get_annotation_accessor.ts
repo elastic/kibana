@@ -22,7 +22,7 @@ export const getAnnotationAccessor = (
       annotationsIconSet.find((option) => option.value === 'triangle')
     : undefined;
 
-  const icon = annotationIcon ? resolveVisIcon(annotationIcon.value).icon : undefined;
+  const icon = annotationIcon ? resolveVisIcon(annotationIcon.value) : undefined;
 
   return {
     columnId: annotation.id,

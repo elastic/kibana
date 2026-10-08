@@ -55,5 +55,5 @@ export {
   IconChartTagcloud,
 } from './src/assets';
 
-export { resolveVisIcon } from './src/vis_icons';
-export type { ResolvedVisIcon, VisIcon, VisIconType } from './src/vis_icons';
+export { resolveVisIcon, isVisIconType } from './src/vis_icons';
+export type { VisIcon, VisIconType } from './src/vis_icons';

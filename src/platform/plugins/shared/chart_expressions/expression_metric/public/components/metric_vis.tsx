@@ -61,14 +61,7 @@ const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) =
 const getIcon =
   (type: string) =>
   ({ width, height, color }: { width: number; height: number; color: string }) =>
-    (
-      <EuiIcon
-        type={resolveVisIcon(type).icon}
-        fill={color}
-        css={{ width, height }}
-        aria-hidden="true"
-      />
-    );
+    <EuiIcon type={resolveVisIcon(type)} fill={color} css={{ width, height }} aria-hidden="true" />;
 
 const SecondaryMetricLabelTooltip: NonNullable<SecondaryMetricProps['labelTooltip']> = ({
   children,

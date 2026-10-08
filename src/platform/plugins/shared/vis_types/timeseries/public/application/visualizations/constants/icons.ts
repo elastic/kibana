@@ -52,5 +52,5 @@ export const ICON_TYPES_MAP = {
  */
 export const getIconType = (iconName: string | undefined): IconType | undefined => {
   const icon = iconName ? ICON_TYPES_MAP[iconName] : undefined;
-  return typeof icon === 'string' ? resolveVisIcon(icon).icon : icon;
+  return typeof icon === 'string' ? resolveVisIcon(icon) : icon;
 };

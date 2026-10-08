@@ -196,7 +196,7 @@ export const AnnotationIcon = ({
       {...rest}
       color={color}
       data-test-subj="xyVisAnnotationIcon"
-      type={resolveVisIcon(iconConfig.value).icon}
+      type={resolveVisIcon(iconConfig.value)}
       className={iconConfig.shouldRotate ? rotateClassName : undefined}
       css={shouldRotateIcon && styles.rotatedIcon}
     />

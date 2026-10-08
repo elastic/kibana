@@ -10,7 +10,6 @@
 import type { XYDataLayerConfig, XYLayerConfig, XYPersistedLayerConfig } from '@kbn/lens-common';
 import type { AvailableAnnotationIcon } from '@kbn/event-annotation-common';
 import { AvailableAnnotationIcons } from '@kbn/event-annotation-common';
-import { resolveVisIcon } from '@kbn/chart-icons';
 import type {
   AnnotationLayerType,
   DataLayerType,
@@ -108,7 +107,6 @@ export const annotationIconCompat = getReversibleMappings<
 export const getAnnotationIconAPIName = (
   icon: string | undefined
 ): AnnotationIconAPIName | undefined => {
-  const { id } = resolveVisIcon(icon);
-  const annotationIcon = Object.values(AvailableAnnotationIcons).find((i) => i === id);
+  const annotationIcon = Object.values(AvailableAnnotationIcons).find((i) => i === icon);
   return annotationIcon ? annotationIconCompat.toAPI(annotationIcon) : undefined;
 };

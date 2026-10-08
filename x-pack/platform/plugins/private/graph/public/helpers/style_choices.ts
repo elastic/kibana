@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import type { VisIconType } from '@kbn/chart-icons';
-import { resolveVisIcon } from '@kbn/chart-icons';
 
 export interface GenericIcon {
   label: string;
@@ -211,6 +210,19 @@ iconChoices.forEach((icon) => {
   iconChoicesByClass[icon.id] = icon;
 });
 
+// Saved workspaces store iconClass as the EUI glyph id. Keep old names resolvable.
+const ICON_ID_ALIASES: Record<string, string> = {
+  desktop: 'display',
+  lettering: 'text',
+};
+
+for (const [alias, canonicalId] of Object.entries(ICON_ID_ALIASES)) {
+  const canonical = iconChoicesByClass[canonicalId];
+  if (canonical) {
+    iconChoicesByClass[alias] = canonical;
+  }
+}
+
 export const urlTemplateIconChoices: IconChoice[] = [
   // Patterns are used to help default icon choices for common field names
   {
@@ -313,22 +325,19 @@ function hasIcon(icon: AnyIconType | undefined): icon is AnyIconType {
   return icon != null;
 }
 
-// Maki and legacy Font Awesome names aren't vis icons, so they're kept as is.
-const getIconChoiceId = (iconId: string): string => resolveVisIcon(iconId).id ?? iconId;
-
 export function isNewIcon(icon: AnyIconType | undefined): icon is GenericIcon {
   if (!hasIcon(icon)) {
     return false;
   }
-  return typeof icon !== 'string' ? 'package' in icon : getIconChoiceId(icon) in iconChoicesByClass;
+  return typeof icon !== 'string' ? 'package' in icon : icon in iconChoicesByClass;
 }
 
 export function getIcon(icon: AnyIconType): GenericIcon {
   if (isNewIcon(icon)) {
     if (typeof icon === 'string') {
-      return iconChoicesByClass[getIconChoiceId(icon)]!;
+      return iconChoicesByClass[icon]!;
     }
-    return iconChoicesByClass[getIconChoiceId(icon.id)] ?? icon;
+    return iconChoicesByClass[icon.id] ?? icon;
   }
   return getIconFromList(icon, iconChoices);
 }

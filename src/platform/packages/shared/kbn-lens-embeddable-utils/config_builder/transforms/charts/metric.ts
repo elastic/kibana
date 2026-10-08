@@ -24,7 +24,7 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { TextBasedLayerColumn } from '@kbn/lens-common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { VisIconType } from '@kbn/chart-icons';
-import { resolveVisIcon } from '@kbn/chart-icons';
+import { isVisIconType } from '@kbn/chart-icons';
 import type { DeepWriteable, LensAttributes } from '../../types';
 import {
   DEFAULT_PRIMARY_POSITION,
@@ -217,7 +217,9 @@ function convertStylingToAPIFormat(
   visualization: MetricVisualizationState,
   hasSecondary: boolean
 ): MetricStyling {
-  const iconName = iconCompat.toAPI(resolveVisIcon(visualization.icon).id);
+  const iconName = isVisIconType(visualization.icon)
+    ? iconCompat.toAPI(visualization.icon)
+    : undefined;
 
   return stripUndefined({
     density: visualization.density ?? LEGACY_METRIC_DENSITY,

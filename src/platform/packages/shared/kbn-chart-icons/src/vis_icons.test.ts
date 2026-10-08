@@ -8,8 +8,9 @@
  */
 
 import { IconCircle, IconTriangle } from './assets';
-import type { VisIcon } from './vis_icons';
-import { resolveVisIcon, VIS_ICONS } from './vis_icons';
+import { resolveVisIcon, isVisIconType } from './vis_icons';
+
+const UNKNOWN_ICON_IDS = [undefined, '', 'notAnIcon', 'https://example.com/icon.svg', 'toString'];
 
 describe('resolveVisIcon', () => {
   it.each([
@@ -17,48 +18,33 @@ describe('resolveVisIcon', () => {
     ['kubernetesPod', 'cube'],
     ['popout', 'external'],
     ['visLine', 'chartLine'],
-  ])(
-    'resolves the identifier "%s", named after a deprecated EUI icon, to the EUI icon "%s"',
-    (iconId, expected) => {
-      expect(resolveVisIcon(iconId)).toEqual({ id: iconId, icon: expected });
-    }
-  );
-
-  it('resolves an alias to the current identifier and its EUI icon', () => {
-    expect(resolveVisIcon('desktop')).toEqual({ id: 'display', icon: 'display' });
+  ])('resolves the identifier "%s" to the EUI icon "%s"', (iconId, expected) => {
+    expect(resolveVisIcon(iconId)).toBe(expected);
   });
 
   it.each(['asterisk', 'bell', 'empty', 'globe', 'info', 'pin', 'sortUp', 'warning'])(
-    'resolves the identifier "%s" to itself and the EUI icon of the same name',
+    'resolves the identifier "%s" to the EUI icon of the same name',
     (iconId) => {
-      expect(resolveVisIcon(iconId)).toEqual({ id: iconId, icon: iconId });
+      expect(resolveVisIcon(iconId)).toBe(iconId);
     }
   );
 
   it('resolves Kibana-owned identifiers to their icon components', () => {
-    expect(resolveVisIcon('circle')).toEqual({ id: 'circle', icon: IconCircle });
-    expect(resolveVisIcon('triangle')).toEqual({ id: 'triangle', icon: IconTriangle });
+    expect(resolveVisIcon('circle')).toBe(IconCircle);
+    expect(resolveVisIcon('triangle')).toBe(IconTriangle);
   });
 
-  it.each([undefined, '', 'notAnIcon', 'fa-star', 'https://example.com/icon.svg'])(
-    'resolves the unknown identifier %p to the "empty" icon without an identifier',
-    (iconId) => {
-      expect(resolveVisIcon(iconId)).toEqual({ id: undefined, icon: 'empty' });
-    }
-  );
+  it.each(UNKNOWN_ICON_IDS)('resolves the unknown identifier %p to the "empty" icon', (iconId) => {
+    expect(resolveVisIcon(iconId)).toBe('empty');
+  });
 });
 
-describe('icon definitions', () => {
-  const definitions: ReadonlyArray<{ icon: VisIcon; aliases?: readonly string[] }> =
-    Object.values(VIS_ICONS);
-  const iconIds = Object.keys(VIS_ICONS);
-  const aliases = definitions.flatMap(({ aliases: iconAliases = [] }) => iconAliases);
-
-  it('uses each alias only once', () => {
-    expect(new Set(aliases).size).toBe(aliases.length);
+describe('isVisIconType', () => {
+  it.each(['empty', 'mapMarker', 'display', 'circle'])('recognizes "%s"', (iconId) => {
+    expect(isVisIconType(iconId)).toBe(true);
   });
 
-  it('never uses a current identifier as an alias', () => {
-    expect(aliases.filter((alias) => iconIds.some((iconId) => iconId === alias))).toEqual([]);
+  it.each(UNKNOWN_ICON_IDS)('does not recognize %p', (iconId) => {
+    expect(isVisIconType(iconId)).toBe(false);
   });
 });

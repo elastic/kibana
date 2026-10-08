@@ -63,7 +63,7 @@ export const IconRenderer = ({
   }
   return (
     <EuiIcon
-      type={resolveVisIcon(icon.id).icon}
+      type={resolveVisIcon(icon.id)}
       color={backgroundColor}
       className={className}
       onClick={onClick}

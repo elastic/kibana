@@ -41,7 +41,7 @@ const IconView = (props: { value?: VisIconType; label: string }) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiIcon type={resolveVisIcon(props.value).icon} aria-hidden={true} />
+        <EuiIcon type={resolveVisIcon(props.value)} aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem>{props.label}</EuiFlexItem>
     </EuiFlexGroup>
@@ -59,12 +59,11 @@ export function IconSelect<Icon extends VisIconType>({
   customIconSet: IconSet<Icon>;
   defaultIcon?: VisIconType;
 }) {
-  const { id } = resolveVisIcon(value);
   const selectedIcon =
-    customIconSet.find((option) => option.value === id) ||
+    customIconSet.find((option) => option.value === value) ||
     customIconSet.find((option) => option.value === defaultIcon)!;
 
-  const { icon } = resolveVisIcon(selectedIcon.value);
+  const icon = resolveVisIcon(selectedIcon.value);
 
   return (
     <EuiComboBox
