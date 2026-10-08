@@ -22,7 +22,7 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { buildChildRequestEnricher, buildTaskFakeRequest } from './fake_request_factory';
 import type { Middleware } from '../lib/middleware';
 import type { Result } from '../lib/result_type';
-import { asErr, asOk, eitherAsync, isOk, mapErr, mapOk, unwrap } from '../lib/result_type';
+import { asErr, asOk, eitherAsync, isErr, isOk, mapErr, mapOk, unwrap } from '../lib/result_type';
 import { getExecutionContextRunner } from '../lib/execution_context';
 import type { TaskMarkRunning, TaskRun, TaskTiming, TaskManagerStat } from '../task_events';
 import {
@@ -43,8 +43,10 @@ import type {
   PartialConcreteTaskInstance,
   RruleSchedule,
   SuccessfulRunResult,
+  TaskCredential,
   TaskDefinition,
   TaskEventLogger,
+  TaskRunAsContext,
   TaskTypeGroup,
 } from '../task';
 import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from '../task';
@@ -60,8 +62,14 @@ import {
   isVersionConflictError,
   getTaskReclaimReason,
 } from './resolve_so_conflicts';
+import { createRunAsContext } from './run_as_context';
+import {
+  getCredentialRunAs,
+  SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+} from '../lib/service_account_credential';
 import type { TaskManagerConfig } from '../config';
 import type { ApiKeyStrategy } from '../api_key_strategy';
+import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
 import { TaskValidator } from '../task_validator';
 import { getRetryDate, getTimeout } from '../lib/get_retry_at';
 import { getNextRunAt } from '../lib/get_next_run_at';
@@ -77,7 +85,7 @@ export const TASK_MANAGER_TRANSACTION_TYPE = 'task-manager';
 export const TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING = 'mark-task-as-running';
 
 const UPDATE_RETRY_AT_INTERVAL = 60000; // 1m
-const UNSUPPORTED_CREDENTIAL_RETRY_DELAY = 5 * 60 * 1000; // 5m
+const CREDENTIAL_RETRY_DELAY = 5 * 60 * 1000; // 5m
 const MAX_CUSTOM_TASK_RUN_EVENT_FIELDS_SIZE = 4096; // 4 KB
 
 export interface TaskRunner {
@@ -119,6 +127,7 @@ export interface Updatable {
   ): Promise<ConcreteTaskInstance>;
   remove(id: string): Promise<void>;
   get(id: string): Promise<ConcreteTaskInstance>;
+  getVerifiedCredential(id: string): Promise<Result<TaskCredential, Error>>;
 }
 
 type Opts = {
@@ -163,6 +172,10 @@ export type ReadyToRunTask = TaskRunning<
 export type RanTask = TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>;
 
 export type TaskRunningInstance = PendingTask | ReadyToRunTask | RanTask;
+
+type CredentialCheck =
+  | { outcome: 'run'; runAs?: TaskRunAsContext }
+  | { outcome: 'retry' | 'fail'; error: DecoratedError };
 
 /**
  * Runs a background task, ensures that errors are properly handled,
@@ -442,16 +455,13 @@ export class TaskManagerRunner implements TaskRunner {
           this.updateRetryAtOnIntervalForLongRunningTasks(startedAt);
 
         try {
-          // This version runs no credential type, including types added by later versions.
           const { credential } = this.instance.task;
-          if (credential) {
+          const credentialCheck: CredentialCheck = credential
+            ? await this.checkCredential(credential, definition)
+            : { outcome: 'run' };
+          if (credentialCheck.outcome !== 'run') {
             stopUpdatingLongRunningTasks();
-            const error = createTaskRunError(
-              new Error(
-                `Task uses credential type "${credential.type}", which this version of Kibana cannot run`
-              ),
-              TaskErrorSource.FRAMEWORK
-            );
+            const { error } = credentialCheck;
             this.logger.error(`Task ${this} failed: ${error}`, {
               tags: [
                 this.taskType,
@@ -460,34 +470,49 @@ export class TaskManagerRunner implements TaskRunner {
                 `${TaskErrorSource.FRAMEWORK}-error`,
               ],
             });
-            // Reported as a successful run with an error, because a failed run uses up an attempt
-            // and a one-off task is deleted once it runs out of attempts.
             const processedResult = await withSpan(
               { name: 'process result', type: 'task manager' },
               () =>
-                this.processResult(
-                  asOk({
-                    state: modifiedContext.taskInstance.state,
-                    taskRunError: error,
-                    ...(this.instance.task.schedule
-                      ? {}
-                      : { runAt: new Date(Date.now() + UNSUPPORTED_CREDENTIAL_RETRY_DELAY) }),
-                  }),
-                  makeTaskTiming()
-                )
+                credentialCheck.outcome === 'fail'
+                  ? this.failAndKeepTask(
+                      error,
+                      modifiedContext.taskInstance.state,
+                      makeTaskTiming()
+                    )
+                  : // Reported as a successful run with an error, because a failed run uses up an
+                    // attempt and a one-off task is deleted once it runs out of attempts.
+                    this.processResult(
+                      asOk({
+                        state: modifiedContext.taskInstance.state,
+                        taskRunError: error,
+                        ...(this.instance.task.schedule
+                          ? {}
+                          : { runAt: new Date(Date.now() + CREDENTIAL_RETRY_DELAY) }),
+                      }),
+                      makeTaskTiming()
+                    )
             );
             if (apmTrans) apmTrans.end('failure');
             return processedResult;
           }
+          const { runAs } = credentialCheck;
 
           const sanitizedTaskInstance = omit(modifiedContext.taskInstance, [
             'apiKey',
             'uiamApiKey',
             'userScope',
+            'credential',
+            'encryptedCredential',
           ]);
-          const apiKeyForRequest = this.apiKeyStrategy.getApiKeyForFakeRequest(
-            modifiedContext.taskInstance
-          );
+          // A service account task never runs with an API key, even one left on the task.
+          let apiKeyForRequest: string | undefined;
+          if (runAs) {
+            taskManagerUiamTelemetry.recordTaskRun('service_account', 'run_as');
+          } else {
+            apiKeyForRequest = this.apiKeyStrategy.getApiKeyForFakeRequest(
+              modifiedContext.taskInstance
+            );
+          }
           const userProfileId = modifiedContext.taskInstance.userScope?.userProfileId;
           const userName = modifiedContext.taskInstance.userScope?.userName;
 
@@ -510,9 +535,8 @@ export class TaskManagerRunner implements TaskRunner {
 
           this.task = definition.createTaskRunner({
             taskInstance: sanitizedTaskInstance,
-            fakeRequest,
+            ...(runAs ? { runAs } : { fakeRequest, enrichRequest }),
             signal: abortController.signal,
-            enrichRequest,
             executionUuid: this.uuid,
             setCustomTaskRunEventFields: this.setCustomTaskRunEventFields,
           });
@@ -586,6 +610,133 @@ export class TaskManagerRunner implements TaskRunner {
         }
       }
     );
+  }
+
+  /**
+   * Decides whether the task's credential lets it run. A credential that fails its integrity check
+   * fails the task; any other credential this run can't use retries it later.
+   */
+  private async checkCredential(
+    credential: TaskCredential,
+    definition: TaskDefinition
+  ): Promise<CredentialCheck> {
+    const retry = (error: Error): CredentialCheck => ({
+      outcome: 'retry',
+      error: createTaskRunError(error, TaskErrorSource.FRAMEWORK),
+    });
+
+    // Includes credential types added by later versions.
+    if (credential.type !== SERVICE_ACCOUNT_CREDENTIAL_TYPE) {
+      return retry(
+        new Error(
+          `Task uses credential type "${credential.type}", which this version of Kibana cannot run`
+        )
+      );
+    }
+
+    const { runAs } = definition;
+    if (!runAs) {
+      return retry(
+        new Error(
+          `Task type "${this.taskType}" can't run as a service account because it doesn't define runAs`
+        )
+      );
+    }
+
+    let verifiedCredential: Result<TaskCredential, Error>;
+    try {
+      verifiedCredential = await this.bufferedTaskStore.getVerifiedCredential(this.id);
+    } catch (e) {
+      return retry(e);
+    }
+    if (isErr(verifiedCredential)) {
+      return {
+        outcome: 'fail',
+        error: createTaskRunError(verifiedCredential.error, TaskErrorSource.FRAMEWORK),
+      };
+    }
+
+    const verifiedRunAs = getCredentialRunAs(verifiedCredential.value);
+    if (!verifiedRunAs) {
+      return {
+        outcome: 'fail',
+        error: createTaskRunError(
+          new Error(
+            'Task credential failed its integrity check: it is not a complete service account credential'
+          ),
+          TaskErrorSource.FRAMEWORK
+        ),
+      };
+    }
+    if (!runAs.workloadTypes.includes(verifiedRunAs.workloadType)) {
+      return retry(
+        new Error(
+          `Task type "${this.taskType}" doesn't allow running as workload type "${verifiedRunAs.workloadType}"`
+        )
+      );
+    }
+
+    return { outcome: 'run', runAs: createRunAsContext(runAs, verifiedRunAs) };
+  }
+
+  /**
+   * Marks the task as failed instead of removing it, so it can be inspected and revived with
+   * `runSoon`. Claiming never picks up a failed task.
+   */
+  private async failAndKeepTask(
+    error: DecoratedError,
+    state: ConcreteTaskInstance['state'],
+    taskTiming: TaskTiming
+  ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
+    const { task } = this.instance;
+    try {
+      this.instance = asRan(
+        await this.bufferedTaskStore.partialUpdate(
+          {
+            id: task.id,
+            version: task.version,
+            status: TaskStatus.Failed,
+            startedAt: null,
+            retryAt: null,
+            ownerId: null,
+          },
+          { validate: false, doc: task }
+        )
+      );
+    } catch (updateError) {
+      // Not rethrown: the generic failure handling could delete the task. Its next claim, once
+      // `retryAt` passes, checks the credential again.
+      this.logger.warn(
+        `Unable to mark task ${this} as failed: ${
+          updateError.message ?? JSON.stringify(updateError)
+        }`,
+        { tags: [this.id, this.taskType] }
+      );
+      this.instance = asRan(task);
+    }
+
+    this.onTaskEvent(
+      asTaskRunEvent(
+        this.id,
+        asErr({
+          task,
+          persistence: task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring,
+          result: TaskRunResult.Failed,
+          isExpired: this.isExpired,
+          error,
+          taskTypeGroup: this.definition?.taskTypeGroup,
+        }),
+        taskTiming
+      )
+    );
+    this.logTaskRunEvent(
+      task,
+      taskTiming,
+      EventLogOutcomes.failure,
+      `Task ${this.taskType} "${this.id}" failed.`,
+      error
+    );
+    return asErr({ error, state });
   }
 
   private validateTaskState(taskInstance: ConcreteTaskInstance) {
