@@ -7,7 +7,16 @@
 
 import { createHash } from 'crypto';
 import { execFile } from 'child_process';
-import { closeSync, mkdtempSync, openSync, readFileSync, rmSync, statSync, writeSync } from 'fs';
+import {
+  closeSync,
+  existsSync,
+  mkdtempSync,
+  openSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeSync,
+} from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
@@ -96,38 +105,60 @@ const scpDestination = (username: string, hostname: string, remotePath: string):
   return `${username}@${host}:${remotePath}`;
 };
 
+let privateSshDir: string | undefined;
+
+// Per-process 0700 directory (mkdtemp) for the ControlPath socket and known_hosts files.
+const getPrivateSshDir = (): string => {
+  if (!privateSshDir || !existsSync(privateSshDir)) {
+    // OpenSSH ControlPath is capped around 104 chars; keep this under /tmp.
+    privateSshDir = mkdtempSync(join('/tmp', 'kbn_ssh_'));
+  }
+  return privateSshDir;
+};
+
 const runExecFile = (
   bin: string,
   args: string[],
-  env: NodeJS.ProcessEnv
+  env: NodeJS.ProcessEnv,
+  input?: string
 ): Promise<ExecFileResult> =>
   new Promise((resolve, reject) => {
-    execFile(bin, args, { env, maxBuffer: MAX_BUFFER_BYTES }, (error, stdout, stderr) => {
-      if (!error) {
-        resolve({ stdout: stdout.trim(), stderr: stderr.trim(), code: 0 });
-        return;
-      }
+    const child = execFile(
+      bin,
+      args,
+      { env, maxBuffer: MAX_BUFFER_BYTES },
+      (error, stdout, stderr) => {
+        if (!error) {
+          resolve({ stdout: stdout.trim(), stderr: stderr.trim(), code: 0 });
+          return;
+        }
 
-      if (error.code === 'ENOENT') {
-        reject(
-          new Error(
-            `${bin} is not installed on the Kibana host. The SSH Host connector requires ssh, scp, and (for password auth) sshpass.`
-          )
-        );
-        return;
-      }
+        if (error.code === 'ENOENT') {
+          reject(
+            new Error(
+              `${bin} is not installed on the Kibana host. The SSH Host connector requires ssh, scp, and (for password auth) sshpass.`
+            )
+          );
+          return;
+        }
 
-      if (typeof error.code === 'number') {
-        resolve({
-          stdout: (error.stdout ?? stdout).toString().trim(),
-          stderr: (error.stderr ?? stderr).toString().trim(),
-          code: error.code,
-        });
-        return;
-      }
+        if (typeof error.code === 'number') {
+          resolve({
+            stdout: (error.stdout ?? stdout).toString().trim(),
+            stderr: (error.stderr ?? stderr).toString().trim(),
+            code: error.code,
+          });
+          return;
+        }
 
-      reject(error);
-    });
+        reject(error);
+      }
+    );
+
+    if (input !== undefined) {
+      child?.stdin?.on('error', () => {});
+      child?.stdin?.end(input);
+    }
   });
 
 export class SshHostConnector extends SubActionConnector<Config, Secrets> {
@@ -363,9 +394,14 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
     const { hostname, port } = parseHost(this.config.host);
     const { username } = this.secrets;
 
-    // One argv to ssh. The remote shell decodes the payload and runs it with bash.
+    // The base64 payload goes over stdin and is decoded into a remote temp file, so neither the
+    // payload nor the decoded script hits the argv size limit. Wrapped in sh -c so it works
+    // regardless of the remote login shell (including csh and fish).
     const encodedScript = Buffer.from(script).toString('base64');
-    const remoteCmd = `printf '%s' '${encodedScript}' | openssl base64 -d -A | bash`;
+    const remoteCmd =
+      "sh -c 'f=$(mktemp) || exit 1; " +
+      'if command -v base64 >/dev/null 2>&1; then base64 -d > "$f"; else openssl base64 -d -A > "$f"; fi; ' +
+      'bash "$f"; rc=$?; rm -f "$f"; exit $rc\'';
 
     const { ssh, authArgs, env, cleanup } = await this.resolveCredentials();
     const args = [
@@ -376,7 +412,7 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
     ];
 
     try {
-      return await runExecFile(ssh.bin, args, env);
+      return await runExecFile(ssh.bin, args, env, encodedScript);
     } finally {
       cleanup();
     }
@@ -428,17 +464,21 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
 
   private getKnownHostsPath(): string {
     const id = createHash('sha256').update(this.connector.id).digest('hex').slice(0, 16);
-    return join(tmpdir(), `kbn_ssh_kh_${id}`);
+    return join(getPrivateSshDir(), `kbn_ssh_kh_${id}`);
   }
 
   private getControlPath(): string {
     const { hostname, port } = parseHost(this.config.host);
-    const { username } = this.secrets;
+    const { username, password, sshPrivateKey } = this.secrets;
+    // Credentials are part of the key so rotated secrets never reuse an old master.
     const id = createHash('sha256')
-      .update(`${this.connector.id}\0${username}\0${hostname}\0${port}`)
+      .update(
+        [this.connector.id, username, hostname, port, password ?? '', sshPrivateKey ?? ''].join(
+          '\0'
+        )
+      )
       .digest('hex')
       .slice(0, 12);
-    // OpenSSH ControlPath is capped around 104 chars; keep this under /tmp.
-    return join('/tmp', `kbn_cm_${id}`);
+    return join(getPrivateSshDir(), `kbn_cm_${id}`);
   }
 }

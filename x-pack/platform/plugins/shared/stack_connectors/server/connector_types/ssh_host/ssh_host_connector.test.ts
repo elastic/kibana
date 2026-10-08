@@ -238,8 +238,8 @@ describe('SshHostConnector', () => {
         arg.startsWith('ControlPersist=')
       );
 
-      expect(pathA).toMatch(/^ControlPath=\/tmp\/kbn_cm_[a-f0-9]{12}$/);
-      expect(pathA!.length).toBeLessThan(40);
+      expect(pathA).toMatch(/^ControlPath=\/tmp\/kbn_ssh_[^/]+\/kbn_cm_[a-f0-9]{12}$/);
+      expect(pathA!.length).toBeLessThan(60);
       expect(pathB).not.toBe(pathA);
       expect(pathAAgain).toBe(pathA);
       expect(persist).toBe('ControlPersist=10s');
