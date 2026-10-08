@@ -139,7 +139,7 @@ export interface VaultTarget {
  * the suite's `vaultSecret` in `evals.suites.json`, kept locally under `<suite dir>/vault/`.
  */
 export const resolveVaultTarget = (vault: KbnEvalsVaultType, suiteId?: string): VaultTarget => {
-  if (!suiteId) {
+  if (suiteId === undefined) {
     return {
       vault,
       vaultPath: getVaultPath(vault),
@@ -147,6 +147,11 @@ export const resolveVaultTarget = (vault: KbnEvalsVaultType, suiteId?: string): 
       exampleFilePath: KBN_EVALS_CONFIG_EXAMPLE_FILE,
       validate: validateKbnEvalsConfig,
     };
+  }
+
+  // A bare `--suite` parses as '' and must not fall back to the general secret.
+  if (!suiteId.trim()) {
+    throw new Error('--suite needs a suite id from evals.suites.json, e.g. --suite my-suite');
   }
 
   const suite = resolveEvalSuites(REPO_ROOT).find(({ id }) => id === suiteId);

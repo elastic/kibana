@@ -190,7 +190,10 @@ describe('suite vault targets', () => {
     jest.restoreAllMocks();
   });
 
-  it('rejects an unknown suite and a suite without vaultSecret', () => {
+  it('rejects a bare --suite, an unknown suite and a suite without vaultSecret', () => {
+    for (const bare of ['', ' ']) {
+      expect(() => resolveVaultTarget('ci-prod', bare)).toThrow('--suite needs a suite id');
+    }
     expect(() => resolveVaultTarget('ci-prod', 'nope')).toThrow('Unknown eval suite "nope"');
     mockedResolveEvalSuites.mockReturnValue([{ ...SUITE, vaultSecret: undefined }]);
     expect(() => resolveVaultTarget('ci-prod', 'my-suite')).toThrow('has no vaultSecret');
@@ -207,13 +210,20 @@ describe('suite vault targets', () => {
   it('uploads once the hook, run without shell credentials, prints an env', async () => {
     mockedRunScoutHook.mockReturnValue({ SANDBOX_API_KEY: 'sandbox-key' });
     mockedExeca.mockResolvedValue({ stdout: '' } as never);
+    const originalEnv = process.env;
+    process.env = { ...originalEnv, SANDBOX_API_KEY: 'ambient-key' };
 
-    await uploadConfigToVault(resolveVaultTarget('ci-prod', 'my-suite'));
+    try {
+      await uploadConfigToVault(resolveVaultTarget('ci-prod', 'my-suite'));
+    } finally {
+      process.env = originalEnv;
+    }
 
     const [, hookPath, hookConfig, { env } = {}] = mockedRunScoutHook.mock.calls[0];
     expect(hookPath).toBe(SUITE.scoutHook);
     expect(hookConfig).toEqual(SUITE_CONFIG);
     expect(Object.keys(env ?? {}).sort()).toEqual(['HOME', 'PATH']);
+    expect(env).not.toHaveProperty('SANDBOX_API_KEY');
     expect(mockedExeca.mock.calls[0][1]).toEqual([
       'kv',
       'put',
