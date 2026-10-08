@@ -40,6 +40,7 @@ dependsOn:
   - '@kbn/es-errors'
   - '@kbn/es'
   - '@kbn/dot-text'
+  - '@kbn/dev-utils'
 tags:
   - test-helper
   - package

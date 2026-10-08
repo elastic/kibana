@@ -1,0 +1,64 @@
+{
+  "sha1": "dcffec787758980349cf95fa0e60ba9350311394",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "35afc4551b2877e-c7483bc594816e6",
+      "title": "AI Index tools over MCP lists read-only tools and chains list -> describe -> query, agreeing with the routes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine_agent_builder/test/scout/api/tests/ai_index_mcp_tools.spec.ts",
+        "line": 227,
+        "column": 18
+      }
+    },
+    {
+      "id": "35afc4551b2877e-e21aaeabf03fb94",
+      "title": "AI Index tools over MCP takes the space from the /s/{spaceId} MCP URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine_agent_builder/test/scout/api/tests/ai_index_mcp_tools.spec.ts",
+        "line": 259,
+        "column": 68
+      }
+    },
+    {
+      "id": "35afc4551b2877e-73d68573bafe573",
+      "title": "AI Index tools over MCP fails closed without the Context Engine read privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine_agent_builder/test/scout/api/tests/ai_index_mcp_tools.spec.ts",
+        "line": 287,
+        "column": 16
+      }
+    },
+    {
+      "id": "35afc4551b2877e-529da5d9671994f",
+      "title": "AI Index tools over MCP reports an unknown id as an error result",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine_agent_builder/test/scout/api/tests/ai_index_mcp_tools.spec.ts",
+        "line": 353,
+        "column": 27
+      }
+    }
+  ]
+}

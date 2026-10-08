@@ -25,6 +25,7 @@ import {
   INTERNAL_CASE_OBSERVABLES_PATCH_URL,
   INTERNAL_CASE_SIMILAR_CASES_URL,
   INTERNAL_CASE_OBSERVABLES_DELETE_URL,
+  INTERNAL_CASE_OBSERVABLES_BULK_DELETE_URL,
   INTERNAL_CASE_WORKFLOW_RUN_URL,
 } from '../constants';
 
@@ -107,6 +108,10 @@ export const getCaseDeleteObservableUrl = (id: string, observableId: string): st
     '{observable_id}',
     observableId
   );
+};
+
+export const getCaseBulkDeleteObservablesUrl = (id: string): string => {
+  return INTERNAL_CASE_OBSERVABLES_BULK_DELETE_URL.replace('{case_id}', id);
 };
 
 export const getCaseSimilarCasesUrl = (caseId: string) => {

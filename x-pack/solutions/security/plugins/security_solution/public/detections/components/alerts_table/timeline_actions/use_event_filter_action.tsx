@@ -8,8 +8,7 @@
 import { useMemo } from 'react';
 import { ACTION_ADD_EVENT_FILTER } from '../translations';
 import type { AlertTableContextMenuItem } from '../types';
-
-export const EVENT_FILTER_ACTION_ID = 'add-event-filter-menu-item';
+import { EVENT_FILTER_ACTION_ID } from '../../../../common/constants/action_ids';
 
 export const useEventFilterAction = ({
   onAddEventFilterClick,

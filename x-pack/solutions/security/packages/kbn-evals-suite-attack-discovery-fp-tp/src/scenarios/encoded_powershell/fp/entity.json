@@ -1,0 +1,77 @@
+[
+  {
+    "index": ".entities.v2.latest.default",
+    "id": "host:ad-scenario-host-56ef10417335cd10",
+    "source": {
+      "@timestamp": "2026-07-13T12:00:00.000Z",
+      "labels": {
+        "ad_portable_seed": "ad-fp-tp-twins-2026-09"
+      },
+      "host": {
+        "name": "wks-alice-01",
+        "hostname": "wks-alice-01",
+        "id": "ad-scenario-host-56ef10417335cd10",
+        "os": {
+          "type": "windows",
+          "name": "Windows",
+          "version": "test"
+        }
+      },
+      "asset": {
+        "name": "Intune / SCCM content distribution",
+        "owner": "endpoint-engineering",
+        "vendor": "Microsoft",
+        "model": "Configuration Manager distribution point",
+        "environment": "management",
+        "criticality": "low_impact"
+      },
+      "entity": {
+        "id": "host:ad-scenario-host-56ef10417335cd10",
+        "name": "wks-alice-01",
+        "type": "host",
+        "sub_type": "mdm_management",
+        "EngineMetadata": {
+          "Type": "host"
+        },
+        "risk": {
+          "calculated_level": "High",
+          "calculated_score_norm": 78
+        }
+      }
+    }
+  },
+  {
+    "index": ".entities.v2.latest.default",
+    "id": "user:alice.chen@ad-scenario-host-56ef10417335cd10@local",
+    "source": {
+      "@timestamp": "2026-07-13T12:00:00.000Z",
+      "labels": {
+        "ad_portable_seed": "ad-fp-tp-twins-2026-09"
+      },
+      "user": {
+        "name": "alice.chen",
+        "domain": "CONTOSO"
+      },
+      "host": {
+        "name": "wks-alice-01",
+        "id": "ad-scenario-host-56ef10417335cd10"
+      },
+      "asset": {
+        "criticality": "low_impact"
+      },
+      "entity": {
+        "id": "user:alice.chen@ad-scenario-host-56ef10417335cd10@local",
+        "name": "alice.chen@wks-alice-01",
+        "type": "user",
+        "sub_type": "intune_admin",
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "risk": {
+          "calculated_level": "Moderate",
+          "calculated_score_norm": 41
+        }
+      }
+    }
+  }
+]

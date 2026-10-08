@@ -33,8 +33,7 @@ import { useStartTransaction } from '../../../../common/lib/apm/use_start_transa
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { defaultUdtHeaders } from '../../../../timelines/components/timeline/body/column_headers/default_headers';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-
-export const INVESTIGATE_IN_TIMELINE_ACTION_ID = 'investigate-in-timeline-action-item';
+import { INVESTIGATE_IN_TIMELINE_ACTION_ID } from '../../../../common/constants/action_ids';
 
 interface UseInvestigateInTimelineActionProps {
   ecsRowData?: Ecs | Ecs[] | null;

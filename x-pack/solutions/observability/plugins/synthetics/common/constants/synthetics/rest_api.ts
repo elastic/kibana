@@ -14,6 +14,7 @@ export enum SYNTHETICS_API_URLS {
   // public apis
   SYNTHETICS_MONITORS = '/api/synthetics/monitors',
   GET_SYNTHETICS_MONITOR = '/api/synthetics/monitors/{monitorId}',
+  SYNTHETICS_MONITORS_BULK_CREATE = '/api/synthetics/monitors/_bulk_create',
   SYNTHETICS_MONITORS_BULK_UPDATE = '/api/synthetics/monitors/_bulk_update',
   PRIVATE_LOCATIONS = `/api/synthetics/private_locations`,
   PARAMS = `/api/synthetics/params`,
@@ -77,6 +78,7 @@ export enum SYNTHETICS_API_URLS {
 
   DYNAMIC_SETTINGS = `/api/synthetics/settings`,
   MULTI_SPACE_SETTINGS = `/internal/synthetics/settings_multi_space`,
+  CLUSTER_SETTINGS_PRIVILEGES = `/internal/synthetics/settings/cluster_privileges`,
 
   INSPECT_STATUS_RULE = '/internal/synthetics/inspect_status_rule',
   INSPECT_TLS_RULE = '/internal/synthetics/inspect_tls_rule',

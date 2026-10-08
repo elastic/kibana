@@ -9,8 +9,8 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { EuiButton } from '@elastic/eui';
 
 import { CaseStatuses, caseStatuses } from '../../../common/types/domain';
-import { useCloseCaseModal } from '../all_cases/use_close_case_modal';
-import { useCanSyncCloseReasonToAlerts } from '../all_cases/use_can_sync_close_reason_to_alerts';
+import { useCloseCaseModal } from '../all_cases/hooks/use_close_case_modal';
+import { useCanSyncCloseReasonToAlerts } from '../all_cases/hooks/use_can_sync_close_reason_to_alerts';
 import { statuses } from './config';
 
 interface Props {

@@ -132,8 +132,18 @@ describe('MaybeViewTraceLink', () => {
 
     const button = screen.getByTestId('apmFullTraceButtonViewFullTraceButton');
     expect(button).not.toBeDisabled();
+    expect(button).toHaveAttribute('data-ebt-action', 'viewFullTrace');
+    expect(button).toHaveAttribute('data-ebt-element', 'waterfallViewFullTrace');
 
     await user.click(button);
     expect(mockOnViewFullTrace).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses a host-provided ebtElement when opening the full trace', () => {
+    renderLink({ ebtElement: 'transactionDetailFlyoutViewFullTrace' });
+
+    const button = screen.getByTestId('apmFullTraceButtonViewFullTraceButton');
+    expect(button).toHaveAttribute('data-ebt-action', 'viewFullTrace');
+    expect(button).toHaveAttribute('data-ebt-element', 'transactionDetailFlyoutViewFullTrace');
   });
 });

@@ -117,6 +117,7 @@ export {
   extractTimeFilter,
   extractTimeRange,
   convertRangeFilterToTimeRange,
+  convertRangeFilterToTimeRangeString,
   BooleanRelation,
 } from './src/filters';
 

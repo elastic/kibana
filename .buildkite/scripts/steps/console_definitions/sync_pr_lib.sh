@@ -29,9 +29,8 @@ create_sync_pr() {
   # Skip (and send message) if last week's PR is still open.
   local existing_pr_title
   existing_pr_title=$(gh pr list \
-    --search "$pr_title" \
+    --search "$pr_title (author:$KIBANA_MACHINE_USERNAME OR author:app/elastic-vault-github-plugin-prod)" \
     --state open \
-    --author "$KIBANA_MACHINE_USERNAME" \
     --limit 1 \
     --json title \
     -q ".[].title")

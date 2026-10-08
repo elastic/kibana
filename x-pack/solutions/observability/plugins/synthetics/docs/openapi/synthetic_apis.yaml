@@ -564,6 +564,122 @@ paths:
           description: >
             Bad request.
             For browser monitors, a 400 error is returned if the timeout is less than 30 seconds.
+  /api/synthetics/monitors/_bulk_create:
+    post:
+      summary: Bulk create monitors
+      operationId: post-synthetic-monitors-bulk-create
+      description: >
+        Create up to 1000 monitors in one request. Every monitor is validated
+        before any monitor is persisted. The API creates the Saved Objects and
+        synchronizes Fleet once for the batch.
+
+        You must have `all` privileges for the Synthetics feature in the
+        Observability section of the Kibana feature privileges. If a monitor is
+        shared to additional spaces, you must also have create privileges in
+        each of those spaces.
+
+        This is a versioned public API (`elastic-api-version: 2023-10-31`).
+      tags:
+        - synthetics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - monitors
+              properties:
+                monitors:
+                  description: A non-empty list of monitor configurations, up to 1000 monitors.
+                  type: array
+                  minItems: 1
+                  maxItems: 1000
+                  items:
+                    oneOf:
+                      - $ref: "#/components/schemas/browserMonitorFields"
+                      - $ref: "#/components/schemas/httpMonitorFields"
+                      - $ref: "#/components/schemas/icmpMonitorFields"
+                      - $ref: "#/components/schemas/tcpMonitorFields"
+                      - $ref: "#/components/schemas/apiMonitorFields"
+                    discriminator:
+                      propertyName: type
+            examples:
+              bulkCreateRequestExample1:
+                summary: Two HTTP monitors
+                value: |-
+                  {
+                    "monitors": [
+                      {
+                        "type": "http",
+                        "name": "Storefront",
+                        "url": "https://example.com",
+                        "locations": ["united_kingdom"]
+                      },
+                      {
+                        "type": "http",
+                        "name": "Documentation",
+                        "url": "https://docs.example.com",
+                        "locations": ["united_kingdom"]
+                      }
+                    ]
+                  }
+      responses:
+        '200':
+          description: >
+            A successful response. `created: false` indicates an individual
+            Saved Object creation or Fleet synchronization failure; see
+            `error`. Batch-level Fleet synchronization errors are returned in
+            `errors`.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - result
+                properties:
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - created
+                      properties:
+                        id:
+                          type: string
+                          description: The config ID of the created monitor.
+                        created:
+                          type: boolean
+                          description: Whether the monitor Saved Object was created.
+                        error:
+                          type: string
+                          description: Present when `created` is `false`.
+                  errors:
+                    type: array
+                    description: Optional service-level errors from the bulk sync.
+                    items:
+                      description: A service-level error from the bulk sync.
+              examples:
+                bulkCreateResponseExample1:
+                  value: |-
+                    {
+                      "result": [
+                        {
+                          "id": "monitor1-id",
+                          "created": true
+                        },
+                        {
+                          "id": "monitor2-id",
+                          "created": true
+                        }
+                      ]
+                    }
+        '400':
+          description: >
+            Bad request. Returned when the batch is empty or too large, a
+            monitor configuration is invalid, or two monitors use the same name.
   /api/synthetics/monitors/_bulk_delete:
     post:
       summary: Delete monitors
@@ -629,6 +745,161 @@ paths:
                         "deleted": true
                       }
                     ]
+  /api/synthetics/monitors/_bulk_update:
+    put:
+      summary: Bulk update monitors
+      operationId: put-synthetic-monitors-bulk-update
+      description: >
+        Partially update multiple monitors in a single request.
+
+        Each `updates` entry has its own `id` and `attributes` patch, so one
+        request can apply a different change per monitor. Unspecified fields are
+        left unchanged. Patches use the same merge, validate, and encrypt path as
+        `PUT /api/synthetics/monitors/{id}`.
+
+        For private-location monitors, Fleet is synced once for the batch instead
+        of once per monitor.
+
+        You must have `all` privileges for the Synthetics feature in the
+        Observability section of the Kibana feature privileges.
+
+        This is a versioned public API (`elastic-api-version: 2023-10-31`).
+      tags:
+        - synthetics
+      x-state: added in 9.5.0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - updates
+              properties:
+                updates:
+                  description: >
+                    Monitors to update. Minimum 1 entry, maximum 1000.
+                    Each `id` may appear at most once. `attributes` must contain
+                    at least one field.
+                  type: array
+                  minItems: 1
+                  maxItems: 1000
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required:
+                      - id
+                      - attributes
+                    properties:
+                      id:
+                        type: string
+                        minLength: 1
+                        maxLength: 1024
+                        description: The monitor config ID to update.
+                      attributes:
+                        type: object
+                        minProperties: 1
+                        additionalProperties: true
+                        description: >
+                          Attributes to update for the monitor. You can specify
+                          the same fields as in `PUT /api/synthetics/monitors/{id}`.
+                          An empty object is rejected.
+            examples:
+              bulkUpdateRequestExample1:
+                summary: Mixed patches
+                description: >
+                  Run `PUT /api/synthetics/monitors/_bulk_update` to apply a
+                  different partial update to each monitor.
+                value: |-
+                  {
+                    "updates": [
+                      {
+                        "id": "monitor1-id",
+                        "attributes": {
+                          "enabled": false
+                        }
+                      },
+                      {
+                        "id": "monitor2-id",
+                        "attributes": {
+                          "tags": ["bulk-patched"]
+                        }
+                      },
+                      {
+                        "id": "monitor3-id",
+                        "attributes": {
+                          "schedule": {
+                            "number": "15",
+                            "unit": "m"
+                          }
+                        }
+                      }
+                    ]
+                  }
+      responses:
+        '200':
+          description: >
+            A successful response. The `result` array is in request order.
+            Per-id failures (not found, validation, Fleet sync) set
+            `updated: false` and `error` without failing the whole batch.
+            `errors` is present only when there are service-level sync errors.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - result
+                properties:
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - updated
+                      properties:
+                        id:
+                          type: string
+                          description: The monitor config ID from the request.
+                        updated:
+                          type: boolean
+                          description: >
+                            If `true`, the monitor was updated. If `false`, see
+                            `error`.
+                        error:
+                          type: string
+                          description: Present when `updated` is `false`.
+                  errors:
+                    type: array
+                    description: Optional service-level errors from the bulk sync.
+                    items:
+                      description: A service-level error from the bulk sync.
+              examples:
+                bulkUpdateResponseExample1:
+                  description: A response from a bulk update with one failure.
+                  value: |-
+                    {
+                      "result": [
+                        {
+                          "id": "monitor1-id",
+                          "updated": true
+                        },
+                        {
+                          "id": "missing-id",
+                          "updated": false,
+                          "error": "Monitor id missing-id not found!"
+                        },
+                        {
+                          "id": "monitor3-id",
+                          "updated": true
+                        }
+                      ]
+                    }
+        '400':
+          description: >
+            Bad request. Returned when `updates` is missing or empty, an
+            `attributes` object is empty, or the same `id` appears more than once.
   /api/synthetics/params:
     get:
       summary: Get parameters
@@ -1158,11 +1429,13 @@ paths:
       summary: Update a private location
       operationId: put-private-location
       description: >
-        Update an existing private location's label.
+        Update an existing private location's label or agent policy.
 
         You must have `all` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
 
         When a private location's label is updated, all monitors using this location will also be updated to maintain data consistency.
+
+        When a private location's agent policy is changed, the package policies of all monitors using this location are deleted and recreated on the new agent policy. Monitors stop running on the previous agents until agents on the new policy pick them up. The new agent policy must be available in all spaces of the private location and must not be used by another private location.
       tags:
         - synthetics
       parameters:
@@ -1178,19 +1451,27 @@ paths:
           application/json:
             schema:
               type: object
-              required:
-                - label
               properties:
                 label:
                   type: string
                   minLength: 1
                   description: A new label for the private location. Must be at least 1 character long.
+                agentPolicyId:
+                  type: string
+                  minLength: 1
+                  description: The ID of the Fleet agent policy to move the private location to.
             examples:
               putPrivateLocationRequestExample1:
                 description: Update a private location's label.
                 value: |-
                   {
                     "label": "Updated Private Location Name"
+                  }
+              putPrivateLocationRequestExample2:
+                description: Move a private location to another agent policy.
+                value: |-
+                  {
+                    "agentPolicyId": "new-agent-policy-id"
                   }
       responses:
         '200':
@@ -1216,7 +1497,8 @@ paths:
                       "spaces": ["*"]
                     }
         '400':
-          description: If the `label` is shorter than 1 character the API will return a 400 Bad Request response with a corresponding error message.
+          description: >
+            If the `label` is shorter than 1 character, or the `agentPolicyId` is not available in the current space, does not cover all spaces of the private location, or is already used by another private location, the API will return a 400 Bad Request response with a corresponding error message.
         '404':
           description: If the private location with the specified ID does not exist, the API will return a 404 Not Found response.
   /api/synthetics/monitor/test/{monitorId}:
@@ -1461,6 +1743,45 @@ components:
               description: The monitor type.
               enum:
                 - browser
+    apiMonitorFields:
+      title: API Journey monitor fields
+      allOf: # Combines the common fields schema with the API Journey-specific details
+        - $ref: "#/components/schemas/commonMonitorFields"
+        - type: object
+          required:
+            - inline_script
+            - type
+          additionalProperties: true
+          properties:
+            ignore_https_errors:
+              type: boolean
+              default: false
+              description: Ignore HTTPS errors.
+            certificate_error_spki_allowlist:
+              type: array
+              default: []
+              description: >-
+                PEM certificates whose public keys (SPKI) are allowlisted so the API request
+                context bypasses certificate errors for matching presented certificates.
+                This does not add a CA to the trust store.
+              items:
+                type: string
+            inline_script:
+              type: string
+              description: The inline API Journey script.
+            playwright_options:
+              type: object
+              description: Playwright API request context options.
+            synthetics_args:
+              type: array
+              description: Synthetics agent CLI arguments.
+              items:
+                type: string
+            type:
+              type: string
+              description: The monitor type.
+              enum:
+                - api
     httpMonitorFields:
       title: HTTP monitor fields
       allOf: # Combines the common fields schema with the hTTP monitor-specific details
