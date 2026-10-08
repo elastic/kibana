@@ -1087,8 +1087,8 @@ endpoint_policy_manager:
 _alertzero_alert_triage:
   description: "Privileges for the service account of the AlertZero Alert Triage worker. Assigned by AlertZero; do not assign to users."
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - "monitor_inference"
     - "read_project_routing"
@@ -1136,8 +1136,8 @@ _alertzero_alert_triage:
 _alertzero_attack_discovery:
   description: "Privileges for the service account of the AlertZero Attack Discovery worker. Assigned by AlertZero; do not assign to users."
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - "monitor_inference"
     - "read_project_routing"
@@ -1222,8 +1222,8 @@ _alertzero_attack_discovery:
 _alertzero_endpoint_analysis:
   description: "Privileges for the service account of the AlertZero Endpoint analysis worker. Assigned by AlertZero; do not assign to users."
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - "monitor_inference"
     - "read_project_routing"
@@ -1279,8 +1279,8 @@ _alertzero_endpoint_analysis:
 _alertzero_threat_hunt:
   description: "Privileges for the service account of the AlertZero Continuous Threat Hunt worker. Assigned by AlertZero; do not assign to users."
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - "monitor_inference"
     - "read_project_routing"
@@ -1328,8 +1328,8 @@ _alertzero_threat_hunt:
 _alertzero_rule_tuning:
   description: "Privileges for the service account of the AlertZero Rule Tuning worker. Assigned by AlertZero; do not assign to users."
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - "monitor_inference"
     - "read_project_routing"
@@ -1397,8 +1397,8 @@ _alertzero_rule_tuning:
 _alertzero_rule_coverage:
   description: "Privileges for the service account of the AlertZero Rule Coverage worker. Assigned by AlertZero; do not assign to users."
   metadata:
-    public: true
-    reserved: true
+    _public: true
+    _reserved: true
   cluster:
     - "monitor_inference"
     - "read_project_routing"
