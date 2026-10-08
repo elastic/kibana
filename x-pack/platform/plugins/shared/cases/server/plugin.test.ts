@@ -58,6 +58,7 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     },
     templates: { enabled: true },
     runWorkflows: { enabled: true },
+    restrictedCases: { enabled: false },
     attachments: { enabled: true },
     chat: { enabled: true },
     ...overrides,

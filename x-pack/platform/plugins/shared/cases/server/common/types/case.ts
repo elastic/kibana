@@ -8,7 +8,7 @@
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { Type } from 'io-ts';
 import { exact, partial, strict, string, number } from 'io-ts';
-import type { CaseAttributes, Observable } from '../../../common/types/domain';
+import type { CaseAccess, CaseAttributes, Observable } from '../../../common/types/domain';
 import { CaseAttributesRt } from '../../../common/types/domain';
 import type { ConnectorPersisted } from './connectors';
 import type { ExternalServicePersisted } from './external_service';
@@ -62,6 +62,7 @@ export interface CasePersistedAttributes {
     version: number;
   } | null;
   extended_fields?: Record<string, unknown> | null;
+  access?: CaseAccess;
 }
 
 type CasePersistedCustomFields = Array<{

@@ -65,6 +65,29 @@ export const CaseSeverityRt = rt.union([
 ]);
 
 /**
+ * Access
+ */
+
+export enum CaseAccessMode {
+  DEFAULT = 'default',
+  RESTRICTED = 'restricted',
+}
+
+export const CaseAccessModeRt = rt.union([
+  rt.literal(CaseAccessMode.DEFAULT),
+  rt.literal(CaseAccessMode.RESTRICTED),
+]);
+
+/**
+ * Access control of a case. A `restricted` case is visible only to its
+ * assignees (and superusers on stateful deployments). A missing value is
+ * treated as `default` everywhere.
+ */
+export const CaseAccessRt = rt.strict({
+  mode: CaseAccessModeRt,
+});
+
+/**
  * Case
  */
 
@@ -168,6 +191,7 @@ export const CaseAttributesRt = rt.intersection([
       time_to_resolve: rt.union([rt.number, rt.null]),
       template: rt.union([rt.null, CaseTemplate]),
       [CASE_EXTENDED_FIELDS]: rt.record(rt.string, rt.string),
+      access: CaseAccessRt,
     })
   ),
 ]);
@@ -226,6 +250,7 @@ export const SimilarCaseRt = rt.intersection([
 
 export type Case = rt.TypeOf<typeof CaseRt>;
 export type Cases = rt.TypeOf<typeof CasesRt>;
+export type CaseAccess = rt.TypeOf<typeof CaseAccessRt>;
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
 export type CaseSettings = rt.TypeOf<typeof CaseSettingsRt>;
 export type RelatedCase = rt.TypeOf<typeof RelatedCaseRt>;

@@ -19,9 +19,9 @@ import { CaseConnectorSchema } from '../connector/v1';
 import { AttachmentSchemaV2 } from '../attachment/v2';
 import { CaseCustomFieldsSchema } from '../custom_field/v1';
 import { CaseObservableSchema } from '../observable/v1';
-import { CaseSeverity } from '../../domain/case/v1';
+import { CaseAccessMode, CaseSeverity } from '../../domain/case/v1';
 
-export { CaseStatuses, CaseSeverity };
+export { CaseStatuses, CaseSeverity, CaseAccessMode };
 
 /**
  * Status
@@ -34,6 +34,15 @@ export const caseStatuses = Object.values(CaseStatuses);
  * Severity
  */
 export const CaseSeveritySchema = BundledCaseSeveritySchema;
+
+/**
+ * Access
+ */
+export const CaseAccessModeSchema = z.enum([CaseAccessMode.DEFAULT, CaseAccessMode.RESTRICTED]);
+
+export const CaseAccessSchema = z.object({
+  mode: CaseAccessModeSchema,
+});
 
 /**
  * Case
@@ -94,6 +103,7 @@ export const CaseAttributesSchema = CaseBasicSchema.extend({
   time_to_resolve: z.number().nullable().optional(),
   template: CaseTemplateSchema.nullable().optional(),
   [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
+  access: CaseAccessSchema.optional(),
 });
 
 export const CaseSchema = CaseAttributesSchema.extend({

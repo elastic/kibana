@@ -213,4 +213,39 @@ describe('caseSavedObjectType model version transformations', () => {
       expect(migrated.attributes).toEqual(expect.objectContaining({ assignees: [{ uid: '123' }] }));
     });
   });
+
+  describe('Model version 10 to 11', () => {
+    it('backfills access.mode to default when converting from v10 to v11', () => {
+      const migrated = migrator.migrate({
+        document: createCaseSavedObjectResponse(),
+        fromVersion: 10,
+        toVersion: 11,
+      });
+
+      expect(migrated.attributes).toEqual(
+        expect.objectContaining({ access: { mode: 'default' } })
+      );
+    });
+
+    it('removes the access field when converting from v11 to v10', () => {
+      const caseObj = createCaseSavedObjectResponse({
+        connector: createESJiraConnector({
+          fields: [{ key: 'issueType', value: 'task' }],
+        }),
+        overrides: {
+          // severity value accepted by the v1 schema (10, 20, 30, 40)
+          severity: 10,
+          total_observables: 0,
+        },
+      });
+
+      const migrated = migrator.migrate({
+        document: { ...caseObj, attributes: { ...caseObj.attributes, access: { mode: 'default' } } },
+        fromVersion: 11,
+        toVersion: 10,
+      });
+
+      expect(migrated.attributes).not.toHaveProperty('access');
+    });
+  });
 });

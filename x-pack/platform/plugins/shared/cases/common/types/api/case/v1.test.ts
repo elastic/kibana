@@ -240,6 +240,19 @@ describe('CasePostRequestRt', () => {
     ).toContain('No errors!');
   });
 
+  it('accepts an optional access object and rejects an invalid access mode', () => {
+    const query = CasePostRequestRt.decode({ ...defaultRequest, access: { mode: 'restricted' } });
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: { ...defaultRequest, access: { mode: 'restricted' } },
+    });
+
+    expect(
+      CasePostRequestRt.decode({ ...defaultRequest, access: { mode: 'hidden' } })._tag
+    ).toBe('Left');
+  });
+
   it('does not throw an error with undefined assignees', async () => {
     const { assignees, ...rest } = defaultRequest;
 
@@ -551,6 +564,22 @@ describe('CasesFindRequestRt', () => {
         CasesFindRequestRt.decode({ ...defaultRequest, rootSearchField: ['foobar'] })
       )
     ).toContain('No errors!');
+  });
+
+  it('accepts access as a single mode or an array of modes', () => {
+    expect(
+      PathReporter.report(CasesFindRequestRt.decode({ ...defaultRequest, access: 'restricted' }))
+    ).toContain('No errors!');
+
+    expect(
+      PathReporter.report(
+        CasesFindRequestRt.decode({ ...defaultRequest, access: ['default', 'restricted'] })
+      )
+    ).toContain('No errors!');
+
+    expect(
+      CasesFindRequestRt.decode({ ...defaultRequest, access: 'hidden' })._tag
+    ).toBe('Left');
   });
 
   it('zod: has expected attributes in request', () => {
@@ -965,6 +994,15 @@ describe('CasePatchRequestRt', () => {
     expect(query).toStrictEqual({
       _tag: 'Right',
       right: defaultRequest,
+    });
+  });
+
+  it('accepts an optional access object', () => {
+    const query = CasePatchRequestRt.decode({ ...defaultRequest, access: { mode: 'default' } });
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: { ...defaultRequest, access: { mode: 'default' } },
     });
   });
 

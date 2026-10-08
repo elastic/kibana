@@ -335,6 +335,24 @@ describe('CaseAttributesRt', () => {
     });
   });
 
+  it('accepts optional access and strips unknown access attributes', () => {
+    const query = CaseAttributesRt.decode({
+      ...defaultRequest,
+      access: { mode: 'restricted', foo: 'bar' },
+    });
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: { ...defaultRequest, access: { mode: 'restricted' } },
+    });
+  });
+
+  it('rejects an invalid access mode', () => {
+    const query = CaseAttributesRt.decode({ ...defaultRequest, access: { mode: 'hidden' } });
+
+    expect(query._tag).toBe('Left');
+  });
+
   it('zod: has expected attributes in request', () => {
     const zodRequest = {
       description: defaultRequest.description,
@@ -454,6 +472,21 @@ describe('CaseAttributesRt', () => {
     const result = CaseAttributesSchema.safeParse(zodRequest);
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual(zodRequest);
+  });
+
+  it('zod: accepts optional access and rejects an invalid access mode', () => {
+    const valid = CaseAttributesSchema.safeParse({
+      ...defaultRequest,
+      access: { mode: 'restricted' },
+    });
+    expect(valid.success).toBe(true);
+    expect(valid.data?.access).toStrictEqual({ mode: 'restricted' });
+
+    const invalid = CaseAttributesSchema.safeParse({
+      ...defaultRequest,
+      access: { mode: 'hidden' },
+    });
+    expect(invalid.success).toBe(false);
   });
 });
 
