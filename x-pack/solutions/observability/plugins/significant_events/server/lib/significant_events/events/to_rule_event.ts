@@ -37,6 +37,7 @@ export const toRuleEvent = (event: SignificantEvent): CreateAlertEventData => {
       causal_features: event.causal_features,
       blast_radius: event.blast_radius,
       investigations: event.investigations,
+      status_evaluations: event.status_evaluations,
       workflow_execution_id: event.workflow_execution_id,
       conversation_id: event.conversation_id,
     }).filter(([_k, v]) => v !== undefined)
