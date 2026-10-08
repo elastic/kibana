@@ -267,6 +267,8 @@ export function makeService(params?: {
   continuousOnboardingEnabled?: boolean;
   /** Per-space scheduled-discovery toggle before pause (default: off). */
   scheduledDiscoveryEnabled?: boolean;
+  /** Spaces where the caller lacks the Nightshift manage and configure privileges (default: none). */
+  unauthorizedSpaceIds?: string[];
   /** Make the continuous-onboarding uiSettings `set` throw. */
   failContinuousSet?: boolean;
   /** Make the scheduled-discovery uiSettings `set` throw. */
@@ -449,6 +451,23 @@ export function makeService(params?: {
         asScopedToClient: jest.fn((client?: { spaceId?: string }) =>
           client?.spaceId ? getInternalSpaceUiSettingsClient(client.spaceId) : spaceUiSettingsClient
         ),
+      },
+    },
+    security: {
+      authz: {
+        mode: { useRbacForRequest: jest.fn(() => true) },
+        actions: { api: { get: jest.fn((privilege: string) => `api:${privilege}`) } },
+        checkPrivilegesWithRequest: jest.fn(() => ({
+          atSpaces: jest.fn(async (spaceIds: string[]) => ({
+            privileges: {
+              kibana: spaceIds.map((spaceId) => ({
+                resource: spaceId,
+                privilege: 'api:manage_nightshift',
+                authorized: !(params?.unauthorizedSpaceIds ?? []).includes(spaceId),
+              })),
+            },
+          })),
+        })),
       },
     },
     workflowsManagement: params?.management ? { management: params.management } : undefined,

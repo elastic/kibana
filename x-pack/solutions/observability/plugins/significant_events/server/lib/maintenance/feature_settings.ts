@@ -423,7 +423,9 @@ export const createFeatureSettingsController = ({
 
   /**
    * The toggles that currently read on in each space, read before Reset turns them off so an
-   * aborted Reset can turn them back on. A toggle that cannot be read counts as off.
+   * aborted Reset can turn them back on. A toggle that cannot be read throws: guessing "off"
+   * would leave an enabled toggle without a restore record if the Reset aborts afterwards, and
+   * nothing destructive has run yet, so failing here is safe.
    */
   const readTogglesOn = async ({
     request,
@@ -435,21 +437,28 @@ export const createFeatureSettingsController = ({
     const on = emptyStillOn();
     const uiSettingsClients = getUiSettingsClients({ request, access: 'system' });
     for (const spaceId of spaceIds) {
+      let spaceClient: Pick<IUiSettingsClient, 'get'>;
       try {
-        const spaceClient = await uiSettingsClients.space(spaceId);
-        if (await readsOn(spaceClient, OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED)) {
-          on.continuousOnboardingSpaceIds.push(spaceId);
-        }
-        if (
-          await readsOn(
-            spaceClient,
-            OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED
-          )
-        ) {
-          on.scheduledDiscoveryEnabledSpaceIds.push(spaceId);
-        }
+        spaceClient = await uiSettingsClients.space(spaceId);
       } catch {
         // No settings client for this space: nothing to restore there.
+        continue;
+      }
+      if (
+        Boolean(
+          await spaceClient.get<boolean>(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED)
+        )
+      ) {
+        on.continuousOnboardingSpaceIds.push(spaceId);
+      }
+      if (
+        Boolean(
+          await spaceClient.get<boolean>(
+            OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED
+          )
+        )
+      ) {
+        on.scheduledDiscoveryEnabledSpaceIds.push(spaceId);
       }
     }
     return on;

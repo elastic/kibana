@@ -530,6 +530,39 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
     });
 
+    it('aborts before destructive work when a toggle cannot be read, instead of treating it as off', async () => {
+      const { api } = makeManagementApi();
+      const { service, esClient, getInternalSpaceUiSettingsClient } = makeService({
+        management: api,
+        continuousOnboardingEnabled: true,
+      });
+      getInternalSpaceUiSettingsClient('default').get.mockRejectedValueOnce(
+        new Error('settings read failed')
+      );
+
+      await expect(service.reset({ request: REQUEST })).rejects.toThrow('settings read failed');
+
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+    });
+
+    it('rejects a caller who cannot manage every space before changing anything', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, soClient, esClient } = makeService({
+        management: api,
+        spaceIds: ['default', 'space-a'],
+        unauthorizedSpaceIds: ['space-a'],
+      });
+
+      await expect(service.reset({ request: REQUEST })).rejects.toMatchObject({
+        output: { statusCode: 403 },
+        message: expect.stringContaining('"space-a"'),
+      });
+
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(updateWorkflow).not.toHaveBeenCalled();
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+    });
+
     it('persists the swept workflows while still paused before destroying data', async () => {
       const { api } = makeManagementApi();
       const { service, soClient, esClient } = makeService({

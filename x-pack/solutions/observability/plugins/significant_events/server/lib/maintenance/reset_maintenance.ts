@@ -24,6 +24,7 @@ import {
   type FeatureSettingsController,
   type StillOnFeatureSettings,
 } from './feature_settings';
+import { assertCanManageAllSpaces } from './assert_manage_all_spaces';
 import { logFailures } from './log_failures';
 import type { MaintenanceWorkflowTarget } from './managed_workflow_targets';
 import { resetDataStreams } from './reset_data_streams';
@@ -223,6 +224,7 @@ export const createResetRunner = ({
     // that is being deleted. A space without a document gets one, and that document is removed
     // again once nothing is left to restore.
     const allSpaceIds = await requireAllSpaceIds(server);
+    await assertCanManageAllSpaces({ server, request, spaceIds: allSpaceIds });
     const existingBySpace = new Map<SpaceId, LoadedMaintenanceState | undefined>(
       await Promise.all(
         allSpaceIds.map(
