@@ -174,6 +174,8 @@ export class DashboardApp {
   /** Navigates to the new dashboard creation page and waits for the editor toolbar to load. */
   async openNewDashboard(options?: TimeoutOptions) {
     await this.page.gotoApp('dashboards', { hash: '/create' });
+    // `gotoApp` resolves on `load`, while core's bootstrap splash is still up, so budget Kibana's cold boot separately from the editor render below.
+    await expect(this.page.testSubj.locator('kbnLoadingMessage')).toBeHidden({ timeout: 30_000 });
     await expect(this.addTopNavButton).toBeVisible({ timeout: options?.timeout ?? 20_000 });
   }
 
