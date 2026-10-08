@@ -7,7 +7,12 @@
 
 import { mockLogger } from '../test_utils';
 import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
-import type { ConcreteTaskInstance, PartialConcreteTaskInstance } from '../task';
+import type {
+  ConcreteTaskInstance,
+  IntervalSchedule,
+  PartialConcreteTaskInstance,
+  RruleSchedule,
+} from '../task';
 import { TaskStatus } from '../task';
 import { resolveTaskDocumentConflicts } from './resolve_so_conflicts';
 import type { Updatable } from './task_runner';
@@ -54,13 +59,14 @@ describe('resolveTaskDocumentConflicts', () => {
     };
   });
 
-  const resolve = () =>
+  const resolve = (getRunAtForSchedule?: (schedule: IntervalSchedule | RruleSchedule) => Date) =>
     resolveTaskDocumentConflicts({
       taskId: originalTask.id,
       partialTask,
       originalTask,
       bufferedTaskStore: store,
       logger,
+      getRunAtForSchedule,
       pRetryOptions: { minTimeout: 0, factor: 1 },
     });
 
@@ -116,6 +122,77 @@ describe('resolveTaskDocumentConflicts', () => {
     expect(store.partialUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
         schedule: { interval: '5m' },
+        version: 'WzIsMV0=',
+      }),
+      { validate: false, doc: currentTask }
+    );
+  });
+
+  test('recomputes runAt from the current schedule when only the schedule changed while the task was running', async () => {
+    const currentTask = createTask({
+      version: 'WzIsMV0=',
+      schedule: { interval: '5m' },
+      startedAt: originalTask.startedAt,
+    });
+    store.get.mockResolvedValue(currentTask);
+    store.partialUpdate.mockResolvedValue(currentTask);
+    const recomputedRunAt = new Date('2020-01-01T00:05:00.000Z');
+    const getRunAtForSchedule = jest.fn().mockReturnValue(recomputedRunAt);
+
+    await resolve(getRunAtForSchedule);
+
+    expect(getRunAtForSchedule).toHaveBeenCalledWith({ interval: '5m' });
+    expect(store.partialUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        schedule: { interval: '5m' },
+        runAt: recomputedRunAt,
+        version: 'WzIsMV0=',
+      }),
+      { validate: false, doc: currentTask }
+    );
+  });
+
+  test('keeps the runAt returned by the task runner when the schedule changed while the task was running', async () => {
+    const currentTask = createTask({
+      version: 'WzIsMV0=',
+      schedule: { interval: '5m' },
+      startedAt: originalTask.startedAt,
+    });
+    store.get.mockResolvedValue(currentTask);
+    store.partialUpdate.mockResolvedValue(currentTask);
+
+    // no getRunAtForSchedule: the runner returned its own runAt
+    await resolve();
+
+    expect(store.partialUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        schedule: { interval: '5m' },
+        runAt: partialTask.runAt,
+        version: 'WzIsMV0=',
+      }),
+      { validate: false, doc: currentTask }
+    );
+  });
+
+  test('prefers the current runAt over recomputing it when both runAt and schedule changed while the task was running', async () => {
+    const currentRunAt = new Date('2020-01-01T00:10:00.000Z');
+    const currentTask = createTask({
+      version: 'WzIsMV0=',
+      schedule: { interval: '5m' },
+      runAt: currentRunAt,
+      startedAt: originalTask.startedAt,
+    });
+    store.get.mockResolvedValue(currentTask);
+    store.partialUpdate.mockResolvedValue(currentTask);
+    const getRunAtForSchedule = jest.fn();
+
+    await resolve(getRunAtForSchedule);
+
+    expect(getRunAtForSchedule).not.toHaveBeenCalled();
+    expect(store.partialUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        schedule: { interval: '5m' },
+        runAt: currentRunAt,
         version: 'WzIsMV0=',
       }),
       { validate: false, doc: currentTask }
@@ -240,20 +317,37 @@ describe('resolveTaskDocumentConflicts', () => {
     );
   });
 
-  test('does not retry when startedAt was updated by another worker', async () => {
-    store.get.mockResolvedValue(createTask({ startedAt: new Date('2020-01-01T00:00:30.000Z') }));
+  test('releases the task when only startedAt changed while the task was running', async () => {
+    const currentTask = createTask({
+      version: 'WzIsMV0=',
+      startedAt: new Date('2020-01-01T00:00:30.000Z'),
+    });
+    store.get.mockResolvedValue(currentTask);
+    store.partialUpdate.mockResolvedValue(currentTask);
 
     await resolve();
 
-    expect(store.get).toHaveBeenCalledTimes(1);
-    expect(store.partialUpdate).not.toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenNthCalledWith(
-      1,
-      'Resolving task document version conflict after task run for task "bar:task-1"',
-      LOG_META
+    expect(store.partialUpdate).toHaveBeenCalledWith(
+      {
+        ...currentTask,
+        ...partialTask,
+        version: 'WzIsMV0=',
+      },
+      { validate: false, doc: currentTask }
     );
-    expect(logger.error).toHaveBeenCalledWith(
-      'Skipping resolving task document version conflict after task run: Unable to resolve task document conflicts for task "bar:task-1": task startedAt has been updated by another worker',
+    expect(store.partialUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: TaskStatus.Idle,
+        startedAt: null,
+        retryAt: null,
+        ownerId: null,
+      }),
+      expect.anything()
+    );
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenNthCalledWith(
+      2,
+      'Resolved task document version conflict after task run for task "bar:task-1"',
       LOG_META
     );
   });

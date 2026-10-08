@@ -15,7 +15,7 @@ import {
   SET_HYPOTHESES_TOOL_ID,
 } from '../../../common/hypotheses/constants';
 import { hypothesisStatusSchema, type Hypothesis } from '../../../common/hypotheses/hypotheses';
-import type { ImpactPrivilegesChecker } from '../../impact/services/check_impact_privileges';
+import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
 import { createInvestigationTool } from '../../investigation_attachments';
 import type { ResolveUser } from '../../services/resolve_user';
 import type { HypothesesService } from '../services/hypotheses_service';
@@ -86,7 +86,7 @@ export const createSetHypothesesTool = ({
 }: {
   getHypothesesService: () => HypothesesService;
   resolveUser: ResolveUser;
-  privileges: ImpactPrivilegesChecker;
+  privileges: InvestigationsPrivilegesChecker;
   logger: Logger;
 }) =>
   createInvestigationTool({
