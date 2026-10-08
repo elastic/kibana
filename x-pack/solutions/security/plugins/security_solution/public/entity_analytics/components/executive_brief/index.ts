@@ -7,3 +7,4 @@
 export { ExecutiveBriefFlyout } from './executive_brief_flyout';
 export type { ExecutiveBriefFlyoutProps } from './executive_brief_flyout';
 export { EXECUTIVE_BRIEF_SECTION_IDS, EXECUTIVE_BRIEF_BODY_ID } from './constants';
+export { useExportBriefPdf } from './hooks/use_export_brief_pdf';

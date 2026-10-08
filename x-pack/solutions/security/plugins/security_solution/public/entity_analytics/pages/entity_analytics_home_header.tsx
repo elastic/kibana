@@ -15,7 +15,7 @@ import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useAddIntegrationsMenuItem } from '../../common/components/app_header/use_add_integrations_menu_item';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import type { TimeRange } from '../../../common/entity_analytics/needs_attention/time_range';
-import { ExecutiveBriefFlyout } from '../components/executive_brief';
+import { ExecutiveBriefFlyout, useExportBriefPdf } from '../components/executive_brief';
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePage.pageTitle', {
   defaultMessage: 'Entity analytics',
@@ -51,6 +51,7 @@ export const EntityAnalyticsHomeHeader = React.memo<EntityAnalyticsHomeHeaderPro
     const [isBriefOpen, setIsBriefOpen] = useState(false);
     const openBrief = useCallback(() => setIsBriefOpen(true), []);
     const closeBrief = useCallback(() => setIsBriefOpen(false), []);
+    const onExportPdf = useExportBriefPdf();
 
     const menu = useMemo<AppHeaderMenu>(
       () => ({
@@ -93,7 +94,11 @@ export const EntityAnalyticsHomeHeader = React.memo<EntityAnalyticsHomeHeaderPro
           docLink={docLinks.links.securitySolution.entityAnalytics.entityRiskScoring}
         />
         {isExecutiveBriefEnabled && isBriefOpen && (
-          <ExecutiveBriefFlyout timeRange={timeRange} onClose={closeBrief} />
+          <ExecutiveBriefFlyout
+            timeRange={timeRange}
+            onClose={closeBrief}
+            onExportPdf={onExportPdf}
+          />
         )}
       </>
     );
