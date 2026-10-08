@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { UptimeStartupPluginsContext } from '../../../../../contexts';
 import { WaterfallContext } from '../context/waterfall_chart';
 import type { JourneyStep } from '../../../../../../../common/runtime_types';
@@ -25,7 +26,13 @@ const EmbeddableMock = ({
 }) => (
   <div>
     <h1>{title}</h1>
-    <div aria-label="append title">{appendTitle}</div>
+    <div
+      aria-label={i18n.translate('xpack.uptime.embeddableMock.div.appendTitleLabel', {
+        defaultMessage: 'append title',
+      })}
+    >
+      {appendTitle}
+    </div>
     <div>{reportType}</div>
     <div aria-label="attributes">{JSON.stringify(attributes)}</div>
   </div>

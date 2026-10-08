@@ -65,7 +65,9 @@ export const MappingErrorPage = () => {
                       href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/troubleshoot-uptime-mapping-issues.html`}
                       target="_blank"
                     >
-                      docs
+                      {i18n.translate('xpack.uptime.mappingErrorPage.docsLinkLabel', {
+                        defaultMessage: 'docs',
+                      })}
                     </EuiLink>
                   ),
                 }}

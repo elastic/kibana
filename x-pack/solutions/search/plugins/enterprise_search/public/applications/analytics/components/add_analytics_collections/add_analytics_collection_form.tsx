@@ -46,6 +46,7 @@ export const AddAnalyticsCollectionForm: React.FC<AddAnalyticsCollectionForm> = 
         error={inputError}
       >
         <EuiFieldText
+          data-test-subj="enterpriseSearchAddAnalyticsCollectionFormFieldText"
           name={collectionNameField}
           fullWidth
           autoFocus

@@ -114,7 +114,12 @@ export const ActionColumn = <Item extends ItemWithAnID>({
       <EuiFlexItem grow={null}>
         {!canRemoveLastItem && displayedItems.length === 1 ? (
           <EuiToolTip content={lastItemWarning}>
-            <EuiButtonEmpty aria-label={DELETE_BUTTON_LABEL} size="xs" disabled>
+            <EuiButtonEmpty
+              data-test-subj="enterpriseSearchActionColumnButton"
+              aria-label={DELETE_BUTTON_LABEL}
+              size="xs"
+              disabled
+            >
               {DELETE_BUTTON_LABEL}
             </EuiButtonEmpty>
           </EuiToolTip>

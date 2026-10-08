@@ -58,7 +58,10 @@ export const SearchApplicationAPI = () => {
                 defaultMessage="Your search application uses a {searchTemplateDocLink} to control the types of queries it accepts. Run the following command to view your current search template:"
                 values={{
                   searchTemplateDocLink: (
-                    <EuiLink href={docLinks.searchTemplates}>
+                    <EuiLink
+                      data-test-subj="enterpriseSearchSearchApplicationAPISearchTemplateLink"
+                      href={docLinks.searchTemplates}
+                    >
                       <FormattedMessage
                         id="xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.step1.setUpSearchtemplate.searchTemplateDocLink"
                         defaultMessage="search template"
@@ -86,7 +89,10 @@ export const SearchApplicationAPI = () => {
                 defaultMessage="We provide a basic, default search template to get started, but you'll probably want to update it for your use case. Use the examples in our {searchTemplateExampleDoc} for inspiration."
                 values={{
                   searchTemplateExampleDoc: (
-                    <EuiLink href={docLinks.searchApplicationsTemplates}>
+                    <EuiLink
+                      data-test-subj="enterpriseSearchSearchApplicationAPIDocumentationLink"
+                      href={docLinks.searchApplicationsTemplates}
+                    >
                       <FormattedMessage
                         id="xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.step1.setUpSearchtemplate.warning.searchTemplateExampleDocLink"
                         defaultMessage="documentation"
@@ -116,7 +122,10 @@ export const SearchApplicationAPI = () => {
                 defaultMessage="This {apiKeyDocumentation} will only be able to access your Search endpoint."
                 values={{
                   apiKeyDocumentation: (
-                    <EuiLink href={docLinks.apiKeys}>
+                    <EuiLink
+                      data-test-subj="enterpriseSearchSearchApplicationAPIApiKeyLink"
+                      href={docLinks.apiKeys}
+                    >
                       <FormattedMessage
                         id="xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.step2.apiKeyWarning.documentationLink"
                         defaultMessage="API key"
@@ -131,6 +140,7 @@ export const SearchApplicationAPI = () => {
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="enterpriseSearchSearchApplicationAPICreateApiKeyButton"
                 iconSide="left"
                 iconType="plusCircle"
                 onClick={openGenerateModal}
@@ -146,6 +156,7 @@ export const SearchApplicationAPI = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="enterpriseSearchSearchApplicationAPIViewKeysButton"
                 iconSide="left"
                 iconType="external"
                 data-telemetry-id="entSearchApplications-searchApi-step2-viewKeysButton"

@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiNotificationBadge, EuiPanel } fr
 import { EditableResult } from '@kbn/search-index-documents';
 import { resultToFieldFromMappingResponse } from '@kbn/search-index-documents/components/result/result_metadata';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FieldError } from 'react-hook-form';
 import { useFetchDocument } from '../../../../hooks/use_fetch_document';
 
@@ -59,7 +60,16 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
       leftSideItem={
         <>
           {type === 'pinned' && (
-            <EuiPanel color="transparent" paddingSize="s" aria-label="Drag Handle">
+            <EuiPanel
+              color="transparent"
+              paddingSize="s"
+              aria-label={
+                <FormattedMessage
+                  id="undefined.documentSelector.euiPanel.dragHandleLabel"
+                  defaultMessage="Drag Handle"
+                />
+              }
+            >
               <EuiFlexGroup alignItems="center" gutterSize="s" direction="row" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiIcon type="dragVertical" aria-hidden />

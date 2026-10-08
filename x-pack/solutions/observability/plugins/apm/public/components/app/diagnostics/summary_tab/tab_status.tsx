@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 export function TabStatus({
@@ -27,7 +28,9 @@ export function TabStatus({
               {isLoading ? (
                 <EuiBadge color="default">-</EuiBadge>
               ) : isOk ? (
-                <EuiBadge color="green">OK</EuiBadge>
+                <EuiBadge color="green">
+                  {i18n.translate('xpack.apm.tabStatus.okBadgeLabel', { defaultMessage: 'OK' })}
+                </EuiBadge>
               ) : (
                 <EuiBadge color="warning">Warning</EuiBadge>
               )}

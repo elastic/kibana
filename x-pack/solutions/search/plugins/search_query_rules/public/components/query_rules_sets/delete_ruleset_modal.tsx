@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiCheckbox,
@@ -79,7 +80,12 @@ export const DeleteRulesetModal = ({
       <EuiSpacer size="m" />
       <EuiCheckbox
         id={confirmCheckboxId}
-        label="This ruleset is safe to delete"
+        label={
+          <FormattedMessage
+            id="undefined.deleteRulesetModal.euiCheckbox.thisRulesetIsSafeLabel"
+            defaultMessage="This ruleset is safe to delete"
+          />
+        }
         data-test-subj="confirmDeleteRulesetCheckbox"
         checked={checked}
         onChange={(e) => {

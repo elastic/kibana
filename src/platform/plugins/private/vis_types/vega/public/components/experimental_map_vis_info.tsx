@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -32,7 +33,9 @@ export const ExperimentalMapLayerInfo = () => (
               href="https://github.com/elastic/kibana/issues/new/choose"
               target="_blank"
             >
-              GitHub
+              {i18n.translate('visTypeVega.experimentalMapLayerInfo.githubLinkLabel', {
+                defaultMessage: 'GitHub',
+              })}
             </EuiLink>
           ),
         }}

@@ -47,7 +47,13 @@ export const ThrottlingLatencyField = ({
         onChange={(event) => handleInputChange(event.target.value)}
         onBlur={() => onFieldBlur?.('latency')}
         data-test-subj="syntheticsBrowserLatency"
-        append={<EuiFormAppend label="ms" />}
+        append={
+          <EuiFormAppend
+            label={i18n.translate('xpack.synthetics.throttlingLatencyField.euiFormAppend.msLabel', {
+              defaultMessage: 'ms',
+            })}
+          />
+        }
         readOnly={readOnly}
       />
     </EuiFormRow>

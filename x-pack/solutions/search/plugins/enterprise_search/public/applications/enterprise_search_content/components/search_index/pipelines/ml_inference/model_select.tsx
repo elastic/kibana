@@ -27,6 +27,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { MlModel } from '../../../../../../../common/types/ml';
 import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
@@ -198,7 +199,15 @@ export const SelectedModel: React.FC<MlModel> = (model) => {
         );
 
   return (
-    <EuiPanel color="subdued" title="Selected model">
+    <EuiPanel
+      color="subdued"
+      title={
+        <FormattedMessage
+          id="xpack.enterpriseSearch.selectedModel.euiPanel.selectedModelLabel"
+          defaultMessage="Selected model"
+        />
+      }
+    >
       <EuiScreenReaderLive>{getSelectedModelAnnouncement(model)}</EuiScreenReaderLive>
       <EuiPanel>
         <EuiFlexGroup direction="column" gutterSize="s">

@@ -45,7 +45,10 @@ export const createNodeAgentInstructions = (commonOptions: AgentInstructions): E
               defaultMessage: 'Copy the code to install the APM agent for Node.js',
             })}
           >
-            npm install elastic-apm-node --save
+            {i18n.translate(
+              'xpack.apm.createNodeAgentInstructions.npmInstallElasticapmnodesaveCodeBlockLabel',
+              { defaultMessage: 'npm install elastic-apm-node --save' }
+            )}
           </EuiCodeBlock>
         </>
       ),

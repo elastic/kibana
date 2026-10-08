@@ -100,14 +100,13 @@ export function DiagnosticsIndices() {
   return (
     <>
       <EuiText>
-        This section shows the concrete indices backing the data streams, and highlights mapping
-        issues and missing ingest pipelines.
-      </EuiText>
+        {i18n.translate('xpack.apm.diagnosticsIndices.thisSectionShowsTheTextLabel', { defaultMessage: 'This section shows the concrete indices backing the data streams, and highlights mapping
+        issues and missing ingest pipelines.' })}</EuiText>
 
       <EuiSpacer />
 
       <EuiTitle size="s">
-        <h3>Indices with problems</h3>
+        <h3>{i18n.translate('xpack.apm.diagnosticsIndices.h3.indicesWithProblemsLabel', { defaultMessage: 'Indices with problems' })}</h3>
       </EuiTitle>
       <EuiBasicTable
         data-test-subj="indicedWithProblems"
@@ -122,7 +121,7 @@ export function DiagnosticsIndices() {
       <EuiSpacer />
 
       <EuiTitle size="s">
-        <h3>Indices without problems</h3>
+        <h3>{i18n.translate('xpack.apm.diagnosticsIndices.h3.indicesWithoutProblemsLabel', { defaultMessage: 'Indices without problems' })}</h3>
       </EuiTitle>
       <EuiBasicTable
         data-test-subj="indicedWithoutProblems"

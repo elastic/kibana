@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -74,7 +75,12 @@ export function VisLabel({
           fullWidth
           compressed
           data-test-subj={`${dataTestSubj}-select`}
-          aria-label="Label"
+          aria-label={
+            <FormattedMessage
+              id="xpack.lens.visLabel.euiSelect.labelLabel"
+              defaultMessage="Label"
+            />
+          }
           onChange={({ target }) => {
             handleChange({
               // reset title to undefined when switching mode

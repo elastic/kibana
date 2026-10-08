@@ -30,7 +30,12 @@ export function ContentPackMetadata({
     <>
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={3}>
-          <EuiFormRow label="Name" fullWidth>
+          <EuiFormRow
+            label={i18n.translate('xpack.streams.contentPackMetadata.euiFormRow.nameLabel', {
+              defaultMessage: 'Name',
+            })}
+            fullWidth
+          >
             <EuiFieldText
               name="name"
               readOnly={readonly}
@@ -43,7 +48,12 @@ export function ContentPackMetadata({
         </EuiFlexItem>
 
         <EuiFlexItem grow={1}>
-          <EuiFormRow label="Version" fullWidth>
+          <EuiFormRow
+            label={i18n.translate('xpack.streams.contentPackMetadata.euiFormRow.versionLabel', {
+              defaultMessage: 'Version',
+            })}
+            fullWidth
+          >
             <EuiFieldText
               readOnly={readonly}
               name="version"
@@ -59,7 +69,9 @@ export function ContentPackMetadata({
 
       <EuiFlexItem grow={true}>
         <EuiFormRow
-          label="Description"
+          label={i18n.translate('xpack.streams.contentPackMetadata.euiFormRow.descriptionLabel', {
+            defaultMessage: 'Description',
+          })}
           labelAppend={
             !readonly && (
               <EuiText size="xs" color="subdued">

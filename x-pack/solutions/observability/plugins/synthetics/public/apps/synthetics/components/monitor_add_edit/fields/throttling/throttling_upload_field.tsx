@@ -69,7 +69,14 @@ export const ThrottlingUploadField = ({
         onChange={(event) => handleInputChange(event.target.value)}
         onBlur={() => onFieldBlur?.('upload')}
         data-test-subj="syntheticsBrowserUploadSpeed"
-        append={<EuiFormAppend label="Mbps" />}
+        append={
+          <EuiFormAppend
+            label={i18n.translate(
+              'xpack.synthetics.throttlingUploadField.euiFormAppend.mbpsLabel',
+              { defaultMessage: 'Mbps' }
+            )}
+          />
+        }
         readOnly={readOnly}
       />
     </EuiFormRow>

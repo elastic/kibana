@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import type { Ping } from '../../../../../../../../common/runtime_types';
 
@@ -23,7 +24,7 @@ interface Props {
 
 export const PingErrorCol = ({ errorType, ping }: Props) => {
   if (!errorType) {
-    return <>--</>;
+    return <>{i18n.translate('xpack.synthetics.pingErrorCol.Label', { defaultMessage: '--' })}</>;
   }
   return (
     <StyledSpan>

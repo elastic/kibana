@@ -13,6 +13,7 @@
 import PropTypes from 'prop-types';
 
 import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { createTickFormatter } from './lib/tick_formatter';
 import { convertSeriesToVars } from './lib/convert_series_to_vars';
@@ -127,7 +128,19 @@ export class MarkdownEditor extends Component {
           </td>
           <td>
             <code>
-              [ [ &ldquo;{date}&rdquo;, &ldquo;{value}&rdquo; ], ... ]
+              {i18n.translate('visTypeTimeseries.createArrayRow.code.Label', {
+                defaultMessage: '[ [ “',
+              })}
+              {date}
+              <FormattedMessage
+                id="visTypeTimeseries.createArrayRow.code.Label"
+                defaultMessage="”, “"
+              />
+              {value}
+              <FormattedMessage
+                id="visTypeTimeseries.createArrayRow.code.Label"
+                defaultMessage="” ], ... ]"
+              />
             </code>
           </td>
         </tr>
@@ -230,7 +243,16 @@ export class MarkdownEditor extends Component {
                 id="visTypeTimeseries.markdownEditor.howToAccessEntireTreeDescription"
                 defaultMessage="There is also a special variable named {all} which you can use to access the entire tree. This is useful for
                 creating lists with data from a group by:"
-                values={{ all: <code>_all</code> }}
+                values={{
+                  all: (
+                    <code>
+                      <FormattedMessage
+                        id="visTypeTimeseries..code.allLabel"
+                        defaultMessage="_all"
+                      />
+                    </code>
+                  ),
+                }}
               />
             </p>
           </EuiText>

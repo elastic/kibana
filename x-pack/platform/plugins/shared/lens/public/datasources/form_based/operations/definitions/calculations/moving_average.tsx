@@ -226,10 +226,27 @@ const MovingAveragePopup = () => {
       </p>
 
       <ul>
-        <li>(1 + 2 + 3 + 4 + 5) / 5 = 3</li>
-        <li>(2 + 3 + 4 + 5 + 6) / 5 = 4</li>
-        <li>...</li>
-        <li>(5 + 6 + 7 + 8 + 9) / 5 = 7</li>
+        <li>
+          <FormattedMessage
+            id="xpack.lens.movingAveragePopup.li.Label"
+            defaultMessage="(1 + 2 + 3 + 4 + 5) / 5 = 3"
+          />
+        </li>
+        <li>
+          <FormattedMessage
+            id="xpack.lens.movingAveragePopup.li.Label"
+            defaultMessage="(2 + 3 + 4 + 5 + 6) / 5 = 4"
+          />
+        </li>
+        <li>
+          <FormattedMessage id="xpack.lens.movingAveragePopup.li.Label" defaultMessage="..." />
+        </li>
+        <li>
+          <FormattedMessage
+            id="xpack.lens.movingAveragePopup.li.Label"
+            defaultMessage="(5 + 6 + 7 + 8 + 9) / 5 = 7"
+          />
+        </li>
       </ul>
 
       <p>
@@ -245,10 +262,30 @@ const MovingAveragePopup = () => {
         />
       </p>
       <ul>
-        <li>(1 + 2) / 2 = 1.5</li>
-        <li>(1 + 2 + 3) / 3 = 2</li>
-        <li>(1 + 2 + 3 + 4) / 4 = 2.5</li>
-        <li>(1 + 2 + 3 + 4 + 5) / 5 = 3</li>
+        <li>
+          <FormattedMessage
+            id="xpack.lens.movingAveragePopup.li.Label"
+            defaultMessage="(1 + 2) / 2 = 1.5"
+          />
+        </li>
+        <li>
+          <FormattedMessage
+            id="xpack.lens.movingAveragePopup.li.Label"
+            defaultMessage="(1 + 2 + 3) / 3 = 2"
+          />
+        </li>
+        <li>
+          <FormattedMessage
+            id="xpack.lens.movingAveragePopup.li.Label"
+            defaultMessage="(1 + 2 + 3 + 4) / 4 = 2.5"
+          />
+        </li>
+        <li>
+          <FormattedMessage
+            id="xpack.lens.movingAveragePopup.li.Label"
+            defaultMessage="(1 + 2 + 3 + 4 + 5) / 5 = 3"
+          />
+        </li>
       </ul>
 
       <p>
