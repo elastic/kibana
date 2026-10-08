@@ -197,6 +197,7 @@ steps:
     if: "${{ steps.draft_ready.output.ok == true }}"
     with:
       workflow-id: system-security-rule-preview
+      run-as-mode: inherit
       inputs:
         space_id: "{{ workflow.spaceId }}"
         preview_body:
@@ -256,6 +257,7 @@ steps:
     if: "${{ steps.proposal_ready.output.ok == true }}"
     with:
       workflow-id: system-create-alertzero-proposal
+      run-as-mode: inherit
       inputs:
         conversationId: "{{ inputs.investigation_id }}"
         comment: |-
