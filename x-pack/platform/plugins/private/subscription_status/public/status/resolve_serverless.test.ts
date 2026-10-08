@@ -68,7 +68,7 @@ describe('resolveServerlessStatus', () => {
     expect(await resolve({ getPrivilegedUrls })).toEqual({
       kind: 'tooltip',
       label: 'Trial',
-      tooltip: 'Contact your administrator to update the subscription.',
+      tooltip: 'Contact your administrator to update the subscription',
       projectType: 'search',
     });
   });

@@ -23,7 +23,7 @@ test.describe(
       await expect(badge).toContainText('Trial');
       await badge.focus();
       await expect(page.testSubj.locator('subscriptionStatusTooltip')).toHaveText(
-        'Contact your administrator to update the subscription.'
+        'Contact your administrator to update the subscription'
       );
       await expect(page.testSubj.locator('subscriptionStatusPrimaryAction')).toBeHidden();
     });

@@ -122,7 +122,7 @@ export const resolveServerlessStatus = async ({
       kind: 'tooltip',
       label,
       tooltip: i18n.translate('xpack.subscriptionStatus.serverless.noBillingAccessTooltip', {
-        defaultMessage: 'Contact your administrator to update the subscription.',
+        defaultMessage: 'Contact your administrator to update the subscription',
       }),
       projectType,
     };
