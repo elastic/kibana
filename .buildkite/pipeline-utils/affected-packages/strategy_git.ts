@@ -24,7 +24,7 @@ export function getAffectedModulesGit({
 }: {
   mergeBase: string;
   includeDownstream: boolean;
-  ignorePatterns?: string[];
+  ignorePatterns?: readonly string[];
   commit?: string;
   ignoreUncategorizedChanges?: boolean;
 }): Set<string> {
