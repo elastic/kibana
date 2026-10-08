@@ -201,6 +201,7 @@ steps:
     if: "${{ steps.run_hunt_coordinator.output != nil }}"
     with:
       workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
       inputs:
         conversation_id: "{{ inputs.investigationConversationId }}"
         message: |-
