@@ -28,10 +28,8 @@ const TEST_SUBJECTS = {
   groupingLoading: TEST_SUBJ_GROUPING_LOADING,
 };
 
-export interface EntitiesGroupsProps {
-  state: EntityURLStateResult;
-  groupsSelected: string[];
-  groupSelectorComponent: JSX.Element;
+/** What every level passes down to the grids at the bottom. */
+interface GroupViewProps {
   timeRange: TimeRange;
   watchlistNames: Map<string, string>;
   rowsMode: RowsMode;
@@ -42,62 +40,45 @@ export interface EntitiesGroupsProps {
   rowActions?: RowActions;
 }
 
-export const EntitiesGroups: React.FC<EntitiesGroupsProps> = ({
-  state,
-  groupsSelected,
-  groupSelectorComponent,
-  timeRange,
-  watchlistNames,
-  rowsMode,
-  searchExpression,
-  entityExpression,
-  cellHandlers,
-  rowActions,
-}) => (
+/** A level of groups: the grouping state and the group field of each level. */
+interface GroupLevelProps extends GroupViewProps {
+  state: EntityURLStateResult;
+  selectedGroup: string;
+  selectedGroupOptions: string[];
+}
+
+/**
+ * The filters of the enclosing groups. A JSON string, not an array: the group wrapper hands
+ * each level new filter arrays on every render, and a string compares by value, so the
+ * grouping memos below don't recompute on every render.
+ */
+type ParentGroupFilters = string | undefined;
+
+export interface EntitiesGroupsProps extends GroupViewProps {
+  state: EntityURLStateResult;
+  groupsSelected: string[];
+  groupSelectorComponent: JSX.Element;
+}
+
+export const EntitiesGroups: React.FC<EntitiesGroupsProps> = ({ groupsSelected, ...props }) => (
   <GroupWithPagination
-    state={state}
+    {...props}
     selectedGroup={groupsSelected[0]}
     selectedGroupOptions={groupsSelected}
-    groupSelectorComponent={groupSelectorComponent}
-    timeRange={timeRange}
-    watchlistNames={watchlistNames}
-    rowsMode={rowsMode}
-    searchExpression={searchExpression}
-    entityExpression={entityExpression}
-    cellHandlers={cellHandlers}
-    rowActions={rowActions}
   />
 );
 
 // ── level 0: URL-driven pagination ───────────────────────────────────────────
 
-interface GroupWithPaginationProps {
-  state: EntityURLStateResult;
-  selectedGroup: string;
-  selectedGroupOptions: string[];
+interface GroupWithPaginationProps extends GroupLevelProps {
   groupSelectorComponent?: JSX.Element;
-  timeRange: TimeRange;
-  watchlistNames: Map<string, string>;
-  rowsMode: RowsMode;
-  searchExpression?: string;
-  entityExpression?: string;
-  cellHandlers?: CellHandlers;
-  rowActions?: RowActions;
 }
 
 const GroupWithPagination: React.FC<GroupWithPaginationProps> = ({
-  state,
-  selectedGroup,
-  selectedGroupOptions,
   groupSelectorComponent,
-  timeRange,
-  watchlistNames,
-  rowsMode,
-  searchExpression,
-  entityExpression,
-  cellHandlers,
-  rowActions,
+  ...level
 }) => {
+  const { state, selectedGroup } = level;
   const { groupData, grouping, isFetching } = useEntityGrouping({
     state,
     selectedGroup,
@@ -111,20 +92,7 @@ const GroupWithPagination: React.FC<GroupWithPaginationProps> = ({
       data={groupData}
       grouping={grouping}
       renderChildComponent={(currentGroupFilters) => (
-        <GroupContent
-          currentGroupFilters={currentGroupFilters}
-          state={state}
-          groupingLevel={1}
-          selectedGroup={selectedGroup}
-          selectedGroupOptions={selectedGroupOptions}
-          timeRange={timeRange}
-          watchlistNames={watchlistNames}
-          rowsMode={rowsMode}
-          searchExpression={searchExpression}
-          entityExpression={entityExpression}
-          cellHandlers={cellHandlers}
-          rowActions={rowActions}
-        />
+        <GroupContent {...level} currentGroupFilters={currentGroupFilters} groupingLevel={1} />
       )}
       activePageIndex={state.pageIndex}
       pageSize={state.pageSize}
@@ -141,112 +109,62 @@ const GroupWithPagination: React.FC<GroupWithPaginationProps> = ({
 
 // ── routing: go deeper or render leaf ────────────────────────────────────────
 
-interface GroupContentProps {
+interface GroupContentProps extends GroupLevelProps {
   currentGroupFilters: Filter[];
-  state: EntityURLStateResult;
   groupingLevel: number;
-  selectedGroup: string;
-  selectedGroupOptions: string[];
-  parentGroupFilters?: string;
-  timeRange: TimeRange;
-  watchlistNames: Map<string, string>;
-  rowsMode: RowsMode;
-  searchExpression?: string;
-  entityExpression?: string;
-  cellHandlers?: CellHandlers;
-  rowActions?: RowActions;
+  parentGroupFilters?: ParentGroupFilters;
 }
 
 const LEAF_PAGE_SIZE_OPTIONS = [5, 10, 25];
 
-const mergeFilters = (current: Filter[], parentJson: string | undefined): Filter[] => [
+const mergeFilters = (current: Filter[], parentJson: ParentGroupFilters): Filter[] => [
   ...current,
   ...(parentJson ? (JSON.parse(parentJson) as Filter[]) : []),
 ];
 
 const GroupContent: React.FC<GroupContentProps> = ({
   currentGroupFilters,
-  state,
   groupingLevel,
-  selectedGroup,
-  selectedGroupOptions,
   parentGroupFilters,
-  timeRange,
-  watchlistNames,
-  rowsMode,
-  searchExpression,
-  entityExpression,
-  cellHandlers,
-  rowActions,
+  ...level
 }) => {
+  const { selectedGroupOptions } = level;
   if (groupingLevel < selectedGroupOptions.length) {
     const merged = processGroupFilters(mergeFilters(currentGroupFilters, parentGroupFilters));
     return (
       <GroupWithLocalPagination
+        {...level}
         // A new group resets this level's local pagination.
         key={selectedGroupOptions[groupingLevel]}
-        state={state}
         groupingLevel={groupingLevel + 1}
         selectedGroup={selectedGroupOptions[groupingLevel]}
-        selectedGroupOptions={selectedGroupOptions}
         parentGroupFilters={JSON.stringify(merged)}
-        timeRange={timeRange}
-        watchlistNames={watchlistNames}
-        rowsMode={rowsMode}
-        searchExpression={searchExpression}
-        entityExpression={entityExpression}
-        cellHandlers={cellHandlers}
-        rowActions={rowActions}
       />
     );
   }
 
   return (
     <LeafGrid
+      {...level}
       currentGroupFilters={currentGroupFilters}
       parentGroupFilters={parentGroupFilters}
-      timeRange={timeRange}
-      watchlistNames={watchlistNames}
-      rowsMode={rowsMode}
-      searchExpression={searchExpression}
-      entityExpression={entityExpression}
-      cellHandlers={cellHandlers}
-      rowActions={rowActions}
     />
   );
 };
 
 // ── level N: local pagination for nested groups ───────────────────────────────
 
-interface GroupWithLocalPaginationProps {
-  state: EntityURLStateResult;
+interface GroupWithLocalPaginationProps extends GroupLevelProps {
   groupingLevel: number;
-  selectedGroup: string;
-  selectedGroupOptions: string[];
-  parentGroupFilters?: string;
-  timeRange: TimeRange;
-  watchlistNames: Map<string, string>;
-  rowsMode: RowsMode;
-  searchExpression?: string;
-  entityExpression?: string;
-  cellHandlers?: CellHandlers;
-  rowActions?: RowActions;
+  parentGroupFilters?: ParentGroupFilters;
 }
 
 const GroupWithLocalPagination: React.FC<GroupWithLocalPaginationProps> = ({
-  state,
   groupingLevel,
-  selectedGroup,
-  selectedGroupOptions,
   parentGroupFilters,
-  timeRange,
-  watchlistNames,
-  rowsMode,
-  searchExpression,
-  entityExpression,
-  cellHandlers,
-  rowActions,
+  ...level
 }) => {
+  const { state, selectedGroup } = level;
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
@@ -269,19 +187,10 @@ const GroupWithLocalPagination: React.FC<GroupWithLocalPaginationProps> = ({
       grouping={grouping}
       renderChildComponent={(currentGroupFilters) => (
         <GroupContent
+          {...level}
           currentGroupFilters={currentGroupFilters.filter((f) => f?.query)}
-          state={state}
           groupingLevel={groupingLevel}
-          selectedGroup={selectedGroup}
-          selectedGroupOptions={selectedGroupOptions}
-          parentGroupFilters={JSON.stringify(groupFilters)}
-          timeRange={timeRange}
-          watchlistNames={watchlistNames}
-          rowsMode={rowsMode}
-          searchExpression={searchExpression}
-          entityExpression={entityExpression}
-          cellHandlers={cellHandlers}
-          rowActions={rowActions}
+          parentGroupFilters={parentGroupFilters}
         />
       )}
       activePageIndex={pageIndex}
@@ -298,16 +207,9 @@ const GroupWithLocalPagination: React.FC<GroupWithLocalPaginationProps> = ({
 
 // ── leaf: ChildEntityGrid with combined filters ───────────────────────────────
 
-interface LeafGridProps {
+interface LeafGridProps extends GroupViewProps {
   currentGroupFilters: Filter[];
-  parentGroupFilters?: string;
-  timeRange: TimeRange;
-  watchlistNames: Map<string, string>;
-  rowsMode: RowsMode;
-  searchExpression?: string;
-  entityExpression?: string;
-  cellHandlers?: CellHandlers;
-  rowActions?: RowActions;
+  parentGroupFilters?: ParentGroupFilters;
 }
 
 const LeafGrid: React.FC<LeafGridProps> = ({
