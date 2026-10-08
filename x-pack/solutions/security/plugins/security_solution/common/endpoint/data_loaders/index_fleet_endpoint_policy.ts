@@ -22,7 +22,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import { memoize } from 'lodash';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
+import { catchHttpErrorFormatAndThrow } from '../format_http_error';
 import { usageTracker } from './usage_tracker';
 import { getEndpointPackageInfo } from '../utils/package';
 import type { PolicyData } from '../types';
@@ -126,7 +126,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
             'elastic-api-version': API_VERSIONS.public.v1,
           },
         })
-        .catch(catchAxiosErrorFormatAndThrow)
+        .catch(catchHttpErrorFormatAndThrow)
         .then((res) => res.data);
 
     const started = new Date();

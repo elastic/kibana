@@ -13,6 +13,7 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import { getJestConfigs } from './configs/get_jest_configs';
+import { isGeneratedJestConfig } from './configs/is_generated_jest_config';
 
 const fmtMs = (ms: number) => {
   if (ms < 1000) {
@@ -81,16 +82,40 @@ export async function runCheckJestConfigsCli() {
         log.error(`The following test files are selected by multiple config files:\n${list}`);
       }
 
+      // Configs that match no tests fall into two buckets:
+      //  - untouched `kbn-generate` boilerplate (mocks/types/Scout-only packages)
+      //    which legitimately never had Jest tests — tolerated, and already
+      //    filtered out of the CI test run order.
+      //  - hand-customized configs (extra `roots`, `testMatch`, coverage config,
+      //    `moduleNameMapper`, …) whose tests were removed or never added —
+      //    these are dead code and must be deleted.
+      const customizedEmptyConfigs = new Set(
+        emptyConfigs
+          .filter((config) => !isGeneratedJestConfig(config))
+          .map((config) => Path.relative(REPO_ROOT, config))
+      );
+
+      if (customizedEmptyConfigs.size) {
+        log.error(
+          `The following jest configs are customized but match no test files, so they are ` +
+            `never run and never report timings to ci-stats. Delete each config (and any ` +
+            `entry in .buildkite/sharded_jest_configs.json), or restore the tests it was ` +
+            `meant to run:\n${fmtList(customizedEmptyConfigs)}`
+        );
+      }
+
       log.info(
-        `Summary        
-          - ${configsWithTests.length} configs with tests. 
-          - ${emptyConfigs.length} configs with no tests.
+        `Summary
+          - ${configsWithTests.length} configs with tests.
+          - ${emptyConfigs.length} configs with no tests (${
+          customizedEmptyConfigs.size
+        } customized, ${emptyConfigs.length - customizedEmptyConfigs.size} generated boilerplate).
           - ${missingConfigs.size} test files not covered by any config.
           - ${multipleConfigs.size} test files covered by multiple configs.
         `
       );
 
-      if (missingConfigs.size || multipleConfigs.size) {
+      if (missingConfigs.size || multipleConfigs.size || customizedEmptyConfigs.size) {
         throw createFailError('Please resolve the previously logged issues.');
       }
 

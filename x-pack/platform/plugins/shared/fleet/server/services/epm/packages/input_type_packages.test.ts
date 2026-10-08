@@ -9,7 +9,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { appContextService } from '../../app_context';
-import { PackageNotFoundError } from '../../../errors';
+import { PackageNotFoundError, PackagePolicyValidationError } from '../../../errors';
 
 import { dataStreamService } from '../../data_streams';
 
@@ -59,6 +59,7 @@ describe('installAssetsForInputPackagePolicy', () => {
   beforeEach(() => {
     jest.mocked(optimisticallyAddEsAssetReferences).mockReset();
     jest.mocked(installIndexTemplatesAndPipelines).mockClear();
+    jest.mocked(appContextService.getConfig).mockReturnValue({} as any);
     const mockedLogger = jest.mocked(appContextService.getLogger());
     mockedLogger.debug.mockClear();
     mockedLogger.error.mockClear();
@@ -243,6 +244,294 @@ describe('installAssetsForInputPackagePolicy', () => {
     expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalled();
   });
 
+  it('should throw for an uploaded package when the existing data stream has no _meta field', async () => {
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: { name: 'uploaded_probe', version: '1.0.0', install_source: 'upload' },
+      packageInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' },
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
+      {
+        name: 'logs-my_dataset-default',
+      },
+    ] as any);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await expect(
+      installAssetsForInputPackagePolicy({
+        pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' } as any,
+        soClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        force: true,
+        logger: mockedLogger,
+        packagePolicy: {
+          inputs: [
+            {
+              name: 'log',
+              type: 'log',
+              streams: [
+                {
+                  data_stream: { type: 'logs' },
+                  vars: { 'data_stream.dataset': { value: 'my_dataset' } },
+                },
+              ],
+            },
+          ],
+        } as any,
+      })
+    ).rejects.toThrowError(PackagePolicyValidationError);
+
+    expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
+  });
+
+  it('should throw for an uploaded package when a same-name stream is not corroborated by installed assets', async () => {
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: {
+        name: 'uploaded_probe',
+        version: '1.0.0',
+        install_source: 'upload',
+        installed_es: [],
+      },
+      packageInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' },
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
+      {
+        name: 'logs-my_dataset-default',
+        _meta: { package: { name: 'uploaded_probe' } },
+      },
+    ] as any);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await expect(
+      installAssetsForInputPackagePolicy({
+        pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' } as any,
+        soClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        force: true,
+        logger: mockedLogger,
+        packagePolicy: {
+          inputs: [
+            {
+              name: 'log',
+              type: 'log',
+              streams: [
+                {
+                  data_stream: { type: 'logs' },
+                  vars: { 'data_stream.dataset': { value: 'my_dataset' } },
+                },
+              ],
+            },
+          ],
+        } as any,
+      })
+    ).rejects.toThrowError(PackagePolicyValidationError);
+
+    expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
+  });
+
+  it('should install templates for an uploaded package when the live stream is corroborated by installed assets', async () => {
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: {
+        name: 'uploaded_probe',
+        version: '1.0.0',
+        install_source: 'upload',
+        installed_es: [{ id: 'logs-my_dataset', type: 'index_template' }],
+      },
+      packageInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' },
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
+      {
+        name: 'logs-my_dataset-default',
+        _meta: { package: { name: 'uploaded_probe' } },
+      },
+    ] as any);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await installAssetsForInputPackagePolicy({
+      pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' } as any,
+      soClient: savedObjectsClientMock.create(),
+      esClient: {} as ElasticsearchClient,
+      force: true,
+      logger: mockedLogger,
+      packagePolicy: {
+        inputs: [
+          {
+            name: 'log',
+            type: 'log',
+            streams: [
+              {
+                data_stream: { type: 'logs' },
+                vars: { 'data_stream.dataset': { value: 'my_dataset' } },
+              },
+            ],
+          },
+        ],
+      } as any,
+    });
+
+    expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalled();
+  });
+
+  it('should throw for an uploaded package when a same-name index template is not corroborated by installed assets', async () => {
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: {
+        name: 'uploaded_probe',
+        version: '1.0.0',
+        install_source: 'upload',
+        installed_es: [],
+      },
+      packageInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' },
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue({
+      name: 'logs-my_dataset',
+      _meta: { package: { name: 'uploaded_probe' } },
+    } as any);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await expect(
+      installAssetsForInputPackagePolicy({
+        pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' } as any,
+        soClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        force: true,
+        logger: mockedLogger,
+        packagePolicy: {
+          inputs: [
+            {
+              name: 'log',
+              type: 'log',
+              streams: [
+                {
+                  data_stream: { type: 'logs' },
+                  vars: { 'data_stream.dataset': { value: 'my_dataset' } },
+                },
+              ],
+            },
+          ],
+        } as any,
+      })
+    ).rejects.toThrowError(PackagePolicyValidationError);
+
+    expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
+  });
+
+  it('should install templates for an uploaded package when the existing index template is corroborated by installed assets', async () => {
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: {
+        name: 'uploaded_probe',
+        version: '1.0.0',
+        install_source: 'upload',
+        installed_es: [{ id: 'logs-my_dataset', type: 'index_template' }],
+      },
+      packageInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' },
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue({
+      name: 'logs-my_dataset',
+      _meta: { package: { name: 'uploaded_probe' } },
+    } as any);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await installAssetsForInputPackagePolicy({
+      pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' } as any,
+      soClient: savedObjectsClientMock.create(),
+      esClient: {} as ElasticsearchClient,
+      force: true,
+      logger: mockedLogger,
+      packagePolicy: {
+        inputs: [
+          {
+            name: 'log',
+            type: 'log',
+            streams: [
+              {
+                data_stream: { type: 'logs' },
+                vars: { 'data_stream.dataset': { value: 'my_dataset' } },
+              },
+            ],
+          },
+        ],
+      } as any,
+    });
+
+    expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalled();
+  });
+
+  it('should skip the corroboration guard when skipUploadPackageValidation is set', async () => {
+    jest
+      .mocked(appContextService.getConfig)
+      .mockReturnValue({ internal: { skipUploadPackageValidation: true } } as any);
+
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: {
+        name: 'uploaded_probe',
+        version: '1.0.0',
+        install_source: 'upload',
+        installed_es: [],
+      },
+      packageInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' },
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
+      {
+        name: 'logs-my_dataset-default',
+        _meta: { package: { name: 'uploaded_probe' } },
+      },
+    ] as any);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await installAssetsForInputPackagePolicy({
+      pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' } as any,
+      soClient: savedObjectsClientMock.create(),
+      esClient: {} as ElasticsearchClient,
+      force: true,
+      logger: mockedLogger,
+      packagePolicy: {
+        inputs: [
+          {
+            name: 'log',
+            type: 'log',
+            streams: [
+              {
+                data_stream: { type: 'logs' },
+                vars: { 'data_stream.dataset': { value: 'my_dataset' } },
+              },
+            ],
+          },
+        ],
+      } as any,
+    });
+
+    expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalled();
+  });
+
   it('should install es index patterns for input package if package is installed', async () => {
     jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
     jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
@@ -290,6 +579,68 @@ describe('installAssetsForInputPackagePolicy', () => {
         'test.tata': 'log-test.tata-*',
       }
     );
+  });
+
+  describe('OTel es_index_patterns', () => {
+    afterEach(() => {
+      jest.mocked(appContextService.getExperimentalFeatures).mockReset();
+    });
+
+    it('stores an .otel-suffixed es index pattern for an otelcol input package', async () => {
+      jest
+        .mocked(appContextService.getExperimentalFeatures)
+        .mockReturnValue({ enableOtelIntegrations: true } as any);
+      const OTEL_PKG_INFO = {
+        type: 'input',
+        name: 'verifier_otel',
+        version: '0.1.1',
+        policy_templates: [
+          {
+            name: 'verifierreceiver',
+            title: 'Permission Verifier',
+            type: 'logs',
+            input: 'otelcol',
+            template_path: 'input.yml.hbs',
+          },
+        ],
+      };
+      jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+      jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null as any);
+      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+        installation: { name: 'verifier_otel', version: '0.1.1', installed_es: [] },
+        packageInfo: OTEL_PKG_INFO,
+        assetsMap: new Map(),
+        paths: [],
+      } as any);
+
+      await installAssetsForInputPackagePolicy({
+        pkgInfo: OTEL_PKG_INFO as any,
+        soClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        force: false,
+        logger: jest.mocked(appContextService.getLogger()),
+        packagePolicy: {
+          inputs: [
+            {
+              type: 'otelcol',
+              streams: [
+                {
+                  data_stream: { type: 'logs' },
+                  vars: { 'data_stream.dataset': { value: 'verifier.status' } },
+                },
+              ],
+            },
+          ],
+        } as any,
+      });
+
+      expect(jest.mocked(optimisticallyAddEsAssetReferences)).toHaveBeenCalledWith(
+        expect.anything(),
+        'verifier_otel',
+        [],
+        { 'verifier.status': 'logs-verifier.status.otel-*' }
+      );
+    });
   });
 
   it('should remove time_series index mode for non-metrics data stream types', async () => {

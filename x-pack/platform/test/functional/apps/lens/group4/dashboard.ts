@@ -40,7 +40,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await browser.getActions().move({ x, y, origin: el._webElement }).contextClick().perform();
   }
 
-  describe('lens dashboard tests', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/280950
+  describe.skip('lens dashboard tests', () => {
     before(async () => {
       await dashboard.navigateToApp();
       await security.testUser.setRoles(

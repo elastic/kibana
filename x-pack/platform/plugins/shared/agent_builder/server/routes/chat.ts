@@ -32,7 +32,7 @@ import type { AgentExecutionService } from '../services/execution';
 import { validateToolSelection } from '../services/agents/persisted/client/utils/tools';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
+import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import converseAsyncDescription from './oas/converse_async.text';
 
 export function registerChatRoutes({
@@ -437,20 +437,7 @@ export function registerChatRoutes({
         });
 
         return response.ok({
-          headers: {
-            // cloud compress text/* types, loosing chunking capabilities which we need for SSE
-            'Content-Type': cloud?.isCloudEnabled
-              ? 'application/octet-stream'
-              : 'text/event-stream',
-            // another attempt at disabling compression
-            'Content-Encoding': 'identity',
-            'Cache-Control': 'no-cache',
-            Connection: 'keep-alive',
-            'Transfer-Encoding': 'chunked',
-            'X-Content-Type-Options': 'nosniff',
-            // This disables response buffering on proxy servers
-            'X-Accel-Buffering': 'no',
-          },
+          headers: getSSEResponseHeaders(),
           body: observableIntoEventSourceStream(
             chatEvents$ as unknown as Observable<ServerSentEvent>,
             {

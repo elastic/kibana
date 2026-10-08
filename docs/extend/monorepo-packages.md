@@ -12,7 +12,7 @@ Previously we relied solely on `@kbn/pm` to manage the development tools of thos
 Remember that any time you need to make sure the monorepo is ready to be used just run:
 
 ```bash
-yarn kbn bootstrap
+pnpm kbn bootstrap
 ```
 
 
@@ -21,7 +21,7 @@ yarn kbn bootstrap
 Bazel packages are built as a whole for now. You can use:
 
 ```bash
-yarn kbn bootstrap
+pnpm kbn bootstrap
 ```
 
 
@@ -30,7 +30,7 @@ yarn kbn bootstrap
 Bazel packages are watched as a whole for now. You can use:
 
 ```bash
-yarn kbn watch
+pnpm kbn watch
 ```
 
 

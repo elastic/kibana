@@ -18,7 +18,7 @@ import type { InternalUiSettingsRequestHandlerContext } from '../../internal_typ
 
 const validate = {
   params: schema.object({
-    key: schema.string(),
+    key: schema.string({ minLength: 1, maxLength: 1024 }),
   }),
 };
 

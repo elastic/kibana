@@ -33,6 +33,7 @@ import { getValues, type NormalizerConfig } from './normalize';
 import { getContinuity, getRangeValue } from '../../../../transforms/coloring';
 import { stripUndefined } from '../../../../transforms/charts/utils';
 import { generateAdHocDataViewId, getAdHocDataViewSpec } from '../../../../transforms/utils';
+import { toApiFieldSettings } from '../../../../transforms/columns/field_settings';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
@@ -55,14 +56,6 @@ const COMMON_STATE_IGNORE_PATHS = [
   'state.datasourceStates.textBased.layers.*.columns.*.meta', // meta is inferred by the transform -> originals may have it, miss it, or have different values
   'state.datasourceStates.textBased.layers.*.allColumns', // runtime-only property, not persisted or produced by transform
   'state.datasourceStates.textBased.layers.*.timeField', // inferred at runtime from the data view -> original may have undefined while transform sets @timestamp from query.esql
-  // TODO: check missing/different properties on adHocDataViews
-  'state.adHocDataViews.*.timeFieldName', // not saved in API re-derived at runtime
-  'state.adHocDataViews.*.fieldAttrs',
-  'state.adHocDataViews.*.managed',
-  'state.adHocDataViews.*.allowNoIndex', // hardcoded to false by transform; if original was true, missing indices would error instead of returning empty
-  'state.adHocDataViews.*.allowHidden', // hardcoded to false by transform; if original was true, hidden indices would no longer be queried
-  'state.adHocDataViews.*.fieldFormats', // custom field formats (e.g. url formatters) will be lost
-  'state.adHocDataViews.*.runtimeFieldMap', // runtime field definitions will be lost
   // TODO: check missing/different properties on colorMapping
   'state.visualization.columns.*.colorMapping.assignments.*.touched', // dropped at state -> API and only applied from API -> State, hardcoded to false by transform
   'state.visualization.columns.*.colorMapping.specialAssignments.*.touched',
@@ -142,8 +135,18 @@ function normalizeESQLAdHocDataViews(
 
       layer.index = newId;
       adHocDataView.id = newId;
-      adHocDataView.name = indexPattern;
       adHocDataView.title = indexPattern;
+      // An ES|QL ad-hoc data view has no dedicated `name` in the `{ type: 'esql', query }` data
+      // source; the transform re-derives both title and name from the query's index pattern
+      // (getAdHocDataViewSpec: `name = dataView.name ?? dataView.index`). This mirrors the DataView
+      // runtime, where `getName() = name || title` and a freshly created ES|QL data view
+      // (getESQLAdHocDataview) sets only `title = queryIndexPattern`, so the effective name is the
+      // query index pattern.
+      adHocDataView.name = adHocDataView.title;
+      // The transform re-derives the time field from the ES|QL query rather than trusting the
+      // persisted value (getAdHocDataViewSpec <- getDataSourceIndex.esql), so align the stored
+      // timeFieldName here instead of skipping it entirely.
+      adHocDataView.timeFieldName = timeFieldName;
       // Transform always sets type: 'esql' on ESQL adHocDataViews (via getAdHocDataViewSpec)
       adHocDataView.type = 'esql';
       attributes.state.adHocDataViews[newId] = adHocDataView;
@@ -197,33 +200,54 @@ function normalizeFormBasedAdHocDataViews(
   const adHocDataViews = attributes.state.adHocDataViews ?? {};
   const refs = [...internalReferences];
 
+  // Compute the deterministic id for every form-based ad-hoc data view once. The
+  // transform dedupes views by id, so several layers can reference the same view;
+  // remapping per data view (instead of per layer) keeps every referencing layer
+  // pointing at the same new id. Doing it per layer would delete the entry on the
+  // first layer and leave the rest pointing at the stale id.
+  const idRemap = new Map<string, string>();
+  for (const [oldId, adHocDataView] of Object.entries(adHocDataViews)) {
+    // ES|QL ad-hoc data views are handled by normalizeESQLAdHocDataViews; skip them here.
+    if (adHocDataView.type === 'esql') {
+      continue;
+    }
+    const newId = generateAdHocDataViewId({
+      index: adHocDataView.title ?? '',
+      timeFieldName: adHocDataView.timeFieldName,
+      name: adHocDataView.name,
+      allowHidden: adHocDataView.allowHidden,
+      fieldSettings: toApiFieldSettings(adHocDataView),
+    });
+    idRemap.set(oldId, newId);
+
+    if (oldId !== newId) {
+      delete adHocDataViews[oldId];
+      adHocDataView.id = newId;
+      adHocDataViews[newId] = adHocDataView;
+    }
+    // mirror the transform's `name = name ?? index` (title === index for form-based)
+    adHocDataView.name = adHocDataView.name ?? adHocDataView.title;
+  }
+
   for (const [layerId, layer] of Object.entries(formBasedLayers)) {
     const layerRefName = `indexpattern-datasource-layer-${layerId}`;
     const ref = refs.find((r) => r.name === layerRefName);
     const adHocId = ref?.id ?? (layer as any).indexPatternId;
+    const newId = adHocId ? idRemap.get(adHocId) : undefined;
 
-    if (adHocId && adHocDataViews[adHocId]) {
-      const adHocDataView: DataViewSpec = adHocDataViews[adHocId];
-      const newId = generateAdHocDataViewId({
-        index: adHocDataView.title ?? '',
-        timeFieldName: adHocDataView.timeFieldName,
+    if (!newId) {
+      continue;
+    }
+
+    if (ref) {
+      ref.id = newId;
+      ref.name = `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`;
+    } else {
+      refs.push({
+        id: newId,
+        name: `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`,
+        type: 'index-pattern',
       });
-
-      delete adHocDataViews[adHocId];
-      adHocDataView.id = newId;
-      adHocDataView.name = adHocDataView.title ?? adHocDataView.name;
-      adHocDataViews[newId] = adHocDataView;
-
-      if (ref) {
-        ref.id = newId;
-        ref.name = `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`;
-      } else {
-        refs.push({
-          id: newId,
-          name: `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`,
-          type: 'index-pattern',
-        });
-      }
     }
   }
 
@@ -269,6 +293,39 @@ function pruneEmptyColumnTextBasedLayers(attributes: LensAttributes) {
   }
 }
 
+/**
+ * Normalize ad-hoc data view spec noise the SO -> API -> SO round-trip introduces.
+ *
+ * DROP verdicts — not carried by the embedded API, loss is accepted:
+ * - `managed`: leaked saved-object metadata, never authored on a Lens ad-hoc data view and stripped from
+ *   the public data-views API anyway.
+ * - `allowNoIndex`: a field-fetch option (ES|`allow_no_indices`), not something authored on an
+ *   ad-hoc data-view. The embedded API has no field for it and the transform always emits `false`, so a
+ *   stored `true` (e.g. Fleet dashboards shipped before their indices exist) can't survive the
+ *   round-trip. Coerce the original to `false` to match the transform.
+ * - `allowHidden` on ES|QL DataViews: an ES|QL ad-hoc DataView serializes as an `{ type: 'esql', query }`
+ *   datasource that carries no `allow_hidden_indices`, so the flag is dropped on that path. Strip
+ *   it here. Form-based DataViews round-trip `allowHidden` faithfully and are compared directly.
+ */
+function normalizeAdHocDataViewSpec(dv: DataViewSpec) {
+  delete dv.managed;
+  dv.allowNoIndex = false;
+
+  if (dv.type === 'esql' && dv.allowHidden === false) {
+    delete dv.allowHidden;
+  }
+
+  if (Object.keys(dv.fieldAttrs ?? {}).length === 0) {
+    delete dv.fieldAttrs;
+  }
+  if (Object.keys(dv.fieldFormats ?? {}).length === 0) {
+    delete dv.fieldFormats;
+  }
+  if (Object.keys(dv.runtimeFieldMap ?? {}).length === 0) {
+    delete dv.runtimeFieldMap;
+  }
+}
+
 function normalizeAdHocDataViews(attributes: LensAttributes) {
   // Clear empty typeMeta objects
   for (const dv of Object.values(attributes.state.adHocDataViews ?? {})) {
@@ -281,6 +338,12 @@ function normalizeAdHocDataViews(attributes: LensAttributes) {
   removeOrphanedAdHocDataViews(attributes, internalReferences);
   internalReferences = normalizeESQLAdHocDataViews(attributes, internalReferences);
   internalReferences = normalizeFormBasedAdHocDataViews(attributes, internalReferences);
+
+  // Normalize spec noise last so it covers every ad-hoc data view (both the ES|QL and form-based paths
+  // rebuild/remap specs above).
+  for (const dv of Object.values(attributes.state.adHocDataViews ?? {})) {
+    normalizeAdHocDataViewSpec(dv);
+  }
 
   if (Object.keys(attributes.state.adHocDataViews ?? {}).length === 0) {
     delete attributes.state.adHocDataViews;
@@ -655,8 +718,8 @@ export function getPaletteNormalizer<T extends LensAttributes>(
         const rangeMax = getRangeValue(palette.params.rangeMax);
 
         if (palette.name !== 'custom') {
-          // Continuity has no meaning for a distributed palette and is always set to 'none'
-          palette.params.continuity = 'none';
+          // A distributed palette always opens both bounds so out-of-range values stay colored
+          palette.params.continuity = 'all';
 
           // The transform canonicalizes the legacy `complimentary` spelling to the GA palette id
           // (`complementary`), matching runtime. Canonicalize the original side too so the
@@ -670,10 +733,17 @@ export function getPaletteNormalizer<T extends LensAttributes>(
           return;
         }
 
-        // The SO→API transform always uses rangeMax as the last step's upper bound (lte),
-        // replacing the original stop value. The API→SO step then reconstructs the stop from lte,
-        // so the last stop always becomes rangeMax after the round-trip.
-        if (palette.params.stops) {
+        // For multi-stop palettes: the SO→API transform uses rangeMax as the last step's upper
+        // bound (lte), replacing the original stop value. The API→SO step then reconstructs the
+        // stop from lte, so the last stop becomes rangeMax after the round-trip.
+        //
+        // For single stop palettes: the transform's `i === 0` branch emits a closed
+        // `lt: <stop>` and returns before the last-step `lte: rangeMax` branch can run, so
+        // `lte: rangeMax` is never applied to the stop. For an open-above single stop (continuity
+        // 'above'/'all', rangeMax null) the transform instead appends a trailing `gte: <stop>`
+        // continuation step, which `mergeTrailingSameColorStep` collapses back on the reverse pass,
+        // leaving the original `lt` (the stop value) intact.
+        if (palette.params.stops && palette.params.stops.length > 1) {
           const lastStop = palette.params.stops.at(-1);
           if (lastStop) lastStop.stop = rangeMax as unknown as number; // can be null
         }

@@ -164,12 +164,14 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
               />
             }
           >
-            <EuiButton onClick={() => setAction('enableUser')} size="s">
-              <FormattedMessage
-                id="xpack.security.management.users.editUserPage.enableUserButton"
-                defaultMessage="Activate user"
-              />
-            </EuiButton>
+            {readOnly ? undefined : (
+              <EuiButton onClick={() => setAction('enableUser')} size="s">
+                <FormattedMessage
+                  id="xpack.security.management.users.editUserPage.enableUserButton"
+                  defaultMessage="Activate user"
+                />
+              </EuiButton>
+            )}
           </EuiCallOut>
           <EuiSpacer />
         </>

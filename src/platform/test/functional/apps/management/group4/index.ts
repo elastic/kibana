@@ -12,7 +12,7 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
-  describe('management - group 4 (settings, relationships, fields, cache)', function () {
+  describe('management - group 4 (saved objects import, files, settings)', function () {
     before(async () => {
       await esArchiver.unload(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
@@ -20,12 +20,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/makelogs');
     });
 
+    loadTestFile(require.resolve('./_mgmt_import_saved_objects'));
+    loadTestFile(require.resolve('./_import_objects'));
     loadTestFile(require.resolve('./_kibana_settings'));
-    loadTestFile(require.resolve('./_data_view_relationships'));
-    loadTestFile(require.resolve('./_edit_field'));
-    loadTestFile(require.resolve('./_data_view_field_filters'));
-    loadTestFile(require.resolve('./_cache'));
-    loadTestFile(require.resolve('./_managed_data_view'));
     loadTestFile(require.resolve('./_files'));
   });
 }
