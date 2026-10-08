@@ -1968,14 +1968,49 @@ describe('delete()', () => {
         getAxiosInstanceWithAuth,
         connectorSigningKeysEnabled: true,
       });
-      unsecuredSavedObjectsClient.delete.mockRejectedValueOnce(
-        SavedObjectsErrorHelpers.createGenericNotFoundError('connector_signing_key', '1')
-      );
+      unsecuredSavedObjectsClient.delete.mockImplementation(async (type, id) => {
+        if (type === 'connector_signing_key') {
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+        }
+        return {};
+      });
 
       await client.delete({ id: '1' });
 
-      expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('connector_signing_key', '1');
-      expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('action', '1');
+      expect(unsecuredSavedObjectsClient.delete.mock.calls).toEqual([
+        ['action', '1'],
+        ['connector_signing_key', '1'],
+      ]);
+    });
+
+    test('keeps the signing key when the connector delete fails', async () => {
+      const client = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        inMemoryConnectors: [],
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        connectorTokenClient,
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+        connectorSigningKeysEnabled: true,
+      });
+      unsecuredSavedObjectsClient.delete.mockRejectedValueOnce(new Error('delete failed'));
+
+      await expect(client.delete({ id: '1' })).rejects.toThrow('delete failed');
+
+      expect(unsecuredSavedObjectsClient.delete).not.toHaveBeenCalledWith(
+        'connector_signing_key',
+        '1'
+      );
     });
 
     describe('when connector has authMode per-user', () => {

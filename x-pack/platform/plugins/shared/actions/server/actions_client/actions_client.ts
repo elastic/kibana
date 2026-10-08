@@ -630,15 +630,16 @@ export class ActionsClient {
       logger: this.context.logger,
     });
 
-    // Not limited to types that publish keys: an import can change the stored actionTypeId.
+    const result = await this.context.unsecuredSavedObjectsClient.delete('action', id);
+
+    // After the connector delete, so a failed delete keeps a working connector. Not limited to
+    // types that publish keys: an import can change the stored actionTypeId.
     if (this.context.connectorSigningKeysEnabled) {
       await deleteConnectorSigningKey({
         unsecuredSavedObjectsClient: this.context.unsecuredSavedObjectsClient,
         connectorId: id,
       });
     }
-
-    const result = await this.context.unsecuredSavedObjectsClient.delete('action', id);
 
     const hookServices: HookServices = {
       scopedClusterClient: this.context.scopedClusterClient,
