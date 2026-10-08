@@ -55,6 +55,7 @@ engine:
   model: opus
   max-turns: 200
   env:
+    BUILDKITE_API_TOKEN: ${{ steps.buildkite_auth.outputs.token }}
     ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
     ANTHROPIC_BASE_URL: https://openrouter.ai/api
     ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-5
@@ -129,6 +130,11 @@ sandbox:
   agent: awf
 
 safe-outputs:
+  threat-detection:
+    engine:
+      id: claude
+      env:
+        BUILDKITE_API_TOKEN: ${{ '' }}
   activation-comments: true
   report-failure-as-issue: false
   messages:

@@ -1,14 +1,14 @@
 ---
 description: >-
   Shared setup step: installs the pinned Buildkite CLI (`bk`) on the self-hosted
-  runner and exports BUILDKITE_API_TOKEN so the agent can inspect CI builds and
-  download failure artifacts. Keep the pinned version/SHA here, in one place.
+  runner. Consumers pass the masked authentication step output to engine.env,
+  so only the agent execution step receives BUILDKITE_API_TOKEN.
+  Keep the pinned version/SHA here, in one place.
 steps:
-  - name: Install Buildkite CLI and export BUILDKITE_API_TOKEN
+  - name: Install Buildkite CLI
     env:
       BK_VERSION: 3.44.0
       BK_SHA256: 88867c0b983ad2afe1efc26f0df6b46b5673577c1aea95eba76992636fb9abe9
-      OPS_BUILDKITE_TOKEN: ${{ secrets.OPS_BUILDKITE_TOKEN }}
     run: |
       set -euo pipefail
       tmp="$(mktemp -d)"
@@ -19,9 +19,19 @@ steps:
       install -d "${RUNNER_TEMP}/gh-aw/mcp-cli/bin"
       install -m 0755 "${tmp}/bk" "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk"
       "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk" --version
+  - name: Prepare Buildkite CLI authentication
+    id: buildkite_auth
+    env:
+      OPS_BUILDKITE_TOKEN: ${{ secrets.OPS_BUILDKITE_TOKEN }}
+    run: |
+      set -euo pipefail
       if [ -z "${OPS_BUILDKITE_TOKEN:-}" ]; then
         echo "::error::OPS_BUILDKITE_TOKEN secret is not set" >&2
         exit 1
       fi
-      echo "BUILDKITE_API_TOKEN=${OPS_BUILDKITE_TOKEN}" >> "${GITHUB_ENV}"
+      # bk needs the token inside the agent sandbox. gh-aw filters direct secret
+      # references in engine.env, so consumers use this explicit masked handoff.
+      # Do not export the token job-wide; the detector must not consume the output.
+      printf '::add-mask::%s\n' "$OPS_BUILDKITE_TOKEN"
+      printf 'token=%s\n' "$OPS_BUILDKITE_TOKEN" >> "$GITHUB_OUTPUT"
 ---

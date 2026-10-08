@@ -7,6 +7,10 @@ on:
         description: Pull request number to fetch context for.
         required: true
         type: string
+      expected_head_sha:
+        description: Optional admitted PR head; fail if it changes while fetching context.
+        required: false
+        type: string
       repo:
         description: Repository in owner/repo form.
         required: true
@@ -33,12 +37,29 @@ jobs:
       - name: Fetch PR context
         env:
           PR_NUMBER: ${{ inputs.pr_number }}
+          EXPECTED_HEAD_SHA: ${{ inputs.expected_head_sha }}
           REPO: ${{ inputs.repo }}
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
+            const expectedHead = process.env.EXPECTED_HEAD_SHA;
+            const checkHead = async () => {
+              if (!expectedHead) return;
+              if (!/^[0-9a-f]{40}$/.test(expectedHead)) {
+                throw new Error('Expected a full PR head SHA.');
+              }
+              const [owner, repo] = process.env.REPO.split('/');
+              const { data: pr } = await github.rest.pulls.get({
+                owner, repo, pull_number: Number(process.env.PR_NUMBER),
+              });
+              if (pr.head.sha !== expectedHead) {
+                throw new Error('The PR head changed while fetching context. Start a new verification run.');
+              }
+            };
+            await checkHead();
             const { prefetchPrContext } = require('./.github/scripts/prefetch_pr_context');
             await prefetchPrContext({ github, core });
+            await checkHead();
 
       - name: Upload PR context artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

@@ -1,5 +1,5 @@
-# gh-aw-metadata: {"schema_version":"v4","frontmatter_hash":"ff938ee003c116738846eed39edace899f4ce4f1d9ddebde1e77322eb7e8b531","body_hash":"97565d43c5fcbff78d735fa3895f4a440e9d5b89eadea5a5cd64e88edd2611bf","compiler_version":"v0.87.10","agent_id":"claude","agent_model":"opus","engine_versions":{"claude":"2.1.165"}}
-# gh-aw-manifest: {"version":1,"secrets":["APPS_DX_AGENT_OBS_OTEL_SECRET","COPILOT_GITHUB_TOKEN","GH_AW_CI_TRIGGER_TOKEN","GH_AW_GITHUB_MCP_SERVER_TOKEN","GH_AW_GITHUB_TOKEN","GITHUB_TOKEN","KIBANAMACHINE_TOKEN","OPENROUTER_API_KEY","OPS_BUILDKITE_TOKEN"],"actions":[{"repo":"actions/cache/restore","sha":"55cc8345863c7cc4c66a329aec7e433d2d1c52a9","version":"v6.1.0"},{"repo":"actions/cache/save","sha":"55cc8345863c7cc4c66a329aec7e433d2d1c52a9","version":"v6.1.0"},{"repo":"actions/checkout","sha":"3d3c42e5aac5ba805825da76410c181273ba90b1","version":"v7.0.1"},{"repo":"actions/download-artifact","sha":"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c","version":"v8.0.1"},{"repo":"actions/github-script","sha":"373c709c69115d41ff229c7e5df9f8788daa9553","version":"v9"},{"repo":"actions/github-script","sha":"3a2844b7e9c422d3c10d287c895573f7108da1b3","version":"v9.0.0"},{"repo":"actions/setup-node","sha":"820762786026740c76f36085b0efc47a31fe5020","version":"v7.0.0"},{"repo":"actions/upload-artifact","sha":"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a","version":"v7.0.1"},{"repo":"github/gh-aw-actions/setup","sha":"bc8c008a419c5b7a29df6f5641edd35fd1c6ea85","version":"v0.87.10"}],"containers":[{"image":"ghcr.io/github/gh-aw-firewall/agent:0.28.10","digest":"sha256:c01e6d16d11ea4f2a46cc023a9f402224a3b3861b026818eec0dc586d7e6918e","pinned_image":"ghcr.io/github/gh-aw-firewall/agent:0.28.10@sha256:c01e6d16d11ea4f2a46cc023a9f402224a3b3861b026818eec0dc586d7e6918e"},{"image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.28.10","digest":"sha256:c3a18aebb8251339117ea998296315de17bada366f8d03919b3348ea71112e64","pinned_image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.28.10@sha256:c3a18aebb8251339117ea998296315de17bada366f8d03919b3348ea71112e64"},{"image":"ghcr.io/github/gh-aw-firewall/squid:0.28.10","digest":"sha256:c06076f7aca95df713e0748c44d80c0a3c2538fad67bfdd04296d45158e083e6","pinned_image":"ghcr.io/github/gh-aw-firewall/squid:0.28.10@sha256:c06076f7aca95df713e0748c44d80c0a3c2538fad67bfdd04296d45158e083e6"},{"image":"ghcr.io/github/gh-aw-mcpg:v0.4.14","digest":"sha256:b2f0c2b2f17b5fbe809e5bb99dc185b6ddd70df25295dc63a6d526350334eff5","pinned_image":"ghcr.io/github/gh-aw-mcpg:v0.4.14@sha256:b2f0c2b2f17b5fbe809e5bb99dc185b6ddd70df25295dc63a6d526350334eff5"},{"image":"ghcr.io/github/gh-aw-node","digest":"sha256:bac2192f6374d6262116399b34fc5e143d576f82719e90a18261cae7480f4d4e","pinned_image":"ghcr.io/github/gh-aw-node@sha256:bac2192f6374d6262116399b34fc5e143d576f82719e90a18261cae7480f4d4e"},{"image":"ghcr.io/github/github-mcp-server:v1.11.0","digest":"sha256:fbec75de11c255213fa08d80fb166abe73d851fff631c51c0079872967720699","pinned_image":"ghcr.io/github/github-mcp-server:v1.11.0@sha256:fbec75de11c255213fa08d80fb166abe73d851fff631c51c0079872967720699"}],"has_pull_request_target":true,"mcp_servers":[{"name":"github","tools":["actions_get","actions_list","get_commit","get_file_contents","get_job_logs","get_latest_release","get_me","get_pull_request","get_pull_request_comments","get_pull_request_diff","get_pull_request_files","get_pull_request_review_comments","get_pull_request_reviews","get_pull_request_status","get_release_by_tag","get_tag","issue_read","list_branches","list_commits","list_issue_types","list_issues","list_pull_requests","list_releases","list_starred_repositories","list_tags","pull_request_read","search_code","search_issues","search_pull_requests","search_repositories"]},{"name":"safeoutputs","tools":["add_comment","add_labels","close_as_duplicate","mark_pr_ready","missing_data","missing_tool","noop","push_to_pull_request_branch","remove_labels","update_pull_request"]}]}
+# gh-aw-metadata: {"schema_version":"v4","frontmatter_hash":"069f53bdaeaafce8334d1208aa38aad627c4674bccd38024339598827130ed27","body_hash":"fee7bcef721fa119e9c8c8ccb6c2e3ed42ffe56b5fd7c707ea289c111f102904","compiler_version":"v0.87.10","agent_id":"claude","agent_model":"opus","detection_agent_id":"claude","engine_versions":{"claude":"2.1.165"}}
+# gh-aw-manifest: {"version":1,"secrets":["APPS_DX_AGENT_OBS_OTEL_SECRET","COPILOT_GITHUB_TOKEN","GH_AW_CI_TRIGGER_TOKEN","GH_AW_GITHUB_MCP_SERVER_TOKEN","GH_AW_GITHUB_TOKEN","GITHUB_TOKEN","KIBANAMACHINE_TOKEN","OPENROUTER_API_KEY","OPS_BUILDKITE_TOKEN"],"actions":[{"repo":"actions/cache/restore","sha":"55cc8345863c7cc4c66a329aec7e433d2d1c52a9","version":"v6.1.0"},{"repo":"actions/cache/save","sha":"55cc8345863c7cc4c66a329aec7e433d2d1c52a9","version":"v6.1.0"},{"repo":"actions/checkout","sha":"3d3c42e5aac5ba805825da76410c181273ba90b1","version":"v7.0.1"},{"repo":"actions/download-artifact","sha":"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c","version":"v8.0.1"},{"repo":"actions/github-script","sha":"373c709c69115d41ff229c7e5df9f8788daa9553","version":"v9"},{"repo":"actions/github-script","sha":"3a2844b7e9c422d3c10d287c895573f7108da1b3","version":"v9.0.0"},{"repo":"actions/setup-node","sha":"820762786026740c76f36085b0efc47a31fe5020","version":"v7.0.0"},{"repo":"actions/upload-artifact","sha":"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a","version":"v7.0.1"},{"repo":"github/gh-aw-actions/setup","sha":"bc8c008a419c5b7a29df6f5641edd35fd1c6ea85","version":"v0.87.10"},{"repo":"github/gh-aw-actions/setup-cli","sha":"bc8c008a419c5b7a29df6f5641edd35fd1c6ea85","version":"v0.87.10"}],"containers":[{"image":"ghcr.io/github/gh-aw-firewall/agent:0.28.10","digest":"sha256:c01e6d16d11ea4f2a46cc023a9f402224a3b3861b026818eec0dc586d7e6918e","pinned_image":"ghcr.io/github/gh-aw-firewall/agent:0.28.10@sha256:c01e6d16d11ea4f2a46cc023a9f402224a3b3861b026818eec0dc586d7e6918e"},{"image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.28.10","digest":"sha256:c3a18aebb8251339117ea998296315de17bada366f8d03919b3348ea71112e64","pinned_image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.28.10@sha256:c3a18aebb8251339117ea998296315de17bada366f8d03919b3348ea71112e64"},{"image":"ghcr.io/github/gh-aw-firewall/squid:0.28.10","digest":"sha256:c06076f7aca95df713e0748c44d80c0a3c2538fad67bfdd04296d45158e083e6","pinned_image":"ghcr.io/github/gh-aw-firewall/squid:0.28.10@sha256:c06076f7aca95df713e0748c44d80c0a3c2538fad67bfdd04296d45158e083e6"},{"image":"ghcr.io/github/gh-aw-mcpg:v0.4.14","digest":"sha256:b2f0c2b2f17b5fbe809e5bb99dc185b6ddd70df25295dc63a6d526350334eff5","pinned_image":"ghcr.io/github/gh-aw-mcpg:v0.4.14@sha256:b2f0c2b2f17b5fbe809e5bb99dc185b6ddd70df25295dc63a6d526350334eff5"},{"image":"ghcr.io/github/gh-aw-node","digest":"sha256:bac2192f6374d6262116399b34fc5e143d576f82719e90a18261cae7480f4d4e","pinned_image":"ghcr.io/github/gh-aw-node@sha256:bac2192f6374d6262116399b34fc5e143d576f82719e90a18261cae7480f4d4e"},{"image":"ghcr.io/github/github-mcp-server:v1.11.0","digest":"sha256:fbec75de11c255213fa08d80fb166abe73d851fff631c51c0079872967720699","pinned_image":"ghcr.io/github/github-mcp-server:v1.11.0@sha256:fbec75de11c255213fa08d80fb166abe73d851fff631c51c0079872967720699"}],"has_pull_request_target":true,"mcp_servers":[{"name":"github","tools":["actions_get","actions_list","get_commit","get_file_contents","get_job_logs","get_latest_release","get_me","get_pull_request","get_pull_request_comments","get_pull_request_diff","get_pull_request_files","get_pull_request_review_comments","get_pull_request_reviews","get_pull_request_status","get_release_by_tag","get_tag","issue_read","list_branches","list_commits","list_issue_types","list_issues","list_pull_requests","list_releases","list_starred_repositories","list_tags","pull_request_read","search_code","search_issues","search_pull_requests","search_repositories"]},{"name":"safeoutputs","tools":["add_comment","add_labels","close_as_duplicate","mark_pr_ready","missing_data","missing_tool","noop","push_to_pull_request_branch","remove_labels","update_pull_request"]}]}
 # This file was automatically generated by gh-aw (v0.87.10). DO NOT EDIT. To debug this workflow, load the skill at https://github.com/github/gh-aw/blob/main/debug.md
 #
 #    ___                   _   _
@@ -64,6 +64,7 @@
 #   - actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
 #   - actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
 #   - actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+#   - github/gh-aw-actions/setup-cli@bc8c008a419c5b7a29df6f5641edd35fd1c6ea85 # v0.87.10
 #   - github/gh-aw-actions/setup@bc8c008a419c5b7a29df6f5641edd35fd1c6ea85 # v0.87.10
 #
 # Container images used:
@@ -415,6 +416,7 @@ jobs:
           GH_AW_GITHUB_WORKSPACE: ${{ github.workspace }}
           GH_AW_INCLUDE_PR_CONTEXT: ${{ (github.event_name == 'issue_comment' && github.event.issue.pull_request != null) || github.event_name == 'pull_request_review_comment' || github.event_name == 'pull_request_review' }}
           GH_AW_MCP_CLI_SERVERS_LIST: '- `safeoutputs` — run `safeoutputs --help` to see available tools'
+          GH_AW_NEEDS_CHECK_PR_ELIGIBILITY_OUTPUTS_HEAD_SHA: ${{ needs.check_pr_eligibility.outputs.head_sha }}
           GH_AW_NEEDS_CHECK_PR_ELIGIBILITY_OUTPUTS_PR_NUMBER: ${{ needs.check_pr_eligibility.outputs.pr_number }}
           GH_AW_NEEDS_PRE_ACTIVATION_OUTPUTS_ACTIVATED: ${{ needs.pre_activation.outputs.activated }}
         with:
@@ -441,6 +443,7 @@ jobs:
                 GH_AW_GITHUB_WORKSPACE: process.env.GH_AW_GITHUB_WORKSPACE,
                 GH_AW_INCLUDE_PR_CONTEXT: process.env.GH_AW_INCLUDE_PR_CONTEXT,
                 GH_AW_MCP_CLI_SERVERS_LIST: process.env.GH_AW_MCP_CLI_SERVERS_LIST,
+                GH_AW_NEEDS_CHECK_PR_ELIGIBILITY_OUTPUTS_HEAD_SHA: process.env.GH_AW_NEEDS_CHECK_PR_ELIGIBILITY_OUTPUTS_HEAD_SHA,
                 GH_AW_NEEDS_CHECK_PR_ELIGIBILITY_OUTPUTS_PR_NUMBER: process.env.GH_AW_NEEDS_CHECK_PR_ELIGIBILITY_OUTPUTS_PR_NUMBER,
                 GH_AW_NEEDS_PRE_ACTIVATION_OUTPUTS_ACTIVATED: process.env.GH_AW_NEEDS_PRE_ACTIVATION_OUTPUTS_ACTIVATED
               }
@@ -481,6 +484,7 @@ jobs:
   agent:
     needs:
       - activation
+      - check_pr_eligibility
       - prefetch_pr_context
     if: needs.activation.outputs.daily_ai_credits_exceeded != 'true'
     runs-on: ubuntu-latest
@@ -562,8 +566,12 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          ref: refs/pull/${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}/head
+          ref: ${{ needs.check_pr_eligibility.outputs.head_sha }}
           fetch-depth: 2
+      - name: Install gh-aw extension
+        uses: github/gh-aw-actions/setup-cli@bc8c008a419c5b7a29df6f5641edd35fd1c6ea85 # v0.87.10
+        with:
+          version: 'v0.87.10'
       - name: Create gh-aw temp directory
         run: bash "${RUNNER_TEMP}/gh-aw/actions/create_gh_aw_tmp_dir.sh"
       - name: Configure gh CLI for GitHub Enterprise
@@ -578,8 +586,7 @@ jobs:
       - env:
           BK_SHA256: 88867c0b983ad2afe1efc26f0df6b46b5673577c1aea95eba76992636fb9abe9
           BK_VERSION: 3.44.0
-          OPS_BUILDKITE_TOKEN: ${{ secrets.OPS_BUILDKITE_TOKEN }}
-        name: Install Buildkite CLI and export BUILDKITE_API_TOKEN
+        name: Install Buildkite CLI
         run: |
           set -euo pipefail
           tmp="$(mktemp -d)"
@@ -590,11 +597,11 @@ jobs:
           install -d "${RUNNER_TEMP}/gh-aw/mcp-cli/bin"
           install -m 0755 "${tmp}/bk" "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk"
           "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk" --version
-          if [ -z "${OPS_BUILDKITE_TOKEN:-}" ]; then
-            echo "::error::OPS_BUILDKITE_TOKEN secret is not set" >&2
-            exit 1
-          fi
-          echo "BUILDKITE_API_TOKEN=${OPS_BUILDKITE_TOKEN}" >> "${GITHUB_ENV}"
+      - env:
+          OPS_BUILDKITE_TOKEN: ${{ secrets.OPS_BUILDKITE_TOKEN }}
+        id: buildkite_auth
+        name: Prepare Buildkite CLI authentication
+        run: "set -euo pipefail\nif [ -z \"${OPS_BUILDKITE_TOKEN:-}\" ]; then\n  echo \"::error::OPS_BUILDKITE_TOKEN secret is not set\" >&2\n  exit 1\nfi\n# bk needs the token inside the agent sandbox. gh-aw filters direct secret\n# references in engine.env, so consumers use this explicit masked handoff.\n# Do not export the token job-wide; the detector must not consume the output.\nprintf '::add-mask::%s\\n' \"$OPS_BUILDKITE_TOKEN\"\nprintf 'token=%s\\n' \"$OPS_BUILDKITE_TOKEN\" >> \"$GITHUB_OUTPUT\"\n"
       - name: Download prefetched PR context
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -1204,6 +1211,7 @@ jobs:
           ANTHROPIC_MODEL: opus
           BASH_DEFAULT_TIMEOUT_MS: 60000
           BASH_MAX_TIMEOUT_MS: 60000
+          BUILDKITE_API_TOKEN: ${{ steps.buildkite_auth.outputs.token }}
           CLAUDE_CODE_DISABLE_FAST_MODE: 1
           CLAUDE_CODE_EFFORT_LEVEL: high
           CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
@@ -1424,6 +1432,7 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
+      head_sha: ${{ steps.check.outputs.head_sha }}
       pr_number: ${{ steps.check.outputs.pr_number }}
     steps:
       - name: Configure GH_HOST for enterprise compatibility
@@ -1459,15 +1468,32 @@ jobs:
               throw new Error('The flaky fix verifier requires a PR opened by kibanamachine.');
             }
 
+            if (!/^[0-9a-f]{40}$/.test(pr.head.sha ?? '')) {
+              throw new Error('The PR head must be a full commit SHA.');
+            }
             core.setOutput('pr_number', String(prNumber));
+            core.setOutput('head_sha', pr.head.sha);
             core.info(`PR #${prNumber} by ${pr.user.login} is eligible.`);
+            const fs = require('node:fs');
+            const path = require('node:path');
+            const dir = path.join(process.env.RUNNER_TEMP, 'verified-pr-head');
+            fs.mkdirSync(dir, { recursive: true });
+            fs.writeFileSync(path.join(dir, 'head-sha.txt'), pr.head.sha);
+      - name: Save admitted PR head
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: verified-pr-head-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/verified-pr-head/head-sha.txt
+          retention-days: 1
 
   close_as_duplicate:
     needs:
       - agent
       - detection
       - safe_outputs
-    if: (!cancelled()) && needs.agent.result != 'skipped' && contains(needs.agent.outputs.output_types, 'close_as_duplicate')
+    if: >
+      (!cancelled()) && needs.agent.result != 'skipped' && contains(needs.agent.outputs.output_types, 'close_as_duplicate') &&
+      (needs.safe_outputs.result == 'success')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -1481,6 +1507,14 @@ jobs:
           pattern: "{agent,agent-output-fallback}"
           merge-multiple: true
           path: ${{ runner.temp }}/gh-aw/safe-jobs/
+      - name: Download admitted PR head
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        env:
+          GH_AW_AGENT_OUTPUT: ${{ runner.temp }}/gh-aw/safe-jobs/agent_output.json
+          GH_AW_PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
+        with:
+          name: verified-pr-head-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/verified-pr-head
       - name: Close the duplicate fix PR
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
@@ -1506,6 +1540,12 @@ jobs:
             const canonicalRef = /^\d+$/.test(canonical) ? `#${canonical}` : 'another open fix PR';
             const { owner, repo } = context.repo;
             const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+            const expectedHead = require('node:fs').readFileSync(
+              require('node:path').join(process.env.RUNNER_TEMP, 'verified-pr-head/head-sha.txt'), 'utf8'
+            );
+            if (!/^[0-9a-f]{40}$/.test(expectedHead) || pr.head.sha !== expectedHead) {
+              throw new Error('The PR head changed; start a new verification run before changing this PR.');
+            }
             if (pr.state !== 'open') {
               core.info(`PR #${prNumber} is already ${pr.state}; nothing to do.`);
               return;
@@ -1942,7 +1982,7 @@ jobs:
           node-version: '24'
           package-manager-cache: false
       - name: Install Claude Code CLI
-        run: npm install -g @anthropic-ai/claude-code@2.1.165
+        run: npm install -g @anthropic-ai/claude-code@2.1.247
       - name: Install threat-detect binary
         if: always() && steps.detection_guard.outputs.run_detection == 'true'
         continue-on-error: true
@@ -1962,6 +2002,7 @@ jobs:
           ANTHROPIC_MODEL: opus
           BASH_DEFAULT_TIMEOUT_MS: 60000
           BASH_MAX_TIMEOUT_MS: 60000
+          BUILDKITE_API_TOKEN: ${{ '' }}
           CLAUDE_CODE_DISABLE_FAST_MODE: 1
           CLAUDE_CODE_EFFORT_LEVEL: high
           CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
@@ -2075,7 +2116,9 @@ jobs:
       - agent
       - detection
       - safe_outputs
-    if: (!cancelled()) && needs.agent.result != 'skipped' && contains(needs.agent.outputs.output_types, 'mark_pr_ready')
+    if: >
+      (!cancelled()) && needs.agent.result != 'skipped' && contains(needs.agent.outputs.output_types, 'mark_pr_ready') &&
+      (needs.safe_outputs.result == 'success')
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -2087,6 +2130,14 @@ jobs:
           pattern: "{agent,agent-output-fallback}"
           merge-multiple: true
           path: ${{ runner.temp }}/gh-aw/safe-jobs/
+      - name: Download admitted PR head
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        env:
+          GH_AW_AGENT_OUTPUT: ${{ runner.temp }}/gh-aw/safe-jobs/agent_output.json
+          GH_AW_PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
+        with:
+          name: verified-pr-head-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/verified-pr-head
       - name: Mark the fix PR ready for review
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
@@ -2102,6 +2153,12 @@ jobs:
             }
             const { owner, repo } = context.repo;
             const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+            const expectedHead = require('node:fs').readFileSync(
+              require('node:path').join(process.env.RUNNER_TEMP, 'verified-pr-head/head-sha.txt'), 'utf8'
+            );
+            if (!/^[0-9a-f]{40}$/.test(expectedHead) || pr.head.sha !== expectedHead) {
+              throw new Error('The PR head changed; start a new verification run before changing this PR.');
+            }
             // Only a verified or unverifiable fix goes to a human: a `failed` or `inconclusive`
             // verdict stays a draft. The labels are written by the safe_outputs job this one
             // depends on, so they are the authoritative verdict by the time we read them.
@@ -2198,7 +2255,9 @@ jobs:
             await main();
 
   prefetch_pr_context:
-    needs: activation
+    needs:
+      - activation
+      - check_pr_eligibility
     permissions:
       contents: read
       issues: read
@@ -2206,6 +2265,7 @@ jobs:
     uses: ./.github/workflows/prefetch-pr-context.yml
     with:
       artifact_name: prefetched-pr-context-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
+      expected_head_sha: ${{ needs.check_pr_eligibility.outputs.head_sha }}
       pr_number: ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
       repo: ${{ github.repository }}
 
@@ -2213,6 +2273,7 @@ jobs:
     needs:
       - activation
       - agent
+      - check_pr_eligibility
       - detection
     if: (!cancelled()) && needs.agent.result != 'skipped' && needs.detection.result == 'success'
     runs-on: ubuntu-slim
@@ -2303,7 +2364,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: true
-          ref: refs/pull/${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}/head
+          ref: ${{ needs.check_pr_eligibility.outputs.head_sha }}
           fetch-depth: 2
           token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
       - name: Configure Git credentials
@@ -2322,6 +2383,25 @@ jobs:
           GH_HOST="${GITHUB_SERVER_URL#https://}"
           GH_HOST="${GH_HOST#http://}"
           echo "GH_HOST=${GH_HOST}" >> "$GITHUB_ENV"
+      - name: Reject results for a changed PR head
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          EXPECTED_HEAD_SHA: ${{ needs.check_pr_eligibility.outputs.head_sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
+        with:
+          script: |
+            const expectedHead = process.env.EXPECTED_HEAD_SHA;
+            if (!/^[0-9a-f]{40}$/.test(expectedHead ?? '')) {
+              throw new Error('Missing validated PR head SHA.');
+            }
+            const { owner, repo } = context.repo;
+            const { data: pr } = await github.rest.pulls.get({
+              owner, repo, pull_number: Number(process.env.PR_NUMBER),
+            });
+            if (pr.state !== 'open' || pr.head.repo?.full_name !== `${owner}/${repo}` ||
+                pr.user.login !== 'kibanamachine' || pr.head.sha !== expectedHead) {
+              throw new Error('The PR changed after verification started. Start a new verification run for its current head.');
+            }
       - name: Process Safe Outputs
         id: process_safe_outputs
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
