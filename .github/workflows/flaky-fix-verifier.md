@@ -29,7 +29,7 @@ permissions:
 
 # Activation rules:
 # - Every trigger requires an open, in-repository PR authored by kibanamachine
-#   or an active Elastic organization member (checked by validate_pr).
+#   (checked by validate_pr).
 # - Manual runs request verification subject to the same PR validation.
 # - `kickoff`: a PR is labeled `flaky-test-fixer`.
 # - `process_results`: the Flaky Test Runner posts its `## Flaky Test Runner Stats`
@@ -144,9 +144,6 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           PR_NUMBER: *pr_number
-          # Organization membership is not readable with the repository GITHUB_TOKEN.
-          # Keep this existing bot credential confined to the validation step.
-          ORG_MEMBERSHIP_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
         with:
           script: |
             const prNumber = Number(process.env.PR_NUMBER);
@@ -162,27 +159,8 @@ jobs:
             if (pr.head.repo?.full_name !== `${owner}/${repo}`) {
               throw new Error(`The flaky fix verifier requires a branch in ${owner}/${repo}.`);
             }
-
             if (pr.user.login !== 'kibanamachine') {
-              if (!process.env.ORG_MEMBERSHIP_TOKEN) {
-                throw new Error('KIBANAMACHINE_TOKEN is required to verify Elastic organization membership.');
-              }
-              const membershipClient = getOctokit(process.env.ORG_MEMBERSHIP_TOKEN);
-              let membership;
-              try {
-                ({ data: membership } = await membershipClient.rest.orgs.getMembershipForUser({
-                  org: 'elastic',
-                  username: pr.user.login,
-                }));
-              } catch (err) {
-                throw new Error(
-                  `Could not verify Elastic membership for ${pr.user.login} (HTTP ${err.status ?? 'unknown'}). ` +
-                  'The author must be a member and KIBANAMACHINE_TOKEN must have organization membership read access.'
-                );
-              }
-              if (membership.state !== 'active') {
-                throw new Error('The PR author must be an active Elastic organization member.');
-              }
+              throw new Error('The flaky fix verifier requires a PR opened by kibanamachine.');
             }
 
             core.setOutput('pr_number', String(prNumber));
