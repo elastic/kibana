@@ -103,6 +103,18 @@ describe('summarizeProfile', () => {
     ]);
   });
 
+  it('attributes a hot frame to its heaviest caller stack, not the first one seen', () => {
+    const summary = summarizeProfile(
+      buildProfile([
+        ['zodInit', 'rarePath'],
+        ...Array.from({ length: 3 }, () => ['zodInit', 'hotPath']),
+      ]),
+      ROOT
+    );
+    expect(summary.frames[0].callers).toEqual(['hotPath (src/hotPath.ts:10)']);
+    expect(summary.kibanaFrames[0]).toMatchObject({ name: 'hotPath', samples: 3 });
+  });
+
   it('formats a single readable line', () => {
     const summary = summarizeProfile(profile, ROOT);
     expect(

@@ -83,15 +83,22 @@ interface Frame {
   label: string;
 }
 
+interface FrameCount {
+  frame: Frame;
+  samples: number;
+  /** Caller stacks by their labels (one representative array each), with sample counts. */
+  stacks: Map<string, { callers: Frame[]; samples: number }>;
+}
+
 const rank = (
-  entries: Map<string, { frame: Frame; samples: number; stacks: Map<Frame[], number> }>,
+  entries: Map<string, FrameCount>,
   total: number
 ): FrameSummary[] =>
   [...entries.values()]
     .sort((a, b) => b.samples - a.samples)
     .slice(0, MAX_FRAMES)
     .map(({ frame, samples, stacks }) => {
-      const [heaviest] = [...stacks].sort((a, b) => b[1] - a[1])[0];
+      const { callers: heaviest } = [...stacks.values()].sort((a, b) => b.samples - a.samples)[0];
       return {
         name: frame.name,
         location: frame.location,
@@ -127,15 +134,15 @@ export const summarizeProfile = (profile: CpuProfile, sanitizeRoot: string): Pro
   };
 
   const busy = profile.samples.filter((leaf) => nodes.get(leaf)?.callFrame.functionName !== IDLE);
-  const frames = new Map<string, { frame: Frame; samples: number; stacks: Map<Frame[], number> }>();
-  const kibanaFrames = new Map<
-    string,
-    { frame: Frame; samples: number; stacks: Map<Frame[], number> }
-  >();
-  const count = (entries: typeof frames, frame: Frame, callers: Frame[]) => {
+  const frames = new Map<string, FrameCount>();
+  const kibanaFrames = new Map<string, FrameCount>();
+  const count = (entries: Map<string, FrameCount>, frame: Frame, callers: Frame[]) => {
     const entry = entries.get(frame.label) ?? { frame, samples: 0, stacks: new Map() };
     entry.samples++;
-    entry.stacks.set(callers, (entry.stacks.get(callers) ?? 0) + 1);
+    const key = callers.map(({ label }) => label).join('\n');
+    const stack = entry.stacks.get(key) ?? { callers, samples: 0 };
+    stack.samples++;
+    entry.stacks.set(key, stack);
     entries.set(frame.label, entry);
   };
   const kibanaCallers = new Map<Frame[], { frame: Frame; callers: Frame[] } | undefined>();
