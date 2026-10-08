@@ -78,7 +78,7 @@ describe('SecurityNavControlService', () => {
     expect(target).toMatchInlineSnapshot(`
       <div>
         <div
-          class="css-12574bb-redirectAppLinksStyles"
+          class="css-qvyf25-redirectAppLinksStyles"
           data-test-subj="kbnRedirectAppLink"
         >
           <div

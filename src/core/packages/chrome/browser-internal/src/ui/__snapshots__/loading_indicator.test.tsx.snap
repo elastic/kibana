@@ -4,13 +4,11 @@ exports[`kbnLoadingIndicator is hidden by default 1`] = `
 <Fragment>
   <ForwardRef
     styles={
-      Array [
-        Object {
-          ".euiHeaderSectionItem .euiButtonEmpty__text": Object {
-            "display": "flex",
-          },
-        },
-      ]
+      Object {
+        "name": "11nwfnw-LoadingIndicator",
+        "styles": ".euiHeaderSectionItem .euiButtonEmpty__text{display:flex;};label:LoadingIndicator;",
+        "toString": [Function],
+      }
     }
   />
   <EuiIcon
@@ -26,13 +24,11 @@ exports[`kbnLoadingIndicator is visible when loadingCount is > 0 1`] = `
 <Fragment>
   <ForwardRef
     styles={
-      Array [
-        Object {
-          ".euiHeaderSectionItem .euiButtonEmpty__text": Object {
-            "display": "flex",
-          },
-        },
-      ]
+      Object {
+        "name": "11nwfnw-LoadingIndicator",
+        "styles": ".euiHeaderSectionItem .euiButtonEmpty__text{display:flex;};label:LoadingIndicator;",
+        "toString": [Function],
+      }
     }
   />
   <EuiIcon
@@ -48,13 +44,11 @@ exports[`kbnLoadingIndicator shows logo image when customLogo is set 1`] = `
 <Fragment>
   <ForwardRef
     styles={
-      Array [
-        Object {
-          ".euiHeaderSectionItem .euiButtonEmpty__text": Object {
-            "display": "flex",
-          },
-        },
-      ]
+      Object {
+        "name": "11nwfnw-LoadingIndicator",
+        "styles": ".euiHeaderSectionItem .euiButtonEmpty__text{display:flex;};label:LoadingIndicator;",
+        "toString": [Function],
+      }
     }
   />
   <EuiImage

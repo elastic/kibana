@@ -56,7 +56,7 @@ Array [
           >
             <a
               aria-label="Elastic home"
-              class="css-r0ozzh-logoCss"
+              class="css-4ghmd2-logoCss"
               data-test-subj="logo"
               href="/"
             >
@@ -69,7 +69,7 @@ Array [
               <svg
                 aria-hidden="true"
                 aria-labelledby="elasticMark"
-                class="css-1k9a18z-logoMarkCss"
+                class="css-1ks1hwq-logoMarkCss"
                 data-test-subj="logoMark"
                 fill="none"
                 height="19"
@@ -182,7 +182,7 @@ Array [
         </div>
         <nav
           aria-label="Breadcrumbs"
-          class="euiBreadcrumbs euiHeaderBreadcrumbs emotion-euiHeaderBreadcrumbs-text"
+          class="euiBreadcrumbs euiHeaderBreadcrumbs emotion-euiHeaderBreadcrumbs-HeaderBreadcrumbs"
           data-test-subj="breadcrumbs"
         >
           <ol

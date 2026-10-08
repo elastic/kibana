@@ -876,12 +876,12 @@ exports[`CollapsibleNav renders the default nav 1`] = `
         Object {
           "insert": [Function],
           "inserted": Object {
-            "btmfgo-navCss": true,
+            "1751mc5-navCss": true,
           },
           "key": "css",
           "nonce": undefined,
           "registered": Object {
-            "css-btmfgo-navCss": "@media (max-height: 240px){overflow-y:auto;};label:navCss",
+            "css-1751mc5-navCss": "@media (max-height: 240px){overflow-y:auto;};label:navCss;",
           },
           "sheet": StyleSheet {
             "_insertTag": [Function],
@@ -914,16 +914,16 @@ exports[`CollapsibleNav renders the default nav 1`] = `
       isStringTag={false}
       serialized={
         Object {
-          "name": "btmfgo-navCss",
+          "name": "1751mc5-navCss",
           "next": undefined,
-          "styles": "@media (max-height: 240px){overflow-y:auto;};label:navCss",
+          "styles": "@media (max-height: 240px){overflow-y:auto;};label:navCss;",
         }
       }
     />
     <EuiCollapsibleNav
       aria-label="Primary"
       button={<button />}
-      className="css-btmfgo-navCss"
+      className="css-1751mc5-navCss"
       data-test-subj="collapsibleNav"
       id="collapsibe-nav"
       isOpen={false}
@@ -1124,12 +1124,12 @@ exports[`CollapsibleNav renders the default nav 2`] = `
         Object {
           "insert": [Function],
           "inserted": Object {
-            "btmfgo-navCss": true,
+            "1751mc5-navCss": true,
           },
           "key": "css",
           "nonce": undefined,
           "registered": Object {
-            "css-btmfgo-navCss": "@media (max-height: 240px){overflow-y:auto;};label:navCss",
+            "css-1751mc5-navCss": "@media (max-height: 240px){overflow-y:auto;};label:navCss;",
           },
           "sheet": StyleSheet {
             "_insertTag": [Function],
@@ -1162,16 +1162,16 @@ exports[`CollapsibleNav renders the default nav 2`] = `
       isStringTag={false}
       serialized={
         Object {
-          "name": "btmfgo-navCss",
+          "name": "1751mc5-navCss",
           "next": undefined,
-          "styles": "@media (max-height: 240px){overflow-y:auto;};label:navCss",
+          "styles": "@media (max-height: 240px){overflow-y:auto;};label:navCss;",
         }
       }
     />
     <EuiCollapsibleNav
       aria-label="Primary"
       button={<button />}
-      className="css-btmfgo-navCss"
+      className="css-1751mc5-navCss"
       data-test-subj="collapsibleNav"
       id="collapsibe-nav"
       isOpen={false}

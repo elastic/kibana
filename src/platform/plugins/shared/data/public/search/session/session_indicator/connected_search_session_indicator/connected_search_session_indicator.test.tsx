@@ -81,7 +81,7 @@ test("shouldn't show indicator in case no active search session", async () => {
   expect(container).toMatchInlineSnapshot(`
     <div>
       <div
-        class="css-12574bb-redirectAppLinksStyles"
+        class="css-qvyf25-redirectAppLinksStyles"
         data-test-subj="kbnRedirectAppLink"
       />
     </div>
@@ -111,7 +111,7 @@ test("shouldn't show indicator in case app hasn't opt-in", async () => {
   expect(container).toMatchInlineSnapshot(`
     <div>
       <div
-        class="css-12574bb-redirectAppLinksStyles"
+        class="css-qvyf25-redirectAppLinksStyles"
         data-test-subj="kbnRedirectAppLink"
       />
     </div>

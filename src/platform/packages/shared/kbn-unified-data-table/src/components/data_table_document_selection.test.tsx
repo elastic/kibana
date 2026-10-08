@@ -17,7 +17,6 @@ import {
   SelectButton,
   getSelectAllButton,
 } from './data_table_document_selection';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import {
   buildSelectedDocsState,
   dataTableContextMock,
@@ -412,9 +411,7 @@ describe('document selection', () => {
         getButton: async () => {
           const menuButton = await screen.findByTestId('unifiedDataTableSelectionBtn');
           await userEvent.click(menuButton);
-          await waitForEuiPopoverOpen();
-
-          return screen.queryByTestId('unifiedDataTableCompareSelectedDocuments');
+          return screen.queryByRole('button', { name: /Compare/ });
         },
       };
     };

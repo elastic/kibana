@@ -26,7 +26,6 @@ type SnapshotUpdateState = 'all' | 'new' | 'none';
 interface SnapshotContext {
   snapshotState: ISnapshotState;
   currentTestName: string;
-  error: Error;
 }
 
 const globalState: {
@@ -198,8 +197,6 @@ export function expectSnapshot(received: any) {
   const context: SnapshotContext = {
     snapshotState,
     currentTestName: getTestTitle(test),
-    // jest-snapshot requires the caller stack to locate inline snapshot updates.
-    error: new Error(),
   };
 
   return {
