@@ -356,7 +356,7 @@ export class DashboardPlugin
             .get$()
             .pipe(
               map((items) =>
-                items.slice(0, 5).map((item) => ({
+                items.map((item) => ({
                   id: item.id,
                   href: core.http.basePath.prepend(item.link),
                   label: item.label,
