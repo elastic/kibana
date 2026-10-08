@@ -43,13 +43,14 @@ export const NoProtectedESLintDisableRule: CreateOnceRule = {
 
         context.report({
           node,
-          loc: getReportLocFromComment(parsedDisable),
+          loc: getReportLocFromComment(comment, parsedDisable.disableValueType),
           messageId: PROTECTED_DISABLE_MSG_ID,
           data: {
             disabledRuleName: disabledProtectedRule,
           },
           fix(fixer) {
-            const { directive, range, rules, type } = parsedDisable;
+            const { range, type } = comment;
+            const { directive, rules, description } = parsedDisable;
             const remainingRules = rules.filter((rule) => !PROTECTED_RULES.has(rule));
 
             // every disabled rule is protected, so the whole comment goes
@@ -57,7 +58,7 @@ export const NoProtectedESLintDisableRule: CreateOnceRule = {
               return fixer.removeRange(range);
             }
 
-            const fixedComment = ` ${directive} ${remainingRules.join(', ')}${
+            const fixedComment = ` ${directive} ${remainingRules.join(', ')}${description}${
               type === 'Block' ? ' ' : ''
             }`;
             const rangeToFix: Range =

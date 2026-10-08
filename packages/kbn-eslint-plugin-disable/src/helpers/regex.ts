@@ -10,21 +10,25 @@
 import type { Comment } from '@oxlint/plugins';
 
 const DISABLE_DIRECTIVE_RE =
-  /^(?<directive>(?:eslint|oxlint)-(?<disableValueType>disable(?:-next-line|-line)?))(?<rulesBlock>.*)/;
+  /^(?<directive>(?:eslint|oxlint)-(?<disableValueType>disable(?:-next-line|-line)?))(?=\s|$)(?<rulesBlock>.*)/;
+
+/** Separates the rule list from a `-- reason` description, matching ESLint's directive parser. */
+const DESCRIPTION_SEPARATOR_RE = /\s-{2,}\s/;
 
 export type DisableValueType = 'disable' | 'disable-line' | 'disable-next-line';
 
-export interface ParsedDisableComment extends Pick<Comment, 'type' | 'range' | 'loc'> {
+export interface ParsedDisableComment {
   /** The directive as written, e.g. `eslint-disable-next-line` or `oxlint-disable`. */
   directive: string;
   disableValueType: DisableValueType;
   rules: string[];
+  /** The `-- reason` description including its leading separator, or an empty string. */
+  description: string;
 }
 
 /** Parses an `eslint-disable*` or `oxlint-disable*` comment; returns undefined for other comments. */
 export function parseDisableComment(comment: Comment): ParsedDisableComment | undefined {
-  const commentVal = comment.value.trim();
-  const regexResult = commentVal.match(DISABLE_DIRECTIVE_RE);
+  const regexResult = comment.value.trim().match(DISABLE_DIRECTIVE_RE);
 
   // no regex match
   if (!regexResult?.groups) {
@@ -32,21 +36,16 @@ export function parseDisableComment(comment: Comment): ParsedDisableComment | un
   }
 
   const { directive, disableValueType, rulesBlock } = regexResult.groups;
-
-  const rules = rulesBlock
-    ? rulesBlock
-        .trim()
-        .split(',')
-        .map((r) => r.trim())
-    : [];
+  const descriptionStart = rulesBlock.search(DESCRIPTION_SEPARATOR_RE);
+  const rulesList = (
+    descriptionStart === -1 ? rulesBlock : rulesBlock.slice(0, descriptionStart)
+  ).trim();
 
   return {
-    type: comment.type,
-    range: comment.range,
-    loc: comment.loc,
     directive,
     // DISABLE_DIRECTIVE_RE only captures the three DisableValueType values
     disableValueType: disableValueType as DisableValueType,
-    rules,
+    rules: rulesList ? rulesList.split(',').map((rule) => rule.trim()) : [],
+    description: descriptionStart === -1 ? '' : rulesBlock.slice(descriptionStart),
   };
 }

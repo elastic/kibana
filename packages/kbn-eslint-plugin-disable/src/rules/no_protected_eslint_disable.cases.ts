@@ -85,6 +85,12 @@ export const noProtectedESLintDisableCases = {
         bar += 'r';
       `,
     },
+    {
+      filename: 'foo.ts',
+      code: dedent`
+        // eslint-disabled, @kbn/eslint/no_unsafe_hash
+      `,
+    },
   ],
 
   invalid: [
@@ -528,6 +534,43 @@ export const noProtectedESLintDisableCases = {
         },
       ],
       output: `\nconst a = 1;`,
+    },
+    {
+      filename: 'foo.ts',
+      code: dedent`
+        // eslint-disable-next-line @kbn/eslint/no_unsafe_hash -- legacy hashing
+        const a = 1;
+      `,
+      errors: [
+        {
+          line: 1,
+          messageId: PROTECTED_DISABLE_MSG_ID,
+          data: {
+            disabledRuleName: '@kbn/eslint/no_unsafe_hash',
+          },
+        },
+      ],
+      output: `\nconst a = 1;`,
+    },
+    {
+      filename: 'foo.ts',
+      code: dedent`
+        /* eslint-disable no-var, @kbn/eslint/no_unsafe_hash -- legacy hashing */
+        const a = 1;
+      `,
+      errors: [
+        {
+          line: 1,
+          messageId: PROTECTED_DISABLE_MSG_ID,
+          data: {
+            disabledRuleName: '@kbn/eslint/no_unsafe_hash',
+          },
+        },
+      ],
+      output: dedent`
+        /* eslint-disable no-var -- legacy hashing */
+        const a = 1;
+      `,
     },
   ],
 };

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Location } from '@oxlint/plugins';
-import type { ParsedDisableComment } from './regex';
+import type { Comment, Location } from '@oxlint/plugins';
+import type { DisableValueType } from './regex';
 
 /**
  * Returns where to report a disable comment so the comment cannot suppress its own report, which
@@ -16,7 +16,10 @@ import type { ParsedDisableComment } from './regex';
  * an `*-disable` block from its first character and the whole `*-disable-line` line up to the
  * comment's end, so those reports use a zero-length location at the comment start or end.
  */
-export function getReportLocFromComment({ disableValueType, loc }: ParsedDisableComment): Location {
+export function getReportLocFromComment(
+  { loc }: Comment,
+  disableValueType: DisableValueType
+): Location {
   switch (disableValueType) {
     case 'disable-next-line':
       return loc;

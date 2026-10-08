@@ -79,6 +79,12 @@ export const noNakedESLintDisableCases = {
         bar += 'r';
       `,
     },
+    {
+      filename: 'foo.ts',
+      code: dedent`
+        // eslint-disable-next-line no-console -- logging is intentional
+      `,
+    },
   ],
 
   invalid: [
@@ -86,6 +92,20 @@ export const noNakedESLintDisableCases = {
       filename: 'foo.ts',
       code: dedent`
         /* eslint-disable */
+        const a = 1;
+      `,
+      errors: [
+        {
+          line: 1,
+          messageId: NAKED_DISABLE_MSG_ID,
+        },
+      ],
+      output: '\nconst a = 1;',
+    },
+    {
+      filename: 'foo.ts',
+      code: dedent`
+        // eslint-disable-next-line -- no rules named, only a reason
         const a = 1;
       `,
       errors: [

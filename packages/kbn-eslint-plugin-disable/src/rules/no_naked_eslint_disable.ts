@@ -40,9 +40,9 @@ export const NoNakedESLintDisableRule: CreateOnceRule = {
 
         context.report({
           node,
-          loc: getReportLocFromComment(parsedDisable),
+          loc: getReportLocFromComment(comment, parsedDisable.disableValueType),
           messageId: NAKED_DISABLE_MSG_ID,
-          fix: (fixer) => fixer.removeRange(parsedDisable.range),
+          fix: (fixer) => fixer.removeRange(comment.range),
         });
       }
     },
