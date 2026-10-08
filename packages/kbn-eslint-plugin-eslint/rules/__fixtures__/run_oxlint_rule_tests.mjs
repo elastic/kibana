@@ -34,7 +34,10 @@ RuleTester.it = (_, fn) => fn();
 eslint.RuleTester = RuleTester;
 
 const parityTests = {
+  'disallow-license-headers': () => require('../disallow_license_headers.test.js'),
+  'require-license-header': () => require('../require_license_header.test.js'),
   deployment_agnostic_test_context: () => require('../deployment_agnostic_test_context.test.js'),
+  module_migration: () => require('../module_migration.test.js'),
   no_async_foreach: () => require('../no_async_foreach.test.js'),
   no_async_promise_body: () => require('../no_async_promise_body.test.js'),
   no_conditional_saved_object_type_registration: () =>
@@ -53,15 +56,24 @@ const parityTests = {
   require_kbn_fs: () => require('../require_kbn_fs.test.js'),
   require_kibana_feature_privileges_naming: () =>
     require('../require_kibana_feature_privileges_naming.test.js'),
+  scout_expect_import: () => require('../scout_expect_import.test.js'),
   scout_max_one_describe: () => require('../scout_max_one_describe.test.js'),
   scout_no_at_in_test_titles: () => require('../scout_no_at_in_test_titles.test.js'),
   scout_no_core_settings_in_space_test: () =>
     require('../scout_no_core_settings_in_space_test.test.js'),
+  scout_no_cross_boundary_imports: () => require('../scout_no_cross_boundary_imports.test.js'),
   scout_no_deprecated_tags: () => require('../scout_no_deprecated_tags.test.js'),
   scout_no_describe_configure: () => require('../scout_no_describe_configure.test.js'),
+  scout_no_es_archiver_in_parallel_tests: () =>
+    require('../scout_no_es_archiver_in_parallel_tests.test.js'),
   scout_no_locators: () => require('../scout_no_locators.test.js'),
   scout_no_promise_all_with_playwright_apis: () =>
     require('../scout_no_promise_all_with_playwright_apis.test.js'),
+  scout_require_api_client_in_api_test: () =>
+    require('../scout_require_api_client_in_api_test.test.js'),
+  scout_require_global_setup_hook_in_parallel_tests: () =>
+    require('../scout_require_global_setup_hook_in_parallel_tests.test.js'),
+  scout_test_file_naming: () => require('../scout_test_file_naming.test.js'),
 };
 
 for (const [ruleName, rule] of Object.entries(oxlintPlugin.rules)) {

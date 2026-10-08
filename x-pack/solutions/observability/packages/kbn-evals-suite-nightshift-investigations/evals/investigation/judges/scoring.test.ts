@@ -134,12 +134,12 @@ describe('composeAnswerText', () => {
   const report: InvestigationStructuredOutput = {
     summary: 'Kafka lag grew.',
     conclusion: 'Index throttling caused consumer lag.',
-    severity: '60-high',
+    severity: 'high',
     hypotheses: [
       { candidate: 'throttling', confidence: 0.9, status: 'confirmed', reason: 'latency spiked' },
-      { candidate: 'network', confidence: 0.2, status: 'rejected' },
+      { candidate: 'network', confidence: 0.2, status: 'dismissed' },
     ],
-  } as InvestigationStructuredOutput;
+  };
 
   it('leads with the conclusion and includes confidence-sorted hypotheses', () => {
     const text = composeAnswerText(report);
@@ -162,7 +162,18 @@ describe('composeEvidenceText', () => {
           candidate: 'throttling',
           confidence: 0.9,
           status: 'confirmed',
-          evidence: [{ description: 'ES rejected bulk writes', esql_query: 'FROM logs-*' }],
+          evidence: [
+            {
+              description: 'ES rejected bulk writes',
+              chart: {
+                type: 'line',
+                title: 'Rejected bulk writes',
+                x_axis: { type: 'time' },
+                y_axis: {},
+                series: [{ name: 'rejections', points: [{ x: '2024-01-01T00:00:00Z', y: 12 }] }],
+              },
+            },
+          ],
         },
         {
           candidate: 'network',
@@ -175,7 +186,7 @@ describe('composeEvidenceText', () => {
     } as unknown as InvestigationStructuredOutput;
     const text = composeEvidenceText(report);
     expect(text).toContain('[confirmed] throttling: ES rejected bulk writes');
-    expect(text).toContain('esql: FROM logs-*');
+    expect(text).toContain('chart: Rejected bulk writes');
     expect(text).toContain('[rejected] network: packet loss briefly spiked');
     expect(text).toContain('recommendation: Raise write queue size');
   });

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-/** Maximum description length accepted by Elasticsearch. */
+/**
+ * Maximum length of a service account's description. Elasticsearch and UIAM enforce the same cap.
+ */
 export const SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH = 1000;
 
 /** Maximum length of a service account's human-readable display name. */

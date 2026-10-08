@@ -53,7 +53,11 @@ export {
 
 export type { DecoratedError } from './task_running';
 
-export type { RunNowResult, BulkUpdateTaskResult } from './task_scheduling';
+export type {
+  RunNowResult,
+  BulkUpdateTaskResult,
+  BulkUpdateSchedulesOptions,
+} from './task_scheduling';
 export { getOldestIdleActionTask } from './queries/oldest_idle_action_task';
 export {
   IdleTaskWithExpiredRunAt,
@@ -126,6 +130,9 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
   },
   exposeToUsage: {
     claim_strategy: true,
+    claim_nudge: {
+      enabled: true,
+    },
     discovery: {
       active_nodes_lookback: true,
     },

@@ -42,7 +42,6 @@ import type {
   ProposalWithMetadata,
 } from '@kbn/proposals-common';
 import type { ReviseProposalRequest } from '@kbn/proposals-common';
-import { isExpired } from '@kbn/proposals-common';
 import {
   anchorQuery,
   bucketedEventQuery,
@@ -54,7 +53,6 @@ import type { ProposalDocument, ProposalsStorageClient } from '../storage/propos
 import { CONFIDENCE_RANK_FIELD, IMPACT_RANK_FIELD, toSortRanks } from '../storage/sort_ranks';
 import {
   ProposalConflictError,
-  ProposalExpiredError,
   ProposalInvalidActionInputError,
   ProposalNotFoundError,
 } from './errors';
@@ -185,7 +183,7 @@ export class ProposalsService {
     await this.attachToConversation(id, params.conversationId, document.title, request);
 
     const proposal = toProposal(id, document);
-    return { ...proposal, action: metadata, expired: isExpired(proposal) };
+    return { ...proposal, action: metadata };
   }
 
   /**
@@ -281,7 +279,8 @@ export class ProposalsService {
   }
 
   /**
-   * Per bucket, how many proposals were open at any point during it. Open means
+   * Per bucket, how many proposals were open at any point during it, except the bucket still in
+   * progress, which counts what is open now. Open means
    * `status: 'pending'`, so an expiry closes a proposal the same way a decision
    * does. An anchor count seeds a running sum that opens and closes then move,
    * keeping this to four queries rather than one per bucket.
@@ -361,13 +360,17 @@ export class ProposalsService {
         runningSums[cat] = Math.max(0, (runningSums[cat] ?? 0) - count);
       }
 
+      // The bucket in progress reports what is open now, so it agrees with the queues and
+      // `currentOpen` rather than counting proposals already closed within it.
+      const counts = i === bucketCount - 1 ? { ...runningSums } : openDuring;
+
       // Keeps the key set stable: a category whose only event here was a close
       // is absent from the pre-close snapshot.
       for (const cat of Object.keys(runningSums)) {
-        openDuring[cat] ??= 0;
+        counts[cat] ??= 0;
       }
 
-      buckets.push({ timestamp, counts: openDuring });
+      buckets.push({ timestamp, counts });
     }
 
     return { buckets, currentOpen: parseEsqlScalar(currentOpenResponse, 'currentOpen') };
@@ -557,7 +560,11 @@ export class ProposalsService {
    * `workflowExecutionId` is the original's, because the gate execution is
    * still running and parked — approving the clone resumes that same execution.
    */
-  async clone({ id, executionError }: CloneProposalParams, spaceId: string): Promise<string> {
+  async clone(
+    { id, executionError }: CloneProposalParams,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<string> {
     const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
 
     // Asserted here rather than left to the caller, because this is reachable
@@ -618,6 +625,8 @@ export class ProposalsService {
 
     await this.writeDocument(id, superseded, { seqNo, primaryTerm });
 
+    await this.attachToConversation(cloneId, document.conversationId, document.title, request);
+
     return cloneId;
   }
 
@@ -655,12 +664,6 @@ export class ProposalsService {
         `Proposal [${id}] was already superseded by ${proposal.supersededBy}`
       );
     }
-    // Mirrors `assertDecidable`, for the same lag: a deadline can pass before the
-    // workflow settles the record, so a revision cut here would be born expired.
-    if (isExpired(proposal)) {
-      throw new ProposalExpiredError(id);
-    }
-
     const { id: _id, ...original } = proposal;
 
     // The override is merged over the predecessor's input and the merged object is
@@ -750,6 +753,8 @@ export class ProposalsService {
       throw error;
     }
 
+    await this.attachToConversation(revisionId, document.conversationId, document.title, request);
+
     return { proposalId: revisionId, revision };
   }
 
@@ -780,6 +785,70 @@ export class ProposalsService {
    * not walk `supersedes` pointers hop by hop, so the cost does not grow with
    * the length of the chain.
    */
+  /**
+   * The proposal a gate workflow execution created, or undefined while its create step has not
+   * run yet. Revisions inherit the execution id, so the original (revision 1) is the one returned.
+   */
+  async findByWorkflowExecutionId(
+    workflowExecutionId: string,
+    spaceId: string
+  ): Promise<Proposal | undefined> {
+    if (blankToUndefined(workflowExecutionId) === undefined) {
+      return undefined;
+    }
+    const response = await this.deps.storage.search({
+      track_total_hits: false,
+      size: 1,
+      query: {
+        bool: { filter: [{ term: { workflowExecutionId } }, { term: { spaceId } }] },
+      },
+      sort: [{ createdAt: { order: 'asc' } }],
+    });
+    const hit = response.hits.hits[0];
+    return hit?._source && hit._id !== undefined
+      ? toProposal(hit._id, hit._source as ProposalDocument)
+      : undefined;
+  }
+
+  /**
+   * Proposals awaiting a decision per conversation (pending, not superseded, deadline not passed),
+   * in one aggregation. Conversations without any are absent from the map.
+   */
+  async countPendingByConversationIds(
+    conversationIds: string[],
+    spaceId: string
+  ): Promise<Map<string, number>> {
+    const ids = [...new Set(conversationIds.filter((id) => blankToUndefined(id) !== undefined))];
+    if (ids.length === 0) {
+      return new Map();
+    }
+    const response = await this.deps.storage.search({
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...toFilterClauses(
+              {
+                status: 'pending',
+                excludeSuperseded: true,
+                // Past its deadline a proposal awaits no decision, even before the gate settles it.
+                excludeExpired: true,
+              },
+              spaceId
+            ),
+            { terms: { conversationId: ids } },
+          ],
+        },
+      },
+      aggs: {
+        by_conversation: { terms: { field: 'conversationId', size: ids.length } },
+      },
+    });
+    const buckets = response.aggregations?.by_conversation.buckets ?? [];
+    return new Map(buckets.map(({ key, doc_count: count }) => [String(key), count]));
+  }
+
   async getLatestRevision(
     id: string,
     spaceId: string
@@ -1019,10 +1088,11 @@ export class ProposalsService {
    * stays at `pending` for as long as the gate workflow's post-gate steps take
    * to run, so a status check alone would let a second approver through.
    *
-   * The status catches what the decision cannot: the workflow settles an
-   * unanswered proposal as `expired` on attempt exhaustion or a failure before
-   * anyone decided, which leaves no decision behind and can happen well before
-   * the wall-clock deadline. The date check below would still read it as live.
+   * The `status` catches what the decision cannot: the workflow settles an
+   * undecided proposal as `expired` on attempt exhaustion or a failure before
+   * anyone decided, which leaves no decision behind. A deadline that has
+   * passed but not yet been swept to `expired` still reads `pending` here
+   * which is accepted lag, rather than a second check against `expiresAt`.
    *
    * `pending` is the only status that is valid while undecided, so anything
    * else is already settled.
@@ -1037,12 +1107,6 @@ export class ProposalsService {
       throw new ProposalConflictError(
         `Proposal [${proposal.id}] has settled as ${proposal.status}`
       );
-    }
-    // Kept alongside the status check for the lag between a deadline passing
-    // and the workflow settling the record, during which it still reads
-    // `pending`.
-    if (isExpired(proposal)) {
-      throw new ProposalExpiredError(proposal.id);
     }
   }
 
@@ -1124,7 +1188,7 @@ export class ProposalsService {
       ? await this.resolveActionMetadata(proposal.actionWorkflowId, spaceId, request)
       : undefined;
 
-    return { ...proposal, action, expired: isExpired(proposal) };
+    return { ...proposal, action };
   }
 
   /**
@@ -1158,7 +1222,6 @@ export class ProposalsService {
         proposal.actionWorkflowId !== undefined
           ? metaMap.get(proposal.actionWorkflowId)
           : undefined,
-      expired: isExpired(proposal),
     }));
   }
 }

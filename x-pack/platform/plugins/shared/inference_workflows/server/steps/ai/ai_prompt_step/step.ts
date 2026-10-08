@@ -7,6 +7,7 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { validateReasoningEffort } from '@kbn/inference-common';
 import { AiPromptStepCommonDefinition } from '../../../../common/steps/ai';
 import type { InferenceWorkflowsStartDeps } from '../../../types';
 import { AI_PROMPT_FEATURE_ID } from '../ai_feature_ids';
@@ -61,6 +62,11 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
           ...(reasoningLevel !== undefined ? { reasoning: { effort: reasoningLevel } } : {}),
         },
       });
+
+      if (reasoningLevel !== undefined) {
+        validateReasoningEffort(chatModel.getConnector(), reasoningLevel);
+      }
+
       const modelInput = [
         ...(context.input.systemPrompt
           ? [{ role: 'system', content: context.input.systemPrompt }]

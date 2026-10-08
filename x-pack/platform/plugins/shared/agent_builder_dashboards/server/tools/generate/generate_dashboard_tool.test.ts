@@ -12,17 +12,24 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 import { DASHBOARD_UPDATED_UI_EVENT } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
-import { executeDashboardOperations, hasValidCreateMetadataOperations } from './core';
+import {
+  executeDashboardOperations,
+  hasValidCreateMetadataOperations,
+} from '@kbn/dashboard-agent-authoring';
 import { generateDashboardTool } from './generate_dashboard_tool';
 
 jest.mock('./attachment_state', () => ({ retrieveLatestVersion: jest.fn() }));
-jest.mock('./core', () => ({
-  ...jest.requireActual('./core'),
+jest.mock('@kbn/dashboard-agent-authoring', () => ({
+  ...jest.requireActual('@kbn/dashboard-agent-authoring'),
   executeDashboardOperations: jest.fn(),
   hasValidCreateMetadataOperations: jest.fn(),
-  createVisPanelResolver: jest.fn(),
-  createAttachmentPanelResolver: jest.fn(),
+}));
+jest.mock('./resolvers/control_field_capabilities_resolver', () => ({
   createControlFieldCapabilitiesResolver: jest.fn(),
+}));
+jest.mock('./resolvers/panel_resolver', () => ({ createPanelResolver: jest.fn() }));
+jest.mock('./resolvers/attachment_panel_resolver', () => ({
+  createAttachmentPanelResolver: jest.fn(),
 }));
 jest.mock('./time_range', () => ({
   applyDefaultDashboardTimeRange: jest.fn(

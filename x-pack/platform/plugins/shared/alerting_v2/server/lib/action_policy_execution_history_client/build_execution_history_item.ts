@@ -8,7 +8,7 @@
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import {
   MAX_EMBEDDED_RULES_PER_ITEM,
-  MAX_EMBEDDED_EPISODES_PER_ITEM,
+  MAX_EMBEDDED_ALERTS_PER_ITEM,
   type DispatchFailureReason,
   type PolicyExecutionHistoryItem,
   type SearchMatchCounts,
@@ -144,7 +144,7 @@ export function buildExecutionHistoryItem(
   );
   if (relevantRuleIds === null) return null;
 
-  const totalRuleCount = relevantRuleIds.length;
+  const ruleCount = relevantRuleIds.length;
   const rules = relevantRuleIds
     .slice(0, MAX_EMBEDDED_RULES_PER_ITEM)
     .map((id) => ({ id, name: ruleNames.get(id) ?? null }));
@@ -153,8 +153,8 @@ export function buildExecutionHistoryItem(
     .filter(isString)
     .map((id) => ({ id, name: workflowNames.get(id) ?? null }));
 
-  const episodeIds = (dispatcher.episode_ids ?? []).filter(isString);
-  const episodes = episodeIds.slice(0, MAX_EMBEDDED_EPISODES_PER_ITEM).map((id) => ({ id }));
+  const alertIds = (dispatcher.alert_ids ?? []).filter(isString);
+  const alerts = alertIds.slice(0, MAX_EMBEDDED_ALERTS_PER_ITEM).map((id) => ({ id }));
 
   const failureReason = dispatcher.failure_reason;
   const errorMessage = event.error?.message;
@@ -163,11 +163,11 @@ export function buildExecutionHistoryItem(
     dispatched_at: timestamp,
     policy: { id: policyId, name: policyNames.get(policyId) ?? null },
     outcome: toPolicyExecutionOutcome(action),
-    episode_count: Number(dispatcher.episode_count ?? 0),
-    episodes,
+    alert_count: Number(dispatcher.alert_count ?? 0),
+    alerts,
     action_group_count: Number(dispatcher.action_group_count ?? 0),
     rules,
-    total_rule_count: totalRuleCount,
+    rule_count: ruleCount,
     workflows,
     failure_reason: failureReason as DispatchFailureReason | undefined,
     error:

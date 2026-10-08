@@ -13,6 +13,7 @@ import { DetectionsList, MAX_VISIBLE_DETECTIONS } from './detections_list';
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
 }));
 
@@ -42,12 +43,11 @@ const mockUseFetchEventLifecycle = useFetchEventLifecycle as jest.Mock;
 const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-07-10T12:00:00Z',
   event_id: 'evt-001',
-  event_uuid: 'evt-uuid-001',
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.web-frontend'],
   title: 'Event',
   summary: 'Summary',
-  severity: '60-high',
+  severity: 'high',
   confidence: 0.9,
   blast_radius: [
     {

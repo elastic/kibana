@@ -33,6 +33,7 @@ import type {
   DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { DataSourceService } from '@kbn/data-source';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -66,6 +67,7 @@ import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/pub
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
+import type { SearchSessionsManagementPluginStart } from '@kbn/search-sessions-management-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
@@ -132,6 +134,7 @@ export interface DiscoverServices {
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;
   dataViews: DataViewsContract;
+  dataSourceService: DataSourceService;
   inspector: InspectorPublicPluginStart;
   metadata: { branch: string; version: string };
   navigation: NavigationPublicPluginStart;
@@ -159,6 +162,7 @@ export interface DiscoverServices {
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTagging?: SavedObjectsTaggingApi;
   savedSearch: SavedSearchPublicPluginStart;
+  searchSessionsManagement?: SearchSessionsManagementPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   lens: LensPublicStart;
   uiActions: UiActionsStart;
@@ -259,6 +263,7 @@ export const buildServices = ({
     initialTabStateService: new InitialTabStateService(),
     setHeaderActionMenu,
     dataViews: plugins.data.dataViews,
+    dataSourceService: new DataSourceService(plugins.data.dataViews),
     inspector: plugins.inspector,
     metadata: {
       branch: context.env.packageInfo.branch,
@@ -288,6 +293,7 @@ export const buildServices = ({
     savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),
     savedObjectsManagement: plugins.savedObjectsManagement,
     savedSearch: plugins.savedSearch,
+    searchSessionsManagement: plugins.searchSessionsManagement,
     unifiedSearch: plugins.unifiedSearch,
     lens: plugins.lens,
     uiActions: plugins.uiActions,

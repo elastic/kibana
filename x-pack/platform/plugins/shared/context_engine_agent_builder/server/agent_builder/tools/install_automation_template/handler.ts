@@ -39,14 +39,29 @@ import {
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
+interface WithName {
+  /** Human-readable name scoped to the AI index. Used for name-based lookup and injected as the workflow name. */
+  name: string;
+}
+
 export type InstallAutomationTemplateParams =
   | ({ template: 'document_orchestration' } & Omit<
       DocumentOrchestrationTemplateValues,
-      'aiIndexId'
-    >)
-  | ({ template: 'index_metadata' } & Omit<IndexMetadataTemplateValues, 'aiIndexId'>)
-  | ({ template: 'unit_profile' } & Omit<UnitProfileTemplateValues, 'aiIndexId'>)
-  | ({ template: 'targeted_ki_writer' } & Omit<TargetedKiWriterTemplateValues, 'aiIndexId'>);
+      'aiIndexId' | 'automationName'
+    > &
+      WithName)
+  | ({ template: 'index_metadata' } & Omit<
+      IndexMetadataTemplateValues,
+      'aiIndexId' | 'automationName'
+    > &
+      WithName)
+  | ({ template: 'unit_profile' } & Omit<
+      UnitProfileTemplateValues,
+      'aiIndexId' | 'automationName'
+    > &
+      WithName)
+  | ({ template: 'targeted_ki_writer' } & Omit<TargetedKiWriterTemplateValues, 'aiIndexId'> &
+      WithName);
 
 const aiIndexIdFromAttachments = (attachments: AttachmentStateManager): string => {
   try {
@@ -72,20 +87,24 @@ const aiIndexIdFromAttachments = (attachments: AttachmentStateManager): string =
 
 const renderTemplate = (params: InstallAutomationTemplateParams, aiIndexId: string): string => {
   if (params.template === 'document_orchestration') {
-    return renderDocumentOrchestrationTemplate({ ...params, aiIndexId });
+    return renderDocumentOrchestrationTemplate({
+      ...params,
+      aiIndexId,
+      automationName: params.name,
+    });
   }
   if (params.template === 'unit_profile') {
-    return renderUnitProfileTemplate({ ...params, aiIndexId });
+    return renderUnitProfileTemplate({ ...params, aiIndexId, automationName: params.name });
   }
   if (params.template === 'targeted_ki_writer') {
     return renderTargetedKiWriterTemplate({ aiIndexId, kis: params.kis });
   }
-  return renderIndexMetadataTemplate({ ...params, aiIndexId });
+  return renderIndexMetadataTemplate({ ...params, aiIndexId, automationName: params.name });
 };
 
 /**
- * The workflow this template already attached to the AI index, if one exists.
- * A tag match wins; a matching workflow name covers a copy saved before the tag existed.
+ * The automation on the AI index with exactly the requested name, if one exists. A workflow tagged
+ * as a different template is never matched, so one template cannot overwrite another.
  */
 export const findInstalledTemplateWorkflowId = async ({
   aiIndexId,
@@ -110,7 +129,6 @@ export const findInstalledTemplateWorkflowId = async ({
   const workflowsManagement = getWorkflowsManagement();
   const templateTag = AUTOMATION_TEMPLATE_TAGS[template];
   const templateName = parseWorkflowNameFromYaml(workflowYaml);
-  let nameMatch: string | undefined;
 
   for (const automation of aiIndex.automations) {
     if (automation.type !== 'workflow') {
@@ -134,16 +152,22 @@ export const findInstalledTemplateWorkflowId = async ({
       continue;
     }
 
-    if (workflow.tags?.includes(templateTag)) {
-      return workflow.id ?? automation.value;
-    }
-
-    if (templateName && workflow.name === templateName && nameMatch === undefined) {
-      nameMatch = workflow.id ?? automation.value;
+    // When a name is provided (always the case now that name is mandatory) use exact name
+    // Name is mandatory and always injected into the YAML, so templateName is always defined.
+    // Matching is by exact name only. A workflow carrying a different template's tag is skipped
+    // to prevent cross-template overwrites. Return immediately on match so later unrelated
+    // workflow reads cannot block an already-found replacement target.
+    if (workflow.name === templateName) {
+      const hasOtherTemplateTag = Object.values(AUTOMATION_TEMPLATE_TAGS).some(
+        (tag) => tag !== templateTag && workflow.tags?.includes(tag)
+      );
+      if (!hasOtherTemplateTag) {
+        return workflow.id ?? automation.value;
+      }
     }
   }
 
-  return nameMatch;
+  return undefined;
 };
 
 export const installAutomationTemplateHandler = async ({
@@ -170,7 +194,16 @@ export const installAutomationTemplateHandler = async ({
   await assertContextEngineWriteAccess({ request, spaceId, getCoreStart, getSecurityStart });
 
   const aiIndexId = aiIndexIdFromAttachments(attachments);
-  const workflowYaml = renderTemplate(params, aiIndexId);
+  // Inject the caller-provided name into the rendered YAML so the server derives a stable
+  // workflow ID from it, keeping workflow IDs scoped to names rather than AI index ids.
+  // NOTE: changing `name` on an existing automation changes its ki_ids (they are prefixed with
+  // automation_name). KIs produced under the old name are not cleaned up automatically; callers
+  // that need to migrate must delete stale KIs out of band before or after re-running.
+  const workflowYaml = renderTemplate(params, aiIndexId).replace(
+    /^name: .*/m,
+    `name: ${JSON.stringify(params.name)}`
+  );
+
   const existingWorkflowId = await findInstalledTemplateWorkflowId({
     aiIndexId,
     spaceId,

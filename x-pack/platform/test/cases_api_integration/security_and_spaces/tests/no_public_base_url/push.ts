@@ -10,13 +10,13 @@ import type { RecordingServiceNowSimulator } from '../../../../alerting_api_inte
 import { ObjectRemover as ActionsRemover } from '../../../../alerting_api_integration/common/lib';
 import { arraysToEqual } from '../../../common/lib/validation';
 import {
-  postCommentUserReq,
-  postCommentAlertReq,
-  postCommentAlertMultipleIdsReq,
-  postCommentActionsReq,
-  postCommentActionsReleaseReq,
-  postExternalReferenceESReq,
-  persistableStateAttachment,
+  postUnifiedCommentReq,
+  postUnifiedAlertReq,
+  postUnifiedAlertMultipleIdsReq,
+  postUnifiedActionsReq,
+  postUnifiedActionsReleaseReq,
+  postUnifiedIndicatorReq,
+  postUnifiedLensReq,
 } from '../../../common/lib/mock';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -89,13 +89,13 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: postedCase.id,
           params: [
-            postCommentUserReq,
-            postCommentAlertReq,
-            postCommentAlertMultipleIdsReq,
-            postCommentActionsReq,
-            postCommentActionsReleaseReq,
-            postExternalReferenceESReq,
-            persistableStateAttachment,
+            postUnifiedCommentReq,
+            postUnifiedAlertReq,
+            postUnifiedAlertMultipleIdsReq,
+            postUnifiedActionsReq,
+            postUnifiedActionsReleaseReq,
+            postUnifiedIndicatorReq,
+            postUnifiedLensReq,
           ],
         });
 
