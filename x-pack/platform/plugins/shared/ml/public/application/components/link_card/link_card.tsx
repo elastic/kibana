@@ -8,12 +8,11 @@
 import type { FC, ReactElement } from 'react';
 import React from 'react';
 
-import type { IconType } from '@elastic/eui';
-import { EuiCard, EuiIcon } from '@elastic/eui';
+import type { EuiIconProps } from '@elastic/eui';
+import { EuiCard } from '@elastic/eui';
 
 interface Props {
-  icon: IconType | ReactElement;
-  iconAreaLabel?: string;
+  icon: ReactElement;
   title: string;
   description: string;
   href?: string;
@@ -26,7 +25,6 @@ interface Props {
 // icon, card title, description and link.
 export const LinkCard: FC<Props> = ({
   icon,
-  iconAreaLabel,
   title,
   description,
   onClick,
@@ -36,15 +34,13 @@ export const LinkCard: FC<Props> = ({
 }) => (
   <EuiCard
     hasBorder
-    hasShadow={false}
     layout="horizontal"
     title={title}
     titleSize="xs"
     titleElement="h3"
     description={description}
-    icon={
-      typeof icon === 'string' ? <EuiIcon size="xl" type={icon} aria-label={iconAreaLabel} /> : icon
-    }
+    // Custom recognizer logos (e.g. <img>) are still rendered in the icon slot.
+    icon={icon as ReactElement<EuiIconProps>}
     onClick={onClick}
     href={href}
     isDisabled={isDisabled}
