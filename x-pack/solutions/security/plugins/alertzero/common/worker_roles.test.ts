@@ -14,7 +14,7 @@ import {
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
 } from '@kbn/alertzero-common';
-import { WORKER_ROLE_DEFINITIONS, buildSecurityRoleUrl } from './worker_roles';
+import { WORKER_ROLE_DEFINITIONS, getWorkerRoleName } from './worker_roles';
 
 describe('WORKER_ROLE_DEFINITIONS', () => {
   it('defines one alertzero_<worker> role for each system worker', () => {
@@ -94,7 +94,12 @@ describe('WORKER_ROLE_DEFINITIONS', () => {
     expect(coverage.role.kibana[0].feature).not.toHaveProperty('siemV5');
   });
 
-  it('encodes the role name in the role URL', () => {
-    expect(buildSecurityRoleUrl('a/b')).toBe('/api/security/role/a%2Fb');
+  it('names the built-in role after the account, with the predefined-role prefix on Serverless', () => {
+    expect(getWorkerRoleName('alertzero_alert_triage', { isServerless: false })).toBe(
+      'alertzero_alert_triage'
+    );
+    expect(getWorkerRoleName('alertzero_alert_triage', { isServerless: true })).toBe(
+      '_alertzero_alert_triage'
+    );
   });
 });
