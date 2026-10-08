@@ -33,6 +33,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EUI_BREAKPOINT_CONTAINER_ATTRIBUTE,
   EuiToolTip,
   euiMaxBreakpoint,
   useCurrentEuiBreakpoint,
@@ -78,10 +79,10 @@ const useWindowWidth = () => {
 const useAppAreaWidth = () => {
   const [width, setWidth] = useState(0);
   useEffect(() => {
-    const appArea = document.getElementById('app-main-scroll');
+    const appArea = document.querySelector(`[${EUI_BREAKPOINT_CONTAINER_ATTRIBUTE}]`);
     if (!appArea) return;
     const observer = new ResizeObserver(([entry]) =>
-      setWidth(Math.round(entry.borderBoxSize[0].inlineSize))
+      setWidth(Math.round(entry.contentBoxSize[0].inlineSize))
     );
     observer.observe(appArea);
     return () => observer.disconnect();
@@ -467,14 +468,16 @@ export const App = () => {
             <ul>
               <li>
                 <strong>CSS.</strong> EUI breakpoint mixins emit{' '}
-                <EuiCode>@container euiSurface (…)</EuiCode> instead of <EuiCode>@media</EuiCode>.
-                The app area and <EuiCode>body</EuiCode> are both <EuiCode>euiSurface</EuiCode>{' '}
-                containers, so styles resolve against the nearest one.
+                <EuiCode>@container euiBreakpointContainer (…)</EuiCode> instead of{' '}
+                <EuiCode>@media</EuiCode>. EUI global styles make <EuiCode>body</EuiCode> and every
+                element marked <EuiCode>{EUI_BREAKPOINT_CONTAINER_ATTRIBUTE}</EuiCode> (the app
+                area) a container, so styles resolve against the nearest one.
               </li>
               <li>
-                <strong>JS.</strong> Each React root tells EUI where it is mounted. Kibana maps
-                mounts inside <EuiCode>#app-main-scroll</EuiCode> to the app area, and everything
-                else to the window. Portals re-resolve from the portal node.
+                <strong>JS.</strong> Each React root passes its mount element to{' '}
+                <EuiCode>EuiProvider</EuiCode>, and EUI measures the nearest container. Portals
+                re-resolve from the portal node, but only add a provider when they land in a
+                different container.
               </li>
               <li>
                 <strong>Toggle.</strong> The Window and App area buttons set{' '}
