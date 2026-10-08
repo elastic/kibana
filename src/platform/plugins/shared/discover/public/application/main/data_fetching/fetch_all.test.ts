@@ -9,7 +9,7 @@
 
 import { FetchStatus } from '../../types';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
-import type { Subject } from 'rxjs';
+import type { Observable, Subject } from 'rxjs';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { reduce } from 'rxjs';
 import type { SearchSource } from '@kbn/data-plugin/public';
@@ -30,7 +30,9 @@ import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-respons
 import { getDiscoverInternalStateMock } from '../../../__mocks__/discover_state.mock';
 import { internalStateActions, selectTabRuntimeState } from '../state_management/redux';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
+import type { RecordsFetchResponse } from '../../types';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
@@ -55,6 +57,32 @@ function subjectCollector<T>(subject: Subject<T>): () => Promise<T[]> {
 }
 
 const waitForNextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+// Mirrors a request cancelled before ES returned an async search id: it only settles by rejecting on abort
+const rejectWhenAborted = (signal?: AbortSignal) =>
+  new Promise<never>((_, reject) => {
+    signal?.addEventListener('abort', () =>
+      reject(new Error('[esql] > Unexpected error from Elasticsearch: canceled'))
+    );
+  });
+
+const createDeferred = <T>() => {
+  let resolve: (value: T) => void = () => {};
+  const promise = new Promise<T>((res) => {
+    resolve = res;
+  });
+  return { promise, resolve };
+};
+
+// Unlike subjectCollector, never completes the subject, so fetches that are expected to stay
+// pending don't reject with an EmptyError that leaks into the next test
+const collectValues = <T>(subject: Observable<T>): T[] => {
+  const values: T[] = [];
+  subject.subscribe((value) => values.push(value));
+  return values;
+};
+
+const lastValue = <T>(values: T[]) => values[values.length - 1];
 
 describe('test fetchAll', () => {
   let subjects: SavedSearchData;
@@ -285,6 +313,192 @@ describe('test fetchAll', () => {
         query,
       },
     ]);
+  });
+
+  describe('cancellation', () => {
+    const esqlQuery = { esql: 'from foo' };
+    const hits = [
+      { _id: '1', _index: 'logs' },
+      { _id: '2', _index: 'logs' },
+    ];
+    const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
+    let activeAbortController: AbortController | undefined;
+
+    const setEsqlQuery = () => {
+      deps.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: deps.getCurrentTab().id,
+          appState: { query: esqlQuery },
+        })
+      );
+    };
+
+    // Starts a fetch the way the data state container does: each fetch gets its own
+    // controller, and only the most recently started one is active
+    const startFetch = (
+      abortController: AbortController,
+      overrides: Partial<Parameters<typeof fetchAll>[0]> = {}
+    ) => {
+      activeAbortController = abortController;
+      return fetchAll({
+        ...deps,
+        esqlSource: createMockEsqlSource([], [], '@timestamp'),
+        abortController,
+        isActiveFetch: () => activeAbortController === abortController,
+        ...overrides,
+      });
+    };
+
+    beforeEach(() => {
+      activeAbortController = undefined;
+      mockfetchEsql.mockImplementation(({ abortSignal }) => rejectWhenAborted(abortSignal));
+      mockFetchDocuments.mockImplementation((_searchSource, { abortController }) =>
+        rejectWhenAborted(abortController.signal)
+      );
+    });
+
+    test('should settle all subjects without an error when an ES|QL query is cancelled', async () => {
+      setEsqlQuery();
+      const documentsValues = collectValues(subjects.documents$);
+      const totalHitsValues = collectValues(subjects.totalHits$);
+      const mainValues = collectValues(subjects.main$);
+      const abortController = new AbortController();
+
+      startFetch(abortController);
+      abortController.abort(AbortReason.CANCELED);
+      await waitForNextTick();
+      expect(lastValue(documentsValues).fetchStatus).toBe(FetchStatus.COMPLETE);
+      expect(lastValue(totalHitsValues).fetchStatus).toBe(FetchStatus.COMPLETE);
+      expect(lastValue(mainValues)).toEqual({
+        fetchStatus: FetchStatus.COMPLETE,
+        foundDocuments: true,
+        error: undefined,
+      });
+      expect(
+        [...documentsValues, ...totalHitsValues, ...mainValues].find(({ error }) => error)
+      ).toBeUndefined();
+    });
+
+    test('should keep previous results when an ES|QL query is cancelled after a successful fetch', async () => {
+      setEsqlQuery();
+      mockfetchEsql.mockResolvedValueOnce({ records: documents });
+      startFetch(new AbortController());
+      await waitForNextTick();
+      // Stands in for the PARTIAL -> COMPLETE promotion done by esqlFetchSubscribe
+      subjects.documents$.next({
+        ...subjects.documents$.getValue(),
+        fetchStatus: FetchStatus.COMPLETE,
+      });
+      await waitForNextTick();
+
+      const documentsValues = collectValues(subjects.documents$);
+      const totalHitsValues = collectValues(subjects.totalHits$);
+      const abortController = new AbortController();
+      startFetch(abortController);
+      abortController.abort(AbortReason.CANCELED);
+      await waitForNextTick();
+
+      const cancelledDocumentsMsg = lastValue(documentsValues);
+      expect(cancelledDocumentsMsg.fetchStatus).toBe(FetchStatus.COMPLETE);
+      // No result key means useDataState merges the message and keeps the previously rendered rows
+      expect(cancelledDocumentsMsg).not.toHaveProperty('result');
+      expect(lastValue(totalHitsValues)).toEqual({
+        fetchStatus: FetchStatus.COMPLETE,
+        result: documents.length,
+      });
+    });
+
+    test('should settle documents$ and keep the previous hit count when a classic query is cancelled', async () => {
+      subjects.totalHits$.next({ fetchStatus: FetchStatus.COMPLETE, result: 42 });
+      const documentsValues = collectValues(subjects.documents$);
+      const totalHitsValues = collectValues(subjects.totalHits$);
+      const mainValues = collectValues(subjects.main$);
+      const abortController = new AbortController();
+
+      startFetch(abortController);
+      abortController.abort(AbortReason.CANCELED);
+      await waitForNextTick();
+      expect(lastValue(documentsValues).fetchStatus).toBe(FetchStatus.COMPLETE);
+      expect(documentsValues.find(({ error }) => error)).toBeUndefined();
+      expect(lastValue(totalHitsValues)).toEqual({
+        fetchStatus: FetchStatus.COMPLETE,
+        result: 42,
+      });
+      expect(lastValue(mainValues).fetchStatus).toBe(FetchStatus.COMPLETE);
+    });
+
+    test.each([AbortReason.REPLACED, AbortReason.CLEANUP])(
+      'should not publish a terminal state when aborted with %s',
+      async (reason) => {
+        setEsqlQuery();
+        const documentsValues = collectValues(subjects.documents$);
+        const totalHitsValues = collectValues(subjects.totalHits$);
+        const mainValues = collectValues(subjects.main$);
+        const abortController = new AbortController();
+
+        startFetch(abortController);
+        abortController.abort(reason);
+        await waitForNextTick();
+        expect(lastValue(documentsValues).fetchStatus).toBe(FetchStatus.LOADING);
+        expect(documentsValues.find(({ error }) => error)).toBeUndefined();
+        expect(lastValue(totalHitsValues).fetchStatus).toBe(FetchStatus.LOADING);
+        expect(lastValue(mainValues).fetchStatus).toBe(FetchStatus.LOADING);
+      }
+    );
+
+    test('should not call onFetchRecordsComplete when the query is cancelled before returning results', async () => {
+      setEsqlQuery();
+      const onFetchRecordsComplete = jest.fn().mockResolvedValue(undefined);
+      const abortController = new AbortController();
+
+      startFetch(abortController, { onFetchRecordsComplete });
+      abortController.abort(AbortReason.CANCELED);
+      await waitForNextTick();
+
+      expect(onFetchRecordsComplete).not.toHaveBeenCalled();
+    });
+
+    test('should not settle a newer fetch that started before the cancellation was processed', async () => {
+      setEsqlQuery();
+      const documentsValues = collectValues(subjects.documents$);
+      const newerFetch = createDeferred<RecordsFetchResponse>();
+      const cancelledController = new AbortController();
+
+      startFetch(cancelledController);
+      cancelledController.abort(AbortReason.CANCELED);
+      mockfetchEsql.mockReturnValueOnce(newerFetch.promise);
+      startFetch(new AbortController());
+      await waitForNextTick();
+
+      expect(subjects.documents$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+
+      newerFetch.resolve({ records: documents });
+      await waitForNextTick();
+      expect(lastValue(documentsValues)).toEqual(
+        expect.objectContaining({ fetchStatus: FetchStatus.PARTIAL, result: documents })
+      );
+      expect(
+        documentsValues.filter(({ fetchStatus }) => fetchStatus === FetchStatus.COMPLETE)
+      ).toHaveLength(0);
+    });
+
+    test('should not let late partial results of a cancelled query overwrite a newer fetch', async () => {
+      setEsqlQuery();
+      const documentsValues = collectValues(subjects.documents$);
+      // Cancelled after ES returned an async search id: the request resolves later with partial results
+      const cancelledFetch = createDeferred<RecordsFetchResponse>();
+      const cancelledController = new AbortController();
+      const partialRecords = [documents[0]];
+
+      mockfetchEsql.mockReturnValueOnce(cancelledFetch.promise);
+      startFetch(cancelledController);
+      cancelledController.abort(AbortReason.CANCELED);
+      startFetch(new AbortController());
+      cancelledFetch.resolve({ records: partialRecords });
+      await waitForNextTick();
+      expect(documentsValues.find(({ result }) => result === partialRecords)).toBeUndefined();
+      expect(lastValue(documentsValues).fetchStatus).toBe(FetchStatus.LOADING);
+    });
   });
 
   describe('fetchMoreDocuments', () => {

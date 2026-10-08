@@ -36,6 +36,7 @@ import {
 import type { DiscoverServices, HistoryLocationState } from '../build_services';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import type { History } from 'history';
 import {
   getConnectedCustomizationService,
@@ -623,7 +624,7 @@ export function initializeDataStateInDiscoverStateMock(
   const tabId = internalState.getState().tabs.unsafeCurrentId;
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
   const dataStateContainer = createDataStateContainer(stateContainer, services);
-  tabRuntimeState.dataStateContainer$.getValue()?.cancel();
+  tabRuntimeState.dataStateContainer$.getValue()?.cancel(AbortReason.CLEANUP);
   tabRuntimeState.dataStateContainer$.next(dataStateContainer);
   return dataStateContainer;
 }

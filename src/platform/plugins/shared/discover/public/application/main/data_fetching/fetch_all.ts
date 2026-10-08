@@ -14,9 +14,11 @@ import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DataViewSource, type EsqlSource } from '@kbn/data-source';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
   checkHitCount,
+  sendCancelledMsg,
   sendCompleteMsg,
   sendErrorMsg,
   sendErrorTo,
@@ -65,6 +67,11 @@ export function fetchAll(
   params: CommonFetchParams & {
     reset: boolean;
     onFetchRecordsComplete?: () => Promise<void>;
+    /**
+     * Whether this is still the most recent fetch. A superseded fetch must not publish to the
+     * data subjects, since a newer fetch owns them.
+     */
+    isActiveFetch?: () => boolean;
   }
 ): Promise<void> {
   const {
@@ -79,6 +86,7 @@ export function fetchAll(
     abortController,
     getCurrentTab,
     onFetchRecordsComplete,
+    isActiveFetch = () => true,
     esqlSource,
   } = params;
   const { data, expressions } = services;
@@ -142,6 +150,8 @@ export function fetchAll(
       timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
     });
 
+    let isCancelledWithoutResults = false;
+
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
       .then(
@@ -152,6 +162,11 @@ export function fetchAll(
           dataSource: fetchedDataSource,
           approximationApplied,
         }) => {
+          // A cancelled request can still resolve late with partial results, after a newer fetch has started
+          if (!isActiveFetch()) {
+            return;
+          }
+
           fetchAllRequestsOnlyTracker.reportEvent({
             requestAdapter: inspectorAdapters.requests,
             approximation: approximationApplied,
@@ -213,6 +228,13 @@ export function fetchAll(
       // In the case that the request was aborted (e.g. a refresh), swallow the abort error
       .catch((e) => {
         if (!abortController.signal.aborted) throw e;
+        // An explicit cancellation has no follow-up fetch, so publish a terminal state
+        // here. REPLACED is immediately followed by another fetch that will publish its
+        // own, and CLEANUP means the tab or panel is being torn down.
+        if (abortController.signal.reason === AbortReason.CANCELED && isActiveFetch()) {
+          isCancelledWithoutResults = true;
+          sendCancelledMsg(dataSubjects);
+        }
       })
       // Only the document query should send its errors to main$, to cause the full Discover app
       // to get into an error state. The other queries will not cause all of Discover to error out
@@ -227,7 +249,10 @@ export function fetchAll(
       race(
         combineLatest([
           isComplete(dataSubjects.documents$).pipe(
-            switchMap(async () => onFetchRecordsComplete?.())
+            // Nothing was fetched, so there is no post-fetch state to apply
+            switchMap(async () =>
+              isCancelledWithoutResults ? undefined : onFetchRecordsComplete?.()
+            )
           ),
           isComplete(dataSubjects.totalHits$),
         ]),
