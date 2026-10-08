@@ -61,7 +61,7 @@ Operations listed in `pagination` (method, path template and a descriptor from t
 - `link`: the next page's URL is sent in a `Link: <url>; rel="next"` header, as on GitHub, and left out on the last page.
 - `next_url`: the next page's URL is written at `nextPath` in the body, as with Microsoft Graph's `@odata.nextLink`, and is `null` or missing on the last page.
 
-Next-page URLs are the request's URL with the cursor, offset or page parameter named in `request` set to the next page. Body paths use lodash syntax; quote keys that contain dots, as in `["@odata.nextLink"]`.
+Next-page URLs are the request's URL with the cursor, offset or page parameter named in `request` set to the next page. Body paths use lodash syntax; quote keys that contain dots, as in `["@odata.nextLink"]`. An empty `itemsPath` means the body is the collection itself, as with Datadog's `GET /api/v1/monitor`; such a body has no room for a next cursor, URL or total, so these operations page by offset, page number, `Link` header or a cursor in a header.
 
 When an operation has recordings, its collection is the recorded pages joined, in place of copies of one item. Recordings store each exchange's request (`query`, `headers`, `body`) so pages can be placed: a page requested by offset or page number starts there, and a page requested with a vendor cursor starts where the page that returned that cursor ended. Recorded cursors then resolve to their position, so replaying them works, and the mock hands them out for the pages they lead to. `collectionSize` cuts the recorded items or pads them with copies of the last one. A fixture for the operation overrides its recordings.
 

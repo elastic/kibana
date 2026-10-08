@@ -95,6 +95,19 @@ const spec = {
         responses: listResponse({ '@odata.nextLink': { type: 'string' } }),
       },
     },
+    '/monitors': {
+      get: {
+        parameters: query('page', 'page_size'),
+        responses: {
+          '200': {
+            description: 'ok',
+            content: {
+              'application/json': { schema: { type: 'array', items: channel } },
+            },
+          },
+        },
+      },
+    },
   },
 };
 
@@ -157,6 +170,14 @@ const pagination: PaginatedOperation[] = [
       style: 'next_url',
       request: { cursorParam: '$skiptoken', sizeParam: '$top' },
       response: { itemsPath: 'channels', nextPath: '["@odata.nextLink"]' },
+    },
+  },
+  {
+    operation: { method: 'GET', path: '/monitors' },
+    pagination: {
+      style: 'page',
+      request: { pageParam: 'page', sizeParam: 'page_size', firstPage: 0 },
+      response: { itemsPath: '' },
     },
   },
 ];
@@ -234,6 +255,16 @@ describe('withPagination', () => {
       total: 5,
     });
     expect(ids(page.body)).toEqual(['C1-3', 'C1-4']);
+  });
+
+  it('pages bodies that are the collection itself, with an empty itemsPath', async () => {
+    const { fetch, calls } = createMock(5);
+
+    const first = await getJson(fetch, '/monitors?page=0&page_size=2');
+    const last = await getJson(fetch, '/monitors?page=2&page_size=2');
+
+    expect([first.body, last.body]).toEqual([toChannels('C1-1', 'C1-2'), toChannels('C1-5')]);
+    expect(calls.flatMap(({ responseViolations }) => responseViolations)).toEqual([]);
   });
 
   it.each([
