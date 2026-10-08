@@ -256,6 +256,7 @@ describe('WorkersService', () => {
     expect(blocked.workers.find(({ id }) => id === TRIAGE)).toMatchObject({
       enabled: false,
       enableBlockedReason: 'alertAnalysisWorkflowDisabled',
+      alertAnalysisDependencyStatus: 'missing',
     });
     expect(
       blocked.workers.find(({ id }) => id === RULE_TUNING)?.enableBlockedReason
@@ -264,6 +265,19 @@ describe('WorkersService', () => {
     (harness.management.getWorkflow as jest.Mock).mockResolvedValue({ enabled: true });
     const ready = await service.list(request, SPACE);
     expect(ready.workers.find(({ id }) => id === TRIAGE)?.enableBlockedReason).toBeUndefined();
+    expect(ready.workers.find(({ id }) => id === TRIAGE)?.alertAnalysisDependencyStatus).toBe(
+      'satisfied'
+    );
+  });
+
+  it('projects an unreadable Alert Analysis workflow as unknown, not available', async () => {
+    const harness = createPersistentHarness();
+    (harness.management.getWorkflow as jest.Mock).mockRejectedValue(new Error('Forbidden'));
+
+    const { workers } = await harness.createService().list(request, SPACE);
+    const triage = workers.find(({ id }) => id === TRIAGE);
+    expect(triage?.alertAnalysisDependencyStatus).toBe('unknown');
+    expect(triage?.enableBlockedReason).toBeUndefined();
   });
 
   it('rejects enabling a worker that has no service account', async () => {
@@ -1090,6 +1104,30 @@ describe('WorkersService', () => {
       );
       return { service, getAttachmentServiceMock };
     };
+
+    it('projects an unreadable runtime setting as unknown', async () => {
+      const harness = createPersistentHarness();
+      const { service } = makeService(harness, makeAttachmentService(), async () => {
+        throw new Error('uiSettings unavailable');
+      });
+
+      const { workers } = await service.list(request, SPACE);
+      const triage = workers.find(({ id }) => id === TRIAGE);
+      expect(triage?.alertAnalysisDependencyStatus).toBe('unknown');
+      expect(triage?.enableBlockedReason).toBeUndefined();
+    });
+
+    it('keeps a confirmed runtime failure missing when the workflow read fails', async () => {
+      const harness = createPersistentHarness();
+      (harness.management.getWorkflow as jest.Mock).mockRejectedValue(new Error('Forbidden'));
+      const { service } = makeService(harness, makeAttachmentService(), async () => false);
+
+      const { workers } = await service.list(request, SPACE);
+      expect(workers.find(({ id }) => id === TRIAGE)).toMatchObject({
+        alertAnalysisDependencyStatus: 'missing',
+        enableBlockedReason: 'alertAnalysisRuntimeDisabled',
+      });
+    });
 
     // A combined settings-and-enable PATCH (one Watch Save) must not persist the settings half
     // when the enable half is refused: the preflight check has to run, and fail, before the

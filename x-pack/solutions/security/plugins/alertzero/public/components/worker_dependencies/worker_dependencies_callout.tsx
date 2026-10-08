@@ -97,7 +97,7 @@ const enableableDependencyLabel = (id: EnableableDependencyId): string => {
 };
 
 interface Props {
-  worker: Pick<Worker, 'id' | 'enableBlockedReason'>;
+  worker: Pick<Worker, 'id' | 'enableBlockedReason' | 'alertAnalysisDependencyStatus'>;
   surface: 'onboarding' | 'settings';
 }
 
@@ -112,12 +112,15 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
 
   const enableDependency = useMutation<void, Error, EnableableDependencyId>({
     mutationFn: async (id) => {
-      if (id === 'contextEngine') {
-        await uiSettings.set(CONTEXT_ENGINE_ENABLED_SETTING_ID, true);
-        return;
-      }
-      if (id === 'attackDiscoveryWorkflows') {
-        await uiSettings.set(ATTACK_DISCOVERY_WORKFLOWS_SETTING, true);
+      if (id === 'contextEngine' || id === 'attackDiscoveryWorkflows') {
+        const settingId =
+          id === 'contextEngine'
+            ? CONTEXT_ENGINE_ENABLED_SETTING_ID
+            : ATTACK_DISCOVERY_WORKFLOWS_SETTING;
+        const saved = await uiSettings.set(settingId, true);
+        if (!saved) {
+          throw new Error(i18n.enableDependencyFailedDescription(enableableDependencyLabel(id)));
+        }
         return;
       }
       const workflowId = THREAT_REPORT_WORKFLOWS[id === 'threatIngest' ? 0 : 1].id;
@@ -180,7 +183,9 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
       case 'alertAnalysis':
         return {
           id,
-          status: worker.enableBlockedReason ? 'missing' : 'satisfied',
+          status:
+            worker.alertAnalysisDependencyStatus ??
+            (worker.enableBlockedReason ? 'missing' : 'satisfied'),
           label: i18n.ALERT_ANALYSIS_LABEL,
           description:
             worker.enableBlockedReason === 'alertAnalysisWorkflowDisabled'
@@ -342,7 +347,15 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
           ))}
         </ul>
         {hasUnknown ? (
-          <EuiButtonEmpty size="xs" onClick={checks.retry}>
+          <EuiButtonEmpty
+            size="xs"
+            onClick={() => {
+              checks.retry();
+              if (worker.alertAnalysisDependencyStatus === 'unknown') {
+                void queryClient.invalidateQueries({ queryKey: queryKeys.workers.list() });
+              }
+            }}
+          >
             {i18n.RETRY_BUTTON_LABEL}
           </EuiButtonEmpty>
         ) : null}
