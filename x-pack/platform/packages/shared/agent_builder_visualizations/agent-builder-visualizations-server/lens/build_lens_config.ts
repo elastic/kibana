@@ -11,6 +11,7 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { validateEsqlQuery } from '@kbn/agent-builder-genai-utils';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
+import { removePromqlTimeRangeParams } from '../shared/remove_promql_time_range';
 import { createVisualizationGraph, getExistingEsqlQueries } from './graph_lens';
 import type { VisualizationConfig } from './types';
 
@@ -84,13 +85,15 @@ export const buildLensConfig = async ({
 
   // If the user provides ES|QL, use it only when validation says it is safe.
   // If validation cannot run, keep the query and let the next step handle it.
-  let providedEsql = esql;
+  // A PROMQL query generated outside a visualization context binds its time range to
+  // ?_tstart/?_tend, which is redundant here, as the time range is applied by itself.
+  let providedEsql = esql ? removePromqlTimeRangeParams(esql) : esql;
   if (providedEsql) {
     let validationError: string | undefined;
     try {
       validationError = await validateEsqlQuery(
         providedEsql,
-        buildServerESQLCallbacks({ client: esClient.asCurrentUser })
+        buildServerESQLCallbacks({ esClient, logger })
       );
     } catch {
       // Couldn't validate, keep it.
