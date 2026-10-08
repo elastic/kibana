@@ -8,6 +8,7 @@
 import type { SurfaceNode, MarkdownNode } from '@kbn/agent-builder-server/attachments';
 import {
   composePacks,
+  createCompositionValidator,
   createPrimitiveDispatcher,
   definePrimitive,
   definePrimitivePack,
@@ -43,7 +44,10 @@ export const agentBuilderPack = definePrimitivePack({
   primitives: [markdown],
 });
 
+const { definitions } = composePacks([agentBuilderPack]);
+
 /** Renders compositions on any surface. */
-export const compositionDispatcher = createPrimitiveDispatcher<SurfaceNode>(
-  composePacks([agentBuilderPack]).definitions
-);
+export const compositionDispatcher = createPrimitiveDispatcher<SurfaceNode>(definitions);
+
+/** Checks a composition against the pack's schemas before it renders. */
+export const validateComposition = createCompositionValidator<SurfaceNode>(definitions);

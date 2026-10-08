@@ -143,6 +143,25 @@ describe('buildComposition', () => {
     ]);
   });
 
+  it('leaves out attachments whose toSurfaceComposition returns an invalid composition', () => {
+    const missingText = (() => ({
+      type: 'view',
+      body: [{ type: 'markdown' }],
+    })) as unknown as ToSurfaceComposition;
+
+    const unknownType = (() => ({
+      type: 'view',
+      body: [{ type: 'chart', text: 'Chart' }],
+    })) as unknown as ToSurfaceComposition;
+
+    for (const toSurfaceComposition of [missingText, unknownType]) {
+      expect(build('Here: <render_attachment id="a1" /> Done', { toSurfaceComposition })).toEqual([
+        'Here:',
+        'Done',
+      ]);
+    }
+  });
+
   it('returns no nodes for an empty message', () => {
     expect(build(' \n<render_attachment />\n ')).toEqual([]);
   });

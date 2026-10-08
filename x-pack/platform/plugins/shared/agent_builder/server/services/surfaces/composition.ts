@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { formatValidationError } from '@elastic/isomer-sdk';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import {
   getVersion,
@@ -25,6 +26,7 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
+import { validateComposition } from './pack';
 
 const { tagName, attributes } = renderAttachmentElement;
 
@@ -92,7 +94,8 @@ const toHeadingNode = ({ title, subtitle }: SurfaceComposition): MarkdownNode[] 
 /**
  * Replaces an attachment node with what its type's `toSurfaceComposition` returns. Attachments
  * that are missing or have no `toSurfaceComposition` are expected, and left out quietly. A
- * `toSurfaceComposition` that fails is a bug in its mapping, so it's left out with a warning.
+ * `toSurfaceComposition` that fails or returns an invalid composition is a bug in its mapping, so
+ * it's left out with a warning, and the rest of the message still renders.
  */
 const resolveAttachmentNode = (
   node: AttachmentNode,
@@ -148,6 +151,18 @@ const resolveAttachmentNode = (
       attachment,
       version: attachmentVersion.version,
     });
+
+    const { valid, errors } = validateComposition(composition);
+
+    if (!valid) {
+      const reasons = errors.map(formatValidationError).join('; ');
+
+      logger.warn(
+        `Leaving out attachment "${attachment.id}": its toSurfaceComposition returned an invalid composition: ${reasons}`
+      );
+
+      return [];
+    }
 
     return [...toHeadingNode(composition), ...composition.body];
   } catch (error) {
