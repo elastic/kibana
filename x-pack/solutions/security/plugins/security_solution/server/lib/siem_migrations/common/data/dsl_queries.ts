@@ -11,7 +11,22 @@ import {
   SiemMigrationStatus,
 } from '../../../../../common/siem_migrations/constants';
 
+// Escapes the characters that have a special meaning in a wildcard query (`*` and `?`
+// wildcard operators and `\` escape char) so the user's search text is matched literally.
+const escapeWildcard = (value: string): string => value.replace(/[\\*?]/g, '\\$&');
+
 export const dsl = {
+  // Case-insensitive substring match on the `.keyword` sub-field of a `text` field.
+  // Needed because titles are analyzed with the standard analyzer, which does not split on
+  // characters like `_` or `-`, so a plain `match` can only find a whole-token term. A
+  // wildcard over `.keyword` lets a search like `sysmon` match `sysmon_detect_sysmon_config_changed`.
+  substringMatch(field: string, value: string): QueryDslQueryContainer {
+    return {
+      wildcard: {
+        [`${field}.keyword`]: { value: `*${escapeWildcard(value)}*`, case_insensitive: true },
+      },
+    };
+  },
   isFullyTranslated(): QueryDslQueryContainer {
     return { term: { translation_result: MigrationTranslationResult.FULL } };
   },

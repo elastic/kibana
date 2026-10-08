@@ -10,10 +10,26 @@ import { dsl as genericDsl } from '../../common/data/dsl_queries';
 
 export const dsl = {
   matchElasticTitle(title: string): QueryDslQueryContainer {
-    return { match: { 'elastic_dashboard.title': { query: title, operator: 'and' } } };
+    return {
+      bool: {
+        should: [
+          // Full-text match: matches whole words in any order
+          { match: { 'elastic_dashboard.title': { query: title, operator: 'and' } } },
+          // Substring match: matches part of a title, including names joined by `_`/`-`
+          genericDsl.substringMatch('elastic_dashboard.title', title),
+        ],
+      },
+    };
   },
   matchOriginalTitle(title: string): QueryDslQueryContainer {
-    return { match: { 'original_dashboard.title': { query: title, operator: 'and' } } };
+    return {
+      bool: {
+        should: [
+          { match: { 'original_dashboard.title': { query: title, operator: 'and' } } },
+          genericDsl.substringMatch('original_dashboard.title', title),
+        ],
+      },
+    };
   },
   matchTitle(title: string): QueryDslQueryContainer {
     return {

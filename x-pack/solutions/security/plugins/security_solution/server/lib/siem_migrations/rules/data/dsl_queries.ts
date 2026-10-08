@@ -23,10 +23,26 @@ export const dsl = {
     return { bool: { must_not: dsl.isPrebuilt() } };
   },
   matchElasticTitle(title: string): QueryDslQueryContainer {
-    return { match: { 'elastic_rule.title': { query: title, operator: 'and' } } };
+    return {
+      bool: {
+        should: [
+          // Full-text match: keeps existing multi-word, any-order matching (e.g. "memory creation")
+          { match: { 'elastic_rule.title': { query: title, operator: 'and' } } },
+          // Substring match: finds part of a title, including names joined by `_`/`-`
+          genericDsl.substringMatch('elastic_rule.title', title),
+        ],
+      },
+    };
   },
   matchOriginalTitle(title: string): QueryDslQueryContainer {
-    return { match: { 'original_rule.title': { query: title, operator: 'and' } } };
+    return {
+      bool: {
+        should: [
+          { match: { 'original_rule.title': { query: title, operator: 'and' } } },
+          genericDsl.substringMatch('original_rule.title', title),
+        ],
+      },
+    };
   },
   matchTitle(title: string): QueryDslQueryContainer {
     return {
