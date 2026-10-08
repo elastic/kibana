@@ -12,10 +12,11 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiSpacer,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -118,37 +119,37 @@ export const EmbeddableEditorPreview = <
           '.euiFlyoutBody__overflowContent': { blockSize: '100%' },
         })}
       >
-        {toolbar ? (
-          <>
-            {toolbar}
-            <EuiSpacer size="m" />
-          </>
-        ) : null}
-        {updateError ? (
-          <EuiCallOut
-            announceOnMount
-            color="danger"
-            title={i18n.translate('presentationUtil.embeddableEditorPreview.updateErrorMessage', {
-              defaultMessage: 'Unable to update preview',
-            })}
+        {/* The embeddable takes the height left by the toolbar and callout, so the body doesn't scroll. */}
+        <EuiFlexGroup direction="column" gutterSize="m" responsive={false} css={{ height: '100%' }}>
+          {toolbar ? <EuiFlexItem grow={false}>{toolbar}</EuiFlexItem> : null}
+          {updateError ? (
+            <EuiFlexItem grow={false}>
+              <EuiCallOut
+                announceOnMount
+                color="danger"
+                title={i18n.translate(
+                  'presentationUtil.embeddableEditorPreview.updateErrorMessage',
+                  {
+                    defaultMessage: 'Unable to update preview',
+                  }
+                )}
+              >
+                <p>{updateError.message}</p>
+              </EuiCallOut>
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem
+            grow={verticalAlignment !== 'top'}
+            css={verticalAlignment === 'top' ? undefined : { minHeight: 240 }}
           >
-            <p>{updateError.message}</p>
-          </EuiCallOut>
-        ) : null}
-        <div
-          css={css(
-            verticalAlignment === 'top'
-              ? { blockSize: 'fit-content' }
-              : { blockSize: '100%', minBlockSize: 240 }
-          )}
-        >
-          <EmbeddableRenderer<SerializedState, Api, ParentApi>
-            type={type}
-            getParentApi={() => parentApi}
-            hidePanelChrome
-            onApiAvailable={setApi}
-          />
-        </div>
+            <EmbeddableRenderer<SerializedState, Api, ParentApi>
+              type={type}
+              getParentApi={() => parentApi}
+              hidePanelChrome
+              onApiAvailable={setApi}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutBody>
     </EuiFlyout>
   );

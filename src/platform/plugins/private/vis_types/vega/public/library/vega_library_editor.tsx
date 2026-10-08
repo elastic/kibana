@@ -293,19 +293,25 @@ export const VegaLibraryEditor = ({
         serializedState={previewState}
         getParentApi={getPreviewParentApi}
         toolbar={
-          <EuiSuperDatePicker
-            start={timeRange?.from}
-            end={timeRange?.to}
-            onTimeChange={({ start, end }) => {
-              const next = { from: start, to: end };
-              setTimeRange(next);
-              timeRange$.next(next);
-            }}
-            commonlyUsedRanges={quickRanges}
-            showUpdateButton={false}
-            width="full"
-            data-test-subj="vegaLibraryEditorPreviewTimePicker"
-          />
+          // Sized and placed like the date picker in the unified search bar.
+          <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiSuperDatePicker
+                start={timeRange?.from}
+                end={timeRange?.to}
+                onTimeChange={({ start, end }) => {
+                  const next = { from: start, to: end };
+                  setTimeRange(next);
+                  timeRange$.next(next);
+                }}
+                commonlyUsedRanges={quickRanges}
+                showUpdateButton={false}
+                compressed
+                width="auto"
+                data-test-subj="vegaLibraryEditorPreviewTimePicker"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
       />
       {isDiscardConfirmOpen ? (
