@@ -59,6 +59,16 @@ function isToolDefinition(def: BindToolsInput): def is ToolDefinition {
   return 'type' in def && def.type === 'function' && 'function' in def && typeof def === 'object';
 }
 
+/**
+ * Top-level keys kept from the generated JSON Schema. `$defs`/`definitions` must be kept
+ * alongside the nested `$ref`s that point into them: providers such as Gemini reject a
+ * schema containing a `$ref` to an undefined definition.
+ */
+const TOOL_SCHEMA_KEYS = ['type', 'properties', 'required', '$defs', 'definitions'];
+
+const pickToolSchema = (jsonSchema: object): ToolSchema =>
+  pick(jsonSchema, TOOL_SCHEMA_KEYS) as unknown as ToolSchema;
+
 function isZodV4(schema: unknown): boolean {
   return schema != null && typeof schema === 'object' && '_zod' in schema;
 }
@@ -74,20 +84,12 @@ function isZodV4(schema: unknown): boolean {
 function resolveToolSchema(schema: unknown): ToolSchema {
   // Zod v4: use native toJSONSchema
   if (isZodV4(schema)) {
-    return pick(z4.toJSONSchema(schema as unknown as z4.ZodType, { io: 'input' }), [
-      'type',
-      'properties',
-      'required',
-    ]) as ToolSchema;
+    return pickToolSchema(z4.toJSONSchema(schema as unknown as z4.ZodType, { io: 'input' }));
   }
   // Zod v3: use zod-to-json-schema
   if (isZodSchema(schema as Record<string, unknown>)) {
-    return pick(zodToJsonSchema(schema as Parameters<typeof zodToJsonSchema>[0]), [
-      'type',
-      'properties',
-      'required',
-    ]) as ToolSchema;
+    return pickToolSchema(zodToJsonSchema(schema as Parameters<typeof zodToJsonSchema>[0]));
   }
   // Plain JSON Schema object
-  return pick(schema as JsonSchema7Type, ['type', 'properties', 'required']) as ToolSchema;
+  return pickToolSchema(schema as JsonSchema7Type);
 }
