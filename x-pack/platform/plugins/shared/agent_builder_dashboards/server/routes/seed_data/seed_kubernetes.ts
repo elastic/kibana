@@ -16,15 +16,14 @@ const KUBELETSTATS_STREAM = `metrics-${KUBELETSTATS_DATASET}-${NAMESPACE}`;
 const CLUSTER_STREAM = `metrics-${CLUSTER_DATASET}-${NAMESPACE}`;
 const HOSTMETRICS_STREAM = `metrics-${HOSTMETRICS_DATASET}-${NAMESPACE}`;
 
-const CLUSTERS = [
-  { name: 'prod-eu-west', healthy: true },
-  { name: 'staging-us-east', healthy: true },
-] as const;
+const DATA_STREAMS = [KUBELETSTATS_STREAM, CLUSTER_STREAM, HOSTMETRICS_STREAM] as const;
+
+const CLUSTERS = [{ name: 'prod-eu-west' }, { name: 'staging-us-east' }] as const;
 
 const NODES = [
-  { name: 'node-1', cluster: 'prod-eu-west', cpu: 0.42, memory: 0.58, disk: 0.35 },
-  { name: 'node-2', cluster: 'prod-eu-west', cpu: 0.61, memory: 0.47, disk: 0.52 },
-  { name: 'node-3', cluster: 'staging-us-east', cpu: 0.28, memory: 0.39, disk: 0.22 },
+  { name: 'node-1', cluster: 'prod-eu-west', cpuUtil: 0.42, memoryUtil: 0.58, diskUtil: 0.35 },
+  { name: 'node-2', cluster: 'prod-eu-west', cpuUtil: 0.61, memoryUtil: 0.47, diskUtil: 0.52 },
+  { name: 'node-3', cluster: 'staging-us-east', cpuUtil: 0.28, memoryUtil: 0.39, diskUtil: 0.22 },
 ] as const;
 
 const PODS = [
@@ -70,229 +69,101 @@ const PODS = [
   },
 ] as const;
 
-const INTERVAL_MS = 60_000;
-const LOOKBACK_MS = 24 * 60 * 60 * 1000;
+const NODE_CPU_CORES = 4;
+const NODE_MEMORY_BYTES = 16 * 1024 ** 3;
+const NODE_DISK_BYTES = 200 * 1024 ** 3;
+
+// kubernetes_otel dashboards use ES|QL `TS` — streams must be TSDS.
+// Keep lookback inside the default metrics-otel acceptance window.
+const INTERVAL_MS = 30_000;
+const LOOKBACK_MS = 15 * 60 * 1000;
+
+/** Pod phase enum used by k8sclusterreceiver / kubernetes_otel dashboards. */
+const POD_PHASE_RUNNING = 2;
 
 export interface SeedKubernetesResult {
   documentsIndexed: number;
   dataStreams: string[];
 }
 
-async function ensureDataStreamTemplate(
+function keyword() {
+  return { type: 'keyword' as const, ignore_above: 1024 };
+}
+
+function keywordDimension() {
+  return { type: 'keyword' as const, ignore_above: 1024, time_series_dimension: true };
+}
+
+function gaugeDouble() {
+  return { type: 'double' as const, time_series_metric: 'gauge' as const };
+}
+
+function gaugeLong() {
+  return { type: 'long' as const, time_series_metric: 'gauge' as const };
+}
+
+async function ensureTsdsTemplate(
   esClient: ElasticsearchClient,
   name: string,
-  indexPatterns: string[]
+  indexPatterns: string[],
+  extraProperties: Record<string, unknown>
 ): Promise<void> {
-  const keyword = { type: 'keyword' as const, ignore_above: 1024 };
-  const double = { type: 'double' as const };
-  const long = { type: 'long' as const };
-
   await esClient.indices.putIndexTemplate({
     name,
     index_patterns: indexPatterns,
     data_stream: {},
-    priority: 150,
+    // Beat the built-in metrics-otel@template (priority 120) with correct dimensions.
+    priority: 500,
     template: {
+      settings: {
+        index: {
+          mode: 'time_series',
+        },
+      },
       mappings: {
+        dynamic: true,
         properties: {
           '@timestamp': { type: 'date' },
-          data_stream: {
-            properties: {
-              dataset: keyword,
-              type: keyword,
-              namespace: keyword,
-            },
-          },
-          k8s: {
-            properties: {
-              cluster: { properties: { name: keyword } },
-              namespace: { properties: { name: keyword } },
-              node: {
-                properties: {
-                  name: keyword,
-                  cpu: {
-                    properties: {
-                      usage: double,
-                      allocatable: double,
-                      utilization: double,
-                    },
-                  },
-                  memory: {
-                    properties: {
-                      usage: double,
-                      allocatable: double,
-                      utilization: double,
-                      working_set: double,
-                    },
-                  },
-                  filesystem: {
-                    properties: {
-                      usage: double,
-                      capacity: double,
-                      utilization: double,
-                    },
-                  },
-                  condition: keyword,
-                },
-              },
-              pod: {
-                properties: {
-                  uid: keyword,
-                  name: keyword,
-                  phase: keyword,
-                  cpu_limit_utilization: double,
-                  cpu: {
-                    properties: {
-                      usage: double,
-                      node: { properties: { utilization: double } },
-                    },
-                  },
-                  memory_limit_utilization: double,
-                  memory: {
-                    properties: {
-                      usage: double,
-                      working_set: double,
-                      node: { properties: { utilization: double } },
-                    },
-                  },
-                  network: { properties: { io: double } },
-                },
-              },
-              deployment: {
-                properties: {
-                  name: keyword,
-                  pod: {
-                    properties: {
-                      available: long,
-                      desired: long,
-                    },
-                  },
-                },
-              },
-              container: {
-                properties: {
-                  name: keyword,
-                  restarts: long,
-                },
-              },
-            },
-          },
-          host: {
-            properties: {
-              name: keyword,
-              hostname: keyword,
-            },
-          },
-          metrics: {
-            properties: {
-              k8s: {
-                properties: {
-                  pod: {
-                    properties: {
-                      cpu_limit_utilization: double,
-                      cpu: {
-                        properties: {
-                          usage: double,
-                          node: { properties: { utilization: double } },
-                        },
-                      },
-                      memory_limit_utilization: double,
-                      memory: {
-                        properties: {
-                          usage: double,
-                          working_set: double,
-                          node: { properties: { utilization: double } },
-                        },
-                      },
-                      network: { properties: { io: double } },
-                    },
-                  },
-                  node: {
-                    properties: {
-                      cpu: {
-                        properties: {
-                          usage: double,
-                          allocatable: double,
-                          utilization: double,
-                        },
-                      },
-                      memory: {
-                        properties: {
-                          usage: double,
-                          allocatable: double,
-                          utilization: double,
-                          working_set: double,
-                        },
-                      },
-                    },
-                  },
-                  deployment: {
-                    properties: {
-                      pod: {
-                        properties: {
-                          available: long,
-                          desired: long,
-                        },
-                      },
-                    },
-                  },
-                  container: {
-                    properties: {
-                      restarts: long,
-                    },
-                  },
-                },
-              },
-              system: {
-                properties: {
-                  cpu: {
-                    properties: {
-                      utilization: double,
-                    },
-                  },
-                  memory: {
-                    properties: {
-                      utilization: double,
-                    },
-                  },
-                  filesystem: {
-                    properties: {
-                      utilization: double,
-                    },
-                  },
-                },
-              },
-            },
-          },
-          resource: {
-            properties: {
-              attributes: {
-                properties: {
-                  k8s: {
-                    properties: {
-                      cluster: { properties: { name: keyword } },
-                      namespace: { properties: { name: keyword } },
-                      node: { properties: { name: keyword } },
-                      pod: {
-                        properties: {
-                          uid: keyword,
-                          name: keyword,
-                        },
-                      },
-                      deployment: { properties: { name: keyword } },
-                    },
-                  },
-                },
-              },
-            },
-          },
-          direction: keyword,
-          interface: keyword,
-          'metricset.name': keyword,
+          // Keep dimension count low (TSDS default limit). Identity for series routing:
+          'data_stream.dataset': keywordDimension(),
+          'metricset.name': keywordDimension(),
+          'k8s.cluster.name': keywordDimension(),
+          'k8s.node.name': keywordDimension(),
+          'k8s.namespace.name': keywordDimension(),
+          'k8s.pod.uid': keywordDimension(),
+          'k8s.deployment.name': keywordDimension(),
+          'host.name': keywordDimension(),
+          direction: keywordDimension(),
+          interface: keywordDimension(),
+          // Non-dimension keywords still queryable by dashboards / resource.attributes panels.
+          'data_stream.type': keyword(),
+          'data_stream.namespace': keyword(),
+          'k8s.pod.name': keyword(),
+          'k8s.container.name': keyword(),
+          'host.hostname': keyword(),
+          'resource.attributes.k8s.cluster.name': keyword(),
+          'resource.attributes.k8s.node.name': keyword(),
+          'resource.attributes.k8s.namespace.name': keyword(),
+          'resource.attributes.k8s.pod.uid': keyword(),
+          'resource.attributes.k8s.pod.name': keyword(),
+          'resource.attributes.k8s.deployment.name': keyword(),
+          ...extraProperties,
         },
       },
     },
   });
+}
+
+async function resetDataStream(esClient: ElasticsearchClient, name: string, logger: Logger) {
+  try {
+    await esClient.indices.deleteDataStream({ name });
+    logger.info(`Deleted existing data stream ${name} before Kubernetes seed`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (!message.includes('index_not_found') && !message.includes('404')) {
+      logger.debug(`deleteDataStream(${name}): ${message}`);
+    }
+  }
 }
 
 function dataStreamFields(dataset: string) {
@@ -306,42 +177,33 @@ function dataStreamFields(dataset: string) {
 function buildDocuments(now: number): Array<{ index: string; document: Record<string, unknown> }> {
   const docs: Array<{ index: string; document: Record<string, unknown> }> = [];
   const start = now - LOOKBACK_MS;
+  // Global ms offset — TSDS _id ignores some dims (direction/interface), so each doc needs a unique @timestamp.
+  let stamp = 0;
 
   for (let ts = start; ts <= now; ts += INTERVAL_MS) {
-    const t = new Date(ts).toISOString();
     const wave = 0.15 * Math.sin(ts / (30 * 60_000));
 
     for (const node of NODES) {
-      const cpu = Math.min(0.95, Math.max(0.05, node.cpu + wave));
-      const memory = Math.min(0.95, Math.max(0.05, node.memory + wave / 2));
-      const disk = Math.min(0.95, Math.max(0.05, node.disk + wave / 3));
+      const cpuUtil = Math.min(0.95, Math.max(0.05, node.cpuUtil + wave));
+      const memoryUtil = Math.min(0.95, Math.max(0.05, node.memoryUtil + wave / 2));
+      const diskUtil = Math.min(0.95, Math.max(0.05, node.diskUtil + wave / 3));
 
+      // Field names match kubernetes_otel Overview / Nodes panels (not ECS nested cpu.allocatable).
       docs.push({
         index: CLUSTER_STREAM,
         document: {
-          '@timestamp': t,
+          '@timestamp': new Date(ts + stamp++).toISOString(),
           ...dataStreamFields(CLUSTER_DATASET),
           'metricset.name': 'node',
           'k8s.cluster.name': node.cluster,
           'k8s.node.name': node.name,
-          'k8s.node.condition': 'Ready',
-          'k8s.node.cpu.usage': cpu,
-          'k8s.node.cpu.allocatable': 4,
-          'k8s.node.cpu.utilization': cpu,
-          'k8s.node.memory.usage': memory * 16 * 1024 ** 3,
-          'k8s.node.memory.allocatable': 16 * 1024 ** 3,
-          'k8s.node.memory.utilization': memory,
-          'k8s.node.memory.working_set': memory * 14 * 1024 ** 3,
-          'k8s.node.filesystem.usage': disk * 200 * 1024 ** 3,
-          'k8s.node.filesystem.capacity': 200 * 1024 ** 3,
-          'k8s.node.filesystem.utilization': disk,
-          'metrics.k8s.node.cpu.usage': cpu,
-          'metrics.k8s.node.cpu.allocatable': 4,
-          'metrics.k8s.node.cpu.utilization': cpu,
-          'metrics.k8s.node.memory.usage': memory * 16 * 1024 ** 3,
-          'metrics.k8s.node.memory.allocatable': 16 * 1024 ** 3,
-          'metrics.k8s.node.memory.utilization': memory,
-          'metrics.k8s.node.memory.working_set': memory * 14 * 1024 ** 3,
+          'k8s.node.condition_ready': 1,
+          'k8s.node.cpu.usage': cpuUtil * NODE_CPU_CORES,
+          'k8s.node.allocatable_cpu': NODE_CPU_CORES,
+          'k8s.node.memory.working_set': memoryUtil * NODE_MEMORY_BYTES,
+          'k8s.node.allocatable_memory': NODE_MEMORY_BYTES,
+          'k8s.node.filesystem.usage': diskUtil * NODE_DISK_BYTES,
+          'k8s.node.filesystem.capacity': NODE_DISK_BYTES,
           'resource.attributes.k8s.cluster.name': node.cluster,
           'resource.attributes.k8s.node.name': node.name,
         },
@@ -350,16 +212,15 @@ function buildDocuments(now: number): Array<{ index: string; document: Record<st
       docs.push({
         index: HOSTMETRICS_STREAM,
         document: {
-          '@timestamp': t,
+          '@timestamp': new Date(ts + stamp++).toISOString(),
           ...dataStreamFields(HOSTMETRICS_DATASET),
-          'metricset.name': 'host',
+          'metricset.name': 'cpu',
           'host.name': node.name,
           'host.hostname': node.name,
           'k8s.cluster.name': node.cluster,
           'k8s.node.name': node.name,
-          'metrics.system.cpu.utilization': cpu,
-          'metrics.system.memory.utilization': memory,
-          'metrics.system.filesystem.utilization': disk,
+          'metrics.system.cpu.utilization': cpuUtil,
+          'system.cpu.utilization': cpuUtil,
           'resource.attributes.k8s.cluster.name': node.cluster,
           'resource.attributes.k8s.node.name': node.name,
         },
@@ -374,16 +235,14 @@ function buildDocuments(now: number): Array<{ index: string; document: Record<st
         docs.push({
           index: CLUSTER_STREAM,
           document: {
-            '@timestamp': t,
+            '@timestamp': new Date(ts + stamp++).toISOString(),
             ...dataStreamFields(CLUSTER_DATASET),
             'metricset.name': 'deployment',
             'k8s.cluster.name': cluster.name,
             'k8s.namespace.name': 'default',
             'k8s.deployment.name': deployment,
-            'k8s.deployment.pod.available': desired,
-            'k8s.deployment.pod.desired': desired,
-            'metrics.k8s.deployment.pod.available': desired,
-            'metrics.k8s.deployment.pod.desired': desired,
+            'k8s.deployment.available': desired,
+            'k8s.deployment.desired': desired,
             'resource.attributes.k8s.cluster.name': cluster.name,
             'resource.attributes.k8s.namespace.name': 'default',
             'resource.attributes.k8s.deployment.name': deployment,
@@ -400,7 +259,6 @@ function buildDocuments(now: number): Array<{ index: string; document: Record<st
       const memNode = 0.3 + (podIndex % 3) * 0.05;
       const memWorkingSet = (300 + podIndex * 40) * 1024 ** 2;
       const memUsage = (400 + podIndex * 50) * 1024 ** 2;
-      let offset = 0;
 
       const base = {
         ...dataStreamFields(KUBELETSTATS_DATASET),
@@ -421,7 +279,7 @@ function buildDocuments(now: number): Array<{ index: string; document: Record<st
       docs.push({
         index: KUBELETSTATS_STREAM,
         document: {
-          '@timestamp': new Date(ts + offset++).toISOString(),
+          '@timestamp': new Date(ts + stamp++).toISOString(),
           ...base,
           'metricset.name': 'cpu',
           'k8s.pod.cpu_limit_utilization': cpuLimit,
@@ -436,7 +294,7 @@ function buildDocuments(now: number): Array<{ index: string; document: Record<st
       docs.push({
         index: KUBELETSTATS_STREAM,
         document: {
-          '@timestamp': new Date(ts + offset++).toISOString(),
+          '@timestamp': new Date(ts + stamp++).toISOString(),
           ...base,
           'metricset.name': 'memory',
           'k8s.pod.memory_limit_utilization': memLimit,
@@ -454,7 +312,7 @@ function buildDocuments(now: number): Array<{ index: string; document: Record<st
         docs.push({
           index: KUBELETSTATS_STREAM,
           document: {
-            '@timestamp': new Date(ts + offset++).toISOString(),
+            '@timestamp': new Date(ts + stamp++).toISOString(),
             ...base,
             'metricset.name': 'network',
             direction,
@@ -469,7 +327,7 @@ function buildDocuments(now: number): Array<{ index: string; document: Record<st
       docs.push({
         index: CLUSTER_STREAM,
         document: {
-          '@timestamp': new Date(ts + offset++).toISOString(),
+          '@timestamp': new Date(ts + stamp++).toISOString(),
           ...dataStreamFields(CLUSTER_DATASET),
           'metricset.name': 'pod',
           'k8s.cluster.name': pod.cluster,
@@ -477,10 +335,9 @@ function buildDocuments(now: number): Array<{ index: string; document: Record<st
           'k8s.node.name': pod.node,
           'k8s.pod.uid': pod.uid,
           'k8s.pod.name': pod.name,
-          'k8s.pod.phase': 'Running',
+          'k8s.pod.phase': POD_PHASE_RUNNING,
           'k8s.container.name': 'main',
           'k8s.container.restarts': podIndex === 3 ? 2 : 0,
-          'metrics.k8s.container.restarts': podIndex === 3 ? 2 : 0,
           'resource.attributes.k8s.cluster.name': pod.cluster,
           'resource.attributes.k8s.namespace.name': pod.namespace,
           'resource.attributes.k8s.node.name': pod.node,
@@ -498,73 +355,129 @@ async function bulkIndex(
   esClient: ElasticsearchClient,
   docs: Array<{ index: string; document: Record<string, unknown> }>,
   logger: Logger
-): Promise<number> {
+): Promise<{ indexed: number; firstError?: { type?: string; reason?: string } }> {
   const chunkSize = 500;
   let indexed = 0;
+  let firstError: { type?: string; reason?: string } | undefined;
 
   for (let i = 0; i < docs.length; i += chunkSize) {
     const chunk = docs.slice(i, i + chunkSize);
     const body = chunk.flatMap(({ index, document }) => [{ index: { _index: index } }, document]);
     const response = await esClient.bulk({ refresh: false, body });
     if (response.errors) {
-      const firstError = response.items.find((item) => item.index?.error)?.index?.error;
+      const errorItem = response.items.find((item) => item.index?.error)?.index?.error;
+      if (errorItem && !firstError) {
+        firstError = { type: errorItem.type, reason: errorItem.reason };
+      }
       logger.warn(
         `Kubernetes seed bulk had errors: ${firstError?.type ?? 'unknown'} — ${
           firstError?.reason ?? 'n/a'
         }`
       );
     }
-    indexed += response.items.filter(
-      (item) =>
-        item.index?.result === 'created' ||
-        item.index?.result === 'updated' ||
-        item.index?.status === 201
-    ).length;
+    indexed += response.items.filter((item) => {
+      const status = item.index?.status;
+      return (
+        !item.index?.error &&
+        (item.index?.result === 'created' ||
+          item.index?.result === 'updated' ||
+          status === 200 ||
+          status === 201)
+      );
+    }).length;
   }
 
   await esClient.indices.refresh({
-    index: [KUBELETSTATS_STREAM, CLUSTER_STREAM, HOSTMETRICS_STREAM],
+    index: [...DATA_STREAMS],
     ignore_unavailable: true,
   });
 
-  return indexed;
+  return { indexed, firstError };
 }
 
-/** Seeds OTel Kubernetes metrics for managed kubernetes_otel dashboards. */
+/** Seeds OTel Kubernetes metrics shaped for kubernetes_otel managed dashboards. */
 export async function seedKubernetesData(
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<SeedKubernetesResult> {
+  // Drop prior lab streams so a previous non-TSDS seed cannot block `TS` ES|QL panels.
+  await Promise.all(DATA_STREAMS.map((stream) => resetDataStream(esClient, stream, logger)));
+
   await Promise.all([
-    ensureDataStreamTemplate(esClient, `metrics-${KUBELETSTATS_DATASET}`, [
+    ensureTsdsTemplate(esClient, `metrics-${KUBELETSTATS_DATASET}`, [
       `metrics-${KUBELETSTATS_DATASET}-*`,
-    ]),
-    ensureDataStreamTemplate(esClient, `metrics-${CLUSTER_DATASET}`, [
-      `metrics-${CLUSTER_DATASET}-*`,
-    ]),
-    ensureDataStreamTemplate(esClient, `metrics-${HOSTMETRICS_DATASET}`, [
-      `metrics-${HOSTMETRICS_DATASET}-*`,
-    ]),
+    ], {
+      'k8s.pod.cpu_limit_utilization': gaugeDouble(),
+      'k8s.pod.cpu.node.utilization': gaugeDouble(),
+      'k8s.pod.cpu.usage': gaugeDouble(),
+      'k8s.pod.memory_limit_utilization': gaugeDouble(),
+      'k8s.pod.memory.node.utilization': gaugeDouble(),
+      'k8s.pod.memory.working_set': gaugeDouble(),
+      'k8s.pod.memory.usage': gaugeDouble(),
+      'k8s.pod.network.io': gaugeDouble(),
+      'metrics.k8s.pod.cpu_limit_utilization': gaugeDouble(),
+      'metrics.k8s.pod.cpu.node.utilization': gaugeDouble(),
+      'metrics.k8s.pod.cpu.usage': gaugeDouble(),
+      'metrics.k8s.pod.memory_limit_utilization': gaugeDouble(),
+      'metrics.k8s.pod.memory.node.utilization': gaugeDouble(),
+      'metrics.k8s.pod.memory.working_set': gaugeDouble(),
+      'metrics.k8s.pod.memory.usage': gaugeDouble(),
+      'metrics.k8s.pod.network.io': gaugeDouble(),
+    }),
+    ensureTsdsTemplate(esClient, `metrics-${CLUSTER_DATASET}`, [`metrics-${CLUSTER_DATASET}-*`], {
+      'k8s.node.condition_ready': gaugeLong(),
+      'k8s.node.cpu.usage': gaugeDouble(),
+      'k8s.node.allocatable_cpu': gaugeDouble(),
+      'k8s.node.memory.working_set': gaugeDouble(),
+      'k8s.node.allocatable_memory': gaugeDouble(),
+      'k8s.node.filesystem.usage': gaugeDouble(),
+      'k8s.node.filesystem.capacity': gaugeDouble(),
+      'k8s.deployment.available': gaugeLong(),
+      'k8s.deployment.desired': gaugeLong(),
+      'k8s.pod.phase': gaugeLong(),
+      'k8s.container.restarts': gaugeLong(),
+    }),
+    ensureTsdsTemplate(
+      esClient,
+      `metrics-${HOSTMETRICS_DATASET}`,
+      [`metrics-${HOSTMETRICS_DATASET}-*`],
+      {
+        'system.cpu.utilization': gaugeDouble(),
+        'metrics.system.cpu.utilization': gaugeDouble(),
+      }
+    ),
   ]);
 
-  // Avoid TSDB time_series mode conflicts for prototype seeding — use plain data streams.
-  // Templates above still define useful mappings; create data streams if missing.
-  for (const stream of [KUBELETSTATS_STREAM, CLUSTER_STREAM, HOSTMETRICS_STREAM]) {
+  for (const stream of DATA_STREAMS) {
     try {
       await esClient.indices.createDataStream({ name: stream });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      if (!message.includes('resource_already_exists_exception') && !message.includes('already exists')) {
-        logger.debug(`createDataStream(${stream}): ${message}`);
+      if (
+        !message.includes('resource_already_exists_exception') &&
+        !message.includes('already exists')
+      ) {
+        throw error;
       }
     }
   }
 
   const docs = buildDocuments(Date.now());
-  const documentsIndexed = await bulkIndex(esClient, docs, logger);
+  const { indexed: documentsIndexed, firstError } = await bulkIndex(esClient, docs, logger);
+
+  if (documentsIndexed === 0) {
+    const detail = firstError
+      ? `${firstError.type ?? 'error'}: ${firstError.reason ?? 'unknown'}`
+      : 'No bulk errors reported — check index privileges and TSDS templates.';
+    throw new Error(
+      `Kubernetes seed indexed 0 documents into ${DATA_STREAMS.join(', ')}. ${detail}`
+    );
+  }
+
+  logger.info(`Kubernetes seed indexed ${documentsIndexed} docs into ${DATA_STREAMS.join(', ')}`);
 
   return {
     documentsIndexed,
-    dataStreams: [KUBELETSTATS_STREAM, CLUSTER_STREAM, HOSTMETRICS_STREAM],
+    dataStreams: [...DATA_STREAMS],
   };
 }

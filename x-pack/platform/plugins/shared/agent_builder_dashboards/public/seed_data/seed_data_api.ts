@@ -52,11 +52,35 @@ export const SEED_DATA_CARDS: SeedCard[] = [
     }),
     description: i18n.translate('xpack.agentBuilderDashboards.seedData.kubernetes.description', {
       defaultMessage:
-        'Installs the kubernetes_otel Fleet package (managed dashboards) and seeds 24h of OTel Kubernetes metrics.',
+        'Installs the kubernetes_otel Fleet package (managed dashboards) and seeds ~15 minutes of recent OTel Kubernetes metrics (TSDS-safe).',
     }),
     dashboardHint: '[Kubernetes OTel] Overview',
   },
 ];
+
+function isAlreadyInstalledSampleDataError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+  const statusCode =
+    'response' in error &&
+    error.response &&
+    typeof error.response === 'object' &&
+    'status' in error.response
+      ? Number((error.response as { status?: number }).status)
+      : 'body' in error &&
+          error.body &&
+          typeof error.body === 'object' &&
+          'statusCode' in error.body
+        ? Number((error.body as { statusCode?: number }).statusCode)
+        : undefined;
+  const message = getSeedErrorMessage(error).toLowerCase();
+  return (
+    statusCode === 409 ||
+    message.includes('already exists') ||
+    message.includes('already installed')
+  );
+}
 
 /** Seeds one dataset (data + dashboards) and returns a short success message. */
 export async function seedDataset(http: CoreStart['http'], id: SeedDataSetId): Promise<string> {
@@ -66,7 +90,16 @@ export async function seedDataset(http: CoreStart['http'], id: SeedDataSetId): P
       dataStreams: string[];
       packageInstalled?: boolean;
       packageName?: string;
+      packageError?: string;
     }>(`${SEED_DATA_API_PATH}/${SEED_DATA_KUBERNETES_ID}`, { body: '{}' });
+
+    if (result.documentsIndexed <= 0) {
+      throw new Error(
+        result.packageError
+          ? `Indexed 0 Kubernetes docs. Package issue: ${result.packageError}`
+          : 'Indexed 0 Kubernetes docs into metrics data streams.'
+      );
+    }
 
     if (result.packageInstalled) {
       return i18n.translate('xpack.agentBuilderDashboards.seedData.kubernetes.successWithPackage', {
@@ -80,33 +113,51 @@ export async function seedDataset(http: CoreStart['http'], id: SeedDataSetId): P
       });
     }
 
+    const packageNote = result.packageError
+      ? i18n.translate('xpack.agentBuilderDashboards.seedData.kubernetes.packageWarning', {
+          defaultMessage: ' (dashboards not installed: {error})',
+          values: { error: result.packageError },
+        })
+      : '';
+
     return i18n.translate('xpack.agentBuilderDashboards.seedData.kubernetes.success', {
-      defaultMessage: 'Indexed {count} docs into {streams}.',
+      defaultMessage: 'Indexed {count} docs into {streams}.{packageNote}',
       values: {
         count: result.documentsIndexed,
         streams: result.dataStreams.join(', '),
+        packageNote,
       },
     });
   }
 
   // Home sample-data installer creates indices + dashboards + visualizations.
-  const result = await http.post<{
-    elasticsearchIndicesCreated?: Record<string, number>;
-    kibanaSavedObjectsLoaded?: number;
-  }>(`/api/sample_data/${id}`, { body: '{}' });
+  try {
+    const result = await http.post<{
+      elasticsearchIndicesCreated?: Record<string, number>;
+      kibanaSavedObjectsLoaded?: number;
+    }>(`/api/sample_data/${id}`, { body: '{}' });
 
-  const docs = Object.values(result.elasticsearchIndicesCreated ?? {}).reduce(
-    (sum, n) => sum + n,
-    0
-  );
-  return i18n.translate('xpack.agentBuilderDashboards.seedData.sample.success', {
-    defaultMessage:
-      'Installed sample data and dashboards ({docs} docs, {objects} saved objects including dashboards).',
-    values: {
-      docs,
-      objects: result.kibanaSavedObjectsLoaded ?? 0,
-    },
-  });
+    const docs = Object.values(result.elasticsearchIndicesCreated ?? {}).reduce(
+      (sum, n) => sum + n,
+      0
+    );
+    return i18n.translate('xpack.agentBuilderDashboards.seedData.sample.success', {
+      defaultMessage:
+        'Installed sample data and dashboards ({docs} docs, {objects} saved objects including dashboards).',
+      values: {
+        docs,
+        objects: result.kibanaSavedObjectsLoaded ?? 0,
+      },
+    });
+  } catch (error) {
+    if (isAlreadyInstalledSampleDataError(error)) {
+      return i18n.translate('xpack.agentBuilderDashboards.seedData.sample.alreadyInstalled', {
+        defaultMessage: 'Sample data "{id}" is already installed.',
+        values: { id },
+      });
+    }
+    throw error;
+  }
 }
 
 export function getSeedErrorMessage(error: unknown): string {

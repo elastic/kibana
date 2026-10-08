@@ -81,7 +81,9 @@ export function registerSeedDataRoute({
           logger,
         });
 
-        const result = await seedKubernetesData(core.elasticsearch.client.asCurrentUser, logger);
+        // Use the internal user so prototype seeding works on deployed clusters
+        // where the signed-in user may lack index/template privileges.
+        const result = await seedKubernetesData(core.elasticsearch.client.asInternalUser, logger);
 
         return response.ok({
           body: {
