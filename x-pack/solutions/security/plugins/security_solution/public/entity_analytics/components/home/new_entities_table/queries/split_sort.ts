@@ -6,8 +6,12 @@
  */
 
 import { ENTITY_ID_FIELD, getEntityId } from '../common';
-import { buildEntitiesInViewCountQuery, buildEntitiesInViewSteps } from './entities_in_view';
-import { buildKeepClause, esc, toList } from './esql';
+import {
+  buildEntitiesInViewConditions,
+  buildEntitiesInViewCountQuery,
+  buildEntitiesInViewSteps,
+} from './entities_in_view';
+import { buildKeepClause, buildLookupJoinClause, esc, toList } from './esql';
 import type {
   EsqlRunner,
   PageCursor,
@@ -153,11 +157,8 @@ const fetchEmptyRowsExcludingValueIds = async (
 export interface EntityListSortOptions {
   sortField: string;
   emptyValue: SplitSortPlan['emptyValue'];
-  /**
-   * Entities in view with a value, with their entity docs: the foreign rows, `groupBy`
-   * (a `STATS … BY entity.id`), the LOOKUP JOIN and the in-view conditions.
-   */
-  buildEntitiesWithValues: (args: QueryArgs, groupBy: string) => string[];
+  /** Foreign index rows mapped to `entity.id`, before any STATS. */
+  buildForeignRows: (args: QueryArgs) => readonly string[];
   buildSortQuery: (args: QueryArgs) => string;
   /** STATS aggregations of the foreign columns. */
   aggregations: readonly string[];
@@ -174,32 +175,41 @@ export interface EntityListSortOptions {
 export const buildEntityListSortPlan = ({
   sortField,
   emptyValue,
-  buildEntitiesWithValues,
+  buildForeignRows,
   buildSortQuery,
   aggregations,
   columns,
   emptyColumns,
-}: EntityListSortOptions): SplitSortPlan => ({
-  sortField,
-  emptyValue,
-  buildValueRowsQuery: (args, limit) =>
-    [
-      ...buildEntitiesWithValues(args, `| STATS ${aggregations.join(', ')} BY \`entity.id\``),
-      ...buildValueCursorClause(args.cursor),
-      ...buildValueSortSuffix(args, sortField, limit),
-      buildKeepClause(args, ...columns),
-    ].join('\n'),
-  buildSortQuery,
-  fetchEmptyRows: (args, runQuery, afterId, limit) =>
-    fetchEmptyRowsExcludingValueIds(
-      args,
-      runQuery,
-      buildEntitiesWithValues(args, '| STATS BY `entity.id`'),
-      { emptyColumns, columns },
-      afterId,
-      limit
-    ),
-});
+}: EntityListSortOptions): SplitSortPlan => {
+  /** Entities in view with a value, with their entity docs. */
+  const buildEntitiesWithValues = (args: QueryArgs, groupBy: string): string[] => [
+    ...buildForeignRows(args),
+    groupBy,
+    buildLookupJoinClause(args.concreteEntityIndexName),
+    ...buildEntitiesInViewConditions(args).map((condition) => `| WHERE ${condition}`),
+  ];
+  return {
+    sortField,
+    emptyValue,
+    buildValueRowsQuery: (args, limit) =>
+      [
+        ...buildEntitiesWithValues(args, `| STATS ${aggregations.join(', ')} BY \`entity.id\``),
+        ...buildValueCursorClause(args.cursor),
+        ...buildValueSortSuffix(args, sortField, limit),
+        buildKeepClause(args, ...columns),
+      ].join('\n'),
+    buildSortQuery,
+    fetchEmptyRows: (args, runQuery, afterId, limit) =>
+      fetchEmptyRowsExcludingValueIds(
+        args,
+        runQuery,
+        buildEntitiesWithValues(args, '| STATS BY `entity.id`'),
+        { emptyColumns, columns },
+        afterId,
+        limit
+      ),
+  };
+};
 
 /**
  * One page of rows plus one, read as value rows and empty rows. Falls back to the general

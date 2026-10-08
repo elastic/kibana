@@ -9,7 +9,6 @@ import { getEuidEsqlFilterBasedOnDocument } from '@kbn/entity-store/common/domai
 import {
   buildIdentityPrefilter,
   getAlertsIndex,
-  buildLookupJoinClause,
   getEntityAlias,
   buildLookback,
   buildJoinedPageSteps,
@@ -146,14 +145,6 @@ const buildOpenAlertEntityRows = ({ namespace, timeRange }: QueryArgs): string[]
   ...buildAlertEuidPipeline(),
 ];
 
-/** Entities in view with open alerts, with their entity docs. */
-const buildAlertedEntitiesInView = (args: QueryArgs, groupBy: string): string[] => [
-  ...buildOpenAlertEntityRows(args),
-  groupBy,
-  buildLookupJoinClause(args.concreteEntityIndexName),
-  ...buildEntitiesInViewConditions(args).map((condition) => `| WHERE ${condition}`),
-];
-
 const ALERT_EMPTY_COLUMNS = [
   ...ALERT_COUNT_FIELDS.map((field) => `${field} = TO_LONG(0)`),
   `${LAST_SEEN_ALERT_FIELD} = TO_DATETIME(null)`,
@@ -164,7 +155,7 @@ export const getAlertSplitSortPlan = (sortField: string): SplitSortPlan =>
     sortField,
     // Entities without alerts count 0, so they sort first ascending; their last alert is null.
     emptyValue: sortField === ALERT_COUNT_FIELD ? 0 : null,
-    buildEntitiesWithValues: buildAlertedEntitiesInView,
+    buildForeignRows: buildOpenAlertEntityRows,
     buildSortQuery: (args) => buildAlertSortQuery(args, sortField),
     aggregations: buildAlertAggregations(),
     columns: [sortField, ...ALERT_FIELDS],

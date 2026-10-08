@@ -10,13 +10,11 @@ import {
   ML_ANOMALY_INDICES,
   ANOMALY_RECORD_FILTER,
   buildAnomalyJobFilter,
-  buildLookupJoinClause,
   buildLookback,
   toList,
 } from './esql';
 import { getEntityIds, getEntityId, getNumber, ANOMALY_COUNT_FIELD } from '../common';
 import { buildEuidStages } from './euid_pipeline';
-import { buildEntitiesInViewConditions } from './entities_in_view';
 import { buildMergedForeignSortQuery } from './foreign_sort';
 import type { QueryArgs, PageEnricher, Row, ColumnQuerySpec } from '../common';
 import { buildEntityListSortPlan, buildSplitSortSpec } from './split_sort';
@@ -58,19 +56,10 @@ const buildAnomalyCountSortQuery = (args: QueryArgs): string =>
 
 // ── split sort (see split_sort.ts) ───────────────────────────────────────────
 
-/** Entities in view with anomalies, with their entity docs. */
-const buildAnomalousEntitiesInView = (args: QueryArgs, groupBy: string): string[] => [
-  SET_UNMAPPED_NULLIFY,
-  ...buildAnomalyEntityRows(args),
-  groupBy,
-  buildLookupJoinClause(args.concreteEntityIndexName),
-  ...buildEntitiesInViewConditions(args).map((condition) => `| WHERE ${condition}`),
-];
-
 export const anomalySplitSortPlan: SplitSortPlan = buildEntityListSortPlan({
   sortField: ANOMALY_COUNT_FIELD,
   emptyValue: null,
-  buildEntitiesWithValues: buildAnomalousEntitiesInView,
+  buildForeignRows: (args) => [SET_UNMAPPED_NULLIFY, ...buildAnomalyEntityRows(args)],
   buildSortQuery: buildAnomalyCountSortQuery,
   aggregations: [`${ANOMALY_COUNT_FIELD} = COUNT(*)`],
   columns: [ANOMALY_COUNT_FIELD],
