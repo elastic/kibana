@@ -9,7 +9,6 @@ import React, { memo, useState } from 'react';
 import { css } from '@emotion/react';
 import { assertNever } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiBadge,
@@ -30,7 +29,9 @@ import { getSeverityColor } from '../../../../detections/components/alerts_kpis/
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { ValidCriticalityLevels } from '../../../../../common/entity_analytics/asset_criticality/constants';
 import { FormattedCount } from '../../../../common/components/formatted_number';
+import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { getNumber } from './common';
+import type { Row } from './common';
 import { ENRICHED_FIELDS, isGridColumnId, type GridColumnId } from './grid_columns';
 import { EntityIconByType } from '../../entity_store/entity_icon_by_type';
 import { RiskScoreCell } from '../entities_table/risk_score_cell';
@@ -217,15 +218,15 @@ const RowActionsCell: React.FC<RowActionsCellProps> = ({
 export { RowActionsCell };
 
 export interface RowActions {
-  onInvestigateInTimeline: (row: Record<string, unknown>) => void;
-  onOpenEntityGraph: (row: Record<string, unknown>) => void;
+  onInvestigateInTimeline: (row: Row) => void;
+  onOpenEntityGraph: (row: Row) => void;
 }
 
 export interface CellHandlers {
-  onEntityNameClick?: (row: Record<string, unknown>) => void;
-  onGroupSizeClick?: (row: Record<string, unknown>) => void;
-  onAlertCountClick?: (row: Record<string, unknown>) => void;
-  onAnomalyCountClick?: (row: Record<string, unknown>) => void;
+  onEntityNameClick?: (row: Row) => void;
+  onGroupSizeClick?: (row: Row) => void;
+  onAlertCountClick?: (row: Row) => void;
+  onAnomalyCountClick?: (row: Row) => void;
 }
 
 const nameCellCss = css`
@@ -251,8 +252,8 @@ const EntityNameCell = memo(
     onEntityNameClick,
   }: {
     value: unknown;
-    row: Record<string, unknown>;
-    onEntityNameClick?: (row: Record<string, unknown>) => void;
+    row: Row;
+    onEntityNameClick?: (row: Row) => void;
   }) => {
     const name = String(value ?? '—');
     const text = (
@@ -341,9 +342,9 @@ const AlertCountCell = memo(
     onAlertCountClick,
   }: {
     value: unknown;
-    row: Record<string, unknown>;
+    row: Row;
     euiTheme: EuiThemeComputed;
-    onAlertCountClick?: (row: Record<string, unknown>) => void;
+    onAlertCountClick?: (row: Row) => void;
   }) => {
     if (typeof value !== 'number' || value === 0) return <>{'—'}</>;
     const count = <FormattedCount count={value} />;
@@ -389,8 +390,8 @@ const GroupSizeCell = memo(
     onGroupSizeClick,
   }: {
     value: unknown;
-    row: Record<string, unknown>;
-    onGroupSizeClick?: (row: Record<string, unknown>) => void;
+    row: Row;
+    onGroupSizeClick?: (row: Row) => void;
   }) =>
     onGroupSizeClick ? (
       <div
@@ -409,11 +410,16 @@ const GroupSizeCell = memo(
 );
 GroupSizeCell.displayName = 'GroupSizeCell';
 
-const RelativeTimeCell = memo(({ value }: { value: unknown }) => {
-  if (value == null) return <>{'—'}</>;
-  const m = typeof value === 'string' || typeof value === 'number' ? moment(value) : null;
-  return <>{m?.isValid() ? m.fromNow() : String(value)}</>;
-});
+/** Hours before a date shows as absolute: never, so the columns read as how long ago. */
+const ALWAYS_RELATIVE_HOURS = 24 * 365 * 100;
+
+/** How long ago, with the absolute date in the user's format in the tooltip. */
+const RelativeTimeCell = memo(({ value }: { value: unknown }) => (
+  <FormattedRelativePreferenceDate
+    value={typeof value === 'string' || typeof value === 'number' ? value : null}
+    relativeThresholdInHrs={ALWAYS_RELATIVE_HOURS}
+  />
+));
 RelativeTimeCell.displayName = 'RelativeTimeCell';
 
 const AnomalyCountCell = memo(
@@ -423,8 +429,8 @@ const AnomalyCountCell = memo(
     onAnomalyCountClick,
   }: {
     value: unknown;
-    row: Record<string, unknown>;
-    onAnomalyCountClick?: (row: Record<string, unknown>) => void;
+    row: Row;
+    onAnomalyCountClick?: (row: Row) => void;
   }) => {
     if (typeof value !== 'number' || value === 0) return <>{'—'}</>;
     const anomalyCount = value;
@@ -475,7 +481,7 @@ SourceCell.displayName = 'SourceCell';
 const renderKnownEntityCell = (
   columnId: GridColumnId,
   value: unknown,
-  row: Record<string, unknown>,
+  row: Row,
   watchlistNames: Map<string, string>,
   euiTheme: EuiThemeComputed,
   handlers?: CellHandlers
@@ -528,7 +534,7 @@ const renderKnownEntityCell = (
 export const renderEntityCell = (
   columnId: string,
   value: unknown,
-  row: Record<string, unknown>,
+  row: Row,
   watchlistNames: Map<string, string>,
   euiTheme: EuiThemeComputed,
   handlers?: CellHandlers,
