@@ -21,7 +21,7 @@ import {
   MAX_SYMPTOM_HYPOTHESIS_LENGTH,
   significantEventSchema,
 } from '@kbn/significant-events-schema';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -140,47 +140,51 @@ export const eventsWriteItemSchema = significantEventSchema
 
 const ITEMS_REQUIRED_MESSAGE = 'Pass items as a non-empty array of event objects.';
 
-const eventsWriteItemsSchema = z
-  .array(eventsWriteItemSchema, { error: ITEMS_REQUIRED_MESSAGE })
-  .min(1, { error: ITEMS_REQUIRED_MESSAGE })
-  .max(MAX_BULK_WRITE_ITEMS)
-  .refine(
-    (items) => {
-      const ruleUuids = items.flatMap((item) =>
-        (item.signals ?? [])
-          .filter((signal) => signal.type === 'detection')
-          .map((signal) => signal.metadata?.rule_uuid)
-          .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid))
-      );
-      return new Set(ruleUuids).size === ruleUuids.length;
-    },
-    {
-      message:
-        'Each detection rule UUID may appear exactly once in the complete write, including within a single event item. Correct ownership before the single write; never retry with an empty placeholder.',
-    }
-  )
-  .describe(
-    i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
-      defaultMessage:
-        'Non-empty array of event objects. One call assigns every batch detection. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals.',
-    })
-  );
+const eventsWriteItemsSchema = lazySchema(() =>
+  z
+    .array(eventsWriteItemSchema, { error: ITEMS_REQUIRED_MESSAGE })
+    .min(1, { error: ITEMS_REQUIRED_MESSAGE })
+    .max(MAX_BULK_WRITE_ITEMS)
+    .refine(
+      (items) => {
+        const ruleUuids = items.flatMap((item) =>
+          (item.signals ?? [])
+            .filter((signal) => signal.type === 'detection')
+            .map((signal) => signal.metadata?.rule_uuid)
+            .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid))
+        );
+        return new Set(ruleUuids).size === ruleUuids.length;
+      },
+      {
+        message:
+          'Each detection rule UUID may appear exactly once in the complete write, including within a single event item. Correct ownership before the single write; never retry with an empty placeholder.',
+      }
+    )
+    .describe(
+      i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
+        defaultMessage:
+          'Non-empty array of event objects. One call assigns every batch detection. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals.',
+      })
+    )
+);
 
-export const eventsWriteSchema = z
-  .object({
-    source: z
-      .literal('discovery')
-      .optional()
-      .describe(
-        'Identifies the caller of this write. Discovery calls must set this to "discovery".'
-      ),
-    items: eventsWriteItemsSchema,
-  })
-  .describe(
-    i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema', {
-      defaultMessage: 'Bulk-write a batch of significant events.',
+export const eventsWriteSchema = lazySchema(() =>
+  z
+    .object({
+      source: z
+        .literal('discovery')
+        .optional()
+        .describe(
+          'Identifies the caller of this write. Discovery calls must set this to "discovery".'
+        ),
+      items: eventsWriteItemsSchema,
     })
-  );
+    .describe(
+      i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema', {
+        defaultMessage: 'Bulk-write a batch of significant events.',
+      })
+    )
+);
 
 export type EventsWriteParams = z.infer<typeof eventsWriteSchema>;
 

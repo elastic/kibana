@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
@@ -38,14 +38,16 @@ const queryInputSchema = upsertStreamQueryRequestSchema.extend({
     ),
 });
 
-const createQueryKnowledgeIndicatorSchema = z
-  .object({
-    stream_name: z
-      .string()
-      .max(MAX_ID_LENGTH)
-      .describe('Target stream name where this query KI should be saved.'),
-  })
-  .extend(queryInputSchema.shape);
+const createQueryKnowledgeIndicatorSchema = lazySchema(() =>
+  z
+    .object({
+      stream_name: z
+        .string()
+        .max(MAX_ID_LENGTH)
+        .describe('Target stream name where this query KI should be saved.'),
+    })
+    .extend(queryInputSchema.shape)
+);
 
 export function createQueryKnowledgeIndicatorTool({
   getScopedClients,
