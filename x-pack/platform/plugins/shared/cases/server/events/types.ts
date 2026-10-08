@@ -47,6 +47,26 @@ export interface AttachmentsAddedEventPayload extends BaseCaseEventPayload {
 }
 
 /**
+ * Event: attachments deleted
+ *
+ * Alert and event references are included because the attachment no longer exists when
+ * the workflow runs. Only identifiers are included, never attachment content.
+ */
+export interface AttachmentsDeletedEventPayload extends BaseCaseEventPayload {
+  readonly caseId: string;
+  readonly attachmentIds: string[];
+  readonly attachmentType: string;
+  /** Alert IDs referenced by the deleted alert attachments. */
+  readonly alertIds?: string[];
+  /** Alert indices, index-aligned with alertIds. */
+  readonly alertIndices?: string[];
+  /** Event IDs referenced by the deleted event attachments. */
+  readonly eventIds?: string[];
+  /** Event indices, index-aligned with eventIds. */
+  readonly eventIndices?: string[];
+}
+
+/**
  * Event: observables added
  *
  * Observable values are deliberately excluded so that users without Cases read
@@ -82,6 +102,7 @@ interface CasesDomainEventPayloadByType {
   readonly caseUpdated: CaseUpdatedEventPayload;
   readonly caseStatusChanged: CaseStatusChangedEventPayload;
   readonly attachmentsAdded: AttachmentsAddedEventPayload;
+  readonly attachmentsDeleted: AttachmentsDeletedEventPayload;
   readonly observablesAdded: ObservablesAddedEventPayload;
   readonly alertStatusChanged: AlertStatusChangedEventPayload;
 }

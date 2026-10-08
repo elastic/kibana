@@ -21,6 +21,14 @@ export const TIMESHIFT_LT_INTERVAL = 'timeshift_smaller_then_interval';
 export const TIMESHIFT_NOT_MULTIPLE_INTERVAL = 'timeshift_not_multiple_interval';
 export const TERMS_WITH_MULTIPLE_TIMESHIFT = 'terms_with_multiple_timeshift';
 export const TERMS_MULTI_TERMS_AND_SCRIPTED_FIELDS = 'terms_wit_multiple_terms_scripted_fields';
+export const TERMS_CUSTOM_RANK_LAST_VALUE_MISSING_SORT_FIELD =
+  'terms_custom_rank_last_value_missing_sort_field';
+export const TERMS_CUSTOM_RANK_LAST_VALUE_NO_DATE_FIELD =
+  'terms_custom_rank_last_value_no_date_field';
+export const TERMS_CUSTOM_RANK_LAST_VALUE_SORT_FIELD_NOT_FOUND =
+  'terms_custom_rank_last_value_sort_field_not_found';
+export const TERMS_CUSTOM_RANK_LAST_VALUE_SORT_FIELD_INVALID_TYPE =
+  'terms_custom_rank_last_value_sort_field_invalid_type';
 
 export const REDUCED_TIME_RANGE_NO_DATE_HISTOGRAM = 'reduced_time_range_no_date_histogram';
 export const REDUCED_TIME_RANGE_DEFAULT_DATE_FIELD = 'reduced_time_range_default_date_field';
