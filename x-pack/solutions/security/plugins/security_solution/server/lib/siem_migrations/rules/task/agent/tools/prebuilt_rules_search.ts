@@ -7,6 +7,7 @@
 
 import { tool } from '@langchain/core/tools';
 import * as z from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 import type { RuleMigrationsRetriever } from '../../retrievers';
 import type { RuleSemanticSearchResult } from '../../../types';
 
@@ -15,21 +16,23 @@ const NAME = 'searchPrebuiltRules' as const;
 const DESCRIPTION =
   'Searches Elastic pre-built detection rules using a semantic query. Use this to find candidate pre-built rules that may match a source SIEM detection rule.';
 
-const SCHEMA = z.object({
-  query: z
-    .string()
-    .max(2000)
-    .describe(
-      'A keyword-rich semantic search query optimized for finding Elastic pre-built detection rules.'
-    ),
-  technique_ids: z
-    .string()
-    .max(500)
-    .optional()
-    .describe(
-      'Optional comma-separated MITRE ATT&CK technique IDs from the source rule to boost matching.'
-    ),
-});
+const SCHEMA = lazySchema(() =>
+  z.object({
+    query: z
+      .string()
+      .max(2000)
+      .describe(
+        'A keyword-rich semantic search query optimized for finding Elastic pre-built detection rules.'
+      ),
+    technique_ids: z
+      .string()
+      .max(500)
+      .optional()
+      .describe(
+        'Optional comma-separated MITRE ATT&CK technique IDs from the source rule to boost matching.'
+      ),
+  })
+);
 
 /**
  * Wraps `RuleMigrationsRetriever#prebuiltRules.search` as a LangChain `tool()` so it has a name,

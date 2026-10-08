@@ -32,12 +32,12 @@ describe('PrincipalRow role selector', () => {
   it('is enabled for an id-backed entry', () => {
     renderRow({ type: 'user', id: 'u_alice', role: AgentAccessControlRole.User });
 
-    expect(screen.getByRole('button', { name: 'Access level' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'User Access level' })).toBeEnabled();
   });
 
   it('is enabled for a legacy name-only entry, which stays editable', () => {
     renderRow({ type: 'user', name: 'alice', role: AgentAccessControlRole.User });
 
-    expect(screen.getByRole('button', { name: 'Access level' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'User Access level' })).toBeEnabled();
   });
 });
