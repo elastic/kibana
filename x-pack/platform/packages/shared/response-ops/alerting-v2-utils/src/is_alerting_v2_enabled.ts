@@ -59,6 +59,19 @@ export const isAlertingV2Enabled: (core: CoreStart) => boolean = (core) => {
   return core.settings.globalClient.get<boolean>(ALERTING_V2_ENABLED_SETTING_ID, false) === true;
 };
 
+const OBSERVABILITY_SOLUTION_NAV_ID = 'oblt';
+
+/**
+ * Returns whether Alerting v2 rules can be managed from the given active solution nav id
+ * (`chrome.getActiveSolutionNavId$()`). Rules are only reachable in the Observability solution,
+ * so a classic space (`null`) or any other solution returns `false`.
+ */
+export const isAlertingV2AvailableInSolution = (
+  solutionNavId: string | null | undefined
+): boolean => {
+  return solutionNavId === OBSERVABILITY_SOLUTION_NAV_ID;
+};
+
 /**
  * Returns whether Alerting v2 create-rule UI should be shown for the current user.
  *

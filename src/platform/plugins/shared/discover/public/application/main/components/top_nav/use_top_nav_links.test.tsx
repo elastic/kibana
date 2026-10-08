@@ -12,6 +12,7 @@ import { renderHook } from '@testing-library/react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { AppMenuActionId } from '@kbn/discover-utils';
 import { BehaviorSubject } from 'rxjs';
+import type { SolutionId } from '@kbn/core-chrome-browser';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { useTopNavLinks, type UseTopNavLinksParams } from './use_top_nav_links';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -45,6 +46,12 @@ jest.mock('../../../../context_awareness/hooks/use_profile_accessor', () => ({
 
 const mockUseProfileAccessor = jest.mocked(useProfileAccessor);
 
+const setSolutionNavId = (services: DiscoverServices, solutionNavId: SolutionId | null) => {
+  jest
+    .mocked(services.core.chrome.getActiveSolutionNavId$)
+    .mockReturnValue(new BehaviorSubject<SolutionId | null>(solutionNavId));
+};
+
 const createTestServices = (overrides: Partial<DiscoverServices> = {}): DiscoverServices => {
   const services = createDiscoverServicesMock();
   const uiSettingsGetMock = services.uiSettings.get;
@@ -67,6 +74,7 @@ const createTestServices = (overrides: Partial<DiscoverServices> = {}): Discover
   };
 
   services.settings.globalClient.get = <T,>(_key: string) => true as T;
+  setSolutionNavId(services, 'oblt');
   services.core.application.capabilities = {
     ...services.core.application.capabilities,
     alerting_v2_rules: {
@@ -477,7 +485,8 @@ describe('useTopNavLinks', () => {
   describe('alerting v2 rules menu', () => {
     const setupWithAlertingV2 = async (
       hookAttrs: Partial<UseTopNavLinksParams> = {},
-      alertingV2Enabled = true
+      alertingV2Enabled = true,
+      solutionNavId: SolutionId | null = 'oblt'
     ) => {
       const baseMock = createDiscoverServicesMock();
       const v2Services = createTestServices({
@@ -499,6 +508,7 @@ describe('useTopNavLinks', () => {
       });
 
       v2Services.settings.globalClient.get = <T,>(_key: string) => alertingV2Enabled as T;
+      setSolutionNavId(v2Services, solutionNavId);
       if (!alertingV2Enabled) {
         const { alerting_v2_rules: _alertingV2Rules, ...capabilitiesWithoutRules } =
           v2Services.core.application.capabilities;
@@ -568,6 +578,20 @@ describe('useTopNavLinks', () => {
       const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
       expect(alertsItem).toBeDefined();
       expect(alertsItem?.items).toBeDefined();
+      expect(alertsItem?.items?.length).toBeGreaterThan(0);
+    });
+
+    it.each<[string, SolutionId | null]>([
+      ['security', 'security'],
+      ['search', 'es'],
+      ['workplace ai', 'workplaceai'],
+      ['classic (no solution)', null],
+    ])('should fall back to v1 popover items in %s', async (_name, solutionNavId) => {
+      const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: true }, true, solutionNavId);
+
+      const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
+      expect(alertsItem).toBeDefined();
+      expect(alertsItem?.run).toBeUndefined();
       expect(alertsItem?.items?.length).toBeGreaterThan(0);
     });
 
@@ -642,10 +666,10 @@ describe('useTopNavLinks', () => {
      * mode. Verifies the parent gate considers v2 access independently.
      */
     const setupV2OnlyServices = (
-      overrides: { alertingVTwoEnabled?: boolean } = {}
+      overrides: { alertingVTwoEnabled?: boolean; solutionNavId?: SolutionId | null } = {}
     ): DiscoverServices => {
       const baseMock = createDiscoverServicesMock();
-      const { alertingVTwoEnabled = true } = overrides;
+      const { alertingVTwoEnabled = true, solutionNavId = 'oblt' } = overrides;
       const v2OnlyServices = createTestServices({
         capabilities: {
           ...baseMock.capabilities,
@@ -664,6 +688,7 @@ describe('useTopNavLinks', () => {
       });
 
       v2OnlyServices.settings.globalClient.get = <T,>(_key: string) => alertingVTwoEnabled as T;
+      setSolutionNavId(v2OnlyServices, solutionNavId);
       if (!alertingVTwoEnabled) {
         const { alerting_v2_rules: _alertingV2Rules, ...capabilitiesWithoutRules } =
           v2OnlyServices.core.application.capabilities;
@@ -700,6 +725,14 @@ describe('useTopNavLinks', () => {
       expect(alertsItem).toBeDefined();
       expect(alertsItem?.run).toBeDefined();
       expect(alertsItem?.items).toBeUndefined();
+    });
+
+    it('should NOT include the alerts menu outside Observability', async () => {
+      const services = setupV2OnlyServices({ solutionNavId: 'security' });
+      const appMenuConfig = await setup({ services, isEsqlMode: true });
+
+      const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
+      expect(alertsItem).toBeUndefined();
     });
 
     it('should NOT include the alerts menu when neither v1 nor v2 access is granted', async () => {
