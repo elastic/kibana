@@ -41,6 +41,7 @@ export GCS_CREDENTIALS='{"type":"service_account",...}'
 The default run ID is pinned in code (`SIGEVENTS_SNAPSHOT_RUN`). Override it at runtime:
 
 ```bash
+# If --judge is not passed, the default judge model is used
 SIGEVENTS_SNAPSHOT_RUN=2026-09-18 node scripts/evals run --suite significant-events --judge gemini-3-pro
 ```
 
@@ -104,8 +105,6 @@ node scripts/scout.js start-server --arch stateful --domain classic --serverConf
 
 ### Run the default datasets
 
-> **Note:** Use Gemini 3 Pro as the evaluation judge to ensure consistent scoring across models. This keeps LLM-as-a-judge criteria evaluations comparable regardless of which model is being evaluated.
-
 When `SIGEVENTS_DATASET` is unset or empty, the suite runs every registered dataset that is not
 marked `optIn: true`. Today those are `otel-demo`, `bank-of-anthos`, and `quarkus-super-heroes`.
 
@@ -116,7 +115,7 @@ explicit selection, and every spec fails when a selected snapshot is missing.
 node scripts/evals run \
   --suite significant-events \
   --project <connector-id> \
-  --judge <gemini-3-pro-connector-id>
+  --judge <gemini-3-pro-connector-id> # skip this flag to use the default judge model
 ```
 
 ### Run every registered dataset
@@ -128,7 +127,7 @@ Set `SIGEVENTS_DATASET=all` to run the default datasets along with the opt-in on
 SIGEVENTS_DATASET=all node scripts/evals run \
   --suite significant-events \
   --project <connector-id> \
-  --judge <gemini-3-pro-connector-id>
+  --judge <gemini-3-pro-connector-id> # skip this flag to use the default judge model
 ```
 
 ### Run a specific dataset
@@ -140,7 +139,7 @@ the data sent to the selected task model and judges.
 SIGEVENTS_DATASET=otel-demo node scripts/evals run \
   --suite significant-events \
   --project <connector-id> \
-  --judge <gemini-3-pro-connector-id>
+  --judge <gemini-3-pro-connector-id> # skip this flag to use the default judge model
 ```
 
 The generic probe and replay scripts do not support datasets that use
@@ -151,6 +150,7 @@ those datasets through their evaluation spec.
 ### Run a specific spec file
 
 ```bash
+# Skip the --judge flag to use the default judge model
 node scripts/evals run \
   --suite significant-events \
   --project <connector-id> \
@@ -164,7 +164,7 @@ node scripts/evals run \
 | ---------------- | ------------------------------------------------------------------------------------------------------- |
 | `--suite`        | Suite ID to run (use `significant-events`)                                                              |
 | `--project`      | Connector/model project to evaluate against                                                             |
-| `--judge`        | Connector ID for the LLM judge (use Gemini 3 Pro for consistency)                                       |
+| `--judge`        | Connector ID for the LLM judge (optional)                                                               |
 | `--repetitions`  | Number of times to repeat each evaluation example (e.g., `3`)                                           |
 | `--trace-es-url` | URL of the Elasticsearch cluster where traces are stored (e.g., `https://user:pass@trace-cluster:9200`) |
 | `--dry-run`      | Preview the command without executing                                                                   |
@@ -260,6 +260,8 @@ node scripts/capture_sigevents_my_app_snapshots.js --connector-id <id> --run-id 
 ```bash
 SIGEVENTS_DATASET=my-app node scripts/evals run --suite significant-events --judge <gemini-3-pro-connector-id>
 ```
+
+> **Note:** Use the `--judge` flag to override the default judge model.
 
 ## Adding a new eval spec
 
