@@ -6,7 +6,18 @@
  */
 
 import type { AnalyticsServiceSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
+  MONITOR_CURRENT_EVENT_TYPE,
+  MONITOR_ERROR_EVENT_TYPE,
+  MONITOR_UPDATE_EVENT_TYPE,
+} from './constants';
 import type { MonitorErrorEvent, MonitorUpdateEvent } from './types';
+
+export interface SyntheticsEventMap {
+  [MONITOR_UPDATE_EVENT_TYPE]: MonitorUpdateEvent;
+  [MONITOR_CURRENT_EVENT_TYPE]: MonitorUpdateEvent;
+  [MONITOR_ERROR_EVENT_TYPE]: MonitorErrorEvent;
+}
 
 /**
  * Reports Synthetics EBT events, enriching them with the license holder.
@@ -26,7 +37,10 @@ export class SyntheticsTelemetry {
     }
   }
 
-  public reportEvent(eventType: string, event: MonitorUpdateEvent | MonitorErrorEvent): void {
+  public reportEvent<K extends keyof SyntheticsEventMap>(
+    eventType: K,
+    event: SyntheticsEventMap[K]
+  ): void {
     this.analytics.reportEvent(eventType, { ...event, issuedTo: this.issuedTo });
   }
 }
