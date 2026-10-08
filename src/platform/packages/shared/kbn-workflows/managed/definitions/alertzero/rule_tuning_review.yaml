@@ -164,7 +164,7 @@ steps:
       metadata:
         status: open
         description: "{{ inputs.fp_count }} false-positive alerts on rule {{ steps.fetch_rule.output.name }} in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days"
-        workflow_execution_id: "{{ execution.id }}"
+        workflow_execution_ids: ["{{ execution.id }}"]
 
   # A snapshot of the rule as it was when this review started. The rule card reads
   # `origin` as the saved-object id for View rule, edit and its saved-rule diff,
@@ -209,7 +209,7 @@ steps:
     type: data.set
     with:
       rule_line: "**Rule:** [{{ steps.fetch_rule.output.name }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ inputs.rule_uuid }}) (`{{ inputs.rule_uuid }}`)"
-      fp_summary: "{% if inputs.total_alert_count > 0 %}{{ inputs.total_fp_count }} of {{ inputs.total_alert_count }} alerts ({{ inputs.total_fp_count | times: 100 | divided_by: inputs.total_alert_count }}%) in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days were closed as false positives; {{ inputs.fp_count }} of them are not reviewed yet.{% else %}{{ inputs.fp_count }} alerts were closed as false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.{% endif %}"
+      fp_summary: "{% if inputs.total_alert_count > 0 %}Analysts closed {{ inputs.total_fp_count }} of {{ inputs.total_alert_count }} alerts ({{ inputs.total_fp_count | times: 100 | divided_by: inputs.total_alert_count | round }}%) as false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days. {{ inputs.fp_count }} of them are not reviewed yet.{% else %}Analysts closed {{ inputs.fp_count }} alerts as false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.{% endif %}"
 
   # Manual mode only: ask the analyst before the agent diagnoses this rule. Assisted
   # mode skips this step and goes directly to diagnosis.
@@ -237,7 +237,7 @@ steps:
               {{ steps.compose_evidence.output.fp_summary }}
 
               **On approval**
-              The agent diagnoses these false positives and proposes a tuning change, which returns as a second proposal for your approval before anything is applied to the rule. Dismissing marks these alerts reviewed and ends the review.
+              If you approve, the agent studies these false positives and makes a tuning proposal. You must approve this second proposal before the agent changes the rule. If you dismiss, the alerts are marked as reviewed and the review ends.
             impact: low
             # No action, so no inherited category, and the queue drops an
             # uncategorised proposal. Grouped with the tuning proposal that follows.
@@ -297,6 +297,7 @@ steps:
 
   - name: diagnose_rule
     type: ai.agent
+    agent-id: alertzero-thin-agent
     # Keep in sync with ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
     connector-id-by-feature: alertzero_agentic
     # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
@@ -308,6 +309,13 @@ steps:
     timeout: "10m"
     create-conversation: true
     with:
+      # The thin agent has no skills or tools of its own. List every skill the
+      # step needs, including the skills those skills load.
+      configuration_overrides:
+        enable_elastic_capabilities: false
+        tools: []
+        skill_ids:
+          - investigate-rule
       # The 100-id cap must match ALERTS_BY_IDS_MAX in the security_solution skill
       # (investigate_rule_skill.ts), the most ids one get_alerts_by_ids call accepts.
       message: |-
@@ -386,6 +394,8 @@ steps:
         recurring benign pattern; reasoning is a numbered list of the steps that led
         to the recommendation; confidence is how sure you are that the change removes
         the false positives without losing detections.
+
+        Write every text field of the proposal in ASD-STE100 Simplified Technical English.
       schema:
         # Omit the root type so Agent Builder wraps this union under a property;
         # the LangChain-to-inference adapter drops root-level oneOf constraints.
@@ -757,6 +767,29 @@ steps:
     on-failure:
       continue: true
 
+  # A risk score change has no backtest, so this note explains what approving does.
+  - name: post_risk_score_note
+    type: kibana.request
+    if: >-
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.diagnose_rule.output.structured_output.change_type == 'risk_score' }}
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+        input: |-
+          About the proposed risk score change for {{ steps.fetch_rule.output.name }}:
+
+          A risk score change does not change which alerts fire. If you approve, the future alerts of the rule change severity from {{ steps.fetch_rule.output.severity }} to {{ steps.diagnose_rule.output.structured_output.proposed_severity }}. Existing alerts keep their severity. The false positive count in the proposal is the evidence for this change.
+        trigger_mode: never
+    on-failure:
+      continue: true
+
   - name: compose_proposal
     type: data.set
     with:
@@ -773,7 +806,7 @@ steps:
         **Why this rule needs tuning**
         {{ steps.compose_evidence.output.fp_summary }}
         {% if inputs.fp_count > inputs.alert_ids.size %}
-        The diagnosis examined and this decision tags the newest {{ inputs.alert_ids.size }} of the {{ inputs.fp_count }} false positives; tagging them retires the older ones from future sweeps too.
+        The agent examined the newest {{ inputs.alert_ids.size }} of the {{ inputs.fp_count }} false positives. Your decision tags these {{ inputs.alert_ids.size }} alerts. The tag also removes the older alerts from future sweeps.
         {% endif %}
 
         **Summary**
@@ -806,13 +839,11 @@ steps:
         {% for entry in steps.diagnose_rule.output.structured_output.exception_entries %}
         - {{ entry.field }} {{ entry.operator }}{% if entry.values %} {{ entry.values | join: ", " }}{% elsif entry.value %} {{ entry.value }}{% endif %}
         {% endfor %}
-        Approving adds the exception to the rule's own exception list. It can be removed in the Detection Rules UI.
+        Approve to add the exception to the exception list of the rule. You can remove it in the Detection Rules UI.
         {% when "risk_score" %}
-        Current risk score: {{ steps.fetch_rule.output.risk_score }}
-        Current severity: {{ steps.fetch_rule.output.severity }}
-        Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}
-        Proposed severity: {{ steps.diagnose_rule.output.structured_output.proposed_severity }}
-        Approving patches the rule's risk score and severity. It can be changed back in the Detection Rules UI.
+        Current risk score: {{ steps.fetch_rule.output.risk_score }} ({{ steps.fetch_rule.output.severity }})
+        Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }} ({{ steps.diagnose_rule.output.structured_output.proposed_severity }})
+        Approve to change the risk score and severity of the rule. You can change them back in the Detection Rules UI.
         {% when "threshold" %}
         Current threshold value: {{ steps.fetch_rule.output.threshold.value }}
         Proposed threshold value: {{ steps.diagnose_rule.output.structured_output.proposed_threshold_value }}
@@ -822,16 +853,16 @@ steps:
         {% endif %}
         Current threshold cardinality: {% if steps.fetch_rule.output.threshold.cardinality %}{% for entry in steps.fetch_rule.output.threshold.cardinality %}- {{ entry.field }} >= {{ entry.value }} {% endfor %}{% else %}none{% endif %}
         Proposed threshold cardinality: {% if steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality %}{% for entry in steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality %}- {{ entry.field }} >= {{ entry.value }} {% endfor %}{% else %}none{% endif %}
-        Approving patches the rule's threshold settings. The change can be reverted in the Detection Rules UI.
+        Approve to change the threshold settings of the rule. You can change them back in the Detection Rules UI.
         {% when "schedule" %}
         Current interval: {{ steps.fetch_rule.output.interval }}
         Proposed interval: {{ steps.diagnose_rule.output.structured_output.proposed_interval }}
         Current lookback (from): {{ steps.fetch_rule.output.from }}
         Proposed lookback (from): {{ steps.diagnose_rule.output.structured_output.proposed_from }}
-        Approving patches the rule's schedule settings. The change can be reverted in the Detection Rules UI.
+        Approve to change the schedule settings of the rule. You can change them back in the Detection Rules UI.
         {% else %}
-        No automated change can be applied safely for this rule.
-        Approving records the handoff — no rule changes are made automatically.
+        No automated change is safe for this rule.
+        Approving records the handoff. The agent makes no change to the rule.
         Apply the recommended change in the Detection Rules UI.
         {% endcase %}
 
@@ -840,11 +871,12 @@ steps:
         {% if steps.can_preview_query_change.output.supported %}
         **Backtest**
 
-        Backtest ({{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} simulated executions of interval {{ steps.fetch_rule.output.interval }},
-        lookback {{ steps.fetch_rule.output.from }}, ending at the newest false positive
-        {{ inputs.last_fp_at }} — usually a much shorter span than the false positives cover):
-        current {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %},
-        proposed {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}.
+        The backtest ran {{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} simulated executions with interval {{ steps.fetch_rule.output.interval }}
+        and lookback {{ steps.fetch_rule.output.from }}. It ends at the newest false positive, {{ inputs.last_fp_at }}.
+        This time span is usually much shorter than the span of the false positives.
+
+        Alerts with the current rule: {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %}
+        Alerts with the proposed change: {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}
         {% if steps.record_preview_outcome.output.current_error_text != '' %}
         Current preview errors: {{ steps.record_preview_outcome.output.current_error_text }}
         {% endif %}
@@ -852,11 +884,11 @@ steps:
         Proposed preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
         {% endif %}
         {% else %}
-        No backtest: this rule is not a plain query rule (saved query, data view,
-        timestamp override, or alert suppression are not supported by the preview),
-        or the proposed exception could not be converted into a preview filter.
-        Approving still applies the proposed change, so judge it on the change itself
-        and the false positives above rather than on a simulated alert count.
+        No backtest is available. The preview supports only plain query rules.
+        It does not support a saved query, a data view, a timestamp override or alert suppression.
+        Or the agent could not convert the proposed exception into a preview filter.
+        Approving still applies the proposed change.
+        Judge it on the change and on the false positives above, not on a simulated alert count.
         {% endif %}
         {% endif %}
 
