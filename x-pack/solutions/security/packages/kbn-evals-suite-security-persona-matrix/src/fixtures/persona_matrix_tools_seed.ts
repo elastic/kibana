@@ -111,7 +111,7 @@ async function attachToolsToDefaultAgent({
   const { data: agent } = await kbnClient.request<{
     name?: string;
     description?: string;
-    access_control?: { access_mode: string };
+    access_control?: { access_mode: string; entries?: unknown };
     configuration?: { tools?: Array<{ tool_ids?: string[] }> } & Record<string, unknown>;
   }>({
     method: 'GET',
@@ -133,7 +133,11 @@ async function attachToolsToDefaultAgent({
       body: {
         name: agent?.name ?? 'Elastic AI Agent',
         description: agent?.description ?? '',
-        access_control: agent?.access_control ?? { access_mode: 'public' },
+        // The update route validates access_control with a mode-only schema
+        // (no `entries`), and the GET response since #290353 includes
+        // `entries: []`. Forward only the mode; entries are managed by the
+        // separate PUT /agents/{id}/access_control endpoint.
+        access_control: { access_mode: agent?.access_control?.access_mode ?? 'public' },
         configuration: { ...agent?.configuration, tools: merged },
       },
     });

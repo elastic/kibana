@@ -7,7 +7,6 @@
 
 import React from 'react';
 import type { Conversation } from '@kbn/agent-builder-common';
-import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import {
   ConversationDetailsFlyoutHeader,
   ConversationDetailsFlyoutFooter,
@@ -15,6 +14,7 @@ import {
   type ConversationDetailsFlyoutFooterProps,
   OverviewTab,
 } from '../components/details';
+import type { FlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
 import {
   conversationToInvestigation,
   conversationToEscalationHeader,
@@ -34,28 +34,28 @@ interface InvestigationSlotProps {
 }
 
 export interface OverviewSlotProps extends InvestigationSlotProps {
-  /**
-   * Captured at registration: the flyout can mount outside a `KibanaContextProvider`, so the
-   * attachment registry cannot be reached from ambient context.
-   */
-  attachmentsService: AttachmentServiceStartContract;
+  groupedAttachments: FlyoutGroupedAttachmentsRegistry;
   /**
    * Renders the "Proposed actions" section's content. Called with the conversation's own id so a
    * host can fetch its proposals; omitted entirely (see `OverviewTab`) when the caller has none.
    */
   renderProposedActions?: (props: { conversationId: string }) => React.ReactNode;
+  /** Renders a count shown beside the "Proposed actions" heading. */
+  renderProposedActionsCount?: (props: { conversationId: string }) => React.ReactNode;
 }
 
 export const OverviewSlot = ({
   conversation,
-  attachmentsService,
+  groupedAttachments,
   renderProposedActions,
+  renderProposedActionsCount,
 }: OverviewSlotProps) => (
   <OverviewTab
     investigation={conversationToInvestigation(conversation)}
     attachments={conversation.attachments}
-    attachmentsService={attachmentsService}
+    groupedAttachments={groupedAttachments}
     proposedActionsContent={renderProposedActions?.({ conversationId: conversation.id })}
+    proposedActionsCount={renderProposedActionsCount?.({ conversationId: conversation.id })}
   />
 );
 

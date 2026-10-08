@@ -14,6 +14,7 @@ import { UnifiedDocViewerObservabilityTraceDocFlyout } from '@kbn/unified-doc-vi
 import type { UnifiedDocViewerObservabilityTracesDocumentType } from '@kbn/unified-doc-viewer-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
 import { TRACE_WATERFALL_EBT_ELEMENTS, TraceWaterfallWithFetching } from '@kbn/apm-ui-shared';
+import type { ApmIndicesSource } from '../../../../../hooks/use_apm_indices';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { useAdHocApmDataView } from '../../../../../hooks/use_adhoc_apm_data_view';
 import { TraceWaterfallFlyoutFooter } from './flyout_footer';
@@ -63,6 +64,11 @@ interface Props {
     core: CoreStart;
     share?: SharePublicStart;
   };
+  /**
+   * When set, the parent owns APM indices, including while they are still loading.
+   * Omit so the footer fetches them — the standalone APM transaction page.
+   */
+  indicesSource?: ApmIndicesSource;
 }
 
 export function TraceWaterfallFlyout({
@@ -77,6 +83,7 @@ export function TraceWaterfallFlyout({
   historyKey = TRACE_WATERFALL_FLYOUT_HISTORY_KEY,
   getErrorMarkerHref,
   deps,
+  indicesSource,
 }: Props) {
   const { callApmApi } = getApmInternalServices();
   const apmPluginContext = useApmPluginContext();
@@ -180,6 +187,7 @@ export function TraceWaterfallFlyout({
         rangeTo={rangeTo}
         share={share}
         http={core.http}
+        indicesSource={indicesSource}
       />
       {selectedDocId && dataView && (
         <UnifiedDocViewerObservabilityTraceDocFlyout

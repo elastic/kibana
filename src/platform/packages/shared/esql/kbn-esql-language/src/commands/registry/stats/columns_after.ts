@@ -6,17 +6,30 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import uniqBy from 'lodash/uniqBy';
 import { isAssignment, isColumn, isFunctionExpression, isOptionNode } from '@elastic/esql';
 import type { ESQLAstItem, ESQLCommand, ESQLCommandOption } from '@elastic/esql/types';
 import type { SupportedDataType } from '../../definitions/types';
 import { getExpressionType } from '../../definitions/utils';
 import type { ESQLColumnData, ESQLUserDefinedColumn, UnmappedFieldsStrategy } from '../types';
 import type { IAdditionalFields } from '../registry';
+import { getColumnsDefinedInByClause, isByOption } from './utils';
+
+type ExpressionType = (thing: ESQLAstItem) => SupportedDataType | 'unknown';
+
+/**
+ * Keeps the last column for each name, preserving order.
+ * When a name is reused, the rightmost definition wins, matching how
+ * Elasticsearch resolves repeated BY assignments and aggregation/grouping collisions.
+ */
+const keepLastByName = (columns: ESQLUserDefinedColumn[]): ESQLUserDefinedColumn[] => {
+  const lastIndexByName = new Map<string, number>();
+  columns.forEach((column, index) => lastIndexByName.set(column.name, index));
+  return columns.filter((column, index) => lastIndexByName.get(column.name) === index);
+};
 
 const getUserDefinedColumns = (
   command: ESQLCommand | ESQLCommandOption,
-  typeOf: (thing: ESQLAstItem) => SupportedDataType | 'unknown',
+  typeOf: ExpressionType,
   query: string
 ): ESQLUserDefinedColumn[] => {
   const columns: ESQLUserDefinedColumn[] = [];
@@ -106,11 +119,36 @@ export const columnsAfter = (
   additionalFields: IAdditionalFields,
   unmappedFieldsStrategy: UnmappedFieldsStrategy
 ) => {
-  const columnMap = new Map<string, ESQLColumnData>();
-  previousColumns.forEach((col) => columnMap.set(col.name, col)); // TODO make this more efficient
+  const inputColumns = new Map<string, ESQLColumnData>();
+  previousColumns.forEach((col) => inputColumns.set(col.name, col)); // TODO make this more efficient
 
+  const assignments = getColumnsDefinedInByClause(
+    command,
+    inputColumns,
+    query,
+    unmappedFieldsStrategy
+  );
+  const aggregatingColumns = new Map([...inputColumns, ...assignments]);
+
+  // Aggregation expressions can reference columns defined in the BY clause, while
+  // the BY expressions themselves are typed using the input columns only.
   const typeOf = (thing: ESQLAstItem) =>
-    getExpressionType(thing, columnMap, unmappedFieldsStrategy);
+    getExpressionType(thing, aggregatingColumns, unmappedFieldsStrategy);
+  const byTypeOf = (thing: ESQLAstItem) =>
+    getExpressionType(thing, inputColumns, unmappedFieldsStrategy);
 
-  return uniqBy([...getUserDefinedColumns(command, typeOf, query)], 'name');
+  const aggregatingArgs: ESQLAstItem[] = [];
+  const byArgs: ESQLAstItem[] = [];
+  for (const arg of command.args) {
+    if (isByOption(arg)) {
+      byArgs.push(arg);
+    } else {
+      aggregatingArgs.push(arg);
+    }
+  }
+
+  return keepLastByName([
+    ...getUserDefinedColumns({ ...command, args: aggregatingArgs }, typeOf, query),
+    ...getUserDefinedColumns({ ...command, args: byArgs }, byTypeOf, query),
+  ]);
 };
