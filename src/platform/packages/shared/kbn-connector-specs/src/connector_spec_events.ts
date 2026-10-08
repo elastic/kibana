@@ -30,7 +30,7 @@ export interface ConnectorIngressContext {
   readonly connectorTypeId: string;
   readonly config: Record<string, unknown>;
   readonly rawBody: unknown;
-  /** Allowlisted delivery metadata; authentication headers are not forwarded. */
+  /** Request headers named in `ConnectorSpecEvents.headers`. */
   readonly headers?: Readonly<Record<string, string | string[] | undefined>>;
 }
 
@@ -58,5 +58,7 @@ export interface EventDefinition {
  */
 export interface ConnectorSpecEvents {
   readonly definitions: Record<string, EventDefinition>;
+  /** Lowercase request header names the hub forwards to `handleEvents`. Never list credentials. */
+  readonly headers?: readonly string[];
   handleEvents(ctx: ConnectorIngressContext): Promise<HandleEventsResult>;
 }

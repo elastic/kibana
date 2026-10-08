@@ -10,7 +10,6 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorIngressContext } from '../../connector_spec_events';
-import { buildEventId } from '../../event_type_id';
 import { validateEmittedEvents } from '../../validate_emitted_events';
 import { GithubConnector } from './github';
 import { githubEvents } from './events';
@@ -108,9 +107,7 @@ describe('GitHub named events', () => {
     expect(Object.keys(githubEvents.definitions)).toEqual(
       deliveries.map(({ eventType }) => eventType)
     );
-    for (const [key, definition] of Object.entries(githubEvents.definitions)) {
-      expect(definition.eventId).toBe(buildEventId('.github', key));
-    }
+    expect(githubEvents.headers).toEqual(['x-github-event', 'x-github-delivery']);
   });
 
   it.each(deliveries)(
@@ -156,30 +153,36 @@ describe('GitHub named events', () => {
     });
   });
 
-  it.each([true, false])('preserves merged=%s on a closed pull request', async (merged) => {
-    const result = await githubEvents.handleEvents(
-      createContext('pull_request', {
-        action: 'closed',
-        pull_request: { number: 43, merged },
-      })
-    );
-    expect(result).toMatchObject({ events: [{ payload: { body: { pull_request: { merged } } } }] });
+  it.each([
+    ['issues', { issue: { number: 1, user: null, labels: [null] } }],
+    ['issue_comment', { comment: { id: 1, user: null } }],
+    ['pull_request', { pull_request: { number: 1, user: null, merged: null } }],
+    ['pull_request_review', { action: 'submitted', review: { id: 1, user: null } }],
+    ['push', { pusher: { name: 'octocat', email: null }, repository: { owner: null } }],
+    ['release', { action: 'published', release: { id: 1, author: null } }],
+  ])('accepts the null values GitHub sends in %s', (eventType, body) => {
+    expect(
+      githubEvents.definitions[eventType].eventSchema.safeParse({ eventType, body }).success
+    ).toBe(true);
   });
 
-  it.each(['success', 'failure', 'cancelled', null])(
-    'preserves check conclusion %s',
-    async (conclusion) => {
-      const result = await githubEvents.handleEvents(
-        createContext('check_run', {
-          action: 'completed',
-          check_run: { id: 10, conclusion },
-        })
-      );
-      expect(result).toMatchObject({
-        events: [{ payload: { body: { check_run: { conclusion } } } }],
-      });
+  it('accepts text longer than 65,536 characters', () => {
+    const body = { action: 'published', release: { id: 1, body: 'r'.repeat(125_000) } };
+    expect(
+      githubEvents.definitions.release.eventSchema.safeParse({ eventType: 'release', body }).success
+    ).toBe(true);
+  });
+
+  it('emits a schema-invalid payload so the hub rejects and logs it', async () => {
+    const result = await githubEvents.handleEvents(
+      createContext('pull_request', { pull_request: { merged: 'yes' } })
+    );
+    if (result.type !== 'emit') {
+      throw new Error('Expected an emitted event');
     }
-  );
+    expect(result.events).toHaveLength(1);
+    expect(validateEmittedEvents(githubEvents.definitions, result.events).ok).toBe(false);
+  });
 
   it.each([
     ['pull_request_review', 'edited'],
@@ -257,7 +260,10 @@ describe('GitHub named events', () => {
             repository: { properties: { full_name: { type: 'string' } } },
             sender: { properties: { login: { type: 'string' } } },
             pull_request: {
-              properties: { number: { type: 'integer' }, merged: { type: 'boolean' } },
+              properties: {
+                number: { type: 'integer' },
+                merged: { anyOf: [{ type: 'boolean' }, { type: 'null' }] },
+              },
             },
           },
         },

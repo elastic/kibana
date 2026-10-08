@@ -13,7 +13,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
-import { buildEventId, connectorsSpecs, MAX_CONNECTOR_TYPE_ID_LENGTH } from '@kbn/connector-specs';
+import { buildEventId, MAX_CONNECTOR_TYPE_ID_LENGTH } from '@kbn/connector-specs';
 
 import { CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import { computeIngestTokenHash } from './compute_ingest_token_hash';
@@ -104,7 +104,7 @@ describe('ingestInboundEvent', () => {
     },
   });
 
-  const createFakeSpec = (handleEvents: jest.Mock) =>
+  const createFakeSpec = (handleEvents: jest.Mock, headers?: string[]) =>
     ({
       metadata: {
         id: '.myConnector',
@@ -124,6 +124,7 @@ describe('ingestInboundEvent', () => {
             eventSchema: z.object({ body: z.unknown() }),
           },
         },
+        headers,
         handleEvents,
       },
     } as ReturnType<typeof getConnectorSpec>);
@@ -170,7 +171,6 @@ describe('ingestInboundEvent', () => {
     spaceId?: string;
     query?: Record<string, unknown>;
     headers?: Record<string, string>;
-    body?: object;
     emit?: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
     inMemoryConnectors?: InMemoryConnector[];
     remoteAddress?: string;
@@ -185,7 +185,7 @@ describe('ingestInboundEvent', () => {
       requestId: 'req-1',
       headers: overrides?.headers ?? {},
       query: (overrides?.query ?? { token }) as { token?: string },
-      body: overrides?.body ?? { hello: 'world' },
+      body: { hello: 'world' },
       inboundEventsEnabled: overrides?.enabled ?? true,
       isActionTypeEnabled: overrides?.isActionTypeEnabled ?? (() => true),
       maxEmitted: overrides?.maxEmitted ?? INBOUND_EVENTS_MAX_EMITTED_DEFAULT,
@@ -612,67 +612,35 @@ describe('ingestInboundEvent', () => {
     expect(emitConnectorEvents).toHaveBeenCalled();
   });
 
-  it('passes only GitHub delivery metadata to the event handler', async () => {
+  it('passes only the headers the spec declares to the event handler', async () => {
     const handleEvents = jest.fn().mockResolvedValue({ type: 'emit', events: [] });
-    getConnectorSpecMock.mockReturnValue(createFakeSpec(handleEvents));
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents, ['x-vendor-event', 'x-vendor-delivery'])
+    );
 
     await run({
       headers: {
         authorization: `Bearer ${token}`,
         cookie: 'session=private',
-        'x-hub-signature-256': 'private-signature',
-        'x-github-event': 'issues',
-        'x-github-delivery': 'delivery-1',
+        'x-vendor-signature': 'private-signature',
+        'x-vendor-event': 'issues',
       },
     });
 
     expect(handleEvents).toHaveBeenCalledWith(
       expect.objectContaining({
-        headers: { 'x-github-event': 'issues', 'x-github-delivery': 'delivery-1' },
+        headers: { 'x-vendor-event': 'issues', 'x-vendor-delivery': undefined },
       })
     );
   });
 
-  it('receives a GitHub webhook with the query token and emits under the connector identity', async () => {
-    getConnectorSpecMock.mockReturnValue(connectorsSpecs.GithubConnector);
-    unsecuredSavedObjectsClient.get
-      .mockResolvedValueOnce({
-        ...mockConnectorGet(),
-        attributes: {
-          ...mockConnectorGet().attributes,
-          actionTypeId: '.github',
-          hasInboundEventIdentity: true,
-        },
-      })
-      .mockResolvedValueOnce(mockCredentialGet());
-    const body = {
-      action: 'closed',
-      repository: { id: 1, full_name: 'elastic/example' },
-      sender: { login: 'octocat' },
-      pull_request: { id: 2, number: 42, merged: true },
-    };
+  it('passes no headers when the spec declares none', async () => {
+    const handleEvents = jest.fn().mockResolvedValue({ type: 'emit', events: [] });
+    getConnectorSpecMock.mockReturnValue(createFakeSpec(handleEvents));
 
-    const { result } = await run({
-      connectorTypeId: '.github',
-      headers: { 'x-github-event': 'pull_request', 'x-github-delivery': 'delivery-1' },
-      body,
-    });
+    await run({ headers: { authorization: `Bearer ${token}`, 'x-vendor-event': 'issues' } });
 
-    expect(result).toEqual({ status: 'accepted', body: { ok: true } });
-    expect(emitConnectorEvents).toHaveBeenCalledTimes(1);
-    expect(emitConnectorEvents).toHaveBeenCalledWith(
-      expect.objectContaining({
-        eventId: 'github.pull_request',
-        connectorId,
-        connectorTypeId: '.github',
-        spaceId,
-        correlationKey: 'delivery-1',
-        payload: { eventType: 'pull_request', body },
-        request: expect.objectContaining({
-          headers: expect.objectContaining({ authorization: `ApiKey ${storedApiKey}` }),
-        }),
-      })
-    );
+    expect(handleEvents).toHaveBeenCalledWith(expect.objectContaining({ headers: {} }));
   });
 
   it('returns 202 and emits on the happy path without secrets', async () => {

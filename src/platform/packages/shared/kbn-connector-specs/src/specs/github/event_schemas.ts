@@ -9,27 +9,26 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-const text = () => z.string().max(65_536);
 const identifier = () => z.number().int().nonnegative();
 
 const UserSchema = lazySchema(() =>
   z.looseObject({
     id: identifier().optional(),
-    login: text().optional(),
-    html_url: text().optional(),
-    type: text().optional(),
+    login: z.string().optional(),
+    html_url: z.string().optional(),
+    type: z.string().optional(),
   })
 );
 
 const RepositorySchema = lazySchema(() =>
   z.looseObject({
     id: identifier().optional(),
-    name: text().optional(),
-    full_name: text().optional(),
-    html_url: text().optional(),
+    name: z.string().optional(),
+    full_name: z.string().optional(),
+    html_url: z.string().optional(),
     private: z.boolean().optional(),
-    default_branch: text().optional(),
-    owner: UserSchema.optional(),
+    default_branch: z.string().optional(),
+    owner: UserSchema.nullable().optional(),
   })
 );
 
@@ -37,14 +36,14 @@ const IssueSchema = lazySchema(() =>
   z.looseObject({
     id: identifier().optional(),
     number: identifier().optional(),
-    title: text().optional(),
-    body: text().nullable().optional(),
-    state: text().optional(),
-    html_url: text().optional(),
-    user: UserSchema.optional(),
+    title: z.string().optional(),
+    body: z.string().nullable().optional(),
+    state: z.string().optional(),
+    html_url: z.string().optional(),
+    user: UserSchema.nullable().optional(),
     assignee: UserSchema.nullable().optional(),
     labels: z
-      .array(z.looseObject({ name: text().optional() }))
+      .array(z.looseObject({ name: z.string().optional() }).nullable())
       .max(1000)
       .optional(),
   })
@@ -52,22 +51,22 @@ const IssueSchema = lazySchema(() =>
 
 const PullRequestSchema = lazySchema(() =>
   IssueSchema.extend({
-    merged: z.boolean().optional().describe('True when the pull request was merged.'),
-    merged_at: text().nullable().optional(),
+    merged: z.boolean().nullable().optional().describe('True when the pull request was merged.'),
+    merged_at: z.string().nullable().optional(),
     merged_by: UserSchema.nullable().optional(),
     draft: z.boolean().optional(),
-    head: z.looseObject({ ref: text().optional(), sha: text().optional() }).optional(),
-    base: z.looseObject({ ref: text().optional(), sha: text().optional() }).optional(),
+    head: z.looseObject({ ref: z.string().optional(), sha: z.string().optional() }).optional(),
+    base: z.looseObject({ ref: z.string().optional(), sha: z.string().optional() }).optional(),
   })
 );
 
 const CommonBodySchema = lazySchema(() =>
   z.looseObject({
-    action: text().optional().describe('GitHub lifecycle action, when supplied.'),
+    action: z.string().optional().describe('GitHub lifecycle action, when supplied.'),
     repository: RepositorySchema.optional(),
     sender: UserSchema.optional().describe('GitHub actor supplied with the event.'),
     organization: z
-      .looseObject({ id: identifier().optional(), login: text().optional() })
+      .looseObject({ id: identifier().optional(), login: z.string().optional() })
       .optional(),
   })
 );
@@ -87,9 +86,9 @@ export const GithubIssueCommentEventSchema = lazySchema(() =>
       comment: z
         .looseObject({
           id: identifier().optional(),
-          body: text().optional(),
-          html_url: text().optional(),
-          user: UserSchema.optional(),
+          body: z.string().optional(),
+          html_url: z.string().optional(),
+          user: UserSchema.nullable().optional(),
         })
         .optional(),
     }),
@@ -114,12 +113,12 @@ export const GithubPullRequestReviewEventSchema = lazySchema(() =>
       review: z
         .looseObject({
           id: identifier().optional(),
-          state: text().optional(),
-          body: text().nullable().optional(),
-          html_url: text().optional(),
-          user: UserSchema.optional(),
-          commit_id: text().optional(),
-          submitted_at: text().nullable().optional(),
+          state: z.string().optional(),
+          body: z.string().nullable().optional(),
+          html_url: z.string().optional(),
+          user: UserSchema.nullable().optional(),
+          commit_id: z.string().optional(),
+          submitted_at: z.string().nullable().optional(),
         })
         .optional(),
     }),
@@ -128,10 +127,10 @@ export const GithubPullRequestReviewEventSchema = lazySchema(() =>
 
 const CommitSchema = lazySchema(() =>
   z.looseObject({
-    id: text().optional(),
-    message: text().optional(),
-    timestamp: text().optional(),
-    url: text().optional(),
+    id: z.string().optional(),
+    message: z.string().optional(),
+    timestamp: z.string().optional(),
+    url: z.string().optional(),
   })
 );
 
@@ -139,16 +138,18 @@ export const GithubPushEventSchema = lazySchema(() =>
   z.object({
     eventType: z.literal('push'),
     body: CommonBodySchema.extend({
-      ref: text().optional(),
-      before: text().optional(),
-      after: text().optional(),
+      ref: z.string().optional(),
+      before: z.string().optional(),
+      after: z.string().optional(),
       created: z.boolean().optional(),
       deleted: z.boolean().optional(),
       forced: z.boolean().optional(),
-      compare: text().optional(),
+      compare: z.string().optional(),
       head_commit: CommitSchema.nullable().optional(),
       commits: z.array(CommitSchema).max(2048).optional(),
-      pusher: z.looseObject({ name: text().optional(), email: text().optional() }).optional(),
+      pusher: z
+        .looseObject({ name: z.string().optional(), email: z.string().nullable().optional() })
+        .optional(),
     }),
   })
 );
@@ -160,14 +161,14 @@ export const GithubReleaseEventSchema = lazySchema(() =>
       release: z
         .looseObject({
           id: identifier().optional(),
-          tag_name: text().optional(),
-          name: text().nullable().optional(),
-          body: text().nullable().optional(),
-          html_url: text().optional(),
+          tag_name: z.string().optional(),
+          name: z.string().nullable().optional(),
+          body: z.string().nullable().optional(),
+          html_url: z.string().optional(),
           draft: z.boolean().optional(),
           prerelease: z.boolean().optional(),
-          published_at: text().nullable().optional(),
-          author: UserSchema.optional(),
+          published_at: z.string().nullable().optional(),
+          author: UserSchema.nullable().optional(),
         })
         .optional(),
     }),
@@ -181,24 +182,25 @@ export const GithubDeploymentStatusEventSchema = lazySchema(() =>
       deployment: z
         .looseObject({
           id: identifier().optional(),
-          ref: text().optional(),
-          sha: text().optional(),
-          environment: text().optional(),
-          task: text().optional(),
-          description: text().nullable().optional(),
+          ref: z.string().optional(),
+          sha: z.string().optional(),
+          environment: z.string().optional(),
+          task: z.string().optional(),
+          description: z.string().nullable().optional(),
           creator: UserSchema.nullable().optional(),
         })
         .optional(),
       deployment_status: z
         .looseObject({
           id: identifier().optional(),
-          state: text()
+          state: z
+            .string()
             .optional()
             .describe('Deployment outcome, such as success, failure, or error.'),
-          environment: text().optional(),
-          environment_url: text().optional(),
-          log_url: text().optional(),
-          description: text().nullable().optional(),
+          environment: z.string().optional(),
+          environment_url: z.string().optional(),
+          log_url: z.string().optional(),
+          description: z.string().nullable().optional(),
           creator: UserSchema.nullable().optional(),
         })
         .optional(),
@@ -213,17 +215,18 @@ export const GithubCheckRunEventSchema = lazySchema(() =>
       check_run: z
         .looseObject({
           id: identifier().optional(),
-          name: text().optional(),
-          head_sha: text().optional(),
-          status: text().optional(),
-          conclusion: text()
+          name: z.string().optional(),
+          head_sha: z.string().optional(),
+          status: z.string().optional(),
+          conclusion: z
+            .string()
             .nullable()
             .optional()
             .describe('Check outcome, such as success or failure.'),
-          html_url: text().optional(),
-          details_url: text().nullable().optional(),
-          started_at: text().nullable().optional(),
-          completed_at: text().nullable().optional(),
+          html_url: z.string().optional(),
+          details_url: z.string().nullable().optional(),
+          started_at: z.string().nullable().optional(),
+          completed_at: z.string().nullable().optional(),
         })
         .optional(),
     }),

@@ -131,35 +131,36 @@ const definitions = {
   },
 };
 
-const requiredActions: Readonly<Record<string, string>> = {
+type GithubEventType = keyof typeof definitions;
+
+const requiredActions: Partial<Record<GithubEventType, string>> = {
   pull_request_review: 'submitted',
   release: 'published',
   check_run: 'completed',
 };
 
+const isGithubEventType = (eventType: string): eventType is GithubEventType =>
+  Object.hasOwn(definitions, eventType);
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
 export const githubEvents: ConnectorSpecEvents = {
   definitions,
+  headers: ['x-github-event', 'x-github-delivery'],
   async handleEvents({ headers, rawBody }) {
     const delivery = DeliveryHeadersSchema.safeParse(headers);
-    if (!delivery.success) {
+    if (!delivery.success || !isPlainObject(rawBody)) {
       return { type: 'emit', events: [] };
     }
 
     const { 'x-github-event': eventType, 'x-github-delivery': deliveryId } = delivery.data;
-    const definition = Object.values(definitions).find(
-      ({ eventId }) => eventId === buildEventId('.github', eventType)
-    );
-    if (!definition) {
-      return { type: 'emit', events: [] };
-    }
-
-    const parsed = definition.eventSchema.safeParse({ eventType, body: rawBody });
-    if (!parsed.success) {
+    if (!isGithubEventType(eventType)) {
       return { type: 'emit', events: [] };
     }
 
     const requiredAction = requiredActions[eventType];
-    if (requiredAction !== undefined && parsed.data.body.action !== requiredAction) {
+    if (requiredAction !== undefined && rawBody.action !== requiredAction) {
       return { type: 'emit', events: [] };
     }
 
@@ -167,9 +168,9 @@ export const githubEvents: ConnectorSpecEvents = {
       type: 'emit',
       events: [
         {
-          eventId: definition.eventId,
+          eventId: definitions[eventType].eventId,
           correlationKey: deliveryId ?? uuidv4(),
-          payload: parsed.data,
+          payload: { eventType, body: rawBody },
         },
       ],
     };
