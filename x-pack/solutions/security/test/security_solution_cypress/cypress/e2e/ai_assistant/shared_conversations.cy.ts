@@ -46,6 +46,7 @@ import { azureConnectorAPIPayload, createAzureConnector } from '../../tasks/api_
 import { deleteConnectors } from '../../tasks/api_calls/common';
 import { getFullname, getUsername } from '../../tasks/common';
 import { login } from '../../tasks/login';
+import { setPreferredChatExperienceToClassic } from '../../tasks/api_calls/kibana_advanced_settings';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
 const userRole: MessageRole = 'user';
 const assistantRole: MessageRole = 'assistant';
@@ -116,6 +117,7 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
     deleteConnectors();
     deleteConversations();
     login(isServerless ? 'admin' : undefined);
+    setPreferredChatExperienceToClassic();
     createAzureConnector();
     seedConversation(mockConvo1);
     seedConversation(mockConvo2);
