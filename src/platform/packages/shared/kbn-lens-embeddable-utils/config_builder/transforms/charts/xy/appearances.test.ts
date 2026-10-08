@@ -28,16 +28,21 @@ import {
 const allLayersPresent: SeriesType[] = ['bar', 'area', 'line'];
 
 describe('XY Appearances Transforms', () => {
-  it('should return empty state when given empty API config', () => {
+  it('should default interpolation and points when converting empty API config for line/area', () => {
     const apiConfig: XYConfig['styling'] = {};
     const result = convertStylingToStateFormat(apiConfig, ['line']);
-    expect(result).toEqual({});
+    expect(result).toEqual({
+      curveType: 'LINEAR',
+      pointVisibility: 'auto',
+    });
   });
 
   it('should default areaFill when omitted to solid', () => {
     expect(convertStylingToStateFormat({ areas: { fill_opacity: 0.5 } }, ['area'])).toEqual({
       fillOpacity: 0.5,
       areaFill: 'solid' as const,
+      curveType: 'LINEAR',
+      pointVisibility: 'auto',
     });
   });
 
@@ -211,5 +216,19 @@ describe('XY Appearances Transforms', () => {
     expect(result.fittingFunction).toBe(original.fittingFunction);
     expect(result.emphasizeFitting).toBe(original.emphasizeFitting);
     expect(result.endValue).toBe(original.endValue);
+  });
+
+  it('should ignore interpolation and points when converting bar-only API config to state', () => {
+    const result = convertStylingToStateFormat(
+      {
+        interpolation: 'linear',
+        points: { visibility: 'auto' },
+        overlays: { partial_buckets: { visible: false } },
+      },
+      ['bar']
+    );
+    expect(result.curveType).toBeUndefined();
+    expect(result.pointVisibility).toBeUndefined();
+    expect(result.hideEndzones).toBe(true);
   });
 });

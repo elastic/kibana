@@ -12,8 +12,9 @@ import { isEqual, isObject, omit, sortBy } from 'lodash';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
-import type { FilterCompareOptions } from '@kbn/es-query';
+import type { Filter, FilterCompareOptions } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, isOfAggregateQueryType } from '@kbn/es-query';
+import { fromStoredFilter, toStoredFilter } from '@kbn/as-code-filters-transforms';
 import { canImportVisContext } from '@kbn/unified-histogram';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { DataGridDensity } from '@kbn/unified-data-table';
@@ -196,6 +197,18 @@ const FILTER_COMPARE_OPTIONS: FilterCompareOptions = {
   state: false, // We don't compare filter types (global vs appState).
 };
 
+// The HTTP API stores filters in the as-code format, which omits default meta values such as
+// alias: null and negate: false, while filters built in the UI keep them. Both sides compare the
+// meta after the same conversion. The query is kept as is, because the conversion can drop query
+// options such as slop. Pinning is not part of the comparison, and a filter that cannot be
+// converted is compared as is.
+const toComparableFilters = (filters: Filter[]): Filter[] =>
+  filters.map((filter) => {
+    const asCodeFilter = fromStoredFilter(omit(filter, '$state'));
+    const storedFilter = asCodeFilter && toStoredFilter(asCodeFilter);
+    return storedFilter ? { ...filter, meta: storedFilter.meta } : filter;
+  });
+
 // ad-hoc data view id can change, so we rather compare the ES|QL query itself here
 const getAdjustedDataViewId = (searchSource: SerializedSearchSourceFields) =>
   isOfAggregateQueryType(searchSource.query)
@@ -208,8 +221,8 @@ export const searchSourceComparator: TabComparators['serializedSearchSource'] = 
   searchSourceA,
   searchSourceB
 ) => {
-  const filtersA = searchSourceA.filter ?? [];
-  const filtersB = searchSourceB.filter ?? [];
+  const filtersA = toComparableFilters(searchSourceA.filter ?? []);
+  const filtersB = toComparableFilters(searchSourceB.filter ?? []);
 
   return (
     // if a filter gets pinned and the order of filters does not change,
