@@ -74,18 +74,35 @@ apiTest.describe(
         .toBe(0);
     };
 
-    apiTest.afterEach(async ({ apiClient }) => {
+    const cleanupManagedWorkflows = async (apiClient: ApiClientFixture) => {
+      const failures: Error[] = [];
       for (const [suffix, global] of [...installed].reverse()) {
-        await waitForNoRunningExecutions(apiClient, suffix);
-        const deleted = await apiClient.delete(`${path(suffix)}?global=${global}`, {
-          headers: getContext().headers,
-          responseType: 'json',
-        });
-        expect(deleted, JSON.stringify(deleted.body)).toHaveStatusCode(204);
-        installed.delete(suffix);
+        try {
+          const cancelled = await apiClient.post(
+            `api/workflows/workflow/${workflowId(suffix)}/executions/cancel`,
+            { headers, responseType: 'json' }
+          );
+          expect(cancelled, JSON.stringify(cancelled.body)).toHaveStatusCode(200);
+          await waitForNoRunningExecutions(apiClient, suffix);
+          const deleted = await apiClient.delete(global ? `${path(suffix)}/global` : path(suffix), {
+            headers: getContext().headers,
+            responseType: 'json',
+          });
+          expect(deleted, JSON.stringify(deleted.body)).toHaveStatusCode(204);
+          installed.delete(suffix);
+        } catch (error) {
+          failures.push(new Error(`Failed to clean managed workflow ${suffix}`, { cause: error }));
+        }
       }
-      await cleanupWorkflows(apiClient);
-    });
+      try {
+        await cleanupWorkflows(apiClient);
+      } catch (error) {
+        failures.push(new Error('Failed to clean ordinary workflows', { cause: error }));
+      }
+      if (failures.length > 0) throw new AggregateError(failures, 'Workflow cleanup failed');
+    };
+
+    apiTest.afterEach(async ({ apiClient }) => cleanupManagedWorkflows(apiClient));
 
     apiTest.afterAll(teardown);
 
@@ -96,7 +113,7 @@ apiTest.describe(
     ) => {
       const suffix = existing ?? `inherit-${Date.now()}-${installed.size}`;
       const { global = false, ...body } = options;
-      const result = await apiClient.post(`${path(suffix)}?global=${global}`, {
+      const result = await apiClient.post(global ? `${path(suffix)}/global` : path(suffix), {
         headers: getContext().headers,
         body,
         responseType: 'json',
@@ -153,6 +170,88 @@ apiTest.describe(
       expect(executions).toHaveStatusCode(200);
       expect(executions.body.results).toHaveLength(0);
     };
+
+    apiTest(
+      'requires superuser privileges for global example mutations',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser({
+          elasticsearch: { cluster: [], indices: [] },
+          kibana: [
+            {
+              base: [],
+              feature: { workflowsManagement: ['all', 'workflow_update_managed'] },
+              spaces: ['default'],
+            },
+          ],
+        });
+        const scopedHeaders = { ...getContext().headers, ...cookieHeader };
+        const suffix = `scope-${Date.now()}`;
+        const local = await apiClient.post(path(suffix), {
+          headers: scopedHeaders,
+          body: {},
+          responseType: 'json',
+        });
+        expect(local, JSON.stringify(local.body)).toHaveStatusCode(200);
+        installed.set(suffix, false);
+        const localDelete = await apiClient.delete(path(suffix), {
+          headers: scopedHeaders,
+          responseType: 'json',
+        });
+        expect(localDelete, JSON.stringify(localDelete.body)).toHaveStatusCode(204);
+        installed.delete(suffix);
+        const create = await apiClient.post(`${path(suffix)}/global`, {
+          headers: scopedHeaders,
+          body: {},
+          responseType: 'json',
+        });
+        expect(create, JSON.stringify(create.body)).toHaveStatusCode(403);
+        await install(apiClient, { global: true }, suffix);
+        const replace = await apiClient.post(`${path(suffix)}/global`, {
+          headers: scopedHeaders,
+          body: { message: 'unauthorized replacement' },
+          responseType: 'json',
+        });
+        expect(replace, JSON.stringify(replace.body)).toHaveStatusCode(403);
+        const remove = await apiClient.delete(`${path(suffix)}/global`, {
+          headers: scopedHeaders,
+          responseType: 'json',
+        });
+        expect(remove, JSON.stringify(remove.body)).toHaveStatusCode(403);
+        const saved = await apiClient.get(`api/workflows/workflow/${workflowId(suffix)}`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(saved).toHaveStatusCode(200);
+        expect(saved.body.yaml).not.toContain('unauthorized replacement');
+      }
+    );
+
+    apiTest('cleans up waiting inherited executions', async ({ apiClient }) => {
+      const { accountId, wait } = getContext();
+      const child = await install(apiClient, { global: true, waitForInput: true });
+      const parent = await install(apiClient, {
+        serviceAccountId: accountId,
+        childWorkflowId: workflowId(child),
+        runAsMode: 'inherit',
+      });
+      const parentExecution = await wait(
+        apiClient,
+        await run(apiClient, parent),
+        'waiting_for_child',
+        headers
+      );
+      const childRun = await childExecution(apiClient, parentExecution);
+      await wait(apiClient, childRun.id, 'waiting_for_input', headers);
+      await cleanupManagedWorkflows(apiClient);
+      expect(installed.size).toBe(0);
+      for (const suffix of [parent, child]) {
+        const saved = await apiClient.get(`api/workflows/workflow/${workflowId(suffix)}`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(saved).toHaveStatusCode(404);
+      }
+    });
 
     for (const asynchronous of [false, true]) {
       apiTest(
@@ -300,7 +399,7 @@ apiTest.describe(
           const childRun = await childExecution(apiClient, parentRun);
           const paused = await wait(apiClient, childRun.id, 'waiting_for_input', headers);
           try {
-            const deleted = await apiClient.delete(`${path(child)}?global=${global}`, {
+            const deleted = await apiClient.delete(global ? `${path(child)}/global` : path(child), {
               headers: getContext().headers,
               responseType: 'json',
             });
@@ -313,7 +412,7 @@ apiTest.describe(
           }
           // Execution reads are realtime; deletion searches wait for the index refresh.
           await waitForNoRunningExecutions(apiClient, child);
-          const deleted = await apiClient.delete(`${path(child)}?global=${global}`, {
+          const deleted = await apiClient.delete(global ? `${path(child)}/global` : path(child), {
             headers: getContext().headers,
             responseType: 'json',
           });

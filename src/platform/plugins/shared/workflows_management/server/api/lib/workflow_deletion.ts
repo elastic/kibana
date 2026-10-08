@@ -59,7 +59,14 @@ const hasRunningExecutions = async (
       },
       size: 1,
       _source: false,
+      allow_partial_search_results: false,
     });
+    if (executions.timed_out || executions._shards.failed > 0) {
+      throw new WorkflowConflictError(
+        'Cannot delete the workflow: the active execution search was incomplete.',
+        id
+      );
+    }
     return executions.hits.hits.length > 0;
   }
   const executions = await deps.getWorkflowExecutions(

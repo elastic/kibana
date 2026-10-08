@@ -66,7 +66,12 @@ const makeStorageClient = (
 
 const makeExecutionsDataAccess = () => {
   const workflowExecutionsDataClient = {
-    search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+    search: jest.fn().mockResolvedValue({
+      took: 0,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { hits: [] },
+    }),
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
   } as unknown as WorkflowExecutionsDataClient;
   const stepExecutionsDataClient = {
@@ -867,6 +872,7 @@ describe('bound workflow deletion OCC', () => {
       },
       size: 1,
       _source: false,
+      allow_partial_search_results: false,
     });
     expect(deleteDocument).not.toHaveBeenCalled();
     expect(client.index).toHaveBeenLastCalledWith(
@@ -887,6 +893,28 @@ describe('bound workflow deletion OCC', () => {
     await expect(deleteWorkflows(params)).rejects.toThrow('unavailable');
     expect(deleteDocument).not.toHaveBeenCalled();
     expect(client.index).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
+    { timed_out: true, failed: 0 },
+    { timed_out: false, failed: 1 },
+  ])('rejects an incomplete global execution search (%j)', async ({ timed_out, failed }) => {
+    const { client, params, deleteDocument } = setup(true);
+    params.spaceId = '*';
+    params.guardedDelete.document.spaceId = '*';
+    params.guardedDelete.document.managed = true;
+    jest.mocked(params.workflowExecutionsDataClient.search).mockResolvedValueOnce({
+      took: 0,
+      timed_out,
+      _shards: { total: 1, successful: 1 - failed, skipped: 0, failed },
+      hits: { hits: [] },
+    });
+    await expect(deleteWorkflows(params)).rejects.toThrow('active execution search was incomplete');
+    expect(deleteDocument).not.toHaveBeenCalled();
+    expect(params.workflowExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
+    expect(client.index).toHaveBeenLastCalledWith(
+      expect.objectContaining({ document: params.guardedDelete.document })
+    );
   });
 
   it('deletes a global managed workflow after all executions finish', async () => {

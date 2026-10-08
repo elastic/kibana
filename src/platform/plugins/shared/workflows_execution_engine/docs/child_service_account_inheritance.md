@@ -26,7 +26,7 @@ The identity resolver requires a managed parent at every delegated hop. Every in
 
 The child execution stores its effective identity and root workload ID. The existing execution context retains the immediate parent workflow/execution IDs, and the execution retains its YAML and definition snapshot. Run and resume obtain fresh scoped credentials from the root binding, including after an async parent completes. Binding changes, revocation, or disabling SAs fail the child without falling back to the caller. `executedBy` continues to identify the initiating caller.
 
-Force-deleting a global managed definition checks active executions across all spaces after disabling the definition. Deletion is rejected while any execution is active.
+Force-deleting a global managed definition checks active executions across all spaces after disabling the definition. Deletion is rejected while any execution is active or the execution search is incomplete.
 
 ## Trust assumption
 
@@ -36,7 +36,7 @@ This approach trusts managed-workflow publishers. Ordinary workflow APIs reject 
 
 Enable SAs and load `examples/developer_examples` and `examples/workflows_extensions_example`. The example-only `/internal/workflows_extensions_example/managed_service_account/{suffix}` endpoint installs the registered managed template, accepting bounded options rather than arbitrary YAML.
 
-- `POST` with `{}` installs an unbound managed child. Add `?global=true` to install it globally through the managed-workflows API; use the same query on `DELETE` to uninstall it.
+- `POST` with `{}` installs an unbound managed child. Use `.../{suffix}/global` to install it globally through the managed-workflows API; use the same path on `DELETE` to uninstall it. Global example mutations require superuser privileges; space-scoped workflow privileges are insufficient.
 - `POST` with `{"serviceAccountId":"<SA>","childWorkflowId":"system-example-service-account-child","runAsMode":"inherit"}` installs a managed parent.
 - Set `fallbackChild: true` on the parent to exercise its child call from a workflow-level failure handler.
 - Set `asynchronous: true` for `workflow.executeAsync`, or `waitForInput: true` on the child to test durable resume.
