@@ -15,6 +15,7 @@ import {
   toActionSource,
 } from './source/v1';
 import { UserActionActionsRt } from './action/v1';
+import { AccessUserActionRt } from './access/v1';
 import { AssigneesUserActionRt } from './assignees/v1';
 import { CategoryUserActionRt } from './category/v1';
 import type { CommentUserActionPayloadWithoutIdsRt } from './comment/v1';
@@ -71,6 +72,7 @@ export const CaseUserActionInjectedIdsRt = rt.strict({
 });
 
 const BasicUserActionsRt = rt.union([
+  AccessUserActionRt,
   DescriptionUserActionRt,
   TagsUserActionRt,
   TitleUserActionRt,
@@ -152,6 +154,7 @@ export type UserAction<T extends UserActionPayload = UserActionPayload> = Omit<
 /**
  * User actions
  */
+export type AccessUserAction = UserAction<rt.TypeOf<typeof AccessUserActionRt>>;
 export type AssigneesUserAction = UserAction<rt.TypeOf<typeof AssigneesUserActionRt>>;
 export type CategoryUserAction = UserAction<rt.TypeOf<typeof CategoryUserActionRt>>;
 export type CommentUserAction = UserAction<rt.TypeOf<typeof CommentUserActionRt>>;

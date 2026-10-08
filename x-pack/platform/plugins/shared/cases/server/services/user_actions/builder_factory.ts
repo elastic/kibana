@@ -6,6 +6,7 @@
  */
 
 import type { UserActionType } from '../../../common/types/domain';
+import { AccessUserActionBuilder } from './builders/access';
 import { CreateCaseUserActionBuilder } from './builders/create_case';
 import { TitleUserActionBuilder } from './builders/title';
 import { CommentUserActionBuilder } from './builders/comment';
@@ -27,6 +28,7 @@ import { TemplateUserActionBuilder } from './builders/template';
 import { WorkflowUserActionBuilder } from './builders/workflow';
 
 const builderMap = {
+  access: AccessUserActionBuilder,
   assignees: AssigneesUserActionBuilder,
   title: TitleUserActionBuilder,
   create_case: CreateCaseUserActionBuilder,

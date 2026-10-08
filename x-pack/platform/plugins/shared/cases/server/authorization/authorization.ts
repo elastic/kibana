@@ -153,6 +153,14 @@ export class Authorization {
   }
 
   /**
+   * Whether the caller holds the reserved superuser role (stateful only).
+   * Superusers bypass restricted-case rules such as the last-assignee guard.
+   */
+  public isSuperuserRequest(): boolean {
+    return this.isSuperuser;
+  }
+
+  /**
    * Returns true when the caller may see the given case. A restricted case is
    * visible only to its assignees (callers without a user profile are never
    * assignees) and superusers.

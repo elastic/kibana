@@ -37,13 +37,19 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
+  MAX_ASSIGNEES_PER_CASE,
   MAX_USER_ACTIONS_PER_CASE,
 } from '../../../common/constants';
 import type { Owner } from '../../../common/constants/types';
 import { Operations } from '../../authorization';
 import { createCaseEntity } from '../../authorization/utils';
 import { createCaseError, isSOError } from '../../common/error';
-import { createAlertUpdateStatusRequest, flattenCaseSavedObject } from '../../common/utils';
+import {
+  createAlertUpdateStatusRequest,
+  flattenCaseSavedObject,
+  getAlertInfoFromComments,
+} from '../../common/utils';
+import type { AlertInfo } from '../../common/types';
 import {
   isAlertAttachmentType,
   UNIFIED_ALERT_TYPES_ARRAY,
@@ -71,7 +77,7 @@ import type {
   AttachmentAttributes,
   CustomFieldsConfiguration,
 } from '../../../common/types/domain';
-import { CaseStatuses, AttachmentType } from '../../../common/types/domain';
+import { CaseAccessMode, CaseStatuses, AttachmentType } from '../../../common/types/domain';
 import {
   validateCustomFields,
   validateCaseExtendedFields,
@@ -194,13 +200,195 @@ function notifyPlatinumUsage(
   licensingService: LicensingService,
   requests: UpdateRequestWithOriginalCase[]
 ) {
-  const requestsUpdatingAssignees = requests.filter(
-    ({ updateReq }) => updateReq.assignees !== undefined
+  const requestsUpdatingAssigneesOrAccess = requests.filter(
+    ({ updateReq }) => updateReq.assignees !== undefined || updateReq.access !== undefined
   );
 
-  if (requestsUpdatingAssignees.length > 0) {
+  if (requestsUpdatingAssigneesOrAccess.length > 0) {
     licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
   }
+}
+
+/**
+ * Removes `access` from patch requests when the restricted-cases feature is
+ * disabled (the field is ignored on write), and drops `access: { mode:
+ * 'default' }` aimed at a case with no stored access field, so restating the
+ * implicit default is not recorded as a change.
+ */
+function normalizeAccessInRequests(
+  requests: CasePatchRequest[],
+  casesMap: Map<string, CaseSavedObjectTransformed>,
+  restrictedCasesEnabled: boolean
+): CasePatchRequest[] {
+  return requests.map((reqCase) => {
+    if (reqCase.access === undefined) {
+      return reqCase;
+    }
+
+    const storedAccess = casesMap.get(reqCase.id)?.attributes.access;
+    const isNoOpDefault =
+      storedAccess === undefined && reqCase.access.mode === CaseAccessMode.DEFAULT;
+
+    if (!restrictedCasesEnabled || isNoOpDefault) {
+      const { access, ...rest } = reqCase;
+      return rest;
+    }
+
+    return reqCase;
+  });
+}
+
+/**
+ * Throws when a request changes a case's access without a Platinum license.
+ * Restricted-case membership is the assignees list, which requires user
+ * profiles — the same licensing bar as case assignment.
+ */
+function throwIfAccessChangeWithoutValidLicense(
+  requests: UpdateRequestWithOriginalCase[],
+  hasPlatinumLicenseOrGreater: boolean
+) {
+  if (hasPlatinumLicenseOrGreater) {
+    return;
+  }
+
+  const requestsUpdatingAccess = requests.filter(({ updateReq }) => updateReq.access !== undefined);
+
+  if (requestsUpdatingAccess.length > 0) {
+    const ids = requestsUpdatingAccess.map(({ updateReq }) => updateReq.id);
+    throw Boom.forbidden(
+      `In order to change the access of cases, you must be subscribed to an Elastic Platinum license, ids: [${ids.join(
+        ', '
+      )}]`
+    );
+  }
+}
+
+/**
+ * The actor restricting a case is added to its assignees so they cannot lock
+ * themselves out. This is a deliberate system action: it does not require the
+ * assign privilege, unlike caller-provided assignee changes.
+ */
+function addActorToAssigneesOnRestrict(requests: UpdateRequestWithOriginalCase[], user: User) {
+  if (user.profile_uid == null) {
+    return;
+  }
+
+  for (const { updateReq, originalCase } of requests) {
+    if (updateReq.access?.mode !== CaseAccessMode.RESTRICTED) {
+      continue;
+    }
+
+    const finalAssignees = updateReq.assignees ?? originalCase.attributes.assignees;
+
+    if (!finalAssignees.some(({ uid }) => uid === user.profile_uid)) {
+      if (finalAssignees.length >= MAX_ASSIGNEES_PER_CASE) {
+        throw Boom.badRequest(
+          `Cannot restrict case ${updateReq.id}: the assignees limit of ${MAX_ASSIGNEES_PER_CASE} prevents adding you as an assignee.`
+        );
+      }
+
+      // keep the user action and the persisted payload uid-only
+      updateReq.assignees = [
+        ...finalAssignees.map(({ uid }) => ({ uid })),
+        { uid: user.profile_uid },
+      ];
+    }
+  }
+}
+
+/**
+ * A restricted case must always keep at least one assignee — the assignees
+ * list is its visibility boundary. Only a superuser may leave a restricted
+ * case without assignees (the recovery path when all assignees have left).
+ */
+function throwIfRestrictedCaseWithoutAssignees({
+  requests,
+  isSuperuser,
+}: {
+  requests: UpdateRequestWithOriginalCase[];
+  isSuperuser: boolean;
+}) {
+  if (isSuperuser) {
+    return;
+  }
+
+  const violatingRequests = requests.filter(({ updateReq, originalCase }) => {
+    const finalMode =
+      updateReq.access?.mode ?? originalCase.attributes.access?.mode ?? CaseAccessMode.DEFAULT;
+
+    if (finalMode !== CaseAccessMode.RESTRICTED) {
+      return false;
+    }
+
+    const finalAssignees = updateReq.assignees ?? originalCase.attributes.assignees;
+    return finalAssignees.length === 0;
+  });
+
+  if (violatingRequests.length > 0) {
+    const ids = violatingRequests.map(({ updateReq }) => updateReq.id);
+    throw Boom.badRequest(
+      `A restricted case must have at least one assignee, ids: [${ids.join(', ')}]`
+    );
+  }
+}
+
+/**
+ * Keeps `kibana.alert.case_ids` consistent with the case's access mode: the
+ * case id is stripped from every attached alert when a case becomes restricted
+ * and re-added when it returns to default. Runs BEFORE the case is persisted
+ * and propagates failures — a restricted case must never persist while alerts
+ * still reference it. The alert attachments remain the source of truth, so a
+ * partial update is recovered by retrying either direction.
+ */
+async function syncAlertCaseIdsForAccessChanges({
+  casesToUpdate,
+  caseService,
+  alertsService,
+}: {
+  casesToUpdate: UpdateRequestWithOriginalCase[];
+  caseService: CasesService;
+  alertsService: AlertService;
+}): Promise<void> {
+  const accessChanges = casesToUpdate.filter(({ updateReq }) => updateReq.access !== undefined);
+
+  if (accessChanges.length === 0) {
+    return;
+  }
+
+  const alertComments = await getAlertComments({ casesToSync: accessChanges, caseService });
+  const alertsByCaseId = new Map<string, AlertInfo[]>();
+
+  for (const comment of alertComments.saved_objects) {
+    const caseId = getID(comment, CASE_SAVED_OBJECT);
+
+    if (caseId == null) {
+      continue;
+    }
+
+    const alerts = getAlertInfoFromComments([comment.attributes]);
+
+    if (alerts.length > 0) {
+      alertsByCaseId.set(caseId, [...(alertsByCaseId.get(caseId) ?? []), ...alerts]);
+    }
+  }
+
+  if (alertsByCaseId.size === 0) {
+    return;
+  }
+
+  const restrictingCaseIds = new Set(
+    accessChanges
+      .filter(({ updateReq }) => updateReq.access?.mode === CaseAccessMode.RESTRICTED)
+      .map(({ updateReq }) => updateReq.id)
+  );
+
+  await Promise.all(
+    Array.from(alertsByCaseId.entries()).map(([caseId, alerts]) =>
+      restrictingCaseIds.has(caseId)
+        ? alertsService.removeCaseIdFromAlertsOrThrow({ alerts, caseId })
+        : alertsService.bulkUpdateCases({ alerts, caseIds: [caseId] })
+    )
+  );
 }
 
 /**
@@ -575,13 +763,19 @@ export const bulkUpdate = async (
       return acc;
     }, new Map<string, CaseSavedObjectTransformed>());
 
+    const requestCases = normalizeAccessInRequests(
+      query.cases,
+      casesMap,
+      clientArgs.config.restrictedCases.enabled
+    );
+
     const { nonExistingCases, conflictedCases, casesToAuthorize, reopenedCases, changedAssignees } =
-      partitionPatchRequest(casesMap, query.cases);
+      partitionPatchRequest(casesMap, requestCases);
 
     const operationsToAuthorize = getOperationsToAuthorize({
       reopenedCases,
       changedAssignees,
-      allCases: query.cases,
+      allCases: requestCases,
     });
 
     await authorization.ensureAuthorized({
@@ -610,7 +804,7 @@ export const bulkUpdate = async (
       configurations.map((conf) => [conf.owner, conf.customFields])
     );
 
-    const casesToUpdate: UpdateRequestWithOriginalCase[] = query.cases.reduce(
+    const casesToUpdate: UpdateRequestWithOriginalCase[] = requestCases.reduce(
       (acc: UpdateRequestWithOriginalCase[], updateCase) => {
         const originalCase = casesMap.get(updateCase.id);
 
@@ -645,6 +839,12 @@ export const bulkUpdate = async (
 
     throwIfUpdateOwner(casesToUpdate);
     throwIfUpdateAssigneesWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
+    throwIfAccessChangeWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
+    addActorToAssigneesOnRestrict(casesToUpdate, user);
+    throwIfRestrictedCaseWithoutAssignees({
+      requests: casesToUpdate,
+      isSuperuser: authorization.isSuperuserRequest(),
+    });
 
     // Validate close reasons
     await Promise.all(
@@ -891,6 +1091,8 @@ export const bulkUpdate = async (
         }
       }
     }
+
+    await syncAlertCaseIdsForAccessChanges({ casesToUpdate, caseService, alertsService });
 
     const updatedCases = await patchCases({ caseService, patchCasesPayload });
 

@@ -10,7 +10,7 @@ import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Case, CustomFieldsConfiguration, User } from '../../../common/types/domain';
-import { CaseSeverity, UserActionTypes } from '../../../common/types/domain';
+import { CaseAccessMode, CaseSeverity, UserActionTypes } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 
 import { Operations } from '../../authorization';
@@ -18,6 +18,7 @@ import { createCaseError, isSODecoratedError, isSOError } from '../../common/err
 import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
+import { MAX_ASSIGNEES_PER_CASE } from '../../../common/constants';
 import type { Owner } from '../../../common/constants/types';
 import { resolveExtractObservables } from '../../../common/utils/case_settings';
 import type {
@@ -122,6 +123,13 @@ export const bulkCreate = async (
 
   try {
     const decodedData = decodeWithExcessOrThrow(BulkCreateCasesRequestRt)(data);
+
+    // The access field is ignored on write while the restricted-cases feature
+    // is disabled.
+    const casesData = clientArgs.config.restrictedCases.enabled
+      ? decodedData
+      : { cases: decodedData.cases.map(({ access, ...theCase }) => theCase) };
+
     const configurations = await casesClient.configure.get();
 
     const customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map(
@@ -132,7 +140,7 @@ export const bulkCreate = async (
       configurations.map((conf) => [conf.owner, conf.extractObservables])
     );
 
-    const casesWithIds = getCaseWithIds(decodedData);
+    const casesWithIds = getCaseWithIds(casesData);
 
     if (
       casesWithIds.filter((theCase) => theCase.assignees && theCase.assignees.length !== 0).length >
@@ -162,6 +170,7 @@ export const bulkCreate = async (
       const customFieldsConfiguration = customFieldsConfigurationMap.get(theCase.owner);
 
       validateRequest({ theCase, customFieldsConfiguration, hasPlatinumLicenseOrGreater });
+      applyRestrictedAccessRules({ theCase, user, licensingService });
 
       // Pairing for existing links runs independently of the templates feature
       // flag (addendum A1) — any owner with configured customFields pays one
@@ -454,6 +463,12 @@ const validateRequest = ({
   validateCustomFieldsStructure(customFieldsValidationParams);
   validateAssigneesUsage({ assignees: theCase.assignees, hasPlatinumLicenseOrGreater });
 
+  if (theCase.access?.mode === CaseAccessMode.RESTRICTED && !hasPlatinumLicenseOrGreater) {
+    throw Boom.forbidden(
+      'In order to restrict a case, you must be subscribed to an Elastic Platinum license'
+    );
+  }
+
   // bulkCreate has no HTTP route — its callers (the cases connector) resolve templates
   // themselves and always pin a version. Server-side template expansion (which resolves an
   // omitted version to latest) is deliberately limited to `create`: running it here would
@@ -480,6 +495,47 @@ const validateAssigneesUsage = ({
         'In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
       );
     }
+  }
+};
+
+/**
+ * Restricted-case create rules, mirroring create.ts: the creator is
+ * auto-assigned (a system action that does not require the assign privilege)
+ * and the resulting case must end with at least one assignee — the assignees
+ * list is its visibility boundary. The Platinum requirement was validated by
+ * the caller before this runs.
+ */
+const applyRestrictedAccessRules = ({
+  theCase,
+  user,
+  licensingService,
+}: {
+  theCase: { id: string } & BulkCreateCasesRequest['cases'][number];
+  user: User;
+  licensingService: CasesClientArgs['services']['licensingService'];
+}) => {
+  if (theCase.access?.mode !== CaseAccessMode.RESTRICTED) {
+    return;
+  }
+
+  licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
+
+  const assignees = theCase.assignees ?? [];
+
+  if (user.profile_uid != null && !assignees.some(({ uid }) => uid === user.profile_uid)) {
+    if (assignees.length >= MAX_ASSIGNEES_PER_CASE) {
+      throw Boom.badRequest(
+        `Cannot create a restricted case: the assignees limit of ${MAX_ASSIGNEES_PER_CASE} prevents adding you as an assignee.`
+      );
+    }
+
+    theCase.assignees = [...assignees, { uid: user.profile_uid }];
+  }
+
+  if ((theCase.assignees ?? []).length === 0) {
+    throw Boom.badRequest(
+      'A restricted case must have at least one assignee. Provide assignees or create the case with the default access mode.'
+    );
   }
 };
 
@@ -678,6 +734,7 @@ const createBulkCreateUserActionsRequest = ({
     assignees: theCase.attributes.assignees?.map(({ uid }) => ({ uid })) ?? [],
     category: theCase.attributes.category ?? null,
     customFields: theCase.attributes.customFields ?? [],
+    ...(theCase.attributes.access !== undefined ? { access: theCase.attributes.access } : {}),
   };
 
   return {

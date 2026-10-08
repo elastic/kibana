@@ -96,6 +96,17 @@ export const CUSTOM_FIELDS = i18n.translate('xpack.cases.caseView.userActions.cu
   defaultMessage: 'Custom Fields',
 });
 
+export const RESTRICTED_CASE = i18n.translate('xpack.cases.caseView.userActions.restrictedCase', {
+  defaultMessage: 'restricted this case to its assignees',
+});
+
+export const UNRESTRICTED_CASE = i18n.translate(
+  'xpack.cases.caseView.userActions.unrestrictedCase',
+  {
+    defaultMessage: 'removed the access restriction from this case',
+  }
+);
+
 export const OBSERVABLES = i18n.translate('xpack.cases.caseView.userActions.observables', {
   defaultMessage: 'Observables',
 });

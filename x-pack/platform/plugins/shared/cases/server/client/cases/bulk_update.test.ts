@@ -4198,4 +4198,316 @@ describe('update', () => {
       );
     });
   });
+
+  describe('restricted case access', () => {
+    const actorUid = 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0';
+    const restrictedCasesClientMock = createCasesClientMock();
+    restrictedCasesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+
+    const buildCaseFixture = (overrides: Partial<CaseSavedObjectTransformed['attributes']> = {}) =>
+      ({
+        ...mockCases[0],
+        attributes: { ...mockCases[0].attributes, ...overrides },
+      } as CaseSavedObjectTransformed);
+
+    const buildAlertComment = (caseId: string) => ({
+      id: 'alert-comment-id',
+      type: 'cases-comments',
+      attributes: {
+        type: 'alert',
+        alertId: ['alert-id-1'],
+        index: ['alert-index-1'],
+        owner: SECURITY_SOLUTION_OWNER,
+      },
+      references: [{ type: 'cases', id: caseId, name: 'associated-cases' }],
+    });
+
+    let clientArgs: ReturnType<typeof createCasesClientMockArgs>;
+
+    const mockLoadedCase = (theCase: CaseSavedObjectTransformed) => {
+      clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: [theCase] });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...theCase }],
+      });
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, restrictedCases: { enabled: true } };
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
+      clientArgs.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+        [mockCases[0].id]: 0,
+      });
+    });
+
+    it('persists the access change and auto-assigns the actor on restrict', async () => {
+      mockLoadedCase(buildCaseFixture({ assignees: [{ uid: 'someone-else' }] }));
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              access: { mode: 'restricted' as const },
+            },
+          ],
+        },
+        clientArgs,
+        restrictedCasesClientMock
+      );
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+      expect(updatedAttributes.access).toEqual({ mode: 'restricted' });
+      expect(updatedAttributes.assignees).toEqual([
+        { uid: 'someone-else' },
+        { uid: actorUid },
+      ]);
+    });
+
+    it('throws when changing access without a platinum license', async () => {
+      clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(false);
+      mockLoadedCase(buildCaseFixture());
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                access: { mode: 'restricted' as const },
+              },
+            ],
+          },
+          clientArgs,
+          restrictedCasesClientMock
+        )
+      ).rejects.toThrow(
+        'In order to change the access of cases, you must be subscribed to an Elastic Platinum license'
+      );
+    });
+
+    it('ignores the access field when the feature is disabled', async () => {
+      clientArgs.config = { ...clientArgs.config, restrictedCases: { enabled: false } };
+      mockLoadedCase(buildCaseFixture());
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                access: { mode: 'restricted' as const },
+              },
+            ],
+          },
+          clientArgs,
+          restrictedCasesClientMock
+        )
+      ).rejects.toThrow('All update fields are identical to current version.');
+    });
+
+    it('treats a default access request against a case without the field as a no-op', async () => {
+      mockLoadedCase(buildCaseFixture());
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                access: { mode: 'default' as const },
+              },
+            ],
+          },
+          clientArgs,
+          restrictedCasesClientMock
+        )
+      ).rejects.toThrow('All update fields are identical to current version.');
+    });
+
+    it('strips the case id from attached alerts before persisting a restrict', async () => {
+      mockLoadedCase(buildCaseFixture());
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [buildAlertComment(mockCases[0].id)],
+        total: 1,
+        per_page: 10,
+        page: 1,
+      });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              access: { mode: 'restricted' as const },
+            },
+          ],
+        },
+        clientArgs,
+        restrictedCasesClientMock
+      );
+
+      expect(clientArgs.services.alertsService.removeCaseIdFromAlertsOrThrow).toHaveBeenCalledWith({
+        alerts: [{ id: 'alert-id-1', index: 'alert-index-1' }],
+        caseId: mockCases[0].id,
+      });
+    });
+
+    it('fails the restrict and does not persist when the alert update fails', async () => {
+      // failure scenario: the rule registry rejects the case id removal — the
+      // case must not persist as restricted while alerts still reference it
+      mockLoadedCase(buildCaseFixture());
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [buildAlertComment(mockCases[0].id)],
+        total: 1,
+        per_page: 10,
+        page: 1,
+      });
+      clientArgs.services.alertsService.removeCaseIdFromAlertsOrThrow.mockRejectedValue(
+        new Error('alert update failed')
+      );
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                access: { mode: 'restricted' as const },
+              },
+            ],
+          },
+          clientArgs,
+          restrictedCasesClientMock
+        )
+      ).rejects.toThrow('alert update failed');
+
+      expect(clientArgs.services.caseService.patchCases).not.toHaveBeenCalled();
+    });
+
+    it('re-adds the case id to attached alerts before persisting an unrestrict', async () => {
+      mockLoadedCase(
+        buildCaseFixture({
+          access: { mode: 'restricted' as const },
+          assignees: [{ uid: actorUid }],
+        })
+      );
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [buildAlertComment(mockCases[0].id)],
+        total: 1,
+        per_page: 10,
+        page: 1,
+      });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              access: { mode: 'default' as const },
+            },
+          ],
+        },
+        clientArgs,
+        restrictedCasesClientMock
+      );
+
+      expect(clientArgs.services.alertsService.bulkUpdateCases).toHaveBeenCalledWith({
+        alerts: [{ id: 'alert-id-1', index: 'alert-index-1' }],
+        caseIds: [mockCases[0].id],
+      });
+      expect(clientArgs.services.caseService.patchCases).toHaveBeenCalled();
+    });
+
+    it('refuses to remove the last assignee of a restricted case', async () => {
+      mockLoadedCase(
+        buildCaseFixture({
+          access: { mode: 'restricted' as const },
+          assignees: [{ uid: actorUid }],
+        })
+      );
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                assignees: [],
+              },
+            ],
+          },
+          clientArgs,
+          restrictedCasesClientMock
+        )
+      ).rejects.toThrow('A restricted case must have at least one assignee');
+    });
+
+    it('allows a superuser to remove the last assignee of a restricted case', async () => {
+      mockLoadedCase(
+        buildCaseFixture({
+          access: { mode: 'restricted' as const },
+          assignees: [{ uid: actorUid }],
+        })
+      );
+      clientArgs.authorization.isSuperuserRequest.mockReturnValue(true);
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              assignees: [],
+            },
+          ],
+        },
+        clientArgs,
+        restrictedCasesClientMock
+      );
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+      expect(updatedAttributes.assignees).toEqual([]);
+    });
+
+    it('refuses a restrict that would leave the case without assignees when the actor has no profile', async () => {
+      clientArgs.user = { ...clientArgs.user, profile_uid: undefined };
+      mockLoadedCase(buildCaseFixture({ assignees: [] }));
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                access: { mode: 'restricted' as const },
+              },
+            ],
+          },
+          clientArgs,
+          restrictedCasesClientMock
+        )
+      ).rejects.toThrow('A restricted case must have at least one assignee');
+    });
+  });
 });

@@ -12,6 +12,7 @@ import * as rt from 'io-ts';
  * user_actions/_find api. These values should not be removed only new values can be added.
  */
 export const UserActionTypes = {
+  access: 'access',
   assignees: 'assignees',
   comment: 'comment',
   connector: 'connector',
