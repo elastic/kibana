@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { InternalRulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import type {
   SignificantEventsMaintenanceFailure,
@@ -23,6 +24,7 @@ import {
 import type { GetScopedClients } from '../../routes/types';
 import { listAllSources } from '../../routes/utils/list_all_sources';
 import type { SignificantEventsServer } from '../../types';
+import { ruleIdsFromQueryLinks } from '../knowledge_indicators/rule_ids_from_query_links';
 import type { SignificantEventsMaintenanceStateAttributes } from './saved_object';
 import {
   createFeatureSettingsController,
@@ -37,7 +39,7 @@ import type { MaintenanceAccess } from './maintenance_access';
 import { createMaintenanceSystemRequest } from './system_request';
 import { toMessage } from './to_message';
 import { logFailures } from './log_failures';
-import { setV2RulesEnabled } from './rules';
+import { runRulesInBatches, setV2RulesEnabled, type RulesToggleResult } from './rules';
 import { requireAllSpaceIds } from './spaces';
 import { runForEachSpace, throwSpaceFailures } from './run_for_each_space';
 import {
@@ -59,6 +61,13 @@ import { reEnableWorkflow, sweepWorkflows, mergeTargets, targetKey } from './wor
  * touching the snapshot, and always runs as the system.
  */
 type PauseRun = { mode: 'pause'; access: MaintenanceAccess } | { mode: 'reassert' };
+
+/** Lists and disables the rules backing KI queries without a user request. */
+export interface InternalRuleBackedRules {
+  /** Rule ids backing the queries of one space. */
+  listRuleIds: (spaceId: SpaceId) => Promise<string[]>;
+  bulkDisableRules: InternalRulesClientApi['bulkDisableRules'];
+}
 
 /**
  * Pauses and resumes the Significant Events background activity of one space from
@@ -96,10 +105,9 @@ export interface SignificantEventsMaintenanceService {
    * Pause because the Nightshift feature flag was turned off, recorded as
    * `MAINTENANCE_FEATURE_FLAG_ACTOR`. Same sweep and restore snapshot as `pause`,
    * but without a user: each existing space is paused through its own document
-   * with internal clients, and rules keep running because alerting v2 has no
-   * internal rules client. Spaces that are already paused are left alone. When
-   * several Kibana nodes call it at once, only the node that claims a space's
-   * paused state sweeps that space.
+   * with internal clients, and rules are disabled as the internal Kibana user.
+   * Spaces that are already paused are left alone. When several Kibana nodes call
+   * it at once, only the node that claims a space's paused state sweeps that space.
    */
   pauseOnFlagOff(): Promise<void>;
   /**
@@ -128,8 +136,8 @@ export interface SignificantEventsMaintenanceService {
    * the pause in every space whose document is paused: disable its per-space
    * workflows, cancel their executions, keep the Settings toggles off, and merge
    * any newly disabled workflows into the snapshot. Runs without a user request,
-   * so it uses internal clients and leaves rules alone (alerting v2 has no
-   * internal rules client). Spaces that are not paused are left alone.
+   * so it uses internal clients, rules included. Spaces that are not paused are
+   * left alone.
    */
   reassertPause(): Promise<void>;
 }
@@ -138,10 +146,12 @@ export const createSignificantEventsMaintenanceService = ({
   logger,
   server,
   getScopedClients,
+  internalRuleBackedRules,
 }: {
   logger: Logger;
   server: SignificantEventsServer;
   getScopedClients: GetScopedClients;
+  internalRuleBackedRules: InternalRuleBackedRules;
 }): SignificantEventsMaintenanceService => {
   const log = logger.get('significant-events-maintenance');
   const featureSettings = createFeatureSettingsController({ server, getScopedClients });
@@ -200,29 +210,63 @@ export const createSignificantEventsMaintenanceService = ({
     }
   };
 
+  /** The rule ids backing KI queries and a way to disable them as the caller or the internal user. */
+  const resolveBackedRules = async (
+    request: KibanaRequest,
+    access: MaintenanceAccess,
+    spaceId: SpaceId
+  ): Promise<{
+    ruleIds: string[];
+    disable: (ids: string[]) => Promise<RulesToggleResult | undefined>;
+  }> => {
+    switch (access) {
+      case 'user': {
+        const { getKnowledgeIndicatorClient, getSignificantEventsAlertingContext } =
+          await getScopedClients({ request });
+        const links = await (await getKnowledgeIndicatorClient()).getRuleBackedQueryLinks();
+        return {
+          ruleIds: ruleIdsFromQueryLinks(links),
+          disable: async (ids) => {
+            const { alertingV2RulesClient } = await getSignificantEventsAlertingContext();
+            return alertingV2RulesClient
+              ? setV2RulesEnabled(alertingV2RulesClient, ids, false)
+              : undefined;
+          },
+        };
+      }
+      case 'system':
+        return {
+          ruleIds: await internalRuleBackedRules.listRuleIds(spaceId),
+          disable: (ids) =>
+            runRulesInBatches(ids, (chunk) =>
+              internalRuleBackedRules.bulkDisableRules({ ids: chunk })
+            ),
+        };
+      default: {
+        const unhandledAccess: never = access;
+        throw new Error(`Unhandled maintenance access: ${unhandledAccess}`);
+      }
+    }
+  };
+
   const disableBackedRules = async (
     request: KibanaRequest,
+    access: MaintenanceAccess,
+    spaceId: SpaceId,
     failures: SignificantEventsMaintenanceFailure[]
   ): Promise<string[]> => {
     try {
-      const { getKnowledgeIndicatorClient, getSignificantEventsAlertingContext } =
-        await getScopedClients({ request });
-      const kiClient = await getKnowledgeIndicatorClient();
-      const links = await kiClient.getRuleBackedQueryLinks();
-      const ruleIds = [...new Set(links.map((link) => link.rule_id).filter(Boolean))];
+      const backedRules = await resolveBackedRules(request, access, spaceId);
+      const ruleIds = [...new Set(backedRules.ruleIds)];
       if (ruleIds.length === 0) {
         return [];
       }
-      const { alertingV2RulesClient } = await getSignificantEventsAlertingContext();
-      if (!alertingV2RulesClient) {
+      const result = await backedRules.disable(ruleIds);
+      if (!result) {
         failures.push({ target: 'rules', error: 'Alerting v2 rules client is not available' });
         return [];
       }
-      const { toggledIds, failures: ruleFailures } = await setV2RulesEnabled(
-        alertingV2RulesClient,
-        ruleIds,
-        false
-      );
+      const { toggledIds, failures: ruleFailures } = result;
       failures.push(...ruleFailures);
       // Record only the rules we actually disabled, so resume re-enables exactly those.
       // Blanket re-enable on resume is intentional: if a user had manually disabled a
@@ -308,15 +352,9 @@ export const createSignificantEventsMaintenanceService = ({
     const mgmt = server.workflowsManagement?.management;
     const newlyDisabled = await sweepWorkflows({ mgmt, spaceIds: [spaceId], request, failures });
 
-    // Alerting v2 only offers request-scoped rules clients, so a system sweep
-    // leaves rules running.
-    const newlyDisabledRules =
-      access === 'user'
-        ? (await disableBackedRules(requestForSpace(request, spaceId), failures)).map((id) => ({
-            id,
-            spaceId,
-          }))
-        : [];
+    const newlyDisabledRules = (
+      await disableBackedRules(requestForSpace(request, spaceId), access, spaceId, failures)
+    ).map((id) => ({ id, spaceId }));
     const disabledRules = mergeTargets(previousRules, newlyDisabledRules);
 
     return {
@@ -553,7 +591,7 @@ export const createSignificantEventsMaintenanceService = ({
 
             logFailures(
               log,
-              `Significant Events paused space "${spaceId}" because Nightshift was turned off: disabled ${summary.workflowsDisabled} workflow(s) (rules keep running: no internal rules client), ${sweep.failures.length} failure(s)`,
+              `Significant Events paused space "${spaceId}" because Nightshift was turned off: disabled ${summary.workflowsDisabled} workflow(s) and ${summary.rulesDisabled} rule(s), ${sweep.failures.length} failure(s)`,
               sweep.failures
             );
           },

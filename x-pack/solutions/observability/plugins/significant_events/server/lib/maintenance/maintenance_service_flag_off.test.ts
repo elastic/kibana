@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_BULK_ITEMS } from '@kbn/alerting-v2-schemas';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
@@ -23,13 +24,14 @@ import {
 
 describe('SignificantEventsMaintenanceService', () => {
   describe('pauseOnFlagOff', () => {
-    it('pauses every space through internal clients, records each space’s restore snapshot, and leaves rules running', async () => {
+    it('pauses every space through internal clients, records each space’s restore snapshot, and disables rules as the internal user', async () => {
       const { api, updateWorkflow } = makeManagementApi();
       const {
         service,
         soClient,
         getScopedClients,
         v2RulesClient,
+        internalRuleBackedRules,
         getInternalSpaceUiSettingsClient,
       } = makeService({
         management: api,
@@ -55,6 +57,7 @@ describe('SignificantEventsMaintenanceService', () => {
         false
       );
       expect(v2RulesClient?.bulkDisableRules).not.toHaveBeenCalled();
+      expect(internalRuleBackedRules.bulkDisableRules).toHaveBeenCalledWith({ ids: ['rule-1'] });
       // The shared workflows belong to every space and stay enabled.
       const disabledIds = updateWorkflow.mock.calls.map(([id]) => id);
       for (const sharedId of GLOBAL_MAINTENANCE_WORKFLOW_IDS) {
@@ -66,7 +69,7 @@ describe('SignificantEventsMaintenanceService', () => {
           expect.objectContaining({
             state: 'paused',
             updatedBy: MAINTENANCE_FEATURE_FLAG_ACTOR,
-            disabledRules: [],
+            disabledRules: [{ id: 'rule-1', spaceId }],
             pausedSettings: {
               continuousOnboardingWasEnabled: false,
               scheduledDiscoveryEnabledSpaceIds: [spaceId],
@@ -80,6 +83,33 @@ describe('SignificantEventsMaintenanceService', () => {
         expect(disabledWorkflows.length).toBeGreaterThan(0);
         expect(disabledWorkflows.every((workflow) => workflow.spaceId === spaceId)).toBe(true);
       }
+    });
+
+    it('disables every backed rule when they exceed one internal bulk request', async () => {
+      const ruleIds = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, index) => `rule-${index}`);
+      const { api } = makeManagementApi();
+      const { service, soClient, v2RulesClient, internalRuleBackedRules, getScopedClients } =
+        makeService({
+          management: api,
+          ruleBackedRuleIds: ruleIds,
+          spaceIds: ['default'],
+        });
+      getScopedClients.mockRejectedValue(new Error('missing authentication credentials'));
+
+      await service.pauseOnFlagOff();
+
+      expect(v2RulesClient?.bulkDisableRules).not.toHaveBeenCalled();
+      const batches = internalRuleBackedRules.bulkDisableRules.mock.calls.map(
+        ([params]) => params.ids
+      );
+      expect(batches.length).toBeGreaterThan(1);
+      expect(batches.every((ids) => ids.length <= MAX_BULK_ITEMS)).toBe(true);
+      expect(soClient.create.mock.calls.at(-1)?.[1]).toEqual(
+        expect.objectContaining({
+          disabledRules: ruleIds.map((id) => ({ id, spaceId: 'default' })),
+          lastSummary: expect.objectContaining({ partialFailures: [] }),
+        })
+      );
     });
 
     it('does not sweep when already paused or when another node claims the pause first', async () => {
@@ -152,12 +182,17 @@ describe('SignificantEventsMaintenanceService', () => {
 
     it('re-asserts in every paused space with a credential-less request', async () => {
       const { api, updateWorkflow, getWorkflow } = makeManagementApi();
-      const { service, soClient, getScopedClients, getInternalSpaceUiSettingsClient } = makeService(
-        {
-          management: api,
-          spaceIds: ['default', 'space-a'],
-        }
-      );
+      const {
+        service,
+        soClient,
+        getScopedClients,
+        internalRuleBackedRules,
+        getInternalSpaceUiSettingsClient,
+      } = makeService({
+        management: api,
+        ruleBackedRuleIds: ['rule-1'],
+        spaceIds: ['default', 'space-a'],
+      });
 
       await service.pause({ request: REQUEST });
       await service.pause({ request: requestInSpace('space-a') });
@@ -199,6 +234,8 @@ describe('SignificantEventsMaintenanceService', () => {
         OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
         false
       );
+      // A rule re-enabled out-of-band while paused is disabled again, without a user.
+      expect(internalRuleBackedRules.bulkDisableRules).toHaveBeenCalledWith({ ids: ['rule-1'] });
     });
 
     it('persists sweep failures on lastSummary so status shows a degraded pause', async () => {

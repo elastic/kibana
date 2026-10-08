@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { MAX_BULK_ITEMS } from '@kbn/alerting-v2-schemas';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { asSpaceId, brandSpaceId } from '@kbn/core-spaces-common';
 import {
@@ -300,6 +301,17 @@ export function makeService(params?: {
       return { sources, total: sources.length };
     }),
   };
+  const internalRuleBackedRules = {
+    listRuleIds: jest.fn(async (_spaceId: string) => params?.ruleBackedRuleIds ?? []),
+    bulkDisableRules: jest.fn(async ({ ids }: { ids: string[] }) => {
+      if (ids.length > MAX_BULK_ITEMS) {
+        throw new Error(
+          `Received ${ids.length} rule ids, exceeding the maximum of ${MAX_BULK_ITEMS} per request.`
+        );
+      }
+      return { affected_count: ids.length, errors: [] };
+    }),
+  };
   const getSourceIdsWithKnowledgeIndicators = jest.fn(async () => params?.indicatorStreams ?? []);
   const findSourceIdsWithOwnedRules = jest.fn(async () => params?.ownedRuleStreams ?? []);
   const getSourceToQueryLinksMap = jest.fn(async (sourceIds: string[]) =>
@@ -473,6 +485,7 @@ export function makeService(params?: {
     logger: loggerMock.create(),
     server,
     getScopedClients: getScopedClients as unknown as GetScopedClients,
+    internalRuleBackedRules,
   });
 
   return {
@@ -483,6 +496,7 @@ export function makeService(params?: {
     getScopedClients,
     v2RulesClient,
     getRuleBackedQueryLinks,
+    internalRuleBackedRules,
     getSourceIdsWithKnowledgeIndicators,
     findSourceIdsWithOwnedRules,
     countKnowledgeIndicators,
