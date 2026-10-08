@@ -40,6 +40,7 @@ import path from 'node:path';
 import { expandWithImplicitConsumers } from './scout_implicit_consumers.ts';
 import type { ScoutLog } from './scout_log.ts';
 import { shouldSkipScoutTests } from './scout_ftr_modules.ts';
+import { SCOUT_MODULE_GRAPH_IGNORE } from './scout_module_graph_ignore.ts';
 import { computeMoonShadow } from './moon_shadow.ts';
 import { getAffectedPackages, listChangedFiles } from '#pipeline-utils';
 
@@ -64,6 +65,7 @@ if (!mergeBase || !outPath) {
   const directlyAffected = await getAffectedPackages(mergeBase, {
     strategy: 'git',
     includeDownstream: false,
+    ignorePatterns: SCOUT_MODULE_GRAPH_IGNORE,
     ignoreUncategorizedChanges: true,
   });
 
@@ -90,6 +92,7 @@ if (!mergeBase || !outPath) {
     await getAffectedPackages(mergeBase, {
       strategy: 'git',
       includeDownstream: true,
+      ignorePatterns: SCOUT_MODULE_GRAPH_IGNORE,
       ignoreUncategorizedChanges: true,
     }),
     changedFiles,
