@@ -18,6 +18,12 @@ if (window.__kbnHardenPrototypes__) {
   require('@kbn/security-hardening/prototype');
 }
 
+// Patch to ensure readoption of tracked DOM elements when Chrome and Edge translations kick in and replace the `<font>` tags.
+// For more details, refer to https://github.com/alexspeller/translation-resilience.
+require('translation-resilience').installTranslationResilience({
+  eager: false, // Only load the translation resilience script when it's needed (the browser translates the page)
+});
+
 // stateful deps
 export const KbnUiTheme = require('@kbn/ui-theme');
 export const KbnI18n = require('@kbn/i18n');
