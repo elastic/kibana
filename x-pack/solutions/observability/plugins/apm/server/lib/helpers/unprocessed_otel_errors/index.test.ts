@@ -71,7 +71,6 @@ describe('toUnprocessedOtelError', () => {
   });
 
   it('omits span when span.id is absent', () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { [SPAN_ID]: _ignored, ...fieldsWithoutSpan } = makeHit().fields;
     const hit = makeHit({ fields: fieldsWithoutSpan as Record<string, unknown[]> });
     const result = toUnprocessedOtelError(hit);
@@ -85,7 +84,6 @@ describe('toUnprocessedOtelError', () => {
   });
 
   it('derives timestamp from @timestamp when timestamp_us is absent', () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { [TIMESTAMP_US]: _ignored, ...fieldsWithoutUsTimestamp } = makeHit().fields as Record<
       string,
       unknown[]
@@ -97,7 +95,6 @@ describe('toUnprocessedOtelError', () => {
   });
 
   it('returns a valid row when trace.id is absent', () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { [TRACE_ID]: _ignored, ...fieldsWithoutTrace } = makeHit().fields as Record<
       string,
       unknown[]
