@@ -27,8 +27,15 @@ export interface ManagedWorkflowUpgrade {
   definitionId: string;
 }
 
+/** Internal snapshot of a managed workflow taken by the orphan sweep, never by a user request. */
+export interface ManagedWorkflowOrphan {
+  managedBy: string | null;
+  definitionId: string | null;
+}
+
 export interface IndexWorkflowDocumentOptions {
   managedWorkflowUpgrade?: ManagedWorkflowUpgrade;
+  managedOrphanDisable?: ManagedWorkflowOrphan;
   previousDocument?: WorkflowProperties;
   request?: KibanaRequest;
   create?: boolean;
