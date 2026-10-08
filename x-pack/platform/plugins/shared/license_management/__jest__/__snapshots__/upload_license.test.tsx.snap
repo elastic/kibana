@@ -290,7 +290,6 @@ exports[`UploadLicense should display an error when ES says license is expired 1
             class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-danger-euiCallOut-danger"
             data-size="m"
             role="alert"
-            style="--euiCallOutTypeColor: #C61E25;"
             tabindex="-1"
           >
             <div
@@ -516,7 +515,6 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
             class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-danger-euiCallOut-danger"
             data-size="m"
             role="alert"
-            style="--euiCallOutTypeColor: #C61E25;"
             tabindex="-1"
           >
             <div
@@ -742,7 +740,6 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
             class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-danger-euiCallOut-danger"
             data-size="m"
             role="alert"
-            style="--euiCallOutTypeColor: #C61E25;"
             tabindex="-1"
           >
             <div
@@ -968,7 +965,6 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
             class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-danger-euiCallOut-danger"
             data-size="m"
             role="alert"
-            style="--euiCallOutTypeColor: #C61E25;"
             tabindex="-1"
           >
             <div
