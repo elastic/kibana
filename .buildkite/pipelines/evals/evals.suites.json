@@ -336,7 +336,7 @@
       "serverConfigSet": "evals_attack_discovery_agent_builder"
     },
     {
-      "id": "attack-discovery-fp-tp",
+      "id": "attack-discovery-fp-tp-corpus",
       "name": "Attack Discovery FP/TP Verdict Analysis",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp-real-workflow/playwright.config.ts",
       "tags": [
@@ -345,9 +345,9 @@
         "agent-builder"
       ],
       "ciLabels": [
-        "evals:attack-discovery-fp-tp"
+        "evals:attack-discovery-fp-tp-corpus"
       ],
-      "serverConfigSet": "evals_attack_discovery_agent_builder"
+      "serverConfigSet": "evals_attack_discovery_fp_tp"
     },
     {
       "id": "lead-generation",

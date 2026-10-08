@@ -137,10 +137,7 @@ steps:
   - name: load_attack_discovery
     type: elasticsearch.search
     with:
-      # The AD data_generator route (create_attack_discovery_alerts_route) persists
-      # under the `.alerts-security.attack.discovery.alerts-<space>` alias, not the
-      # (empty) `.adhoc.…` backfill index.
-      index: .alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}
+      index: .adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}
       size: 1
       query:
         ids:

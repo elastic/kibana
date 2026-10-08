@@ -375,9 +375,9 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(loadAttack?.type).toBe('elasticsearch.search');
     });
 
-    it('reads it from the space-scoped discovery index the data_generator route writes', () => {
+    it('reads it from the space-scoped ad-hoc discovery index', () => {
       expect(loadAttack?.with?.index).toBe(
-        '.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}'
+        '.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}'
       );
     });
 
