@@ -58,6 +58,10 @@ jest.mock('../use_aws_identity_federation_enabled', () => ({
   useAwsIdentityFederationEnabled: jest.fn(),
 }));
 
+jest.mock('../use_is_self_managed', () => ({
+  useIsSelfManaged: jest.fn(() => false),
+}));
+
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import type { AwsServiceMatrixEntry } from '../aws_service_matrix';
 import { buildIacIntegrations } from './authenticate_and_deploy_step/package_inputs';
@@ -70,6 +74,7 @@ import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_ba
 import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useAwsIdentityFederationEnabled } from '../use_aws_identity_federation_enabled';
+import { useIsSelfManaged } from '../use_is_self_managed';
 import { AuthenticateAndDeployStep } from './authenticate_and_deploy_step';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
@@ -84,6 +89,7 @@ const MockAgentBasedSection = AgentBasedSection as unknown as jest.Mock;
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
 const mockBuildIacIntegrations = buildIacIntegrations as jest.Mock;
 const mockUseAwsIdentityFederationEnabled = useAwsIdentityFederationEnabled as jest.Mock;
+const mockUseIsSelfManaged = useIsSelfManaged as jest.Mock;
 
 function getLastMiSectionProps(): { showIdentityFederation: boolean } {
   const { calls } = MockManagedIntegrationsSection.mock;
@@ -221,6 +227,7 @@ describe('AuthenticateAndDeployStep', () => {
     ]);
     mockBuildIacIntegrations.mockReturnValue([]);
     mockUseAwsIdentityFederationEnabled.mockReturnValue(true);
+    mockUseIsSelfManaged.mockReturnValue(false);
     MockManagedIntegrationsSection.mockImplementation(
       ({ onDeploy, hasFailed }: { onDeploy: () => void; hasFailed: boolean }) => (
         <div>
@@ -1294,6 +1301,98 @@ describe('AuthenticateAndDeployStep', () => {
         screen.queryByTestId('authenticateAndDeployStep-settingsChangedCallout')
       ).not.toBeInTheDocument();
       expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).not.toBeDisabled();
+    });
+  });
+  describe('self-managed', () => {
+    beforeEach(() => {
+      mockUseIsSelfManaged.mockReturnValue(true);
+      // An MI-capable service with the agentless method already pinned to agent_based by the
+      // context — the state a self-managed session actually reaches.
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['guardduty'] },
+        awsServicesMap: new Map([['guardduty', miService]]),
+        deploymentMethod: 'agent_based',
+        setDeploymentMethod: jest.fn(),
+        agentBasedDeployment: { selectedAgentPolicyIds: [] },
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+        updateDetectAndReviewStep: jest.fn(),
+        removeDeployInstances: jest.fn(),
+      });
+      mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: false }));
+    });
+
+    it('offers agent_based as the only method and locks the card', () => {
+      renderStep();
+      expect(MockDeploymentMethodCard).toHaveBeenCalledWith(
+        expect.objectContaining({
+          locked: true,
+          availableMethods: ['agent_based'],
+          selectedMethod: 'agent_based',
+        }),
+        expect.anything()
+      );
+    });
+
+    it('does not render the Managed Integrations section for an MI-capable service', () => {
+      renderStep();
+      expect(MockManagedIntegrationsSection).not.toHaveBeenCalled();
+    });
+
+    it('does not render the ECF section even when ECF instances are present', () => {
+      // useEcfDeployment is called with an empty instance list in agent-based mode, so a
+      // self-managed session can never surface ECF regardless of the selection.
+      renderStep();
+      expect(mockUseEcfDeployment).toHaveBeenCalledWith(expect.objectContaining({ instances: [] }));
+      expect(MockEcfDeploymentSection).not.toHaveBeenCalled();
+    });
+
+    it('resets to agent_based, not managed_integration, when the last agent-only service is deselected', () => {
+      const mockSetDeploymentMethod = jest.fn();
+      const agentOnlyService: AwsServiceMatrixEntry = {
+        ...miService,
+        id: 'awsfargate',
+        name: 'AWS Fargate',
+        packageName: 'awsfargate',
+        deploymentMethods: [{ method: 'agent_based', preferred: true }],
+        isStaticAgentBasedOnly: true,
+      };
+      const map = new Map([
+        ['awsfargate', agentOnlyService],
+        ['guardduty', miService],
+      ]);
+
+      // First render: agent-only service selected while the method reads managed_integration,
+      // so the effect auto-forces and records wasAutoForced.
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['awsfargate'] },
+        awsServicesMap: map,
+        deploymentMethod: 'managed_integration',
+        setDeploymentMethod: mockSetDeploymentMethod,
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+      });
+      const { rerender } = renderStep();
+      mockSetDeploymentMethod.mockClear();
+
+      // Second render: agent-only service removed. On cloud this resets to managed_integration;
+      // on self-managed it must stay agent_based.
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['guardduty'] },
+        awsServicesMap: map,
+        deploymentMethod: 'agent_based',
+        setDeploymentMethod: mockSetDeploymentMethod,
+        agentBasedDeployment: { selectedAgentPolicyIds: [] },
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+        updateDetectAndReviewStep: jest.fn(),
+        removeDeployInstances: jest.fn(),
+      });
+      rerender(
+        <I18nProvider>
+          <AuthenticateAndDeployStep onContinue={jest.fn()} />
+        </I18nProvider>
+      );
+
+      expect(mockSetDeploymentMethod).not.toHaveBeenCalledWith('managed_integration');
+      expect(mockSetDeploymentMethod).toHaveBeenCalledWith('agent_based');
     });
   });
 });

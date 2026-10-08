@@ -16,7 +16,7 @@ export interface ToSignificantEventSeedParams {
 
 /**
  * Map a produced discovery into a `SignificantEvent` document suitable for indexing into
- * `.significant_events-events` between continuation cycles. The seeded doc has `status: "active"`
+ * `.rule-events` between continuation cycles. The seeded doc has `status: "active"`
  * so the next cycle's `event_search state: "active"` call picks it up for continuation routing.
  */
 export function canonicalSignificantEventFromGroundTruth({

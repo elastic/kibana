@@ -16,12 +16,13 @@ import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import type { ActionPolicyAttachmentData } from '@kbn/alerting-v2-schemas';
 import type { WorkflowsManagementClient } from '@kbn/workflows-management-plugin/server';
 import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import type { ValidateWorkflowResponseDto } from '@kbn/workflows';
 import {
   actionPolicyOperationSchema,
   executeActionPolicyOperations,
   ActionPolicyOperationValidationError,
 } from './operations';
-import { validateDestinations } from './validate_destinations';
+import { validateDestinations, type WorkflowDestinationDiagnostic } from './validate_destinations';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 
@@ -44,12 +45,24 @@ export interface ManageActionPolicyToolDeps {
   ) => Promise<{
     connectorTypes: Record<string, { instances: Array<{ id: string; name: string }> }>;
   }>;
+  /**
+   * Runs a workflow's YAML through the workflows validation service (schema,
+   * variable refs, Liquid syntax). Optional — when omitted, destination
+   * workflows are still checked for a manual trigger and `inputs.payload`,
+   * but variable-ref errors are not surfaced.
+   */
+  validateWorkflow?: (
+    yaml: string,
+    spaceId: string,
+    request: KibanaRequest
+  ) => Promise<ValidateWorkflowResponseDto>;
 }
 
 export const manageActionPolicyTool = ({
   logger,
   getWorkflowClient,
   getAvailableConnectors,
+  validateWorkflow,
 }: ManageActionPolicyToolDeps): BuiltinSkillBoundedTool<typeof manageActionPolicySchema> => ({
   id: ALERTING_TOOL_IDS.manageActionPolicy,
   type: ToolType.builtin,
@@ -94,6 +107,8 @@ Use operations[] to:
       // Prefer persisted origin; fall back to draft / pre-assigned id (also in tool result).
       policyId = policyId ?? updatedData.id;
 
+      let workflowDiagnostics: WorkflowDestinationDiagnostic[] = [];
+
       if (updatedData.destinations?.length) {
         const findConnectorById = async (
           id: string
@@ -110,12 +125,24 @@ Use operations[] to:
           return null;
         };
 
-        await validateDestinations(updatedData.destinations, {
+        // Hard-block only when this call is the one introducing/changing the
+        // destinations (new policy, or an explicit set_destinations) — an edit
+        // that leaves an already-persisted, already-invalid destination
+        // untouched should warn instead of failing.
+        const blockOnMissingManualTrigger =
+          isNew || operations.some((op) => op.operation === 'set_destinations');
+
+        const destinationResult = await validateDestinations(updatedData.destinations, {
           attachments,
-          workflowLookup: getWorkflowClient(request),
+          persistedWorkflowLookup: getWorkflowClient(request),
           connectorLookup: { findConnectorById },
           spaceId,
+          validateWorkflow,
+          request,
+          logger,
+          blockOnMissingManualTrigger,
         });
+        workflowDiagnostics = destinationResult.diagnostics;
       }
 
       const attachmentInput = {
@@ -161,6 +188,7 @@ Use operations[] to:
                 groupingMode: updatedData.grouping_mode,
                 throttle: updatedData.throttle,
               },
+              ...(workflowDiagnostics.length > 0 ? { workflowDiagnostics } : {}),
             },
           },
         ],
