@@ -56,6 +56,7 @@ import type {
   UserActionInternalFindResponse,
 } from '@kbn/cases-plugin/common/types/api';
 import {
+  getCaseBulkDeleteObservablesUrl,
   getCaseCreateObservableUrl,
   getCaseDeleteObservableUrl,
   getCaseFindUserActionsUrl,
@@ -934,6 +935,36 @@ export const deleteObservable = async ({
     .set(headers)
     .send()
     .expect(expectedHttpCode);
+};
+
+export const bulkDeleteObservables = async ({
+  supertest,
+  caseId,
+  observableIds,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+  headers = {},
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  observableIds: string[];
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null } | null;
+  headers?: Record<string, string | string[]>;
+}): Promise<Case | { message: string }> => {
+  const apiCall = supertest.post(
+    `${getSpaceUrlPrefix(auth?.space)}${getCaseBulkDeleteObservablesUrl(caseId)}`
+  );
+  void setupAuth({ apiCall, headers, auth });
+
+  const { body: updatedCase } = await apiCall
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .set(headers)
+    .send({ observableIds })
+    .expect(expectedHttpCode);
+
+  return updatedCase;
 };
 
 export const similarCases = async ({
