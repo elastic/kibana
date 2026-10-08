@@ -23,12 +23,7 @@ import {
   riskScoreIndexOf,
   toList,
 } from '../common';
-import type {
-  QueryArgs,
-  PageEnricher,
-  ColumnDescriptor,
-  MergedForeignRowsOptions,
-} from '../common';
+import type { QueryArgs, PageEnricher, ColumnQuerySpec, MergedForeignRowsOptions } from '../common';
 import {
   buildEmptyRowsQuery,
   buildValueCursorClause,
@@ -189,17 +184,13 @@ const riskScoreChangeEnricher: PageEnricher = {
   },
 };
 
-// ── column descriptor ─────────────────────────────────────────────────────────
+// ── query spec ────────────────────────────────────────────────────────────────
 
-export const riskScoreChangeColumn = {
-  id: RISK_SCORE_CHANGE_FIELD,
-  displayAsText: 'Risk score change',
-  initialWidth: 140,
-  isSortable: true,
-  sortKind: 'foreign',
-  isExpandable: false,
-  buildSortQuery: buildRiskScoreChangeSortQuery,
-  buildCountQuery: buildEntitiesInViewCountQuery,
-  runSortPage: (args, ctx) => runSplitSortPage(riskScoreChangeSplitSortPlan, args, ctx),
+export const riskScoreChangeQuerySpec = {
+  sort: {
+    buildSortQuery: buildRiskScoreChangeSortQuery,
+    buildCountQuery: buildEntitiesInViewCountQuery,
+    runSortPage: (args, ctx) => runSplitSortPage(riskScoreChangeSplitSortPlan, args, ctx),
+  },
   enricher: riskScoreChangeEnricher,
-} as const satisfies ColumnDescriptor;
+} satisfies ColumnQuerySpec;

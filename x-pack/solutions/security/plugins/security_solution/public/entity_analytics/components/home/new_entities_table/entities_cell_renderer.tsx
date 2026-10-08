@@ -31,7 +31,7 @@ import { EntityType } from '../../../../../common/entity_analytics/types';
 import { ValidCriticalityLevels } from '../../../../../common/entity_analytics/asset_criticality/constants';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { getNumber } from './common';
-import { isGridColumnId, type GridColumnId } from './columns/registry';
+import { ENRICHED_FIELDS, isGridColumnId, type GridColumnId } from './grid_columns';
 import { EntityIconByType } from '../../entity_store/entity_icon_by_type';
 import { RiskScoreCell } from '../entities_table/risk_score_cell';
 import { AssetCriticalityBadge } from '../../asset_criticality';
@@ -525,15 +525,6 @@ const renderKnownEntityCell = (
 };
 
 /** Columns that page enrichers fill after the sort query; the sort column has its value. */
-const ENRICHED_COLUMN_IDS: ReadonlySet<string> = new Set<GridColumnId>([
-  'alert_count',
-  'last_seen_alert',
-  'anomaly_count',
-  'case_count',
-  'risk_score_change',
-  'group_size',
-]);
-
 export const renderEntityCell = (
   columnId: string,
   value: unknown,
@@ -545,7 +536,7 @@ export const renderEntityCell = (
 ): JSX.Element => {
   // Enrichers set every field they own (null or 0 when empty), so `undefined` here
   // means "not loaded yet", not "no value". Show nothing rather than "—".
-  if (isEnriching && value === undefined && ENRICHED_COLUMN_IDS.has(columnId)) {
+  if (isEnriching && value === undefined && ENRICHED_FIELDS.has(columnId)) {
     return <></>;
   }
   if (!isGridColumnId(columnId)) {

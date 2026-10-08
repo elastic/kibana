@@ -6,7 +6,7 @@
  */
 
 import type { QueryArgs, Row } from '../common';
-import { groupSizeColumn } from './group_size';
+import { groupSizeQuerySpec } from './group_size';
 import { SPLIT_SORT_MIN_VIEW_SIZE } from './split_sort';
 
 const LARGE_VIEW = SPLIT_SORT_MIN_VIEW_SIZE;
@@ -53,11 +53,11 @@ const fakeRunner = (groups: Row[], singles: Row[]) => {
 };
 
 const runPage = (args: QueryArgs, runQuery: (q: string) => Promise<Row[]>, viewSize = LARGE_VIEW) =>
-  groupSizeColumn.runSortPage(args, { runQuery, viewSize });
+  groupSizeQuerySpec.sort.runSortPage(args, { runQuery, viewSize });
 
 const ids = (rows: Row[]) => rows.map((r) => r['entity.id']);
 
-describe('groupSizeColumn.runSortPage', () => {
+describe('group size sort page', () => {
   it('runs the single query for small views and for search', async () => {
     const { runQuery, kinds } = fakeRunner([], []);
     await runPage(baseArgs, runQuery, 10);

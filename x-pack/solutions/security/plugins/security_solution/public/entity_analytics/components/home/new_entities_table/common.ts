@@ -10,7 +10,6 @@ import {
   getEuidNamespaceSourceFields,
   getEuidSourceFields,
 } from '@kbn/entity-store/common/domain/euid';
-import type { EuiDataGridColumn } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESQLSearchResponse } from '@kbn/es-types';
@@ -129,20 +128,14 @@ export interface PageEnricher {
   read: (rows: readonly Row[], args: QueryArgs, ctx: RunContext) => Promise<EnrichedFields>;
 }
 
-interface ColumnBase extends EuiDataGridColumn {
-  enricher?: PageEnricher;
-}
-
 export interface SortPageContext {
   runQuery: EsqlRunner;
   /** Number of entities in view, from the count query. */
   viewSize: number;
 }
 
-export interface SortableColumn extends ColumnBase {
-  isSortable: true;
-  /** `native`: the sort field is on the entity doc. `foreign`: STATS computes the sort value. */
-  sortKind: 'native' | 'foreign';
+/** How the grid sorts by a column. */
+export interface SortQuerySpec {
   /** Builds the query for one page of rows plus one, sorted by this column. */
   buildSortQuery: (args: QueryArgs) => string;
   /** Builds the query for the total row count when this column is the sort. */
@@ -154,14 +147,11 @@ export interface SortableColumn extends ColumnBase {
   runSortPage?: (args: QueryArgs, ctx: SortPageContext) => Promise<Row[]>;
 }
 
-export interface UnsortableColumn extends ColumnBase {
-  isSortable: false;
+/** How the grid reads a column: its sort, if it has one, and the enricher of its values. */
+export interface ColumnQuerySpec {
+  sort?: SortQuerySpec;
+  enricher?: PageEnricher;
 }
-
-export type ColumnDescriptor = SortableColumn | UnsortableColumn;
-
-export const isSortableColumn = (column: ColumnDescriptor): column is SortableColumn =>
-  column.isSortable;
 
 // ── index name helpers ────────────────────────────────────────────────────────
 

@@ -7,7 +7,7 @@
 
 import { ENTITY_GRID_CASES_INTERNAL_URL } from '../../../../../../common/entity_analytics/entity_analytics/constants';
 import { entityIdsOf, nullOnFailure } from '../common';
-import type { RunContext, PageEnricher, ColumnDescriptor } from '../common';
+import type { RunContext, PageEnricher, ColumnQuerySpec } from '../common';
 
 export const CASE_COUNT_FIELD = 'case_count';
 
@@ -35,13 +35,6 @@ const caseCountEnricher: PageEnricher = {
   },
 };
 
-// ── column descriptor ─────────────────────────────────────────────────────────
+// ── query spec ────────────────────────────────────────────────────────────────
 
-export const caseCountColumn = {
-  id: CASE_COUNT_FIELD,
-  displayAsText: 'Cases',
-  initialWidth: 100,
-  isSortable: false,
-  isExpandable: false,
-  enricher: caseCountEnricher,
-} as const satisfies ColumnDescriptor;
+export const caseCountQuerySpec = { enricher: caseCountEnricher } satisfies ColumnQuerySpec;

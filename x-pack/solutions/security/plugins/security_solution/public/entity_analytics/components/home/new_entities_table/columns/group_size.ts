@@ -28,7 +28,7 @@ import type {
   QueryArgs,
   PageEnricher,
   Row,
-  ColumnDescriptor,
+  ColumnQuerySpec,
   PageCursor,
   SortDir,
   SortPageContext,
@@ -325,17 +325,13 @@ const groupSizeEnricher: PageEnricher = {
   },
 };
 
-// ── column descriptor ─────────────────────────────────────────────────────────
+// ── query spec ────────────────────────────────────────────────────────────────
 
-export const groupSizeColumn = {
-  id: GROUP_SIZE_FIELD,
-  displayAsText: 'Records',
-  initialWidth: 100,
-  isSortable: true,
-  sortKind: 'foreign',
-  isExpandable: false,
-  buildSortQuery: buildGroupSizeSortQuery,
-  buildCountQuery: buildGroupSizeCountQuery,
-  runSortPage: runGroupSizeSortPage,
+export const groupSizeQuerySpec = {
+  sort: {
+    buildSortQuery: buildGroupSizeSortQuery,
+    buildCountQuery: buildGroupSizeCountQuery,
+    runSortPage: runGroupSizeSortPage,
+  },
   enricher: groupSizeEnricher,
-} as const satisfies ColumnDescriptor;
+} satisfies ColumnQuerySpec;

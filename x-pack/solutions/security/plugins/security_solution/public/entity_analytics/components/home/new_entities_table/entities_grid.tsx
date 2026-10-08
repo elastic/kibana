@@ -17,6 +17,7 @@ import {
   useEuiFontSize,
   useEuiTheme,
   type EuiDataGridCellValueElementProps,
+  type EuiDataGridColumn,
   type EuiDataGridControlColumn,
   type EuiDataGridCustomBodyProps,
   type EuiDataGridStyle,
@@ -36,7 +37,7 @@ import { AdditionalControls } from '../entities_table/additional_controls';
 import { DataViewContext } from '../entities_table';
 import { LastUpdated } from '../last_updated';
 import type { CellHandlers, RowActions } from './entities_cell_renderer';
-import { isGridColumnId, type ColumnDescriptor } from './columns/registry';
+import { isGridColumnId } from './grid_columns';
 import { useEntityAnalyticsUrlState } from './use_entity_analytics_url_state';
 import type { TimeRange } from './use_entity_analytics_url_state';
 import type { Row, RowsMode, SortDir } from './common';
@@ -108,7 +109,7 @@ interface EntityGridCellContext {
 interface EntityGridView extends EntityGridCellContext {
   expandedIds: ReadonlySet<string>;
   childMap: Map<string, Row[]>;
-  columns: ColumnDescriptor[];
+  columns: EuiDataGridColumn[];
   prefetchChildren: (entityId: string) => void;
   toggleExpandedId: (entityId: string) => void;
   rowActions?: RowActions;
@@ -302,7 +303,7 @@ const EntityGridCustomBody = memo(
 EntityGridCustomBody.displayName = 'EntityGridCustomBody';
 
 export interface EntitiesGridProps {
-  columns: ColumnDescriptor[];
+  columns: readonly EuiDataGridColumn[];
   rowsMode: RowsMode;
   timeRange: TimeRange;
   watchlistNames: Map<string, string>;
@@ -436,23 +437,19 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   });
 
   const extraColumns = useMemo(
-    (): ColumnDescriptor[] =>
+    (): EuiDataGridColumn[] =>
       keepFields.map((id) => ({
         id,
         displayAsText: dataView?.getFieldByName(id)?.customLabel || id,
         initialWidth: 160,
         isSortable: false,
         isExpandable: false,
+        isResizable: false,
       })),
     [keepFields, dataView]
   );
 
-  const gridColumns = useMemo(
-    () => [...columns, ...extraColumns].map((col) => ({ ...col, isResizable: false })),
-    [columns, extraColumns]
-  );
-
-  const gridViewColumns = useMemo(() => [...columns, ...extraColumns], [columns, extraColumns]);
+  const gridColumns = useMemo(() => [...columns, ...extraColumns], [columns, extraColumns]);
 
   const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns }), [visibleColumns]);
 
@@ -556,7 +553,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       ...cellContext,
       expandedIds,
       childMap,
-      columns: gridViewColumns,
+      columns: gridColumns,
       prefetchChildren,
       toggleExpandedId,
       rowActions,
@@ -567,7 +564,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       cellContext,
       expandedIds,
       childMap,
-      gridViewColumns,
+      gridColumns,
       prefetchChildren,
       toggleExpandedId,
       rowActions,

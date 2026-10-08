@@ -31,7 +31,7 @@ import {
   nullOnFailure,
   toSortValue,
 } from './common';
-import { PAGE_ENRICHERS, findSortableColumn } from './columns/registry';
+import { PAGE_ENRICHERS, findSortQuerySpec } from './grid_columns';
 
 const GRID_QUERY_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.entitiesGrid.queryError',
@@ -174,7 +174,7 @@ export const useEntityGridData = ({
   const isAnomalySort = sortField === ANOMALY_COUNT_FIELD;
 
   const keepFieldsKey = (keepFields ?? []).join('\0');
-  const sortColumn = findSortableColumn(sortField);
+  const sortSpec = findSortQuerySpec(sortField);
 
   const scope: GridQueryScope = {
     sortField,
@@ -228,8 +228,8 @@ export const useEntityGridData = ({
         null;
 
   const countEsql =
-    concreteEntityIndexName && sortColumn
-      ? sortColumn.buildCountQuery(buildArgs(concreteEntityIndexName, null))
+    concreteEntityIndexName && sortSpec
+      ? sortSpec.buildCountQuery(buildArgs(concreteEntityIndexName, null))
       : null;
   const countKey = entityGridKeys.count(spaceId, countEsql);
   const fetchCount = async ({ signal }: { signal?: AbortSignal }): Promise<number> => {
@@ -243,15 +243,15 @@ export const useEntityGridData = ({
     shellKey(fetchPageIndex),
     async ({ signal }): Promise<EntityGridResponse> => {
       if (!concreteEntityIndexName) throw new Error('entity store index not resolved');
-      if (!sortColumn) throw new Error(`Column ${sortField} is not sortable`);
+      if (!sortSpec) throw new Error(`Column ${sortField} is not sortable`);
 
       const args = buildArgs(concreteEntityIndexName, cursor);
       const runQuery = createEsqlRunner(searchService, signal);
       // A column that reads its page with several queries picks them by the view size,
       // from the count query that runs for the grid anyway. Without a count it keeps its
       // general sort query (view size 0).
-      const allRows = sortColumn.runSortPage
-        ? await sortColumn.runSortPage(args, {
+      const allRows = sortSpec.runSortPage
+        ? await sortSpec.runSortPage(args, {
             runQuery,
             viewSize:
               (await nullOnFailure(
@@ -262,7 +262,7 @@ export const useEntityGridData = ({
                 })
               )) ?? 0,
           })
-        : await runQuery(sortColumn.buildSortQuery(args));
+        : await runQuery(sortSpec.buildSortQuery(args));
       const hasNextPage = allRows.length > pageSize;
       const pageRows = hasNextPage ? allRows.slice(0, pageSize) : allRows;
 

@@ -15,7 +15,7 @@ import {
   ENTITY_TYPE_FILTER,
   ENTITY_ID_FIELD,
 } from '../common';
-import type { ColumnDescriptor, QueryArgs } from '../common';
+import type { ColumnQuerySpec, QueryArgs } from '../common';
 
 const buildNativeEntitySortQuery = (args: QueryArgs): string => {
   const {
@@ -39,92 +39,10 @@ const buildNativeEntitySortQuery = (args: QueryArgs): string => {
   ].join('\n');
 };
 
-export const entityNameColumn = {
-  id: 'entity.name',
-  displayAsText: 'Entity name',
-  initialWidth: 200,
-  isSortable: true,
-  sortKind: 'native',
-  isExpandable: false,
-  buildSortQuery: buildNativeEntitySortQuery,
-  buildCountQuery: buildEntitiesInViewCountQuery,
-} as const satisfies ColumnDescriptor;
-
-export const resolvedToColumn = {
-  id: 'entity.relationships.resolution.resolved_to',
-  displayAsText: 'Resolved to',
-  initialWidth: 200,
-  isSortable: false,
-  isExpandable: false,
-} as const satisfies ColumnDescriptor;
-
-export const entityTypeColumn = {
-  id: 'entity.EngineMetadata.Type',
-  displayAsText: 'Entity type',
-  initialWidth: 120,
-  isSortable: true,
-  sortKind: 'native',
-  isExpandable: false,
-  buildSortQuery: buildNativeEntitySortQuery,
-  buildCountQuery: buildEntitiesInViewCountQuery,
-} as const satisfies ColumnDescriptor;
-
-export const riskScoreColumn = {
-  id: 'entity.risk.calculated_score_norm',
-  displayAsText: 'Risk score',
-  initialWidth: 120,
-  isSortable: true,
-  sortKind: 'native',
-  isExpandable: false,
-  buildSortQuery: buildNativeEntitySortQuery,
-  buildCountQuery: buildEntitiesInViewCountQuery,
-} as const satisfies ColumnDescriptor;
-
-export const criticalityColumn = {
-  id: 'asset.criticality',
-  displayAsText: 'Asset criticality',
-  initialWidth: 160,
-  isSortable: true,
-  sortKind: 'native',
-  isExpandable: false,
-  buildSortQuery: buildNativeEntitySortQuery,
-  buildCountQuery: buildEntitiesInViewCountQuery,
-} as const satisfies ColumnDescriptor;
-
-export const sourceColumn = {
-  id: 'entity.source',
-  displayAsText: 'Source',
-  initialWidth: 140,
-  isSortable: false,
-  isExpandable: false,
-} as const satisfies ColumnDescriptor;
-
-export const watchlistsColumn = {
-  id: 'entity.attributes.watchlists',
-  displayAsText: 'Watchlists',
-  initialWidth: 200,
-  isSortable: false,
-  isExpandable: false,
-} as const satisfies ColumnDescriptor;
-
-export const firstSeenColumn = {
-  id: 'entity.lifecycle.first_seen',
-  displayAsText: 'First seen',
-  initialWidth: 180,
-  isSortable: true,
-  sortKind: 'native',
-  isExpandable: false,
-  buildSortQuery: buildNativeEntitySortQuery,
-  buildCountQuery: buildEntitiesInViewCountQuery,
-} as const satisfies ColumnDescriptor;
-
-export const lastSeenColumn = {
-  id: '@timestamp',
-  displayAsText: 'Last seen',
-  initialWidth: 180,
-  isSortable: true,
-  sortKind: 'native',
-  isExpandable: false,
-  buildSortQuery: buildNativeEntitySortQuery,
-  buildCountQuery: buildEntitiesInViewCountQuery,
-} as const satisfies ColumnDescriptor;
+/** Sort of a column whose value is on the entity doc. */
+export const nativeSortQuerySpec = {
+  sort: {
+    buildSortQuery: buildNativeEntitySortQuery,
+    buildCountQuery: buildEntitiesInViewCountQuery,
+  },
+} satisfies ColumnQuerySpec;

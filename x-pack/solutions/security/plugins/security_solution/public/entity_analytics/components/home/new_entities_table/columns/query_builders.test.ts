@@ -7,10 +7,12 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { enrichEntityRows } from '../common';
-import type { PageCursor, PageEnricher, QueryArgs, Row, RunContext } from '../common';
-import { ALL_COLUMNS_LIST, SORTABLE_COLUMNS } from './registry';
-import { alertCountColumn } from './alerts';
+import type { PageCursor, QueryArgs, Row, RunContext } from '../common';
+import { COLUMN_ENRICHERS, SORT_QUERY_SPECS } from '../grid_columns';
+import { alertCountQuerySpec } from './alerts';
 import { SPLIT_SORT_MIN_VIEW_SIZE } from './split_sort';
+
+const { enricher: alertsEnricher } = alertCountQuerySpec;
 
 const NOW = new Date('2026-10-04T12:00:00.000Z');
 
@@ -69,10 +71,6 @@ const PAGE_ROWS: readonly Row[] = [
   },
 ];
 
-const ENRICHED_COLUMNS = ALL_COLUMNS_LIST.flatMap(({ id, enricher }) =>
-  enricher ? [[id, enricher] as [string, PageEnricher]] : []
-);
-
 const createRunContext = (runQuery: RunContext['runQuery']): RunContext => {
   const http = httpServiceMock.createSetupContract();
   http.post.mockResolvedValue({});
@@ -96,7 +94,7 @@ describe('entities grid query builders', () => {
     jest.useRealTimers();
   });
 
-  describe.each(SORTABLE_COLUMNS.map((column) => [column.id, column] as const))(
+  describe.each(SORT_QUERY_SPECS)(
     'sort by %s',
     (sortField, { buildSortQuery, buildCountQuery }) => {
       it('builds the sort and count queries', () => {
@@ -142,7 +140,7 @@ describe('entities grid query builders', () => {
   );
 
   describe.each(
-    SORTABLE_COLUMNS.flatMap(({ id, runSortPage }) =>
+    SORT_QUERY_SPECS.flatMap(([id, { runSortPage }]) =>
       runSortPage ? [[id, runSortPage] as const] : []
     )
   )('sort page by %s on a large view', (sortField, runSortPage) => {
@@ -178,7 +176,7 @@ describe('entities grid query builders', () => {
   });
 
   describe('enrich queries', () => {
-    it.each(ENRICHED_COLUMNS)('%s builds its query from the page rows', async (_id, { read }) => {
+    it.each(COLUMN_ENRICHERS)('%s builds its query from the page rows', async (_id, { read }) => {
       const runQuery = jest.fn(async (_query: string) => []);
 
       await read(PAGE_ROWS, BASE_ARGS, createRunContext(runQuery));
@@ -190,7 +188,7 @@ describe('entities grid query builders', () => {
       const runQuery = jest.fn(async (_query: string) => []);
 
       await Promise.all(
-        ENRICHED_COLUMNS.map(([, { read }]) => read([{}], BASE_ARGS, createRunContext(runQuery)))
+        COLUMN_ENRICHERS.map(([, { read }]) => read([{}], BASE_ARGS, createRunContext(runQuery)))
       );
 
       expect(runQuery).not.toHaveBeenCalled();
@@ -211,7 +209,7 @@ describe('entities grid query builders', () => {
       ]);
 
       const enriched = await enrichEntityRows(rows, BASE_ARGS, createRunContext(runQuery), [
-        alertCountColumn.enricher,
+        alertsEnricher,
       ]);
 
       expect(enriched.map(({ 'entity.id': id, ...rest }) => [id, rest])).toEqual([
@@ -253,9 +251,7 @@ describe('entities grid query builders', () => {
         alert_low: 0,
       }));
 
-      await enrichEntityRows(sortedRows, BASE_ARGS, createRunContext(runQuery), [
-        alertCountColumn.enricher,
-      ]);
+      await enrichEntityRows(sortedRows, BASE_ARGS, createRunContext(runQuery), [alertsEnricher]);
 
       expect(runQuery).not.toHaveBeenCalled();
     });
@@ -266,7 +262,7 @@ describe('entities grid query builders', () => {
       });
 
       const enriched = await enrichEntityRows(PAGE_ROWS, BASE_ARGS, createRunContext(runQuery), [
-        alertCountColumn.enricher,
+        alertsEnricher,
       ]);
 
       expect(enriched).toEqual(PAGE_ROWS);

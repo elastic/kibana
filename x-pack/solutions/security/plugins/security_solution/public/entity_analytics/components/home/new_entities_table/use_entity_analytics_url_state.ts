@@ -19,7 +19,7 @@ import {
   TIME_RANGE_OPTIONS,
 } from './common';
 import type { RowsMode, SortDir, TimeRange } from './common';
-import { findSortableColumn } from './columns/registry';
+import { findSortQuerySpec } from './grid_columns';
 import { isSignalCardId, type SignalCardId } from '../needs_attention_tiles/data';
 
 export { TIME_RANGE_OPTIONS };
@@ -94,7 +94,7 @@ const isSortDir = (v: string | null): v is SortDir => v === 'asc' || v === 'desc
 /** Group size has no meaning for individual rows, so it is not a valid sort there. */
 const isValidSortField = (field: string | null, rowsMode: RowsMode): field is string =>
   field != null &&
-  findSortableColumn(field) != null &&
+  findSortQuerySpec(field) != null &&
   !(rowsMode === 'individual' && field === GROUP_SIZE_FIELD);
 const isNonNegativeInt = (v: string | null): boolean =>
   v != null && /^\d+$/.test(v) && Number(v) >= 0;

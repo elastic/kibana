@@ -27,7 +27,7 @@ import {
   esc,
 } from './common';
 import type { QueryArgs, Row } from './common';
-import { PAGE_ENRICHERS } from './columns/registry';
+import { PAGE_ENRICHERS } from './grid_columns';
 
 /** `[entityId, shell dataUpdatedAt, enrich dataUpdatedAt]` of one expanded entity. */
 type ChildDataVersion = [string, number, number];

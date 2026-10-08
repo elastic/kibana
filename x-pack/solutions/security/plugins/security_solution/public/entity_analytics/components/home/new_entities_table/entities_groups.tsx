@@ -15,7 +15,7 @@ import type { EntityURLStateResult } from '../entities_table/hooks/use_entity_ur
 import { useEntityGridFilters } from './use_entity_grid_filters';
 import { TEST_SUBJ_GROUPING, TEST_SUBJ_GROUPING_LOADING } from '../entities_table/constants';
 import { EntitiesGrid } from './entities_grid';
-import { CHILD_ROWS_COLUMNS } from './columns/registry';
+import { CHILD_ROWS_COLUMNS } from './grid_columns';
 import { RISK_SCORE_NORM_FIELD } from './common';
 import type { RowsMode, SortDir } from './common';
 import type { TimeRange } from './use_entity_analytics_url_state';

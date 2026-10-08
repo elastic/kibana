@@ -24,7 +24,7 @@ import {
   nullOnFailure,
   toList,
 } from '../common';
-import type { QueryArgs, PageEnricher, Row, ColumnDescriptor } from '../common';
+import type { QueryArgs, PageEnricher, Row, ColumnQuerySpec } from '../common';
 import {
   MAX_VALUE_ROWS,
   buildValueCursorClause,
@@ -132,17 +132,13 @@ const anomalyCountEnricher: PageEnricher = {
   },
 };
 
-// ── column descriptor ─────────────────────────────────────────────────────────
+// ── query spec ────────────────────────────────────────────────────────────────
 
-export const anomalyCountColumn = {
-  id: ANOMALY_COUNT_FIELD,
-  displayAsText: 'Anomalies',
-  initialWidth: 120,
-  isSortable: true,
-  sortKind: 'foreign',
-  isExpandable: false,
-  buildSortQuery: buildAnomalyCountSortQuery,
-  buildCountQuery: buildEntitiesInViewCountQuery,
-  runSortPage: (args, ctx) => runSplitSortPage(anomalySplitSortPlan, args, ctx),
+export const anomalyCountQuerySpec = {
+  sort: {
+    buildSortQuery: buildAnomalyCountSortQuery,
+    buildCountQuery: buildEntitiesInViewCountQuery,
+    runSortPage: (args, ctx) => runSplitSortPage(anomalySplitSortPlan, args, ctx),
+  },
   enricher: anomalyCountEnricher,
-} as const satisfies ColumnDescriptor;
+} satisfies ColumnQuerySpec;

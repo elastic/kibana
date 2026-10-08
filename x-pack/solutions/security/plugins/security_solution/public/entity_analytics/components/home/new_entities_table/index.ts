@@ -23,12 +23,8 @@ export { EntitiesGroups } from './entities_groups';
 export type { EntitiesGroupsProps } from './entities_groups';
 export { renderEntityCell } from './entities_cell_renderer';
 export type { RowActions, CellHandlers } from './entities_cell_renderer';
-export {
-  RESOLVED_ROWS_COLUMNS,
-  INDIVIDUAL_ROWS_COLUMNS,
-  CHILD_ROWS_COLUMNS,
-} from './columns/registry';
-export type { GridColumnId } from './columns/registry';
+export { RESOLVED_ROWS_COLUMNS, INDIVIDUAL_ROWS_COLUMNS, CHILD_ROWS_COLUMNS } from './grid_columns';
+export type { GridColumnId } from './grid_columns';
 export {
   RESOLUTION_GROUPING_ID,
   PAGE_SIZE_OPTIONS,

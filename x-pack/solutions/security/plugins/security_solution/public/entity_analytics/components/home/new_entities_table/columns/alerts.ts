@@ -27,7 +27,7 @@ import {
   nullOnFailure,
   toList,
 } from '../common';
-import type { QueryArgs, Row, PageEnricher, ColumnDescriptor } from '../common';
+import type { QueryArgs, Row, PageEnricher, ColumnQuerySpec } from '../common';
 import {
   MAX_VALUE_ROWS,
   buildValueCursorClause,
@@ -245,32 +245,24 @@ const alertsEnricher: PageEnricher = {
   },
 };
 
-// ── column descriptors ────────────────────────────────────────────────────────
+// ── query specs ───────────────────────────────────────────────────────────────
 
-export const alertCountColumn = {
-  id: ALERT_COUNT_FIELD,
-  displayAsText: 'Alerts',
-  initialWidth: 140,
-  isSortable: true,
-  sortKind: 'foreign',
-  isExpandable: false,
-  // Entities without alerts count 0, so they sort first in ascending order.
-  buildSortQuery: (args) => buildAlertSortQuery(args, ALERT_COUNT_FIELD),
-  buildCountQuery: buildEntitiesInViewCountQuery,
-  runSortPage: (args, ctx) => runSplitSortPage(alertSplitSortPlan(ALERT_COUNT_FIELD), args, ctx),
+export const alertCountQuerySpec = {
+  sort: {
+    // Entities without alerts count 0, so they sort first in ascending order.
+    buildSortQuery: (args) => buildAlertSortQuery(args, ALERT_COUNT_FIELD),
+    buildCountQuery: buildEntitiesInViewCountQuery,
+    runSortPage: (args, ctx) => runSplitSortPage(alertSplitSortPlan(ALERT_COUNT_FIELD), args, ctx),
+  },
   enricher: alertsEnricher,
-} as const satisfies ColumnDescriptor;
+} satisfies ColumnQuerySpec;
 
-export const lastSeenAlertColumn = {
-  id: LAST_SEEN_ALERT_FIELD,
-  displayAsText: 'Last alert',
-  initialWidth: 180,
-  isSortable: true,
-  sortKind: 'foreign',
-  isExpandable: false,
-  buildSortQuery: (args) => buildAlertSortQuery(args, LAST_SEEN_ALERT_FIELD),
-  buildCountQuery: buildEntitiesInViewCountQuery,
-  runSortPage: (args, ctx) =>
-    runSplitSortPage(alertSplitSortPlan(LAST_SEEN_ALERT_FIELD), args, ctx),
-  // No enricher: the alerts enricher of alertCountColumn reads this field too.
-} as const satisfies ColumnDescriptor;
+export const lastSeenAlertQuerySpec = {
+  sort: {
+    buildSortQuery: (args) => buildAlertSortQuery(args, LAST_SEEN_ALERT_FIELD),
+    buildCountQuery: buildEntitiesInViewCountQuery,
+    runSortPage: (args, ctx) =>
+      runSplitSortPage(alertSplitSortPlan(LAST_SEEN_ALERT_FIELD), args, ctx),
+  },
+  // No enricher: the alerts enricher of the alert count reads this field too.
+} satisfies ColumnQuerySpec;
