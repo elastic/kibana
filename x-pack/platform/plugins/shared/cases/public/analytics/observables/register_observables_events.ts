@@ -11,8 +11,9 @@ import { CASES_OBSERVABLES_DELETED_EVENT_TYPE } from '../../../common/constants'
 /**
  * Registers the browser event for observable deletion. One event per confirmed user action — a
  * bulk delete reports once whatever the number of removed observables, and a single row delete
- * also reports once. The server-side observable counters remain the totals because they count every
- * caller (API, workflows) rather than the UI alone.
+ * also reports once. Server-side usage counters (`delete_observable`, `bulk_delete_observables`)
+ * increment once per client method call across all callers (API, workflows, UI). They do not report
+ * the number of removed observables. EBT adds UI-only `delete_scope` that usage counters do not capture.
  */
 export const registerObservablesEvents = ({
   analyticsService,
