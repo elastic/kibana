@@ -5,54 +5,76 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /** Maximum number of entities in one attachment; producers must cap and set truncated=true. */
 export const MAX_IMPACTED_ENTITIES = 50;
+
+/**
+ * Sentinel written by the alert-analysis workflow when an alert has no host.name / user.name.
+ * Kept distinct from a real ECS value of `"unknown"`. Display UIs must map this to a readable label.
+ */
+export const MISSING_ENTITY_NAME = '__missing__';
+
+/** English label for `MISSING_ENTITY_NAME` (agent / LLM text; UI uses i18n). */
+export const formatMissingEntityName = (entityType: 'host' | 'user'): string =>
+  entityType === 'host' ? 'No host name' : 'No user name';
+
+/** Display name for an impact entity row, mapping the missing sentinel to a readable label. */
+export const formatImpactEntityDisplayName = (entityType: 'host' | 'user', name: string): string =>
+  name === MISSING_ENTITY_NAME ? formatMissingEntityName(entityType) : name;
 
 /**
  * Accepts a native number or a Liquid `{{ }}` numeric string (e.g. `"3"`).
  * Rejects JS-coercible junk (`null`, `true`/`false`, `""`) that `z.coerce.number()` would
  * silently turn into 0/1.
  */
-const liquidNonNegativeInt = z.union([
-  z.number().int().min(0).max(100_000),
-  z
-    .string()
-    .max(6)
-    .regex(/^\d+$/, 'Expected a non-negative integer string')
-    .transform((value) => Number(value))
-    .pipe(z.number().int().min(0).max(100_000)),
-]);
+const liquidNonNegativeInt = lazySchema(() =>
+  z.union([
+    z.number().int().min(0).max(100_000),
+    z
+      .string()
+      .max(6)
+      .regex(/^\d+$/, 'Expected a non-negative integer string')
+      .transform((value) => Number(value))
+      .pipe(z.number().int().min(0).max(100_000)),
+  ])
+);
 
-const impactVerdictCountsSchema = z.object({
-  // Liquid {{ }} yields strings; only ${{ }} preserves numbers. Use liquidNonNegativeInt
-  // (not z.coerce.number) so blank/boolean/null fail validation instead of becoming 0/1.
-  true_positive: liquidNonNegativeInt.default(0),
-  false_positive: liquidNonNegativeInt.default(0),
-  inconclusive: liquidNonNegativeInt.default(0),
-});
+const impactVerdictCountsSchema = lazySchema(() =>
+  z.object({
+    // Liquid {{ }} yields strings; only ${{ }} preserves numbers. Use liquidNonNegativeInt
+    // (not z.coerce.number) so blank/boolean/null fail validation instead of becoming 0/1.
+    true_positive: liquidNonNegativeInt.default(0),
+    false_positive: liquidNonNegativeInt.default(0),
+    inconclusive: liquidNonNegativeInt.default(0),
+  })
+);
 
 /** Per-entity row schema (shared by server validate and public renderer filtering). */
-export const impactedEntitySchema = z
-  .object({
-    entity_type: z.enum(['host', 'user']),
-    /** 'unknown' is a real value emitted by the sub-workflow when the alert lacked the field. */
-    name: z.string().min(1).max(1024),
-    alert_count: liquidNonNegativeInt,
-    verdicts: impactVerdictCountsSchema,
-  })
-  .superRefine((entity, ctx) => {
-    const verdictSum =
-      entity.verdicts.true_positive + entity.verdicts.false_positive + entity.verdicts.inconclusive;
-    if (verdictSum !== entity.alert_count) {
-      ctx.addIssue({
-        code: 'custom',
-        message: `verdict counts (${verdictSum}) must equal alert_count (${entity.alert_count})`,
-        path: ['verdicts'],
-      });
-    }
-  });
+export const impactedEntitySchema = lazySchema(() =>
+  z
+    .object({
+      entity_type: z.enum(['host', 'user']),
+      /** `__missing__` is emitted by the alert-analysis workflow when the alert lacked the field. */
+      name: z.string().min(1).max(1024),
+      alert_count: liquidNonNegativeInt,
+      verdicts: impactVerdictCountsSchema,
+    })
+    .superRefine((entity, ctx) => {
+      const verdictSum =
+        entity.verdicts.true_positive +
+        entity.verdicts.false_positive +
+        entity.verdicts.inconclusive;
+      if (verdictSum !== entity.alert_count) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `verdict counts (${verdictSum}) must equal alert_count (${entity.alert_count})`,
+          path: ['verdicts'],
+        });
+      }
+    })
+);
 
 export type ImpactVerdictCounts = z.infer<typeof impactVerdictCountsSchema>;
 export type ImpactedEntity = z.infer<typeof impactedEntitySchema>;
@@ -64,32 +86,34 @@ export type ImpactedEntity = z.infer<typeof impactedEntitySchema>;
  * same alert can contribute to both a host and a user row. It must still be >= each entity's
  * own `alert_count`.
  */
-export const impactAttachmentDataSchema = z
-  .object({
-    attachmentLabel: z.string().max(1024).optional(),
-    entities: z.array(impactedEntitySchema).max(MAX_IMPACTED_ENTITIES),
-    total_alert_count: liquidNonNegativeInt.optional(),
-    /** True when the entity list was capped to MAX_IMPACTED_ENTITIES before attaching.
-     *  Accepts native boolean or the Liquid-rendered strings "true"/"false". */
-    truncated: z
-      .union([z.boolean(), z.enum(['true', 'false']).transform((v) => v === 'true')])
-      .optional(),
-  })
-  .superRefine((data, ctx) => {
-    if (data.total_alert_count === undefined) {
-      return;
-    }
-    for (const entity of data.entities) {
-      if (data.total_alert_count < entity.alert_count) {
-        ctx.addIssue({
-          code: 'custom',
-          message: `total_alert_count (${data.total_alert_count}) must be >= each entity alert_count`,
-          path: ['total_alert_count'],
-        });
+export const impactAttachmentDataSchema = lazySchema(() =>
+  z
+    .object({
+      attachmentLabel: z.string().max(1024).optional(),
+      entities: z.array(impactedEntitySchema).max(MAX_IMPACTED_ENTITIES),
+      total_alert_count: liquidNonNegativeInt.optional(),
+      /** True when the entity list was capped to MAX_IMPACTED_ENTITIES before attaching.
+       *  Accepts native boolean or the Liquid-rendered strings "true"/"false". */
+      truncated: z
+        .union([z.boolean(), z.enum(['true', 'false']).transform((v) => v === 'true')])
+        .optional(),
+    })
+    .superRefine((data, ctx) => {
+      if (data.total_alert_count === undefined) {
         return;
       }
-    }
-  });
+      for (const entity of data.entities) {
+        if (data.total_alert_count < entity.alert_count) {
+          ctx.addIssue({
+            code: 'custom',
+            message: `total_alert_count (${data.total_alert_count}) must be >= each entity alert_count`,
+            path: ['total_alert_count'],
+          });
+          return;
+        }
+      }
+    })
+);
 
 export type ImpactAttachmentData = z.infer<typeof impactAttachmentDataSchema>;
 
@@ -101,8 +125,9 @@ export const formatImpactForAgent = (data: ImpactAttachmentData): string => {
 
   const lines: string[] = ['Alert impact summary'];
   for (const { entity_type, name, alert_count, verdicts } of data.entities) {
+    const displayName = formatImpactEntityDisplayName(entity_type, name);
     lines.push(
-      `${entity_type} ${name}: ${alert_count} alert(s) — ${verdicts.true_positive} TP, ${verdicts.false_positive} FP, ${verdicts.inconclusive} inconclusive`
+      `${entity_type} ${displayName}: ${alert_count} alert(s) — ${verdicts.true_positive} TP, ${verdicts.false_positive} FP, ${verdicts.inconclusive} inconclusive`
     );
   }
   if (data.total_alert_count !== undefined) {

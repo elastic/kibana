@@ -80,6 +80,8 @@ describe('ServiceAccountWorkloadBindings', () => {
       createFakeRequest: jest.fn().mockResolvedValue(mintedRequest),
       reauthenticateFakeRequest: jest.fn(),
       releaseFakeRequest: jest.fn(),
+      getFakeRequestPrincipal: jest.fn(),
+      delete: jest.fn(),
     };
 
     license = licenseMock.create();
@@ -288,6 +290,14 @@ describe('ServiceAccountWorkloadBindings', () => {
       expect(result).toBe('executed');
       expect(backend.createFakeRequest).toHaveBeenCalledWith(
         expect.objectContaining({ serviceAccountId: 'service-account-id', spaceId: 'default' })
+      );
+    });
+
+    it('tells the backend when the workload was bound', async () => {
+      await bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => undefined);
+
+      expect(backend.createFakeRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ boundAt: '2026-08-21T00:00:00.000Z' })
       );
     });
 

@@ -13,7 +13,7 @@ import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 
 /** Backing store for execution documents. */
-export type ExecutionStorageSource = 'plain_index' | 'data_stream';
+export type ExecutionStorageSource = 'system_index' | 'data_stream';
 
 /** Search body without index — DAL resolves the target. */
 export type ExecutionsSearchRequest = Omit<estypes.SearchRequest, 'index'>;
@@ -29,7 +29,6 @@ export type UpsertDocument<TDoc extends { id: string }> = Partial<TDoc> & { id: 
 
 export interface CreateDataClientDeps {
   source: ExecutionStorageSource;
-  dataRetention: string;
   logger: Logger;
 }
 
@@ -154,9 +153,6 @@ export interface BulkUpdateOrUpsertItem<TDocument extends { id: string }>
   extends BulkPlainItemBase<TDocument> {
   operation: 'update' | 'upsert';
   retryOnConflict?: number;
-  documentId?: never;
-  sourceFields?: never;
-  updater?: never;
 }
 
 export type BulkPlainItem<TDocument extends { id: string }> =

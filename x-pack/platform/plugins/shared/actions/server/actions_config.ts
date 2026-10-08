@@ -24,6 +24,7 @@ import type { ActionsConfig } from './config';
 import { AllowedHosts, EnabledActionTypes, DEFAULT_QUEUED_MAX } from './config';
 import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
+import { parseDuration } from './lib/parse_date';
 import type { AwsSesConfig, ResponseSettings } from './types';
 import type { ValidateEmailAddressesOptions } from '../common';
 import {
@@ -37,6 +38,24 @@ export { AllowedHosts, EnabledActionTypes } from './config';
 enum AllowListingField {
   URL = 'url',
   hostname = 'hostname',
+}
+
+export interface InboundEventAdmissionConfig {
+  enabled: boolean;
+  maxInFlight: number;
+  maxInFlightPerConnector: number;
+}
+
+export interface InboundEventRateLimitBudgetConfig {
+  limit: number;
+  windowMs: number;
+}
+
+export interface InboundEventRateLimitConfig {
+  enabled: boolean;
+  maxKeys: number;
+  remoteAddress: InboundEventRateLimitBudgetConfig;
+  connector: InboundEventRateLimitBudgetConfig;
 }
 
 export const DEFAULT_MAX_ATTEMPTS = 3;
@@ -153,6 +172,8 @@ export interface ActionsConfigurationUtilities {
   isInboundEventsEnabled: () => boolean;
   getInboundEventsMaxBodyBytes: () => number;
   getInboundEventsMaxEmitted: () => number;
+  getInboundEventsAdmission: () => InboundEventAdmissionConfig;
+  getInboundEventsRateLimit: () => InboundEventRateLimitConfig;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -379,5 +400,22 @@ export function getActionsConfigurationUtilities(
     isInboundEventsEnabled: () => config.inboundEvents.enabled,
     getInboundEventsMaxBodyBytes: () => config.inboundEvents.maxBodyBytes.getValueInBytes(),
     getInboundEventsMaxEmitted: () => config.inboundEvents.maxEmitted,
+    getInboundEventsAdmission: (): InboundEventAdmissionConfig => ({
+      enabled: config.inboundEvents.admission.enabled,
+      maxInFlight: config.inboundEvents.admission.maxInFlight,
+      maxInFlightPerConnector: config.inboundEvents.admission.maxInFlightPerConnector,
+    }),
+    getInboundEventsRateLimit: (): InboundEventRateLimitConfig => ({
+      enabled: config.inboundEvents.rateLimit.enabled,
+      maxKeys: config.inboundEvents.rateLimit.maxKeys,
+      remoteAddress: {
+        limit: config.inboundEvents.rateLimit.remoteAddress.limit,
+        windowMs: parseDuration(config.inboundEvents.rateLimit.remoteAddress.window),
+      },
+      connector: {
+        limit: config.inboundEvents.rateLimit.connector.limit,
+        windowMs: parseDuration(config.inboundEvents.rateLimit.connector.window),
+      },
+    }),
   };
 }

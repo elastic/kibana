@@ -10,13 +10,13 @@ export {
   ESCALATION_ASSIGN_URL,
   ESCALATION_BY_ID_URL,
   ESCALATION_CLOSE_PREVIEW_URL,
+  ESCALATION_LINK_URL,
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
   ESCALATION_LINKED_INVESTIGATIONS_URL,
   ESCALATION_STATUS_FIELD,
   ESCALATION_STATUS_URL,
   ESCALATION_TEMPLATE_ID,
   ESCALATIONS_INTERNAL_URL,
-  ESCALATIONS_SUGGEST_USERS_URL,
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   ESCALATIONS_UI_CAPABILITY_SHOW,
   INVESTIGATION_TEMPLATE_ID,
@@ -30,8 +30,8 @@ export {
   createEscalationRequestSchema,
   escalationStatusSchema,
   escalationVisibilitySchema,
+  linkEscalationRequestSchema,
   listEscalationsQuerySchema,
-  updateEscalationRequestSchema,
 } from './escalation';
 
 export type {
@@ -40,9 +40,16 @@ export type {
   EscalationConversationSummary,
   EscalationStatus,
   EscalationVisibility,
+  LinkEscalationRequest,
   LinkedInvestigationSummary,
   ListEscalationsQuery,
   ListEscalationsResponse,
   ListLinkedInvestigationsResponse,
-  UpdateEscalationRequest,
 } from './escalation';
+
+export {
+  ESCALATION_CREATED_FROM_INVESTIGATION_EVENT_TYPE,
+  ESCALATION_INVESTIGATION_LINKED_EVENT_TYPE,
+  escalationInvestigationEventSchema,
+} from './conversation_events';
+export type { EscalationInvestigationEventData } from './conversation_events';

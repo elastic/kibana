@@ -120,6 +120,41 @@ const restoreDisabledWorkflows = async (
   }
 };
 
+const VERSION_CONFLICT_PURGE_ATTEMPTS = 3;
+
+interface PurgeDeleteResponse {
+  timed_out?: boolean;
+  version_conflicts?: number;
+  failures?: Array<{ cause?: { type?: string } }>;
+}
+
+class HistoryCleanupIncompleteError extends Error {
+  constructor(response: PurgeDeleteResponse) {
+    super(
+      `History cleanup incomplete: timed_out=${response.timed_out ?? false}, ` +
+        `version_conflicts=${response.version_conflicts ?? 0}, ` +
+        `failures=${response.failures?.length ?? 0}`
+    );
+  }
+}
+
+const isVersionConflictOnly = (response: PurgeDeleteResponse | undefined): boolean => {
+  if (!response?.version_conflicts || response.timed_out) {
+    return false;
+  }
+  return (response.failures ?? []).every(
+    (failure) => failure.cause?.type === 'version_conflict_engine_exception'
+  );
+};
+
+const thrownVersionConflict = (error: unknown): boolean => {
+  if (typeof error !== 'object' || error === null || !('statusCode' in error)) {
+    return false;
+  }
+  const { statusCode, body } = error as { statusCode?: unknown; body?: PurgeDeleteResponse };
+  return statusCode === 409 && isVersionConflictOnly(body);
+};
+
 const purgeWorkflowRelatedData = async (
   workflowIds: string[],
   spaceId: string,
@@ -147,25 +182,49 @@ const purgeWorkflowRelatedData = async (
     dataClient: WorkflowExecutionsDataClient | StepExecutionsDataClient,
     label: string
   ) => {
-    try {
-      const response = await dataClient.deleteByQuery(deleteByQueryRequest);
-      if (
-        strict &&
-        (response.timed_out || response.version_conflicts || response.failures?.length)
-      ) {
-        throw new Error(
-          `History cleanup incomplete: timed_out=${response.timed_out ?? false}, ` +
-            `version_conflicts=${response.version_conflicts ?? 0}, ` +
-            `failures=${response.failures?.length ?? 0}`
+    if (!strict) {
+      try {
+        await dataClient.deleteByQuery(deleteByQueryRequest);
+      } catch (error) {
+        logger.warn(
+          `Failed to purge ${label} for workflows [${workflowIds.join(', ')}]: ${
+            error instanceof Error ? error.message : String(error)
+          }`
         );
       }
-    } catch (error) {
-      if (strict) throw error;
-      logger.warn(
-        `Failed to purge ${label} for workflows [${workflowIds.join(', ')}]: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
+      return;
+    }
+
+    for (let attempt = 1; attempt <= VERSION_CONFLICT_PURGE_ATTEMPTS; attempt++) {
+      try {
+        const response = await dataClient.deleteByQuery(deleteByQueryRequest);
+        const incomplete = Boolean(
+          response.timed_out || response.version_conflicts || response.failures?.length
+        );
+        if (!incomplete) {
+          return;
+        }
+        if (!(isVersionConflictOnly(response) && attempt < VERSION_CONFLICT_PURGE_ATTEMPTS)) {
+          throw new HistoryCleanupIncompleteError(response);
+        }
+        logger.warn(
+          `Retrying ${label} purge for workflows [${workflowIds.join(
+            ', '
+          )}] after a version conflict (${attempt}/${VERSION_CONFLICT_PURGE_ATTEMPTS})`
+        );
+      } catch (error) {
+        if (error instanceof HistoryCleanupIncompleteError) {
+          throw error;
+        }
+        if (!(thrownVersionConflict(error) && attempt < VERSION_CONFLICT_PURGE_ATTEMPTS)) {
+          throw error;
+        }
+        logger.warn(
+          `Retrying ${label} purge for workflows [${workflowIds.join(
+            ', '
+          )}] after a version conflict (${attempt}/${VERSION_CONFLICT_PURGE_ATTEMPTS})`
+        );
+      }
     }
   };
 
@@ -411,7 +470,7 @@ const deleteBoundWorkflow = async (
   params: Parameters<typeof deleteWorkflows>[0]
 ): Promise<DeleteWorkflowsResponse> => {
   const { id, document } = guarded;
-  params.assertCanDelete?.(document);
+  params.assertCanDelete?.(document, id);
   const isPrivate = document.access_control?.access_mode === 'private';
   if (params.force && isPrivate && !params.acknowledgeAclLoss) {
     throw new WorkflowConflictError(
@@ -506,7 +565,7 @@ export const deleteWorkflows = async (params: {
   spaceId: string;
   force: boolean;
   acknowledgeAclLoss?: boolean;
-  assertCanDelete?: (workflow: WorkflowProperties) => void;
+  assertCanDelete?: (workflow: WorkflowProperties, id: string) => void;
   guardedDelete?: GuardedWorkflowDeletion;
   guardedBatch?: OccWorkflowHit[];
   deferCleanup?: boolean;
@@ -528,7 +587,7 @@ export const deleteWorkflows = async (params: {
       client: params.storage.getClient(),
       hits: params.guardedBatch,
       mutate: (hit) => {
-        params.assertCanDelete?.(hit._source);
+        params.assertCanDelete?.(hit._source, hit._id);
         return { ...hit._source, enabled: false, deleted_at: now };
       },
       maxRetries: 0,
@@ -568,7 +627,10 @@ export const deleteWorkflows = async (params: {
 
   const hits = searchResponse.hits.hits;
   for (const hit of hits) {
-    if (hit._source) params.assertCanDelete?.(hit._source);
+    if (hit._source) {
+      if (!hit._id) throw new Error('Missing workflow ID in deletion result.');
+      params.assertCanDelete?.(hit._source, hit._id);
+    }
   }
 
   if (force) {

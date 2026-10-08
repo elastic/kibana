@@ -950,7 +950,12 @@ export class WorkflowExecutionQueryService {
         ],
       });
 
-      return getBulkUpdaterWriteResult(items[0]) === 'updated';
+      const writeResult = getBulkUpdaterWriteResult(items[0]);
+      if (writeResult === 'conflict') {
+        // Retries were exhausted without a write; this is not a lost claim, so surface it.
+        throw new Error(`Version conflict claiming step execution ${stepExecutionId}`);
+      }
+      return writeResult === 'updated';
     } catch (error) {
       this.deps.logger.error(
         `Failed to mark step execution ${stepExecutionId} as responded: ${error}`

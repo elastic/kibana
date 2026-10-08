@@ -21,7 +21,6 @@ import type {
 } from '@kbn/core/server';
 import {
   ExecutionStatus,
-  getWorkflowPermissions,
   isTerminalStatus,
   toWorkflowExecutionEngineModel,
   WorkflowRepository,
@@ -57,7 +56,7 @@ import {
   UNKNOWN_EXECUTION_IDENTITY,
 } from './lib/execution_identity';
 import { getAuthenticatedUser } from './lib/get_user';
-import { hasWorkflowAccess } from './lib/has_workflow_access';
+import { checkWorkflowAccess, hasWorkflowAccess } from './lib/has_workflow_access';
 import { logWorkflowTaskFailure } from './lib/log_workflow_task_failure';
 import {
   failExecutionMissingIdentity,
@@ -76,6 +75,7 @@ import {
 } from './lib/workflow_task_run_event_fields';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { createDataClientBundle, type DataClientBundle } from './repositories/data_access_layer';
+import { LogsRepository } from './repositories/logs_repository';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
@@ -106,7 +106,7 @@ import {
   type WorkflowExecutionForInputRendering,
 } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
-import { WorkflowEventLoggerService } from './workflow_event_logger';
+import { WorkflowLogsQueryService } from './workflow_event_logger';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
@@ -119,6 +119,7 @@ import {
 import {
   getWorkflowImmediateResumeTaskId,
   getWorkflowWakeTaskId,
+  WORKFLOW_PARKED_RUNNER_DELAY_MS,
   WORKFLOW_WAKE_POLL_INTERVAL_MS,
   WorkflowTaskManager,
 } from './workflow_task_manager/workflow_task_manager';
@@ -582,7 +583,12 @@ export class WorkflowsExecutionEnginePlugin
                     workflowRunId,
                     spaceId
                   );
-                  if (!execution || isTerminalStatus(execution.status)) return;
+                  if (!execution || isTerminalStatus(execution.status)) {
+                    await new WorkflowTaskManager(
+                      pluginsStart.taskManager
+                    ).removeParkedImmediateResume(workflowRunId);
+                    return;
+                  }
                 }
                 const accepted = await new WorkflowTaskManager(
                   pluginsStart.taskManager
@@ -697,6 +703,13 @@ export class WorkflowsExecutionEnginePlugin
                       outcome,
                     });
                   }
+                }
+                if (execution && !isTerminalStatus(execution.status)) {
+                  // Recreating the runner on the next wake-up would grant a new API key.
+                  return {
+                    runAt: new Date(Date.now() + WORKFLOW_PARKED_RUNNER_DELAY_MS),
+                    state: {},
+                  };
                 }
               } catch (error) {
                 const aborted = taskAbortController.signal.aborted;
@@ -882,7 +895,12 @@ export class WorkflowsExecutionEnginePlugin
                     state: taskInstance.state,
                   };
                 }
-                if (!(await hasWorkflowAccess(workflow, fakeRequest, coreStart))) {
+                if (
+                  !(await hasWorkflowAccess(workflow, fakeRequest, coreStart, {
+                    id: workflowId,
+                    spaceId,
+                  }))
+                ) {
                   logger.warn(
                     `Skipping scheduled workflow ${workflow.id}: execution access was removed.`
                   );
@@ -1276,7 +1294,10 @@ export class WorkflowsExecutionEnginePlugin
         includeGlobal: true,
         includeDeleted: true,
       });
-      if (current && !(await hasWorkflowAccess(current, request, coreStart))) {
+      if (
+        current &&
+        !(await hasWorkflowAccess(current, request, coreStart, { id: workflow.id, spaceId }))
+      ) {
         throw new Error('You do not have permission to execute this workflow.');
       }
     };
@@ -1581,7 +1602,15 @@ export class WorkflowsExecutionEnginePlugin
           const spaceId = spaceIdFor(item);
           if (!item.workflow.isEphemeral) {
             const state = executionStates.get(`${spaceId}:${item.workflow.id}`);
-            if (state && !getWorkflowPermissions(state, profileId).execute) {
+            if (
+              state &&
+              !checkWorkflowAccess(state, profileId, {
+                core: coreStart,
+                request,
+                id: item.workflow.id,
+                spaceId,
+              })
+            ) {
               throw new Error('You do not have permission to execute this workflow.');
             }
             if (!state?.enabled) {
@@ -1965,11 +1994,8 @@ export class WorkflowsExecutionEnginePlugin
 
     this.internalResumeWorkflowExecutionHandler = internalResumeWorkflowExecution;
 
-    const workflowEventLoggerService = new WorkflowEventLoggerService(
-      coreStart.dataStreams,
-      this.logger,
-      this.config.logging.console
-    );
+    const logsRepository = new LogsRepository(coreStart.dataStreams, this.logger);
+    const workflowEventLoggerService = new WorkflowLogsQueryService(logsRepository, this.logger);
 
     const triggerEventsClientPromise = initializeTriggerEventsClient(coreStart.dataStreams);
 

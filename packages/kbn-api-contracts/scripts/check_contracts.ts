@@ -11,6 +11,7 @@ import { execSync } from 'child_process';
 import { writeFileSync, mkdirSync, rmSync } from 'fs';
 import { resolve } from 'path';
 import { run } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
 import {
   runOasdiff,
   runOasdiffStructural,
@@ -23,6 +24,7 @@ import { loadOas } from '../src/input/load_oas';
 import { formatFailure } from '../src/report/format_failure';
 import { writeImpactReport } from '../src/report/write_impact_report';
 import type { ImpactReportEntry } from '../src/report/write_impact_report';
+import type { BreakingChange } from '../src/diff';
 import { loadAllowlist } from '../src/allowlist/load_allowlist';
 import { resolveTier, isGatingTier } from '../src/stability';
 
@@ -216,7 +218,18 @@ run(
 
       const allBreakingChanges = parseOasdiff([...diffEntries, ...syntheticEntries]);
 
+      // Every completed run writes a report, even an empty one, so the notifier can
+      // tell a clean run apart from a skipped or failed one and clear a stale comment.
+      const writeReport = (entries: ImpactReportEntry[]) => {
+        if (!opts.reportPath) {
+          return;
+        }
+        writeImpactReport(opts.reportPath, { distribution: opts.distribution, entries });
+        log.info(`Impact report written to ${opts.reportPath}`);
+      };
+
       if (allBreakingChanges.length === 0) {
+        writeReport([]);
         log.success('No breaking changes detected');
         return;
       }
@@ -231,18 +244,10 @@ run(
         log.info(`${allowlistedChanges.length} allowlisted change(s) ignored`);
       }
 
-      if (breakingChanges.length === 0) {
-        log.success('All breaking changes are allowlisted');
-        return;
-      }
-
       // Tier from the base spec (the API as it existed before the break).
       const baseOas = await loadOas(basePath);
 
-      // Classify every breaking change by tier. All tiers are reported so the PR
-      // notifier can surface experimental breaks as an informational section, but
-      // only stable and tech_preview gate: experimental APIs do not
-      const entries: ImpactReportEntry[] = breakingChanges.map((change) => {
+      const toEntry = (change: BreakingChange): ImpactReportEntry => {
         const { tier, since } = resolveTier(baseOas, change);
         const entry: ImpactReportEntry = {
           path: change.path,
@@ -255,23 +260,57 @@ run(
         if (since !== undefined) {
           entry.since = since;
         }
+        if (change.reportOnly) {
+          entry.reportOnly = true;
+          entry.policyReason = change.policyReason;
+        }
         return entry;
-      });
+      };
 
-      if (opts.reportPath) {
-        writeImpactReport(opts.reportPath, { entries });
-        log.info(`Impact report written to ${opts.reportPath}`);
+      // Classify every breaking change by tier. All tiers are reported so the PR
+      // notifier can surface experimental breaks as an informational section, but
+      // only stable and tech_preview gate: experimental APIs do not
+      const entries = breakingChanges.map(toEntry);
+
+      // Allowlisted stable and tech_preview changes no longer gate, but they still
+      // ship as breaking changes, so they stay in the report to keep the release
+      // note guidance in front of the author.
+      const allowlistedEntries: ImpactReportEntry[] = allowlistedChanges
+        .map(toEntry)
+        .filter((entry) => isGatingTier(entry.tier) && !entry.reportOnly)
+        .map((entry) => ({ ...entry, allowlisted: true }));
+      const reportEntries = [...entries, ...allowlistedEntries];
+
+      writeReport(reportEntries);
+
+      if (breakingChanges.length === 0) {
+        if (allowlistedEntries.length > 0) {
+          log.info(formatFailure(reportEntries));
+        }
+        log.success('All breaking changes are allowlisted');
+        return;
       }
 
-      const gatingEntries = entries.filter((entry) => isGatingTier(entry.tier));
-      const experimentalCount = entries.length - gatingEntries.length;
+      const gatingEntries = entries.filter(
+        (entry) => isGatingTier(entry.tier) && !entry.reportOnly
+      );
+      const reportOnlyCount = entries.filter((entry) => entry.reportOnly).length;
+      const experimentalCount = entries.filter(
+        (entry) => !entry.reportOnly && !isGatingTier(entry.tier)
+      ).length;
       if (experimentalCount > 0) {
         log.info(
           `${experimentalCount} experimental-tier breaking change(s) reported (informational, not blocking)`
         );
       }
+      if (reportOnlyCount > 0) {
+        log.info(
+          `${reportOnlyCount} change(s) matched a report-only rule (informational, not blocking)`
+        );
+      }
 
       if (gatingEntries.length === 0) {
+        log.info(formatFailure(reportEntries));
         log.success('No breaking changes detected in stable or tech_preview APIs');
         return;
       }
@@ -279,8 +318,8 @@ run(
       const stableCount = gatingEntries.filter((entry) => entry.tier === 'stable').length;
       const techPreviewCount = gatingEntries.length - stableCount;
 
-      log.error(formatFailure(entries));
-      throw new Error(
+      log.error(formatFailure(reportEntries));
+      throw createFailError(
         `Detected ${gatingEntries.length} breaking change(s) in stable/tech_preview APIs: ` +
           `${stableCount} stable, ${techPreviewCount} tech_preview`
       );

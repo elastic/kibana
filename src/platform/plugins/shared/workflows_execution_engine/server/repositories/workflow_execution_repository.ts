@@ -528,7 +528,14 @@ export class WorkflowExecutionRepository {
       ],
     });
 
-    return getBulkUpdaterWriteResult(items[0]) === 'updated';
+    const writeResult = getBulkUpdaterWriteResult(items[0]);
+    if (writeResult === 'conflict') {
+      // The CAS never landed; throwing avoids reading this as another drain iteration winning.
+      throw new Error(
+        `Version conflict promoting queued workflow execution ${params.workflowExecutionId} to pending`
+      );
+    }
+    return writeResult === 'updated';
   }
 
   /**

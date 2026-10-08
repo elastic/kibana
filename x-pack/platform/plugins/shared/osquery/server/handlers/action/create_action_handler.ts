@@ -201,10 +201,19 @@ export const createActionHandler = async (
   });
 
   if (actionsComponentTemplateExists) {
-    await esClientInternal.bulk({
+    const bulkResponse = await esClientInternal.bulk({
       refresh: 'wait_for',
       operations: [{ index: { _index: `${ACTIONS_INDEX}-default` } }, osqueryAction],
     });
+
+    // `bulk` reports item failures in the body instead of throwing. Result reads are
+    // authorized against this document, so without it they 404 for this action.
+    if (bulkResponse.errors) {
+      const reason = bulkResponse.items[0]?.index?.error?.reason ?? 'unknown error';
+      throw new Error(
+        `Failed to write osquery action document ${osqueryAction.action_id}: ${reason}`
+      );
+    }
   }
 
   osqueryContext.telemetryEventsSender.reportEvent(TELEMETRY_EBT_LIVE_QUERY_EVENT, {

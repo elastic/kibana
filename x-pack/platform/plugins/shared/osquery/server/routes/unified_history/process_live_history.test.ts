@@ -67,7 +67,6 @@ describe('processLiveHistory', () => {
       liveHits: hits,
       osqueryContext: createMockOsqueryContext() as never,
       request: mockRequest,
-      spaceId: 'default',
       logger: {} as never,
     });
 
@@ -94,7 +93,6 @@ describe('processLiveHistory', () => {
       liveHits: hits,
       osqueryContext: createMockOsqueryContext() as never,
       request: mockRequest,
-      spaceId: 'default',
       logger: {} as never,
     });
 
@@ -123,7 +121,6 @@ describe('processLiveHistory', () => {
       liveHits: hits,
       osqueryContext: createMockOsqueryContext() as never,
       request: mockRequest,
-      spaceId: 'default',
       logger: {} as never,
     });
 
@@ -133,7 +130,6 @@ describe('processLiveHistory', () => {
     expect(mockGetResultCountsForActions).toHaveBeenCalledWith(
       expect.anything(),
       ['query-1'],
-      'default',
       undefined,
       false
     );
@@ -166,7 +162,6 @@ describe('processLiveHistory', () => {
       liveHits: hits,
       osqueryContext: createMockOsqueryContext() as never,
       request: mockRequest,
-      spaceId: 'default',
       logger: {} as never,
     });
 
@@ -176,7 +171,6 @@ describe('processLiveHistory', () => {
     expect(mockGetResultCountsForActions).toHaveBeenCalledWith(
       expect.anything(),
       ['query-1', 'query-2'],
-      'default',
       undefined,
       false
     );
@@ -193,7 +187,6 @@ describe('processLiveHistory', () => {
       liveHits: [createLiveHit()],
       osqueryContext: createMockOsqueryContext() as never,
       request: mockRequest,
-      spaceId: 'production',
       integrationNamespaces: ['prod'],
       ccsEnabled: true,
       logger: {} as never,
@@ -202,7 +195,6 @@ describe('processLiveHistory', () => {
     expect(mockGetResultCountsForActions).toHaveBeenCalledWith(
       expect.anything(),
       ['query-1'],
-      'production',
       ['prod'],
       true
     );
@@ -213,7 +205,6 @@ describe('processLiveHistory', () => {
       liveHits: [],
       osqueryContext: createMockOsqueryContext() as never,
       request: mockRequest,
-      spaceId: 'default',
       logger: {} as never,
     });
 
@@ -248,14 +239,12 @@ describe('processLiveHistory', () => {
         ]),
       } as never,
       request: mockRequest,
-      spaceId: 'default',
       logger: {} as never,
     });
 
     expect(mockGetResultCountsForActions).toHaveBeenCalledWith(
       mockScopedEsClient,
       ['query-1'],
-      'default',
       undefined,
       false
     );
