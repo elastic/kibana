@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
+
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
-import { OTLP_MINIMUM_FLEET_SERVER_VERSION } from '../../../common/constants';
+import {
+  ENABLE_OTLP_OUTPUT_FLAG,
+  OTLP_MINIMUM_FLEET_SERVER_VERSION,
+} from '../../../common/constants';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
 import { isFleetServerVersionRequirementMet } from '../fleet_server/version_requirements';
@@ -24,6 +29,12 @@ const mockedIsFleetServerVersionRequirementMet =
     typeof isFleetServerVersionRequirementMet
   >;
 
+const mockOtlpFlag = (value: boolean) => {
+  const getBooleanValue$ = jest.fn().mockReturnValue(of(value));
+  (appContextService.getFeatureFlags as jest.Mock).mockReturnValue({ getBooleanValue$ });
+  return getBooleanValue$;
+};
+
 describe('checkOtlpOutputAllowed', () => {
   const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
   const soClientMock = savedObjectsClientMock.create();
@@ -34,9 +45,16 @@ describe('checkOtlpOutputAllowed', () => {
   });
 
   it('returns { result: false } when the feature flag is off, without calling the version check', async () => {
-    (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
-      enableOtlpOutput: false,
-    });
+    mockOtlpFlag(false);
+
+    const result = await checkOtlpOutputAllowed(esClientMock, soClientMock);
+
+    expect(result).toEqual({ result: false, error: 'OTLP output type is not enabled' });
+    expect(mockedIsFleetServerVersionRequirementMet).not.toHaveBeenCalled();
+  });
+
+  it('returns { result: false } when feature flags are unavailable, without calling the version check', async () => {
+    (appContextService.getFeatureFlags as jest.Mock).mockReturnValue(undefined);
 
     const result = await checkOtlpOutputAllowed(esClientMock, soClientMock);
 
@@ -45,9 +63,7 @@ describe('checkOtlpOutputAllowed', () => {
   });
 
   it('returns { result: false, error } when the feature flag is on but the version requirement is not met', async () => {
-    (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
-      enableOtlpOutput: true,
-    });
+    mockOtlpFlag(true);
     mockedIsFleetServerVersionRequirementMet.mockResolvedValue(false);
 
     const result = await checkOtlpOutputAllowed(esClientMock, soClientMock);
@@ -58,13 +74,12 @@ describe('checkOtlpOutputAllowed', () => {
   });
 
   it('returns { result: true } when both the feature flag and version requirement are met', async () => {
-    (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
-      enableOtlpOutput: true,
-    });
+    const getBooleanValue$ = mockOtlpFlag(true);
     mockedIsFleetServerVersionRequirementMet.mockResolvedValue(true);
 
     const result = await checkOtlpOutputAllowed(esClientMock, soClientMock);
 
+    expect(getBooleanValue$).toHaveBeenCalledWith(ENABLE_OTLP_OUTPUT_FLAG, false);
     expect(result).toEqual({ result: true });
     expect(result.error).toBeUndefined();
   });

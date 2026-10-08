@@ -240,8 +240,8 @@ describe('loadOperations', () => {
   });
 
   it('rejects unsupported versions and external refs', () => {
-    expect(() => loadOperations({ swagger: '2.0', paths: {} })).toThrow(
-      'Unsupported spec version unknown; expected OpenAPI 3.x'
+    expect(() => loadOperations({ swagger: '1.2', paths: {} })).toThrow(
+      'Unsupported spec version unknown; expected Swagger 2.0 or OpenAPI 3.x'
     );
     expect(() =>
       loadOperations({

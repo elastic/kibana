@@ -30,7 +30,8 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { RunAgentFn } from '@kbn/agent-builder-server';
+import type { ExecutionConversationAccess, RunAgentFn } from '@kbn/agent-builder-server';
+import type { ConversationOperation } from '@kbn/agent-builder-server/execution';
 import type { ChatEvent, ConverseInput, ConversationRoundAuthor } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
@@ -217,20 +218,26 @@ const handleConversationExecution = async ({
 
   // The execution service resolved the conversation, created it when it was new and wrote the
   // opening user message before this run was dispatched: the run reads the stored document and is
-  // told how the request resolved it, since its own read only ever sees an update. A run that does
-  // not store its conversation wrote nothing to read, so it resolves the placeholder here.
-  const conversation: ConversationWithOperation = storeConversation
-    ? { ...(await conversationClient.get(conversationId)), operation: conversationOperation }
-    : await getConversation({
-        agentId,
-        conversationId,
-        autoCreateConversationWithId: true,
-        conversationClient,
-        accessControl,
-        readOnly,
-        origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
-        subagentCreation,
-      });
+  // told how the request resolved it, since its own read only ever sees an update. An existing
+  // conversation is read even when the run stores nothing, so a deleted one fails the run instead of
+  // being replaced by an empty placeholder; only a non-storing new conversation resolves the
+  // placeholder here, as nothing was written for it.
+  const conversation: ConversationWithOperation =
+    storeConversation || conversationOperation === 'UPDATE'
+      ? { ...(await conversationClient.get(conversationId)), operation: conversationOperation }
+      : await getConversation({
+          agentId,
+          conversationId,
+          autoCreateConversationWithId: true,
+          conversationClient,
+          accessControl,
+          readOnly,
+          origin: origin
+            ? { external_conversation_id: origin.external_conversation_id }
+            : undefined,
+          subagentCreation,
+        });
+  const conversationAccess = toConversationAccess({ storeConversation, conversationOperation });
 
   // Matches the receipt-time write's timestamp, so a rebuilt interruption event lands with the
   // same created_at rather than moving to when this run picked the record up.
@@ -285,11 +292,13 @@ const handleConversationExecution = async ({
       parentExecutionId: execution.parentExecutionId,
       projectRouting,
       roundId,
+      conversationAccess,
     });
 
     // Generate title when creating a new conversation
     // OR when the conversation still carries the default placeholder title
-    const needsTitle = conversationNeedsTitle(conversation) && !subagentCreation;
+    const needsTitle =
+      storeConversation && conversationNeedsTitle(conversation) && !subagentCreation;
     const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
     const [titleChatModel, { chatModel }, { name: agentName }, privacySettings] = await Promise.all(
       [
@@ -624,8 +633,14 @@ const handleStandaloneExecution = async ({
 }): Promise<Observable<ChatEvent>> => {
   const agentId = execution.agentId;
   const { logger, runAgent } = deps;
-  const { telemetryMetadata, maxContentLength, reasoningLevel, projectRouting } =
-    execution.agentParams;
+  const {
+    telemetryMetadata,
+    maxContentLength,
+    reasoningLevel,
+    projectRouting,
+    structuredOutput,
+    outputSchema,
+  } = execution.agentParams;
 
   // See the matching comment in handleConversationExecution: captured once, ahead of the first
   // model call, so every EIS call in this execution reports the same trace id.
@@ -647,6 +662,8 @@ const handleStandaloneExecution = async ({
     executionId: execution.executionId,
     request,
     nextInput: execution.agentParams.nextInput,
+    structuredOutput,
+    outputSchema,
     abortSignal,
     conversation: undefined,
     defaultConnectorId: selectedConnectorId,
@@ -675,4 +692,17 @@ const handleStandaloneExecution = async ({
       });
     })
   );
+};
+
+const toConversationAccess = ({
+  storeConversation,
+  conversationOperation,
+}: {
+  storeConversation: boolean;
+  conversationOperation: ConversationOperation;
+}): ExecutionConversationAccess => {
+  if (storeConversation) {
+    return 'readWrite';
+  }
+  return conversationOperation === 'UPDATE' ? 'readOnly' : 'none';
 };

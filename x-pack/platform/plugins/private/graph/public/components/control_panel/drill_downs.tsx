@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import type { UrlTemplate } from '../../types';
 import { IconRenderer } from '../icon_renderer';
 import { gphSidebarHeaderStyles, gphSidebarPanelStyles, noUserSelectStyles } from '../../styles';
@@ -27,7 +27,7 @@ export const DrillDowns = ({ urlTemplates, openUrlTemplate }: DrillDownsProps) =
         })}
       </div>
 
-      <div css={gphSidebarPanelStyles}>
+      <div css={gphSidebarPanelStyles} data-test-subj="graphDrilldowns">
         {urlTemplates.length === 0 && (
           <p className="help-block">
             {i18n.translate('xpack.graph.sidebar.drillDowns.noDrillDownsHelpText', {
@@ -47,12 +47,14 @@ export const DrillDowns = ({ urlTemplates, openUrlTemplate }: DrillDownsProps) =
                     <IconRenderer icon={urlTemplate.icon} css={noUserSelectStyles} />{' '}
                   </>
                 )}
-                <EuiLink
+                <EuiButtonEmpty
+                  size="xs"
+                  flush="both"
                   data-test-subj={urlTemplate.isDefault ? 'graphRawDocumentsDrilldown' : undefined}
                   onClick={onOpenUrlTemplate}
                 >
                   {urlTemplate.description}
-                </EuiLink>
+                </EuiButtonEmpty>
               </li>
             );
           })}
