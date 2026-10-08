@@ -43,7 +43,7 @@ import { ACTIVITY_INDEX_MAPPING } from './activity';
  * reads). The user-actions SO is `dynamic: false` on `payload`,
  * so payload sub-fields aren't mirrored. The surface fields the
  * builder reads (`type`, `action`, `created_at`, `created_by`,
- * `owner`) must still exist on the SO mapping.
+ * `owner`, `source`) must still exist on the SO mapping.
  */
 
 // ----- Mapping-walking helpers (mirrors cases drift test) -----
@@ -113,6 +113,7 @@ const baseAttrs = {
   created_at: '2026-05-01T10:00:00.000Z',
   created_by: { username: 'jane', full_name: 'J', email: 'j@e.com', profile_uid: 'p-1' },
   owner: 'securitySolution',
+  source: { type: 'workflow', id: 'wf-1', name: 'My Workflow', run_id: 'exec-1' },
 };
 
 const caseRef: SavedObjectReference = {
@@ -250,6 +251,14 @@ const PER_TYPE_FIXTURES: {
     { template: { id: 't-1', version: 1 } },
     { action: 'update' }
   ),
+  workflow: makeUserActionSO(
+    'workflow',
+    {
+      workflow: { id: 'wf-1', name: 'My Workflow', executionId: 'exec-1' },
+      origin: { type: 'cases.case', id: 'case-1' },
+    },
+    { action: 'create' }
+  ),
 };
 
 // ----- Layer 1: doc-builder output ⊆ activity mapping (per-type) -----
@@ -323,6 +332,7 @@ const SURFACE_FIELDS_THE_DOC_BUILDER_READS = [
   'created_at',
   'created_by',
   'owner',
+  'source',
 ];
 
 describe('SO mapping carries every surface field the activity doc-builder reads', () => {

@@ -9,10 +9,7 @@
 
 const THRESHOLD = 0.15;
 const MARKER = '<!-- bundle-size-limits-comment -->';
-const LIMITS_PATHS = [
-  'packages/kbn-optimizer/limits.yml',
-  'packages/kbn-rspack-optimizer/limits.yml',
-];
+const LIMITS_PATH = 'packages/kbn-rspack-optimizer/limits.yml';
 
 const getContent = async ({ github, context }, ref, path) => {
   const { data } = await github.rest.repos.getContent({
@@ -36,11 +33,21 @@ const parseYaml = (content) => {
 module.exports = async ({ github, context }) => {
   const pr = context.payload.pull_request;
 
+  // The workflow runs on every push and base change, so check here whether the PR's diff
+  // against its current base touches the limits file. A retarget can drop it from the diff.
+  const files = await github.paginate(github.rest.pulls.listFiles, {
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    pull_number: pr.number,
+    per_page: 100,
+  });
+  const touchesLimits = files.some(({ filename }) => filename === LIMITS_PATH);
+
   const bigIncreases = [];
-  for (const path of LIMITS_PATHS) {
+  if (touchesLimits) {
     const [baseContent, headContent] = await Promise.all([
-      getContent({ github, context }, pr.base.sha, path),
-      getContent({ github, context }, pr.head.sha, path),
+      getContent({ github, context }, pr.base.sha, LIMITS_PATH),
+      getContent({ github, context }, pr.head.sha, LIMITS_PATH),
     ]);
 
     const baseMap = parseYaml(baseContent);
@@ -51,7 +58,7 @@ module.exports = async ({ github, context }) => {
       if (baseSize != null && headSize > baseSize) {
         const pct = (headSize - baseSize) / baseSize;
         if (pct >= THRESHOLD) {
-          bigIncreases.push({ path, plugin, baseSize, headSize, pct });
+          bigIncreases.push({ plugin, baseSize, headSize, pct });
         }
       }
     }
@@ -78,17 +85,17 @@ module.exports = async ({ github, context }) => {
   const rows = bigIncreases
     .sort((a, b) => b.pct - a.pct)
     .map(
-      ({ path, plugin, baseSize, headSize, pct }) =>
-        `| \`${path}\` | \`${plugin}\` | ${baseSize.toLocaleString()} | ${headSize.toLocaleString()} | +${(
+      ({ plugin, baseSize, headSize, pct }) =>
+        `| \`${plugin}\` | ${baseSize.toLocaleString()} | ${headSize.toLocaleString()} | +${(
           pct * 100
         ).toFixed(1)}% |`
     )
     .join('\n');
 
   const body =
-    `@${pr.user.login}, this PR increases one or more page-load bundle sizes by 15% or more:\n\n` +
-    `| Limits file | Plugin | Before (bytes) | After (bytes) | Change |\n` +
-    `|-------------|--------|----------------|---------------|--------|\n` +
+    `@${pr.user.login}, this PR increases one or more page-load bundle sizes in \`${LIMITS_PATH}\` by 15% or more:\n\n` +
+    `| Plugin | Before (bytes) | After (bytes) | Change |\n` +
+    `|--------|----------------|---------------|--------|\n` +
     `${rows}\n\n` +
     `Large bundle size increases can affect page load performance. Consider whether dependencies can be lazy-loaded or code split to reduce the bundle.\n\n` +
     `See the [bundle optimization guide](https://www.elastic.co/docs/extend/kibana/ci-metrics#ci-metric-resolving-overages) for tips.\n\n` +

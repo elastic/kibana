@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -101,11 +103,6 @@ describe('GenAiSettingsApp', () => {
       advancedSettings: { show: true, save: true },
     };
 
-    // Mock feature flags to enable AI Agents by default
-    jest
-      .spyOn(coreStart.featureFlags, 'getBooleanValue')
-      .mockImplementation((_flagName: string, _fallbackValue: boolean) => true as boolean);
-
     // Mock settings client with default settings
     coreStart.settings.client.getAll.mockReturnValue(createSettingsMock() as any);
     coreStart.http.fetch.mockResolvedValue({
@@ -132,13 +129,15 @@ describe('GenAiSettingsApp', () => {
       ...servicesOverrides,
     };
     return renderWithI18n(
-      <QueryClientProvider client={new QueryClient()}>
-        <KibanaContextProvider services={services}>
-          <SettingsContextProvider>
-            <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} {...props} />
-          </SettingsContextProvider>
-        </KibanaContextProvider>
-      </QueryClientProvider>
+      <MockAppHeaderProvider>
+        <QueryClientProvider client={new QueryClient()}>
+          <KibanaContextProvider services={services}>
+            <SettingsContextProvider>
+              <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} {...props} />
+            </SettingsContextProvider>
+          </KibanaContextProvider>
+        </QueryClientProvider>
+      </MockAppHeaderProvider>
     );
   };
 
@@ -175,7 +174,9 @@ describe('GenAiSettingsApp', () => {
 
       // Main page section
       expect(screen.getByTestId('genAiSettingsPage')).toBeInTheDocument();
-      expect(screen.getByTestId('genAiSettingsTitle')).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'GenAI Settings'
+      );
 
       // Feature visibility section (with default settings)
       expect(screen.getByTestId('aiFeatureVisibilitySection')).toBeInTheDocument();
@@ -277,9 +278,6 @@ describe('GenAiSettingsApp', () => {
         }
         return fallback;
       });
-      jest
-        .spyOn(coreStart.featureFlags, 'getBooleanValue')
-        .mockImplementation((_flagName, _fallbackValue) => true);
 
       renderComponent();
 

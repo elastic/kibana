@@ -21,12 +21,15 @@ import {
   syntheticsMonitorAttributes,
   syntheticsMonitorSOTypes,
 } from '../../common/types/saved_objects';
-import { DeployPrivateLocationMonitors } from './deploy_private_location_monitors';
-import { cleanUpDuplicatedPackagePolicies } from './clean_up_duplicate_policies';
+import {
+  DeployPrivateLocationMonitors,
+  formatFailedCreates,
+} from './deploy_private_location_monitors';
 import type { HeartbeatConfig } from '../../common/runtime_types';
 import { MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL } from '../../common/constants';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
+import { bumpAgentPolicyRevision } from '../synthetics_service/private_location/package_policy_service';
 import type { SyntheticsServerSetup } from '../types';
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
@@ -35,15 +38,21 @@ export const DEFAULT_TASK_SCHEDULE = `${MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL}m`;
 
 export interface SyncTaskState extends Record<string, unknown> {
   lastStartedAt: string;
-  hasAlreadyDoneCleanup: boolean;
-  maxCleanUpRetries: number;
   disableAutoSync?: boolean;
   privateLocationId?: string;
+  /** Agent policy the location just moved away from; its revision is bumped after the sync. */
+  previousAgentPolicyId?: string;
 }
 
 export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
   state: Partial<SyncTaskState>;
 };
+
+// TM forbids `runAt` and `schedule` on the same result object.
+export type SyncTaskRunResult =
+  | { state: SyncTaskState; error?: Error; schedule: IntervalSchedule | RruleSchedule }
+  | { state: SyncTaskState; error?: Error; runAt: Date }
+  | { state: SyncTaskState; error?: Error };
 
 export class SyncPrivateLocationMonitorsTask {
   public deployPackagePolicies: DeployPrivateLocationMonitors;
@@ -62,9 +71,9 @@ export class SyncPrivateLocationMonitorsTask {
       [TASK_TYPE]: {
         title: 'Synthetics Sync Private Location Monitors Task',
         description:
-          'This task syncs private location monitor package policies, handling maintenance window changes and cleaning up duplicate policies',
+          'This task syncs private location monitor package policies, handling maintenance window changes.',
         timeout: '10m',
-        maxAttempts: 1,
+        maxAttempts: 2,
         createTaskRunner: ({ taskInstance }) => {
           return {
             run: async () => {
@@ -76,11 +85,11 @@ export class SyncPrivateLocationMonitorsTask {
     });
   }
 
-  public async runTask({ taskInstance }: { taskInstance: CustomTaskInstance }): Promise<{
-    state: SyncTaskState;
-    error?: Error;
-    schedule?: IntervalSchedule | RruleSchedule;
-  }> {
+  public async runTask({
+    taskInstance,
+  }: {
+    taskInstance: CustomTaskInstance;
+  }): Promise<SyncTaskRunResult> {
     this.debugLog(
       `Syncing private location monitors, current task state is ${JSON.stringify(
         taskInstance.state
@@ -109,21 +118,52 @@ export class SyncPrivateLocationMonitorsTask {
       ]);
       const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
 
-      if (taskInstance.state.privateLocationId) {
-        // if privateLocationId exists on state, we just perform sync and exit
-        await this.deployPackagePolicies.syncAllPackagePolicies({
-          allPrivateLocations,
-          encryptedSavedObjects,
-          privateLocationId: taskInstance.state.privateLocationId,
-          soClient: savedObjects.createInternalRepository(),
-        });
+      const { privateLocationId, previousAgentPolicyId } = taskInstance.state;
+      if (privateLocationId) {
+        // This instance is one-shot, so never return a schedule: task manager
+        // would turn a failed run into a recurring task. A failed run keeps the
+        // location in state so the retry re-runs this branch instead of the MW sync.
+        const retryState = taskInstance.state as SyncTaskState;
+        const doneState = {
+          ...taskInstance.state,
+          privateLocationId: undefined,
+          previousAgentPolicyId: undefined,
+        } as SyncTaskState;
 
-        return {
-          state: {
-            ...taskInstance.state,
-            privateLocationId: undefined,
-          } as SyncTaskState,
-        };
+        try {
+          const { failedCreatesBySpace } = await this.deployPackagePolicies.syncAllPackagePolicies({
+            allPrivateLocations,
+            encryptedSavedObjects,
+            privateLocationId,
+            soClient: savedObjects.createInternalRepository(),
+          });
+
+          if (failedCreatesBySpace.length > 0) {
+            // surface it as a task failure rather than a silent success
+            const error = new Error(formatFailedCreates(failedCreatesBySpace));
+            logger.error(
+              `Sync of private location monitors failed for location ${privateLocationId}: ${error.message}`
+            );
+            return { error, state: retryState };
+          }
+        } catch (error) {
+          logger.error(
+            `Sync of private location monitors failed for location ${privateLocationId}: ${error.message}`
+          );
+          return { error, state: retryState };
+        } finally {
+          // Policies written with a sharding condition skip Fleet's own bump, which
+          // would leave agents on the old policy still running the moved monitors.
+          if (previousAgentPolicyId) {
+            await bumpAgentPolicyRevision(this.serverSetup, previousAgentPolicyId).catch((error) =>
+              logger.error(
+                `Failed to bump revision of previous agent policy ${previousAgentPolicyId}: ${error.message}`
+              )
+            );
+          }
+        }
+
+        return { state: doneState };
       }
 
       const defaultState = {
@@ -131,37 +171,9 @@ export class SyncPrivateLocationMonitorsTask {
         schedule: { interval },
       };
 
-      const { performCleanupSync } = await this.cleanUpDuplicatedPackagePolicies(
-        soClient,
-        taskState
-      );
-
       if (allPrivateLocations.length === 0) {
         this.debugLog(`No private locations found, skipping sync of private location monitors`);
         return { state: taskState, schedule: { interval } };
-      }
-      if (performCleanupSync) {
-        this.debugLog(
-          `Syncing private location monitors because cleanup performed a change, ` +
-            `locations count: ${allPrivateLocations.length}`
-        );
-
-        if (allPrivateLocations.length > 1) {
-          for (const location of allPrivateLocations) {
-            await runTaskPerPrivateLocation({
-              server: this.serverSetup,
-              privateLocationId: location.id,
-            });
-          }
-        } else {
-          await this.deployPackagePolicies.syncAllPackagePolicies({
-            allPrivateLocations,
-            soClient,
-            encryptedSavedObjects,
-          });
-        }
-        this.debugLog(`Completed post-cleanup sync`);
-        return defaultState;
       }
 
       if (taskState.disableAutoSync) {
@@ -208,8 +220,21 @@ export class SyncPrivateLocationMonitorsTask {
           );
         }
       }
+
+      // Only `updatedAt` after this run's start — missing IDs persist after a
+      // sync and would schedule follow-ups forever.
+      if (await this.haveMWsUpdatedSince(taskState.lastStartedAt, monitorMwsIds)) {
+        this.debugLog(
+          `Maintenance windows changed during this run; scheduling an immediate follow-up`
+        );
+        return { state: taskState, runAt: new Date() };
+      }
     } catch (error) {
       logger.error(`Sync of private location monitors failed: ${error.message}`);
+      if (taskInstance.state.privateLocationId) {
+        // One-shot: no schedule (it would make the task recurring), and keep the location for the retry.
+        return { error, state: taskInstance.state as SyncTaskState };
+      }
       return { error, state: taskState, schedule: { interval } };
     }
 
@@ -221,8 +246,6 @@ export class SyncPrivateLocationMonitorsTask {
 
     return {
       lastStartedAt: startedAt.toISOString(),
-      hasAlreadyDoneCleanup: taskInstance.state.hasAlreadyDoneCleanup || false,
-      maxCleanUpRetries: taskInstance.state.maxCleanUpRetries || 3,
       disableAutoSync: taskInstance.state.disableAutoSync ?? false,
     };
   }
@@ -334,11 +357,17 @@ export class SyncPrivateLocationMonitorsTask {
     };
   }
 
-  async cleanUpDuplicatedPackagePolicies(
-    soClient: SavedObjectsClientContract,
-    taskState: SyncTaskState
-  ) {
-    return await cleanUpDuplicatedPackagePolicies(this.serverSetup, soClient, taskState);
+  async haveMWsUpdatedSince(sinceIso: string, monitorMwsIds: string[]): Promise<boolean> {
+    const { syntheticsService } = this.syntheticsMonitorClient;
+    const maintenanceWindows = (await syntheticsService.getMaintenanceWindows(ALL_SPACES_ID)) ?? [];
+    const monitorMwIds = new Set(monitorMwsIds);
+    return maintenanceWindows.some((mw) => {
+      if (!monitorMwIds.has(mw.id)) {
+        return false;
+      }
+      const updatedAt = mw.updatedAt;
+      return Boolean(updatedAt) && moment(updatedAt).isAfter(moment(sinceIso));
+    });
   }
 
   debugLog = (message: string) => {
@@ -346,6 +375,16 @@ export class SyncPrivateLocationMonitorsTask {
   };
 }
 
+/**
+ * Asks task manager to run the private-location sync task now.
+ *
+ * Throws when scheduling ultimately fails (for example the task is already
+ * running and cannot be re-run within the retry window). Callers that answer an
+ * HTTP request must propagate that: a swallowed failure meant the caller was told
+ * the sync had been scheduled when nothing had been, and the work only happened
+ * whenever the periodic interval next came around. Fire-and-forget callers are
+ * expected to attach their own `catch`.
+ */
 export const runSynPrivateLocationMonitorsTaskSoon = async ({
   server,
   retries = 5,
@@ -373,27 +412,8 @@ export const runSynPrivateLocationMonitorsTaskSoon = async ({
       `Error scheduling Synthetics sync private location monitors task: ${error.message}`,
       { error }
     );
+    throw error;
   }
-};
-
-export const resetSyncPrivateCleanUpState = async ({
-  server,
-  hasAlreadyDoneCleanup = false,
-}: {
-  server: SyntheticsServerSetup;
-  hasAlreadyDoneCleanup: boolean;
-}) => {
-  const {
-    logger,
-    pluginsStart: { taskManager },
-  } = server;
-  logger.debug(`Resetting Synthetics sync private location monitors cleanup state`);
-  await taskManager.bulkUpdateState([PRIVATE_LOCATIONS_SYNC_TASK_ID], (state) => ({
-    ...state,
-    hasAlreadyDoneCleanup,
-  }));
-  await runSynPrivateLocationMonitorsTaskSoon({ server });
-  logger.debug(`Synthetics sync private location monitors cleanup state reset successfully`);
 };
 
 export const disableSyncPrivateLocationTask = async ({
@@ -420,19 +440,27 @@ export const disableSyncPrivateLocationTask = async ({
 export const runTaskPerPrivateLocation = async ({
   server,
   privateLocationId,
+  previousAgentPolicyId,
 }: {
   server: SyntheticsServerSetup;
   privateLocationId: string;
+  previousAgentPolicyId?: string;
 }) => {
   const {
     pluginsStart: { taskManager },
   } = server;
 
-  await taskManager.ensureScheduled({
-    id: `${TASK_TYPE}:${privateLocationId}`,
+  // `schedule`, not `ensureScheduled`: this is one-shot work, and a fixed id made
+  // it unreliable. `ensureScheduled` only updates the schedule of an existing task
+  // (and only for interval schedules), so a still-pending or in-flight instance
+  // left by an earlier cleanup silently swallowed this request — the policies
+  // cleanup had just deleted were then never recreated. A fresh instance per
+  // request always runs; the sync itself is idempotent, and the daily clean up
+  // queues at most one per affected location per day.
+  await taskManager.schedule({
     params: {},
     taskType: TASK_TYPE,
     runAt: new Date(Date.now() + 3 * 1000),
-    state: { privateLocationId },
+    state: { privateLocationId, ...(previousAgentPolicyId && { previousAgentPolicyId }) },
   });
 };

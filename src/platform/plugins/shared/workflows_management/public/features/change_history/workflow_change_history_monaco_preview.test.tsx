@@ -12,8 +12,8 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react';
 import { monaco } from '@kbn/code-editor';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { WorkflowChangeHistoryMonacoPreview } from './workflow_change_history_monaco_preview';
-import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
 
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
@@ -28,6 +28,7 @@ jest.mock('./use_workflow_change_history_preview_validation', () => ({
   useWorkflowChangeHistoryPreviewValidation: jest.fn(() => ({
     validationResults: mockValidationResults,
     isValidationLoading: mockIsValidationLoading,
+    validationError: null,
     handleValidationErrorClick: mockHandleValidationErrorClick,
   })),
 }));
@@ -92,44 +93,51 @@ let mockLineChanges: Array<{
   },
 ];
 
-jest.mock('@kbn/code-editor', () => ({
-  monaco: {
-    MarkerSeverity: { Error: 8 },
-    editor: {
-      createModel: jest.fn((value: string) => ({ value, dispose: jest.fn() })),
-      create: jest.fn(() => ({
-        dispose: jest.fn(),
-        layout: jest.fn(),
-        getModel: jest.fn(() => mockYamlModel),
-        updateOptions: jest.fn(),
-        createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
-      })),
-      createDiffEditor: jest.fn(() => ({
-        setModel: jest.fn(),
-        dispose: jest.fn(),
-        layout: jest.fn(),
-        updateOptions: mockDiffUpdateOptions,
-        getLineChanges: jest.fn(() => mockLineChanges),
-        onDidUpdateDiff: jest.fn((listener: () => void) => {
-          onDidUpdateDiffCallbacks.push(listener);
-          return { dispose: jest.fn() };
-        }),
-        setPosition: mockSetPosition,
-        revealLineInCenter: mockRevealLineInCenter,
-        revealLinesInCenter: mockRevealLinesInCenter,
-        getOriginalEditor: jest.fn(() => ({ updateOptions: mockOriginalUpdateOptions })),
-        getModifiedEditor: jest.fn(() => ({
-          updateOptions: mockModifiedUpdateOptions,
-          revealLineInCenter: jest.fn(),
+jest.mock('@kbn/code-editor', () => {
+  const actual = jest.requireActual('@kbn/code-editor');
+
+  return {
+    ...actual,
+    monaco: {
+      ...actual.monaco,
+      MarkerSeverity: { Error: 8 },
+      editor: {
+        ...actual.monaco.editor,
+        createModel: jest.fn((value: string) => ({ value, dispose: jest.fn() })),
+        create: jest.fn(() => ({
+          dispose: jest.fn(),
+          layout: jest.fn(),
           getModel: jest.fn(() => mockYamlModel),
+          updateOptions: jest.fn(),
           createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
         })),
-      })),
-      setModelMarkers: jest.fn(),
-      onDidChangeMarkers: jest.fn(() => ({ dispose: jest.fn() })),
+        createDiffEditor: jest.fn(() => ({
+          setModel: jest.fn(),
+          dispose: jest.fn(),
+          layout: jest.fn(),
+          updateOptions: mockDiffUpdateOptions,
+          getLineChanges: jest.fn(() => mockLineChanges),
+          onDidUpdateDiff: jest.fn((listener: () => void) => {
+            onDidUpdateDiffCallbacks.push(listener);
+            return { dispose: jest.fn() };
+          }),
+          setPosition: mockSetPosition,
+          revealLineInCenter: mockRevealLineInCenter,
+          revealLinesInCenter: mockRevealLinesInCenter,
+          getOriginalEditor: jest.fn(() => ({ updateOptions: mockOriginalUpdateOptions })),
+          getModifiedEditor: jest.fn(() => ({
+            updateOptions: mockModifiedUpdateOptions,
+            revealLineInCenter: jest.fn(),
+            getModel: jest.fn(() => mockYamlModel),
+            createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
+          })),
+        })),
+        setModelMarkers: jest.fn(),
+        onDidChangeMarkers: jest.fn(() => ({ dispose: jest.fn() })),
+      },
     },
-  },
-}));
+  };
+});
 
 const mockCreateEditor = monaco.editor.create as jest.Mock;
 const mockCreateDiffEditor = monaco.editor.createDiffEditor as jest.Mock;
@@ -139,6 +147,7 @@ const sampleValidationError: YamlValidationResult = {
   severity: 'error',
   message: 'Invalid workflow step',
   owner: 'step-name-validation',
+  ruleId: 'duplicateStepName',
   startLineNumber: 3,
   startColumn: 5,
   endLineNumber: 3,

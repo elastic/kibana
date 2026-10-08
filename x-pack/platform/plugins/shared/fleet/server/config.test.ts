@@ -146,7 +146,6 @@ describe('Config schema', () => {
     expect(() => {
       config.schema.validate({
         iacProvisioner: {
-          enabled: true,
           api: {
             url: 'https://iac-provisioner.api.url',
             tls: {
@@ -160,11 +159,10 @@ describe('Config schema', () => {
     }).not.toThrow();
   });
 
-  it('should allow to specify iacProvisioner.api.tls.ca as a list of CA paths', () => {
+  it('should reject iacProvisioner.api.tls.ca as a list of CA paths', () => {
     expect(() => {
       config.schema.validate({
         iacProvisioner: {
-          enabled: true,
           api: {
             url: 'https://iac-provisioner.api.url',
             tls: {
@@ -175,7 +173,7 @@ describe('Config schema', () => {
           },
         },
       });
-    }).not.toThrow();
+    }).toThrow();
   });
 
   it('should allow to specify packageInstallation configuration', () => {

@@ -25,6 +25,8 @@ import {
   INTERNAL_CASE_OBSERVABLES_PATCH_URL,
   INTERNAL_CASE_SIMILAR_CASES_URL,
   INTERNAL_CASE_OBSERVABLES_DELETE_URL,
+  INTERNAL_CASE_OBSERVABLES_BULK_DELETE_URL,
+  INTERNAL_CASE_WORKFLOW_RUN_URL,
 } from '../constants';
 
 export const getCaseDetailsUrl = (id: string): string => {
@@ -108,6 +110,14 @@ export const getCaseDeleteObservableUrl = (id: string, observableId: string): st
   );
 };
 
+export const getCaseBulkDeleteObservablesUrl = (id: string): string => {
+  return INTERNAL_CASE_OBSERVABLES_BULK_DELETE_URL.replace('{case_id}', id);
+};
+
 export const getCaseSimilarCasesUrl = (caseId: string) => {
   return INTERNAL_CASE_SIMILAR_CASES_URL.replace('{case_id}', caseId);
+};
+
+export const getRunCaseWorkflowUrl = (workflowId: string): string => {
+  return INTERNAL_CASE_WORKFLOW_RUN_URL.replace('{workflow_id}', workflowId);
 };

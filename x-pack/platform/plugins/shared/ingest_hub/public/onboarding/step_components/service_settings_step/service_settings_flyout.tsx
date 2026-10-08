@@ -15,27 +15,67 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiSpacer,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AwsServiceMatrixEntry, DataStreamInfo } from '../../aws_service_matrix';
+import { makeDsView } from '../../aws_service_matrix';
+import { shouldDefaultCollectS3Logs } from './field_config';
 import type { ServiceVars, ServiceDataStreamVars } from './use_service_settings';
+import { isServiceConfigIncomplete } from './use_service_settings';
 import { ServiceFieldsForm } from './service_fields_form';
+import {
+  InstanceNamespaceField,
+  getNamespaceError,
+  supportsNamespace,
+} from './instance_namespace_field';
 import { SignalTypeBadge } from '../services_step/signal_type_badge';
 
-function getDefaultDsInputs(dsInfo: DataStreamInfo | undefined, isSingleDs: boolean): string[] {
-  return isSingleDs ? dsInfo?.inputs ?? [] : dsInfo?.defaultEnabledInputs ?? [];
+function getDefaultDsInputs(
+  dsInfo: DataStreamInfo | undefined,
+  isSingleDs: boolean,
+  serviceDefaultEnabledInputs?: string[]
+): string[] {
+  if (isSingleDs) {
+    // For single-DS services, prefer the entry-level defaultEnabledInputs (which may have been
+    // overridden in the static matrix, e.g. ECF OTel entries default to S3 only). Fall back to
+    // all DS inputs when no override is set (original behaviour for non-ECF services).
+    return serviceDefaultEnabledInputs?.length ? serviceDefaultEnabledInputs : dsInfo?.inputs ?? [];
+  }
+  return dsInfo?.defaultEnabledInputs ?? [];
+}
+
+/** Persist `collect_s3_logs: true` for S3 inputs given a bucket ARN, so the switch shows the real behaviour. */
+function withCollectS3Defaults(
+  service: AwsServiceMatrixEntry,
+  draftByDs: Record<string, ServiceDataStreamVars>
+): Record<string, ServiceDataStreamVars> {
+  const result: Record<string, ServiceDataStreamVars> = {};
+  for (const [dsId, dsVars] of Object.entries(draftByDs)) {
+    const dsView = makeDsView(service, dsId);
+    const varsByInput = { ...dsVars.varsByInput };
+    for (const input of Object.keys(varsByInput)) {
+      if (shouldDefaultCollectS3Logs(dsView, input, varsByInput[input])) {
+        varsByInput[input] = { ...varsByInput[input], collect_s3_logs: 'true' };
+      }
+    }
+    result[dsId] = { ...dsVars, varsByInput };
+  }
+  return result;
 }
 
 interface ServiceSettingsFlyoutProps {
   service: AwsServiceMatrixEntry;
   config: ServiceVars;
   globalRegion: string;
+  isNamespaceLocked?: boolean;
   onApply: (
     varsByDataStream: Record<string, ServiceDataStreamVars>,
-    enabledDataStreams: string[]
+    enabledDataStreams: string[],
+    namespace: string
   ) => void;
   onClose: () => void;
 }
@@ -44,6 +84,7 @@ export function ServiceSettingsFlyout({
   service,
   config,
   globalRegion,
+  isNamespaceLocked = false,
   onApply,
   onClose,
 }: ServiceSettingsFlyoutProps) {
@@ -51,17 +92,34 @@ export function ServiceSettingsFlyout({
 
   const isSingleDs = service.dataStreams.length === 1;
 
-  const [draftByDs, setDraftByDs] = useState<Record<string, ServiceDataStreamVars>>(() => ({
-    ...config.varsByDataStream,
-  }));
+  // Seed the S3 toggle on open too, so a stored bucket ARN shows the switch on before any save.
+  const [draftByDs, setDraftByDs] = useState<Record<string, ServiceDataStreamVars>>(() =>
+    withCollectS3Defaults(service, { ...config.varsByDataStream })
+  );
+  const [namespace, setNamespace] = useState(config.namespace ?? '');
+  const showNamespace = supportsNamespace(service);
+  const isNamespaceInvalid = showNamespace && !!getNamespaceError(namespace);
+
+  const enabledDataStreams = service.dataStreams.filter((dsId) => {
+    const dsVars = draftByDs[dsId];
+    if (dsVars) return dsVars.enabledInputs.length > 0;
+    return (
+      getDefaultDsInputs(
+        service.varDefsByDataStream?.[dsId],
+        isSingleDs,
+        service.defaultEnabledInputs
+      ).length > 0
+    );
+  });
+  // Same rule as the Step 2 / Step 3 gates, so Save cannot persist a config those would reject.
+  const isDraftIncomplete = isServiceConfigIncomplete(service, {
+    enabledDataStreams,
+    varsByDataStream: draftByDs,
+    namespace,
+  });
 
   const handleApply = () => {
-    const enabledDataStreams = service.dataStreams.filter((dsId) => {
-      const dsVars = draftByDs[dsId];
-      if (dsVars) return dsVars.enabledInputs.length > 0;
-      return getDefaultDsInputs(service.varDefsByDataStream?.[dsId], isSingleDs).length > 0;
-    });
-    onApply(draftByDs, enabledDataStreams);
+    onApply(withCollectS3Defaults(service, draftByDs), enabledDataStreams, namespace);
   };
 
   return (
@@ -85,6 +143,16 @@ export function ServiceSettingsFlyout({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        {showNamespace && (
+          <>
+            <InstanceNamespaceField
+              namespace={namespace}
+              onChange={setNamespace}
+              isLocked={isNamespaceLocked}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         <ServiceFieldsForm
           service={service}
           varsByDataStream={draftByDs}
@@ -93,10 +161,10 @@ export function ServiceSettingsFlyout({
             setDraftByDs((prev) => {
               const dsInfo = service.varDefsByDataStream?.[dsId];
               const existing = prev[dsId] ?? {
-                enabledInputs: getDefaultDsInputs(dsInfo, isSingleDs),
+                enabledInputs: getDefaultDsInputs(dsInfo, isSingleDs, service.defaultEnabledInputs),
                 varsByInput: {},
               };
-              return {
+              return withCollectS3Defaults(service, {
                 ...prev,
                 [dsId]: {
                   ...existing,
@@ -105,14 +173,14 @@ export function ServiceSettingsFlyout({
                     [input]: { ...(existing.varsByInput[input] ?? {}), [fieldName]: value },
                   },
                 },
-              };
+              });
             })
           }
           onInputToggle={(dsId, input, enabled) =>
             setDraftByDs((prev) => {
               const dsInfo = service.varDefsByDataStream?.[dsId];
               const existing = prev[dsId] ?? {
-                enabledInputs: getDefaultDsInputs(dsInfo, isSingleDs),
+                enabledInputs: getDefaultDsInputs(dsInfo, isSingleDs, service.defaultEnabledInputs),
                 varsByInput: {},
               };
               return {
@@ -139,7 +207,12 @@ export function ServiceSettingsFlyout({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={handleApply} data-test-subj="serviceSettingsFlyout-saveButton">
+            <EuiButton
+              fill
+              onClick={handleApply}
+              isDisabled={isNamespaceInvalid || isDraftIncomplete}
+              data-test-subj="serviceSettingsFlyout-saveButton"
+            >
               <FormattedMessage
                 id="xpack.ingestHub.serviceSettingsStep.flyout.saveButton"
                 defaultMessage="Save"

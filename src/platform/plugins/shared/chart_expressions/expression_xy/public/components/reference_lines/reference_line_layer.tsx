@@ -65,7 +65,7 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
     );
 
     const formatter =
-      formatters[decorationConfig.forAccessor] || axisGroup?.formatter || xAxisFormatter;
+      axisGroup?.formatter ?? formatters[decorationConfig.forAccessor] ?? xAxisFormatter;
     const name =
       columnToLabelMap[decorationConfig.forAccessor] ??
       titles?.yTitles?.[decorationConfig.forAccessor];

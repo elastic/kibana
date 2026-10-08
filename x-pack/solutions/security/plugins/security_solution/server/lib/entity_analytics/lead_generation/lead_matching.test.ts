@@ -120,7 +120,7 @@ describe('computeContentHash', () => {
       observations: [{ moduleId: 'risk_analysis', type: 'high_risk_score', severity: 'high' }],
     });
     const b = computeContentHash({
-      observations: [{ moduleId: 'entity_profile', type: 'high_risk_score', severity: 'high' }],
+      observations: [{ moduleId: 'entity_attributes', type: 'high_risk_score', severity: 'high' }],
     });
     expect(a).not.toBe(b);
   });

@@ -56,6 +56,285 @@ describe('CRUDClient', () => {
         client.bulkUpdateEntity({ objects: [{ type: 'generic', doc: entity }] })
       ).rejects.toThrow(EntityStoreNotInstalledError);
     });
+
+    it('createEntitiesFromSource throws EntityStoreNotInstalledError when index does not exist', async () => {
+      esClient.indices.exists.mockResolvedValue(false);
+
+      await expect(
+        client.createEntitiesFromSource([
+          {
+            type: 'host',
+            source: { host: { id: 'host-1' } },
+            expectedEntityId: 'host:host-1',
+            createdBy: 'risk_score_maintainer',
+          },
+        ])
+      ).rejects.toThrow(EntityStoreNotInstalledError);
+    });
+  });
+
+  describe('createEntitiesFromSource', () => {
+    beforeEach(() => {
+      esClient.indices.exists.mockResolvedValue(true);
+    });
+
+    const getBulkOperations = (callIndex: number) => {
+      const operations = esClient.bulk.mock.calls[callIndex][0].operations;
+      if (!operations) {
+        throw new Error(`expected esClient.bulk call ${callIndex} to include operations`);
+      }
+      return operations;
+    };
+
+    it('rejects policy-ineligible requests without calling bulk', async () => {
+      const result = await client.createEntitiesFromSource([
+        {
+          type: 'host',
+          source: { host: { name: 'server1' } },
+          expectedEntityId: 'host:server1',
+          createdBy: 'risk_score_maintainer',
+        },
+      ]);
+
+      expect(result).toEqual({
+        created: [],
+        alreadyExists: [],
+        skipped: [{ euid: 'host:server1', reason: 'host_missing_host_id' }],
+        failed: [],
+      });
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('rejects a request whose re-derived EUID does not match expectedEntityId, without calling bulk', async () => {
+      const result = await client.createEntitiesFromSource([
+        {
+          type: 'host',
+          source: { host: { id: 'host-1', name: 'server1' } },
+          expectedEntityId: 'host:host-2',
+          createdBy: 'risk_score_maintainer',
+        },
+      ]);
+
+      expect(result).toEqual({
+        created: [],
+        alreadyExists: [],
+        skipped: [],
+        failed: [{ euid: 'host:host-2', reason: 'euid_mismatch' }],
+      });
+      expect(esClient.bulk).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('does not match expected EUID')
+      );
+    });
+
+    it('rejects on a multivalued identity field ranked differently than the caller expected', async () => {
+      // Re-derivation selects the first array value; reject a caller keyed to another value.
+      const result = await client.createEntitiesFromSource([
+        {
+          type: 'host',
+          source: { host: { id: ['host-2', 'host-1'] } },
+          expectedEntityId: 'host:host-1',
+          createdBy: 'risk_score_maintainer',
+        },
+      ]);
+
+      expect(result).toEqual({
+        created: [],
+        alreadyExists: [],
+        skipped: [],
+        failed: [{ euid: 'host:host-1', reason: 'euid_mismatch' }],
+      });
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('rejects a request whose fields supply a reserved dot-path, without calling bulk', async () => {
+      const result = await client.createEntitiesFromSource([
+        {
+          type: 'host',
+          source: { host: { id: 'host-1' } },
+          expectedEntityId: 'host:host-1',
+          createdBy: 'risk_score_maintainer',
+          fields: { 'entity.created_by': 'risk_score_maintainer' },
+        },
+      ]);
+
+      expect(result).toEqual({
+        created: [],
+        alreadyExists: [],
+        skipped: [],
+        failed: [{ euid: 'host:host-1', reason: 'reserved_field' }],
+      });
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('creates policy-accepted entities via a create-only bulk request', async () => {
+      esClient.bulk.mockResolvedValue({ errors: false, items: [] } as any);
+
+      const result = await client.createEntitiesFromSource([
+        {
+          type: 'host',
+          source: { host: { id: 'host-1', name: 'server1' } },
+          expectedEntityId: 'host:host-1',
+          createdBy: 'risk_score_maintainer',
+          fields: { 'entity.risk.calculated_score_norm': 70 },
+        },
+      ]);
+
+      expect(result).toEqual({
+        created: ['host:host-1'],
+        alreadyExists: [],
+        skipped: [],
+        failed: [],
+      });
+      expect(esClient.bulk).toHaveBeenCalledTimes(1);
+      expect(esClient.bulk).toHaveBeenCalledWith(expect.objectContaining({ refresh: false }));
+
+      const operations = getBulkOperations(0);
+      expect(operations[0]).toEqual({ create: { _id: hashEuid('host:host-1') } });
+      const createdDoc = operations[1] as Entity;
+      expect(createdDoc.entity).toMatchObject({
+        id: 'host:host-1',
+        name: 'server1',
+        created_by: 'risk_score_maintainer',
+        EngineMetadata: { Type: 'host', UntypedId: 'host-1' },
+        risk: { calculated_score_norm: 70 },
+      });
+      expect((createdDoc as any).host).toEqual({ id: 'host-1' });
+    });
+
+    it('falls back entity.name to the untyped id when the source has no host.name (matches extraction)', async () => {
+      esClient.bulk.mockResolvedValue({ errors: false, items: [] } as any);
+
+      const result = await client.createEntitiesFromSource([
+        {
+          type: 'host',
+          source: { host: { id: 'host-1' } },
+          expectedEntityId: 'host:host-1',
+          createdBy: 'risk_score_maintainer',
+        },
+      ]);
+
+      expect(result.created).toEqual(['host:host-1']);
+      const operations = getBulkOperations(0);
+      const createdDoc = operations[1] as Entity;
+      expect(createdDoc.entity).toMatchObject({
+        id: 'host:host-1',
+        name: 'host-1',
+      });
+    });
+
+    it('creates local-namespace users with entity.confidence and composed entity.name', async () => {
+      esClient.bulk.mockResolvedValue({ errors: false, items: [] } as any);
+
+      const result = await client.createEntitiesFromSource([
+        {
+          type: 'user',
+          source: { user: { name: 'alice' }, host: { id: 'host-1', name: 'workstation-1' } },
+          expectedEntityId: 'user:alice@host-1@local',
+          createdBy: 'risk_score_maintainer',
+        },
+      ]);
+
+      expect(result.created).toEqual(['user:alice@host-1@local']);
+      const operations = getBulkOperations(0);
+      const createdDoc = operations[1] as Entity;
+      expect(createdDoc.entity).toMatchObject({
+        id: 'user:alice@host-1@local',
+        namespace: 'local',
+        confidence: 'medium',
+        name: 'alice@workstation-1',
+        created_by: 'risk_score_maintainer',
+      });
+    });
+
+    it('routes per-item 409 conflicts to alreadyExists (race with another creator)', async () => {
+      esClient.bulk.mockResolvedValue({
+        errors: true,
+        items: [
+          {
+            create: {
+              _id: hashEuid('service:api-gateway'),
+              status: 409,
+              error: { type: 'version_conflict_engine_exception' },
+            },
+          },
+        ],
+      } as any);
+
+      const result = await client.createEntitiesFromSource([
+        {
+          type: 'service',
+          source: { service: { name: 'api-gateway' } },
+          expectedEntityId: 'service:api-gateway',
+          createdBy: 'logs_extraction',
+        },
+      ]);
+
+      expect(result).toEqual({
+        created: [],
+        alreadyExists: ['service:api-gateway'],
+        skipped: [],
+        failed: [],
+      });
+    });
+
+    it('counts entities that fail for a reason other than a conflict as failed, and logs a warning', async () => {
+      esClient.bulk.mockResolvedValue({
+        errors: true,
+        items: [
+          {
+            create: {
+              _id: hashEuid('service:api-gateway'),
+              status: 500,
+              error: { type: 'some_other_exception' },
+            },
+          },
+        ],
+      } as any);
+
+      const result = await client.createEntitiesFromSource([
+        {
+          type: 'service',
+          source: { service: { name: 'api-gateway' } },
+          expectedEntityId: 'service:api-gateway',
+          createdBy: 'logs_extraction',
+        },
+      ]);
+
+      expect(result).toEqual({
+        created: [],
+        alreadyExists: [],
+        skipped: [],
+        failed: [{ euid: 'service:api-gateway', reason: 'bulk_create_failed' }],
+      });
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('some_other_exception'));
+    });
+
+    it('mixes created, skipped, and untouched-by-bulk results across a batch', async () => {
+      esClient.bulk.mockResolvedValue({ errors: false, items: [] } as any);
+
+      const result = await client.createEntitiesFromSource([
+        {
+          type: 'host',
+          source: { host: { id: 'host-1' } },
+          expectedEntityId: 'host:host-1',
+          createdBy: 'risk_score_maintainer',
+        },
+        {
+          type: 'generic',
+          source: { entity: { id: 'anything' } },
+          expectedEntityId: 'anything',
+          createdBy: 'risk_score_maintainer',
+        },
+      ]);
+
+      expect(result).toEqual({
+        created: ['host:host-1'],
+        alreadyExists: [],
+        skipped: [{ euid: 'anything', reason: 'entity_type_not_creatable' }],
+        failed: [],
+      });
+    });
   });
 
   describe('asset criticality trigger emit', () => {

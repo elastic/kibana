@@ -72,6 +72,10 @@ const SCENARIO_ALIASES: Record<string, string> = {
   infra_k8s_containers:
     'x-pack/solutions/observability/plugins/infra/test/scenarios/infra_k8s_containers.ts',
   infra_k8s_pods: 'x-pack/solutions/observability/plugins/infra/test/scenarios/infra_k8s_pods.ts',
+  infra_k8s_pods_semconv:
+    'x-pack/solutions/observability/plugins/infra/test/scenarios/infra_k8s_pods_semconv.ts',
+  infra_metrics_explorer_negative_domain:
+    'x-pack/solutions/observability/plugins/infra/test/scenarios/infra_metrics_explorer_negative_domain.ts',
   kafka_topics: 'x-pack/solutions/observability/plugins/apm/test/scenarios/kafka_topics.ts',
   kubernetes_logs: 'x-pack/platform/plugins/shared/streams/test/scenarios/kubernetes_logs.ts',
   low_throughput: 'x-pack/solutions/observability/plugins/apm/test/scenarios/low_throughput.ts',
@@ -89,6 +93,8 @@ const SCENARIO_ALIASES: Record<string, string> = {
   missing_service_environment:
     'x-pack/solutions/observability/plugins/apm/test/scenarios/missing_service_environment.ts',
   mobile: 'x-pack/solutions/observability/plugins/apm/test/scenarios/mobile.ts',
+  otel_exception_logs_missing_fields:
+    'x-pack/solutions/observability/plugins/apm/test/scenarios/otel_exception_logs_missing_fields.ts',
   otel_exit_span_missing_destination:
     'x-pack/solutions/observability/plugins/apm/test/scenarios/otel_exit_span_missing_destination.ts',
   otel_logs_and_metrics_only:
@@ -116,6 +122,8 @@ const SCENARIO_ALIASES: Record<string, string> = {
     'x-pack/solutions/observability/plugins/apm/test/scenarios/trace_with_long_service_names.ts',
   trace_with_orphan_items:
     'x-pack/solutions/observability/plugins/apm/test/scenarios/trace_with_orphan_items.ts',
+  trace_with_service_names_with_colons:
+    'x-pack/solutions/observability/plugins/apm/test/scenarios/trace_with_service_names_with_colons.ts',
   trace_with_service_names_with_slashes:
     'x-pack/solutions/observability/plugins/apm/test/scenarios/trace_with_service_names_with_slashes.ts',
   unstructured_logs: 'x-pack/platform/plugins/shared/streams/test/scenarios/unstructured_logs.ts',

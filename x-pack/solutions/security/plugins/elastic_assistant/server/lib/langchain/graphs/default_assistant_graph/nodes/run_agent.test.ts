@@ -67,7 +67,7 @@ describe('run agent', () => {
       tags: ['agent_run'],
       signal: abortController.signal,
     });
-    expect(model.invoke).toBeCalledTimes(1);
+    expect(model.invoke).toHaveBeenCalledTimes(1);
     expect(model.invoke).toHaveBeenCalledWith([
       new SystemMessage('You are a system prompt'),
       new HumanMessage('["some","json","string"].'),

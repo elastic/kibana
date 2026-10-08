@@ -7,10 +7,13 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('@kbn/fleet-plugin/public', () => ({
   LazyPackagePolicyInputVarField: jest.fn(() => null),
+  DataStreamTypeSelector: jest.fn(() => null),
+  useGetDataStreams: jest.fn(() => ({ data: undefined })),
 }));
 
 import { ServiceFieldsForm } from './service_fields_form';
@@ -55,6 +58,9 @@ describe('ServiceFieldsForm — multi-DS flat input-toggle rendering', () => {
     defaultEnabled: true,
     defaultEnabledInputs: ['aws-s3'],
     showInUI: true,
+    isManifestLoaded: true,
+    isManifestError: false,
+    isStaticAgentBasedOnly: false,
     varDefsByDataStream: {
       ds_a: {
         title: 'DS A Logs',
@@ -129,5 +135,288 @@ describe('ServiceFieldsForm — multi-DS flat input-toggle rendering', () => {
     const cwSwitchB = screen.getByTestId('serviceSettingsFlyout-inputToggle-ds_b-aws-cloudwatch');
     expect(s3SwitchB).not.toBeChecked();
     expect(cwSwitchB).toBeChecked();
+  });
+});
+
+describe('ServiceFieldsForm — ECF single-DS multi-input trigger vars', () => {
+  const ECF_SERVICE: AwsServiceMatrixEntry = {
+    id: 'cloudtrail',
+    name: 'AWS CloudTrail',
+    category: 'management_governance',
+    signalTypes: ['logs'],
+    dataStreams: ['cloudtrail'],
+    packageName: 'aws',
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
+    inputs: ['aws-s3', 'aws-cloudwatch'],
+    requiredConfig: ['bucket_arn', 'log_group_arn'],
+    defaultEnabled: true,
+    defaultEnabledInputs: ['aws-s3', 'aws-cloudwatch'],
+    showInUI: true,
+    isManifestLoaded: true,
+    isManifestError: false,
+    isStaticAgentBasedOnly: false,
+    varDefsByDataStream: {
+      cloudtrail: {
+        title: 'CloudTrail',
+        type: 'logs',
+        inputs: ['aws-s3', 'aws-cloudwatch'],
+        defaultEnabledInputs: ['aws-s3', 'aws-cloudwatch'],
+        requiredConfig: ['bucket_arn', 'log_group_arn'],
+        varDefsByInput: {
+          'aws-s3': {
+            bucket_arn: {
+              name: 'bucket_arn',
+              type: 'text',
+              title: 'Bucket ARN',
+              required: true,
+              show_user: true,
+            },
+          },
+          'aws-cloudwatch': {
+            log_group_arn: {
+              name: 'log_group_arn',
+              type: 'text',
+              title: 'Log Group ARN',
+              required: true,
+              show_user: true,
+            },
+          },
+        },
+      },
+    },
+    varDefsByInput: {
+      'aws-s3': {
+        bucket_arn: {
+          name: 'bucket_arn',
+          type: 'text',
+          title: 'Bucket ARN',
+          required: true,
+          show_user: true,
+        },
+      },
+      'aws-cloudwatch': {
+        log_group_arn: {
+          name: 'log_group_arn',
+          type: 'text',
+          title: 'Log Group ARN',
+          required: true,
+          show_user: true,
+        },
+      },
+    },
+  };
+
+  beforeEach(() => {
+    (LazyPackagePolicyInputVarField as unknown as jest.Mock).mockClear();
+  });
+
+  it('shows both ECF inputs enabled by default for a single data stream', () => {
+    renderForm(ECF_SERVICE);
+    expect(screen.getByTestId('serviceSettingsFlyout-inputToggle-aws-s3')).toBeChecked();
+    expect(screen.getByTestId('serviceSettingsFlyout-inputToggle-aws-cloudwatch')).toBeChecked();
+  });
+
+  it('forces ECF trigger vars to multi-value fields for the no-duplicate flow', () => {
+    renderForm(ECF_SERVICE);
+    const varDefs = (LazyPackagePolicyInputVarField as unknown as jest.Mock).mock.calls.map(
+      ([props]) => props.varDef
+    );
+
+    const bucketVar = varDefs.find((v: { name?: string }) => v.name === 'bucket_arn');
+    const logGroupVar = varDefs.find((v: { name?: string }) => v.name === 'log_group_arn');
+
+    expect(bucketVar).toMatchObject({ multi: true, required: true });
+    expect(logGroupVar).toMatchObject({ multi: true, required: true });
+  });
+});
+
+describe('ServiceFieldsForm — agent-based "at least one source" hint', () => {
+  const optional = (name: string, title: string) => ({
+    name,
+    type: 'text' as const,
+    title,
+    required: false,
+    show_user: true,
+  });
+  const varDefsByInput = {
+    'aws-s3': {
+      bucket_arn: optional('bucket_arn', 'Bucket ARN'),
+      queue_url: optional('queue_url', 'Queue URL'),
+    },
+  };
+  const AGENT_VIEW: AwsServiceMatrixEntry = {
+    id: 'waf',
+    name: 'AWS WAF',
+    category: 'security_identity_compliance',
+    signalTypes: ['logs'],
+    dataStreams: ['waf'],
+    packageName: 'aws',
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
+    inputs: ['aws-s3'],
+    optionalConfig: ['bucket_arn', 'queue_url'],
+    defaultEnabled: true,
+    defaultEnabledInputs: ['aws-s3'],
+    showInUI: true,
+    isManifestLoaded: true,
+    isManifestError: false,
+    isStaticAgentBasedOnly: false,
+    ecfSettings: {
+      requiredConfig: ['bucket_arn'],
+      dataStreams: ['waf'],
+      inputs: ['aws-s3'],
+      defaultEnabledInputs: ['aws-s3'],
+    },
+    varDefsByInput,
+    varDefsByDataStream: {
+      waf: {
+        type: 'logs',
+        inputs: ['aws-s3'],
+        defaultEnabledInputs: ['aws-s3'],
+        varDefsByInput,
+      },
+    },
+  };
+
+  const withBucket = (bucket_arn: string) => ({
+    waf: { enabledInputs: ['aws-s3'], varsByInput: { 'aws-s3': { bucket_arn } } },
+  });
+
+  it('names the source fields while none is filled', () => {
+    renderForm(AGENT_VIEW, { varsByDataStream: withBucket('') });
+    expect(screen.getByTestId('serviceSettingsFlyout-sourceRequiredHint')).toHaveTextContent(
+      'Provide at least one of: Bucket ARN, Queue URL.'
+    );
+  });
+
+  it('clears the hint once a source is filled', () => {
+    renderForm(AGENT_VIEW, { varsByDataStream: withBucket('arn:aws:s3:::b') });
+    expect(
+      screen.queryByTestId('serviceSettingsFlyout-sourceRequiredHint')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows no hint in the ECF view, which enforces the ARN as required instead', () => {
+    renderForm(
+      { ...AGENT_VIEW, settingsScope: 'ecf', requiredConfig: ['bucket_arn'] },
+      {
+        varsByDataStream: withBucket(''),
+      }
+    );
+    expect(
+      screen.queryByTestId('serviceSettingsFlyout-sourceRequiredHint')
+    ).not.toBeInTheDocument();
+  });
+});
+
+describe('ServiceFieldsForm — data_stream.dataset onChange extraction', () => {
+  const DATASET_SERVICE: AwsServiceMatrixEntry = {
+    id: 'test_otel',
+    name: 'Test OTel',
+    packageName: 'aws',
+    dataStreams: ['otel_logs'],
+    inputs: ['aws-s3'],
+    showInUI: true,
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    varDefsByDataStream: {
+      otel_logs: {
+        title: 'OTel Logs',
+        type: 'logs',
+        inputs: ['aws-s3'],
+        defaultEnabledInputs: ['aws-s3'],
+        requiredConfig: ['data_stream.dataset'],
+        varDefsByInput: {
+          'aws-s3': {
+            'data_stream.dataset': {
+              name: 'data_stream.dataset',
+              type: 'text',
+              title: 'Dataset',
+              show_user: true,
+            },
+          },
+        },
+      },
+    },
+  } as unknown as AwsServiceMatrixEntry;
+
+  beforeEach(() => {
+    (LazyPackagePolicyInputVarField as unknown as jest.Mock).mockClear();
+  });
+
+  it('extracts .dataset string from DatasetComponent object instead of stringifying it', () => {
+    const { onFieldChange } = renderForm(DATASET_SERVICE);
+    const varFieldCall = (LazyPackagePolicyInputVarField as unknown as jest.Mock).mock.calls.find(
+      ([props]: [{ varDef?: { name?: string }; onChange?: (v: unknown) => void }]) =>
+        props.varDef?.name === 'data_stream.dataset'
+    );
+    expect(varFieldCall).toBeDefined();
+    const { onChange } = varFieldCall![0] as { onChange: (val: unknown) => void };
+    onChange({ dataset: 'my-custom-dataset', package: 'aws' });
+    expect(onFieldChange).toHaveBeenCalledWith(
+      'otel_logs',
+      'aws-s3',
+      'data_stream.dataset',
+      'my-custom-dataset'
+    );
+  });
+});
+
+describe('ServiceFieldsForm — VarField onChange suppression', () => {
+  // Service with a text field that has a manifest default ('manifest-default').
+  // When the draft is empty the effective displayed value is that default; clearing
+  // it must still fire onFieldChange even though the raw draft entry is undefined.
+  const DEFAULT_SERVICE: AwsServiceMatrixEntry = {
+    id: 'test_default',
+    name: 'Test Default',
+    packageName: 'aws',
+    dataStreams: ['logs'],
+    inputs: ['aws-s3'],
+    showInUI: true,
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    varDefsByDataStream: {
+      logs: {
+        title: 'Logs',
+        type: 'logs',
+        inputs: ['aws-s3'],
+        defaultEnabledInputs: ['aws-s3'],
+        requiredConfig: [],
+        optionalConfig: ['my_field'],
+        varDefsByInput: {
+          'aws-s3': {
+            my_field: {
+              name: 'my_field',
+              type: 'text',
+              default: 'manifest-default',
+              show_user: true,
+            },
+          },
+        },
+      },
+    },
+  } as unknown as AwsServiceMatrixEntry;
+
+  function getVarFieldOnChange() {
+    const varFieldCall = (LazyPackagePolicyInputVarField as unknown as jest.Mock).mock.calls.find(
+      ([props]: [{ varDef?: { name?: string } }]) => props.varDef?.name === 'my_field'
+    );
+    expect(varFieldCall).toBeDefined();
+    return varFieldCall![0].onChange as (v: unknown) => void;
+  }
+
+  beforeEach(() => {
+    (LazyPackagePolicyInputVarField as unknown as jest.Mock).mockClear();
+  });
+
+  it('fires onFieldChange when clearing an untouched field with a manifest default', () => {
+    // Draft is empty — the field shows 'manifest-default' via toTyped but no draft entry exists.
+    const { onFieldChange } = renderForm(DEFAULT_SERVICE);
+    getVarFieldOnChange()('');
+    expect(onFieldChange).toHaveBeenCalledWith('logs', 'aws-s3', 'my_field', '');
+  });
+
+  it('suppresses onFieldChange when new value matches the effective displayed value', () => {
+    // User re-types the exact manifest default — no actual change.
+    const { onFieldChange } = renderForm(DEFAULT_SERVICE);
+    getVarFieldOnChange()('manifest-default');
+    expect(onFieldChange).not.toHaveBeenCalled();
   });
 });

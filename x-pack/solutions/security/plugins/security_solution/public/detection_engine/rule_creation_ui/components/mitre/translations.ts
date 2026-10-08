@@ -119,3 +119,10 @@ export const TECHNIQUE_REASSIGNED_FROM_TACTIC_ERROR = (id: string) =>
       values: { id },
     }
   );
+
+export const MITRE_LOADING_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mitreAttack.loadingError',
+  {
+    defaultMessage: 'Failed to load MITRE ATT&CK® data. Refresh the page to try again.',
+  }
+);

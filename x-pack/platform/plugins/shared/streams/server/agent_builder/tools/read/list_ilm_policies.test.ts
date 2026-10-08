@@ -6,11 +6,14 @@
  */
 
 import type { ToolHandlerReturn } from '@kbn/agent-builder-server/tools/handler';
+import type { ToolAvailabilityContext } from '@kbn/agent-builder-server';
+import type { IUiSettingsClient } from '@kbn/core/server';
 import { createListIlmPoliciesTool } from './list_ilm_policies';
 import {
   createMockGetScopedClients,
   createMockToolContext,
   mockEsMethodResolvedValue,
+  createMockRequest,
 } from '../../utils/test_helpers';
 
 interface ListIlmPoliciesResultData {
@@ -196,5 +199,32 @@ describe('createListIlmPoliciesTool handler', () => {
         operation: 'list_ilm_policies',
       })
     );
+  });
+});
+
+describe('createListIlmPoliciesTool availability', () => {
+  const buildAvailabilityContext = (): ToolAvailabilityContext => ({
+    request: createMockRequest(),
+    uiSettings: {} as IUiSettingsClient,
+    spaceId: 'default',
+  });
+
+  it('is unavailable on serverless', async () => {
+    const { getScopedClients } = createMockGetScopedClients();
+    const tool = createListIlmPoliciesTool({ getScopedClients, isServerless: true });
+
+    const result = await tool.availability!.handler(buildAvailabilityContext());
+
+    expect(result.status).toBe('unavailable');
+    expect(result.reason).toContain('serverless');
+  });
+
+  it('is available on stateful', async () => {
+    const { getScopedClients } = createMockGetScopedClients();
+    const tool = createListIlmPoliciesTool({ getScopedClients, isServerless: false });
+
+    const result = await tool.availability!.handler(buildAvailabilityContext());
+
+    expect(result.status).toBe('available');
   });
 });

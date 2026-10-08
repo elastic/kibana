@@ -22,22 +22,22 @@ const isV2AlertingAsset = (asset: Pick<AlertingAsset, 'attributes'>): boolean =>
 
 const ALERTING_ENGINE_CLASSIC_BADGE = i18n.translate(
   'xpack.fleet.epm.assets.alertingEngineClassicBadgeLabel',
-  { defaultMessage: 'Classic' }
+  { defaultMessage: 'Standard' }
 );
 
 const ALERTING_ENGINE_V2_BADGE = i18n.translate(
   'xpack.fleet.epm.assets.alertingEngineV2BadgeLabel',
-  { defaultMessage: 'v2' }
+  { defaultMessage: 'ES|QL' }
 );
 
 const ALERTING_ENGINE_CLASSIC_ARIA_LABEL = i18n.translate(
   'xpack.fleet.epm.assets.alertingEngineClassicBadgeAriaLabel',
-  { defaultMessage: 'Classic Alerting' }
+  { defaultMessage: 'Standard Rules' }
 );
 
 const ALERTING_ENGINE_V2_ARIA_LABEL = i18n.translate(
   'xpack.fleet.epm.assets.alertingEngineV2BadgeAriaLabel',
-  { defaultMessage: 'Alerting v2' }
+  { defaultMessage: 'ES|QL Rules' }
 );
 
 const getAlertingEngineBadge = (engine?: AlertingEngine): { label: string; ariaLabel: string } => {
@@ -49,8 +49,15 @@ const getAlertingEngineBadge = (engine?: AlertingEngine): { label: string; ariaL
 };
 
 const getAlertingAssetTitleHref = (
-  asset: Pick<AlertingAsset, 'attributes' | 'appLink'>
-): string | undefined => (isV2AlertingAsset(asset) ? undefined : asset.appLink);
+  asset: Pick<AlertingAsset, 'attributes' | 'appLink'>,
+  type: DisplayedAssetType
+): string | undefined => {
+  // Alerting v2 rule templates have no management destination.
+  if (type === KibanaAssetType.alertingRuleTemplate && isV2AlertingAsset(asset)) {
+    return undefined;
+  }
+  return asset.appLink;
+};
 
 const listAlertingAssets = (
   savedObjects: AlertingAsset[],
@@ -78,8 +85,8 @@ const AlertingEngineTabs: React.FunctionComponent<{
         isSelected={selectedEngineTab === 'v2'}
       >
         <FormattedMessage
-          id="xpack.fleet.epm.assets.alertingV2TabLabel"
-          defaultMessage="Alerting v2"
+          id="xpack.fleet.epm.assets.kibanaEsqlRulesTabLabel"
+          defaultMessage="ES|QL Rules"
         />
       </EuiTab>
       <EuiTab
@@ -88,8 +95,8 @@ const AlertingEngineTabs: React.FunctionComponent<{
         isSelected={selectedEngineTab === 'v1'}
       >
         <FormattedMessage
-          id="xpack.fleet.epm.assets.classicAlertingTabLabel"
-          defaultMessage="Classic Alerting"
+          id="xpack.fleet.epm.assets.kibanaStandardRulesTabLabel"
+          defaultMessage="Standard Rules"
         />
       </EuiTab>
     </EuiTabs>
@@ -172,7 +179,7 @@ export const AlertingAssetsAccordion: React.FunctionComponent<{
           ? (asset) => <AlertingEngineBadge engine={asset.attributes?.engine} />
           : undefined
       }
-      getTitleHref={getAlertingAssetTitleHref}
+      getTitleHref={(asset) => getAlertingAssetTitleHref(asset, type)}
     />
   );
 };

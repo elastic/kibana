@@ -55,7 +55,7 @@ import { agentPolicyService } from '../agent_policy';
 import { getInstallation, getPackageInfo } from '../epm/packages';
 import { runWithCache } from '../epm/packages/cache';
 import { appContextService, cloudConnectorService } from '..';
-import { FleetNotFoundError, PackagePolicyRequestError } from '../../errors';
+import { FleetError, FleetNotFoundError, PackagePolicyRequestError } from '../../errors';
 import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 } from '../../constants';
 
 import type { PackageInfo } from '../../types';
@@ -65,6 +65,7 @@ import {
 } from '../../../common/services/agentless_policy_helper';
 import { agentlessAgentService } from '../agents/agentless_agent';
 import { createAndIntegrateCloudConnector } from '../cloud_connectors';
+import { assertSecretIdsReusable, deleteSecretsIfNotReferenced } from '../secrets';
 
 import { prefixKueryFieldsWithSavedObjectType } from './kuery_utils';
 
@@ -205,6 +206,22 @@ const toUpdatePackagePolicy = (packagePolicy: PackagePolicy): NewPackagePolicy =
   };
 };
 
+/** The ids of every secret ref (`{ isSecretRef: true, id | ids }`) found in a request body. */
+const collectSecretRefIds = (node: unknown, found = new Set<string>()): Set<string> => {
+  if (Array.isArray(node)) {
+    node.forEach((child) => collectSecretRefIds(child, found));
+  } else if (node && typeof node === 'object') {
+    const object = node as Record<string, unknown>;
+    if (object.isSecretRef === true) {
+      const ids = Array.isArray(object.ids) ? object.ids : [object.id];
+      ids.forEach((id) => typeof id === 'string' && found.add(id));
+    } else {
+      Object.values(object).forEach((child) => collectSecretRefIds(child, found));
+    }
+  }
+  return found;
+};
+
 export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
   constructor(
     private readonly packagePolicyService: PackagePolicyClient,
@@ -225,6 +242,10 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     const agentPolicyId = packagePolicyId; // Use the same ID for agent policy and package policy
     const force = data.force;
     this.logger.debug('Creating agentless policy');
+
+    // A request may reuse the secrets of a sibling policy by sending their refs back; it cannot
+    // point a new policy at a secret no policy it can see uses.
+    await assertSecretIdsReusable(this.soClient, [...collectSecretRefIds(data)]);
 
     const user = request
       ? appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined
@@ -467,6 +488,16 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     // mirroring the regular package-policy PUT.
     this.assertPackageNameUnchanged(existingPackagePolicy, pkg);
 
+    // Refs the policy already holds are fine; any other secret must be in use by a policy the
+    // caller can see (see createAgentlessPolicy).
+    const ownSecretIds = new Set(
+      (existingPackagePolicy.secret_references ?? []).map(({ id }) => id)
+    );
+    await assertSecretIdsReusable(
+      this.soClient,
+      [...collectSecretRefIds(data)].filter((id) => !ownSecretIds.has(id))
+    );
+
     // Load package info for the *requested* version (not the stored one) so a version
     // change re-derives the agentless config, resources, global data tags and inputs
     // against the new version.
@@ -600,6 +631,12 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         throwOnAgentlessError: true,
       });
 
+      await this.deleteReplacedSecrets({
+        previous: existingPackagePolicy,
+        updated: updatedPackagePolicy,
+        agentPolicyId,
+      });
+
       return packagePolicyToAgentlessPolicy(updatedPackagePolicy);
     } catch (err) {
       // Log the triggering failure at error level before attempting rollback. The error is also
@@ -625,6 +662,53 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       });
 
       throw err;
+    }
+  }
+
+  /**
+   * Deletes the secrets an update replaced. The package-policy update runs with
+   * `bumpRevision: false`, so while it runs the compiled policy still references the old secrets
+   * and Fleet keeps them (it never deletes a secret a compiled policy references). Once the agent
+   * policy update has written the new revision they are unreferenced, so they are removed here.
+   * Secrets another package policy still uses (in any Space) are kept by
+   * `deleteSecretsIfNotReferenced`.
+   * Best-effort: a failed cleanup leaves a secret behind but must not fail the update.
+   */
+  private async deleteReplacedSecrets({
+    previous,
+    updated,
+    agentPolicyId,
+  }: {
+    previous: PackagePolicy;
+    updated: PackagePolicy;
+    agentPolicyId: string;
+  }) {
+    // Cloud connector secrets are shared across package policies and not tracked in their
+    // `secret_references`, so they are never removed from here.
+    if (previous.cloud_connector_id) return;
+
+    const stillUsed = new Set((updated.secret_references ?? []).map(({ id }) => id));
+    const replaced = (previous.secret_references ?? [])
+      .map(({ id }) => id)
+      .filter((id) => !stillUsed.has(id));
+    if (replaced.length === 0) return;
+
+    try {
+      await deleteSecretsIfNotReferenced({
+        esClient: this.esClient,
+        // Secrets are global: a package policy in another Space can reference one of them, and
+        // the request-scoped client only sees its own Space. Check every Space before deleting.
+        soClient: appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+        checkAllSpaces: true,
+        ids: replaced,
+        agentPolicyIds: [agentPolicyId],
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Could not delete replaced secrets [${replaced.join(', ')}] of agentless policy: ${
+          error.message
+        }`
+      );
     }
   }
 
@@ -659,7 +743,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     } catch (e) {
       if (e instanceof FleetNotFoundError || SavedObjectsErrorHelpers.isNotFoundError(e)) {
         this.logger.warn(`Agent policy ${agentPolicyId} not found, cleaning up orphaned resources`);
-        await this.deleteOrphanedAgentlessResources(agentPolicyId, user);
+        await this.deleteOrphanedAgentlessResources(agentPolicyId, user, options);
         return;
       }
       throw e;
@@ -1212,19 +1296,49 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     }
   }
 
-  private async deleteOrphanedAgentlessResources(policyId: string, user?: AuthenticatedUser) {
-    const packagePolicies = await this.packagePolicyService.findAllForAgentPolicy(
+  private async deleteOrphanedAgentlessResources(
+    policyId: string,
+    user?: AuthenticatedUser,
+    options?: { force?: boolean }
+  ) {
+    const allPackagePolicies = await this.packagePolicyService.findAllForAgentPolicy(
       this.soClient,
       policyId
     );
 
-    if (packagePolicies.length > 0) {
-      await this.packagePolicyService.delete(
+    const agentlessPackagePolicies = allPackagePolicies.filter((pp) => pp.supports_agentless);
+    const skippedIds = allPackagePolicies.filter((pp) => !pp.supports_agentless).map((pp) => pp.id);
+
+    if (skippedIds.length > 0) {
+      this.logger.warn(
+        `Skipping deletion of non-agentless package policies for orphaned agent policy ${policyId}: ${skippedIds.join(
+          ', '
+        )}`
+      );
+    }
+
+    const managedIds = agentlessPackagePolicies
+      .filter((pp) => pp.is_managed && !options?.force)
+      .map((pp) => pp.id);
+    if (managedIds.length > 0) {
+      throw new FleetError(
+        `Cannot delete managed agentless policies without force: ${managedIds.join(
+          ', '
+        )}. Pass force: true to override.`
+      );
+    }
+
+    let deleteErrors: string[] = [];
+    if (agentlessPackagePolicies.length > 0) {
+      const deleteResult = await this.packagePolicyService.delete(
         this.soClient,
         this.esClient,
-        packagePolicies.map((pp) => pp.id),
-        { force: true, user: user ?? undefined, skipUnassignFromAgentPolicies: true }
+        agentlessPackagePolicies.map((pp) => pp.id),
+        { force: options?.force, user: user ?? undefined }
       );
+      deleteErrors = deleteResult
+        .filter((r) => !r.success)
+        .map((r) => `${r.id}: ${r.body?.message ?? 'unknown error'}`);
     }
 
     try {
@@ -1232,6 +1346,18 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     } catch (e) {
       this.logger.warn(
         `Failed to delete agentless deployment for orphaned policy ${policyId}: ${e.message}`
+      );
+    }
+
+    if (agentlessPackagePolicies.length === 0) {
+      throw new FleetNotFoundError(`No agentless package policies found for policy ${policyId}`);
+    }
+
+    if (deleteErrors.length > 0) {
+      throw new PackagePolicyRequestError(
+        `Failed to delete some package policies for orphaned agent policy ${policyId}: ${deleteErrors.join(
+          '; '
+        )}`
       );
     }
   }

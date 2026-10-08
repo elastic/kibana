@@ -118,7 +118,7 @@ steps:
 
     beforeAll(async () => {
       getByIdsSpy = jest.spyOn(fixture.stepExecutionRepositoryMock, 'getStepExecutionsByIds');
-      await fixture.resumeWorkflow();
+      await fixture.resumeWorkflowAtScheduledTime();
     });
 
     it('should complete workflow after resume', () => {
@@ -253,7 +253,7 @@ steps:
 
     beforeAll(async () => {
       getByIdsSpy = jest.spyOn(fixture.stepExecutionRepositoryMock, 'getStepExecutionsByIds');
-      await fixture.resumeWorkflow();
+      await fixture.resumeWorkflowAtScheduledTime();
     });
 
     it('should complete workflow successfully after resume', () => {
@@ -409,7 +409,7 @@ steps:
 
     beforeAll(async () => {
       getByIdsSpy = jest.spyOn(fixture.stepExecutionRepositoryMock, 'getStepExecutionsByIds');
-      await fixture.resumeWorkflow();
+      await fixture.resumeWorkflowAtScheduledTime();
     });
 
     it('should complete workflow after resume', () => {

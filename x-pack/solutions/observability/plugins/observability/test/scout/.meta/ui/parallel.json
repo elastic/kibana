@@ -1,9 +1,25 @@
 {
-  "sha1": "1705d0ef8d1349189fe935ccabd6752c0ae99d1c",
+  "sha1": "7e2f03be824ce018ad0dbbb560ee18b1ea839d45",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "f3ddbbb53c28ebe-21381b726c466b4",
+      "title": "Reset alerting v2 nav settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 6,
+        "column": 1
+      }
+    },
     {
       "id": "f3ddbbb53c28ebe-f2cd2d3cdc77643",
       "title": "Ingest data to Elasticsearch",
@@ -16,7 +32,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 6,
+        "line": 22,
         "column": 1
       }
     },
@@ -396,8 +412,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 192,
+        "line": 190,
         "column": 32
+      }
+    },
+    {
+      "id": "a2f8223a9b58a7e-58190071c832551",
+      "title": "Stack Alerts visibility in Observability project nav hides Stack Alerts and keeps Stack Rules while alerting v2 is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/stack_alerts_nav_visibility.spec.ts",
+        "line": 21,
+        "column": 43
       }
     },
     {
@@ -433,8 +465,8 @@
       }
     },
     {
-      "id": "19ff7375d931f4e-920679a76f69971",
-      "title": "Custom threshold preview chart should render the empty chart only once at bootstrap",
+      "id": "19ff7375d931f4e-07ca570af3e7fd8",
+      "title": "Custom threshold preview chart should show an error message when the equation is invalid",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -449,22 +481,6 @@
       }
     },
     {
-      "id": "19ff7375d931f4e-07ca570af3e7fd8",
-      "title": "Custom threshold preview chart should show an error message when the equation is invalid",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/custom_threshold_preview_chart.spec.ts",
-        "line": 23,
-        "column": 75
-      }
-    },
-    {
       "id": "19ff7375d931f4e-7d7813aed627c3b",
       "title": "Custom threshold preview chart should render chart correctly after fixing an invalid equation",
       "expectedStatus": "passed",
@@ -476,8 +492,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/custom_threshold_preview_chart.spec.ts",
-        "line": 35,
-        "column": 13
+        "line": 32,
+        "column": 26
       }
     },
     {

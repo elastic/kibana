@@ -58,10 +58,8 @@ xpack.features.overrides:
   discover_v2.category: "enterpriseSearch"
   ### Machine Learning feature is moved from Analytics category to the Management one.
   ml.category: "management"
-  ### Stack Alerts feature is moved from Analytics category to the Search one renamed to simply `Alerts`.
-  stackAlerts:
-    name: "Alerts"
-    category: "enterpriseSearch"
+  ### Stack Rules feature is moved from Analytics category to the Search one.
+  stackAlerts.category: "enterpriseSearch"
   ### Observability AI Assistant feature is moved to Search and renamed
   observabilityAIAssistant:
     name: "AI Assistant"
@@ -94,9 +92,6 @@ xpack.ml.compatibleModuleType: 'search'
 
 data_visualizer.resultLinks.fileBeat.enabled: false
 
-# Search Notebooks
-xpack.searchNotebooks.catalog.url: https://elastic-enterprise-search.s3.us-east-2.amazonaws.com/serverless/catalog.json
-
 # Semantic text UI
 xpack.index_management.dev.enableSemanticText: true
 
@@ -113,6 +108,9 @@ aiAssistantManagementSelection.preferredChatExperience: "agent"
 
 # Query Rules UI
 xpack.searchQueryRules.enabled: true
+
+## ES|QL Data Federation in stack management
+xpack.dataFederation.enabled: true
 
 ## Search Connectors in stack management
 xpack.contentConnectors.ui.enabled: false

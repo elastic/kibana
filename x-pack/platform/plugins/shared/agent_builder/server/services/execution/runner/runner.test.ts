@@ -12,6 +12,8 @@ import type {
   RunToolParams,
   RunAgentParams,
   ToolHandlerFn,
+  RunApprovals,
+  AgentHandlerContext,
 } from '@kbn/agent-builder-server';
 import type {
   CreateScopedRunnerDepsMock,
@@ -29,12 +31,15 @@ import {
   createToolRegistryMock,
 } from '../../../test_utils';
 import { createScopedRunner, createRunner } from './runner';
+import { createEmptyConversation } from '../../../test_utils/conversations';
 import { createAgentHandler } from '../run_agent/create_handler';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
 import { HookLifecycle } from '@kbn/agent-builder-common';
+import type { AutoApprovedApi, InteractivityConfig } from '@kbn/agent-builder-common';
 import {
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+  AGENT_BUILDER_API_DISCOVERY_SETTING_ID,
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
@@ -134,6 +139,85 @@ describe('AgentBuilder runner', () => {
         ],
       });
     });
+
+    const runToolWithApprovals = async (approvals?: RunApprovals) => {
+      const runnerDeps = createRunnerDepsMock();
+      runnerDeps.toolsService.getRegistry.mockResolvedValue(registry);
+
+      const params: RunToolParams = {
+        toolId: 'test-tool',
+        toolParams: { foo: 'bar' },
+        request: scopedRunnerDeps.request,
+        approvals,
+      };
+
+      return { run: () => createRunner(runnerDeps).runTool(params), params };
+    };
+
+    it.each<{
+      description: string;
+      approvals?: RunApprovals;
+      expected: InteractivityConfig;
+    }>([
+      {
+        description:
+          'carries the API pre-approvals of a runner-level call into the handler context',
+        approvals: { autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.create' }] },
+        expected: {
+          enabled: false,
+          auto_approved_apis: [{ target: 'elasticsearch', api: 'indices.create' }],
+        },
+      },
+      {
+        description: 'carries a wildcard grant through unexpanded',
+        approvals: { autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.*' }] },
+        expected: {
+          enabled: false,
+          auto_approved_apis: [{ target: 'elasticsearch', api: 'indices.*' }],
+        },
+      },
+      {
+        description: 'defaults a runner-level call to the non-interactive config with no grants',
+        approvals: undefined,
+        expected: { enabled: false },
+      },
+    ])('$description', async ({ approvals, expected }) => {
+      const { run, params } = await runToolWithApprovals(approvals);
+
+      await run();
+
+      expect(toolHandler).toHaveBeenCalledWith(
+        params.toolParams,
+        expect.objectContaining({ interactivity: expected })
+      );
+    });
+
+    it.each<{ description: string; autoApprovedApis: AutoApprovedApi[]; expected: string }>([
+      {
+        description: 'names no real API',
+        autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.crate' }],
+        expected: 'Unknown auto_approved_apis: "indices.crate" (elasticsearch)',
+      },
+      {
+        description: 'only exists on the other target',
+        autoApprovedApis: [{ target: 'kibana', api: 'indices.delete' }],
+        expected: '"indices.delete" (kibana)',
+      },
+      {
+        description: 'wildcards a namespace the target does not ship',
+        autoApprovedApis: [{ target: 'elasticsearch', api: 'nonsense.*' }],
+        expected: '"nonsense.*" (elasticsearch)',
+      },
+    ])(
+      'rejects a pre-approval that $description, without running the tool',
+      async ({ autoApprovedApis, expected }) => {
+        const { run } = await runToolWithApprovals({ autoApprovedApis });
+
+        await expect(run()).rejects.toThrow(expected);
+
+        expect(toolHandler).not.toHaveBeenCalled();
+      }
+    );
 
     it('executes beforeToolCall hook and aborts when it throws', async () => {
       scopedRunnerDeps.hooks.run = jest.fn(async () => {
@@ -239,6 +323,34 @@ describe('AgentBuilder runner', () => {
       });
     });
 
+    describe('conversation access', () => {
+      const runWith = async (params: Partial<RunAgentParams>) => {
+        const runnerDeps = createRunnerDepsMock();
+        runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
+        await createRunner(runnerDeps).runAgent({
+          agentId: 'test-tool',
+          agentParams: {
+            nextInput: { message: 'dolly' },
+            conversation: createEmptyConversation({ id: 'conversation-1' }),
+          },
+          request: scopedRunnerDeps.request,
+          ...params,
+        } as RunAgentParams);
+        return (agentHandler.mock.calls[0][1] as AgentHandlerContext).conversationAccess;
+      };
+
+      it('defaults to readWrite', async () => {
+        expect(await runWith({})).toBe('readWrite');
+      });
+
+      it.each(['readWrite', 'readOnly', 'none'] as const)(
+        'passes %s to the agent handler',
+        async (conversationAccess) => {
+          expect(await runWith({ conversationAccess })).toBe(conversationAccess);
+        }
+      );
+    });
+
     it.each([
       {
         experimentalEnabled: false,
@@ -276,6 +388,9 @@ describe('AgentBuilder runner', () => {
             if (settingId === AGENT_BUILDER_BASH_SUPPORT_SETTING_ID) {
               return Promise.resolve(false);
             }
+            if (settingId === AGENT_BUILDER_API_DISCOVERY_SETTING_ID) {
+              return Promise.resolve(false);
+            }
             return Promise.resolve(false);
           }),
         } as any);
@@ -292,6 +407,46 @@ describe('AgentBuilder runner', () => {
           expect.objectContaining({
             experimentalFeatures: expect.objectContaining({
               aiIndices: expectedAiIndices,
+            }),
+          })
+        );
+      }
+    );
+
+    it.each([
+      { experimentalEnabled: false, apiDiscoveryEnabled: false },
+      { experimentalEnabled: true, apiDiscoveryEnabled: false },
+      { experimentalEnabled: false, apiDiscoveryEnabled: true },
+      { experimentalEnabled: true, apiDiscoveryEnabled: true },
+    ])(
+      'tracks API discovery from its own setting ($apiDiscoveryEnabled) when experimental=$experimentalEnabled',
+      async ({ experimentalEnabled, apiDiscoveryEnabled }) => {
+        const runnerDeps = createRunnerDepsMock();
+        runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
+        (runnerDeps.uiSettings.asScopedToClient as jest.Mock).mockReturnValue({
+          get: jest.fn((settingId: string) => {
+            if (settingId === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID) {
+              return Promise.resolve(experimentalEnabled);
+            }
+            if (settingId === AGENT_BUILDER_API_DISCOVERY_SETTING_ID) {
+              return Promise.resolve(apiDiscoveryEnabled);
+            }
+            return Promise.resolve(false);
+          }),
+        } as any);
+
+        const runner = createRunner(runnerDeps);
+        await runner.runAgent({
+          agentId: 'test-tool',
+          agentParams: { nextInput: { message: 'dolly' } },
+          request: scopedRunnerDeps.request,
+        });
+
+        expect(agentHandler).toHaveBeenCalledWith(
+          expect.any(Object),
+          expect.objectContaining({
+            experimentalFeatures: expect.objectContaining({
+              apiDiscovery: apiDiscoveryEnabled,
             }),
           })
         );

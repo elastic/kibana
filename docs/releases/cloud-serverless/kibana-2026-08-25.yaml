@@ -1,0 +1,587 @@
+products:
+- product: cloud-serverless
+  target: 2026-08-25
+  lifecycle: ga
+  repo: kibana
+  owner: elastic
+release-date: 2026-08-25
+hide-features:
+- data-federation
+entries:
+- file:
+    name: 281884.yaml
+    checksum: c3467747c3e8ded97962146d810422b8805686db
+  type: enhancement
+  title: Allow Elastic videos and related iframes to load in Kibana
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  description: Adds a default Content Security Policy `frame-src` allow list so in-product videos and Elastic-hosted iframes keep working when stricter CSP defaults are enforced. Allowed origins include `videos.elastic.co`, `play.vidyard.com`, `kibana.estccdn.com`, and `ela.st`. Operators only need to extend `csp.frame_src` for additional iframe sources.
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/281884
+- file:
+    name: 286382.yaml
+    checksum: 9db82e071cd4278e34f21a36c05b420cbc0eecff
+  type: bug-fix
+  title: Fix alert flyout crash when MITRE ATT&CK tactic or technique is missing
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286382
+- file:
+    name: 284331.yaml
+    checksum: 33a50a7d1129161bcd1af045cf81710e65d48f26
+  type: feature
+  title: Add Jira Data Center PAT authentication fields
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  description: Adds personal access token fields to Jira Data Center connectors in the Kibana create UI when password-based basic authentication is turned off.
+  prs:
+  - https://github.com/elastic/kibana/pull/284331
+- file:
+    name: 286459.yaml
+    checksum: d5f5aacc57210eefee7823336a51431bbbc23d8a
+  type: bug-fix
+  title: Fix errors on the attack page when a linked project is unresponsive
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286459
+- file:
+    name: 285275.yaml
+    checksum: 0c613b15586a97407ae09b5ef709314e4d741e73
+  type: feature
+  title: Add episode attachments and auto-attach in Agent Builder
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  description: Adds episode attachment UI in Agent Builder and auto-attaches the episode open on the details page when a new conversation starts.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/285275
+  issues:
+  - '# PRIVATE: https://github.com/elastic/rna-program/issues/836'
+- file:
+    name: 286264.yaml
+    checksum: 64f168477876233bd72b96b99420a2b8a179c7f5
+  type: enhancement
+  title: Add `low_count` detector and `txLowCount` to APM anomaly rules
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  description: Adds a `low_count` detector to the out-of-the-box APM transaction machine learning job and accepts `txLowCount` in the anomaly rule schema so a drop to zero can raise an anomaly. Existing jobs are not updated.
+  prs:
+  - https://github.com/elastic/kibana/pull/286264
+- file:
+    name: 284936.yaml
+    checksum: d137bf12a39e2f9eb7f11768e27548d987c24aef
+  type: bug-fix
+  title: Fix Fleet agent API space isolation
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  description: Fixes space awareness so Fleet agent tags, uploads, and diagnostic files are no longer listed, downloaded, or deleted across spaces.
+  prs:
+  - https://github.com/elastic/kibana/pull/284936
+- file:
+    name: 283973.yaml
+    checksum: 2d77b5e96c3f12fa2a3486580e1a9692c521dced
+  type: bug-fix
+  title: Fix rate aggregation not firing on counter increase from 0 to N
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  description: Fixes an issue in the custom threshold rule that uses the rate aggregation so it correctly alerts when a counter increases from 0 (for example, the first container restart).
+  prs:
+  - https://github.com/elastic/kibana/pull/283973
+  issues:
+  - https://github.com/elastic/kibana/issues/255798
+- file:
+    name: 285327.yaml
+    checksum: 71f5109b24d494eac705803bff222e2a37b3733c
+  type: enhancement
+  title: Warn in Synthetics when a private-location agent predates maintenance window support
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  description: Shows a warning in Synthetics when a monitor has a maintenance window but its private-location Elastic Agent is older than 8.19.0 and may not honor the window.
+  prs:
+  - https://github.com/elastic/kibana/pull/285327
+- file:
+    name: 286209.yaml
+    checksum: d56d14f50d94af5a6e3a76f3950b363f6ddcc6b7
+  type: bug-fix
+  title: Fix "Respond" availability for hosts on a linked project
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286209
+- file:
+    name: 286546.yaml
+    checksum: 29b1eca6a0ec9fcf3ecb8d09d0d1791e716ca6e5
+  type: enhancement
+  title: Cap Observability "Add Data" search results at two rows
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  description: Caps "Add Data" search results at two rows and paginates the rest so the curated integrations stay reachable under broad search terms.
+  prs:
+  - https://github.com/elastic/kibana/pull/286546
+- file:
+    name: 285645.yaml
+    checksum: 325dad31d1906b314243f910f0650a3c63d7bef6
+  type: breaking-change
+  title: Require the `read` privilege for workflow execution detail APIs
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  impact: >
+    The following routes now require the `workflowsManagement:read` privilege in addition to `workflowsManagement:readExecution`:
+
+
+    ```
+
+    GET /api/workflows/workflow/{workflowId}/executions
+
+    GET /api/workflows/workflow/{workflowId}/executions/steps
+
+    ```
+
+
+    This change is transparent for the UI, which already requires the `workflow:read` privilege.
+  action: >
+    API users with only the `workflowsManagement:readExecution` privilege must also be granted `workflowsManagement:read` to use these APIs.
+  subtype: api
+  prs:
+  - https://github.com/elastic/kibana/pull/285645
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/18893'
+- file:
+    name: 286481.yaml
+    checksum: d5cba79f1c33a17bcd5f11d9b50a0e9aa8136c41
+  type: bug-fix
+  title: Fix errors in the alert flyout when a linked project is unresponsive
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286481
+- file:
+    name: 286131.yaml
+    checksum: da6035fcd70155eaae05b5406325fdd6c9fa8957
+  type: bug-fix
+  title: Fix copy label on the Agent Builder user prompt bubble
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  description: Agent Builder chat now labels the copy button on a user message as "Copy prompt" instead of "Copy response".
+  prs:
+  - https://github.com/elastic/kibana/pull/286131
+  issues:
+  - https://github.com/elastic/kibana/issues/280441
+- file:
+    name: 284527.yaml
+    checksum: 959f087e85e379ec88ebfa50ef49662696443ff7
+  type: enhancement
+  title: Add auto-indent for Console requests that contain comments
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/284527
+  issues:
+  - https://github.com/elastic/kibana/issues/182138
+- file:
+    name: 285766.yaml
+    checksum: 4e2bdd9b5037fa8e62f7fe76147f0fafb36e68e2
+  type: enhancement
+  title: Use the shared date range picker in alerting V2
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  description: Updates alerting date range pickers to use the shared date range picker so date selection is consistent across alerting.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/285766
+- file:
+    name: 286185.yaml
+    checksum: c9060ad35d9847711f4ea53dd7d13a44cc63f331
+  type: bug-fix
+  title: Fix Cases metrics errors for alerts from linked projects
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  description: Fixes Cases metrics so linked-project alerts no longer cause an error toast and alert and host counts stay accurate.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/286185
+- file:
+    name: 285951.yaml
+    checksum: d40880dd7159f91046df08ec50dd5871bbc2ed75
+  type: bug-fix
+  title: Fix errors on the Alerts page when a linked cluster is unresponsive
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/285951
+- file:
+    name: 286385.yaml
+    checksum: 143a48628546fe8ed4793e1f82206fb2cbfb2a6c
+  type: bug-fix
+  title: Fix invalid Fleet namespaces that contain only whitespace
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286385
+  issues:
+  - https://github.com/elastic/kibana/issues/276589
+- file:
+    name: 281745.yaml
+    checksum: a23c53114a11d96e9b5b21922f558993f219e8d4
+  type: bug-fix
+  title: Fix missing privilege checks for exception lists on the alerting APIs
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  description: Fixes a gap where users could change detection-rule exception lists, investigation fields, and investigation guides through the generic alerting APIs without the corresponding sub-feature privileges.
+  prs:
+  - https://github.com/elastic/kibana/pull/281745
+- file:
+    name: 286624.yaml
+    checksum: e96147154c842ef2d24ebdc923cfd04208c478f9
+  type: enhancement
+  title: Move assignees onto the same row as page filters on the Alerts page
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286624
+- file:
+    name: 284530.yaml
+    checksum: bc0ef59ae971e304d1ae358dd4826e15ec1a889e
+  type: bug-fix
+  title: Fix Console autocomplete triggers, template insertion, and completion range bugs
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  description: Fixes Dev Tools Console autocomplete not triggering at request-body completion positions (after `{`, `[`, `,`, `:`, or inside expanded objects) and several completion-range bugs, including template expansion before auto-closed quotes and text corruption when accepting a suggestion mid-string.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/284530
+- file:
+    name: 285264.yaml
+    checksum: c5b24670e85f119c50f6ae644b88e0eea1d2f253
+  type: enhancement
+  title: Add a "Confirm region selection" modal
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  description: Adds a "Confirm region selection" modal that lists indexes and pipelines still using denied inference endpoints, so you can review the conflict and ignore those errors when saving region preferences.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/285264
+- file:
+    name: 286164.yaml
+    checksum: bd0263e40ac780654b3754b26e196788dffed3a5
+  type: bug-fix
+  title: Fix saved Lens visualizations in case attachments
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  description: Fixes saved Lens visualizations missing from case attachments and adds helper text to the markdown editor.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/286164
+- file:
+    name: 286390.yaml
+    checksum: 4459b73e8c737e734a6e3d92c641fc8c50e55388
+  type: enhancement
+  title: Remove the "Add to Timeline" cell action from Security dashboards
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286390
+- file:
+    name: 286386.yaml
+    checksum: 0ea519c8a36424f197eeeff531915b9130613dc6
+  type: bug-fix
+  title: Fix incorrect tooltip for offline agent CPU and memory metrics
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286386
+  issues:
+  - https://github.com/elastic/kibana/issues/275500
+- file:
+    name: 282701.yaml
+    checksum: f277e5d9170c4959c147d58107178502ffab83fe
+  type: enhancement
+  title: Add line wrapping for large axis tick labels in categorical XY charts
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/282701
+  issues:
+  - https://github.com/elastic/kibana/issues/13727
+- file:
+    name: 286353.yaml
+    checksum: b8874d1043e86160dde33ff988fbcf4ca25298bd
+  type: bug-fix
+  title: Fix Linux aarch64 install command indentation in Fleet
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286353
+  issues:
+  - https://github.com/elastic/kibana/issues/218521
+- file:
+    name: 286128.yaml
+    checksum: dd3b8d9bd000bfb645cadd8055a7020bd8e312c3
+  type: bug-fix
+  title: Fix event flyout deep links in Nightshift to open the correct event
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286128
+  issues:
+  - '# PRIVATE: https://github.com/elastic/nightshift-program/issues/1195'
+- file:
+    name: 285856.yaml
+    checksum: b8708160d83e7dc98571cd120ee56c4baa77cc92
+  type: feature
+  title: Add create and AI Agent options to the action policy empty state
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/285856
+- file:
+    name: 280838.yaml
+    checksum: 0e8b40a2b918aa249a91e414907ea125b3c2ee35
+  type: bug-fix
+  title: Fix duplicate writes for significant events
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/280838
+  issues:
+  - '# PRIVATE: https://github.com/elastic/nightshift-program/issues/772'
+- file:
+    name: 285899.yaml
+    checksum: 4ae84b154df7baf522306cc68832955cd43c0c1f
+  type: enhancement
+  title: Increase matching indices shown when creating a data view
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  description: Increases the number of matching indices shown when creating a data view from 100 to 10,000.
+  areas:
+  - Search and data
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/285899
+- file:
+    name: 286574.yaml
+    checksum: d90615b4dabf280c2940a556e00eeee82dc8056c
+  type: bug-fix
+  title: Fix notes page not restoring filter UI state on return
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  description: Fixes an issue where previously applied filters on the Notes management page were not shown in the filter controls after navigating away and returning, even though the filters were still active.
+  prs:
+  - https://github.com/elastic/kibana/pull/286574
+- file:
+    name: 285345.yaml
+    checksum: c465cc3e461de5f26c63729d37763d76d0044faf
+  type: bug-fix
+  title: Distinguish "waiting" labels in the Workflows executions filter
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/285345
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/18961'
+- file:
+    name: 284667.yaml
+    checksum: 4f8c94a3349d95ad35091af19ce60910f64cd3ef
+  type: enhancement
+  title: Add "Get Blacklist" and IPv6 support to the AbuseIPDB connector
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  description: Adds a "Get Blacklist" action to the AbuseIPDB connector, returns `lastReportedAt` on IP checks, and accepts IPv4 and IPv6 addresses.
+  prs:
+  - https://github.com/elastic/kibana/pull/284667
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/18364'
+- file:
+    name: 286066.yaml
+    checksum: 63faab851662b1ea0c4a8366e4e03ff60e163448
+  type: bug-fix
+  title: Fix ancestry correlations for alerts created from linked documents
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286066
+- file:
+    name: 285467.yaml
+    checksum: 2138470535dfa83a8cdce9a961cba927c3ae629f
+  type: enhancement
+  title: Persist metrics grid sort in the Discover URL
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/285467
+  issues:
+  - https://github.com/elastic/kibana/issues/278357
+- file:
+    name: 284332.yaml
+    checksum: 6c75253a39073491f17d657ad958a484808b2098
+  type: feature
+  title: Add Confluence Data Center PAT authentication fields
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  description: Adds personal access token fields to Confluence Data Center connectors in the Kibana create UI when password-based basic authentication is turned off.
+  prs:
+  - https://github.com/elastic/kibana/pull/284332
+- file:
+    name: 285997.yaml
+    checksum: bcd6f8ff7e89d21dd2859858b15c09dcac6d3e45
+  type: bug-fix
+  title: Fix flattened fields expanding into orphan rows in the document flyout
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/285997
+- file:
+    name: 286207.yaml
+    checksum: 6c8bcd46cac677c3cd4719b3d4b998158737bf8e
+  type: bug-fix
+  title: Fix "Isolate host" availability for hosts on a linked project
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286207
+- file:
+    name: 285581.yaml
+    checksum: fedecdc2ed6a2bf18915ebeb3c76e86c4d107aba
+  type: bug-fix
+  title: Fix Kafka dynamic topic validation for multi-field format strings in Fleet
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  description: Fixes a bug in Fleet where entering a multi-field format string (for example, `%{[data_stream.type]}-%{[data_stream.namespace]}`) in the Kafka output dynamic topic field would produce a double-wrapped invalid topic expression. The field now accepts the full format string directly and validates bracket syntax.
+  prs:
+  - https://github.com/elastic/kibana/pull/285581
+- file:
+    name: 286084.yaml
+    checksum: 6019606a519d645ab5817b4cd086e9196a8ae77f
+  type: bug-fix
+  title: Fix cluster privilege filtering for Fleet package manifests
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  description: Allows cluster privileges declared in package manifests through the same allow-list already applied to index privileges.
+  prs:
+  - https://github.com/elastic/kibana/pull/286084
+- file:
+    name: 284754.yaml
+    checksum: 07f3edb4f39841deadfb2ec5a68d7a3d545e6db1
+  type: bug-fix
+  title: Fix empty Discover results for Osquery live queries
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/284754
+  issues:
+  - '# PRIVATE: https://github.com/elastic/sdh-security-team/issues/1779'
+- file:
+    name: 286513.yaml
+    checksum: 83909aeb422030204d58a61e6a13ca00e87ecbc8
+  type: bug-fix
+  title: Fix missing menu bar in Security document flyouts
+  products:
+  - product: cloud-serverless
+    target: 2026-08-25
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286513
+  issues:
+  - https://github.com/elastic/kibana/issues/284882

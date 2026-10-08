@@ -8,7 +8,6 @@
 import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHighlight,
@@ -18,6 +17,7 @@ import {
   EuiToolTip,
   formatDate,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -130,14 +130,7 @@ export const StdErrorLogs = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           {summaryMessage && (
-            <EuiCallOut
-              announceOnMount
-              title={ERROR_SUMMARY_LABEL}
-              color="danger"
-              iconType="warning"
-            >
-              <p>{summaryMessage}</p>
-            </EuiCallOut>
+            <KbnDangerCallout announceOnMount title={ERROR_SUMMARY_LABEL} text={summaryMessage} />
           )}
         </>
       )}

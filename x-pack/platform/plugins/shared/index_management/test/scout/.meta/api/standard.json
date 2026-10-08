@@ -1,8 +1,7 @@
 {
-  "sha1": "1fbd8237e9b1615fbf7672ce963504c28b31aca2",
+  "sha1": "54859c6291f68e321df5e3ab5c692be2cdfcdcdb",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -342,8 +341,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_get_serverless.spec.ts",
-        "line": 43,
-        "column": 27
+        "line": 50,
+        "column": 13
       }
     },
     {
@@ -369,8 +368,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_get_serverless.spec.ts",
-        "line": 57,
-        "column": 68
+        "line": 64,
+        "column": 23
       }
     },
     {
@@ -396,8 +395,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_get_serverless.spec.ts",
-        "line": 81,
-        "column": 37
+        "line": 88,
+        "column": 54
       }
     },
     {
