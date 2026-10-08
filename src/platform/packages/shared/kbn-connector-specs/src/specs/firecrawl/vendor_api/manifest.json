@@ -29,6 +29,7 @@
     "map": [
       {
         "method": "post",
+        "pagination": "none",
         "path": "/map",
         "source": "v2"
       }

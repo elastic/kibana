@@ -25,9 +25,28 @@ const manifest: VendorApiManifest = {
       fetchedAt: '2026-10-07T00:00:00Z',
     },
   },
-  operations: { search: [{ source: 'v1', method: 'get', path: '/search' }] },
+  operations: {
+    search: [
+      {
+        source: 'v1',
+        method: 'get',
+        path: '/search',
+        pagination: {
+          style: 'cursor',
+          request: { cursorParam: 'cursor' },
+          response: { itemsPath: 'results', nextPath: 'next' },
+        },
+      },
+    ],
+    tags: [{ source: 'v1', method: 'get', path: '/tags', pagination: 'none' }],
+  },
   unmatched: { mute: [{ method: 'post', path: '/v1/mute', reason: 'Missing from the spec' }] },
 };
+
+const withPagination = (pagination: unknown) => ({
+  ...manifest,
+  operations: { search: [{ source: 'v1', method: 'get', path: '/search', pagination }] },
+});
 
 describe('serializeManifest', () => {
   it('sorts keys at every depth and round-trips', () => {
@@ -46,6 +65,15 @@ describe('serializeManifest', () => {
       'an unmatched request without a reason',
       { ...manifest, unmatched: { mute: [{ method: 'post', path: '/mute', reason: '' }] } },
     ],
+    [
+      'a pagination style with another style’s fields',
+      withPagination({
+        style: 'page',
+        request: { cursorParam: 'cursor' },
+        response: { itemsPath: '' },
+      }),
+    ],
+    ['an unknown pagination value', withPagination('all')],
   ])('rejects %s', (_, invalid) => {
     expect(() => serializeManifest(invalid as VendorApiManifest)).toThrow();
   });

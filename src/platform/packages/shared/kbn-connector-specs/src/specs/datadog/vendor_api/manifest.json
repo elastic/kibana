@@ -17,6 +17,19 @@
     "getAlertEvents": [
       {
         "method": "post",
+        "pagination": {
+          "defaultSize": 10,
+          "request": {
+            "cursorParam": "page.cursor",
+            "in": "body",
+            "sizeParam": "page.limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "meta.page.after"
+          },
+          "style": "cursor"
+        },
         "path": "/api/v2/events/search",
         "source": "v2"
       }
@@ -31,6 +44,18 @@
     "listMonitors": [
       {
         "method": "get",
+        "pagination": {
+          "defaultSize": 100,
+          "request": {
+            "firstPage": 0,
+            "pageParam": "page",
+            "sizeParam": "page_size"
+          },
+          "response": {
+            "itemsPath": ""
+          },
+          "style": "page"
+        },
         "path": "/api/v1/monitor",
         "source": "v1"
       }
@@ -60,6 +85,19 @@
     "searchLogs": [
       {
         "method": "post",
+        "pagination": {
+          "defaultSize": 10,
+          "request": {
+            "cursorParam": "page.cursor",
+            "in": "body",
+            "sizeParam": "page.limit"
+          },
+          "response": {
+            "itemsPath": "data",
+            "nextPath": "meta.page.after"
+          },
+          "style": "cursor"
+        },
         "path": "/api/v2/logs/events/search",
         "source": "v2"
       }

@@ -27,12 +27,21 @@ paths:
   /items:
     get:
       description: Lists items
+      parameters: [{ name: page, in: query, schema: { type: integer } }]
       responses:
         '200':
           description: ok
           content:
             application/json:
               schema: { type: array, items: { $ref: 'models.yaml#/Item' } }
+  /tags:
+    get:
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: { type: array, items: { type: string } }
   /unused:
     get:
       responses: { '204': { description: none } }
@@ -73,6 +82,25 @@ const withLegacy: ConnectorSpec = {
       handler: async ({ client }) => (await client.get(`${BASE}/legacy`)).data,
     },
   },
+};
+
+const withTags: ConnectorSpec = {
+  ...connector,
+  actions: {
+    ...connector.actions,
+    listTags: {
+      scope: 'read',
+      input: z.object({}),
+      handler: async ({ client }) => (await client.get(`${BASE}/tags`)).data,
+    },
+  },
+};
+
+const itemsOperation = {
+  source: 'main',
+  method: 'get',
+  path: '/items',
+  pagination: { style: 'page', request: { pageParam: 'page' }, response: { itemsPath: '' } },
 };
 
 describe('updateVendorApi', () => {
@@ -128,7 +156,7 @@ describe('updateVendorApi', () => {
           fetchedAt: '2026-10-07T12:00:00.000Z',
         },
       },
-      operations: { listItems: [{ source: 'main', method: 'get', path: '/items' }] },
+      operations: { listItems: [itemsOperation] },
     });
     const snapshot = await readJson('snapshots/main.openapi.json');
     expect(Object.keys(snapshot.paths)).toEqual(['/items']);
@@ -187,8 +215,36 @@ describe('updateVendorApi', () => {
     });
   });
 
+  it('proposes pagination for review once, then keeps what the manifest declares', async () => {
+    await update({ sources: { main: SPEC_URL } });
+    expect(warnings).toEqual([
+      'GET /items (main): proposed "pagination" from parameter and field names in manifest.json; review it',
+    ]);
+
+    const manifest = await readJson('manifest.json');
+    const declared = {
+      ...manifest,
+      operations: { listItems: [{ ...itemsOperation, pagination: 'none' }] },
+    };
+    await fs.writeFile(path.join(directory, 'manifest.json'), JSON.stringify(declared));
+    warnings = [];
+
+    expect((await update()).problems).toEqual([]);
+    expect((await readJson('manifest.json')).operations).toEqual(declared.operations);
+    expect(warnings).toEqual([]);
+  });
+
+  it('reports list-like operations it cannot propose pagination for', async () => {
+    const { problems } = await update({ connector: withTags, sources: { main: SPEC_URL } });
+
+    expect(problems).toEqual([
+      'GET /tags (main) looks like it returns a collection, as it returns an array; declare its "pagination" in manifest.json, or "none" if it returns everything at once',
+    ]);
+  });
+
   it('records against the overlay but snapshots the vendor spec without it', async () => {
     await update({ sources: { main: SPEC_URL } });
+    warnings = [];
     await fs.writeFile(
       path.join(directory, 'overlay.yaml'),
       `
