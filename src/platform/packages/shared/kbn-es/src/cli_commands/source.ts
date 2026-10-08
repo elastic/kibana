@@ -37,6 +37,7 @@ export const source: Command = {
         --skip-ready-check  Disable the ready check,
         --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
         --es-log-level    Log level for ES stdout output (all, info, warn, error, silent) [default: info]
+        --no-dev-config   Prevents loading the config/es.dev.yml file, if present
 
       Example:
 
@@ -61,12 +62,13 @@ export const source: Command = {
         esLogLevel: 'es-log-level',
         secureFiles: 'secure-files',
         esArgs: 'E',
+        devConfig: 'dev-config',
       },
 
       string: ['ready-timeout', 'es-log-level'],
       boolean: ['skip-ready-check'],
 
-      default: defaults,
+      default: { ...defaults, devConfig: true },
     });
 
     // Collect user-provided esArgs
