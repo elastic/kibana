@@ -23,7 +23,7 @@ import {
   ATTRIBUTE_GEN_AI_SYSTEM,
   ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS,
   ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS,
-} from '@kbn/apm-types';
+} from '@kbn/genai-common';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
