@@ -69,6 +69,33 @@ When an operation has recordings, its collection is the recorded pages joined, i
 
 Page sizes above the vendor's `maximum` already get **422** from request validation.
 
+## Correcting vendor specs
+
+Vendor specs are sometimes wrong about the API they describe: a parameter documented in the query string is sent in the body, or a property marked required is often missing. When verification against the real API shows this, record the correction in an [OpenAPI Overlay](https://spec.openapis.org/overlay/v1.1.0.html) next to the spec, rather than editing the vendor's file, and apply it before loading:
+
+```yaml
+overlay: 1.1.0
+info:
+  title: Trello corrections
+  version: 1.0.0
+actions:
+  - target: $.paths['/cards'].post.parameters[?@.name == 'idList']
+    description: idList is sent in the JSON body; verified against the API on 2026-10-06.
+    remove: true
+  - target: $.components.schemas.Card.required[?@ == 'badges']
+    description: Archived cards omit badges.
+    remove: true
+```
+
+```ts
+const { document, findings } = applyOverlay(vendorSpec, overlay);
+const { fetch } = createContractMockFetch({ specs: [document], recordings });
+```
+
+The mock then enforces the API's real contract, and recordings the vendor's spec contradicted are served. Say in each action's `description` (or an `x-` field) what showed the spec to be wrong, so the correction can be dropped once the vendor fixes it.
+
+`applyOverlay` returns a corrected copy of the document. It implements the `update`, `copy` and `remove` actions of Overlay 1.0 and 1.1: `update` merges objects, appends to arrays and replaces primitives. Items an `update` would append are skipped when the array already has them. Targets are JSONPath ([RFC 9535](https://www.rfc-editor.org/rfc/rfc9535)) without function extensions. A malformed overlay or target throws an `InvalidOverlayError` naming the action. `findings` lists actions that matched nothing (`no-match`) or changed nothing (`no-change`), which signals that the vendor changed or fixed that part of the spec and the correction needs another look.
+
 ## Spec loading
 
 `loadContractOperations` accepts a parsed OpenAPI 3.x or Swagger 2.0 document (converted to OpenAPI 3.0 first) and returns its operations: method, path, servers, parameters (with `style` and `explode` defaults applied), request body and responses. Parameter, request body, response and header refs are resolved. Schemas are not dereferenced: each one stays in place in a copy of the document, together with its JSON pointer, so its refs keep resolving against the document. This keeps large specs such as Microsoft Graph fast to load. The schema dialect follows the OpenAPI version: OpenAPI 3.0 schemas for 3.0, JSON Schema 2020-12 for 3.1 and later.
