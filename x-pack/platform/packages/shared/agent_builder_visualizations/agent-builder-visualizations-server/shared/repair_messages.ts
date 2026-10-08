@@ -13,6 +13,8 @@ interface AttemptOutcome {
   /** Raw model response of an authoring attempt. */
   readonly response?: string;
   readonly error?: string;
+  /** Extra context shown with the error, e.g. the schema of the failing fields. */
+  readonly repairContext?: string;
 }
 
 /**
@@ -28,7 +30,7 @@ export const formatRepairMessages = ({
   validated: readonly AttemptOutcome[];
   instructions: string;
 }): BaseMessageLike[] =>
-  validated.flatMap(({ attempt, success, error }): BaseMessageLike[] => {
+  validated.flatMap(({ attempt, success, error, repairContext }): BaseMessageLike[] => {
     const response = authored.find((outcome) => outcome.attempt === attempt)?.response;
     // Without a response (e.g. the model call itself failed) there is nothing to repair.
     if (success || response === undefined || !error) {
@@ -38,7 +40,9 @@ export const formatRepairMessages = ({
       ['ai', response],
       [
         'human',
-        `Your previous response was rejected with this error:\n\n\`\`\`\n${error}\n\`\`\`\n\n${instructions}`,
+        `Your previous response was rejected with this error:\n\n\`\`\`\n${error}\n\`\`\`\n\n${
+          repairContext ? `${repairContext}\n\n` : ''
+        }${instructions}`,
       ],
     ];
   });

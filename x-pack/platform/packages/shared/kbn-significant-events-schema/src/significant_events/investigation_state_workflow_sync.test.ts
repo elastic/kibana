@@ -27,6 +27,8 @@ interface ParsedInvestigationWorkflow {
   steps: Array<{ name: string; with?: { schema?: object } }>;
 }
 
+const ORDER_INSENSITIVE_KEYS = ['enum', 'required'];
+
 /**
  * Strips keys that intentionally differ between the hand-authored YAML schema and
  * `z.toJSONSchema(investigationStateSchema)`:
@@ -45,7 +47,15 @@ const normalizeSchema = (value: unknown): unknown => {
     return Object.fromEntries(
       Object.entries(value)
         .filter(([key]) => !['$schema', 'description', 'additionalProperties'].includes(key))
-        .map(([key, entry]) => [key, normalizeSchema(entry)])
+        .map(([key, entry]) => {
+          const normalized = normalizeSchema(entry);
+          return [
+            key,
+            ORDER_INSENSITIVE_KEYS.includes(key) && Array.isArray(normalized)
+              ? [...normalized].sort()
+              : normalized,
+          ];
+        })
     );
   }
   return value;

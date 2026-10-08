@@ -21,17 +21,19 @@ import { z, lazySchema } from '@kbn/zod/v4';
  * override the configured one, so the discovery loop can complete without
  * requiring the user to edit the connector first.
  */
-const subscriptionIdInputSchema = z
-  .string()
-  .max(100)
-  .regex(
-    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
-    'Must be a valid Azure subscription ID (GUID).'
-  )
-  .optional()
-  .describe(
-    'Azure subscription ID to use for this call. Optional if the connector has a Subscription ID configured; required otherwise (e.g. immediately after listSubscriptions when none is configured).'
-  );
+const subscriptionIdInputSchema = lazySchema(() =>
+  z
+    .string()
+    .max(100)
+    .regex(
+      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
+      'Must be a valid Azure subscription ID (GUID).'
+    )
+    .optional()
+    .describe(
+      'Azure subscription ID to use for this call. Optional if the connector has a Subscription ID configured; required otherwise (e.g. immediately after listSubscriptions when none is configured).'
+    )
+);
 
 // =============================================================================
 // listSubscriptions

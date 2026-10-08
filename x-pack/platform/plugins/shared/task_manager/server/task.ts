@@ -179,6 +179,8 @@ export interface RunContext {
  */
 
 export type SuccessfulRunResult = {
+  /** Overrides the task priority when rescheduling after a successful run. */
+  priority?: TaskPriority;
   /**
    * The state which will be passed to the next run of this task (if this is a
    * recurring task). See the RunContext type definition for more details.
@@ -259,6 +261,10 @@ export const taskDefinitionSchema = schema.object(
      * Priority of this task type. Defaults to "NORMAL" if not defined
      */
     priority: schema.maybe(schema.number()),
+    /**
+     * Allows `runSoon({ priority })` and a successful run result to change the stored priority.
+     */
+    allowPriorityOverride: schema.maybe(schema.boolean()),
     /**
      * Cost to run this task type. Defaults to "Normal".
      */
@@ -667,6 +673,16 @@ export interface ConcreteTaskInstance extends TaskInstance {
 export type PartialConcreteTaskInstance = Partial<ConcreteTaskInstance> & {
   id: ConcreteTaskInstance['id'];
 };
+
+/**
+ * A task as returned by the claim candidate search, carrying only the metadata the claim
+ * phase needs. The omitted fields are loaded for the winners of the claim instead, so the
+ * missing type members keep a candidate from being mistaken for a runnable task.
+ */
+export type TaskClaimCandidate = Omit<
+  ConcreteTaskInstance,
+  'state' | 'params' | 'apiKey' | 'uiamApiKey'
+>;
 
 export interface ConcreteTaskInstanceVersion {
   /** The _id of the the document (not the SO id) */

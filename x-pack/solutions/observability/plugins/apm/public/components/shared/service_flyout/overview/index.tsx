@@ -56,6 +56,11 @@ interface SelectedTransactionDetail {
   isFiltersStale: boolean;
   /** Schema confirmed with the selection — kept when filters freeze (e.g. ECS → OTel). */
   schema?: ServiceSchemaType;
+  /**
+   * Active alerts for this transaction from the transactions table.
+   * Synced on click and when the list resettles with the row still present.
+   */
+  alertsCount?: number;
 }
 
 function isSameAppliedFilters(a: AppliedTransactionFilters, b: AppliedTransactionFilters): boolean {
@@ -396,6 +401,7 @@ export function ServiceFlyoutOverview() {
           confirmedFilters: liveTransactionFilters,
           isFiltersStale: false,
           schema: capabilities.schema,
+          alertsCount: item.alertsCount,
         };
       });
     },
@@ -439,10 +445,11 @@ export function ServiceFlyoutOverview() {
           return prev;
         }
 
-        const isPresent = items.some((item) => {
+        const matchingItem = items.find((item) => {
           const resolvedType = item.transactionType || transactionType;
           return item.name === prev.transactionName && resolvedType === prev.transactionType;
         });
+        const isPresent = matchingItem != null;
 
         // A server-side search cannot prove absence (the row may exist outside the query),
         // but presence in the narrowed result is enough to promote live filters.
@@ -452,12 +459,19 @@ export function ServiceFlyoutOverview() {
         pendingFilterReconcileRef.current = false;
 
         if (isPresent) {
+          const nextAlertsCount = matchingItem.alertsCount;
           if (
             !prev.isFiltersStale &&
             isSameAppliedFilters(prev.filters, liveTransactionFilters) &&
             isSameAppliedFilters(prev.confirmedFilters, liveTransactionFilters)
           ) {
-            return prev;
+            if (prev.alertsCount === nextAlertsCount) {
+              return prev;
+            }
+            return {
+              ...prev,
+              alertsCount: nextAlertsCount,
+            };
           }
           return {
             ...prev,
@@ -465,6 +479,7 @@ export function ServiceFlyoutOverview() {
             confirmedFilters: liveTransactionFilters,
             isFiltersStale: false,
             schema: capabilities.schema,
+            alertsCount: nextAlertsCount,
           };
         }
 
@@ -664,7 +679,8 @@ export function ServiceFlyoutOverview() {
           historyKey={flyoutHistoryKey}
           preferDocumentBasedCharts={preferDocumentBasedCharts}
           schema={selectedTransaction.schema}
-          indices={indices}
+          indicesSource={{ indices }}
+          alertsCount={selectedTransaction.alertsCount}
         />
       )}
     </div>

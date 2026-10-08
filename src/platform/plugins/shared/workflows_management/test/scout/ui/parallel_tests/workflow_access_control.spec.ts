@@ -7,11 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SamlAuth } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { spaceTest as test } from '../fixtures';
 import { getDummyWorkflowYaml } from '../fixtures/workflows';
+
+// Local SAML synthesizes `elastic_<role>` / `test <role>`, while Cloud logs in as a real QA account.
+const resolveUser = async (samlAuth: SamlAuth, role: string) => {
+  const { username, full_name: fullName, email } = await samlAuth.session.getUserData(role);
+  return { username, displayName: fullName || email || username };
+};
 
 test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
   let workflowId: string | undefined;
@@ -59,6 +66,8 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
     // Activate the recipient profile so it is available in the access picker.
     await samlAuth.asInteractiveUser('viewer');
     ownerHeaders = (await samlAuth.asInteractiveUser('editor')).cookieHeader;
+    const owner = await resolveUser(samlAuth, 'editor');
+    const viewer = await resolveUser(samlAuth, 'viewer');
     await browserAuth.loginAsPrivilegedUser();
     const editor = pageObjects.workflowEditor;
     await editor.gotoNewWorkflow();
@@ -72,13 +81,13 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
     await expect(page.getByRole('heading', { name: 'Access control', exact: true })).toBeVisible();
     await expect(editor.accessMode).toContainText('Public');
     await expect(page.getByText('Owner (you)', { exact: true })).toBeVisible();
-    await expect(page.getByText('test editor', { exact: true })).toBeVisible();
+    await expect(page.getByText(owner.displayName, { exact: true })).toBeVisible();
     expect(
       (await page.checkA11y({ include: ['[aria-labelledby="workflowAccessTitle"]'] })).violations
     ).toStrictEqual([]);
     await editor.setAccessMode('private');
-    await editor.addAccessUser('test viewer');
-    await editor.setAccessRole('elastic_viewer', 'executor');
+    await editor.addAccessUser(viewer.displayName);
+    await editor.setAccessRole(viewer.username, 'executor');
     await page.testSubj.click('workflowAccessSave');
     await expect(
       page.getByText(
@@ -86,7 +95,7 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
         { exact: true }
       )
     ).toBeVisible();
-    await editor.setAccessRole('elastic_viewer', 'viewer');
+    await editor.setAccessRole(viewer.username, 'viewer');
     await expect(page.getByText('Owner (you)', { exact: true })).toBeVisible();
     expect(
       (await page.checkA11y({ include: ['[aria-labelledby="workflowAccessTitle"]'] })).violations
@@ -99,7 +108,7 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
     await editor.gotoWorkflow(workflowId);
     await editor.openAccessDialog();
     await expect(editor.accessMode).toContainText('Private');
-    await expect(editor.accessRole('elastic_viewer')).toContainText('Viewer');
+    await expect(editor.accessRole(viewer.username)).toContainText('Viewer');
     await editor.setAccessMode('public');
     await editor.saveAccess();
     await editor.gotoWorkflow(workflowId);
@@ -119,6 +128,7 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
       const editor = pageObjects.workflowEditor;
       await samlAuth.asInteractiveUser('editor');
       ownerHeaders = (await samlAuth.asInteractiveUser('admin')).cookieHeader;
+      const executor = await resolveUser(samlAuth, 'editor');
       await browserAuth.loginAsAdmin();
       await editor.gotoNewWorkflow();
       await editor.setYamlEditorValue(
@@ -130,8 +140,8 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
       await editor.gotoWorkflow(workflowId);
       await editor.openAccessDialog();
       await editor.setAccessMode('private');
-      await editor.addAccessUser('test editor');
-      await editor.setAccessRole('elastic_editor', 'executor');
+      await editor.addAccessUser(executor.displayName);
+      await editor.setAccessRole(executor.username, 'executor');
       await editor.saveAccess();
       await browserAuth.loginAsPrivilegedUser();
       await editor.gotoWorkflow(workflowId);

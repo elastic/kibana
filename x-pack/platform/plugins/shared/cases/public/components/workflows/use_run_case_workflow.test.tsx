@@ -10,6 +10,8 @@ import type { WorkflowListItemDto } from '@kbn/workflows';
 import {
   createCaseWorkflowComparator,
   createCaseWorkflowFilter,
+  useAreWorkflowsAvailableForCases,
+  useCaseWorkflowFilters,
   useRunCaseWorkflow,
 } from './use_run_case_workflow';
 import { CASE_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
@@ -27,6 +29,7 @@ jest.mock('../cases_context/use_cases_context');
 jest.mock('./use_cases_workflow_executor', () => ({
   useCasesWorkflowExecutor: jest.fn().mockReturnValue(jest.fn()),
 }));
+jest.mock('../../containers/configure/use_get_case_configuration');
 
 const mockUseWorkflowsCapabilities = jest.fn();
 const mockUseWorkflowsUIEnabledSetting = jest.fn();
@@ -40,23 +43,49 @@ jest.mock('@kbn/workflows-ui', () => ({
 
 const { useCasesContext } = jest.requireMock('../cases_context/use_cases_context');
 const { useCasesConfig } = jest.requireMock('../../common/lib/kibana');
+const { useGetCaseConfiguration } = jest.requireMock(
+  '../../containers/configure/use_get_case_configuration'
+);
 
 const setupMocks = ({
   permissionsUpdate = true,
   runWorkflowsEnabled = true,
   workflowsUIEnabled = true,
   canExecuteWorkflow = true,
+  canReadWorkflow = true,
+  workflowTags = [] as string[],
+  isConfigurationFetched = true,
+  isConfigurationError = false,
 }: {
   permissionsUpdate?: boolean;
   runWorkflowsEnabled?: boolean;
   workflowsUIEnabled?: boolean;
   canExecuteWorkflow?: boolean;
+  canReadWorkflow?: boolean;
+  workflowTags?: string[];
+  isConfigurationFetched?: boolean;
+  isConfigurationError?: boolean;
 } = {}) => {
   useCasesContext.mockReturnValue({ permissions: { update: permissionsUpdate } });
   useCasesConfig.mockReturnValue({ runWorkflowsEnabled });
-  mockUseWorkflowsCapabilities.mockReturnValue({ canExecuteWorkflow });
+  mockUseWorkflowsCapabilities.mockReturnValue({ canExecuteWorkflow, canReadWorkflow });
   mockUseWorkflowsUIEnabledSetting.mockReturnValue(workflowsUIEnabled);
+  useGetCaseConfiguration.mockReturnValue({
+    data: { workflowTags },
+    isFetched: isConfigurationFetched,
+    isError: isConfigurationError,
+  });
 };
+
+const makeTaggedWorkflow = (id: string, tags: string[]): WorkflowListItemDto =>
+  ({
+    id,
+    name: id,
+    enabled: true,
+    valid: true,
+    tags,
+    definition: { tags },
+  } as unknown as WorkflowListItemDto);
 
 // ---- tests ----
 
@@ -141,6 +170,81 @@ describe('useRunCaseWorkflow', () => {
   });
 });
 
+describe('useCaseWorkflowFilters', () => {
+  const triage = makeTaggedWorkflow('triage-wf', ['soc-triage']);
+  const untagged = makeTaggedWorkflow('untagged-wf', []);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('keeps only workflows with a configured tag once the configuration is fetched', () => {
+    setupMocks({ workflowTags: ['soc-triage'] });
+    const { result } = renderHook(() => useCaseWorkflowFilters());
+
+    expect([triage, untagged].filter(result.current.filterWorkflow)).toEqual([triage]);
+  });
+
+  it('keeps every workflow when no tags are configured', () => {
+    setupMocks({ workflowTags: [] });
+    const { result } = renderHook(() => useCaseWorkflowFilters());
+
+    expect([triage, untagged].filter(result.current.filterWorkflow)).toEqual([triage, untagged]);
+  });
+
+  it('rejects every workflow while the configuration has not been fetched', () => {
+    setupMocks({ workflowTags: [], isConfigurationFetched: false });
+    const { result } = renderHook(() => useCaseWorkflowFilters());
+
+    expect([triage, untagged].filter(result.current.filterWorkflow)).toEqual([]);
+  });
+
+  it('rejects every workflow when the configuration fails to load', () => {
+    setupMocks({ workflowTags: [], isConfigurationError: true });
+    const { result } = renderHook(() => useCaseWorkflowFilters());
+
+    expect([triage, untagged].filter(result.current.filterWorkflow)).toEqual([]);
+  });
+
+  it('ranks workflows with a configured tag first', () => {
+    setupMocks({ workflowTags: ['soc-triage'] });
+    const { result } = renderHook(() => useCaseWorkflowFilters());
+
+    expect([untagged, triage].sort(result.current.sortWorkflow)).toEqual([triage, untagged]);
+  });
+});
+
+describe('useAreWorkflowsAvailableForCases', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('is true when workflows are enabled for Cases and readable', () => {
+    setupMocks();
+    const { result } = renderHook(() => useAreWorkflowsAvailableForCases());
+
+    expect(result.current).toBe(true);
+  });
+
+  it.each([
+    ['the runWorkflows feature flag is off', { runWorkflowsEnabled: false }],
+    ['the Workflows UI setting is disabled', { workflowsUIEnabled: false }],
+    ['the user lacks workflow read capability', { canReadWorkflow: false }],
+  ])('is false when %s', (_, overrides) => {
+    setupMocks(overrides);
+    const { result } = renderHook(() => useAreWorkflowsAvailableForCases());
+
+    expect(result.current).toBe(false);
+  });
+
+  it('does not depend on case update permission or workflow execute capability', () => {
+    setupMocks({ permissionsUpdate: false, canExecuteWorkflow: false });
+    const { result } = renderHook(() => useAreWorkflowsAvailableForCases());
+
+    expect(result.current).toBe(true);
+  });
+});
+
 // ---- createCaseWorkflowFilter ----
 
 describe('createCaseWorkflowFilter', () => {
@@ -169,6 +273,16 @@ describe('createCaseWorkflowFilter', () => {
     const filter = createCaseWorkflowFilter(['cases']);
     expect(filter(makeWorkflow(['security', 'other']))).toBe(false);
     expect(filter(makeWorkflow([]))).toBe(false);
+  });
+
+  it('prefers the top-level indexed tags over the YAML definition tags', () => {
+    const filter = createCaseWorkflowFilter(['cases']);
+    const workflow = {
+      ...makeWorkflow(['cases']),
+      tags: ['security'],
+    } as WorkflowListItemDto;
+
+    expect(filter(workflow)).toBe(false);
   });
 });
 

@@ -15,6 +15,7 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
 import type {
   DiscoverSessionApiEmbeddableTab,
+  DiscoverSessionApiEmbeddableOverrides,
   DiscoverSessionApiTabBase,
 } from '@kbn/as-code-discover-schema';
 import {
@@ -40,7 +41,7 @@ import {
   toStoredSearchAndTableAttributes,
   toStoredTableSettings,
   fromStoredSearchAndTable,
-  fromStoredTableSettings,
+  fromStoredCommonTableSettings,
 } from '../session/search_and_table_mapping';
 import { toStoredTabTypeState, fromStoredTabTypeState } from '../session/tab_type_state';
 import { isDiscoverSessionEsqlTab } from '../session/type_guards';
@@ -198,6 +199,14 @@ export function toStoredSearchEmbeddableByValue(
   };
 }
 
+/** Converts embeddable table settings, preserving sample size for both Classic and ES|QL panels. */
+export const fromStoredTableSettings = (
+  storedState: Partial<DiscoverSessionTabAttributes>
+): DiscoverSessionApiEmbeddableOverrides => ({
+  ...fromStoredCommonTableSettings(storedState),
+  ...(storedState.sampleSize && { sample_size: storedState.sampleSize }),
+});
+
 function fromStoredTab(
   tab: DiscoverSessionTabAttributes,
   references: SavedObjectReference[] = []
@@ -205,7 +214,11 @@ function fromStoredTab(
   const { searchSourceJSON } = tab.kibanaSavedObjectMeta;
   const searchSourceValues = parseSearchSourceJSON(searchSourceJSON);
   const searchSource = injectReferences(searchSourceValues, references);
-  return fromStoredSearchAndTable(tab, searchSource);
+  return {
+    ...fromStoredSearchAndTable(tab, searchSource),
+    // The panel API preserves sample_size for ES|QL as well as Classic tabs.
+    ...fromStoredTableSettings(tab),
+  };
 }
 
 export function toStoredTab(apiTab: DiscoverSessionApiTabBase): {
