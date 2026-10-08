@@ -21,6 +21,7 @@ const FAMILIES = [
   'Danger',
   'Assistance',
 ] as const;
+const SHADOW_STEPS = ['xs', 's', 'm', 'l', 'xl'] as const;
 const SEVERITIES = ['unknown', 'neutral', 'success', 'warning', 'risk', 'danger'] as const;
 const VIS_INDEXES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
 
@@ -51,7 +52,7 @@ const byVisIndex = <P extends string>(prefix: P, read: (index: VisIndex) => stri
  * Replace this source when `@elastic/design-tokens` ships (elastic/eui#9595).
  */
 export const toTokenValues = (theme: EuiThemeComputed) => {
-  const { border, colors, font, size } = theme;
+  const { border, colors, font, shadows, size } = theme;
   const { severity, vis } = colors;
   return {
     color: {
@@ -112,6 +113,7 @@ export const toTokenValues = (theme: EuiThemeComputed) => {
         frame: String(border.radius.frame),
       },
     },
+    shadow: byKey(SHADOW_STEPS, (step) => shadows[step].down ?? 'none'),
   };
 };
 

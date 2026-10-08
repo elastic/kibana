@@ -185,6 +185,13 @@ export const borealisLight: BorealisTokenValues = {
       frame: '16px',
     },
   },
+  shadow: {
+    xs: '0px 0px 2px 0px hsla(216.67,29.51%,23.92%,0.16), 0px 1px 4px 0px hsla(216.67,29.51%,23.92%,0.06), 0px 2px 8px 0px hsla(216.67,29.51%,23.92%,0.04)',
+    s: '0px 0px 2px 0px hsla(216.67,29.51%,23.92%,0.16), 0px 2px 7px 0px hsla(216.67,29.51%,23.92%,0.08), 0px 4px 11px 0px hsla(216.67,29.51%,23.92%,0.05)',
+    m: '0px 0px 2px 0px hsla(216.67,29.51%,23.92%,0.16), 0px 3px 10px 0px hsla(216.67,29.51%,23.92%,0.1), 0px 6px 14px 0px hsla(216.67,29.51%,23.92%,0.06)',
+    l: '0px 0px 2px 0px hsla(216.67,29.51%,23.92%,0.16), 0px 4px 13px 0px hsla(216.67,29.51%,23.92%,0.12), 0px 8px 17px 0px hsla(216.67,29.51%,23.92%,0.07)',
+    xl: '0px 0px 2px 0px hsla(216.67,29.51%,23.92%,0.16), 0px 5px 16px 0px hsla(216.67,29.51%,23.92%,0.14), 0px 10px 20px 0px hsla(216.67,29.51%,23.92%,0.08)',
+  },
 };
 
 export const borealisDark: BorealisTokenValues = {
@@ -362,5 +369,12 @@ export const borealisDark: BorealisTokenValues = {
       panel: '12px',
       frame: '16px',
     },
+  },
+  shadow: {
+    xs: '0px 1px 4px 0px hsla(0,0%,0%,0.4), 0px 2px 8px 0px hsla(0,0%,0%,0.24)',
+    s: '0px 2px 7px 0px hsla(0,0%,0%,0.46), 0px 4px 11px 0px hsla(0,0%,0%,0.26)',
+    m: '0px 3px 10px 0px hsla(0,0%,0%,0.52), 0px 6px 14px 0px hsla(0,0%,0%,0.28)',
+    l: '0px 4px 13px 0px hsla(0,0%,0%,0.58), 0px 8px 17px 0px hsla(0,0%,0%,0.3)',
+    xl: '0px 5px 16px 0px hsla(0,0%,0%,0.64), 0px 10px 20px 0px hsla(0,0%,0%,0.32)',
   },
 };

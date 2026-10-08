@@ -7,7 +7,7 @@
 
 import type { LiveCollectionOptions, StyleHandle } from '@elastic/distillate';
 import type { StyledRenderContext } from '@elastic/isomer-sdk';
-import { isomerDistillery } from './distillery';
+import { isomerDistillery, isomerRenderOptions } from './distillery';
 import { collectRootStyles } from './root_styles';
 
 /**
@@ -17,7 +17,10 @@ import { collectRootStyles } from './root_styles';
 export const createIsomerStyleContext = (
   options?: LiveCollectionOptions
 ): Required<Pick<StyledRenderContext, 'resolveClassName'>> => {
-  const { collector, resolveClassName } = isomerDistillery.liveCollection(options);
+  const { collector, resolveClassName } = isomerDistillery.liveCollection({
+    ...options,
+    render: { ...isomerRenderOptions(), ...options?.render },
+  });
   collectRootStyles(collector);
   return {
     // Primitives pass Distillate handles, which the SDK types as its narrower `StyleHandle`.

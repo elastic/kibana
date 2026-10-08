@@ -8,13 +8,13 @@
 import type { StyleHandle, StylesCollector } from '@elastic/distillate';
 import type { PrimitiveNode } from '@elastic/isomer-sdk';
 import type { HTMLStyleAdapter } from '@elastic/isomer-sdk/html';
-import { isomerDistillery } from './distillery';
+import { isomerDistillery, isomerRenderOptions } from './distillery';
 import { collectRootStyles } from './root_styles';
 
 /** The `styleCollector` tag of packs whose styles are collected by {@link isomerStyleAdapter}. */
 export const ISOMER_STYLE_COLLECTOR = 'distillate';
 
-const { artifactCollector, environment, registry, renderStyles } = isomerDistillery;
+const { artifactCollector, registry, renderStyles } = isomerDistillery;
 
 /** HTML style adapter that records the Distillate handles a render uses and emits their stylesheet. */
 export const isomerStyleAdapter: HTMLStyleAdapter<PrimitiveNode, StylesCollector> = {
@@ -32,17 +32,8 @@ export const isomerStyleAdapter: HTMLStyleAdapter<PrimitiveNode, StylesCollector
       return handles.map(({ readableName }) => readableName).join(' ');
     },
   }),
-  renderStyles: (collector, { scheme }) => {
-    if (!scheme) {
-      return renderStyles(collector);
-    }
-
-    // Image backends evaluate no `light-dark()`, so a requested scheme resolves to literal values.
-    const themeValueOverrides = Object.fromEntries(
-      Object.entries(environment.themeVars).map(([path, values]) => [path, values[scheme]])
-    );
-    return renderStyles(collector, undefined, { themeValueOverrides });
-  },
+  renderStyles: (collector, { scheme }) =>
+    renderStyles(collector, undefined, isomerRenderOptions(scheme)),
   ownsHandle: (handle) => {
     const { moduleName } = handle as Partial<StyleHandle>;
     return registry.module(moduleName ?? '') !== undefined;

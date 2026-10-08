@@ -19,6 +19,7 @@ import { isomerStyleAdapter } from './style_adapter';
 const noteStyles = isomerDistillery.createStyleModule('testNote', ({ css, tokens }) => ({
   root: css`
     color: ${tokens.color.text.paragraph};
+    box-shadow: ${tokens.shadow.m};
   `,
 }));
 
@@ -65,6 +66,23 @@ describe('isomerStyleAdapter', () => {
 
     expect(css).not.toContain('light-dark(');
     expect(css).toContain(borealisDark.color.text.paragraph);
+  });
+
+  it('switches shadows on the wrapper data-theme', () => {
+    const { css } = renderStyles();
+
+    expect(css).toMatch(/\.isomer\{[^}]*--isomer-shadow-m:0px 0px 2px/);
+    expect(css).toMatch(
+      /\.isomer\[data-theme='dark'\]\{--isomer-shadow-m:0px 3px 10px 0px hsla\(0,0%,0%,0\.52\)/
+    );
+  });
+
+  it('resolves shadows for a requested scheme', () => {
+    expect(renderStyles('dark').css).toMatch(
+      /--isomer-shadow-m:0px 3px 10px 0px hsla\(0,0%,0%,0\.52\)/
+    );
+    expect(renderStyles('dark').css).not.toContain("[data-theme='dark']{--isomer-shadow");
+    expect(renderStyles('light').css).toMatch(/--isomer-shadow-m:0px 0px 2px/);
   });
 
   it('owns only handles authored in the Isomer distillery', () => {

@@ -8,5 +8,11 @@
 import { zipSchemes } from '@elastic/distillate';
 import { borealisDark, borealisLight } from './borealis_tokens.generated';
 
-/** Borealis tokens for both color modes; values that differ by mode become `light-dark()` pairs. */
-export const borealisTheme = zipSchemes(borealisLight, borealisDark);
+const { shadow: lightShadow, ...lightZippable } = borealisLight;
+const { shadow: darkShadow, ...darkZippable } = borealisDark;
+
+/** Borealis tokens for both color modes; colors that differ by mode become `light-dark()` pairs, and shadows default to light. */
+export const borealisTheme = { ...zipSchemes(lightZippable, darkZippable), shadow: lightShadow };
+
+/** Dark-mode values that `light-dark()` can't carry because they aren't colors. */
+export const borealisDarkVariation = { shadow: darkShadow };
