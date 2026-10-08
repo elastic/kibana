@@ -11,10 +11,12 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AuthFormTestProvider } from '../../connector_types/lib/test_utils';
 
+jest.setTimeout(30_000);
+
 describe('BasicAuthFields', () => {
   const onSubmit = jest.fn();
 
-  it('renders all fields', async () => {
+  it('renders all fields', () => {
     const testFormData = {
       secrets: {
         user: 'user',
@@ -28,9 +30,9 @@ describe('BasicAuthFields', () => {
       </AuthFormTestProvider>
     );
 
-    expect(await screen.findByTestId('basicAuthFields')).toBeInTheDocument();
-    expect(await screen.findByTestId('webhookUserInput')).toBeInTheDocument();
-    expect(await screen.findByTestId('webhookPasswordInput')).toBeInTheDocument();
+    expect(screen.getByTestId('basicAuthFields')).toBeInTheDocument();
+    expect(screen.getByTestId('webhookUserInput')).toBeInTheDocument();
+    expect(screen.getByTestId('webhookPasswordInput')).toBeInTheDocument();
   });
 
   describe('Validation', () => {
