@@ -8,6 +8,8 @@
  */
 
 import type { ContractRequest, ContractResponse, Responder, Violation } from '../contract/types';
+import type { Recording, RejectedResponse, ResponseFixture } from '../engine/response_engine';
+import { createResponseEngine } from '../engine/response_engine';
 import { sampleResponse } from '../engine/sample_response';
 import type { OpenApiDocument } from '../openapi';
 import { loadContractOperations } from '../openapi';
@@ -27,13 +29,22 @@ export interface ContractCall {
 export interface ContractMockOptions {
   /** The vendor specs the connector targets, e.g. both API versions it calls. */
   readonly specs: readonly OpenApiDocument[];
-  /** Produces responses to valid requests; defaults to deterministic samples of the spec. */
+  /** Hand-written responses, served in preference to everything else. */
+  readonly fixtures?: readonly ResponseFixture[];
+  /** Responses captured from the vendor, served when they still conform to the spec. */
+  readonly recordings?: readonly Recording[];
+  /**
+   * Answers operations without a fixture or recording; defaults to the spec's examples,
+   * then deterministic samples of its schemas.
+   */
   readonly respond?: Responder;
 }
 
 export interface ContractMock {
   readonly fetch: typeof fetch;
   readonly calls: ContractCall[];
+  /** Fixtures and recordings that aren't served because the spec contradicts them. */
+  readonly rejectedResponses: readonly RejectedResponse[];
 }
 
 const JSON_HEADERS = { 'content-type': 'application/json' };
@@ -90,9 +101,13 @@ const toResponse = ({ statusCode, headers, body }: ContractResponse): Response =
  */
 export const createContractMockFetch = ({
   specs,
+  fixtures,
+  recordings,
   respond = sampleResponse,
 }: ContractMockOptions): ContractMock => {
-  const contract = createOpenApiAdapter(specs.flatMap(loadContractOperations), respond);
+  const operations = specs.flatMap(loadContractOperations);
+  const engine = createResponseEngine(operations, { fixtures, recordings, fallback: respond });
+  const contract = createOpenApiAdapter(operations, engine.respond);
   const calls: ContractCall[] = [];
 
   const handle = async (request: ContractRequest): Promise<ContractResponse> => {
@@ -144,5 +159,5 @@ export const createContractMockFetch = ({
   const mockFetch: typeof fetch = async (input, init) =>
     toResponse(await handle(await toContractRequest(new Request(input, init))));
 
-  return { fetch: mockFetch, calls };
+  return { fetch: mockFetch, calls, rejectedResponses: engine.rejected };
 };

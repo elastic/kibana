@@ -14,6 +14,14 @@ export type {
   ContractMockOptions,
 } from './src/fetch/create_contract_mock_fetch';
 export type {
+  OperationRef,
+  RecordedExchange,
+  Recording,
+  RejectedResponse,
+  ResponseFixture,
+  StoredResponse,
+} from './src/engine/response_engine';
+export type {
   ContractAdapter,
   ContractRequest,
   ContractResponse,

@@ -107,4 +107,37 @@ describe('sampleResponse', () => {
     expect(response.status).toBe(204);
     expect(await response.text()).toBe('');
   });
+
+  it('serves the first media type example that matches the schema, following refs', async () => {
+    const { fetch: exampleFetch } = createContractMockFetch({
+      specs: [
+        {
+          ...spec,
+          paths: {
+            '/count': {
+              get: {
+                responses: {
+                  '200': {
+                    description: 'ok',
+                    content: {
+                      'application/json': {
+                        schema: { type: 'object', required: ['count'] },
+                        example: { total: 1 },
+                        examples: { real: { $ref: '#/components/examples/Count' } },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          components: { examples: { Count: { value: { count: 3 } } } },
+        },
+      ],
+    });
+
+    expect(await (await exampleFetch('https://api.example.com/count')).json()).toEqual({
+      count: 3,
+    });
+  });
 });
