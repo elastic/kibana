@@ -36,11 +36,11 @@ export class LensMetric {
     this.secondaryMetricBadge = this.metricRoot().locator('.echBadge__content');
     this.secondaryMetricLabel = this.metricRoot().locator('.echSecondaryMetric__label');
     this.secondaryMetric = this.metricRoot().locator('.echSecondaryMetric');
-    this.secondaryMetricNameTooltip = this.page.testSubj.locator('mtrVisSecondaryNameTooltip');
+    this.secondaryMetricNameTooltip = this.page.getByTestId('mtrVisSecondaryNameTooltip');
     this.metricProgressBar = this.progressBar();
-    this.legacyMetricLabel = this.page.testSubj.locator('metric_label');
-    this.legacyMetricValue = this.page.testSubj.locator('metric_value');
-    this.trendline = this.metricRoot().locator('.echSingleMetricSparkline');
+    this.legacyMetricLabel = this.page.getByTestId('metric_label');
+    this.legacyMetricValue = this.page.getByTestId('metric_value');
+    this.trendline = this.metricRoot().getByRole('img');
   }
 
   async setBackgroundChart(type: 'none' | 'bar' | 'line'): Promise<void> {
@@ -53,12 +53,12 @@ export class LensMetric {
 
   /** Root `[data-test-subj="mtrVis"]` locator, optionally limited to a dashboard panel. */
   private metricRoot(scope?: Locator): Locator {
-    return (scope ?? this.page).locator('[data-test-subj="mtrVis"]');
+    return (scope ?? this.page).getByTestId('mtrVis');
   }
 
   /** Metric tiles currently rendered, optionally limited to a dashboard panel. */
   metricTiles(scope?: Locator): Locator {
-    return this.metricRoot(scope).locator('.echChart li:not([role="presentation"])');
+    return this.metricRoot(scope).getByRole('listitem');
   }
 
   /**
@@ -66,7 +66,7 @@ export class LensMetric {
    * pass after `waitForVisualization`; wait on this locator before snapshotting tile data.
    */
   progressBar(scope?: Locator): Locator {
-    return this.metricRoot(scope).locator('.echSingleMetricProgress');
+    return this.metricRoot(scope).getByRole('meter');
   }
 
   /** Returns locators for each Elastic Charts metric tile currently rendered. */
@@ -121,7 +121,7 @@ export class LensMetric {
           if ((await el.count()) === 0) return undefined;
           return (await el.getAttribute('fill')) ?? undefined;
         })(),
-        showingTrendline: (await tile.locator('.echSingleMetricSparkline').count()) > 0,
+        showingTrendline: (await tile.getByRole('img').count()) > 0,
         showingBar,
       });
     }
