@@ -90,10 +90,7 @@ interface FrameCount {
   stacks: Map<string, { callers: Frame[]; samples: number }>;
 }
 
-const rank = (
-  entries: Map<string, FrameCount>,
-  total: number
-): FrameSummary[] =>
+const rank = (entries: Map<string, FrameCount>, total: number): FrameSummary[] =>
   [...entries.values()]
     .sort((a, b) => b.samples - a.samples)
     .slice(0, MAX_FRAMES)
