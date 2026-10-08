@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Readable } from 'stream';
 import { z } from '@kbn/zod/v4';
 import { getGcpIdToken, parseServiceAccountKey } from '../auth_types/gcp_jwt_helpers';
 import type { ConnectorSpec } from '../connector_spec';
@@ -199,6 +200,23 @@ describe('createContractContext', () => {
 
     expect(await runAction('upload', {})).toBe(200);
     expect(mock.calls[0].requestViolations).toEqual([]);
+  });
+
+  it('answers stream responses with Node streams, as the http adapter does', async () => {
+    const { ctx } = await createContractContext({
+      connector: FigmaConnector,
+      authType: 'api_key_header',
+      specs: [figmaSpec],
+    });
+
+    const { data } = await ctx.client.get('https://api.figma.com/v1/me', {
+      responseType: 'stream',
+    });
+
+    expect(data).toBeInstanceOf(Readable);
+    expect(JSON.parse(Buffer.concat(await data.toArray()).toString())).toEqual(
+      expect.objectContaining({ handle: 'string' })
+    );
   });
 
   it('reports requests the vendor spec rejects', async () => {
