@@ -756,6 +756,9 @@ describe('Package policy service', () => {
     it('should call bumpRevision when package has agent version condition', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
+      jest
+        .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
+        .mockResolvedValueOnce(undefined);
 
       soClient.create.mockResolvedValueOnce({
         id: 'test-package-policy',
@@ -797,6 +800,9 @@ describe('Package policy service', () => {
     it('should store package_agent_version_condition on saved object when package manifest has agent version condition', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
+      jest
+        .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
+        .mockResolvedValueOnce(undefined);
 
       soClient.create.mockResolvedValueOnce({
         id: 'test-package-policy',
@@ -4088,6 +4094,9 @@ describe('Package policy service', () => {
         requestCondition?: string;
       }) => {
         const savedObjectsClient = createSavedObjectClientMock();
+        jest
+          .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
+          .mockResolvedValueOnce(undefined);
         const mockPackagePolicy = createPackagePolicyMock();
 
         (getPackageInfo as jest.Mock).mockResolvedValue({
@@ -4650,6 +4659,9 @@ describe('Package policy service', () => {
 
       it('should never remove protections for non-endpoint packages, regardless of policy_ids change', async () => {
         const savedObjectsClient = createSavedObjectClientMock();
+        jest
+          .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
+          .mockResolvedValueOnce(undefined);
         const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
         const testPolicyIds = ['test-agent-policy-1', 'test-agent-policy-2'];
 
@@ -6440,6 +6452,9 @@ describe('Package policy service', () => {
 
     it('should store package_agent_version_condition from the target package version', async () => {
       const savedObjectsClient = createSavedObjectClientMock();
+      jest
+        .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
+        .mockResolvedValueOnce(undefined);
       const mockPackagePolicy = createPackagePolicyMock();
 
       (getPackageInfo as jest.Mock).mockResolvedValue({
@@ -15478,6 +15493,64 @@ describe('compilePackagePolicyForVersions()', () => {
 
       // Should compile 9.3 and 9.4 - no duplicates
       expect(mockRecompileInputsWithAgentVersion).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('agent version condition detection', () => {
+    const noConditionAssetsMap = new Map([
+      ['pkg-1.0.0/data_stream/logs/agent/stream/stream.yml.hbs', Buffer.from('paths: []')],
+    ]) as PackagePolicyAssetsMap;
+
+    it('refreshes inputs_for_versions when the condition is only in the package manifest', async () => {
+      mockGetAgentVersionsForVersionSpecificPolicies.mockResolvedValue(['9.3', '9.4']);
+      const soClient = makeSoClient({ '9.3': [{ type: 'logfile' }] });
+
+      await packagePolicyService.compilePackagePolicyForVersions(
+        soClient,
+        { ...mockPackageInfo, conditions: { agent: { version: '^9.3.0' } } } as PackageInfo,
+        noConditionAssetsMap,
+        mockPackagePolicy
+      );
+
+      expect(mockRecompileInputsWithAgentVersion).toHaveBeenCalledTimes(2);
+      expect(soClient.update).toHaveBeenCalledWith(
+        expect.anything(),
+        mockPackagePolicy.id,
+        expect.objectContaining({
+          inputs_for_versions: expect.objectContaining({ '9.3': [], '9.4': [] }),
+        })
+      );
+    });
+
+    it('does nothing when there is no manifest or template condition', async () => {
+      const soClient = makeSoClient({});
+
+      await packagePolicyService.compilePackagePolicyForVersions(
+        soClient,
+        mockPackageInfo,
+        noConditionAssetsMap,
+        mockPackagePolicy
+      );
+
+      expect(mockRecompileInputsWithAgentVersion).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when the feature flag is disabled', async () => {
+      jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+        enableVersionSpecificPolicies: false,
+      } as any);
+      const soClient = makeSoClient({});
+
+      await packagePolicyService.compilePackagePolicyForVersions(
+        soClient,
+        { ...mockPackageInfo, conditions: { agent: { version: '^9.3.0' } } } as PackageInfo,
+        versionConditionAssetsMap,
+        mockPackagePolicy
+      );
+
+      expect(mockRecompileInputsWithAgentVersion).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
     });
   });
 });

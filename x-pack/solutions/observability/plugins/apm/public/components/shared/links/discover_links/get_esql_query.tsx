@@ -177,11 +177,10 @@ export const getESQLQueryFromIndexPattern = ({
     query = query.where`${esql.col(TRANSACTION_TYPE)} == ${transactionType}`;
   }
 
-  if (
-    environment &&
-    environment !== ENVIRONMENT_ALL_VALUE &&
-    environment !== ENVIRONMENT_NOT_DEFINED_VALUE
-  ) {
+  if (environment === ENVIRONMENT_NOT_DEFINED_VALUE) {
+    const notDefinedKql = `NOT ${SERVICE_ENVIRONMENT} : *`;
+    query = query.pipe`WHERE KQL(${notDefinedKql})`;
+  } else if (environment && environment !== ENVIRONMENT_ALL_VALUE) {
     query = query.where`${esql.col(SERVICE_ENVIRONMENT)} == ${environment}`;
   }
 
