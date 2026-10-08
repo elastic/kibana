@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { createActionGroup, createAlertEpisode } from '../fixtures/test_utils';
+import { createActionGroup, createAlert } from '../fixtures/test_utils';
 import { DispatchPlan } from './dispatch_plan';
 
 describe('DispatchPlan', () => {
-  const ep1 = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' });
-  const ep2 = createAlertEpisode({ rule_id: 'r2', group_hash: 'h2', episode_id: 'e2' });
-  const ep3 = createAlertEpisode({ rule_id: 'r3', group_hash: 'h3', episode_id: 'e3' });
+  const alert1 = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
+  const alert2 = createAlert({ rule_id: 'r2', group_hash: 'h2', alert_id: 'e2' });
+  const alert3 = createAlert({ rule_id: 'r3', group_hash: 'h3', alert_id: 'e3' });
 
   it('reports emptiness', () => {
     const plan = DispatchPlan.of({
-      toDispatch: [createActionGroup({ id: 'g1', episodes: [ep1] })],
-      throttled: [createActionGroup({ id: 'g2', episodes: [ep2] })],
-      dispatchable: [ep1, ep2],
+      toDispatch: [createActionGroup({ id: 'g1', alerts: [alert1] })],
+      throttled: [createActionGroup({ id: 'g2', alerts: [alert2] })],
+      dispatchable: [alert1, alert2],
     });
 
     expect(plan.isEmpty()).toBe(false);
@@ -25,27 +25,31 @@ describe('DispatchPlan', () => {
   });
 
   describe('unmatched', () => {
-    it('contains the dispatchable episodes that landed in no group', () => {
+    it('contains the dispatchable alerts that landed in no group', () => {
       const plan = DispatchPlan.of({
-        toDispatch: [createActionGroup({ id: 'g1', episodes: [ep1] })],
-        throttled: [createActionGroup({ id: 'g2', episodes: [ep2] })],
-        dispatchable: [ep1, ep2, ep3],
+        toDispatch: [createActionGroup({ id: 'g1', alerts: [alert1] })],
+        throttled: [createActionGroup({ id: 'g2', alerts: [alert2] })],
+        dispatchable: [alert1, alert2, alert3],
       });
 
-      expect(plan.unmatched).toEqual([ep3]);
+      expect(plan.unmatched).toEqual([alert3]);
     });
 
     it('contains everything dispatchable when no groups were planned', () => {
-      const plan = DispatchPlan.of({ toDispatch: [], throttled: [], dispatchable: [ep1, ep2] });
+      const plan = DispatchPlan.of({
+        toDispatch: [],
+        throttled: [],
+        dispatchable: [alert1, alert2],
+      });
 
-      expect(plan.unmatched).toEqual([ep1, ep2]);
+      expect(plan.unmatched).toEqual([alert1, alert2]);
     });
 
-    it('is empty when every dispatchable episode is grouped', () => {
+    it('is empty when every dispatchable alert is grouped', () => {
       const plan = DispatchPlan.of({
-        toDispatch: [createActionGroup({ id: 'g1', episodes: [ep1, ep2] })],
+        toDispatch: [createActionGroup({ id: 'g1', alerts: [alert1, alert2] })],
         throttled: [],
-        dispatchable: [ep1, ep2],
+        dispatchable: [alert1, alert2],
       });
 
       expect(plan.unmatched).toEqual([]);

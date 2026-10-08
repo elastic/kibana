@@ -20,4 +20,9 @@ export const apiKeyToInvalidateSchemaV2 = schema.object({
   uiamApiKey: schema.maybe(schema.string()),
 });
 
-export type ApiKeyToInvalidate = TypeOf<typeof apiKeyToInvalidateSchemaV2>;
+export const apiKeyToInvalidateSchemaV3 = apiKeyToInvalidateSchemaV2.extends({
+  taskId: schema.maybe(schema.string()),
+  taskStartedAt: schema.maybe(schema.string()),
+});
+
+export type ApiKeyToInvalidate = TypeOf<typeof apiKeyToInvalidateSchemaV3>;

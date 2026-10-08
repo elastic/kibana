@@ -23,6 +23,7 @@ import {
 } from './register';
 import type { RenderAssignees, RenderLinkedInvestigations } from './types';
 import { ACTIONS_TRANSLATIONS } from '../components/actions/translations';
+import { createFlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
 
 const conversation: Conversation = {
   id: 'conversation-1',
@@ -106,6 +107,7 @@ const register = (
   registerAgenticInvestigationTemplateUI({
     conversationTemplates: contract,
     templateId: 'investigation',
+    groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
     name: 'Investigation',
     icon: 'securitySignalDetected',
     onCopyLink: () => true,
