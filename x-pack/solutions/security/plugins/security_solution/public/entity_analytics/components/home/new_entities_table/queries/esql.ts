@@ -7,6 +7,8 @@
 
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import { getEuidSourceFields } from '@kbn/entity-store/common/domain/euid';
+import { DEFAULT_ALERTS_INDEX } from '../../../../../../common/constants';
+import { getRiskScoreTimeSeriesIndex } from '../../../../../../common/entity_analytics/risk_engine';
 import {
   ALLOWED_ENTITY_TYPES,
   ENTITY_FIELDS,
@@ -21,8 +23,8 @@ import type { PageCursor, QueryArgs, Row, SortDir, TimeRange } from '../common';
 // ── index name helpers ────────────────────────────────────────────────────────
 
 export const entityAliasOf = (namespace: string) => getEntitiesAlias(ENTITY_LATEST, namespace);
-export const alertsIndexOf = (namespace: string) => `.alerts-security.alerts-${namespace}`;
-export const riskScoreIndexOf = (namespace: string) => `risk-score.risk-score-${namespace}`;
+export const alertsIndexOf = (namespace: string) => `${DEFAULT_ALERTS_INDEX}-${namespace}`;
+export const riskScoreIndexOf = (namespace: string) => getRiskScoreTimeSeriesIndex(namespace);
 
 // ── ML anomalies ─────────────────────────────────────────────────────────────
 // One definition of an entity anomaly, shared by the anomalies tile and column.

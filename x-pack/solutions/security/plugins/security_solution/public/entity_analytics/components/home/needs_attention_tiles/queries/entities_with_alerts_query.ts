@@ -7,9 +7,8 @@
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
 import type { TimeRange } from '../../new_entities_table';
+import { alertsIndexOf } from '../../new_entities_table/queries/esql';
 import { buildAlertEuidPipeline } from './alert_euid_pipeline';
-
-const alertsIndex = (spaceId: string) => `.alerts-security.alerts-${spaceId}`;
 
 /**
  * Builds a single ES|QL query that computes three tiles in one pass over the alerts index:
@@ -42,7 +41,7 @@ export const buildAlertBasedTilesQuery = (
   const parts: string[] = [];
 
   parts.push(`SET unmapped_fields="nullify";`);
-  parts.push(`FROM ${alertsIndex(spaceId)}`);
+  parts.push(`FROM ${alertsIndexOf(spaceId)}`);
   parts.push(`| WHERE @timestamp >= NOW() - ${timeRange}`);
   parts.push(...buildAlertEuidPipeline(euid));
 
