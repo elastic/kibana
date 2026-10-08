@@ -246,3 +246,27 @@ describe('FlyoutTemplate body callouts', () => {
     expect(scrollContainer.scrollTop).toBe(0);
   });
 });
+
+describe('FlyoutTemplate body banner test subject', () => {
+  const callout = <FlyoutTemplate.Body.Callout level="info" title="Heads up" />;
+
+  it('derives the banner test subject from the root test subject', () => {
+    renderWithKibanaRenderContext(
+      <FlyoutTemplate onClose={noop} session="never" data-test-subj="myFlyout">
+        <FlyoutTemplate.Body>{callout}</FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByTestId('myFlyoutBodyBanner')).toHaveTextContent('Heads up');
+  });
+
+  it('derives the banner test subject from an explicit body test subject', () => {
+    renderWithKibanaRenderContext(
+      <FlyoutTemplate onClose={noop} session="never" data-test-subj="myFlyout">
+        <FlyoutTemplate.Body data-test-subj="alertBody">{callout}</FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByTestId('alertBodyBanner')).toHaveTextContent('Heads up');
+  });
+});

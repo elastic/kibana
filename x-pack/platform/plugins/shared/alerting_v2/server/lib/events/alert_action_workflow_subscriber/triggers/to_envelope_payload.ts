@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EpisodeActionEnvelopePayload } from '../../../../../common/workflows/triggers';
+import type { AlertActionEnvelopePayload } from '../../../../../common/workflows/triggers';
 import type { AlertActionEventEnvelope } from '../../alert_action_event_publisher/events';
 
 /**
@@ -15,12 +15,10 @@ import type { AlertActionEventEnvelope } from '../../alert_action_event_publishe
  * bindings spread the result and append their action-specific fields, so the
  * envelope mapping lives here once rather than in each binding.
  */
-export const toEnvelopePayload = (
-  event: AlertActionEventEnvelope
-): EpisodeActionEnvelopePayload => ({
+export const toEnvelopePayload = (event: AlertActionEventEnvelope): AlertActionEnvelopePayload => ({
   occurredAt: event.occurredAt,
   groupHash: event.groupHash,
-  episodeId: event.episodeId,
+  alertId: event.episodeId,
   ruleId: event.ruleId,
   spaceId: event.spaceId,
   actorUid: event.actorUid,

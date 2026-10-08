@@ -9,6 +9,7 @@ import type { EsClient, KbnClient } from '@kbn/scout';
 import type { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { EntityStoreStatusResponseBody } from '../../../../server/routes/apis/status';
+import type { ResolutionGroup } from '../../../../server/domain/resolution/resolution_client';
 import { hashEuid } from '../../../../common/domain/euid';
 import {
   RESOLUTION_RULE_IDS,
@@ -349,6 +350,25 @@ export const waitForResolution = async (
   return matchedSource;
 };
 
+/** Asserts the resolution group headed by `targetId` holds exactly `aliasIds`, in any order. */
+export const assertResolutionGroup = async (
+  apiClient: ForceLogExtractionApiClient,
+  headers: Record<string, string>,
+  { targetId, aliasIds }: { targetId: string; aliasIds: string[] }
+): Promise<void> => {
+  const response = await apiClient.get(
+    `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${targetId}&apiVersion=2`,
+    { headers, responseType: 'json' }
+  );
+  expect(response.statusCode).toBe(200);
+  const group = response.body as ResolutionGroup;
+  expect(getNestedValue(group.target, 'entity.id')).toBe(targetId);
+  expect(group.group_size).toBe(aliasIds.length + 1);
+  expect(group.aliases.map((alias) => getNestedValue(alias, 'entity.id')).sort()).toStrictEqual(
+    [...aliasIds].sort()
+  );
+};
+
 /**
  * Polls the LATEST index and asserts that an entity does NOT gain a
  * `resolved_to` value within the given timeout (shorter default for negative tests).
@@ -493,12 +513,17 @@ export const forceLogExtraction = async (
   headers: Record<string, string>,
   entityType: EntityType,
   fromDateISO: string,
-  toDateISO: string
+  toDateISO: string,
+  /**
+   * Omitted lets the server pick the process this deployment runs. `all` runs priority and
+   * non-priority together and answers with one summary per process.
+   */
+  process?: 'single' | 'priority' | 'nonPriority' | 'all'
 ) =>
   await apiClient.post(ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION(entityType), {
     headers,
     responseType: 'json',
-    body: { fromDateISO, toDateISO },
+    body: { fromDateISO, toDateISO, ...(process ? { process } : {}) },
   });
 
 export const installAllEntityTypes = (

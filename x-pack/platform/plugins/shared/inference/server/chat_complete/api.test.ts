@@ -19,6 +19,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
   type ChatCompleteAPI,
+  type AnonymizationRule,
   type ChatCompletionChunkEvent,
   MessageRole,
   isChatCompletionChunkEvent,
@@ -34,6 +35,7 @@ import {
   chunkEvent,
   tokensEvent,
 } from '../test_utils';
+import { executeRegexRulesTask } from './anonymization/execute_regex_rule_task';
 import { createChatCompleteApi } from './api';
 import { createChatCompleteCallbackApi } from './callback_api';
 import { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
@@ -1065,6 +1067,101 @@ describe('createChatCompleteApi', () => {
       expect(events).toHaveLength(2);
       expect(events[0].content).toBe('chunk-1');
       expect(events[1].content).toBe('chunk-2');
+    });
+  });
+
+  describe('anonymization instructions', () => {
+    const emailRule: AnonymizationRule = {
+      type: 'RegExp',
+      entityClass: 'EMAIL',
+      pattern: '([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})',
+      enabled: true,
+    };
+
+    // Runs the live anonymization path: enabled rules (as read from the `ai:anonymizationSettings`
+    // uiSetting) detected by the regex worker, with no policy-service inputs.
+    const createChatCompleteWithEmailRule = () => {
+      jest
+        .mocked(regexWorker.run)
+        .mockImplementation(async (payload) => executeRegexRulesTask(payload));
+
+      const callbackApiWithRules = createChatCompleteCallbackApi({
+        request,
+        namespace: 'default',
+        actions,
+        logger,
+        anonymizationRulesPromise: Promise.resolve([emailRule]),
+        regexWorker,
+        esClient: mockEsClient,
+        endpointIdCache,
+      });
+      return createChatCompleteApi({ callbackApi: callbackApiWithRules });
+    };
+
+    beforeEach(() => {
+      inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
+    });
+
+    it('injects the anonymization instruction even when the request has no system prompt', async () => {
+      await createChatCompleteWithEmailRule()({
+        connectorId: 'connectorId',
+        // Deliberately no `system` prompt.
+        messages: [{ role: MessageRole.User, content: 'echo back claudia@example.com to me' }],
+        maxRetries: 0,
+      });
+
+      // Assert on the real outbound payload sent to the model.
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          system: expect.stringContaining('### Anonymization'),
+          messages: [
+            expect.objectContaining({
+              role: MessageRole.User,
+              content: expect.stringMatching(/^echo back EMAIL_\w+ to me$/),
+            }),
+          ],
+        })
+      );
+    });
+
+    it('appends the instruction to an existing system prompt when something was anonymized', async () => {
+      await createChatCompleteWithEmailRule()({
+        connectorId: 'connectorId',
+        system: 'You are a helpful assistant.',
+        messages: [{ role: MessageRole.User, content: 'echo back claudia@example.com to me' }],
+        maxRetries: 0,
+      });
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          system: expect.stringMatching(/^You are a helpful assistant\.[\s\S]*### Anonymization/),
+        })
+      );
+    });
+
+    it('does not add a system prompt when rules are enabled but nothing was anonymized', async () => {
+      await createChatCompleteWithEmailRule()({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question without any email address' }],
+        maxRetries: 0,
+      });
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ system: undefined })
+      );
+    });
+
+    it('leaves an existing system prompt untouched when nothing was anonymized', async () => {
+      await createChatCompleteWithEmailRule()({
+        connectorId: 'connectorId',
+        system: 'You are a helpful assistant.',
+        messages: [{ role: MessageRole.User, content: 'question without any email address' }],
+        maxRetries: 0,
+      });
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ system: 'You are a helpful assistant.' })
+      );
     });
   });
 });

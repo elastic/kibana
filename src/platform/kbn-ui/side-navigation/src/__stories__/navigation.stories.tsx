@@ -263,6 +263,19 @@ export const WithLongSecondaryItemLabels: StoryObj<PropsAndArgs> = {
                   href: '/dashboards/long-alone',
                 },
                 {
+                  id: 'long-external',
+                  label: longLabel,
+                  href: '/dashboards/long-external',
+                  isExternal: true,
+                },
+                {
+                  id: 'long-external-beta',
+                  label: longLabel,
+                  href: '/dashboards/long-external-beta',
+                  isExternal: true,
+                  badgeType: 'beta',
+                },
+                {
                   id: 'short-new',
                   label: 'Overview',
                   href: '/dashboards/short-new',
@@ -278,6 +291,12 @@ export const WithLongSecondaryItemLabels: StoryObj<PropsAndArgs> = {
                   id: 'short-alone',
                   label: 'Alerts',
                   href: '/dashboards/short-alone',
+                },
+                {
+                  id: 'short-external',
+                  label: 'Traces',
+                  href: '/dashboards/short-external',
+                  isExternal: true,
                 },
               ],
             },
@@ -334,6 +353,12 @@ export const WithLongSecondaryItemLabels: StoryObj<PropsAndArgs> = {
     },
   },
   render: (args) => <ControlledNavigation {...args} />,
+};
+
+export const WithLongPopoverItemLabels: StoryObj<PropsAndArgs> = {
+  ...WithLongSecondaryItemLabels,
+  name: 'Navigation with Long Popover Item Labels',
+  args: { ...WithLongSecondaryItemLabels.args, isCollapsed: true },
 };
 
 // Mirrors a user who hid most items: the More menu overflows the popover max height,

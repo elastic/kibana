@@ -8,9 +8,12 @@
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { act, fireEvent, render } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Router } from '@kbn/shared-ux-router';
 import type { DataSetWithName } from '../common';
+import { CREATE_DATASET_PATH, getEditDatasetPath } from './app_paths';
 import type { DataSetListRow } from './datasets_table';
 import { DatasetsTable } from './datasets_table';
 
@@ -45,6 +48,10 @@ const createDataSetRow = ({
     description: '',
   } as DataSetWithName);
 
+interface DiscoverLocatorMock {
+  navigateSync: jest.Mock;
+}
+
 describe('DatasetsTable', () => {
   const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: unknown[]) => {
     const [first] = args;
@@ -57,81 +64,57 @@ describe('DatasetsTable', () => {
     consoleWarnSpy.mockRestore();
   });
 
-  it('disables create when isCreateDisabled is true', async () => {
-    const onCreate = jest.fn();
-
-    const { getByTestId } = render(
+  const renderTable = (
+    props: Partial<React.ComponentProps<typeof DatasetsTable>> = {},
+    discoverLocator?: DiscoverLocatorMock
+  ) => {
+    const history = createMemoryHistory({ initialEntries: ['/datasets'] });
+    const view = render(
       <EuiProvider>
-        <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-          <DatasetsTable
-            items={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
-            selectedItems={[]}
-            dataSourceNames={['ds1']}
-            isCreateDisabled={true}
-            onSelectionChange={jest.fn()}
-            onCreate={onCreate}
-            onEdit={jest.fn()}
-            onDelete={jest.fn()}
-            onDeleteSelected={jest.fn()}
-          />
-        </KibanaContextProvider>
+        <Router history={history}>
+          <KibanaContextProvider services={{ docLinks: docLinksMock, discoverLocator }}>
+            <DatasetsTable
+              items={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
+              selectedItems={[]}
+              dataSourceNames={['ds1']}
+              onSelectionChange={jest.fn()}
+              onDelete={jest.fn()}
+              onDeleteSelected={jest.fn()}
+              {...props}
+            />
+          </KibanaContextProvider>
+        </Router>
       </EuiProvider>
     );
+    return { ...view, history };
+  };
 
-    const createButton = getByTestId('dataSetsSetsCreateButton');
-    expect(createButton).toBeDisabled();
-
-    fireEvent.click(createButton);
-    expect(onCreate).not.toHaveBeenCalled();
-  });
-
-  it('calls onCreate when create is enabled and clicked', async () => {
-    const onCreate = jest.fn();
-
-    const { getByTestId } = render(
-      <EuiProvider>
-        <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-          <DatasetsTable
-            items={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
-            selectedItems={[]}
-            dataSourceNames={['ds1']}
-            isCreateDisabled={false}
-            onSelectionChange={jest.fn()}
-            onCreate={onCreate}
-            onEdit={jest.fn()}
-            onDelete={jest.fn()}
-            onDeleteSelected={jest.fn()}
-          />
-        </KibanaContextProvider>
-      </EuiProvider>
-    );
+  it('links the add dataset button to the create wizard', async () => {
+    const { getByTestId, history } = renderTable();
 
     fireEvent.click(getByTestId('dataSetsSetsCreateButton'));
-    expect(onCreate).toHaveBeenCalledTimes(1);
+    expect(history.location.pathname).toBe(CREATE_DATASET_PATH);
+  });
+
+  it('keeps the add dataset button enabled when there are no data sources', async () => {
+    const { getByTestId, history } = renderTable({ items: [], dataSourceNames: [] });
+
+    const createButton = getByTestId('dataSetsSetsCreateButton');
+    expect(createButton).toBeEnabled();
+
+    fireEvent.click(createButton);
+    expect(history.location.pathname).toBe(CREATE_DATASET_PATH);
   });
 
   it('filters rows by the selected data sources', async () => {
-    const { getByRole, findByRole, queryByText } = render(
-      <EuiProvider>
-        <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-          <DatasetsTable
-            items={[
-              createDataSetRow({ name: 'set1', dataSource: 'ds1' }),
-              createDataSetRow({ name: 'set2', dataSource: 'ds10' }),
-              createDataSetRow({ name: 'set3', dataSource: 'ds2' }),
-            ]}
-            selectedItems={[]}
-            dataSourceNames={['ds1', 'ds10', 'ds2']}
-            isCreateDisabled={false}
-            onSelectionChange={jest.fn()}
-            onCreate={jest.fn()}
-            onEdit={jest.fn()}
-            onDelete={jest.fn()}
-            onDeleteSelected={jest.fn()}
-          />
-        </KibanaContextProvider>
-      </EuiProvider>
-    );
+    const { getByRole, findByRole, queryByText } = renderTable({
+      items: [
+        createDataSetRow({ name: 'set1', dataSource: 'ds1' }),
+        createDataSetRow({ name: 'set2', dataSource: 'ds10' }),
+        createDataSetRow({ name: 'set3', dataSource: 'ds2' }),
+      ],
+      dataSourceNames: ['ds1', 'ds10', 'ds2'],
+    });
 
     await act(async () => {
       fireEvent.click(getByRole('button', { name: /Data sources/ }));
@@ -159,23 +142,12 @@ describe('DatasetsTable', () => {
     const onSelectionChange = jest.fn();
     const selectedItems = [createDataSetRow({ name: 'set1', dataSource: 'ds1' })];
 
-    const { getByRole, findByRole } = render(
-      <EuiProvider>
-        <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-          <DatasetsTable
-            items={[...selectedItems, createDataSetRow({ name: 'set2', dataSource: 'ds2' })]}
-            selectedItems={selectedItems}
-            dataSourceNames={['ds1', 'ds2']}
-            isCreateDisabled={false}
-            onSelectionChange={onSelectionChange}
-            onCreate={jest.fn()}
-            onEdit={jest.fn()}
-            onDelete={jest.fn()}
-            onDeleteSelected={jest.fn()}
-          />
-        </KibanaContextProvider>
-      </EuiProvider>
-    );
+    const { getByRole, findByRole } = renderTable({
+      items: [...selectedItems, createDataSetRow({ name: 'set2', dataSource: 'ds2' })],
+      selectedItems,
+      dataSourceNames: ['ds1', 'ds2'],
+      onSelectionChange,
+    });
 
     await act(async () => {
       fireEvent.click(getByRole('button', { name: /Data sources/ }));
@@ -188,66 +160,75 @@ describe('DatasetsTable', () => {
     expect(onSelectionChange).toHaveBeenCalledWith([]);
   });
 
-  it('calls onEdit and onDelete for row actions', async () => {
-    const onEdit = jest.fn();
+  const twoRows = [
+    createDataSetRow({ name: 'set1', dataSource: 'ds1' }),
+    createDataSetRow({ name: 'set2', dataSource: 'ds1' }),
+  ];
+
+  it('navigates to the edit wizard from the row actions menu', async () => {
+    const { getAllByTestId, getByTestId, history } = renderTable({ items: twoRows });
+
+    fireEvent.click(getAllByTestId('dataSetsSetsActionsButton')[0]);
+    fireEvent.click(getByTestId('dataSetsSetsEditButton'));
+    expect(history.location.pathname).toBe(getEditDatasetPath('set1'));
+  });
+
+  it('calls onDelete from the row actions menu', async () => {
     const onDelete = jest.fn();
+    const { getAllByTestId, getByTestId } = renderTable({ items: twoRows, onDelete });
 
-    const { getAllByTestId } = render(
-      <EuiProvider>
-        <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-          <DatasetsTable
-            items={[
-              createDataSetRow({ name: 'set1', dataSource: 'ds1' }),
-              createDataSetRow({ name: 'set2', dataSource: 'ds1' }),
-            ]}
-            selectedItems={[]}
-            dataSourceNames={['ds1']}
-            isCreateDisabled={false}
-            onSelectionChange={jest.fn()}
-            onCreate={jest.fn()}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            onDeleteSelected={jest.fn()}
-          />
-        </KibanaContextProvider>
-      </EuiProvider>
-    );
-
-    const editButtons = getAllByTestId('dataSetsSetsEditButton');
-    const deleteButtons = getAllByTestId('dataSetsSetsDeleteIconButton');
-    expect(editButtons).toHaveLength(2);
-    expect(deleteButtons).toHaveLength(2);
-
-    fireEvent.click(editButtons[0]);
-    expect(onEdit).toHaveBeenCalledTimes(1);
-    expect(onEdit).toHaveBeenCalledWith(expect.objectContaining({ name: 'set1' }));
-
-    fireEvent.click(deleteButtons[1]);
+    fireEvent.click(getAllByTestId('dataSetsSetsActionsButton')[1]);
+    fireEvent.click(getByTestId('dataSetsSetsDeleteIconButton'));
     expect(onDelete).toHaveBeenCalledTimes(1);
     expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ name: 'set2' }));
+  });
+
+  it('opens Discover with an ES|QL query for the dataset', async () => {
+    const navigateSync = jest.fn();
+    const { getByTestId } = renderTable({}, { navigateSync });
+
+    fireEvent.click(getByTestId('dataSetsSetsDiscoverButton'));
+    expect(navigateSync).toHaveBeenCalledTimes(1);
+    expect(navigateSync).toHaveBeenCalledWith({ query: { esql: 'FROM set1' } });
+  });
+
+  it('quotes dataset names that need quoting in ES|QL when opening Discover', async () => {
+    const navigateSync = jest.fn();
+    const { getByTestId } = renderTable(
+      { items: [createDataSetRow({ name: 'set=[1]', dataSource: 'ds1' })] },
+      { navigateSync }
+    );
+
+    fireEvent.click(getByTestId('dataSetsSetsDiscoverButton'));
+    expect(navigateSync).toHaveBeenCalledWith({ query: { esql: 'FROM "set=[1]"' } });
+  });
+
+  it('disables the row actions while rows are selected', async () => {
+    const navigateSync = jest.fn();
+    const selectedItems = [createDataSetRow({ name: 'set1', dataSource: 'ds1' })];
+    const { getByTestId } = renderTable({ items: selectedItems, selectedItems }, { navigateSync });
+
+    expect(getByTestId('dataSetsSetsActionsButton')).toHaveAttribute('aria-disabled', 'true');
+    const discoverButton = getByTestId('dataSetsSetsDiscoverButton');
+    expect(discoverButton).toHaveAttribute('aria-disabled', 'true');
+    fireEvent.click(discoverButton);
+    expect(navigateSync).not.toHaveBeenCalled();
+  });
+
+  it('hides the Discover link when Discover is unavailable', async () => {
+    const { queryByTestId } = renderTable();
+
+    expect(queryByTestId('dataSetsSetsDiscoverButton')).not.toBeInTheDocument();
   });
 
   it('shows bulk delete when selection is non-empty and calls onDeleteSelected', async () => {
     const onDeleteSelected = jest.fn();
     const selectedItems = [createDataSetRow({ name: 'set1', dataSource: 'ds1' })];
-
-    const { getByTestId } = render(
-      <EuiProvider>
-        <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-          <DatasetsTable
-            items={[...selectedItems, createDataSetRow({ name: 'set2', dataSource: 'ds1' })]}
-            selectedItems={selectedItems}
-            dataSourceNames={['ds1']}
-            isCreateDisabled={false}
-            onSelectionChange={jest.fn()}
-            onCreate={jest.fn()}
-            onEdit={jest.fn()}
-            onDelete={jest.fn()}
-            onDeleteSelected={onDeleteSelected}
-          />
-        </KibanaContextProvider>
-      </EuiProvider>
-    );
+    const { getByTestId } = renderTable({
+      items: [...selectedItems, createDataSetRow({ name: 'set2', dataSource: 'ds1' })],
+      selectedItems,
+      onDeleteSelected,
+    });
 
     fireEvent.click(getByTestId('dataSetsSetsDeleteButton'));
     expect(onDeleteSelected).toHaveBeenCalledTimes(1);

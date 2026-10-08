@@ -20,6 +20,7 @@ import {
   ESQL_RESOURCE_BROWSER_ITEM_TOGGLED,
   ESQL_RESOURCE_BROWSER_OPENED,
   ESQL_VISOR_NL_SUBMITTED,
+  ESQL_VISOR_NL_REVIEWED,
   ESQL_COMMENT_TO_ESQL_SUBMITTED,
   ESQL_COMMENT_TO_ESQL_REVIEWED,
   ESQL_FIX_WITH_AI_SUBMITTED,
@@ -276,6 +277,17 @@ describe('ESQLEditorTelemetryService', () => {
         unknown
       >;
       expect(payload).not.toHaveProperty('generated_line_count');
+    });
+  });
+
+  describe('trackVisorNlReviewed', () => {
+    it.each([AiReviewAction.ACCEPT, AiReviewAction.REJECT])('tracks a %s action', (action) => {
+      telemetryService.trackVisorNlReviewed({ action, linesChanged: 3 });
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_VISOR_NL_REVIEWED, {
+        action,
+        lines_changed: 3,
+      });
     });
   });
 
