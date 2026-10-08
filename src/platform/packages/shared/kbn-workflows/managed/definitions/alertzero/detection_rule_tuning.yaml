@@ -7,6 +7,8 @@ enabled: false
 tags:
   - watch
   - watch-detection
+settings:
+  __WORKER_RUN_AS_LINE__:
 triggers:
   # This worker owns the per-space tuning cadence; the sweep it dispatches stays
   # manual-only so there is one scheduler authority and no cross-space collision.

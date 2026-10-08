@@ -62,13 +62,17 @@ triggers:
         title:
           type: string
           maxLength: 1024
-          description: Title of the Attack Discovery under review.
+          description: >-
+            Persisted, anonymized title of the Attack Discovery under review. The
+            fallback when `resolve_display_text` cannot read its display title.
         alert_ids:
           type: array
           maxItems: 1000
           items:
             type: string
-            maxLength: 512
+            # The most `security.getAlertEntities` accepts; one longer id would fail its
+            # whole read of the alerts.
+            maxLength: 256
           description: >-
             Document ids of the DETECTION alerts the Attack Discovery correlated.
             Not the Attack Discovery's own id — that is `attack_discovery_id`.
@@ -77,7 +81,9 @@ triggers:
         summary_markdown:
           type: string
           maxLength: 8000
-          description: Summary of the Attack Discovery, shown to the analyst and the analysis agent.
+          description: >-
+            Persisted, anonymized summary of the Attack Discovery under review. The
+            fallback when `resolve_display_text` cannot read its display summary.
         autonomy:
           type: string
           enum:
@@ -149,6 +155,11 @@ consts:
   # empty array. A const is the only way to spell an empty-array fallback, which is
   # what keeps `| size` from erroring when `alert_ids` is omitted.
   no_alert_ids: []
+  # How many hosts and users one attack records as Impact: the most-alerted win.
+  # Half of MAX_ENTITY_IDS (100), the most one Investigation's merged impact may
+  # hold, so another writer can still add to it, and few enough pills for the
+  # landing page to stay readable.
+  impact_entity_cap: 50
 steps:
   # kibana-q0t5: the Investigation id is a pure function of the attack, so every
   # execution that reviews this attack addresses the SAME Investigation — a hand
@@ -170,6 +181,42 @@ steps:
       investigation_id: |-
         {%- assign attack = inputs.attack_discovery_id -%}
         {{ attack | slice: 0,8 }}-{{ attack | slice: 8,4 }}-8{{ attack | slice: 12,3 }}-8{{ attack | slice: 15,3 }}-{{ attack | slice: 18,12 }}
+
+  # The discovery's title and summary as an analyst should read them. The `title`
+  # and `summary_markdown` inputs are the persisted, anonymized text, with
+  # `{{ field value }}` tokens that only the Attack Discovery renderer understands,
+  # so the Investigation title, its summary, the journal and the proposal comment,
+  # which render plain text or plain markdown, would show both. The public Attack
+  # Discovery find API returns the same discovery with its field values as inline
+  # code and its original values restored, under this workflow's identity and
+  # privileges.
+  #
+  # `on-failure: continue`, and every use falls back to the inputs: text that shows
+  # anonymized values is not a reason to abandon the review. This text is only for
+  # display. The FP/TP analysis loads the discovery itself. `journal_review_started`
+  # records when the fallback was used, because a re-review cannot repair the
+  # Investigation title or summary: its create 409s.
+  #
+  # One retry, because a transient failure here leaves the fallback text in place for
+  # good. The timeout bounds each attempt well below the transport's 300s default.
+  - name: resolve_display_text
+    type: kibana.request
+    timeout: "30s"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/attack_discovery/_find"
+      # Encoded by the step, so the id cannot add parameters of its own.
+      # `include_all_authors`, so a discovery another identity generated is found.
+      query:
+        ids: "{{ inputs.attack_discovery_id }}"
+        include_all_authors: "true"
+      headers:
+        elastic-api-version: "2023-10-31"
+    on-failure:
+      retry:
+        max-attempts: 1
+        delay: 5s
+      continue: true
 
   #
   # One Investigation per attack, opened before the analysis runs so there is
@@ -197,22 +244,26 @@ steps:
     type: ai.conversation.create
     with:
       conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
-      title: "{{ inputs.title }}"
+      title: "{{ steps.resolve_display_text.output.data[0].title | default: inputs.title }}"
       template_id: investigation
       access_control:
         access_mode: public
       metadata:
         status: open
-        summary: "{{ inputs.summary_markdown }}"
+        # Plain text: the Investigation list and overview show it as-is, so the
+        # inline-code backticks are removed. Original values can be longer than
+        # the anonymized ones, so it is truncated to the discovery's own bound.
+        summary: "{{ steps.resolve_display_text.output.data[0].summary_markdown | remove: '`' | default: inputs.summary_markdown | truncate: 8000 }}"
         description: >-
-          Attack Discovery review of "{{ inputs.title }}" covering
+          Attack Discovery review of
+          "{{ steps.resolve_display_text.output.data[0].title | default: inputs.title }}" covering
           {{ inputs.alert_ids | default: consts.no_alert_ids | size }} detection alert(s).
         # The RUNNER's execution, not this one. This is the only record of which
         # attacks came out of the same Worker run, which is what telemetry and
         # evaluation group by; this review's own id is unique per attack and so
         # would group nothing. Empty on a standalone run, which is accurate — such a
         # run belongs to no Worker run.
-        workflow_execution_id: "{{ inputs.parent_run_id }}"
+        workflow_execution_ids: ["{{ inputs.parent_run_id }}"]
     on-failure:
       continue: true
 
@@ -227,6 +278,15 @@ steps:
     with:
       conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
 
+  - name: append_workflow_execution
+    type: investigations.appendWorkflowExecutionId
+    if: "${{ inputs.parent_run_id != blank }}"
+    with:
+      conversationId: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+      workflowExecutionId: "{{ inputs.parent_run_id }}"
+    on-failure:
+      continue: true
+
   # Always-on journal. `trigger_mode: never` (elastic/kibana#290223) persists a
   # user_message without waking the Investigation agent. A user round or
   # `ai.agent` against this conversation still would. A failed note must not
@@ -238,8 +298,11 @@ steps:
       inputs:
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: >-
-          Review started for "{{ inputs.title }}".
-          {{ inputs.alert_ids | default: consts.no_alert_ids | size }} correlated detection alert(s).
+          Review started for
+          "{{ steps.resolve_display_text.output.data[0].title | default: inputs.title }}".
+          {% if steps.resolve_display_text.output.data[0].title == blank %}Could not read the
+          discovery's display text, so names and values below are shown anonymized.
+          {% endif %}{{ inputs.alert_ids | default: consts.no_alert_ids | size }} correlated detection alert(s).
           Autonomy: {{ inputs.autonomy | default: consts.default_autonomy }}.
           Parent run: {{ inputs.parent_run_id }}.
           This execution: {{ execution.id }}.
@@ -335,6 +398,78 @@ steps:
           Attached the Attack Discovery. Attempted attachment of
           {{ inputs.alert_ids | default: consts.no_alert_ids | size }} correlated detection
           alert(s); see the attachment list for the batches that landed.
+    on-failure:
+      continue: true
+
+  # Impact: the hosts and users this attack touched, recorded on the Investigation
+  # with `investigations.attachImpact`.
+  #
+  # Impact requires no agent, and no inference; the correlated alerts are the only
+  # source.
+  #
+  # Impact is not required for the review. Nothing below reads it, the FP/TP analysis loads
+  # its own entities, and a review that records no impact is still a complete review. So
+  # every impact related step continues on failure, and is skipped rather than failed when
+  # the step before it left it nothing to work with. The outcome is journaled either way.
+  #
+  # `security.getAlertEntities` derives every id with the Entity Store's own identity
+  # rules, the same way the Attack Discovery flyout resolves a badge to an entity, so
+  # it needs no Entity Store in the space and does NOT depend on detection having stamped
+  # `kibana.alert.entity.id`.
+  - name: collect_impact_entities
+    type: security.getAlertEntities
+    if: "${{ inputs.alert_ids != blank }}"
+    timeout: "60s"
+    with:
+      alert_ids: "${{ inputs.alert_ids }}"
+      max_entities: "${{ consts.impact_entity_cap }}"
+    on-failure:
+      continue: true
+
+  # Merged by id onto whatever impact the Investigation already carries, so a
+  # re-review of the same attack rewrites the same entities rather than adding a
+  # second set.
+  #
+  # Besides the impact record, this puts one `investigation_impact` attachment on the
+  # Investigation.
+  - name: attach_impact
+    type: investigations.attachImpact
+    if: "${{ steps.collect_impact_entities.output.entities != blank }}"
+    with:
+      conversationId: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+      entities: "${{ steps.collect_impact_entities.output.entities }}"
+    on-failure:
+      continue: true
+
+  # Says whether impact was recorded, or why it was not recorded.
+  #
+  # A failed attach is described by its error type, never its message: an internal
+  # failure's message would land in the Investigation, where every later agent round
+  # reads it as user input. The execution history keeps the message.
+  - name: journal_impact_recorded
+    type: workflow.execute
+    with:
+      workflow-id: "{{ consts.journal_note }}"
+      inputs:
+        conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+        message: >-
+          {% if steps.attach_impact.output.entities != blank %}Recorded impact:
+          {{ steps.collect_impact_entities.output.entities | size }} host(s) and user(s){% if
+          steps.collect_impact_entities.output.truncated == true %} (the most alerted of
+          {{ steps.collect_impact_entities.output.total }}){% endif %}.{% elsif
+          steps.attach_impact.error != blank %}Could not record impact{% case
+          steps.attach_impact.error.type %}{% when 'PermissionError' %}: the review's
+          principal lacks the Manage investigations privilege.{% when 'NotFoundError'
+          %}: the review's principal does not own this Investigation.{% when
+          'ValidationError' %}: it was rejected as invalid (an Investigation's impact
+          holds at most 100 hosts and users).{% when 'ConflictError' %}: another writer
+          updated it at the same time. Re-running the review retries it.{% else %}. See
+          review execution {{ execution.id }}.{% endcase %}{% elsif
+          steps.collect_impact_entities.error != blank %}Could not read the correlated
+          alerts' hosts and users, so no impact was recorded. See review execution
+          {{ execution.id }}.{% elsif inputs.alert_ids == blank %}No impact recorded: the
+          review was given no correlated alerts.{% else %}No impact recorded: the
+          {{ inputs.alert_ids | size }} correlated alert(s) name no host or user.{% endif %}
     on-failure:
       continue: true
 
@@ -690,8 +825,12 @@ steps:
       # `escalate` above is what restricts this to true_positive and inconclusive, so
       # autonomy is the only axis left to test.
       auto_approve: "${{ steps.resolve_context.output.autonomy == 'supervised' }}"
+      # Rendered as plain markdown, so the discovery text comes from
+      # `resolve_display_text`: field values as inline code, original values
+      # restored. The summary is truncated so the whole comment stays under the
+      # proposal's 8192-character bound, with room for the title and the text below.
       comment: >-
-        ## {{ inputs.title }}
+        ## {{ steps.resolve_display_text.output.data[0].title | default: inputs.title }}
 
 
         FP/TP analysis classified this attack as
@@ -699,7 +838,7 @@ steps:
         {{ inputs.alert_ids | default: consts.no_alert_ids | size }} detection alert(s).
 
 
-        {{ inputs.summary_markdown }}
+        {{ steps.resolve_display_text.output.data[0].summary_markdown | default: inputs.summary_markdown | truncate: 6000 }}
 
 
         **Approve** to **run a deep forensics investigation**: Forensics Watch picks the
@@ -720,9 +859,13 @@ steps:
     type: workflow.execute
     if: "${{ steps.resolve_escalation.output.escalate == true }}"
     with:
-      workflow-id: system-create-proposal
+      workflow-id: system-create-alertzero-proposal
       inputs:
         conversationId: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+        # The attack's own name, which `resolve_escalation` already heads the
+        # comment with. Truncated because this trigger allows 1024 and the
+        # proposal step rejects anything over 256.
+        title: "{{ steps.resolve_display_text.output.data[0].title | default: inputs.title | truncate: 256, '' }}"
         comment: "{{ steps.resolve_escalation.output.comment }}"
         actionWorkflowId: "{{ consts.handoff_to_forensics_action }}"
         actionInput: "${{ steps.resolve_escalation.output.action_input }}"
@@ -901,7 +1044,7 @@ steps:
     type: workflow.output
     status: completed
     with:
-      title: "{{ inputs.title }}"
+      title: "{{ steps.resolve_display_text.output.data[0].title | default: inputs.title }}"
       verdict: "{{ steps.resolve_analysis.output.verdict }}"
       attack_discovery_id: "{{ inputs.attack_discovery_id }}"
       investigation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"

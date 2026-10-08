@@ -6,6 +6,7 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import type { AvailabilityConfig } from '@kbn/agent-builder-server/availability';
 import {
   ACTION_POLICY_MANAGEMENT_SKILL_ID,
   ALERTING_TOOL_IDS,
@@ -13,7 +14,6 @@ import {
 } from '@kbn/alerting-v2-constants';
 import { manageActionPolicyTool } from '../tools/manage_action_policy';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
-import { alertingV2ExperimentalAvailability } from './alerting_v2_experimental_availability';
 import {
   generateActionPolicyOperationsDoc,
   generateActionPolicyWorkflowPayloadDoc,
@@ -27,7 +27,11 @@ import {
   generateMultiRuleActionPolicyDoc,
 } from './schema_to_skill_docs';
 
-export const createActionPolicyManagementSkill = (deps: ManageActionPolicyToolDeps) =>
+type ActionPolicyManagementSkillDeps = ManageActionPolicyToolDeps & {
+  availability: AvailabilityConfig;
+};
+
+export const createActionPolicyManagementSkill = (deps: ActionPolicyManagementSkillDeps) =>
   defineSkillType({
     id: ACTION_POLICY_MANAGEMENT_SKILL_ID,
     name: ACTION_POLICY_MANAGEMENT_SKILL_ID,
@@ -36,7 +40,7 @@ export const createActionPolicyManagementSkill = (deps: ManageActionPolicyToolDe
       'Compose, discover, and modify Alerting V2 action policies within a conversation. Use when the user wants to set up, change, or inspect how alert notifications are matched, grouped, throttled, and dispatched to workflows ("notify me when this rule fires", "set up email notifications for my alert", "create a notification policy", "change my alert to page via PagerDuty", "list my action policies"). Covers workflow destinations, KQL matchers, grouping, and throttling. For composing or editing the underlying alert rules themselves, load the rule-management skill.',
     experimental: true,
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
-    availability: alertingV2ExperimentalAvailability,
+    availability: deps.availability,
     referencedContent: [
       {
         name: 'action-policy-matchers',
@@ -102,7 +106,7 @@ Do **not** use this skill for:
 
 ## Action Policies
 
-An action policy is a **space-scoped saved object** that controls how alert episodes are matched, grouped, throttled, and dispatched to workflow destinations. They are not embedded in rules: one policy can match episodes from many rules.
+An action policy is a **space-scoped saved object** that controls how alerts are matched, grouped, throttled, and dispatched to workflow destinations. They are not embedded in rules: one policy can match alerts from many rules.
 
 ---
 
@@ -126,7 +130,7 @@ For a new policy, start with \`set_metadata\` (name required), then \`set_destin
 
 For an existing policy, pass the \`actionPolicyAttachmentId\` and only include the operations for the requested changes.
 
-See the [action-policy-matchers reference](./references/action-policy-matchers.md) when choosing matcher fields. To scope a policy to one rule, use a shared link tag on both the rule and \`matcher.tags\` — the \`matcher\` field in the operations table below shows the shape but does not expand its \`tags\`/\`expression\` sub-fields; consult the matchers reference for the full API. For whether to scope to one rule or many, consult [single-rule action policies](./references/action-policy-single-rule.md) or [multi-rule action policies](./references/action-policy-multi-rule.md).
+See the [action-policy-matchers reference](./references/action-policy-matchers.md) when choosing matcher fields. To scope a policy to one rule, use a shared routing tag on both the rule's \`routing_tags\` and \`matcher.tags\` — the \`matcher\` field in the operations table below shows the shape but does not expand its \`tags\`/\`expression\` sub-fields; consult the matchers reference for the full API. For whether to scope to one rule or many, consult [single-rule action policies](./references/action-policy-single-rule.md) or [multi-rule action policies](./references/action-policy-multi-rule.md).
 
 ${generateActionPolicyOperationsDoc()}
 
@@ -210,16 +214,16 @@ After creating the defaults, briefly mention:
 ## When to Load References
 
 ### Single-rule Action Policies
-When notifying on one specific rule (link via a shared tag on both the rule and \`matcher.tags\`), consult the [action-policy-single-rule reference](./references/action-policy-single-rule.md).
+When notifying on one specific rule (link via a shared routing tag on both the rule's \`routing_tags\` and \`matcher.tags\`), consult the [action-policy-single-rule reference](./references/action-policy-single-rule.md).
 
 ### Multi-rule Action Policies
 When the user wants one policy across several rules, a catch-all, or routing by tag/severity, consult the [action-policy-multi-rule reference](./references/action-policy-multi-rule.md).
 
 ### Matchers
-When the user asks how to match episodes, or which KQL fields are available, consult the [action-policy-matchers reference](./references/action-policy-matchers.md).
+When the user asks how to match alerts, or which KQL fields are available, consult the [action-policy-matchers reference](./references/action-policy-matchers.md).
 
 ### Grouping Modes
-When the user asks how episodes are grouped (per episode, all together, by field), consult the [action-policy-grouping-modes reference](./references/action-policy-grouping-modes.md).
+When the user asks how alerts are grouped (\`per_alert\`, all together, by field), consult the [action-policy-grouping-modes reference](./references/action-policy-grouping-modes.md).
 
 ### Throttle Strategies
 When the user asks how often notifications fire, or to change throttle strategy, consult the [action-policy-throttle-strategies reference](./references/action-policy-throttle-strategies.md).
@@ -234,6 +238,6 @@ When the user asks how destinations relate to workflows or connectors, consult t
 When the user asks how a notification gets from a rule firing to email/Slack, consult the [dispatch-flow reference](./references/dispatch-flow.md).
 
 ### Workflow Dispatch Payload
-When choosing Liquid variables for a notification workflow, including query-specific \`ep.data.*\` fields, consult the [workflow-dispatch-payload reference](./references/workflow-dispatch-payload.md).`,
+When choosing Liquid variables for a notification workflow, including query-specific \`alert.data.*\` fields, consult the [workflow-dispatch-payload reference](./references/workflow-dispatch-payload.md).`,
     getInlineTools: () => [manageActionPolicyTool(deps)],
   });

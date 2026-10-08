@@ -17,6 +17,10 @@ import {
   type CustomContentContextAttachmentData,
 } from '../../common/panel_context_attachment';
 import { readPanelContextData } from '../../common/read_panel_context_data';
+import {
+  CUSTOM_CONTENT_UPDATED_UI_EVENT,
+  type CustomContentUpdatedUiEventData,
+} from '../../common/ui_events';
 
 const updateCustomContentSchema = customContentPanelUpdateSchema;
 
@@ -35,7 +39,7 @@ const GENERATE_DASHBOARD_TOOL_ID = 'platform.dashboard.generate_dashboard';
  * itself it invents remediations like asking the user to click the panel, which attaches nothing.
  */
 const NOT_ATTACHED_REMEDIATION =
-  `If this panel is on the dashboard attached to this conversation, do not ask the user for anything — edit it with \`${GENERATE_DASHBOARD_TOOL_ID}\` using an \`edit_panels\` operation with \`source: "config"\`, \`type: "custom_content"\`, and the panel's \`panelId\` (read the dashboard attachment to find it; for a dashboard panel the panelId is the same value as embeddable_id). ` +
+  `If this panel is on the dashboard attached to this conversation, do not ask the user for anything — edit it with \`${GENERATE_DASHBOARD_TOOL_ID}\` using an \`edit_panels\` operation with \`source: "request"\`, \`renderer: "custom_content"\`, and the panel's \`panelId\` (read the dashboard attachment to find it; for a dashboard panel the panelId is the same value as embeddable_id). ` +
   'Only if no dashboard is attached, ask the user to open that panel\'s context menu, choose Edit, then "Refine with chat". Never suggest clicking the panel — that attaches nothing.';
 
 export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
@@ -65,7 +69,7 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
   schema: updateCustomContentSchema,
   handler: async (
     { embeddable_id, prompt, esqlQuery },
-    { attachments, logger, esClient, modelProvider }
+    { attachments, events, logger, esClient, modelProvider }
   ) => {
     const panelAttachments = attachments
       .getAll()
@@ -156,6 +160,13 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
       { data: newData },
       ATTACHMENT_REF_ACTOR.agent
     );
+
+    if (updated) {
+      events.sendUiEvent<typeof CUSTOM_CONTENT_UPDATED_UI_EVENT, CustomContentUpdatedUiEventData>(
+        CUSTOM_CONTENT_UPDATED_UI_EVENT,
+        { attachmentId: contextAttachment.id, data: newData }
+      );
+    }
 
     return {
       results: [

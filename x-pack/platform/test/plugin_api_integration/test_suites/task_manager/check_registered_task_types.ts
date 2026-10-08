@@ -230,6 +230,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:reassign_agents_to_version_specific_policies',
         'fleet:reindex_integration_knowledge',
         'fleet:request_diagnostics:retry',
+        'fleet:restart_action:retry',
         'fleet:rollback_action:retry',
         'fleet:setup',
         'fleet:setup:upgrade_managed_package_policies',

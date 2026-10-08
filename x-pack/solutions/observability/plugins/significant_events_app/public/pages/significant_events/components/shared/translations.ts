@@ -139,17 +139,45 @@ export const MODEL_SELECTION_PANEL_TITLE = i18n.translate(
   }
 );
 
-export const MODEL_SETTINGS_LABEL = i18n.translate(
-  'xpack.significantEventsApp.streamsView.modelSettingsLabel',
-  {
-    defaultMessage: 'Model settings',
-  }
-);
-
 export const DEFAULT_MODEL_BADGE_LABEL = i18n.translate(
   'xpack.significantEventsApp.streamsView.defaultModelBadgeLabel',
   {
     defaultMessage: 'Default',
+  }
+);
+
+export const MISSING_DEFAULT_MODEL_LABEL = i18n.translate(
+  'xpack.significantEventsApp.streamsView.missingDefaultModelLabel',
+  {
+    defaultMessage: 'Default model unavailable',
+  }
+);
+
+export const MISSING_SELECTED_MODEL_LABEL = i18n.translate(
+  'xpack.significantEventsApp.streamsView.missingSelectedModelLabel',
+  {
+    defaultMessage: 'Selected model unavailable',
+  }
+);
+
+export const SELECT_MODEL_LABEL = i18n.translate(
+  'xpack.significantEventsApp.streamsView.selectModelLabel',
+  {
+    defaultMessage: 'Select a model',
+  }
+);
+
+export const CONFIGURED_DEFAULT_MODEL_CALLOUT_TITLE = i18n.translate(
+  'xpack.significantEventsApp.streamsView.configuredDefaultModelCalloutTitle',
+  {
+    defaultMessage: 'Configured default model only',
+  }
+);
+
+export const CONFIGURED_DEFAULT_MODEL_CALLOUT_DESCRIPTION = i18n.translate(
+  'xpack.significantEventsApp.streamsView.configuredDefaultModelCalloutDescription',
+  {
+    defaultMessage: 'Generation succeeds only with the configured default model.',
   }
 );
 
@@ -205,13 +233,10 @@ export const changeTypeLabel = (type?: string): string =>
   (type ? CHANGE_TYPE_LABELS[type] : undefined) ?? type ?? '-';
 
 export const SIGNIFICANT_EVENT_STATUS_LABELS: Record<SignificantEventStatus, string> = {
-  open: i18n.translate('xpack.significantEventsApp.significantEvent.status.open', {
-    defaultMessage: 'Open',
+  active: i18n.translate('xpack.significantEventsApp.significantEvent.status.active', {
+    defaultMessage: 'Active',
   }),
-  dismissed: i18n.translate('xpack.significantEventsApp.significantEvent.status.dismissed', {
-    defaultMessage: 'Dismissed',
-  }),
-  closed: i18n.translate('xpack.significantEventsApp.significantEvent.status.closed', {
-    defaultMessage: 'Closed',
+  inactive: i18n.translate('xpack.significantEventsApp.significantEvent.status.inactive', {
+    defaultMessage: 'Inactive',
   }),
 };

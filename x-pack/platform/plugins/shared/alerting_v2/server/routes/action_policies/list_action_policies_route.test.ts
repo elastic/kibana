@@ -17,16 +17,16 @@ describe('toFindActionPoliciesArgs', () => {
       toFindActionPoliciesArgs({
         page: 3,
         per_page: 10,
+        filter: 'enabled: true',
         search: 'slack',
-        enabled: true,
         sort_field: 'name',
         sort_order: 'asc',
       })
     ).toEqual({
       page: 3,
       perPage: 10,
+      filter: 'enabled: true',
       search: 'slack',
-      enabled: true,
       sortField: 'name',
       sortOrder: 'asc',
     });

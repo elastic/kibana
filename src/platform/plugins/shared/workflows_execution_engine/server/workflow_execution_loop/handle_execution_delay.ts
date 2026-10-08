@@ -11,6 +11,7 @@ import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { isEnterStepTimeoutZone } from '@kbn/workflows/graph';
+import { ResumeTaskSchedulingError } from './resume_task_scheduling_error';
 import type { WorkflowExecutionLoopParams } from './types';
 import { getResolvedStepTimeout } from '../step/timeout_zone_step/step_level/enter_step_timeout_zone_node_impl';
 import {
@@ -290,11 +291,15 @@ export async function handleExecutionDelay(
   params.workflowExecutionState.updateWorkflowExecution({
     status: ExecutionStatus.WAITING,
   });
-  await params.workflowTaskManager.scheduleResumeTask({
-    workflowExecution: workflowExecution as EsWorkflowExecution,
-    resumeAt,
-    fakeRequest: params.fakeRequest,
-  });
+  try {
+    await params.workflowTaskManager.scheduleResumeTask({
+      workflowExecution: workflowExecution as EsWorkflowExecution,
+      resumeAt,
+      fakeRequest: params.fakeRequest,
+    });
+  } catch (error) {
+    throw new ResumeTaskSchedulingError(error);
+  }
   // Execution loop should stop here so the workflow can be resumed later
   params.workflowExecutionCursor.stop();
 }

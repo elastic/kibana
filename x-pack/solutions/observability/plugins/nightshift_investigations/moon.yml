@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/nightshift-investigations-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/nightshift-context-and-research-team'
+  defaultOwner: '@elastic/nightshift'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/nightshift-investigations-plugin'
   description: Moon project for @kbn/nightshift-investigations-plugin
   channel: ''
-  owner: '@elastic/nightshift-context-and-research-team'
+  owner: '@elastic/nightshift'
   sourceRoot: x-pack/solutions/observability/plugins/nightshift_investigations
 dependsOn:
   - '@kbn/share-plugin'
@@ -30,20 +30,24 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/std'
   - '@kbn/workflows'
+  - '@kbn/workflows-execution-engine'
   - '@kbn/workflows-extensions'
   - '@kbn/workflows-management-plugin'
   - '@kbn/zod'
   - '@kbn/scout-oblt'
   - '@kbn/agent-builder-plugin'
   - '@kbn/agent-builder-common'
+  - '@kbn/core-http-server-mocks'
   - '@kbn/logging-mocks'
   - '@kbn/significant-events-schema'
+  - '@kbn/nightshift-ai'
   - '@kbn/nightshift-shared'
   - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-genai-utils'
   - '@kbn/i18n'
   - '@kbn/core-saved-objects-server'
+  - '@kbn/core-security-common'
   - '@kbn/es-query'
-  - '@kbn/search-inference-endpoints'
   - '@kbn/task-manager-plugin'
   - '@kbn/rule-data-utils'
   - '@kbn/rule-registry-plugin'
@@ -56,6 +60,11 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/utility-types'
   - '@kbn/es-errors'
+  - '@kbn/test'
+  - '@kbn/tooling-log'
+  - '@kbn/occ'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/security-plugin'
 tags:
   - plugin
   - prod
@@ -67,6 +76,7 @@ fileGroups:
     - common/**/*
     - server/**/*
     - public/**/*
+    - integration_tests/**/*
     - test/scout*/**/*
     - '!target/**/*'
   jest-config:

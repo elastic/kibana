@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
 import classnames from 'classnames';
 import throttle from 'lodash/throttle';
@@ -34,6 +34,7 @@ import {
   useWorkflowEventsOnDecorations,
   useWorkflowIdDecorations,
 } from './decorations';
+import { useServiceAccountDecorations } from './decorations/use_service_account_decorations';
 import { EditorSettingsPopover } from './editor_settings_popover';
 import type { ExtraAction } from './extra_actions_bar';
 import { ExtraActionsBar } from './extra_actions_bar';
@@ -41,6 +42,7 @@ import { useAgentBuilderIntegration } from './hooks/use_agent_builder_integratio
 import { useFixWithAi } from './hooks/use_fix_with_ai';
 import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
 import { KeyboardShortcutsPopover } from './keyboard_shortcuts_popover';
+import { ServiceAccountEditorWidgets } from './service_accounts/service_account_editor_widgets';
 import { StepActions } from './step_actions';
 import { WorkflowStepMinimap } from './workflow_step_minimap';
 import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
@@ -67,6 +69,7 @@ import {
   selectStepExecutions,
   selectWorkflow,
   selectWorkflowDefinition,
+  selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
   HIGHLIGHTED_STEP_TRIGGER,
@@ -83,7 +86,7 @@ import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_w
 import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/use_yaml_validation';
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useWorkflowEditorReadOnly } from '../../../hooks/use_workflow_editor_read_only';
+import { useWorkflowEditorReadOnlyReason } from '../../../hooks/use_workflow_editor_read_only';
 import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
 import { triggerSchemas } from '../../../trigger_schemas';
@@ -133,9 +136,9 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
     filterGraceful: true, // Better filtering
     localityBonus: true, // Prioritize matches near cursor
   },
-  wordBasedSuggestions: false,
+  wordBasedSuggestions: 'off',
   hover: {
-    enabled: true,
+    enabled: 'on',
     delay: 300,
     sticky: true,
     above: false, // Force hover below cursor to avoid clipping
@@ -176,6 +179,16 @@ export interface WorkflowYAMLEditorProps {
    * control bar (e.g. WorkflowDetailBottomBar) already owns those buttons.
    */
   hideEditorTools?: boolean;
+  /**
+   * Reports the height (px) of the validation panel docked below the editor, so an overlay
+   * floating over the editor (e.g. WorkflowDetailBottomBar) can sit above it.
+   */
+  onValidationPanelHeightChange?: (height: number) => void;
+  /**
+   * Called when an agent proposal arrives while the user views a past
+   * execution. The proposal shows once the parent opens the Workflow tab.
+   */
+  onAgentProposalHeld?: () => void;
 }
 
 export const WorkflowYAMLEditor = ({
@@ -186,13 +199,15 @@ export const WorkflowYAMLEditor = ({
   openActionsRef,
   onToggleEditorMode,
   hideEditorTools = false,
+  onValidationPanelHeightChange,
+  onAgentProposalHeld,
 }: WorkflowYAMLEditorProps) => {
   const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
     WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
     false
   );
-  // The step minimap ships under the same Workflows experimental-features
-  // Advanced Setting as the graph visualization — use isVisualEditorEnabled directly.
+  // Currently gates only the step minimap (and the hidden Monaco scrollbar it replaces); the
+  // read-only graph view is GA. The setting is expected to gate the authoring graph view later.
   const { notifications, http } = useKibana().services;
   const euiThemeContext = useEuiTheme();
 
@@ -205,7 +220,8 @@ export const WorkflowYAMLEditor = ({
   const dispatch = useDispatch();
   const workflow = useSelector(selectWorkflow);
   const isExecutionYaml = useSelector(selectIsExecutionsTab);
-  const isReadOnlyYaml = useWorkflowEditorReadOnly();
+  const readOnlyReason = useWorkflowEditorReadOnlyReason();
+  const isReadOnlyYaml = readOnlyReason !== undefined;
   const isReadOnlyYamlRef = useRef(isReadOnlyYaml);
   isReadOnlyYamlRef.current = isReadOnlyYaml;
   const onChange = useCallback(
@@ -270,6 +286,12 @@ export const WorkflowYAMLEditor = ({
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const focusedStepInfoRef = useRef<StepInfo | undefined>(focusedStepInfo);
   focusedStepInfoRef.current = focusedStepInfo;
+  const [validationPanel, setValidationPanel] = useState<HTMLDivElement | null>(null);
+  const { height: validationPanelHeight } = useResizeObserver(validationPanel);
+  useEffect(() => {
+    onValidationPanelHeightChange?.(validationPanel ? validationPanelHeight : 0);
+  }, [onValidationPanelHeightChange, validationPanel, validationPanelHeight]);
+
   const [insertedStepRange, setInsertedStepRange] = useState<StepLineRange | null>(null);
 
   const highlightedStepId = useSelector(selectHighlightedStepId);
@@ -355,6 +377,8 @@ export const WorkflowYAMLEditor = ({
     dispatch(setHasYamlSchemaValidationErrors(hasErrors));
   }, [validationErrors, dispatch]);
 
+  const workflowTabYaml = useSelector(selectYamlString);
+
   // Agent Builder integration for AI-assisted editing
   const { isAgentBuilderAvailable, openAgentChat } = useAgentBuilderIntegration({
     editorRef,
@@ -362,6 +386,11 @@ export const WorkflowYAMLEditor = ({
     workflowId: workflow?.id,
     workflowName: getWorkflowName(workflow, workflowDefinition),
     validationErrors,
+    readOnlyReason,
+    // The store catches up with the URL tab one render later, so wait for both.
+    canApplyProposals: !isReadOnlyYaml && !isExecutionYaml,
+    onProposalDeferred: readOnlyReason === 'executions_tab' ? onAgentProposalHeld : undefined,
+    workflowTabYaml,
   });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
@@ -556,6 +585,7 @@ export const WorkflowYAMLEditor = ({
   }, [insertedStepRange]);
 
   // Decorations
+  useServiceAccountDecorations({ editor: editorRef.current, isEditorMounted });
   useTriggerTypeDecorations({
     editor: editorRef.current,
     yamlDocument: yamlDocument || null,
@@ -746,7 +776,7 @@ export const WorkflowYAMLEditor = ({
         shortcut: [isMac ? '⌘' : 'Ctrl', 'Shift', 'F'],
       },
     ];
-    if (isVisualEditorEnabled && onToggleEditorMode) {
+    if (onToggleEditorMode) {
       cmds.push({
         id: 'toggleEditorMode',
         label: i18n.translate('workflows.yamlEditor.commands.toggleEditorMode', {
@@ -759,7 +789,7 @@ export const WorkflowYAMLEditor = ({
       });
     }
     return cmds;
-  }, [isVisualEditorEnabled, onToggleEditorMode]);
+  }, [onToggleEditorMode]);
 
   const jumpToStepEntries: JumpToStepEntry[] = useMemo(() => {
     if (!workflowLookup) return [];
@@ -891,6 +921,7 @@ export const WorkflowYAMLEditor = ({
       ref={containerRef}
     >
       <GlobalWorkflowEditorStyles />
+      {isActive && <ServiceAccountEditorWidgets editor={mountedEditor} />}
       <ActionsMenuPopover
         closePopover={dismissActionsPopover}
         onActionSelected={onActionSelected}
@@ -916,7 +947,11 @@ export const WorkflowYAMLEditor = ({
       <div css={styles.editorAreaWrapper}>
         {/* Step minimap — experimental; hidden with the editor body in graph view. */}
         {isVisualEditorEnabled && isActive ? (
-          <div css={styles.minimapContainer} ref={minimapContainerRef}>
+          <div
+            css={styles.minimapContainer}
+            ref={minimapContainerRef}
+            data-test-subj="workflowYamlEditorMinimapContainer"
+          >
             <WorkflowStepMinimap
               editor={mountedEditor}
               validationErrors={validationErrors}
@@ -945,7 +980,7 @@ export const WorkflowYAMLEditor = ({
         </div>
       </div>
       {isActive && (
-        <div css={styles.validationErrorsContainer}>
+        <div css={styles.validationErrorsContainer} ref={setValidationPanel}>
           <WorkflowYamlValidationAccordion
             isMounted={isEditorMounted}
             isLoading={isLoadingValidation}

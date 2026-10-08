@@ -11,6 +11,15 @@ import type { Setup } from './helpers';
 
 export const runSubqueriesValidationSuite = (setup: Setup) => {
   describe('Subqueries Validation', () => {
+    it.each([
+      'FROM (FROM index | FORK (LIMIT 1) (LIMIT 2) | FORK (LIMIT 3) (LIMIT 4))',
+      'FROM index | WHERE keywordField IN (FROM other_index | FORK (LIMIT 1) (LIMIT 2) | FORK (LIMIT 3) (LIMIT 4) | KEEP keywordField)',
+    ])('rejects multiple FORKs in the same pipeline: %s', async (query) => {
+      const { expectErrors } = await setup();
+
+      await expectErrors(query, ['[FORK] a query cannot have more than one FORK command.']);
+    });
+
     describe('FROM subqueries', () => {
       it('should validate commands inside subqueries', async () => {
         const { expectErrors } = await setup();
@@ -41,7 +50,7 @@ export const runSubqueriesValidationSuite = (setup: Setup) => {
         const { expectErrors } = await setup();
 
         await expectErrors('FROM index, (FROM other_index METADATA _invalidField)', [
-          'Metadata field "_invalidField" is not available. Available metadata fields are: [_version, _id, _index, _source, _ignored, _index_mode, _score]',
+          'Metadata field "_invalidField" is not available. Available metadata fields are: [_version, _id, _index, _source, _ignored, _index_mode, _score, _name, _class]',
         ]);
       });
 
@@ -58,9 +67,10 @@ export const runSubqueriesValidationSuite = (setup: Setup) => {
         const { expectErrors } = await setup();
 
         // A nonempty source ensures Elasticsearch does not skip RERANK validation.
+        // An empty inference_id is valid, so the query type error is the nested signal.
         await expectErrors(
-          'FROM index, (FROM other_index, (ROW keywordField = "text" | RERANK "query" ON keywordField WITH {}))',
-          ['"inference_id" parameter is required for RERANK.']
+          'FROM index, (FROM other_index, (ROW keywordField = "text" | RERANK 1 ON keywordField WITH {}))',
+          ['RERANK query must be of type text. Found integer']
         );
       });
 
@@ -69,9 +79,34 @@ export const runSubqueriesValidationSuite = (setup: Setup) => {
 
         await expectErrors('FROM (TS a_index | STATS col0 = AVG(AVG_OVER_TIME(doubleField)))', []);
       });
+
+      it('accepts a FORK inside a subquery and another FORK after it', async () => {
+        const { expectErrors } = await setup();
+
+        await expectErrors(
+          'FROM index, (FROM other_index | FORK (LIMIT 1) (LIMIT 2)) | FORK (LIMIT 3) (LIMIT 4)',
+          []
+        );
+      });
     });
 
     describe('WHERE IN subqueries', () => {
+      it('accepts a FORK in an IN subquery inside a FORK branch', async () => {
+        const { expectErrors } = await setup();
+
+        await expectErrors(
+          `FROM index
+          | FORK
+              (WHERE keywordField IN (
+                FROM other_index
+                | FORK (LIMIT 1) (LIMIT 2)
+                | KEEP keywordField
+              ))
+              (LIMIT 3)`,
+          []
+        );
+      });
+
       it('accepts a valid IN subquery with no errors', async () => {
         const { expectErrors } = await setup();
 

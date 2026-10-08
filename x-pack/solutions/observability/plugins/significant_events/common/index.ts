@@ -8,10 +8,7 @@
 export { QUERY_STATUSES } from './queries';
 export type { QueryStatus } from './queries';
 
-export {
-  SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG,
-  STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG,
-} from './feature_flags';
+export { SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG } from './feature_flags';
 
 export {
   SIGNIFICANT_EVENTS_APP_ROUTE,
@@ -70,6 +67,7 @@ export type {
 } from './slack_app/types';
 
 export type {
+  SignificantEventsMaintenanceDeletedCounts,
   SignificantEventsMaintenanceFailure,
   SignificantEventsMaintenanceSummary,
   SignificantEventsMaintenanceStatus,
@@ -81,6 +79,7 @@ export {
   isMaintenanceState,
   stateBlocksNewActivity,
 } from './maintenance/state_machine';
+export { MAINTENANCE_FEATURE_FLAG_ACTOR } from './maintenance/actors';
 export type { SignificantEventsMaintenanceState } from './maintenance/state_machine';
 
 export { DEFAULT_RUN_LIMITS, MAX_RUN_LIMIT, MIN_RUN_LIMIT, RUN_QUOTA_GROUPS } from './run_quotas';

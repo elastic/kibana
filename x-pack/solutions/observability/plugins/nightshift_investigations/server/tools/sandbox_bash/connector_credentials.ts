@@ -8,12 +8,10 @@
 import type { Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { SandboxCallContext } from './tool_utils';
+import { createOutputRedactor, MIN_REDACTABLE_SECRET_LENGTH } from './output_redactor';
 
 /** Env var prefix under which connector material is exposed to a single sandbox command. */
 export const CONNECTOR_ENV_PREFIX = 'CONNECTOR_';
-
-/** Minimum length for a secret value to be redacted from command output. */
-const MIN_REDACTABLE_SECRET_LENGTH = 6;
 
 export interface ConnectorCredentialEnv {
   /** Environment variables to inject into the command. */
@@ -44,6 +42,45 @@ const toEnvValue = (value: unknown): string | undefined => {
   if (typeof value === 'string') return value;
   if (typeof value === 'number' || typeof value === 'boolean') return String(value);
   return JSON.stringify(value);
+};
+
+/** Reads Authorization from a header record or from the JSON string preconfigured connectors store. */
+const readAuthorizationHeader = (secretHeaders: unknown): string | undefined => {
+  let record = secretHeaders;
+  if (typeof record === 'string') {
+    try {
+      record = JSON.parse(record);
+    } catch {
+      return undefined;
+    }
+  }
+  if (!record || typeof record !== 'object' || Array.isArray(record)) return undefined;
+
+  const authorization = Object.entries(record).find(
+    ([key]) => key.toLowerCase() === 'authorization'
+  )?.[1];
+  return typeof authorization === 'string' ? authorization : undefined;
+};
+
+/**
+ * Secret values derived from a connector's raw `secrets`, beyond its own top-level leaves — e.g.
+ * the bare API key `buildConnectorEnv` extracts out of an `Authorization: ApiKey …` header and
+ * injects as `CONNECTOR_SECRET_PASSWORD`. Anything derived here must also reach every redactor
+ * that guards this connector's secrets, not just the one covering a single command's own output:
+ * a bare derived value never appears verbatim in the raw `secrets` object, so a redactor built
+ * only from `collectSecretLeaves`-style traversal of `secrets` would miss it.
+ */
+export const deriveConnectorCredentialSecretValues = (
+  secrets: Record<string, unknown>
+): string[] => {
+  const secretValues: string[] = [];
+  // HTTP ES connectors store `Authorization: ApiKey …` in secretHeaders, not `password`.
+  const authorization = readAuthorizationHeader(secrets.secretHeaders);
+  if (authorization?.startsWith('ApiKey ')) {
+    const apiKey = authorization.slice('ApiKey '.length);
+    if (apiKey.length >= MIN_REDACTABLE_SECRET_LENGTH) secretValues.push(apiKey);
+  }
+  return secretValues;
 };
 
 /**
@@ -81,9 +118,9 @@ export const buildConnectorEnv = ({
   return { env, secretValues };
 };
 
-/** Replaces every occurrence of an injected secret value in command output. */
+/** Redacts injected secret values (and their common encodings) from command output. */
 export const redactSecrets = (text: string, secretValues: readonly string[]): string =>
-  secretValues.reduce((acc, secret) => acc.split(secret).join('[REDACTED]'), text);
+  createOutputRedactor(secretValues).redact(text);
 
 /**
  * Creates the resolver that turns a connector id into a one-command credential environment.
