@@ -208,6 +208,23 @@ describe('createCustomMetricsAggregations', () => {
       );
     });
 
+    it('applies the filter to both rate windows without changing the rate buckets path', () => {
+      const aggregations = createCustomMetricsAggregations(
+        'aggregatedValue',
+        [{ name: 'A', aggType: Aggregators.RATE, field: 'metric', filter: KQL_FILTER }],
+        { start: 0, end: 120_000 },
+        '@timestamp'
+      ) as Record<string, any>;
+
+      expect(aggregations.aggregatedValue_A_first_bucket.filter.bool.must).toContainEqual(
+        filterQuery
+      );
+      expect(aggregations.aggregatedValue_A_second_bucket.filter.bool.must).toContainEqual(
+        filterQuery
+      );
+      expect(getBucketsPath(aggregations)).toEqual({ A: 'aggregatedValue_A' });
+    });
+
     it('throws when the filter is not valid KQL', () => {
       expect(() =>
         createCustomMetricsAggregations(

@@ -88,7 +88,13 @@ export const createCustomMetricsAggregations = (
       bucketsPath[metric.name] = key;
       return {
         ...acc,
-        ...createRateAggsBuckets(currentTimeFrame, key, timeFieldName, metric.field || ''),
+        ...createRateAggsBuckets(
+          currentTimeFrame,
+          key,
+          timeFieldName,
+          metric.field || '',
+          filterQuery
+        ),
         ...createRateAggsBucketScript(currentTimeFrame, key),
       };
     }
