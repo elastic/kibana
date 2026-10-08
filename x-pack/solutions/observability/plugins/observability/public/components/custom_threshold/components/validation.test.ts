@@ -111,14 +111,12 @@ describe('Metric Threshold Validation', () => {
       }
     );
 
-    it.each([
-      Aggregators.COUNT,
-      Aggregators.AVERAGE,
-      Aggregators.RATE,
-      Aggregators.LAST_VALUE,
-    ])('does not report an error for a valid filter on %s', (aggType) => {
-      expect(validate({ aggType, field: 'metric', filter: 'status: 500' })).toBeUndefined();
-    });
+    it.each([Aggregators.COUNT, Aggregators.AVERAGE, Aggregators.RATE, Aggregators.LAST_VALUE])(
+      'does not report an error for a valid filter on %s',
+      (aggType) => {
+        expect(validate({ aggType, field: 'metric', filter: 'status: 500' })).toBeUndefined();
+      }
+    );
   });
 
   describe('warning threshold', () => {

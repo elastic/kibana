@@ -203,9 +203,7 @@ describe('createCustomMetricsAggregations', () => {
         A: 'aggregatedValue_A>filtered_metric',
         B: 'aggregatedValue_B',
       });
-      expect(aggregations.aggregatedValue.bucket_script.script.source).toBe(
-        'params.A / params.B'
-      );
+      expect(aggregations.aggregatedValue.bucket_script.script.source).toBe('params.A / params.B');
     });
 
     it('applies the filter to both rate windows without changing the rate buckets path', () => {
