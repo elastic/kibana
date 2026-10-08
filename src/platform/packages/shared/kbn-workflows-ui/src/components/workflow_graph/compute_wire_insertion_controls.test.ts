@@ -200,13 +200,15 @@ describe('computeWireInsertionControls', () => {
       insertionPoints: forkInsertion,
       direction: 'TB',
     });
-    // Fork controls are now terminal-kind chips below the bus label.
+    // Fork branch-head chips sit below the bus label. They connect a real
+    // fork to a real branch head, so they're wire-kind (hover-only), not
+    // always-visible terminals.
     const thenCtrl = controls.find((c) => c.id === 'terminal:fork:gate-then');
     const elseCtrl = controls.find((c) => c.id === 'terminal:fork:gate-else');
     expect(thenCtrl).toBeDefined();
     expect(elseCtrl).toBeDefined();
-    expect(thenCtrl!.kind).toBe('terminal');
-    expect(elseCtrl!.kind).toBe('terminal');
+    expect(thenCtrl!.kind).toBe('wire');
+    expect(elseCtrl!.kind).toBe('wire');
     // gate exit = center-bottom of gate: x=200, y=48.
     // Chip Y = gateExitY + FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET.
     // "+" centre Y = chipY + 36 (CHIP_PLUS_GAP = chip_half_incl_border + button_half + 14px gap).

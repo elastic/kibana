@@ -55,13 +55,18 @@ export interface WireSegmentPoint {
 }
 
 /**
- * One Add-step insertion control. Mid-wire centres use the segment midpoint;
- * terminals sit at the stub tip (end of the half-height arrow).
+ * One Add-step insertion control. `kind` drives visibility, not geometry:
+ * `'wire'` sits on an edge between two real nodes (fork head, branch tail, or
+ * a plain sequential edge) and stays hidden until hover/focus; `'terminal'`
+ * sits on a genuinely dangling stub — a step/branch exit with nothing wired
+ * after it yet — and stays always visible. A `'wire'` control's centre is
+ * usually the segment midpoint, except fork-head/branch-tail controls, which
+ * sit near the branch chip or stub tip like a terminal would.
  */
 export interface WireInsertionControl {
   readonly id: string;
   readonly kind: WireControlKind;
-  /** Control centre in flow-space (midpoint for wires; stub tip for terminals). */
+  /** Control centre in flow-space — see `kind` for how it's placed. */
   readonly centre: WireSegmentPoint;
   /** Segment start (source exit) — for stub wire rendering on terminals. */
   readonly segmentStart: WireSegmentPoint;
@@ -342,7 +347,9 @@ export function computeWireInsertionControls(args: {
       const fork = !merge && isForkEdge(edge);
 
       if (fork) {
-        // Fork branch head "+" sits below the chip label (always visible, like a terminal).
+        // Fork branch head "+" sits below the chip label. It connects a real
+        // fork node to a real branch head, so it's a mid-wire control
+        // (hover-only), not a dangling terminal — kind: 'wire'.
         // Chip is at FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET below the source exit.
         const chipOffset = FORK_BUS_TRUNK + FORK_BUS_LABEL_OFFSET;
         // "+" centre must clear the chip AND the button itself with visible breathing room:
@@ -362,7 +369,7 @@ export function computeWireInsertionControls(args: {
         const chipBottomY = direction === 'LR' ? chipY : chipY + FORK_CHIP_HALF_HEIGHT;
         controls.push({
           id: `terminal:fork:${edge.id}`,
-          kind: 'terminal',
+          kind: 'wire',
           centre: plusPos,
           segmentStart: { x: chipX, y: chipBottomY },
           segmentEnd: plusPos,
@@ -382,10 +389,11 @@ export function computeWireInsertionControls(args: {
             triggerFanInBus.set(edge.target, { busPos, entry: end, insertContext });
           }
         } else if (insertContext.mode === 'after' || insertContext.mode === 'prepend-step') {
-          // Non-trigger fan-in: emit a branch-tail terminal just below the branch's
+          // Non-trigger fan-in: emit a branch-tail control just below the branch's
           // last step (the source of this merge edge). One per non-bypass fan-in edge —
           // bypass nodes have no insertion ports so they're filtered out naturally.
-          // Always visible (kind: 'terminal'). Context: `after <leaf step>`.
+          // It connects a real step to the real rejoin, so it's mid-wire
+          // (hover-only), not a dangling terminal — kind: 'wire'. Context: `after <leaf step>`.
           //
           // The stub length is clamped so the + button stays above the merge bus.
           // The bus is drawn MERGE_BUS_TRUNK before the join entry. When the branch is
@@ -403,7 +411,7 @@ export function computeWireInsertionControls(args: {
               : { x: start.x, y: start.y + stub };
           controls.push({
             id: `terminal:branch-tail:${edge.id}`,
-            kind: 'terminal',
+            kind: 'wire',
             centre: tip,
             segmentStart: start,
             segmentEnd: tip,
