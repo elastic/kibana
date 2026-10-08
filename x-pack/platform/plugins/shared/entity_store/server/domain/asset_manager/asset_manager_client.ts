@@ -337,6 +337,80 @@ export class AssetManagerClient {
     }
   }
 
+  /**
+   * Starts one extraction process without touching the other. `start()` is deliberately paired -
+   * it schedules both tasks and rolls both back on failure - so per-process control cannot reuse it.
+   *
+   * `priority` and `single` resolve to the same task id and the same status field, so starting
+   * `priority` also covers the single process.
+   */
+  public async startProcess(
+    request: KibanaRequest,
+    type: EntityType,
+    process: Exclude<ExtractionMode, 'single'>
+  ) {
+    const isNonPriority = process === EXTRACTION_MODE.nonPriority;
+    try {
+      const { frequency } = await this.getLogExtractionConfig(type, process);
+
+      await scheduleExtractEntityTask({
+        logger: this.logger,
+        taskManager: this.taskManager,
+        type,
+        frequency,
+        namespace: this.namespace,
+        request,
+        ...(isNonPriority ? { extractionMode: EXTRACTION_MODE.nonPriority } : {}),
+      });
+
+      await this.engineDescriptorClient.update(
+        type,
+        isNonPriority
+          ? { nonPriorityStatus: ENGINE_STATUS.STARTED, nonPriorityError: null }
+          : { status: ENGINE_STATUS.STARTED, error: null }
+      );
+    } catch (error) {
+      this.logger
+        .get(type)
+        .error(`Error starting ${process} extraction for type ${type}: ${getErrorMessage(error)}`);
+      await this.engineDescriptorClient.update(
+        type,
+        isNonPriority ? { nonPriorityStatus: ENGINE_STATUS.ERROR } : { status: ENGINE_STATUS.ERROR }
+      );
+      throw error;
+    }
+  }
+
+  /** Stops one extraction process without touching the other. Counterpart of `startProcess`. */
+  public async stopProcess(type: EntityType, process: Exclude<ExtractionMode, 'single'>) {
+    const isNonPriority = process === EXTRACTION_MODE.nonPriority;
+    try {
+      await stopExtractEntityTask({
+        taskManager: this.taskManager,
+        logger: this.logger,
+        type,
+        namespace: this.namespace,
+        extractionMode: process,
+      });
+
+      await this.engineDescriptorClient.update(
+        type,
+        isNonPriority
+          ? { nonPriorityStatus: ENGINE_STATUS.STOPPED }
+          : { status: ENGINE_STATUS.STOPPED }
+      );
+    } catch (error) {
+      this.logger
+        .get(type)
+        .error(`Error stopping ${process} extraction for type ${type}: ${getErrorMessage(error)}`);
+      await this.engineDescriptorClient.update(
+        type,
+        isNonPriority ? { nonPriorityStatus: ENGINE_STATUS.ERROR } : { status: ENGINE_STATUS.ERROR }
+      );
+      throw error;
+    }
+  }
+
   public async uninstall(type: EntityType) {
     try {
       const { engines } = await this.getStatus();

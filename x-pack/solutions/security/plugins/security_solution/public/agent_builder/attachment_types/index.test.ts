@@ -15,17 +15,7 @@ describe('registerAttachmentUiDefinitions', () => {
     addAttachmentType: mockAddAttachmentType,
   } as unknown as AttachmentServiceStartContract;
 
-  const resolveSecurityCanvasContext = jest.fn();
-  const getSpaceId = jest.fn().mockResolvedValue('default');
-  const mockData = { search: { search: jest.fn() } };
-
-  const register = () =>
-    registerAttachmentUiDefinitions({
-      attachments: mockAttachments,
-      resolveSecurityCanvasContext,
-      getSpaceId,
-      data: mockData as never,
-    });
+  const register = () => registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -72,22 +62,13 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(entityCall).toBeUndefined();
   });
 
-  it('registers a renderConversationDetailsContent for security.alert', () => {
-    register();
-
-    const alertCall = mockAddAttachmentType.mock.calls.find(
-      (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
-    );
-    expect(alertCall![1].renderConversationDetailsContent).toBeDefined();
-  });
-
-  it('registers a renderConversationDetailsContent for security.alerts', () => {
+  it('registers security.alerts with a label and icon only', () => {
     register();
 
     const alertsCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alerts
     );
     expect(alertsCall).toBeDefined();
-    expect(alertsCall![1].renderConversationDetailsContent).toBeDefined();
+    expect(alertsCall![1].renderConversationDetailsContent).toBeUndefined();
   });
 });

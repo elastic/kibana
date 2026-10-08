@@ -16,13 +16,14 @@ import {
   EuiSkeletonTitle,
   EuiText,
   EuiTitle,
-  type EuiThemeComputed,
+  euiShadowHover,
+  type UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Severity, SeverityCounts } from '@kbn/nightshift-investigations-plugin/common';
 import { getSeverityLabel, SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
-import { SEVERITY_DOT_COLOR } from '../common/severity';
+import { SEVERITY_TILE_ICON, SEVERITY_TILE_ICON_COLORS } from '../common/severity';
 
 /** A muted tier has no section to scroll to, so its tile reads as a figure rather than a control. */
 type SeverityTileState = 'muted' | 'interactive';
@@ -34,42 +35,88 @@ interface SeverityTileStateStyles {
   count?: SerializedStyles;
 }
 
+interface SeverityIconBoxStyles {
+  muted: SerializedStyles;
+  interactive: SerializedStyles;
+}
+
 /** Every visual difference between a muted and an interactive tile, in one place. */
 const getSeverityTileStyles = (
-  euiTheme: EuiThemeComputed
+  euiThemeContext: UseEuiTheme
 ): {
+  iconBox: Readonly<Record<Severity, SeverityIconBoxStyles>>;
+  iconGlyphRotateUp: SerializedStyles;
   label: SerializedStyles;
-  countSkeleton: SerializedStyles;
+  count: SerializedStyles;
   byState: Readonly<Record<SeverityTileState, SeverityTileStateStyles>>;
-} => ({
-  label: css`
-    font-weight: ${euiTheme.font.weight.medium};
-    margin-bottom: ${euiTheme.size.s};
-  `,
-  countSkeleton: css`
-    inline-size: ${euiTheme.size.xl};
-  `,
-  byState: {
-    muted: {
-      panelColor: 'subdued',
-      count: css`
-        color: ${euiTheme.colors.textSubdued};
-      `,
+} => {
+  const { euiTheme } = euiThemeContext;
+  const iconBoxBase = css`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: ${euiTheme.size.xxl};
+    height: ${euiTheme.size.xxl};
+    border-radius: ${euiTheme.border.radius.control};
+  `;
+
+  const iconBox = Object.fromEntries(
+    SEVERITY_OPTIONS.map((severity) => {
+      const tokens = SEVERITY_TILE_ICON_COLORS[severity];
+      return [
+        severity,
+        {
+          muted: css`
+            ${iconBoxBase}
+            background: ${euiTheme.colors.backgroundBaseSubdued};
+            color: ${euiTheme.colors.textDisabled};
+          `,
+          interactive: css`
+            ${iconBoxBase}
+            background: ${euiTheme.colors[tokens.background]};
+            color: ${euiTheme.colors[tokens.color]};
+          `,
+        },
+      ];
+    })
+  ) as Record<Severity, SeverityIconBoxStyles>;
+
+  return {
+    iconBox,
+    iconGlyphRotateUp: css`
+      transform: rotate(-90deg);
+    `,
+    // Match EuiButtonEmpty: medium weight (EuiText has no weight prop).
+    label: css`
+      font-weight: ${euiTheme.font.weight.medium};
+    `,
+    // Same stack/weight as Lens metric values (`echMetricText__value` + Elastic UI Numeric).
+    count: css`
+      font-family: 'Elastic UI Numeric', ${euiTheme.font.family};
+      font-weight: ${euiTheme.font.weight.medium};
+    `,
+    byState: {
+      muted: {
+        panelColor: 'subdued',
+        count: css`
+          color: ${euiTheme.colors.textSubdued};
+        `,
+      },
+      // Clickable EuiPanel defaults to hover shadow `m`; use `xs` for a lighter lift.
+      interactive: {
+        panelColor: undefined,
+        panel: css`
+          &&:hover,
+          &&:focus,
+          &&:focus-visible {
+            ${euiShadowHover(euiThemeContext, 'xs')}
+          }
+        `,
+      },
     },
-    interactive: {
-      panelColor: undefined,
-      panel: css`
-        text-align: left;
-        outline: ${euiTheme.border.width.thick} solid transparent;
-        transition: outline ${euiTheme.animation.fast} ease;
-        &:hover,
-        &:focus-visible {
-          outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
-        }
-      `,
-    },
-  },
-});
+  };
+};
 
 export interface InvestigationSeverityTilesProps {
   severityCounts: SeverityCounts;
@@ -84,15 +131,16 @@ export const InvestigationSeverityTiles = ({
   isLoading,
   onSeverityClick,
 }: InvestigationSeverityTilesProps): React.ReactElement => {
-  const { euiTheme } = useEuiTheme();
-  const styles = useMemo(() => getSeverityTileStyles(euiTheme), [euiTheme]);
+  const euiThemeContext = useEuiTheme();
+  const styles = useMemo(() => getSeverityTileStyles(euiThemeContext), [euiThemeContext]);
 
   return (
-    <EuiFlexGroup gutterSize="s" responsive={false}>
+    <EuiFlexGroup gutterSize="m" responsive={false}>
       {SEVERITY_OPTIONS.map((severity) => {
         const count = severityCounts[severity];
         const isMuted = !scrollableSeverities.has(severity);
         const stateStyles = styles.byState[isMuted ? 'muted' : 'interactive'];
+        const icon = SEVERITY_TILE_ICON[severity];
 
         return (
           <EuiFlexItem key={severity}>
@@ -101,36 +149,51 @@ export const InvestigationSeverityTiles = ({
               hasShadow={false}
               paddingSize="m"
               color={stateStyles.panelColor}
+              css={stateStyles.panel}
               data-test-subj={`nightshiftSeverityTile-${severity}`}
               onClick={isMuted ? undefined : () => onSeverityClick(severity)}
-              css={stateStyles.panel}
             >
-              <EuiText color="subdued" size="xs" css={styles.label}>
-                {getSeverityLabel(severity)}
-              </EuiText>
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="dot" color={SEVERITY_DOT_COLOR[severity]} aria-hidden={true} />
+                  <EuiText color="default" size="xs" css={styles.label}>
+                    {getSeverityLabel(severity)}
+                  </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiSkeletonTitle
-                    size="s"
-                    isLoading={isLoading}
-                    contentAriaLabel={i18n.translate(
-                      'xpack.nightshift.investigations.severityTileCountAriaLabel',
-                      {
-                        defaultMessage: '{severityLabel} investigation count',
-                        values: { severityLabel: getSeverityLabel(severity) },
-                      }
-                    )}
-                    css={styles.countSkeleton}
-                  >
-                    <EuiTitle size="s" css={stateStyles.count}>
-                      <span data-test-subj={`nightshiftSeverityTileCount-${severity}`}>
-                        {count}
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <span
+                        css={styles.iconBox[severity][isMuted ? 'muted' : 'interactive']}
+                        aria-hidden={true}
+                      >
+                        <EuiIcon
+                          type={icon.type}
+                          size="m"
+                          css={icon.rotateUp ? styles.iconGlyphRotateUp : undefined}
+                          aria-hidden={true}
+                        />
                       </span>
-                    </EuiTitle>
-                  </EuiSkeletonTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiSkeletonTitle
+                        size="l"
+                        isLoading={isLoading}
+                        contentAriaLabel={i18n.translate(
+                          'xpack.nightshift.investigations.severityTileCountAriaLabel',
+                          {
+                            defaultMessage: '{severityLabel} investigation count',
+                            values: { severityLabel: getSeverityLabel(severity) },
+                          }
+                        )}
+                      >
+                        <EuiTitle size="l" css={[styles.count, stateStyles.count]}>
+                          <span data-test-subj={`nightshiftSeverityTileCount-${severity}`}>
+                            {count}
+                          </span>
+                        </EuiTitle>
+                      </EuiSkeletonTitle>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>

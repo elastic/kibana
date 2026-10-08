@@ -28,10 +28,10 @@ permissions:
   models: read
 
 # Activation rules:
-# - Manual runs always activate.
+# - Every trigger requires an open, in-repository PR authored by kibanamachine
+#   (checked by check_pr_eligibility).
+# - Manual runs request verification subject to the same PR validation.
 # - `kickoff`: a PR is labeled `flaky-test-fixer`.
-#   NOTE: not checking the author is a temporary measure for testing; tighten it
-#   back (e.g. to the `kibanamachine` fixer identity) once the flow is validated.
 # - `process_results`: the Flaky Test Runner posts its `## Flaky Test Runner Stats`
 #   comment on a PR we are actively validating (`flaky-fix-check:started`). The
 #   workflow removes `running` when it reaches a terminal verdict, so the label's
@@ -127,6 +127,44 @@ checkout:
   fetch-depth: 2
 
 jobs:
+  activation:
+    needs: [check_pr_eligibility]
+  check_pr_eligibility:
+    needs: pre_activation
+    if: needs.pre_activation.outputs.activated == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      pr_number: ${{ steps.check.outputs.pr_number }}
+    steps:
+      # No checkout: validation must run before any PR code or agent tools.
+      - name: Check flaky fix PR eligibility
+        id: check
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          PR_NUMBER: *pr_number
+        with:
+          script: |
+            const prNumber = Number(process.env.PR_NUMBER);
+            if (!/^[1-9][0-9]*$/.test(process.env.PR_NUMBER ?? '') || !Number.isSafeInteger(prNumber)) {
+              throw new Error('A positive integer PR number is required.');
+            }
+
+            const { owner, repo } = context.repo;
+            const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+            if (pr.state !== 'open') {
+              throw new Error('The flaky fix verifier requires an open PR.');
+            }
+            if (pr.head.repo?.full_name !== `${owner}/${repo}`) {
+              throw new Error(`The flaky fix verifier requires a branch in ${owner}/${repo}.`);
+            }
+            if (pr.user.login !== 'kibanamachine') {
+              throw new Error('The flaky fix verifier requires a PR opened by kibanamachine.');
+            }
+
+            core.setOutput('pr_number', String(prNumber));
+            core.info(`PR #${prNumber} by ${pr.user.login} is eligible.`);
   prefetch_pr_context:
     permissions:
       contents: read
@@ -443,7 +481,7 @@ The fixer deliberately leaves every created PR with only the `flaky-test-fixer` 
    - **`release_note:fix`** — a user-facing bug fix for an issue in an already released version.
 
    Do not choose `release_note:fix` merely because application code changed; confirm the affected behavior was released.
-3. For `release_note:fix`, emit one `update-pull-request` safe output that preserves the current title and body while inserting or updating exactly one section immediately before the final `> [!NOTE]` block (or at the end when that block is absent):
+3. For `release_note:fix`, emit one `update-pull-request` safe output that preserves the current title and body while inserting or updating exactly one section immediately before the final `> [!IMPORTANT]` block (or `> [!NOTE]` on older PRs, or at the end when neither is present):
 
    ```markdown
    ## Release note
