@@ -15,6 +15,7 @@ import type { GetScopedClients } from '../../routes/types';
 import type { SignificantEventsServer } from '../../types';
 import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
 import {
+  continuousOnboardingWorkflowTarget,
   emptyStillOn,
   isContinuousOnboardingWorkflowId,
   isScheduledDiscoveryWorkflowId,
@@ -302,9 +303,17 @@ export const createResetRunner = ({
           spaceIds: releasedSpaces,
           run: async (spaceId) => {
             const previous = existingBySpace.get(spaceId);
+            // Resume derives the continuous onboarding setting from its workflow document, so a
+            // toggle that could not be turned back on needs that document recorded even when
+            // the sweep did not newly disable it.
+            const continuousNotRestored =
+              togglesNotRestored.continuousOnboardingSpaceIds.includes(spaceId);
             const spaceWorkflows = mergeTargets(
               previous?.disabledWorkflows ?? [],
-              remainingWorkflows.filter((workflow) => workflow.spaceId === spaceId)
+              mergeTargets(
+                remainingWorkflows.filter((workflow) => workflow.spaceId === spaceId),
+                continuousNotRestored ? [continuousOnboardingWorkflowTarget(spaceId)] : []
+              )
             );
             const scheduledNotRestored =
               togglesNotRestored.scheduledDiscoveryEnabledSpaceIds.includes(spaceId);

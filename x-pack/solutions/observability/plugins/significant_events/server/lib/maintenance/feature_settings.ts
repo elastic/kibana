@@ -65,7 +65,9 @@ export const isContinuousOnboardingWorkflowId = (workflowId: string): boolean =>
   workflowId.startsWith(`${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-`);
 
 /** The per-space continuous onboarding document of a space. */
-const continuousOnboardingWorkflowTarget = (spaceId: SpaceId): MaintenanceWorkflowTarget => ({
+export const continuousOnboardingWorkflowTarget = (
+  spaceId: SpaceId
+): MaintenanceWorkflowTarget => ({
   id: `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`,
   spaceId,
 });

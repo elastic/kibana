@@ -49,7 +49,18 @@ const unsetAlertingV2 = async (kbnClient: KbnClient) => {
   });
 };
 
-const createClient = (apiClient: ApiClientFixture, cookieHeader: Record<string, string>) => {
+const isSpaceList = (value: unknown): value is Array<{ id: string }> =>
+  Array.isArray(value) &&
+  value.every((space) => typeof space === 'object' && space !== null && 'id' in space);
+
+const toSpaceIds = (value: unknown): string[] =>
+  isSpaceList(value) ? value.map(({ id }) => id) : [];
+
+const createClient = (
+  apiClient: ApiClientFixture,
+  cookieHeader: Record<string, string>,
+  engineAdminCookieHeader: Record<string, string>
+) => {
   const internalHeaders = { ...COMMON_API_HEADERS, ...cookieHeader };
   const publicHeaders = { ...PUBLIC_API_HEADERS, ...cookieHeader };
 
@@ -77,8 +88,9 @@ const createClient = (apiClient: ApiClientFixture, cookieHeader: Record<string, 
       return response.statusCode === 200 ? response.body.enabled : undefined;
     },
     async bootstrapSpaceWorkflow() {
+      // Bootstrapping needs Manage engines, which the streams admin role does not include.
       const response = await apiClient.post(BOOTSTRAP_CLEANUP_ENDPOINT, {
-        headers: internalHeaders,
+        headers: { ...COMMON_API_HEADERS, ...engineAdminCookieHeader },
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
@@ -122,10 +134,12 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let cookieHeader: Record<string, string>;
+    let engineAdminCookieHeader: Record<string, string>;
     let queryId: string | undefined;
 
     apiTest.beforeAll(async ({ samlAuth, apiServices, kbnClient }) => {
       ({ cookieHeader } = await samlAuth.asStreamsAdmin());
+      ({ cookieHeader: engineAdminCookieHeader } = await samlAuth.asNightshiftEngineAdmin());
       await enableAlertingV2(kbnClient);
       // An earlier flag flip in this run may have left the deployment paused.
       await apiServices.significantEventsTest.resumeSignificantEvents();
@@ -134,8 +148,23 @@ apiTest.describe(
     apiTest.afterAll(async ({ apiServices, apiClient, kbnClient }) => {
       await apiServices.significantEventsTest.enableSignificantEvents();
       await apiServices.significantEventsTest.resumeSignificantEvents();
+      // Flag-off pauses every space, and resume only reaches the space it is called in.
+      const spaceIds = toSpaceIds(await kbnClient.spaces.list());
+      await Promise.all(
+        spaceIds
+          .filter((id) => id !== 'default')
+          .map((id) =>
+            kbnClient.request({
+              description: `resume Significant Events in space ${id}`,
+              method: 'POST',
+              path: `/s/${id}/internal/significant_events/maintenance/_resume`,
+              headers: COMMON_API_HEADERS,
+              ignoreErrors: [403, 404],
+            })
+          )
+      );
       if (queryId !== undefined) {
-        await createClient(apiClient, cookieHeader).deleteQuery(queryId);
+        await createClient(apiClient, cookieHeader, engineAdminCookieHeader).deleteQuery(queryId);
       }
       await unsetAlertingV2(kbnClient);
     });
@@ -145,7 +174,7 @@ apiTest.describe(
       async ({ apiClient, apiServices }) => {
         // Waits for workflow installation plus the flag settle window, beyond the 60s default.
         apiTest.setTimeout(120_000);
-        const client = createClient(apiClient, cookieHeader);
+        const client = createClient(apiClient, cookieHeader, engineAdminCookieHeader);
         const nightshift = apiServices.significantEventsTest;
 
         const ruleId = await apiTest.step(
