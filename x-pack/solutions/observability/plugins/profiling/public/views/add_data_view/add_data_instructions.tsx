@@ -30,8 +30,8 @@ import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { AsyncStatus, useAsync } from '../../hooks/use_async';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
-import { hasProfilingData } from '../../utils/has_profiling_data';
 import { useEnabledProfilingStatus } from '../../components/contexts/profiling_status/use_enabled_profiling_status';
+import { hasUsableProfilingData } from '../../utils/has_usable_profiling_data';
 import type { AddDataTab } from './types';
 import { AddDataTabs } from './types';
 
@@ -64,7 +64,7 @@ export function AddDataInstructions() {
   const stackVersion = data?.stackVersion;
   const majorVersion = stackVersion ? major(stackVersion).toString() : undefined;
 
-  const tabs: AddDataTab[] = useMemo(
+  const tabs: Array<AddDataTab<AddDataTabs>> = useMemo(
     () => [
       {
         key: AddDataTabs.Kubernetes,
@@ -497,7 +497,7 @@ EOF`}
       pageTitle={i18n.translate('xpack.profiling.noDataPage.pageTitle', {
         defaultMessage: 'Add profiling data',
       })}
-      suppressMenu={!hasProfilingData(profilingStatus)}
+      suppressMenu={!hasUsableProfilingData(profilingStatus)}
     >
       {isLoading ? (
         <EuiFlexItem>

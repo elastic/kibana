@@ -41875,7 +41875,6 @@
     "xpack.securitySolution.detectionEngine.components.importRuleModal.overwriteDescription": "Écraser les règles de détection existantes avec l’ID de règle conflictuel \"rule_id\"",
     "xpack.securitySolution.detectionEngine.components.importRuleModal.overwriteExceptionLabel": "Écraser les listes d'exception existantes avec l'ID de liste conflictuel \"list_id\"",
     "xpack.securitySolution.detectionEngine.components.importRuleModal.selectRuleDescription": "Sélectionnez les règles à importer. Les actions et exceptions de règles associées peuvent être incluses.",
-    "xpack.securitySolution.detectionEngine.createRule.ariaLabel": "Créez une règle à l'aide de l’agent ou manuellement à l'aide du formulaire de création de règles",
     "xpack.securitySolution.detectionEngine.createRule.backToRulesButton": "Règles",
     "xpack.securitySolution.detectionEngine.createRule.cancelButtonLabel": "Annuler",
     "xpack.securitySolution.detectionEngine.createRule.contextMenu.aiRuleCreation": "Création de règles d'IA",
