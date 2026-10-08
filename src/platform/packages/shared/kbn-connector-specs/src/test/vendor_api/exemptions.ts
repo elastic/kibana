@@ -13,3 +13,13 @@ import { z } from '@kbn/zod/v4';
 export const vendorApiExemptionsSchema = z.record(z.string().startsWith('.'), z.string().min(1));
 
 export type VendorApiExemptions = z.infer<typeof vendorApiExemptionsSchema>;
+
+/**
+ * The exemptions added since `previous` for connectors that already existed: the list only
+ * shrinks, except for new connectors, whose exemption is reviewed with them.
+ */
+export const findAddedExemptions = (
+  previous: VendorApiExemptions,
+  current: VendorApiExemptions,
+  isNewConnector: (id: string) => boolean
+): string[] => Object.keys(current).filter((id) => !(id in previous) && !isNewConnector(id));

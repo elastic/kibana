@@ -7,22 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fs from 'fs/promises';
-import path from 'path';
-import { vendorApiExemptionsSchema } from './exemptions';
-import { findConnector } from './find_connector';
+import { findAddedExemptions, vendorApiExemptionsSchema } from './exemptions';
 
-const EXEMPTIONS = path.resolve(__dirname, '../../../vendor_api_exemptions.json');
+describe('findAddedExemptions', () => {
+  const previous = { '.mysql': 'Driver protocol', '.slack': 'Not recorded yet' };
+  const isNewConnector = (id: string) => id === '.brand_new';
 
-describe('vendor_api_exemptions.json', () => {
-  it('lists existing connectors without a vendor_api folder, each with a reason', async () => {
-    const exemptions = vendorApiExemptionsSchema.parse(
-      JSON.parse(await fs.readFile(EXEMPTIONS, 'utf8'))
-    );
+  it('allows removals and new connectors', () => {
+    expect(
+      findAddedExemptions(
+        previous,
+        { '.mysql': 'Driver protocol', '.brand_new': 'No spec' },
+        isNewConnector
+      )
+    ).toEqual([]);
+  });
 
-    for (const id of Object.keys(exemptions)) {
-      const { directory } = await findConnector(id);
-      await expect(fs.access(directory)).rejects.toThrow('ENOENT');
-    }
+  it('reports exemptions added for existing connectors', () => {
+    expect(
+      findAddedExemptions(previous, { ...previous, '.github': 'Not recorded yet' }, isNewConnector)
+    ).toEqual(['.github']);
+  });
+});
+
+describe('vendorApiExemptionsSchema', () => {
+  it.each([
+    ['ids without the leading dot', { mysql: 'Driver protocol' }],
+    ['empty reasons', { '.mysql': '' }],
+  ])('rejects %s', (_, exemptions) => {
+    expect(vendorApiExemptionsSchema.safeParse(exemptions).success).toBe(false);
   });
 });
