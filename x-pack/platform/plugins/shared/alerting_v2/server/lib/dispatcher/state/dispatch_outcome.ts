@@ -56,7 +56,7 @@ export class DispatchOutcome {
   /**
    * Destinations of the group that actually delivered. A group with
    * destinations but none delivered failed completely and must not appear in
-   * the `dispatched` summary — its episodes are carried by `dispatch_failed`.
+   * the `dispatched` summary — its alerts are carried by `dispatch_failed`.
    */
   public deliveredDestinationsFor(group: ActionGroup): readonly ActionPolicyDestination[] {
     const failed = this.failedWorkflowsByGroup.get(group.id);
