@@ -23,6 +23,7 @@ import type {
   AgenticInvestigationsPublicPluginStart,
   AgenticInvestigationsPublicSetupDependencies,
   AgenticInvestigationsPublicStartDependencies,
+  ImpactEntityOpener,
 } from './types';
 
 /**
@@ -42,6 +43,7 @@ export class AgenticInvestigationsPublicPlugin
 {
   private readonly escalationsEnabled: boolean;
   private readonly groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
+  private impactEntityOpener: ImpactEntityOpener | undefined;
 
   constructor(context: PluginInitializerContext<AgenticInvestigationsPublicConfig>) {
     this.escalationsEnabled = context.config.get().escalations.enabled;
@@ -63,7 +65,7 @@ export class AgenticInvestigationsPublicPlugin
   ): AgenticInvestigationsPublicPluginStart {
     const { agentBuilder } = startDeps;
     if (agentBuilder) {
-      registerImpactAttachmentTypes(agentBuilder);
+      registerImpactAttachmentTypes(agentBuilder, () => this.impactEntityOpener);
       if (this.escalationsEnabled) {
         registerEscalationConversationEventUiDefinitions({
           conversationEvents: agentBuilder.conversationEvents,
@@ -84,8 +86,14 @@ export class AgenticInvestigationsPublicPlugin
           : [investigationTemplate],
       });
     }
-    return {};
+    return {
+      registerImpactEntityOpener: (opener) => {
+        this.impactEntityOpener = opener;
+      },
+    };
   }
 
-  stop() {}
+  stop() {
+    this.impactEntityOpener = undefined;
+  }
 }

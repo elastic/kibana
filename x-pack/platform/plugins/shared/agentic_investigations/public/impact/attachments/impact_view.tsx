@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
+import { truncate } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
@@ -22,11 +23,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import {
-  entityStoreIdType,
-  hasImpactEntityOpener,
-  openImpactEntity,
-} from '@kbn/agentic-investigations-common';
+import { entityStoreIdType, type ImpactEntityTarget } from '@kbn/agentic-investigations-common';
 import type { Impact, ImpactEntity } from '../../../common/impact/impact';
 import { EvidenceView } from '../../evidence/evidence_view';
 import type { InvestigationAttachmentContentProps } from '../../investigation_attachments';
@@ -37,11 +34,8 @@ const IMPACT_SUMMARY_MAX_LENGTH = 500;
 const entityLabel = (entity: ImpactEntity): string => entity.name ?? entity.id;
 
 /** Cuts `text` to at most `maxLength` characters at a word boundary and marks the cut. */
-const truncateAtWord = (text: string, maxLength: number): string => {
-  const cut = text.slice(0, maxLength);
-  const lastSpace = cut.lastIndexOf(' ');
-  return `${(lastSpace > 0 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`;
-};
+const truncateAtWord = (text: string, maxLength: number): string =>
+  truncate(text, { length: maxLength, separator: ' ', omission: '…' });
 
 const EntityHeader = ({ entity }: { entity: ImpactEntity }) => (
   <EuiText size="s" textAlign="left">
@@ -54,7 +48,13 @@ const EntityHeader = ({ entity }: { entity: ImpactEntity }) => (
   </EuiText>
 );
 
-const FlyoutEntityButton = ({ entity }: { entity: ImpactEntity }) => (
+const FlyoutEntityButton = ({
+  entity,
+  onOpenEntity,
+}: {
+  entity: ImpactEntity;
+  onOpenEntity: (entity: ImpactEntityTarget) => void;
+}) => (
   <button
     type="button"
     css={css({
@@ -67,7 +67,7 @@ const FlyoutEntityButton = ({ entity }: { entity: ImpactEntity }) => (
       padding: 0,
     })}
     data-test-subj="investigationImpactEntityFlyout"
-    onClick={() => openImpactEntity({ id: entity.id, name: entity.name, type: entity.type })}
+    onClick={() => onOpenEntity({ id: entity.id, name: entity.name, type: entity.type })}
   >
     <EntityHeader entity={entity} />
   </button>
@@ -77,12 +77,20 @@ const FlyoutEntityButton = ({ entity }: { entity: ImpactEntity }) => (
  * One impacted entity. Evidence stays collapsed, matching the Nightshift impact section. An
  * entity-store id opens the entity flyout; a plain name does not.
  */
-const ImpactEntityRow = ({ entity, isLast }: { entity: ImpactEntity; isLast: boolean }) => {
+const ImpactEntityRow = ({
+  entity,
+  isLast,
+  onOpenEntity,
+}: {
+  entity: ImpactEntity;
+  isLast: boolean;
+  onOpenEntity?: (entity: ImpactEntityTarget) => void;
+}) => {
   const { euiTheme } = useEuiTheme();
   const accordionId = useGeneratedHtmlId({ prefix: 'investigationImpactEntity' });
-  const opensFlyout = hasImpactEntityOpener() && entityStoreIdType(entity.id) !== undefined;
+  const opensFlyout = onOpenEntity !== undefined && entityStoreIdType(entity.id) !== undefined;
   const header = opensFlyout ? (
-    <FlyoutEntityButton entity={entity} />
+    <FlyoutEntityButton entity={entity} onOpenEntity={onOpenEntity} />
   ) : (
     <EntityHeader entity={entity} />
   );
@@ -133,7 +141,13 @@ const ImpactEntityRow = ({ entity, isLast }: { entity: ImpactEntity; isLast: boo
   );
 };
 
-const EntityList = ({ entities }: { entities: ImpactEntity[] }) => (
+const EntityList = ({
+  entities,
+  onOpenEntity,
+}: {
+  entities: ImpactEntity[];
+  onOpenEntity?: (entity: ImpactEntityTarget) => void;
+}) => (
   <EuiPanel
     hasBorder
     hasShadow={false}
@@ -141,7 +155,12 @@ const EntityList = ({ entities }: { entities: ImpactEntity[] }) => (
     data-test-subj="investigationImpactEntities"
   >
     {entities.map((entity, index) => (
-      <ImpactEntityRow key={entity.id} entity={entity} isLast={index === entities.length - 1} />
+      <ImpactEntityRow
+        key={entity.id}
+        entity={entity}
+        isLast={index === entities.length - 1}
+        onOpenEntity={onOpenEntity}
+      />
     ))}
   </EuiPanel>
 );
@@ -191,10 +210,12 @@ const ImpactSummary = ({ summary }: { summary: string }) => {
  * flyout matches Nightshift's impact section. An entity-store id opens the entity flyout; the
  * inline chat render lists entities only.
  */
-export const ImpactView: React.FC<InvestigationAttachmentContentProps<Impact>> = ({
-  document: { summary, evidence, entities = [] },
-  variant,
-}) => {
+export const ImpactView: React.FC<
+  InvestigationAttachmentContentProps<Impact> & {
+    /** Present when a solution registered an entity flyout. Entity-store ids open it. */
+    onOpenEntity?: (entity: ImpactEntityTarget) => void;
+  }
+> = ({ document: { summary, evidence, entities = [] }, variant, onOpenEntity }) => {
   const hasSummary = Boolean(summary?.trim());
   if (!hasSummary && !evidence && entities.length === 0) {
     return (
@@ -237,7 +258,7 @@ export const ImpactView: React.FC<InvestigationAttachmentContentProps<Impact>> =
       )}
       {entities.length > 0 && (
         <EuiFlexItem grow={false}>
-          <EntityList entities={entities} />
+          <EntityList entities={entities} onOpenEntity={onOpenEntity} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

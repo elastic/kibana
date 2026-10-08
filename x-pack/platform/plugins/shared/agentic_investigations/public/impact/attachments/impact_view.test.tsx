@@ -9,10 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import {
-  clearImpactEntityOpener,
-  registerImpactEntityOpener,
-} from '@kbn/agentic-investigations-common';
+import type { ImpactEntityTarget } from '@kbn/agentic-investigations-common';
 import type { Impact } from '../../../common/impact/impact';
 import type { InvestigationAttachmentVariant } from '../../investigation_attachments';
 import { ImpactView } from './impact_view';
@@ -38,20 +35,20 @@ const chart = {
   series: [{ name: 'checkout', points: [{ x: '2026-07-28T14:00:00Z', y: 1 }] }],
 };
 
-const renderView = (document: Impact, variant: InvestigationAttachmentVariant = 'details') =>
+const renderView = (
+  document: Impact,
+  variant: InvestigationAttachmentVariant = 'details',
+  onOpenEntity?: (entity: ImpactEntityTarget) => void
+) =>
   render(
     <EuiProvider>
       <I18nProvider>
-        <ImpactView document={document} variant={variant} />
+        <ImpactView document={document} variant={variant} onOpenEntity={onOpenEntity} />
       </I18nProvider>
     </EuiProvider>
   );
 
 describe('ImpactView', () => {
-  afterEach(() => {
-    clearImpactEntityOpener();
-  });
-
   it('renders the summary as Markdown and the top-level evidence chart', () => {
     renderView({
       ...base,
@@ -87,12 +84,15 @@ describe('ImpactView', () => {
 
   it('opens the entity flyout when a row is clicked', () => {
     const open = jest.fn();
-    registerImpactEntityOpener(open);
 
-    renderView({
-      ...base,
-      entities: [{ id: 'user:cfo@corp', name: 'cfo@corp', type: 'user' }],
-    });
+    renderView(
+      {
+        ...base,
+        entities: [{ id: 'user:cfo@corp', name: 'cfo@corp', type: 'user' }],
+      },
+      'details',
+      open
+    );
 
     fireEvent.click(screen.getByTestId('investigationImpactEntityFlyout'));
 
@@ -101,12 +101,15 @@ describe('ImpactView', () => {
 
   it('leaves a named entity as text when it is not an entity-store id', () => {
     const open = jest.fn();
-    registerImpactEntityOpener(open);
 
-    renderView({
-      ...base,
-      entities: [{ id: 'checkout-service', name: 'checkout-service', type: 'service' }],
-    });
+    renderView(
+      {
+        ...base,
+        entities: [{ id: 'checkout-service', name: 'checkout-service', type: 'service' }],
+      },
+      'details',
+      open
+    );
 
     expect(screen.queryByTestId('investigationImpactEntityFlyout')).not.toBeInTheDocument();
     expect(screen.getByText('· service')).toBeInTheDocument();
