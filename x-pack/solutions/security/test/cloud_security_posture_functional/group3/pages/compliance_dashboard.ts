@@ -61,6 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await cspDashboard.index.remove();
+      await cspSecurity.restoreDefaultUser();
     });
 
     describe('Kubernetes Dashboard', () => {
@@ -77,8 +78,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Access with custom roles', async () => {
       this.afterEach(async () => {
-        // force logout to prevent the next test from failing
-        await cspSecurity.logout();
+        // Log back in as the default user — logout alone can leave a valid csp_read_user session.
+        await cspSecurity.restoreDefaultUser();
       });
       it('Access with valid user role', async () => {
         await cspSecurity.logout();
