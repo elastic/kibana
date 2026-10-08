@@ -9648,6 +9648,11 @@ packages:
   '@frsource/cypress-plugin-visual-regression-diff@3.3.10':
     resolution: {integrity: sha512-ZjfOpdmXUgNRfLpsbrYiDujUzNEgLx+3dMtvMJHO3d+Yri0wniMB3mukf5+58QUMXuw8mr1cLoBkeWr1UxCOpA==}
     engines: {node: '>=10'}
+    deprecated: |-
+      This package has been moved to a new organization.
+      Migration is just a change of scope name (@frsource -> @pixsame).
+      To do it automatically, run: `npx @frsource/cypress-plugin-visual-regression-diff migrate`
+      More info in the README: https://www.npmjs.com/package/@frsource/cypress-plugin-visual-regression-diff
     peerDependencies:
       cypress: '>=4.5.0'
 
