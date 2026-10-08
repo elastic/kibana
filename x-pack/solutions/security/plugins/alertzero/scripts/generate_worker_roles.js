@@ -7,32 +7,37 @@
  */
 
 /**
- * Generates the Elasticsearch reserved roles for AlertZero worker service accounts from
- * WORKER_ROLE_DEFINITIONS (common/worker_roles.ts), so the two never drift apart.
+ * Generates every built-in copy of the AlertZero worker roles from WORKER_ROLE_DEFINITIONS
+ * (common/worker_roles.ts), so they never drift apart. Workers run with these built-in roles:
+ * Elasticsearch reserved roles on stateful, and elasticsearch-controller predefined roles on
+ * Serverless. After changing a worker's role, run:
  *
- * Outside Serverless, workers run with these built-in roles instead of roles AlertZero creates.
- * After changing a worker's role, regenerate them and update elastic/elasticsearch:
+ *   node x-pack/solutions/security/plugins/alertzero/scripts/generate_worker_roles.js <out_dir>
  *
- *   node x-pack/solutions/security/plugins/alertzero/scripts/generate_es_reserved_roles.js <out_dir>
+ * It writes into <out_dir>:
+ *   descriptors.java       replaces the AlertZero block at the end of Elasticsearch's
+ *                          KibanaOwnedReservedRoleDescriptors.java
+ *   entries.java           replaces the AlertZero entries in ReservedRolesStore.initializeReservedRoles()
+ *   tests.java             replaces the ALERTZERO_* test data in ReservedRolesStoreTests.java
+ *   serverless_roles.yaml  replaces the AlertZero block at the end of elasticsearch-controller's
+ *                          internal/config/roles/security.yaml, and the `_alertzero_*` roles in its two
+ *                          mirrors here (kbn-es serverless_resources/project_roles/security/roles.yml and
+ *                          Security Solution's es_serverless_resources/roles.yml), which
+ *                          worker_roles_mirrors.test.ts checks
  *
- * It writes three snippets into <out_dir>:
- *   descriptors.java  replaces the AlertZero block at the end of KibanaOwnedReservedRoleDescriptors.java
- *   entries.java      replaces the AlertZero entries in ReservedRolesStore.initializeReservedRoles()
- *   tests.java        replaces the ALERTZERO_* test data in ReservedRolesStoreTests.java
- *
- * Then run `./gradlew :x-pack:plugin:core:spotlessApply` and
- * `./gradlew :x-pack:plugin:core:test --tests "*ReservedRolesStoreTests*"` in Elasticsearch.
+ * Then, in Elasticsearch, run `./gradlew :x-pack:plugin:core:spotlessApply` and
+ * `./gradlew :x-pack:plugin:core:test --tests "*ReservedRolesStoreTests*"`.
  */
 
 require('@kbn/setup-node-env');
 const fs = require('fs');
 const path = require('path');
 const { isDeepStrictEqual } = require('util');
-const { WORKER_ROLE_DEFINITIONS } = require('../common/worker_roles');
+const { WORKER_ROLE_DEFINITIONS, getWorkerRoleName } = require('../common/worker_roles');
 
 const outDir = process.argv[2];
 if (!outDir) {
-  process.stderr.write('Usage: node generate_es_reserved_roles.js <out_dir>\n');
+  process.stderr.write('Usage: node generate_worker_roles.js <out_dir>\n');
   process.exit(1);
 }
 
@@ -234,8 +239,52 @@ const tests = [
   )});`,
 ];
 
+// Serverless predefined roles, in elasticsearch-controller's format. Serverless adds
+// `read_project_routing`, which the controller requires of every role that can read index data.
+const yamlList = (values, indent) => values.map((value) => `${indent}- ${value}`);
+const serverlessRoles = [
+  "# AlertZero worker roles: each is assigned only to its worker's service account (alertzero_<worker>),",
+  '# which AlertZero creates when the worker is enabled. Not meant for users.',
+  roles
+    .map(({ name, worker, cluster, indices, features }) =>
+      [
+        `${getWorkerRoleName(name, { isServerless: true })}:`,
+        `  description: "Privileges for the service account of the AlertZero ${worker} worker. Assigned by AlertZero; do not assign to users."`,
+        '  metadata:',
+        '    _public: true',
+        '    _reserved: true',
+        '  cluster:',
+        ...yamlList(
+          [...cluster, 'read_project_routing'].map((value) => JSON.stringify(value)),
+          '    '
+        ),
+        '  indices:',
+        ...indices.flatMap(({ names, privileges }) => [
+          '    - names:',
+          ...yamlList(
+            names.map((value) => JSON.stringify(value)),
+            '        '
+          ),
+          '      privileges:',
+          ...yamlList(
+            privileges.map((value) => JSON.stringify(value)),
+            '        '
+          ),
+          '      allow_restricted_indices: false',
+        ]),
+        '  applications:',
+        '    - application: "kibana-.kibana"',
+        '      privileges:',
+        ...yamlList(features, '        '),
+        '      resources: "*"',
+      ].join('\n')
+    )
+    .join('\n\n'),
+];
+
 fs.mkdirSync(outDir, { recursive: true });
 fs.writeFileSync(path.join(outDir, 'descriptors.java'), `${descriptors.join('\n')}\n`);
 fs.writeFileSync(path.join(outDir, 'entries.java'), `${entries.join('\n')}\n`);
 fs.writeFileSync(path.join(outDir, 'tests.java'), `${tests.join('\n')}\n`);
+fs.writeFileSync(path.join(outDir, 'serverless_roles.yaml'), `${serverlessRoles.join('\n')}\n`);
 process.stdout.write(`Wrote ${roles.length} roles to ${outDir}\n`);

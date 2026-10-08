@@ -123,10 +123,10 @@ const buildRole = (
  * (`approvalPolicy: always-gate`) run as the approver, so their privileges are left out. Mirrors
  * "AlertZero prebuilt service accounts — Minimum privileges", including its conditional rows.
  *
- * AlertZero no longer creates these roles; they ship built in. After changing a role here, update
- * every copy: the Elasticsearch reserved roles (generate them with
- * `scripts/generate_es_reserved_roles.js`), and the Serverless predefined roles in
- * elasticsearch-controller with their two mirrors in this repository.
+ * AlertZero no longer creates these roles; they ship built in. After changing a role here,
+ * regenerate every copy with `scripts/generate_worker_roles.js`: the Elasticsearch reserved roles,
+ * and the Serverless predefined roles in elasticsearch-controller with their two mirrors in this
+ * repository (checked by `worker_roles_mirrors.test.ts`).
  */
 export const WORKER_ROLE_DEFINITIONS: Readonly<Record<string, WorkerRoleDefinition>> = {
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: {
