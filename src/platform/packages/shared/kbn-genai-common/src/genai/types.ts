@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { GEN_AI_MESSAGE_ROLES } from './constants';
+
+export type GenAiMessageRole = (typeof GEN_AI_MESSAGE_ROLES)[keyof typeof GEN_AI_MESSAGE_ROLES];
+
 export interface GenAiMessage {
-  role: string;
+  role: GenAiMessageRole | (string & {});
   content?: string;
   parts?: Array<{ type: string; content?: string; [key: string]: unknown }>;
   [key: string]: unknown;
