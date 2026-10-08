@@ -89,6 +89,7 @@ const investigationsResult = (total: number, overrides: QueryOverrides = {}) => 
 
 const wrap = (ui: React.ReactElement) => {
   const core = coreMock.createStart();
+  (core.application.capabilities as Record<string, unknown>).alertzero = { write: true };
   const history = createMemoryHistory();
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },

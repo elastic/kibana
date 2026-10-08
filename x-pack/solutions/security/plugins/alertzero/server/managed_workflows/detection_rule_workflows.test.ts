@@ -636,12 +636,10 @@ describe('detection rule workflows', () => {
       // disabled after alerting keeps harvesting until its FPs age out of the window.
       // The sweep checks live enabled status for the harvested candidates only and
       // drops disabled rules from the fan-out source (a parallel branch body cannot
-      // carry a step-level `if`), failing open into a full fan-out when the lookup
-      // returned nothing.
+      // carry a step-level `if`).
       it('skips reviews for rules that are no longer enabled', () => {
         const collect = tuningSteps.find(({ name }) => name === 'collect_candidates')!;
         const lookup = tuningSteps.find(({ name }) => name === 'list_enabled_candidates')!;
-        const resolve = tuningSteps.find(({ name }) => name === 'resolve_enabled_rules')!;
         const rows = tuningSteps.find(({ name }) => name === 'resolve_fanout_rows')!;
         const fanOut = tuningSteps.find(({ name }) => name === 'run_reviews')!;
 
@@ -656,25 +654,17 @@ describe('detection rule workflows', () => {
         expect(String(lookup.if)).toContain('steps.collect_candidates.output.count > 0');
         expect(lookup['on-failure']).toEqual({ continue: true });
 
-        // The prefixed joined string stays non-empty when zero candidates are
-        // enabled, so all-disabled never reads as a missing lookup.
-        expect(String(resolve.if)).toContain('steps.list_enabled_candidates.output.data != null');
-        expect(String(resolve.with?.enabled_rule_ids)).toContain(
-          "| join: ',' | prepend: 'enabled:'"
-        );
-
         const rowsExpr = String(rows.with?.rows);
         expect(rowsExpr).toContain(
-          "where_exp: 'row', 'steps.resolve_enabled_rules.output.enabled_rule_ids == null or steps.resolve_enabled_rules.output.enabled_rule_ids contains row[0]'"
+          "where_exp: 'row', 'steps.resolve_current_revisions.output.rule_revision_keys contains row[6]'"
         );
         // No `default` after where_exp: an empty filtered array is legitimate and a
         // default would resurrect every disabled candidate.
         expect(rowsExpr).not.toMatch(/where_exp:.*\| default:/);
         // The engine's rehydration planner cannot see step paths inside the quoted
-        // where_exp argument; this direct reference keeps the ids resident. If it
-        // is removed, an evicted value renders null and the filter fails open.
-        expect(String(rows.with?.enabled_rule_ids)).toContain(
-          '${{ steps.resolve_enabled_rules.output.enabled_rule_ids }}'
+        // where_exp argument. This direct reference keeps the keys resident.
+        expect(String(rows.with?.rule_revision_keys)).toContain(
+          '${{ steps.resolve_current_revisions.output.rule_revision_keys }}'
         );
         // Slice after the enabled filter: the pool overscans the launch cap so
         // disabled candidates cannot starve enabled rules ranked below them.
@@ -686,6 +676,66 @@ describe('detection rule workflows', () => {
         expect(String((fanOut as NestedStep & { foreach?: string }).foreach)).toContain(
           'steps.resolve_fanout_rows.output.rows'
         );
+      });
+
+      // Rule A was edited after its false positives, so they came from an older
+      // version. Rule B was not edited. Only rule B should be reviewed.
+      it('reviews a rule only on false positives from its current version', () => {
+        const resolveVersions = tuningSteps.find(
+          ({ name }) => name === 'resolve_current_revisions'
+        )!;
+        const rows = tuningSteps.find(({ name }) => name === 'resolve_fanout_rows')!;
+
+        expect(harvestQuery).toContain('BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`');
+
+        const currentVersions = createWorkflowLiquidEngine().parseAndRenderSync(
+          String(resolveVersions.with?.rule_revision_keys),
+          {
+            steps: {
+              list_enabled_candidates: {
+                output: {
+                  data: [
+                    { id: 'rule-a', revision: 2 },
+                    { id: 'rule-b', revision: 5 },
+                  ],
+                },
+              },
+            },
+          }
+        );
+
+        // The last column is the "rule@version" key the harvest query adds to each row.
+        const ruleAOldVersion = [
+          'rule-a',
+          12,
+          '2026-10-01T00:00:00.000Z',
+          ['a1'],
+          20,
+          12,
+          ',rule-a@1,',
+        ];
+        const ruleBCurrentVersion = [
+          'rule-b',
+          15,
+          '2026-10-01T00:00:00.000Z',
+          ['b1'],
+          20,
+          15,
+          ',rule-b@5,',
+        ];
+
+        const reviewedRows = resolveExpression(rows.with?.rows, {
+          consts: tuning.consts,
+          steps: {
+            harvest_fp_alerts_by_rule: {
+              output: { values: [ruleAOldVersion, ruleBCurrentVersion] },
+            },
+            resolve_current_revisions: { output: { rule_revision_keys: currentVersions } },
+            collect_candidates: { output: { fanout_limit: 10 } },
+          },
+        });
+
+        expect(reviewedRows).toEqual([ruleBCurrentVersion]);
       });
 
       // The pool is cut in ES|QL before the enabled check runs, so it must exceed
