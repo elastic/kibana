@@ -39,7 +39,7 @@ export const findMissingTimeFilterError = async (
 
     return `The query has no time filter, so the chart would ignore the time picker: "${index}" has no ${DEFAULT_TIME_FIELD} field for Kibana to filter on its own. Pick its event-time field (one of: ${dateFields.join(
       ', '
-    )}) and filter it before STATS with WHERE <time field> >= ?_tstart AND <time field> < ?_tend, or bucket it with BUCKET(<time field>, 100, ?_tstart, ?_tend) when the chart groups by time.`;
+    )}) and filter it before STATS with WHERE <time field> >= ?_tstart AND <time field> < ?_tend, or bucket it with BUCKET(<time field>, 100, ?_tstart, ?_tend) when the chart groups by time. Keep the query without a time filter only when the request asks for all-time data or none of these dates is an event time.`;
   } catch {
     return undefined;
   }

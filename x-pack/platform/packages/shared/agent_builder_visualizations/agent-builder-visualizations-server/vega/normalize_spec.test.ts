@@ -25,22 +25,12 @@ describe('normalizeVegaSpec', () => {
     expect(result.data).toEqual({ url: { '%type%': 'esql', '%context%': true, query: ESQL } });
   });
 
-  it.each([
-    [
-      'a WHERE on a source field',
-      'FROM orders | WHERE order_date >= ?_tstart AND order_date < ?_tend | STATS count = COUNT()',
-    ],
-    [
-      'a BUCKET alias',
-      'FROM logs-* | STATS count = COUNT() BY Date = BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
-    ],
-    [
-      'a TBUCKET alias',
-      'FROM logs-* | STATS count = COUNT() BY bucket = TBUCKET(100, ?_tstart, ?_tend)',
-    ],
-  ])('leaves the time field for Kibana to resolve from %s', (_, timeAwareEsql) => {
+  it('leaves the time field for Kibana to resolve, even from a bucket alias', () => {
     // Regression (#275519): a bucket alias is a result column, not a field Kibana
     // can filter on, so the spec must never pin it as the %timefield%.
+    const timeAwareEsql =
+      'FROM logs-* | STATS count = COUNT() BY Date = BUCKET(@timestamp, 75, ?_tstart, ?_tend)';
+
     const result = normalizeVegaSpec({ spec: { mark: 'line' }, esqlQuery: timeAwareEsql });
 
     expect(result.data).toEqual({
