@@ -81,6 +81,7 @@ describe('createDescribeApiTool', () => {
           },
         },
         destructive: false,
+        readOnly: false,
       })
     );
 
@@ -111,6 +112,7 @@ describe('createDescribeApiTool', () => {
           properties: { query: { $ref: './_types.json#/$defs/Oversized' } },
         },
         destructive: false,
+        readOnly: true,
       })
     );
 
@@ -143,6 +145,7 @@ describe('createDescribeApiTool', () => {
           },
         },
         destructive: false,
+        readOnly: false,
       })
     );
 
@@ -180,6 +183,7 @@ describe('createDescribeApiTool', () => {
           },
         },
         destructive: true,
+        readOnly: false,
       })
     );
 
@@ -208,6 +212,7 @@ describe('createDescribeApiTool', () => {
           properties: { timeout: { $ref: '../outside.json#/$defs/Duration' } },
         },
         destructive: false,
+        readOnly: false,
       })
     );
 
@@ -234,6 +239,7 @@ describe('createDescribeApiTool', () => {
         method: 'DELETE',
         path: '/{index}',
         destructive: true,
+        readOnly: false,
       })
     );
 
@@ -256,6 +262,7 @@ describe('createDescribeApiTool', () => {
         method: 'GET',
         path: '/',
         destructive: false,
+        readOnly: true,
       })
     );
 

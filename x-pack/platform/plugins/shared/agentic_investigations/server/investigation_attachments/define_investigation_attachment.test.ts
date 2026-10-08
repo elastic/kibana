@@ -106,12 +106,18 @@ const setup = () => {
 
 const registeredType = (
   service: ReturnType<typeof setup>['service'],
-  assertCanRead: jest.Mock = jest.fn().mockResolvedValue(undefined)
+  assertCanRead: jest.Mock = jest.fn().mockResolvedValue(undefined),
+  assertCanReadConversation: jest.Mock = jest.fn().mockResolvedValue(undefined)
 ) => {
   const registerType = jest.fn();
   note.registerAttachmentType(
     { attachments: { registerType } } as unknown as AgentBuilderPluginSetup,
-    { getService: () => service, assertCanRead, logger: loggerMock.create() }
+    {
+      getService: () => service,
+      assertCanRead,
+      assertCanReadConversation,
+      logger: loggerMock.create(),
+    }
   );
   return registerType.mock.calls[0][0] as AttachmentTypeDefinition;
 };
@@ -307,8 +313,9 @@ describe('InvestigationAttachmentDocService', () => {
     await expect(service.listByConversationIds(ids, SPACE_ID)).rejects.toBeInstanceOf(
       InvestigationAttachmentInvalidRequestError
     );
+    // Candidate searches may return up to Elasticsearch's result window of conversations.
     await expect(
-      service.searchConversationIds({ spaceId: SPACE_ID, filter: [], size: 1001 })
+      service.searchConversationIds({ spaceId: SPACE_ID, filter: [], size: 10_001 })
     ).rejects.toBeInstanceOf(InvestigationAttachmentInvalidRequestError);
   });
 
@@ -365,6 +372,18 @@ describe('InvestigationAttachmentDocService', () => {
     } finally {
       jest.useRealTimers();
     }
+  });
+
+  it('finds the conversations holding documents across spaces, once each', async () => {
+    const { storage, service } = setup();
+    storage.put('a', body({ conversationId: 'conv-1' }));
+    storage.put('b', body({ conversationId: 'conv-1' }));
+    storage.put('c', body({ conversationId: 'conv-1', spaceId: 'other' }));
+
+    await expect(service.findConversationsAcrossSpaces()).resolves.toEqual([
+      { spaceId: SPACE_ID, conversationId: 'conv-1' },
+      { spaceId: 'other', conversationId: 'conv-1' },
+    ]);
   });
 
   it('deletes by conversation and by space for maintenance', async () => {
@@ -444,6 +463,46 @@ describe('investigation attachment type', () => {
     expect(storage.search).not.toHaveBeenCalled();
   });
 
+  it('resolves and checks staleness only for a caller who can read the document conversation', async () => {
+    const { storage, service } = setup();
+    storage.put(noteId(), body());
+    const assertCanReadConversation = jest
+      .fn()
+      .mockRejectedValue(new Error('Conversation is not readable'));
+    const definition = registeredType(
+      service,
+      jest.fn().mockResolvedValue(undefined),
+      assertCanReadConversation
+    );
+
+    await expect(definition.resolve?.(noteId(), resolveContext)).resolves.toBeUndefined();
+    await expect(
+      definition.isStale?.(
+        {
+          id: noteId(),
+          type: TYPE,
+          origin: noteId(),
+          current_version: 1,
+          active: true,
+          versions: [
+            {
+              version: 1,
+              data: { id: noteId(), ...body({ count: 9 }) },
+              created_at: '',
+              content_hash: '',
+              estimated_tokens: 1,
+            },
+          ],
+        },
+        resolveContext
+      )
+    ).resolves.toBe(false);
+    expect(assertCanReadConversation).toHaveBeenCalledWith(
+      resolveContext.request,
+      body().conversationId
+    );
+  });
+
   it('is stale when the index changed beyond a timestamp', async () => {
     const { storage, service } = setup();
     const definition = registeredType(service);
@@ -491,7 +550,7 @@ describe('writeAndAttach', () => {
       get: jest.fn().mockResolvedValue({ permissions: { update_access_control: true } }),
     } as unknown as ConversationPublicClient);
 
-  it('writes the index after the owner check and creates the by-reference attachment', async () => {
+  it('writes the index after confirming the conversation is readable, then creates the by-reference attachment', async () => {
     const { storage, service } = setup();
     const create = jest.fn().mockResolvedValue({ id: noteId() });
 
@@ -572,9 +631,11 @@ describe('writeAndAttach', () => {
     });
   });
 
-  it('does not write when the caller does not own the conversation', async () => {
+  it('does not write when the caller cannot converse with the conversation', async () => {
     const { storage, service } = setup();
 
+    // `conversations.get` itself enforces `converse` access and fails closed as not-found;
+    // `writeAndAttach` relies on that instead of a separate permission check.
     await expect(
       note.writeAndAttach({
         service,
@@ -583,7 +644,11 @@ describe('writeAndAttach', () => {
         mutate: () => body(),
         conversationId: CONVERSATION_ID,
         conversations: {
-          get: jest.fn().mockResolvedValue({ permissions: { update_access_control: false } }),
+          get: jest
+            .fn()
+            .mockRejectedValue(
+              createConversationNotFoundError({ conversationId: CONVERSATION_ID })
+            ),
         } as unknown as ConversationPublicClient,
         attachments: { create: jest.fn() } as unknown as AttachmentPublicClient,
       })

@@ -31,7 +31,7 @@ const ALERTING_APP_META: Record<AlertingApp, AlertingAppMeta> = {
   },
   alerts: {
     featureId: 'alerting_v2_alerts',
-    heading: /alert episodes/i,
+    heading: /^Alerts$/i,
   },
   actionPolicies: {
     featureId: 'alerting_v2_action_policies',

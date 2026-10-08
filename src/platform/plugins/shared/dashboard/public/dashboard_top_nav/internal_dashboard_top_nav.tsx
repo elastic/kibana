@@ -392,9 +392,8 @@ export function InternalDashboardTopNav({
             onClick: () => {
               void enhanceAction.execute();
             },
-            tooltip: i18n.translate('dashboard.topNav.enhanceButtonTooltip', {
-              defaultMessage: 'Improve the content and style of your dashboard using AI',
-            }),
+            isDisabled: enhanceAction.isDisabled,
+            tooltip: enhanceAction.tooltip,
           }
         : undefined,
     [viewMode, enhanceAction]
