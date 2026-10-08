@@ -38,6 +38,7 @@ export const copyInvestigationAttachments = async ({
   investigation,
   logger,
   existingAttachmentIds,
+  onBeforeCopy,
 }: {
   attachmentsClient: AttachmentPublicClient;
   escalation: ConversationWithPermissions;
@@ -45,6 +46,12 @@ export const copyInvestigationAttachments = async ({
   logger: Logger;
   /** Ids already present in the escalation; matching copies are left out of the write. */
   existingAttachmentIds?: ReadonlySet<string>;
+  /**
+   * Called with the ids about to be written, only when there are any, and before the write: the
+   * escalation timeline orders by write time, so this is the hook for an event that must show
+   * above the copied attachments.
+   */
+  onBeforeCopy?: (attachmentIds: string[]) => Promise<void>;
 }): Promise<{ copied: number; failed: number }> => {
   const source = (investigation.attachments ?? []).filter(
     (att) =>
@@ -70,6 +77,8 @@ export const copyInvestigationAttachments = async ({
     ...(att.readonly !== undefined && { readonly: att.readonly }),
     ...(att.group_id !== undefined && { group_id: att.group_id }),
   }));
+
+  await onBeforeCopy?.(source.map((att) => toCopiedAttachmentId(investigation.id, att.id)));
 
   const { created, errors } = await attachmentsClient.bulkCreate({
     conversationId: escalation.id,

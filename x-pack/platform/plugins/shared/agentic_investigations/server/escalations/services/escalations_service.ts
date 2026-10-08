@@ -53,8 +53,10 @@ import {
   TooManyLinkedInvestigationsError,
 } from './errors';
 import {
+  ESCALATION_ATTACHMENTS_SYNCED_EVENT_TYPE,
   ESCALATION_CREATED_FROM_INVESTIGATION_EVENT_TYPE,
   ESCALATION_INVESTIGATION_LINKED_EVENT_TYPE,
+  type EscalationAttachmentsSyncedEventData,
   type EscalationInvestigationEventData,
 } from '../../../common/escalations/conversation_events';
 import { filterMetadataToTemplateFields } from './filter_template_metadata';
@@ -298,7 +300,10 @@ export class EscalationsService {
   private async addTimelineEvents(
     client: ConversationPublicClient,
     escalationId: string,
-    events: Array<{ type: string; data: EscalationInvestigationEventData }>
+    events: Array<{
+      type: string;
+      data: EscalationInvestigationEventData | EscalationAttachmentsSyncedEventData;
+    }>
   ): Promise<void> {
     for (let i = 0; i < events.length; i += MAX_EVENTS_PER_REQUEST) {
       try {
@@ -431,6 +436,16 @@ export class EscalationsService {
         investigation,
         logger: this.logger,
         existingAttachmentIds: existingIds,
+        // Written before the copy so the event sits above the attachment cards in the timeline.
+        // Only investigations that actually gain attachments get one. The ids are the planned
+        // ones: a copy that then fails is logged, but stays listed.
+        onBeforeCopy: (attachmentIds) =>
+          this.addTimelineEvents(client, escalationId, [
+            {
+              type: ESCALATION_ATTACHMENTS_SYNCED_EVENT_TYPE,
+              data: { ...toEventData(investigation), attachment_ids: attachmentIds },
+            },
+          ]),
       });
       copied += result.copied;
       failed += result.failed;
