@@ -6,7 +6,21 @@
  */
 
 import type { RuleAttachmentData, CreateRuleData } from '@kbn/alerting-v2-schemas';
+import { noDataStrategy, recoveryStrategy } from '@kbn/alerting-v2-schemas';
 import { DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
+
+/**
+ * The lifecycle an alert rule gets when the author did not pick one. The write
+ * API requires both objects and defaults neither, so the choice is made here,
+ * on the authoring side. Signal rules carry neither.
+ */
+const buildLifecycle = (data: Partial<RuleAttachmentData>) =>
+  data.kind === 'alert'
+    ? {
+        recovery: data.recovery ?? { strategy: recoveryStrategy.no_breach },
+        no_data: data.no_data ?? { strategy: noDataStrategy.ignore },
+      }
+    : {};
 
 /**
  * Maps partial rule attachment data to the API request payload,
@@ -20,8 +34,7 @@ export const buildRulePayload = (data: Partial<RuleAttachmentData>): CreateRuleD
   query: data.query!,
   state_transition: data.state_transition ?? null,
   time_field: data.time_field ?? DEFAULT_TIME_FIELD,
-  ...(data.recovery_strategy !== undefined ? { recovery_strategy: data.recovery_strategy } : {}),
-  ...(data.no_data_strategy !== undefined ? { no_data_strategy: data.no_data_strategy } : {}),
+  ...buildLifecycle(data),
   ...(data.grouping !== undefined ? { grouping: data.grouping } : {}),
   ...(data.artifacts !== undefined ? { artifacts: data.artifacts } : {}),
 });

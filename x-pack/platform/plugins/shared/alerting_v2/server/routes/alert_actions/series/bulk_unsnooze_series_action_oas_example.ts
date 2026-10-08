@@ -8,9 +8,10 @@
 import type { BulkResponse, BulkUnsnoozeSeriesActionBody } from '@kbn/alerting-v2-schemas';
 import { buildOasOperation, invalidResponseExample } from '../../oas_utils';
 import type { AlertingOasOperationObject } from '../../oas_types';
+import { SAMPLE_GROUP_HASH, SAMPLE_OTHER_GROUP_HASH } from '../alert_oas_shared_examples';
 
 export const BULK_UNSNOOZE_SERIES_ACTION_REQUEST: BulkUnsnoozeSeriesActionBody = {
-  items: [{ group_hash: 'group-hash-1' }, { group_hash: 'group-hash-2' }],
+  items: [{ group_hash: SAMPLE_GROUP_HASH }, { group_hash: SAMPLE_OTHER_GROUP_HASH }],
 };
 
 export const BULK_UNSNOOZE_SERIES_ACTION_RESPONSE: BulkResponse = {

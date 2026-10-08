@@ -39,7 +39,7 @@ const mockGetEpisodeDetailsHref = (episodeId: string) => `/host-aware/inbox/${ep
 const mockRule = {
   id: 'rule-1',
   metadata: { name: 'My rule' },
-  query: { format: 'standalone', breach: { query: 'FROM logs' } },
+  query: { base: 'FROM logs' },
 } as unknown as RuleResponse;
 
 const mockEpisodeEventsResponse = {

@@ -91,23 +91,18 @@ const EnhanceButton = ({ action }: { action: AppHeaderExperimentalDashboardAiAct
     });
   };
 
-  if (iconOnly) {
-    return (
-      <AiButton
-        iconOnly
-        variant="empty"
-        size="xs"
-        iconType="sparkles"
-        withToolTip
-        aria-label={ENHANCE_LABEL}
-        isDisabled={action.isDisabled}
-        data-test-subj={testSubj}
-        onClick={handleClick}
-      />
-    );
-  }
-
-  return (
+  const button = iconOnly ? (
+    <AiButton
+      iconOnly
+      variant="empty"
+      size="xs"
+      iconType="sparkles"
+      aria-label={ENHANCE_LABEL}
+      isDisabled={action.isDisabled}
+      data-test-subj={testSubj}
+      onClick={handleClick}
+    />
+  ) : (
     <AiButton
       variant="empty"
       size="xs"
@@ -120,6 +115,8 @@ const EnhanceButton = ({ action }: { action: AppHeaderExperimentalDashboardAiAct
       {ENHANCE_LABEL}
     </AiButton>
   );
+
+  return <EuiToolTip content={action.tooltip}>{button}</EuiToolTip>;
 };
 
 export interface TitleActionsProps {
@@ -136,6 +133,7 @@ export const TitleActions = React.memo<TitleActionsProps>(
       return null;
     }
 
+    const shareLabel = asOptionalPlainText(shareAction?.label) ?? SHARE_ARIA_LABEL;
     const shareTooltipContent = asOptionalPlainText(shareAction?.tooltip?.content);
     const shareTooltipTitle = asOptionalPlainText(shareAction?.tooltip?.title);
     const hasCustomShareTooltip = !!shareTooltipContent || !!shareTooltipTitle;
@@ -144,7 +142,7 @@ export const TitleActions = React.memo<TitleActionsProps>(
       <div css={styles.root} data-test-subj={APP_HEADER_TEST_SUBJECTS.titleActions}>
         {shareAction ? (
           <EuiToolTip
-            content={shareTooltipContent ?? SHARE_ARIA_LABEL}
+            content={shareTooltipContent ?? shareLabel}
             title={shareTooltipTitle}
             {...(!hasCustomShareTooltip && { disableScreenReaderOutput: true })}
           >
@@ -154,7 +152,7 @@ export const TitleActions = React.memo<TitleActionsProps>(
               display="empty"
               size="xs"
               css={styles.iconButton}
-              aria-label={SHARE_ARIA_LABEL}
+              aria-label={shareLabel}
               isDisabled={shareAction.isDisabled}
               data-test-subj={`${APP_HEADER_TEST_SUBJECTS.sharePrefix} ${APP_HEADER_TEST_SUBJECTS.shareButton}`}
               onClick={(event: ReactMouseEvent<HTMLButtonElement>) => {

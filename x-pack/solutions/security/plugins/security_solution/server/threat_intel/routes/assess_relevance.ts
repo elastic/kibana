@@ -5,23 +5,17 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { ALERTZERO_FAST_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
 import {
   ASSESS_RELEVANCE_API_PATH,
-  THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
+  assessRelevanceBodySchema,
+  assessRelevanceResponseSchema,
+  ASSESS_RELEVANCE_MAX_BODY_BYTES,
 } from '../../../common/threat_intel';
 import { assessRelevance } from '../services';
 import { resolveScopedModel } from './lib/scoped_model';
 import { THREAT_INTEL_WRITE_AUTHZ } from './lib/authz';
 import type { RouteRegistrationDeps } from '.';
-
-const assessRelevanceBodySchema = schema.object({
-  url: schema.maybe(schema.string({ minLength: 1, maxLength: 2048 })),
-  title: schema.maybe(schema.string({ maxLength: 1024 })),
-  text: schema.string({ minLength: 1, maxLength: 5_000_000 }),
-});
-
-const ASSESS_RELEVANCE_MAX_BODY_BYTES = 10 * 1024 * 1024;
 
 export const registerAssessRelevanceRoute = ({
   router,
@@ -44,7 +38,10 @@ export const registerAssessRelevanceRoute = ({
     .addVersion(
       {
         version: '1',
-        validate: { request: { body: assessRelevanceBodySchema } },
+        validate: {
+          request: { body: assessRelevanceBodySchema },
+          response: { 200: { body: () => assessRelevanceResponseSchema } },
+        },
       },
       async (context, request, response) => {
         const core = await context.core;
@@ -54,7 +51,7 @@ export const registerAssessRelevanceRoute = ({
           searchInferenceEndpoints: getSearchInferenceEndpoints(),
           request,
           uiSettingsClient: core.uiSettings.client,
-          featureId: THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
+          featureId: ALERTZERO_FAST_INFERENCE_FEATURE_ID,
           logger,
         });
         if (!modelOutcome.ok) {
