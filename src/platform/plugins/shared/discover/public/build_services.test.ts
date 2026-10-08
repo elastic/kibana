@@ -54,7 +54,7 @@ describe('discoverFeatureFlags', () => {
         flagName === CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY
           ? false
           : flagName === IS_ESQL_DEFAULT_FEATURE_FLAG_KEY
-          ? true
+          ? false
           : fallback
       )
     );
@@ -71,6 +71,6 @@ describe('discoverFeatureFlags', () => {
         })
     );
 
-    expect(services.discoverFeatureFlags.getIsEsqlDefault()).toBe(true);
+    expect(services.discoverFeatureFlags.getIsEsqlDefault()).toBe(false);
   });
 });

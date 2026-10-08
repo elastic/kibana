@@ -55,14 +55,14 @@ export abstract class DiscoverNavigation extends DiscoverAppBase {
   /**
    * Seeds the persisted query mode in localStorage on the next page load. Discover
    * ignores `currentMode` unless `defaultMode` matches the resolved default (the
-   * `discover.isEsqlDefault` flag), so `defaultMode` defaults to `'esql'` to
-   * match the enabled default.
+   * `discover.isEsqlDefault` flag), so `defaultMode` defaults to `'classic'` to
+   * match the current application default.
    *
    * Not idempotent: each call adds an `addInitScript` that reruns on every later
    * load in order, so the last write wins. Avoid calling it more than once per
    * test unless that stacking is intentional.
    */
-  public setQueryMode(currentMode: DiscoverQueryMode, defaultMode: DiscoverQueryMode = 'esql') {
+  public setQueryMode(currentMode: DiscoverQueryMode, defaultMode: DiscoverQueryMode = 'classic') {
     return this.page.addInitScript(
       ({ storageKey, storageValue }) => {
         window.localStorage.setItem(storageKey, storageValue);
