@@ -71,10 +71,10 @@ export const anomalySplitSortPlan: SplitSortPlan = buildEntityListSortPlan({
   sortField: ANOMALY_COUNT_FIELD,
   emptyValue: null,
   buildEntitiesWithValues: buildAnomalousEntitiesInView,
+  buildSortQuery: buildAnomalyCountSortQuery,
   aggregations: [`${ANOMALY_COUNT_FIELD} = COUNT(*)`],
   columns: [ANOMALY_COUNT_FIELD],
   emptyColumns: `${ANOMALY_COUNT_FIELD} = TO_LONG(null)`,
-  buildSortQuery: buildAnomalyCountSortQuery,
 });
 
 // ── enrichment ────────────────────────────────────────────────────────────────
@@ -89,7 +89,7 @@ const buildAnomalyCountEnrichQuery = (args: QueryArgs, pageRows: readonly Row[])
 
 const anomalyCountEnricher: PageEnricher = {
   fields: [ANOMALY_COUNT_FIELD],
-  read: async (pageRows, args, { runQuery }) => {
+  fetch: async (pageRows, args, { runQuery }) => {
     const entityIds = getEntityIds(pageRows);
     if (!entityIds.length) return new Map();
 

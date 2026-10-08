@@ -26,7 +26,7 @@ const fetchCaseCounts = async (
 
 const caseCountEnricher: PageEnricher = {
   fields: [CASE_COUNT_FIELD],
-  read: async (pageRows, _args, ctx) => {
+  fetch: async (pageRows, _args, ctx) => {
     const entityIds = getEntityIds(pageRows);
     const counts = await fetchCaseCounts(ctx, entityIds);
     return new Map(entityIds.map((id) => [id, { [CASE_COUNT_FIELD]: counts.get(id) ?? 0 }]));

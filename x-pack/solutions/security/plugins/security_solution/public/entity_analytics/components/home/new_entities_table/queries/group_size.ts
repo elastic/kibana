@@ -398,7 +398,7 @@ const buildGroupSizeEnrichQuery = (
 
 const groupSizeEnricher: PageEnricher = {
   fields: [GROUP_SIZE_FIELD],
-  read: async (pageRows, args, { runQuery }) => {
+  fetch: async (pageRows, args, { runQuery }) => {
     const entityIds = [...new Set(getEntityIds(pageRows))];
     if (!entityIds.length) return new Map();
 

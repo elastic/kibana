@@ -115,14 +115,14 @@ export interface RunContext {
   signal?: AbortSignal;
 }
 
-/** Fields an enricher read, per entity id; `null` when its query failed. */
+/** Fields an enricher fetched, per entity id; `null` when its query failed. */
 export type EnrichedFields = ReadonlyMap<string, Row>;
 
 /** Reads computed fields of the page rows after the sort query. It rejects when it fails. */
 export interface PageEnricher {
   /** Row fields it reads. */
   fields: readonly string[];
-  read: (rows: readonly Row[], args: QueryArgs, ctx: RunContext) => Promise<EnrichedFields>;
+  fetch: (rows: readonly Row[], args: QueryArgs, ctx: RunContext) => Promise<EnrichedFields>;
 }
 
 export interface SortPageContext {
@@ -243,7 +243,7 @@ export const fetchEnrichedRows = async (
   const settled = await Promise.allSettled(
     enrichers
       .filter((enricher) => isMissingFields(rows, enricher))
-      .map(({ read }) => read(rows, args, ctx))
+      .map(({ fetch }) => fetch(rows, args, ctx))
   );
   const results: EnrichedFields[] = [];
   const errors: unknown[] = [];

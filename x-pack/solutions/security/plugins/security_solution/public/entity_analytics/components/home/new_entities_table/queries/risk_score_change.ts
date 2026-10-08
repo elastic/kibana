@@ -114,6 +114,7 @@ export const riskScoreChangeSplitSortPlan: SplitSortPlan = {
       // LOOKUP JOIN may not keep the input order.
       ...buildValueSortSuffix(args, RISK_SCORE_CHANGE_FIELD, limit),
     ].join('\n'),
+  buildSortQuery: buildRiskScoreChangeSortQuery,
   // Empty rows: unscored entities, plus scored entities without a reference score.
   fetchEmptyRows: async (args, runQuery, afterId, limit) => {
     const [unscored, unreferenced] = await Promise.all([
@@ -145,7 +146,6 @@ export const riskScoreChangeSplitSortPlan: SplitSortPlan = {
       .sort((a, b) => ((getEntityId(a) ?? '') < (getEntityId(b) ?? '') ? -1 : 1))
       .slice(0, limit);
   },
-  buildSortQuery: buildRiskScoreChangeSortQuery,
 };
 
 // ── enrichment ────────────────────────────────────────────────────────────────
@@ -165,7 +165,7 @@ const buildRiskScoreChangeEnrichQuery = (args: QueryArgs, entityIds: string[]): 
 
 const riskScoreChangeEnricher: PageEnricher = {
   fields: [RISK_SCORE_CHANGE_FIELD],
-  read: async (pageRows, args, { runQuery }) => {
+  fetch: async (pageRows, args, { runQuery }) => {
     const entityIds = getEntityIds(pageRows);
     if (!entityIds.length) return new Map();
 

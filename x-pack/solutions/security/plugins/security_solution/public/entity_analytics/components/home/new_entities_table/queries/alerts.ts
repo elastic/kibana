@@ -169,10 +169,10 @@ export const getAlertSplitSortPlan = (sortField: string): SplitSortPlan =>
     // Entities without alerts count 0, so they sort first ascending; their last alert is null.
     emptyValue: sortField === ALERT_COUNT_FIELD ? 0 : null,
     buildEntitiesWithValues: buildAlertedEntitiesInView,
+    buildSortQuery: (args) => buildAlertSortQuery(args, sortField),
     aggregations: buildAlertAggregations(),
     columns: [sortField, ...ALERT_FIELDS],
     emptyColumns: ALERT_EMPTY_COLUMNS,
-    buildSortQuery: (args) => buildAlertSortQuery(args, sortField),
   });
 
 // ── enrichment ────────────────────────────────────────────────────────────────
@@ -196,7 +196,7 @@ const buildAlertsEnrichQuery = (
 /** Reads the alert count, last alert, and per-severity counts of the page rows. */
 const alertsEnricher: PageEnricher = {
   fields: ALERT_FIELDS,
-  read: async (pageRows, args, { runQuery }) => {
+  fetch: async (pageRows, args, { runQuery }) => {
     const entityIds = getEntityIds(pageRows);
     if (!entityIds.length) return new Map();
 

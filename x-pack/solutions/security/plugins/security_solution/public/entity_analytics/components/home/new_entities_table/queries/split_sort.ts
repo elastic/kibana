@@ -53,6 +53,8 @@ export interface SplitSortPlan {
   emptyValue: 0 | null;
   /** Page of value rows after the cursor, sorted, at most `limit` rows. */
   buildValueRowsQuery: (args: QueryArgs, limit: number) => string;
+  /** General sort query, for views where the split does not apply. */
+  buildSortQuery: (args: QueryArgs) => string;
   /** Page of empty rows after `afterId`, sorted by entity.id, at most `limit` rows. */
   fetchEmptyRows: (
     args: QueryArgs,
@@ -60,8 +62,6 @@ export interface SplitSortPlan {
     afterId: string | null,
     limit: number
   ) => Promise<Row[] | null>;
-  /** General sort query, for views where the split does not apply. */
-  buildSortQuery: (args: QueryArgs) => string;
 }
 
 export const isLargeView = (args: QueryArgs, viewSize: number): boolean =>
@@ -151,13 +151,13 @@ export interface EntityListSortOptions {
    * (a `STATS … BY entity.id`), the LOOKUP JOIN and the in-view conditions.
    */
   buildEntitiesWithValues: (args: QueryArgs, groupBy: string) => string[];
+  buildSortQuery: (args: QueryArgs) => string;
   /** STATS aggregations of the foreign columns. */
   aggregations: readonly string[];
   /** Foreign columns the rows carry. */
   columns: readonly string[];
   /** `EVAL` that sets the foreign columns of an empty row. */
   emptyColumns: string;
-  buildSortQuery: (args: QueryArgs) => string;
 }
 
 /**
@@ -168,10 +168,10 @@ export const buildEntityListSortPlan = ({
   sortField,
   emptyValue,
   buildEntitiesWithValues,
+  buildSortQuery,
   aggregations,
   columns,
   emptyColumns,
-  buildSortQuery,
 }: EntityListSortOptions): SplitSortPlan => ({
   sortField,
   emptyValue,
@@ -182,6 +182,7 @@ export const buildEntityListSortPlan = ({
       ...buildValueSortSuffix(args, sortField, limit),
       buildKeepClause(args, ...columns),
     ].join('\n'),
+  buildSortQuery,
   fetchEmptyRows: (args, runQuery, afterId, limit) =>
     fetchEmptyRowsExcludingValueIds(
       args,
@@ -191,7 +192,6 @@ export const buildEntityListSortPlan = ({
       afterId,
       limit
     ),
-  buildSortQuery,
 });
 
 /**

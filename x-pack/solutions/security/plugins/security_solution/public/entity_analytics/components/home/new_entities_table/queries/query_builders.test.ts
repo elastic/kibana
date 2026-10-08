@@ -180,10 +180,10 @@ describe('entities grid query builders', () => {
   });
 
   describe('enrich queries', () => {
-    it.each(COLUMN_ENRICHERS)('%s builds its query from the page rows', async (_id, { read }) => {
+    it.each(COLUMN_ENRICHERS)('%s builds its query from the page rows', async (_id, { fetch }) => {
       const runQuery = jest.fn(async (_query: string) => []);
 
-      await read(PAGE_ROWS, BASE_ARGS, createRunContext(runQuery));
+      await fetch(PAGE_ROWS, BASE_ARGS, createRunContext(runQuery));
 
       expect(runQuery.mock.calls.map(([query]) => query)).toMatchSnapshot();
     });
@@ -192,7 +192,7 @@ describe('entities grid query builders', () => {
       const runQuery = jest.fn(async (_query: string) => []);
 
       await Promise.all(
-        COLUMN_ENRICHERS.map(([, { read }]) => read([{}], BASE_ARGS, createRunContext(runQuery)))
+        COLUMN_ENRICHERS.map(([, { fetch }]) => fetch([{}], BASE_ARGS, createRunContext(runQuery)))
       );
 
       expect(runQuery).not.toHaveBeenCalled();
