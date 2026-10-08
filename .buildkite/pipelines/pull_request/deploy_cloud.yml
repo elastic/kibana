@@ -6,7 +6,6 @@ steps:
       machineType: n2-standard-16
       preemptible: true
     timeout_in_minutes: 60
-    soft_fail: true
     retry:
       automatic:
         - exit_status: '-1'
@@ -20,7 +19,6 @@ steps:
     depends_on:
       - build_cloud_image
     timeout_in_minutes: 30
-    soft_fail: true
     retry:
       automatic:
         - exit_status: '-1'

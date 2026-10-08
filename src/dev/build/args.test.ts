@@ -396,7 +396,7 @@ it('only builds cloud packages if --cloud is passed', () => {
         "createDebPackage": false,
         "createDockerCloud": true,
         "createDockerCloudFIPS": false,
-        "createDockerContexts": true,
+        "createDockerContexts": false,
         "createDockerFIPS": false,
         "createDockerServerless": false,
         "createDockerUBI": false,
@@ -429,4 +429,28 @@ it('only builds cloud packages if --cloud is passed', () => {
       "unknownFlags": Array [],
     }
   `);
+});
+
+it.each([
+  { flags: ['--all-platforms'] },
+  { flags: ['--all-platforms', '--docker-cross-compile'] },
+  { flags: ['--all-platforms', '--docker-images'] },
+])('only builds cloud artifacts with --cloud $flags', ({ flags }) => {
+  const { buildOptions } = readCliArgs(['node', 'scripts/build', '--cloud', ...flags]);
+
+  expect(buildOptions).toMatchObject({
+    createArchives: true,
+    createDebPackage: false,
+    createRpmPackage: false,
+    createDockerCloud: true,
+    createDockerCloudFIPS: false,
+    createDockerContexts: false,
+    createDockerFIPS: false,
+    createDockerServerless: false,
+    createDockerUBI: false,
+    createDockerWolfi: false,
+    targetAllPlatforms: true,
+    targetCloudPlatforms: true,
+    targetServerlessPlatforms: false,
+  });
 });

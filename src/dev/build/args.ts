@@ -100,7 +100,7 @@ export function readCliArgs(argv: string[]) {
   }
 
   function isOsPackageDesired(name: string) {
-    if (flags['skip-os-packages'] || !flags['all-platforms']) {
+    if (flags.cloud || flags['skip-os-packages'] || !flags['all-platforms']) {
       return false;
     }
 
@@ -153,7 +153,7 @@ export function readCliArgs(argv: string[]) {
       ((isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-serverless'])) ||
         Boolean(flags.serverless)),
     createDockerUBI: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubi']),
-    createDockerContexts: !Boolean(flags['skip-docker-contexts']),
+    createDockerContexts: !Boolean(flags.cloud) && !Boolean(flags['skip-docker-contexts']),
     createDockerFIPS: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-fips']),
     targetAllPlatforms: Boolean(flags['all-platforms']),
     targetServerlessPlatforms: Boolean(flags.serverless),
