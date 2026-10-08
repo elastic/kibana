@@ -208,6 +208,27 @@ const inspectZodChain = (node) => {
 };
 
 /**
+ * True for a zero-argument `.meta()` call, which reads metadata instead of building a schema.
+ * @param {Expression | undefined} node
+ * @returns {boolean}
+ */
+const isMetaGetterCall = (node) => {
+  const unwrapped = unwrapExpression(node);
+  if (!unwrapped || unwrapped.type !== esTypes.CallExpression) {
+    return false;
+  }
+  const callee = unwrapExpression(unwrapped.callee);
+  return Boolean(
+    callee &&
+      callee.type === esTypes.MemberExpression &&
+      !callee.computed &&
+      callee.property.type === esTypes.Identifier &&
+      callee.property.name === 'meta' &&
+      unwrapped.arguments.length === 0
+  );
+};
+
+/**
  * @typedef {{
  *   zodNamespaces: Set<string>;
  *   lazySchemaNames: Set<string>;
@@ -226,7 +247,7 @@ const inspectZodChain = (node) => {
  */
 const isZodNamespaceChain = (init, state) => {
   const { hasCall } = inspectZodChain(init);
-  if (!hasCall) {
+  if (!hasCall || isMetaGetterCall(init)) {
     return false;
   }
   const root = getChainRootIdentifier(init);
@@ -241,7 +262,12 @@ const isZodNamespaceChain = (init, state) => {
  */
 const isEagerZodNamespaceChain = (init, state) => {
   const { hasCall, firstMember } = inspectZodChain(init);
-  if (!hasCall || firstMember === 'lazy' || firstMember === 'lazySchema') {
+  if (
+    !hasCall ||
+    isMetaGetterCall(init) ||
+    firstMember === 'lazy' ||
+    firstMember === 'lazySchema'
+  ) {
     return false;
   }
   const root = getChainRootIdentifier(init);
@@ -288,6 +314,7 @@ const canAutoFixSchemaCall = (node) => {
   }
   const { callee } = node;
   return (
+    !isMetaGetterCall(node) &&
     !callee.computed &&
     callee.property.type === esTypes.Identifier &&
     AUTO_FIX_SCHEMA_METHODS.has(callee.property.name)
@@ -326,13 +353,50 @@ const isEagerDerivedSchemaChain = (init, state) => {
     return false;
   }
   const { hasCall } = inspectZodChain(init);
-  if (!hasCall) {
+  if (!hasCall || isMetaGetterCall(init)) {
     return false;
   }
   const root = getChainRootIdentifier(init);
   return Boolean(
     root && (state.schemaBindings.has(root.name) || state.schemaFactoryBindings.has(root.name))
   );
+};
+
+/**
+ * Collects return statements of a function body, skipping nested functions.
+ * @param {Node} body
+ * @returns {Node[]}
+ */
+const collectReturnStatements = (body) => {
+  const returns = [];
+  const visit = (node) => {
+    if (!node || typeof node.type !== 'string') {
+      return;
+    }
+    if (
+      node.type === esTypes.ArrowFunctionExpression ||
+      node.type === esTypes.FunctionExpression ||
+      node.type === esTypes.FunctionDeclaration
+    ) {
+      return;
+    }
+    if (node.type === esTypes.ReturnStatement) {
+      returns.push(node);
+      return;
+    }
+    for (const [key, value] of Object.entries(node)) {
+      if (key === 'parent') {
+        continue;
+      }
+      if (Array.isArray(value)) {
+        value.forEach(visit);
+      } else if (value && typeof value === 'object') {
+        visit(value);
+      }
+    }
+  };
+  body.body.forEach(visit);
+  return returns;
 };
 
 /**
@@ -347,9 +411,10 @@ const isSchemaFactory = (init, state) => {
   if (init.body.type !== esTypes.BlockStatement) {
     return isEagerZodNamespaceChain(init.body, state) && canAutoFixSchemaCall(init.body);
   }
-  const returns = init.body.body.filter((statement) => statement.type === esTypes.ReturnStatement);
+  const returns = collectReturnStatements(init.body);
+  const lastStatement = init.body.body[init.body.body.length - 1];
   return (
-    returns.length > 0 &&
+    lastStatement?.type === esTypes.ReturnStatement &&
     returns.every(
       (statement) =>
         statement.argument &&
@@ -598,7 +663,7 @@ module.exports = {
           schemaFactoryBindings: new Set(),
         };
         sourceCode = context.sourceCode;
-        fileChangedLines = changedLines.getChangedLines(context.filename);
+        fileChangedLines = changedLines.getChangedLines(context.filename, sourceCode.text);
         schemaFactoryCandidates = [];
       },
       ImportDeclaration(node) {

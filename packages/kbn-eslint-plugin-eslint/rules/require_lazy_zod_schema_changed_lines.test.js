@@ -214,4 +214,24 @@ describe('Git diff hunk lines', () => {
       changedLines.isDeclarationInRemovedSource("const Moved = z.enum(['a', 'c']);", removed)
     ).toBe(false);
   });
+
+  it('does not match a function-local declaration removed from the base file', () => {
+    const removed = ["  const Local = z.enum(['a', 'b']);"];
+    expect(changedLines.isDeclarationInRemovedSource("Local = z.enum(['a', 'b']);", removed)).toBe(
+      false
+    );
+  });
+
+  it('matches a module-level declaration written without the const keyword prefix', () => {
+    const removed = ["export const Moved = z.enum(['a', 'b']);"];
+    expect(changedLines.isDeclarationInRemovedSource("Moved = z.enum(['a', 'b']);", removed)).toBe(
+      true
+    );
+  });
+});
+
+describe('unsaved editor buffer', () => {
+  it('treats every line as changed when the linted text differs from disk', () => {
+    expect(changedLines.getChangedLines(__filename, 'const unsaved = true;')).toBeNull();
+  });
 });

@@ -29,6 +29,35 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
   valid: [
     {
       code: dedent`
+        import { z } from '@kbn/zod';
+        export const meta = z.string().meta();
+      `,
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
+        const Factory = () => {
+          if (process.env.X) {
+            return undefined;
+          }
+          return z.string();
+        };
+        export const X = Factory().optional();
+      `,
+    },
+    {
+      code: dedent`
+        import { z } from '@kbn/zod';
+        const Factory = () => {
+          if (process.env.X) {
+            return z.string();
+          }
+        };
+        export const X = Factory().optional();
+      `,
+    },
+    {
+      code: dedent`
         import { z, lazySchema } from '@kbn/zod';
         export const X = lazySchema(() => z.object({}));
       `,
@@ -153,6 +182,34 @@ ruleTester.run('@kbn/eslint/require_lazy_zod_schema', rule, {
   ],
 
   invalid: [
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const X = z.string().meta({ id: 'x' });
+      `,
+      errors: [EAGER],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        export const X = lazySchema(() => z.string().meta({ id: 'x' }));
+      `,
+    },
+    {
+      code: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const Factory = () => {
+          return z.string();
+        };
+        export const X = Factory().optional();
+      `,
+      errors: [DERIVED],
+      output: dedent`
+        import { z, lazySchema } from '@kbn/zod';
+        const Factory = () => {
+          return z.string();
+        };
+        export const X = lazySchema(() => Factory().optional());
+      `,
+    },
     {
       code: dedent`
         import { z } from '@kbn/zod';

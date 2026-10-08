@@ -127,11 +127,18 @@ const parseChangedLines = (diff) => {
 
 /**
  * @param {string} filename
+ * @param {string} [sourceText] Linted text. When it differs from disk, every line counts as changed.
  * @returns {LineRange[] | null}
  */
-const getChangedLines = (filename) => {
+const getChangedLines = (filename, sourceText) => {
   if (typeof filename !== 'string' || !path.isAbsolute(filename) || !fs.existsSync(filename)) {
     return null; // RuleTester and new editor buffers have no on-disk file.
+  }
+  if (
+    typeof sourceText === 'string' &&
+    sourceText !== fs.readFileSync(filename, 'utf8').replace(/^\uFEFF/, '')
+  ) {
+    return null; // Unsaved editor buffer: the diff on disk does not describe it.
   }
 
   const relative = path.relative(ROOT, filename).split(path.sep).join('/');
@@ -232,7 +239,17 @@ const getRemovedSourceChunks = (base, files) => {
  * @returns {boolean}
  */
 const isDeclarationInRemovedSource = (declaration, removedSourceChunks) =>
-  removedSourceChunks.some((chunk) => chunk.includes(declaration));
+  removedSourceChunks.some((chunk) => {
+    for (let index = chunk.indexOf(declaration); index !== -1; ) {
+      const prefix = chunk.slice(chunk.lastIndexOf('\n', index - 1) + 1, index);
+      // Reject an indented `const`, which is a function-local declaration, not a module-level one.
+      if (/^(?:export\s+)?(?:const\s+)?$|^\s*$/.test(prefix)) {
+        return true;
+      }
+      index = chunk.indexOf(declaration, index + 1);
+    }
+    return false;
+  });
 
 /**
  * Checks whether an exact declaration in an added file already existed in the base tree.
