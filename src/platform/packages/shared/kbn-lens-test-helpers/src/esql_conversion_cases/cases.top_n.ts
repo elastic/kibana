@@ -12,22 +12,45 @@ import { count, dateHistogram, metric, terms } from './columns';
 import { createEsqlConversionCaseContext } from './fixtures';
 
 export const buildTopNCases = (): EsqlConversionCase[] => {
-  const { ecommerce, ecommerceFrom, ecommerceWhere, logs, logsFrom, logsWhere } =
-    createEsqlConversionCaseContext();
+  const {
+    ecommerce,
+    ecommerceFrom,
+    ecommerceWhere,
+    ecommerceWithoutTimeField,
+    logs,
+    logsFrom,
+    logsWhere,
+  } = createEsqlConversionCaseContext();
 
-  // Restricts the query to the top values of an outer dimension, which `LIMIT n BY` cannot do.
+  // Restricts the query to the top values of a dimension that `LIMIT n BY` cannot cap globally
+  // (outer Top values, or Top values above a date histogram). Pass `where: null` to omit the
+  // time filter (data views without a time field).
   const outerTopNFilter = ({
     field,
     score,
     sort,
     size,
+    from = logsFrom,
+    where: whereOption,
   }: {
     field: string;
     score: string;
     sort: string;
     size: number;
-  }) =>
-    `WHERE ${field} IN (${logsFrom} | ${logsWhere} | STATS ${score} BY ${field} | SORT ${sort} | LIMIT ${size} | KEEP ${field})`;
+    from?: string;
+    where?: string | null;
+  }) => {
+    const where = whereOption === null ? undefined : whereOption ?? logsWhere;
+    const subquery = [
+      from,
+      ...(where ? [where] : []),
+      `STATS ${score} BY ${field}`,
+      `SORT ${sort}`,
+      `LIMIT ${size}`,
+      `KEEP ${field}`,
+    ].join(' | ');
+    return `WHERE ${field} IN (${subquery})`;
+  };
 
   return [
     {
@@ -157,19 +180,254 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
         reason: 'terms_other_bucket_not_supported',
       },
     },
+    // Top values above a date histogram: rank the top N globally, then plot those series over
+    // time (`IN (subquery)` + optional INLINE STATS rank; no LIMIT n / LIMIT n BY).
     {
       group: 'top_n',
       dataset: logs,
-      description: 'terms above a date histogram is not convertible yet',
+      description: 'terms above a date histogram (fixed interval) ranked by metric DESC',
       columns: {
-        col1: terms('host.keyword', {}),
-        col2: dateHistogram('timestamp', { interval: '1h' }),
+        col1: terms('host.keyword', {
+          size: 5,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col2: dateHistogram('timestamp', { interval: '1d' }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'host.keyword',
+          score: 'rank_host_keyword = AVG(bytes)',
+          sort: 'rank_host_keyword DESC',
+          size: 5,
+        })} | INLINE STATS rank_host_keyword = AVG(bytes) BY host.keyword | STATS AVG(bytes) BY rank_host_keyword, host.keyword, BUCKET(timestamp, 1 day) | SORT rank_host_keyword DESC, \`BUCKET(timestamp, 1 day)\` ASC | DROP rank_host_keyword`,
+        columnNames: ['AVG(bytes)', 'host.keyword', 'BUCKET(timestamp, 1 day)'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'host.keyword': ['col1'],
+          'BUCKET(timestamp, 1 day)': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms above a date histogram (fixed interval) ranked by metric ASC',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'asc',
+        }),
+        col2: dateHistogram('timestamp', { interval: '1d' }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'host.keyword',
+          score: 'rank_host_keyword = AVG(bytes)',
+          sort: 'rank_host_keyword ASC',
+          size: 3,
+        })} | INLINE STATS rank_host_keyword = AVG(bytes) BY host.keyword | STATS AVG(bytes) BY rank_host_keyword, host.keyword, BUCKET(timestamp, 1 day) | SORT rank_host_keyword ASC, \`BUCKET(timestamp, 1 day)\` ASC | DROP rank_host_keyword`,
+        columnNames: ['AVG(bytes)', 'host.keyword', 'BUCKET(timestamp, 1 day)'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'host.keyword': ['col1'],
+          'BUCKET(timestamp, 1 day)': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms above a date histogram (auto interval) ranked by metric',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 4,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col2: dateHistogram('timestamp', { interval: 'auto' }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'host.keyword',
+          score: 'rank_host_keyword = AVG(bytes)',
+          sort: 'rank_host_keyword DESC',
+          size: 4,
+        })} | INLINE STATS rank_host_keyword = AVG(bytes) BY host.keyword | STATS AVG(bytes) BY rank_host_keyword, host.keyword, timestamp = BUCKET(timestamp, 75, ?_tstart, ?_tend) | SORT rank_host_keyword DESC, timestamp ASC | DROP rank_host_keyword`,
+        columnNames: ['AVG(bytes)', 'host.keyword', 'timestamp'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'host.keyword': ['col1'],
+          timestamp: ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms above a date histogram ranked alphabetically DESC',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 5,
+          orderBy: { type: 'alphabetical' },
+          orderDirection: 'desc',
+        }),
+        col2: dateHistogram('timestamp', { interval: '1d' }),
         col3: count(),
       },
       columnOrder: ['col1', 'col2', 'col3'],
       expected: {
-        success: false,
-        reason: 'terms_date_histogram_not_supported',
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'host.keyword',
+          score: 'COUNT(*)',
+          sort: 'host.keyword DESC',
+          size: 5,
+        })} | STATS COUNT(*) BY host.keyword, BUCKET(timestamp, 1 day) | SORT host.keyword DESC, \`BUCKET(timestamp, 1 day)\` ASC`,
+        columnNames: ['COUNT(*)', 'host.keyword', 'BUCKET(timestamp, 1 day)'],
+        expectedSourceIds: {
+          'COUNT(*)': ['col3'],
+          'host.keyword': ['col1'],
+          'BUCKET(timestamp, 1 day)': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms above a date histogram ranked alphabetically ASC',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 4,
+          orderBy: { type: 'alphabetical' },
+          orderDirection: 'asc',
+        }),
+        col2: dateHistogram('timestamp', { interval: '1d' }),
+        col3: count(),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'host.keyword',
+          score: 'COUNT(*)',
+          sort: 'host.keyword ASC',
+          size: 4,
+        })} | STATS COUNT(*) BY host.keyword, BUCKET(timestamp, 1 day) | SORT host.keyword ASC, \`BUCKET(timestamp, 1 day)\` ASC`,
+        columnNames: ['COUNT(*)', 'host.keyword', 'BUCKET(timestamp, 1 day)'],
+        expectedSourceIds: {
+          'COUNT(*)': ['col3'],
+          'host.keyword': ['col1'],
+          'BUCKET(timestamp, 1 day)': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms above a date histogram uses the metric column role in STATS only',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 5,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col2: dateHistogram('timestamp', { interval: '1d' }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      columnRoles: { col3: 'avg_bytes' },
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'host.keyword',
+          score: 'rank_host_keyword = AVG(bytes)',
+          sort: 'rank_host_keyword DESC',
+          size: 5,
+        })} | INLINE STATS rank_host_keyword = AVG(bytes) BY host.keyword | STATS avg_bytes = AVG(bytes) BY rank_host_keyword, host.keyword, BUCKET(timestamp, 1 day) | SORT rank_host_keyword DESC, \`BUCKET(timestamp, 1 day)\` ASC | DROP rank_host_keyword`,
+        columnNames: ['avg_bytes', 'host.keyword', 'BUCKET(timestamp, 1 day)'],
+        expectedSourceIds: {
+          avg_bytes: ['col3'],
+          'host.keyword': ['col1'],
+          'BUCKET(timestamp, 1 day)': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms above a date histogram ranked by a KQL-filtered metric',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 5,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col2: dateHistogram('timestamp', { interval: '1d' }),
+        col3: count({ filter: { language: 'kuery', query: 'bytes > 1000' } }),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'host.keyword',
+          score: 'rank_host_keyword = COUNT(*) WHERE KQL("bytes > 1000")',
+          sort: 'rank_host_keyword DESC',
+          size: 5,
+        })} | INLINE STATS rank_host_keyword = COUNT(*) WHERE KQL("bytes > 1000") BY host.keyword | STATS COUNT(*) WHERE KQL("bytes > 1000") BY rank_host_keyword, host.keyword, BUCKET(timestamp, 1 day) | SORT rank_host_keyword DESC, \`BUCKET(timestamp, 1 day)\` ASC | DROP rank_host_keyword`,
+        columnNames: [
+          'COUNT(*) WHERE KQL("bytes > 1000")',
+          'host.keyword',
+          'BUCKET(timestamp, 1 day)',
+        ],
+        expectedSourceIds: {
+          'COUNT(*) WHERE KQL("bytes > 1000")': ['col3'],
+          'host.keyword': ['col1'],
+          'BUCKET(timestamp, 1 day)': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: ecommerceWithoutTimeField,
+      description: 'terms above a date histogram without a time field omits WHERE in the subquery',
+      skipApiExecution: true,
+      columns: {
+        col1: terms('category.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col2: dateHistogram('order_date', { interval: '1d' }),
+        col3: count(),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${ecommerceFrom} | ${outerTopNFilter({
+          field: 'category.keyword',
+          score: 'rank_category_keyword = COUNT(*)',
+          sort: 'rank_category_keyword DESC',
+          size: 3,
+          from: ecommerceFrom,
+          where: null,
+        })} | INLINE STATS rank_category_keyword = COUNT(*) BY category.keyword | STATS COUNT(*) BY rank_category_keyword, category.keyword, BUCKET(order_date, 1 day) | SORT rank_category_keyword DESC, \`BUCKET(order_date, 1 day)\` ASC | DROP rank_category_keyword`,
+        columnNames: ['COUNT(*)', 'category.keyword', 'BUCKET(order_date, 1 day)'],
+        expectedSourceIds: {
+          'COUNT(*)': ['col3'],
+          'category.keyword': ['col1'],
+          'BUCKET(order_date, 1 day)': ['col2'],
+        },
       },
     },
     // A date histogram above Top values ranks the top N per time bucket, which is the
