@@ -18,6 +18,12 @@ import {
 import type { CatalogWorker } from './use_worker_selection';
 import { WorkerSelectionRow } from './worker_selection_row';
 
+jest.mock('../../components/worker_dependencies/worker_dependencies_callout', () => ({
+  WorkerDependenciesCallout: ({ worker, surface }: { worker: { id: string }; surface: string }) => (
+    <div data-test-subj={`alertZeroWorkerDependencies-${surface}-${worker.id}`} />
+  ),
+}));
+
 const getWorker = (id: string): CatalogWorker => {
   const worker = SYSTEM_SECURITY_WORKER_CATALOG.find((entry) => entry.id === id);
   if (!worker) throw new Error(`Unknown worker ${id}`);
@@ -118,13 +124,21 @@ describe('WorkerSelectionRow', () => {
     ).toBeDisabled();
   });
 
-  it('shows the workflows note only for Attack Discovery', () => {
-    renderRow({ workerId: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID });
-    expect(screen.getByTestId('alertZeroOnboardingAttackDiscoveryNote')).toBeInTheDocument();
+  it('places the shared dependency callout on the Attack Discovery row', () => {
+    renderRow({ workerId: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID, checked: false });
+    expect(
+      screen.getByTestId(
+        `alertZeroWorkerDependencies-onboarding-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
+      )
+    ).toBeInTheDocument();
   });
 
-  it('does not show the workflows note for other workers', () => {
+  it('uses the same callout entry point for other workers', () => {
     renderRow({ workerId: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID });
-    expect(screen.queryByTestId('alertZeroOnboardingAttackDiscoveryNote')).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId(
+        `alertZeroWorkerDependencies-onboarding-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+      )
+    ).toBeInTheDocument();
   });
 });

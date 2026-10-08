@@ -233,6 +233,29 @@ describe('getRunAttackDiscoveryTool', () => {
     );
   });
 
+  it('normalizes an explicit provided alert_retrieval_mode to the default-retrieval query mode', async () => {
+    // `provided` is an alias for "the alerts are supplied". The value that reaches
+    // the generation workflow config is the built-in default-retrieval query mode,
+    // because `alert_retrieval_mode` is typed as `custom_query | esql`
+    // (WorkflowConfig) and is derived as `mode === 'esql' ? 'esql' : 'custom_query'`.
+    // The pipeline_data route reconstructs the provided-alert entry from
+    // `tracking.providedAlerts` for exactly this reason — see its Step 2.5 tests.
+    await invokeHandler({
+      alerts: ['Alert 1', 'Alert 2'],
+      alert_retrieval_mode: 'provided',
+    });
+
+    expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alerts: ['Alert 1', 'Alert 2'],
+        workflowConfig: expect.objectContaining({
+          alert_retrieval_mode: 'custom_query',
+          default_retrieval_enabled: false,
+        }),
+      })
+    );
+  });
+
   it('returns inline discoveries on validation_succeeded outcome (sync mode)', async () => {
     const result = await invokeHandler({});
 

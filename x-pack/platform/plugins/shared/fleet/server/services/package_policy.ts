@@ -2017,7 +2017,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       } else {
         await deleteSecrets({
           esClient,
-          soClient,
+          // Secrets are global: a package policy in another Space may reference one, and the
+          // request-scoped client only sees its own Space.
+          soClient: appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+          checkAllSpaces: true,
           ids: secretsToDelete.map((s) => s.id),
           agentPolicyIds: [...associatedPolicyIds],
         });
@@ -2512,7 +2515,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       const runDelete = () =>
         deleteSecrets({
           esClient,
-          soClient,
+          // Secrets are global: see the single update above.
+          soClient: appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+          checkAllSpaces: true,
           ids: secretIdsToDelete,
           agentPolicyIds: agentPolicyIdsForDelete,
         });
