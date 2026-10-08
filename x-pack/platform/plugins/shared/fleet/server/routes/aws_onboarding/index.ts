@@ -10,6 +10,7 @@ import type { FleetAuthzRouter } from '../../services/security';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import {
   CreateAwsOnboardingStackRequestSchema,
+  DeleteAwsOnboardingCredentialsRequestSchema,
   GetAwsOnboardingStackRequestSchema,
   PutAwsOnboardingCredentialsRequestSchema,
   UpdateAwsOnboardingStackRequestSchema,
@@ -96,7 +97,13 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       access: 'internal',
       security: WRITE_SECURITY,
     })
-    .addVersion({ version: API_VERSIONS.internal.v1, validate: false }, deleteCredentialsHandler);
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: { request: DeleteAwsOnboardingCredentialsRequestSchema },
+      },
+      deleteCredentialsHandler
+    );
 
   router.versioned
     .post({

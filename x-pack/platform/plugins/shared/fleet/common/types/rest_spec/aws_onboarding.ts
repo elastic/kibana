@@ -22,6 +22,8 @@ export interface AwsOnboardingCredentialsPublic {
   accessKeyIdMasked?: string;
   region?: string;
   stackNamePrefix?: string;
+  /** Bootstrap stack ARN, when given: removing the credentials deletes that stack first. */
+  bootstrapStackArn?: string;
 }
 
 /** Write-only; see the module comment for how `secrets` is stored and used. */
@@ -29,10 +31,21 @@ export interface PutAwsOnboardingCredentialsRequest {
   accessKeyId: string;
   region: string;
   stackNamePrefix?: string;
+  bootstrapStackArn?: string;
   secrets: {
     /** Encrypted at rest (Encrypted Saved Object); never logged or echoed back. */
     secretAccessKey: string;
   };
+}
+
+export interface DeleteAwsOnboardingCredentialsRequestQuery {
+  /** Remove the credentials even if the bootstrap stack cannot be deleted (or should be kept). */
+  force?: boolean;
+}
+
+export interface DeleteAwsOnboardingCredentialsResponse {
+  /** `skipped` when no bootstrap stack ARN is stored, the stack is already gone, or `force` was set. */
+  bootstrapStack: 'deletion_started' | 'skipped';
 }
 
 /** Where the CloudFormation template came from. `iacp` carries the digest to persist as `iac_key`. */

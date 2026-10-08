@@ -47,10 +47,19 @@ export const PutAwsOnboardingCredentialsRequestSchema = {
     stackNamePrefix: schema.maybe(
       schema.string({ minLength: 1, maxLength: 40, validate: validateStackNamePrefix })
     ),
+    bootstrapStackArn: schema.maybe(
+      schema.string({ minLength: 1, maxLength: 2048, validate: validateStackArn })
+    ),
     // Write-only: stored encrypted (Encrypted Saved Object), never returned by any route.
     secrets: schema.object({
       secretAccessKey: schema.string({ minLength: 1, maxLength: 256 }),
     }),
+  }),
+};
+
+export const DeleteAwsOnboardingCredentialsRequestSchema = {
+  query: schema.object({
+    force: schema.boolean({ defaultValue: false }),
   }),
 };
 

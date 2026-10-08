@@ -14,6 +14,8 @@ import type {
   PutAwsOnboardingCredentialsRequest,
   UpdateAwsOnboardingStackRequest,
   UpdateAwsOnboardingStackResponse,
+  DeleteAwsOnboardingCredentialsRequestQuery,
+  DeleteAwsOnboardingCredentialsResponse,
 } from '../../../common/types/rest_spec/aws_onboarding';
 import { API_VERSIONS, AWS_ONBOARDING_API_ROUTES } from '../../../common/constants';
 
@@ -37,11 +39,14 @@ export function sendPutAwsOnboardingCredentials(body: PutAwsOnboardingCredential
   });
 }
 
-export function sendDeleteAwsOnboardingCredentials() {
-  return sendRequest<{}>({
+export function sendDeleteAwsOnboardingCredentials(
+  query: DeleteAwsOnboardingCredentialsRequestQuery = {}
+) {
+  return sendRequest<DeleteAwsOnboardingCredentialsResponse>({
     method: 'delete',
     path: AWS_ONBOARDING_API_ROUTES.CREDENTIALS_PATTERN,
     version: API_VERSIONS.internal.v1,
+    query: { force: query.force ?? false },
   });
 }
 

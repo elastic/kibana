@@ -8,7 +8,11 @@
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 
-import type { PutAwsOnboardingCredentialsRequest } from '../../../../common/types/rest_spec/aws_onboarding';
+import type {
+  DeleteAwsOnboardingCredentialsRequestQuery,
+  DeleteAwsOnboardingCredentialsResponse,
+  PutAwsOnboardingCredentialsRequest,
+} from '../../../../common/types/rest_spec/aws_onboarding';
 import { useStartServices } from '../../../hooks';
 import {
   sendDeleteAwsOnboardingCredentials,
@@ -57,19 +61,29 @@ export const useManagedOnboardingCredentials = () => {
   );
 
   const remove = useMutation(
-    async () => {
-      const { error } = await sendDeleteAwsOnboardingCredentials();
-      if (error) {
+    async (query: DeleteAwsOnboardingCredentialsRequestQuery = {}) => {
+      const { data, error } = await sendDeleteAwsOnboardingCredentials(query);
+      if (error || !data) {
         throw toError(error);
       }
+      return data;
     },
     {
-      onSuccess: () => {
+      onSuccess: (data: DeleteAwsOnboardingCredentialsResponse) => {
         queryClient.invalidateQueries([AWS_ONBOARDING_CREDENTIALS_QUERY_KEY]);
         notifications.toasts.addSuccess({
-          title: i18n.translate('xpack.fleet.cloudConnector.managedOnboarding.removeSuccess', {
-            defaultMessage: 'Managed onboarding credentials removed',
-          }),
+          title:
+            data.bootstrapStack === 'deletion_started'
+              ? i18n.translate(
+                  'xpack.fleet.cloudConnector.managedOnboarding.removeSuccessWithStack',
+                  {
+                    defaultMessage:
+                      'Managed onboarding credentials removed; the bootstrap stack is being deleted in AWS',
+                  }
+                )
+              : i18n.translate('xpack.fleet.cloudConnector.managedOnboarding.removeSuccess', {
+                  defaultMessage: 'Managed onboarding credentials removed',
+                }),
         });
       },
       onError: (error: Error) => {

@@ -25,6 +25,7 @@ import {
 import type { FleetRequestHandler } from '../../types';
 import type {
   CreateAwsOnboardingStackRequestSchema,
+  DeleteAwsOnboardingCredentialsRequestSchema,
   GetAwsOnboardingStackRequestSchema,
   PutAwsOnboardingCredentialsRequestSchema,
   UpdateAwsOnboardingStackRequestSchema,
@@ -76,10 +77,22 @@ export const putCredentialsHandler: FleetRequestHandler<
   }
 };
 
-export const deleteCredentialsHandler: FleetRequestHandler = async (context, request, response) => {
+export const deleteCredentialsHandler: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof DeleteAwsOnboardingCredentialsRequestSchema.query>
+> = async (context, request, response) => {
   if (!(await isAwsManagedOnboardingEnabled())) return notEnabled(response);
-  await awsOnboardingCredentialsService.delete();
-  return response.ok({ body: {} });
+  try {
+    // The bootstrap stack goes first: once the credentials are gone Kibana cannot reach AWS, and
+    // a failed deletion keeps the credentials so the user can retry or force-remove them.
+    const bootstrapStack = request.query.force
+      ? 'skipped'
+      : await awsOnboardingStackService.deleteBootstrapStack();
+    await awsOnboardingCredentialsService.delete();
+    return response.ok({ body: { bootstrapStack } });
+  } catch (error) {
+    return mapError(error, response);
+  }
 };
 
 export const createStackHandler: FleetRequestHandler<

@@ -149,6 +149,16 @@ import { bumpProfilingSymbolizerPolicy } from './model_versions/bump_profiling_s
  * schemas in `/server/types` if mappings are updated.
  */
 
+const AwsOnboardingCredentialsSchemaV1 = schema.object({
+  accessKeyId: schema.string(),
+  secretAccessKey: schema.string(),
+  region: schema.string(),
+  stackNamePrefix: schema.string(),
+  bootstrapStackArn: schema.maybe(schema.string()),
+  createdAt: schema.string(),
+  updatedAt: schema.string(),
+});
+
 export const getSavedObjectTypes = (
   options = { useSpaceAwareness: false }
 ): { [key: string]: SavedObjectsType } => {
@@ -1937,6 +1947,19 @@ export const getSavedObjectTypes = (
       mappings: {
         dynamic: false,
         properties: {},
+      },
+      modelVersions: {
+        '1': {
+          changes: [],
+          schemas: {
+            // Nothing is mapped; the secret is encrypted at rest and the rest is only read back by Fleet.
+            forwardCompatibility: AwsOnboardingCredentialsSchemaV1.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: AwsOnboardingCredentialsSchemaV1,
+          },
+        },
       },
     },
     [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE]: {

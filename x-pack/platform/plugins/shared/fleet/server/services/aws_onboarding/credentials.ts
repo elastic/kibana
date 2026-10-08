@@ -25,6 +25,8 @@ interface AwsOnboardingCredentialsSOAttributes {
   secretAccessKey: string;
   region: string;
   stackNamePrefix: string;
+  /** ARN of the bootstrap stack that created the user; lets Kibana delete it with the credentials. */
+  bootstrapStackArn?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -34,6 +36,7 @@ export interface AwsOnboardingCredentials {
   secretAccessKey: string;
   region: string;
   stackNamePrefix: string;
+  bootstrapStackArn?: string;
 }
 
 const maskAccessKeyId = (accessKeyId: string): string =>
@@ -67,6 +70,7 @@ export class AwsOnboardingCredentialsService {
       secretAccessKey: request.secrets.secretAccessKey,
       region: request.region,
       stackNamePrefix: request.stackNamePrefix ?? DEFAULT_STACK_NAME_PREFIX,
+      bootstrapStackArn: request.bootstrapStackArn,
       createdAt: existing.configured ? existing.createdAt ?? now : now,
       updatedAt: now,
     };
@@ -92,6 +96,7 @@ export class AwsOnboardingCredentialsService {
         accessKeyIdMasked: maskAccessKeyId(so.attributes.accessKeyId),
         region: so.attributes.region,
         stackNamePrefix: so.attributes.stackNamePrefix,
+        bootstrapStackArn: so.attributes.bootstrapStackArn,
         createdAt: so.attributes.createdAt,
       };
     } catch (error) {
@@ -113,8 +118,9 @@ export class AwsOnboardingCredentialsService {
           AWS_ONBOARDING_CREDENTIALS_SAVED_OBJECT_TYPE,
           CREDENTIALS_SO_ID
         );
-      const { accessKeyId, secretAccessKey, region, stackNamePrefix } = so.attributes;
-      return { accessKeyId, secretAccessKey, region, stackNamePrefix };
+      const { accessKeyId, secretAccessKey, region, stackNamePrefix, bootstrapStackArn } =
+        so.attributes;
+      return { accessKeyId, secretAccessKey, region, stackNamePrefix, bootstrapStackArn };
     } catch (error) {
       if (error?.output?.statusCode === 404 || error?.statusCode === 404) {
         throw new FleetNotFoundError('AWS onboarding credentials are not configured');

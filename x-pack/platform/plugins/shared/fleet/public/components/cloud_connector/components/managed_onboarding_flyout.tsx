@@ -74,6 +74,7 @@ export const ManagedOnboardingFlyout: React.FC<ManagedOnboardingFlyoutProps> = (
   const [accessKeyId, setAccessKeyId] = useState('');
   const [secretAccessKey, setSecretAccessKey] = useState('');
   const [region, setRegion] = useState(defaultRegion);
+  const [bootstrapStackArn, setBootstrapStackArn] = useState('');
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | undefined>(undefined);
   const { save } = useManagedOnboardingCredentials();
@@ -92,6 +93,7 @@ export const ManagedOnboardingFlyout: React.FC<ManagedOnboardingFlyoutProps> = (
       {
         accessKeyId: accessKeyId.trim(),
         region: region.trim(),
+        ...(bootstrapStackArn.trim() ? { bootstrapStackArn: bootstrapStackArn.trim() } : {}),
         secrets: { secretAccessKey },
       },
       {
@@ -223,6 +225,27 @@ export const ManagedOnboardingFlyout: React.FC<ManagedOnboardingFlyoutProps> = (
             value={region}
             onChange={(e) => setRegion(e.target.value)}
             data-test-subj="managedOnboardingFlyout-region"
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate(
+            'xpack.fleet.cloudConnector.managedOnboarding.bootstrapStackArnLabel',
+            { defaultMessage: 'Bootstrap stack ARN (optional)' }
+          )}
+          helpText={i18n.translate(
+            'xpack.fleet.cloudConnector.managedOnboarding.bootstrapStackArnHelp',
+            {
+              defaultMessage:
+                'The BootstrapStackId output (also in the secret). With it, removing the credentials deletes the bootstrap stack, its user and its key.',
+            }
+          )}
+        >
+          <EuiFieldText
+            fullWidth
+            value={bootstrapStackArn}
+            onChange={(e) => setBootstrapStackArn(e.target.value)}
+            data-test-subj="managedOnboardingFlyout-bootstrapStackArn"
           />
         </EuiFormRow>
       </EuiFlyoutBody>

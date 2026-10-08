@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { Suspense, useEffect, useMemo } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { css } from '@emotion/react';
 import {
@@ -20,6 +20,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
+import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { LazyManagedOnboardingCallout } from '@kbn/fleet-plugin/public';
+import type { CloudSetupForCloudConnector } from '@kbn/fleet-plugin/public';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -63,6 +67,7 @@ const INTEGRATION_META: Record<string, IntegrationMeta> = {
 
 export function OnboardingShell() {
   const { integrationId } = useParams<{ integrationId: string }>();
+  const { services } = useKibana<CoreStart & { cloud?: CloudSetupForCloudConnector }>();
   const history = useHistory();
   const location = useLocation();
   const meta = INTEGRATION_META[integrationId];
@@ -175,6 +180,13 @@ export function OnboardingShell() {
         <EuiSpacer size="xs" />
         <EuiStepsHorizontal steps={horizontalStepsConfig} />
         <EuiSpacer size="xl" />
+        {/* Managed AWS onboarding (POC) opt-in: lives under the steps so it is reachable from every
+            step. Only meaningful on Cloud, where the stack parameters come from. */}
+        {services.cloud && (
+          <Suspense fallback={null}>
+            <LazyManagedOnboardingCallout cloud={services.cloud} />
+          </Suspense>
+        )}
         {awsServiceMatrixError ? (
           <KbnDangerCallout
             announceOnMount

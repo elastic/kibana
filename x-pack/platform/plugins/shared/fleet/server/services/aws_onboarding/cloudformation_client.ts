@@ -8,6 +8,7 @@
 import {
   CloudFormationClient,
   CreateStackCommand,
+  DeleteStackCommand,
   DescribeStacksCommand,
   GetTemplateSummaryCommand,
   UpdateStackCommand,
@@ -81,6 +82,19 @@ export class AwsCloudFormationClient {
     } catch (error) {
       if (isNoUpdatesError(error)) {
         return undefined;
+      }
+      throw error;
+    }
+  }
+
+  /** Starts deletion; false when the stack is already gone. */
+  public async deleteStack(stackArn: string): Promise<boolean> {
+    try {
+      await this.client.send(new DeleteStackCommand({ StackName: stackArn }));
+      return true;
+    } catch (error) {
+      if (isStackNotFoundError(error)) {
+        return false;
       }
       throw error;
     }

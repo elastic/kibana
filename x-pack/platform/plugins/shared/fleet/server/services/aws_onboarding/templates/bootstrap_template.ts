@@ -17,8 +17,10 @@ Description: >-
   POC ONLY. One-time bootstrap for Kibana-managed AWS onboarding: creates a least-privilege IAM
   user whose access key Kibana stores (encrypted) and uses to create and update the Elastic
   Federated Identity CloudFormation stacks named <StackNamePrefix>-*. The access key is written
-  to AWS Secrets Manager; nothing sensitive is exposed as a stack output. A production version
-  would hand Kibana a role to assume (temporary credentials) instead of a long-lived access key.
+  to AWS Secrets Manager; nothing sensitive is exposed as a stack output. The user may also delete
+  this stack (and with it its own key and secret) so that removing the credentials from Kibana
+  leaves nothing behind in AWS. A production version would hand Kibana a role to assume
+  (temporary credentials) instead of a long-lived access key.
 
 Parameters:
   StackNamePrefix:
@@ -92,6 +94,34 @@ Resources:
                   - lambda:TagResource
                   - lambda:ListTags
                 Resource: !Sub "arn:\${AWS::Partition}:lambda:*:\${AWS::AccountId}:function:\${StackNamePrefix}-*"
+              # Self-cleanup when the credentials are removed from Kibana. CloudFormation deletes the
+              # secret, then the access key, then the user; the session it opened with the key stays
+              # valid for those remaining calls.
+              - Sid: DeleteThisBootstrapStack
+                Effect: Allow
+                Action:
+                  - cloudformation:DeleteStack
+                  - cloudformation:DescribeStacks
+                  - cloudformation:DescribeStackEvents
+                Resource: !Ref AWS::StackId
+              - Sid: DeleteOwnUser
+                Effect: Allow
+                Action:
+                  - iam:DeleteUser
+                  - iam:DeleteUserPolicy
+                  - iam:DeleteAccessKey
+                  - iam:ListAccessKeys
+                  - iam:GetUser
+                  - iam:ListUserPolicies
+                  - iam:ListAttachedUserPolicies
+                  - iam:ListGroupsForUser
+                Resource: !Sub "arn:\${AWS::Partition}:iam::\${AWS::AccountId}:user/kibana-managed-onboarding-\${AWS::StackName}"
+              - Sid: DeleteOwnSecret
+                Effect: Allow
+                Action:
+                  - secretsmanager:DeleteSecret
+                  - secretsmanager:DescribeSecret
+                Resource: !Sub "arn:\${AWS::Partition}:secretsmanager:\${AWS::Region}:\${AWS::AccountId}:secret:kibana/managed-onboarding/\${AWS::StackName}-*"
 
   KibanaOnboardingAccessKey:
     Type: AWS::IAM::AccessKey
@@ -106,7 +136,7 @@ Resources:
       Name: !Sub "kibana/managed-onboarding/\${AWS::StackName}"
       Description: Access key for Kibana-managed AWS onboarding (POC). Rotate or delete with the stack.
       SecretString: !Sub
-        - '{"accessKeyId":"\${KeyId}","secretAccessKey":"\${Secret}","region":"\${AWS::Region}","stackNamePrefix":"\${StackNamePrefix}"}'
+        - '{"accessKeyId":"\${KeyId}","secretAccessKey":"\${Secret}","region":"\${AWS::Region}","stackNamePrefix":"\${StackNamePrefix}","bootstrapStackId":"\${AWS::StackId}"}'
         - KeyId: !Ref KibanaOnboardingAccessKey
           Secret: !GetAtt KibanaOnboardingAccessKey.SecretAccessKey
 
@@ -116,4 +146,7 @@ Outputs:
     Value: !Ref KibanaOnboardingSecret
   StackNamePrefix:
     Value: !Ref StackNamePrefix
+  BootstrapStackId:
+    Description: Paste into Kibana as the bootstrap stack ARN so that removing the credentials also deletes this stack.
+    Value: !Ref AWS::StackId
 `;

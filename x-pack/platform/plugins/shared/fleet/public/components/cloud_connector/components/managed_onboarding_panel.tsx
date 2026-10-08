@@ -19,7 +19,7 @@ interface ManagedOnboardingPanelProps {
   credentials: AwsOnboardingCredentialsPublic;
 }
 
-/** Opt-in / status callout for Kibana-managed AWS onboarding, shown above the Identity Federation tabs. */
+/** Opt-in / status callout for Kibana-managed AWS onboarding, shown under the onboarding wizard steps. */
 export const ManagedOnboardingPanel: React.FC<ManagedOnboardingPanelProps> = ({ credentials }) => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const { remove } = useManagedOnboardingCredentials();
@@ -40,15 +40,36 @@ export const ManagedOnboardingPanel: React.FC<ManagedOnboardingPanelProps> = ({ 
           actionProps={{
             primary: {
               isLoading: remove.isLoading,
-              onClick: () => remove.mutate(),
+              onClick: () => remove.mutate({}),
               'data-test-subj': 'managedOnboardingPanel-remove',
-              children: (
+              children: credentials.bootstrapStackArn ? (
+                <FormattedMessage
+                  id="xpack.fleet.cloudConnector.managedOnboarding.removeWithStackButton"
+                  defaultMessage="Delete bootstrap stack and remove credentials"
+                />
+              ) : (
                 <FormattedMessage
                   id="xpack.fleet.cloudConnector.managedOnboarding.removeButton"
                   defaultMessage="Remove credentials"
                 />
               ),
             },
+            // Offered once the stack deletion failed (e.g. the stack was deleted by hand already).
+            ...(remove.isError && credentials.bootstrapStackArn
+              ? {
+                  secondary: {
+                    isLoading: remove.isLoading,
+                    onClick: () => remove.mutate({ force: true }),
+                    'data-test-subj': 'managedOnboardingPanel-removeOnly',
+                    children: (
+                      <FormattedMessage
+                        id="xpack.fleet.cloudConnector.managedOnboarding.removeOnlyButton"
+                        defaultMessage="Remove credentials only"
+                      />
+                    ),
+                  },
+                }
+              : {}),
           }}
         />
       ) : (

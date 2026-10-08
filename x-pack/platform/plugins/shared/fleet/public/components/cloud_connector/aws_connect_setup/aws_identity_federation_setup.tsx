@@ -38,7 +38,6 @@ import {
   getTemplateUrlFromQuickCreateUrl,
   useManagedStackCreate,
 } from '../hooks/use_managed_stack';
-import { ManagedOnboardingPanel } from '../components/managed_onboarding_panel';
 import { ManagedStackProgress } from '../components/managed_stack_progress';
 import { CloudConnectorTabs, type CloudConnectorTab } from '../cloud_connector_tabs';
 import { CloudConnectorSelector } from '../form/cloud_connector_selector';
@@ -476,7 +475,6 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
 
   return (
     <>
-      {managed.isEnabled && <ManagedOnboardingPanel credentials={managed.credentials} />}
       <CloudConnectorTabs
         tabs={tabs}
         selectedTabId={selectedTabId}

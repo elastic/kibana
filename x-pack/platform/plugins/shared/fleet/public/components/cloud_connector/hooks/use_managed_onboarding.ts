@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 
 import { AWS_MANAGED_ONBOARDING_FLAG } from '../../../../common/constants';
@@ -25,9 +26,11 @@ const NOT_CONFIGURED: AwsOnboardingCredentialsPublic = { configured: false };
  * customer has stored bootstrap credentials.
  */
 export const useManagedOnboarding = (cloud: CloudSetupForCloudConnector | undefined) => {
-  const { featureFlags } = useStartServices();
+  // Existing cloud-connector test suites mock the start services partially (or not at all);
+  // without a feature-flags service the POC is simply off.
+  const featureFlags = useStartServices()?.featureFlags;
   const flag$ = useMemo(
-    () => featureFlags.getBooleanValue$(AWS_MANAGED_ONBOARDING_FLAG, false),
+    () => featureFlags?.getBooleanValue$(AWS_MANAGED_ONBOARDING_FLAG, false) ?? of(false),
     [featureFlags]
   );
   const flagEnabled = useObservable(flag$, false);

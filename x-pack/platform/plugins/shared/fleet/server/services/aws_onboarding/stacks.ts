@@ -14,6 +14,7 @@ import { AWS_CLOUD_PROVIDER } from '../../../common/types/models/cloud_connector
 import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
 import type { RenderIacTemplateIntegration } from '../../../common/types/rest_spec/iac_provisioner';
 import type {
+  DeleteAwsOnboardingCredentialsResponse,
   AwsOnboardingStackStatus,
   AwsOnboardingTemplateInfo,
   CreateAwsOnboardingStackResponse,
@@ -204,6 +205,37 @@ export class AwsOnboardingStackService {
       return { status: 'up_to_date' };
     }
     return { status: 'updating', stackId, template: resolved.info };
+  }
+
+  /**
+   * Deletes the bootstrap stack (IAM user, access key, secret) with the very credentials it
+   * created, so removing them from Kibana leaves nothing behind in AWS. Only the deletion is
+   * started here: once the credentials are gone Kibana can no longer observe the stack.
+   */
+  public async deleteBootstrapStack(): Promise<
+    DeleteAwsOnboardingCredentialsResponse['bootstrapStack']
+  > {
+    const logger = appContextService.getLogger().get('AwsOnboardingStackService');
+    let credentials;
+    try {
+      credentials = await awsOnboardingCredentialsService.getDecrypted();
+    } catch (error) {
+      if (error instanceof FleetNotFoundError) {
+        return 'skipped';
+      }
+      throw error;
+    }
+    if (!credentials.bootstrapStackArn) {
+      return 'skipped';
+    }
+    const client = new AwsCloudFormationClient(credentials);
+    const started = await client.deleteStack(credentials.bootstrapStackArn);
+    logger.info(
+      started
+        ? `Deleting bootstrap CloudFormation stack ${credentials.bootstrapStackArn}`
+        : `Bootstrap CloudFormation stack ${credentials.bootstrapStackArn} no longer exists`
+    );
+    return started ? 'deletion_started' : 'skipped';
   }
 
   public async status(stackArn: string): Promise<GetAwsOnboardingStackResponse> {
