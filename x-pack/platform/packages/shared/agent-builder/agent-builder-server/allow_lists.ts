@@ -10,6 +10,7 @@ import {
   platformCoreCasesTools,
   platformSignificantEventsTools,
   contextEngineAiIndexTools,
+  contextEngineMemoryTools,
   contextEngineAutomationTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
@@ -31,6 +32,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Alerting
   `${internalNamespaces.platformAlerting}.manage_rule`,
+
+  // Proposals
+  'platform.proposals.revise',
 
   // Observability
   `${internalNamespaces.observability}.get_anomaly_detection_jobs`,
@@ -59,7 +63,6 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Security Solution
   `${internalNamespaces.security}.alertzero.actions.list`,
-  `${internalNamespaces.security}.alertzero.proposals.revise`,
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.create_detection_rule`,
   `${internalNamespaces.security}.run_rule_preview`,
@@ -77,12 +80,20 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.list_watchlists`,
   `${internalNamespaces.security}.get_watchlist_id`,
   `${internalNamespaces.security}.remove_entities_from_watchlist`,
+  `${internalNamespaces.security}.set_watchlist_rule_based_data_source`,
+  `${internalNamespaces.security}.remove_watchlist_rule_based_data_source`,
+  `${internalNamespaces.security}.list_watchlist_data_sources`,
   `${internalNamespaces.security}.search_entities`,
   `${internalNamespaces.security}.update_watchlist`,
   `${internalNamespaces.security}.list_leads`,
   `${internalNamespaces.security}.generate_leads`,
   `${internalNamespaces.security}.dismiss_lead`,
   `${internalNamespaces.security}.set_asset_criticality`,
+  `${internalNamespaces.security}.get_resolution_group`,
+  `${internalNamespaces.security}.link_entities`,
+  `${internalNamespaces.security}.unlink_entities`,
+  `${internalNamespaces.security}.list_resolution_rules`,
+  `${internalNamespaces.security}.set_resolution_rules`,
   `${internalNamespaces.security}.pci_scope_discovery`,
   `${internalNamespaces.security}.pci_compliance`,
   `${internalNamespaces.security}.pci_field_mapper`,
@@ -100,6 +111,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.siem_migration.stop_rule_migration`,
   `${internalNamespaces.security}.siem_migration.update_rule_migration`,
   `${internalNamespaces.security}.siem_migration.delete_rule_migration`,
+  `${internalNamespaces.security}.siem_migration.update_translated_rule`,
   `${internalNamespaces.security}.siem_migration.install_migration_rules`,
   `${internalNamespaces.security}.alert-triage`,
 
@@ -121,6 +133,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   contextEngineAutomationTools.saveAutomation,
   contextEngineAutomationTools.runAutomation,
   ...Object.values(contextEngineAiIndexTools),
+  ...Object.values(contextEngineMemoryTools),
 
   // Nightshift – Sandbox
   'nightshift_sandbox_bash',
@@ -133,6 +146,13 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'nightshift_record_system_learning',
   'nightshift_record_tool_learning',
   'nightshift_record_remediation',
+
+  // Platform – Agentic Investigations
+  `${internalNamespaces.agenticInvestigations}.set_impact`,
+  `${internalNamespaces.agenticInvestigations}.set_hypotheses`,
+
+  // Platform – Proposals
+  `${internalNamespaces.proposals}.create`,
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
@@ -199,6 +219,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'visualization-creation',
   'graph-creation',
   'agent-builder-traces',
+  'proposal-management',
 
   // Platform – Cases
   'cases-management',
@@ -209,7 +230,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'action-policy-management',
 
   // Platform – Dashboard
-  'dashboard-management',
+  'dashboards',
 
   // Platform – Discover
   'discover-data-analysis',
@@ -251,9 +272,11 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'automatic_troubleshooting',
   'entity-analytics',
   'manage-watchlists',
+  'entity-resolution',
   'alert-analysis',
   'alert-triage',
   'detection-rule-edit',
+  'alertzero-action-discovery',
   'recommend-prebuilt-rules',
   'threat-hunting',
   'find-security-rules',
@@ -269,6 +292,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'automatic-migration-rules-stop-migration',
   'automatic-migration-rules-update-migration',
   'automatic-migration-rules-delete-migration',
+  'automatic-migration-rules-update-translated-rule',
   'attack-discovery-alert-retrieval-builder',
   'attack-discovery-generator',
   'attack-discovery-workflow-troubleshooting',
@@ -359,13 +383,12 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'cases',
 
   // Platform – Alerting v2
+  'platform.alerting.alert',
   'platform.alerting.rule',
   'platform.alerting.action_policy',
-  'platform.alerting.episode',
 
   // Security Solution
   'security.alert',
-  'security.impact',
   'security.alerts',
   'security.entity',
   'security.entity_analytics_dashboard',
@@ -378,6 +401,8 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'security.siem_readiness',
   // gated behind experimentalFeatures.rulePreviewAttachmentEnabled
   'security.rule.preview',
+  // gated behind !siemMigrationsDisabled && siemRuleMigrationsAgentBuilderEnabled
+  'security.siem_migration.rule_migration_items',
 
   // Security Solution – Attack Discovery (discoveries plugin)
   // gated behind the workflows feature flag
@@ -418,6 +443,8 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Agentic Investigations
   'investigation_impact',
+  'investigation_subject',
+  'investigation_hypotheses',
 ] as const;
 
 export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];

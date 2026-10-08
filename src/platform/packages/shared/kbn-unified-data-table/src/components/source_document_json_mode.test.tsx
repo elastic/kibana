@@ -217,7 +217,10 @@ describe('SourceDocumentJsonMode', () => {
       const onFilter: jest.MockedFunction<DocViewFilterFn> = jest.fn();
       renderCell(
         { _id: '1', _index: 'test', _source: { computedField: 42 } },
-        { onFilter, columnsMeta: { computedField: { type: 'number' } } }
+        {
+          onFilter,
+          columnsMeta: { computedField: { type: 'number', isComputedColumn: true } },
+        }
       );
 
       expect(screen.getByTestId(filterForTestId('computedField'))).toBeInTheDocument();
@@ -233,7 +236,7 @@ describe('SourceDocumentJsonMode', () => {
         { _id: '1', _index: 'test', _source: { computedField: 42 } },
         {
           onFilter: jest.fn(),
-          columnsMeta: { computedField: { type: 'number' } },
+          columnsMeta: { computedField: { type: 'number', isComputedColumn: true } },
           hideFilteringOnComputedColumns: true,
         }
       );

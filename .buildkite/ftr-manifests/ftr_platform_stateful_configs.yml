@@ -64,7 +64,6 @@ enabled:
   - src/platform/test/api_integration/apis/unused_urls_task/config.ts
   - src/platform/test/examples/config.js
   - src/platform/test/functional/apps/bundles/config.ts
-  - src/platform/test/functional/apps/console/config.ts
   - src/platform/test/functional/apps/dashboard_elements/controls/common/config.ts
   - src/platform/test/functional/apps/dashboard_elements/controls/options_list/config.ts
   - src/platform/test/functional/apps/dashboard_elements/image_embeddable/config.ts
@@ -80,9 +79,6 @@ enabled:
   - src/platform/test/functional/apps/dashboard/esql_controls/config.ts
   - src/platform/test/functional/apps/discover/ccs_compatibility/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
-  - src/platform/test/functional/apps/management/group1/config.ts
-  - src/platform/test/functional/apps/management/group2/config.ts
-  - src/platform/test/functional/apps/management/group3/config.ts
   - src/platform/test/functional/apps/visualize/group1/config.ts
   - src/platform/test/functional/apps/visualize/group2/config.ts
   - src/platform/test/functional/apps/visualize/group3/config.ts
@@ -214,7 +210,6 @@ enabled:
   - x-pack/platform/test/functional/apps/maps/group2/config.ts
   - x-pack/platform/test/functional/apps/maps/group3/config.ts
   - x-pack/platform/test/functional/apps/maps/group4/config.ts
-  - x-pack/platform/test/functional/apps/maps/group5/config.ts
   - x-pack/platform/test/functional/apps/maps/group6/config.ts
   - x-pack/platform/test/functional/apps/maps/group7/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group1/config.ts

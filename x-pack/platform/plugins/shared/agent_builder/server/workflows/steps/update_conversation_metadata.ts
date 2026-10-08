@@ -17,25 +17,21 @@ import type { ConversationStepDeps } from '../registry';
 export const updateConversationMetadataStepDefinition = ({
   getConversationClient,
   getAgentRegistry,
-  isExperimentalEnabled,
 }: ConversationStepDeps) =>
   createServerStepDefinition({
     ...updateConversationMetadataStepCommonDefinition,
     handler: async (context: StepHandlerContext) => {
       try {
         const request = context.contextManager.getFakeRequest();
-        if (!(await isExperimentalEnabled(request))) {
-          return {
-            error: new Error(
-              'Conversation metadata steps require experimental features to be enabled'
-            ),
-          };
-        }
         const [client, agentRegistry] = await Promise.all([
           getConversationClient(request),
           getAgentRegistry(request),
         ]);
-        const publicClient = createConversationPublicClient({ client, agentRegistry });
+        const publicClient = createConversationPublicClient({
+          client,
+          agentRegistry,
+          source: 'workflow',
+        });
         const input = context.input as UpdateConversationMetadataStepInput;
 
         const { conversation, changedFields } = await publicClient.patchMetadata(

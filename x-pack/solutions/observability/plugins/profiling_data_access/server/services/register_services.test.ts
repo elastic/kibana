@@ -29,6 +29,7 @@ describe('registerServices', () => {
   const services = registerServices({
     createProfilingEsClient,
     logger: {} as RegisterServicesParams['logger'],
+    buildFlavor: 'traditional',
     deps: {},
   });
 

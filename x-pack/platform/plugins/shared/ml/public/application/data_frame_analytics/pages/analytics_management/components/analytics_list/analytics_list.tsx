@@ -212,8 +212,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   if (analytics.length === 0) {
     return (
       <div data-test-subj="mlAnalyticsJobList">
-        <EuiSpacer size="m" />
-        <AnalyticsEmptyPrompt showDocsLink />
+        <AnalyticsEmptyPrompt showDocsLink centered />
       </div>
     );
   }

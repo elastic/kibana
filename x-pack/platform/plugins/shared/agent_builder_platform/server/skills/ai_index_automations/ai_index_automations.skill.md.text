@@ -22,9 +22,11 @@ the prompt is phrased. Look for that before looking at wording.
 
 Misquoting what an automation does is the most expensive mistake available here: every claim built
 on it inherits the error, and a reviewer who catches one stops trusting the rest. When several
-automations write to the same index, attribute an indicator to one by reading the definitions and
-seeing which writes to that destination and id pattern. If that does not settle it, say attribution
-was not established rather than guessing.
+automations write to the same index, attribute an indicator to one by its
+`governance.provenance.created_by.uri`, which the steps stamp as `workflow://<workflow id>`, and
+confirm against the definition that writes to that destination and id pattern. Name that field in
+`KEEP`: `platform.context_engine.query_ai_indices` drops `governance` from any query that does not.
+If that does not settle it, say attribution was not established rather than guessing.
 
 The syntax these automations need — Liquid templating, `on-failure` handling, `if` conditions — is
 written out below, alongside the `context-engine` step contracts that no other skill or tool
@@ -52,10 +54,12 @@ Whatever the strategy, a generated workflow has to:
   workflow you assemble outside the templates carries it too, on each `ai.prompt` and `ai.agent`
   step. Use a different connector only when the user names one; they can change it after the save,
   in the workflow editor, without your involvement.
-- **Retry every `ai.prompt`**: `on-failure.retry` with three attempts, exponential delay and
-  jitter. Rate limits, transient connector errors and a structured output that failed to parse
-  once are the ordinary failures of a model call, and without the retry each one costs the unit
-  it was profiling. The templates carry it; keep it on any `ai.prompt` you add.
+- **Retry `ai.prompt` outside a `parallel` branch**: `on-failure.retry` with three attempts,
+  exponential delay and jitter. Rate limits, transient connector errors and a structured output
+  that failed to parse once are the ordinary failures of a model call, and without the retry each
+  one costs the unit it was profiling. A `parallel` branch cannot hold `on-failure`. The templates'
+  loops are all `parallel`, so they run their model calls without it: a failed call costs that one
+  item until the next run, and a pilot that wrote fewer KIs than it covered shows it.
 - **Write through the `context-engine` steps**, never a raw `elasticsearch.index`, and pass
   `verifiers` to every `context-engine.createKi` so an indicator whose ES|QL fails to parse is
   reported rather than persisted.
@@ -67,8 +71,9 @@ Whatever the strategy, a generated workflow has to:
   than writing an empty list.
 
 Index metadata, bottom-up document, unit profile and targeted-ki-writer automations are all
-installed by `platform.context_engine.install_automation_template`, and calling it again replaces
-the automation that template already attached. `targeted-ki-writer` is installed with
+installed by `platform.context_engine.install_automation_template`. Every install takes a `name`:
+installing the same template with the same `name` replaces that automation in place, and a
+different `name` adds another automation to the AI index. `targeted-ki-writer` is installed with
 `template: targeted_ki_writer` — the same tool, same pattern as the others.
 
 Two more references are attached and shared with `analyze-and-improve`: `ki_shapes`, the KI
@@ -101,7 +106,8 @@ written out here — this skill is the only place they exist.
       tags: ['logs'] # optional, <= 100 entries
       references: # optional, <= 100 entries
         - uri: 'index://logs-*'
-          relation: 'derived_from'
+          relation: 'derived_from' # derived_from | relates_to | supersedes
+          description: 'The indices this profile describes'
       expires_at: '2026-10-22T00:00:00Z' # optional; unset never expires
       attributes: # optional, <= 100 keys
         esql: 'FROM logs-* | LIMIT 10'
@@ -122,17 +128,19 @@ it belongs to the cumulative strategy that reads before it merges — it is not 
 
 **`context-engine.deleteKi`** takes `ai_index_id` and `ki_id` and outputs `id`.
 On an index `deleteKi` removes the document; on a data stream it appends a revision with
-`governance.lifecycle.status: deleted`, so the earlier revisions stay in the backing store. It
-fails when the indicator does not exist. This is what pilot cleanup runs.
+`governance.lifecycle.status: deleted`, so the earlier revisions stay in the backing store and
+`platform.context_engine.query_ai_indices` hides the indicator. It fails when the indicator does
+not exist. This is what pilot cleanup runs.
 
-**`context-engine.verifyKi`** takes a partial `ki` and a non-empty, duplicate-free `verifiers` list,
-and outputs `passed` plus a per-verifier `results` array of `{ verifier, passed, reason }`. The two
-built-in verifier ids are `esql-valid-syntax`, which parses each query the indicator carries without
-touching the cluster, and `esql-valid-runtime`, which executes it against live data bounded to a
-single row. An entry can also be a custom verifier workflow, `{ workflow_id }`, with an optional
-`timeout_sec` and `applies_to`; the templates use the two built-ins. An unknown id fails the step.
-Gate every write on this: an indicator carrying ES|QL that does not run is worse than a missing
-one, because retrieval surfaces it as though it worked.
+**Verification rides on `createKi`.** Its `verifiers` list is non-empty and duplicate-free, and the
+step runs each entry in order before it writes. The two built-in verifier ids are
+`esql-valid-syntax`, which parses each query the indicator carries without touching the cluster,
+and `esql-valid-runtime`, which executes it against live data bounded to a single row. An entry can
+also be a custom verifier workflow, `{ workflow_id }`, with an optional `timeout_sec` and
+`applies_to`; the templates use the two built-ins. An unknown id fails the step. When any verifier
+fails, nothing is written, the output carries no `id`, and `verification.results` names the
+verifier and the reason. Pass `verifiers` on every write: an indicator carrying ES|QL that does not
+run is worse than a missing one, because retrieval surfaces it as though it worked.
 
 `attributes` values are strings, numbers, booleans or arrays of strings — never nested objects. A
 single value caps at 10,000 characters, which is what bounds the ES|QL an indicator can carry. A
@@ -173,8 +181,8 @@ reference is `workflow-authoring`, and it is worth loading for a validation erro
 — but not for authoring, for the reason given at the top.
 
 **An `if` condition is KQL, not Liquid.** `condition:` is the one place in a workflow where `{{ }}`
-does not apply. The templates gate their write on `condition: "steps.verify_ki.output.passed :
-true"` — a KQL field match, with the colon, not `==` and not an interpolation. KQL cannot evaluate
+does not apply. A gate on a step's output reads `condition: "steps.set_flag.output.ready : true"`
+— a KQL field match, with the colon, not `==` and not an interpolation. KQL cannot evaluate
 filters, so anything computed goes through a `data.set` first and the condition reads that step's
 output:
 
@@ -201,6 +209,38 @@ indicator per document, where the alternative is losing every indicator after th
   iteration-on-failure:
     continue: true
 ```
+
+**`parallel` is that same loop with its items run concurrently**, and it is what the per-record
+templates use: a model call per record run end to end is the slowest thing these workflows do. It
+takes the same `foreach` expression and the same `steps` body, and swaps `iteration-on-failure` for
+`mode: settled`, which likewise runs every branch to a terminal state instead of stopping at the
+first failure. `concurrency` defaults to 5 and is capped at 20; the fan-out is capped at 100 items,
+so corpora larger than 100 records must be split into batches with `chunk: 100` before entering
+`parallel`. The per-record templates do this with an outer `foreach` over the chunks, so they
+handle any corpus size up to the ES|QL row cap:
+
+```yaml
+- name: loop_batches
+  type: foreach
+  foreach: '{{ steps.discover_documents.output.values | chunk: 100 | json }}'
+  iteration-on-failure:
+    continue: true
+  steps:
+    - name: loop_documents
+      type: parallel
+      foreach: '{{ foreach.item | json }}'
+      concurrency: 5
+      mode: settled
+      steps: [] # ...
+```
+
+A branch reads `{{ foreach.item }}` and its own earlier steps exactly as a sequential iteration
+does. A branch cannot hold a step-level `timeout:` or `on-failure`, an `if`, a nested `foreach`,
+`while` or `switch`, or a step that waits on a human: each is a compile-time error rather than a
+surprise at runtime. Verify inside `context-engine.createKi` with `verifiers` rather than gating
+the write with an `if`.
+
+Outside a branch, any step can carry `on-failure` with a retry, a fallback and `continue`:
 
 ```yaml
 on-failure:
@@ -251,15 +291,16 @@ in `strategy_catalog` as worked examples. These are what each one becomes as a w
 
 Index metadata, bottom-up document and unit profile automations are installed by
 `platform.context_engine.install_automation_template`. Do not write their YAML and do not start a
-subagent for them. Calling the tool again replaces the workflow already attached to the AI index.
+subagent for them. Installing the same template with the same `name` replaces that automation in
+place; a different `name` adds another.
 Outlier, atomic facts, detection and connector automations have no template of their own. Do not
 look for one and do not invent a name; start from the shape of `unit-profile-template`, which is
 the YAML the install tool provides for the Cumulative strategy. It is a
 complete workflow that runs as it stands, and it already carries the parts a fresh draft gets
 wrong: the grounding, the prompt's output schema, the single `data.set` that builds the indicator
-so verification and the write see the same document, the `verifyKi` gate, the `ki_id` scheme that
-makes a re-run replace rather than duplicate, the retry on the model call, and the
-`attributes.esql` wiring the verifiers read.
+so verification and the write see the same document, the `verifiers` on `createKi`, the `ki_id`
+scheme that makes a re-run replace rather than duplicate, and the `attributes.esql` wiring the
+verifiers read.
 
 It opens with a comment saying what to change and what to leave, and declares what varies in
 `consts` at the top — the AI Index id, the source index, the fields the strategy turns on. The
@@ -268,22 +309,23 @@ install arguments almost one for one.
 
 **Index/Table Metadata** (`type: index_metadata`) — call
 `platform.context_engine.install_automation_template` with `template: index_metadata`. Pass
-`sourceIndex` and `categoryField`, a keyword field an analyst would group by. The AI index is the
-one attached to the conversation. The tool fills the consts and attaches the workflow. Do not write
-the YAML and do not start a subagent.
-Calling it again replaces the automation this template already attached.
+`sources`, one `{ index, categoryField }` per source of the AI index, where `categoryField` is the
+keyword field an analyst would group that index by. List every source the profile should cover:
+one install and one run write one KI per source, so do not install the template once per index.
+The AI index is the one attached to the conversation. The tool fills the consts and attaches the
+workflow. Do not write the YAML and do not start a subagent. Each KI's id is `<name>/<index>`, so
+reinstalling an index-metadata automation from before `sources` existed, whose single KI has the id
+`<name>`, leaves that old KI in place: tell the user it is now stale.
 
 **Bottom-Up** (`type: document`) — call `platform.context_engine.install_automation_template` with
 `template: document_orchestration`. Pass `sourceIndex`, `titleField` and `bodyField`. The AI index
 is the one attached to the conversation.
 Pass `corpusFilter`, `maxDocuments` and `bodyMaxChars` when the corpus needs a bound; they default
-to an empty filter, 50 documents and 12000 characters. `corpusFilter` is inserted after `FROM`.
+to an empty filter, 50 documents and 12000 characters. Keep `maxDocuments` within the KI budget
+(`strategy_catalog`, "The KI budget"). `corpusFilter` is inserted after `FROM`.
 A `WHERE` line may omit the leading `|`; the tool adds it. The tool attaches only the orchestration.
-Each parallel branch is one `workflow.execute` of the system workflow
-`system-context-engine-document-summary`, which is already installed and is not an automation on
-the AI index. Do not save it and do not start a subagent. Calling the tool again replaces the
-orchestration already attached and keeps the same workflow id. Run that workflow id, not the
-system summary. When the pass yields many near-identically-titled entries, say so: the installed
+Each parallel branch summarizes one document and writes it through `context-engine.createKi` with its
+verifiers. Do not save it and do not start a subagent. When the pass yields many near-identically-titled entries, say so: the installed
 summary writes one indicator per document, and clustering them is a custom workflow.
 
 **Cumulative / Wiki-style** (`type: entity`) — call
@@ -292,26 +334,31 @@ summary writes one indicator per document, and clustering them is a custom workf
 `activityField`, a date field whose per-unit range bounds the unit's activity, and
 `breakdownField`, a second field whose per-unit distribution characterises it. The AI index is the
 one attached to the conversation. Do not write the YAML and do not start a subagent.
+The unit key is what each indicator is titled by, so when the index carries both an id and a name
+for the unit and they map one to one, prefer a human-readable field such as `product_name` over
+`product_id`: an indicator titled by an opaque id is one no question will find.
 **Pass `metricFields`.** Sibling unit indicators are near-identical to a retriever unless their
 descriptions carry numbers that separate them, and `metricFields` is what puts those numbers
-there: each one is averaged per unit and named in the prompt. Choose the numeric fields an analyst
-would compare these units on.
-Pass `catalogIndex` and `catalogKey` when a second index holds one record per unit, such as a
-catalog row or a case header; they default to `sourceIndex` and `unitKey`, which means there is no
-separate record. Pass `discoveryFilter`, a complete ES|QL line beginning with `| WHERE`, to
-re-profile only some units; it defaults to taking every unit.
-`maxUnits` bounds the run and defaults to 25; each unit costs a model call, so raise it
-deliberately on a high-cardinality field.
-The installed workflow pages through the units on a keyword cursor, so a corpus above the row cap
-is walked rather than truncated, and a re-run regenerates every unit and replaces its indicator.
+there: each one is averaged per unit and written into the profile. Choose up to ten fields an
+analyst would compare these units on, each numeric in the mapping: `AVG` over any other type fails
+the query for every unit.
+Pass `corpusFilter`, a `WHERE` line, to profile only some units: it bounds both which units are
+found and which of their rows the figures describe. It defaults to taking every row.
+`maxUnits` bounds the run: one KI and one model call per unit. It defaults to 100, the KI budget;
+keep it within that budget (`strategy_catalog`, "The KI budget").
+Units are found by one ranked query capped at `maxUnits`, most active first, and
+a re-run regenerates every unit and replaces its indicator.
+The template reads one index. A unit that needs data from a second index — a customer's profile
+plus what they bought from a products index, an incident header plus its events — is a custom workflow
+built through a subagent from the template's shape, not this install.
 To accumulate across runs rather than replace, read the stored indicator and merge through
 `context-engine.updateKi` — that is a custom workflow, not this template.
 
 **Targeted KIs** (`type: constraint`, `workaround`, `disambiguation`, `task_recipe`) — call
 `platform.context_engine.install_automation_template` with `template: targeted_ki_writer`. No model
-call: the KIs are written verbatim from a `kis` array in `consts`, each through `verifyKi` and
-`createKi` with a stable `ki_id`. After installation, edit the `kis` array in the workflow's
-`consts` block and run it with `platform.core.execute_workflow`. The content comes from the counted
+call: the KIs are written verbatim from the `kis` array passed to the install, each through
+`createKi` with its verifiers and a stable `ki_id`. Run it with `platform.core.execute_workflow`.
+The content comes from the counted
 finding in the brief, and so does the provenance — `trace_ids`, `conversation_id`, `error_text`,
 `source_index` — from ids that already exist. Any ES|QL the KI recommends goes in `attributes.esql`
 as well as `content`, so the verifiers run it; a KI with none leaves the key out. This is the shape
@@ -369,10 +416,11 @@ will invent it confidently. Put in the prompt:
 - the AI Index id, its destination index name, and whether that destination is an index or a
   data stream
 - the sources and the exact corpus filter the automation should apply
-- the KI budget: at most 100 KIs per run during onboarding, set in the template's own bound
-  (`max_units`, or `max_documents` — multiplied by the claims per document for a per-claim
-  variant). This is guidance for the automation, not a figure to put to the user, and it can be
-  raised once the output is trusted
+- the KI budget: at most 100 KIs per run during onboarding, set in the workflow's own bound
+  (`max_units` or `max_documents`; for a workflow that writes several KIs per document, the
+  `maxItems` and `max_documents` that `strategy_catalog`'s "The KI budget" describes). This is
+  guidance for the automation, not a limit to present to the user, and it can be raised once the
+  output is trusted
 - the strategy from `analyze-and-improve` **as its three answers** — the unit, what one KI
   carries, how units are found and refreshed — and what the indicators are meant to capture.
   Those three are what fill the `consts`, so a brief that names a strategy without them leaves
@@ -444,7 +492,7 @@ automation that has been run. Read it, fill in its `consts` block, and add the g
 strategy needs. That is the draft. Authoring one from nothing is a long generate-and-repair loop
 that arrives somewhere worse, because the template already encodes the things a fresh draft gets
 wrong and a run does not catch: the single `data.set` that builds the indicator so verification and
-the write see the same document, the `verifyKi` gate, the `ki_id` scheme that makes a re-run
+the write see the same document, the `verifiers` on `createKi`, the `ki_id` scheme that makes a re-run
 replace rather than duplicate, and the `attributes.esql` wiring that decides what the verifiers
 actually check.
 
@@ -502,12 +550,12 @@ than that and it returns bare ids and labels with no parameters at all — so a 
 you nothing and buys a chain of follow-up calls. Pass `stepType` with an exact id.
 
 The types these automations use are a closed set: `elasticsearch.esql.query`,
-`elasticsearch.search`, `elasticsearch.request`, `ai.prompt`, `foreach`, `while`, `parallel`,
-`workflow.execute`, `if`, `data.set` and `console`, alongside the `context-engine` steps written out
-above, which no lookup can return at all. `unit-profile-template` wires most of them up correctly
-already, so a lookup is worth a call only for a step type it does not use. `parallel` and
-`workflow.execute` are the two it does not: look those up with `stepType` when a custom workflow
-needs them, and do not skip the lookup because an older template used to show them.
+`elasticsearch.search`, `elasticsearch.request`, `ai.prompt`, `parallel`, `foreach`, `if`,
+`data.set`, `console` and `workflow.execute`, alongside the `context-engine` steps written out
+above, which no lookup can return at all. All but `workflow.execute` appear in the templates
+already wired up correctly. Look up `workflow.execute` with `stepType` when a custom workflow
+needs it — the Selective / Outlier strategy's parallel branch is a `workflow.execute` — and do
+not skip the lookup because an older template used to show it.
 
 `platform.workflows.get_examples` is one call for the example library rather than one per step, and
 `platform.workflows.get_trigger_definitions` gives the event context a trigger provides.
@@ -521,23 +569,25 @@ unique to this attempt. In the templates the indicator is built in a single `dat
 tag goes on that step's `ki.tags` list — the one place all of them read from — not on
 `context-engine.createKi`, which takes the assembled document rather than building it.
 
-That tag is the handle on what the pilot wrote. The KI ids are a second one: on an index a re-run
-overwrites them, and on a data stream each write appends a revision under the same `id`, so the
-tag and the `id` together find every document the pilot left.
+**Prefix every `ki_id` too.** The templates write with stable ids into the user's real destination,
+so an unprefixed pilot replaces a live indicator on an index and stacks a revision on it on a data
+stream, and the cleanup below would then remove the user's indicator rather than yours. Prefix the
+`ki_id` on `context-engine.createKi` with the same `ce-pilot-<runId>-`, so every id the pilot writes
+is its own. The tag and the prefix are the only handles you will have on what the pilot wrote.
 
-Bound the run to a handful of documents while you are iterating. `maxUnits`, `maxDocuments`,
-`corpusFilter` and `discoveryFilter` are arguments to the install tool on the automations it
-installs, so narrowing a run is a re-install rather than an edit, and you do not edit those
+Bound the run to a handful of documents while you are iterating. `maxUnits`, `maxDocuments` and
+`corpusFilter` are arguments to the install tool on the automations it installs, so narrowing a run is a re-install rather than an edit, and you do not edit those
 workflows by hand. A custom workflow should put its own bound in `consts` the same way, rather
 than threading the limit through every query. The targeted KI writer needs no bound: its `kis`
-list is the whole corpus.
+list is the whole corpus. Pilot on one full batch of the loop: as many units as its `concurrency`,
+5 unless the workflow sets another. A `parallel` loop runs a batch in about the time of its slowest
+unit, so a smaller pilot finishes in about the time of one unit and its per-unit time overstates the
+full run.
 
 **Run it without saving.** `platform.core.execute_workflow` accepts a `yaml` argument and runs the
 definition ephemerally — nothing is persisted, nothing needs enabling. It waits for completion and
 returns step outputs and the failure message when a step throws. A custom workflow whose branch is
-`workflow.execute` needs its child saved first, because that step needs a saved workflow id. The
-installed document automation does not: its child is `system-context-engine-document-summary`,
-already installed, and you do not save or pilot that workflow.
+`workflow.execute` needs its child saved first, because that step needs a saved workflow id.
 
 **Read what it wrote, not whether it ran.** A workflow completes cleanly and still emits indicators
 with empty `content`, absent `attributes`, or titles too alike to tell apart under retrieval. Query
@@ -585,30 +635,25 @@ FROM <destination>
 Then run a second inline workflow with those ids in its `consts` (`ki_ids: [...]`) and a `foreach`
 over `consts.ki_ids` calling `context-engine.deleteKi` with `ki_id` set to each `id`. Do not select
 the ids inside the cleanup workflow with an `elasticsearch.esql.query` step: it reads the backing
-store directly and skips the space filter the tool applies.
+store directly and skips the space filter the tool applies. The prefix is what makes this safe:
+every `id` under the tag is a pilot write, so nothing the user owned is touched.
 
-Then confirm, with `platform.context_engine.query_ai_indices` again. On an index the tag query
-returns nothing once the cleanup has run. On a data stream it still returns every revision, the
-deleted ones included, so check the newest revision per `id` instead:
+Then confirm, with `platform.context_engine.query_ai_indices` again:
 
 ```esql
 FROM <destination>
 | MV_EXPAND tags
 | WHERE tags == "ce-pilot-<runId>"
-| INLINE STATS latest = MAX(@timestamp) BY id
-| WHERE @timestamp == latest
-| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted"
-| KEEP id, title
-| LIMIT 10
+| LIMIT 1
 ```
 
-It returns nothing once the cleanup has run. If ES|QL reports `governance.lifecycle.status` as an
-unknown column, drop that line: nothing in that index has been deleted yet, so the tag query
-alone is the answer. Do this for every `runId` you used, not only the last.
+It returns nothing once the cleanup has run, on an index and on a data stream alike: the tool
+reads only the newest revision per `id` and hides the tombstones the backing store still holds.
+Do this for every `runId` you used, not only the last.
 
 **Strip the tag, then hand it back.** Remove the `ce-pilot-*` tag from the indicator's `tags` and
-widen the `consts` bounds back to what the brief specified — the pilot's narrow filter is not the
-automation.
+the `ce-pilot-*` prefix from `ki_id`, and widen the `consts` bounds back to what the brief specified
+— the pilot's narrow filter is not the automation.
 Return the finished YAML in full, a plain-language account of what the workflow does, what the
 pilot indicators looked like, and what the pilot cost: how many units it wrote and how long the
 successful run took, from the `started_at` and `finished_at` on the execution result
@@ -627,18 +672,20 @@ Present the subagent's summary and its pilot indicators before you save. The sav
 the workflow and the index but shows none of its content, so that account is the only thing the user
 has to approve on.
 
-**State the time estimate from the pilot in the same message.** The save dialog approves a run over
-the whole corpus, so the cost of that run has to be on the table before it opens. Take the pilot's
+**State the time estimate from the pilot in the same message.** The run dialog approves the full run
+over the filtered corpus, so the cost of that run has to be on the table before it opens. Take the pilot's
 duration and the number of units it wrote, divide to get a per-unit time, and multiply by the
 number of units the saved run will write: the unit count from the proposal's Unit section
 (units, not rows — a unit profile over 62,884 sales rows may have 2,517 units), or the
-automation's own bound when that is lower: "the pilot wrote 4 indicators in 64 seconds; the full run writes 100
-units, so expect at least 27 minutes". Say *at least*: a pilot skips the batch overhead and
-the verification retries that a full run pays for, so a straight-line projection is a floor.
-Show the three numbers, not only the result, so the reader can see what was assumed.
+automation's own bound when that is lower: "the pilot wrote 5 indicators in 80 seconds; the full run writes 100
+units, so expect roughly 27 minutes". When the pilot wrote fewer indicators than the batch it
+covered, say how many and do not project: the others failed or did not pass verification. Say *roughly*: rate limits and the pause between batches can
+slow a full run, and fixed costs the pilot paid once can speed it up, so the projection is neither a
+floor nor a ceiling. Show the three numbers, not only the result, so the reader can see what was
+assumed.
 
 **When the projection exceeds one hour, put the estimate in bold between 🚨 markers** so it
-cannot be skimmed past: "🚨 **The full run over 300 units will take at least 80 minutes** 🚨".
+cannot be skimmed past: "🚨 **The full run over 100 units will take roughly 80 minutes** 🚨".
 Under an hour, write it in plain text. A projection that comes out in hours is a finding of its
 own, and the answer is usually a narrower corpus filter or a cheaper unit rather than a shrug, so
 follow the warning with the option you would take. Report token usage only when the execution
@@ -652,32 +699,60 @@ handful of documents that get deleted afterwards. Running the saved automation i
 it writes indicators across the whole corpus and costs model calls on every document it touches.
 
 Saving an automation and running it are two separate operations, each with its own confirmation
-dialog. That is `save_automation`. The install tool is neither: it does not
-confirm and it does not start a run.
+dialog: `save_automation` confirms the save and `run_automation` confirms the run. The install tool
+is neither: it does not confirm and it does not start a run.
 
 **Index metadata, bottom-up document and unit profile** — call
 `platform.context_engine.install_automation_template` once. Pass `template: index_metadata`,
 `template: document_orchestration` or `template: unit_profile` and the consts it asks for. Do not
 write the YAML and do not call
-`platform.context_engine.save_automation` for these. If this template is already an automation on
-the AI index, the tool replaces that workflow's definition and keeps the same workflow id. The
-result says `replaced: true` when it did. It does not add a second automation and it does not start
-a run. Do not look for `run.started`. The document summary workflow is
-`system-context-engine-document-summary`. It is not attached to the AI index.
+`platform.context_engine.save_automation` for these. Installing the same template with the same
+`name` replaces that automation in place and keeps its workflow id, and the result says `replaced: true`; a different
+`name` adds another automation. The install does not start a run.
 
 **Every other strategy** — call `platform.context_engine.save_automation`. The tool confirms the save
 with the user before writing anything. It returns `workflowId`. Save the YAML the subagent returned.
 
 **Running** — call `platform.context_engine.run_automation` with the `workflowId` returned by the
-install or save tool. It asks the user for confirmation, enables the workflow if it is disabled, and
-returns immediately with `executionId` and `workflowUrl` — the run continues after the call returns.
-Tell the user it has started and that they can ask for a progress update at any time.
+install or save tool. It asks the user for confirmation and enables the workflow if it is disabled.
+A full run returns immediately with `executionId` and `workflowUrl` — the run continues after the
+call returns. Tell the user it has started and that they can ask for a progress update at any time.
+
+**Pilot a template install that writes more than 5 items before its full run.** The install tool
+does not run anything, so nothing has measured the automation, and the full-run dialog needs a time
+estimate. A Targeted KI writer has no pilot: it makes no model call, and it runs through
+`platform.core.execute_workflow` as described above. Count the items the full run writes: documents
+(up to `maxDocuments`), units (up to `maxUnits`) or sources for Index/Table Metadata. For documents
+and units, take the count from the Unit section of the proposal, or from a count query with the
+corpus filter when there is no proposal; for Index/Table Metadata, the number of `sources`, or 1 for
+`sourceIndex` with `categoryField`. When there are more than 5, call `run_automation` with
+`pilotSize: 5` first. Every template's loop runs five items at a time, so a pilot of 5 is one
+batch of the full run, and the per-unit arithmetic above holds. The pilot runs the automation over
+the first five documents, the five most active units, or the first five sources of the same list the
+full run uses, waits for it, and returns `status`, `durationMs` and `kisWritten`. When the pilot
+ended with any `status` other than `completed`, report `errorMessage` and stop: there is no duration
+to project from, and a failed pilot means the full run would fail the same way. When it is still
+`running`, say the time is not yet measured, and check it with
+`platform.core.get_workflow_execution_status` before you start the full run. Project only when
+`kisWritten` equals the pilot size. When it is lower, say how many of the pilot's items wrote a KI and stop: the others failed or
+did not pass verification, and the full run would lose the same share. Then project the full run
+from `durationMs` and `kisWritten` as the time estimate above lays out — the full run writes the
+item count counted above — and state it. When it
+exceeds an hour, give the 🚨 warning and the cheaper option you would take in the same message. Then
+call `run_automation` again without `pilotSize`; its dialog asks for the full run. The full run
+replaces the pilot's indicators, since they share ids; on an AI index backed by a data stream it
+adds a newer revision of each instead. If the user declines it, the pilot's indicators stay in the
+index: say so.
+
+**With 5 items or fewer, skip the pilot**: it would be the full run. Say the run covers only that
+many items, so there is no time estimate, and start it.
 
 ## Corpora larger than 10,000 documents
 
-ES|QL caps at 10,000 rows per query. An automation over a larger corpus needs cursor pagination —
-the `unit-profile-template` pages with a `while` over a keyword cursor, and the same `while` and
-`advance_cursor` pair transplants into the document template around its `discover_documents` and
-`foreach` — or a parent workflow dispatching per-item children with `workflow.executeAsync`. Note
+ES|QL caps at 10,000 rows per query. The templates stay under it by design: each discovery query
+keeps the top `max_units` or `max_documents`, at or under the cap. A custom automation that must
+walk a larger corpus needs cursor pagination — a `while` over a keyword cursor around its discovery
+query and `foreach` — or a parent workflow dispatching per-item children with
+`workflow.executeAsync`. Note
 the cap rather than drafting a workflow that silently truncates — this fails quietly, and the index
 looks under-covered for reasons no one will connect back to here.

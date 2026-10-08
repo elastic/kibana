@@ -127,8 +127,26 @@ const hasWorkflowDeletePrivilege = (request: KibanaRequest): boolean =>
     (privilege) => request.authzResult?.[privilege] === true
   );
 
+class MemoryFeatureDisabledError extends Error {}
+
+const isMemoryEnabledOnExistingAiIndex = async (
+  aiIndexService: AiIndexService,
+  aiIndexId: string,
+  spaceId: string
+): Promise<boolean> => {
+  try {
+    return (await aiIndexService.get(aiIndexId, spaceId)).memory_enabled;
+  } catch (error) {
+    if (error instanceof AiIndexNotFoundError) {
+      return false;
+    }
+    throw error;
+  }
+};
+
 const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, logger: Logger) => {
   if (
+    error instanceof MemoryFeatureDisabledError ||
     error instanceof InvalidAiIndexDestError ||
     error instanceof InvalidConnectorSourceError ||
     error instanceof InvalidEsqlSourceError ||
@@ -179,6 +197,7 @@ export const registerAiIndexRoutes = ({
   getAiIndexDataReadService,
   getImprovementsService,
   getScheduleService,
+  isMemoryEnabled,
   getActions,
   getAgentBuilder,
   getWorkflowsManagementApi,
@@ -193,6 +212,7 @@ export const registerAiIndexRoutes = ({
     spaceId: string
   ) => ImprovementsServiceApi;
   getScheduleService: () => FeedbackAnalysisScheduleService;
+  isMemoryEnabled: (request: KibanaRequest) => Promise<boolean>;
   getActions: () => Promise<ActionsPluginStart>;
   getAgentBuilder: () => Promise<AgentBuilderPluginStart | undefined>;
   getWorkflowsManagementApi: () => Promise<DeleteWorkflowsApi | undefined>;
@@ -273,6 +293,11 @@ export const registerAiIndexRoutes = ({
         const auditLogger = security.audit.logger;
         const { id, ...properties } = request.body;
         try {
+          if (properties.memory_enabled === true && !(await isMemoryEnabled(request))) {
+            throw new MemoryFeatureDisabledError(
+              'Context Engine memory is disabled. Enable the global memory feature flag before setting memory_enabled to true.'
+            );
+          }
           await validateEsqlSources(properties.sources);
           await validateConnectorSources({
             sources: properties.sources,
@@ -361,6 +386,17 @@ export const registerAiIndexRoutes = ({
         const auditLogger = security.audit.logger;
         const { aiIndexId } = request.params;
         try {
+          const spaceId = resolveSpaceId(await getSpaces(), request);
+          const aiIndexService = getAiIndexService();
+          if (
+            request.body.memory_enabled === true &&
+            !(await isMemoryEnabled(request)) &&
+            !(await isMemoryEnabledOnExistingAiIndex(aiIndexService, aiIndexId, spaceId))
+          ) {
+            throw new MemoryFeatureDisabledError(
+              'Context Engine memory is disabled. Enable the global memory feature flag before setting memory_enabled to true.'
+            );
+          }
           await validateEsqlSources(request.body.sources);
           await validateConnectorSources({
             sources: request.body.sources,
@@ -373,8 +409,7 @@ export const registerAiIndexRoutes = ({
             agents: (await getAgentBuilder())?.agents,
             request,
           });
-          const spaceId = resolveSpaceId(await getSpaces(), request);
-          const status = await getAiIndexService().put(aiIndexId, spaceId, request.body);
+          const status = await aiIndexService.put(aiIndexId, spaceId, request.body);
           const putAction =
             status === 'created' ? AiIndexAuditAction.CREATE : AiIndexAuditAction.UPDATE;
           auditLogger.log(aiIndexAuditEvent({ action: putAction, id: aiIndexId }));

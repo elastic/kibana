@@ -95,9 +95,17 @@ export const metadataSchema = z
       .min(1)
       .optional()
       .describe('Tags for categorization, e.g. ["production", "infra"].'),
-    builder_type: z
-      .string()
-      .max(64)
+    routing_tags: tagsSchema
+      .min(1)
+      .optional()
+      .describe(
+        'Routing tags that link alerts from this rule to action policies. An action policy applies when its `matcher.tags` contains at least one of these tags. Only allowed when kind is "alert".'
+      ),
+    builder: z
+      .object({
+        type: z.string().max(64).describe('Rule builder type.'),
+      })
+      .strict()
       .optional()
       .describe(
         'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.'
@@ -213,9 +221,7 @@ export const recoverySchema = z
     z
       .object({ strategy: z.literal(recoveryStrategy.no_breach) })
       .strict()
-      .describe(
-        'Recovers the alert episode when its group no longer appears in the breach results.'
-      )
+      .describe('Recovers the alert when its group no longer appears in the breach results.')
       .meta({ id: 'alerting_rule_recovery_no_breach' }),
     z
       .object({
@@ -226,29 +232,29 @@ export const recoverySchema = z
       })
       .strict()
       .describe(
-        'Recovers the alert episode when `query.base` plus `segment` returns the group. Requires `query.breach`.'
+        'Recovers the alert when `query.base` plus `segment` returns the group. Requires `query.breach`.'
       )
       .meta({ id: 'alerting_rule_recovery_condition' }),
     z
       .object({
         strategy: z.literal(recoveryStrategy.query),
         query: esqlQuerySchema.describe(
-          'Independent ES|QL query, including its own `FROM` clause. A matching group recovers the alert episode.'
+          'Independent ES|QL query, including its own `FROM` clause. A matching group recovers the alert.'
         ),
       })
       .strict()
-      .describe('Recovers the alert episode when this separate query returns the group.')
+      .describe('Recovers the alert when this separate query returns the group.')
       .meta({ id: 'alerting_rule_recovery_query' }),
     z
       .object({ strategy: z.literal(recoveryStrategy.manual) })
       .strict()
       .describe(
-        'Does not recover automatically. Close the alert episode with a user action. `state_transition.recovering` has no effect.'
+        'Does not recover automatically. Close the alert with a user action. `state_transition.recovering` has no effect.'
       )
       .meta({ id: 'alerting_rule_recovery_manual' }),
   ])
   .describe(
-    'When an alert episode recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.'
+    'When an alert recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.'
   )
   .meta({ id: 'alerting_rule_recovery' });
 
@@ -295,15 +301,15 @@ export const noDataSchema = z
       .meta({ id: 'alerting_rule_no_data_ignore' }),
     classifyingNoDataSchema(
       noDataStrategy.keep_last,
-      "Holds the alert episode's current status when the rule finds no data."
+      "Holds the alert's current status when the rule finds no data."
     ),
     classifyingNoDataSchema(
       noDataStrategy.resolve,
-      'Closes the alert episode the first time the rule finds no data for a group.'
+      'Closes the alert the first time the rule finds no data for a group.'
     ),
     classifyingNoDataSchema(
       noDataStrategy.alert,
-      'Marks an existing alert episode `active` when the rule finds no data. It never opens an episode for a group that has not breached. Not accepted when creating or updating rules.'
+      'Marks an existing alert `active` when the rule finds no data. It never opens an alert for a group that has not breached. Not accepted when creating or updating rules.'
     ),
   ])
   .describe(
@@ -440,28 +446,28 @@ export const stateTransitionSchema = z
   .object({
     pending: stateTransitionPhaseSchema({
       countDescription:
-        'Consecutive matches required before the alert episode becomes `active`. Set to `0` to open it on the first match.',
+        'Consecutive matches the alert spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match.',
       timeframeDescription:
         'Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.',
       metaId: 'alerting_rule_state_transition_pending',
     })
       .optional()
-      .describe('Delay before a match opens an alert episode.'),
+      .describe('Delay before a match opens an alert.'),
     recovering: stateTransitionPhaseSchema({
       countDescription:
-        'Consecutive recoveries required before the alert episode becomes `inactive`. Set to `0` to close it on the first recovery.',
+        'Consecutive recoveries the alert spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery.',
       timeframeDescription:
         'Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.',
       metaId: 'alerting_rule_state_transition_recovering',
     })
       .optional()
       .describe(
-        'Delay before a recovered match closes the alert episode. Has no effect when `recovery.strategy` is `manual`.'
+        'Delay before a recovered match closes the alert. Has no effect when `recovery.strategy` is `manual`.'
       ),
   })
   .strict()
   .describe(
-    'Specifies how many consecutive matches, or how long a condition must hold, before an alert episode becomes `active` or `inactive`. Allowed only when `kind` is `alert`.'
+    'Specifies how many consecutive matches, or how long a condition must hold, before an alert becomes `active` or `inactive`. Allowed only when `kind` is `alert`.'
   )
   .meta({ id: 'alerting_rule_state_transition' });
 
@@ -593,6 +599,15 @@ export const isStateTransitionAllowed = (data: {
   state_transition?: unknown;
 }): boolean => data.kind === 'alert' || data.state_transition == null;
 
+/** Signal rules never create alerts, so no action policy can be routed to them. */
+export const isRoutingTagsAllowedForKind = (data: {
+  kind?: string;
+  metadata?: { routing_tags?: unknown } | null;
+}): boolean => data.kind !== 'signal' || data.metadata?.routing_tags == null;
+
+export const ROUTING_TAGS_SIGNAL_RULE_MESSAGE =
+  'metadata.routing_tags is only allowed when kind is "alert".';
+
 /** The two objects that describe an alert rule's episode lifecycle. */
 const LIFECYCLE_FIELDS = ['recovery', 'no_data'] as const;
 
@@ -664,7 +679,7 @@ export const isRecoveryTransitionConsistentWithStrategy = (data: RuleLifecycleSh
 /** The create-rule fields the refinements below read. */
 type CreateRuleRefinementFields = Pick<
   z.infer<typeof createRuleDataBaseSchema>,
-  'kind' | 'query' | 'recovery' | 'no_data' | 'state_transition'
+  'kind' | 'metadata' | 'query' | 'recovery' | 'no_data' | 'state_transition'
 >;
 
 /**
@@ -681,6 +696,10 @@ const applyCreateRuleRefinements = <T extends z.ZodType<CreateRuleRefinementFiel
     .refine(isStateTransitionAllowed, {
       message: 'state_transition is only allowed when kind is "alert".',
       path: ['state_transition'],
+    })
+    .refine(isRoutingTagsAllowedForKind, {
+      message: ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
+      path: ['metadata', 'routing_tags'],
     })
     .check((ctx) => {
       const allowed = isLifecycleConfigAllowedForKind(ctx.value);
@@ -769,10 +788,15 @@ export const updateRuleDataSchema = z
     metadata: metadataSchema
       .partial()
       .extend({
-        builder_type: z.string().max(64).optional().nullable(),
+        builder: z
+          .object({ type: z.string().max(64).describe('Rule builder type.') })
+          .strict()
+          .optional()
+          .nullable(),
         // `null` clears all tags (an empty array is rejected by `.min(1)`, and
         // omitting `tags` preserves the existing ones on a partial update).
         tags: tagsSchema.min(1).nullable().optional(),
+        routing_tags: tagsSchema.min(1).nullable().optional(),
       })
       .optional(),
     time_field: z
@@ -781,7 +805,7 @@ export const updateRuleDataSchema = z
       .max(MAX_FIELD_NAME_LENGTH)
       .optional()
       .describe(TIME_FIELD_UPDATE_DESCRIPTION),
-    schedule: scheduleSchema.partial().optional().nullable(),
+    schedule: scheduleSchema.partial().optional(),
     query: querySchema.optional(),
     recovery: recoverySchema.optional(),
     no_data: noDataSchema.optional(),
@@ -890,6 +914,28 @@ export const ruleTagsResponseSchema = tagsResponseSchema
 
 export type RuleTagsResponse = z.infer<typeof ruleTagsResponseSchema>;
 
+/** Query parameters for the rule routing tags API. */
+export const ruleRoutingTagsParamsSchema = z
+  .object({
+    search: z
+      .string()
+      .max(256)
+      .optional()
+      .describe(
+        'Prefix to filter routing tags by. Returns all most-used routing tags when omitted.'
+      ),
+  })
+  .strict();
+
+export type RuleRoutingTagsParams = z.infer<typeof ruleRoutingTagsParamsSchema>;
+
+/** Rule routing tags response schema. */
+export const ruleRoutingTagsResponseSchema = tagsResponseSchema
+  .describe('All unique routing tags across rules.')
+  .meta({ id: 'alerting_rule_routing_tags_response' });
+
+export type RuleRoutingTagsResponse = z.infer<typeof ruleRoutingTagsResponseSchema>;
+
 export const ruleIdSchema = entityIdSchema.describe(`A rule identifier. ${ENTITY_ID_NOTE}`);
 
 /**
@@ -933,7 +979,7 @@ export type BulkCreateRuleItem = z.infer<typeof bulkCreateRuleItemSchema>;
  */
 export const bulkCreateRulesRequestSchema = z
   .object({
-    rules: z
+    items: z
       .array(bulkCreateRuleItemSchema)
       .min(1)
       .max(MAX_BULK_ITEMS)
@@ -942,12 +988,12 @@ export const bulkCreateRulesRequestSchema = z
   .strict()
   .refine(
     (data) => {
-      const ids = data.rules
+      const ids = data.items
         .map((rule) => rule.id)
         .filter((id): id is string => id != null && id.length > 0);
       return new Set(ids).size === ids.length;
     },
-    { message: 'Duplicate rule identifiers in the request.', path: ['rules'] }
+    { message: 'Duplicate rule identifiers in the request.', path: ['items'] }
   )
   .meta({ id: 'alerting_bulk_create_rules_request' });
 
