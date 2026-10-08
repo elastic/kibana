@@ -15,13 +15,11 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiSuperDatePicker,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
@@ -39,20 +37,15 @@ import { fromDraft, isSameDraft, toDraft } from '../lib/library_draft';
 import type { VegaDraft } from '../lib/library_draft';
 import type { VegaPluginStartDependencies } from '../plugin';
 import { getData } from '../services';
+import { PreviewTimePicker } from './preview_time_picker';
 import { saveVegaToLibrary } from './save_to_library';
 import type { VegaLibraryClient } from './vega_library_client';
 
 type VegaPreviewApi = DefaultEmbeddableApi<VegaByValueState> &
   HasSerializableState<VegaByValueState>;
 type VegaPreviewParentApi = HasSerializedChildState<VegaByValueState> & {
-  timeRange$: BehaviorSubject<TimeRange | undefined>;
+  timeRange$: BehaviorSubject<TimeRange>;
 };
-
-interface QuickRange {
-  from: string;
-  to: string;
-  display: string;
-}
 
 const saveLabel = i18n.translate('visTypeVega.libraryEditor.saveButtonLabel', {
   defaultMessage: 'Save',
@@ -69,7 +62,7 @@ const savedMessage = (title: string) =>
   });
 
 export interface VegaLibraryEditorProps {
-  core: Pick<CoreStart, 'notifications' | 'uiSettings'>;
+  core: Pick<CoreStart, 'application' | 'featureFlags' | 'http' | 'notifications' | 'uiSettings'>;
   client: VegaLibraryClient;
   SearchBar: VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'];
   savedObjectsTagging?: SavedObjectsTaggingApi;
@@ -134,19 +127,11 @@ export const VegaLibraryEditor = ({
 
   // The library has no dashboard to take a time range from, so the preview has its own.
   const timeRange$ = useMemo(
-    () =>
-      new BehaviorSubject<TimeRange | undefined>(getData().query.timefilter.timefilter.getTime()),
+    () => new BehaviorSubject<TimeRange>(getData().query.timefilter.timefilter.getTime()),
     []
   );
   const [timeRange, setTimeRange] = useState(timeRange$.getValue());
   const getPreviewParentApi = useCallback(() => ({ timeRange$ }), [timeRange$]);
-  const quickRanges = useMemo(
-    () =>
-      core.uiSettings
-        .get<QuickRange[]>(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
-        .map(({ from, to, display }) => ({ start: from, end: to, label: display })),
-    [core.uiSettings]
-  );
 
   const previewState = useMemo(() => fromDraft(previewedDraft), [previewedDraft]);
 
@@ -301,22 +286,16 @@ export const VegaLibraryEditor = ({
           getParentApi={getPreviewParentApi}
           onClose={() => setIsPreviewOpen(false)}
           toolbar={
-            // Sized and placed like the date picker in the unified search bar.
+            // Placed like the date picker in the unified search bar.
             <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiSuperDatePicker
-                  start={timeRange?.from}
-                  end={timeRange?.to}
-                  onTimeChange={({ start, end }) => {
-                    const next = { from: start, to: end };
+                <PreviewTimePicker
+                  core={core}
+                  timeRange={timeRange}
+                  onTimeRangeChange={(next) => {
                     setTimeRange(next);
                     timeRange$.next(next);
                   }}
-                  commonlyUsedRanges={quickRanges}
-                  showUpdateButton={false}
-                  compressed
-                  width="auto"
-                  data-test-subj="vegaLibraryEditorPreviewTimePicker"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
