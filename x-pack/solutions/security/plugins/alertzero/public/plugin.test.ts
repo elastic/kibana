@@ -277,7 +277,7 @@ describe('AlertZeroPublicPlugin Serverless entitlement', () => {
       const contract = plugin.start(core, {
         licensing: hasLicense ? createLicensing() : { ...createLicensing(), license$: EMPTY },
         agentBuilder,
-        agenticInvestigations: {},
+        agenticInvestigations: { registerImpactEntityOpener: jest.fn() },
         proposals: {},
       });
       await flushRegistration();

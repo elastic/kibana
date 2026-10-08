@@ -7,7 +7,7 @@ pageLoadAssetSize:
   agentBuilderSml: 597
   agentBuilderVisualizations: 1551
   agentBuilderWorkflows: 1152
-  agenticInvestigations: 34370
+  agenticInvestigations: 47910
   aiAssistantManagementSelection: 355
   aiops: 586
   alerting: 8789
@@ -232,7 +232,7 @@ pageLoadAssetSize:
   visTypeVega: 3994
   visTypeVislib: 21971
   visTypeXy: 24402
-  visualizationListing: 1339
+  visualizationListing: 1488
   visualizations: 1147
   watcher: 5497
   workflowsExtensions: 38186

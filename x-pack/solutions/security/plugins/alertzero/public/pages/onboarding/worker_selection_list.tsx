@@ -55,6 +55,7 @@ export const WorkerSelectionList: React.FC<Props> = ({
                 {index > 0 && <EuiHorizontalRule margin="none" />}
                 <WorkerSelectionRow
                   worker={worker}
+                  serverWorker={serverWorkers.get(worker.id)}
                   scheduleInterval={serverWorkers.get(worker.id)?.settings?.scheduleInterval}
                   checked={checked}
                   disabled={(checked && enabledCount <= 1) || isSaving || !canModifyWorkers}

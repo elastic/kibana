@@ -666,7 +666,7 @@ describe('Endpoint analysis run', () => {
     const journalSteps = allSteps.filter(
       ({ with: withInputs }) =>
         (withInputs as { 'workflow-id'?: string } | undefined)?.['workflow-id'] ===
-        '{{ consts.journal_note }}'
+        'system-alertzero-journal-note'
     );
 
     it('narrates problem paths as journal notes rather than attachments', () => {
@@ -683,7 +683,9 @@ describe('Endpoint analysis run', () => {
         'journal_proposals_queued',
         'journal_timeline',
       ]);
-      expect(definition.consts?.journal_note).toBe('system-alertzero-journal-note');
+      expect(
+        journalSteps.every(({ with: withInputs }) => withInputs?.['run-as-mode'] === 'inherit')
+      ).toBe(true);
     });
 
     // The helper continues past its own append and reports nothing back, so an
@@ -767,7 +769,7 @@ describe('Endpoint analysis run', () => {
 
       expect(rationaleCap).toBe(7900);
       expect(rationaleCap + longerPrefix.length).toBeLessThanOrEqual(JOURNAL_MESSAGE_MAX_LENGTH);
-      const message = (journal?.with as { body?: { input?: string } })?.body?.input ?? '';
+      const message = (journal?.with as { inputs?: { message?: string } })?.inputs?.message ?? '';
       expect(message).toContain('{{ steps.forensic_analysis.output.structured_output.rationale }}');
       expect(message).toContain('Rationale for proposed actions');
       expect(message).toContain('Rationale for ending investigation');
