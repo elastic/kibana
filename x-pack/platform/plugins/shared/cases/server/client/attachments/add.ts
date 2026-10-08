@@ -20,6 +20,7 @@ import { getIDsAndIndicesAsArrays } from '../../common/utils';
 import { isAlertAttachmentType, isEventAttachmentType } from '../../../common/utils/attachments';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
+import { createCaseEntity } from '../../authorization/utils';
 import type { AddArgs } from './types';
 import { validateUnifiedAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
@@ -80,7 +81,7 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
     logger,
     authorization,
     unifiedAttachmentTypeRegistry,
-    services: { userActionService },
+    services: { caseService, userActionService },
   } = clientArgs;
 
   try {
@@ -89,6 +90,9 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
     await validateMaxUserActions({ caseId, userActionService, userActionsToAdd: 1 });
 
     const savedObjectID = id ?? SavedObjectsUtils.generateId();
+    // the parent case is authorized alongside the new attachment so a
+    // restricted case the caller may not see yields a not-found outcome
+    const theCase = await caseService.getCase({ id: caseId });
     await authorization.ensureAuthorized({
       operation: Operations.createComment,
       entities: [
@@ -96,6 +100,7 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
           id: savedObjectID,
           owner: query.owner,
         },
+        createCaseEntity(theCase),
       ],
     });
 

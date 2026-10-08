@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockCaseComments } from '../../mocks';
+import { mockCaseComments, mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { deleteComment, deleteAll } from './delete';
 
@@ -18,6 +18,7 @@ describe('delete', () => {
       jest.resetAllMocks();
 
       clientArgs.services.attachmentService.getter.get.mockResolvedValue(mockCaseComments[0]);
+      clientArgs.services.caseService.getCase.mockResolvedValue(mockCases[0]);
       clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
         new Map()
       );
@@ -175,6 +176,7 @@ describe('delete', () => {
         async ({ savedObjectIds }) => savedObjectIds
       );
 
+      clientArgs.services.caseService.getCase.mockResolvedValue(mockCases[0]);
       clientArgs.services.caseService.getAllCaseComments.mockResolvedValue(
         getAllCaseCommentsResponse
       );

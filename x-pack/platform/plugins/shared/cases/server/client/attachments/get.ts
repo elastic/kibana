@@ -30,7 +30,7 @@ import type {
 } from './types';
 
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import { getAttachmentAuthorizationFilter } from '../../authorization/utils';
+import { createCaseEntity, getAttachmentAuthorizationFilter } from '../../authorization/utils';
 import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
 import {
   defaultSortField,
@@ -196,18 +196,26 @@ export async function get(
   clientArgs: CasesClientArgs
 ): Promise<UnifiedAttachment> {
   const {
-    services: { attachmentService },
+    services: { attachmentService, caseService },
     logger,
     authorization,
   } = clientArgs;
 
   try {
-    const attachment = await attachmentService.getter.get({
-      savedObjectId,
-    });
+    const [attachment, theCase] = await Promise.all([
+      attachmentService.getter.get({
+        savedObjectId,
+      }),
+      // the parent case is authorized alongside the attachment so a restricted
+      // case the caller may not see yields a not-found outcome
+      caseService.getCase({ id: caseID }),
+    ]);
 
     await authorization.ensureAuthorized({
-      entities: [{ owner: attachment.attributes.owner, id: attachment.id }],
+      entities: [
+        { owner: attachment.attributes.owner, id: attachment.id },
+        createCaseEntity(theCase),
+      ],
       operation: Operations.getComment,
     });
 

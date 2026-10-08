@@ -10,6 +10,7 @@ import { CaseUserActionsDeprecatedResponseRt } from '../../../common/types/api';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
+import { createCaseEntity } from '../../authorization/utils';
 import type { UserActionGet } from './types';
 import { extractAttributes } from './utils';
 import { decodeOrThrow } from '../../common/runtime_types';
@@ -19,19 +20,27 @@ export const get = async (
   clientArgs: CasesClientArgs
 ): Promise<CaseUserActionsDeprecatedResponse> => {
   const {
-    services: { userActionService },
+    services: { caseService, userActionService },
     logger,
     authorization,
   } = clientArgs;
 
   try {
-    const userActions = await userActionService.getAll(caseId);
+    const [userActions, theCase] = await Promise.all([
+      userActionService.getAll(caseId),
+      // the parent case is authorized alongside the user actions so a restricted
+      // case the caller may not see yields a not-found outcome
+      caseService.getCase({ id: caseId }),
+    ]);
 
     await authorization.ensureAuthorized({
-      entities: userActions.saved_objects.map((userAction) => ({
-        owner: userAction.attributes.owner,
-        id: userAction.id,
-      })),
+      entities: [
+        ...userActions.saved_objects.map((userAction) => ({
+          owner: userAction.attributes.owner,
+          id: userAction.id,
+        })),
+        createCaseEntity(theCase),
+      ],
       operation: Operations.getUserActions,
     });
 

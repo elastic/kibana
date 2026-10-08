@@ -116,6 +116,7 @@ export const INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL =
 export const INTERNAL_CASE_USERS_URL = `${CASES_INTERNAL_URL}/{case_id}/_users` as const;
 export const INTERNAL_DELETE_FILE_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/files/_bulk_delete` as const;
+export const INTERNAL_CASE_FILES_URL = `${CASES_INTERNAL_URL}/{case_id}/files` as const;
 export const INTERNAL_GET_CASE_CATEGORIES_URL = `${CASES_INTERNAL_URL}/categories` as const;
 export const INTERNAL_CASE_METRICS_URL = `${CASES_INTERNAL_URL}/metrics` as const;
 export const INTERNAL_CASE_METRICS_DETAILS_URL = `${CASES_INTERNAL_URL}/metrics/{case_id}` as const;

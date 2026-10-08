@@ -18,6 +18,7 @@ import type { CasesClientArgs } from '..';
 
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
+import { createCaseEntity } from '../../authorization/utils';
 import type { BulkCreateArgs } from './types';
 import { validateUnifiedAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
@@ -34,7 +35,7 @@ export const bulkCreate = async (
     logger,
     authorization,
     unifiedAttachmentTypeRegistry,
-    services: { userActionService },
+    services: { caseService, userActionService },
   } = clientArgs;
 
   try {
@@ -71,9 +72,12 @@ export const bulkCreate = async (
       [[], []]
     );
 
+    // the parent case is authorized alongside the new attachments so a
+    // restricted case the caller may not see yields a not-found outcome
+    const theCase = await caseService.getCase({ id: caseId });
     await authorization.ensureAuthorized({
       operation: Operations.bulkCreateAttachments,
-      entities,
+      entities: [...entities, createCaseEntity(theCase)],
     });
 
     const model = await CaseCommentModel.create(caseId, clientArgs);
