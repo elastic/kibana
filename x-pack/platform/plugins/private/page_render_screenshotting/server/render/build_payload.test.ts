@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { markExternalUiamCredential } from '@kbn/core-security-server';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import type { PdfScreenshotOptions, PngScreenshotOptions } from '@kbn/screenshotting-plugin/server';
 import { buildRenderPageRequest, withCaptureOrigin } from './build_payload';
@@ -220,6 +221,34 @@ describe('buildRenderPageRequest', () => {
       expect(security.authc.apiKeys.uiam!.getInternalCallerAttestationHeaders).toHaveBeenCalledWith(
         expect.objectContaining({ scheme: 'ApiKey', credentials: 'essu_some-uiam-key' })
       );
+    });
+
+    it('forwards but does not attest a UIAM credential marked external by Task Manager', () => {
+      const request = httpServerMock.createFakeKibanaRequest({
+        headers: { authorization: 'ApiKey essu_external-key' },
+      });
+      markExternalUiamCredential(request);
+
+      const payload = buildRenderPageRequest(pdfOptions({ request }), security);
+
+      expect(payload.pageAuth?.headers?.authorization).toBe('ApiKey essu_external-key');
+      expect(
+        security.authc.apiKeys.uiam!.getInternalCallerAttestationHeaders
+      ).not.toHaveBeenCalled();
+    });
+
+    it('forwards but does not attest a UIAM credential that is an external API key', () => {
+      const request = httpServerMock.createFakeKibanaRequest({
+        headers: { authorization: 'ApiKey essu_external-key' },
+      });
+      (security.authc.apiKeys.uiam!.isExternalApiKey as jest.Mock).mockReturnValue(true);
+
+      const payload = buildRenderPageRequest(pdfOptions({ request }), security);
+
+      expect(payload.pageAuth?.headers?.authorization).toBe('ApiKey essu_external-key');
+      expect(
+        security.authc.apiKeys.uiam!.getInternalCallerAttestationHeaders
+      ).not.toHaveBeenCalled();
     });
 
     it('forwards a cookie header when present, alongside the credential', () => {

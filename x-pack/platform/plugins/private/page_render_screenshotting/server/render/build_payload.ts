@@ -7,7 +7,11 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
+import {
+  HTTPAuthorizationHeader,
+  isExternalUiamCredential,
+  isUiamCredential,
+} from '@kbn/core-security-server';
 import { KBN_SCREENSHOT_MODE_ENABLED_KEY } from '@kbn/screenshot-mode-plugin/common';
 import type { ScreenshotOptions } from '@kbn/screenshotting-plugin/server';
 import type { RenderPageRequest } from './types';
@@ -22,7 +26,8 @@ const SHARED_ITEMS_COUNT_ATTRIBUTE = 'data-shared-items-count';
 const RENDER_COMPLETE_ATTRIBUTE = 'data-render-complete';
 const RENDER_ERROR_ATTRIBUTE = 'data-render-error';
 
-// Same as the screenshotting plugin's default viewport.
+// Same as the screenshotting plugin's default viewport. Deliberately fixed, ignoring
+// `layout.dimensions`: at this width the layout no longer reflows, and it bounds the document size.
 const DEFAULT_VIEWPORT = { width: 1950, height: 1200 };
 
 // Same as the screenshotting plugin's preserve_layout.css. Not used for the print layout.
@@ -55,11 +60,16 @@ function getRequestAuthHeaders(
   if (authHeader) {
     headers.authorization = authHeader.toString();
 
-    if (isUiamCredential(authHeader) && security.authc.apiKeys.uiam) {
-      Object.assign(
-        headers,
-        security.authc.apiKeys.uiam.getInternalCallerAttestationHeaders(authHeader)
-      );
+    const uiam = security.authc.apiKeys.uiam;
+    // Externally created UIAM keys are not internal callers: UIAM rejects them when paired with the
+    // attestation, so they are forwarded as-is.
+    if (
+      uiam &&
+      isUiamCredential(authHeader) &&
+      !isExternalUiamCredential(request) &&
+      !uiam.isExternalApiKey(request)
+    ) {
+      Object.assign(headers, uiam.getInternalCallerAttestationHeaders(authHeader));
     }
   }
 
