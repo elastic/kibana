@@ -25,8 +25,10 @@ const WORKFLOW_NAME_TEMPLATE = '{{ workflow.name }}';
 const SPACE_PATH_PREFIX_TEMPLATE = '/s/{{ workflow.spaceId }}';
 const EVALUATE_PATH = '/internal/evals/_evaluate';
 const PERSIST_PATH = '/internal/evals/online_scores';
-const SPACE_EVALUATE_PATH = `${SPACE_PATH_PREFIX_TEMPLATE}${EVALUATE_PATH}`;
-const SPACE_PERSIST_PATH = `${SPACE_PATH_PREFIX_TEMPLATE}${PERSIST_PATH}`;
+// Keep module-level values plain literals: computed values make the bundler keep this module
+// in the plugin's page-load bundle through the `common` barrel.
+const SPACE_EVALUATE_PATH = '/s/{{ workflow.spaceId }}/internal/evals/_evaluate';
+const SPACE_PERSIST_PATH = '/s/{{ workflow.spaceId }}/internal/evals/online_scores';
 // `${{ ... }}` (not `{{ ... }}`) is required here: the workflow templating engine
 // stringifies plain `{{ }}` interpolations, which would turn this array into a
 // string and fail `IngestOnlineScoresRequestBody`'s `results: array` validation.
