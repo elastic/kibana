@@ -12,7 +12,7 @@ import {
   ANOMALY_RECORD_FILTER,
   ML_ANOMALY_INDICES,
   buildAnomalyJobFilter,
-} from '../../new_entities_table/common';
+} from '../../new_entities_table/queries/esql';
 import { evalGuardedTypedEuids } from './guarded_typed_euid_eval';
 
 const ENTITY_TYPES = ['user', 'host', 'service'] as const;

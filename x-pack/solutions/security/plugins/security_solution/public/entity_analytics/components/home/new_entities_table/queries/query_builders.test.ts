@@ -6,7 +6,8 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { buildKeepClause, enrichEntityRows } from '../common';
+import { buildKeepClause } from './esql';
+import { enrichEntityRows } from '../common';
 import type { PageCursor, QueryArgs, Row, RunContext } from '../common';
 import { COLUMN_ENRICHERS, SORT_QUERY_SPECS } from '../grid_columns';
 import { alertCountQuerySpec } from './alerts';

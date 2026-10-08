@@ -8,24 +8,28 @@
 import { getEuidEsqlFilterBasedOnDocument } from '@kbn/entity-store/common/domain/euid';
 import {
   buildIdentityPrefilter,
+  alertsIndexOf,
+  buildLookupJoinClause,
+  entityAliasOf,
+  lookbackCutoff,
+  toList,
+} from './esql';
+import {
   entityIdsOf,
   getEntityId,
   ALERT_COUNT_FIELD,
   ALLOWED_ENTITY_TYPES,
   ENTITY_TYPE_FIELD,
   LAST_SEEN_ALERT_FIELD,
-  alertsIndexOf,
-  buildAlertEuidPipeline,
+  nullOnFailure,
+} from '../common';
+import { buildAlertEuidPipeline } from './euid_pipeline';
+import {
   buildEntitiesInViewConditions,
   buildEntitiesInViewCountQuery,
-  buildForeignSortPageSteps,
-  buildLookupJoinClause,
-  entityAliasOf,
   IN_VIEW_FIELD,
-  lookbackCutoff,
-  nullOnFailure,
-  toList,
-} from '../common';
+} from './entities_in_view';
+import { buildForeignSortPageSteps } from './foreign_sort';
 import type { QueryArgs, Row, PageEnricher, ColumnQuerySpec } from '../common';
 import { buildEntityListSortPlan, runSplitSortPage } from './split_sort';
 import type { SplitSortPlan } from './split_sort';

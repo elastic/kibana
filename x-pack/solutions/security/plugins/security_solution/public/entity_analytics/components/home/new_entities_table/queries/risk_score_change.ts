@@ -13,17 +13,13 @@ import {
   RISK_SCORE_CHANGE_FIELD,
   RISK_SCORE_NORM_FIELD,
   TIME_RANGE_DAYS,
-  buildEntitiesInViewCountQuery,
-  buildKeepClause,
-  buildLookupJoinClause,
-  buildMergedForeignRows,
-  buildMergedForeignSortQuery,
-  esc,
   nullOnFailure,
-  riskScoreIndexOf,
-  toList,
 } from '../common';
-import type { QueryArgs, PageEnricher, ColumnQuerySpec, MergedForeignRowsOptions } from '../common';
+import { buildEntitiesInViewCountQuery } from './entities_in_view';
+import { buildKeepClause, buildLookupJoinClause, esc, riskScoreIndexOf, toList } from './esql';
+import { buildMergedForeignRows, buildMergedForeignSortQuery } from './foreign_sort';
+import type { QueryArgs, PageEnricher, ColumnQuerySpec } from '../common';
+import type { MergedForeignRowsOptions } from './foreign_sort';
 import {
   buildEmptyRowsQuery,
   buildValueCursorClause,

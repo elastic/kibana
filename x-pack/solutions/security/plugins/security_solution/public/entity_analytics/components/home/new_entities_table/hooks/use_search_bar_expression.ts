@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { convertFiltersToESQLExpression, convertQueryToESQLExpression } from '@kbn/esql-utils';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../../../common/store/inputs';
-import { joinAnd } from '../common';
+import { joinAnd } from '../queries/esql';
 
 /** The search bar's query and filter pills as one ES|QL expression; `undefined` when empty. */
 export const useSearchBarExpression = (): string | undefined => {

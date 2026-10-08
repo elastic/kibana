@@ -1,0 +1,145 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
+import { getEuidSourceFields } from '@kbn/entity-store/common/domain/euid';
+import {
+  ALLOWED_ENTITY_TYPES,
+  ENTITY_FIELDS,
+  ENTITY_ID_FIELD,
+  ENTITY_TYPE_FIELD,
+  MS_PER_DAY,
+  RESOLVED_TO_FIELD,
+  TIME_RANGE_DAYS,
+} from '../common';
+import type { PageCursor, QueryArgs, Row, SortDir, TimeRange } from '../common';
+
+// ── index name helpers ────────────────────────────────────────────────────────
+
+export const entityAliasOf = (namespace: string) => getEntitiesAlias(ENTITY_LATEST, namespace);
+export const alertsIndexOf = (namespace: string) => `.alerts-security.alerts-${namespace}`;
+export const riskScoreIndexOf = (namespace: string) => `risk-score.risk-score-${namespace}`;
+
+// ── ML anomalies ─────────────────────────────────────────────────────────────
+// One definition of an entity anomaly, shared by the anomalies tile and column.
+
+export const ML_ANOMALY_INDICES = '.ml-anomalies-shared*';
+
+/** Final anomaly records with a score. */
+export const ANOMALY_RECORD_FILTER =
+  'result_type == "record" AND is_interim == false AND record_score >= 1';
+
+/** Records of the installed security jobs; matches nothing when there are none. */
+export const buildAnomalyJobFilter = (jobIds: readonly string[]): string =>
+  jobIds.length ? `job_id IN (${toList(jobIds)})` : 'false';
+
+// ── primitives ───────────────────────────────────────────────────────────────
+
+export const esc = (s: string) =>
+  `"${s
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\t/g, '\\t')}"`;
+
+export const toList = (items: readonly string[]) => items.map(esc).join(', ');
+
+/** Raw identity fields that EUIDs are built from. */
+const IDENTITY_SOURCE_FIELDS = [
+  ...new Set(ALLOWED_ENTITY_TYPES.flatMap((t) => getEuidSourceFields(t).identitySourceFields)),
+];
+
+const stringValuesOf = (value: unknown): string[] =>
+  [value].flat().filter((v): v is string => typeof v === 'string' && v !== '');
+
+/**
+ * Pushable prefilter: `field IN (…)` over the identity values of `rows`.
+ * It matches a superset of the documents whose derived EUID is one of the rows' ids, so it
+ * can run before the EUID evaluation, which casts fields with `TO_STRING` and can't be
+ * pushed down. Must be its own top-level `WHERE` to reach Lucene.
+ */
+export const buildIdentityPrefilter = (rows: readonly Row[]): string | undefined => {
+  const parts = IDENTITY_SOURCE_FIELDS.flatMap((field) => {
+    const values = [...new Set(rows.flatMap((row) => stringValuesOf(row[field])))];
+    return values.length ? [`${field} IN (${toList(values)})`] : [];
+  });
+  return parts.length ? parts.join(' OR ') : undefined;
+};
+
+/** ES|QL field names without quotes: letters, digits, `_` and `.`, not starting with a digit. */
+const PLAIN_FIELD_NAME = /^[A-Za-z_][A-Za-z0-9_.]*$/;
+
+/**
+ * Backticks a field name unless it is plain, e.g. `@timestamp` or a field picked in Fields
+ * with `-` or `:`. A backtick in the name is doubled.
+ */
+const quoteField = (field: string): string =>
+  PLAIN_FIELD_NAME.test(field) ? field : `\`${field.replace(/`/g, '``')}\``;
+
+export const buildKeepClause = (
+  args: Pick<QueryArgs, 'keepFields'>,
+  ...extra: string[]
+): string => {
+  const fields = [...new Set([...ENTITY_FIELDS, ...(args.keepFields ?? []), ...extra])];
+  return `| KEEP ${fields.map(quoteField).join(', ')}`;
+};
+
+export const buildResolvedRowsFilter = (rowsMode: QueryArgs['rowsMode']): string[] =>
+  rowsMode === 'resolved' ? [`| WHERE ${RESOLVED_TO_FIELD} IS NULL`] : [];
+
+export const buildFilterClause = (filterExpression?: string): string[] =>
+  filterExpression ? [`| WHERE ${filterExpression}`] : [];
+
+/** AND-join ES|QL boolean fragments; `undefined` when empty. */
+export const joinAnd = (...parts: Array<string | undefined | null | false>): string | undefined => {
+  const filtered = parts.filter((p): p is string => typeof p === 'string' && p.length > 0);
+  return filtered.length ? filtered.join(' AND ') : undefined;
+};
+
+/** `| WHERE search AND entity` for native (entity-index) sorts. */
+export const buildCombinedFilterClause = (
+  searchExpression?: string,
+  entityExpression?: string
+): string[] => buildFilterClause(joinAnd(searchExpression, entityExpression));
+
+/**
+ * Joins entity docs on `entity.id` only. The search expression must not go in `ON`:
+ * ES|QL rejects KQL there. The join needs a concrete index name, not the alias.
+ */
+export const buildLookupJoinClause = (concreteEntityIndexName: string): string =>
+  `| LOOKUP JOIN ${concreteEntityIndexName} ON \`entity.id\``;
+
+/** ISO timestamp at the start of the time range. Alert and anomaly queries filter on it. */
+export const lookbackCutoff = (range: TimeRange): string =>
+  new Date(Date.now() - TIME_RANGE_DAYS[range] * MS_PER_DAY).toISOString();
+
+// ── cursors ──────────────────────────────────────────────────────────────────
+
+/**
+ * Keeps the rows after the cursor in `SORT field <dir> NULLS LAST, entity.id ASC` order.
+ * Null sort values come last, so every page after a non-null cursor also keeps them.
+ */
+export const buildCursorClause = (cursor: PageCursor | null): string[] => {
+  if (cursor == null) return [];
+  const { sortField, sortValue, sortDirection, entityId } = cursor;
+  if (sortValue == null) {
+    return [`| WHERE ${sortField} IS NULL AND ${ENTITY_ID_FIELD} > ${esc(entityId)}`];
+  }
+  const op = sortDirection === 'desc' ? '<' : '>';
+  const val = typeof sortValue === 'string' ? esc(sortValue) : String(sortValue);
+  const tieBreaker = `${sortField} == ${val} AND ${ENTITY_ID_FIELD} > ${esc(entityId)}`;
+  return [`| WHERE (${sortField} ${op} ${val}) OR (${tieBreaker}) OR ${sortField} IS NULL`];
+};
+
+export const buildSortSuffix = (field: string, dir: SortDir, pageSize: number): string =>
+  [
+    `| SORT ${field} ${dir.toUpperCase()} NULLS LAST, ${ENTITY_ID_FIELD} ASC`,
+    `| LIMIT ${pageSize + 1}`,
+  ].join('\n');
+
+export const ENTITY_TYPE_FILTER = `${ENTITY_TYPE_FIELD} IN (${toList(ALLOWED_ENTITY_TYPES)})`;

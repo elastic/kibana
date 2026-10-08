@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import {
-  ENTITY_ID_FIELD,
-  buildEntitiesInViewSteps,
-  buildKeepClause,
-  esc,
-  getEntityId,
-  toList,
-} from '../common';
+import { ENTITY_ID_FIELD, getEntityId } from '../common';
+import { buildEntitiesInViewSteps } from './entities_in_view';
+import { buildKeepClause, esc, toList } from './esql';
 import type { EsqlRunner, PageCursor, QueryArgs, Row, SortPageContext } from '../common';
 
 /*

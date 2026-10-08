@@ -12,7 +12,8 @@ import {
   buildTileFilter,
   buildTileWhereExpression,
 } from '../needs_attention_tiles/tile_entity_filter';
-import { RESOLVED_TO_FIELD, joinAnd } from './common';
+import { RESOLVED_TO_FIELD } from './common';
+import { joinAnd } from './queries/esql';
 import type { RowsMode } from './common';
 import {
   buildEntityFiltersExpression,

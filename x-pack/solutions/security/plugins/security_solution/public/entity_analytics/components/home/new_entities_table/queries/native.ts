@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { buildEntitiesInViewCountQuery } from './entities_in_view';
 import {
-  buildEntitiesInViewCountQuery,
   entityAliasOf,
   buildKeepClause,
   buildCursorClause,
   buildResolvedRowsFilter,
   buildCombinedFilterClause,
   ENTITY_TYPE_FILTER,
-  ENTITY_ID_FIELD,
-} from '../common';
+} from './esql';
+import { ENTITY_ID_FIELD } from '../common';
 import type { ColumnQuerySpec, QueryArgs } from '../common';
 
 const buildNativeEntitySortQuery = (args: QueryArgs): string => {

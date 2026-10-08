@@ -29,11 +29,10 @@ export {
   RESOLUTION_GROUPING_ID,
   PAGE_SIZE_OPTIONS,
   ENTITY_TYPE_FIELD,
-  toList,
-  joinAnd,
   getEntityId,
   getString,
 } from './common';
+export { toList, joinAnd } from './queries/esql';
 export type { EntityGridResponse } from './common';
 export {
   buildEntityFilterClauses,

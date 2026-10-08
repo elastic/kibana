@@ -12,7 +12,7 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { inputsActions } from '../../../../../common/store/inputs';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useEntityAnalyticsUrlState, type EntityFilters } from './use_entity_analytics_url_state';
-import { buildFilterClause, esc, toList } from '../common';
+import { buildFilterClause, esc, toList } from '../queries/esql';
 
 /** Membership on multivalue keyword fields — scalar `IN` returns null for multi-valued docs. */
 const buildMvContainsExpression = (field: string, values: string[]): string => {

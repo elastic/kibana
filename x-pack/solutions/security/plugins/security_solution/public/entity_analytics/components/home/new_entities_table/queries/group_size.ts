@@ -11,22 +11,23 @@ import {
   getNumber,
   getString,
   ENTITY_ID_FIELD,
-  ENTITY_TYPE_FILTER,
   GROUP_SIZE_FIELD,
   RESOLVED_TO_FIELD,
+  nullOnFailure,
+} from '../common';
+import {
+  ENTITY_TYPE_FILTER,
   entityAliasOf,
   buildKeepClause,
   buildFilterClause,
   buildLookupJoinClause,
-  nullOnFailure,
   toList,
   buildSortSuffix,
   buildCursorClause,
   esc,
-  buildEntitiesInViewCountQuery,
-  buildEntitiesInViewSteps,
-  buildMergedForeignSortQuery,
-} from '../common';
+} from './esql';
+import { buildEntitiesInViewCountQuery, buildEntitiesInViewSteps } from './entities_in_view';
+import { buildMergedForeignSortQuery } from './foreign_sort';
 import type {
   EsqlRunner,
   QueryArgs,

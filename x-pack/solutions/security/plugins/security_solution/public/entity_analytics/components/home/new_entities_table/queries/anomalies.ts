@@ -7,22 +7,17 @@
 
 import {
   buildIdentityPrefilter,
-  entityIdsOf,
-  getEntityId,
-  getNumber,
-  ANOMALY_COUNT_FIELD,
   ML_ANOMALY_INDICES,
   ANOMALY_RECORD_FILTER,
   buildAnomalyJobFilter,
-  buildEuidStages,
-  buildEntitiesInViewConditions,
-  buildEntitiesInViewCountQuery,
   buildLookupJoinClause,
-  buildMergedForeignSortQuery,
   lookbackCutoff,
-  nullOnFailure,
   toList,
-} from '../common';
+} from './esql';
+import { entityIdsOf, getEntityId, getNumber, ANOMALY_COUNT_FIELD, nullOnFailure } from '../common';
+import { buildEuidStages } from './euid_pipeline';
+import { buildEntitiesInViewConditions, buildEntitiesInViewCountQuery } from './entities_in_view';
+import { buildMergedForeignSortQuery } from './foreign_sort';
 import type { QueryArgs, PageEnricher, Row, ColumnQuerySpec } from '../common';
 import { buildEntityListSortPlan, runSplitSortPage } from './split_sort';
 import type { SplitSortPlan } from './split_sort';

@@ -24,9 +24,9 @@ import {
   GROUP_SIZE_FIELD,
   RESOLVED_TO_FIELD,
   RISK_SCORE_NORM_FIELD,
-  esc,
   getEntityId,
 } from './common';
+import { esc } from './queries/esql';
 import type { TimeRange } from './common';
 
 /** Most records an expanded group shows. */

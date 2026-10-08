@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { toList } from '../new_entities_table/common';
+import { toList } from '../new_entities_table/queries/esql';
 import type { RowsMode } from '../new_entities_table/common';
 
 /** Cap tile → table IN-list size; ES|QL IN lists and ES terms queries both have practical limits. */
