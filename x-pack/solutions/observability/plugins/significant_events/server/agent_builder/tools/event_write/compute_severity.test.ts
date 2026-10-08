@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SignalEntry } from '@kbn/significant-events-schema';
+import type { BlastRadiusEntry, SignalEntry } from '@kbn/significant-events-schema';
 import { CRITICAL_SEVERITY_THRESHOLD } from '@kbn/significant-events-schema';
 import {
   BREADTH_THRESHOLD,
@@ -13,6 +13,7 @@ import {
   deriveEventEffect,
   TOPOLOGY_FAN_OUT_THRESHOLD,
 } from './compute_severity';
+import { computeTopologyFanOut } from './topology_breadth';
 
 const makeSignal = (overrides: Partial<SignalEntry> & { ruleUuid?: string } = {}): SignalEntry => {
   const { ruleUuid = 'rule-1', ...rest } = overrides;
@@ -194,6 +195,29 @@ describe('computeSeverity', () => {
       expect(computeSeverity({ ...single, topologyFanOut: TOPOLOGY_FAN_OUT_THRESHOLD - 1 })).toBe(
         'high'
       );
+    });
+
+    it('unrelated dependency edges remain high', () => {
+      const dependencies: BlastRadiusEntry[] = [
+        {
+          type: 'dependency',
+          feature_id: 'postgres',
+          source: 'orders-api',
+          target: 'postgres',
+          stream_name: 'logs.orders',
+        },
+        {
+          type: 'dependency',
+          feature_id: 'redis',
+          source: 'search',
+          target: 'redis',
+          stream_name: 'logs.search',
+        },
+      ];
+
+      expect(
+        computeSeverity({ ...single, topologyFanOut: computeTopologyFanOut(dependencies) })
+      ).toBe('high');
     });
 
     it('a single path with no score and no fan-out → high', () => {

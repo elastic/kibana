@@ -22,19 +22,25 @@ export const computeTopologyBreadth = (
 };
 
 /**
- * Counts distinct dependency edges (deduped by feature_id) in the member-union blast_radius
+ * Counts the largest same-source set of distinct dependency edges in the member-union blast_radius.
  */
 export const computeTopologyFanOut = (blastRadius: BlastRadiusEntry[] | undefined): number => {
-  const edges = new Set<string>();
+  const edgesBySource = new Map<string, Set<string>>();
   for (const entry of blastRadius ?? []) {
-    if (entry.type === 'dependency') edges.add(entry.feature_id);
+    if (entry.type !== 'dependency') {
+      continue;
+    }
+
+    const edges = edgesBySource.get(entry.source) ?? new Set<string>();
+    edges.add(entry.feature_id);
+    edgesBySource.set(entry.source, edges);
   }
-  return edges.size;
+  return Math.max(0, ...[...edgesBySource.values()].map((edges) => edges.size));
 };
 
 /**
- * True when the member-union blast_radius carries at least one dependency-type edge — a
- * confirmed call-chain cascade, independent of how many distinct entities it resolves to.
+ * True when one source fans out to multiple distinct dependency edges in the member-union
+ * blast_radius, indicating a confirmed call-chain cascade.
  */
 export const hasCascadePath = (blastRadius: BlastRadiusEntry[] | undefined): boolean =>
-  (blastRadius ?? []).some((entry) => entry.type === 'dependency');
+  computeTopologyFanOut(blastRadius) >= 2;
