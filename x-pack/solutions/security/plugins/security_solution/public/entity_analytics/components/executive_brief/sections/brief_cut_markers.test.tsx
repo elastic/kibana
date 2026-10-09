@@ -88,6 +88,8 @@ describe('PDF cut point markers (print mode)', () => {
       urgency: 'now',
       relatesTo: storyline.evidenceId,
       targets: [],
+      evidence: [storyline.evidenceId],
+      agentPrompt: 'Investigate.',
     };
     if (!narrative) throw new Error('missing narrative');
     const { container } = render(
@@ -109,8 +111,10 @@ describe('PDF cut point markers (print mode)', () => {
       action: `Action ${index}`,
       rationale: 'Because.',
       urgency: 'now' as const,
-      relatesTo: 'x',
+      relatesTo: 'STORY-1' as const,
       targets: [],
+      evidence: ['STORY-1' as const],
+      agentPrompt: 'Investigate.',
     }));
     const { container } = render(<Decisions decisions={decisions} />);
     expect(cutMarkers(container)).toHaveLength(2);

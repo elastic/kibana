@@ -32,18 +32,41 @@ export const AREA_ORDER: readonly AttentionAreaId[] = [
 ];
 
 export const AREA_NAMES: Record<AttentionAreaId, string> = {
-  threats: 'Active threats',
+  threats: 'Threat activity',
   response: 'Response',
   coverage: 'Detection coverage',
   visibility: 'Visibility',
 };
 
-const AREA_TARGETS: Record<AttentionAreaId, string> = {
-  threats: EXECUTIVE_BRIEF_SECTION_IDS.storylines,
-  response: EXECUTIVE_BRIEF_SECTION_IDS.storylines,
-  coverage: EXECUTIVE_BRIEF_SECTION_IDS.blindSpots,
-  visibility: EXECUTIVE_BRIEF_SECTION_IDS.blindSpots,
-};
+/** Rows are grouped under the section they summarise, using the same names as the tabs and headings. */
+export const AREA_GROUPS: ReadonlyArray<{
+  title: string;
+  target: string;
+  areas: readonly AttentionAreaId[];
+}> = [
+  {
+    title: 'Priority threats',
+    target: EXECUTIVE_BRIEF_SECTION_IDS.storylines,
+    areas: ['threats', 'response'],
+  },
+  {
+    title: 'Blind spots',
+    target: EXECUTIVE_BRIEF_SECTION_IDS.blindSpots,
+    areas: ['coverage', 'visibility'],
+  },
+];
+
+const AREA_TARGETS = Object.fromEntries(
+  AREA_GROUPS.flatMap(({ target, areas }) => areas.map((id) => [id, target]))
+) as Record<AttentionAreaId, string>;
+
+const AREA_GROUP_TITLES = Object.fromEntries(
+  AREA_GROUPS.flatMap(({ title, areas }) => areas.map((id) => [id, title]))
+) as Record<AttentionAreaId, string>;
+
+/** Section and row name, e.g. "Priority threats · Response" (used for exports and labels). */
+export const areaFullName = (id: AttentionAreaId): string =>
+  `${AREA_GROUP_TITLES[id]} · ${AREA_NAMES[id]}`;
 
 export const STATUS_LABELS: Record<AttentionLevel, string> = {
   urgent: 'Urgent',
@@ -66,76 +89,101 @@ const scrollToSection = (id: string): void => {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
+const AttentionAreaRow: React.FC<{ area: AttentionArea }> = ({ area }) => {
+  const { euiTheme } = useEuiTheme();
+  const isPrintMode = useIsPrintMode();
+  const { color, icon } = STATUS_DISPLAY[area.level];
+  const target = AREA_TARGETS[area.id];
+  return (
+    <div
+      key={area.id}
+      data-test-subj={TEST_IDS.attentionRow(area.id)}
+      role={isPrintMode ? undefined : 'button'}
+      tabIndex={isPrintMode ? undefined : 0}
+      onClick={isPrintMode ? undefined : () => scrollToSection(target)}
+      onKeyDown={
+        isPrintMode
+          ? undefined
+          : (event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                scrollToSection(target);
+              }
+            }
+      }
+      css={css`
+        padding: ${euiTheme.size.s} ${euiTheme.size.m};
+        cursor: ${isPrintMode ? 'default' : 'pointer'};
+        border-top: ${euiTheme.border.thin};
+      `}
+    >
+      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false} css={{ width: '10.5em' }}>
+          <EuiText
+            size="s"
+            css={css`
+              font-weight: ${euiTheme.font.weight.semiBold};
+            `}
+          >
+            {AREA_NAMES[area.id]}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={{ width: '6.5em' }}>
+          <span>
+            <EuiBadge color={color} iconType={icon} data-test-subj="executiveBriefAreaStatus">
+              {STATUS_LABELS[area.level]}
+            </EuiBadge>
+          </span>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size="s" data-test-subj="executiveBriefAreaSummary">
+            {area.summary}
+          </EuiText>
+          {isPrintMode ? (
+            <EuiText size="xs" color="subdued" data-test-subj="executiveBriefAreaRulePrint">
+              {area.rule}
+            </EuiText>
+          ) : null}
+        </EuiFlexItem>
+        {isPrintMode ? null : (
+          <EuiFlexItem grow={false} data-test-subj={`executiveBriefAreaWhy-${area.id}`}>
+            <EuiIconTip
+              type="question"
+              size="s"
+              aria-label={`Why ${areaFullName(area.id)} is ${STATUS_LABELS[area.level]}`}
+              content={area.rule}
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </div>
+  );
+};
+
 export const AttentionAreaRows: React.FC<{ areas: readonly AttentionArea[] }> = ({ areas }) => {
   const { euiTheme } = useEuiTheme();
   const isPrintMode = useIsPrintMode();
   return (
     <EuiPanel hasBorder paddingSize="none" data-test-subj="executiveBriefAttentionRows">
-      {sortAreas(areas).map((area, index) => {
-        const { color, icon } = STATUS_DISPLAY[area.level];
-        const target = AREA_TARGETS[area.id];
+      {AREA_GROUPS.map((group, groupIndex) => {
+        const groupAreas = sortAreas(areas).filter((area) => group.areas.includes(area.id));
+        if (groupAreas.length === 0) return null;
         return (
-          <div
-            key={area.id}
-            data-test-subj={TEST_IDS.attentionRow(area.id)}
-            role={isPrintMode ? undefined : 'button'}
-            tabIndex={isPrintMode ? undefined : 0}
-            onClick={isPrintMode ? undefined : () => scrollToSection(target)}
-            onKeyDown={
-              isPrintMode
-                ? undefined
-                : (event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      scrollToSection(target);
-                    }
-                  }
-            }
-            css={css`
-              padding: ${euiTheme.size.s} ${euiTheme.size.m};
-              cursor: ${isPrintMode ? 'default' : 'pointer'};
-              ${index > 0 ? `border-top: ${euiTheme.border.thin};` : ''}
-            `}
-          >
-            <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false} css={{ width: '10.5em' }}>
-                <EuiText
-                  size="s"
-                  css={css`
-                    font-weight: ${euiTheme.font.weight.semiBold};
-                  `}
-                >
-                  {AREA_NAMES[area.id]}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} css={{ width: '6.5em' }}>
-                <span>
-                  <EuiBadge color={color} iconType={icon} data-test-subj="executiveBriefAreaStatus">
-                    {STATUS_LABELS[area.level]}
-                  </EuiBadge>
-                </span>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="s" data-test-subj="executiveBriefAreaSummary">
-                  {area.summary}
-                </EuiText>
-                {isPrintMode ? (
-                  <EuiText size="xs" color="subdued" data-test-subj="executiveBriefAreaRulePrint">
-                    {area.rule}
-                  </EuiText>
-                ) : null}
-              </EuiFlexItem>
-              {isPrintMode ? null : (
-                <EuiFlexItem grow={false} data-test-subj={`executiveBriefAreaWhy-${area.id}`}>
-                  <EuiIconTip
-                    type="question"
-                    size="s"
-                    aria-label={`Why ${AREA_NAMES[area.id]} is ${STATUS_LABELS[area.level]}`}
-                    content={area.rule}
-                  />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+          <div key={group.title} data-test-subj={`executiveBriefAttentionGroup-${group.target}`}>
+            <div
+              css={css`
+                padding: ${euiTheme.size.s} ${euiTheme.size.m} ${euiTheme.size.xs};
+                background: ${euiTheme.colors.backgroundBaseSubdued};
+                ${groupIndex > 0 ? `border-top: ${euiTheme.border.thin};` : ''}
+              `}
+            >
+              <EuiText size="xs" color="subdued">
+                <strong>{group.title}</strong>
+              </EuiText>
+            </div>
+            {groupAreas.map((area) => (
+              <AttentionAreaRow key={area.id} area={area} />
+            ))}
           </div>
         );
       })}

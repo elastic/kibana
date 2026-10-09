@@ -102,7 +102,7 @@ describe('AtAGlance attention verdict', () => {
     const rows = ['threats', 'response', 'coverage', 'visibility'].map((id) =>
       screen.getByTestId(`executiveBriefAttentionRow-${id}`)
     );
-    ['Active threats', 'Response', 'Detection coverage', 'Visibility'].forEach((name, index) => {
+    ['Threat activity', 'Response', 'Detection coverage', 'Visibility'].forEach((name, index) => {
       expect(within(rows[index]).getByText(name)).toBeInTheDocument();
     });
     expect(within(rows[0]).getByText('Urgent')).toBeInTheDocument();
@@ -165,12 +165,18 @@ describe('briefToMarkdown glance', () => {
     const markdown = briefToMarkdown(makeJob(makeAssessment()));
     const glance = markdown.split('## At a glance')[1].split('## Priority threats')[0];
     expect(glance).toContain('**Urgent attention needed**');
-    expect(glance).toContain('- Active threats — Urgent: 1 critical threat unaddressed');
-    expect(glance).toContain('- Response — Action: 9 high/critical alerts have no case');
     expect(glance).toContain(
-      '- Detection coverage — Action: Lateral Movement: 1 of 2 rules not working'
+      '- Priority threats · Threat activity — Urgent: 1 critical threat unaddressed'
     );
-    expect(glance).toContain('- Visibility — Watch: ML off · 173 identities unresolved');
+    expect(glance).toContain(
+      '- Priority threats · Response — Action: 9 high/critical alerts have no case'
+    );
+    expect(glance).toContain(
+      '- Blind spots · Detection coverage — Action: Lateral Movement: 1 of 2 rules not working'
+    );
+    expect(glance).toContain(
+      '- Blind spots · Visibility — Watch: ML off · 173 identities unresolved'
+    );
     expect(glance).not.toContain('Posture score');
   });
 

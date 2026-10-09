@@ -8,7 +8,7 @@ import type {
   EvidenceId,
   ExecutiveBriefJob,
 } from '../../../../../common/entity_analytics/executive_brief/types';
-import { AREA_NAMES, STATUS_LABELS, sortAreas } from '../components/attention_area_rows';
+import { STATUS_LABELS, areaFullName, sortAreas } from '../components/attention_area_rows';
 import {
   ATTENTION_LEVEL_DISPLAY,
   TREND_TEXT,
@@ -51,7 +51,7 @@ export const briefToMarkdown = (job: ExecutiveBriefJob): string => {
   lines.push(brief.glance.headline, '');
   if (assessment) {
     sortAreas(assessment.areas).forEach((area) =>
-      lines.push(`- ${AREA_NAMES[area.id]} — ${STATUS_LABELS[area.level]}: ${area.summary}`)
+      lines.push(`- ${areaFullName(area.id)} — ${STATUS_LABELS[area.level]}: ${area.summary}`)
     );
     lines.push('');
   }
