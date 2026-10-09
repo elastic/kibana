@@ -10,18 +10,8 @@ import { i18n } from '@kbn/i18n';
 import type { CommonProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
 import { CardCompressedHeaderLayout, CardSectionPanel } from '../../artifact_entry_card';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-
-const GridHeaderContainer = styled(CardSectionPanel)`
-  && {
-    /* Match the collapsible card inset (section padding + outer border) so column tracks line up. */
-    padding: 0
-      calc(${({ theme }) => theme.eui.euiSizeL} + ${({ theme }) => theme.eui.euiBorderWidthThin})
-      ${({ theme }) => theme.eui.euiSizeS};
-  }
-`;
 
 export type GridHeaderProps = Pick<CommonProps, 'data-test-subj'> & {
   expandAllIconType: 'fold' | 'unfold';
@@ -63,7 +53,7 @@ export const GridHeader = memo<GridHeaderProps>(
     );
 
     return (
-      <GridHeaderContainer data-test-subj={dataTestSubj}>
+      <CardSectionPanel gridHeader data-test-subj={dataTestSubj}>
         <CardCompressedHeaderLayout
           expanded={false}
           expandToggle={expandToggleElement}
@@ -113,7 +103,7 @@ export const GridHeader = memo<GridHeaderProps>(
           }
           actionMenu={true}
         />
-      </GridHeaderContainer>
+      </CardSectionPanel>
     );
   }
 );
