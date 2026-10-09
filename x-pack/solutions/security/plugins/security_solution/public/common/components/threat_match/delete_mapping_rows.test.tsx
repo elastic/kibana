@@ -54,6 +54,9 @@ const deleteRow = async (row: number) => {
 };
 
 describe('ThreatMatchComponent deleting mapping rows', () => {
+  // Typing into the combo boxes is slow on loaded CI shards, where the 5s default timed out.
+  jest.setTimeout(30_000);
+
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -86,15 +89,15 @@ describe('ThreatMatchComponent deleting mapping rows', () => {
       />
     );
     const [, firstIndicator, , secondIndicator] = getFieldInputs();
-    await userEvent.type(firstIndicator, 'non-existent-value');
-    await userEvent.type(secondIndicator, 'second-non-existent-value');
+    await userEvent.type(firstIndicator, 'bad-one');
+    await userEvent.type(secondIndicator, 'bad-two');
 
     await deleteRow(1);
 
     const inputs = getFieldInputs();
     expect(inputs).toHaveLength(2);
     expect(inputs[0]).toHaveValue('host.name');
-    expect(inputs[1]).toHaveValue('second-non-existent-value');
+    expect(inputs[1]).toHaveValue('bad-two');
   });
 
   it('keeps the second row, with its invalid index field, when the first row is deleted', async () => {
@@ -104,14 +107,14 @@ describe('ThreatMatchComponent deleting mapping rows', () => {
       />
     );
     const [firstIndex, , secondIndex] = getFieldInputs();
-    await userEvent.type(firstIndex, 'non-existent-value');
-    await userEvent.type(secondIndex, 'second-non-existent-value');
+    await userEvent.type(firstIndex, 'bad-one');
+    await userEvent.type(secondIndex, 'bad-two');
 
     await deleteRow(1);
 
     const inputs = getFieldInputs();
     expect(inputs).toHaveLength(2);
-    expect(inputs[0]).toHaveValue('second-non-existent-value');
+    expect(inputs[0]).toHaveValue('bad-two');
     expect(inputs[1]).toHaveValue('ip');
   });
 
@@ -128,8 +131,8 @@ describe('ThreatMatchComponent deleting mapping rows', () => {
       />
     );
     const [, , secondIndex, secondIndicator] = getFieldInputs();
-    await userEvent.type(secondIndex, 'non-existent-value');
-    await userEvent.type(secondIndicator, 'non-existent-value');
+    await userEvent.type(secondIndex, 'bad-one');
+    await userEvent.type(secondIndicator, 'bad-one');
 
     await deleteRow(2);
 
@@ -150,8 +153,8 @@ describe('ThreatMatchComponent deleting mapping rows', () => {
       />
     );
     const [firstIndex, firstIndicator] = getFieldInputs();
-    await userEvent.type(firstIndex, 'non-existent-value-one');
-    await userEvent.type(firstIndicator, 'non-existent-value-two');
+    await userEvent.type(firstIndex, 'bad-one');
+    await userEvent.type(firstIndicator, 'bad-two');
 
     await deleteRow(1);
 
