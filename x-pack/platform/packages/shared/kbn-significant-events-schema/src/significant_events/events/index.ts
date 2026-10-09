@@ -106,14 +106,6 @@ export const significantEventSchema = lazySchema(() =>
         `
       ),
     investigations: z.array(significantEventInvestigationSchema).max(100).optional(),
-    status_evaluations: z
-      .number()
-      .int()
-      .min(0)
-      .optional()
-      .describe(
-        'Engine-owned: evaluations the series has spent in "recovering". Set only on a recovering version and cleared in every other state; never supplied by a caller.'
-      ),
   })
 );
 
