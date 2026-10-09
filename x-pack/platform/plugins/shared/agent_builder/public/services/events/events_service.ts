@@ -16,9 +16,8 @@ import {
   share,
   switchMap,
 } from 'rxjs';
-import { isApiStateChangedEvent } from '@kbn/agent-builder-common';
+import { isApiStateChangedEvent, matchesAnyApiSelector } from '@kbn/agent-builder-common';
 import type { ApiStateChangedEventData, ChatEvent } from '@kbn/agent-builder-common';
-import { matchesAnyApiSelector } from '@kbn/agent-builder-common/apis/known_apis';
 import type {
   ActiveConversation,
   ApiStateChangesOptions,

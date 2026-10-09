@@ -14,6 +14,8 @@ export {
   toNamespaceSelector,
   isApiWildcardSelector,
   matchesApiSelector,
+  matchesAnyApiSelector,
+  type ApiReference,
 } from './apis';
 export {
   ConversationMetadataUpdatedTriggerId,

@@ -41,7 +41,7 @@ import type {
 import type { VersionedAttachment } from '../attachments';
 import type { ConversationAccessControl } from './access_control';
 import type { UserIdAndName } from '../base/users';
-import type { ApiReference } from '../apis/known_apis';
+import type { ApiReference } from '../apis';
 
 export enum ChatEventType {
   toolCall = 'tool_call',

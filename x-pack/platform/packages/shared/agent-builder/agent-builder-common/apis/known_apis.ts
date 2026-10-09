@@ -8,21 +8,11 @@
 import { esManifest } from '@elastic/schemas/es/tools/manifest.js';
 import { kibanaManifest } from '@elastic/schemas/kibana/tools/manifest.js';
 import { compact, uniq } from 'lodash';
-import {
-  allApisSelector,
-  matchesApiSelector,
-  toApiNamespace,
-  toNamespaceSelector,
-} from './api_selectors';
+import { allApisSelector, toApiNamespace, toNamespaceSelector } from './api_selectors';
+import type { ApiReference } from './api_selectors';
 import type { ApiTarget } from './targets';
 
-/**
- * An API operation, addressed by the backend it belongs to and its identifier.
- */
-export interface ApiReference {
-  target: ApiTarget;
-  api: string;
-}
+export type { ApiReference } from './api_selectors';
 
 /**
  * Every Elasticsearch operation the API tools can reach.
@@ -79,20 +69,6 @@ const selectorSetsByTarget: Record<ApiTarget, ReadonlySet<string>> = {
  */
 export const isKnownApiSelector = ({ target, api }: ApiReference): boolean =>
   selectorSetsByTarget[target].has(api);
-
-/**
- * Whether any of a list of target/selector pairs covers a specific operation.
- *
- * @param selectors - Pairs to match against. Each selector is `*`, a namespace wildcard such as
- *   `indices.*`, or an exact identifier, and only covers operations on its own target.
- * @param reference - Target and exact operation identifier to look up.
- * @returns True when at least one pair covers the operation. False for an empty list.
- */
-export const matchesAnyApiSelector = (
-  selectors: readonly ApiReference[],
-  { target, api }: ApiReference
-): boolean =>
-  selectors.some((selector) => selector.target === target && matchesApiSelector(selector.api, api));
 
 /**
  * Filters a list of target/selector pairs down to the ones that name nothing grantable.

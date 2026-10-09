@@ -23,7 +23,6 @@ import {
   findUnknownApis,
   formatUnknownApis,
   isKnownApiSelector,
-  matchesAnyApiSelector,
 } from './known_apis';
 
 describe('elasticsearchApiSelectors', () => {
@@ -78,42 +77,6 @@ describe('isKnownApiSelector', () => {
   it('rejects a typo and an empty identifier', () => {
     expect(isKnownApiSelector({ target: 'elasticsearch', api: 'indices.crate' })).toBe(false);
     expect(isKnownApiSelector({ target: 'elasticsearch', api: '' })).toBe(false);
-  });
-});
-
-describe('matchesAnyApiSelector', () => {
-  it('matches when any pair covers the operation on the same target', () => {
-    expect(
-      matchesAnyApiSelector(
-        [
-          { target: 'kibana', api: 'cases.create' },
-          { target: 'elasticsearch', api: 'indices.*' },
-        ],
-        { target: 'elasticsearch', api: 'indices.delete' }
-      )
-    ).toBe(true);
-  });
-
-  it('does not let a selector cover an operation on the other target', () => {
-    expect(
-      matchesAnyApiSelector([{ target: 'kibana', api: '*' }], {
-        target: 'elasticsearch',
-        api: 'indices.create',
-      })
-    ).toBe(false);
-  });
-
-  it('does not match when no pair covers the operation', () => {
-    expect(
-      matchesAnyApiSelector([{ target: 'elasticsearch', api: 'indices.create' }], {
-        target: 'elasticsearch',
-        api: 'indices.delete',
-      })
-    ).toBe(false);
-  });
-
-  it('matches nothing for an empty list', () => {
-    expect(matchesAnyApiSelector([], { target: 'kibana', api: 'cases.create' })).toBe(false);
   });
 });
 
