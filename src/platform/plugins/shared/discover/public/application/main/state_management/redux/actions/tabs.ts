@@ -54,7 +54,7 @@ import { initializeAndSync, stopSyncing } from './tab_sync';
 import { assignSessionDataViewIds } from '../../utils/assign_session_data_view_ids';
 import { showSessionWarnings } from '../../../../../session';
 import {
-  clearUrlStateWrittenForTab,
+  updateUrlStateForRestoredTab,
   withoutUnsavedChangesFlag,
 } from '../../utils/restore_clean_tabs';
 
@@ -502,9 +502,9 @@ export const initializeTabs = createInternalStateAsyncThunk(
     services.initialTabStateService.capture(initialTabState);
 
     if (!initialTabState) {
-      await clearUrlStateWrittenForTab({
+      await updateUrlStateForRestoredTab({
         previousTab: previousSelectedTab,
-        savedTab: initialTabsState.updatedDiscoverSession?.tabs.find(
+        restoredTab: initialTabsState.allTabs.find(
           ({ id }) => id === initialTabsState.selectedTabId
         ),
         urlStateStorage,

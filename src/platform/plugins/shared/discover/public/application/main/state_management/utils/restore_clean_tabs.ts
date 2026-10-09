@@ -160,19 +160,19 @@ const isUrlStateFromTab = ({
   );
 };
 
-/** Clears matching URL overrides for a clean saved tab before the existing sync writes its new state. */
-export const clearUrlStateWrittenForTab = async ({
+/** Updates a clean saved tab's matching URL with its restored app state, preserving local-only fields. */
+export const updateUrlStateForRestoredTab = async ({
   previousTab,
-  savedTab,
+  restoredTab,
   urlStateStorage,
   profileStateRegistry,
 }: {
   previousTab: TabState | undefined;
-  savedTab: DiscoverSessionTab | undefined;
+  restoredTab: TabState | undefined;
   urlStateStorage: IKbnUrlStateStorage;
   profileStateRegistry: ProfileStateRegistry;
 }): Promise<void> => {
-  if (previousTab?.hasUnsavedChanges !== false || !savedTab) {
+  if (previousTab?.hasUnsavedChanges !== false || !restoredTab) {
     return;
   }
 
@@ -189,8 +189,8 @@ export const clearUrlStateWrittenForTab = async ({
     return;
   }
 
-  const updates = [urlStateStorage.set(APP_STATE_URL_KEY, undefined, { replace: true })];
-  if (savedTab.timeRestore) {
+  const updates = [urlStateStorage.set(APP_STATE_URL_KEY, restoredTab.appState, { replace: true })];
+  if (restoredTab.attributes.timeRestore) {
     updates.push(
       urlStateStorage.set(
         GLOBAL_STATE_URL_KEY,

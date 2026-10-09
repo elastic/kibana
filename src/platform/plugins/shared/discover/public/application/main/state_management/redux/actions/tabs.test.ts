@@ -177,6 +177,10 @@ describe('tabs actions', () => {
         await toolkit.initializeTabs({
           persistedDiscoverSession: createDiscoverSessionMock({ id: 'session', tabs: [tab] }),
         });
+        expect(toolkit.stateStorageContainer.get(APP_STATE_URL_KEY)).toMatchObject({
+          hideSidebar: false,
+          savedQuery: 'saved-query-id',
+        });
         await toolkit.initializeSingleTab({ tabId: tab.id });
         const changes = selectHasUnsavedChanges(toolkit.internalState.getState(), {
           runtimeStateManager: toolkit.runtimeStateManager,
@@ -186,11 +190,15 @@ describe('tabs actions', () => {
 
         expect(changes.hasUnsavedChanges).toBe(hasUnsavedChanges);
         expect(toolkit.getCurrentTab()).toMatchObject({
-          appState: { query },
+          appState: { query, hideSidebar: false, savedQuery: 'saved-query-id' },
           globalState: { timeRange: time },
         });
         await waitFor(() => {
-          expect(toolkit.stateStorageContainer.get(APP_STATE_URL_KEY)).toMatchObject({ query });
+          expect(toolkit.stateStorageContainer.get(APP_STATE_URL_KEY)).toMatchObject({
+            query,
+            hideSidebar: false,
+            savedQuery: 'saved-query-id',
+          });
           expect(toolkit.stateStorageContainer.get(GLOBAL_STATE_URL_KEY)).toMatchObject({
             time,
             filters: JSON.parse(JSON.stringify(pinnedFilters)),
@@ -204,6 +212,10 @@ describe('tabs actions', () => {
       };
 
       const firstLoad = createToolkit();
+      await firstLoad.stateStorageContainer.set(APP_STATE_URL_KEY, {
+        hideSidebar: false,
+        savedQuery: 'saved-query-id',
+      });
       await firstLoad.stateStorageContainer.set(GLOBAL_STATE_URL_KEY, { filters: pinnedFilters });
       await openSessionAndExpect(firstLoad, savedTab, {
         query: savedTab.serializedSearchSource.query,
