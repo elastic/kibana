@@ -82,13 +82,12 @@ export class WorkflowGraphAuthoringPage {
         return true;
       };
       for (const el of Array.from(document.querySelectorAll('[data-insert-context]'))) {
-        let ctx: Record<string, unknown>;
         try {
-          ctx = JSON.parse(el.getAttribute('data-insert-context') ?? '');
+          const ctx = JSON.parse(el.getAttribute('data-insert-context') ?? '');
+          if (matches(ctx)) return el.getAttribute('data-control-id');
         } catch {
-          continue;
+          // Not a control for this insertion context — keep looking.
         }
-        if (matches(ctx)) return el.getAttribute('data-control-id');
       }
       return null;
     }, spec);
@@ -106,12 +105,23 @@ export class WorkflowGraphAuthoringPage {
   }
 
   /**
-   * Picks an action (trigger type or step type) from the currently open
-   * Actions menu by its exact display label. Narrows via the search box
-   * first so the match is unambiguous regardless of category nesting.
+   * Picks a step/connector action from the currently open Actions menu by
+   * its exact display label. Narrows via the search box first so the match
+   * is unambiguous regardless of category nesting.
    */
   async pickActionFromMenu(label: string): Promise<void> {
     await this.actionsMenuSearch.fill(label);
+    await this.page.getByRole('option', { name: label, exact: false }).click();
+  }
+
+  /**
+   * Picks a trigger type from the "Add trigger" menu. Unlike step actions,
+   * trigger leaves render directly at the menu's root (no parent category
+   * node) — the search box's category-based matching never recurses into
+   * root-level leaves, so a trigger can only be picked from the unfiltered
+   * root list, not found via `pickActionFromMenu`'s search.
+   */
+  async pickTrigger(label: string): Promise<void> {
     await this.page.getByRole('option', { name: label, exact: false }).click();
   }
 
@@ -156,8 +166,14 @@ export class WorkflowGraphAuthoringPage {
     await this.page.testSubj.click(`workflowStepConfigAddOptionalOption-${fieldPath}`);
   }
 
-  /** Removes a previously-revealed optional field. */
+  /**
+   * Removes a previously-revealed optional field. The remove (✕) control is
+   * width/opacity-collapsed until the field row is hovered or focused —
+   * hovering the field itself also satisfies the row's `:hover`, since the
+   * field sits inside it.
+   */
   async removeOptionalField(fieldPath: string): Promise<void> {
+    await this.stepField(fieldPath).hover();
     await this.page.testSubj.click(`workflowStepConfigRemoveOptional-${fieldPath}`);
   }
 
