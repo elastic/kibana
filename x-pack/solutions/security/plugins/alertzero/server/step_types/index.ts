@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ActionsService } from '../services/actions/actions_service';
@@ -26,6 +26,7 @@ export const registerStepDefinitions = ({
   getHuntServices,
   getResolveHostEnrollment,
   isContextEngineEnabled,
+  getInternalEsClient,
   logger,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
@@ -36,6 +37,7 @@ export const registerStepDefinitions = ({
   getHuntServices: () => HuntServices;
   getResolveHostEnrollment?: PackageReportStepDependencies['getResolveHostEnrollment'];
   isContextEngineEnabled: PackageReportStepDependencies['isContextEngineEnabled'];
+  getInternalEsClient?: () => ElasticsearchClient;
   logger?: Logger;
 }) => {
   workflowsExtensions.registerStepDefinition(
@@ -45,6 +47,7 @@ export const registerStepDefinitions = ({
       getHuntServices,
       getResolveHostEnrollment,
       isContextEngineEnabled,
+      getInternalEsClient,
       logger,
     })
   );

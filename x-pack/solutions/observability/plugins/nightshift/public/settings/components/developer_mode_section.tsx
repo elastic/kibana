@@ -9,20 +9,18 @@ import React from 'react';
 import { EuiForm, EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SettingsSection, SettingsSectionRow } from './settings_section';
-import type { DetectionSettingsForm } from './use_detection_settings_form';
+import type { UseDeveloperModeResult } from '../hooks/use_developer_mode';
 
 export const DeveloperModeSection = ({
   isDeveloperMode,
   setDeveloperMode,
   isDeveloperModeSaving,
   canSaveAdvancedSettings,
-  isSaving,
 }: {
   isDeveloperMode: boolean;
-  setDeveloperMode: DetectionSettingsForm['setDeveloperMode'];
+  setDeveloperMode: UseDeveloperModeResult['setDeveloperMode'];
   isDeveloperModeSaving: boolean;
   canSaveAdvancedSettings: boolean;
-  isSaving: boolean;
 }) => (
   <SettingsSection
     title={i18n.translate('xpack.nightshift.settings.developerModeTitle', {
@@ -32,12 +30,12 @@ export const DeveloperModeSection = ({
   >
     <SettingsSectionRow
       title={i18n.translate('xpack.nightshift.settings.developerModeFeaturesTitle', {
-        defaultMessage: 'Developer features',
+        defaultMessage: 'Nightshift developer mode',
       })}
       description={
         <p>
           {i18n.translate('xpack.nightshift.settings.developerModeHelpText', {
-            defaultMessage: 'Show extra details and configuration options for expert users.',
+            defaultMessage: 'Show extra tabs, details, and configuration options for expert users.',
           })}
         </p>
       }
@@ -53,7 +51,7 @@ export const DeveloperModeSection = ({
             onChange={(event) => {
               void setDeveloperMode(event.target.checked);
             }}
-            disabled={!canSaveAdvancedSettings || isDeveloperModeSaving || isSaving}
+            disabled={!canSaveAdvancedSettings || isDeveloperModeSaving}
           />
         </EuiFormRow>
       </EuiForm>

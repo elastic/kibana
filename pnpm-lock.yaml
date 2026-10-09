@@ -2500,6 +2500,9 @@ importers:
       '@kbn/isomer':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/isomer/isomer
+      '@kbn/isomer-theme':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/isomer/isomer-theme
       '@kbn/item-buffer':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-item-buffer
@@ -5084,6 +5087,9 @@ importers:
       '@elastic/eui-test-helpers':
         specifier: 2.0.0
         version: 2.0.0(@playwright/test@1.63.0)
+      '@elastic/eui-theme-common':
+        specifier: 10.1.0
+        version: 10.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@elastic/makelogs':
         specifier: 6.1.1
         version: 6.1.1
@@ -9043,6 +9049,8 @@ importers:
   x-pack/platform/packages/shared/ingest-pipelines: {}
 
   x-pack/platform/packages/shared/isomer/isomer: {}
+
+  x-pack/platform/packages/shared/isomer/isomer-theme: {}
 
   x-pack/platform/packages/shared/kbn-agentic-investigations-common: {}
 
