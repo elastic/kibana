@@ -102,6 +102,7 @@ export const toggleRuleEnabled = () => {
   cy.get(RULE_ENABLED_BADGE).should('be.visible');
   cy.get(RULE_ENABLED_BADGE).click();
   cy.get(RULE_ENABLED_TOGGLE).click();
+  cy.focused().type('{esc}');
 };
 
 export const expectRuleEnabled = (enabled: boolean) => {

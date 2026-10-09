@@ -606,11 +606,11 @@ export const RuleDetailsPage = connector(
               />
             </Display>
             <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
+              <NeedAdminForUpdateRulesCallOut />
+              <MissingDetectionsPrivilegesCallOut />
+              {upgradeCallout}
+              {deprecationCallout}
               <Display show={!globalFullScreen}>
-                <NeedAdminForUpdateRulesCallOut />
-                <MissingDetectionsPrivilegesCallOut />
-                {upgradeCallout}
-                {deprecationCallout}
                 {ruleError}
                 <LegacyUrlConflictCallOut rule={rule} spacesApi={spacesApi} />
                 <EuiSpacer size="l" />
