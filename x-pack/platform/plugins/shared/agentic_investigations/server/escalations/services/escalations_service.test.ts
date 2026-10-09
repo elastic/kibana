@@ -98,7 +98,7 @@ const makeClient = (overrides: Record<string, jest.Mock> = {}) => ({
 
 const makeService = (
   clientOverrides: Record<string, jest.Mock> = {},
-  countPendingProposals?: jest.Mock
+  countPendingProposals: jest.Mock = jest.fn().mockResolvedValue(undefined)
 ) => {
   const client = makeClient(clientOverrides);
   const getConversationClient = jest.fn().mockResolvedValue(client);

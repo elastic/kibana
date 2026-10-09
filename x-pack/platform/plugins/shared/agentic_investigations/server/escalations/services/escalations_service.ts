@@ -135,7 +135,7 @@ export interface EscalationsServiceDeps {
    * Pending proposals per conversation id, absent ids having none. Undefined when proposals are
    * unavailable or the caller may not read them.
    */
-  countPendingProposals?: (
+  countPendingProposals: (
     request: KibanaRequest,
     conversationIds: string[]
   ) => Promise<Map<string, number> | undefined>;
@@ -720,7 +720,7 @@ export class EscalationsService {
     // A closed investigation has nothing left to decide, so only open ones are counted.
     const openIds = summaries.filter(({ status }) => status === 'open').map(({ id }) => id);
     const pendingCounts =
-      openIds.length > 0 ? await this.countPendingProposals?.(request, openIds) : undefined;
+      openIds.length > 0 ? await this.countPendingProposals(request, openIds) : undefined;
     const results = pendingCounts
       ? summaries.map((summary) => ({
           ...summary,
