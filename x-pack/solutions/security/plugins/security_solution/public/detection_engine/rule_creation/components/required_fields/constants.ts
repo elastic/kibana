@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export * from './normalize_filter_array';
-export * from './normalize_query_field';
-export * from './normalize_rule_threshold';
-export * from './normalize_threat_array';
-export * from './normalize_required_fields';
+/* Long required fields lists show only this many fields until the user expands them */
+export const MAX_UNFOLDED_REQUIRED_FIELDS = 15;
