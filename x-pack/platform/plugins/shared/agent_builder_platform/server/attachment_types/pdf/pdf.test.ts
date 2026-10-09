@@ -17,6 +17,7 @@ import {
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
   CHAT_ATTACHMENT_PDFS_FILE_KIND,
   MAX_PDF_BYTES,
+  MAX_PDF_TEXT_LENGTH,
 } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
 import { FileNotFoundError, type FilesStart } from '@kbn/files-plugin/server';
@@ -209,6 +210,15 @@ describe('pdf attachment type', () => {
         createDefinition(plugin).resolve!('file-abc', createResolveContext(request))
       ).rejects.toThrow('The PDF is larger than 10 MB.');
       expect(mockExtractDocument).not.toHaveBeenCalled();
+    });
+
+    it('fails when the extracted text is too long', async () => {
+      mockExtractDocument.mockResolvedValue('a'.repeat(MAX_PDF_TEXT_LENGTH + 1));
+      const { plugin } = createFilesPluginStub();
+
+      await expect(
+        createDefinition(plugin).resolve!('file-abc', createResolveContext(request))
+      ).rejects.toThrow('The text of the PDF is too long. Try a smaller PDF.');
     });
 
     it('fails when the file does not start with the PDF header', async () => {

@@ -10,6 +10,7 @@ import {
   AttachmentType,
   CHAT_ATTACHMENT_PDFS_FILE_KIND,
   MAX_PDF_BYTES,
+  MAX_PDF_TEXT_LENGTH,
   pdfAttachmentDataSchema,
 } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
@@ -122,6 +123,9 @@ export const createPdfAttachmentType = ({
           signal,
           logger,
         });
+        if (text.length > MAX_PDF_TEXT_LENGTH) {
+          throw pdfErrors.textTooLong();
+        }
         return { file_id: origin, name: file.data.name, text };
       } catch (error) {
         if (signal.aborted) {

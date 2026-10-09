@@ -13,6 +13,7 @@ export type PdfErrorCode =
   | 'too_big'
   | 'not_a_pdf'
   | 'extraction_failed'
+  | 'text_too_long'
   | 'timeout';
 
 export class PdfError extends Error {
@@ -31,6 +32,8 @@ export const pdfErrors = {
   notAPdf: () => new PdfError('not_a_pdf', 'The file is not a valid PDF.'),
   extractionFailed: () =>
     new PdfError('extraction_failed', 'Could not read the PDF. Try again later.'),
+  textTooLong: () =>
+    new PdfError('text_too_long', 'The text of the PDF is too long. Try a smaller PDF.'),
   timeout: () => new PdfError('timeout', 'Reading the PDF took too long. Try a smaller PDF.'),
 };
 
