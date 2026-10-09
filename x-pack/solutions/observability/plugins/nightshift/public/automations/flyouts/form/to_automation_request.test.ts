@@ -248,6 +248,32 @@ describe('automation request', () => {
       });
     });
 
+    it.each(['#oncall', '#new-channel'])(
+      'preserves the saved Slack connector when saving channel %s',
+      (destination) => {
+        const automation = buildAutomation({
+          completion: {
+            action: 'post_to_slack',
+            targetMode: 'channel',
+            destination: '#oncall',
+            connectorId: 'saved-slack',
+          },
+        });
+        const values = {
+          ...alertValues,
+          name: 'Renamed',
+          slackAction: { target: 'channel' as const, destination },
+        };
+
+        expect(toAutomationUpdateBody(values, automation).completion).toEqual({
+          action: 'post_to_slack',
+          targetMode: 'channel',
+          destination,
+          connectorId: 'saved-slack',
+        });
+      }
+    );
+
     it('keeps the trigger untouched when the form did not change it', () => {
       const row = {
         kind: 'schedule' as const,

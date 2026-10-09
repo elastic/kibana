@@ -15,6 +15,7 @@ import * as i18n from './translations';
 interface TypeComboBoxProps {
   field: FieldHook<RequiredFieldInput>;
   itemId: string;
+  autoFocus?: boolean;
   typesByFieldName: Record<string, string[] | undefined>;
   typeWarning: string;
   typeError: { message: string } | undefined;
@@ -23,6 +24,7 @@ interface TypeComboBoxProps {
 export function TypeComboBox({
   field,
   itemId,
+  autoFocus,
   typesByFieldName,
   typeWarning,
   typeError,
@@ -125,6 +127,7 @@ export function TypeComboBox({
 
   return (
     <EuiComboBox
+      autoFocus={autoFocus}
       data-test-subj={`requiredFieldTypeSelect-${value.type || 'empty'}`}
       aria-label={i18n.FIELD_TYPE}
       placeholder={i18n.FIELD_TYPE}

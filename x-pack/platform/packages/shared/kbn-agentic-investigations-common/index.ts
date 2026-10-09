@@ -47,12 +47,18 @@ export {
 export {
   OverviewTab,
   type OverviewTabProps,
+  type OverviewSections,
 } from './src/components/details/details_flyout_tab_contents';
 export {
   EscalationFlyoutHeader,
   type EscalationFlyoutHeaderProps,
 } from './src/components/details/escalation_flyout_header';
 export { StatusToggle, type StatusToggleProps } from './src/components/details/status_toggle';
+export {
+  SEVERITY_COLORS,
+  SEVERITY_LABELS,
+  type InvestigationSeverityLevel,
+} from './src/components/details/severity';
 export { DetailsBlock } from './src/components/details/detail_block';
 export {
   ProposedActionButton,
@@ -90,6 +96,12 @@ export {
   type RenderSyncIndicator,
   type SyncIndicatorSlotRenderProps,
   type LinkedInvestigationsSlotRenderProps,
+  type RenderOverview,
+  type OverviewSlotRenderProps,
+  type RenderLiveState,
+  type LiveStateSlotRenderProps,
+  type RenderTitle,
+  type TitleSlotRenderProps,
 } from './src/template_ui/types';
 export {
   LinkedInvestigationsList,
