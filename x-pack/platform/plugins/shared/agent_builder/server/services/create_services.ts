@@ -130,6 +130,8 @@ export class ServiceManager {
     trackingService,
     analyticsService,
     searchInferenceEndpoints,
+    licensing,
+    deploymentInfo,
     deductiveRegister,
     conversationEventBus,
   }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
@@ -231,6 +233,7 @@ export class ServiceManager {
       conversationService: conversations,
       attachmentsService: attachments,
       renderersService: renderers,
+      conversationEventsService: conversationEvents,
       skillServiceStart: skillsServiceStart,
       pluginsServiceStart: plugins,
       trackingService,
@@ -239,6 +242,8 @@ export class ServiceManager {
       getExecutionService,
       searchInferenceEndpoints,
       conversationTemplates: conversationTemplatesStart,
+      licensing,
+      deploymentInfo,
       deductiveRegister,
     });
     runner = runnerFactory.getRunner();
@@ -258,6 +263,7 @@ export class ServiceManager {
     const taskHandler = createTaskHandler({
       logger: logger.get('task-handler'),
       elasticsearch,
+      security,
       inference,
       conversationService: conversations,
       agentService: agents,
@@ -275,6 +281,7 @@ export class ServiceManager {
     executionService = createAgentExecutionService({
       logger: logger.get('execution'),
       elasticsearch,
+      security,
       taskManager,
       spaces,
       inference,

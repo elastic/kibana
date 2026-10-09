@@ -12,8 +12,7 @@ const baseRule = {
   metadata: { name: 'High CPU', tags: ['ops'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '15m' },
-  query: { format: 'standalone', breach: { query: 'FROM metrics-* | LIMIT 10' } },
-  state_transition: null,
+  query: { base: 'FROM metrics-* | LIMIT 10' },
 };
 
 describe('ruleAttachmentDataSchema', () => {
@@ -58,6 +57,22 @@ describe('ruleAttachmentDataSchema', () => {
       created_at: '2026-04-01T00:00:00.000Z',
       updated_at: '2026-04-10T00:00:00.000Z',
     });
+  });
+
+  it('still resolves an attachment stored with the saved-object version token', () => {
+    const result = ruleAttachmentDataSchema.parse({
+      ...baseRule,
+      id: 'rule-1',
+      version: 'WzEsMV0=',
+    });
+
+    expect(result).not.toHaveProperty('version');
+  });
+
+  it('drops the rule version counter rather than storing it on the attachment', () => {
+    const result = ruleAttachmentDataSchema.parse({ ...baseRule, id: 'rule-1', version: 4 });
+
+    expect(result).not.toHaveProperty('version');
   });
 
   it('still resolves an attachment stored with the removed metadata.owner', () => {

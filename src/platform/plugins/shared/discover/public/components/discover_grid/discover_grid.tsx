@@ -37,6 +37,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
   ({
     query,
     cascadedDocumentsContext,
+    dataSource,
     externalAdditionalControls: customExternalAdditionalControls,
     rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
     onFullScreenChange,
@@ -45,8 +46,8 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     const { dataView } = props;
     const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
     const getRowIndicator = useMemo(() => {
-      return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
-    }, [getRowIndicatorProvider, props.dataView]);
+      return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView, dataSource });
+    }, [dataSource, getRowIndicatorProvider, props.dataView]);
 
     const getRowAdditionalLeadingControlsAccessor = useProfileAccessor(
       'getRowAdditionalLeadingControls'
@@ -88,7 +89,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     });
 
     const isCascadedDocumentsAvailable =
-      props.isPlainRecord && !!cascadedDocumentsContext?.availableCascadeGroups.length;
+      dataSource?.kind === 'esql' && !!cascadedDocumentsContext?.availableCascadeGroups.length;
 
     const externalAdditionalControls = useMemo(() => {
       const additionalControls: ReactNode[] = [];
@@ -135,7 +136,6 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
         enableInTableSearch
         showSummaryColumnToggle
         renderCustomToolbar={renderCustomToolbar}
-        getRowIndicator={getRowIndicator}
         rowAdditionalLeadingControls={rowAdditionalLeadingControls}
         visibleCellActions={3} // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
         paginationMode={paginationModeConfig.paginationMode}
@@ -144,6 +144,8 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
         externalAdditionalControls={externalAdditionalControls}
         onFullScreenChange={onFullScreenChange}
         {...props}
+        dataSource={dataSource}
+        getRowIndicator={getRowIndicator}
       />
     );
   }

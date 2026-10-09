@@ -23,10 +23,30 @@ export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
   title,
   button,
   layout,
+  href,
+  onClick,
+  isDisabled,
+  target,
+  rel,
   ...cardRest
 }) => {
+  const hasAction = href !== undefined || onClick !== undefined;
+
   const footer =
-    typeof button !== 'string' ? button : <EuiButton fill>{button || title}</EuiButton>;
+    typeof button !== 'string' && typeof button !== 'undefined' ? (
+      button
+    ) : typeof button === 'string' || hasAction ? (
+      <EuiButton
+        fill
+        href={href}
+        onClick={onClick}
+        isDisabled={isDisabled}
+        target={target}
+        rel={rel}
+      >
+        {button || title}
+      </EuiButton>
+    ) : undefined;
 
   return (
     <EuiCard
@@ -40,6 +60,7 @@ export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
       betaBadgeProps={recommended ? { label: NO_DATA_RECOMMENDED } : undefined}
       footer={footer}
       layout={layout as 'vertical' | undefined}
+      isDisabled={isDisabled}
       {...cardRest}
     />
   );

@@ -9,7 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES, esFieldTypeToKibanaFieldType } from '@kbn/field-types';
-import { getTextBasedColumnIconType } from '../../utils/get_text_based_column_icon_type';
+import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
+import { getFieldIconType as getFieldIconTypeForField } from '../../utils/get_field_icon_type';
 import { getFieldTypeName } from '../../utils/get_field_type_name';
 
 export const TYPE_GROUPS: { label: string; types: string[] }[] = [
@@ -95,7 +96,13 @@ export const getFieldLabel = (type: string) => {
 };
 
 export const getFieldIconType = (type: string): string => {
-  const fieldIconType = getTextBasedColumnIconType({ type: KBN_FIELD_TYPES.UNKNOWN, esType: type });
+  const fieldIconType = getFieldIconTypeForField(
+    convertDatatableColumnToDataViewFieldSpec({
+      id: '',
+      name: '',
+      meta: { type: KBN_FIELD_TYPES.UNKNOWN, esType: type },
+    })
+  );
   if (fieldIconType && fieldIconType !== KBN_FIELD_TYPES.UNKNOWN) {
     return fieldIconType;
   }

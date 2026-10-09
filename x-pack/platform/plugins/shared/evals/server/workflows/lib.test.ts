@@ -327,6 +327,58 @@ describe('runExampleEvaluation evaluator model attribution', () => {
       { name: 'correctness', direction: 'maximize' },
     ]);
   });
+
+  it("stamps each score with its own direction when a judge's scores point different ways", async () => {
+    const recorded: RecordedCall[] = [];
+    const runtime: StepRuntime = {
+      ...createRuntime(recorded),
+      callKibanaApi: (async ({ path, body }: { path: string; body?: unknown }) => {
+        recorded.push({ path, body });
+        if (path === EVALS_EVALUATE_URL) {
+          return {
+            status: 200,
+            headers: {},
+            body: {
+              results: [
+                {
+                  status: 'ok',
+                  evaluator: {
+                    name: 'answer-quality',
+                    version: '1.0.0',
+                    kind: 'llm',
+                    direction: 'maximize',
+                  },
+                  scores: [
+                    { name: 'grounded', score: 0.9, direction: 'maximize' },
+                    { name: 'hallucination', score: 0.1, direction: 'minimize' },
+                    { name: 'length', score: 0.5, direction: 'neutral' },
+                  ],
+                },
+              ],
+            },
+          };
+        }
+        if (path === EVALS_SCORES_URL) {
+          return { status: 200, headers: {}, body: { ingested: 3, conflicted: 0, failed: [] } };
+        }
+        throw new Error(`Unexpected path: ${path}`);
+      }) as unknown as StepRuntime['callKibanaApi'],
+    };
+
+    await runExampleEvaluation(createRegistry(), runtime, baseParams());
+
+    const scores = ingestedScoresBody(recorded).scores;
+    expect(
+      scores.map(({ evaluator }: { evaluator: Record<string, unknown> }) => ({
+        name: evaluator.name,
+        direction: evaluator.direction,
+      }))
+    ).toEqual([
+      { name: 'answer-quality.grounded', direction: 'maximize' },
+      { name: 'answer-quality.hallucination', direction: 'minimize' },
+      { name: 'answer-quality.length', direction: 'neutral' },
+    ]);
+  });
 });
 
 describe('evaluateWorkBatch reference data', () => {

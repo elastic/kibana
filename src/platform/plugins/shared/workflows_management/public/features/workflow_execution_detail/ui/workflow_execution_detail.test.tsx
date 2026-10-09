@@ -226,7 +226,7 @@ describe('WorkflowExecutionDetail', () => {
         </TestWrapper>
       );
 
-      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('trigger');
+      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('trigger', { replace: true });
     });
   });
 
@@ -436,6 +436,7 @@ describe('WorkflowExecutionDetail', () => {
 
       // The component should render without errors when finding child step
       expect(screen.getByTestId('step-details')).toBeInTheDocument();
+      expect(mockStepExecutionDetailsProps.current.resumeExecutionId).toBe('child-exec-1');
     });
   });
 
@@ -460,7 +461,7 @@ describe('WorkflowExecutionDetail', () => {
         </TestWrapper>
       );
 
-      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('trigger');
+      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('trigger', { replace: true });
     });
 
     it('should auto-select trigger when no step is selected and execution is terminal with no steps', () => {
@@ -477,7 +478,7 @@ describe('WorkflowExecutionDetail', () => {
         </TestWrapper>
       );
 
-      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('trigger');
+      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('trigger', { replace: true });
     });
   });
 });
@@ -844,6 +845,6 @@ describe('WorkflowExecutionDetail - auto-select trigger on failed before steps',
       </TestWrapper>
     );
 
-    expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('trigger');
+    expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('trigger', { replace: true });
   });
 });

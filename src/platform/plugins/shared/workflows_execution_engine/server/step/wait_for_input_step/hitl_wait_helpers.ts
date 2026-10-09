@@ -52,7 +52,9 @@ export function resumeHitlWaitStep({
 
   if (context != null && typeof context === 'object' && 'resumeInput' in context) {
     // ES merges partial context updates; omitting the key would retain the consumed approval.
-    stepExecutionRuntime.updateWorkflowExecution({ context: { ...context, resumeInput: null } });
+    stepExecutionRuntime.updateWorkflowExecution({
+      context: { ...context, resumeInput: null, pendingInteractiveResume: false },
+    });
   }
 
   workflowLogger.logDebug(`Workflow ${executionId} resumed by ${resumedBy}`, {

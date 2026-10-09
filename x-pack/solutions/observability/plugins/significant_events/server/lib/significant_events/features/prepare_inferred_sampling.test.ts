@@ -9,12 +9,10 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { FeatureWithFilter } from '@kbn/significant-events-schema';
+import { MAX_INFERENCE_DOCUMENTS_BYTES } from '@kbn/nightshift-ai';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { fetchSampleDocuments } from './fetch_sample_documents';
-import {
-  MAX_INFERENCE_DOCUMENTS_BYTES,
-  prepareInferredSampling,
-} from './prepare_inferred_sampling';
+import { prepareInferredSampling } from './prepare_inferred_sampling';
 
 jest.mock('./fetch_sample_documents', () => ({
   fetchSampleDocuments: jest.fn(),
