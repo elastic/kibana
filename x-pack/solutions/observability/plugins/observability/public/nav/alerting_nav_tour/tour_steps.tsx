@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import type { EuiTourStepProps } from '@elastic/eui';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
@@ -20,6 +20,7 @@ import * as i18n from './translations';
 export type AlertingNavTourStepId =
   | 'alerts'
   | 'rules'
+  | 'rulesTabs'
   | 'actionPolicies'
   | 'executionHistory'
   | 'maintenanceWindows'
@@ -37,10 +38,6 @@ export interface AlertingNavTourStep {
   path?: string;
   /** Optional management (or other) deep link id for `navigateToApp`. */
   deepLinkId?: string;
-  /** Runs after navigation when this step becomes active. */
-  onEnter?: () => void;
-  /** Runs when leaving this step for another step (not on tour finish/skip). */
-  onLeave?: () => void;
 }
 
 const wrap = (text: string) => (
@@ -49,20 +46,9 @@ const wrap = (text: string) => (
   </EuiText>
 );
 
-const wrapWithDocsLink = (text: string, href: string, linkLabel: string) => (
-  <EuiText size="s">
-    <p>
-      {text}{' '}
-      <EuiLink href={href} target="_blank" external>
-        {linkLabel}
-      </EuiLink>
-    </p>
-  </EuiText>
-);
-
 const navAnchor = (deepLinkId: string) => `[data-test-subj~="nav-item-deepLinkId-${deepLinkId}"]`;
 
-export const getAlertingNavTourSteps = (actionPoliciesDocHref: string): AlertingNavTourStep[] => [
+export const getAlertingNavTourSteps = (): AlertingNavTourStep[] => [
   {
     stepId: 'alerts',
     title: i18n.STEP_ALERTS_TITLE,
@@ -76,9 +62,18 @@ export const getAlertingNavTourSteps = (actionPoliciesDocHref: string): Alerting
     stepId: 'rules',
     title: i18n.STEP_RULES_TITLE,
     content: wrap(i18n.STEP_RULES_DESCRIPTION),
-    // Anchor to the Universal tab so the popover sits under the tab row instead of covering it.
     anchor:
-      '[data-test-subj="v2RulesTab"], [data-test-subj="v1RulesTab"], [data-test-subj~="nav-item-deepLinkId-observabilityAlerting:rules"], [data-test-subj~="nav-item-deepLinkId-observabilityAlerting:rules-v2"]',
+      '[data-test-subj~="nav-item-deepLinkId-observabilityAlerting:rules"], [data-test-subj~="nav-item-deepLinkId-observabilityAlerting:rules-v2"]',
+    anchorPosition: 'rightCenter',
+    appId: OBSERVABILITY_ALERTING_APP_ID,
+    path: OBSERVABILITY_ALERTING_RULES_V2_PATH,
+  },
+  {
+    stepId: 'rulesTabs',
+    title: i18n.STEP_RULES_TABS_TITLE,
+    content: wrap(i18n.STEP_RULES_TABS_DESCRIPTION),
+    // Anchor to the Universal tab so the popover sits under the tab row instead of covering it.
+    anchor: '[data-test-subj="v2RulesTab"]',
     anchorPosition: 'downLeft',
     appId: OBSERVABILITY_ALERTING_APP_ID,
     path: OBSERVABILITY_ALERTING_RULES_V2_PATH,
@@ -86,11 +81,7 @@ export const getAlertingNavTourSteps = (actionPoliciesDocHref: string): Alerting
   {
     stepId: 'actionPolicies',
     title: i18n.STEP_ACTION_POLICIES_TITLE,
-    content: wrapWithDocsLink(
-      i18n.STEP_ACTION_POLICIES_DESCRIPTION,
-      actionPoliciesDocHref,
-      i18n.STEP_ACTION_POLICIES_DOCS_LINK
-    ),
+    content: wrap(i18n.STEP_ACTION_POLICIES_DESCRIPTION),
     anchor: navAnchor('observabilityAlerting:action-policies'),
     anchorPosition: 'rightCenter',
     appId: OBSERVABILITY_ALERTING_APP_ID,
@@ -122,9 +113,11 @@ export const getAlertingNavTourSteps = (actionPoliciesDocHref: string): Alerting
     stepId: 'createFirstRule',
     title: i18n.STEP_CREATE_FIRST_RULE_TITLE,
     content: wrap(i18n.STEP_CREATE_FIRST_RULE_DESCRIPTION),
-    anchor:
-      '[data-test-subj="createRuleButton"], [data-test-subj="esqlRulesEmptyStateCreateButton"]',
-    anchorPosition: 'leftCenter',
+    // Header Create rule is hidden in the true empty state. Fall back to the empty-state
+    // heading — not a create-option card — because EuiTourStep's wrapping popover moves the
+    // anchor node and shrinks full-width cards.
+    anchor: '[data-test-subj="createRuleButton"], [data-test-subj="ruleCreateOptionsPanel"] h2',
+    anchorPosition: 'downCenter',
     appId: OBSERVABILITY_ALERTING_APP_ID,
     path: OBSERVABILITY_ALERTING_RULES_V2_PATH,
   },

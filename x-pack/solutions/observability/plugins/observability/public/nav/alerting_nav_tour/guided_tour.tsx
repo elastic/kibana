@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
+import React, { useCallback, useEffect, useState } from 'react';
+import { EuiButton, EuiButtonEmpty, EuiTourStep, useEuiTheme } from '@elastic/eui';
 import type { ApplicationStart } from '@kbn/core/public';
 import {
   ALERTING_NAV_TOUR_TEST_ID_PREFIX,
   ANCHOR_TIMEOUT_MS,
-  TOUR_POPOVER_WIDTH,
+  TOUR_POPOVER_WIDTH_BASE_MULTIPLIER,
 } from './constants';
 import type { AlertingNavTourStep } from './tour_steps';
 import { useIsAnchorMounted } from './use_is_anchor_mounted';
@@ -26,7 +26,7 @@ export interface AlertingNavGuidedTourProps {
 
 /**
  * Multi-step tour over Alerting side-nav items and in-page controls. Navigates
- * between Alerting pages as steps advance; optional onEnter/onLeave run per step.
+ * between Alerting pages as steps advance.
  */
 export const AlertingNavGuidedTour: React.FC<AlertingNavGuidedTourProps> = ({
   steps,
@@ -34,13 +34,13 @@ export const AlertingNavGuidedTour: React.FC<AlertingNavGuidedTourProps> = ({
   onFinish,
   application,
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const tourPopoverWidth = euiTheme.base * TOUR_POPOVER_WIDTH_BASE_MULTIPLIER;
   const [currentStep, setCurrentStep] = useState(1);
-  const previousStepRef = useRef<AlertingNavTourStep | undefined>(undefined);
 
   useEffect(() => {
     if (isActive) {
       setCurrentStep(1);
-      previousStepRef.current = undefined;
     }
   }, [isActive]);
 
@@ -59,39 +59,7 @@ export const AlertingNavGuidedTour: React.FC<AlertingNavGuidedTourProps> = ({
     });
   }, [isActive, currentStepConfig, application]);
 
-  // Run leave/enter hooks when the active step changes. Retry onEnter briefly so
-  // page-mounted anchors are available before step actions run.
-  useEffect(() => {
-    if (!isActive || !currentStepConfig) {
-      return;
-    }
-    const previous = previousStepRef.current;
-    if (previous && previous.stepId !== currentStepConfig.stepId) {
-      previous.onLeave?.();
-    }
-    previousStepRef.current = currentStepConfig;
-
-    if (!currentStepConfig.onEnter) {
-      return;
-    }
-
-    let attempts = 0;
-    const maxAttempts = 10;
-    const tryEnter = () => {
-      currentStepConfig.onEnter?.();
-      attempts += 1;
-      if (document.querySelector(currentStepConfig.anchor) || attempts >= maxAttempts) {
-        clearInterval(intervalId);
-      }
-    };
-    tryEnter();
-    const intervalId = setInterval(tryEnter, 200);
-    return () => clearInterval(intervalId);
-  }, [isActive, currentStepConfig]);
-
   const finishTour = useCallback(() => {
-    previousStepRef.current?.onLeave?.();
-    previousStepRef.current = undefined;
     onFinish();
   }, [onFinish]);
 
@@ -139,8 +107,8 @@ export const AlertingNavGuidedTour: React.FC<AlertingNavGuidedTourProps> = ({
       stepsTotal={stepsTotal}
       isStepOpen
       repositionOnScroll
-      minWidth={TOUR_POPOVER_WIDTH}
-      maxWidth={TOUR_POPOVER_WIDTH}
+      minWidth={tourPopoverWidth}
+      maxWidth={tourPopoverWidth}
       onFinish={finishTour}
       data-test-subj={`${ALERTING_NAV_TOUR_TEST_ID_PREFIX}-${currentStepConfig.stepId}`}
       footerAction={

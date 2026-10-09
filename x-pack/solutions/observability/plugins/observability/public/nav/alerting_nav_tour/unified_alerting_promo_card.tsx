@@ -23,6 +23,7 @@ import {
   ALERTING_NAV_PROMO_CARD_TEST_ID,
   ALERTING_NAV_PROMO_DISMISS_TEST_ID,
   ALERTING_NAV_PROMO_TAKE_TOUR_TEST_ID,
+  PROMO_IMAGE_ASPECT_RATIO,
 } from './constants';
 import promoImageDark from './assets/alerting_promo_dark.webp';
 import promoImageLight from './assets/alerting_promo_light.webp';
@@ -86,8 +87,7 @@ export const UnifiedAlertingPromoCard: React.FC<UnifiedAlertingPromoCardProps> =
           align-items: center;
           justify-content: center;
           width: 100%;
-          /* Matches 448×240 assets at the ~224px card width so the media fills edge-to-edge. */
-          height: 120px;
+          aspect-ratio: ${PROMO_IMAGE_ASPECT_RATIO};
           overflow: hidden;
           line-height: 0;
           border-bottom: ${euiTheme.border.thin};

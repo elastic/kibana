@@ -9,8 +9,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { CoreStart } from '@kbn/core/public';
-import { ALERTING_ONBOARDING_START_TOUR_EVENT } from '@kbn/alerting-v2-constants';
 import {
+  ALERTING_NAV_START_TOUR_EVENT,
   ALERTING_NAV_TOUR_STORAGE_KEY,
   ALERTING_PANEL_FOOTER_SELECTOR,
   DEFAULT_ALERTING_NAV_TOUR_STATE,
@@ -56,14 +56,13 @@ export const AlertingNavTour: React.FC<AlertingNavTourProps> = ({ coreStart }) =
   const [isTourActive, setIsTourActive] = useState(false);
 
   const dismiss = useCallback(() => {
-    setPersisted({ ...persisted, isDismissed: true });
+    setPersisted({ isDismissed: true });
     setIsTourActive(false);
-  }, [persisted, setPersisted]);
+  }, [setPersisted]);
 
   const finishTour = useCallback(() => {
     setIsTourActive(false);
-    setPersisted({ ...persisted, isTourComplete: true });
-  }, [persisted, setPersisted]);
+  }, []);
 
   const startTour = useCallback(() => {
     if (!isTourEnabled) {
@@ -74,13 +73,13 @@ export const AlertingNavTour: React.FC<AlertingNavTourProps> = ({ coreStart }) =
 
   useEffect(() => {
     const onStartTourEvent = () => startTour();
-    window.addEventListener(ALERTING_ONBOARDING_START_TOUR_EVENT, onStartTourEvent);
+    window.addEventListener(ALERTING_NAV_START_TOUR_EVENT, onStartTourEvent);
     return () => {
-      window.removeEventListener(ALERTING_ONBOARDING_START_TOUR_EVENT, onStartTourEvent);
+      window.removeEventListener(ALERTING_NAV_START_TOUR_EVENT, onStartTourEvent);
     };
   }, [startTour]);
 
-  const tourSteps = getAlertingNavTourSteps(coreStart.docLinks.links.alerting.actionPolicies);
+  const tourSteps = getAlertingNavTourSteps();
   const showPromoCard = !persisted.isDismissed;
 
   return (

@@ -7,13 +7,14 @@
 
 import { getAlertingNavTourSteps } from './tour_steps';
 
-const TOUR_STEPS = getAlertingNavTourSteps('https://docs.test/action-policies');
+const TOUR_STEPS = getAlertingNavTourSteps();
 
 describe('getAlertingNavTourSteps', () => {
   it('covers alerts through create-first-rule, including maintenance windows', () => {
     expect(TOUR_STEPS.map((step) => step.stepId)).toEqual([
       'alerts',
       'rules',
+      'rulesTabs',
       'actionPolicies',
       'maintenanceWindows',
       'executionHistory',
@@ -21,10 +22,16 @@ describe('getAlertingNavTourSteps', () => {
     ]);
   });
 
-  it('anchors the rules step to the Universal/Classic tabs so they stay visible', () => {
+  it('anchors the rules step to the Rules nav item', () => {
     const rulesStep = TOUR_STEPS.find((step) => step.stepId === 'rules');
-    expect(rulesStep?.anchor).toContain('v2RulesTab');
-    expect(rulesStep?.anchorPosition).toBe('downLeft');
+    expect(rulesStep?.anchor).toContain('nav-item-deepLinkId-observabilityAlerting:rules');
+    expect(rulesStep?.anchorPosition).toBe('rightCenter');
+  });
+
+  it('anchors the rules tabs step to the Universal tab', () => {
+    const rulesTabsStep = TOUR_STEPS.find((step) => step.stepId === 'rulesTabs');
+    expect(rulesTabsStep?.anchor).toBe('[data-test-subj="v2RulesTab"]');
+    expect(rulesTabsStep?.anchorPosition).toBe('downLeft');
   });
 
   it('navigates to Management for maintenance windows and anchors to the nav item', () => {
@@ -42,6 +49,9 @@ describe('getAlertingNavTourSteps', () => {
     expect(createFirstRuleStep?.appId).toBe('observabilityAlerting');
     expect(createFirstRuleStep?.path).toBe('/rules/v2');
     expect(createFirstRuleStep?.anchor).toContain('createRuleButton');
+    expect(createFirstRuleStep?.anchor).toContain('ruleCreateOptionsPanel');
+    expect(createFirstRuleStep?.anchor).toContain('h2');
+    expect(createFirstRuleStep?.anchorPosition).toBe('downCenter');
   });
 
   it('navigates within Alerting for every step except maintenance windows', () => {

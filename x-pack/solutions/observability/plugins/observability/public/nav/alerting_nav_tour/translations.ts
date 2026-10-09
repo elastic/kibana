@@ -67,12 +67,26 @@ export const STEP_ALERTS_DESCRIPTION = i18n.translate(
 export const STEP_RULES_TITLE = i18n.translate(
   'xpack.observability.alertingNavTour.steps.rules.title',
   {
-    defaultMessage: 'Universal and Classic rules',
+    defaultMessage: 'Rules',
   }
 );
 
 export const STEP_RULES_DESCRIPTION = i18n.translate(
   'xpack.observability.alertingNavTour.steps.rules.description',
+  {
+    defaultMessage: 'Create, edit, and manage your alerting rules from one place.',
+  }
+);
+
+export const STEP_RULES_TABS_TITLE = i18n.translate(
+  'xpack.observability.alertingNavTour.steps.rulesTabs.title',
+  {
+    defaultMessage: 'Universal and Classic rules',
+  }
+);
+
+export const STEP_RULES_TABS_DESCRIPTION = i18n.translate(
+  'xpack.observability.alertingNavTour.steps.rulesTabs.description',
   {
     defaultMessage:
       'Use these tabs to switch between Universal and Classic rule management from one Rules page.',
@@ -90,14 +104,7 @@ export const STEP_ACTION_POLICIES_DESCRIPTION = i18n.translate(
   'xpack.observability.alertingNavTour.steps.actionPolicies.description',
   {
     defaultMessage:
-      'Unlike Classic actions that you configure on each rule, action policies define notifications and suppressions once and reuse them across Universal rules—so you manage routing in one place instead of duplicating connectors per rule. This feature is not available for Kibana Classic alerting.',
-  }
-);
-
-export const STEP_ACTION_POLICIES_DOCS_LINK = i18n.translate(
-  'xpack.observability.alertingNavTour.steps.actionPolicies.docsLink',
-  {
-    defaultMessage: 'Read the docs',
+      'Define notifications and suppressions once, then reuse them across Universal rules. Not available for Classic alerting.',
   }
 );
 
@@ -134,14 +141,13 @@ export const STEP_MAINTENANCE_WINDOWS_DESCRIPTION = i18n.translate(
 export const STEP_CREATE_FIRST_RULE_TITLE = i18n.translate(
   'xpack.observability.alertingNavTour.steps.createFirstRule.title',
   {
-    defaultMessage: 'Create your first ES|QL rule',
+    defaultMessage: 'Try it out',
   }
 );
 
 export const STEP_CREATE_FIRST_RULE_DESCRIPTION = i18n.translate(
   'xpack.observability.alertingNavTour.steps.createFirstRule.description',
   {
-    defaultMessage:
-      'You’re ready to go. Use Create rule to start your first ES|QL rule and get started with Universal rules.',
+    defaultMessage: 'You’re ready to go. Create a new rule to get started with Universal Alerting.',
   }
 );
