@@ -318,18 +318,6 @@ describe('generateWorkflowYaml', () => {
         expect(matches(filtered(text), { text: 'unrelated' })).toBe(false);
       });
 
-      it.each([
-        ['in the middle', 'was not in production'],
-        ['at the start', 'not in production'],
-        ['at the end', 'was in production not'],
-        ['alone', 'not'],
-        ['in capitals', 'was NOT in production'],
-        ['repeated', 'not not here'],
-      ])('keeps the condition valid when the filter has the word not %s', (_label, text) => {
-        expect(matches(filtered(text), { text: `x ${text} y` })).toBe(true);
-        expect(matches(filtered(text), { text: 'unrelated' })).toBe(false);
-      });
-
       it('ANDs the filter with the channel and user filters', () => {
         const automation = slackAutomation(
           slackRow({ channels: ['C1'], users: ['U1'], messageFilter: 'deploy' })

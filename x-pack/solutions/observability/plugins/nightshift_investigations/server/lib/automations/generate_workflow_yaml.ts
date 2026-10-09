@@ -319,32 +319,16 @@ function buildSlackRowCondition(row: SlackRow): string {
 }
 
 /**
- * The message filter as unquoted wildcard terms. A quoted value is compared for equality with the
- * whole field by the in-memory evaluator, so it cannot express "contains". Wildcards are case
- * sensitive, and spaces cannot be escaped inside one.
+ * The message filter as one unquoted wildcard term. A quoted value is compared for equality with
+ * the whole field by the in-memory evaluator, so it cannot express "contains". Wildcards are case
+ * sensitive.
  *
- * The word "not" cannot sit inside a multi-word term: unescaped it fails to parse, and escaped it
- * never matches, which would break the whole trigger condition. So the phrase is split around
- * "not" into runs of words, each its own term, and "not" is its own term. Words stay in order
- * within a run, and the order between runs is not checked.
+ * Known limit: the KQL grammar ends an unquoted value at "not" followed by whitespace, including
+ * the end of a word such as "cannot", so a filter containing that sub-phrase produces a condition
+ * that does not parse. It is not handled here yet.
  */
 function buildMessageFilterTerms(messageFilter: string): string {
-  const runs: string[] = [];
-  let run: string[] = [];
-  const flush = () => {
-    if (run.length > 0) runs.push(run.join(' '));
-    run = [];
-  };
-  for (const word of messageFilter.split(/\s+/)) {
-    if (word.toLowerCase() === 'not') {
-      flush();
-      runs.push(word);
-    } else {
-      run.push(word);
-    }
-  }
-  flush();
-  return runs.map((text) => `event.text: *${escapeKqlWildcardTerm(text)}*`).join(' and ');
+  return `event.text: *${escapeKqlWildcardTerm(messageFilter)}*`;
 }
 
 // Escapes KQL syntax characters and the `and` and `or` keywords so they stay literal text.
