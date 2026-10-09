@@ -26255,8 +26255,6 @@
     "xpack.indexLifecycleMgmt.warmPhase.dataTier.noTiersAvailableTitle": "ウォームティアに割り当てられているノードがありません",
     "xpack.indexLifecycleMgmt.warmPhase.dataTier.willUseFallbackTierDescription": "使用可能なウォームノードがない場合は、データが{tier}ティアに格納されます。",
     "xpack.indexLifecycleMgmt.warmPhase.dataTier.willUseFallbackTierTitle": "ウォームティアに割り当てられているノードがありません",
-    "xpack.inference.anonymizationSettingsDescription": "匿名化ルールのリスト<ul><li><strong>type:</strong> &quot;ner&quot; または &quot;regex&quot;</li><li> <strong>entityClass:</strong> (正規表現タイプのみ) 例: EMAIL、URL、IP</li><li><strong>pattern:</strong> (正規表現型のみ) 一致させる正規表現文字列</li><li><strong>modelId:</strong> (ner タイプのみ) 使用するNER (固有表現認識) モデルのID</li><li> <strong>enabled:</strong>ルールをオンまたはオフにするブールフラグ</li><li><strong>timeoutSeconds:</strong> (ner型のみ) タイムアウトするまで<em>の推論リクエストごとの</em>最大秒数 (1回のチャット対話中に複数のリクエストが発行される場合があります)</li></ul>",
-    "xpack.inference.anonymizationSettingsLabel": "匿名化設定",
     "xpack.inference.chatCompletionError.tokenLimitReachedError": "トークンの上限に達しました。トークンの上限は{tokenLimit}ですが、現在の会話には{tokenCount}個のトークンがあります。",
     "xpack.inferenceEndpointUICommon.components.adaptiveResourcesAriaLabel": "適応型リソース情報のポップオーバーを開く",
     "xpack.inferenceEndpointUICommon.components.adaptiveResourcesDescription": "割り当て数は負荷に基づいて自動的に調整されます。",
