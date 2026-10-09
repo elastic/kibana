@@ -89,7 +89,8 @@ export async function renderApp({
   autocompleteInfo.mapping.setup(http, settings);
 
   render(
-    <KibanaRenderContextProvider {...startServices}>
+    // POC: opt in so EUI breakpoint hooks follow the app area with `kbnSurfacePoc = 'js'`.
+    <KibanaRenderContextProvider {...startServices} mountElement={element}>
       <ServicesContextProvider
         value={{
           ...startServices,
