@@ -15,6 +15,8 @@ import {
   removeVersionSuffixFromPolicyId,
   splitVersionSuffixFromPolicyId,
   buildVersionVariantsKueryFragment,
+  buildAgentVersionVariantsKueryFragment,
+  buildAgentVersionVariantsEsFilter,
   buildPolicyIdOrVariantsKuery,
   buildPolicyIdsOrVariantsKuery,
   buildVersionVariantsEsFilter,
@@ -250,6 +252,31 @@ describe('buildPolicyIdsOrVariantsKuery', () => {
 
   it('should return a valid, never-matching kuery for an empty array instead of invalid syntax', () => {
     expect(buildPolicyIdsOrVariantsKuery([])).toBe('policy_id:""');
+  });
+});
+
+describe('buildAgentVersionVariantsKueryFragment', () => {
+  it('matches the variants but not the sentinel', () => {
+    expect(buildAgentVersionVariantsKueryFragment('my-policy')).toBe(
+      '(policy_id:my-policy#* and not policy_id:"my-policy#sentinel")'
+    );
+  });
+
+  it('uses the given field name and escapes the policy id', () => {
+    expect(buildAgentVersionVariantsKueryFragment('my policy:1', 'agent.policy_id')).toBe(
+      '(agent.policy_id:my policy\\:1#* and not agent.policy_id:"my policy:1#sentinel")'
+    );
+  });
+});
+
+describe('buildAgentVersionVariantsEsFilter', () => {
+  it('matches the variants but not the sentinel', () => {
+    expect(buildAgentVersionVariantsEsFilter('my-policy')).toEqual({
+      bool: {
+        filter: [{ prefix: { policy_id: 'my-policy#' } }],
+        must_not: [{ term: { policy_id: 'my-policy#sentinel' } }],
+      },
+    });
   });
 });
 

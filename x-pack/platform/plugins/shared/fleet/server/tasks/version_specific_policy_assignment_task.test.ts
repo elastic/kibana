@@ -1308,6 +1308,49 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         );
       });
 
+      it.each([
+        ['managed', { is_managed: true }],
+        ['agentless', { supports_agentless: true }],
+      ])(
+        'moves the agents of the other variants of a %s policy to the base policy, keeping the #sentinel policy',
+        async (_name, attributes) => {
+          mockAgentPolicyService.getByIds = jest
+            .fn()
+            .mockResolvedValue([
+              { id: 'policy-1', revision: 2, has_agent_version_conditions: false, ...attributes },
+            ]);
+          await mockSweepAndSentinelDocs(
+            ['policy-1', 'policy-1#sentinel', 'policy-1#9.4'],
+            [{ 'policy-1#sentinel': 2 }]
+          );
+          mockedGetVariantAgentsKuery.mockResolvedValue('policy_base_id:"policy-1"');
+          mockedFetchAllAgentsByKuery.mockResolvedValue(
+            getMockFetchAllAgentsByKuery([{ id: 'agent-1', policy_id: 'policy-1#9.4' }] as Agent[])
+          );
+          mockedGetAgentsByKuery.mockResolvedValueOnce({
+            total: 0,
+            agents: [],
+            page: 1,
+            perPage: 0,
+          });
+
+          await runTask();
+
+          expect(mockedReassignAgents).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.anything(),
+            expect.objectContaining({ agentIds: ['agent-1'] }),
+            'policy-1'
+          );
+          expect(mockAgentPolicyService.deployPolicies).not.toHaveBeenCalled();
+          expect(mockedDeleteVersionSpecificFleetServerPolicies).toHaveBeenCalledWith(
+            expect.anything(),
+            'policy-1',
+            { keepPolicyIds: ['policy-1#sentinel'] }
+          );
+        }
+      );
+
       it('moves the agents of the other variants to the base policy when the #sentinel policy cannot be deployed', async () => {
         await mockSweepAndSentinelDocs(['policy-1', 'policy-1#9.4'], [{}]);
         mockedGetVariantAgentsKuery.mockResolvedValue('policy_base_id:"policy-1"');

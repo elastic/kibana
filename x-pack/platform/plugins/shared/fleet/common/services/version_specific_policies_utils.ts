@@ -93,6 +93,21 @@ export function buildVersionVariantsKueryFragment(
 }
 
 /**
+ * KQL fragment matching only the agent version variants of a base policy id
+ * (e.g. `policy_id:my-policy#* and not policy_id:"my-policy#sentinel"`) — NOT the base id itself
+ * and NOT the sentinel. Wrapped in parentheses so it can be combined with other conditions.
+ */
+export function buildAgentVersionVariantsKueryFragment(
+  baseId: string,
+  fieldName: string = DEFAULT_POLICY_ID_FIELD
+): string {
+  return `(${buildVersionVariantsKueryFragment(
+    baseId,
+    fieldName
+  )} and not ${fieldName}:"${escapeQuotes(getSentinelVersionPolicyId(baseId))}")`;
+}
+
+/**
  * KQL matching a base policy id or any of its version-specific variants, e.g.
  * `(policy_id:"my-policy" or policy_id:my-policy#*)`. Canonical replacement for hand-rolled
  * copies of this query across Fleet.
@@ -139,6 +154,22 @@ export function buildVersionVariantsEsFilter(
   fieldName: string = DEFAULT_POLICY_ID_FIELD
 ) {
   return { prefix: { [fieldName]: `${baseId}${AGENT_POLICY_VERSION_SEPARATOR}` } };
+}
+
+/**
+ * ES query DSL filter matching only the agent version variants of a base policy id — NOT the base
+ * id itself and NOT the sentinel.
+ */
+export function buildAgentVersionVariantsEsFilter(
+  baseId: string,
+  fieldName: string = DEFAULT_POLICY_ID_FIELD
+) {
+  return {
+    bool: {
+      filter: [buildVersionVariantsEsFilter(baseId, fieldName)],
+      must_not: [{ term: { [fieldName]: getSentinelVersionPolicyId(baseId) } }],
+    },
+  };
 }
 
 /**

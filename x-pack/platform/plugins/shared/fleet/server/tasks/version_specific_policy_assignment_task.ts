@@ -42,7 +42,7 @@ import { reassignAgents } from '../services/agents/reassign';
 import {
   splitVersionSuffixFromPolicyId,
   classifyPolicyId,
-  buildVersionVariantsKueryFragment,
+  buildAgentVersionVariantsKueryFragment,
   getSentinelVersionPolicyId,
   hasSentinelVersionSuffix,
 } from '../../common/services/version_specific_policies_utils';
@@ -505,7 +505,7 @@ export class VersionSpecificPolicyAssignmentTask {
     // Query 2: Agents on any versioned policy derived from this parent that:
     //   - Were recently upgraded (version might have changed)
     //   - May need to move to a different versioned policy
-    const versionedPolicyKuery = `${buildVersionVariantsKueryFragment(
+    const versionedPolicyKuery = `${buildAgentVersionVariantsKueryFragment(
       agentPolicyId
     )} AND upgraded_at >= "${recentlyUpgradedTime}"`;
 
@@ -844,7 +844,16 @@ export class VersionSpecificPolicyAssignmentTask {
     const parentPolicies = await agentPolicyService.getByIds(
       soClient,
       basePolicyIds.map((id) => ({ id, spaceId: '*' })),
-      { fields: ['id', 'revision', 'has_agent_version_conditions'], ignoreMissing: true }
+      {
+        fields: [
+          'id',
+          'revision',
+          'is_managed',
+          'supports_agentless',
+          'has_agent_version_conditions',
+        ],
+        ignoreMissing: true,
+      }
     );
     const parentPoliciesById = new Map(parentPolicies.map((p) => [p.id, p]));
 
@@ -875,7 +884,7 @@ export class VersionSpecificPolicyAssignmentTask {
           signal,
           agentOnlyVariantIdsByParent.get(parentPolicyId),
           sentinelVersionEnabled,
-          parentPoliciesById.get(parentPolicyId)?.revision
+          parentPoliciesById.get(parentPolicyId)
         );
       }
     }
@@ -998,7 +1007,7 @@ export class VersionSpecificPolicyAssignmentTask {
     signal: AbortSignal,
     agentOnlyVariantPolicyIds: string[] = [],
     sentinelVersionEnabled: boolean = false,
-    parentRevision: number = 0
+    parentPolicy?: Pick<AgentPolicy, 'revision' | 'is_managed' | 'supports_agentless'>
   ) {
     // With the sentinel version enabled, `#sentinel` agents and documents are kept, and agents on
     // other variants go straight to `#sentinel` instead of the base policy.
@@ -1036,11 +1045,16 @@ export class VersionSpecificPolicyAssignmentTask {
         // be left on a missing policy. Falling back to the base policy is always safe: the
         // sentinel assignment moves the agents later.
         let targetPolicyId = parentPolicyId;
-        if (sentinelVersionEnabled) {
+        // Managed and agentless policies are left on the plain id, like in `assignAgentsToSentinelPolicies`.
+        if (
+          sentinelVersionEnabled &&
+          !parentPolicy?.is_managed &&
+          !parentPolicy?.supports_agentless
+        ) {
           const upToDatePolicyIds = await this.ensureSentinelPoliciesUpToDate(
             esClient,
             soClient,
-            new Map([[parentPolicyId, parentRevision]])
+            new Map([[parentPolicyId, parentPolicy?.revision ?? 0]])
           );
           if (upToDatePolicyIds.includes(parentPolicyId)) {
             targetPolicyId = sentinelPolicyId;
