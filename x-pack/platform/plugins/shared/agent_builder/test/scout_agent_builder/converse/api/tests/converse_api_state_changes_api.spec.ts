@@ -25,7 +25,8 @@ import { chatApiPath } from '../../../../../common/constants';
 import { apiTest, API_AGENT_BUILDER, COMMON_HEADERS } from '../fixtures';
 
 const CHAT_CONVERSE_ASYNC = `${chatApiPath}/converse/async`;
-const CREATED_AGENT_ID = 'scout-api-state-changes-agent';
+const RUN_ID = Date.now().toString(36);
+const CREATED_AGENT_ID = `scout-api-state-changes-agent-${RUN_ID}`;
 
 interface ParsedSseBlock {
   type: string;
