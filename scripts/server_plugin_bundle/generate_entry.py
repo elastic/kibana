@@ -59,6 +59,7 @@ lines = [
     'const modules = Object.create(null);',
     'function add(rootRel, mod) {',
     "  modules[path.join(REPO, rootRel, 'server')] = mod;",
+    "  modules[rootRel + '/server'] = mod;",
     '}',
 ]
 for rel in plugins:

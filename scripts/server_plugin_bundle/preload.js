@@ -21,15 +21,22 @@ if (process.env.KBN_PLUGIN_BUNDLE === '1' && process.env.isDevCliChild !== 'true
 
   var Module = require('node:module');
   var repoNodeModules = path.join(REPO, 'node_modules');
+  var distNodeModules = process.env.KBN_DIST_NODE_MODULES;
 
   var origNodeModulePaths = Module._nodeModulePaths;
   Module._nodeModulePaths = function patchedNodeModulePaths(from) {
     var lookupPaths = origNodeModulePaths.call(this, from);
+    if (distNodeModules && lookupPaths.indexOf(distNodeModules) === -1) {
+      lookupPaths.unshift(distNodeModules);
+    }
     if (lookupPaths.indexOf(repoNodeModules) === -1) {
       lookupPaths.push(repoNodeModules);
     }
     return lookupPaths;
   };
+  if (distNodeModules && module.paths.indexOf(distNodeModules) === -1) {
+    module.paths.unshift(distNodeModules);
+  }
   if (module.paths.indexOf(repoNodeModules) === -1) {
     module.paths.push(repoNodeModules);
   }
@@ -46,10 +53,38 @@ if (process.env.KBN_PLUGIN_BUNDLE === '1' && process.env.isDevCliChild !== 'true
 
   function moduleKey(specifier) {
     var trimmed;
+    var mods;
+    var keys;
+    var i;
+    var key;
+    var best;
+    var bestLen;
+    var boundary;
     if (typeof specifier !== 'string' || specifier.charAt(0) !== '/') return undefined;
     trimmed = specifier.replace(/\/index\.(ts|js)$/, '');
     if (trimmed.slice(-7) !== '/server') return undefined;
-    return trimmed;
+    mods = global.__KBN_PLUGIN_MODULES;
+    if (!mods) return trimmed;
+    if (mods[trimmed]) return trimmed;
+    // Distributable plugins live at <dist>/<repo-relative>/server, not the checkout path.
+    keys = Object.keys(mods);
+    best = undefined;
+    bestLen = -1;
+    for (i = 0; i < keys.length; i++) {
+      key = keys[i];
+      if (key.charAt(0) === '/') continue;
+      boundary = trimmed.length - key.length;
+      if (
+        boundary > 0 &&
+        trimmed.charAt(boundary - 1) === '/' &&
+        trimmed.slice(boundary) === key &&
+        key.length > bestLen
+      ) {
+        best = key;
+        bestLen = key.length;
+      }
+    }
+    return best;
   }
 
   moduleHooks.registerHooks({

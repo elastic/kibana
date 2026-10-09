@@ -149,7 +149,27 @@ async function startKibana({
     }, pid=${process.pid}`
   );
 
-  const proc: ExecaChildProcess = execa(file, cmdArgs, { cwd: distDir });
+  // Hardcoded experiment: preload plugins.cjs only for the warm-start target distributable.
+  const usePluginBundle =
+    process.env.KBN_PLUGIN_BUNDLE_CI === '1' && distDir.includes('warm-start-memory-bench/target');
+  const proc: ExecaChildProcess = execa(file, cmdArgs, {
+    cwd: distDir,
+    env: usePluginBundle
+      ? {
+          ...process.env,
+          KBN_PLUGIN_BUNDLE: '1',
+          KBN_REPO: cwd,
+          KBN_PLUGIN_BUNDLE_OUT: '/tmp/kibana-server-plugin-bundle',
+          KBN_DIST_NODE_MODULES: Path.join(distDir, 'node_modules'),
+          NODE_OPTIONS: [
+            process.env.NODE_OPTIONS,
+            `--require=${Path.join(cwd, 'scripts/server_plugin_bundle/preload.js')}`,
+          ]
+            .filter(Boolean)
+            .join(' '),
+        }
+      : undefined,
+  });
 
   await waitForStdout({
     proc,
