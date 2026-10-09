@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  allLocationsToClientContract,
-  toClientContract,
-  updatePrivateLocationMonitors,
-} from './helpers';
+import { allLocationsToClientContract, updatePrivateLocationMonitors } from './helpers';
 import type { RouteContext } from '../../types';
 
 // Mock the syncEditedMonitorBulk module

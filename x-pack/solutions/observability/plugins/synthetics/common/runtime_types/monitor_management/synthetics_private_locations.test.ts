@@ -17,5 +17,4 @@ describe('PrivateLocationCodec', () => {
   it('decodes a location', () => {
     expect(PrivateLocationCodec.safeParse(location).success).toBe(true);
   });
-
 });

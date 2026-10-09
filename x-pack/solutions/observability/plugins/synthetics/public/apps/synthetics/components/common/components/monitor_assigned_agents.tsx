@@ -57,7 +57,8 @@ export const MonitorAssignedAgents = ({
   const privateLocationIds = new Set(privateLocations.map((loc) => loc.id));
   const entries = assignments.filter(
     (entry) =>
-      privateLocationIds.has(entry.locationId) && (entry.isShardingActive || entry.agents.length > 0)
+      privateLocationIds.has(entry.locationId) &&
+      (entry.isShardingActive || entry.agents.length > 0)
   );
 
   const allSharded =
