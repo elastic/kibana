@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// FTR source: src/platform/test/functional/apps/dashboard_elements/image_embeddable/image_embeddable.ts
-
 import path from 'path';
 import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
