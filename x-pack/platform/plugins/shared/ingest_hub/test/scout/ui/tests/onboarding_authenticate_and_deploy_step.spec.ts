@@ -6,9 +6,12 @@
  */
 
 import { tags } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
+import { mockEcfOnlyServicePackages, mockEcfTemplateVersion } from '../helpers/ecf_only_services';
 import {
+  SERVICES_STEP_SESSION_KEY,
   mockAwsPackage,
   navigateToOnboardingStep,
   useOnboardingFeatureFlag,
@@ -90,6 +93,12 @@ const MOCK_AWS_PACKAGE_WITH_VERSION = {
     ],
   },
 };
+
+const readSelectedServiceIds = (page: ScoutPage) =>
+  page.evaluate(
+    (key) => JSON.parse(sessionStorage.getItem(key) ?? '{}').selectedServiceIds as string[],
+    SERVICES_STEP_SESSION_KEY
+  );
 
 test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.classic }, () => {
   useOnboardingFeatureFlag();
@@ -415,5 +424,53 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     // so we use the Next button — outside the section — as a stable indicator.)
     await expect(deployButton).toBeHidden();
     await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
+  });
+
+  // ECF-only services (OTel format) alias an ECS policy template and have no agent-based route.
+  // These tests register their own manifests, which win over the `elb` mock from beforeEach.
+  test('ecf-only services: switching to agent-based warns first, then removes them on Save', async ({
+    browserAuth,
+    page,
+  }) => {
+    await mockEcfOnlyServicePackages(page);
+    await mockEcfTemplateVersion(page);
+    await navigateToOnboardingStep(browserAuth, page, 'authenticate-and-deploy', {
+      dataFormat: 'otel',
+      selectedServiceIds: ['cloudtrail_otel', 'ec2_otel'],
+    });
+    await expect(page.testSubj.locator('ecfDeploymentSection')).toBeVisible();
+
+    await page.testSubj.locator('deploymentMethodCard-editButton').click();
+    await page.testSubj.locator('editDeploymentMethodModal-select').selectOption('agent_based');
+    await expect(
+      page.testSubj.locator('editDeploymentMethodModal-removedServicesCallout')
+    ).toContainText('AWS CloudTrail');
+
+    // Cancel changes nothing.
+    await page.testSubj.locator('editDeploymentMethodModal-cancelButton').click();
+    await expect(page.testSubj.locator('ecfDeploymentSection')).toBeVisible();
+    expect(await readSelectedServiceIds(page)).toStrictEqual(['cloudtrail_otel', 'ec2_otel']);
+
+    // Save drops the ECF-only service from the selection, so its ECF section goes with it.
+    await page.testSubj.locator('deploymentMethodCard-editButton').click();
+    await page.testSubj.locator('editDeploymentMethodModal-select').selectOption('agent_based');
+    await page.testSubj.locator('editDeploymentMethodModal-saveButton').click();
+
+    await expect(page.testSubj.locator('ecfDeploymentSection')).toBeHidden();
+    await expect.poll(() => readSelectedServiceIds(page)).toStrictEqual(['ec2_otel']);
+  });
+
+  test('ecf-only services: the deployment method cannot be changed when only they are selected', async ({
+    browserAuth,
+    page,
+  }) => {
+    await mockEcfOnlyServicePackages(page);
+    await navigateToOnboardingStep(browserAuth, page, 'authenticate-and-deploy', {
+      dataFormat: 'otel',
+      selectedServiceIds: ['cloudtrail_otel', 'vpcflow_otel'],
+    });
+
+    await expect(page.testSubj.locator('deploymentMethodCard')).toBeVisible();
+    await expect(page.testSubj.locator('deploymentMethodCard-editButton')).toBeHidden();
   });
 });

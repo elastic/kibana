@@ -8,7 +8,12 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
-import { expectOnboardingStepVisible, useOnboardingFeatureFlag } from '../helpers/onboarding';
+import { mockEcfOnlyServicePackages } from '../helpers/ecf_only_services';
+import {
+  expectOnboardingStepVisible,
+  navigateToOnboardingStep,
+  useOnboardingFeatureFlag,
+} from '../helpers/onboarding';
 
 // Services are grouped by category; only the active category's rows are rendered in the DOM.
 // Default active category: security_identity_compliance (first in CATEGORY_ORDER).
@@ -114,5 +119,48 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
     // Metrics filter on Databases view — dynamodb stays visible (it is a metrics service)
     await page.testSubj.locator('servicesStep-signalFilter').getByText('Metrics').click();
     await expect(page.testSubj.locator('servicesStep-serviceRow-dynamodb')).toBeVisible();
+  });
+
+  // ECF-only services (OTel format) can only be deployed through ECF. `waf_otel` is in the default
+  // category (security_identity_compliance).
+  test('ecf-only services: warns when one is selected', async ({ browserAuth, page }) => {
+    await mockEcfOnlyServicePackages(page);
+    await navigateToOnboardingStep(browserAuth, page, 'services', {
+      dataFormat: 'otel',
+      selectedServiceIds: [],
+    });
+    const callout = page.testSubj.locator('servicesStep-ecfOnlyCallout');
+    await expect(callout).toBeHidden();
+
+    await page.testSubj.locator('servicesStep-toggle-waf_otel').click();
+    await expect(callout).toBeVisible();
+    await expect(callout).toContainText('AWS WAF');
+
+    await page.testSubj.locator('servicesStep-toggle-waf_otel').click();
+    await expect(callout).toBeHidden();
+  });
+
+  test('ecf-only services: cannot be selected while agent-based is the deployment method', async ({
+    browserAuth,
+    page,
+  }) => {
+    await mockEcfOnlyServicePackages(page);
+    await navigateToOnboardingStep(browserAuth, page, 'services', {
+      dataFormat: 'otel',
+      selectedServiceIds: [],
+      authenticateAndDeployStep: { deploymentMethod: 'agent_based' },
+    });
+
+    const toggle = page.testSubj.locator('servicesStep-toggle-waf_otel');
+    await expect(toggle).toBeDisabled();
+
+    await page.testSubj.locator('servicesStep-serviceRow-waf_otel').hover();
+    await expect(
+      page.getByText("Agent-based deployment doesn't support this service.")
+    ).toBeVisible();
+
+    // Select all skips the unavailable services.
+    await page.testSubj.locator('servicesStep-selectAllButton').click();
+    await expect(toggle).not.toBeChecked();
   });
 });
