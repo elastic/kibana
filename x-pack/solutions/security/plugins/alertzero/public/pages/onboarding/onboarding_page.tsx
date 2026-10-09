@@ -68,6 +68,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
 
   return (
     <AlertZeroPageSection
+      grow
       contentProps={{
         css: css`
           display: flex;
