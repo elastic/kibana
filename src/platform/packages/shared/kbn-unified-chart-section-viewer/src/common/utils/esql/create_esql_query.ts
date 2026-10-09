@@ -8,9 +8,10 @@
  */
 
 import { esql } from '@elastic/esql';
-import { sanitazeESQLInput, isSingleSource } from '@kbn/esql-utils';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
 import type { MetricsGridSettings } from '@kbn/discover-utils';
 import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
+import { resolveSource } from './esql_helpers';
 import { firstNonNullable } from '../first_null_nullable';
 import type { ParsedMetricItem } from '../../../types';
 
@@ -44,7 +45,7 @@ export function createESQLQuery({
   gridSettings,
 }: CreateESQLQueryParams): string {
   const { metricName, metricTypes, fieldTypes, indexName } = metricItem;
-  const index = isSingleSource(originalSource) ? originalSource : indexName;
+  const index = resolveSource(originalSource, indexName);
   const instrument = firstNonNullable(metricTypes);
 
   if (fieldTypes.length === 0 || !instrument) {
