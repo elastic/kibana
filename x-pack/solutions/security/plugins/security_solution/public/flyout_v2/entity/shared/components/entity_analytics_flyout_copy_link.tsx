@@ -59,7 +59,7 @@ export interface EntityAnalyticsFlyoutCopyLinkProps {
   target: EntityAnalyticsFlyoutLinkTarget;
 }
 
-/** Copies a URL to the Entity Analytics page with this flyout open. Hidden when the new page flag is off. */
+/** Copies a URL to the Entity Analytics page with this flyout open */
 export const EntityAnalyticsFlyoutCopyLink = ({ target }: EntityAnalyticsFlyoutCopyLinkProps) => {
   const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
   const { getAppUrl } = useAppUrl();

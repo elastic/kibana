@@ -21,15 +21,15 @@ const recordWithBothScores = {
 } as EntityStoreRecord;
 
 describe('getHeaderRiskLevel', () => {
-  it('uses the individual level when the facelift preference is off', () => {
+  it('uses the individual level when the preferResolutionRisk=false', () => {
     expect(getHeaderRiskLevel(recordWithBothScores, false)).toBe(RiskSeverity.Low);
   });
 
-  it('uses the resolution-group level when the facelift preference is on and a group score exists', () => {
+  it('uses the resolution-group level when preferResolutionRisk=true and a group score exists', () => {
     expect(getHeaderRiskLevel(recordWithBothScores, true)).toBe(RiskSeverity.Critical);
   });
 
-  it('keeps the individual level when the facelift is on but the record has no resolution score', () => {
+  it('keeps the individual level when preferResolutionRisk=true but the record has no resolution score', () => {
     const record = {
       entity: { risk: { calculated_level: RiskSeverity.High, calculated_score_norm: 70 } },
     } as EntityStoreRecord;

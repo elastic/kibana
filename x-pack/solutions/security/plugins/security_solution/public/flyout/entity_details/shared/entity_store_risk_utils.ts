@@ -19,7 +19,7 @@ export function getRiskFromEntityRecord(record: EntityStoreRecord): {
   return getRiskFromRecord(record);
 }
 
-/** Resolution-group risk stored on the entity record, when a normalized score is present. */
+// Resolution-group risk stored on the entity record, when a normalized score is present.
 export function getResolutionRiskFromEntityRecord(record: EntityStoreRecord): {
   calculated_level?: string;
   calculated_score?: number;
@@ -37,7 +37,8 @@ export function getResolutionRiskFromEntityRecord(record: EntityStoreRecord): {
   };
 }
 
-/** Header badge level: the resolution-group level when the flag prefers it and a group score exists. */
+// Returns the appropriate risk level for the header badge, preferring the resolution-group risk if specified.
+// Only the resolution target contains a resolution risk level, not all the entities within a resolution group
 export function getHeaderRiskLevel(
   record: EntityStoreRecord | null | undefined,
   preferResolutionRisk: boolean
