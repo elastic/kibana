@@ -47,7 +47,7 @@ export const alertingSpaceAdvancedSettings = {
   [ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID]: {
     category: [ALERTING_CATEGORY],
     name: i18n.translate('xpack.alertingVTwo.showV1ObservabilityAlertsTableSettingName', {
-      defaultMessage: 'Show V1 Observability alerts table',
+      defaultMessage: 'Classic Alerting: Show Classic Alerts table',
     }),
     type: 'boolean',
     value: false,
@@ -55,7 +55,7 @@ export const alertingSpaceAdvancedSettings = {
       'xpack.alertingVTwo.showV1ObservabilityAlertsTableSettingDescription',
       {
         defaultMessage:
-          'Show the V1 Observability alerts table in navigation. Only shows alerts from V1 alerting rules.',
+          'Show the Classic Observability alerts table in navigation. Only shows alerts from Classic rules.',
       }
     ),
     schema: schema.boolean(),
@@ -65,7 +65,7 @@ export const alertingSpaceAdvancedSettings = {
   [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: {
     category: [ALERTING_CATEGORY],
     name: i18n.translate('xpack.alertingV2.experimentalFeaturesSettingName', {
-      defaultMessage: 'Universal Alerting experimental features',
+      defaultMessage: 'Universal Alerting: Experimental Features',
     }),
     type: 'boolean',
     value: false,
