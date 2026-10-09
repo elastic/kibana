@@ -759,14 +759,14 @@ describe('AlertsListPage fetch errors', () => {
       expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
         expect.objectContaining({ message: 'classic alerts failed' }),
         expect.objectContaining({
-          title: 'Failed to fetch alerts for Standard alerting',
+          title: 'Failed to fetch alerts for Classic alerting',
         })
       );
     });
     expect(screen.queryByText('Unable to load some alerts')).not.toBeInTheDocument();
     expect(screen.queryByTestId('alertingV2EpisodesListFetchError')).not.toBeInTheDocument();
     expect(
-      screen.queryByText('Failed to fetch alerts for Standard alerting')
+      screen.queryByText('Failed to fetch alerts for Classic alerting')
     ).not.toBeInTheDocument();
   });
 
@@ -798,7 +798,7 @@ describe('AlertsListPage fetch errors', () => {
       expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
         expect.objectContaining({ message: 'v2 episodes failed' }),
         expect.objectContaining({
-          title: 'Failed to fetch alerts for ES|QL alerting',
+          title: 'Failed to fetch alerts for Universal alerting',
         })
       );
     });

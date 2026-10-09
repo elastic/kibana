@@ -355,7 +355,7 @@ describe('EsQueryRuleTypeExpression', () => {
     expect(screen.getByTestId('esQueryEsqlRulesBanner')).toBeInTheDocument();
   });
 
-  test('should not render the ES|QL rules banner when editing a rule', async () => {
+  test('should not render the Universal rules banner when editing a rule', async () => {
     setup(defaultEsQueryRuleParams, { adHocDataViewList: [], isEdit: true });
 
     await waitFor(() => {
@@ -364,7 +364,7 @@ describe('EsQueryRuleTypeExpression', () => {
     expect(screen.queryByTestId('esQueryEsqlRulesBanner')).not.toBeInTheDocument();
   });
 
-  test('should link the ES|QL rules banner to the host-provided ES|QL rules tab', async () => {
+  test('should link the Universal rules banner to the host-provided Universal rules tab', async () => {
     setup(defaultEsQueryRuleParams, { adHocDataViewList: [] }, [
       { id: ALERTING_V2_RULES_TAB_ID, href: '/obs/rules/v2' },
     ]);
@@ -378,7 +378,7 @@ describe('EsQueryRuleTypeExpression', () => {
     );
   });
 
-  test('should not render the ES|QL rules banner when the user cannot access ES|QL rules', async () => {
+  test('should not render the Universal rules banner when the user cannot access Universal rules', async () => {
     mockIsAlertingV2Enabled.mockReturnValue(false);
     setup(defaultEsQueryRuleParams, { adHocDataViewList: [] });
 

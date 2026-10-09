@@ -10,13 +10,13 @@ import { CLASSIC_EPISODE_SOURCE_ID } from './classic_alerts/constants';
 import { ELASTIC_SOURCE_ICON, getEpisodeSourceIcon, getEpisodeSourceLabel } from './source_labels';
 
 describe('getEpisodeSourceLabel', () => {
-  it('names ES|QL alerting when the row has no source id', () => {
-    expect(getEpisodeSourceLabel()).toBe('ES|QL alerting');
-    expect(getEpisodeSourceLabel(ALERTING_V2_EPISODE_SOURCE_ID)).toBe('ES|QL alerting');
+  it('names Universal alerting when the row has no source id', () => {
+    expect(getEpisodeSourceLabel()).toBe('Universal alerting');
+    expect(getEpisodeSourceLabel(ALERTING_V2_EPISODE_SOURCE_ID)).toBe('Universal alerting');
   });
 
-  it('names Standard alerting for classic rows', () => {
-    expect(getEpisodeSourceLabel(CLASSIC_EPISODE_SOURCE_ID)).toBe('Standard alerting');
+  it('names Classic alerting for classic rows', () => {
+    expect(getEpisodeSourceLabel(CLASSIC_EPISODE_SOURCE_ID)).toBe('Classic alerting');
   });
 
   it('keeps a registered label for any other source', () => {

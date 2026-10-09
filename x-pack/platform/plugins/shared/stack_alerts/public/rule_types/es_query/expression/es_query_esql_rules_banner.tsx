@@ -14,12 +14,12 @@ import { canAccessAlertingV2Rules } from '@kbn/alerting-v2-utils';
 import { useTriggerUiActionServices } from '../util';
 
 const BANNER_TITLE = i18n.translate('xpack.stackAlerts.esQuery.ui.esqlRulesBanner.title', {
-  defaultMessage: 'Looking for ES|QL rules?',
+  defaultMessage: 'Looking for Universal rules?',
 });
 
-const ESQL_RULES_LINK_LABEL = i18n.translate(
-  'xpack.stackAlerts.esQuery.ui.esqlRulesBanner.esqlRulesLinkLabel',
-  { defaultMessage: 'ES|QL rules' }
+const UNIVERSAL_RULES_LINK_LABEL = i18n.translate(
+  'xpack.stackAlerts.esQuery.ui.esqlRulesBanner.universalRulesLinkLabel',
+  { defaultMessage: 'Universal rules' }
 );
 
 export const EsQueryEsqlRulesBanner = () => {
@@ -45,9 +45,9 @@ export const EsQueryEsqlRulesBanner = () => {
         <p>
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.esqlRulesBanner.body"
-            defaultMessage="ES Query rules are part of Standard rules. Try {esqlRulesLink} for the newer ES|QL-based experience."
+            defaultMessage="ES Query rules are part of Classic rules. Try {universalRulesLink} for the newer ES|QL-based experience."
             values={{
-              esqlRulesLink: (
+              universalRulesLink: (
                 <EuiLink
                   href={href}
                   onClick={(event: React.MouseEvent) => {
@@ -56,7 +56,7 @@ export const EsQueryEsqlRulesBanner = () => {
                   }}
                   data-test-subj="esQueryEsqlRulesBannerLink"
                 >
-                  {ESQL_RULES_LINK_LABEL}
+                  {UNIVERSAL_RULES_LINK_LABEL}
                 </EuiLink>
               ),
             }}

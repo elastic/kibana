@@ -68,7 +68,7 @@ const getExecutionHistoryTabs = ({
 const ESQL_RULES_ONLY_CALLOUT_BODY = i18n.translate(
   'xpack.alertingV2.executionHistory.esqlRulesOnlyCalloutBody',
   {
-    defaultMessage: 'Review past runs for ES|QL rules and action policies.',
+    defaultMessage: 'Review past runs for Universal rules and action policies.',
   }
 );
 

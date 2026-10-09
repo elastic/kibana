@@ -327,7 +327,10 @@ describe('RulesListPage', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole('heading', { level: 2, name: /no es\|ql rules yet\. let's get started!/i })
+        screen.getByRole('heading', {
+          level: 2,
+          name: /no universal rules yet\. let's get started!/i,
+        })
       ).toBeInTheDocument();
     });
     expect(screen.queryByTestId('rulesListTable')).not.toBeInTheDocument();

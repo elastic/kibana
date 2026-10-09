@@ -22,7 +22,7 @@ import { fetchClassicAlertsHistogram } from './apis/fetch_classic_histogram';
 import { fetchClassicAlertsKpis } from './apis/fetch_classic_kpis';
 import { fetchClassicAlertsTags } from './apis/fetch_classic_tags';
 import { resolveClassicRules } from './apis/resolve_classic_rules';
-import { ELASTIC_SOURCE_ICON, STANDARD_ALERTING_LABEL } from '../source_labels';
+import { ELASTIC_SOURCE_ICON, CLASSIC_ALERTING_LABEL } from '../source_labels';
 import { CLASSIC_ALERTS_HISTOGRAM_LIMIT, CLASSIC_EPISODE_SOURCE_ID } from './constants';
 import { classicAlertQueryKeys } from './query_keys';
 
@@ -60,7 +60,7 @@ export const createClassicEpisodeSource = ({
   host = STACK_MANAGEMENT_RULES_HOST,
 }: CreateClassicEpisodeSourceOptions): EpisodeDataSource => ({
   id: CLASSIC_EPISODE_SOURCE_ID,
-  label: STANDARD_ALERTING_LABEL,
+  label: CLASSIC_ALERTING_LABEL,
   icon: ELASTIC_SOURCE_ICON,
   queryKeyPrefix: classicAlertQueryKeys.all(),
 

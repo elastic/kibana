@@ -95,7 +95,7 @@ const YAML_VIEW_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.editMod
 });
 
 const ES_QL_RULES_BADGE_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.esqlRulesBadge', {
-  defaultMessage: 'ES|QL rules',
+  defaultMessage: 'Universal rules',
 });
 
 const YAML_MODE_BADGE_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.yamlMode.badge', {

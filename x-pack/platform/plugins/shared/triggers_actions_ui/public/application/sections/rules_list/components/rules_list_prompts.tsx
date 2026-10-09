@@ -34,7 +34,7 @@ export const RulesListPrompts = (props: RulesListPromptsProps) => {
         title={
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.rulesList.noPermissionToReadRulesTitle"
-            defaultMessage="No permissions to read Standard rules"
+            defaultMessage="No permissions to read Classic rules"
           />
         }
       />

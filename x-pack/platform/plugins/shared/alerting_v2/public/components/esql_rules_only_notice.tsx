@@ -14,14 +14,14 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 export const esqlRulesOnlyBadge: AppHeaderBadge = {
   label: i18n.translate('xpack.alertingV2.esqlRulesOnly.badgeLabel', {
-    defaultMessage: 'ES|QL rules only',
+    defaultMessage: 'Universal rules only',
   }),
   color: 'hollow',
   'data-test-subj': 'esqlRulesOnlyBadge',
 };
 
 const CALLOUT_TITLE = i18n.translate('xpack.alertingV2.esqlRulesOnly.calloutTitle', {
-  defaultMessage: 'ES|QL rules only',
+  defaultMessage: 'Universal rules only',
 });
 
 export const EsqlRulesOnlyCallout = ({

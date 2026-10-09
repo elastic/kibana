@@ -114,12 +114,12 @@ describe('RulesListHeader', () => {
 
     expect(v1Tab).toHaveAttribute('aria-selected', 'false');
     expect(v2Tab).toHaveAttribute('aria-selected', 'true');
-    expect(v1Tab).toHaveTextContent('Standard rules');
-    expect(v2Tab).toHaveTextContent('ES|QL rules');
+    expect(v1Tab).toHaveTextContent('Classic rules');
+    expect(v2Tab).toHaveTextContent('Universal rules');
     expect(await screen.findAllByRole('tab')).toHaveLength(2);
   });
 
-  it('orders the Standard rules tab before the ES|QL rules tab', async () => {
+  it('orders the Classic rules tab before the Universal rules tab', async () => {
     renderHeader();
 
     const tabs = await screen.findAllByRole('tab');

@@ -47,7 +47,7 @@ const getRuleDetailBadges = (rule: RuleApiResponse): AppHeaderBadge[] => {
   const badges: AppHeaderBadge[] = [
     {
       label: i18n.translate('xpack.alertingV2.ruleDetails.esqlRulesBadge', {
-        defaultMessage: 'ES|QL rules',
+        defaultMessage: 'Universal rules',
       }),
       color: 'hollow',
       'data-test-subj': 'esqlRulesBadge',

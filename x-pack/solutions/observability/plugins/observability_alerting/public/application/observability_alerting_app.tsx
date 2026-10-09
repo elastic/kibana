@@ -65,7 +65,7 @@ const useObservabilityRulesTabs = (
       tabs.push({
         id: 'v1Rules',
         label: i18n.translate('xpack.observabilityAlerting.rulesPage.v1RulesTabTitle', {
-          defaultMessage: 'Standard rules',
+          defaultMessage: 'Classic rules',
         }),
         isSelected: selected === 'v1',
         href: prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V1_PATH}`),
@@ -77,7 +77,7 @@ const useObservabilityRulesTabs = (
       tabs.push({
         id: ALERTING_V2_RULES_TAB_ID,
         label: i18n.translate('xpack.observabilityAlerting.rulesPage.v2RulesTabTitle', {
-          defaultMessage: 'ES|QL rules',
+          defaultMessage: 'Universal rules',
         }),
         isSelected: selected === 'v2',
         href: prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V2_PATH}`),

@@ -27,7 +27,7 @@ export const getAlertingV2Breadcrumb = (
     case 'root':
       return {
         text: i18n.translate('xpack.alertingV2.breadcrumbs.rootTitle', {
-          defaultMessage: 'Kibana ES|QL alerting',
+          defaultMessage: 'Universal alerting',
         }),
       };
     case 'rules_list':

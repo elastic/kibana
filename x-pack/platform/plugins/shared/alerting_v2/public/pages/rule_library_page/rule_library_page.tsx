@@ -24,7 +24,7 @@ const RULE_LIBRARY_PAGE_TITLE = i18n.translate('xpack.alertingV2.ruleLibrary.pag
 const ESQL_RULES_ONLY_CALLOUT_BODY = i18n.translate(
   'xpack.alertingV2.ruleLibrary.esqlRulesOnlyCalloutBody',
   {
-    defaultMessage: 'Browse templates for ES|QL rules and create new rules from them.',
+    defaultMessage: 'Browse templates for Universal rules and create new rules from them.',
   }
 );
 

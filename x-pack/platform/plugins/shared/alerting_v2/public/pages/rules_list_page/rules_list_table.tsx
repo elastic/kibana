@@ -458,10 +458,10 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   const noItemsMessage =
     search || hasActiveFilters
       ? i18n.translate('xpack.alertingV2.rulesList.noSearchResults', {
-          defaultMessage: 'No ES|QL rules match your search or filters.',
+          defaultMessage: 'No Universal rules match your search or filters.',
         })
       : i18n.translate('xpack.alertingV2.rulesList.noRules', {
-          defaultMessage: 'No ES|QL rules found.',
+          defaultMessage: 'No Universal rules found.',
         });
 
   // Single wrapper is required: ContentList lays out its children with a column

@@ -50,7 +50,7 @@ describe('registerFeaturePrivileges', () => {
 
     expect(rulesFeature.category).toEqual({
       id: 'alerting',
-      label: 'Kibana ES|QL alerting',
+      label: 'Universal alerting',
       order: 1000,
       euiIconType: 'watchesApp',
     });

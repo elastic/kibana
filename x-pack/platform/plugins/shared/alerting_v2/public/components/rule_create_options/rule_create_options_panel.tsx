@@ -203,7 +203,7 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
         <h2>
           <FormattedMessage
             id="xpack.alertingV2.ruleCreateOptionsPanel.emptyStateTitle"
-            defaultMessage="No ES|QL rules yet. Let's get started!"
+            defaultMessage="No Universal rules yet. Let's get started!"
           />
         </h2>
       }
@@ -261,7 +261,7 @@ const LegacyRuleTypesSection: React.FC<{ items: LegacyRuleTypeItem[] }> = ({ ite
         <h3>
           <FormattedMessage
             id="xpack.alertingV2.ruleCreateOptionsPanel.legacyRuleTypesTitle"
-            defaultMessage="Standard rule types"
+            defaultMessage="Classic rule types"
           />
         </h3>
       </EuiTitle>

@@ -689,7 +689,7 @@ export const RULE_FORM_RETURN_TITLE = i18n.translate('responseOpsRuleForm.ruleFo
 
 export const STANDARD_RULES_BADGE_LABEL = i18n.translate(
   'responseOpsRuleForm.ruleForm.standardRulesBadgeLabel',
-  { defaultMessage: 'Standard rules' }
+  { defaultMessage: 'Classic rules' }
 );
 
 export const RULE_FORM_CANCEL_MODAL_TITLE = i18n.translate(

@@ -91,7 +91,8 @@ export interface ActionPoliciesListHeaderProps {
 const ESQL_RULES_ONLY_CALLOUT_BODY = i18n.translate(
   'xpack.alertingV2.actionPolicies.esqlRulesOnlyCalloutBody',
   {
-    defaultMessage: 'Action policies only apply to alerts from ES|QL rules and external alerts.',
+    defaultMessage:
+      'Action policies only apply to alerts from Universal rules and external alerts.',
   }
 );
 

@@ -84,7 +84,7 @@ export const RulesListPage = () => {
         <h2>
           <FormattedMessage
             id="xpack.alertingV2.rulesList.readOnlyEmptyTitle"
-            defaultMessage="No ES|QL rules"
+            defaultMessage="No Universal rules"
           />
         </h2>
       }
@@ -92,7 +92,7 @@ export const RulesListPage = () => {
         <p>
           <FormattedMessage
             id="xpack.alertingV2.rulesList.readOnlyEmptyBody"
-            defaultMessage="There are no ES|QL rules to display."
+            defaultMessage="There are no Universal rules to display."
           />
         </p>
       }

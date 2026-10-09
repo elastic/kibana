@@ -56,7 +56,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
         'Discover\nAll\nRead\nNone',
         'Dashboard\nAll\nRead\nNone',
         'Logs\nAll\nRead\nNone',
-        'Kibana standard alerting\nAll\nRead\nNone',
+        'Classic alerting\nAll\nRead\nNone',
       ]);
     });
 

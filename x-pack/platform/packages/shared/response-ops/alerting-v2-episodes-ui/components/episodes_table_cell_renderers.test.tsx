@@ -50,7 +50,7 @@ const baseCellProps = {
 describe('EpisodeSourceCell', () => {
   const classicSource = createTestEpisodeSource({
     id: CLASSIC_EPISODE_SOURCE_ID,
-    label: 'Standard alerting',
+    label: 'Classic alerting',
     icon: ELASTIC_SOURCE_ICON,
   });
 
@@ -65,17 +65,17 @@ describe('EpisodeSourceCell', () => {
       </EpisodeDataSourceProvider>
     );
 
-  it('shows the icon the classic source declares, with Standard alerting', () => {
+  it('shows the icon the classic source declares, with Classic alerting', () => {
     renderSourceCell(CLASSIC_EPISODE_SOURCE_ID);
 
-    expect(screen.getByTestId('episodeSourceCell')).toHaveTextContent('Standard alerting');
+    expect(screen.getByTestId('episodeSourceCell')).toHaveTextContent('Classic alerting');
     expect(screen.getByTestId('episodeSourceIcon')).toBeInTheDocument();
   });
 
   it('falls back to the Elastic logo for native ES|QL rows', () => {
     renderSourceCell(undefined);
 
-    expect(screen.getByTestId('episodeSourceCell')).toHaveTextContent('ES|QL alerting');
+    expect(screen.getByTestId('episodeSourceCell')).toHaveTextContent('Universal alerting');
     expect(screen.getByTestId('episodeSourceIcon')).toBeInTheDocument();
   });
 

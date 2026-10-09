@@ -149,7 +149,7 @@ export const RulesListHeader = ({
       headerTabs.push({
         id: 'v1Rules',
         label: i18n.translate('xpack.alertingV2.rulesList.v1RulesTabTitle', {
-          defaultMessage: 'Standard rules',
+          defaultMessage: 'Classic rules',
         }),
         isSelected: false,
         href: basePath.prepend(triggersActionsRoute),
@@ -160,7 +160,7 @@ export const RulesListHeader = ({
     headerTabs.push({
       id: ALERTING_V2_RULES_TAB_ID,
       label: i18n.translate('xpack.alertingV2.rulesList.v2RulesTabTitle', {
-        defaultMessage: 'ES|QL rules',
+        defaultMessage: 'Universal rules',
       }),
       isSelected: true,
       href: basePath.prepend(paths.ruleList),

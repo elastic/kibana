@@ -34,7 +34,7 @@ export const RulesApp = () => {
     <RequireAlertingPrivilege
       features={['rules']}
       pageName={i18n.translate('xpack.alertingV2.rulesApp.pageName', {
-        defaultMessage: 'ES|QL rules',
+        defaultMessage: 'Universal rules',
       })}
     >
       <Routes>

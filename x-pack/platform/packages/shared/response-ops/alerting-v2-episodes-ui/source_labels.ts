@@ -12,14 +12,14 @@ import { CLASSIC_EPISODE_SOURCE_ID } from './classic_alerts/constants';
 import { useAdditionalEpisodesDataSource } from './context/episode_data_source_context';
 import type { EpisodeDataSource } from './types/episode_data_source';
 
-export const STANDARD_ALERTING_LABEL = i18n.translate(
-  'xpack.alertingV2EpisodesUi.source.standardAlertingLabel',
-  { defaultMessage: 'Standard alerting' }
+export const CLASSIC_ALERTING_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.source.classicAlertingLabel',
+  { defaultMessage: 'Classic alerting' }
 );
 
-export const ESQL_ALERTING_LABEL = i18n.translate(
-  'xpack.alertingV2EpisodesUi.source.esqlAlertingLabel',
-  { defaultMessage: 'ES|QL alerting' }
+export const UNIVERSAL_ALERTING_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.source.universalAlertingLabel',
+  { defaultMessage: 'Universal alerting' }
 );
 
 export const getEpisodeSourceLabel = (
@@ -33,10 +33,10 @@ export const getEpisodeSourceLabel = (
     }
   }
   if (sourceId == null || sourceId === ALERTING_V2_EPISODE_SOURCE_ID) {
-    return ESQL_ALERTING_LABEL;
+    return UNIVERSAL_ALERTING_LABEL;
   }
   if (sourceId === CLASSIC_EPISODE_SOURCE_ID) {
-    return STANDARD_ALERTING_LABEL;
+    return CLASSIC_ALERTING_LABEL;
   }
   return sourceId;
 };

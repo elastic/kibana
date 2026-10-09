@@ -24,7 +24,7 @@ describe('useToastSourceErrors', () => {
 
     expect(addError).toHaveBeenCalledTimes(1);
     expect(addError).toHaveBeenCalledWith(error, {
-      title: 'Failed to fetch alerts for ES|QL alerting',
+      title: 'Failed to fetch alerts for Universal alerting',
     });
   });
 
@@ -35,7 +35,7 @@ describe('useToastSourceErrors', () => {
     renderHook(() => useToastSourceErrors([{ sourceId: 'v1', error }], { addError }, 'list'));
 
     expect(addError).toHaveBeenCalledWith(error, {
-      title: 'Failed to fetch alerts for Standard alerting',
+      title: 'Failed to fetch alerts for Classic alerting',
     });
   });
 
@@ -57,10 +57,10 @@ describe('useToastSourceErrors', () => {
 
     expect(addError).toHaveBeenCalledTimes(2);
     expect(addError).toHaveBeenNthCalledWith(1, classicError, {
-      title: 'Failed to fetch KPIs for Standard alerting',
+      title: 'Failed to fetch KPIs for Classic alerting',
     });
     expect(addError).toHaveBeenNthCalledWith(2, v2Error, {
-      title: 'Failed to fetch KPIs for ES|QL alerting',
+      title: 'Failed to fetch KPIs for Universal alerting',
     });
   });
 
@@ -71,7 +71,7 @@ describe('useToastSourceErrors', () => {
     renderHook(() => useToastSourceErrors([{ sourceId: 'v1', error }], { addError }, 'histogram'));
 
     expect(addError).toHaveBeenCalledWith(error, {
-      title: 'Failed to fetch histogram data for Standard alerting',
+      title: 'Failed to fetch histogram data for Classic alerting',
     });
   });
 
@@ -86,7 +86,7 @@ describe('useToastSourceErrors', () => {
     });
 
     expect(addError).toHaveBeenCalledWith(error, {
-      title: 'Failed to fetch alert episodes for SLO burn rate',
+      title: 'Failed to fetch alerts for SLO burn rate',
     });
   });
 

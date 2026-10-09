@@ -137,13 +137,13 @@ export const SCOPE_DESCRIPTION = i18n.translate('xpack.maintenanceWindows.scope.
 });
 
 export const ALERTS_SCOPE_TITLE = i18n.translate('xpack.maintenanceWindows.scope.alerts.title', {
-  defaultMessage: 'Kibana standard alerting',
+  defaultMessage: 'Classic alerting',
 });
 
 export const ALERTS_SCOPE_DESCRIPTION = i18n.translate(
   'xpack.maintenanceWindows.scope.alerts.description',
   {
-    defaultMessage: 'Suppress notifications from Kibana standard alerting during maintenance',
+    defaultMessage: 'Suppress notifications from Classic alerting during maintenance',
   }
 );
 
@@ -157,14 +157,14 @@ export const FILTER_ALERTS_SUBTITLE = i18n.translate(
 export const ALERTING_V2_SCOPE_TITLE = i18n.translate(
   'xpack.maintenanceWindows.scope.alertingV2.title',
   {
-    defaultMessage: 'Kibana ES|QL alerting',
+    defaultMessage: 'Universal alerting',
   }
 );
 
 export const ALERTING_V2_SCOPE_DESCRIPTION = i18n.translate(
   'xpack.maintenanceWindows.scope.alertingV2.description',
   {
-    defaultMessage: 'Suppress notifications from Kibana ES|QL alerting during maintenance',
+    defaultMessage: 'Suppress notifications from Universal alerting during maintenance',
   }
 );
 
