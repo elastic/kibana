@@ -13,6 +13,37 @@ import type { InferenceWorkflowsStartDeps } from '../../../types';
 import { AI_PROMPT_FEATURE_ID } from '../ai_feature_ids';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
 
+interface MessageWithUsage {
+  response_metadata?: Record<string, unknown>;
+  usage_metadata?: {
+    input_tokens: number;
+    output_tokens: number;
+    input_token_details?: { cache_read?: number };
+  };
+}
+
+/**
+ * The model's response metadata plus the token usage and connector under `usage`, the shape the
+ * workflow engine reads (`output.metadata.usage`). The inference chat model reports tokens on the
+ * message's `usage_metadata`, not in `response_metadata`, so without this the step's usage is lost.
+ */
+const buildMetadata = (
+  { response_metadata: responseMetadata = {}, usage_metadata: usage }: MessageWithUsage,
+  connectorId: string
+): Record<string, unknown> => {
+  if (!usage) return responseMetadata;
+  const cachedTokens = usage.input_token_details?.cache_read;
+  return {
+    ...responseMetadata,
+    usage: {
+      inputTokens: usage.input_tokens,
+      outputTokens: usage.output_tokens,
+      ...(cachedTokens !== undefined ? { cachedTokens } : {}),
+      connectorId,
+    },
+  };
+};
+
 export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsStartDeps>) =>
   createServerStepDefinition({
     ...AiPromptStepCommonDefinition,
@@ -105,7 +136,7 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
           // so we keep the same output structure with potential response_metadata addition in the future.
           output: {
             content: invocationResult.parsed.response,
-            metadata: invocationResult.raw.response_metadata,
+            metadata: buildMetadata(invocationResult.raw, resolvedConnectorId),
           },
         };
       }
@@ -117,7 +148,7 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
       return {
         output: {
           content: invocationResult.content,
-          metadata: invocationResult.response_metadata,
+          metadata: buildMetadata(invocationResult, resolvedConnectorId),
         },
       };
     },
