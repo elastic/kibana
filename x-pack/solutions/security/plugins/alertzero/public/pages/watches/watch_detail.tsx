@@ -334,7 +334,9 @@ export const WatchDetailPage: React.FC = () => {
                 enabled={draft.enabled}
                 settings={draft.settings}
                 error={draft.error}
-                warningReasons={getWorkerWarningReasons(worker, enabledById)}
+                warningReasons={getWorkerWarningReasons(worker, enabledById, {
+                  includeBlocking: canWrite,
+                })}
                 settingsLocked={worker.state === 'unavailable'}
                 isSaving={isSaving}
                 canWrite={canWrite}
