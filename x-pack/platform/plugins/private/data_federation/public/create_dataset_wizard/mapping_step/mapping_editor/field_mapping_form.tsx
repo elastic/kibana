@@ -20,13 +20,10 @@ import type { DatasetMappingFieldType } from '../../../../common/dataset_types';
 import { FormRowLabelWithInfo } from '../../components/form_row_label_with_info';
 import { DatetimeFormatComboBox } from '../../components/datetime_format_combo_box';
 import {
-  FORMAT_FIELD_BASIS,
-  NAME_FIELD_BASIS,
-  PATH_FIELD_BASIS,
-  TYPE_FIELD_BASIS,
-  getFieldGroupItemStyles,
-  getFixedFieldItemStyles,
-  getTextFieldItemStyles,
+  fieldRowContainerStyles,
+  getRemainingFieldsGridStyles,
+  getRemainingFieldsGroupItemStyles,
+  getTypeFieldItemStyles,
 } from '../field_row_layout';
 import { FieldTypeSelect } from './field_type_select';
 
@@ -51,11 +48,6 @@ export interface FieldMappingFormProps {
   onCancel?: () => void;
   onDraftChange?: (value: FieldMappingFormValue) => void;
 }
-
-const typeFieldItemStyles = getFixedFieldItemStyles(TYPE_FIELD_BASIS);
-const nameFieldItemStyles = getTextFieldItemStyles(NAME_FIELD_BASIS);
-const pathFieldItemStyles = getTextFieldItemStyles(PATH_FIELD_BASIS);
-const formatFieldItemStyles = getFixedFieldItemStyles(FORMAT_FIELD_BASIS);
 
 const isDateLikeType = (type: DatasetMappingFieldType): boolean => {
   return type === 'date' || type === 'date_nanos';
@@ -119,17 +111,18 @@ export function FieldMappingForm({
   const isDateType = Boolean(draft.type) && isDateLikeType(draft.type as DatasetMappingFieldType);
   const { euiTheme } = useEuiTheme();
   const gutter = euiTheme.size.base;
-  const typeAndNamePairStyles = useMemo(
-    () => getFieldGroupItemStyles([TYPE_FIELD_BASIS, NAME_FIELD_BASIS], gutter),
-    [gutter]
+  const remainingFieldCount = isDateType ? 3 : 2;
+  const typeFieldItemStyles = useMemo(
+    () => getTypeFieldItemStyles(remainingFieldCount, gutter),
+    [gutter, remainingFieldCount]
   );
-  const pathAndFormatPairStyles = useMemo(
-    () =>
-      getFieldGroupItemStyles(
-        isDateType ? [PATH_FIELD_BASIS, FORMAT_FIELD_BASIS] : [PATH_FIELD_BASIS],
-        gutter
-      ),
-    [gutter, isDateType]
+  const remainingFieldsGroupStyles = useMemo(
+    () => getRemainingFieldsGroupItemStyles(remainingFieldCount, gutter),
+    [gutter, remainingFieldCount]
+  );
+  const remainingFieldsGridStyles = useMemo(
+    () => getRemainingFieldsGridStyles(remainingFieldCount, gutter),
+    [gutter, remainingFieldCount]
   );
 
   const updateDraft = (patch: Partial<FieldMappingFormValue>) => {
@@ -149,22 +142,23 @@ export function FieldMappingForm({
           responsive={false}
           wrap
           style={{ width: '100%' }}
+          css={fieldRowContainerStyles}
         >
-          <EuiFlexItem css={typeAndNamePairStyles}>
-            <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false} wrap>
-              <EuiFlexItem css={typeFieldItemStyles}>
-                <FieldTypeSelect
-                  value={draft.type}
-                  onChange={(nextType) => {
-                    updateDraft({
-                      type: nextType,
-                      ...(isDateLikeType(nextType) ? {} : { format: '' }),
-                    });
-                  }}
-                />
-              </EuiFlexItem>
+          <EuiFlexItem css={typeFieldItemStyles}>
+            <FieldTypeSelect
+              value={draft.type}
+              onChange={(nextType) => {
+                updateDraft({
+                  type: nextType,
+                  ...(isDateLikeType(nextType) ? {} : { format: '' }),
+                });
+              }}
+            />
+          </EuiFlexItem>
 
-              <EuiFlexItem css={nameFieldItemStyles}>
+          <EuiFlexItem css={remainingFieldsGroupStyles}>
+            <div css={remainingFieldsGridStyles}>
+              <EuiFlexItem>
                 <EuiFormRow
                   label={i18n.translate('xpack.dataFederation.mappingEditor.logicalName', {
                     defaultMessage: 'Field name',
@@ -185,12 +179,7 @@ export function FieldMappingForm({
                   />
                 </EuiFormRow>
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-
-          <EuiFlexItem css={pathAndFormatPairStyles}>
-            <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false} wrap>
-              <EuiFlexItem css={pathFieldItemStyles}>
+              <EuiFlexItem>
                 <EuiFormRow
                   label={i18n.translate(
                     'xpack.dataFederation.mappingEditor.originalFieldNameLabel',
@@ -217,7 +206,7 @@ export function FieldMappingForm({
               </EuiFlexItem>
 
               {isDateType ? (
-                <EuiFlexItem css={formatFieldItemStyles}>
+                <EuiFlexItem>
                   <EuiFormRow
                     label={
                       <FormRowLabelWithInfo
@@ -260,7 +249,7 @@ export function FieldMappingForm({
               ) : (
                 <></>
               )}
-            </EuiFlexGroup>
+            </div>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

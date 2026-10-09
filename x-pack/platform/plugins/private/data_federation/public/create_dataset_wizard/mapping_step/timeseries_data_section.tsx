@@ -29,19 +29,13 @@ import { TIMESTAMP_LOGICAL_FIELD_NAME } from '../constants';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import { fieldTypeSelectStrings } from './mapping_editor/field_type_select_i18n';
 import {
-  FORMAT_FIELD_BASIS,
-  NAME_FIELD_BASIS,
-  TYPE_FIELD_BASIS,
   fieldRowContainerStyles,
-  getFieldGroupItemStyles,
-  getFixedFieldItemStyles,
-  getFixedUntilNarrowFieldItemStyles,
-  getTextFieldItemStyles,
+  getRemainingFieldsGridStyles,
+  getRemainingFieldsGroupItemStyles,
+  getTypeFieldItemStyles,
 } from './field_row_layout';
 
-const TYPE_AND_PATH_FIELD_BASES = [TYPE_FIELD_BASIS, NAME_FIELD_BASIS] as const;
-const typeFieldItemStyles = getFixedFieldItemStyles(TYPE_FIELD_BASIS);
-const pathFieldItemStyles = getTextFieldItemStyles(NAME_FIELD_BASIS);
+const REMAINING_FIELD_COUNT = 2;
 
 export interface TimeseriesDataSectionProps {
   isEnabled: boolean;
@@ -62,13 +56,20 @@ export function TimeseriesDataSection({
     shouldShowValidation && isEnabled && (timestampField?.path ?? '').trim() === '';
   const { euiTheme } = useEuiTheme();
   const gutter = euiTheme.size.base;
-  const typeAndPathGroupStyles = useMemo(
-    () => getFieldGroupItemStyles(TYPE_AND_PATH_FIELD_BASES, gutter),
-    [gutter]
+  // The field mapping editor pads its form on both sides; matching it keeps both rows switching
+  // layouts at the same viewport width.
+  const inset = `calc(${euiTheme.size.s} * 2)`;
+  const typeFieldItemStyles = useMemo(
+    () => getTypeFieldItemStyles(REMAINING_FIELD_COUNT, gutter, inset),
+    [gutter, inset]
   );
-  const formatFieldItemStyles = useMemo(
-    () => getFixedUntilNarrowFieldItemStyles(FORMAT_FIELD_BASIS, TYPE_AND_PATH_FIELD_BASES, gutter),
-    [gutter]
+  const remainingFieldsGroupStyles = useMemo(
+    () => getRemainingFieldsGroupItemStyles(REMAINING_FIELD_COUNT, gutter, inset),
+    [gutter, inset]
+  );
+  const remainingFieldsGridStyles = useMemo(
+    () => getRemainingFieldsGridStyles(REMAINING_FIELD_COUNT, gutter, inset),
+    [gutter, inset]
   );
 
   return (
@@ -120,36 +121,36 @@ export function TimeseriesDataSection({
             wrap
             css={fieldRowContainerStyles}
           >
-            <EuiFlexItem css={typeAndPathGroupStyles}>
-              <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false} wrap>
-                <EuiFlexItem css={typeFieldItemStyles}>
-                  <EuiFormRow
-                    label={i18n.translate(
-                      'xpack.dataFederation.createDatasetWizard.timestampFieldTypeLabel',
-                      {
-                        defaultMessage: 'Field type',
-                      }
-                    )}
-                    fullWidth
-                  >
-                    <EuiSelect
-                      fullWidth
-                      value={timestampField?.type ?? 'date'}
-                      options={[
-                        { value: 'date', text: fieldTypeSelectStrings.dateOption },
-                        { value: 'date_nanos', text: fieldTypeSelectStrings.dateNanosOption },
-                      ]}
-                      onChange={(e) =>
-                        onChangeTimestampField({
-                          type: e.target.value as 'date' | 'date_nanos',
-                        })
-                      }
-                      data-test-subj="createDatasetWizardTimestampType"
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
+            <EuiFlexItem css={typeFieldItemStyles}>
+              <EuiFormRow
+                label={i18n.translate(
+                  'xpack.dataFederation.createDatasetWizard.timestampFieldTypeLabel',
+                  {
+                    defaultMessage: 'Field type',
+                  }
+                )}
+                fullWidth
+              >
+                <EuiSelect
+                  fullWidth
+                  value={timestampField?.type ?? 'date'}
+                  options={[
+                    { value: 'date', text: fieldTypeSelectStrings.dateOption },
+                    { value: 'date_nanos', text: fieldTypeSelectStrings.dateNanosOption },
+                  ]}
+                  onChange={(e) =>
+                    onChangeTimestampField({
+                      type: e.target.value as 'date' | 'date_nanos',
+                    })
+                  }
+                  data-test-subj="createDatasetWizardTimestampType"
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
 
-                <EuiFlexItem css={pathFieldItemStyles}>
+            <EuiFlexItem css={remainingFieldsGroupStyles}>
+              <div css={remainingFieldsGridStyles}>
+                <EuiFlexItem>
                   <EuiFormRow
                     label={i18n.translate(
                       'xpack.dataFederation.createDatasetWizard.timestampFieldPathLabel',
@@ -183,35 +184,35 @@ export function TimeseriesDataSection({
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
 
-            <EuiFlexItem css={formatFieldItemStyles}>
-              <EuiFormRow
-                label={i18n.translate(
-                  'xpack.dataFederation.createDatasetWizard.timestampFieldFormatLabel',
-                  {
-                    defaultMessage: 'Date and time format (optional)',
-                  }
-                )}
-                helpText={<DatetimeFormatHelpText />}
-                fullWidth
-              >
-                <DatetimeFormatComboBox
-                  value={timestampField?.format ?? ''}
-                  onChange={(next: string) => onChangeTimestampField({ format: next })}
-                  onBlur={() => {}}
-                  placeholder={i18n.translate(
-                    'xpack.dataFederation.createDatasetWizard.timestampFieldFormatPlaceholder',
-                    { defaultMessage: 'yyyy-MM-dd HH:mm:ss' }
-                  )}
-                  data-test-subj="createDatasetWizardTimestampFormat"
-                  aria-label={i18n.translate(
-                    'xpack.dataFederation.createDatasetWizard.timestampFieldFormatAriaLabel',
-                    { defaultMessage: 'Select or enter a format' }
-                  )}
-                />
-              </EuiFormRow>
+                <EuiFlexItem>
+                  <EuiFormRow
+                    label={i18n.translate(
+                      'xpack.dataFederation.createDatasetWizard.timestampFieldFormatLabel',
+                      {
+                        defaultMessage: 'Date and time format (optional)',
+                      }
+                    )}
+                    helpText={<DatetimeFormatHelpText />}
+                    fullWidth
+                  >
+                    <DatetimeFormatComboBox
+                      value={timestampField?.format ?? ''}
+                      onChange={(next: string) => onChangeTimestampField({ format: next })}
+                      onBlur={() => {}}
+                      placeholder={i18n.translate(
+                        'xpack.dataFederation.createDatasetWizard.timestampFieldFormatPlaceholder',
+                        { defaultMessage: 'yyyy-MM-dd HH:mm:ss' }
+                      )}
+                      data-test-subj="createDatasetWizardTimestampFormat"
+                      aria-label={i18n.translate(
+                        'xpack.dataFederation.createDatasetWizard.timestampFieldFormatAriaLabel',
+                        { defaultMessage: 'Select or enter a format' }
+                      )}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </div>
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
