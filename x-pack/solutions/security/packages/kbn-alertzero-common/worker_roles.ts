@@ -13,7 +13,7 @@ import {
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
-} from '@kbn/alertzero-common';
+} from './constants';
 
 /** Security's public role API, used with `createOnly` so an existing role is never overwritten. */
 export const SECURITY_ROLE_API_VERSION = '2023-10-31' as const;
