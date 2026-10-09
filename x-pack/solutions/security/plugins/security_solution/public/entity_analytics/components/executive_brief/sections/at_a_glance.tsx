@@ -5,14 +5,14 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import type {
   BriefSnapshot,
   ExecutiveBrief,
 } from '../../../../../common/entity_analytics/executive_brief/types';
+import { AttentionAreaRows } from '../components/attention_area_rows';
+import { AttentionVerdict } from '../components/attention_verdict';
 import { ClaimFlag } from '../components/brief_context';
-import { BriefStatTile } from '../components/brief_stat_tile';
 import { SectionTitle } from '../components/section_title';
 import { BRIEF_BLOCK_ATTRIBUTE, EXECUTIVE_BRIEF_SECTION_IDS } from '../constants';
 
@@ -22,7 +22,7 @@ interface AtAGlanceProps {
 }
 
 export const AtAGlance: React.FC<AtAGlanceProps> = ({ snapshot, glance }) => {
-  const { euiTheme } = useEuiTheme();
+  const { assessment } = snapshot.glance;
   return (
     <section
       id={EXECUTIVE_BRIEF_SECTION_IDS.atAGlance}
@@ -30,31 +30,26 @@ export const AtAGlance: React.FC<AtAGlanceProps> = ({ snapshot, glance }) => {
       {...{ [BRIEF_BLOCK_ATTRIBUTE]: 'glance' }}
     >
       <SectionTitle index={1} title="At a glance" subtitle="How are we doing?" />
-      <EuiFlexGrid columns={4} gutterSize="m" responsive>
-        {snapshot.glance.stats.map((stat) => (
-          <EuiFlexItem key={stat.id}>
-            <BriefStatTile stat={stat} />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
-      <EuiSpacer size="m" />
-      <EuiPanel
-        hasBorder
-        paddingSize="m"
-        css={css`
-          border-inline-start: ${euiTheme.border.width.thick} solid ${euiTheme.colors.accent};
-        `}
-        data-test-subj="executiveBriefThreatNarrative"
-      >
-        <EuiText size="s">
+      <AttentionVerdict assessment={assessment}>
+        <EuiSpacer size="s" />
+        <EuiText size="s" data-test-subj="executiveBriefThreatNarrative">
           <p>
-            <strong>{glance.headline}</strong> <ClaimFlag claimPath="glance.headline" />
-          </p>
-          <p>
-            {glance.threatNarrative} <ClaimFlag claimPath="glance.threatNarrative" />
+            {glance.headline} <ClaimFlag claimPath="glance.headline" />
           </p>
         </EuiText>
-      </EuiPanel>
+      </AttentionVerdict>
+      {assessment ? (
+        <>
+          <EuiSpacer size="m" />
+          <AttentionAreaRows areas={assessment.areas} />
+        </>
+      ) : null}
+      <EuiSpacer size="m" />
+      <EuiText size="s" data-test-subj="executiveBriefNarrative">
+        <p>
+          {glance.threatNarrative} <ClaimFlag claimPath="glance.threatNarrative" />
+        </p>
+      </EuiText>
     </section>
   );
 };

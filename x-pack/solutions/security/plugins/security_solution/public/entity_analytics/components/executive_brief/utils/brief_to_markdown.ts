@@ -8,16 +8,13 @@ import type {
   EvidenceId,
   ExecutiveBriefJob,
 } from '../../../../../common/entity_analytics/executive_brief/types';
+import { AREA_NAMES, STATUS_LABELS, sortAreas } from '../components/attention_area_rows';
+import {
+  ATTENTION_LEVEL_DISPLAY,
+  TREND_TEXT,
+  UNAVAILABLE_LABEL,
+} from '../components/attention_verdict';
 import { getEntityByEuid, getStoryline, getTacticName } from './resolve_evidence';
-
-const GLANCE_LABELS: Record<string, string> = {
-  postureScore: 'Posture score',
-  materialRiskEntities: 'Material-risk entities',
-  activeSignals: 'Active signals',
-  stagesWithActivity: 'Stages with activity',
-};
-
-const signed = (n: number): string => (n > 0 ? `+${n}` : `${n}`);
 
 /** Plain-English markdown rendering of a succeeded job, used by "Copy as markdown". */
 export const briefToMarkdown = (job: ExecutiveBriefJob): string => {
@@ -37,12 +34,28 @@ export const briefToMarkdown = (job: ExecutiveBriefJob): string => {
 
   lines.push('# Executive brief', '');
   lines.push(`Time range: ${snapshot.timeRange.range} (generated ${snapshot.generatedAt})`, '');
-  lines.push('## At a glance', '', `**${brief.glance.headline}**`, '');
-  snapshot.glance.stats.forEach((stat) => {
-    const delta = stat.delta !== undefined ? ` (${signed(stat.delta)} vs previous)` : '';
-    lines.push(`- ${GLANCE_LABELS[stat.id] ?? stat.id}: ${stat.value}${delta}`);
-  });
-  lines.push('', brief.glance.threatNarrative, '');
+  lines.push('## At a glance', '');
+  const { assessment } = snapshot.glance;
+  if (assessment) {
+    const trend =
+      assessment.trend === 'more' || assessment.trend === 'less'
+        ? TREND_TEXT[assessment.trend]
+        : '';
+    lines.push(
+      `**${ATTENTION_LEVEL_DISPLAY[assessment.level].label}**${trend ? ` (${trend})` : ''}`,
+      ''
+    );
+  } else {
+    lines.push(`**${UNAVAILABLE_LABEL}**`, '');
+  }
+  lines.push(brief.glance.headline, '');
+  if (assessment) {
+    sortAreas(assessment.areas).forEach((area) =>
+      lines.push(`- ${AREA_NAMES[area.id]} — ${STATUS_LABELS[area.level]}: ${area.summary}`)
+    );
+    lines.push('');
+  }
+  lines.push(brief.glance.threatNarrative, '');
 
   lines.push('## Priority threats', '');
   if (brief.storylines.length === 0) lines.push('No connected activity.', '');
