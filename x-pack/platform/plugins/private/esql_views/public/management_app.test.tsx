@@ -1371,6 +1371,25 @@ describe('ManagementApp', () => {
       expect(telemetryClient.trackViewCreated).not.toHaveBeenCalled();
     });
 
+    it('does not report an edit that failed', async () => {
+      const client = createClient();
+      client.getViews.mockResolvedValue(twoViews);
+      client.updateView.mockRejectedValue(createClientError('Forbidden', 403));
+
+      const { telemetryClient } = renderApp(client);
+      await screen.findByText('logs-view');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Actions for logs-view' }));
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Edit' }));
+      fireEvent.change(await screen.findByTestId('esqlViewDescriptionInput'), {
+        target: { value: 'Updated logs' },
+      });
+      fireEvent.click(screen.getByTestId('esqlViewSaveButton'));
+
+      await screen.findByTestId('esqlViewSaveError');
+      expect(telemetryClient.trackViewEdited).not.toHaveBeenCalled();
+    });
+
     it('reports one deletion event per bulk delete operation, counting the submitted views', async () => {
       const client = createClient();
       client.getViews.mockResolvedValueOnce(twoViews).mockResolvedValueOnce({ views: [] });
