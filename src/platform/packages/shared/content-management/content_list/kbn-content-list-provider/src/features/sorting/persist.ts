@@ -12,7 +12,7 @@ import { getSortKey, isAllowedSort, parseSortKey } from './allowed_sorts';
 import type { SortDirectionsByField } from './allowed_sorts';
 import type { SortState } from './types';
 
-const STORAGE_KEY_PREFIX_SORTING = 'sort:';
+const STORAGE_KEY_PREFIX_SORT = 'sort:';
 
 /**
  * Read the persisted sort from `localStorage`.
@@ -28,7 +28,7 @@ export const getPersistedSort = (
   key: string,
   sortDirectionsByField: SortDirectionsByField
 ): SortState | undefined => {
-  const raw = readLocalStorage(`${STORAGE_KEY_PREFIX_SORTING}${key}`);
+  const raw = readLocalStorage(`${STORAGE_KEY_PREFIX_SORT}${key}`);
   if (raw === null) {
     return undefined;
   }
@@ -44,5 +44,5 @@ export const getPersistedSort = (
  * @param sort - Sort to persist.
  */
 export const setPersistedSort = (key: string, sort: SortState): void => {
-  writeLocalStorage(`${STORAGE_KEY_PREFIX_SORTING}${key}`, getSortKey(sort));
+  writeLocalStorage(`${STORAGE_KEY_PREFIX_SORT}${key}`, getSortKey(sort));
 };
