@@ -363,6 +363,7 @@ describe('registerEscalationTemplateUI', () => {
     registerEscalationTemplateUI({
       conversationTemplates: contract,
       templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
       name: 'Escalation',
       onCopyLink,
     });
@@ -500,6 +501,7 @@ describe('registerEscalationTemplateUI', () => {
       templateId: 'escalation',
       groupedAttachments,
       name: 'Escalation',
+      onCopyLink: () => true,
     });
 
     const TabContent = contract.getTab('escalation.overview')?.content;
