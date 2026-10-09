@@ -16,7 +16,8 @@ project:
   channel: ''
   owner: '@elastic/observability-ui'
   sourceRoot: src/platform/packages/shared/kbn-cleanup-before-exit
-dependsOn: []
+dependsOn:
+  - '@kbn/std'
 tags:
   - shared-server
   - package
