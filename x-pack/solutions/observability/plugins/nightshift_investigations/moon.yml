@@ -67,6 +67,7 @@ dependsOn:
   - '@kbn/occ'
   - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/security-plugin'
+  - '@kbn/eval-kql'
 tags:
   - plugin
   - prod
