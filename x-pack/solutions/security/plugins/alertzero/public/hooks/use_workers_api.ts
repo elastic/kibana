@@ -18,6 +18,7 @@ import type {
   Worker,
 } from '@kbn/alertzero-common';
 import { retryOnTransientError } from './retry_on_transient_error';
+import { invalidateHuntThreatIntelSupplyStatus } from './use_hunt_threat_intel_supply';
 import { queryKeys } from '../query_keys';
 
 export const useWorkers = () => {
@@ -150,6 +151,8 @@ export const useUpdateWorker = () => {
     // workers query error, which the Watch page uses to block Save.
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey });
+      // Hunt enable/disable/settings can change TI supply; refresh when present.
+      await invalidateHuntThreatIntelSupplyStatus(queryClient);
     },
   });
 };

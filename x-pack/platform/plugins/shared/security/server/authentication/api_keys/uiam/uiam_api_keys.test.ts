@@ -13,6 +13,7 @@ import {
   httpServerMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { CLOUD_SERVICE_ACCOUNT_REALM_TYPE } from '@kbn/core-security-common';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
@@ -266,6 +267,68 @@ describe('UiamAPIKeys', () => {
       );
 
       expect(logger.error).toHaveBeenCalledWith('Failed to grant API key: UIAM service error');
+    });
+
+    describe('when the caller is a service account', () => {
+      const createUiamError = (statusCode: number, code: string, message: string) => {
+        const error = new Boom.Boom(`[${code}] ${message}`, { statusCode });
+        Object.assign(error.output.payload, { error: { code, message } });
+        return error;
+      };
+
+      beforeEach(() => {
+        mockGetCurrentUser.mockReturnValue(
+          mockAuthenticatedUser({
+            username: 'organization-service-account-id',
+            authentication_provider: { type: 'http', name: '__http__' },
+            authentication_realm: {
+              name: CLOUD_SERVICE_ACCOUNT_REALM_TYPE,
+              type: CLOUD_SERVICE_ACCOUNT_REALM_TYPE,
+            },
+            authentication_type: 'token',
+          }) as AuthenticatedUser
+        );
+      });
+
+      it('maps a refused grant to an error that names the account', async () => {
+        mockUiam.grantApiKey.mockRejectedValue(
+          createUiamError(403, '0x8E231F', 'service accounts cannot grant API keys')
+        );
+
+        const failure = await uiamApiKeys
+          .grant(createMockRequest('Bearer essu_service_account_token'), { name: 'test-key' })
+          .catch((error: Boom.Boom) => error);
+
+        expect(Boom.isBoom(failure)).toBe(true);
+        expect((failure as Boom.Boom).output.statusCode).toBe(403);
+        expect((failure as Boom.Boom).message).toBe(
+          'Unable to grant an API key for service account [organization-service-account-id]: ' +
+            '[0x8E231F] service accounts cannot grant API keys'
+        );
+        expect(logger.warn).toHaveBeenCalledTimes(1);
+        expect(logger.error).not.toHaveBeenCalled();
+      });
+
+      it('maps a 401 to a 403, since Kibana already authenticated the caller', async () => {
+        mockUiam.grantApiKey.mockRejectedValue(createUiamError(401, '0x7E0116', 'token expired'));
+
+        await expect(
+          uiamApiKeys.grant(createMockRequest('Bearer essu_service_account_token'), {
+            name: 'test-key',
+          })
+        ).rejects.toMatchObject({ output: { statusCode: 403 } });
+      });
+
+      it('keeps the original error for a server error', async () => {
+        const error = createUiamError(503, '0x000000', 'unavailable');
+        mockUiam.grantApiKey.mockRejectedValue(error);
+
+        await expect(
+          uiamApiKeys.grant(createMockRequest('Bearer essu_service_account_token'), {
+            name: 'test-key',
+          })
+        ).rejects.toBe(error);
+      });
     });
 
     it('throws error when using Bearer scheme without UIAM prefix', async () => {
