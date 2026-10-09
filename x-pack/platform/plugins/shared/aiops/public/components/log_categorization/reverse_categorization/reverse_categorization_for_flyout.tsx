@@ -455,7 +455,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     <>
       <Header
         fieldName={selectedField.name}
-        randomSampler={randomSampler}
+        randomSampler={isEsqlQuery ? undefined : randomSampler}
         reload={() => forceRefresh()}
       />
       <EuiFlyoutBody data-test-subj="mlJobSelectorFlyoutBody">
@@ -596,7 +596,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
 
 interface HeaderProps {
   fieldName: string;
-  randomSampler: ReturnType<typeof useCategorizeRequest>['randomSampler'];
+  randomSampler: ReturnType<typeof useCategorizeRequest>['randomSampler'] | undefined;
   reload: () => void;
 }
 
@@ -616,7 +616,7 @@ const Header: FC<HeaderProps> = ({ fieldName, randomSampler, reload }) => (
       </EuiFlexItem>
       <EuiFlexItem />
       <EuiFlexItem grow={false}>
-        <SamplingMenu randomSampler={randomSampler} reload={reload} />
+        {randomSampler ? <SamplingMenu randomSampler={randomSampler} reload={reload} /> : null}
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFlyoutHeader>
