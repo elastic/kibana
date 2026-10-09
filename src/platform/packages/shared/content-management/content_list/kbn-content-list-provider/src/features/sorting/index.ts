@@ -25,4 +25,4 @@ export {
   parseSortKey,
   toSortDirectionsByField,
 } from './allowed_sorts';
-export { getPersistedSort, setPersistedSort } from './persist';
+export { getPersistedSort } from './persist';
