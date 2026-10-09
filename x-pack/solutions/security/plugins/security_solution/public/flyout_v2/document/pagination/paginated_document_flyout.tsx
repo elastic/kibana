@@ -6,18 +6,13 @@
  */
 
 import React, { memo } from 'react';
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiCallOut, EuiFlyoutBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
-import { DocumentPagination } from '../main/components/document_pagination';
+import {
+  DocumentPaginationHeader,
+  DocumentPaginationLoading,
+} from '../main/components/document_pagination';
 import { FLYOUT_V2_PAGINATION_QUERY_ERROR_TEST_ID } from '../main/components/test_ids';
 import { DocumentFlyoutWrapper } from '../main/document_flyout_wrapper';
 import { useFlyoutPagination } from './use_flyout_pagination';
@@ -59,13 +54,7 @@ export const PaginatedDocumentFlyout = memo(
     if (hasFlyoutQueryError) {
       return (
         <>
-          <EuiFlyoutHeader>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <DocumentPagination />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutHeader>
+          <DocumentPaginationHeader />
           <EuiFlyoutBody>
             <EuiCallOut
               announceOnMount
@@ -79,31 +68,13 @@ export const PaginatedDocumentFlyout = memo(
       );
     }
 
-    // Index is set but the source has not resolved an id yet (the alerts table is
-    // fetching that page). Keep the pager mounted and wait for the id.
+    // The source has not resolved the identity of this index yet (e.g. the alerts table is still
+    // fetching its page). Keep the pager mounted and wait.
     if (
       flyoutDocumentIndex != null &&
       (flyoutDocumentId == null || flyoutDocumentIndexName == null)
     ) {
-      return (
-        <>
-          <EuiFlyoutHeader>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <DocumentPagination />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutHeader>
-          <EuiFlexItem
-            css={css`
-              align-items: center;
-              justify-content: center;
-            `}
-          >
-            <EuiLoadingSpinner size="xxl" data-test-subj="document-overview-wrapper-loading" />
-          </EuiFlexItem>
-        </>
-      );
+      return <DocumentPaginationLoading data-test-subj="document-overview-wrapper-loading" />;
     }
 
     return (

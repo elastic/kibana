@@ -69,7 +69,6 @@ export const usePaginatedFlyout = ({
   historyKey,
   origin,
   onClose,
-  onDocumentPending,
 }: UsePaginatedFlyoutOptions): UsePaginatedFlyoutReturn => {
   // Per-instance store created once at mount. Lives in a ref so it never
   // changes identity and its subscribe/getSnapshot are stable.
@@ -117,8 +116,6 @@ export const usePaginatedFlyout = ({
   // always call the latest version.
   const resolveDocumentRef = useRef(resolveDocument);
   resolveDocumentRef.current = resolveDocument;
-  const onDocumentPendingRef = useRef(onDocumentPending);
-  onDocumentPendingRef.current = onDocumentPending;
 
   // Bundle mutable infra values so the stable `openPaginatedFlyout` never
   // captures a stale closure.
@@ -192,10 +189,6 @@ export const usePaginatedFlyout = ({
           documentId: stateUpdate.flyoutDocumentId,
           indexName: stateUpdate.flyoutDocumentIndexName ?? '',
         });
-      } else {
-        // Same index twice does not change the store, so the source cannot see the retry
-        // from a subscription. Tell it directly.
-        onDocumentPendingRef.current?.();
       }
 
       if (v2OverlayRef.current) return;

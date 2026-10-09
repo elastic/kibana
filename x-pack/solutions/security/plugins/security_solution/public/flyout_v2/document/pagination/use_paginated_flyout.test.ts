@@ -360,25 +360,6 @@ describe('usePaginatedFlyout', () => {
       });
     });
 
-    it('tells the source the document is still pending, including a repeat of the same index', () => {
-      const onDocumentPending = jest.fn();
-      const { result } = renderHook(() =>
-        usePaginatedFlyout(
-          makeOptions({
-            resolveDocument: jest.fn().mockReturnValue(null),
-            onDocumentPending,
-          })
-        )
-      );
-
-      act(() => {
-        result.current.openPaginatedFlyout(4);
-        result.current.openPaginatedFlyout(4);
-      });
-
-      expect(onDocumentPending).toHaveBeenCalledTimes(2);
-    });
-
     it('builds onClose fresh at close time so it reads the latest write generation', () => {
       const resolveDocument = jest.fn().mockReturnValue({
         flyoutDocumentId: 'alert-1',

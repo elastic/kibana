@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { buildDataTableRecord, type DataTableRecord } from '@kbn/discover-utils';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
-import type { RunTimeMappings } from '../../../../../common/api/search_strategy';
-import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
 
 export interface UseResolvedDocumentParams {
   /**
@@ -40,9 +36,12 @@ export type ResolvedDocument =
   | { status: 'error'; hit: null; refetch: () => void };
 
 /**
- * Resolves one document. A pinned `_index` search is the fast path; a data stream or alias misses
- * that filter, so a direct search of `indexName` runs before the document is reported missing.
- * A hit from a previous id is never returned.
+ * Resolves one document by id.
+ *
+ * `useEsDocSearch` keeps returning the previously fetched hit while a new `id` is loading, so this
+ * hook must be mounted once per document (the wrapper keys it by id and index) rather than reused
+ * across ids. The hit's own `_index` is not compared with `indexName`: that one may be an alias or
+ * data stream, in which case the hit reports the concrete backing index.
  */
 export const useResolvedDocument = ({
   documentId,
@@ -50,78 +49,29 @@ export const useResolvedDocument = ({
   dataView,
   skip,
 }: UseResolvedDocumentParams): ResolvedDocument => {
-  const [requestState, pinnedHit, refetchPinned] = useEsDocSearch({
+  const [requestState, hit, refetch] = useEsDocSearch({
     id: documentId ?? '',
     index: indexName,
     dataView,
     skip,
   });
 
-  const pinnedNotFound = !skip && requestState === ElasticRequestState.NotFound;
-  const runtimeMappings = useMemo(
-    () =>
-      (dataView && 'getRuntimeMappings' in dataView
-        ? dataView.getRuntimeMappings()
-        : {}) as RunTimeMappings,
-    [dataView]
-  );
-  const [indexNameLoading, , indexNameSearchHit, , refetchIndexName] = useTimelineEventsDetails({
-    indexName: indexName ?? '',
-    eventId: documentId ?? '',
-    runtimeMappings,
-    skip: !pinnedNotFound,
-  });
-
-  // The direct search starts in an effect, one render after the pinned search reports not found.
-  // Remember that this id was asked for, so that empty first render is still loading.
-  const requestKey = `${documentId ?? ''}\0${indexName ?? ''}`;
-  const [indexNameAttemptKey, setIndexNameAttemptKey] = useState<string | null>(null);
-  useEffect(() => {
-    setIndexNameAttemptKey(pinnedNotFound ? requestKey : null);
-  }, [pinnedNotFound, requestKey]);
-  const indexNameSettled = indexNameAttemptKey === requestKey && !indexNameLoading;
-
-  const indexNameHit = useMemo(() => {
-    if (!indexNameSettled || indexNameSearchHit?._id !== documentId) {
-      return undefined;
-    }
-    return buildDataTableRecord(indexNameSearchHit as EsHitRecord);
-  }, [documentId, indexNameSearchHit, indexNameSettled]);
-
-  const refetch = useCallback(() => {
-    refetchPinned();
-    refetchIndexName();
-  }, [refetchIndexName, refetchPinned]);
-
-  const pinnedMatches =
-    pinnedHit != null && pinnedHit.raw._id === documentId && pinnedHit.raw._index === indexName;
-
+  // A skipped search reports `Found` without a hit until it starts.
   if (
     skip ||
     requestState === ElasticRequestState.Loading ||
-    (requestState === ElasticRequestState.Found && !pinnedMatches)
+    (!hit && requestState === ElasticRequestState.Found)
   ) {
     return { status: 'loading', hit: null, refetch };
   }
 
-  if (pinnedMatches && pinnedHit) {
-    return { status: 'found', hit: pinnedHit, refetch };
+  if (hit && requestState === ElasticRequestState.Found) {
+    return { status: 'found', hit, refetch };
   }
 
-  if (
-    requestState === ElasticRequestState.Error ||
-    requestState === ElasticRequestState.NotFoundDataView
-  ) {
-    return { status: 'error', hit: null, refetch };
+  if (requestState === ElasticRequestState.NotFound) {
+    return { status: 'notFound', hit: null, refetch };
   }
 
-  if (!indexNameSettled) {
-    return { status: 'loading', hit: null, refetch };
-  }
-
-  if (indexNameHit) {
-    return { status: 'found', hit: indexNameHit, refetch };
-  }
-
-  return { status: 'notFound', hit: null, refetch };
+  return { status: 'error', hit: null, refetch };
 };

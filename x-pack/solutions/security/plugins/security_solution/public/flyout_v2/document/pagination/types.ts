@@ -118,12 +118,6 @@ export interface UsePaginatedFlyoutOptions {
   readonly historyKey: symbol;
   /** Which top-level UI opened the paginated document flyout. */
   readonly origin: FlyoutOrigin;
-  /**
-   * Called when a pagination step cannot resolve a document yet. The alerts table uses this to
-   * retry following that page: an identical index writes nothing to the store, so the table
-   * would otherwise ignore a second request for the same document.
-   */
-  readonly onDocumentPending?: () => void;
   /** Optional callback invoked when the V2 system flyout is closed externally. */
   readonly onClose?: () => void;
 }

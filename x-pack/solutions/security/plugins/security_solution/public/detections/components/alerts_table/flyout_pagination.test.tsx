@@ -257,7 +257,7 @@ describe('AlertsTable flyout pagination', () => {
       getProps().onUpdate!(
         makeRenderContext({
           pageIndex: 1,
-          alerts: page0Alerts,
+          alerts: [],
           alertsCount: ALERTS_TABLE_DEFAULT_ITEMS_PER_PAGE * 2,
           isLoadingAlerts: false,
         })
@@ -289,22 +289,22 @@ describe('AlertsTable flyout pagination', () => {
     });
   });
 
-  it('follows the flyout again when the same document is requested after the table moved away', async () => {
+  it('keeps the table on the flyout page until its document resolves, then lets it move freely', async () => {
     const pageSize = ALERTS_TABLE_DEFAULT_ITEMS_PER_PAGE;
-    const page0Alerts = makeAlerts('page0', pageSize);
-    const page1Alerts = makeAlerts('page1', pageSize);
     const { getProps, getSlice } = await renderTable();
+    const loadPage = (pageIndex: number, prefix: string) =>
+      act(() => {
+        getProps().onUpdate!(
+          makeRenderContext({
+            pageIndex,
+            alerts: makeAlerts(prefix, pageSize),
+            alertsCount: pageSize * 2,
+            isLoadingAlerts: false,
+          })
+        );
+      });
 
-    act(() => {
-      getProps().onUpdate!(
-        makeRenderContext({
-          pageIndex: 0,
-          alerts: page0Alerts,
-          alertsCount: pageSize * 2,
-          isLoadingAlerts: false,
-        })
-      );
-    });
+    loadPage(0, 'page0');
 
     act(() => {
       getProps().additionalContext!.openDocumentFlyout(pageSize);
@@ -312,29 +312,22 @@ describe('AlertsTable flyout pagination', () => {
     expect(getSlice().flyoutDocumentId).toBeNull();
     expect(getProps().pageIndex).toBe(1);
 
+    // Moving the table away while the document is still pending pulls it back.
+    act(() => {
+      getProps().onPageIndexChange!(0);
+    });
+    expect(getProps().pageIndex).toBe(1);
+
+    loadPage(1, 'page1');
+    await waitFor(() => {
+      expect(getSlice().flyoutDocumentId).toBe('page1-0');
+    });
+
+    // Once resolved the flyout is pinned to its document and the table is free again.
     act(() => {
       getProps().onPageIndexChange!(0);
     });
     expect(getProps().pageIndex).toBe(0);
-
-    act(() => {
-      getProps().additionalContext!.openDocumentFlyout(pageSize);
-    });
-    expect(getProps().pageIndex).toBe(1);
-
-    act(() => {
-      getProps().onUpdate!(
-        makeRenderContext({
-          pageIndex: 1,
-          alerts: page1Alerts,
-          alertsCount: pageSize * 2,
-          isLoadingAlerts: false,
-        })
-      );
-    });
-
-    await waitFor(() => {
-      expect(getSlice().flyoutDocumentId).toBe('page1-0');
-    });
+    expect(getSlice().flyoutDocumentId).toBe('page1-0');
   });
 });

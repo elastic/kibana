@@ -6,14 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlyoutBody } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,7 +16,10 @@ import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useResolvedDocument } from './hooks/use_resolved_document';
 import { FlyoutMissingAlertsPrivilege } from './components/flyout_missing_alerts_privilege';
-import { DocumentPagination, useShowDocumentPagination } from './components/document_pagination';
+import {
+  DocumentPaginationHeader,
+  DocumentPaginationLoading,
+} from './components/document_pagination';
 import { DataViewDegradedCallout } from '../../../data_view_manager/components/data_view_degraded_callout';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
@@ -79,7 +75,17 @@ export interface DocumentFlyoutWrapperProps {
  * based on the provided document ID and index name, and manages loading and error states.
  * It is currently used in Analyzer when opening a document from the detail panel.
  */
-export const DocumentFlyoutWrapper = memo(
+export const DocumentFlyoutWrapper = memo((props: DocumentFlyoutWrapperProps) => (
+  // Remounted per document so the document search never serves the previous document's hit.
+  <DocumentFlyoutWrapperContent
+    key={`${props.documentId ?? ''}\0${props.indexName ?? ''}`}
+    {...props}
+  />
+));
+
+DocumentFlyoutWrapper.displayName = 'DocumentFlyoutWrapper';
+
+const DocumentFlyoutWrapperContent = memo(
   ({
     documentId,
     indexName,
@@ -88,7 +94,6 @@ export const DocumentFlyoutWrapper = memo(
     dataTestSubj,
   }: DocumentFlyoutWrapperProps) => {
     const { dataView, status: dataViewStatus } = useDataView(PageScope.default);
-    const showPagination = useShowDocumentPagination();
 
     const isDataViewLoading = dataViewStatus === 'loading' || dataViewStatus === 'pristine';
     const isDataViewInvalid = dataViewStatus === 'error';
@@ -123,12 +128,7 @@ export const DocumentFlyoutWrapper = memo(
       (isAlert && isAlertsPrivilegesLoading) ||
       (!shouldSkipSearch && status === 'loading')
     ) {
-      return (
-        <LoadingState
-          showPagination={showPagination}
-          data-test-subj="document-overview-wrapper-loading"
-        />
-      );
+      return <DocumentPaginationLoading data-test-subj="document-overview-wrapper-loading" />;
     }
 
     if (missingAlertsPrivilege) {
@@ -173,15 +173,18 @@ export const DocumentFlyoutWrapper = memo(
     if (status === 'notFound' || status === 'error') {
       const isNotFound = status === 'notFound';
       return (
-        <UnavailableState showPagination={showPagination}>
-          <KbnDangerCallout
-            announceOnMount
-            title={isNotFound ? DOCUMENT_NOT_FOUND : FETCH_ERROR}
-            data-test-subj={
-              isNotFound ? 'document-overview-wrapper-not-found' : 'document-overview-fetch-error'
-            }
-          />
-        </UnavailableState>
+        <>
+          <DocumentPaginationHeader />
+          <EuiFlyoutBody>
+            <KbnDangerCallout
+              announceOnMount
+              title={isNotFound ? DOCUMENT_NOT_FOUND : FETCH_ERROR}
+              data-test-subj={
+                isNotFound ? 'document-overview-wrapper-not-found' : 'document-overview-fetch-error'
+              }
+            />
+          </EuiFlyoutBody>
+        </>
       );
     }
 
@@ -189,57 +192,4 @@ export const DocumentFlyoutWrapper = memo(
   }
 );
 
-DocumentFlyoutWrapper.displayName = 'DocumentFlyoutWrapper';
-
-const LoadingState = ({
-  showPagination,
-  'data-test-subj': dataTestSubj,
-}: {
-  showPagination: boolean;
-  'data-test-subj': string;
-}) => (
-  <>
-    {showPagination && (
-      <EuiFlyoutHeader>
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <DocumentPagination />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
-    )}
-    <EuiFlexItem
-      css={css`
-        align-items: center;
-        justify-content: center;
-      `}
-    >
-      <EuiLoadingSpinner size="xxl" data-test-subj={dataTestSubj} />
-    </EuiFlexItem>
-  </>
-);
-
-const UnavailableState = ({
-  showPagination,
-  children,
-}: {
-  showPagination: boolean;
-  children: React.ReactNode;
-}) => {
-  if (!showPagination) {
-    return <>{children}</>;
-  }
-
-  return (
-    <>
-      <EuiFlyoutHeader>
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <DocumentPagination />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>{children}</EuiFlyoutBody>
-    </>
-  );
-};
+DocumentFlyoutWrapperContent.displayName = 'DocumentFlyoutWrapperContent';

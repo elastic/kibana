@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { type FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiDataGridRowHeightsOptions, EuiDataGridStyle } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
@@ -383,22 +383,14 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     [reduxItemsPerPage, tableContext]
   );
 
-  // Bumped when the pager asks for a document the table does not have yet. A second request
-  // for the same index does not change the store, so this is what restarts the page follow.
-  const [followAttempt, setFollowAttempt] = useState(0);
-  const onDocumentPending = useCallback(() => {
-    setFollowAttempt((attempt) => attempt + 1);
-  }, []);
-
   const { openDocumentFlyout, slice, setState } = usePaginatedFlyout({
     resolveDocument,
     renderBody: getDocumentFlyoutBody,
     historyKey: documentFlyoutHistoryKey,
     origin: FLYOUT_ORIGIN.ALERTS_TABLE,
-    onDocumentPending,
   });
 
-  const { flyoutDocumentIndex, flyoutDocumentId } = slice;
+  const { flyoutDocumentIndex, flyoutDocumentId, hasFlyoutQueryError } = slice;
 
   const onUpdate: GetSecurityAlertsTableProp<'onUpdate'> = useCallback(
     (context) => {
@@ -433,40 +425,6 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
       ? Math.floor(flyoutDocumentIndex / reduxItemsPerPage)
       : null;
 
-  // Set when the flyout steps onto a page the table is not showing. Cleared once
-  // that page's fetch settles, so a later refetch of the same page does not
-  // repoint the flyout at whichever alert now occupies the index.
-  const pendingPageRef = useRef<number | null>(null);
-  // Page index `tableContext` was on when the pending follow was armed. Same alerts
-  // reference is a failure only when that snapshot was a different page (`keepPreviousData`).
-  const pendingSnapshotPageRef = useRef<number | null>(null);
-  const alertsAtPendingStartRef = useRef<Alert[] | undefined>(undefined);
-  const sawPendingFetchRef = useRef(false);
-  const lastFollowedPageRef = useRef<number | null>(null);
-  const appliedFollowAttemptRef = useRef(0);
-
-  const onPageIndexChange = useCallback(
-    (newPageIndex: number) => {
-      setTablePageIndex(newPageIndex);
-      if (flyoutPageIndex == null) return;
-      // The table's own pager. Drop a follow that was waiting on another page so a late
-      // response cannot resolve the flyout against the wrong rows. If the user lands on
-      // the page the flyout is still waiting for, pick the resolution up from here.
-      if (newPageIndex !== flyoutPageIndex || flyoutDocumentId != null) {
-        pendingPageRef.current = null;
-        pendingSnapshotPageRef.current = null;
-        alertsAtPendingStartRef.current = undefined;
-        sawPendingFetchRef.current = false;
-        return;
-      }
-      pendingPageRef.current = newPageIndex;
-      pendingSnapshotPageRef.current = tableContext?.pageIndex ?? null;
-      alertsAtPendingStartRef.current = tableContext?.alerts;
-      sawPendingFetchRef.current = false;
-    },
-    [flyoutDocumentId, flyoutPageIndex, tableContext?.alerts, tableContext?.pageIndex]
-  );
-
   const onPageSizeChange = useCallback(
     (newPageSize: number) => {
       dispatch(updateItemsPerPage({ id: tableType, itemsPerPage: newPageSize }));
@@ -474,87 +432,32 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     [dispatch, tableType]
   );
 
+  // The pager stepped onto a row the table does not have yet: bring the table to that page, then
+  // read the identity from it. Only runs while the identity is missing, so a later refetch never
+  // repoints a flyout that has already resolved.
   useEffect(() => {
-    if (flyoutPageIndex == null) {
-      lastFollowedPageRef.current = null;
-      pendingPageRef.current = null;
-      pendingSnapshotPageRef.current = null;
-      alertsAtPendingStartRef.current = undefined;
-      sawPendingFetchRef.current = false;
+    if (flyoutDocumentIndex == null || flyoutPageIndex == null) return;
+    if (flyoutDocumentId != null || hasFlyoutQueryError) return;
+
+    if (tablePageIndex !== flyoutPageIndex) {
+      setTablePageIndex(flyoutPageIndex);
       return;
     }
+    // `tableContext` is only trustworthy once it describes the page that was asked for.
+    if (tableContext?.pageIndex !== flyoutPageIndex || tableContext.isLoadingAlerts) return;
 
-    const flyoutPageChanged = lastFollowedPageRef.current !== flyoutPageIndex;
-    const retryRequested = appliedFollowAttemptRef.current !== followAttempt;
-    if (!flyoutPageChanged && !retryRequested) return;
-
-    lastFollowedPageRef.current = flyoutPageIndex;
-    appliedFollowAttemptRef.current = followAttempt;
-
-    if (flyoutPageIndex === tablePageIndex) {
-      // Already showing this page. Arm a resolution only when the id is still missing
-      // and nothing else is waiting; an in-flight follow keeps its own snapshot.
-      if (pendingPageRef.current == null && flyoutDocumentId == null) {
-        pendingPageRef.current = flyoutPageIndex;
-        pendingSnapshotPageRef.current = tableContext?.pageIndex ?? null;
-        alertsAtPendingStartRef.current = tableContext?.alerts;
-        sawPendingFetchRef.current = false;
-      }
-      return;
-    }
-
-    pendingPageRef.current = flyoutPageIndex;
-    pendingSnapshotPageRef.current = tableContext?.pageIndex ?? null;
-    alertsAtPendingStartRef.current = tableContext?.alerts;
-    sawPendingFetchRef.current = false;
-    setTablePageIndex(flyoutPageIndex);
+    const alert = tableContext.alerts?.[flyoutDocumentIndex - flyoutPageIndex * reduxItemsPerPage];
+    setState(alert ? getDocumentIdentity(alert) : { hasFlyoutQueryError: true });
   }, [
     flyoutDocumentId,
+    flyoutDocumentIndex,
     flyoutPageIndex,
-    followAttempt,
-    tableContext?.alerts,
-    tableContext?.pageIndex,
+    hasFlyoutQueryError,
+    reduxItemsPerPage,
+    setState,
+    tableContext,
     tablePageIndex,
   ]);
-
-  useEffect(() => {
-    const pendingPage = pendingPageRef.current;
-    if (pendingPage == null || flyoutDocumentIndex == null || reduxItemsPerPage <= 0) return;
-    if (!tableContext || tableContext.pageIndex !== pendingPage) return;
-    if (tableContext.isLoadingAlerts) {
-      sawPendingFetchRef.current = true;
-      return;
-    }
-
-    const alertsChanged = tableContext.alerts !== alertsAtPendingStartRef.current;
-    const snapshotIsThisPage = pendingSnapshotPageRef.current === pendingPage;
-    // Wait until the table has either started fetching or already swapped in the
-    // new page. `keepPreviousData` otherwise leaves the previous page's alerts
-    // in place for one render after `pageIndex` changes. A snapshot taken while
-    // the context was already on this page is that page's rows, not a placeholder.
-    if (!sawPendingFetchRef.current && !alertsChanged && !snapshotIsThisPage) return;
-
-    const offset = flyoutDocumentIndex - pendingPage * reduxItemsPerPage;
-    const alert = tableContext.alerts?.[offset] as Alert | undefined;
-    pendingPageRef.current = null;
-    pendingSnapshotPageRef.current = null;
-    alertsAtPendingStartRef.current = undefined;
-    sawPendingFetchRef.current = false;
-
-    if ((!alertsChanged && !snapshotIsThisPage) || !alert) {
-      setState({
-        hasFlyoutQueryError: true,
-        flyoutDocumentId: null,
-        flyoutDocumentIndexName: null,
-      });
-      return;
-    }
-
-    setState({
-      ...getDocumentIdentity(alert),
-      hasFlyoutQueryError: false,
-    });
-  }, [flyoutDocumentIndex, reduxItemsPerPage, setState, tableContext, tablePageIndex]);
 
   const userProfiles = useFetchUserProfilesFromAlerts({
     alerts: tableContext?.alerts ?? [],
@@ -739,7 +642,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
               pageSize={reduxItemsPerPage}
               onPageSizeChange={onPageSizeChange}
               pageIndex={tablePageIndex}
-              onPageIndexChange={onPageIndexChange}
+              onPageIndexChange={setTablePageIndex}
               expandedAlertIndex={flyoutDocumentIndex}
               renderExpandedAlertView={null}
               runtimeMappings={runtimeMappings}
