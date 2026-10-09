@@ -1,0 +1,168 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { HttpHandler } from '@kbn/core/public';
+import { ToolingLog } from '@kbn/tooling-log';
+import type { EvalConnector } from '@kbn/evals';
+import { runPreflight } from './preflight';
+import { EVAL_SPACE_IDS } from './constants';
+
+const CONNECTOR: EvalConnector = {
+  type: 'inference_endpoint',
+  id: 'subject-connector',
+  name: 'Subject Connector',
+  inferenceId: 'subject-connector',
+  provider: 'elastic',
+  taskType: 'completion',
+};
+
+const JUDGE_CONNECTOR: EvalConnector = {
+  type: 'inference_endpoint',
+  id: 'judge-connector',
+  name: 'Judge Connector',
+  inferenceId: 'judge-connector',
+  provider: 'elastic',
+  taskType: 'completion',
+};
+
+interface MockOverrides {
+  tierFeaturesWithEndpoint?: string[];
+  threatIntelSupplyBySpace?: Record<
+    string,
+    { huntEnabled?: boolean; hardGateOk?: boolean; drift?: boolean }
+  >;
+  enableWorkerErrorSpaces?: string[];
+}
+
+const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
+  const {
+    tierFeaturesWithEndpoint = [],
+    threatIntelSupplyBySpace = {},
+    enableWorkerErrorSpaces = [],
+  } = overrides;
+
+  return jest.fn(async (...args: unknown[]) => {
+    const first = args[0];
+    const { path, method = 'GET' }: { path: string; method?: string } =
+      typeof first === 'string'
+        ? { path: first, ...(args[1] as { method?: string } | undefined) }
+        : (first as { path: string; method?: string });
+
+    if (/^\/api\/spaces\/space\/[^/]+$/.test(path) && method === 'GET') {
+      // Every eval space already exists — space-creation is not under test here.
+      return {};
+    }
+    if (/^\/api\/security\/role\/[^/]+$/.test(path) && method === 'PUT') {
+      // The Worker's prebuilt role already exists — role creation is not under test here.
+      return {};
+    }
+    if (path === '/internal/security/service_account' && method === 'GET') {
+      // No account exists yet, so `ensureWorkerServiceAccount` creates one below.
+      return { serviceAccounts: [] };
+    }
+    if (path === '/internal/security/service_account' && method === 'POST') {
+      return { id: 'mock-service-account-id' };
+    }
+    if (path === '/internal/kibana/settings' || /\/internal\/kibana\/settings$/.test(path)) {
+      if (method === 'GET') return { settings: {} };
+      return {};
+    }
+    if (/\/internal\/search_inference_endpoints\/settings$/.test(path)) {
+      return {
+        data: {
+          features: tierFeaturesWithEndpoint.map((featureId) => ({
+            feature_id: featureId,
+            endpoints: [{ id: 'some-endpoint' }],
+          })),
+        },
+      };
+    }
+    if (/\/internal\/alertzero\/workers$/.test(path) && method === 'GET') {
+      return {
+        workers: [{ id: 'system-security-hunt-continuous-threat-hunt', settingsRevision: 1 }],
+      };
+    }
+    const workerPatchMatch = /^\/s\/([^/]+)\/internal\/alertzero\/workers\/[^/]+$/.exec(path);
+    if (workerPatchMatch && method === 'PATCH') {
+      const spaceId = decodeURIComponent(workerPatchMatch[1]);
+      if (enableWorkerErrorSpaces.includes(spaceId)) {
+        throw new Error(
+          `AlertZero Hunt Watch Worker cannot be turned on because no AI model is available (noModel)`
+        );
+      }
+      return { worker: { id: 'system-security-hunt-continuous-threat-hunt' } };
+    }
+    const supplyMatch = /^\/s\/([^/]+)\/internal\/alertzero\/hunt\/threat_intel_supply$/.exec(path);
+    if (supplyMatch) {
+      const spaceId = decodeURIComponent(supplyMatch[1]);
+      const override = threatIntelSupplyBySpace[spaceId] ?? {};
+      return {
+        workflows: [],
+        hardGate: {
+          ok: override.hardGateOk ?? true,
+          reasonCodes: override.hardGateOk === false ? ['no_embeddings'] : [],
+        },
+        drift: override.drift ?? false,
+        huntEnabled: override.huntEnabled ?? true,
+      };
+    }
+    if (path === '/api/security/entity_store/status') {
+      return { status: 'running' };
+    }
+    if (path === '/api/security/entity_store/install') {
+      return {};
+    }
+    if (/\/internal\/_inference\/_exists\//.test(path)) {
+      return { isEndpointExists: true };
+    }
+
+    throw new Error(`Unexpected fetch call: ${method} ${path}`);
+  }) as unknown as HttpHandler;
+};
+
+const run = (fetch: HttpHandler) =>
+  runPreflight({
+    fetch,
+    log: new ToolingLog(),
+    connectorId: CONNECTOR.id,
+    evaluationConnector: JUDGE_CONNECTOR,
+  });
+
+describe('runPreflight', () => {
+  it('resolves and returns a cleanup function on a healthy stack', async () => {
+    const cleanup = await run(buildMockFetch());
+    expect(typeof cleanup).toBe('function');
+  });
+
+  it('throws naming the assigned tier feature when an alertzero_* tier endpoint is already assigned', async () => {
+    await expect(
+      run(buildMockFetch({ tierFeaturesWithEndpoint: ['alertzero_fast'] }))
+    ).rejects.toThrow(/alertzero_fast/);
+  });
+
+  it('throws when TI supply hardGate.ok is false in an eval space', async () => {
+    await expect(
+      run(
+        buildMockFetch({
+          threatIntelSupplyBySpace: { [EVAL_SPACE_IDS[0]]: { hardGateOk: false } },
+        })
+      )
+    ).rejects.toThrow(/hardGate\.ok=false/);
+  });
+
+  it('throws when TI supply reports drift in an eval space', async () => {
+    await expect(
+      run(buildMockFetch({ threatIntelSupplyBySpace: { [EVAL_SPACE_IDS[0]]: { drift: true } } }))
+    ).rejects.toThrow(/drift=true/);
+  });
+
+  it('throws naming the space and the noModel gate when enabling the Worker is refused', async () => {
+    await expect(
+      run(buildMockFetch({ enableWorkerErrorSpaces: [EVAL_SPACE_IDS[0]] }))
+    ).rejects.toThrow(/noModel/);
+  });
+});
