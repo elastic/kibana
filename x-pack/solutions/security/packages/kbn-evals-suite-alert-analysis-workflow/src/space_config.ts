@@ -20,7 +20,7 @@ import {
  * a non-empty `connectorId`, so this must be set before any run.
  *
  * `connectorId` is pinned to the current Playwright project's connector so the workflow's
- * `ai.agent` step uses the same model the suite is evaluating. Auto-close is disabled so
+ * classification step (agent or prompt, per `usePrompt`) uses the same model the suite is evaluating. Auto-close is disabled so
  * the eval never mutates alert status (we only read the classification verdict).
  */
 export const configureAlertAnalysisWorkflow = async ({
@@ -28,16 +28,19 @@ export const configureAlertAnalysisWorkflow = async ({
   log,
   connectorId,
   agentId,
+  usePrompt,
   tagPrefix = EVAL_TAG_PREFIX,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
   connectorId: string;
   agentId: string;
+  /** Classify with a single prompt instead of the agent. */
+  usePrompt: boolean;
   tagPrefix?: string;
 }): Promise<void> => {
   log.info(
-    `Configuring alert-analysis workflow settings (connectorId=${connectorId}, agentId=${agentId})`
+    `Configuring alert-analysis workflow settings (connectorId=${connectorId}, agentId=${agentId}, usePrompt=${usePrompt})`
   );
 
   await fetch(ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE, {
@@ -49,7 +52,7 @@ export const configureAlertAnalysisWorkflow = async ({
       connectorId,
       agentId,
       createConversation: false,
-      usePrompt: false,
+      usePrompt,
       autoCloseEnabled: false,
       autoCloseConfidenceScoreMinThreshold: 0.9,
       autoCloseConfidenceScoreMaxThreshold: 1,
