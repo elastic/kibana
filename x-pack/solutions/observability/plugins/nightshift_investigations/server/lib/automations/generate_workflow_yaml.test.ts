@@ -6,6 +6,7 @@
  */
 
 import { parse } from 'yaml';
+import { evaluateKql } from '@kbn/eval-kql';
 import { generateWorkflowYaml } from './generate_workflow_yaml';
 import type { NightshiftAutomationAttributes, NightshiftTriggerRow } from './types';
 
@@ -163,81 +164,132 @@ describe('generateWorkflowYaml', () => {
       ...overrides,
     });
 
-    it('emits a slack2.message trigger with no condition when the row has no filters', () => {
+    // Evaluates the generated trigger condition against a Slack event, the way the engine does.
+    const matches = (
+      automation: NightshiftAutomationAttributes,
+      event: Record<string, unknown>
+    ): boolean => {
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      return evaluateKql(yaml.triggers[0].on.condition, {
+        event: { workspace: 'T1', channel: 'C1', sender: 'U1', text: 'hello', ...event },
+      });
+    };
+
+    it('emits a slack2.message trigger on the Elastic Slack app connector', () => {
       const yaml = parse(generateWorkflowYaml('auto-123', slackAutomation(slackRow())));
-      expect(yaml.triggers).toEqual([
-        { type: 'slack2.message', 'connector-id': 'elastic-apps-slack' },
-      ]);
-    });
-
-    it('adds no exclusions beyond the row filters', () => {
-      const yaml = parse(
-        generateWorkflowYaml('auto-123', slackAutomation(slackRow({ channels: ['C1'] })))
-      );
-      const condition: string = yaml.triggers[0].on.condition;
-      expect(condition).not.toMatch(/botId|threadId|subtype/);
-    });
-
-    it('filters by a single channel', () => {
-      const yaml = parse(
-        generateWorkflowYaml('auto-123', slackAutomation(slackRow({ channels: ['C1'] })))
-      );
-      expect(yaml.triggers[0].on.condition).toBe('event.channel:"C1"');
-    });
-
-    it('ORs multiple channels and ANDs them with users and text', () => {
-      const yaml = parse(
-        generateWorkflowYaml(
-          'auto-123',
-          slackAutomation(
-            slackRow({ channels: ['C1', 'C2'], users: ['U1'], messageFilter: 'deploy failed' })
-          )
-        )
-      );
-      expect(yaml.triggers[0].on.condition).toBe(
-        '(event.channel:"C1" or event.channel:"C2") and event.sender:"U1" and event.text:"deploy failed"'
-      );
-    });
-
-    it('escapes quotes and backslashes in the message filter', () => {
-      const yaml = parse(
-        generateWorkflowYaml(
-          'auto-123',
-          slackAutomation(slackRow({ messageFilter: 'say "hi" \\ now' }))
-        )
-      );
-      expect(yaml.triggers[0].on.condition).toContain('event.text:"say \\"hi\\" \\\\ now"');
-    });
-
-    it('ignores blank values and a whitespace-only message filter', () => {
-      const yaml = parse(
-        generateWorkflowYaml(
-          'auto-123',
-          slackAutomation(slackRow({ channels: [' ', ''], users: [], messageFilter: '   ' }))
-        )
-      );
-      expect(yaml.triggers[0].on).toBeUndefined();
-    });
-
-    it('merges several slack rows into one trigger with OR-joined rows', () => {
-      const yaml = parse(
-        generateWorkflowYaml(
-          'auto-123',
-          slackAutomation(slackRow({ channels: ['C1'] }), slackRow({ users: ['U1'] }))
-        )
-      );
       expect(yaml.triggers).toHaveLength(1);
-      expect(yaml.triggers[0].on.condition).toBe('(event.channel:"C1") or (event.sender:"U1")');
+      expect(yaml.triggers[0]).toMatchObject({
+        type: 'slack2.message',
+        'connector-id': 'elastic-apps-slack',
+      });
     });
 
-    it('emits no condition when any row has no filters', () => {
-      const yaml = parse(
-        generateWorkflowYaml(
-          'auto-123',
-          slackAutomation(slackRow({ channels: ['C1'] }), slackRow())
-        )
-      );
-      expect(yaml.triggers[0].on).toBeUndefined();
+    describe('exclusions', () => {
+      const automation = slackAutomation(slackRow());
+
+      it('matches a top-level message', () => {
+        expect(matches(automation, {})).toBe(true);
+      });
+
+      it('excludes thread replies', () => {
+        expect(matches(automation, { threadId: '1.1' })).toBe(false);
+      });
+
+      it('excludes events without a workspace', () => {
+        expect(matches(automation, { workspace: undefined })).toBe(false);
+      });
+
+      it('excludes edits and other subtypes', () => {
+        expect(matches(automation, { subtype: 'message_changed' })).toBe(false);
+      });
+
+      it('allows bot messages and file shares', () => {
+        expect(matches(automation, { subtype: 'bot_message' })).toBe(true);
+        expect(matches(automation, { subtype: 'file_share' })).toBe(true);
+      });
+    });
+
+    describe('row filters', () => {
+      it('matches only the selected channels', () => {
+        const automation = slackAutomation(slackRow({ channels: ['C1', 'C2'] }));
+        expect(matches(automation, { channel: 'C2' })).toBe(true);
+        expect(matches(automation, { channel: 'C3' })).toBe(false);
+      });
+
+      it('matches only the selected users', () => {
+        const automation = slackAutomation(slackRow({ users: ['U9'] }));
+        expect(matches(automation, { sender: 'U9' })).toBe(true);
+        expect(matches(automation, { sender: 'U1' })).toBe(false);
+      });
+
+      it('ANDs channels, users and text within a row', () => {
+        const automation = slackAutomation(
+          slackRow({ channels: ['C1'], users: ['U1'], messageFilter: 'deploy' })
+        );
+        expect(matches(automation, { text: 'a deploy' })).toBe(true);
+        expect(matches(automation, { text: 'a deploy', channel: 'C2' })).toBe(false);
+        expect(matches(automation, { text: 'a deploy', sender: 'U2' })).toBe(false);
+        expect(matches(automation, { text: 'nothing' })).toBe(false);
+      });
+
+      it('ORs several rows into one trigger', () => {
+        const automation = slackAutomation(
+          slackRow({ channels: ['C1'] }),
+          slackRow({ users: ['U9'] })
+        );
+        const yaml = parse(generateWorkflowYaml('auto-123', automation));
+        expect(yaml.triggers).toHaveLength(1);
+        expect(matches(automation, { channel: 'C1', sender: 'U2' })).toBe(true);
+        expect(matches(automation, { channel: 'C2', sender: 'U9' })).toBe(true);
+        expect(matches(automation, { channel: 'C2', sender: 'U2' })).toBe(false);
+      });
+
+      it('applies no row filter when any row has no filters', () => {
+        const automation = slackAutomation(slackRow({ channels: ['C1'] }), slackRow());
+        expect(matches(automation, { channel: 'C9' })).toBe(true);
+      });
+
+      it('ignores blank values and a whitespace-only message filter', () => {
+        const automation = slackAutomation(
+          slackRow({ channels: [' ', ''], users: [], messageFilter: '   ' })
+        );
+        expect(matches(automation, { channel: 'C9', text: 'anything' })).toBe(true);
+      });
+    });
+
+    describe('message filter', () => {
+      const filtered = (messageFilter: string) => slackAutomation(slackRow({ messageFilter }));
+
+      it('matches messages that contain the text, not only an exact match', () => {
+        expect(matches(filtered('deploy failed'), { text: 'the deploy failed again' })).toBe(true);
+        expect(matches(filtered('deploy failed'), { text: 'deploy failed' })).toBe(true);
+      });
+
+      it('requires every word, in any order', () => {
+        expect(matches(filtered('deploy failed'), { text: 'failed to deploy' })).toBe(true);
+        expect(matches(filtered('deploy failed'), { text: 'the deploy went fine' })).toBe(false);
+      });
+
+      it('ignores extra whitespace between words', () => {
+        expect(matches(filtered('  deploy \n  failed '), { text: 'deploy failed' })).toBe(true);
+      });
+
+      it('is case sensitive', () => {
+        expect(matches(filtered('deploy'), { text: 'the DEPLOY failed' })).toBe(false);
+      });
+
+      it.each([
+        ['quotes', 'say "hi"'],
+        ['parentheses', 'fix (urgent)'],
+        ['colons', 'error: timeout'],
+        ['asterisks', 'a*b'],
+        ['backslashes', 'path\\to'],
+        ['braces', '{x}'],
+        ['boolean keywords', 'this and that or not'],
+      ])('treats %s in the filter as literal text', (_label, text) => {
+        expect(matches(filtered(text), { text: `before ${text} after` })).toBe(true);
+        expect(matches(filtered(text), { text: 'unrelated' })).toBe(false);
+      });
     });
 
     it('emits both triggers, alert first, for mixed alert and slack rows', () => {

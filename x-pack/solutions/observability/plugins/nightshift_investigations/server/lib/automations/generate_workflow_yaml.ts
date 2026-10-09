@@ -22,6 +22,15 @@ const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
 const ALERT_TRIGGER_TYPE = 'alerting.alertStatusChanged';
 const SLACK_MESSAGE_TRIGGER_TYPE = 'slack2.message';
 
+// Top-level messages only, since replies are handled by the managed Slack thread workflow. Edits
+// carry a subtype and are left out. Posts from other bots are allowed, so an alert another bot
+// posts can start an investigation.
+const SLACK_MESSAGE_EXCLUSIONS = [
+  'event.workspace:*',
+  'not event.threadId:*',
+  '(not event.subtype:* or event.subtype:bot_message or event.subtype:file_share)',
+];
+
 // One investigation per message, so concurrent messages in a channel do not share a subject.
 const SLACK_SUBJECT_ID = '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}';
 
@@ -229,19 +238,21 @@ function buildTriggers(alertRows: AlertRow[], slackRows: SlackRow[]): unknown[] 
 }
 
 /**
- * KQL over the `slack2.message` event payload, built only from the filters on the trigger rows.
- * Nothing is excluded beyond what the user chose. The Relay already drops the Slack app's own
- * posts and edits.
+ * KQL over the `slack2.message` event payload: the fixed exclusions, then the row filters.
  *
  * `channels` and `users` are matched against `event.channel` and `event.sender`, which are Slack
- * ids, so a channel name never matches. `messageFilter` is a phrase match, not a substring match.
- * A row with no filters matches every message, so no condition is emitted at all.
+ * ids, so a channel name never matches. A quoted value is compared for equality with the whole
+ * field in the in-memory evaluator, which is right for ids but not for message text, so
+ * `messageFilter` is emitted as unquoted `*word*` wildcards, one per word. It is case sensitive.
+ * A row with no filters matches every message the exclusions let through.
  */
 function buildSlackCondition(rows: SlackRow[]): string {
+  const exclusions = SLACK_MESSAGE_EXCLUSIONS.join(' and ');
   const rowConditions = rows.map(buildSlackRowCondition);
-  if (rowConditions.some((c) => c === '')) return '';
-  if (rowConditions.length === 1) return rowConditions[0];
-  return rowConditions.map((c) => `(${c})`).join(' or ');
+  if (rowConditions.some((c) => c === '')) return exclusions;
+  const rowFilter =
+    rowConditions.length === 1 ? rowConditions[0] : rowConditions.map((c) => `(${c})`).join(' or ');
+  return `${exclusions} and (${rowFilter})`;
 }
 
 function buildSlackRowCondition(row: SlackRow): string {
@@ -259,10 +270,19 @@ function buildSlackRowCondition(row: SlackRow): string {
 
   const messageFilter = row.messageFilter?.trim();
   if (messageFilter) {
-    parts.push(`event.text:"${escapeKql(messageFilter)}"`);
+    // One term per word, so every word must appear in the message, in any order. A multi-word
+    // wildcard term cannot be made safe: spaces cannot be escaped, and the word "not" inside one
+    // either fails to parse or never matches, which would break the whole trigger condition.
+    const words = messageFilter.split(/\s+/);
+    parts.push(words.map((word) => `event.text: *${escapeKqlWildcardTerm(word)}*`).join(' and '));
   }
 
   return parts.join(' and ');
+}
+
+// Escapes KQL syntax characters and the `and` and `or` keywords so a word stays a single term.
+function escapeKqlWildcardTerm(word: string): string {
+  return word.replace(/[\\():<>"*{}]/g, '\\$&').replace(/\b(or|and)\b/gi, '\\$1');
 }
 
 function cleanValues(values: string[] | undefined): string[] {
