@@ -310,8 +310,12 @@ export function getDataStateContainer({
             autoRefreshDone = undefined;
             return;
           }
-          const { scopedProfilesManager$, scopedEbtManager$, currentDataSource$ } =
-            selectTabRuntimeState(runtimeStateManager, currentTabId);
+          const {
+            scopedProfilesManager$,
+            scopedEbtManager$,
+            currentDataSource$,
+            cascadedLeafDataSource$,
+          } = selectTabRuntimeState(runtimeStateManager, currentTabId);
           const scopedProfilesManager = scopedProfilesManager$.getValue();
           const scopedEbtManager = scopedEbtManager$.getValue();
           const existingSource = currentDataSource$.getValue();
@@ -385,11 +389,11 @@ export function getDataStateContainer({
             injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
               cascadedDocumentsState: {
                 ...getCurrentTab().cascadedDocumentsState,
-                columnsMeta: {},
                 cascadedDocumentsMap: {},
               },
             })
           );
+          cascadedLeafDataSource$.next(undefined);
 
           const { didProfileChange, isFirstResolution } =
             await scopedProfilesManager.resolveDataSourceProfile(

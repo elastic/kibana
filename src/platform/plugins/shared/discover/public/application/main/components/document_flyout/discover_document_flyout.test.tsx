@@ -13,7 +13,8 @@ import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { copyToClipboard, type EuiFlyoutProps } from '@elastic/eui';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { buildDataTableRecord, type DataTableColumnsMeta } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query } from '@kbn/es-query';
@@ -666,7 +667,6 @@ describe('DiscoverDocumentFlyout', () => {
     const tabId = toolkit.getCurrentTab().id;
     const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMock);
     const nextExpandedDoc = buildDataTableRecord(esHitsMock[1], dataViewMock);
-    const cascadedColumnsMeta: DataTableColumnsMeta = { bytes: { type: 'number' } };
 
     toolkit.internalState.dispatch(
       internalStateActions.setExpandedDoc({
@@ -685,14 +685,8 @@ describe('DiscoverDocumentFlyout', () => {
         },
       })
     );
-    toolkit.internalState.dispatch(
-      internalStateActions.setCascadedDocumentsState({
-        tabId,
-        cascadedDocumentsState: {
-          ...toolkit.getCurrentTab().cascadedDocumentsState,
-          columnsMeta: cascadedColumnsMeta,
-        },
-      })
+    toolkit.runtimeStateManager.tabs.byId[tabId].cascadedLeafDataSource$.next(
+      createMockEsqlSource([{ name: 'bytes', type: 'number', source: 'index' }])
     );
 
     setUnifiedDocViewerServices(mockUnifiedDocViewerServices);

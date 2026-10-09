@@ -56,7 +56,6 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
   ],
   search: ['elastic/jinastic', 'elastic/search-design', 'elastic/search-ml-ux'],
   observability: [
-    'elastic/actionable-obs-team',
     'elastic/apm-agent-approvers',
     'elastic/nightshift',
     'elastic/nightshift-context-and-research-team',
@@ -68,7 +67,6 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/obs-knowledge-team',
     'elastic/obs-onboarding-team',
     'elastic/obs-signals-traces-team',
-    'elastic/obs-ux-management-team',
     'elastic/observability-bi',
     'elastic/observability-design',
     'elastic/observability-ui',

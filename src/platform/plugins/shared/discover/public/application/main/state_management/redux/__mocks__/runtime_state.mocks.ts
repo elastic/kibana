@@ -35,6 +35,7 @@ export function getTabRuntimeStateMock(
       {} as CascadedDocumentsFetcher
     ),
     currentDataSource$: new BehaviorSubject<DataSource | undefined>(undefined),
+    cascadedLeafDataSource$: new BehaviorSubject<DataSource | undefined>(undefined),
     unsubscribeFn$: new BehaviorSubject<(() => void) | undefined>(undefined),
     ...attrs,
   };

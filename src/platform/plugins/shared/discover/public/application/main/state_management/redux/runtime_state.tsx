@@ -48,6 +48,8 @@ interface TabRuntimeState {
   scopedEbtManager: ScopedDiscoverEBTManager;
   cascadedDocumentsFetcher: CascadedDocumentsFetcher;
   currentDataSource: DataSource;
+  /** Source of the cascade leaf rows; keeps the parent id, so never publish it as the current source. */
+  cascadedLeafDataSource: DataSource;
   unsubscribeFn: (() => void) | undefined;
 }
 
@@ -57,7 +59,10 @@ type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
   >;
 };
 
-export type ReactiveTabRuntimeState = ReactiveRuntimeState<TabRuntimeState, 'currentDataSource'>;
+export type ReactiveTabRuntimeState = ReactiveRuntimeState<
+  TabRuntimeState,
+  'currentDataSource' | 'cascadedLeafDataSource'
+>;
 
 export type RuntimeStateManager = ReactiveRuntimeState<DiscoverRuntimeState> & {
   tabs: { byId: Record<string, ReactiveTabRuntimeState> };
@@ -99,11 +104,13 @@ export const createTabRuntimeState = ({
     toolkit,
   });
   const currentDataSource$ = new BehaviorSubject<DataSource | undefined>(undefined);
+  const cascadedLeafDataSource$ = new BehaviorSubject<DataSource | undefined>(undefined);
   const cascadedDocumentsFetcher = new CascadedDocumentsFetcher(
     services,
     scopedProfilesManager,
     cascadedDocumentsStateManager,
-    currentDataSource$
+    currentDataSource$,
+    cascadedLeafDataSource$
   );
 
   return {
@@ -119,6 +126,7 @@ export const createTabRuntimeState = ({
     scopedEbtManager$: new BehaviorSubject(scopedEbtManager),
     cascadedDocumentsFetcher$: new BehaviorSubject(cascadedDocumentsFetcher),
     currentDataSource$,
+    cascadedLeafDataSource$,
     unsubscribeFn$: new BehaviorSubject<TabRuntimeState['unsubscribeFn']>(undefined),
   };
 };

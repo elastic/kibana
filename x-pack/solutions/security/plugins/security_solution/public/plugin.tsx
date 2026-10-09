@@ -572,7 +572,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       search: plugins.data.search.search,
       resolveSecurityCanvasContext,
     });
-    registerAttacksFlyoutGroupedAttachment({ register, getSpaceId, resolveSecurityCanvasContext });
+    registerAttacksFlyoutGroupedAttachment({
+      register,
+      application: core.application,
+      getSpaceId,
+      resolveSecurityCanvasContext,
+    });
     registerRulesFlyoutGroupedAttachment({
       register,
       application: core.application,
