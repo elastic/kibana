@@ -11,7 +11,7 @@ import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-b
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -24,53 +24,55 @@ import { attachEventInvestigationToolHandler } from './handler';
 export const SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID =
   platformSignificantEventsTools.attachInvestigation;
 
-const eventInvestigationAttachSchema = z.object({
-  event_id: z
-    .string()
-    .max(MAX_ID_LENGTH)
-    .describe(
+const eventInvestigationAttachSchema = lazySchema(() =>
+  z.object({
+    event_id: z
+      .string()
+      .max(MAX_ID_LENGTH)
+      .describe(
+        i18n.translate(
+          'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.eventId',
+          {
+            defaultMessage:
+              'Stable event_id slug of the significant event to attach the investigation to (e.g. "checkout-latency-slo-breach"). Read from the Event ID field.',
+          }
+        )
+      ),
+    workflow_execution_id: z
+      .string()
+      .max(MAX_ID_LENGTH)
+      .describe(
+        i18n.translate(
+          'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.workflowExecutionId',
+          {
+            defaultMessage:
+              'The investigation id. For an investigation started with execute_workflow it is the returned executionId. Used to read the investigation from the shared investigations API.',
+          }
+        )
+      ),
+    started_at: z.iso.datetime({ offset: true }).describe(
       i18n.translate(
-        'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.eventId',
+        'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.startedAt',
         {
           defaultMessage:
-            'Stable event_id slug of the significant event to attach the investigation to (e.g. "checkout-latency-slo-breach"). Read from the Event ID field.',
+            'ISO-8601 datetime when the investigation started. Read from the workflow execution returned by execute_workflow.',
         }
       )
     ),
-  workflow_execution_id: z
-    .string()
-    .max(MAX_ID_LENGTH)
-    .describe(
-      i18n.translate(
-        'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.workflowExecutionId',
-        {
-          defaultMessage:
-            'The investigation id. For an investigation started with execute_workflow it is the returned executionId. Used to read the investigation from the shared investigations API.',
-        }
-      )
-    ),
-  started_at: z.iso.datetime({ offset: true }).describe(
-    i18n.translate(
-      'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.startedAt',
-      {
-        defaultMessage:
-          'ISO-8601 datetime when the investigation started. Read from the workflow execution returned by execute_workflow.',
-      }
-    )
-  ),
-  completed_at: z.iso
-    .datetime({ offset: true })
-    .optional()
-    .describe(
-      i18n.translate(
-        'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.completedAt',
-        {
-          defaultMessage:
-            'ISO-8601 datetime when the investigation completed. Omit while the investigation is still running.',
-        }
-      )
-    ),
-});
+    completed_at: z.iso
+      .datetime({ offset: true })
+      .optional()
+      .describe(
+        i18n.translate(
+          'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.completedAt',
+          {
+            defaultMessage:
+              'ISO-8601 datetime when the investigation completed. Omit while the investigation is still running.',
+          }
+        )
+      ),
+  })
+);
 
 export const createEventInvestigationAttachTool = ({
   getScopedClients,

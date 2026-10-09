@@ -559,7 +559,7 @@ describe('Endpoint analysis run', () => {
     const journalSteps = allSteps.filter(
       ({ with: withInputs }) =>
         (withInputs as { 'workflow-id'?: string } | undefined)?.['workflow-id'] ===
-        '{{ consts.journal_note }}'
+        'system-alertzero-journal-note'
     );
 
     it('narrates problem paths and the assessment as journal notes rather than attachments', () => {
@@ -575,7 +575,9 @@ describe('Endpoint analysis run', () => {
         'journal_rationale',
         'journal_timeline',
       ]);
-      expect(definition.consts?.journal_note).toBe('system-alertzero-journal-note');
+      expect(
+        journalSteps.every(({ with: withInputs }) => withInputs?.['run-as-mode'] === 'inherit')
+      ).toBe(true);
     });
 
     // A missing discovery alert is narrated and then falls through to the no-host
@@ -631,7 +633,7 @@ describe('Endpoint analysis run', () => {
       expect(rationaleCap + longerPrefix.length).toBeLessThanOrEqual(JOURNAL_MESSAGE_MAX_LENGTH);
       expect(journal?.type).toBe('workflow.execute');
       expect((journal?.with as { 'workflow-id'?: string })?.['workflow-id']).toBe(
-        '{{ consts.journal_note }}'
+        'system-alertzero-journal-note'
       );
       const message = (journal?.with as { inputs?: { message?: string } })?.inputs?.message ?? '';
       expect(message).toContain('{{ steps.forensic_analysis.output.structured_output.rationale }}');

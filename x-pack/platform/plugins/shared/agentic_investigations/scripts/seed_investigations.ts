@@ -451,6 +451,170 @@ const SCENARIOS: Scenario[] = [
       ),
     },
   }),
+  // Every overview section at once, each in its fuller form: a long "What's happened" and impact
+  // summary (both behind Show more), impact evidence with a stacked, annotated chart, and entities
+  // of every shape: Entity Store ids (which open the entity flyout when Security registered an
+  // opener), names with chart or markdown evidence, a name without evidence, and one without a type.
+  completed({
+    severity: 'critical',
+    title: 'Orders API outage after the inventory-db failover',
+    subject: {
+      type: 'alert',
+      id: 'alert-orders-5xx',
+      summary: 'orders-api 5xx rate above 20%',
+      snapshot: alertSnapshot(
+        'alert-orders-5xx',
+        'orders-api 5xx rate above 20%',
+        'orders-api returns 5xx for 34% of requests, above the threshold of 20%.',
+        95
+      ),
+    },
+    minutesAgo: 30,
+    durationMinutes: 45,
+    summary:
+      'orders-api started failing 34% of requests at 09:12, two minutes after inventory-db failed over to its replica in eu-west-1b. The new primary rejected writes for 18 minutes while it replayed its WAL, and orders-api retried every rejected write three times, which tripled the load on the replica and kept it from catching up.',
+    verdict:
+      'The **inventory-db failover** caused the outage: the new primary replayed its WAL for 18 minutes and rejected writes meanwhile.\n\n- orders-api retries made the replay slower.\n- Checkout and the storefront degraded because they read order state from orders-api.\n\nNo data was lost; every rejected write was retried after the replay.',
+    hypotheses: [
+      hypothesis(
+        'inventory-db failover leaves the new primary read-only during WAL replay',
+        0.91,
+        'confirmed',
+        'Write rejections start with the failover and stop when the replay completes.',
+        evidence(
+          'Write rejections start at the failover and stop when the WAL replay ends.',
+          timeChart({
+            title: 'inventory-db rejected writes',
+            type: 'bar',
+            yLabel: 'Rejected writes per minute',
+            unit: 'number',
+            series: [
+              timeSeries('Rejected writes', 30, [0, 0, 820, 1900, 2100, 1750, 900, 40, 0, 0], 5),
+            ],
+            annotations: [annotation(75, 'Failover'), annotation(70, 'WAL replay', 50)],
+          })
+        ),
+        evidence('The replica log shows `recovery in progress` from **09:10** to **09:28** UTC.')
+      ),
+      hypothesis(
+        'orders-api retry storm amplifies the outage',
+        0.55,
+        'investigating',
+        'Retries triple write traffic, but the replay would have taken time regardless.',
+        evidence(
+          'Retries triple the write traffic while the primary rejects writes.',
+          timeChart({
+            title: 'orders-api write requests',
+            type: 'bar',
+            yLabel: 'Requests per minute',
+            unit: 'number',
+            stacked: true,
+            series: [
+              timeSeries('Original', 30, [600, 610, 620, 600, 615, 605, 610, 600, 600, 610], 5),
+              timeSeries('Retried', 30, [0, 0, 1700, 1800, 1850, 1700, 900, 30, 0, 0], 5),
+            ],
+          })
+        )
+      ),
+      hypothesis(
+        'A bad orders-api deploy',
+        0.05,
+        'dismissed',
+        'The last orders-api deploy was two days ago.'
+      ),
+    ],
+    recommendations: [
+      recommendation(
+        'Cap orders-api write retries at one, with backoff',
+        0.9,
+        'Stops retries from tripling the load on a recovering primary.',
+        'kubectl -n orders set env deploy/orders-api WRITE_RETRY_MAX=1 WRITE_RETRY_BACKOFF_MS=500'
+      ),
+      recommendation(
+        'Fail inventory-db over to a hot standby',
+        0.72,
+        'A hot standby replays continuously, so a failover does not pause writes.'
+      ),
+      recommendation(
+        'Page the database on-call on every failover',
+        0.4,
+        'Nobody was paged; the outage was found from the orders-api alert.'
+      ),
+    ],
+    impact: {
+      summary:
+        'For 18 minutes, from 09:12 to 09:30 UTC, about a third of all order writes failed on the first try. Shoppers saw "Something went wrong" on the last checkout step, and roughly 1,900 of them abandoned their cart, which is about 9% of the checkouts in that window. The storefront kept working but showed stale order states, so some shoppers placed the same order twice: 140 duplicate orders need a refund. Partners on the orders API saw the same errors; two of them paused their integrations and have to resume them by hand. No order data was lost, since every write went through once the replay finished, but support received 320 tickets in the first hour.',
+      evidence: evidence(
+        'Checkout success drops to 65% during the outage and recovers once the replay ends.',
+        timeChart({
+          title: 'Checkout success rate',
+          yLabel: 'Success rate',
+          unit: 'percent',
+          series: [
+            timeSeries(
+              'Success rate',
+              30,
+              [99.1, 99.0, 71.2, 64.8, 66.3, 70.1, 88.4, 98.7, 99.0, 99.1],
+              5
+            ),
+          ],
+          annotations: [annotation(72, 'Outage', 54)],
+        })
+      ),
+      entities: [
+        {
+          id: 'service:orders-api',
+          name: 'orders-api',
+          type: 'service',
+          evidence: evidence(
+            'orders-api fails a third of its requests during the outage.',
+            timeChart({
+              title: 'orders-api 5xx rate',
+              yLabel: '5xx rate',
+              unit: 'percent',
+              series: [
+                timeSeries('5xx rate', 30, [0.2, 0.3, 31, 34, 33, 29, 12, 0.4, 0.2, 0.2], 5),
+              ],
+            })
+          ),
+        },
+        { id: 'host:inventory-db-2', name: 'inventory-db-2', type: 'host' },
+        entity(
+          'checkout',
+          'service',
+          'logs.checkout',
+          'checkout',
+          evidence(
+            'Checkout failures by step:\n\n| Step | Failures |\n| --- | --- |\n| Payment | 40 |\n| Place order | 1,870 |'
+          )
+        ),
+        entity('storefront', 'service', 'logs.storefront'),
+        { id: 'partner-orders-integrations', name: 'Partner integrations' },
+      ],
+    },
+  }),
+  // Closed, with an impact that only names entities: no summary, no evidence.
+  completed({
+    severity: 'low',
+    status: 'closed',
+    title: 'Search latency blip during the index rollover',
+    subject: {
+      type: 'manual',
+      id: 'manual-search-latency',
+      summary: 'Why was search slow at 06:00?',
+    },
+    minutesAgo: 900,
+    durationMinutes: 5,
+    triggerType: 'manual',
+    summary: 'Search P95 rose to 900ms for two minutes at 06:00 UTC.',
+    verdict: 'The daily index rollover. Expected and short; no action needed.',
+    impact: {
+      entities: [
+        entity('search-api', 'service', 'logs.search-api'),
+        entity('product-search', 'service', 'logs.product-search'),
+      ],
+    },
+  }),
   // Just started: no findings and no title yet, so the UI names it after its subject.
   unfinished({
     subject: {

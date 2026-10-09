@@ -53,6 +53,7 @@ export const investigationTemplate: TemplateDefinition = {
     groupedAttachments,
     renderAssignees,
     renderStatus,
+    getImpactEntityOpener,
   }) => {
     const { agentBuilder, proposals } = startDeps;
 
@@ -127,7 +128,12 @@ export const investigationTemplate: TemplateDefinition = {
     const LazyInvestigationOverview = makeLazyWithSharedClient<OverviewSlotRenderProps>(
       async () => {
         const { InvestigationOverview } = await import('./flyout/overview_tab');
-        return InvestigationOverview;
+        const Overview: React.FC<OverviewSlotRenderProps> = (props) =>
+          React.createElement(InvestigationOverview, {
+            ...props,
+            onOpenEntity: getImpactEntityOpener(),
+          });
+        return Overview;
       }
     );
 

@@ -44,6 +44,7 @@ const register = ({
     startDeps: { agentBuilder: agentBuilderMocks.createStart(), proposals },
     escalationsEnabled,
     groupedAttachments,
+    getImpactEntityOpener: () => undefined,
     templates: escalationsEnabled
       ? [investigationTemplate, escalationTemplate]
       : [investigationTemplate],
