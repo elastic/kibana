@@ -94,11 +94,6 @@ triggers:
             Minimum confidence score for FP auto-close. Overrides the uiSettings value.
             When supplied, the max threshold is collapsed to 1 (range becomes a floor).
             Bounded to 0–1 to match the uiSettings contract.
-        agentId:
-          type: string
-          minLength: 1
-          maxLength: 64
-          description: Agent Builder agent id. Overrides the uiSettings-derived agentId.
         tagPrefix:
           type: string
           maxLength: 256
@@ -118,14 +113,17 @@ triggers:
             Must be non-empty — an empty string passes the != null gate but leaves both
             connectors unset, causing analysis to silently skip with empty verdicts.
             Bounded to 255 chars to match other Kibana featureId request bounds; interpolated
-            into every batch's ai.agent connector lookup.
+            into every batch's connector lookup.
         calledByWorker:
           type: boolean
           description: >
             Explicit flag that this run was triggered by an AlertZero Worker via
             workflow.execute (not by the alert trigger directly). When true, Worker-specific
             steps activate: input overrides, caller-supplied alerts, and output accumulation.
-            Absent (or false) keeps the standalone (alert-trigger) path unchanged.
+            Absent (or false) keeps the standalone (alert-trigger) path unchanged. Each batch is
+            then classified with one `ai.prompt` call, never an `ai.agent` run: the prompt is
+            self-contained, so the agent adds only its framework prompt and extra model calls.
+            The standalone path follows the space's "use a prompt" setting instead.
         investigationConversationId:
           type: string
           minLength: 1
@@ -301,6 +299,9 @@ consts:
   # alerts than this is split into consecutive batches.
   batch_size: 50
 
+  # Placeholder for a batch whose model call returned nothing.
+  no_verdicts: []
+
   # Related-alert enrichment: for each alert, build the shared-entity graph and summarise
   # it into one line of the prompt. This is what lets the model see an attack chain that
   # spans rules, so it is on by default; set to false to trade that signal for one less
@@ -355,8 +356,11 @@ steps:
       batch_output_tokens: 0
       batch_llm_calls: 0
       # Sibling of connector_id; apply_caller_input_overrides sets the feature id when the
-      # Worker supplies connectorIdByFeature. analysis_enabled / ai.agent check either.
+      # Worker supplies connectorIdByFeature. analysis_enabled and the batch steps check either.
       connector_id_by_feature: ""
+      # True when each batch is classified with ai.prompt instead of ai.agent. The space's
+      # "use a prompt" setting sets it; the Worker path always sets it.
+      use_prompt: false
       # apply_caller_input_overrides sets this from investigationConversationId (Worker
       # progress comments when calledByWorker is true).
       investigation_conversation_id: ""
@@ -399,6 +403,7 @@ steps:
       connector_id: "{{ steps.fetch_runtime_config.output.connectorId }}"
       agent_id: "{{ steps.fetch_runtime_config.output.agentId }}"
       create_conversation: "${{ steps.fetch_runtime_config.output.createConversation }}"
+      use_prompt: "${{ steps.fetch_runtime_config.output.usePrompt }}"
       auto_close_enabled: "${{ steps.fetch_runtime_config.output.autoCloseEnabled }}"
       auto_close_confidence_score_min_threshold: "${{ steps.fetch_runtime_config.output.autoCloseConfidenceScoreMinThreshold }}"
       auto_close_confidence_score_max_threshold: "${{ steps.fetch_runtime_config.output.autoCloseConfidenceScoreMaxThreshold }}"
@@ -432,12 +437,14 @@ steps:
           # execution time with "The provided expression is invalid", so every fallback here
           # is either a filter or a separate gated step.
           auto_close_confidence_score_min_threshold: "${{ inputs.autoCloseConfidenceScoreMinThreshold | default: variables.auto_close_confidence_score_min_threshold }}"
-          agent_id: "{{ inputs.agentId | default: variables.agent_id }}"
           tag_prefix: "{{ inputs.tagPrefix | default: variables.tag_prefix }}"
           # When called by the Worker the ai.agent output is posted into the Investigation
           # conversation. Showing a separate Agent Builder chat entry in the Chats UI
           # would be confusing and redundant.
           create_conversation: false
+          # The Worker always classifies with ai.prompt, whatever the space's setting says: no
+          # agent or conversation is involved, so the space's agent is not used on this path.
+          use_prompt: true
           # When the Worker passes investigationConversationId, store it for progress
           # comment steps guarded by calledByWorker.
           investigation_conversation_id: "{{ inputs.investigationConversationId }}"
@@ -447,8 +454,8 @@ steps:
           auto_close_enabled: false
 
       # Swap to the feature-registry connector only when one is supplied, so an omitted
-      # connectorIdByFeature keeps the space's uiSettings connector. Clearing connector_id
-      # keeps the ai.agent step's superRefine from seeing both non-empty.
+      # connectorIdByFeature keeps the space's uiSettings connector. The feature then replaces
+      # the space's connector rather than competing with it.
       - name: use_connector_by_feature_if_provided
         type: if
         condition: "${{ inputs.connectorIdByFeature != null }}"
@@ -1479,6 +1486,10 @@ steps:
 
           - name: runAgent_step
             type: ai.agent
+            # Skipped when the space's "use a prompt" setting is on, and always on the Worker path;
+            # runPrompt_step below classifies the batch instead. `!= true` rather than `== false`
+            # so a missing value still runs exactly one of the two steps.
+            if: "${{ variables.use_prompt != true }}"
             agent-id: "{{ variables.agent_id }}"
             connector-id: "{{ variables.connector_id }}"
             # Exactly one of connector-id / connector-id-by-feature must be non-empty at
@@ -1583,13 +1594,140 @@ steps:
                   - verdicts
 
           # -------------------------------------------------------------------
+          # Direct prompt (the space's "use a prompt" setting, and always the Worker path)
+          # -------------------------------------------------------------------
+          # The message above is complete (role, protocol and every alert), and the agent runs
+          # with no tools, so the agent adds nothing but its own framework prompt, extra model
+          # calls for built-in tools it is not meant to use, and a conversation we do not keep.
+          # ai.prompt sends the message to the connector once and returns the structured reply
+          # in `output.content`.
+          - name: runPrompt_step
+            type: ai.prompt
+            if: "${{ variables.use_prompt == true }}"
+            connector-id: "{{ variables.connector_id }}"
+            # Same as runAgent_step: exactly one of the two is non-empty at execution time, and
+            # ai.prompt treats a blank value as unset.
+            connector-id-by-feature: "{{ variables.connector_id_by_feature }}"
+            # The default maxResponseContentLength (1 MB) is too small for a 50-alert batch (see
+            # runAgent_step).
+            max-step-size: '10mb'
+            on-failure:
+              retry:
+                max-attempts: 3
+                # Short and growing, unlike runAgent_step. The usual failure is the model sending
+                # the structured reply as a string, about 1 call in 40 and gone on the next try, so
+                # waiting 30 s only added to the batch time. The growth leaves room for a busy model.
+                delay: "5s"
+                strategy: exponential
+                multiplier: 3
+                max-delay: "30s"
+              # Same as runAgent_step: a batch that still fails must not abort the execution.
+              continue: true
+            with:
+              prompt: "{{ steps.build_agent_message.output.message }}"
+
+              # Structured output schema the model must conform to. Keep identical to the schema of
+              # runAgent_step above (a test compares them): one verdict object per
+              # alert in the batch. The root must stay an object (the step's schema contract
+              # does not accept a root-level array), so the verdicts are carried in a property.
+              schema:
+                type: object
+                properties:
+                  verdicts:
+                    type: array
+                    # Cap at consts.batch_size: a batch never has more than 50 real alerts, so
+                    # more than 50 verdicts is hallucination/injection. Without this bound a
+                    # 10 MB response can inflate all_verdicts across up to 20 batches.
+                    maxItems: 50
+                    description: One verdict per alert in the batch, in the order the alerts were given.
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          # Matches alerts items._id maxLength — the model must echo a real id.
+                          maxLength: 512
+                          description: The alert id, copied verbatim from the <alert id="..."> block being classified
+                        classification:
+                          type: string
+                          enum:
+                            - false_positive
+                            - true_positive
+                            - inconclusive
+                          description: Classification of the alert based on analysis
+                        confidence_score:
+                          type: number
+                          minimum: 0
+                          maximum: 1
+                          description: Confidence score from 0.0-1.0 indicating certainty of the classification
+                        rationale:
+                          type: string
+                          # Matches workflow.output / AlertAnalysisVerdict — unbounded rationale
+                          # would pass the agent schema then fail final output validation after
+                          # tags/notes have already been written.
+                          maxLength: 500
+                          description: One short sentence (max 20 words) naming the decision gate and the strongest evidence
+                        contributing_factors:
+                          type: array
+                          maxItems: 3
+                          items:
+                            type: string
+                            # Matches workflow.output / AlertAnalysisVerdict — unbounded factors
+                            # would pass the agent schema then fail final output validation after
+                            # tags/notes have already been written.
+                            maxLength: 100
+                          description: At most 3 short phrases (max 6 words each) naming the strongest contributing factors
+                      required:
+                        - id
+                        - classification
+                        - confidence_score
+                        - rationale
+                        - contributing_factors
+                  batch_summary:
+                    type: string
+                    # The prompt still asks for 45 words; this is only a safety net. ai.prompt rejects
+                    # the whole reply when one field breaks a schema limit, and models write this
+                    # summary at about 500 characters (measured: median 518, max 655, over 500 in
+                    # half of the replies), so the agent step's limit of 500 failed a quarter of the
+                    # batches. 1000 leaves room for that and still stops a runaway summary, and the
+                    # summary is cut to the same length in normalize_batch_result.
+                    maxLength: 1000
+                    description: >-
+                      Optional 1–2 sentences (≤45 words) grouped by host or user explaining
+                      why the batch verdicts came out as they did. Present only when
+                      calledByWorker; per-alert detail stays in each rationale. Not required —
+                      omit entirely if there is nothing to add beyond counts.
+                required:
+                  - verdicts
+
+          # -------------------------------------------------------------------
+          # One shape for both ways of calling the model
+          # -------------------------------------------------------------------
+          # Only one of the two steps above runs. Everything below reads these variables, so it
+          # does not depend on which one it was. A step that failed after its retries leaves no
+          # output, which reads as no verdicts.
+          - name: normalize_batch_result
+            type: data.set
+            with:
+              batch_result_verdicts: "${{ steps.runAgent_step.output.structured_output.verdicts | default: steps.runPrompt_step.output.content.verdicts | default: consts.no_verdicts }}"
+              batch_result_summary: "{{ steps.runAgent_step.output.structured_output.batch_summary | default: steps.runPrompt_step.output.content.batch_summary | default: '' | truncate: 1000 }}"
+              batch_result_input_tokens: "${{ steps.runAgent_step.output.metadata.usage.inputTokens | default: steps.runPrompt_step.output.metadata.usage.inputTokens | default: 0 }}"
+              batch_result_output_tokens: "${{ steps.runAgent_step.output.metadata.usage.outputTokens | default: steps.runPrompt_step.output.metadata.usage.outputTokens | default: 0 }}"
+              batch_result_connector_id: "{{ steps.runAgent_step.output.metadata.usage.connectorId | default: steps.runPrompt_step.output.metadata.usage.connectorId | default: '' }}"
+
+          - name: count_batch_result_verdicts
+            type: data.set
+            with:
+              batch_result_verdict_count: "${{ variables.batch_result_verdicts | size }}"
+
+          # -------------------------------------------------------------------
           # Collect this batch's verdicts
           # -------------------------------------------------------------------
           # A batch that returns nothing is logged and skipped: the alerts it covered get an
           # error note from the apply loop below, and the remaining batches still run.
           - name: check_batch_output_exists
             type: if
-            condition: "not steps.runAgent_step.output.structured_output.verdicts:*"
+            condition: "${{ variables.batch_result_verdict_count == 0 }}"
             steps:
               - name: log_missing_batch_output
                 type: console
@@ -1620,21 +1758,21 @@ steps:
               - name: filter_verdicts_to_batch
                 type: data.set
                 with:
-                  batch_verdicts: "${{ steps.runAgent_step.output.structured_output.verdicts | where_exp: 'v', 'variables.batch_alert_ids contains v.id' }}"
+                  batch_verdicts: "${{ variables.batch_result_verdicts | where_exp: 'v', 'variables.batch_alert_ids contains v.id' }}"
 
               - name: collect_batch_verdicts
                 type: data.set
                 with:
                   all_verdicts: "${{ variables.all_verdicts | concat: variables.batch_verdicts }}"
-                  batch_input_tokens: "${{ variables.batch_input_tokens | plus: steps.runAgent_step.output.metadata.usage.inputTokens }}"
-                  batch_output_tokens: "${{ variables.batch_output_tokens | plus: steps.runAgent_step.output.metadata.usage.outputTokens }}"
+                  batch_input_tokens: "${{ variables.batch_input_tokens | plus: variables.batch_result_input_tokens }}"
+                  batch_output_tokens: "${{ variables.batch_output_tokens | plus: variables.batch_result_output_tokens }}"
                   batch_llm_calls: "${{ variables.batch_llm_calls | plus: 1 }}"
                   # `uniq` so a repeated id cannot stand in for one the model dropped.
                   batch_matched_id_count: "${{ variables.batch_verdicts | map: 'id' | uniq | size }}"
                   # First non-empty wins: keep the connector from the first successful batch
                   # call so the Worker can name it in Comment 2 without a second lookup.
                   resolved_connector_id: >-
-                    {% if variables.resolved_connector_id == '' %}{{ steps.runAgent_step.output.metadata.usage.connectorId }}{% else %}{{ variables.resolved_connector_id }}{% endif %}
+                    {% if variables.resolved_connector_id == '' %}{{ variables.batch_result_connector_id }}{% else %}{{ variables.resolved_connector_id }}{% endif %}
 
               # -------------------------------------------------------------------
               # Accumulate the verdicts a caller receives via workflow.output
@@ -1712,13 +1850,13 @@ steps:
               # a summary with no matched verdicts would describe results the caller never sees.
               - name: accumulate_batch_summary_gate
                 type: if
-                condition: "${{ inputs.calledByWorker == true and variables.batch_matched_id_count > 0 and steps.runAgent_step.output.structured_output.batch_summary != blank }}"
+                condition: "${{ inputs.calledByWorker == true and variables.batch_matched_id_count > 0 and variables.batch_result_summary != blank }}"
                 steps:
                   - name: build_batch_summary_entry
                     type: data.set
                     with:
                       batch_summary_entry: >-
-                        {{ steps.runAgent_step.output.structured_output.batch_summary }}{% if variables.batch_matched_id_count < variables.batch_alert_ids.size %} (Covers {{ variables.batch_matched_id_count }} of {{ variables.batch_alert_ids.size }} alerts in this batch; the rest returned no verdict.){% endif %}
+                        {{ variables.batch_result_summary }}{% if variables.batch_matched_id_count < variables.batch_alert_ids.size %} (Covers {{ variables.batch_matched_id_count }} of {{ variables.batch_alert_ids.size }} alerts in this batch; the rest returned no verdict.){% endif %}
                   - name: accumulate_batch_summary
                     type: data.set
                     with:
@@ -2178,8 +2316,9 @@ steps:
       generated_summary: "{{ variables.generated_summary }}"
       # Connector ID used by the first successful batch call, for Worker attribution.
       connector_id: "{{ variables.resolved_connector_id }}"
-      # Agent / model id resolved at run time, passed through for Worker attribution.
-      agent_id: "{{ variables.agent_id }}"
+      # Agent id resolved at run time, passed through for Worker attribution. Empty when the
+      # batches were classified with a prompt, because no agent ran.
+      agent_id: "{% if variables.use_prompt == true %}{% else %}{{ variables.agent_id }}{% endif %}"
       # Host/user entities for the Worker's investigations.attachImpact step.
       impacted_entities: "${{ variables.impacted_entities }}"
       # Alert ids the agent omitted; empty when every analyzed alert got a verdict.

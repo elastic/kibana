@@ -132,6 +132,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(manualInputs.properties).toHaveProperty('alerts');
     expect(manualInputs.properties).toHaveProperty('calledByWorker');
     expect(manualInputs.properties).toHaveProperty('connectorIdByFeature');
+    // The agent and the prompt option come from the space's settings, not from the caller.
+    expect(manualInputs.properties).not.toHaveProperty('agentId');
+    expect(manualInputs.properties).not.toHaveProperty('useDirectPrompt');
 
     expect(result.data.outputs).toBeDefined();
     if (
@@ -413,9 +416,20 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     const batchCheck = findStepByName(workflow.steps, 'check_batch_output_exists') as {
       condition: string;
     };
-    expect(batchCheck.condition).toBe(
-      'not steps.runAgent_step.output.structured_output.verdicts:*'
-    );
+    expect(batchCheck.condition).toBe('${{ variables.batch_result_verdict_count == 0 }}');
+
+    // The direct prompt is the same batch with the same failure handling.
+    const promptStep = findStepByName(workflow.steps, 'runPrompt_step') as {
+      'on-failure': {
+        retry: { 'max-attempts': number; delay: string; strategy: string };
+        continue: boolean;
+      };
+    };
+    expect(promptStep['on-failure'].retry['max-attempts']).toBe(3);
+    expect(promptStep['on-failure'].continue).toBe(true);
+    // The prompt's usual failure goes away on the next try, so it retries sooner than the agent.
+    expect(promptStep['on-failure'].retry.delay).toBe('5s');
+    expect(promptStep['on-failure'].retry.strategy).toBe('exponential');
   });
 
   it('posts batch progress counts reconciled to this batch alert ids, not raw agent verdicts', () => {
@@ -584,11 +598,18 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(collectStep.with.all_verdicts).toBe(
       '${{ variables.all_verdicts | concat: variables.batch_verdicts }}'
     );
-    expect(collectStep.with.batch_input_tokens).toContain(
+    expect(collectStep.with.batch_input_tokens).toContain('variables.batch_result_input_tokens');
+    expect(collectStep.with.batch_output_tokens).toContain('variables.batch_result_output_tokens');
+
+    // Whichever step ran, its usage is read from the same place.
+    const normalizeStep = findStepByName(workflow.steps, 'normalize_batch_result') as {
+      with: Record<string, string>;
+    };
+    expect(normalizeStep.with.batch_result_input_tokens).toContain(
       'steps.runAgent_step.output.metadata.usage.inputTokens'
     );
-    expect(collectStep.with.batch_output_tokens).toContain(
-      'steps.runAgent_step.output.metadata.usage.outputTokens'
+    expect(normalizeStep.with.batch_result_input_tokens).toContain(
+      'steps.runPrompt_step.output.metadata.usage.inputTokens'
     );
   });
 
@@ -885,7 +906,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(autoCloseGate.steps[0].with.auto_close_enabled).toBe('${{ inputs.autoCloseEnabled }}');
     // String fields use Liquid | default: (safe because empty string is the only falsy edge case
     // and neither field would be intentionally set to "")
-    expect(setStep.with.agent_id).toBe('{{ inputs.agentId | default: variables.agent_id }}');
+    // The Worker has no agent input and ignores the space's agent: it always classifies with a prompt.
+    expect(setStep.with).not.toHaveProperty('agent_id');
+    expect(setStep.with.use_prompt).toBe(true);
     expect(setStep.with.tag_prefix).toBe('{{ inputs.tagPrefix | default: variables.tag_prefix }}');
     // Worker path: suppress Agent Builder chats (output goes to the Investigation via comments)
     // and stash investigationConversationId for the gated kibana.request comment steps.
@@ -2004,21 +2027,14 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     const filterStep = findStepByName(workflow.steps, 'filter_verdicts_to_batch') as {
       with: { batch_verdicts: string };
     };
-    const { name: agentStepName } = findStepByType(workflow.steps, 'ai.agent') as { name: string };
 
     const batchAlertIds = evaluateExpression(engine, idsStep.with.batch_alert_ids, {
       foreach: { item: [{ _id: 'a1' }, { _id: 'a2' }] },
     });
     const batchVerdicts = evaluateExpression(engine, filterStep.with.batch_verdicts, {
-      variables: { batch_alert_ids: batchAlertIds },
-      steps: {
-        [agentStepName]: {
-          output: {
-            structured_output: {
-              verdicts: [{ id: 'a1' }, { id: 'other-batch-alert' }, { id: 'a2' }],
-            },
-          },
-        },
+      variables: {
+        batch_alert_ids: batchAlertIds,
+        batch_result_verdicts: [{ id: 'a1' }, { id: 'other-batch-alert' }, { id: 'a2' }],
       },
     });
 
@@ -2425,9 +2441,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
   });
 
   describe('batch_summary reconciliation', () => {
-    const { name: agentStepName } = findStepByType(workflow.steps, 'ai.agent') as { name: string };
-    const agentOutput = (batchSummary: string | null) => ({
-      [agentStepName]: { output: { structured_output: { batch_summary: batchSummary } } },
+    // The summary reaches these steps through normalize_batch_result.
+    const summaryVariables = (batchSummary: string | null) => ({
+      batch_result_summary: batchSummary ?? '',
     });
 
     it('counts distinct matched verdict ids so a repeated id cannot hide a dropped alert', () => {
@@ -2449,8 +2465,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       const evaluate = (matched: number, batchSummary: string | null, calledByWorker = true) =>
         evaluateExpression(engine, gate.condition, {
           inputs: { calledByWorker },
-          variables: { batch_matched_id_count: matched },
-          steps: agentOutput(batchSummary),
+          variables: { batch_matched_id_count: matched, ...summaryVariables(batchSummary) },
         });
 
       expect(evaluate(2, 'Hosts look benign.')).toBe(true);
@@ -2466,8 +2481,11 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       };
       const render = (matched: number) =>
         engine.parseAndRenderSync(entryStep.with.batch_summary_entry, {
-          variables: { batch_matched_id_count: matched, batch_alert_ids: ['a1', 'a2', 'a3'] },
-          steps: agentOutput('Hosts look benign.'),
+          variables: {
+            batch_matched_id_count: matched,
+            batch_alert_ids: ['a1', 'a2', 'a3'],
+            ...summaryVariables('Hosts look benign.'),
+          },
         });
 
       expect(render(3)).toBe('Hosts look benign.');
@@ -2534,5 +2552,174 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     // caller knows the summary is partial (not silently cut mid-sentence).
     expect(longSummary.length).toBeLessThanOrEqual(10000);
     expect(longSummary).toContain('[truncated]');
+  });
+
+  describe('direct prompt', () => {
+    const AGENT_STEP = 'runAgent_step';
+    const PROMPT_STEP = 'runPrompt_step';
+    const normalizeStep = findStepByName(workflow.steps, 'normalize_batch_result') as {
+      with: Record<string, string>;
+    };
+    const normalize = (steps: Record<string, unknown>) => ({
+      verdicts: evaluateExpression(engine, normalizeStep.with.batch_result_verdicts, {
+        steps,
+        consts: workflow.consts,
+      }),
+      summary: engine.parseAndRenderSync(normalizeStep.with.batch_result_summary, { steps }),
+      inputTokens: evaluateExpression(engine, normalizeStep.with.batch_result_input_tokens, {
+        steps,
+      }),
+      connectorId: engine.parseAndRenderSync(normalizeStep.with.batch_result_connector_id, {
+        steps,
+      }),
+    });
+
+    it.each([
+      { usePrompt: false, expected: { agent: true, prompt: false } },
+      { usePrompt: true, expected: { agent: false, prompt: true } },
+      // A runtime config without the field must still run one of the two steps.
+      { usePrompt: undefined, expected: { agent: true, prompt: false } },
+    ])('runs exactly one of the agent and the prompt when use_prompt is $usePrompt', (testCase) => {
+      const agentStep = findStepByName(workflow.steps, 'runAgent_step') as { if: string };
+      const promptStep = findStepByName(workflow.steps, 'runPrompt_step') as { if: string };
+      const variables = { use_prompt: testCase.usePrompt };
+
+      expect({
+        agent: evaluateExpression(engine, agentStep.if, { variables }),
+        prompt: evaluateExpression(engine, promptStep.if, { variables }),
+      }).toEqual(testCase.expected);
+    });
+
+    it('takes use_prompt from the space settings, starting with the agent so the standalone path is unchanged', () => {
+      const init = findStepByName(workflow.steps, 'set_workflow_variables') as {
+        with: Record<string, unknown>;
+      };
+      const runtime = findStepByName(workflow.steps, 'set_runtime_config_variables') as {
+        with: Record<string, string>;
+      };
+
+      expect(init.with.use_prompt).toBe(false);
+      expect(runtime.with.use_prompt).toBe('${{ steps.fetch_runtime_config.output.usePrompt }}');
+    });
+
+    it('lists both connector fields on the prompt, like the agent, so either path can set one', () => {
+      const promptStep = findStepByName(workflow.steps, 'runPrompt_step') as Record<
+        string,
+        unknown
+      >;
+
+      expect(promptStep['connector-id']).toBe('{{ variables.connector_id }}');
+      expect(promptStep['connector-id-by-feature']).toBe('{{ variables.connector_id_by_feature }}');
+    });
+
+    it('accepts the same large reply as the agent', () => {
+      const agentStep = findStepByName(workflow.steps, 'runAgent_step') as Record<string, unknown>;
+      const promptStep = findStepByName(workflow.steps, 'runPrompt_step') as Record<
+        string,
+        unknown
+      >;
+
+      expect(promptStep['max-step-size']).toBe('10mb');
+      expect(promptStep['max-step-size']).toBe(agentStep['max-step-size']);
+    });
+
+    it('reports no agent in the output when the prompt classified the batches', () => {
+      const outputStep = findStepByName(workflow.steps, 'emit_workflow_output') as {
+        with: { agent_id: string };
+      };
+      const agentIdFor = (use_prompt: boolean) =>
+        engine.parseAndRenderSync(outputStep.with.agent_id, {
+          variables: { use_prompt, agent_id: 'elastic-ai-agent' },
+        });
+
+      expect(agentIdFor(true)).toBe('');
+      expect(agentIdFor(false)).toBe('elastic-ai-agent');
+    });
+
+    it('sends the same message and expects the same structured reply as the agent', () => {
+      const agentStep = findStepByName(workflow.steps, 'runAgent_step') as {
+        with: { message: string; schema: unknown };
+      };
+      const promptStep = findStepByName(workflow.steps, 'runPrompt_step') as {
+        with: { prompt: string; schema: unknown };
+      };
+
+      expect(promptStep.with.prompt).toBe(agentStep.with.message);
+      // The one difference is the summary length limit, see the next test.
+      const withPromptSummaryLimit = structuredClone(agentStep.with.schema) as {
+        properties: { batch_summary: Record<string, unknown> };
+      };
+      withPromptSummaryLimit.properties.batch_summary.maxLength = 1000;
+      expect(promptStep.with.schema).toEqual(withPromptSummaryLimit);
+    });
+
+    it('allows a summary longer than the prompt asks for and cuts a runaway one', () => {
+      const promptStep = findStepByName(workflow.steps, 'runPrompt_step') as {
+        with: { schema: { properties: { batch_summary: { maxLength?: number } } } };
+      };
+      // Looser than the agent's 500: models write about 500 and a reply over the limit is rejected
+      // whole. Measured replies reached 655 characters.
+      expect(promptStep.with.schema.properties.batch_summary.maxLength).toBe(1000);
+
+      const summary = 'word '.repeat(400);
+      const result = normalize({
+        [PROMPT_STEP]: {
+          output: { content: { verdicts: [{ id: 'a1' }], batch_summary: summary } },
+        },
+      });
+
+      expect(result.summary.length).toBe(1000);
+      expect(result.verdicts).toEqual([{ id: 'a1' }]);
+    });
+
+    it('keeps a summary within the limit as it is', () => {
+      const result = normalize({
+        [PROMPT_STEP]: {
+          output: { content: { verdicts: [{ id: 'a1' }], batch_summary: 'Looks benign.' } },
+        },
+      });
+
+      expect(result.summary).toBe('Looks benign.');
+    });
+
+    it('reads the verdicts, summary, tokens and connector from the agent when it ran', () => {
+      const result = normalize({
+        [AGENT_STEP]: {
+          output: {
+            structured_output: { verdicts: [{ id: 'a1' }], batch_summary: 'Looks benign.' },
+            metadata: { usage: { inputTokens: 120, outputTokens: 30, connectorId: 'connector-1' } },
+          },
+        },
+      });
+
+      expect(result).toEqual({
+        verdicts: [{ id: 'a1' }],
+        summary: 'Looks benign.',
+        inputTokens: 120,
+        connectorId: 'connector-1',
+      });
+    });
+
+    it('reads them from the prompt when it ran', () => {
+      const result = normalize({
+        [PROMPT_STEP]: {
+          output: {
+            content: { verdicts: [{ id: 'a1' }, { id: 'a2' }], batch_summary: 'Two hosts.' },
+            metadata: { usage: { inputTokens: 80, outputTokens: 25, connectorId: 'connector-2' } },
+          },
+        },
+      });
+
+      expect(result).toEqual({
+        verdicts: [{ id: 'a1' }, { id: 'a2' }],
+        summary: 'Two hosts.',
+        inputTokens: 80,
+        connectorId: 'connector-2',
+      });
+    });
+
+    it('reads a batch whose call failed as no verdicts', () => {
+      expect(normalize({})).toEqual({ verdicts: [], summary: '', inputTokens: 0, connectorId: '' });
+    });
   });
 });
