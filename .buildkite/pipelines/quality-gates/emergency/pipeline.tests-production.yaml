@@ -4,6 +4,7 @@
 
 steps:
   - label: ':kibana: SLO check (60 minutes)'
+    key: kibana-slo-check
     trigger: 'serverless-quality-gates' # https://buildkite.com/elastic/serverless-quality-gates
     build:
       message: '${BUILDKITE_MESSAGE} (triggered by pipeline.tests-production.yaml)'
@@ -17,6 +18,7 @@ steps:
     soft_fail: true
 
   - label: ':kibana: Alerts check'
+    key: kibana-alerts-check
     trigger: 'serverless-quality-gates' # https://buildkite.com/elastic/serverless-quality-gates
     build:
       message: '${BUILDKITE_MESSAGE} (triggered by pipeline.tests-production.yaml)'
@@ -63,16 +65,17 @@ steps:
 
   - label: ':memo: Notify documentation release-notes automation'
     if: build.env("ENVIRONMENT") == "production-noncanary" && build.env("DEPLOYMENT_SLICES") =~ /(^|.*, *)production-noncanary-ds-5( *,.*|$$)/
+    depends_on:
+      - kibana-slo-check
+      - kibana-alerts-check
     soft_fail: true
-    trigger: docs-release-notes # https://buildkite.com/elastic/docs-release-notes
-    async: true
-    build:
-      message: '${BUILDKITE_MESSAGE} (triggered by pipeline.tests-production.yaml)'
-      env:
-        SERVICE: kibana
-        SERVICE_VERSION: ${SERVICE_VERSION:-""}
-        ENVIRONMENT: ${ENVIRONMENT:-""}
-        DEPLOYMENT_SLICES: ${DEPLOYMENT_SLICES:-""}
+    # The checks above are soft_fail, so depends_on alone also runs this step after a failed check.
+    # The script reads the outcome of the checks and triggers the docs pipeline only if they passed.
+    command: .buildkite/scripts/pipelines/quality_gates/notify_docs_release_notes.sh kibana kibana-slo-check kibana-alerts-check
+    env:
+      SERVICE_VERSION: ${SERVICE_VERSION:-""}
+      ENVIRONMENT: ${ENVIRONMENT:-""}
+      DEPLOYMENT_SLICES: ${DEPLOYMENT_SLICES:-""}
 
   - input: 'Cancel bake time step early?'
     if: build.env("ENVIRONMENT") == "production-canary"
