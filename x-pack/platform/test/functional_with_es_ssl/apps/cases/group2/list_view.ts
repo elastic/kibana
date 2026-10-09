@@ -306,10 +306,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           category: 'foobar',
           description: 'lots of information about an incident',
         });
-        const case2 = await cases.api.createCase({ title: 'test2', tags: ['two'] });
+        // The default description embeds a random UUID, which ID searches can match.
+        const case2 = await cases.api.createCase({
+          title: 'test2',
+          tags: ['two'],
+          description: 'second description',
+        });
         const case3 = await cases.api.createCase({
           title: case2.id,
           assignees: [{ uid: profiles[0].uid }],
+          description: 'third description',
         });
         const case4 = await cases.api.createCase({
           title: 'test4',
