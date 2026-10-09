@@ -1124,6 +1124,7 @@ describe('handleInstallPackageFailure', () => {
 
   beforeEach(() => {
     mockedLogger.error.mockClear();
+    mockedLogger.warn.mockClear();
     jest.mocked(installStateMachine._stateMachineInstallPackage).mockClear();
     jest.mocked(installStateMachine._stateMachineInstallPackage).mockClear();
     mockGetBundledPackageByPkgKey.mockReset();
@@ -1271,6 +1272,42 @@ describe('handleInstallPackageFailure', () => {
             packageInfo: expect.objectContaining({ name: pkgName, version: '1.0.0' }),
           }),
         })
+      );
+    });
+
+    it('should not rollback and should warn when the error is an Elasticsearch read-only block', async () => {
+      const installedPkg: SavedObject<Installation> = {
+        id: 'test-package',
+        references: [],
+        attributes: {
+          name: pkgName,
+          version: '1.0.0',
+          install_version: '1.0.0',
+          format_version: '1.0.0',
+          title: 'Test Package',
+          description: 'A package for testing',
+          owner: {
+            github: 'elastic',
+          },
+        },
+      } as any;
+
+      await handleInstallPackageFailure({
+        savedObjectsClient,
+        error: new Error(
+          'Error installing test_package-2.0.0: [ResponseError: index [.kibana_ingest_9.0.0_001] blocked by: [TOO_MANY_REQUESTS/12/disk usage exceeded flood-stage watermark, index has read-only-allow-delete block]: cluster_block_exception]'
+        ),
+        esClient: {} as ElasticsearchClient,
+        installedPkg,
+        pkgName,
+        pkgVersion: '2.0.0',
+        spaceId: 'default',
+      });
+
+      expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
+      expect(mockedLogger.error).not.toHaveBeenCalled();
+      expect(mockedLogger.warn).toHaveBeenCalledWith(
+        expect.stringMatching(/Skipping retry\/rollback for test_package-2\.0\.0/)
       );
     });
   });
@@ -1456,6 +1493,42 @@ describe('handleInstallPackageFailure', () => {
       });
 
       expect(installStateMachine._stateMachineInstallPackage).not.toBeCalled();
+    });
+
+    it('should not retry and should warn when the error is an Elasticsearch read-only block', async () => {
+      const installedPkg: SavedObject<Installation> = {
+        id: 'test-package',
+        references: [],
+        attributes: {
+          name: pkgName,
+          version: '2.0.0',
+          install_version: '2.0.0',
+          format_version: '2.0.0',
+          title: 'Test Package',
+          description: 'A package for testing',
+          owner: {
+            github: 'elastic',
+          },
+        },
+      } as any;
+
+      await handleInstallPackageFailure({
+        savedObjectsClient,
+        error: new Error(
+          'index [.kibana_ingest_9.0.0_001] blocked by: [TOO_MANY_REQUESTS/12/disk usage exceeded flood-stage watermark, index has read-only-allow-delete block]: cluster_block_exception'
+        ),
+        esClient: {} as ElasticsearchClient,
+        installedPkg,
+        pkgName,
+        pkgVersion: '2.0.0',
+        spaceId: 'default',
+      });
+
+      expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
+      expect(mockedLogger.error).not.toHaveBeenCalled();
+      expect(mockedLogger.warn).toHaveBeenCalledWith(
+        expect.stringMatching(/Skipping retry\/rollback for test_package-2\.0\.0/)
+      );
     });
   });
 });
