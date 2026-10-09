@@ -632,7 +632,8 @@ steps:
                 or steps.fetch_rule.output.type == 'eql'
                 or steps.fetch_rule.output.type == 'esql'
                 or steps.fetch_rule.output.type == 'new_terms'
-                or steps.fetch_rule.output.type == 'threat_match'))
+                or steps.fetch_rule.output.type == 'threat_match'
+                or steps.fetch_rule.output.type == 'threshold'))
             or (steps.diagnose_rule.output.structured_output.change_type == 'exception'
               and (steps.fetch_rule.output.type == 'query'
                 or steps.fetch_rule.output.type == 'eql'
