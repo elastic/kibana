@@ -16,7 +16,9 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart, ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
+import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import type {
+  Investigation as SharedInvestigation,
   InvestigationSubject as StoredInvestigationSubject,
   SlackSeenEvent,
   SlackThreadSubject,
@@ -32,6 +34,12 @@ import { investigationStateSchema } from '@kbn/significant-events-schema';
 import { assertNever } from '@kbn/std';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
+import {
+  validateNotificationDestination,
+  type NotifiableInvestigation,
+} from '../lib/notifications/notification_delivery';
+import { investigationNotificationDestinationsSchema } from '../../common/schemas';
+import type { InvestigationNotificationDestination } from '../../common/schemas';
 import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_investigation_workflow_execution';
 import type { InvestigationQuotaCallback } from '../types';
 import type {
@@ -39,7 +47,6 @@ import type {
   AlertSnapshot,
   GetInvestigationResponse,
   InvestigationContext,
-  InvestigationStatus,
   InvestigationSubject,
   InvestigationSubjectType,
   InvestigationTriggerType,
@@ -54,6 +61,7 @@ import {
   alertInvestigationContextSchema,
   DEFAULT_INVESTIGATION_TRIGGER_TYPE,
   freeFormContextSchema,
+  isTerminalStatus,
 } from '../../common';
 import type {
   InvestigationAttributes,
@@ -92,10 +100,6 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
 
 function asString(v: unknown): string | undefined {
   return typeof v === 'string' ? v || undefined : undefined;
-}
-
-function isTerminalStatus(status: InvestigationStatus): boolean {
-  return status === 'completed' || status === 'failed' || status === 'cancelled';
 }
 
 /** Used when persist omitted `error`. */
@@ -334,6 +338,28 @@ const toListInvestigationItem = (record: ListInvestigationRecord): ListInvestiga
   impact: record.impact,
 });
 
+/**
+ * A lifecycle message's view of an investigation. Until Agent Builder titles it, the title is the
+ * run's `title` input; the first pending proposal stands in for the top recommendation.
+ */
+const toNotifiableInvestigation = (
+  { id, title, title_pending: titlePending, metadata, impact, proposals }: SharedInvestigation,
+  fallbackTitle: string | undefined
+): NotifiableInvestigation => ({
+  investigation_id: id,
+  title: titlePending ? fallbackTitle ?? '' : title,
+  ...(metadata.severity && { severity: metadata.severity }),
+  ...(metadata.summary && { summary: metadata.summary }),
+  ...(impact && {
+    impact: {
+      entities: impact.entities.map(({ id: entityId, name }) => ({ name: name ?? entityId })),
+    },
+  }),
+  recommendations: proposals
+    .filter(({ status }) => status === 'pending')
+    .map(({ title: proposalTitle }) => ({ title: proposalTitle })),
+});
+
 const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationResponse => {
   const recommendations = investigationStateSchema.shape.recommendations.safeParse(
     record.recommendations
@@ -467,6 +493,7 @@ export class NightshiftInvestigationsClient {
     stream_names,
     connector_id,
     context = {},
+    notificationDestinations,
   }: StartInvestigationRequest): Promise<StartInvestigationResponse> {
     if (!(await this.checkInfrastructureAvailability())) {
       throw new InvestigationUnavailableError('Investigations are not available');
@@ -475,6 +502,11 @@ export class NightshiftInvestigationsClient {
     if (!this.inference || !this.savedObjects || !this.uiSettings) {
       throw new InvestigationUnavailableError('Investigations are not available');
     }
+
+    const parsedNotificationDestinations = investigationNotificationDestinationsSchema
+      .optional()
+      .parse(notificationDestinations);
+    parsedNotificationDestinations?.forEach(validateNotificationDestination);
 
     const resolvedConnectorId = await resolveNightshiftModelForRequest({
       request: this.request,
@@ -558,6 +590,9 @@ export class NightshiftInvestigationsClient {
       ...(connector_id?.trim() ? { connector_id: resolvedConnectorId } : {}),
       investigation_id: investigationId,
       subjects: newSubjects,
+      ...(parsedNotificationDestinations?.length
+        ? { notificationDestinations: parsedNotificationDestinations }
+        : {}),
       context: {
         ...prepared.context,
         source: resolvedSubject.type,
@@ -726,25 +761,13 @@ export class NightshiftInvestigationsClient {
    * caller cannot create or reopen an investigation without a run to work on it.
    */
   async ensureOrCreate(investigationId: string, executionId = investigationId): Promise<string> {
-    const { workflowsManagement, agentBuilder, agenticInvestigations } = this.requireWriteDeps();
+    const { agentBuilder, agenticInvestigations } = this.requireWriteDeps();
 
-    const execution = await workflowsManagement.management.getWorkflowExecution(
-      executionId,
-      this.getSpaceId(),
-      { includeOutput: false, request: this.request }
+    const { execution, inputs } = await this.readInvestigationExecution(
+      investigationId,
+      executionId
     );
-    const inputs =
-      isPlainObject(execution?.context) && isPlainObject(execution?.context.inputs)
-        ? execution?.context.inputs
-        : undefined;
-
-    if (
-      !execution ||
-      !isInvestigationWorkflowExecution(execution) ||
-      TerminalExecutionStatuses.includes(execution.status) ||
-      // The investigation the run works on: its `investigation_id` input, or itself without one.
-      (asString(inputs?.investigation_id) ?? executionId) !== investigationId
-    ) {
+    if (TerminalExecutionStatuses.includes(execution.status)) {
       throw new InvestigationNotFoundError(investigationId);
     }
 
@@ -794,6 +817,78 @@ export class NightshiftInvestigationsClient {
     }
 
     return conversation.id;
+  }
+
+  /**
+   * Reads a run of the investigation workflow that works on this investigation: its
+   * `investigation_id` input, or the run itself without one. Throws not found for a missing run,
+   * another workflow's run, or a run of another investigation.
+   */
+  private async readInvestigationExecution(investigationId: string, executionId: string) {
+    const { workflowsManagement } = this.requireWriteDeps();
+    const execution = await workflowsManagement.management.getWorkflowExecution(
+      executionId,
+      this.getSpaceId(),
+      { includeOutput: false, request: this.request }
+    );
+    const inputs =
+      isPlainObject(execution?.context) && isPlainObject(execution?.context.inputs)
+        ? execution?.context.inputs
+        : undefined;
+
+    if (
+      !execution ||
+      !isInvestigationWorkflowExecution(execution) ||
+      (asString(inputs?.investigation_id) ?? executionId) !== investigationId
+    ) {
+      throw new InvestigationNotFoundError(investigationId);
+    }
+    return { execution, inputs };
+  }
+
+  /**
+   * What `nightshift.sendNotifications` needs for a lifecycle phase of a run: the investigation as
+   * the shared query API reads it, its conversation, and the notification destinations the run was
+   * started with. The run must be a run of the investigation workflow that works on this
+   * investigation; a completed run may be replayed. The started phase merges the destinations into
+   * the routing attachment, so follow-up runs can omit them.
+   */
+  async getInvestigationExecutionContext(
+    investigationId: string,
+    executionId: string
+  ): Promise<{
+    investigation: NotifiableInvestigation;
+    conversationId: string;
+    workflowId: string;
+    notificationDestinations: InvestigationNotificationDestination[];
+  }> {
+    const { agenticInvestigations } = this.requireWriteDeps();
+    const { execution, inputs } = await this.readInvestigationExecution(
+      investigationId,
+      executionId
+    );
+    const notificationDestinations =
+      investigationNotificationDestinationsSchema
+        .optional()
+        .parse(inputs?.notificationDestinations) ?? [];
+    notificationDestinations.forEach(validateNotificationDestination);
+
+    const investigation = await agenticInvestigations
+      .getInvestigationsClient(this.request)
+      .get(investigationId)
+      .catch((error: unknown) => {
+        if (isConversationNotFoundError(error)) {
+          throw new InvestigationNotFoundError(investigationId);
+        }
+        throw error;
+      });
+
+    return {
+      investigation: toNotifiableInvestigation(investigation, asString(inputs?.title)),
+      conversationId: investigation.id,
+      workflowId: execution.workflowId ?? NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      notificationDestinations,
+    };
   }
 
   /**

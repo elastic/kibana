@@ -33,6 +33,18 @@ describe('WORKER_ROLE_DEFINITIONS', () => {
   });
 
   it.each(Object.values(WORKER_ROLE_DEFINITIONS))(
+    'never grants $name read on Elastic AI indices, which would bypass their document filter',
+    ({ role }) => {
+      const elasticAiIndexReads = role.elasticsearch.indices.filter(
+        ({ names, privileges }) =>
+          names.some((name) => /^\.ai-index-(idx|ds)-/.test(name)) &&
+          privileges.some((privilege) => ['read', 'all'].includes(privilege))
+      );
+      expect(elasticAiIndexReads).toEqual([]);
+    }
+  );
+
+  it.each(Object.values(WORKER_ROLE_DEFINITIONS))(
     'grants $name the common baseline in every space',
     ({ role }) => {
       expect(role.elasticsearch.cluster).toEqual(['monitor_inference']);
@@ -42,7 +54,7 @@ describe('WORKER_ROLE_DEFINITIONS', () => {
       });
       expect(role.elasticsearch.indices).toContainEqual({
         names: ['.ai-index-idx-elastic-index'],
-        privileges: ['read', 'view_index_metadata'],
+        privileges: ['view_index_metadata'],
       });
       expect(role.kibana).toHaveLength(1);
       expect(role.kibana[0].spaces).toEqual(['*']);

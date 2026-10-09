@@ -24,6 +24,7 @@ import {
   InvestigationQuotaDeniedError,
   InvestigationUnavailableError,
   InvalidInvestigationContextError,
+  InvalidNotificationDestinationError,
 } from '../client/errors';
 
 /**
@@ -64,7 +65,10 @@ export function rethrowInvestigationClientError(error: unknown): never {
   if (error instanceof InvestigationQuotaDeniedError) {
     throw tooManyRequests(error.message);
   }
-  if (error instanceof InvalidInvestigationContextError) {
+  if (
+    error instanceof InvalidInvestigationContextError ||
+    error instanceof InvalidNotificationDestinationError
+  ) {
     throw badRequest(error.message);
   }
   if (error instanceof InvestigationUnavailableError) {

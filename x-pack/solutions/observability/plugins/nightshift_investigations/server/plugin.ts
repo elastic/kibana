@@ -22,7 +22,9 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
 import type { NightshiftInvestigationsConfig } from './config';
+import { InvestigationLocatorDefinition } from '../common/locators';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
@@ -37,6 +39,10 @@ import {
   isInvestigationRunAvailable,
 } from './is_investigation_available';
 import { ensureInvestigationAgentStepDefinition } from './step_definitions/ensure_investigation_agent';
+import { notificationRoutingAttachment } from './lib/notifications/notification_routing';
+import type { StoredNotificationRouting } from './lib/notifications/notification_routing';
+import { NotificationRoutingClient } from './lib/notifications/notification_routing_client';
+import { sendNotificationsStepDefinition } from './step_definitions/send_notifications';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
 import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
 import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
@@ -123,6 +129,7 @@ export class NightshiftInvestigationsPlugin
   private encryptedSavedObjectsStart?: NightshiftInvestigationsStartDeps['encryptedSavedObjects'];
   private securityStart?: NightshiftInvestigationsStartDeps['security'];
   private security?: CoreStart['security'];
+  private notificationRoutingService?: InvestigationAttachmentDocService<StoredNotificationRouting>;
   private investigationAvailability?: AvailabilityConfig;
   private cortexEnabled = false;
   private memoryEnabled = false;
@@ -138,6 +145,9 @@ export class NightshiftInvestigationsPlugin
     plugins: NightshiftInvestigationsSetupDeps
   ): NightshiftInvestigationsServerSetup {
     this.workflowsManagement = plugins.workflowsManagement;
+    const investigationLocator = plugins.share.url.locators.create(
+      new InvestigationLocatorDefinition()
+    );
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
     const telemetry = setupNightshiftTelemetry({
       analytics: core.analytics,
@@ -209,6 +219,18 @@ export class NightshiftInvestigationsPlugin
     );
 
     if (plugins.agentBuilder) {
+      notificationRoutingAttachment.registerAttachmentType(plugins.agentBuilder, {
+        getService: () => this.getNotificationRoutingService(),
+        assertCanRead: async () => {},
+        assertCanReadConversation: async (request, conversationId) => {
+          if (!this.agentBuilder) {
+            throw new Error('agentBuilder is not available');
+          }
+          const conversations = await this.agentBuilder.conversations.getScopedClient({ request });
+          await conversations.get(conversationId);
+        },
+        logger: this.logger,
+      });
       const config = this.ctx.config.get();
       const telemetryConnectorId = config.sandbox?.telemetry_connector_id;
       registerInvestigationAgentType(plugins.agentBuilder, {
@@ -326,6 +348,14 @@ export class NightshiftInvestigationsPlugin
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             logger: this.logger.get('resolve_model'),
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          sendNotificationsStepDefinition({
+            investigationLocator,
+            getInvestigationsClient: this.getInvestigationsClient,
+            getActions: () => this.actionsStart,
+            getRoutingClient: this.getNotificationRoutingClient,
           })
         );
         // Registered even when disabled: the combined workflow no-ops a writer branch instead
@@ -496,6 +526,10 @@ export class NightshiftInvestigationsPlugin
     this.encryptedSavedObjectsStart = plugins.encryptedSavedObjects;
     this.securityStart = plugins.security;
     this.security = coreStart.security;
+    this.notificationRoutingService = notificationRoutingAttachment.createService({
+      esClient: coreStart.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+    });
 
     // Installed here so the agent is visible in the Agent Builder UI before the first run.
     if (plugins.agentBuilder) {
@@ -624,6 +658,40 @@ export class NightshiftInvestigationsPlugin
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,
         }),
+    });
+  };
+
+  private getNotificationRoutingService =
+    (): InvestigationAttachmentDocService<StoredNotificationRouting> => {
+      if (!this.notificationRoutingService) {
+        throw new Error('Notification routing storage is not available');
+      }
+      return this.notificationRoutingService;
+    };
+
+  private getNotificationRoutingClient = async (
+    request: KibanaRequest,
+    spaceId: string,
+    conversationId: string,
+    investigationId: string
+  ): Promise<NotificationRoutingClient> => {
+    if (!this.agentBuilder) {
+      throw new Error('agentBuilder is not available');
+    }
+    if (request.spaceId !== spaceId) {
+      throw new Error('Notification request and execution spaces do not match');
+    }
+    const [attachments, conversations] = await Promise.all([
+      this.agentBuilder.attachments.getScopedClient({ request }),
+      this.agentBuilder.conversations.getScopedClient({ request }),
+    ]);
+    return new NotificationRoutingClient({
+      service: this.getNotificationRoutingService(),
+      attachments,
+      conversations,
+      spaceId,
+      conversationId,
+      investigationId,
     });
   };
 

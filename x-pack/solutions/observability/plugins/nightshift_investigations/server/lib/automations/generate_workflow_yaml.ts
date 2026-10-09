@@ -6,6 +6,7 @@
  */
 
 import { stringify } from 'yaml';
+import type { InvestigationNotificationDestination } from '../../../common';
 import type { NightshiftAutomationAttributes, NightshiftTriggerRow, OverlapPolicy } from './types';
 
 // alerting.alertStatusChanged uses 'active'/'recovered'; our AlertStatus uses 'active'/'inactive'.
@@ -13,6 +14,10 @@ const ALERT_STATUS_TO_KQL: Record<string, string> = {
   active: 'active',
   inactive: 'recovered',
 };
+
+// Defaults to the Elastic Slack app when no connector is selected; the channel remains user-selected.
+// Mirrors significant_events/server/lib/slack_app/service.ts, which depends on this plugin.
+const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
 
 // Maps our OverlapPolicy type to workflow engine concurrency strategy strings.
 const OVERLAP_POLICY_TO_STRATEGY: Record<OverlapPolicy, string> = {
@@ -45,6 +50,7 @@ export function generateWorkflowYaml(
   const strategy = automation.runtime.overlapPolicy
     ? OVERLAP_POLICY_TO_STRATEGY[automation.runtime.overlapPolicy]
     : 'drop';
+  const notificationDestinations = buildNotificationDestinations(automationId, automation);
 
   const workflowObj: Record<string, unknown> = {
     name: automation.name,
@@ -71,12 +77,43 @@ export function generateWorkflowYaml(
           ...(automation.execution.promptTemplate
             ? { message: automation.execution.promptTemplate }
             : {}),
+          ...(notificationDestinations ? { notificationDestinations } : {}),
         },
       },
     ],
   };
 
   return stringify(workflowObj, { lineWidth: 0 });
+}
+
+/**
+ * The Slack destination the investigation posts its outcome to, copied onto the run so delivery
+ * needs no automation lookup. Only `channel` mode is emitted: `thread` mode needs the triggering
+ * Slack message (`event.channel`, `event.threadId | default: event.messageId`, `event.connectorId`),
+ * which no current trigger row provides; rendering those on an alert trigger would produce empty
+ * strings and the investigation step would reject the run.
+ */
+function buildNotificationDestinations(
+  automationId: string,
+  automation: NightshiftAutomationAttributes
+): InvestigationNotificationDestination[] | undefined {
+  const { completion } = automation;
+  if (
+    completion.action !== 'post_to_slack' ||
+    completion.targetMode !== 'channel' ||
+    !completion.destination
+  ) {
+    return undefined;
+  }
+  return [
+    {
+      type: 'slack',
+      connector_id: completion.connectorId ?? ELASTIC_APPS_SLACK_CONNECTOR_ID,
+      params: { channel: completion.destination },
+      automation_id: automationId,
+      automation_name: automation.name,
+    },
+  ];
 }
 
 function buildTriggers(

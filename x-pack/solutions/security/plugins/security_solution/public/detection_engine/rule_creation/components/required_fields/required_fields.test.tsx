@@ -187,6 +187,34 @@ describe('RequiredFields form part', () => {
     expect(firstRowNameOptions).toEqual(['field1', 'field3']);
   });
 
+  it('user can select a field name freed up in another row', async () => {
+    const initialState = [
+      { name: 'field1', type: 'string' },
+      { name: 'field2', type: 'keyword' },
+    ];
+
+    const indexPatternFields: DataViewFieldBase[] = [
+      createIndexPatternField({ name: 'field1', esTypes: ['string'] }),
+      createIndexPatternField({ name: 'field2', esTypes: ['keyword'] }),
+      createIndexPatternField({ name: 'field3', esTypes: ['date'] }),
+    ];
+
+    render(<TestForm initialState={initialState} indexPatternFields={indexPatternFields} />);
+
+    const secondRowNameOptions = await getDropdownOptions(getSelectToggleButtonForName('field2'));
+    expect(secondRowNameOptions).toEqual(['field2', 'field3']);
+
+    await selectEuiComboBoxOption({
+      comboBoxToggleButton: getSelectToggleButtonForName('field1'),
+      optionText: 'field3',
+    });
+
+    const updatedSecondRowNameOptions = await getDropdownOptions(
+      getSelectToggleButtonForName('field2')
+    );
+    expect(updatedSecondRowNameOptions).toEqual(['field2', 'field1']);
+  });
+
   it('adding a new required field is disabled when index patterns are loading', async () => {
     render(<TestForm indexPatternFields={undefined} isIndexPatternLoading={true} />);
 
@@ -456,6 +484,193 @@ describe('RequiredFields form part', () => {
       expect(handleSubmit).toHaveBeenCalledWith({
         data: [{ name: '', type: '' }],
         isValid: true,
+      });
+    });
+  });
+
+  describe('folding long lists', () => {
+    const longInitialState = Array.from({ length: 20 }, (_, i) => ({
+      name: `field${i}`,
+      type: 'keyword',
+    }));
+
+    it('shows only the first 15 required fields', () => {
+      render(<TestForm initialState={longInitialState} />);
+
+      expect(screen.getByDisplayValue('field14')).toBeVisible();
+      expect(screen.queryByDisplayValue('field15')).not.toBeInTheDocument();
+      expect(screen.getByTestId('toggleRequiredFieldsFoldButton')).toHaveTextContent('Show 5 more');
+    });
+
+    it('shows and hides the folded required fields', async () => {
+      render(<TestForm initialState={longInitialState} />);
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('toggleRequiredFieldsFoldButton'));
+      });
+
+      expect(screen.getByDisplayValue('field19')).toBeVisible();
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('toggleRequiredFieldsFoldButton'));
+      });
+
+      expect(screen.queryByDisplayValue('field19')).not.toBeInTheDocument();
+    });
+
+    it('does not show the fold button for short lists', () => {
+      render(<TestForm initialState={longInitialState.slice(0, 15)} />);
+
+      expect(screen.queryByTestId('toggleRequiredFieldsFoldButton')).not.toBeInTheDocument();
+    });
+
+    it('shows a newly added required field while the list is folded', async () => {
+      render(<TestForm initialState={longInitialState} />);
+
+      await addRequiredFieldRow();
+
+      expect(screen.getByTestId('requiredFieldNameSelect-empty')).toBeVisible();
+      expect(screen.queryByDisplayValue('field15')).not.toBeInTheDocument();
+    });
+
+    it('submits folded required fields', async () => {
+      const handleSubmit = jest.fn();
+
+      render(<TestForm initialState={longInitialState} onSubmit={handleSubmit} />);
+
+      await submitForm();
+
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalledWith({
+          data: longInitialState,
+          isValid: true,
+        });
+      });
+    });
+
+    it('reveals an invalid folded required field while keeping the list folded', async () => {
+      const handleSubmit = jest.fn();
+      const initialState = [...longInitialState, { name: 'field0', type: 'keyword' }];
+
+      render(<TestForm initialState={initialState} onSubmit={handleSubmit} />);
+
+      await submitForm();
+
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalledWith(expect.objectContaining({ isValid: false }));
+      });
+
+      expect(screen.getAllByTestId('requiredFieldNameSelect-field0')).toHaveLength(2);
+      expect(screen.queryByDisplayValue('field19')).not.toBeInTheDocument();
+      expect(screen.getByTestId('toggleRequiredFieldsFoldButton')).toHaveTextContent('Show 6 more');
+    });
+
+    it('collapses the list while a revealed required field is still invalid', async () => {
+      const handleSubmit = jest.fn();
+      const initialState = [...longInitialState, { name: 'field0', type: 'keyword' }];
+
+      render(<TestForm initialState={initialState} onSubmit={handleSubmit} />);
+
+      await submitForm();
+
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalledWith(expect.objectContaining({ isValid: false }));
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('toggleRequiredFieldsFoldButton'));
+      });
+
+      expect(screen.getByTestId('requiredFieldNameCompact-field19')).toBeVisible();
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('toggleRequiredFieldsFoldButton'));
+      });
+
+      expect(screen.queryByDisplayValue('field19')).not.toBeInTheDocument();
+      expect(screen.getAllByTestId('requiredFieldNameSelect-field0')).toHaveLength(2);
+    });
+
+    it('renders unfolded rows beyond the first 15 as compact rows', async () => {
+      render(<TestForm initialState={longInitialState} />);
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('toggleRequiredFieldsFoldButton'));
+      });
+
+      expect(screen.getByTestId('requiredFieldNameSelect-field14')).toBeVisible();
+      expect(screen.getByTestId('requiredFieldNameCompact-field15')).toHaveValue('field15');
+      expect(screen.queryByTestId('requiredFieldNameSelect-field15')).not.toBeInTheDocument();
+    });
+
+    it('switches a compact row to comboboxes when its name is focused', async () => {
+      render(<TestForm initialState={longInitialState} />);
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('toggleRequiredFieldsFoldButton'));
+      });
+
+      await act(async () => {
+        fireEvent.focus(screen.getByTestId('requiredFieldNameCompact-field19'));
+      });
+
+      expect(screen.queryByTestId('requiredFieldNameCompact-field19')).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId('requiredFieldNameSelect-field19').querySelector('input')
+      ).toHaveFocus();
+    });
+
+    it('switches a compact row to comboboxes when its type is focused', async () => {
+      render(<TestForm initialState={longInitialState} />);
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('toggleRequiredFieldsFoldButton'));
+      });
+
+      await act(async () => {
+        fireEvent.focus(screen.getAllByTestId('requiredFieldTypeCompact-keyword')[0]);
+      });
+
+      expect(screen.getByTestId('requiredFieldNameSelect-field15')).toBeVisible();
+      expect(
+        screen.getAllByTestId('requiredFieldTypeSelect-keyword')[15].querySelector('input')
+      ).toHaveFocus();
+    });
+
+    it('submits a required field updated in a compact row', async () => {
+      const handleSubmit = jest.fn();
+      const indexPatternFields: DataViewFieldBase[] = [
+        createIndexPatternField({ name: 'field20', esTypes: ['keyword'] }),
+      ];
+
+      render(
+        <TestForm
+          initialState={longInitialState}
+          indexPatternFields={indexPatternFields}
+          onSubmit={handleSubmit}
+        />
+      );
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('toggleRequiredFieldsFoldButton'));
+      });
+
+      await act(async () => {
+        fireEvent.focus(screen.getByTestId('requiredFieldNameCompact-field19'));
+      });
+
+      await selectEuiComboBoxOption({
+        comboBoxToggleButton: getSelectToggleButtonForName('field19'),
+        optionText: 'field20',
+      });
+
+      await submitForm();
+
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalledWith({
+          data: [...longInitialState.slice(0, 19), { name: 'field20', type: 'keyword' }],
+          isValid: true,
+        });
       });
     });
   });

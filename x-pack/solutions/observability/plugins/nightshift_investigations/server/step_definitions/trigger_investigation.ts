@@ -14,7 +14,10 @@ import {
 } from '@kbn/significant-events-schema';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { INVESTIGATION_TRIGGER_TYPES } from '../../common';
+import {
+  INVESTIGATION_TRIGGER_TYPES,
+  investigationNotificationDestinationsSchema,
+} from '../../common';
 import type { GetInvestigationsClient } from '../routes/types';
 
 const inputSchema = z.object({
@@ -56,6 +59,11 @@ const inputSchema = z.object({
     .describe(
       'Additional context to pass to the investigation workflow. When subject_type is "alert" this must carry an "alerts" array of alert snapshots, or the investigation is rejected.'
     ),
+  notificationDestinations: investigationNotificationDestinationsSchema
+    .optional()
+    .describe(
+      'Destinations that receive the concluded investigation. Delivery results are recorded on the investigation.'
+    ),
 });
 
 export const triggerInvestigationStepDefinition = (
@@ -91,6 +99,7 @@ export const triggerInvestigationStepDefinition = (
         message: input.message,
         stream_names: input.stream_names,
         context: input.context,
+        notificationDestinations: input.notificationDestinations,
       });
       return { output: result };
     },

@@ -11,6 +11,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   createConversationAlreadyExistsError,
+  createConversationNotFoundError,
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
@@ -23,6 +24,7 @@ import {
   NIGHTSHIFT_DEFAULT_MODELS,
   NightshiftModelNotFoundError,
 } from '@kbn/significant-events-schema';
+import type { StartInvestigationRequest } from '../../common';
 import { freeFormContextSchema } from '../../common/schemas';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import type {
@@ -80,7 +82,7 @@ const subjectsClient = {
   listByConversationIds: jest.fn(),
   claimSubjects: jest.fn(),
 };
-const agenticInvestigationsClient = { findOpenBySubjects: jest.fn() };
+const agenticInvestigationsClient = { findOpenBySubjects: jest.fn(), get: jest.fn() };
 
 const mockAgenticInvestigations = {
   getSubjectsClient: jest.fn().mockReturnValue(subjectsClient),
@@ -2125,5 +2127,162 @@ describe('NightshiftInvestigationsClient.getLifecycleSubject()', () => {
 
   it('returns undefined for an investigation without subjects', async () => {
     await expect(makeClient().getLifecycleSubject('inv-1')).resolves.toBeUndefined();
+  });
+});
+
+describe('NightshiftInvestigationsClient notification destinations', () => {
+  const destination = {
+    type: 'slack',
+    connector_id: 'slack-connector',
+    params: { channel: 'C123' },
+    automation_id: 'automation-1',
+    automation_name: 'Checkout latency',
+  };
+
+  beforeEach(() => {
+    mockManagement.getWorkflow.mockResolvedValue({
+      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      enabled: true,
+      valid: true,
+      definition: { steps: [] },
+    });
+    mockManagement.runWorkflow.mockResolvedValue('exec-1');
+  });
+
+  const startManual = (extra: Pick<StartInvestigationRequest, 'notificationDestinations'> = {}) =>
+    makeClient().start({
+      subject: { type: 'manual', id: 'question' },
+      message: 'Why is checkout slow?',
+      trigger_type: 'manual',
+      ...extra,
+    });
+
+  it('start() passes the destinations to the workflow', async () => {
+    await startManual({ notificationDestinations: [destination] });
+
+    expect(mockManagement.runWorkflow.mock.calls[0][2]).toMatchObject({
+      investigation_id: 'inv-new',
+      notificationDestinations: [destination],
+    });
+  });
+
+  it('start() omits notificationDestinations from the inputs when none are given', async () => {
+    await startManual();
+
+    expect(mockManagement.runWorkflow.mock.calls[0][2]).not.toHaveProperty(
+      'notificationDestinations'
+    );
+  });
+
+  it('start() rejects an unsupported destination type before running the workflow', async () => {
+    await expect(
+      startManual({ notificationDestinations: [{ ...destination, type: 'pager' }] })
+    ).rejects.toThrow('Unsupported notification type "pager"');
+    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+  });
+
+  describe('getInvestigationExecutionContext()', () => {
+    const withExecution = (
+      inputs: Record<string, unknown>,
+      workflowId = NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID
+    ) =>
+      mockManagement.getWorkflowExecution.mockResolvedValue({
+        id: 'exec-1',
+        workflowId,
+        status: ExecutionStatus.COMPLETED,
+        context: { inputs },
+      });
+    const sharedInvestigation = (overrides: Record<string, unknown> = {}) => ({
+      id: 'inv-1',
+      title: 'Checkout latency regression',
+      title_pending: false,
+      metadata: { status: 'open', severity: 'high', summary: 'p99 latency doubled.' },
+      impact: {
+        entities: [{ id: 'checkout', name: 'checkout' }, { id: 'payments' }],
+        created_at: '2026-10-09T12:00:00.000Z',
+      },
+      proposals: [
+        { id: 'p-1', title: 'Roll back', status: 'approved' },
+        { id: 'p-2', title: 'Scale out checkout', status: 'pending' },
+      ],
+      ...overrides,
+    });
+
+    it('reads the run, its destinations, and the shared investigation', async () => {
+      withExecution({ investigation_id: 'inv-1', notificationDestinations: [destination] });
+      agenticInvestigationsClient.get.mockResolvedValue(sharedInvestigation());
+
+      await expect(
+        makeClient().getInvestigationExecutionContext('inv-1', 'exec-1')
+      ).resolves.toEqual({
+        investigation: {
+          investigation_id: 'inv-1',
+          title: 'Checkout latency regression',
+          severity: 'high',
+          summary: 'p99 latency doubled.',
+          impact: { entities: [{ name: 'checkout' }, { name: 'payments' }] },
+          recommendations: [{ title: 'Scale out checkout' }],
+        },
+        conversationId: 'inv-1',
+        workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+        notificationDestinations: [destination],
+      });
+      expect(mockManagement.getWorkflowExecution).toHaveBeenCalledWith('exec-1', SPACE_ID, {
+        includeOutput: false,
+        request: mockRequest,
+      });
+    });
+
+    it('uses the run title until Agent Builder titles the investigation', async () => {
+      withExecution({ investigation_id: 'inv-1', title: 'Checkout latency' });
+      agenticInvestigationsClient.get.mockResolvedValue(
+        sharedInvestigation({ title: DEFAULT_CONVERSATION_TITLE, title_pending: true })
+      );
+
+      const { investigation, notificationDestinations } =
+        await makeClient().getInvestigationExecutionContext('inv-1', 'exec-1');
+
+      expect(investigation.title).toBe('Checkout latency');
+      expect(notificationDestinations).toEqual([]);
+    });
+
+    it.each([
+      ['another workflow', { investigation_id: 'inv-1' }, 'other-workflow'],
+      [
+        'another investigation',
+        { investigation_id: 'inv-2' },
+        NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      ],
+    ])('rejects a run of %s', async (_, inputs, workflowId) => {
+      withExecution(inputs, workflowId);
+
+      await expect(
+        makeClient().getInvestigationExecutionContext('inv-1', 'exec-1')
+      ).rejects.toThrow(InvestigationNotFoundError);
+      expect(agenticInvestigationsClient.get).not.toHaveBeenCalled();
+    });
+
+    it('rejects malformed destinations on the run', async () => {
+      withExecution({
+        investigation_id: 'inv-1',
+        notificationDestinations: [{ ...destination, params: { channel: '' } }],
+      });
+
+      await expect(
+        makeClient().getInvestigationExecutionContext('inv-1', 'exec-1')
+      ).rejects.toThrow();
+      expect(agenticInvestigationsClient.get).not.toHaveBeenCalled();
+    });
+
+    it('maps a missing conversation to InvestigationNotFoundError', async () => {
+      withExecution({ investigation_id: 'inv-1' });
+      agenticInvestigationsClient.get.mockRejectedValue(
+        createConversationNotFoundError({ conversationId: 'inv-1' })
+      );
+
+      await expect(
+        makeClient().getInvestigationExecutionContext('inv-1', 'exec-1')
+      ).rejects.toThrow(InvestigationNotFoundError);
+    });
   });
 });

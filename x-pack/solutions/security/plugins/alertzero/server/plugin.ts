@@ -19,6 +19,11 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentService } from '@kbn/fleet-plugin/server';
 import { SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED } from '@kbn/management-settings-ids';
+import {
+  ALERTZERO_ENABLED_SETTING_ID,
+  TEMPLATE_ID_ESCALATION,
+  TEMPLATE_ID_INVESTIGATION,
+} from '@kbn/alertzero-common';
 import { getSubscriptionAvailability } from '../common/availability';
 import {
   ALERTZERO_API_PRIVILEGE_READ,
@@ -166,6 +171,17 @@ export class AlertZeroPlugin
         ...listActionsTool(() => this.requireActionsService(), assertAlertZeroAccess),
       });
       agentBuilder.skills.register(createActionDiscoverySkill(assertAlertZeroAccess));
+      // `ai.conversation.updated` is opt-in, so Agent Builder only emits it where a consumer
+      // subscribes. Scoped per space, like the routes, so spaces without AlertZero stay quiet.
+      agentBuilder.conversations.enableUpdatedTrigger({
+        templateIds: [TEMPLATE_ID_INVESTIGATION, TEMPLATE_ID_ESCALATION],
+        isEnabled: async (request) => {
+          const [{ savedObjects, uiSettings }] = await coreSetup.getStartServices();
+          return uiSettings
+            .asScopedToClient(savedObjects.getScopedClient(request))
+            .get<boolean>(ALERTZERO_ENABLED_SETTING_ID);
+        },
+      });
     }
 
     registerAlertZeroInferenceFeatures(searchInferenceEndpoints, this.logger.get('inference'));
