@@ -49,6 +49,7 @@ const createWrapper =
 describe('useSorting', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
   });
 
   describe('sorting config', () => {

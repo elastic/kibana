@@ -21,4 +21,20 @@ describe('utils', function () {
       expectTemplate('{{name}}').withInput({ name }).toCompileTo('<em>Sean O&#x27;Malley</em>');
     });
   });
+
+  describe('#escapeExpression', function () {
+    it('should escape objects whose "toHTML" is not a function', function () {
+      const obj = {
+        toHTML: '<b>',
+        toString() {
+          return '<i>';
+        },
+      };
+      expect(Handlebars.Utils.escapeExpression(obj as unknown as string)).toEqual('&lt;i&gt;');
+
+      expectTemplate('{{value}}')
+        .withInput({ value: JSON.parse('{"toHTML": 1}') })
+        .toCompileTo('[object Object]');
+    });
+  });
 });

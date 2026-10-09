@@ -6,16 +6,15 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Conversation } from '@kbn/agent-builder-common';
 import {
   ConversationDetailsFlyoutHeader,
   ConversationDetailsFlyoutFooter,
   EscalationFlyoutHeader,
+  EscalationOverviewTab,
   type ConversationDetailsFlyoutFooterProps,
   OverviewTab,
 } from '../components/details';
-import { ImpactSection } from '../components/details/impact_section';
 import type { FlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
 import {
   conversationToInvestigation,
@@ -25,6 +24,9 @@ import type {
   RenderAssignees,
   RenderStatus,
   RenderLinkedInvestigations,
+  RenderOverview,
+  RenderLiveState,
+  RenderTitle,
   RenderSyncIndicator,
 } from './types';
 
@@ -47,6 +49,8 @@ export interface OverviewSlotProps extends InvestigationSlotProps {
    * host can fetch its proposals; omitted entirely (see `OverviewTab`) when the caller has none.
    */
   renderProposedActions?: (props: { conversationId: string }) => React.ReactNode;
+  /** Replaces the tab body; see `RenderOverview`. */
+  renderOverview?: RenderOverview;
   /** Renders a count shown beside the "Proposed actions" heading. */
   renderProposedActionsCount?: (props: { conversationId: string }) => React.ReactNode;
 }
@@ -55,26 +59,47 @@ export const OverviewSlot = ({
   conversation,
   groupedAttachments,
   renderProposedActions,
+  renderOverview,
   renderProposedActionsCount,
-}: OverviewSlotProps) => (
-  <OverviewTab
-    investigation={conversationToInvestigation(conversation)}
-    attachments={conversation.attachments}
-    groupedAttachments={groupedAttachments}
-    proposedActionsContent={renderProposedActions?.({ conversationId: conversation.id })}
-    proposedActionsCount={renderProposedActionsCount?.({ conversationId: conversation.id })}
-  />
-);
+}: OverviewSlotProps) => {
+  const proposedActionsContent = renderProposedActions?.({ conversationId: conversation.id });
+  const proposedActionsCount = renderProposedActionsCount?.({ conversationId: conversation.id });
+  if (renderOverview) {
+    return (
+      <>
+        {renderOverview({
+          conversation,
+          groupedAttachments,
+          proposedActionsContent,
+          proposedActionsCount,
+        })}
+      </>
+    );
+  }
+  return (
+    <OverviewTab
+      investigation={conversationToInvestigation(conversation)}
+      attachments={conversation.attachments}
+      groupedAttachments={groupedAttachments}
+      proposedActionsContent={proposedActionsContent}
+      proposedActionsCount={proposedActionsCount}
+    />
+  );
+};
 
 export interface HeaderSlotProps extends InvestigationSlotProps {
   renderAssignees?: RenderAssignees;
   renderStatus?: RenderStatus;
+  renderLiveState?: RenderLiveState;
+  renderTitle?: RenderTitle;
 }
 
 export const HeaderSlot = ({
   conversation,
   renderAssignees,
   renderStatus,
+  renderLiveState,
+  renderTitle,
   refetchConversation,
 }: HeaderSlotProps) => {
   const investigation = conversationToInvestigation(conversation);
@@ -100,6 +125,11 @@ export const HeaderSlot = ({
       investigation={investigation}
       assigneesNode={assigneesNode}
       statusNode={statusNode}
+      liveStateNode={renderLiveState?.({
+        conversationId: conversation.id,
+        severity: investigation.severity,
+      })}
+      titleNode={renderTitle?.({ conversationId: conversation.id, title: conversation.title })}
     />
   );
 };
@@ -189,34 +219,35 @@ export const EscalationHeaderSlot = ({
 
 export interface EscalationOverviewSlotProps {
   conversation: Conversation;
+  groupedAttachments: FlyoutGroupedAttachmentsRegistry;
   renderLinkedInvestigations?: RenderLinkedInvestigations;
   onOpenInvestigation: (args: { conversationId: string; agentId: string }) => void;
 }
 
 /**
- * The body tab for the escalation details flyout. Renders the linked investigations list via
- * `renderLinkedInvestigations` (supplied by the consuming plugin so it can use HTTP hooks), then
- * the Impact copied over from the linked investigations.
+ * The body tab for the escalation details flyout: the summary and grouped attachments, then the
+ * linked investigations list via `renderLinkedInvestigations` (supplied by the consuming plugin so
+ * it can use HTTP hooks), then the Impact copied over from the linked investigations. The list is
+ * omitted when no render prop is provided.
  */
 export const EscalationOverviewSlot = ({
   conversation,
+  groupedAttachments,
   renderLinkedInvestigations,
   onOpenInvestigation,
 }: EscalationOverviewSlotProps) => {
-  const { linkedInvestigationIds } = conversationToEscalationHeader(conversation);
+  const { linkedInvestigationIds, summary } = conversationToEscalationHeader(conversation);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      {renderLinkedInvestigations && (
-        <EuiFlexItem>
-          {renderLinkedInvestigations({
-            escalationId: conversation.id,
-            linkedInvestigationIds,
-            onOpenInvestigation,
-          })}
-        </EuiFlexItem>
-      )}
-      <ImpactSection attachments={conversation.attachments} />
-    </EuiFlexGroup>
+    <EscalationOverviewTab
+      summary={summary}
+      attachments={conversation.attachments}
+      groupedAttachments={groupedAttachments}
+      linkedInvestigationsContent={renderLinkedInvestigations?.({
+        escalationId: conversation.id,
+        linkedInvestigationIds,
+        onOpenInvestigation,
+      })}
+    />
   );
 };

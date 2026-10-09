@@ -15,11 +15,12 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiText,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import { SignificantEventsTuningConfigEditor } from './significant_events_tuning_config_editor';
 import { SettingsSectionRow } from './settings_section';
 import type { DetectionSettingsForm } from './use_detection_settings_form';
@@ -69,34 +70,32 @@ export const TuningSection = ({
         title={i18n.translate('xpack.nightshift.settings.tuningTitle', {
           defaultMessage: 'Significant events tuning',
         })}
+        description={
+          <p>
+            {i18n.translate('xpack.nightshift.settings.tuningInfo', {
+              defaultMessage:
+                'These settings control how features are discovered and queries are searched. Incorrect values may degrade onboarding quality or cause unexpected behavior.',
+            })}
+          </p>
+        }
         data-test-subj="nightshiftSettingsTuningPanel"
       >
-        <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              iconType="pencil"
-              onClick={() => setIsFlyoutOpen(true)}
-              aria-haspopup="dialog"
-              aria-expanded={isFlyoutOpen}
-              data-test-subj="nightshiftSettingsTuningEditButton"
-            >
-              {i18n.translate('xpack.nightshift.settings.editTuningDocument', {
-                defaultMessage: 'Edit tuning document',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              <p>
-                {i18n.translate('xpack.nightshift.settings.tuningInfo', {
-                  defaultMessage:
-                    'These settings control how features are discovered and queries are searched. Incorrect values may degrade onboarding quality or cause unexpected behavior.',
-                })}
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiButton
+          size="s"
+          iconType="pencil"
+          onClick={() => setIsFlyoutOpen(true)}
+          aria-haspopup="dialog"
+          aria-expanded={isFlyoutOpen}
+          data-test-subj="nightshiftSettingsTuningEditButton"
+          {...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.EDIT_TUNING_DOCUMENT,
+            element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+          })}
+        >
+          {i18n.translate('xpack.nightshift.settings.editTuningDocument', {
+            defaultMessage: 'Edit tuning document',
+          })}
+        </EuiButton>
       </SettingsSectionRow>
 
       {isFlyoutOpen && (
@@ -138,6 +137,10 @@ export const TuningSection = ({
                   iconType="refresh"
                   isDisabled={!canEditSettings || isSavingTuningConfig}
                   onClick={handleResetTuningConfig}
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.RESET_TUNING_DOCUMENT,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                  })}
                 >
                   {i18n.translate('xpack.nightshift.settings.resetToDefaults', {
                     defaultMessage: 'Reset to defaults',
@@ -154,6 +157,10 @@ export const TuningSection = ({
                   }
                   onClick={() => void saveTuningConfig()}
                   data-test-subj="nightshiftSettingsTuningSaveButton"
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.SAVE_TUNING_DOCUMENT,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                  })}
                 >
                   {i18n.translate('xpack.nightshift.settings.saveTuningButton', {
                     defaultMessage: 'Save',
