@@ -31,3 +31,9 @@ export const serviceAccountsServerArgs = [
  * more than a minute after its token was issued fails here.
  */
 export const serviceAccountsUiamEphemeralTokenExpiration = 'PT1M';
+
+/**
+ * Serverless only. A UIAM service account that schedules a task gets a UIAM API key and no
+ * Elasticsearch key, and Task Manager only grants UIAM keys when this is on.
+ */
+export const serviceAccountsUiamServerArgs = ['--xpack.task_manager.grant_uiam_api_keys=true'];

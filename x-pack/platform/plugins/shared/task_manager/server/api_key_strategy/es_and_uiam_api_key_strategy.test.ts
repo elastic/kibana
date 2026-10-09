@@ -392,6 +392,109 @@ describe('EsAndUiamApiKeyStrategy', () => {
       );
     });
 
+    describe('UIAM service account principals', () => {
+      const serviceAccountRequest = () =>
+        httpServerMock.createKibanaRequest({
+          headers: { authorization: 'Bearer essu_service_account_token' },
+        });
+      const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
+
+      const setUp = (typeToUse: ApiKeyType) => {
+        const strategyAndMocks = createStrategy(typeToUse);
+        const { coreStart } = strategyAndMocks;
+        (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+          username: 'sa-id',
+          authentication_type: 'token',
+        });
+        (coreStart.security.authc.getPrincipal as jest.Mock).mockReturnValue({
+          type: 'service_account',
+          serviceAccountId: 'sa-id',
+          variant: 'uiam',
+        });
+        hasApiKeyMock.mockReturnValue(false);
+        return strategyAndMocks;
+      };
+
+      test('grants only a UIAM key for a request that is not cloned, even when typeToUse is ES', async () => {
+        const { strategy, coreStart, mockUiam } = setUp(ApiKeyType.ES);
+        mockUiam.grant.mockResolvedValueOnce({
+          id: 'sa-uiam-id',
+          name: 'test',
+          api_key: 'essu_sa-secret',
+        });
+
+        const result = await strategy.grantApiKeys(
+          tasks,
+          serviceAccountRequest(),
+          coreStart.security
+        );
+
+        expect(createApiKeyMock).not.toHaveBeenCalled();
+        expect(mockUiam.grant).toHaveBeenCalledTimes(1);
+        expect(result.get('task-1')).toEqual({
+          uiamApiKey: 'essu_sa-secret',
+          userScope: expect.objectContaining({
+            apiKeyId: 'sa-uiam-id',
+            uiamApiKeyId: 'sa-uiam-id',
+            apiKeyCreatedByUser: false,
+            userName: 'sa-id',
+          }),
+        });
+      });
+
+      test('rethrows the UIAM grant error, even when typeToUse is ES', async () => {
+        const { strategy, coreStart, mockUiam } = setUp(ApiKeyType.ES);
+        const refusal = new Error('Unable to grant an API key for service account [sa-id]');
+        mockUiam.grant.mockRejectedValueOnce(refusal);
+
+        await expect(
+          strategy.grantApiKeys(tasks, serviceAccountRequest(), coreStart.security)
+        ).rejects.toBe(refusal);
+        expect(createApiKeyMock).not.toHaveBeenCalled();
+      });
+
+      test('keeps the ES path when the caller asks for an ES key only', async () => {
+        const { strategy, coreStart, mockUiam } = setUp(ApiKeyType.ES);
+        createApiKeyMock.mockResolvedValueOnce(
+          new Map([['task-1', { apiKey: 'es-key', apiKeyId: 'es-id' }]])
+        );
+
+        const result = await strategy.grantApiKeys(
+          tasks,
+          serviceAccountRequest(),
+          coreStart.security,
+          { onEsKey: true }
+        );
+
+        expect(createApiKeyMock).toHaveBeenCalledTimes(1);
+        expect(mockUiam.grant).not.toHaveBeenCalled();
+        expect(result.get('task-1')?.apiKey).toBe('es-key');
+      });
+
+      test('keeps the ES path for an Elasticsearch service account', async () => {
+        const { strategy, coreStart, mockUiam } = setUp(ApiKeyType.ES);
+        (coreStart.security.authc.getPrincipal as jest.Mock).mockReturnValue({
+          type: 'service_account',
+          serviceAccountId: 'elastic/sa',
+          variant: 'stack',
+        });
+        createApiKeyMock.mockResolvedValueOnce(
+          new Map([['task-1', { apiKey: 'es-key', apiKeyId: 'es-id' }]])
+        );
+
+        const result = await strategy.grantApiKeys(
+          tasks,
+          httpServerMock.createKibanaRequest({ headers: { authorization: 'Bearer es-token' } }),
+          coreStart.security
+        );
+
+        expect(createApiKeyMock).toHaveBeenCalledTimes(1);
+        expect(mockUiam.grant).not.toHaveBeenCalled();
+        expect(result.get('task-1')?.apiKey).toBe('es-key');
+        expect(result.get('task-1')).not.toHaveProperty('uiamApiKey');
+      });
+    });
+
     test('reports UIAM keys created before a later cloned grant fails', async () => {
       const { strategy, coreStart, mockUiam } = createStrategy();
       const request = httpServerMock.createKibanaRequest({
