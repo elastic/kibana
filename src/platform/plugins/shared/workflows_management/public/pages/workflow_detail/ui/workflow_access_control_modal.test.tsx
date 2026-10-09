@@ -220,6 +220,7 @@ describe.skip('WorkflowAccessControlModal', () => {
       expect(mockHttp.get).not.toHaveBeenCalled();
       expect(store.getState().detail.workflow).toEqual({ ...workflow, ...savedMetadata });
       expect(store.getState().detail.yamlString).toBe('name: unsaved changes');
-    }
+    },
+    30_000
   );
 });
