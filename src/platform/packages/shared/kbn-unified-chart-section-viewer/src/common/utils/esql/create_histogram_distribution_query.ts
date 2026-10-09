@@ -30,8 +30,8 @@ export const getHistogramFieldExpression = (metricItem: ParsedMetricItem): strin
     return undefined;
   }
 
-  // One metric can carry different histogram mappings across streams. A single cast for a mixed
-  // set would fail with a verification_exception, so only continue when the type is unambiguous.
+  // The same field can be mapped as different histogram types across streams. One query cannot mix
+  // them, so only continue when every stream uses the same type.
   const uniqueFieldTypes = new Set(metricItem.fieldTypes.filter(Boolean));
   if (uniqueFieldTypes.size !== 1) {
     return undefined;
@@ -44,7 +44,8 @@ export const getHistogramFieldExpression = (metricItem: ParsedMetricItem): strin
 
   const column = BasicPrettyPrinter.print(fieldNameToColumn(metricItem.metricName));
 
-  // `TS` aggregations only accept `exponential_histogram` and `tdigest`.
+  // `TS` aggregations only accept `exponential_histogram` and `tdigest`, so a legacy `histogram`
+  // field has to be cast to tdigest first. The other two types are already accepted as they are.
   return fieldType === ES_FIELD_TYPES.HISTOGRAM ? `TO_TDIGEST(${column})` : column;
 };
 
@@ -56,7 +57,7 @@ export const createHistogramDistributionQuery = ({
   originalSource,
 }: {
   metricItem: ParsedMetricItem;
-  bounds: HistogramBounds; // until https://github.com/elastic/elasticsearch/issues/158876 is ready
+  bounds: HistogramBounds; // temporary until https://github.com/elastic/elasticsearch/issues/158876 is resolved
   whereStatements?: readonly string[];
   originalSource?: string;
 }): string | undefined => {
