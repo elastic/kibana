@@ -24,9 +24,35 @@ const baseAutomation = (): NightshiftAutomationAttributes => ({
 
 describe('generateWorkflowYaml', () => {
   describe('concurrency settings', () => {
-    it('uses automationId as the concurrency key', () => {
+    it('keys alert-triggered runs on the alert, so one alert does not drop the next', () => {
       const yaml = parse(generateWorkflowYaml('auto-123', baseAutomation()));
+      expect(yaml.settings.concurrency.key).toBe('auto-123-{{ trigger.alert.uuid }}');
+    });
+
+    it('keys slack-triggered runs on the message', () => {
+      const automation = baseAutomation();
+      automation.trigger.rows = [{ kind: 'slack', event: 'message' }];
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      expect(yaml.settings.concurrency.key).toBe(
+        'auto-123-{{ event.channel }}-{{ event.messageId }}'
+      );
+    });
+
+    it('names both payloads in the key for mixed alert and slack rows', () => {
+      const automation = baseAutomation();
+      automation.trigger.rows = [{ kind: 'alert' }, { kind: 'slack', event: 'message' }];
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      expect(yaml.settings.concurrency.key).toBe(
+        'auto-123-{{ trigger.alert.uuid }}{{ event.channel }}-{{ event.messageId }}'
+      );
+    });
+
+    it('keys manual runs on the automation, since there is no payload', () => {
+      const automation = baseAutomation();
+      automation.trigger.rows = [{ kind: 'schedule' }];
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
       expect(yaml.settings.concurrency.key).toBe('auto-123');
+      expect(yaml.steps[0].with.concurrency_key).toBe('auto-123');
     });
 
     it('defaults to drop strategy when overlapPolicy is not set', () => {
@@ -222,14 +248,11 @@ describe('generateWorkflowYaml', () => {
         expect(matches(automation, { sender: 'U1' })).toBe(false);
       });
 
-      it('ANDs channels, users and text within a row', () => {
-        const automation = slackAutomation(
-          slackRow({ channels: ['C1'], users: ['U1'], messageFilter: 'deploy' })
-        );
-        expect(matches(automation, { text: 'a deploy' })).toBe(true);
-        expect(matches(automation, { text: 'a deploy', channel: 'C2' })).toBe(false);
-        expect(matches(automation, { text: 'a deploy', sender: 'U2' })).toBe(false);
-        expect(matches(automation, { text: 'nothing' })).toBe(false);
+      it('ANDs channels and users within a row', () => {
+        const automation = slackAutomation(slackRow({ channels: ['C1'], users: ['U1'] }));
+        expect(matches(automation, {})).toBe(true);
+        expect(matches(automation, { channel: 'C2' })).toBe(false);
+        expect(matches(automation, { sender: 'U2' })).toBe(false);
       });
 
       it('ORs several rows into one trigger', () => {
@@ -260,18 +283,22 @@ describe('generateWorkflowYaml', () => {
     describe('message filter', () => {
       const filtered = (messageFilter: string) => slackAutomation(slackRow({ messageFilter }));
 
-      it('matches messages that contain the text, not only an exact match', () => {
-        expect(matches(filtered('deploy failed'), { text: 'the deploy failed again' })).toBe(true);
-        expect(matches(filtered('deploy failed'), { text: 'deploy failed' })).toBe(true);
+      it('matches the phrase anywhere in the message', () => {
+        const automation = filtered('production deployment');
+        expect(matches(automation, { text: 'the production deployment failed' })).toBe(true);
+        expect(matches(automation, { text: 'production deployment' })).toBe(true);
       });
 
-      it('requires every word, in any order', () => {
-        expect(matches(filtered('deploy failed'), { text: 'failed to deploy' })).toBe(true);
-        expect(matches(filtered('deploy failed'), { text: 'the deploy went fine' })).toBe(false);
+      it('does not match when the words are only scattered through the message', () => {
+        expect(
+          matches(filtered('production deployment'), {
+            text: 'I was in production, it was the staging deployment that was failing',
+          })
+        ).toBe(false);
       });
 
-      it('ignores extra whitespace between words', () => {
-        expect(matches(filtered('  deploy \n  failed '), { text: 'deploy failed' })).toBe(true);
+      it('requires the words in order', () => {
+        expect(matches(filtered('deploy failed'), { text: 'failed deploy' })).toBe(false);
       });
 
       it('is case sensitive', () => {
@@ -285,10 +312,42 @@ describe('generateWorkflowYaml', () => {
         ['asterisks', 'a*b'],
         ['backslashes', 'path\\to'],
         ['braces', '{x}'],
-        ['boolean keywords', 'this and that or not'],
+        ['and and or', 'this and that or the other'],
       ])('treats %s in the filter as literal text', (_label, text) => {
         expect(matches(filtered(text), { text: `before ${text} after` })).toBe(true);
         expect(matches(filtered(text), { text: 'unrelated' })).toBe(false);
+      });
+
+      it.each([
+        ['in the middle', 'was not in production'],
+        ['at the start', 'not in production'],
+        ['at the end', 'was in production not'],
+        ['alone', 'not'],
+        ['in capitals', 'was NOT in production'],
+        ['repeated', 'not not here'],
+      ])('keeps the condition valid when the filter has the word not %s', (_label, text) => {
+        expect(matches(filtered(text), { text: `x ${text} y` })).toBe(true);
+        expect(matches(filtered(text), { text: 'unrelated' })).toBe(false);
+      });
+
+      it('ANDs the filter with the channel and user filters', () => {
+        const automation = slackAutomation(
+          slackRow({ channels: ['C1'], users: ['U1'], messageFilter: 'deploy' })
+        );
+        expect(matches(automation, { text: 'a deploy' })).toBe(true);
+        expect(matches(automation, { text: 'a deploy', channel: 'C2' })).toBe(false);
+        expect(matches(automation, { text: 'a deploy', sender: 'U2' })).toBe(false);
+        expect(matches(automation, { text: 'nothing' })).toBe(false);
+      });
+
+      it('ignores a whitespace-only filter', () => {
+        expect(matches(filtered('   '), { text: 'anything' })).toBe(true);
+      });
+
+      it('needs no workflow step, so every run has matched the filter already', () => {
+        const yaml = parse(generateWorkflowYaml('auto-123', filtered('disk full')));
+        expect(yaml.steps).toHaveLength(1);
+        expect(yaml.steps[0].type).toBe('nightshift.triggerInvestigation');
       });
     });
 
@@ -385,9 +444,9 @@ describe('generateWorkflowYaml', () => {
       expect(yaml.steps[0].with.title).toBe('{{ trigger.rule.name }}');
     });
 
-    it('uses automationId as concurrency_key in the step', () => {
+    it('uses the alert as concurrency_key in the step for alert triggers', () => {
       const yaml = parse(generateWorkflowYaml('auto-123', baseAutomation()));
-      expect(yaml.steps[0].with.concurrency_key).toBe('auto-123');
+      expect(yaml.steps[0].with.concurrency_key).toBe('auto-123-{{ trigger.alert.uuid }}');
     });
 
     it('includes message when promptTemplate is set', () => {
@@ -421,6 +480,72 @@ describe('generateWorkflowYaml', () => {
       ]);
     });
 
+    describe('for a slack-triggered run', () => {
+      const slackAutomationWith = (completion: NightshiftAutomationAttributes['completion']) => {
+        const automation = baseAutomation();
+        automation.trigger.rows = [{ kind: 'slack', event: 'message' }];
+        automation.completion = completion;
+        return automation;
+      };
+
+      it('replies under the triggering message in thread mode', () => {
+        const yaml = parse(
+          generateWorkflowYaml(
+            'auto-123',
+            slackAutomationWith({ action: 'post_to_slack', targetMode: 'thread' })
+          )
+        );
+        expect(yaml.steps[0].with.notificationDestinations).toEqual([
+          {
+            type: 'slack',
+            connector_id: 'elastic-apps-slack',
+            params: { channel: '{{ event.channel }}', thread_ts: '{{ event.messageId }}' },
+            automation_id: 'auto-123',
+            automation_name: 'Test automation',
+          },
+        ]);
+      });
+
+      it('uses the named connector in thread mode', () => {
+        const yaml = parse(
+          generateWorkflowYaml(
+            'auto-123',
+            slackAutomationWith({
+              action: 'post_to_slack',
+              targetMode: 'thread',
+              connectorId: 'my-slack',
+            })
+          )
+        );
+        expect(yaml.steps[0].with.notificationDestinations[0].connector_id).toBe('my-slack');
+      });
+
+      it('still posts to the configured channel in channel mode', () => {
+        const yaml = parse(
+          generateWorkflowYaml(
+            'auto-123',
+            slackAutomationWith({
+              action: 'post_to_slack',
+              targetMode: 'channel',
+              destination: '#prod-alerts',
+            })
+          )
+        );
+        expect(yaml.steps[0].with.notificationDestinations[0].params).toEqual({
+          channel: '#prod-alerts',
+        });
+      });
+
+      it('gives only the slack step a thread destination in a mixed automation', () => {
+        const automation = slackAutomationWith({ action: 'post_to_slack', targetMode: 'thread' });
+        automation.trigger.rows = [{ kind: 'alert' }, { kind: 'slack', event: 'message' }];
+        const yaml = parse(generateWorkflowYaml('auto-123', automation));
+        const [alertGuard, slackGuard] = yaml.steps;
+        expect(alertGuard.steps[0].with.notificationDestinations).toBeUndefined();
+        expect(slackGuard.steps[0].with.notificationDestinations).toHaveLength(1);
+      });
+    });
+
     it('uses an explicit Slack connector when the automation names one', () => {
       const automation = baseAutomation();
       automation.completion = {
@@ -443,7 +568,7 @@ describe('generateWorkflowYaml', () => {
       ['a silent completion', { action: 'silent', targetMode: 'channel', destination: '#x' }],
       ['create_investigation', { action: 'create_investigation', destination: '#x' }],
       [
-        'thread mode, which needs the Slack source',
+        'thread mode on an alert trigger, which has no message to reply to',
         { action: 'post_to_slack', targetMode: 'thread' },
       ],
       ['channel mode without a destination', { action: 'post_to_slack', targetMode: 'channel' }],

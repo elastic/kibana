@@ -71,7 +71,6 @@ export function generateWorkflowYaml(
   const strategy = automation.runtime.overlapPolicy
     ? OVERLAP_POLICY_TO_STRATEGY[automation.runtime.overlapPolicy]
     : 'drop';
-  const notificationDestinations = buildNotificationDestinations(automationId, automation);
 
   const workflowObj: Record<string, unknown> = {
     name: automation.name,
@@ -79,15 +78,13 @@ export function generateWorkflowYaml(
     tags: ['nightshift', 'automation'],
     settings: {
       concurrency: {
-        key: automationId,
+        key: buildWorkflowConcurrencyKey(automationId, alertRows.length > 0, slackRows.length > 0),
         strategy,
         max: 1,
       },
     },
     triggers: buildTriggers(alertRows, slackRows),
-    steps: buildSteps(alertRows.length > 0, slackRows.length > 0, (kind, name) =>
-      buildInvestigationStep(kind, name, automationId, automation, notificationDestinations)
-    ),
+    steps: buildSteps(automationId, automation, alertRows.length > 0, slackRows.length > 0),
   };
 
   return stringify(workflowObj, { lineWidth: 0 });
@@ -96,34 +93,73 @@ export function generateWorkflowYaml(
 type TriggerKind = 'alert' | 'slack';
 
 /**
+ * One investigation per alert and per Slack message, so a new one does not cancel or drop the
+ * previous one. An automation with neither trigger kind runs from the manual trigger and has no
+ * payload to key on.
+ */
+const ALERT_CONCURRENCY_SUFFIX = '{{ trigger.alert.uuid }}';
+const SLACK_CONCURRENCY_SUFFIX = '{{ event.channel }}-{{ event.messageId }}';
+
+function buildConcurrencyKey(
+  kind: TriggerKind,
+  automationId: string,
+  hasAlertRows: boolean
+): string {
+  if (kind === 'slack') return `${automationId}-${SLACK_CONCURRENCY_SUFFIX}`;
+  return hasAlertRows ? `${automationId}-${ALERT_CONCURRENCY_SUFFIX}` : automationId;
+}
+
+// A run only has the payload of the trigger that fired, and a missing variable renders as empty,
+// so the key can name both kinds.
+function buildWorkflowConcurrencyKey(
+  automationId: string,
+  hasAlertRows: boolean,
+  hasSlackRows: boolean
+): string {
+  if (hasAlertRows && hasSlackRows) {
+    return `${automationId}-${ALERT_CONCURRENCY_SUFFIX}${SLACK_CONCURRENCY_SUFFIX}`;
+  }
+  return buildConcurrencyKey(hasSlackRows ? 'slack' : 'alert', automationId, hasAlertRows);
+}
+
+/**
  * A run is started by exactly one trigger, but its payload differs by kind, so each kind gets its
- * own investigation step. With a single kind the step runs unguarded. With several, each step is
- * guarded on `execution.triggeredBy`, which holds the id of the trigger that fired.
+ * own investigation step. With a single kind the step runs unguarded. With several, each kind's
+ * step is guarded on `execution.triggeredBy`, which holds the id of the trigger that fired.
  */
 function buildSteps(
-  hasAlert: boolean,
-  hasSlack: boolean,
-  buildStep: (kind: TriggerKind, name: string) => Record<string, unknown>
+  automationId: string,
+  automation: NightshiftAutomationAttributes,
+  hasAlertRows: boolean,
+  hasSlack: boolean
 ): unknown[] {
-  if (hasAlert && hasSlack) {
+  const stepsFor = (kind: TriggerKind, name: string): unknown[] => [
+    buildInvestigationStep(kind, name, automationId, automation, hasAlertRows),
+  ];
+
+  if (hasAlertRows && hasSlack) {
     return [
-      guardedStep('alert', ALERT_TRIGGER_TYPE, buildStep),
-      guardedStep('slack', SLACK_MESSAGE_TRIGGER_TYPE, buildStep),
+      guardedStep('alert', ALERT_TRIGGER_TYPE, stepsFor('alert', 'trigger_investigation_alert')),
+      guardedStep(
+        'slack',
+        SLACK_MESSAGE_TRIGGER_TYPE,
+        stepsFor('slack', 'trigger_investigation_slack')
+      ),
     ];
   }
-  return [buildStep(hasSlack ? 'slack' : 'alert', 'trigger_investigation')];
+  return stepsFor(hasSlack ? 'slack' : 'alert', 'trigger_investigation');
 }
 
 function guardedStep(
   kind: TriggerKind,
   triggerType: string,
-  buildStep: (kind: TriggerKind, name: string) => Record<string, unknown>
+  steps: unknown[]
 ): Record<string, unknown> {
   return {
     name: `on_${kind}_trigger`,
     type: 'if',
     condition: `\${{ execution.triggeredBy == '${triggerType}' }}`,
-    steps: [buildStep(kind, `trigger_investigation_${kind}`)],
+    steps,
   };
 }
 
@@ -132,11 +168,11 @@ function buildInvestigationStep(
   name: string,
   automationId: string,
   automation: NightshiftAutomationAttributes,
-  notificationDestinations: InvestigationNotificationDestination[] | undefined
+  hasAlertRows: boolean
 ): Record<string, unknown> {
+  const notificationDestinations = buildNotificationDestinations(automationId, automation, kind);
   // The alert shape also covers an automation with no alert or Slack rows, which runs from the
   // manual trigger and has no payload to read.
-  const hasAlertRows = automation.trigger.rows.some((r) => r.kind === 'alert');
   return {
     name,
     type: 'nightshift.triggerInvestigation',
@@ -150,7 +186,7 @@ function buildInvestigationStep(
           }),
       summary: automation.name,
       trigger_type: 'automatic',
-      concurrency_key: automationId,
+      concurrency_key: buildConcurrencyKey(kind, automationId, hasAlertRows),
       ...buildMessage(automation.execution.promptTemplate, kind === 'slack'),
       ...(notificationDestinations ? { notificationDestinations } : {}),
     },
@@ -158,33 +194,40 @@ function buildInvestigationStep(
 }
 
 /**
- * The Slack destination the investigation posts its outcome to, copied onto the run so delivery
- * needs no automation lookup. Only `channel` mode is emitted: `thread` mode needs the triggering
- * Slack message (`event.channel`, `event.threadId | default: event.messageId`, `event.connectorId`),
- * which no current trigger row provides; rendering those on an alert trigger would produce empty
- * strings and the investigation step would reject the run.
+ * The Slack destination the investigation posts its progress and outcome to, copied onto the run
+ * so delivery needs no automation lookup.
+ *
+ * `channel` mode posts to the configured channel. `thread` mode only makes sense for a run started
+ * by a Slack message: it replies under that message, so the first notification joins the thread
+ * and does not start a new one. An alert-triggered run has no message to reply to, so it gets no
+ * destination in `thread` mode.
  */
 function buildNotificationDestinations(
   automationId: string,
-  automation: NightshiftAutomationAttributes
+  automation: NightshiftAutomationAttributes,
+  kind: TriggerKind
 ): InvestigationNotificationDestination[] | undefined {
   const { completion } = automation;
-  if (
-    completion.action !== 'post_to_slack' ||
-    completion.targetMode !== 'channel' ||
-    !completion.destination
-  ) {
+  if (completion.action !== 'post_to_slack') {
     return undefined;
   }
-  return [
-    {
-      type: 'slack',
-      connector_id: completion.connectorId ?? ELASTIC_APPS_SLACK_CONNECTOR_ID,
-      params: { channel: completion.destination },
-      automation_id: automationId,
-      automation_name: automation.name,
-    },
-  ];
+
+  const base = {
+    type: 'slack',
+    connector_id: completion.connectorId ?? ELASTIC_APPS_SLACK_CONNECTOR_ID,
+    automation_id: automationId,
+    automation_name: automation.name,
+  };
+
+  if (completion.targetMode === 'channel' && completion.destination) {
+    return [{ ...base, params: { channel: completion.destination } }];
+  }
+  if (completion.targetMode === 'thread' && kind === 'slack') {
+    return [
+      { ...base, params: { channel: '{{ event.channel }}', thread_ts: '{{ event.messageId }}' } },
+    ];
+  }
+  return undefined;
 }
 
 function isSlackRow(row: NightshiftTriggerRow): row is SlackRow {
@@ -241,10 +284,9 @@ function buildTriggers(alertRows: AlertRow[], slackRows: SlackRow[]): unknown[] 
  * KQL over the `slack2.message` event payload: the fixed exclusions, then the row filters.
  *
  * `channels` and `users` are matched against `event.channel` and `event.sender`, which are Slack
- * ids, so a channel name never matches. A quoted value is compared for equality with the whole
- * field in the in-memory evaluator, which is right for ids but not for message text, so
- * `messageFilter` is emitted as unquoted `*word*` wildcards, one per word. It is case sensitive.
- * A row with no filters matches every message the exclusions let through.
+ * ids, so a channel name never matches. The message filter is a case sensitive contains check, see
+ * `buildMessageFilterTerms`. A row with no filters matches every message the exclusions let
+ * through.
  */
 function buildSlackCondition(rows: SlackRow[]): string {
   const exclusions = SLACK_MESSAGE_EXCLUSIONS.join(' and ');
@@ -270,19 +312,44 @@ function buildSlackRowCondition(row: SlackRow): string {
 
   const messageFilter = row.messageFilter?.trim();
   if (messageFilter) {
-    // One term per word, so every word must appear in the message, in any order. A multi-word
-    // wildcard term cannot be made safe: spaces cannot be escaped, and the word "not" inside one
-    // either fails to parse or never matches, which would break the whole trigger condition.
-    const words = messageFilter.split(/\s+/);
-    parts.push(words.map((word) => `event.text: *${escapeKqlWildcardTerm(word)}*`).join(' and '));
+    parts.push(buildMessageFilterTerms(messageFilter));
   }
 
   return parts.join(' and ');
 }
 
-// Escapes KQL syntax characters and the `and` and `or` keywords so a word stays a single term.
-function escapeKqlWildcardTerm(word: string): string {
-  return word.replace(/[\\():<>"*{}]/g, '\\$&').replace(/\b(or|and)\b/gi, '\\$1');
+/**
+ * The message filter as unquoted wildcard terms. A quoted value is compared for equality with the
+ * whole field by the in-memory evaluator, so it cannot express "contains". Wildcards are case
+ * sensitive, and spaces cannot be escaped inside one.
+ *
+ * The word "not" cannot sit inside a multi-word term: unescaped it fails to parse, and escaped it
+ * never matches, which would break the whole trigger condition. So the phrase is split around
+ * "not" into runs of words, each its own term, and "not" is its own term. Words stay in order
+ * within a run, and the order between runs is not checked.
+ */
+function buildMessageFilterTerms(messageFilter: string): string {
+  const runs: string[] = [];
+  let run: string[] = [];
+  const flush = () => {
+    if (run.length > 0) runs.push(run.join(' '));
+    run = [];
+  };
+  for (const word of messageFilter.split(/\s+/)) {
+    if (word.toLowerCase() === 'not') {
+      flush();
+      runs.push(word);
+    } else {
+      run.push(word);
+    }
+  }
+  flush();
+  return runs.map((text) => `event.text: *${escapeKqlWildcardTerm(text)}*`).join(' and ');
+}
+
+// Escapes KQL syntax characters and the `and` and `or` keywords so they stay literal text.
+function escapeKqlWildcardTerm(text: string): string {
+  return text.replace(/[\\():<>"*{}]/g, '\\$&').replace(/\b(or|and)\b/gi, '\\$1');
 }
 
 function cleanValues(values: string[] | undefined): string[] {
