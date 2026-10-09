@@ -16,12 +16,6 @@ import { RulesListHeader } from './rules_list_header';
 
 let mockPhase: 'initialLoad' | 'empty' | 'populated' | 'filtering' | 'filtered' = 'populated';
 let mockCanReadV1Rules = true;
-let mockExperimentalFeaturesEnabled = true;
-let mockAreAgentBuilderSkillsAvailable = true;
-let mockAgentBuilderSkillsRequirements = {
-  hasAgentBuilderCapability: true,
-  isExperimentalFeaturesEnabled: true,
-};
 
 /** Non-empty so the assertions below prove each href is run through `basePath.prepend`. */
 const MOCK_BASE_PATH = '/mock-base';
@@ -58,31 +52,12 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
-jest.mock('../../hooks/use_alerting_v2_experimental_features', () => ({
-  useAlertingV2ExperimentalFeatures: () => mockExperimentalFeaturesEnabled,
-}));
-
-jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
-  useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
-  useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
-}));
-
 const onCreateRule = jest.fn();
-const onCreateEsqlRule = jest.fn();
-const onCreateWithAgent = jest.fn();
-const onBuildSequence = jest.fn();
 
 const renderHeader = (props?: Partial<React.ComponentProps<typeof RulesListHeader>>) =>
   render(
     <ListPageTestProviders>
-      <RulesListHeader
-        canWrite={true}
-        onCreateRule={onCreateRule}
-        onCreateEsqlRule={onCreateEsqlRule}
-        onCreateWithAgent={onCreateWithAgent}
-        onBuildSequence={onBuildSequence}
-        {...props}
-      />
+      <RulesListHeader canWrite={true} onCreateRule={onCreateRule} {...props} />
     </ListPageTestProviders>
   );
 
@@ -91,22 +66,16 @@ describe('RulesListHeader', () => {
     jest.clearAllMocks();
     mockPhase = 'populated';
     mockCanReadV1Rules = true;
-    mockExperimentalFeaturesEnabled = true;
-    mockAreAgentBuilderSkillsAvailable = true;
-    mockAgentBuilderSkillsRequirements = {
-      hasAgentBuilderCapability: true,
-      isExperimentalFeaturesEnabled: true,
-    };
   });
 
-  it('renders the page title without an experimental badge', () => {
+  it('renders the page title', () => {
     renderHeader();
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rules');
     expect(screen.queryByTestId('alertingV2ExperimentalBadge')).not.toBeInTheDocument();
   });
 
-  it('renders V1 rules and V2 rules tabs with V2 selected', async () => {
+  it('renders Classic and Universal tabs with Universal selected', async () => {
     renderHeader();
 
     const v1Tab = await screen.findByTestId('v1RulesTab');
@@ -114,30 +83,32 @@ describe('RulesListHeader', () => {
 
     expect(v1Tab).toHaveAttribute('aria-selected', 'false');
     expect(v2Tab).toHaveAttribute('aria-selected', 'true');
+    expect(v1Tab).toHaveTextContent('Classic');
+    expect(v2Tab).toHaveTextContent('Universal');
     expect(await screen.findAllByRole('tab')).toHaveLength(2);
   });
 
-  it('orders the V1 rules tab before the V2 rules tab', async () => {
+  it('orders the Universal tab before the Classic tab', async () => {
     renderHeader();
 
     const tabs = await screen.findAllByRole('tab');
 
     expect(tabs.map((tab) => tab.getAttribute('data-test-subj'))).toEqual([
-      'v1RulesTab',
       'v2RulesTab',
+      'v1RulesTab',
     ]);
   });
 
   it('points each tab at its own app, under the server base path', async () => {
     renderHeader();
 
-    expect(await screen.findByTestId('v2RulesTab')).toHaveAttribute(
-      'href',
-      `${MOCK_BASE_PATH}${ALERTING_V2_RULES_BASE_PATH}`
-    );
     expect(await screen.findByTestId('v1RulesTab')).toHaveAttribute(
       'href',
       `${MOCK_BASE_PATH}${triggersActionsRoute}`
+    );
+    expect(await screen.findByTestId('v2RulesTab')).toHaveAttribute(
+      'href',
+      `${MOCK_BASE_PATH}${ALERTING_V2_RULES_BASE_PATH}`
     );
   });
 
@@ -180,13 +151,7 @@ describe('RulesListHeader', () => {
     render(
       <ListPageTestProviders>
         <TabsProvider tabs={hostTabs}>
-          <RulesListHeader
-            canWrite={true}
-            onCreateRule={onCreateRule}
-            onCreateEsqlRule={onCreateEsqlRule}
-            onCreateWithAgent={onCreateWithAgent}
-            onBuildSequence={onBuildSequence}
-          />
+          <RulesListHeader canWrite={true} onCreateRule={onCreateRule} />
         </TabsProvider>
       </ListPageTestProviders>
     );

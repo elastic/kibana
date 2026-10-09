@@ -7,7 +7,8 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, useEuiMinBreakpoint, useEuiTheme } from '@elastic/eui';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -79,6 +80,8 @@ const useRuleFormServicesBag = (): RuleFormServices => {
 export const SequenceBuilderPage: React.FC = () => {
   const ruleFormServices = useRuleFormServicesBag();
   const { rulesLocators } = useAlertingLocators();
+  const { euiTheme } = useEuiTheme();
+  const largeMediaQuery = useEuiMinBreakpoint('m');
 
   const { methods } = useSequenceBuilderForm();
   const uiState = useSequenceBuilderState();
@@ -136,7 +139,19 @@ export const SequenceBuilderPage: React.FC = () => {
         <EuiFlexGroup
           direction="column"
           gutterSize="none"
-          style={{ height: '100%', overflow: 'hidden' }}
+          data-test-subj="sequenceBuilderPage"
+          css={css`
+            overflow: hidden;
+            /* Parent hosts (e.g. EuiPageSection) often lack a definite height, so
+               percentage height collapses the React Flow canvas to a thin strip.
+               Subtract page-section padding (size.m top + bottom) when hosted under
+               ObservabilityAlertingApp's padded Rules route. */
+            ${largeMediaQuery} {
+              block-size: calc(
+                var(--kbn-application--content-height, 100vh) - (${euiTheme.size.m} * 2)
+              );
+            }
+          `}
         >
           <EuiFlexItem grow={false}>
             <SequenceBuilderHeader
@@ -150,7 +165,9 @@ export const SequenceBuilderPage: React.FC = () => {
             />
           </EuiFlexItem>
 
-          <EuiFlexItem style={{ minHeight: 0 }}>{canvasContent}</EuiFlexItem>
+          <EuiFlexItem grow style={{ minHeight: 0 }}>
+            {canvasContent}
+          </EuiFlexItem>
         </EuiFlexGroup>
       </FormProvider>
     </RuleFormProvider>

@@ -77,7 +77,7 @@ describe('NewAlertsExperienceBanner', () => {
     expect(screen.getByText('Try the new Alerts experience')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'The new Alerts page brings alerts from Kibana ES|QL alerting, Kibana standard alerting, and external sources into one inbox so you can triage everything in a single place.'
+        'The new Alerts page brings alerts from Universal Alerting, Classic Alerting, and external sources into one inbox so you can triage everything in a single place.'
       )
     ).toBeInTheDocument();
     expect(screen.getByTestId('newAlertsExperienceBannerGoToNewButton')).toHaveTextContent(

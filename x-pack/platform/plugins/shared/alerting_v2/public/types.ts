@@ -6,16 +6,23 @@
  */
 
 import type { ComponentType } from 'react';
+import type { ClassicRuleSummaryFlyoutProps } from './classic_rule_summary_flyout';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
+import type { RuleSummaryFlyoutEntryProps } from './rule_summary_flyout_entry';
 import type { AlertingV2PageProps } from './application/composable_pages';
 import type { CreateAlertingV2HostApp } from './locator_host';
 
 export type { CreateRuleOptionsFlyoutLegacyItem } from './create_rule_options_flyout';
 export type { AlertingV2PageProps } from './application/composable_pages';
 export type { PrivilegeCheck } from './application/privilege_check_context';
+export type { ClassicRuleSummaryFlyoutProps } from './classic_rule_summary_flyout';
+export type { RuleSummaryFlyoutEntryProps } from './rule_summary_flyout_entry';
 
 export interface AlertingV2PublicStart {
   CreateRuleOptionsFlyout: ComponentType<CreateRuleOptionsFlyoutProps>;
+  ClassicRuleSummaryFlyout: ComponentType<ClassicRuleSummaryFlyoutProps>;
+  /** Host-facing Universal (v2) rule summary flyout (list expand). */
+  RuleSummaryFlyout: ComponentType<RuleSummaryFlyoutEntryProps>;
   RulesPage: ComponentType<AlertingV2PageProps>;
   RuleLibraryPage: ComponentType<AlertingV2PageProps>;
   EpisodesPage: ComponentType<AlertingV2PageProps>;

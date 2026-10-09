@@ -309,7 +309,7 @@ function InternalAlertsPage() {
           badges={[
             {
               label: i18n.translate('xpack.observability.alertsStandardBadge', {
-                defaultMessage: 'Standard',
+                defaultMessage: 'Classic',
               }),
               color: 'hollow',
               'data-test-subj': 'observabilityAlertsStandardBadge',

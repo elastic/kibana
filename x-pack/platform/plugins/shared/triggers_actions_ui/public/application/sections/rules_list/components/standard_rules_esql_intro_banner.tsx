@@ -23,7 +23,7 @@ export const STANDARD_RULES_ESQL_INTRO_DOC_URL = '#' as const;
  * Introduces ES|QL rules on the Standard rules list when both rule systems are available.
  */
 export const StandardRulesEsqlIntroBanner = () => {
-  const { http } = useKibana().services;
+  const { http, tabs } = useKibana().services;
   const [isDismissed, setIsDismissed] = useLocalStorage<boolean>(
     STANDARD_RULES_ESQL_INTRO_BANNER_DISMISSED_STORAGE_KEY,
     false
@@ -33,7 +33,10 @@ export const StandardRulesEsqlIntroBanner = () => {
     return null;
   }
 
-  const esqlRulesHref = http.basePath.prepend(ALERTING_V2_RULES_BASE_PATH);
+  // Prefer the host Universal tab (e.g. Observability `/rules/v2`) when present;
+  // fall back to Stack Management Universal rules for standalone Classic lists.
+  const universalTabHref = tabs?.find((tab) => tab.id === 'v2Rules')?.href;
+  const esqlRulesHref = universalTabHref ?? http.basePath.prepend(ALERTING_V2_RULES_BASE_PATH);
 
   return (
     <>
@@ -44,7 +47,7 @@ export const StandardRulesEsqlIntroBanner = () => {
         size="s"
         data-test-subj="standardRulesEsqlIntroBanner"
         title={i18n.translate('xpack.triggersActionsUI.rulesList.esqlIntroBanner.title', {
-          defaultMessage: 'Introducing ES|QL rules',
+          defaultMessage: 'Introducing Universal rules',
         })}
         onDismiss={() => setIsDismissed(true)}
       >
@@ -56,7 +59,7 @@ export const StandardRulesEsqlIntroBanner = () => {
               <EuiLink href={esqlRulesHref} data-test-subj="standardRulesEsqlIntroBannerEsqlLink">
                 {i18n.translate(
                   'xpack.triggersActionsUI.rulesList.esqlIntroBanner.esqlRulesLinkLabel',
-                  { defaultMessage: 'ES|QL rules' }
+                  { defaultMessage: 'Universal rules' }
                 )}
               </EuiLink>
             ),

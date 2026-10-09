@@ -15,44 +15,24 @@ import {
   EuiIllustration,
   EuiLink,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { esqlRulesIllustration } from '../../assets/esql_rules_illustration';
 
 export interface EsqlRulesEmptyStateProps {
   onCreateRule: () => void;
-  onCreateWithAgent: () => void;
-  createWithAgentDisabled?: boolean;
-  createWithAgentTooltipText?: string;
+  onHelpMeOnboard: () => void;
   documentationHref: string;
 }
 
 /**
- * Empty state for the ES|QL rules list (write-capable users).
+ * Empty state for the Universal rules list (write-capable users).
  */
 export const EsqlRulesEmptyState = ({
   onCreateRule,
-  onCreateWithAgent,
-  createWithAgentDisabled,
-  createWithAgentTooltipText,
+  onHelpMeOnboard,
   documentationHref,
 }: EsqlRulesEmptyStateProps) => {
-  const isAgentDisabled = createWithAgentDisabled === true;
-  const createWithAgentButton = (
-    <EuiButtonEmpty
-      iconType="sparkles"
-      onClick={onCreateWithAgent}
-      disabled={isAgentDisabled}
-      data-test-subj="esqlRulesEmptyStateCreateWithAgentButton"
-    >
-      <FormattedMessage
-        id="xpack.alertingV2.rulesList.emptyState.createWithAgentButton"
-        defaultMessage="Create with AI agent"
-      />
-    </EuiButtonEmpty>
-  );
-
   return (
     <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '60vh' }}>
       <EuiFlexItem grow={false}>
@@ -71,7 +51,7 @@ export const EsqlRulesEmptyState = ({
             <h2 style={{ whiteSpace: 'nowrap' }}>
               <FormattedMessage
                 id="xpack.alertingV2.rulesList.emptyState.title"
-                defaultMessage="Get started with ES|QL rules"
+                defaultMessage="Get started with Universal rules"
               />
             </h2>
           }
@@ -79,7 +59,7 @@ export const EsqlRulesEmptyState = ({
             <p>
               <FormattedMessage
                 id="xpack.alertingV2.rulesList.emptyState.description"
-                defaultMessage="Build rules with native ES|QL queries. ES|QL rules are the newer alternative to Standard rules, with a dedicated rules list, a shared alerts inbox, and centralized action policies for notifications."
+                defaultMessage="Create and manage Universal rules with a dedicated rules list, a shared alerts inbox, and centralized action policies for notifications."
               />
             </p>
           }
@@ -91,7 +71,7 @@ export const EsqlRulesEmptyState = ({
                   fill
                   iconType="plusCircle"
                   onClick={onCreateRule}
-                  data-test-subj="esqlRulesEmptyStateCreateButton"
+                  data-test-subj="createRuleButton"
                 >
                   <FormattedMessage
                     id="xpack.alertingV2.rulesList.emptyState.createButton"
@@ -100,13 +80,16 @@ export const EsqlRulesEmptyState = ({
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {createWithAgentTooltipText ? (
-                  <EuiToolTip content={createWithAgentTooltipText}>
-                    <span>{createWithAgentButton}</span>
-                  </EuiToolTip>
-                ) : (
-                  createWithAgentButton
-                )}
+                <EuiButtonEmpty
+                  iconType="play"
+                  onClick={onHelpMeOnboard}
+                  data-test-subj="esqlRulesEmptyStateHelpMeOnboardButton"
+                >
+                  <FormattedMessage
+                    id="xpack.alertingV2.rulesList.emptyState.helpMeOnboardButton"
+                    defaultMessage="Get started"
+                  />
+                </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
           }

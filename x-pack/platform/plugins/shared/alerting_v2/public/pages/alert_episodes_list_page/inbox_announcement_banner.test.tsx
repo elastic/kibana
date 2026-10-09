@@ -49,15 +49,18 @@ describe('InboxAnnouncementBanner', () => {
 
     expect(screen.getByText('Introducing a new alerts experience')).toBeInTheDocument();
     expect(
-      screen.getByText(/We've improved the alerts experience to work across alerting frameworks/)
+      screen.getByText(
+        /Bring alerts from Kibana Universal Alerting, Kibana Classic Alerting, and external sources into one unified view/
+      )
     ).toBeInTheDocument();
+    expect(screen.getByText(/Prefer the previous alerts page\?/)).toBeInTheDocument();
   });
 
-  it('renders the Enable standard view link when Standard Alerts is disabled', () => {
+  it('renders the Enable classic view link when Classic Alerts is disabled', () => {
     renderBanner();
 
     expect(screen.getByTestId('inboxAnnouncementBannerStandardLink')).toHaveTextContent(
-      'Enable standard view'
+      'Enable classic view'
     );
   });
 

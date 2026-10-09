@@ -27,18 +27,9 @@ export const getV1RulesPageTabs = ({
   v2Href,
 }: GetV1RulesPageTabsParams): AppHeaderTab[] => [
   {
-    id: 'v1Rules',
-    label: i18n.translate('xpack.triggersActionsUI.rulesPage.v1RulesTabTitle', {
-      defaultMessage: 'Standard rules',
-    }),
-    isSelected: true,
-    href: v1Href,
-    'data-test-subj': 'v1RulesTab',
-  },
-  {
     id: 'v2Rules',
     label: i18n.translate('xpack.triggersActionsUI.rulesPage.v2RulesTabTitle', {
-      defaultMessage: 'ES|QL rules',
+      defaultMessage: 'Universal',
     }),
     isSelected: false,
     href: v2Href,
@@ -50,5 +41,14 @@ export const getV1RulesPageTabs = ({
       }),
     },
     'data-test-subj': 'v2RulesTab',
+  },
+  {
+    id: 'v1Rules',
+    label: i18n.translate('xpack.triggersActionsUI.rulesPage.v1RulesTabTitle', {
+      defaultMessage: 'Classic',
+    }),
+    isSelected: true,
+    href: v1Href,
+    'data-test-subj': 'v1RulesTab',
   },
 ];

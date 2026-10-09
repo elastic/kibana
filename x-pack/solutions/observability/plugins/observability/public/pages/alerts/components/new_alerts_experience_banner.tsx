@@ -25,7 +25,7 @@ const DESCRIPTION = i18n.translate(
   'xpack.observability.alerts.newAlertsExperienceBanner.description',
   {
     defaultMessage:
-      'The new Alerts page brings alerts from Kibana ES|QL alerting, Kibana standard alerting, and external sources into one inbox so you can triage everything in a single place.',
+      'The new Alerts page brings alerts from Universal Alerting, Classic Alerting, and external sources into one inbox so you can triage everything in a single place.',
   }
 );
 const GO_TO_NEW_ALERTS_LABEL = i18n.translate(

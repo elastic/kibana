@@ -172,7 +172,8 @@ export const SourceRuleSummaryFlyout = ({
     <EuiFlyout
       type="overlay"
       hasAnimation={false}
-      size="s"
+      size="m"
+      resizable
       ownFocus={false}
       hideCloseButton
       paddingSize="none"

@@ -7,10 +7,13 @@
 
 import type { Capabilities, ScopedHistory } from '@kbn/core/public';
 import type { AlertingV2PageProps } from '@kbn/alerting-v2-plugin/public';
+import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { render, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { createMemoryHistory } from 'history';
+import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import type { ClassicRulesPageProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
@@ -23,9 +26,19 @@ import {
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
+  OBSERVABILITY_ALERTING_RULES_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
+
+jest.mock('@kbn/alerts-ui-shared', () => ({
+  useGetRuleTypesPermissions: () => ({
+    ruleTypesState: {
+      data: new Map(),
+      isLoading: false,
+    },
+  }),
+}));
 
 const Placeholder = ({
   name,
@@ -62,6 +75,9 @@ const mockAlertingVTwo = {
         privilegeCheck={privilegeCheck}
       />
       <HostTabs tabs={tabs} />
+      <button type="button" data-test-subj="createRuleButton">
+        Create rule
+      </button>
     </>
   ),
   RuleLibraryPage: ({ hostApp, privilegeCheck }: AlertingV2PageProps) => (
@@ -90,6 +106,8 @@ const mockAlertingVTwo = {
     />
   ),
   CreateRuleOptionsFlyout: () => null,
+  ClassicRuleSummaryFlyout: () => null,
+  RuleSummaryFlyout: () => null,
   createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) => ({
     rules: { app: appId, pathPrefix: paths.rules },
     ruleLibrary: { app: appId, pathPrefix: paths.ruleLibrary },
@@ -111,8 +129,17 @@ const mockTriggersActionsUi = {
     <>
       <Placeholder name="classicRulesPage" />
       <HostTabs tabs={tabs} />
+      <button type="button" data-test-subj="createRuleButton">
+        Create rule
+      </button>
     </>
   )),
+  ruleTypeRegistry: {
+    list: () => [],
+  },
+} as unknown as {
+  getClassicRulesPage: jest.Mock;
+  ruleTypeRegistry: { list: () => [] };
 };
 
 const v1RulesCapabilities = {
@@ -136,15 +163,19 @@ const renderAt = (pathname: string, capabilities?: Capabilities) => {
   const history = createTestHistory(pathname);
 
   const result = render(
-    <Router history={history}>
-      <ObservabilityAlertingApp
-        coreStart={coreStart}
-        alertingVTwo={mockAlertingVTwo}
-        triggersActionsUi={mockTriggersActionsUi}
-        history={history}
-        setBreadcrumbs={jest.fn()}
-      />
-    </Router>
+    <EuiProvider>
+      <I18nProvider>
+        <Router history={history}>
+          <ObservabilityAlertingApp
+            coreStart={coreStart}
+            alertingVTwo={mockAlertingVTwo}
+            triggersActionsUi={mockTriggersActionsUi as never}
+            history={history}
+            setBreadcrumbs={jest.fn()}
+          />
+        </Router>
+      </I18nProvider>
+    </EuiProvider>
   );
 
   return { ...result, coreStart, history };
@@ -159,6 +190,12 @@ describe('ObservabilityAlertingApp', () => {
     const { history } = renderAt('/');
 
     expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_ALERTS_PATH);
+  });
+
+  it('redirects /rules to /rules/v2 for a mixed user', () => {
+    const { history } = renderAt(OBSERVABILITY_ALERTING_RULES_PATH, mixedRulesCapabilities);
+
+    expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_RULES_V2_PATH);
   });
 
   it('renders EpisodesPage at /alerts with observability host', async () => {
@@ -208,6 +245,8 @@ describe('ObservabilityAlertingApp', () => {
     );
     expect(getByTestId('v1RulesTab')).toHaveAttribute('aria-selected', 'true');
     expect(getByTestId('v2RulesTab')).toHaveAttribute('aria-selected', 'false');
+    expect(getByTestId('v2RulesTab')).toHaveTextContent('Universal');
+    expect(getByTestId('v1RulesTab')).toHaveTextContent('Classic');
   });
 
   it('hides the rules tab bar for a v1-only user', async () => {
@@ -250,6 +289,19 @@ describe('ObservabilityAlertingApp', () => {
     );
     expect(getByTestId('v2RulesTab')).toHaveAttribute('aria-selected', 'true');
     expect(getByTestId('v1RulesTab')).toHaveAttribute('aria-selected', 'false');
+    expect(getByTestId('v2RulesTab')).toHaveTextContent('Universal');
+    expect(getByTestId('v1RulesTab')).toHaveTextContent('Classic');
+  });
+
+  it('opens the mixed create chooser from Create rule on Universal', async () => {
+    const user = userEvent.setup();
+    const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_RULES_V2_PATH, mixedRulesCapabilities);
+
+    await user.click(getByTestId('createRuleButton'));
+
+    expect(getByTestId('mixedRulesExperienceChooser')).toBeInTheDocument();
+    expect(getByTestId('mixedRulesChooseThreshold')).toBeInTheDocument();
+    expect(getByTestId('mixedRulesBrowseClassic')).toBeInTheDocument();
   });
 
   it('hides the rules tab bar for a v2-only user', async () => {

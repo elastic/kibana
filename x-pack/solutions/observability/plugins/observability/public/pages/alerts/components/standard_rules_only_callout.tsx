@@ -15,12 +15,12 @@ export const STANDARD_RULES_ONLY_CALLOUT_DISMISSED_STORAGE_KEY =
   'observability.alerts.standard.standardRulesOnlyCalloutDismissed.v1' as const;
 
 const TITLE = i18n.translate('xpack.observability.alerts.standardRulesOnlyCallout.title', {
-  defaultMessage: 'Standard rules only',
+  defaultMessage: 'Classic only',
 });
 
 /**
  * Dismissible info callout explaining that the classic Alerts page only
- * shows alerts from Standard rules.
+ * shows alerts from Classic alerting.
  */
 export const StandardRulesOnlyCallout = () => {
   const [isDismissed, setIsDismissed] = useLocalStorage<boolean>(
@@ -44,7 +44,7 @@ export const StandardRulesOnlyCallout = () => {
     >
       <FormattedMessage
         id="xpack.observability.alerts.standardRulesOnlyCallout.description"
-        defaultMessage="This page only shows alerts from Standard rules."
+        defaultMessage="This page only shows alerts from Classic alerting. Use the new Alerts experience to triage Universal, Classic, and external alerts together."
       />
     </EuiCallOut>
   );

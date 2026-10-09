@@ -136,3 +136,19 @@ export { SequenceEdge, WINDOW_OPTIONS } from './sequence/sequence_edge';
 export type { SequenceEdgeType } from './sequence/sequence_edge';
 export { layoutSequence } from './sequence/layout_sequence';
 export type { LayoutSequenceOptions } from './sequence/layout_sequence';
+
+// Query pipeline explainer (Get started + create Assembled queries)
+export {
+  QueryPipelineExplainer,
+  AssembledQueriesControl,
+  buildPipelineSteps,
+  isComplexEsql,
+  DEMO_QUERY,
+  DEMO_RECOVERY,
+  DEMO_NO_DATA,
+} from './query_pipeline_explainer';
+export type {
+  QueryPipelineExplainerProps,
+  PipelineStep,
+  PipelineStepId,
+} from './query_pipeline_explainer';

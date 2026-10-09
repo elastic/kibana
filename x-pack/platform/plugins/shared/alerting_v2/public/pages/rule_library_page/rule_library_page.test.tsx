@@ -111,7 +111,7 @@ describe('RuleLibraryPage', () => {
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rule library');
     expect(screen.getByTestId('alertingV2EsqlRulesOnlyBadge')).toHaveTextContent(
-      'ES|QL rules only'
+      'Universal only'
     );
     expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
     expect(screen.getByTestId('esqlRulesOnlyCallout')).toBeInTheDocument();

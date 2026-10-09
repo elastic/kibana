@@ -27,7 +27,7 @@ const ALERTS_ICON = 'warning';
 export const getObservabilityAlertsLinkTitle = (alertingV2Enabled: boolean): string =>
   alertingV2Enabled
     ? i18n.translate('xpack.observability.nav.alertsV1', {
-        defaultMessage: 'Alerts (V1)',
+        defaultMessage: 'Alerts (Classic)',
       })
     : i18n.translate('xpack.observability.alertsLinkTitle', {
         defaultMessage: 'Alerts',
@@ -79,6 +79,7 @@ const getAlertsSection = (core: CoreStart): PanelOpenerChildDefinition[] => {
       title: i18n.translate('xpack.observability.nav.alerts', {
         defaultMessage: 'Alerts',
       }),
+      badgeType: 'new',
     });
   }
 
@@ -100,17 +101,15 @@ const getRuleManagementSection = (core: CoreStart): PanelOpenerChildDefinition[]
     return [];
   }
 
-  const rulesChildren: PanelOpenerChildDefinition[] = [];
-
-  if (canReadV2Rules) {
-    rulesChildren.push({ link: obsAlertingLink('rules-v2') });
-    rulesChildren.push({ link: obsAlertingLink('rules-v1'), sideNavStatus: 'hidden' });
-  } else {
-    rulesChildren.push({
-      link: obsAlertingLink('rules-v1'),
-      title: i18n.translate('xpack.observability.nav.rulesV1', { defaultMessage: 'Rules' }),
-    });
-  }
+  // Use the `rules` deep link (visible in projectSideNav). `rules-v2` / `rules-v1`
+  // are search-only and would be filtered out of the Alerting panel.
+  const rulesChildren: PanelOpenerChildDefinition[] = [
+    {
+      link: obsAlertingLink('rules'),
+      title: i18n.translate('xpack.observability.nav.rules', { defaultMessage: 'Rules' }),
+      ...(canReadV2Rules ? { badgeType: 'new' as const } : {}),
+    },
+  ];
 
   return maybeSection(rulesChildren, {
     title: i18n.translate('xpack.observability.nav.ruleManagement', {
@@ -120,7 +119,7 @@ const getRuleManagementSection = (core: CoreStart): PanelOpenerChildDefinition[]
   });
 };
 
-// Side nav renders at most two `new` badges per panel. Those slots are Action policies and Execution history.
+// Side-nav `new` badges (chrome allows up to 4 per level): Alerts, Rules, Action policies, Execution history.
 const getNotificationsSection = (core: CoreStart): PanelOpenerChildDefinition[] => {
   const notificationsChildren: PanelOpenerChildDefinition[] = [];
 

@@ -33,7 +33,9 @@ import { registerCreateAlertEventStep } from './lib/workflow_extensions/register
 import { setKibanaServices } from './kibana_services';
 import type { AlertingV2UIConfig } from './kibana_services';
 import type { AlertingV2PublicStart } from './types';
+import type { ClassicRuleSummaryFlyoutProps } from './classic_rule_summary_flyout';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
+import type { RuleSummaryFlyoutEntryProps } from './rule_summary_flyout_entry';
 import type { AlertingV2PageProps } from './application/composable_pages';
 import {
   AlertingV2RulesLocatorDefinition,
@@ -53,6 +55,28 @@ const CreateRuleOptionsFlyout = (props: CreateRuleOptionsFlyoutProps) =>
     React.Suspense,
     { fallback: null },
     React.createElement(LazyCreateRuleOptionsFlyout, props)
+  );
+
+const LazyClassicRuleSummaryFlyout = React.lazy(() =>
+  import('./classic_rule_summary_flyout').then((m) => ({ default: m.ClassicRuleSummaryFlyout }))
+);
+
+const ClassicRuleSummaryFlyout = (props: ClassicRuleSummaryFlyoutProps) =>
+  React.createElement(
+    React.Suspense,
+    { fallback: null },
+    React.createElement(LazyClassicRuleSummaryFlyout, props)
+  );
+
+const LazyRuleSummaryFlyout = React.lazy(() =>
+  import('./rule_summary_flyout_entry').then((m) => ({ default: m.RuleSummaryFlyoutEntry }))
+);
+
+const RuleSummaryFlyout = (props: RuleSummaryFlyoutEntryProps) =>
+  React.createElement(
+    React.Suspense,
+    { fallback: null },
+    React.createElement(LazyRuleSummaryFlyout, props)
   );
 
 /**
@@ -88,6 +112,8 @@ export type {
   PrivilegeCheck,
 } from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
+export type { ClassicRuleSummaryFlyoutProps } from './classic_rule_summary_flyout';
+export type { RuleSummaryFlyoutEntryProps } from './rule_summary_flyout_entry';
 export type { AlertingV2HostApp, CreateAlertingV2HostApp } from './locator_host';
 export type {
   AlertingV2RulesLocatorParams,
@@ -112,6 +138,8 @@ const pluginModule = new ContainerModule(({ bind }) => {
       const container = get(Container);
       return {
         CreateRuleOptionsFlyout,
+        ClassicRuleSummaryFlyout,
+        RuleSummaryFlyout,
         RulesPage: lazyPageWithContainer(
           () =>
             import('./application/composable_pages').then((m) => ({

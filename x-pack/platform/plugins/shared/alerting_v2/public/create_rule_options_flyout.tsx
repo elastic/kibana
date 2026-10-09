@@ -60,6 +60,12 @@ export interface CreateRuleOptionsFlyoutProps {
   getEsqlVariables?: () => ESQLControlVariable[] | undefined;
   /** Scoped history of the host app — used to close the flyout on in-app navigation. */
   history?: History;
+  /** Skip the selector and open ES|QL or threshold authoring immediately. */
+  initialStep?: 'esql' | 'threshold';
+  /** Share flyout history with a parent flyout (e.g. the mixed create chooser). */
+  historyKey?: symbol;
+  /** Called after a rule is created successfully, before `onClose`. */
+  onCreated?: () => void;
 }
 
 type Step =
@@ -117,8 +123,11 @@ const CreateRuleOptionsFlyoutInner = ({
   getQuery,
   getEsqlVariables,
   history,
+  initialStep,
+  historyKey: historyKeyProp,
+  onCreated,
 }: CreateRuleOptionsFlyoutProps) => {
-  const [step, setStep] = useState<Step>({ type: 'selector' });
+  const [step, setStep] = useState<Step>({ type: initialStep ?? 'selector' });
   const [isSaving, setIsSaving] = useState(false);
 
   const snapshotRef = useRef<DiscoverQuerySnapshot>({
@@ -224,7 +233,8 @@ const CreateRuleOptionsFlyoutInner = ({
     onClose();
   }, [value, onClose]);
 
-  const historyKey = useMemo(() => Symbol('discoverCreateAlert'), []);
+  const generatedHistoryKey = useMemo(() => Symbol('discoverCreateAlert'), []);
+  const historyKey = historyKeyProp ?? generatedHistoryKey;
   const returnToSelector = useCallback(() => setStep({ type: 'selector' }), []);
 
   const rulesApi = useMemo(
@@ -244,6 +254,7 @@ const CreateRuleOptionsFlyoutInner = ({
             values: { ruleName: rule.metadata.name },
           })
         );
+        onCreated?.();
         onClose();
       } catch (err) {
         value.services.notifications.toasts.addDanger(
@@ -254,7 +265,7 @@ const CreateRuleOptionsFlyoutInner = ({
         setIsSaving(false);
       }
     },
-    [rulesApi, value, onClose]
+    [rulesApi, value, onClose, onCreated]
   );
 
   const legacyPanelItems = useMemo(
@@ -269,10 +280,17 @@ const CreateRuleOptionsFlyoutInner = ({
   );
 
   if (loading || !value) {
+    if (historyKeyProp) {
+      return null;
+    }
     return (
       <EuiFlyout
-        type="push"
-        size="s"
+        type="overlay"
+        session="start"
+        historyKey={historyKey}
+        size={540}
+        minWidth={480}
+        resizable
         ownFocus
         onClose={onClose}
         aria-label={i18n.translate('xpack.alertingV2.createAlertFlyout.loadingFlyoutAriaLabel', {
@@ -296,6 +314,28 @@ const CreateRuleOptionsFlyoutInner = ({
     if (legacyItem) {
       return legacyItem.render(onClose);
     }
+  }
+
+  // When opened via mixed create (`initialStep`), only mount the authoring flyout so it
+  // stacks on the chooser. Otherwise keep the selector mounted underneath for Back.
+  if (initialStep && showAuthoringFlyout) {
+    return (
+      <Context.Provider value={services.container}>
+        <ActionPolicyAwareComposeDiscoverFlyout
+          ComposeDiscoverFlyout={ComposeDiscoverFlyout}
+          historyKey={historyKey}
+          session="start"
+          mode="create"
+          onClose={onClose}
+          services={services}
+          builderType={step.type === 'threshold' ? 'threshold' : undefined}
+          onCreateRule={handleCreateRule}
+          isSaving={isSaving}
+          initialQuery={query}
+          esqlVariables={esqlVariables}
+        />
+      </Context.Provider>
+    );
   }
 
   return (

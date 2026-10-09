@@ -74,12 +74,12 @@ describe('ActionPoliciesListHeader', () => {
     mockIsLicenseValid = true;
   });
 
-  it('renders the page title with an ES|QL rules only badge and callout', () => {
+  it('renders the page title with a Universal only badge and callout', () => {
     renderHeader();
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Action Policies');
     expect(screen.getByTestId('alertingV2EsqlRulesOnlyBadge')).toHaveTextContent(
-      'ES|QL rules only'
+      'Universal only'
     );
     expect(screen.queryByTestId('alertingV2ExperimentalBadge')).not.toBeInTheDocument();
     expect(screen.getByTestId('esqlRulesOnlyCallout')).toBeInTheDocument();

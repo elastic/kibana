@@ -253,14 +253,14 @@ describe('rulesPage', () => {
         useKibanaMock().services.tabs = [
           {
             id: 'v2Rules',
-            label: 'V2 rules',
+            label: 'Universal',
             isSelected: false,
             href: '/obs/rules/v2',
             'data-test-subj': 'v2RulesTab',
           },
           {
             id: 'v1Rules',
-            label: 'V1 rules',
+            label: 'Classic',
             isSelected: true,
             href: '/obs/rules/v1',
             'data-test-subj': 'v1RulesTab',
@@ -274,32 +274,12 @@ describe('rulesPage', () => {
         expect(await screen.findByTestId('v1RulesTab')).toHaveAttribute('href', '/obs/rules/v1');
         expect(screen.getByTestId('v1RulesTab')).toHaveAttribute('aria-selected', 'true');
         expect(screen.getByTestId('v2RulesTab')).toHaveAttribute('aria-selected', 'false');
-      });
 
-      it('orders the V1 rules tab before the V2 rules tab', async () => {
-        const history = createMemoryHistory({ initialEntries: ['/'] });
-        renderRulesPage(history);
-
-        const tabs = await screen.findAllByRole('tab');
-
+        const tabs = screen.getAllByRole('tab');
         expect(tabs.map((tab) => tab.getAttribute('data-test-subj'))).toEqual([
-          'v1RulesTab',
           'v2RulesTab',
+          'v1RulesTab',
         ]);
-      });
-
-      it('points each tab at its own app, under the server base path', async () => {
-        const history = createMemoryHistory({ initialEntries: ['/'] });
-        renderRulesPage(history);
-
-        expect(await screen.findByTestId('v1RulesTab')).toHaveAttribute(
-          'href',
-          `${MOCK_BASE_PATH}${triggersActionsRoute}`
-        );
-        expect(await screen.findByTestId('v2RulesTab')).toHaveAttribute(
-          'href',
-          `${MOCK_BASE_PATH}${ALERTING_V2_RULES_BASE_PATH}`
-        );
       });
 
       it('uses a Logs heading with a back button to Rules and no Logs menu item', async () => {

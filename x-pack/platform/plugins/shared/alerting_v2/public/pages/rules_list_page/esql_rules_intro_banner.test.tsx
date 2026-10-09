@@ -11,7 +11,6 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   EsqlRulesIntroBanner,
   ESQL_RULES_INTRO_BANNER_DISMISSED_STORAGE_KEY,
-  ESQL_RULES_INTRO_DOC_URL,
 } from './esql_rules_intro_banner';
 
 const mockToursIsEnabled = jest.fn(() => true);
@@ -43,10 +42,10 @@ describe('EsqlRulesIntroBanner', () => {
   it('renders title and description', () => {
     renderBanner();
 
-    expect(screen.getByText('Introducing ES|QL rules')).toBeInTheDocument();
+    expect(screen.getByText('Introducing Kibana Universal Alerting')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Build rules with native ES|QL queries. ES|QL rules are the newer alternative to Standard rules, with a dedicated rules list, a shared alerts inbox, and centralized action policies for notifications.'
+        "Bring your alerting needs together in one open, universal system. Detect the signals that matter, work with alerts as data, combine alerts across different sources and use cases, and control how they're managed, routed, and acted on."
       )
     ).toBeInTheDocument();
   });
@@ -54,16 +53,7 @@ describe('EsqlRulesIntroBanner', () => {
   it('renders the illustration', () => {
     renderBanner();
 
-    expect(screen.getByAltText('ES|QL rules illustration')).toBeInTheDocument();
-  });
-
-  it('Learn more CTA has the placeholder docs href', () => {
-    renderBanner();
-
-    expect(screen.getByTestId('esqlRulesIntroBannerLearnMore')).toHaveAttribute(
-      'href',
-      ESQL_RULES_INTRO_DOC_URL
-    );
+    expect(screen.getByAltText('Kibana Universal Alerting illustration')).toBeInTheDocument();
   });
 
   it('dismiss hides the banner and persists the dismissed state to localStorage', () => {

@@ -114,6 +114,7 @@ export type SloLinkId = 'management' | 'settings';
 
 export type ObservabilityAlertingLinkId =
   | 'alerts'
+  | 'rules'
   | 'rules-v1'
   | 'rules-v2'
   | 'rule-library'

@@ -36,12 +36,12 @@ export const EsqlRulesMigrationBanner = () => {
         size="s"
         data-test-subj="esQueryEsqlRulesMigrationBanner"
         title={i18n.translate('xpack.stackAlerts.esQuery.ui.esqlRulesMigrationBanner.title', {
-          defaultMessage: 'Looking for ES|QL rules?',
+          defaultMessage: 'Looking for Universal rules?',
         })}
       >
         <FormattedMessage
           id="xpack.stackAlerts.esQuery.ui.esqlRulesMigrationBanner.description"
-          defaultMessage="ES Query rules are part of Standard rules. Try {esqlRulesLink} for the newer ES|QL-based experience. {learnMoreLink}"
+          defaultMessage="Try {esqlRulesLink} for the newer ES|QL-based experience. {learnMoreLink}"
           values={{
             esqlRulesLink: (
               <EuiLink
@@ -50,7 +50,7 @@ export const EsqlRulesMigrationBanner = () => {
               >
                 {i18n.translate(
                   'xpack.stackAlerts.esQuery.ui.esqlRulesMigrationBanner.esqlRulesLinkLabel',
-                  { defaultMessage: 'ES|QL rules' }
+                  { defaultMessage: 'Universal rules' }
                 )}
               </EuiLink>
             ),
