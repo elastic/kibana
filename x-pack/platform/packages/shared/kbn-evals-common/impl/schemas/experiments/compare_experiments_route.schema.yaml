@@ -10,8 +10,7 @@ paths:
       operationId: CompareExperiments
       description: >-
         Compare two evaluation experiments with a paired statistical test per
-        dataset and evaluator. Every result row reports which test was used
-        and why.
+        dataset and evaluator.
       summary: Compare two evaluation experiments
       tags:
         - Evals API

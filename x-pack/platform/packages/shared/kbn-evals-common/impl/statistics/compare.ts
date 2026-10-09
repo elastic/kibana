@@ -15,15 +15,6 @@ import type { PairedScore } from './pairing';
 import { runPairedTest } from './run_test';
 import { selectTest } from './select_test';
 
-/** Discordant pairs of a binary slice: `[[both 1, target only], [baseline only, both 0]]`. */
-function countDiscordantPairs(
-  target: number[],
-  baseline: number[]
-): NonNullable<HypothesisTest['discordantPairs']> {
-  const [[, targetOnly], [baselineOnly]] = pairedTable(target, baseline);
-  return { targetOnly, baselineOnly };
-}
-
 function groupByDatasetAndEvaluator(pairs: PairedScore[]): PairedScore[][] {
   const groups = new Map<string, PairedScore[]>();
   for (const pair of pairs) {
@@ -51,10 +42,11 @@ function compareSlice(group: PairedScore[]): ComparisonResult {
     id: outcome.id,
     ...(outcome.method !== undefined && { method: outcome.method }),
     statistic: outcome.statistic,
-    ...(metricType === 'binary' && {
-      discordantPairs: countDiscordantPairs(target, baseline),
-    }),
   };
+  if (metricType === 'binary') {
+    const [[, targetOnly], [baselineOnly]] = pairedTable(target, baseline);
+    hypothesisTest.discordantPairs = { targetOnly, baselineOnly };
+  }
 
   const direction =
     group.find((pair) => pair.direction !== undefined)?.direction ??

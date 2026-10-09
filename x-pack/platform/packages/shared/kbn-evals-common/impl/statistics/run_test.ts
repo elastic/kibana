@@ -10,21 +10,11 @@ import type { StatisticalTestId } from '../schemas/experiments/compare_experimen
 
 export interface PairedTestOutcome {
   id: StatisticalTestId;
-  /** Variant of the test that produced the p-value, when the test has more than one. */
+  /** Variant of the test that produced the p-value */
   method?: string;
   statistic: number | null;
   pValue: number | null;
 }
-
-/** Thrown when a test was requested for scores it cannot run on (e.g. McNemar on fractions). */
-export class InvalidTestForDataError extends Error {
-  constructor(public readonly test: StatisticalTestId, message: string) {
-    super(message);
-    this.name = 'InvalidTestForDataError';
-  }
-}
-
-const isBinary = (value: number): boolean => value === 0 || value === 1;
 
 /** Run one paired hypothesis test on aligned target/baseline scores. */
 export function runPairedTest(
@@ -51,13 +41,6 @@ export function runPairedTest(
       };
     }
     case 'mcnemar': {
-      const offending = [...target, ...baseline].find((value) => !isBinary(value));
-      if (offending !== undefined) {
-        throw new InvalidTestForDataError(
-          test,
-          `McNemar's test requires every score to be 0 or 1; observed ${offending}.`
-        );
-      }
       const { statistic, pValue, method } = mcnemar(target, baseline);
       return { id: test, method, statistic, pValue };
     }

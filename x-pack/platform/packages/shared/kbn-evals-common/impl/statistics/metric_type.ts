@@ -11,10 +11,11 @@ export type { MetricType };
 
 /**
  * Maximum share of distinct values among the observed scores for an integer metric to be
- * treated as an ordinal scale. A scale is re-used across many examples, so its distinct
- * values are few relative to the sample; a count tends to spread out as n grows.
+ * treated as an ordinal scale.
  */
 const ORDINAL_MAX_UNIQUE_RATIO = 0.5;
+
+const isBinary = (value: number): boolean => value === 0 || value === 1;
 
 /** True when the distinct values form the dense run 1..k, the shape of a Likert-style scale. */
 function isContiguousFromOne(values: number[]): boolean {
@@ -23,8 +24,7 @@ function isContiguousFromOne(values: number[]): boolean {
 }
 
 /**
- * Infer the metric type of one (dataset, evaluator) slice from the scores observed
- * on both arms of the comparison. Returns `undefined` when there are no observed scores.
+ * Infer the metric type. Returns `undefined` when there are no observed scores.
  */
 export function inferMetricType(target: number[], baseline: number[]): MetricType | undefined {
   const values = [...target, ...baseline];
@@ -33,7 +33,7 @@ export function inferMetricType(target: number[], baseline: number[]): MetricTyp
     return undefined;
   }
 
-  if (values.every((value) => value === 0 || value === 1)) {
+  if (values.every(isBinary)) {
     return 'binary';
   }
 

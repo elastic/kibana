@@ -8,7 +8,7 @@
 export { pairScores, resolveDirection, isImproved } from './pairing';
 export type { PairedScore, Direction } from './pairing';
 export { compareScores } from './compare';
-export { runPairedTest, InvalidTestForDataError } from './run_test';
+export { runPairedTest } from './run_test';
 export type { PairedTestOutcome } from './run_test';
 export { selectTest, PARAMETRIC_UPGRADE_MIN_PAIRS, NORMALITY_ALPHA } from './select_test';
 export { inferMetricType } from './metric_type';

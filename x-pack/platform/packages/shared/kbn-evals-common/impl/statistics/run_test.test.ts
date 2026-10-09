@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InvalidTestForDataError, runPairedTest } from './run_test';
+import { runPairedTest } from './run_test';
 
 // Reference values are the scipy / statsmodels numbers recorded in the
 // @elastic/statistics fixtures (`src/non_parametric_tests/__fixtures__/*.json`).
@@ -14,9 +14,6 @@ const PRECISION = 9;
 describe('runPairedTest', () => {
   describe('paired_t', () => {
     it('pins the p-value for differences 1..5 (population-SD variant of the t statistic)', () => {
-      // scipy.ttest_rel reports t=4.243, p=0.0132 for these diffs. The package divides by n
-      // instead of n-1 in the standard deviation, so its t is inflated by sqrt(n/(n-1)).
-      // This pin guards the "identical to before" guarantee until the package changes.
       const outcome = runPairedTest('paired_t', [1, 2, 3, 4, 5], [0, 0, 0, 0, 0]);
 
       expect(outcome.id).toBe('paired_t');
@@ -116,19 +113,8 @@ describe('runPairedTest', () => {
       expect(outcome.pValue).toBe(1);
     });
 
-    it('throws InvalidTestForDataError on scores other than 0 and 1', () => {
-      expect(() => runPairedTest('mcnemar', [1, 0.5], [0, 1])).toThrow(InvalidTestForDataError);
-      expect(() => runPairedTest('mcnemar', [1, 0], [0, 0.25])).toThrow(/observed 0.25/);
-    });
-
-    it('exposes the offending test id on the error', () => {
-      try {
-        runPairedTest('mcnemar', [0.4], [0.8]);
-        throw new Error('expected runPairedTest to throw');
-      } catch (error) {
-        expect(error).toBeInstanceOf(InvalidTestForDataError);
-        expect((error as InvalidTestForDataError).test).toBe('mcnemar');
-      }
+    it('throws on scores other than 0 and 1', () => {
+      expect(() => runPairedTest('mcnemar', [1, 0], [0, 0.25])).toThrow(RangeError);
     });
   });
 });

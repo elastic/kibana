@@ -23,10 +23,7 @@ const isNormal = (differences: number[]): boolean => {
 };
 
 /**
- * Pick the paired test for one (dataset, evaluator) slice from its metric type and observed
- * scores. Binary metrics use McNemar; everything else uses Wilcoxon signed-rank, upgraded to
- * the paired t-test only for continuous metrics with enough pairs whose differences pass
- * Shapiro-Wilk. Two-sided throughout.
+ * Pick the paired test from its metric type and observed scores.
  */
 export function selectTest(
   target: number[],
