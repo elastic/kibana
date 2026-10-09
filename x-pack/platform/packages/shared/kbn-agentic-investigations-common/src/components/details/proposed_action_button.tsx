@@ -8,8 +8,8 @@
 import React, { memo, useCallback, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
-import { FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import {
+  ApprovalActorTime,
   ApprovalModal,
   getApprovalOutcomeBadge,
   getProposalCaption,
@@ -92,23 +92,17 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     // chiefly) — the badge label alone ("Expired") already says what happened, so this only adds
     // "by {name}" when there is a real actor to name.
     const caption = decision?.actorName ? (
-      decision.decidedAt ? (
-        <FormattedMessage
-          id="xpack.alertzero.detailsFlyout.proposedAction.decidedByCaption"
-          defaultMessage="{approvalType} by {name} at {time}"
-          values={{
-            approvalType: badge.label,
-            name: decision.actorName,
-            time: <FormattedTime value={decision.decidedAt} />,
-          }}
-        />
-      ) : (
-        <FormattedMessage
-          id="xpack.alertzero.detailsFlyout.proposedAction.decidedByCaptionWithoutTime"
-          defaultMessage="{approvalType} by {name}"
-          values={{ approvalType: badge.label, name: decision.actorName }}
-        />
-      )
+      <ApprovalActorTime
+        actorName={decision.actorName}
+        at={decision.decidedAt}
+        outcome={
+          decision.status === 'failed'
+            ? 'executed'
+            : decision.status === 'declined'
+            ? 'declined'
+            : 'approved'
+        }
+      />
     ) : decision ? (
       badge.label
     ) : pendingCaption ? (

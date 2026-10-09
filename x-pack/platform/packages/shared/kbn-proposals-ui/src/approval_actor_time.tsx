@@ -25,6 +25,11 @@ export interface ApprovalActorTimeProps {
   live?: boolean;
   /** Prefixes "executed", for an approved action that ran and failed. */
   executed?: boolean;
+  /**
+   * Leads the caption with the outcome in sentence case ("Approved by …"), for a caption that
+   * stands on its own rather than following other header text. Wins over `executed`.
+   */
+  outcome?: 'approved' | 'declined' | 'executed';
 }
 
 const UPDATE_INTERVAL_SECONDS = 1;
@@ -41,8 +46,19 @@ export const ApprovalActorTime = ({
   at,
   live = false,
   executed = false,
+  outcome,
 }: ApprovalActorTimeProps) => {
   if (at === undefined) {
+    if (outcome) {
+      return (
+        <FormattedMessage
+          id="xpack.proposals.approvalActorTime.outcomeLabelWithoutTime"
+          defaultMessage="{outcome, select, approved {Approved} declined {Declined} other {Executed}} by {actorName}"
+          values={{ outcome, actorName: <strong>{actorName}</strong> }}
+        />
+      );
+    }
+
     return (
       <FormattedMessage
         id={
@@ -61,12 +77,21 @@ export const ApprovalActorTime = ({
   return (
     <FormattedMessage
       id={
-        executed
+        outcome
+          ? 'xpack.proposals.approvalActorTime.outcomeLabel'
+          : executed
           ? 'xpack.proposals.approvalActorTime.executedLabel'
           : 'xpack.proposals.approvalActorTime.label'
       }
-      defaultMessage={executed ? 'executed by {actorName} at {time}' : 'by {actorName} at {time}'}
+      defaultMessage={
+        outcome
+          ? '{outcome, select, approved {Approved} declined {Declined} other {Executed}} by {actorName} at {time}'
+          : executed
+          ? 'executed by {actorName} at {time}'
+          : 'by {actorName} at {time}'
+      }
       values={{
+        outcome,
         actorName: <strong>{actorName}</strong>,
         time: live ? (
           <FormattedRelative
