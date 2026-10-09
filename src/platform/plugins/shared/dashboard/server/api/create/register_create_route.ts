@@ -75,14 +75,11 @@ export function registerCreateRoute(
     async (ctx, req, res) =>
       telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
-          const result = await create(
-            ctx,
-            getCachedDashboardStateSchema(),
-            req.body,
-            req.serverTiming,
-            spacesService?.getSpaceId(req),
-            isDashboardAppRequest
-          );
+          const result = await create(ctx, getCachedDashboardStateSchema(), req.body, {
+            serverTiming: req.serverTiming,
+            spaceId: spacesService?.getSpaceId(req),
+            isDashboardAppRequest,
+          });
           try {
             await trackCreateDashboardAction(result, req);
           } catch (e) {

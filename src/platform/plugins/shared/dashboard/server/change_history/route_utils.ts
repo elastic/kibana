@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from '@kbn/core/server';
+import type {
+  KibanaRequest,
+  KibanaResponseFactory,
+  RequestHandlerContext,
+  RouteMethod,
+} from '@kbn/core/server';
 
 import { getChangeHistoryClient } from './change_history_service';
 import { spacesService } from '../kibana_services';
@@ -23,9 +28,9 @@ export const CHANGE_HISTORY_ROUTE_SECURITY = {
  * Checks dashboard edit privileges and resolves the change history client and space for a
  * request. Returns the error response to send when the request cannot be served.
  */
-export const getChangeHistoryContext = async <P, Q, B>(
+export const getChangeHistoryContext = async <P, Q, B, M extends RouteMethod>(
   ctx: RequestHandlerContext,
-  req: KibanaRequest<P, Q, B, 'get'>,
+  req: KibanaRequest<P, Q, B, M>,
   res: KibanaResponseFactory
 ) => {
   const core = await ctx.core;

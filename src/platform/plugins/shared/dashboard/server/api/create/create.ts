@@ -18,14 +18,18 @@ import { transformDashboardIn } from '../transforms';
 import type { DashboardCreateResponseBody } from './types';
 import { addToHistory } from '../../change_history/util';
 
+export interface CreateOptions {
+  id?: string;
+  serverTiming?: RequestTiming;
+  spaceId?: string;
+  isDashboardAppRequest?: boolean;
+}
+
 export async function create(
   requestCtx: RequestHandlerContext,
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   createBody: DashboardState,
-  serverTiming?: RequestTiming,
-  spaceId: string = 'default',
-  isDashboardAppRequest: boolean = false,
-  id?: string
+  { id, serverTiming, spaceId, isDashboardAppRequest = false }: CreateOptions = {}
 ): Promise<DashboardCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
   const { access_control: accessControl, ...restOfData } = createBody;

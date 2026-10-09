@@ -6,9 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import * as jsondiffpatch from 'jsondiffpatch';
-import * as jsonpatchFormatter from 'jsondiffpatch/formatters/jsonpatch';
-
 import { i18n } from '@kbn/i18n';
 import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import type { CoreSetup, IRouter, RequestHandlerContext } from '@kbn/core/server';
@@ -87,12 +84,7 @@ export const registerHistoryListRoute = (
           items: items.map((item, index) => {
             const user = item.user;
             const profile = user.id ? profileByUid.get(user.id) : undefined;
-            const changes =
-              index + 1 < items.length
-                ? jsonpatchFormatter.format(
-                    jsondiffpatch.diff(item.object.snapshot, items[index + 1].object.snapshot)
-                  )
-                : undefined;
+            const changeCount = item.metadata?.changeCount;
             return {
               id: item.event.id,
               action: item.event.action,
@@ -102,7 +94,7 @@ export const registerHistoryListRoute = (
                 name: profile?.user.full_name || user.name,
                 id: user.id,
               },
-              ...(changes ? { changes: { count: changes.length } } : {}),
+              ...(typeof changeCount === 'number' ? { changes: { count: changeCount } } : {}),
               ...('restoredFrom' in (item.metadata ?? {})
                 ? {
                     comment: i18n.translate('dashboard.changeHistory.restoredFromComment', {

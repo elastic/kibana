@@ -9,7 +9,6 @@
 
 import Boom from '@hapi/boom';
 import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
-import type { RequestTiming } from '@kbn/core-http-server';
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { RequestHandlerContext } from '@kbn/core/server';
@@ -17,7 +16,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
-import type { DashboardCreateResponseBody } from '../create';
+import type { CreateOptions, DashboardCreateResponseBody } from '../create';
 import { create } from '../create';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
@@ -29,6 +28,11 @@ import {
   INITIAL_HISTORY_SEQUENCE,
 } from '../../change_history/history_sequence';
 import { addToHistory } from '../../change_history/util';
+
+export interface UpdateOptions extends Omit<CreateOptions, 'id'> {
+  /** Sequence number of the history version this update restores */
+  restoredFrom?: number;
+}
 
 /**
  * Upserts a dashboard by id — creates it if it doesn't exist, or updates it if it does.
@@ -45,10 +49,7 @@ export async function update(
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   id: string,
   updateBody: DashboardState,
-  serverTiming?: RequestTiming,
-  spaceId: string = 'default',
-  isDashboardAppRequest: boolean = false,
-  restoredFrom?: number
+  { serverTiming, spaceId, isDashboardAppRequest = false, restoredFrom }: UpdateOptions = {}
 ): Promise<{
   body: DashboardCreateResponseBody | DashboardUpdateResponseBody;
   operation: Operation;
@@ -89,15 +90,12 @@ export async function update(
   if (!existing) {
     asCodeIdSchema.parse(id);
 
-    const body = await create(
-      requestCtx,
-      strictValidationSchema,
-      updateBody,
+    const body = await create(requestCtx, strictValidationSchema, updateBody, {
+      id,
       serverTiming,
       spaceId,
       isDashboardAppRequest,
-      id
-    );
+    });
     return { body, operation: 'create' };
   }
 

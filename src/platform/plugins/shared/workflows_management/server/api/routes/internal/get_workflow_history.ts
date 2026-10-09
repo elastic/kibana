@@ -60,8 +60,6 @@ export function registerGetWorkflowHistoryRoute(deps: RouteDependencies) {
           const page = request.query.page ?? 1;
           const perPage = request.query.per_page ?? 20;
           const history = await api.getHistoryForWorkflow(id, spaceId, { page, perPage, request });
-          console.log({ history: JSON.stringify(history, null, 2) });
-
           audit.logWorkflowAccessed(request, { id });
           return response.ok({ body: history });
         } catch (error) {

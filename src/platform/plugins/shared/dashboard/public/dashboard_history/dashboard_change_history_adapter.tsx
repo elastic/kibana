@@ -58,8 +58,8 @@ export const createDashboardChangeHistoryAdapter = (
   restoreChange: dashboardApi
     ? async ({ objectId, changeId, signal }) => {
         try {
-          const response = await http.get<RestoreChangeResponse>(
-            `${BASE_HISTORY_PATH}/${objectId}/restore/${changeId}`,
+          const response = await http.post<RestoreChangeResponse>(
+            `${BASE_HISTORY_PATH}/${objectId}/${changeId}/_restore`,
             {
               signal,
             }

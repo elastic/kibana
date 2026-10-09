@@ -128,7 +128,7 @@ export const createWorkflowChangeHistoryAdapter = (
           signal,
         }
       );
-      console.log({ response });
+
       signal?.throwIfAborted();
 
       const items: ChangeHistoryListItem[] = [];

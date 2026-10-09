@@ -38,6 +38,6 @@ function resolveUserName(
   userProfilesById: Map<string, UserProfile>
 ): string {
   const profile = user.id ? userProfilesById.get(user.id) : undefined;
-  console.log({ userProfilesById, profile, user });
+
   return profile?.user.full_name || user.name;
 }

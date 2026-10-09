@@ -96,9 +96,11 @@ export function registerUpdateRoute(
             getCachedDashboardStateSchema(),
             req.params.id,
             req.body,
-            req.serverTiming,
-            spacesService?.getSpaceId(req),
-            isDashboardAppRequest
+            {
+              serverTiming: req.serverTiming,
+              spaceId: spacesService?.getSpaceId(req),
+              isDashboardAppRequest,
+            }
           );
           if (operation === 'create') {
             // do not await tracking actions

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import * as jsondiffpatch from 'jsondiffpatch';
+import * as jsonpatchFormatter from 'jsondiffpatch/formatters/jsonpatch';
+
 import type { ObjectChange } from '@kbn/change-history';
 import type { RequestHandlerContext } from '@kbn/core/server';
 
@@ -51,12 +54,27 @@ export const addToHistory = async ({
   };
 
   try {
+    const {
+      items: [previous],
+    } = await client.getHistory(spaceId, 'dashboard', dashboardId, {
+      size: 1,
+    });
+    // stored with the event so that listing history does not need to diff every snapshot
+    const changeCount = previous
+      ? jsonpatchFormatter.format(jsondiffpatch.diff(previous.object.snapshot, snapshot)).length
+      : undefined;
+
     await client.log(change, {
       action: 'dashboard_update',
       username: user.username,
       userProfileId: user.profile_uid,
       spaceId,
-      ...(typeof restoredFrom === 'number' && { data: { metadata: { restoredFrom } } }),
+      data: {
+        metadata: {
+          ...(changeCount !== undefined && { changeCount }),
+          ...(typeof restoredFrom === 'number' && { restoredFrom }),
+        },
+      },
       refresh: restoredFrom ? 'wait_for' : undefined, // wait for ES to update so that we fetch the updated list
     });
   } catch {

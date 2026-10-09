@@ -19,9 +19,9 @@ import { update } from '../api/update/update';
 export type RestoreChangeResponse = DashboardState;
 
 export const registerRestoreChangeRoute = (router: IRouter<RequestHandlerContext>) => {
-  router.get(
+  router.post(
     {
-      path: '/internal/dashboard/change_history/{id}/restore/{changeId}',
+      path: '/internal/dashboard/change_history/{id}/{changeId}/_restore',
       validate: {
         request: {
           params: z
@@ -59,10 +59,7 @@ export const registerRestoreChangeRoute = (router: IRouter<RequestHandlerContext
         getDashboardStateSchema(true, true),
         req.params.id,
         item.object.snapshot as DashboardState,
-        undefined,
-        spaceId,
-        true,
-        item.object.sequence
+        { spaceId, isDashboardAppRequest: true, restoredFrom: item.object.sequence }
       );
       return res.ok({ body: result.body.data });
     }

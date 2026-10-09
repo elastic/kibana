@@ -7,20 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { lazy, Suspense, useMemo, useState } from 'react';
 
-import { css } from '@emotion/react';
-import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import { toStoredFilters } from '@kbn/as-code-filters-transforms';
-import type { ChangeHistoryPreviewRenderFn } from '@kbn/change-history-ui';
+import { EuiLoadingSpinner } from '@elastic/eui';
+
 import { ChangeHistoryModal, ChangeHistoryProvider } from '@kbn/change-history-ui';
 import { i18n } from '@kbn/i18n';
 
-import type { DashboardApi, DashboardInitializationState } from '..';
-import { DASHBOARD_APP_ID, DashboardRenderer } from '..';
-import { coreServices, unifiedSearchService } from '../services/kibana_services';
+import type { DashboardApi } from '..';
+import { coreServices } from '../services/kibana_services';
 import { createDashboardChangeHistoryAdapter } from './dashboard_change_history_adapter';
 import { renderDashboardChangeHistoryBadge } from './dashboard_change_history_badge';
+
+// the preview embeds a second dashboard renderer, so only load it once a change is previewed
+const LazyDashboardPreview = lazy(async () => {
+  const { DashboardPreview } = await import('./dashboard_preview');
+  return { default: DashboardPreview };
+});
 
 export interface DashboardChangeHistoryProviderProps {
   dashboardId: string;
@@ -57,11 +60,13 @@ export const DashboardChangeHistoryProvider = ({
       objectId={dashboardId}
       adapter={adapter}
       renderPreview={(props) => (
-        <DashboardPreview
-          {...props}
-          setPreviewTitle={setPreviewTitle}
-          inheritedTimeRange={dashboardApi?.timeRange$.getValue()}
-        />
+        <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
+          <LazyDashboardPreview
+            {...props}
+            setPreviewTitle={setPreviewTitle}
+            inheritedTimeRange={dashboardApi?.timeRange$.getValue()}
+          />
+        </Suspense>
       )}
       renderBadge={renderDashboardChangeHistoryBadge}
       labels={{
@@ -78,64 +83,5 @@ export const DashboardChangeHistoryProvider = ({
       {children}
       <ChangeHistoryModal />
     </ChangeHistoryProvider>
-  );
-};
-
-const DashboardPreview: ChangeHistoryPreviewRenderFn<{
-  setPreviewTitle: (title: string) => void;
-  inheritedTimeRange?: DashboardState['time_range'];
-}> = ({ change, setPreviewTitle, inheritedTimeRange }) => {
-  const initialState = useRef<DashboardInitializationState>({
-    time_range: inheritedTimeRange,
-    ...change,
-    viewMode: 'view' as const,
-  });
-  const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
-
-  useEffect(() => {
-    if (!dashboardApi) return;
-    setPreviewTitle((change.snapshot as DashboardState).title);
-    dashboardApi.setState(change.snapshot as DashboardState);
-  }, [change, dashboardApi, setPreviewTitle]);
-
-  const memoized = useMemo(() => {
-    /** Prevent dashboard renderer from remounting with every history item selection; instead, we will call `setState` on the API */
-    return (
-      <DashboardRenderer
-        getCreationOptions={() =>
-          Promise.resolve({
-            getInitialInput: () => initialState.current,
-          })
-        }
-        onApiAvailable={setDashboardApi}
-      />
-    );
-  }, []);
-
-  const searchBarVisibilityProps = useMemo(() => {
-    return {
-      showFilterBar: ((change.snapshot as DashboardState).filters ?? []).length > 0,
-      showQueryInput: (change.snapshot as DashboardState).query?.expression !== '',
-      showDatePicker: Boolean((change.snapshot as DashboardState).time_range), // if time range is saved, then `time_restore` is true
-    };
-  }, [change.snapshot]);
-
-  return (
-    <div
-      css={css`
-        overflow: scroll;
-      `}
-    >
-      {Object.values(searchBarVisibilityProps).some((visible) => visible) && (
-        <unifiedSearchService.ui.SearchBar
-          appName={DASHBOARD_APP_ID}
-          filters={toStoredFilters((change.snapshot as DashboardState).filters)}
-          disableSubscribingToGlobalDataServices
-          isDisabled={true}
-          {...searchBarVisibilityProps}
-        />
-      )}
-      {memoized}
-    </div>
   );
 };

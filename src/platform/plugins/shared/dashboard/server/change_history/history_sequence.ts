@@ -11,8 +11,8 @@ import equal from 'fast-deep-equal';
 
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 
-import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import { omit } from 'lodash';
+import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 
 export const INITIAL_HISTORY_SEQUENCE = 1;
 

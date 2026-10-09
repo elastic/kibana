@@ -81,6 +81,7 @@ export const createChangeHistoryHttpAdapter = (
           query,
           signal,
         });
+
         const mapped = mapListResponse(body);
         const mapListItem = config.mapListItem;
 
@@ -103,6 +104,7 @@ export const createChangeHistoryHttpAdapter = (
       }
 
       const path = replaceEventId(replaceObjectId(config.detailPath, objectId), changeId);
+
       try {
         const body = await config.http.get<unknown>(path, { signal });
         return config.mapDetail ? config.mapDetail(body) : (body as ChangeHistoryDetail);
