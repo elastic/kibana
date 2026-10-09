@@ -1626,8 +1626,9 @@ steps:
             with:
               prompt: "{{ steps.build_agent_message.output.message }}"
 
-              # Structured output schema the model must conform to. Keep identical to the schema of
-              # runAgent_step above (a test compares them): one verdict object per
+              # Structured output schema the model must conform to. Keep it the same as the schema of
+              # runAgent_step above except for batch_summary.maxLength, which is 1000 here and 500
+              # there on purpose (see below); a test compares them. One verdict object per
               # alert in the batch. The root must stay an object (the step's schema contract
               # does not accept a root-level array), so the verdicts are carried in a property.
               schema:

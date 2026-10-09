@@ -216,6 +216,32 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
       tagPrefix: 'alert-analysis',
     };
 
+    describe('request body validation', () => {
+      const validateBody = (body: Record<string, unknown>) => {
+        const { config } = router.versioned.getRoute('put', ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE)
+          .versions['1'];
+        return config.validate.request.body(body, {
+          ok: (value: unknown) => ({ value }),
+          badRequest: (error: unknown) => ({ error }),
+        });
+      };
+
+      it('accepts the full settings', () => {
+        expect(validateBody(settings)).toHaveProperty('value');
+      });
+
+      // A partial body must not silently turn the option on or off, so it is rejected like a body
+      // that omits workflowEnabled or createConversation.
+      it.each(['usePrompt', 'createConversation', 'workflowEnabled'])(
+        'rejects a body that omits %s',
+        (field) => {
+          const { [field]: omitted, ...body } = settings as Record<string, unknown>;
+
+          expect(validateBody(body)).toHaveProperty('error');
+        }
+      );
+    });
+
     it('persists settings without reinstalling the workflow', async () => {
       const handler = router.versioned.getRoute('put', ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE)
         .versions['1'].handler;

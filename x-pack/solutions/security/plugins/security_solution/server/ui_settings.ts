@@ -955,7 +955,7 @@ export const getAlertAnalysisWorkflowSettings = (): SettingsConfig => ({
   },
   [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_USE_PROMPT]: {
     name: i18n.translate('xpack.securitySolution.uiSettings.alertAnalysisWorkflowUsePromptLabel', {
-      defaultMessage: 'Classify alerts with a prompt instead of an AI agent',
+      defaultMessage: 'Use a prompt instead of an agent',
     }),
     value: false,
     description: i18n.translate(
