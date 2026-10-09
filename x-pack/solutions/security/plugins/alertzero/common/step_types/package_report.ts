@@ -138,7 +138,7 @@ const coverageSkippedSchema = z.object({
 });
 
 export const packageReportMintPayloadSchema = z.object({
-  /** Idempotency key: uuidv5(conversationId, endpointId, actionWorkflowId[, processKey]). */
+  /** Idempotency key: uuidv5(conversationId, subjectId, actionWorkflowId[, processKey]). */
   subjectKey: z.string(),
   conversationId: z.string(),
   /** Short plain-text label naming what is proposed; omitting it falls back to the action's own name. */
@@ -148,8 +148,20 @@ export const packageReportMintPayloadSchema = z.object({
   impact: z.string().optional(),
   actionWorkflowId: z.string().optional(),
   actionInput: z.record(z.string(), z.unknown()).optional(),
-  /** Host name when the mint is host-scoped; absent on a hostless analyst recommendation. */
+  /** Host name when the mint is host-scoped; absent on identity mints and the analyst recommendation. */
   hostName: z.string().optional(),
+  /** What the proposal acts on; absent on the analyst recommendation. `hostName` stays for host and process mints. */
+  subject: z
+    .object({
+      kind: z.enum(['host', 'process', 'user', 'service']),
+      // Matches the SSE entity value cap (`entityRefSchema.value` in
+      // significant_security_event_schema.ts): a user/service subject's value is read
+      // straight from an SSE entity, which allows up to 2048 (ARN-shaped service names
+      // run long). A tighter cap here would throw on mint and fail the whole package
+      // result, including the host/process proposals bundled in the same array.
+      value: z.string().max(2048),
+    })
+    .optional(),
   confidence: z.enum(['low', 'medium', 'high']).optional(),
 });
 

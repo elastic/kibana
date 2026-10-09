@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ActionCatalogEntry } from '@kbn/alertzero-common';
+import type { ActionCatalogEntry, ActionSubjectKind } from '@kbn/alertzero-common';
 import type {
   PackageReportBehavior,
   PackageReportMintPayload,
@@ -42,6 +42,25 @@ export interface ProcessSelector {
    */
   techniqueId?: string;
 }
+
+export type SubjectKind = ActionSubjectKind;
+
+/**
+ * One thing packaging could act on. Hosts and processes are reachable when the host is
+ * enrolled with an agent id; users and services are always reachable (the identity action
+ * is a Kibana API). `value` is the human-readable name the proposal is about.
+ */
+export type Subject =
+  | { kind: 'host'; value: string; reachable: boolean; host: CurrentRunHost }
+  | {
+      kind: 'process';
+      value: string;
+      reachable: boolean;
+      host: CurrentRunHost;
+      processSelector: ProcessSelector;
+    }
+  | { kind: 'user'; value: string; reachable: true }
+  | { kind: 'service'; value: string; reachable: true };
 
 /** One confirmed Tier 2 behavior, deduped by `technique_id` across current-run SSEs. */
 export interface HuntEvidenceTechnique {
@@ -127,7 +146,10 @@ export interface CurrentRunState {
   findings: CurrentRunFinding[];
   /** Technique id to display name, from SSE behaviors and technique SKIs (`T1078.004 (Cloud Accounts)`). */
   techniqueNames: Record<string, string>;
-  /** Distinct `user.name` entities across current-run SSEs. */
+  /**
+   * Distinct `user.name` entities across current-run SSEs, in SSE order. Tier 1's CloudTrail
+   * identity-type vote decides whether an identity lands here or in `services`.
+   */
   users: string[];
   /** Hunt window of the first current-run SSE that names one. */
   window?: { from: string; to: string };
@@ -148,10 +170,17 @@ export interface CurrentRunState {
    * Empty means kill/suspend cannot be filled.
    */
   processSelectors: ProcessSelector[];
-  /** True when any current-run SSE entity is `user.name` or `service.name`, not a host. */
-  hasNonHostEntity: boolean;
+  /** Deduped `service.name` entity values across current-run SSEs (assumed roles, service accounts). */
+  services: string[];
   /** True when any current-run SSE security knowledge indicator is IOC-typed. */
   hasIocIndicator: boolean;
+  /**
+   * True when a current-run SSE entity names an identity by `user.email`, `user.id`, or
+   * `service.id` -- allowlisted fields the deterministic mapper never emits, but an
+   * agent-written SSE could. Not resolvable to a `users`/`services` entry, so this is the
+   * only signal that evidence exists for it at all.
+   */
+  hasUnnamedIdentityEntity: boolean;
   /** False when a current-run SSE event ref's `source_index` falls outside the run's `actionable_indices`. */
   allEventsActionable: boolean;
   /** True when a current-run SSE event ref's `source_index` is one of the run's `actionable_indices`. */

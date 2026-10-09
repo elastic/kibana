@@ -47,7 +47,7 @@ interface YamlWorkflow {
   name: string;
   tags?: string[];
   consts?: {
-    actionMetadata?: { category?: string; impact?: string };
+    actionMetadata?: { category?: string; impact?: string; subject?: string | string[] };
     privilege_probe_action_id?: string;
   };
   outputs?: Array<{ name: string; type?: string }>;
@@ -58,6 +58,7 @@ interface ResponseActionCase {
   id: string;
   workflow: { id: string; yaml: string };
   dispatchPath: string;
+  subject: 'host' | 'process';
 }
 
 const CASES: ResponseActionCase[] = [
@@ -65,16 +66,19 @@ const CASES: ResponseActionCase[] = [
     id: ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
     workflow: ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW,
     dispatchPath: '/s/{{ workflow.spaceId }}/api/endpoint/action/isolate',
+    subject: 'host',
   },
   {
     id: ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
     workflow: ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW,
     dispatchPath: '/s/{{ workflow.spaceId }}/api/endpoint/action/kill_process',
+    subject: 'process',
   },
   {
     id: ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
     workflow: ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW,
     dispatchPath: '/s/{{ workflow.spaceId }}/api/endpoint/action/suspend_process',
+    subject: 'process',
   },
 ];
 
@@ -108,6 +112,10 @@ describe('AlertZero response-action workflows', () => {
 
     it('declares respond catalog metadata so the action catalog can group it', () => {
       expect(parsed.consts?.actionMetadata?.category).toBe('respond');
+    });
+
+    it('declares the subject kind it acts on, so packaging never falls back to inferring it', () => {
+      expect(parsed.consts?.actionMetadata?.subject).toBe(spec.subject);
     });
 
     it('space-scopes every kibana.request path', () => {

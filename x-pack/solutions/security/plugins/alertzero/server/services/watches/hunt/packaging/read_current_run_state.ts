@@ -211,15 +211,24 @@ export const readCurrentRunState = async ({
     ),
   ];
 
-  const hostNames = [
+  const entityValues = (matches: (field: string) => boolean): string[] => [
     ...new Set(
-      currentRun.flatMap((sse) =>
-        sse.entities
-          .filter((e) => e.field === 'host.name' || e.field === 'host.hostname')
-          .map((e) => e.value)
-      )
+      currentRun.flatMap((sse) => sse.entities.filter((e) => matches(e.field)).map((e) => e.value))
     ),
   ];
+  const hostNames = entityValues((field) => field === 'host.name' || field === 'host.hostname');
+  // `users` above (from `findings`) already covers `user.name`. `services` is the same idea
+  // for `service.name`, which no other feature derives yet. `user.email`/`user.id`/`service.id`
+  // stay allowlisted for an agent-written SSE, though, and have no subject of their own to be
+  // named by -- rather than going silent on that evidence, `hasUnnamedIdentityEntity` below
+  // keeps a generic signal for it, mirroring how `hasIocIndicator` covers evidence with no
+  // subject at all.
+  const services = entityValues((field) => field === 'service.name');
+  const hasUnnamedIdentityEntity = currentRun.some((sse) =>
+    sse.entities.some(
+      (e) => e.field === 'user.email' || e.field === 'user.id' || e.field === 'service.id'
+    )
+  );
 
   const hosts: CurrentRunHost[] = [];
   for (const name of hostNames) {
@@ -242,9 +251,6 @@ export const readCurrentRunState = async ({
     })),
   });
 
-  const hasNonHostEntity = currentRun.some((sse) =>
-    sse.entities.some((e) => e.field !== 'host.name' && e.field !== 'host.hostname')
-  );
   const hasIocIndicator = currentRun.some((sse) =>
     sse.security_knowledge_indicators.some((ski) => ski.type === 'ioc')
   );
@@ -276,13 +282,14 @@ export const readCurrentRunState = async ({
     ...(window ? { window } : {}),
     severity,
     corroboratedTechniques,
-    hasNonHostEntity,
     hasIocIndicator,
+    hasUnnamedIdentityEntity,
     allEventsActionable,
     hasProcessBearingEvent,
     manualRemediation,
     hosts,
     processSelectors,
+    services,
     evidence,
   };
 };
