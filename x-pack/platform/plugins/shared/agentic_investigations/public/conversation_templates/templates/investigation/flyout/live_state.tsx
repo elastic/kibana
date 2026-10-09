@@ -7,17 +7,14 @@
 
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import type { LiveStateSlotRenderProps } from '@kbn/agentic-investigations-common';
-import { INVESTIGATION_SEVERITIES, type InvestigationSeverity } from '../../../../../common';
-import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import {
-  INVESTIGATION_SEVERITY_COLORS,
-  INVESTIGATION_SEVERITY_LABELS,
-  RUNNING_LABEL,
-} from '../translations';
-
-const isSeverity = (value: unknown): value is InvestigationSeverity =>
-  INVESTIGATION_SEVERITIES.some((severity) => severity === value);
+  SEVERITY_COLORS,
+  SEVERITY_LABELS,
+  type LiveStateSlotRenderProps,
+} from '@kbn/agentic-investigations-common';
+import { isInvestigationSeverity } from '../../../../../common';
+import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
+import { RUNNING_LABEL } from '../translations';
 
 /**
  * The flyout header's live state: the severity, from the polled investigation (an agent sets it
@@ -32,13 +29,10 @@ export const InvestigationLiveState: React.FC<LiveStateSlotRenderProps> = ({
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      {isSeverity(severity) && (
+      {isInvestigationSeverity(severity) && (
         <EuiFlexItem grow={false}>
-          <EuiBadge
-            color={INVESTIGATION_SEVERITY_COLORS[severity]}
-            data-test-subj="investigationFlyoutSeverity"
-          >
-            {INVESTIGATION_SEVERITY_LABELS[severity]}
+          <EuiBadge color={SEVERITY_COLORS[severity]} data-test-subj="investigationFlyoutSeverity">
+            {SEVERITY_LABELS[severity]}
           </EuiBadge>
         </EuiFlexItem>
       )}

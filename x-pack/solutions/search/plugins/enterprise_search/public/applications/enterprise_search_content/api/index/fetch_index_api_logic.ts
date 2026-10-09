@@ -21,7 +21,7 @@ export type FetchIndexApiResponse = ElasticsearchIndexWithIngestion & {
 export const fetchIndex = async ({
   indexName,
 }: FetchIndexApiParams): Promise<FetchIndexApiResponse> => {
-  const route = `/internal/enterprise_search/indices/${indexName}`;
+  const route = `/internal/enterprise_search/indices/${encodeURIComponent(indexName)}`;
 
   return await HttpLogic.values.http.get<FetchIndexApiResponse>(route);
 };

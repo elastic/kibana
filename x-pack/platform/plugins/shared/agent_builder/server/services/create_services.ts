@@ -39,6 +39,7 @@ import {
 import { type PluginsService, createPluginsService } from './plugins';
 import { CallbackDeliveryService } from './execution/callback';
 import { createSpaceSettingsService } from './space_settings';
+import { SurfacesServiceImpl } from './surfaces';
 import { ConversationTemplatesService } from './conversation/templates';
 
 interface ServiceInstances {
@@ -260,6 +261,11 @@ export class ServiceManager {
       logger: logger.get('audit'),
     });
 
+    const surfaces = new SurfacesServiceImpl({
+      attachmentsService: attachments,
+      logger: logger.get('surfaces'),
+    });
+
     const taskHandler = createTaskHandler({
       logger: logger.get('task-handler'),
       elasticsearch,
@@ -276,6 +282,7 @@ export class ServiceManager {
       meteringService: this.services.metering,
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
+      surfacesService: surfaces,
     });
 
     executionService = createAgentExecutionService({
