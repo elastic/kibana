@@ -332,19 +332,33 @@ const ensureWorkerServiceAccount = async (
   }
 };
 
+const EVAL_AI_INDEX_PATTERN = 'ai-index-idx-alertzero-eval-*';
+const PRODUCTION_AI_INDEX_PATTERN = 'ai-index-idx-security-investigations';
+
 /**
  * The production `alertzero_endpoint_analysis` prebuilt role from `@kbn/alertzero-common`
- * (`WORKER_ROLE_DEFINITIONS`), plus the single documented eval delta: read access to the
- * backing indices of the AI indexes this suite seeds (`ai-index-idx-alertzero-eval-*`).
- * The worker executes as the eval service account and must read the fixture it sweeps.
+ * (`WORKER_ROLE_DEFINITIONS`), plus the single documented eval delta: access to the backing
+ * indices of the AI indexes this suite seeds (`ai-index-idx-alertzero-eval-*`). The worker
+ * executes as the eval service account and must read the fixture it sweeps, and its
+ * `set_ki_autonomy` step writes KI state to the seeded AI index, so the delta grants exactly
+ * the privileges production grants its own AI index — derived from that grant, never a
+ * restated list that can drift read-only again.
  */
 const WORKER_ROLE: WorkerRolePayload = structuredClone(
   WORKER_ROLE_DEFINITIONS[SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID].role
 );
 WORKER_ROLE.description = `${WORKER_ROLE.description} Eval variant.`;
+const productionAiIndexGrant = WORKER_ROLE.elasticsearch.indices.find((entry) =>
+  entry.names.includes(PRODUCTION_AI_INDEX_PATTERN)
+);
+if (!productionAiIndexGrant) {
+  throw new Error(
+    `Production worker role no longer grants ${PRODUCTION_AI_INDEX_PATTERN}; the eval AI index delta must be re-derived`
+  );
+}
 WORKER_ROLE.elasticsearch.indices.push({
-  names: ['ai-index-idx-alertzero-eval-*'],
-  privileges: ['read', 'view_index_metadata'],
+  names: [EVAL_AI_INDEX_PATTERN],
+  privileges: structuredClone(productionAiIndexGrant.privileges),
 });
 
 const AI_INDEX_ROUTE = '/api/context_engine/ai_index';

@@ -69,6 +69,16 @@ describe('AlertZeroRuntime.read', () => {
 
 describe('AlertZeroRuntime.installWorker', () => {
   const WORKER = 'system-security-forensics-endpoint-analysis';
+  /**
+   * Privileges production grants its own AI index (`ai-index-idx-security-investigations`).
+   * The eval delta is derived from this grant at runtime, so the pin asserts parity with
+   * production rather than a restated list.
+   */
+  const productionAiIndexPrivileges = structuredClone(
+    WORKER_ROLE_DEFINITIONS[WORKER].role.elasticsearch.indices.find((entry: { names: string[] }) =>
+      entry.names.includes('ai-index-idx-security-investigations')
+    )!
+  ).privileges as string[];
 
   it('enables the worker with a provisioned service account and disables it when it was off', async () => {
     const fetch = createFetch((path, options) => {
@@ -204,7 +214,10 @@ describe('AlertZeroRuntime.installWorker', () => {
         ...production.elasticsearch,
         indices: [
           ...production.elasticsearch.indices,
-          { names: ['ai-index-idx-alertzero-eval-*'], privileges: ['read', 'view_index_metadata'] },
+          {
+            names: ['ai-index-idx-alertzero-eval-*'],
+            privileges: productionAiIndexPrivileges,
+          },
         ],
       },
     });
@@ -275,11 +288,12 @@ describe('AlertZeroRuntime.installWorker', () => {
       privileges: string[];
     }
     const isDelta = (entry: IndexEntry) => entry.names.includes('ai-index-idx-alertzero-eval-*');
-    // Pin the delta itself: it must be exactly one read-only entry on exactly that pattern.
-    // Filtering it out of the comparison without asserting it would let a widened grant
-    // (extra privileges or names, or additional write entries) pass.
+    // Pin the delta itself: it must be exactly one entry on exactly that pattern carrying
+    // exactly the privileges production grants its own AI index. Filtering it out of the
+    // comparison without asserting it would let a widened grant (extra privileges or names,
+    // or additional write entries) pass — and a read-only delta would 403 `set_ki_autonomy`.
     expect(evalRole.elasticsearch.indices.filter(isDelta)).toEqual([
-      { names: ['ai-index-idx-alertzero-eval-*'], privileges: ['read', 'view_index_metadata'] },
+      { names: ['ai-index-idx-alertzero-eval-*'], privileges: productionAiIndexPrivileges },
     ]);
     // Everything outside the delta must equal production, so extra entries (e.g. a
     // `.kibana*` write grant) are caught by the comparison below.
