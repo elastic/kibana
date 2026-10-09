@@ -127,16 +127,18 @@ const run = async ({
   builders = createBuilders(),
   generator = new TemplateBriefGenerator(),
   context = createContext(),
+  params: runParams = params,
 }: {
   store?: ReturnType<typeof createMemoryStore>;
   builders?: jest.Mocked<SnapshotBuilders>;
   generator?: BriefGenerator;
   context?: SnapshotContext;
+  params?: GenerateBriefRequestBody;
 } = {}) => {
   let tick = 0;
   await runExecutiveBrief({
     briefId: 'job-1',
-    params,
+    params: runParams,
     context,
     builders,
     generator,
@@ -343,8 +345,45 @@ describe('runExecutiveBrief', () => {
         inventedNumbers: ['57'],
         invalidEvidenceIds: ['RULE-99'],
       });
-      expect(store.doc.brief?.glance.threatNarrative).toBe('');
+      // The model glance was dropped (invented number): the template glance is shown and flagged.
+      expect(store.doc.brief?.glance.threatNarrative).toContain('storylines are active');
+      expect(store.doc.validation?.flags).toEqual([
+        expect.objectContaining({ claimPath: 'glance.headline', reason: 'fallback' }),
+        expect.objectContaining({ claimPath: 'glance.threatNarrative', reason: 'fallback' }),
+      ]);
       expect(store.doc.brief?.decisions).toEqual([]);
+    });
+
+    it('writes the fallback glance in the narration mode of the job (ids_only has no names)', async () => {
+      const generator = generatorReturning({
+        ...FIXTURE_BRIEF,
+        glance: { ...FIXTURE_BRIEF.glance, threatNarrative: '57 entities are compromised.' },
+      });
+      const { store } = await run({ generator, params: { ...params, mode: 'ids_only' } });
+      expect(store.doc.brief?.glance.headline).toContain('ENT-1');
+      expect(store.doc.brief?.glance.headline).not.toContain('a.rodriguez');
+    });
+
+    it('records the model name for an inference generator, and none for the template generator', async () => {
+      const inference: BriefGenerator = {
+        kind: 'inference',
+        generate: jest.fn(async () => ({
+          brief: FIXTURE_BRIEF,
+          model: 'Anthropic Claude Sonnet 5',
+        })),
+      };
+      expect((await run({ generator: inference })).store.doc.model).toBe(
+        'Anthropic Claude Sonnet 5'
+      );
+      expect((await run()).store.doc.model).toBeUndefined();
+    });
+
+    it('does not record a model when an inference generator returns none', async () => {
+      const inference: BriefGenerator = {
+        kind: 'inference',
+        generate: jest.fn(async () => ({ brief: FIXTURE_BRIEF })),
+      };
+      expect((await run({ generator: inference })).store.doc.model).toBeUndefined();
     });
   });
 

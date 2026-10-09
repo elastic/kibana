@@ -223,7 +223,7 @@ export const runExecutiveBrief = async ({
 
     await store.update(briefId, { stage: 'validate', timings: { ...timings } });
     const { brief, validation } = await timed('validate', async () =>
-      validateBrief({ brief: generated.brief, snapshot })
+      validateBrief({ brief: generated.brief, snapshot, mode: params.mode })
     );
 
     await store.update(briefId, { stage: 'persist', timings: { ...timings } });
@@ -232,6 +232,8 @@ export const runExecutiveBrief = async ({
         brief,
         validation,
         ...(generated.tokens ? { tokens: generated.tokens } : {}),
+        // Only a model-written brief has a model; the template generator is not one.
+        ...(generator.kind === 'inference' && generated.model ? { model: generated.model } : {}),
       })
     );
 

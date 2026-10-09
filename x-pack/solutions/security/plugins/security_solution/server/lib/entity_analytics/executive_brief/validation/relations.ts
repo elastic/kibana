@@ -13,59 +13,53 @@ import type {
   StoryEdge,
   StoryEdgeType,
 } from '../../../../../common/entity_analytics/executive_brief/types';
-import { escapeRegExp, findEntityMentions, splitSentences } from './entity_mentions';
+import { findEntityMentions, splitSentences } from './entity_mentions';
 import type { EntityIndex, EntityMention } from './entity_mentions';
+import { findPredicates } from './relation_predicates';
+import type { PredicateMatch, StrongKind } from './relation_predicates';
 
 export type UnbackedRelation = BriefValidation['unbackedRelations'][number];
 
-const LATERAL_TACTIC_ID = 'TA0008';
+/**
+ * A relation claim without backing. `strong` claims (lateral movement, compromise, exfiltration)
+ * drop the claim they are in; `weak` ones keep the claim and are flagged.
+ */
+export interface RelationFinding extends UnbackedRelation {
+  strength: 'weak' | 'strong';
+  reason: string;
+}
+
+const TACTIC_BY_STRONG_KIND: Partial<Record<StrongKind, string>> = {
+  lateral: 'TA0008',
+  exfiltration: 'TA0010',
+};
+
 const ACCESS_EDGE_TYPES: readonly StoryEdgeType[] = [
   'accesses_frequently',
   'accesses_infrequently',
   'communicates_with',
 ];
+const FREQUENT_EDGE_TYPES: readonly StoryEdgeType[] = ['accesses_frequently', 'communicates_with'];
+const INFREQUENT_EDGE_TYPES: readonly StoryEdgeType[] = ['accesses_infrequently'];
 
-/** Distinct verbs the narrative may use, lower-cased, matched as whole phrases. */
-const EDGE_VERB_PATTERNS: Array<{ verb: string; pattern: RegExp }> = [
-  ...new Set(Object.values(STORY_EDGE_CONFIG).map(({ verb }) => verb.toLowerCase())),
-].map((verb) => ({
-  verb,
-  pattern: new RegExp(`(?<![\\w])${escapeRegExp(verb)}(?![\\w])`, 'i'),
-}));
+const RARE_WORDS = '(?:only\\s+|very\\s+)?(?:rarely|infrequently|occasionally|seldom)';
+const REGULAR_WORDS = '(?:regularly|frequently|routinely|often)';
+const QUALIFIER_BEFORE = new RegExp(`\\b(${RARE_WORDS}|${REGULAR_WORDS})\\s*$`, 'i');
+const QUALIFIER_PARENTHESIS = new RegExp(
+  `^\\s*\\(\\s*(${RARE_WORDS}|${REGULAR_WORDS})\\s*\\)`,
+  'i'
+);
+const QUALIFIER_AFTER = new RegExp(`^\\s*(${RARE_WORDS}|${REGULAR_WORDS})\\b`, 'i');
 
-interface StrongClaim {
-  pattern: RegExp;
-  isBacked: (backing: Backing) => boolean;
-}
+/** "A, B and C", "A / B": the gap between two mentions of the same coordinated list. */
+const COORDINATION_GAP = /^\s*(?:,\s*(?:(?:and|or)\s+)?|(?:and|or|&|plus)\s+|\/)\s*$/i;
+const COMMA_CONJUNCTION_GAP = /^\s*,\s*(?:and|or)\s+$/i;
+/** ", and appeared together ...": the same subject continues with a new predicate. */
+const SUBJECT_CONTINUES_GAP = /^[\s,]*(?:(?:and|but|then)\s+)*(?:also\s+)?$/i;
+const TO_GAP = /^\s*(?:to|into|onto|towards?)\s+$/i;
 
-interface Backing {
-  edges: StoryEdge[];
-  /** True when a TA0008 rule is cited by the claim or by one of the connecting edges. */
-  hasLateralRule: boolean;
-}
-
-/**
- * Relation claims that are stronger than the typed edges. Each is only acceptable when the
- * snapshot backs it: lateral movement needs a cited TA0008 rule; "attacked/compromised" needs an
- * attack discovery edge; "logged on" needs an access edge.
- */
-const STRONG_CLAIMS: StrongClaim[] = [
-  {
-    pattern:
-      /\b(?:moved|move|moves|moving) laterally\b|\blateral(?:ly)?[ -]movement\b|\bpivot(?:ed|ing|s)?\b|\bspread(?:s|ing)? (?:to|from|across|through)\b/i,
-    isBacked: ({ hasLateralRule }) => hasLateralRule,
-  },
-  {
-    pattern:
-      /\b(?:compromis(?:ed|es|ing)|breach(?:ed|es|ing)|infect(?:ed|s|ing)|attack(?:ed|s|ing)|exploit(?:ed|s|ing)|took over|taken over|hijack(?:ed|s|ing))\b/i,
-    isBacked: ({ edges }) => edges.some(({ type }) => type === 'same_ad'),
-  },
-  {
-    pattern:
-      /\blog(?:s|ged|ging)? (?:on|in) to\b|\blogons? to\b|\bsigned in to\b|\bauthenticated to\b/i,
-    isBacked: ({ edges }) => edges.some(({ type }) => ACCESS_EDGE_TYPES.includes(type)),
-  },
-];
+const MAX_OBJECT_GAP_WORDS = 4;
+const MAX_TIGHT_SUBJECT_GAP_WORDS = 4;
 
 export const edgeLinksGroups = (edge: StoryEdge, a: Set<string>, b: Set<string>): boolean =>
   (a.has(edge.from) && b.has(edge.to)) || (b.has(edge.from) && a.has(edge.to));
@@ -105,17 +99,209 @@ const edgesBackingPair = (a: Set<string>, b: Set<string>, edges: StoryEdge[]): S
   );
 };
 
-const hasLateralRuleEvidence = (ids: readonly EvidenceId[], catalog: EvidenceCatalog): boolean =>
+const hasTacticRuleEvidence = (
+  ids: readonly EvidenceId[],
+  catalog: EvidenceCatalog,
+  tacticId: string
+): boolean =>
   ids.some((id) => {
     const entry = catalog[id];
-    return entry?.kind === 'rule' && entry.tacticIds.includes(LATERAL_TACTIC_ID);
+    return entry?.kind === 'rule' && entry.tacticIds.includes(tacticId);
   });
 
 const mentionKey = (mention: EntityMention): string => [...mention.euids].sort().join('|');
 
+interface Run {
+  mentions: EntityMention[];
+  start: number;
+  end: number;
+}
+
+const wordCount = (text: string): number =>
+  text
+    .replace(/\([^)]*\)/g, ' ')
+    .split(/\s+/)
+    .filter((word) => word.length > 0).length;
+
+const hasClauseBreak = (text: string): boolean => /[;:]/.test(text);
+
+/** Blanks the given spans so other predicates in a gap do not count as words. */
+const blankSpans = (
+  sentence: string,
+  from: number,
+  to: number,
+  spans: ReadonlyArray<{ start: number; end: number }>
+): string => {
+  let text = '';
+  for (let i = from; i < to; i++) {
+    const inside = spans.some((span) => i >= span.start && i < span.end);
+    text += inside ? ' ' : sentence[i];
+  }
+  return text;
+};
+
 /**
- * Finds sentences that link two entities without a computed edge, or with a stronger verb than
- * the edge allows. Direction is not parsed: an edge in either direction backs the pair.
+ * Groups mentions into coordinated lists ("A, B and C"). A ", and" that starts a new clause
+ * ("A owns B, and C logged on to D") ends the list.
+ */
+const buildRuns = (
+  sentence: string,
+  mentions: EntityMention[],
+  predicates: PredicateMatch[]
+): Run[] => {
+  const runs: Run[] = [];
+  let current: EntityMention[] = [];
+
+  const flush = (): void => {
+    if (current.length > 0) {
+      runs.push({
+        mentions: current,
+        start: current[0].start,
+        end: current[current.length - 1].end,
+      });
+      current = [];
+    }
+  };
+
+  mentions.forEach((mention, i) => {
+    if (current.length === 0) {
+      current = [mention];
+      return;
+    }
+    const previous = current[current.length - 1];
+    const gap = sentence.slice(previous.end, mention.start);
+    let coordinated = COORDINATION_GAP.test(gap);
+    if (coordinated && COMMA_CONJUNCTION_GAP.test(gap)) {
+      const nextStart = mentions[i + 1]?.start ?? Number.POSITIVE_INFINITY;
+      const predicateBefore = predicates.some(({ end }) => end <= current[0].start);
+      const predicateAfter = predicates.some(
+        ({ start }) => start >= mention.end && start < nextStart
+      );
+      if (predicateBefore && predicateAfter) {
+        coordinated = false;
+      }
+    }
+    if (coordinated) {
+      current.push(mention);
+    } else {
+      flush();
+      current = [mention];
+    }
+  });
+  flush();
+  return runs;
+};
+
+type Qualifier = 'rare' | 'regular';
+
+const qualifierOf = (word: string): Qualifier =>
+  /^(?:only\s+|very\s+)?(?:rarely|infrequently|occasionally|seldom)$/i.test(word.trim())
+    ? 'rare'
+    : 'regular';
+
+/** A rarely/regularly qualifier next to a logon predicate, or after its object. */
+const findQualifier = (
+  sentence: string,
+  predicate: PredicateMatch,
+  objectRun: Run | undefined
+): Qualifier | undefined => {
+  const before = sentence.slice(Math.max(0, predicate.start - 24), predicate.start);
+  const beforeMatch = QUALIFIER_BEFORE.exec(before);
+  if (beforeMatch) {
+    return qualifierOf(beforeMatch[1]);
+  }
+  const parenthesis = QUALIFIER_PARENTHESIS.exec(sentence.slice(predicate.end, predicate.end + 24));
+  if (parenthesis) {
+    return qualifierOf(parenthesis[1]);
+  }
+  if (objectRun) {
+    const after = QUALIFIER_AFTER.exec(sentence.slice(objectRun.end, objectRun.end + 24));
+    if (after) {
+      return qualifierOf(after[1]);
+    }
+  }
+  return undefined;
+};
+
+interface PairCheckContext {
+  edges: StoryEdge[];
+  catalog: EvidenceCatalog;
+  claimTactics: ReadonlySet<string>;
+}
+
+interface PairVerdict {
+  backed: boolean;
+  detail: string;
+}
+
+const describeEdges = (edges: StoryEdge[]): string => {
+  const verbs = [...new Set(edges.map(({ type }) => STORY_EDGE_CONFIG[type].verb))];
+  return verbs.length === 0
+    ? 'no computed link between them'
+    : `computed links: ${verbs.join(', ')}`;
+};
+
+const checkPair = ({
+  predicate,
+  qualifier,
+  a,
+  b,
+  context,
+}: {
+  predicate: PredicateMatch;
+  qualifier: Qualifier | undefined;
+  a: Set<string>;
+  b: Set<string>;
+  context: PairCheckContext;
+}): PairVerdict => {
+  const { rule } = predicate.definition;
+  const backing = edgesBackingPair(a, b, context.edges);
+  const detail = describeEdges(backing);
+
+  switch (rule.kind) {
+    case 'edge':
+      return { backed: backing.some(({ type }) => type === rule.edgeType), detail };
+    case 'access': {
+      const allowed =
+        qualifier === 'rare'
+          ? INFREQUENT_EDGE_TYPES
+          : qualifier === 'regular'
+          ? FREQUENT_EDGE_TYPES
+          : ACCESS_EDGE_TYPES;
+      return { backed: backing.some(({ type }) => allowed.includes(type)), detail };
+    }
+    case 'generic':
+      return { backed: backing.length > 0, detail };
+    case 'strong': {
+      if (backing.length === 0) {
+        return { backed: false, detail };
+      }
+      if (rule.strong === 'compromise') {
+        return { backed: backing.some(({ type }) => type === 'same_ad'), detail };
+      }
+      const tactic = TACTIC_BY_STRONG_KIND[rule.strong];
+      const backedByRule =
+        tactic !== undefined &&
+        (context.claimTactics.has(tactic) ||
+          backing.some((edge) => hasTacticRuleEvidence(edge.evidenceIds, context.catalog, tactic)));
+      return {
+        backed: backedByRule,
+        detail: backedByRule ? detail : `${detail}; no ${tactic} rule evidence`,
+      };
+    }
+    default:
+      return { backed: true, detail };
+  }
+};
+
+/**
+ * Finds sentences that make a relational claim about two entities that the snapshot does not back.
+ *
+ * Only explicit predicates between two entity mentions are checked ("A logged on to B", "A and B
+ * appeared together in alerts", "A linked via an Attack Discovery to B, C and D" checks A-B, A-C and
+ * A-D, not B-C). Co-mention and enumeration are not relations. Each predicate is checked on its
+ * own: a sentence with several predicates is not held to the verbs of the others. Direction is
+ * not parsed: an edge in either direction backs the pair.
  */
 export const findUnbackedRelations = ({
   text,
@@ -123,6 +309,7 @@ export const findUnbackedRelations = ({
   index,
   catalog,
   citedEvidence,
+  isComparisonPair,
 }: {
   text: string;
   edges: StoryEdge[];
@@ -130,59 +317,154 @@ export const findUnbackedRelations = ({
   catalog: EvidenceCatalog;
   /** Valid evidence ids cited by the claim the text belongs to. */
   citedEvidence: readonly EvidenceId[];
-}): UnbackedRelation[] => {
-  const found: UnbackedRelation[] = [];
-  const claimHasLateralRule = hasLateralRuleEvidence(citedEvidence, catalog);
+  /**
+   * True for an entity pair that belongs to different storylines cited by a cross-storyline
+   * comparison. Such pairs are not edge-checked, unless the claim about them is strong.
+   */
+  isComparisonPair?: (a: ReadonlySet<string>, b: ReadonlySet<string>) => boolean;
+}): RelationFinding[] => {
+  const findings = new Map<string, RelationFinding>();
+  const claimTactics = new Set<string>();
+  Object.values(TACTIC_BY_STRONG_KIND).forEach((tactic) => {
+    if (tactic !== undefined && hasTacticRuleEvidence(citedEvidence, catalog, tactic)) {
+      claimTactics.add(tactic);
+    }
+  });
+  const context: PairCheckContext = { edges, catalog, claimTactics };
 
   splitSentences(text).forEach((sentence) => {
     const mentions = findEntityMentions(sentence, index);
-    const distinct: EntityMention[] = [];
-    mentions.forEach((mention) => {
-      if (!distinct.some((d) => mentionKey(d) === mentionKey(mention))) {
-        distinct.push(mention);
-      }
-    });
-    if (distinct.length < 2) {
+    if (new Set(mentions.map(mentionKey)).size < 2) {
       return;
     }
-
-    const usedVerbs = EDGE_VERB_PATTERNS.filter(({ pattern }) => pattern.test(sentence)).map(
-      ({ verb }) => verb
+    const predicates = findPredicates(sentence).filter(
+      (predicate) =>
+        !mentions.some(({ start, end }) => predicate.start < end && start < predicate.end)
     );
-    const strongClaims = STRONG_CLAIMS.filter(({ pattern }) => pattern.test(sentence));
+    if (predicates.length === 0) {
+      return;
+    }
+    const runs = buildRuns(sentence, mentions, predicates);
+    const predicateSpans = predicates.map(({ start, end }) => ({ start, end }));
 
-    for (let i = 0; i < distinct.length; i++) {
-      for (let j = i + 1; j < distinct.length; j++) {
-        const a = new Set(distinct[i].euids);
-        const b = new Set(distinct[j].euids);
-        const sameEntity = distinct[j].euids.some((euid) => a.has(euid));
-        const backing = edgesBackingPair(a, b, edges);
-        const allowedVerbs = new Set(
-          backing.map(({ type }) => STORY_EDGE_CONFIG[type].verb.toLowerCase())
-        );
-        const lateralOnEdges = backing.some((edge) =>
-          hasLateralRuleEvidence(edge.evidenceIds, catalog)
-        );
-        const context: Backing = {
-          edges: backing,
-          hasLateralRule: claimHasLateralRule || lateralOnEdges,
-        };
+    let previous:
+      | { subject: Run | undefined; objectRun: Run | undefined; start: number }
+      | undefined;
 
-        const isBacked =
-          sameEntity ||
-          (backing.length > 0 &&
-            usedVerbs.every((verb) => allowedVerbs.has(verb)) &&
-            strongClaims.every(({ isBacked: check }) => check(context)));
+    predicates.forEach((predicate) => {
+      const { definition } = predicate;
+      const fromTo = /\bfrom$/i.test(predicate.text);
+      const between = /\bbetween$/i.test(predicate.text);
 
-        if (!isBacked) {
-          found.push({
-            statement: sentence,
-            from: index.displayName(distinct[i].euids[0]),
-            to: index.displayName(distinct[j].euids[0]),
-          });
+      let subject: Run | undefined;
+      let objectRun: Run | undefined;
+      let subjectIsTight = false;
+
+      if (fromTo || between) {
+        // "lateral movement from A to B", "movement between A and B": operands follow.
+        const first = runs.find((run) => run.start >= predicate.end);
+        const gapToFirst = first ? sentence.slice(predicate.end, first.start) : '';
+        if (first && gapToFirst.trim().length === 0) {
+          subject = first;
+          subjectIsTight = true;
+          if (fromTo) {
+            const second = runs.find((run) => run.start >= first.end);
+            if (second && TO_GAP.test(sentence.slice(first.end, second.start))) {
+              objectRun = second;
+            }
+          }
+        }
+      } else {
+        const left = [...runs].reverse().find((run) => run.end <= predicate.start);
+        const gapFromLeft = left ? sentence.slice(left.end, predicate.start) : '';
+        if (left && !hasClauseBreak(gapFromLeft)) {
+          const continues =
+            previous !== undefined &&
+            ((previous.objectRun === left && SUBJECT_CONTINUES_GAP.test(gapFromLeft)) ||
+              left.end <= previous.start);
+          if (previous && continues) {
+            subject = previous.subject;
+            subjectIsTight = true;
+          } else {
+            subject = left;
+            const words = wordCount(
+              blankSpans(sentence, left.end, predicate.start, predicateSpans)
+            );
+            subjectIsTight = !/[,;]/.test(gapFromLeft) && words <= MAX_TIGHT_SUBJECT_GAP_WORDS;
+          }
+        }
+
+        const candidate = runs.find((run) => run.start >= predicate.end);
+        if (candidate) {
+          const gapToObject = blankSpans(
+            sentence,
+            predicate.end,
+            candidate.start,
+            predicateSpans.filter(({ start }) => start >= predicate.end)
+          );
+          if (
+            !/[,;:]/.test(gapToObject.replace(/\([^)]*\)/g, ' ')) &&
+            wordCount(gapToObject) <= MAX_OBJECT_GAP_WORDS
+          ) {
+            objectRun = candidate;
+          }
         }
       }
-    }
+
+      previous = { subject, objectRun, start: predicate.start };
+
+      const qualifier =
+        definition.rule.kind === 'access'
+          ? findQualifier(sentence, predicate, objectRun)
+          : undefined;
+
+      const pairs: Array<[EntityMention, EntityMention]> = [];
+      if (subject && objectRun) {
+        subject.mentions.forEach((s) =>
+          objectRun?.mentions.forEach((o) => {
+            pairs.push([s, o]);
+          })
+        );
+      } else if (subject && (definition.symmetric || between) && subjectIsTight) {
+        for (let i = 0; i < subject.mentions.length; i++) {
+          for (let j = i + 1; j < subject.mentions.length; j++) {
+            pairs.push([subject.mentions[i], subject.mentions[j]]);
+          }
+        }
+      }
+
+      pairs.forEach(([first, second]) => {
+        const a = new Set(first.euids);
+        const b = new Set(second.euids);
+        if (second.euids.some((euid) => a.has(euid))) {
+          return;
+        }
+        const strength = definition.rule.kind === 'strong' ? 'strong' : 'weak';
+        if (strength === 'weak' && isComparisonPair?.(a, b)) {
+          return;
+        }
+        const { backed, detail } = checkPair({ predicate, qualifier, a, b, context });
+        if (backed) {
+          return;
+        }
+        const from = index.displayName(first.euids[0]);
+        const to = index.displayName(second.euids[0]);
+        const key = `${sentence}\u0000${from}\u0000${to}`;
+        const reason = `"${predicate.text.trim()}" between ${from} and ${to} is not backed (${detail})`;
+        const existing = findings.get(key);
+        if (!existing) {
+          findings.set(key, { statement: sentence, from, to, strength, reason });
+        } else {
+          findings.set(key, {
+            ...existing,
+            strength: existing.strength === 'strong' || strength === 'strong' ? 'strong' : 'weak',
+            reason: existing.reason.includes(reason)
+              ? existing.reason
+              : `${existing.reason}; ${reason}`,
+          });
+        }
+      });
+    });
   });
-  return found;
+  return [...findings.values()];
 };

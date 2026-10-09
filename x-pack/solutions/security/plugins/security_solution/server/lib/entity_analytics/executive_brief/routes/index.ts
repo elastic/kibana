@@ -99,8 +99,10 @@ export const registerExecutiveBriefRoutes = ({
               });
             }
             // Resolve the connector now so a bad connector is an immediate 400, not a failed job.
+            let connectorName: string;
             try {
-              await startPlugins.inference.getConnectorById(connectorId, request);
+              const connector = await startPlugins.inference.getConnectorById(connectorId, request);
+              connectorName = connector.name || connectorId;
             } catch (error) {
               return siemResponse.error({
                 statusCode: 400,
@@ -111,7 +113,7 @@ export const registerExecutiveBriefRoutes = ({
             }
             generator = new InferenceBriefGenerator(
               startPlugins.inference.getClient({ request, bindTo: { connectorId } }),
-              connectorId
+              connectorName
             );
           } else {
             generator = new TemplateBriefGenerator();

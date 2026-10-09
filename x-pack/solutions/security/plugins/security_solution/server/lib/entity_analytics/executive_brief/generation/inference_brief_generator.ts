@@ -34,7 +34,8 @@ export interface BriefOutputClient {
 export class InferenceBriefGenerator implements BriefGenerator {
   public readonly kind = 'inference' as const;
 
-  constructor(private readonly client: BriefOutputClient, private readonly connectorId?: string) {}
+  /** `model` is the connector's display name, recorded on the job. */
+  constructor(private readonly client: BriefOutputClient, private readonly model?: string) {}
 
   public async generate({
     snapshot,
@@ -51,6 +52,6 @@ export class InferenceBriefGenerator implements BriefGenerator {
       abortSignal,
       retry: { onValidationError: 1 },
     });
-    return { brief: parseBriefOutput(response.output), model: this.connectorId };
+    return { brief: parseBriefOutput(response.output), model: this.model };
   }
 }

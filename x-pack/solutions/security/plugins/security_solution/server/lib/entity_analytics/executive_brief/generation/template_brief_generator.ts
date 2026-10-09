@@ -23,7 +23,8 @@ import type {
 } from '../../../../../common/entity_analytics/executive_brief/types';
 import type { BriefGenerationInput, BriefGenerationResult, BriefGenerator } from './types';
 
-const MAX_PAIR_SENTENCES = 6;
+const MAX_PAIR_SENTENCES = 3;
+const MAX_TITLE_LENGTH = 70;
 const MAX_FACT_ENTITIES = 3;
 const MAX_DECISIONS = 5;
 const MAX_COVERAGE_DECISIONS = 2;
@@ -91,7 +92,7 @@ const URGENCY_ORDER: Record<ExecutiveBriefDecision['urgency'], number> = {
 };
 
 /**
- * The only prose in a storyline narrative: one clause per typed edge, using exactly the verb in
+ * The relation clause of a storyline narrative: one typed edge, using exactly the verb in
  * `STORY_EDGE_CONFIG`. Symmetric edges are written "A and B ...".
  */
 const edgeClause = (type: StoryEdgeType, from: string, to: string): string => {
@@ -170,64 +171,56 @@ const responsePhrase = (storyline: Storyline): string => {
   }
 };
 
+/** "a.rodriguez: Initial Access → Lateral Movement", from the first and last observed tactic. */
 const buildTitle = (ctx: TemplateContext, storyline: Storyline): string => {
   const primary = primaryEuid(storyline);
   const names = storyline.tacticIds.flatMap((id) => {
     const name = ctx.tacticName(id);
     return name ? [name] : [];
   });
-  const focus = primary ? ` centred on ${ctx.label(primary)}` : '';
   const stages =
     names.length >= 2
-      ? `${names[0]} to ${names[names.length - 1]} activity`
+      ? `${names[0]} → ${names[names.length - 1]}`
       : names.length === 1
-      ? `${names[0]} activity`
-      : 'Activity';
-  const suffix =
-    storyline.response.state === 'unaddressed'
-      ? ' (unaddressed)'
-      : storyline.response.state === 'in_progress'
-      ? ' (being handled)'
-      : ' (contained)';
-  return `${stages}${focus}${suffix}`;
+      ? names[0]
+      : 'Connected activity';
+  if (!primary) {
+    return stages;
+  }
+  const label = ctx.label(primary);
+  const room = MAX_TITLE_LENGTH - stages.length - 2;
+  const subject = label.length > room ? `${label.slice(0, Math.max(room - 1, 1))}…` : label;
+  return `${subject}: ${stages}`;
 };
 
 const buildNarrative = (ctx: TemplateContext, storyline: Storyline): string => {
   const sentences: string[] = [];
 
-  // One sentence per entity pair; every typed edge between the pair contributes one clause.
+  // One sentence per entity pair, using only the strongest verb (highest edge weight).
   const ordered = [...storyline.edges]
     .map((edge, position) => ({ edge, position }))
     .sort((a, b) => b.edge.weight - a.edge.weight || a.position - b.position)
     .map(({ edge }) => edge);
-  const pairs = new Map<string, StoryEdge[]>();
+  const strongestByPair = new Map<string, StoryEdge>();
   ordered.forEach((edge) => {
     const key = [edge.from, edge.to].sort().join('\u0000');
-    pairs.set(key, [...(pairs.get(key) ?? []), edge]);
+    if (!strongestByPair.has(key)) {
+      strongestByPair.set(key, edge);
+    }
   });
 
   const covered = new Set<string>();
   let shown = 0;
-  pairs.forEach((edges) => {
-    edges.forEach(({ from, to }) => {
-      covered.add(from);
-      covered.add(to);
-    });
+  strongestByPair.forEach((edge) => {
+    covered.add(edge.from);
+    covered.add(edge.to);
     if (shown >= MAX_PAIR_SENTENCES) {
       return;
     }
     shown += 1;
-    const seenTypes = new Set<StoryEdgeType>();
-    const clauses = edges.flatMap((edge) => {
-      if (seenTypes.has(edge.type)) {
-        return [];
-      }
-      seenTypes.add(edge.type);
-      return [edgeClause(edge.type, ctx.label(edge.from), ctx.label(edge.to))];
-    });
-    sentences.push(`${clauses.join('; ')}.`);
+    sentences.push(`${edgeClause(edge.type, ctx.label(edge.from), ctx.label(edge.to))}.`);
   });
-  if (pairs.size > MAX_PAIR_SENTENCES) {
+  if (strongestByPair.size > MAX_PAIR_SENTENCES) {
     sentences.push('Further links are shown in the storyline graph.');
   }
 
@@ -622,6 +615,12 @@ const buildDecisions = (ctx: TemplateContext): ExecutiveBriefDecision[] => {
     .slice(0, MAX_DECISIONS)
     .map(({ decision }) => decision);
 };
+
+/** The template "at a glance" on its own, used when the model's glance cannot be kept. */
+export const buildTemplateGlance = (
+  snapshot: BriefSnapshot,
+  mode: BriefNarrationMode
+): ExecutiveBrief['glance'] => buildGlance(createTemplateContext(snapshot, mode));
 
 /**
  * Deterministic generator: prose is assembled from the snapshot only. Relations use exactly the

@@ -12,6 +12,11 @@ import type { EntityIndex } from './entity_mentions';
 const NUMBER_PATTERN = /\d+(?:,\d{3})*(?:\.\d+)?/g;
 const EVIDENCE_ID_PATTERN = /\b(?:ENT|RULE|AD|LEAD|CASE|ANOM|TAC|GAP|STORY|EVT)-[\w-]+/g;
 const MITRE_ID_PATTERN = /\bT(?:A)?\d{4}(?:\.\d{3})?\b/g;
+const UUID_PATTERN = /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi;
+/** ISO dates and timestamps ("2026-10-05", "2026-10-05T08:31:18.503Z"): identifiers, not counts. */
+const ISO_DATE_PATTERN =
+  /\b\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?(?!\d)/g;
+const IPV4_PATTERN = /\b\d{1,3}(?:\.\d{1,3}){3}\b/g;
 
 const parseNumbers = (text: string): number[] =>
   (text.match(NUMBER_PATTERN) ?? []).map((token) => Number(token.replace(/,/g, '')));
@@ -100,7 +105,10 @@ export const buildNumberMask = (
   return new RegExp(sorted.map(escapeRegExp).join('|'), 'gi');
 };
 
-/** Returns the numbers written in `text` (as written, e.g. "57") that are not in `allowed`. */
+/**
+ * Returns the numbers written in `text` (as written, e.g. "57") that are not in `allowed`.
+ * Names, evidence ids, MITRE ids, UUIDs, ISO dates and IPv4 addresses are masked first.
+ */
 export const findInventedNumbers = ({
   text,
   allowed,
@@ -111,6 +119,9 @@ export const findInventedNumbers = ({
   mask?: RegExp;
 }): string[] => {
   const masked = (mask ? text.replace(mask, ' ') : text)
+    .replace(UUID_PATTERN, ' ')
+    .replace(ISO_DATE_PATTERN, ' ')
+    .replace(IPV4_PATTERN, ' ')
     .replace(EVIDENCE_ID_PATTERN, ' ')
     .replace(MITRE_ID_PATTERN, ' ');
   const invented: string[] = [];

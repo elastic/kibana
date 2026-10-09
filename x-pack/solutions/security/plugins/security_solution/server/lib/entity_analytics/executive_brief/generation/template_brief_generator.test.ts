@@ -48,10 +48,15 @@ describe('TemplateBriefGenerator', () => {
       'a.rodriguez and docker-host-prod-01 were part of the same discovered attack'
     );
     expect(storylines[0].narrative).toContain(
-      'a.rodriguez and LAPTOP-FIN03 appeared together in alerts; a.rodriguez regularly logs on to LAPTOP-FIN03.'
+      'a.rodriguez and LAPTOP-FIN03 appeared together in alerts.'
     );
-    expect(storylines[0].narrative).toContain('a.rodriguez logged on to (rarely) jump-box-01');
-    expect(storylines[1].narrative).toContain('j.chen owns LAPTOP-MKT07');
+    expect(storylines[0].narrative).toContain(
+      'a.rodriguez and jump-box-01 appeared together in alerts.'
+    );
+    // j.chen has both same_ad and owns edges to LAPTOP-MKT07; only the strongest verb is used.
+    expect(storylines[1].narrative).toContain(
+      'j.chen and LAPTOP-MKT07 were part of the same discovered attack.'
+    );
     expect(storylines[2].narrative).toContain(
       'svc-build and build-runner-02 appeared together in alerts.'
     );
@@ -60,6 +65,159 @@ describe('TemplateBriefGenerator', () => {
     );
     storylines.forEach(({ narrative, whyItMatters }) => {
       expect(`${narrative} ${whyItMatters}`).not.toMatch(/laterally|compromis|breach|pivot/i);
+    });
+  });
+
+  describe('narrative: one sentence per entity pair, strongest verb only, at most three pairs', () => {
+    const story = FIXTURE_SNAPSHOT.storylines.storylines[0];
+    const withEdges = (edges: typeof story.edges, tacticIds = story.tacticIds) => ({
+      ...FIXTURE_SNAPSHOT,
+      storylines: {
+        ...FIXTURE_SNAPSHOT.storylines,
+        storylines: [{ ...story, edges, tacticIds }],
+      },
+    });
+    const sentences = (narrative: string) => narrative.split('. ').length;
+
+    it('writes exactly one sentence for a pair that has several edges', async () => {
+      const [first] = (await run()).storylines;
+      // a.rodriguez - LAPTOP-FIN03 has co_alert and accesses_frequently; only co_alert (0.8) is used.
+      expect(first.narrative).not.toContain('regularly logs on to');
+      expect(first.narrative.match(/LAPTOP-FIN03/g)).toHaveLength(1);
+    });
+
+    it('uses the highest-weight edge of the pair whatever the edge order', async () => {
+      const edges = [...story.edges].reverse();
+      const [first] = (await run(withEdges(edges))).storylines;
+      expect(first.narrative).toContain(
+        'a.rodriguez and docker-host-prod-01 were part of the same discovered attack.'
+      );
+      // Equal weights keep edge order, so the reversed list also reverses those pairs.
+      expect(first.narrative.indexOf('jump-box-01')).toBeLessThan(
+        first.narrative.indexOf('LAPTOP-FIN03')
+      );
+    });
+
+    it('caps the pair sentences at three and points to the graph for the rest', async () => {
+      const [first] = (
+        await run(
+          withEdges([
+            ...story.edges,
+            {
+              type: 'owns',
+              from: 'user:a.rodriguez@acme.com@okta',
+              to: 'host:DC01',
+              weight: 0.6,
+              evidenceIds: [],
+            },
+          ])
+        )
+      ).storylines;
+      expect(first.narrative).toContain('Further links are shown in the storyline graph.');
+      // 3 pair sentences + the graph pointer + the stage sentence.
+      expect(sentences(first.narrative)).toBe(5);
+    });
+
+    it('does not add the graph pointer at exactly three pairs', async () => {
+      expect((await run()).storylines[0].narrative).not.toContain('Further links');
+    });
+
+    it('uses "logged on to (rarely)" and "regularly logs on to" for a pair with only logon edges', async () => {
+      const [first] = (
+        await run(
+          withEdges([
+            story.edges.find(({ type }) => type === 'accesses_infrequently')!,
+            story.edges.find(({ type }) => type === 'accesses_frequently')!,
+          ])
+        )
+      ).storylines;
+      expect(first.narrative).toContain('a.rodriguez logged on to (rarely) jump-box-01.');
+      expect(first.narrative).toContain('a.rodriguez regularly logs on to LAPTOP-FIN03.');
+    });
+
+    it('mentions entities that have no edge', async () => {
+      const [first] = (await run(withEdges([story.edges[0]]))).storylines;
+      expect(first.narrative).toContain('jump-box-01 is part of this storyline.');
+    });
+
+    it.each<BriefNarrationMode>(['names', 'ids_only'])(
+      'every narrative sentence is backed by the validator (%s)',
+      async (mode) => {
+        const brief = await run(FIXTURE_SNAPSHOT, mode);
+        const { validation } = validateBrief({ brief, snapshot: FIXTURE_SNAPSHOT });
+        expect(validation.unbackedRelations).toEqual([]);
+        expect(validation.flags).toBeUndefined();
+      }
+    );
+  });
+
+  describe('title: "<main entity>: <first tactic> → <last tactic>"', () => {
+    const story = FIXTURE_SNAPSHOT.storylines.storylines[0];
+    const titleFor = async (
+      tacticIds: string[],
+      mode: BriefNarrationMode = 'names',
+      entityEuids = story.entityEuids
+    ) =>
+      (
+        await run(
+          {
+            ...FIXTURE_SNAPSHOT,
+            storylines: {
+              ...FIXTURE_SNAPSHOT.storylines,
+              storylines: [{ ...story, tacticIds, entityEuids }],
+            },
+          },
+          mode
+        )
+      ).storylines[0].title;
+
+    it('uses the first and last observed tactic and the main entity', async () => {
+      expect((await run()).storylines.map((s) => s.title)).toEqual([
+        'a.rodriguez: Initial Access → Lateral Movement',
+        'j.chen: Execution → Credential Access',
+        'svc-build: Credential Access → Exfiltration',
+      ]);
+    });
+
+    it('names a single tactic, and still gives a title when no tactic is known', async () => {
+      expect(await titleFor(['TA0008'])).toBe('a.rodriguez: Lateral Movement');
+      expect(await titleFor([])).toBe('a.rodriguez: Connected activity');
+      expect(await titleFor(['TA9999'])).toBe('a.rodriguez: Connected activity');
+    });
+
+    it('uses the ENT id in ids_only mode and never the name', async () => {
+      expect(await titleFor(['TA0001', 'TA0008'], 'ids_only')).toBe(
+        'ENT-1: Initial Access → Lateral Movement'
+      );
+    });
+
+    it('does not carry the response state or the words "activity centred on"', async () => {
+      (await run()).storylines.forEach(({ title }) => {
+        expect(title).not.toMatch(/unaddressed|being handled|contained|centred|activity/i);
+      });
+    });
+
+    it('stays within 70 characters, shortening a long entity name', async () => {
+      const longName = 'a-very-long-host-name-'.repeat(5);
+      const snapshot: BriefSnapshot = {
+        ...FIXTURE_SNAPSHOT,
+        entities: {
+          ...FIXTURE_SNAPSHOT.entities,
+          'user:a.rodriguez@acme.com@okta': {
+            ...FIXTURE_SNAPSHOT.entities['user:a.rodriguez@acme.com@okta'],
+            name: longName,
+          },
+        },
+      };
+      const [first] = (await run(snapshot)).storylines;
+      expect(first.title.length).toBeLessThanOrEqual(70);
+      expect(first.title).toContain('…: Initial Access → Lateral Movement');
+    });
+
+    it('is a storyline with no entity at all: just the stages', async () => {
+      expect(await titleFor(['TA0001', 'TA0008'], 'names', [])).toBe(
+        'Initial Access → Lateral Movement'
+      );
     });
   });
 

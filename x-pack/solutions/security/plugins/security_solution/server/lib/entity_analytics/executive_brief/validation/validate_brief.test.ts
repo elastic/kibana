@@ -78,8 +78,11 @@ describe('validateBrief', () => {
       expect(validation.droppedClaims).toBeGreaterThanOrEqual(2);
     });
 
-    it('catches two entities with no computed edge', () => {
-      const { validation } = validate(byName('links two entities with no computed edge').brief);
+    it('catches two entities with no computed edge, keeps the claim and flags it', () => {
+      // Policy change (V6): a weak unbacked relation no longer drops the claim; it is flagged.
+      const { brief, validation } = validate(
+        byName('links two entities with no computed edge').brief
+      );
       expect(validation.unbackedRelations).toEqual([
         {
           statement: 'a.rodriguez appeared together in alerts with j.chen.',
@@ -87,14 +90,30 @@ describe('validateBrief', () => {
           to: 'j.chen',
         },
       ]);
+      expect(brief.storylines).toHaveLength(1);
+      expect(validation.droppedClaims).toBe(0);
+      expect(validation.flags).toEqual([
+        {
+          claimPath: 'storylines[0].narrative',
+          statement: 'a.rodriguez appeared together in alerts with j.chen.',
+          reason: expect.stringContaining('no computed link between them'),
+        },
+      ]);
     });
 
-    it('catches an invented number and drops the claim', () => {
+    it('catches an invented number, drops the claim and shows the template glance instead', () => {
+      // Policy change (V7): a dropped glance is replaced by the template glance, never blanked.
       const { brief, validation } = validate(byName('invents a number').brief);
       expect(validation.inventedNumbers).toEqual(['57']);
-      expect(brief.glance.threatNarrative).toBe('');
-      expect(brief.glance.headline).toBe('');
+      expect(brief.glance.threatNarrative).not.toContain('57');
+      expect(brief.glance.headline).toBe(
+        'The most serious storyline centres on a.rodriguez and no one is working this yet'
+      );
       expect(validation.droppedClaims).toBe(2);
+      expect(validation.flags).toEqual([
+        expect.objectContaining({ claimPath: 'glance.headline', reason: 'fallback' }),
+        expect.objectContaining({ claimPath: 'glance.threatNarrative', reason: 'fallback' }),
+      ]);
     });
 
     it('drops an uncited decision', () => {
@@ -193,12 +212,14 @@ describe('validateBrief', () => {
       expect(validation.droppedClaims).toBe(2);
     });
 
-    it('drops an uncited glance as two claims', () => {
+    it('drops an uncited glance as two claims and falls back to the template glance', () => {
       const { brief, validation } = validate({
         ...FIXTURE_BRIEF,
         glance: { ...FIXTURE_BRIEF.glance, evidence: [] },
       });
-      expect(brief.glance.headline).toBe('');
+      expect(brief.glance.headline).not.toBe(FIXTURE_BRIEF.glance.headline);
+      expect(brief.glance.headline.length).toBeGreaterThan(0);
+      expect(brief.glance.evidence).toEqual(['STORY-1', 'STORY-2', 'STORY-3']);
       expect(validation.droppedClaims).toBe(2);
     });
 
@@ -385,11 +406,19 @@ describe('validateBrief', () => {
         withStoryline(0, { whyItMatters: 'a.rodriguez owns j.chen.' })
       );
       expect(validation.unbackedRelations).toHaveLength(1);
-      const titled = validate(withStoryline(0, { title: 'a.rodriguez and j.chen' }));
+      expect(validation.flags).toEqual([
+        expect.objectContaining({ claimPath: 'storylines[0].whyItMatters' }),
+      ]);
+      const titled = validate(withStoryline(0, { title: 'a.rodriguez owns j.chen' }));
       expect(titled.validation.unbackedRelations).toHaveLength(1);
+      expect(titled.validation.flags).toEqual([
+        expect.objectContaining({ claimPath: 'storylines[0].title' }),
+      ]);
     });
 
-    it('checks decision text against the storyline it relates to', () => {
+    it('does not count co-mention in a title or a decision as a relation (V1)', () => {
+      const titled = validate(withStoryline(0, { title: 'a.rodriguez and j.chen' }));
+      expect(titled.validation.unbackedRelations).toEqual([]);
       const { validation, brief } = validate({
         ...FIXTURE_BRIEF,
         decisions: [
@@ -400,8 +429,40 @@ describe('validateBrief', () => {
           },
         ],
       });
+      expect(validation.unbackedRelations).toEqual([]);
+      expect(brief.decisions).toHaveLength(1);
+    });
+
+    it('checks decision text against the storyline it relates to, and flags instead of dropping', () => {
+      const { validation, brief } = validate({
+        ...FIXTURE_BRIEF,
+        decisions: [
+          {
+            ...FIXTURE_BRIEF.decisions[2],
+            relatesTo: 'STORY-3',
+            action: 'Isolate svc-build, which owns docker-host-prod-01',
+          },
+        ],
+      });
+      expect(validation.unbackedRelations).toHaveLength(1);
+      expect(brief.decisions).toHaveLength(1);
+      expect(validation.flags).toEqual([expect.objectContaining({ claimPath: 'decisions[0]' })]);
+    });
+
+    it('drops a decision that makes a strong unbacked claim', () => {
+      const { validation, brief } = validate({
+        ...FIXTURE_BRIEF,
+        decisions: [
+          {
+            ...FIXTURE_BRIEF.decisions[2],
+            relatesTo: 'STORY-3',
+            rationale: 'svc-build moved laterally to docker-host-prod-01.',
+          },
+        ],
+      });
       expect(validation.unbackedRelations).toHaveLength(1);
       expect(brief.decisions).toHaveLength(0);
+      expect(validation.droppedClaims).toBe(1);
     });
 
     it('does not apply relation checks to agent prompts', () => {
@@ -429,6 +490,90 @@ describe('validateBrief', () => {
         ],
       });
       expect(validation.unbackedRelations).toHaveLength(1);
+    });
+  });
+
+  describe('flags', () => {
+    it('are absent on a clean brief', () => {
+      expect(validate(FIXTURE_BRIEF).validation).not.toHaveProperty('flags');
+    });
+
+    it('flag a decision without an owner and keep it', () => {
+      const { owner: _owner, ...withoutOwner } = FIXTURE_BRIEF.decisions[0];
+      const { brief, validation } = validate({
+        ...FIXTURE_BRIEF,
+        decisions: [FIXTURE_BRIEF.decisions[1], withoutOwner],
+      });
+      expect(brief.decisions).toHaveLength(2);
+      expect(validation.flags).toEqual([
+        {
+          claimPath: 'decisions[1]',
+          statement: FIXTURE_BRIEF.decisions[0].action,
+          reason: 'missing_owner',
+        },
+      ]);
+    });
+
+    it('use the output index of a decision even when an earlier one was dropped', () => {
+      const { validation } = validate({
+        ...FIXTURE_BRIEF,
+        decisions: [
+          { ...FIXTURE_BRIEF.decisions[0], evidence: [] },
+          { ...FIXTURE_BRIEF.decisions[1], owner: undefined },
+        ],
+      });
+      expect(validation.flags).toEqual([
+        expect.objectContaining({ claimPath: 'decisions[0]', reason: 'missing_owner' }),
+      ]);
+    });
+
+    it('are written for the cross-storyline conclusion and the blind-spot summary', () => {
+      const { validation } = validate({
+        ...FIXTURE_BRIEF,
+        crossStorylineConclusion: {
+          ...FIXTURE_BRIEF.crossStorylineConclusion!,
+          statement: 'j.chen owns docker-host-prod-01.',
+        },
+        blindSpots: { ...FIXTURE_BRIEF.blindSpots, summary: 'j.chen owns docker-host-prod-01.' },
+      });
+      expect(validation.flags?.map(({ claimPath }) => claimPath)).toEqual([
+        'crossStorylineConclusion.statement',
+        'blindSpots.summary',
+      ]);
+    });
+
+    it('are not written for a claim that is dropped', () => {
+      const { validation } = validate({
+        ...FIXTURE_BRIEF,
+        storylines: [
+          { ...FIXTURE_BRIEF.storylines[0], narrative: 'j.chen owns jump-box-01 for 4242 days.' },
+        ],
+      });
+      expect(validation.flags).toBeUndefined();
+      expect(validation.unbackedRelations).toHaveLength(1);
+    });
+
+    it('list the same statement once per path', () => {
+      const text = 'j.chen owns jump-box-01 and administers jump-box-01.';
+      const { validation } = validate(withStoryline(0, { narrative: text }));
+      expect(validation.flags).toHaveLength(1);
+    });
+  });
+
+  describe('blank prose', () => {
+    it('drops a storyline with a blank title or narrative', () => {
+      expect(validate(withStoryline(0, { narrative: '  ' })).brief.storylines).toHaveLength(0);
+      expect(validate(withStoryline(0, { title: '' })).brief.storylines).toHaveLength(0);
+    });
+
+    it('drops a decision with a blank action and a conclusion with a blank statement', () => {
+      const { brief } = validate({
+        ...FIXTURE_BRIEF,
+        decisions: [{ ...FIXTURE_BRIEF.decisions[0], action: '' }],
+        crossStorylineConclusion: { ...FIXTURE_BRIEF.crossStorylineConclusion!, statement: ' ' },
+      });
+      expect(brief.decisions).toHaveLength(0);
+      expect(brief.crossStorylineConclusion).toBeUndefined();
     });
   });
 

@@ -8,7 +8,11 @@
 import type { AuthenticatedUser } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { APP_ID } from '../../../../../common';
-import { FIXTURE_JOB_SUCCEEDED } from '../../../../../common/entity_analytics/executive_brief/__fixtures__/brief';
+import {
+  FIXTURE_BRIEF,
+  FIXTURE_JOB_SUCCEEDED,
+} from '../../../../../common/entity_analytics/executive_brief/__fixtures__/brief';
+import { FIXTURE_SNAPSHOT } from '../../../../../common/entity_analytics/executive_brief/__fixtures__/snapshot';
 import {
   EXECUTIVE_BRIEF_POC_GENERATE_URL,
   EXECUTIVE_BRIEF_POC_JOB_URL,
@@ -202,6 +206,24 @@ describe('executive brief routes', () => {
         expect.objectContaining({ bindTo: { connectorId: 'c1' } })
       );
       expect(mockRun.mock.calls[0][0].generator.kind).toBe('inference');
+    });
+
+    it("hands the connector's display name to the generator as the model", async () => {
+      getConnectorById.mockResolvedValue({ connectorId: 'c1', name: 'Anthropic Claude Sonnet 5' });
+      getClient.mockReturnValue({ output: jest.fn(async () => ({ output: FIXTURE_BRIEF })) });
+      await post({ ...validBody, generator: 'inference', connectorId: 'c1' });
+      const { generator } = mockRun.mock.calls[0][0];
+      const result = await generator.generate({ snapshot: FIXTURE_SNAPSHOT, mode: 'names' });
+      expect(result.model).toBe('Anthropic Claude Sonnet 5');
+    });
+
+    it('uses the connector id as the model when the connector has no name', async () => {
+      getConnectorById.mockResolvedValue({ connectorId: 'c1', name: '' });
+      getClient.mockReturnValue({ output: jest.fn(async () => ({ output: FIXTURE_BRIEF })) });
+      await post({ ...validBody, generator: 'inference', connectorId: 'c1' });
+      const { generator } = mockRun.mock.calls[0][0];
+      const result = await generator.generate({ snapshot: FIXTURE_SNAPSHOT, mode: 'names' });
+      expect(result.model).toBe('c1');
     });
 
     it('returns 401 when the user cannot be resolved', async () => {

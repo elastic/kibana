@@ -10,7 +10,7 @@ import { FIXTURE_BRIEF } from '../../../../../common/entity_analytics/executive_
 import { FIXTURE_SNAPSHOT } from '../../../../../common/entity_analytics/executive_brief/__fixtures__/snapshot';
 import { BriefJobError, toJobError } from '../job/job_errors';
 import { validateBrief } from '../validation/validate_brief';
-import { BRIEF_SYSTEM_PROMPT, buildBriefPayload } from './brief_prompt';
+import { BRIEF_OUTPUT_SCHEMA, BRIEF_SYSTEM_PROMPT, buildBriefPayload } from './brief_prompt';
 import { EXECUTIVE_BRIEF_INFERENCE_ID, InferenceBriefGenerator } from './inference_brief_generator';
 import type { BriefOutputClient, BriefOutputRequest } from './inference_brief_generator';
 
@@ -188,5 +188,147 @@ describe('buildBriefPayload', () => {
     expect(payload.dataGaps.map((g: { source: string }) => g.source)).toEqual(
       expect.arrayContaining(['posture', 'anomalies'])
     );
+  });
+});
+
+describe('brief prompt and schema (D8, V5)', () => {
+  const decisionSchema = (() => {
+    const decisions = BRIEF_OUTPUT_SCHEMA.properties.decisions.items;
+    return decisions;
+  })();
+
+  it('requires an owner on every decision', () => {
+    expect(decisionSchema.required).toContain('owner');
+    expect(decisionSchema.properties.owner.enum).toEqual([
+      'soc',
+      'it',
+      'iam',
+      'cloud',
+      'detection_engineering',
+      'leadership',
+    ]);
+    expect(BRIEF_SYSTEM_PROMPT).toMatch(/MUST have an "owner"/);
+  });
+
+  it('forbids placeholder and invented evidence ids and asks to omit instead', () => {
+    expect(BRIEF_SYSTEM_PROMPT).toMatch(/Never write a placeholder or invented id/);
+    expect(BRIEF_SYSTEM_PROMPT).toMatch(/leave it out of the array instead of inventing one/);
+    expect(JSON.stringify(BRIEF_OUTPUT_SCHEMA)).toMatch(
+      /Never a placeholder; omit rather than invent/
+    );
+  });
+
+  it('asks for a concise style: narrative of at most 3 sentences, title of at most 70 characters', () => {
+    expect(BRIEF_SYSTEM_PROMPT).toMatch(/at most 3 sentences/);
+    expect(BRIEF_SYSTEM_PROMPT).toMatch(/at most 10 words and 70 characters/);
+    expect(BRIEF_SYSTEM_PROMPT).toMatch(/written as what happened/);
+    expect(BRIEF_SYSTEM_PROMPT).toMatch(/never a template such as "X to Y activity"/);
+    expect(BRIEF_OUTPUT_SCHEMA.properties.storylines.items.properties.title.description).toMatch(
+      /70 characters/
+    );
+    expect(
+      BRIEF_OUTPUT_SCHEMA.properties.storylines.items.properties.narrative.description
+    ).toMatch(/3 sentences/);
+  });
+
+  it('encourages one cross-storyline conclusion that cites the storylines it compares', () => {
+    expect(BRIEF_SYSTEM_PROMPT).toMatch(/exactly one cross-storyline conclusion/);
+    expect(BRIEF_SYSTEM_PROMPT).toMatch(/cite each STORY-\* id it compares/);
+    expect(BRIEF_OUTPUT_SCHEMA.properties.crossStorylineConclusion.description).toMatch(
+      /cites each STORY-\* id/
+    );
+    // It stays optional in the schema: the data may support none.
+    expect(BRIEF_OUTPUT_SCHEMA.required).not.toContain('crossStorylineConclusion');
+  });
+
+  it('allows listing entities but not verbs between unlinked entities', () => {
+    expect(BRIEF_SYSTEM_PROMPT).toMatch(/Listing the entities of a storyline is fine/);
+  });
+});
+
+describe('buildBriefPayload: no raw UUIDs (V4)', () => {
+  const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+  const caseUuid = '6ac716c0-7062-4941-a710-3ad055ef71db';
+  const adUuid = '2ac34749-ad66-49eb-b463-4c44381c4b13';
+  const leadUuid = '0e5e2a70-3a3d-4d6c-8f6f-5c1c6b3a9a11';
+
+  const snapshot = {
+    ...FIXTURE_SNAPSHOT,
+    catalog: {
+      ...FIXTURE_SNAPSHOT.catalog,
+      'CASE-1': {
+        kind: 'case' as const,
+        caseId: caseUuid,
+        title: 'Marketing takeover',
+        status: 'open' as const,
+      },
+      'AD-1': {
+        kind: 'attack_discovery' as const,
+        id: adUuid,
+        title: 'Stolen credentials',
+        workflowStatus: 'open' as const,
+        alertCount: 12,
+        tacticIds: [],
+      },
+      'LEAD-1': {
+        kind: 'lead' as const,
+        id: leadUuid,
+        title: 'Hunt',
+        priority: 1,
+        status: 'active',
+      },
+    },
+    storylines: {
+      ...FIXTURE_SNAPSHOT.storylines,
+      storylines: FIXTURE_SNAPSHOT.storylines.storylines.map((storyline, i) =>
+        i === 1
+          ? {
+              ...storyline,
+              response: {
+                ...storyline.response,
+                cases: [
+                  {
+                    evidenceId: 'CASE-1' as const,
+                    caseId: caseUuid,
+                    title: 'Marketing takeover',
+                    status: 'open' as const,
+                  },
+                ],
+              },
+            }
+          : storyline
+      ),
+    },
+  };
+
+  it.each(['names', 'ids_only'] as const)(
+    'removes case, attack discovery and lead ids (%s)',
+    (mode) => {
+      const payload = buildBriefPayload(snapshot, mode);
+      expect(payload).not.toMatch(UUID);
+      [caseUuid, adUuid, leadUuid].forEach((uuid) => expect(payload).not.toContain(uuid));
+      expect(payload).toContain('CASE-1');
+      expect(payload).toContain('Marketing takeover');
+    }
+  );
+
+  it('replaces a UUID that appears inside free text, as a last line of defence', () => {
+    const payload = buildBriefPayload(
+      {
+        ...snapshot,
+        catalog: {
+          ...snapshot.catalog,
+          'CASE-1': {
+            kind: 'case' as const,
+            caseId: caseUuid,
+            title: `Case ${caseUuid} for j.chen`,
+            status: 'open' as const,
+          },
+        },
+      },
+      'names'
+    );
+    expect(payload).not.toMatch(UUID);
+    expect(payload).toContain('Case [id] for j.chen');
   });
 });
