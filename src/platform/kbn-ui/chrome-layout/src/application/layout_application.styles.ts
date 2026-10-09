@@ -9,6 +9,7 @@
 
 import { css } from '@emotion/react';
 import {
+  euiBreakpointContainer,
   euiOverflowScroll,
   euiShadow,
   highContrastModeStyles,
@@ -41,6 +42,10 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
 
       z-index: ${layoutLevels.content};
       position: relative;
+
+      // EUI breakpoints follow this wrapper when EuiProvider breakpointContainer is set. As a container,
+      // it's the containing block for fixed descendants. It doesn't scroll, so they don't scroll away with the content.
+      ${euiBreakpointContainer(useEuiTheme)}
 
       // Only apply distinguished background styling for framed appearance
       ${isFramedAppearance &&

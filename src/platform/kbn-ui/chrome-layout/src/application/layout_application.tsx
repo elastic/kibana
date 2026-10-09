@@ -34,8 +34,7 @@ export const LayoutApplication = ({
   const { appearance } = useLayoutConfig();
 
   return (
-    // EUI breakpoints follow this element when `EuiProvider` `breakpointContainer` is set. It's the
-    // non-scrolling wrapper, so fixed descendants contained by it don't scroll away with the content.
+    // The JS breakpoint hooks measure this element. Pairs with `euiBreakpointContainer` in the root styles.
     <div css={styles.root(appearance)} {...{ [EUI_BREAKPOINT_CONTAINER_ATTRIBUTE]: true }}>
       <div
         css={styles.scrollContainer}
