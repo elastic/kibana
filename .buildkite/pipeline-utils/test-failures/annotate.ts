@@ -30,6 +30,7 @@ export interface TestFailure {
   jobName: string;
   githubIssue?: string;
   failureCount?: number;
+  alertSlack?: boolean;
 }
 
 const recursiveReadDir = (dirPath: string, allFiles: string[] = []) => {
@@ -107,10 +108,15 @@ export const getPrComment = (
 export const getSlackMessage = (
   failures: TestFailure[],
   failureHtmlArtifacts: Record<string, Artifact>
-): string => {
+): string | undefined => {
+  const notifiableFailures = failures.filter(({ alertSlack }) => alertSlack !== false);
+  if (notifiableFailures.length === 0) {
+    return;
+  }
+
   return (
     `*Test Failures*\n` +
-    failures
+    notifiableFailures
       .map((failure) => {
         const lookup = failure.jobId + failure.hash;
         const jobUrl = `${failure.url}#${failure.jobId}`;
@@ -186,9 +192,9 @@ export const annotateTestFailures = async () => {
     process.env.ELASTIC_SLACK_NOTIFICATIONS_ENABLED === 'true' ||
     process.env.KIBANA_SLACK_NOTIFICATIONS_ENABLED === 'true'
   ) {
-    buildkite.setMetadata(
-      'slack:test_failures:body',
-      getSlackMessage(failures, failureHtmlArtifacts)
-    );
+    const slackMessage = getSlackMessage(failures, failureHtmlArtifacts);
+    if (slackMessage) {
+      buildkite.setMetadata('slack:test_failures:body', slackMessage);
+    }
   }
 };
