@@ -157,7 +157,10 @@
     "@kbn/licensing-types",
     "@kbn/workflows-yaml",
     "@kbn/tooling-log",
-    "@kbn/test"
+    "@kbn/test",
+    "@kbn/cloud-plugin",
+    "@kbn/core-overlays-browser-mocks",
+    "@kbn/core-rendering-browser-mocks"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

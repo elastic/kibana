@@ -8,7 +8,10 @@
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { AuthenticatedUser } from '@kbn/core/server';
 import { writeAttackDiscoveryEvent, type EventLogRefresher } from './write_attack_discovery_event';
-import { ATTACK_DISCOVERY_EVENT_PROVIDER } from './constants';
+import {
+  ATTACK_DISCOVERY_EVENT_PROVIDER,
+  ATTACK_DISCOVERY_EVENT_SERVICE_ACCOUNT_TAG,
+} from './constants';
 
 describe('writeAttackDiscoveryEvent', () => {
   const mockEventLogger: jest.Mocked<IEventLogger> = {
@@ -87,6 +90,54 @@ describe('writeAttackDiscoveryEvent', () => {
         name: 'test-user',
       },
     });
+  });
+
+  it('tags events written by a service account', async () => {
+    await writeAttackDiscoveryEvent({
+      ...defaultParams,
+      authenticatedUser: {
+        ...mockAuthenticatedUser,
+        authentication_realm: { name: '_service_account', type: '_service_account' },
+        username: 'kibana/alertzero_attack_discovery',
+      },
+    });
+
+    const loggedEvent = mockEventLogger.logEvent.mock.calls[0][0];
+
+    expect(loggedEvent).toMatchObject({
+      tags: ['securitySolution', 'attackDiscovery', ATTACK_DISCOVERY_EVENT_SERVICE_ACCOUNT_TAG],
+      user: { name: 'kibana/alertzero_attack_discovery' },
+    });
+  });
+
+  it('does NOT tag a generation-dismissed event written by a service account', async () => {
+    await writeAttackDiscoveryEvent({
+      ...defaultParams,
+      action: 'generation-dismissed',
+      authenticatedUser: {
+        ...mockAuthenticatedUser,
+        authentication_realm: { name: '_service_account', type: '_service_account' },
+        username: 'kibana/alertzero_attack_discovery',
+      },
+    });
+
+    const loggedEvent = mockEventLogger.logEvent.mock.calls[0][0];
+
+    expect(loggedEvent?.tags).toEqual(['securitySolution', 'attackDiscovery']);
+  });
+
+  it('does NOT tag events written by a user whose username looks like a service account', async () => {
+    await writeAttackDiscoveryEvent({
+      ...defaultParams,
+      authenticatedUser: {
+        ...mockAuthenticatedUser,
+        username: 'kibana/alertzero_attack_discovery',
+      },
+    });
+
+    const loggedEvent = mockEventLogger.logEvent.mock.calls[0][0];
+
+    expect(loggedEvent?.tags).toEqual(['securitySolution', 'attackDiscovery']);
   });
 
   it('includes metrics when alertsContextCount is provided', async () => {

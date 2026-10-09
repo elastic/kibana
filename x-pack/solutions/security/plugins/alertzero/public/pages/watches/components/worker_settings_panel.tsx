@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import {
   getAllowedAutonomyLevels,
+  isWorkerEnableBlocked,
   type Worker,
   type WorkerSettings,
   type WorkerSettingsWrite,
@@ -29,7 +30,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ServiceAccountField } from './service_account_field';
+import { WorkerDependenciesCallout } from '../../../components/worker_dependencies/worker_dependencies_callout';
 import type { AlertZeroStartDependencies } from '../../../types';
 import { AutonomyLevelControl } from './autonomy_level_control';
 import { getAutonomyLevelCards } from './autonomy_level_cards_data';
@@ -102,8 +103,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       ? workerScheduleCadenceLabel(settings.scheduleInterval)
       : undefined;
   const controlsDisabled = settingsLocked || isSaving || !canWrite;
-  // A worker that is already on can be turned off. Turning one on requires an account.
-  const cannotEnable = !enabled && !settings.serviceAccountId;
+  const isEnableBlocked = isWorkerEnableBlocked(worker.blockingReasons);
   const executionsHref = worker.workflowId
     ? application.getUrlForApp(WORKFLOWS_APP_ID, {
         path: `/${encodeURIComponent(worker.workflowId)}?tab=executions`,
@@ -269,7 +269,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       compressed
       label={settingsI18n.ENABLED_SWITCH_LABEL}
       checked={enabled}
-      disabled={controlsDisabled || cannotEnable}
+      disabled={controlsDisabled || (isEnableBlocked && !worker.enabled)}
       onChange={(event) => onEnabledChange(event.target.checked)}
       data-test-subj={`alertZeroWorkerEnabledSwitch-${worker.id}`}
     />
@@ -292,6 +292,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
 
   const settingsBody = (
     <>
+      <WorkerDependenciesCallout worker={worker} surface="settings" />
       {settingsLocked ? (
         <EuiText size="s" color="subdued">
           <p>{settingsI18n.WORKER_SETTINGS_UNAVAILABLE}</p>
@@ -305,31 +306,6 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           </EuiText>
         </>
       ) : null}
-      <SettingRow
-        label={settingsI18n.SERVICE_ACCOUNT_LABEL}
-        labelHelp={settingsI18n.SERVICE_ACCOUNT_HELP}
-        data-test-subj={`alertZeroServiceAccountRow-${worker.id}`}
-      >
-        <ServiceAccountField
-          workerId={worker.id}
-          workerName={name}
-          current={settings.serviceAccountId}
-          isDisabled={controlsDisabled}
-          onChange={(serviceAccountId) => onSettingsChange({ serviceAccountId })}
-        />
-        {enabled && !settings.serviceAccountId ? (
-          <>
-            <EuiSpacer size="s" />
-            <EuiText
-              size="xs"
-              color="danger"
-              data-test-subj={`alertZeroServiceAccountRequired-${worker.id}`}
-            >
-              <p>{settingsI18n.SERVICE_ACCOUNT_REQUIRED_TO_SAVE}</p>
-            </EuiText>
-          </>
-        ) : null}
-      </SettingRow>
       <SettingRow
         label={settingsI18n.AUTONOMY_SECTION_TITLE}
         labelHelp={autonomyIntro}

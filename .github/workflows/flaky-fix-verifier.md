@@ -18,6 +18,7 @@ on:
 
 resources:
   - prefetch-pr-context.yml
+  - prefetch-same-team-fix-prs.yml
 
 permissions:
   contents: read
@@ -28,10 +29,10 @@ permissions:
   models: read
 
 # Activation rules:
-# - Manual runs always activate.
+# - Every trigger requires an open, in-repository PR authored by kibanamachine
+#   (checked by check_pr_eligibility).
+# - Manual runs request verification subject to the same PR validation.
 # - `kickoff`: a PR is labeled `flaky-test-fixer`.
-#   NOTE: not checking the author is a temporary measure for testing; tighten it
-#   back (e.g. to the `kibanamachine` fixer identity) once the flow is validated.
 # - `process_results`: the Flaky Test Runner posts its `## Flaky Test Runner Stats`
 #   comment on a PR we are actively validating (`flaky-fix-check:started`). The
 #   workflow removes `running` when it reaches a terminal verdict, so the label's
@@ -77,6 +78,7 @@ concurrency:
 env:
   PR_NUMBER: &pr_number ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
   PR_CONTEXT_ARTIFACT_NAME: &pr_context_artifact_name prefetched-pr-context-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
+  SAME_TEAM_FIX_PRS_ARTIFACT_NAME: &same_team_fix_prs_artifact_name same-team-fix-prs-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
   # Lets the agent omit `-o elastic` on every `bk` invocation.
   BUILDKITE_ORGANIZATION_SLUG: elastic
 
@@ -90,6 +92,7 @@ engine:
   model: opus
   max-turns: 120
   env:
+    BUILDKITE_API_TOKEN: ${{ steps.buildkite_auth.outputs.token }}
     ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
     ANTHROPIC_BASE_URL: https://openrouter.ai/api
     ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-5
@@ -127,6 +130,44 @@ checkout:
   fetch-depth: 2
 
 jobs:
+  activation:
+    needs: [check_pr_eligibility]
+  check_pr_eligibility:
+    needs: pre_activation
+    if: needs.pre_activation.outputs.activated == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      pr_number: ${{ steps.check.outputs.pr_number }}
+    steps:
+      # No checkout: validation must run before any PR code or agent tools.
+      - name: Check flaky fix PR eligibility
+        id: check
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          PR_NUMBER: *pr_number
+        with:
+          script: |
+            const prNumber = Number(process.env.PR_NUMBER);
+            if (!/^[1-9][0-9]*$/.test(process.env.PR_NUMBER ?? '') || !Number.isSafeInteger(prNumber)) {
+              throw new Error('A positive integer PR number is required.');
+            }
+
+            const { owner, repo } = context.repo;
+            const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+            if (pr.state !== 'open') {
+              throw new Error('The flaky fix verifier requires an open PR.');
+            }
+            if (pr.head.repo?.full_name !== `${owner}/${repo}`) {
+              throw new Error(`The flaky fix verifier requires a branch in ${owner}/${repo}.`);
+            }
+            if (pr.user.login !== 'kibanamachine') {
+              throw new Error('The flaky fix verifier requires a PR opened by kibanamachine.');
+            }
+
+            core.setOutput('pr_number', String(prNumber));
+            core.info(`PR #${prNumber} by ${pr.user.login} is eligible.`);
   prefetch_pr_context:
     permissions:
       contents: read
@@ -137,12 +178,28 @@ jobs:
       pr_number: *pr_number
       repo: ${{ github.repository }}
       artifact_name: *pr_context_artifact_name
+  prefetch_same_team_fix_prs:
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    uses: ./.github/workflows/prefetch-same-team-fix-prs.yml
+    with:
+      pr_number: *pr_number
+      artifact_name: *same_team_fix_prs_artifact_name
 
 steps:
   - name: Download prefetched PR context
     uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
     with:
       name: ${{ env.PR_CONTEXT_ARTIFACT_NAME }}
+      path: /tmp/gh-aw/agent
+  - name: Download same-team fix PRs
+    # Absent when duplicate detection failed; the agent treats a missing file as "no candidates".
+    continue-on-error: true
+    uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+    with:
+      name: ${{ env.SAME_TEAM_FIX_PRS_ARTIFACT_NAME }}
       path: /tmp/gh-aw/agent
   - name: Precompute flaky run count
     env:
@@ -165,22 +222,14 @@ steps:
       fs.writeFileSync(path.join(dir, 'flaky-run-count.json'), `${JSON.stringify({ triggeredByBot })}\n`);
       console.log(`Flaky runs already triggered by kibanamachine: ${triggeredByBot}`);
       NODE
-  - name: Detect duplicate fix PRs
-    # Shortlist the `flaky-test-fixer` PRs whose `failed-test` issue is owned by the same
-    # team as this PR, so the agent triages a short, relevant set instead of blind-searching.
-    # Non-fatal: a detection failure must not block verification — the agent treats a missing
-    # file as "no candidates".
-    uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-    with:
-      script: |
-        const { writeDuplicateCandidates } = require('./.github/scripts/find_duplicate_fix_prs.js');
-        try {
-          await writeDuplicateCandidates({ github, core, prNumber: Number(process.env.PR_NUMBER) });
-        } catch (err) {
-          core.warning(`Duplicate detection failed: ${err.message}`);
-        }
 
 safe-outputs:
+  threat-detection:
+    engine:
+      id: claude
+      version: '2.1.165'
+      env:
+        BUILDKITE_API_TOKEN: ${{ '' }}
   activation-comments: false
   report-failure-as-issue: false
   add-comment:
@@ -371,7 +420,7 @@ You verify a flaky test fix PR by running the flaky test runner against it, revi
 
 ## Prefetched PR context
 
-A prior job has already fetched this PR's data into `/tmp/gh-aw/agent/`. Prefer reading these files over live GitHub API/tool calls — they are the deterministic source of truth for this run:
+Preparation jobs have already fetched this PR's data into `/tmp/gh-aw/agent/`. Prefer reading these files over live GitHub API/tool calls — they are the deterministic source of truth for this run:
 
 - `pr-metadata.json` — title, body, labels, head/base branch, and cross-referenced PRs/issues.
 - `pr-diff.txt` — unified diff of every changed file.
@@ -443,7 +492,7 @@ The fixer deliberately leaves every created PR with only the `flaky-test-fixer` 
    - **`release_note:fix`** — a user-facing bug fix for an issue in an already released version.
 
    Do not choose `release_note:fix` merely because application code changed; confirm the affected behavior was released.
-3. For `release_note:fix`, emit one `update-pull-request` safe output that preserves the current title and body while inserting or updating exactly one section immediately before the final `> [!NOTE]` block (or at the end when that block is absent):
+3. For `release_note:fix`, emit one `update-pull-request` safe output that preserves the current title and body while inserting or updating exactly one section immediately before the final `> [!IMPORTANT]` block (or `> [!NOTE]` on older PRs, or at the end when neither is present):
 
    ```markdown
    ## Release note
