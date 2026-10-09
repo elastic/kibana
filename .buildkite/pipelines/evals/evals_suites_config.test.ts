@@ -204,8 +204,8 @@ describe('llm_evals.yml suite steps', () => {
   });
 
   it('flags an unknown suite id, including one nested in a group', () => {
-    // Exercises the same helper as the check above on a hand-written pipeline: both a top-level
-    // mistyped id and one nested inside a group step must surface in the unknown list.
+    // Exercises the same helper as the check above on a hand-written pipeline: only the id nested
+    // inside a group is mistyped, so this goes red if the walk stops recursing into groups.
     expect(
       unknownSuiteIds(
         stepsFromYamlText(
@@ -213,12 +213,12 @@ describe('llm_evals.yml suite steps', () => {
             'steps:',
             '  - command: run_suite.sh',
             '    env:',
-            '      EVAL_SUITE_ID: security-attack-discovery-fp-tpp',
+            '      EVAL_SUITE_ID: attack-discovery',
             '  - group: weekly',
             '    steps:',
             '      - command: run_suite.sh',
             '        env:',
-            '          EVAL_SUITE_ID: attack-discovery',
+            '          EVAL_SUITE_ID: security-attack-discovery-fp-tpp',
             '  - command: run_suite.sh',
             '    env:',
             '      EVAL_SUITE_ID: security-attack-discovery-fp-tp',
@@ -236,8 +236,9 @@ describe('llm_evals.yml suite steps', () => {
   });
 
   it('flags a missing or mismatched EVAL_SERVER_CONFIG_SET, including in a group-nested step', () => {
-    // Exercises the same helper as the check above on a hand-written pipeline: a non-allowlisted
-    // suite whose serverConfigSet is absent must surface, while the allowlisted one must not.
+    // Exercises the same helper as the check above on a hand-written pipeline: only the nested step
+    // is non-allowlisted and missing its serverConfigSet, so this goes red if the walk stops
+    // recursing into groups. The allowlisted top-level step must not surface.
     expect(
       configSetProblems(
         stepsFromYamlText(
@@ -245,12 +246,12 @@ describe('llm_evals.yml suite steps', () => {
             'steps:',
             '  - command: run_suite.sh',
             '    env:',
-            '      EVAL_SUITE_ID: nightshift-investigations',
+            '      EVAL_SUITE_ID: attack-discovery',
             '  - group: weekly',
             '    steps:',
             '      - command: run_suite.sh',
             '        env:',
-            '          EVAL_SUITE_ID: attack-discovery',
+            '          EVAL_SUITE_ID: nightshift-investigations',
             '',
           ].join('\n')
         )
