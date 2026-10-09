@@ -26,11 +26,11 @@ const NGINX_GROUP_FIXTURE: RegistrySearchResult = {
   requires: {
     integration: [
       { package: 'nginx', version: '^3.0.0' },
-      { package: 'nginx_otel_integ', version: '^0.1.0' },
+      { package: 'nginx_otel_integration', version: '^0.1.0' },
     ],
   },
   schemas: {
-    otel: { integration: 'nginx_otel_integ', default: true },
+    otel: { integration: 'nginx_otel_integration', default: true },
     ecs: { integration: 'nginx' },
   },
 };

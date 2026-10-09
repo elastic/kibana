@@ -22,11 +22,11 @@ describe('withGroupPackagesFixture', () => {
   it('adds nginx_group with schemas and nginx icon path', () => {
     const res = withGroupPackagesFixture([nginx]);
     const group = res.find((p) => p.name === 'nginx_group')!;
-    expect(group.schemas?.otel).toEqual({ integration: 'nginx_otel_integ', default: true });
+    expect(group.schemas?.otel).toEqual({ integration: 'nginx_otel_integration', default: true });
     expect(group.schemas?.ecs).toEqual({ integration: 'nginx' });
     expect(group.requires?.integration?.map((d) => d.package)).toEqual([
       'nginx',
-      'nginx_otel_integ',
+      'nginx_otel_integration',
     ]);
     expect(group.icons?.[0]).toMatchObject({ src: '', path: '/package/nginx/3.2.2/img/logo.svg' });
   });

@@ -43,11 +43,11 @@ const group = pkg('nginx_group', {
   requires: {
     integration: [
       { package: 'nginx', version: '^3.0.0' },
-      { package: 'nginx_otel_integ', version: '^0.1.0' },
+      { package: 'nginx_otel_integration', version: '^0.1.0' },
     ],
   },
   schemas: {
-    otel: { integration: 'nginx_otel_integ', default: true },
+    otel: { integration: 'nginx_otel_integration', default: true },
     ecs: { integration: 'nginx' },
   },
 });
@@ -70,7 +70,7 @@ describe('applyGroupPackages', () => {
 
   it('hides children, emits one group card linking to the group page', () => {
     const res = applyGroupPackages({
-      items: [group, pkg('nginx'), pkg('nginx_otel_integ'), pkg('redis')],
+      items: [group, pkg('nginx'), pkg('nginx_otel_integration'), pkg('redis')],
       ...params,
     });
     expect(res.remainingItems.map((i) => (i as PackageListItem).name)).toEqual(['redis']);
@@ -81,13 +81,13 @@ describe('applyGroupPackages', () => {
   });
 
   it("hides children's input/content deps unless something else requires them", () => {
-    const otelChild = pkg('nginx_otel_integ', {
+    const otelChild = pkg('nginx_otel_integration', {
       requires: {
         input: [
           { package: 'nginx_otel_input', version: '0.2.2' },
           { package: 'filelog_otel', version: '0.2.0' },
         ],
-        content: [{ package: 'nginx_otel', version: '0.6.1' }],
+        content: [{ package: 'nginx_otel', version: '0.7.0' }],
       },
     });
     const other = pkg('apache_otel', {
@@ -112,7 +112,7 @@ describe('applyGroupPackages', () => {
   });
 
   it('derives installed state from children', () => {
-    const items = [group, pkg('nginx', installed), pkg('nginx_otel_integ')];
+    const items = [group, pkg('nginx', installed), pkg('nginx_otel_integration')];
     expect(getInstalledGroupSchemas(group, items)).toEqual(['ecs']);
     const res = applyGroupPackages({ items, ...params });
     expect(res.groupCards[0].installStatus).toBe(installationStatuses.Installed);

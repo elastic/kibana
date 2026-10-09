@@ -54,7 +54,7 @@ export interface PackageSchema {
   default?: boolean;
 }
 
-/** Prototype: integration group schema map, e.g. { otel: { integration: 'nginx_otel_integ', default: true }, ecs: { integration: 'nginx' } }. */
+/** Prototype: integration group schema map, e.g. { otel: { integration: 'nginx_otel_integration', default: true }, ecs: { integration: 'nginx' } }. */
 export type PackageSchemas = Record<string, PackageSchema>;
 
 // Based on https://github.com/elastic/package-spec/blob/master/versions/1/manifest.spec.yml#L8
