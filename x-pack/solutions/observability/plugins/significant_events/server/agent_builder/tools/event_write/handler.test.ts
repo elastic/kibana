@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { eventsWriteBulkHandler, eventsWriteHandler, type EventsWriteInput } from './handler';
+import { eventsWriteBulkHandler, eventsWriteHandler } from './handler';
+import type { EventsWriteInput } from './types';
 import type {
   SignificantEvent,
   SignalEntry,
@@ -1027,7 +1028,6 @@ describe('eventsWriteBulkHandler — continuation status', () => {
   });
 
   it('no-op guard skips when both severity and status are identical to latest', async () => {
-    // baseInput has no signals, so its explicit severity ('high') is kept and must match stored.
     const stored = makeStoredEvent('checkout-stable', { severity: 'high' });
     const eventClient = makeEventSearchClient({
       findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
@@ -1196,10 +1196,10 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
     const eventClient = makeEventSearchClient({
       findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
     });
-    // Severity is computed from the merged signal set, not copied from input.severity; the new confirmed rule must itself classify as "outage" with a critical-band severity_score to compute to 'critical' once the investigation lock unlocks.
-    const newConfirmedRule = {
+
+    const newConfirmedRule: SignalEntry = {
       ...makeDetectionSignal('rule-2'),
-      effect: 'outage' as const,
+      effect: 'outage',
       outage_paths: ['checkout'],
       metadata: {
         ...makeDetectionSignal('rule-2').metadata,

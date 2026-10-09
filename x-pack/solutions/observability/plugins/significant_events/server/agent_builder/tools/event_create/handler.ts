@@ -18,12 +18,10 @@ import { createBulkWriteOutcomeUnknownError } from '../bulk_write';
  *
  * Always-write snapshot: a generated `event_id` is supplied so find-or-create does not
  * collapse chat creates onto an existing same-stream event. `status` defaults to 'active'.
- * Severity is stored as given when provided; a chat-created event carries no signals, so when
- * omitted it computes to 'low' until evidence is attached.
  */
 export type EventCreateInput = Pick<
   EventsWriteInput,
-  'title' | 'symptom_hypothesis' | 'summary' | 'stream_names' | 'confidence' | 'severity'
+  'title' | 'symptom_hypothesis' | 'summary' | 'stream_names' | 'severity' | 'confidence'
 > & {
   status?: EventsWriteInput['status'];
 };

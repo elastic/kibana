@@ -11,7 +11,7 @@ import { lockSeverityForCompletedInvestigation } from './severity_lock';
 const detectionSignal = (
   ruleUuid: string,
   verdict: Extract<SignalEntry, { type: 'detection' }>['verdict'] = 'confirms'
-): Extract<SignalEntry, { type: 'detection' }> => ({
+): SignalEntry => ({
   type: 'detection',
   stream_name: 'logs.test',
   description: `Signal for ${ruleUuid}`,

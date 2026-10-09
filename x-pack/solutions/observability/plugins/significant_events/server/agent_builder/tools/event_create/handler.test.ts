@@ -44,7 +44,7 @@ describe('createEventToolHandler', () => {
   it('passes explicit status through', async () => {
     await createEventToolHandler({
       eventSearchClient: {} as never,
-      eventInput: { ...baseInput, status: 'inactive' as const },
+      eventInput: { ...baseInput, status: 'inactive' },
       alertEventsClient: {} as never,
     });
 

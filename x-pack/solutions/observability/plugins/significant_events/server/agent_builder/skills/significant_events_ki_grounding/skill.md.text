@@ -151,16 +151,14 @@ Stored form (written to evidence.esql_query — no executed ordering/limit tail)
    - `confirms` only for a found row that directly supports the rule's failure, degradation, exposure, or evidenced cascade. The error signature in the found row is itself the mechanism — do not require a separate independent confirmation of the dependency path on top of a clearly on-topic error row.
    - `refutes` for successful healthy, positive, or no-failure found rows.
    - `off_topic` for a found row that does not address the authored rule hypothesis.
-   - `inconclusive` for empty or errored evidence when a query ran. It cannot establish a mechanism, impact, or severity tier.
+   - `inconclusive` for empty or errored evidence when a query ran. It cannot establish a mechanism or impact.
    - `not_checked` only when no backed query KI exists.
    - When an off-topic found row contains a concrete non-benign error, preserve only a redacted signature in the signal description. The calling discovery agent must assess that observed error as a separate incident candidate; an off-topic verdict rejects the rule hypothesis, not the observed error.
 
-3. **Classify `effect` per the `effect` field contract on `platform_sig_events_events_write`** — judge the operation's success vs failure from the row itself, never from `p_value`, `change_point_type`, alert volume, or this signal's own description wording. Only when the row itself genuinely doesn't show success or failure (not merely silent on cause) may the matched query KI's own description break the tie — cite the specific clause it supports in this signal's description; do not inherit the KI description's wording as if it were observed.
+3. **Classify `effect` per the `effect` field contract on `platform_sig_events_events_write`** — judge the operation's success vs failure from the row itself, never from `p_value`, `change_point_type`, alert volume, or this signal's own description wording. Only when the row itself genuinely doesn't show success or failure (not merely silent on cause) may the matched query KI's own description break the tie — cite the specific clause it supports in this signal's description; do not inherit the KI description's wording as if it were observed. If neither the row nor the cited clause decides it, set `effect: "degradation"` for a `confirms` signal.
    - Every verdict other than `confirms` → `effect: "none"`, except `off_topic` with a concrete non-benign error, which classifies `effect` (and `outage_paths` if `outage`) from that observed error.
    - Confirmed active exposure of PII, PCI DSS, SSN, credentials, secrets, or tokens → `effect: "exposure"`, only when `verdict` is `confirms` (or `off_topic` with a concrete observed error); every other verdict uses `effect: "none"`.
    - When `effect` is `"outage"`, add one `outage_paths` entry per distinct verified path the row shows failing to complete, named by what traverses it: the caller operation when the evidence names one (`checkout`), otherwise the failing hop (`orders-api -> postgres`). One entry per path — do not split one path by endpoint variant or status code; a URL alone is not a path. Omit `outage_paths` for every other `effect`.
-   - Severity is computed from `effect`, `outage_paths`, KI `severity_score`, and topology — not written directly, and not something to reason about here.
-
 ### Step 5: Consolidate Causal Features and Blast Radius
 
 Build one topology graph for the batch. `query.features[]` seeds the graph; it never limits it. Evaluate every fetched `dependency`, `entity`, and `infrastructure` KI once. Do not issue another KI search.

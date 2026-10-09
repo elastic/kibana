@@ -21,7 +21,6 @@ type EventsWriteItemResult =
       index: number;
       event_id: string;
       written: true;
-      /** Computed server-side (#1759) — the agent's own request item never carries this. */
       severity?: Severity;
     }
   | {
@@ -35,6 +34,7 @@ type EventsWriteItemResult =
         | 'unchanged_outcome'
         | 'unknown_event_id';
       existing_event_id?: string;
+      severity?: Severity;
     };
 
 const toolCallSteps = (steps: ConverseStep[], toolId: string) =>
@@ -97,7 +97,7 @@ const isProducedDiscovery = (result: EventsWriteItemResult): boolean => {
 };
 
 /**
- * Severity is computed server-side (#1759) and returned only on the tool result, never echoed
+ * Severity is computed server-side  and returned only on the tool result, never echoed
  * back on the request item — merge it in alongside event_id, or every post-migration evaluator
  * reading `severity` off the extracted event sees it as missing.
  */
@@ -108,7 +108,7 @@ const mergeComputedFields = (
   ({
     ...item,
     event_id: result.event_id,
-    ...(result.written && result.severity !== undefined ? { severity: result.severity } : {}),
+    ...(result.severity !== undefined ? { severity: result.severity } : {}),
   } as SignificantEvent);
 
 /**

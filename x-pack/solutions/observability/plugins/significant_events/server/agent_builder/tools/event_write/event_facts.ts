@@ -21,18 +21,32 @@ import { computeSeverity, deriveEventEffect } from './compute_severity';
 import { computeTopologyBreadth, computeTopologyFanOut, hasCascadePath } from './topology_breadth';
 import type { BulkResults, EventsWriteInput, EventsWriteResult, WriteCandidate } from './types';
 
+interface EventFacts
+  extends Pick<SignificantEvent, 'status' | 'severity' | 'signals' | 'confidence'> {
+  candidate: WriteCandidate;
+  rest: Omit<EventsWriteInput, 'event_id'>;
+  latestEvent: SignificantEvent | undefined;
+  episodeContext: ReturnType<typeof mergeEpisodeContext>;
+  frozenNarrative: ReturnType<typeof preserveStableNarrative>;
+  effect: SignalEffect;
+}
+
 /**
  * Returns true when the latest stored version for this event_id has the same computed severity
  * and status as the candidate and the candidate introduces no new detection rules — indicating
  * this snapshot would produce a pure-churn duplicate.
- * Must not call any esClient or eventClient method.
  */
-export const shouldSkipAsNoOp = (
-  latestEvent: SignificantEvent | undefined,
-  candidate: WriteCandidate,
-  priorDocs: SignificantEvent[],
-  computedSeverity: Severity
-): boolean => {
+export const shouldSkipAsNoOp = ({
+  latestEvent,
+  candidate,
+  priorDocs,
+  computedSeverity,
+}: {
+  latestEvent: SignificantEvent | undefined;
+  candidate: WriteCandidate;
+  priorDocs: SignificantEvent[];
+  computedSeverity: Severity;
+}): boolean => {
   if (latestEvent === undefined) return false;
 
   const knownRuleUuids = extractRuleUuidsFromEvents([...priorDocs, latestEvent]);
@@ -46,10 +60,13 @@ export const shouldSkipAsNoOp = (
 };
 
 /** Full history for remaining continuation writes (lineage merge). */
-export const fetchPriorDocsByEventId = async (
-  eventSearchClient: RuleEventsClient,
-  candidates: WriteCandidate[]
-): Promise<{
+export const fetchPriorDocsByEventId = async ({
+  eventSearchClient,
+  candidates,
+}: {
+  eventSearchClient: RuleEventsClient;
+  candidates: WriteCandidate[];
+}): Promise<{
   latestByEventId: Map<string, SignificantEvent>;
   priorDocsByEventId: Map<string, SignificantEvent[]>;
 }> => {
@@ -70,31 +87,25 @@ export const fetchPriorDocsByEventId = async (
   return { latestByEventId, priorDocsByEventId };
 };
 
-interface EventFacts {
-  candidate: WriteCandidate;
-  rest: Omit<EventsWriteInput, 'event_id'>;
-  latestEvent: SignificantEvent | undefined;
-  signals: SignificantEvent['signals'];
-  episodeContext: ReturnType<typeof mergeEpisodeContext>;
-  status: SignificantEvent['status'];
-  severity: Severity;
-  effect: SignalEffect;
-  frozenNarrative: ReturnType<typeof preserveStableNarrative>;
-}
-
 /**
  * Merges this candidate's signals and topology with its prior versions (continuation only), then
  * computes its severity from that merged member-union — the facts shared by the no-op check and
  * the final document, computed once per candidate so neither recomputes nor disagrees with the
  * other.
  */
-export const computeEventFacts = (
-  candidate: WriteCandidate,
-  timestamp: string,
-  latestByEventId: Map<string, SignificantEvent>,
-  priorDocsByEventId: Map<string, SignificantEvent[]>,
-  source: EventsWriteSource | undefined
-): EventFacts => {
+export const computeEventFacts = ({
+  candidate,
+  timestamp,
+  latestByEventId,
+  priorDocsByEventId,
+  source,
+}: {
+  candidate: WriteCandidate;
+  timestamp: string;
+  latestByEventId: Map<string, SignificantEvent>;
+  priorDocsByEventId: Map<string, SignificantEvent[]>;
+  source: EventsWriteSource | undefined;
+}): EventFacts => {
   const { event_id: _explicitId, ...rest } = candidate.input;
   const priorDocs = priorDocsByEventId.get(candidate.eventId) ?? [];
   const latestEvent = latestByEventId.get(candidate.eventId);
@@ -110,6 +121,7 @@ export const computeEventFacts = (
         streamNames: rest.stream_names,
         causalFeatures: rest.causal_features ?? [],
         blastRadius: rest.blast_radius ?? [],
+        confidence: rest.confidence ?? 0,
       };
 
   // Discovery assigns the final status directly; persist caller-supplied status for all write modes.
@@ -162,11 +174,18 @@ export const computeEventFacts = (
     severity,
     effect,
     frozenNarrative,
+    confidence: episodeContext.confidence,
   };
 };
 
 /** Assembles the final document from facts computeEventFacts already derived for this candidate. */
-export const buildPendingWrite = (facts: EventFacts, timestamp: string) => {
+export const buildPendingWrite = ({
+  facts,
+  timestamp,
+}: {
+  facts: EventFacts;
+  timestamp: string;
+}) => {
   const {
     candidate,
     rest,
@@ -177,6 +196,7 @@ export const buildPendingWrite = (facts: EventFacts, timestamp: string) => {
     severity,
     effect,
     frozenNarrative,
+    confidence,
   } = facts;
 
   return {
@@ -204,16 +224,21 @@ export const buildPendingWrite = (facts: EventFacts, timestamp: string) => {
       blast_radius: episodeContext.blastRadius,
       severity,
       status,
+      confidence,
     },
   };
 };
 
 /** Writes `error ? bulk_error : written` into `results` for each pending write, by index. */
-export const applyWriteOutcomes = (
-  pendingWrites: Array<ReturnType<typeof buildPendingWrite>>,
-  errors: Array<CompactBulkError | undefined>,
-  results: BulkResults
-): void => {
+export const applyWriteOutcomes = ({
+  pendingWrites,
+  errors,
+  results,
+}: {
+  pendingWrites: Array<ReturnType<typeof buildPendingWrite>>;
+  errors: Array<CompactBulkError | undefined>;
+  results: BulkResults;
+}): void => {
   pendingWrites.forEach(
     ({ candidate, status, narrativePreserved, severity, effect }, responseIndex) => {
       const error = errors[responseIndex];

@@ -266,7 +266,7 @@ const signalBaseSchema = lazySchema(() =>
     verdict: z
       .enum(SIGNAL_VERDICTS)
       .describe(
-        'Conclusion for the authored rule hypothesis: confirms = matching failure or degradation at a newly elevated rate; refutes = verified healthy, positive, or no-failure result; off_topic = query found an observation unrelated to the rule; inconclusive = the check could not establish a conclusion (empty or errored evidence, or matching rows whose pre/post rate shows no new elevation); not_checked = no query was available.'
+        'Conclusion for the authored rule hypothesis: confirms = a found row directly showing the failure or degradation; refutes = verified healthy, positive, or no-failure result; off_topic = query found an observation unrelated to the rule; inconclusive = the check could not establish a conclusion from the evidence (empty, errored, or found rows that do not directly show the outcome); not_checked = no query was available.'
       ),
     collected_at: z.iso
       .datetime({ offset: true })
@@ -337,7 +337,7 @@ const detectionSignalSchema = lazySchema(() =>
           code: 'custom',
           path: ['verdict'],
           message:
-            'An inconclusive verdict requires query evidence (found rate-flat rows, empty, or error).',
+            'An inconclusive verdict requires query evidence (empty, error, or found rows that do not directly show the outcome).',
         });
       }
       if (
@@ -487,7 +487,6 @@ export const significantEventBaseSchema = lazySchema(() =>
       .number()
       .min(0)
       .max(1)
-      .optional()
       .describe(
         'symptom_hypothesis correctness 0.0–1.0 float. Higher values reflect stronger evidence grounding and more corroboration. ' +
           'causal_features ceiling: cap at 0.65 when causal_features is empty (applies to open status only).'

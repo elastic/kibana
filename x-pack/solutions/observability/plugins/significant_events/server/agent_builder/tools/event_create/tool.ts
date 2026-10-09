@@ -23,9 +23,6 @@ import { createEventToolHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID = platformSignificantEventsTools.createEvent;
 
-const CHAT_SEVERITY_RULE =
-  'Severity tier for a chat-created event, stored as given. Omit to leave it computed (low until discovery attaches signals). Options: critical | high | medium | low.';
-
 const createEventSchema = lazySchema(() =>
   significantEventSchema
     .pick({
@@ -37,7 +34,14 @@ const createEventSchema = lazySchema(() =>
       stream_names: true,
     })
     .extend({
-      severity: severitySchema.optional().describe(CHAT_SEVERITY_RULE),
+      severity: severitySchema.optional().describe(dedent`
+          Severity tier, stored as given. Omit to leave it computed (low until signals are attached).
+          critical = site-wide outage, or confirmed active exposure of PII, credentials, or secrets.
+          high = a core operation fails or is blocked on the verified path, or is broadly degraded.
+          medium = minor confirmed degradation with limited reach, or unconfirmed whether the operation fails.
+          low = recovery, noise, false alarm, or non-issue.
+          When uncertain, choose the lower tier.
+        `),
     })
 );
 

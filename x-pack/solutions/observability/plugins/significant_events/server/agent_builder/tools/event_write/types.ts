@@ -35,11 +35,6 @@ export interface EventsWriteResult {
   /** Set when the stored title and symptom_hypothesis were preserved because this continuation
    *  introduced no new rule UUIDs — preventing identity hijack by an unrelated condition. */
   narrative_preserved?: true;
-  /** Logged (not gated on) for fleet-wide EBT monitoring of the severity policy's behavior,
-   *  since `.rule-events` itself never leaves the customer's cluster. `severity` and `effect` are
-   *  the coarse, low-cardinality pair that lets a tier skew be told apart from an effect-
-   *  classification skew; breadth, fan-out, and `severity_score` are numeric and only
-   *  interpretable alongside the full document, so they're left to `.rule-events` analysis */
   severity: Severity;
   effect: SignalEffect;
 }
@@ -52,6 +47,8 @@ export interface EventsWriteDuplicateResult {
   skipped: true;
   reason: 'existing_active_event';
   existing_event_id: string;
+  /** Stored tier of the active event this write deduplicated into. */
+  severity?: Severity;
 }
 
 export interface EventsWriteNoOpResult {
@@ -61,6 +58,8 @@ export interface EventsWriteNoOpResult {
   written: false;
   skipped: true;
   reason: 'unchanged_outcome';
+  /** Stored tier that the unchanged outcome matched. */
+  severity?: Severity;
 }
 
 export interface EventsWriteFailureResult {

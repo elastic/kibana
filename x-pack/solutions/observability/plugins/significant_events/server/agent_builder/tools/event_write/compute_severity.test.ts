@@ -7,6 +7,7 @@
 
 import type { BlastRadiusEntry, SignalEntry } from '@kbn/significant-events-schema';
 import { CRITICAL_SEVERITY_THRESHOLD } from '@kbn/significant-events-schema';
+import type { ComputeSeverityInput } from './compute_severity';
 import {
   BREADTH_THRESHOLD,
   computeSeverity,
@@ -165,7 +166,7 @@ describe('computeSeverity', () => {
   });
 
   describe('outage', () => {
-    const single = { ...base, effect: 'outage' as const, outagePaths: ['checkout'] };
+    const single: ComputeSeverityInput = { ...base, effect: 'outage', outagePaths: ['checkout'] };
 
     it('>=2 distinct paths → critical regardless of score, breadth, fan-out, or cascade', () => {
       expect(

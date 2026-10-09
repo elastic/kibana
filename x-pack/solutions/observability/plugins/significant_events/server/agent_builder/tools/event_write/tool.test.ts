@@ -6,6 +6,7 @@
  */
 
 import type { RunContextStackEntry } from '@kbn/agent-builder-server';
+import type { SignalEntry, SignificantEvent } from '@kbn/significant-events-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -29,9 +30,9 @@ jest.mock('./handler', () => ({
   eventsWriteBulkHandler: jest.fn(),
 }));
 
-const input = {
+const input: Partial<SignificantEvent> = {
   event_id: 'event-1',
-  status: 'active' as const,
+  status: 'active',
   stream_names: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
@@ -91,8 +92,8 @@ describe('events_write tool', () => {
   });
 
   it('rejects duplicate detection rules anywhere in a write', () => {
-    const signal = {
-      type: 'detection' as const,
+    const signal: SignalEntry = {
+      type: 'detection',
       stream_name: 'logs.test',
       description: 'Found: error. Impact: requests failed.',
       verdict: 'confirms',
@@ -100,7 +101,7 @@ describe('events_write tool', () => {
       metadata: {
         rule_uuid: 'rule-1',
         detection_id: 'detection-1',
-        change_point_type: 'spike' as const,
+        change_point_type: 'spike',
         p_value: 0.01,
       },
     };
@@ -126,28 +127,28 @@ describe('events_write tool', () => {
   });
 
   it('rejects mixing confirms and not_checked on the same item', () => {
-    const confirmsSignal = {
-      type: 'detection' as const,
+    const confirmsSignal: SignalEntry = {
+      type: 'detection',
       stream_name: 'logs.test',
       description: 'Found: matching failure logs at similar pre/post rates. Impact: not new.',
-      verdict: 'confirms' as const,
-      evidence: { esql_query: 'FROM logs.test', result: 'found' as const },
+      verdict: 'confirms',
+      evidence: { esql_query: 'FROM logs.test', result: 'found' },
       metadata: {
         rule_uuid: 'rule-1',
         detection_id: 'detection-1',
-        change_point_type: 'spike' as const,
+        change_point_type: 'spike',
         p_value: 0.01,
       },
     };
-    const quiet = {
-      type: 'detection' as const,
+    const quiet: SignalEntry = {
+      type: 'detection',
       stream_name: 'logs.test',
       description: 'Rule Y: no backed query KI matched this detection.',
-      verdict: 'not_checked' as const,
+      verdict: 'not_checked',
       metadata: {
         rule_uuid: 'rule-2',
         detection_id: 'detection-2',
-        change_point_type: 'spike' as const,
+        change_point_type: 'spike',
         p_value: 0.2,
       },
     };

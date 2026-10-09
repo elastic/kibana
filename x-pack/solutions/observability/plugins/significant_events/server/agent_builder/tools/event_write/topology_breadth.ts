@@ -8,7 +8,8 @@
 import type { BlastRadiusEntry, CausalFeature } from '@kbn/significant-events-schema';
 
 /**
- * Counts distinct entities in an event's member-union topology (causal_features ∪ blast_radius, deduped by feature_id).
+ * Counts distinct entities in an event's member-union topology (causal_features ∪ blast_radius,
+ * deduped by feature_id).
  */
 export const computeTopologyBreadth = (
   causalFeatures: CausalFeature[] | undefined,
@@ -38,7 +39,8 @@ export const computeTopologyFanOut = (blastRadius: BlastRadiusEntry[] | undefine
 };
 
 /**
- * True when multiple sources depend on the same target in the member-union blast_radius, indicating a confirmed call-chain cascade.
+ * True when multiple sources depend on the same target in the member-union blast_radius,
+ * indicating a confirmed call-chain cascade.
  */
 export const hasCascadePath = (blastRadius: BlastRadiusEntry[] | undefined): boolean =>
   computeTopologyFanOut(blastRadius) >= 2;

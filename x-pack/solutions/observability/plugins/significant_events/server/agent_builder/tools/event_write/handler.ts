@@ -42,6 +42,8 @@ import {
   type EventsWriteResult,
 } from './types';
 
+export type { EventsWriteBulkResult, EventsWriteInput, EventsWriteResult } from './types';
+
 const WRITE_CONCURRENCY = 10;
 
 /**
@@ -63,10 +65,6 @@ const WRITE_CONCURRENCY = 10;
  *    Merges signals and topology with prior versions when history is found.
  *    When no new rule UUIDs are introduced, the stored `title` and `symptom_hypothesis` are
  *    preserved (`narrative_preserved: true` on the result) to prevent identity hijack.
- *
- * Dedup (dedup.ts), merge/severity (event_facts.ts) and the lock (severity_lock.ts) each own their
- * own concern; this function is the pipeline over them, plus the write to `.rule-events` and the
- * workflow-trigger emission.
  */
 export async function eventsWriteBulkHandler({
   eventSearchClient,
@@ -100,10 +98,11 @@ export async function eventsWriteBulkHandler({
   const activeEvents = await fetchActiveEventsForDedup(eventSearchClient, dedupCandidates);
   const toWrite = resolveDedupSkips(validCandidates, activeEvents, results);
 
-  const { latestByEventId, priorDocsByEventId } = await fetchPriorDocsByEventId(
+  const { latestByEventId, priorDocsByEventId } = await fetchPriorDocsByEventId({
     eventSearchClient,
-    toWrite
-  );
+    candidates: toWrite,
+  });
+
   const knownCandidates = toWrite.filter((candidate) => {
     if (
       rejectUnknownEventIds &&
@@ -132,18 +131,18 @@ export async function eventsWriteBulkHandler({
   // here, so the no-op check below and the final document agree on the same severity — neither
   // recomputes it.
   const factsByCandidate = knownCandidates.map((candidate) =>
-    computeEventFacts(candidate, timestamp, latestByEventId, priorDocsByEventId, source)
+    computeEventFacts({ candidate, timestamp, latestByEventId, priorDocsByEventId, source })
   );
   const remaining = factsByCandidate.filter((facts) => {
     const { candidate } = facts;
     if (
       candidate.mode === 'snapshot' &&
-      shouldSkipAsNoOp(
-        latestByEventId.get(candidate.eventId),
+      shouldSkipAsNoOp({
+        latestEvent: latestByEventId.get(candidate.eventId),
         candidate,
-        priorDocsByEventId.get(candidate.eventId) ?? [],
-        facts.severity
-      )
+        priorDocs: priorDocsByEventId.get(candidate.eventId) ?? [],
+        computedSeverity: facts.severity,
+      })
     ) {
       results[candidate.index] = {
         index: candidate.index,
@@ -152,6 +151,7 @@ export async function eventsWriteBulkHandler({
         written: false,
         skipped: true,
         reason: 'unchanged_outcome',
+        severity: latestByEventId.get(candidate.eventId)?.severity,
       };
       return false;
     }
@@ -162,7 +162,7 @@ export async function eventsWriteBulkHandler({
     return alignResults(results, 'Event bulk results were not aligned');
   }
 
-  const pendingToWrite = remaining.map((facts) => buildPendingWrite(facts, timestamp));
+  const pendingToWrite = remaining.map((facts) => buildPendingWrite({ facts, timestamp }));
 
   // `createAlertEvent` waits for a refresh, so the next discovery read sees the new version.
   const writeLimit = pLimit(WRITE_CONCURRENCY);
@@ -180,7 +180,7 @@ export async function eventsWriteBulkHandler({
       })
     )
   );
-  applyWriteOutcomes(pendingToWrite, errors, results);
+  applyWriteOutcomes({ pendingWrites: pendingToWrite, errors, results });
 
   // Notify subscribed workflows (fire-and-forget) for successfully written docs only: no prior
   // version -> created; a prior version with a different status (e.g. triage re-open) -> status
