@@ -58,6 +58,7 @@ import {
   createAlertAnalysisTrajectoryEvaluator,
   validVerdict,
 } from '../src/evaluators';
+import { createRationaleQualityEvaluator } from '../src/rationale_evaluator';
 import { ALERT_ANALYSIS_EVAL_ALERTS } from '../src/synthetic_alerts';
 import { ALERTS_INDEX } from '../src/constants';
 
@@ -137,7 +138,10 @@ evaluate.describe(
           classificationAccuracy,
           validVerdict,
           createAlertAnalysisTrajectoryEvaluator(),
-          evaluators.criteria(RATIONALE_CRITERIA),
+          // Missing rationale is a measurement gap (N/A), not a quality zero —
+          // the judge would otherwise grade "no rationale" against grounding
+          // criteria and drag the mean toward 0 for runs that never produced one.
+          createRationaleQualityEvaluator(evaluators, RATIONALE_CRITERIA),
         ]);
 
         await executorClient.runExperiment(

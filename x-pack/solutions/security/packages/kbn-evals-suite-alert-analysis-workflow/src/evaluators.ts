@@ -28,7 +28,18 @@ export const classificationAccuracy: Evaluator = {
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output, expected }) => {
-    const predicted = asVerdict(output).classification;
+    const verdict = asVerdict(output);
+    // An empty artifact (no verdict at all) is a missing measurement, not a
+    // wrong classification — score N/A instead of dragging the mean toward 0.
+    if (verdict == null || typeof verdict !== 'object' || Object.keys(verdict).length === 0) {
+      return {
+        score: null,
+        label: 'N/A',
+        explanation: 'Empty verdict artifact — workflow produced no output to score.',
+        metadata: { predicted: null, expected: asExpected(expected)?.classification ?? null },
+      };
+    }
+    const predicted = verdict.classification;
     const goldenLabel = asExpected(expected)?.classification;
     const correct = predicted != null && predicted === goldenLabel;
 
@@ -57,6 +68,16 @@ export const validVerdict: Evaluator = {
   direction: 'maximize',
   evaluate: async ({ output }) => {
     const verdict = asVerdict(output);
+    // Same rule as ClassificationAccuracy: an empty artifact is N/A, not a
+    // schema-drift failure. score_stats already excludes null scores.
+    if (verdict == null || typeof verdict !== 'object' || Object.keys(verdict).length === 0) {
+      return {
+        score: null,
+        label: 'N/A',
+        explanation: 'Empty verdict artifact — workflow produced no output to score.',
+        metadata: { classificationValid: false, confidenceValid: false },
+      };
+    }
     const classificationValid =
       verdict.classification != null &&
       (CLASSIFICATIONS as readonly string[]).includes(verdict.classification);
