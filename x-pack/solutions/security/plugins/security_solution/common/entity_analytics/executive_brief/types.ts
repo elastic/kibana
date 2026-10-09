@@ -518,7 +518,12 @@ export interface ExecutiveBriefJob {
   validation?: BriefValidation;
   /** Milliseconds per stage. */
   timings?: Partial<Record<BriefJobStage, number>>;
-  tokens?: { prompt: number; completion: number };
+  /** Actual usage reported by the model (summed over attempts); absent for the template generator. */
+  tokens?: { prompt: number; completion: number; cached?: number; total?: number };
+  /** LLM calls made for this brief (1 + schema-validation retries). */
+  attempts?: number;
+  /** Pre-call estimate of the prompt size (system prompt + payload), and the payload size in bytes. */
+  estimate?: { promptTokens: number; payloadBytes: number; method: 'tokenizer' | 'chars_div_4' };
   /** Display name of the model/connector that wrote the brief (absent for the template generator). */
   model?: string;
   error?: {
