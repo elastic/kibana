@@ -40,6 +40,21 @@ const SECTION_DESCRIPTION = i18n.translate('xpack.nightshift.settings.maintenanc
     'Controls detection activity across all spaces, including knowledge indicator extraction, query alerting, rule creation, and significant event discovery. Existing data always persists.',
 });
 
+const ActivityCount = ({ label, dataTestSubj }: { label: string; dataTestSubj: string }) => (
+  <EuiFlexItem grow={false} data-test-subj={dataTestSubj}>
+    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="check" color="success" size="s" aria-hidden={true} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText size="xs" color="subdued">
+          <p>{label}</p>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlexItem>
+);
+
 const ActivityCounts = ({
   automationsDisabled,
   rulesDisabled,
@@ -49,35 +64,27 @@ const ActivityCounts = ({
 }) => {
   return (
     <EuiFlexGroup
-      alignItems="center"
-      gutterSize="xs"
+      direction="column"
+      alignItems="flexStart"
+      gutterSize="s"
       responsive={false}
       data-test-subj="streams-settings-maintenance-activity-counts"
     >
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="clock" color="subdued" size="s" aria-hidden={true} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText size="xs" color="subdued">
-          <p>
-            <span data-test-subj="streams-settings-maintenance-automations-disabled">
-              {i18n.translate('xpack.nightshift.settings.maintenance.automationsDisabledSummary', {
-                defaultMessage:
-                  '{automationsDisabled, plural, one {# automation disabled} other {# automations disabled}}',
-                values: { automationsDisabled },
-              })}
-            </span>
-            <br />
-            <span data-test-subj="streams-settings-maintenance-rules-disabled">
-              {i18n.translate('xpack.nightshift.settings.maintenance.rulesDisabledSummary', {
-                defaultMessage:
-                  '{rulesDisabled, plural, one {# rule disabled} other {# rules disabled}}',
-                values: { rulesDisabled },
-              })}
-            </span>
-          </p>
-        </EuiText>
-      </EuiFlexItem>
+      <ActivityCount
+        dataTestSubj="streams-settings-maintenance-automations-disabled"
+        label={i18n.translate('xpack.nightshift.settings.maintenance.automationsDisabledSummary', {
+          defaultMessage:
+            '{automationsDisabled, plural, one {# automation disabled} other {# automations disabled}}',
+          values: { automationsDisabled },
+        })}
+      />
+      <ActivityCount
+        dataTestSubj="streams-settings-maintenance-rules-disabled"
+        label={i18n.translate('xpack.nightshift.settings.maintenance.rulesDisabledSummary', {
+          defaultMessage: '{rulesDisabled, plural, one {# rule disabled} other {# rules disabled}}',
+          values: { rulesDisabled },
+        })}
+      />
     </EuiFlexGroup>
   );
 };
