@@ -36,6 +36,7 @@ export class StreamsApp {
   public readonly conditionEditorValueComboBox;
   public readonly processorTypeComboBox;
   public readonly dateProcessorFormatsComboBox;
+  public readonly stepsListSaveSettledToast;
   public readonly fieldTypeSuperSelect;
   public readonly previewDataGrid;
   public readonly schemaDataGrid;
@@ -99,6 +100,10 @@ export class StreamsApp {
     this.dateProcessorFormatsComboBox = this.page.components.comboBox(
       'streamsAppDateProcessorFormatsComboBox'
     );
+    // Either terminal outcome of a steps list "Save changes" round-trip.
+    this.stepsListSaveSettledToast = this.page
+      .getByText("Stream's processors updated")
+      .or(this.page.getByText("An issue occurred saving processors' changes."));
     this.fieldTypeSuperSelect = this.page.components.superSelect('streamsAppFieldFormTypeSelect');
     this.previewDataGrid = this.page.components.dataGrid('streamsAppPreviewDataGrid');
     this.schemaDataGrid = this.page.components.dataGrid('streamsAppSchemaEditorFieldsTableLoaded');
@@ -996,8 +1001,29 @@ export class StreamsApp {
     await expect.poll(async () => readySignal.count(), { timeout: 60_000 }).toBeGreaterThan(0);
   }
 
-  async saveStepsListChanges() {
+  async clickSaveStepsListChanges() {
+    // Clearing the toast list first keeps the Save button clickable and guarantees that a
+    // toast awaited after the click belongs to this save rather than a previous one.
+    await this.waitForEmptyGlobalToastList();
     await this.page.getByRole('button', { name: 'Save changes' }).click();
+  }
+
+  /**
+   * Waits for the steps list save round-trip to reach a terminal state. The success and
+   * failure toasts both fire on the upsert actor settling, i.e. strictly after the
+   * `_ingest` request has resolved and released the deployment-wide streams lock.
+   */
+  async waitForStepsListSaveSettled(timeout: number = 30_000) {
+    // `stepsListSaveSettledToast` matches either outcome, so avoid strict-locator
+    // assertions like `toBeVisible()` which require a single match.
+    await expect
+      .poll(async () => this.stepsListSaveSettledToast.count(), { timeout })
+      .toBeGreaterThan(0);
+  }
+
+  async saveStepsListChanges() {
+    await this.clickSaveStepsListChanges();
+    await this.waitForStepsListSaveSettled();
   }
 
   private async getStepListItems(testId: string, expectItems: boolean = true) {
