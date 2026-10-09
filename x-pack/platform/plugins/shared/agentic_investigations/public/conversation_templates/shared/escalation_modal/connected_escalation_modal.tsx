@@ -58,7 +58,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
     const conversationId = investigation.conversationId;
     const { euiTheme } = useEuiTheme();
     const [mode, setMode] = useState(initialMode);
-    const [incidentSearch, setIncidentSearch] = useState('');
+    const [escalationSearch, setEscalationSearch] = useState('');
     const [assigneeSearch, setAssigneeSearch] = useState('');
     const {
       services: { notifications },
@@ -96,7 +96,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
       isError: isEscalationsError,
       error: escalationsError,
       refetch: refetchEscalations,
-    } = useListEscalations({ searchQuery: incidentSearch, enabled: showEscalations });
+    } = useListEscalations({ searchQuery: escalationSearch, enabled: showEscalations });
 
     const { data: existingEscalationsData } = useEscalationsForInvestigation(conversationId, {
       enabled: showEscalations,
@@ -108,7 +108,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
 
     const existingEscalations = existingEscalationsData?.results ?? [];
 
-    const incidents = (escalationsData?.results ?? []).map((e) => {
+    const escalations = (escalationsData?.results ?? []).map((e) => {
       const linkedInvestigations = e.metadata?.linked_investigations;
       const linked = Array.isArray(linkedInvestigations) ? linkedInvestigations : [];
       return {
@@ -299,13 +299,13 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
 
         {mode === 'addToExisting' ? (
           <AddToExistingEscalationForm
-            incidents={incidents}
+            escalations={escalations}
             isLoading={isLoadingEscalations}
             isError={isEscalationsError}
             error={escalationsError}
             onRetry={refetchEscalations}
-            searchQuery={incidentSearch}
-            onSearchChange={setIncidentSearch}
+            searchQuery={escalationSearch}
+            onSearchChange={setEscalationSearch}
             onSubmit={(escalationId) =>
               attachToEscalation.mutate(
                 { escalationId, linkedInvestigationId: conversationId },

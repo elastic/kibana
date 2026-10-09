@@ -27,7 +27,6 @@ export {
 export { ConversationCard } from './src/components/conversation_card/conversation_card';
 export { ConversationCardCompact } from './src/components/conversation_card/conversation_card_compact';
 export { ConversationMetaInfo } from './src/components/conversation_card/conversation_meta_info';
-export { TemplateBadge } from './src/components/conversation_card/template_badge';
 export { type ConversationsActionsGroupProps } from './src/components/conversation_card/actions_group';
 
 export { ConversationQueue } from './src/components/conversation_queue/conversation_queue';
@@ -135,7 +134,7 @@ export {
 } from './src/components/modals/investigation_action_modals';
 export {
   type EscalationModalMode,
-  type EscalationIncidentSummary,
+  type EscalationSummary,
 } from './src/components/modals/escalation_modal';
 export { type EscalationModalRenderProps } from './src/components/modals/investigation_action_modals';
 

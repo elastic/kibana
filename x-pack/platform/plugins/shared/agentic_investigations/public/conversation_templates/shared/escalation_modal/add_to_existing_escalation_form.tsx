@@ -24,28 +24,28 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { EscalationIncidentSummary } from '@kbn/agentic-investigations-common';
+import type { EscalationSummary } from '@kbn/agentic-investigations-common';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { ESCALATION_MODAL_TRANSLATIONS } from './escalation_modal_translations';
 
 const T = ESCALATION_MODAL_TRANSLATIONS.addToExistingForm;
 
 export interface AddToExistingEscalationFormProps {
-  incidents: EscalationIncidentSummary[];
+  escalations: EscalationSummary[];
   isLoading: boolean;
   isError: boolean;
   error?: unknown;
   onRetry: () => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
-  onSubmit: (incidentId: string) => void;
+  onSubmit: (escalationId: string) => void;
   isSubmitting: boolean;
   onCancel: () => void;
 }
 
 export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps>(
   ({
-    incidents,
+    escalations,
     isLoading,
     isError,
     error,
@@ -59,21 +59,24 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
     const { euiTheme } = useEuiTheme();
     const [selectedId, setSelectedId] = useState<string | null>(null);
 
-    const isRowDisabled = (incident: EscalationIncidentSummary) =>
-      incident.alreadyLinked || !incident.canManage;
+    const isRowDisabled = (escalation: EscalationSummary) =>
+      escalation.alreadyLinked || !escalation.canManage;
 
     // Clear the selection whenever the current results no longer include the selected id as a
     // selectable row — covers refetch, retry, or search-driven list changes that didn't go
     // through the search-box onChange handler.
     useEffect(() => {
-      if (selectedId !== null && !incidents.some((i) => i.id === selectedId && !isRowDisabled(i))) {
+      if (
+        selectedId !== null &&
+        !escalations.some((i) => i.id === selectedId && !isRowDisabled(i))
+      ) {
         setSelectedId(null);
       }
-    }, [incidents, selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [escalations, selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const rowTooltip = (incident: EscalationIncidentSummary) => {
-      if (incident.alreadyLinked) return T.alreadyLinkedTooltip;
-      if (!incident.canManage) return T.notOwnerTooltip;
+    const rowTooltip = (escalation: EscalationSummary) => {
+      if (escalation.alreadyLinked) return T.alreadyLinkedTooltip;
+      if (!escalation.canManage) return T.notOwnerTooltip;
       return undefined;
     };
 
@@ -88,7 +91,7 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
               setSelectedId(null);
               onSearchChange(e.target.value);
             }}
-            data-test-subj="escalationModalIncidentSearch"
+            data-test-subj="escalationModalEscalationSearch"
           />
 
           <EuiSpacer size="m" />
@@ -112,15 +115,15 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
                 },
               }}
             />
-          ) : incidents.length === 0 ? (
+          ) : escalations.length === 0 ? (
             <EuiText size="s" color="subdued" textAlign="center">
               <p>{T.emptyText}</p>
             </EuiText>
           ) : (
-            incidents.map((incident) => (
+            escalations.map((escalation) => (
               <EuiToolTip
-                key={incident.id}
-                content={rowTooltip(incident)}
+                key={escalation.id}
+                content={rowTooltip(escalation)}
                 position="top"
                 display="block"
               >
@@ -129,31 +132,33 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
                   paddingSize="m"
                   css={css`
                     margin-bottom: ${euiTheme.size.s};
-                    ${isRowDisabled(incident)
+                    ${isRowDisabled(escalation)
                       ? `cursor: not-allowed; opacity: 0.6;`
                       : `cursor: pointer;`}
-                    ${selectedId === incident.id ? `border-color: ${euiTheme.colors.primary};` : ''}
+                    ${selectedId === escalation.id
+                      ? `border-color: ${euiTheme.colors.primary};`
+                      : ''}
                   `}
-                  onClick={() => !isRowDisabled(incident) && setSelectedId(incident.id)}
-                  data-test-subj={`escalationModalIncident-${incident.id}`}
+                  onClick={() => !isRowDisabled(escalation) && setSelectedId(escalation.id)}
+                  data-test-subj={`escalationModalEscalation-${escalation.id}`}
                 >
                   <EuiFlexGroup alignItems="center" gutterSize="s">
                     <EuiFlexItem grow={false}>
                       <EuiRadio
-                        id={`incident-${incident.id}`}
-                        name="escalation-incident"
-                        checked={selectedId === incident.id}
-                        disabled={isRowDisabled(incident)}
-                        onChange={() => !isRowDisabled(incident) && setSelectedId(incident.id)}
-                        aria-label={incident.title}
+                        id={`escalation-${escalation.id}`}
+                        name="escalation-radio"
+                        checked={selectedId === escalation.id}
+                        disabled={isRowDisabled(escalation)}
+                        onChange={() => !isRowDisabled(escalation) && setSelectedId(escalation.id)}
+                        aria-label={escalation.title}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiText size="s">
-                        <strong>{incident.title}</strong>
+                        <strong>{escalation.title}</strong>
                       </EuiText>
                       <EuiText size="xs" color="subdued">
-                        {T.linkedInvestigationsCount(incident.linkedInvestigationCount)}
+                        {T.linkedInvestigationsCount(escalation.linkedInvestigationCount)}
                       </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
