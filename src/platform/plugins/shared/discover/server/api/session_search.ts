@@ -9,7 +9,7 @@
 
 import { getMeta } from '@kbn/as-code-shared-schemas';
 import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
-import { findWithTagFilter } from '@kbn/as-code-utils';
+import { findWithTagFilter, getAsCodeListSort } from '@kbn/as-code-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
@@ -20,7 +20,7 @@ export const searchDiscoverSessions = async (
   params: DiscoverSessionSearchRequestParams
 ): Promise<DiscoverSessionSearchResponse> => {
   const { core } = await requestContext.resolve(['core']);
-  const { query, page, per_page: perPage } = params;
+  const { query, page, per_page: perPage, sort } = params;
 
   const findResponse = await findWithTagFilter<DiscoverSessionAttributes>(
     core.savedObjects.client,
@@ -32,6 +32,7 @@ export const searchDiscoverSessions = async (
       page,
       perPage,
       defaultSearchOperator: 'AND',
+      ...getAsCodeListSort({ query, sort }),
     },
     params
   );

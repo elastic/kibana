@@ -10,6 +10,7 @@
 import { z } from '@kbn/zod';
 import { asCodePaginationParamsSchema } from '../pagination';
 import { getAsCodeTagsSchema } from '../tags/schema';
+import { asCodeSortQuerySchema } from './sort';
 
 export const asCodeSearchRequestSchema = z
   .object({
@@ -48,5 +49,6 @@ export const asCodeSearchRequestSchema = z
         description:
           'A tag name to exclude. Accepts a single tag name or multiple tag names. When multiple are specified, library items matching any of the tag names are excluded. If the same name is shared by multiple tags, items matching any of those tags are excluded.',
       }),
+    sort: asCodeSortQuerySchema,
   })
   .strict();

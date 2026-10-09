@@ -20,6 +20,7 @@ import { DATA_VIEW_SAVED_OBJECT_TYPE, type DataViewLazy } from '@kbn/data-views-
 import type { DataViewsService } from '@kbn/data-views-plugin/server';
 import { omit } from 'lodash';
 import { getMeta } from '@kbn/as-code-shared-schemas';
+import { getAsCodeListSort } from '@kbn/as-code-utils';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { badRequest } from '@hapi/boom';
 import type { asCodePaginatedResponseSchema } from '../rest_routes/schema';
@@ -151,10 +152,12 @@ export class DataViewsAsCodeService {
     page,
     perPage,
     search,
+    sort,
   }: {
     page?: number;
     perPage?: number;
     search?: string;
+    sort?: string;
   }): Promise<z.output<typeof asCodePaginatedResponseSchema>> {
     const result = await this.savedObjectsClient.find<DataViewAttributes>({
       type: DATA_VIEW_SAVED_OBJECT_TYPE,
@@ -163,6 +166,7 @@ export class DataViewsAsCodeService {
       search,
       searchFields: ['name', 'title'],
       fields: ['name', 'title', 'timeFieldName'],
+      ...getAsCodeListSort({ query: search, sort }),
     });
 
     /**
