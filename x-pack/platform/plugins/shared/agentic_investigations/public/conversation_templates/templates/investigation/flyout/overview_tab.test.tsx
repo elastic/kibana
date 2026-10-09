@@ -80,6 +80,17 @@ describe('InvestigationOverview', () => {
     expect(screen.getByText('Checkout is degraded')).toBeInTheDocument();
     expect(screen.getByText('A bad deploy.')).toBeInTheDocument();
     expect(screen.getByText('Bad deploy')).toBeInTheDocument();
+    expect(screen.getByTestId('investigationHypothesisTreeButton')).toHaveTextContent(
+      '1 hypothesis analyzed'
+    );
+  });
+
+  it('leaves the hypothesis tree out without hypotheses', () => {
+    mockUseInvestigation.mockReturnValue({ data: { ...investigation, hypotheses: undefined } });
+
+    renderOverview();
+
+    expect(screen.queryByTestId('investigationHypothesisTreeButton')).not.toBeInTheDocument();
   });
 
   it('falls back to the conversation when the investigation cannot be read', () => {
@@ -90,5 +101,6 @@ describe('InvestigationOverview', () => {
     expect(screen.getByText('From the conversation')).toBeInTheDocument();
     expect(screen.queryByText('Impact')).not.toBeInTheDocument();
     expect(screen.queryByText('Investigation trace')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('investigationHypothesisTreeButton')).not.toBeInTheDocument();
   });
 });

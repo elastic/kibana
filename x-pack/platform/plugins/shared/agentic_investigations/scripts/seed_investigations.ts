@@ -615,6 +615,98 @@ const SCENARIOS: Scenario[] = [
       ],
     },
   }),
+  // A wide hypothesis tree: five hypotheses in every status and three proposed actions of
+  // different confidence, so the tree's collapsed action stack fronts the most confident one.
+  completed({
+    severity: 'high',
+    title: 'Checkout 502s after the edge-proxy config push',
+    subject: {
+      type: 'alert',
+      id: 'alert-checkout-502',
+      summary: 'Checkout 502 rate above 5%',
+      snapshot: alertSnapshot(
+        'alert-checkout-502',
+        'Checkout 502 rate above 5%',
+        'The 502 rate on checkout-frontend is 11.4%, above the threshold of 5%.',
+        95
+      ),
+    },
+    minutesAgo: 70,
+    durationMinutes: 22,
+    summary:
+      'checkout-frontend returned 502s for 11% of requests from 13:05 UTC, right after edge-proxy config `v2026.10.09-1` rolled out.',
+    verdict:
+      "The edge-proxy config push lowered the upstream keep-alive timeout to **5s**, below checkout-frontend's **15s** idle timeout. The proxy reuses connections the backend already closed and answers with a 502. Rolling the config back ends the errors.",
+    hypotheses: [
+      hypothesis(
+        'edge-proxy config push broke upstream keep-alive',
+        0.92,
+        'confirmed',
+        'The 502s start within a minute of the rollout and only on connections idle for more than 5s. The new config sets `keepalive_timeout 5s`.',
+        evidence(
+          '502s per minute on checkout-frontend jump the minute the config rolls out.',
+          timeChart({
+            title: 'checkout-frontend 502s',
+            type: 'bar',
+            yLabel: '502s / min',
+            unit: 'number',
+            series: [timeSeries('502s', 70, [0, 1, 0, 2, 140, 152, 148, 160, 155, 149, 151, 158])],
+            annotations: [annotation(90, 'edge-proxy v2026.10.09-1')],
+          })
+        )
+      ),
+      hypothesis(
+        'checkout-frontend pods running out of memory',
+        0.35,
+        'confirmed',
+        'Two pods restarted with `OOMKilled` during the window, but they account for under 3% of the 502s.'
+      ),
+      hypothesis(
+        'payment-gateway latency',
+        0.08,
+        'dismissed',
+        'payment-gateway P99 stayed at 180ms; checkout requests fail before reaching it.'
+      ),
+      hypothesis(
+        'TLS certificate rotation on the load balancer',
+        0.05,
+        'dismissed',
+        'The certificate rotated at 09:00, four hours before the errors started.'
+      ),
+      hypothesis(
+        'Bot traffic spike',
+        0.2,
+        'investigating',
+        'Request volume is up 12%, mostly from one ASN. Not enough to explain an 11% error rate on its own.'
+      ),
+    ],
+    recommendations: [
+      recommendation(
+        'Raise the checkout-frontend memory limit to 1.5Gi',
+        0.6,
+        'Stops the occasional `OOMKilled` restarts seen during the incident.'
+      ),
+      recommendation(
+        'Roll back edge-proxy to v2026.10.08-3',
+        0.93,
+        'Restores the 60s upstream keep-alive timeout. 502s should stop within a minute.',
+        'kubectl -n edge rollout undo deployment/edge-proxy'
+      ),
+      recommendation(
+        'Set the upstream keep-alive timeout above the backend idle timeout',
+        0.8,
+        "Keep `keepalive_timeout` longer than checkout-frontend's 15s idle timeout, so the proxy never reuses a closed connection."
+      ),
+    ],
+    impact: {
+      summary:
+        'About 1 in 9 checkout requests failed for 70 minutes. Shoppers saw an error page and had to retry.',
+      entities: [
+        entity('checkout-frontend', 'service', 'logs.checkout-frontend'),
+        entity('edge-proxy', 'service', 'logs.edge-proxy'),
+      ],
+    },
+  }),
   // Just started: no findings and no title yet, so the UI names it after its subject.
   unfinished({
     subject: {
