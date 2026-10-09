@@ -376,11 +376,9 @@ const RiskInputsTabContent = <T extends EntityType>({
   const [historyRange, setHistoryRange] = useState(DEFAULT_HISTORY_RANGE);
   const [selectedTimestamp, setSelectedTimestamp] = useState<string | undefined>(undefined);
   const isRiskScoreHistoryEnabled = useIsExperimentalFeatureEnabled('riskScoreHistoryEnabled');
-  const hasEntityScore = Boolean(entityRiskScore);
-  const showScoreViewToggle = hasResolutionScore && hasEntityScore;
 
   const defaultView =
-    !loadingRiskScore && !hasEntityScore && hasResolutionScore
+    !loadingRiskScore && !entityRiskScore && hasResolutionScore
       ? RiskScoreLeftPanelSubTab.RESOLUTION
       : RiskScoreLeftPanelSubTab.ENTITY;
   const selectedView = userSelectedView ?? defaultView;
@@ -637,7 +635,7 @@ const RiskInputsTabContent = <T extends EntityType>({
 
   return (
     <>
-      {showScoreViewToggle && (
+      {hasResolutionScore && (
         <>
           <EuiButtonGroup
             isFullWidth
