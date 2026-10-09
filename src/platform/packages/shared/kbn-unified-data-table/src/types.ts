@@ -68,6 +68,8 @@ export type DataGridPaginationMode = 'multiPage' | 'singlePage' | 'infinite';
 
 export type DocumentsDisplayMode = 'table' | 'json';
 
+export type DataGridRenderMode = 'interactive' | 'print';
+
 /**
  * Settings that only apply while the source column is rendered in JSON mode.
  */

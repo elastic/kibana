@@ -13,7 +13,11 @@ import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EsqlSource } from '@kbn/data-source';
 import { SORT_DEFAULT_ORDER_SETTING, getSortArray } from '@kbn/discover-utils';
-import { useBatchedPublishingSubjects, type FetchContext } from '@kbn/presentation-publishing';
+import {
+  getViewModeSubject,
+  useBatchedPublishingSubjects,
+  type FetchContext,
+} from '@kbn/presentation-publishing';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
@@ -99,6 +103,7 @@ export function SearchEmbeddableGridComponent({
   const [emptyEsqlSource$] = useState(() => new BehaviorSubject<EsqlSource | undefined>(undefined));
 
   const kbnDataSource = useObservable(esqlSource$ ?? emptyEsqlSource$, undefined);
+  const [viewModeSubject$] = useState(() => getViewModeSubject(api) ?? new BehaviorSubject('view'));
 
   const [
     loading,
@@ -118,6 +123,7 @@ export function SearchEmbeddableGridComponent({
     savedSearchDescription,
     esqlVariables,
     abortSignal,
+    viewMode,
   ] = useBatchedPublishingSubjects(
     api.dataLoading$,
     api.savedSearch$,
@@ -135,7 +141,8 @@ export function SearchEmbeddableGridComponent({
     api.defaultTitle$,
     api.defaultDescription$,
     esqlVariables$ ?? emptyEsqlVariables$,
-    api.abortSignal$
+    api.abortSignal$,
+    viewModeSubject$
   );
 
   // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
@@ -144,6 +151,7 @@ export function SearchEmbeddableGridComponent({
   const savedSearchFilters = apiFilters;
 
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
+  const isPrintMode = viewMode === 'print';
 
   const sort = useMemo(
     () => getSortArray(savedSearch.sort ?? [], dataView, isEsql),
@@ -408,6 +416,7 @@ export function SearchEmbeddableGridComponent({
       docViewerRef={docViewerRef}
       setExpandedDoc={setExpandedDoc}
       searchContext={searchContext}
+      renderMode={isPrintMode ? 'print' : 'interactive'}
       flyoutMenuTrailingActions={flyoutMenuTrailingActions}
     />
   );
