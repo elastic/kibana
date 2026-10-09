@@ -30,6 +30,7 @@ jest.mock('./hypothesis_tree_flyout', () => ({
 }));
 
 const input: HypothesisTreeInput = {
+  id: 'conv-1',
   title: 'Checkout latency spike',
   subjects: [],
   hypotheses: [

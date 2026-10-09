@@ -54,7 +54,7 @@ const isSafeSlackHref = (url: string): boolean => /^https:\/\//i.test(url);
  * Where a click on the row goes: the alert's `kibana.alert.url` (whatever the rule type writes
  * there, for example a Discover link) or the Slack thread.
  */
-const getSubjectHref = ({ type, snapshot, slack }: SubjectRowData): string | undefined => {
+export const getSubjectHref = ({ type, snapshot, slack }: SubjectRowData): string | undefined => {
   if (type === 'alert') {
     return snapshot?.url && isSafeHref(snapshot.url) ? snapshot.url : undefined;
   }

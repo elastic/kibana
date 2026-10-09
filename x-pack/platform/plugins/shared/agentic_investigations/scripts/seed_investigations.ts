@@ -314,6 +314,9 @@ const alertSnapshot = (
   status: 'active',
   start: iso(startMinutesAgo),
   timestamp: iso(startMinutesAgo),
+  // `kibana.alert.url` is written by the rule type. A seeded alert has no details page, so this
+  // points at the alerts list instead.
+  url: '/app/observability/alerts',
 });
 
 const SCENARIOS: Scenario[] = [

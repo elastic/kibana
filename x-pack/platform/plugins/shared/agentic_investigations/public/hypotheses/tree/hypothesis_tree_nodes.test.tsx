@@ -69,6 +69,62 @@ describe('HypothesisTreeNode', () => {
     expect(node).toHaveTextContent('Alert · +1 more');
   });
 
+  it('links an alert trigger to the alert without selecting the node', () => {
+    renderNode({
+      kind: 'trigger',
+      title: 'Checkout latency spike',
+      subjects: [
+        {
+          type: 'alert',
+          id: 'a-1',
+          snapshot: { rule_name: 'Checkout p99 > 2s', url: '/app/observability/alerts/a-1' },
+          created_at: 'x',
+        },
+      ],
+      ...flags,
+    });
+
+    const link = screen.getByTestId('investigationHypothesisTreeTriggerLink');
+    expect(link).toHaveTextContent('View alert');
+    expect(link).toHaveAttribute('href', '/app/observability/alerts/a-1');
+  });
+
+  it('links a Slack trigger to the thread in a new tab', () => {
+    renderNode({
+      kind: 'trigger',
+      title: 'Why is checkout slow?',
+      subjects: [
+        {
+          type: 'slack_thread',
+          id: 's-1',
+          summary: 'Why is checkout slow?',
+          slack: {
+            channel: 'ops',
+            thread_ts: '1.2',
+            permalink: 'https://example.slack.com/archives/C1/p12',
+          },
+          created_at: 'x',
+        },
+      ],
+      ...flags,
+    });
+
+    const link = screen.getByTestId('investigationHypothesisTreeTriggerLink');
+    expect(link).toHaveTextContent('Open in Slack');
+    expect(link).toHaveAttribute('target', '_blank');
+  });
+
+  it('does not link a subject without a link', () => {
+    renderNode({
+      kind: 'trigger',
+      title: 'x',
+      subjects: [{ type: 'alert', id: 'a-1', created_at: 'x' }],
+      ...flags,
+    });
+
+    expect(screen.queryByTestId('investigationHypothesisTreeTriggerLink')).toBeNull();
+  });
+
   it('falls back to the title for a trigger without subjects', () => {
     renderNode({ kind: 'trigger', title: 'Checkout latency spike', subjects: [], ...flags });
 

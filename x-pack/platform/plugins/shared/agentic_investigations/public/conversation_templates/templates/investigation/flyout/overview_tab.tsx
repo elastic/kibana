@@ -55,6 +55,7 @@ export const toOverviewSections = (
       investigation && hypotheses.length > 0 ? (
         <HypothesisTreeCard
           input={{
+            id: investigation.id,
             title: getInvestigationDisplayTitle(investigation),
             subjects,
             hypotheses,

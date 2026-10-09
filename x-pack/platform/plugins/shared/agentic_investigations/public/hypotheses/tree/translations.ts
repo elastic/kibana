@@ -153,12 +153,6 @@ export const NO_COMMENT_LABEL = i18n.translate(
     defaultMessage: 'No rationale recorded.',
   }
 );
-export const PROPOSAL_REVIEW_HINT = i18n.translate(
-  'xpack.agenticInvestigations.hypothesisTree.detail.proposalReviewHint',
-  {
-    defaultMessage: 'Approve or dismiss it under Proposed actions in the overview.',
-  }
-);
 export const PREVIOUS_ACTION_LABEL = i18n.translate(
   'xpack.agenticInvestigations.hypothesisTree.detail.previousAction',
   {
@@ -203,4 +197,13 @@ export const INVESTIGATING_LABEL = i18n.translate(
   {
     defaultMessage: 'Investigating…',
   }
+);
+
+export const VIEW_ALERT_LABEL = i18n.translate(
+  'xpack.agenticInvestigations.hypothesisTree.node.viewAlert',
+  { defaultMessage: 'View alert' }
+);
+export const OPEN_SLACK_THREAD_LABEL = i18n.translate(
+  'xpack.agenticInvestigations.hypothesisTree.node.openSlackThread',
+  { defaultMessage: 'Open in Slack' }
 );
