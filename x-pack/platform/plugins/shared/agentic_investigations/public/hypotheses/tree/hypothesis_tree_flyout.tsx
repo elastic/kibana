@@ -281,8 +281,8 @@ const HypothesisTreeCanvas = ({
   const canvasWidth = useStore(selectCanvasWidth);
   const canvasHeight = useStore(selectCanvasHeight);
   const [isHypothesesExpanded, setIsHypothesesExpanded] = useState(true);
-  // Collapsed to a stack fronted by the highest-confidence action.
-  const [isActionsExpanded, setIsActionsExpanded] = useState(false);
+  // Expanded by default; collapsing leaves a stack fronted by the highest-confidence action.
+  const [isActionsExpanded, setIsActionsExpanded] = useState(true);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedActionIndex, setSelectedActionIndex] = useState<number | null>(null);
   const [measuredHeights, setMeasuredHeights] = useState<Record<string, number>>({});

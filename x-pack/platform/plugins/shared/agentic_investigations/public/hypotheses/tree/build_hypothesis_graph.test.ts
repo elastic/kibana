@@ -70,8 +70,46 @@ describe('buildHypothesisGraph', () => {
       'conclusion',
       'actions',
     ]);
-    // trigger→chip, chip→3 hypotheses, 3 hypotheses→conclusion, conclusion→actions
-    expect(graph.edges).toHaveLength(8);
+    // trigger→chip, chip→3 hypotheses, 2 hypotheses not dismissed→conclusion, conclusion→actions
+    expect(graph.edges).toHaveLength(7);
+  });
+
+  it('leads no edge from a dismissed hypothesis to the conclusion', () => {
+    const { edges } = buildHypothesisGraph({ input: completed, isHypothesesExpanded: true });
+
+    expect(
+      edges
+        .filter(({ target }) => target === HYPOTHESIS_TREE_NODE_IDS.conclusion)
+        .map(({ source }) => source)
+    ).toEqual([getHypothesisNodeId(1), getHypothesisNodeId(2)]);
+  });
+
+  it('feeds the conclusion from the chip when every hypothesis was dismissed', () => {
+    const { edges } = buildHypothesisGraph({
+      input: {
+        ...completed,
+        hypotheses: completed.hypotheses.map((hypothesis) => ({
+          ...hypothesis,
+          status: 'dismissed' as const,
+        })),
+      },
+      isHypothesesExpanded: true,
+    });
+
+    expect(
+      edges
+        .filter(({ target }) => target === HYPOTHESIS_TREE_NODE_IDS.conclusion)
+        .map(({ source }) => source)
+    ).toEqual([HYPOTHESIS_TREE_NODE_IDS.hypotheses]);
+  });
+
+  it('expands the proposed actions by default', () => {
+    const actions = buildHypothesisGraph({
+      input: completed,
+      isHypothesesExpanded: true,
+    }).nodes.find(({ id }) => id === HYPOTHESIS_TREE_NODE_IDS.actions)?.data;
+
+    expect(actions).toMatchObject({ kind: 'actions', isExpanded: true });
   });
 
   it('puts the subjects and the title on the trigger node', () => {
@@ -125,7 +163,7 @@ describe('buildHypothesisGraph', () => {
     expect(kinds(graph)).not.toContain('conclusion');
     expect(
       graph.edges.filter(({ target }) => target === HYPOTHESIS_TREE_NODE_IDS.actions)
-    ).toHaveLength(3);
+    ).toHaveLength(2);
   });
 
   it('has no happy path when no hypothesis is confirmed', () => {
