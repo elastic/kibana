@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import {
   MAX_ID_LENGTH,
@@ -37,7 +37,9 @@ const upsertFeatureRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string().max(MAX_ID_LENGTH) }),
-    body: baseFeatureSchema.and(z.object({ expires_at: z.iso.datetime().optional() })),
+    body: lazySchema(() =>
+      baseFeatureSchema.and(z.object({ expires_at: z.iso.datetime().optional() }))
+    ),
   }),
   handler: async ({
     params,

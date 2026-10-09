@@ -72,10 +72,10 @@ describe('utils', () => {
       expect(result.metadata.description).toBeUndefined();
     });
 
-    it('passes metadata.builder_type through to SO attributes', () => {
+    it('maps metadata.builder.type to metadata.builder_type in SO attributes', () => {
       const data: CreateRuleData = {
         ...baseCreateData,
-        metadata: { name: 'test-rule', builder_type: 'threshold' },
+        metadata: { name: 'test-rule', builder: { type: 'threshold' } },
       };
 
       const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
@@ -157,8 +157,8 @@ describe('utils', () => {
       expect(result).not.toHaveProperty('no_data');
     });
 
-    it('normalises a null state_transition to an absent one', () => {
-      const data: CreateRuleData = { ...baseCreateData, state_transition: null };
+    it('stores an omitted state_transition as absent', () => {
+      const data: CreateRuleData = { ...baseCreateData, state_transition: undefined };
 
       const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
 
@@ -212,6 +212,35 @@ describe('utils', () => {
 
       expect(result.metadata.name).toBe('renamed');
       expect(result.metadata.description).toBe('Existing desc');
+    });
+
+    it('clears the description when update sends null', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', description: 'Existing desc' },
+      });
+      const updateData: UpdateRuleData = { metadata: { description: null } };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: { profile_uid: 'user-2' },
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.description).toBeUndefined();
+    });
+
+    it('patches a rule whose description is a legacy empty string on disk', () => {
+      const existing = createRuleSoAttributes({ metadata: { name: 'original', description: '' } });
+      const updateData: UpdateRuleData = { metadata: { name: 'renamed' } };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: { profile_uid: 'user-2' },
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.name).toBe('renamed');
+      expect(result.metadata.description).toBeUndefined();
     });
 
     it('clears tags when update sends null', () => {
@@ -389,13 +418,13 @@ describe('utils', () => {
       ).toThrow(/Cannot update the query on a builder rule/);
     });
 
-    it('clears builder_type when query changes and explicit builder_type: null is sent', () => {
+    it('clears builder_type when query changes and explicit builder: null is sent', () => {
       const existing = createRuleSoAttributes({
         metadata: { name: 'test-rule', builder_type: 'threshold' },
       });
       const updateData: UpdateRuleData = {
         query: { base: 'FROM new-index | LIMIT 1' },
-        metadata: { builder_type: null },
+        metadata: { builder: null },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
@@ -508,13 +537,13 @@ describe('utils', () => {
       expect(result.metadata.builder_type).toBe('threshold');
     });
 
-    it('keeps metadata.builder_type when query is changed with explicit builder_type', () => {
+    it('keeps metadata.builder_type when query is changed with explicit builder metadata', () => {
       const existing = createRuleSoAttributes({
         metadata: { name: 'test-rule', builder_type: 'threshold' },
       });
       const updateData: UpdateRuleData = {
         query: { base: 'FROM new-index | LIMIT 1' },
-        metadata: { builder_type: 'threshold' },
+        metadata: { builder: { type: 'threshold' } },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
@@ -526,12 +555,12 @@ describe('utils', () => {
       expect(result.metadata.builder_type).toBe('threshold');
     });
 
-    it('clears metadata.builder_type when explicitly set to null', () => {
+    it('clears metadata.builder_type when builder metadata is explicitly set to null', () => {
       const existing = createRuleSoAttributes({
         metadata: { name: 'test-rule', builder_type: 'threshold' },
       });
       const updateData: UpdateRuleData = {
-        metadata: { builder_type: null },
+        metadata: { builder: null },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
@@ -580,12 +609,12 @@ describe('utils', () => {
       expect(result.query).toEqual({ base: 'FROM metrics-*' });
     });
 
-    it('replaces the query wholesale, dropping a breach block the update omits', () => {
+    it('keeps a breach block the update omits, merging query leaf by leaf', () => {
       const existing = createRuleSoAttributes({
         query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
       });
       const updateData: UpdateRuleData = {
-        query: { base: 'FROM logs-*' },
+        query: { base: 'FROM metrics-*' },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
@@ -593,6 +622,23 @@ describe('utils', () => {
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
+
+      expect(result.query).toEqual({
+        base: 'FROM metrics-*',
+        breach: { segment: 'WHERE error' },
+      });
+    });
+
+    it('drops a breach block only when the update clears it explicitly', () => {
+      const existing = createRuleSoAttributes({
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
+      });
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { query: { breach: null } },
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
+      );
 
       expect(result.query).toEqual({ base: 'FROM logs-*' });
     });
@@ -675,6 +721,38 @@ describe('utils', () => {
         { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
       ]);
     });
+
+    it('clears artifacts by removing the key, never by storing an empty list', () => {
+      const existing = createRuleSoAttributesWithArtifacts();
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { artifacts: null },
+        {
+          updatedBy: { profile_uid: 'user-2' },
+          updatedAt: '2025-01-02T00:00:00.000Z',
+          version: 2,
+        }
+      );
+
+      expect(result.artifacts).toBeUndefined();
+    });
+
+    it('drops a legacy empty artifacts list rather than writing it back', () => {
+      const existing = createRuleSoAttributes({ artifacts: [] });
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { name: 'renamed' } },
+        {
+          updatedBy: { profile_uid: 'user-2' },
+          updatedAt: '2025-01-02T00:00:00.000Z',
+          version: 2,
+        }
+      );
+
+      expect(result.artifacts).toBeUndefined();
+    });
   });
 
   describe('transformRuleSoAttributesToRuleApiResponse', () => {
@@ -698,6 +776,24 @@ describe('utils', () => {
         { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
         { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
       ]);
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+    });
+
+    it('projects a legacy empty artifacts list as an absent key', () => {
+      const attrs = createRuleSoAttributes({ artifacts: [] });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.artifacts).toBeUndefined();
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+    });
+
+    it('projects a legacy empty description as an absent key', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'test-rule', description: '' } });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.metadata.description).toBeUndefined();
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
 
@@ -814,22 +910,34 @@ describe('utils', () => {
       expect(response.query).toEqual(createData.query);
     });
 
-    it('includes metadata.builder_type in API response', () => {
+    it('maps metadata.builder_type to metadata.builder in the API response', () => {
       const attrs = createRuleSoAttributes({
         metadata: { name: 'test-rule', builder_type: 'threshold' },
       });
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
-      expect(result.metadata.builder_type).toBe('threshold');
+      expect(result.metadata).toEqual({
+        name: 'test-rule',
+        description: undefined,
+        tags: undefined,
+        routing_tags: undefined,
+        builder: { type: 'threshold' },
+      });
     });
 
-    it('sets metadata.builder_type to undefined when absent from SO attributes', () => {
+    it('sets metadata.builder to undefined when builder_type is absent from SO attributes', () => {
       const attrs = createRuleSoAttributes({});
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
-      expect(result.metadata.builder_type).toBeUndefined();
+      expect(result.metadata).toEqual({
+        name: 'test-rule',
+        description: undefined,
+        tags: undefined,
+        routing_tags: undefined,
+        builder: undefined,
+      });
     });
 
     it('exposes the persisted version counter on the rule', () => {

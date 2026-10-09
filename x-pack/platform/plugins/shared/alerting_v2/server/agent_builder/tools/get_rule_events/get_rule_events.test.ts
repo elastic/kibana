@@ -349,7 +349,7 @@ describe('getRuleEventsTool', () => {
         'Failed to fetch rule events for episode',
         expect.objectContaining({
           labels: {
-            episode_id: 'ep-1',
+            alert_id: 'ep-1',
             space_id: 'default',
             code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_GET_RULE_EVENTS_FAILED,
           },
@@ -384,7 +384,7 @@ describe('getRuleEventsTool', () => {
         'Failed to look up episode while fetching rule events',
         expect.objectContaining({
           labels: {
-            episode_id: 'ep-1',
+            alert_id: 'ep-1',
             space_id: 'default',
             code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_LOOKUP_FAILED,
           },

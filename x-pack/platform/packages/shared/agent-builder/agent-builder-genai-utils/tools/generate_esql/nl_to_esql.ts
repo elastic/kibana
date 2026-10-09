@@ -66,6 +66,7 @@ export type GenerateEsqlModelDeps =
 
 export type GenerateEsqlDeps = GenerateEsqlModelDeps & {
   esClient: ElasticsearchClient;
+  internalEsClient?: ElasticsearchClient;
   logger: Logger;
   events?: ToolEventEmitter;
 };
@@ -158,6 +159,7 @@ export const generateEsql = async ({
   model: inputModel,
   modelProvider,
   esClient,
+  internalEsClient,
   logger,
   sessionId,
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
@@ -167,7 +169,10 @@ export const generateEsql = async ({
   const timeRange = inputTimeRange ?? { from: 'now-24h', to: 'now' };
   const docBase = await EsqlDocumentBase.load();
   const documentation = await loadDocumentation();
-  const esqlCallbacks = buildServerESQLCallbacks({ client: esClient });
+  const esqlCallbacks = buildServerESQLCallbacks({
+    esClient: { asCurrentUser: esClient, asInternalUser: internalEsClient ?? esClient },
+    logger,
+  });
 
   const graph = createNlToEsqlGraph({
     model,

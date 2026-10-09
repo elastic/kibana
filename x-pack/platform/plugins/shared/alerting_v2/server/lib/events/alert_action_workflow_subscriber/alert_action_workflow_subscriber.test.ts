@@ -104,7 +104,7 @@ describe('AlertActionWorkflowSubscriber', () => {
         labels: {
           event_type: EPISODE_ASSIGNED_EVENT_TYPE,
           space_id: episodeAssignedEvent.spaceId,
-          episode_id: episodeAssignedEvent.episodeId,
+          alert_id: episodeAssignedEvent.episodeId,
           rule_id: episodeAssignedEvent.ruleId,
           code: ALERTING_LOG_CODES.EVENTS_ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILED,
         },

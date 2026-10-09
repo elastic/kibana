@@ -22,6 +22,7 @@ export const getThreatIntelligenceAnalyst: () => Omit<Role, 'name'> = () => {
             'blocklist_all',
             'global_artifact_management_all',
             'endpoint_exceptions_all',
+            'custom_yara_signatures_read',
             'actions_log_management_read',
           ],
           securitySolutionRulesV2: ['all'],
