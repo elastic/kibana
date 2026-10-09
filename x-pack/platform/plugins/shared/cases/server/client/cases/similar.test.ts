@@ -151,7 +151,7 @@ describe('similar', () => {
           ],
           "search": "-\\"cases:mock-id\\"",
           "sortField": "created_at",
-          "sortOrder": "desc",
+          "sortOrder": undefined,
         }
       `);
   });
@@ -253,7 +253,7 @@ describe('similar', () => {
     );
   });
 
-  it('should use defaultSortField and desc order when no sort params are provided', async () => {
+  it('should use defaultSortField and leave the order unset when no sort params are provided', async () => {
     await similar(
       mockCase.id,
       {
@@ -264,8 +264,9 @@ describe('similar', () => {
       mockCasesClient
     );
 
-    expect(mockClientArgs.services.caseService.findCases).toHaveBeenCalledWith(
-      expect.objectContaining({ sortField: 'created_at', sortOrder: 'desc' })
-    );
+    const findCasesArgs = mockClientArgs.services.caseService.findCases.mock.calls[0][0];
+
+    expect(findCasesArgs).toEqual(expect.objectContaining({ sortField: 'created_at' }));
+    expect(findCasesArgs?.sortOrder).toBeUndefined();
   });
 });

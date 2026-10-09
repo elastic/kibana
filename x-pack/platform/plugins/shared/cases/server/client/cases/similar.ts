@@ -134,7 +134,7 @@ export const similar = async (
     const cases = await caseService.findCases({
       filter: finalCasesFilter,
       sortField: convertSortField(paramArgs.sortField),
-      sortOrder: paramArgs.sortOrder ?? 'desc',
+      sortOrder: paramArgs.sortOrder,
       search: `-"cases:${caseId}"`,
       rootSearchFields: ['_id'],
       page: paramArgs.page,
