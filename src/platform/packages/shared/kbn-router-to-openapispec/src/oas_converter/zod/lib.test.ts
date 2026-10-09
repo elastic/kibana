@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { z as z4, isoDateTime } from '@kbn/zod/v4';
 import { BooleanFromString, PassThroughAny } from '@kbn/zod-helpers';
 import { DeepStrict } from '@kbn/zod-helpers/v4';
@@ -692,6 +692,22 @@ describe('zod', () => {
       expect(outputStr).not.toContain('x-kbn-oas-component-id');
     });
 
+    test('component named like an Object.prototype member keeps its definition', () => {
+      const ctor = z.object({ a: z.string() });
+      registerZodV4Component(ctor, 'constructor');
+
+      const result = convert(z.object({ ctor }) as any);
+
+      expect(result.schema).toMatchObject({
+        properties: { ctor: { $ref: '#/components/schemas/constructor' } },
+      });
+      expect(Object.hasOwn(result.shared, 'constructor')).toBe(true);
+      expect(result.shared.constructor).toMatchObject({
+        type: 'object',
+        properties: { a: { type: 'string' } },
+      });
+    });
+
     test('registered schema passed directly to convert() produces $ref', () => {
       const tag = z.object({ id: z.string(), label: z.string() });
       registerZodV4Component(tag, 'Tag');
@@ -915,6 +931,60 @@ describe('zod', () => {
 
         expect(result.shared).toHaveProperty('AutoDiscPlain_Stream');
         expect(result.shared.AutoDiscPlain_Stream).not.toHaveProperty('discriminator');
+      });
+    });
+
+    describe('lazySchema-wrapped schemas', () => {
+      type Wrap = <T extends object>(factory: () => T) => T;
+      const eager: Wrap = (factory) => factory();
+
+      const convertBoth = (build: (wrap: Wrap) => z.ZodType) => {
+        resetDefsCounter();
+        const expected = convert(build(eager) as any);
+        resetDefsCounter();
+        const actual = convert(build(lazySchema) as any);
+        return { expected, actual };
+      };
+
+      test('references an id-ed lazy schema by its stable name when its .meta() clone is also used', () => {
+        const { expected, actual } = convertBoth((wrap) => {
+          const operation = wrap(() =>
+            z.object({ op: z.string() }).meta({ id: 'LazyOperation', title: 'Operation' })
+          );
+          return z.object({
+            annotated: operation.meta({ title: 'Annotated operation' }),
+            operations: z.union([operation, z.string()]),
+          });
+        });
+
+        expect(actual).toEqual(expected);
+        expect(actual.shared).toHaveProperty('LazyOperation');
+        expect(JSON.stringify(actual.schema)).toContain('#/components/schemas/LazyOperation');
+      });
+
+      test('keeps the full component when a lazy schema and its .meta() clone are both used', () => {
+        const { expected, actual } = convertBoth((wrap) => {
+          const colorMapping = wrap(() =>
+            z
+              .union([
+                z.object({ mode: z.literal('categorical') }),
+                z.object({ mode: z.literal('gradient') }),
+              ])
+              .meta({ id: 'LazyColorMapping', title: 'Color mapping' })
+          );
+          const bucket = wrap(() =>
+            z.object({ operation: z.literal('terms') }).meta({ id: 'LazyBucket' })
+          );
+          return z.object({
+            color: z.union([colorMapping, z.literal('auto')]),
+            rows: z.array(z.object({ color: z.union([colorMapping, z.literal('auto')]) })),
+            buckets: z.array(z.union([bucket.meta({ title: 'Bucket' }), bucket])),
+          });
+        });
+
+        expect(actual).toEqual(expected);
+        expect(actual.shared.LazyColorMapping).toHaveProperty('anyOf');
+        expect(actual.shared.LazyBucket).toHaveProperty('additionalProperties', false);
       });
     });
   });

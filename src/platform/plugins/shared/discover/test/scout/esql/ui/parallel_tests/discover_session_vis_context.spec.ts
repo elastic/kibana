@@ -205,7 +205,8 @@ const prepareLegacyVisualization = async ({
   return { sourceSession, legacyVisContext };
 };
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/295237
+spaceTest.describe.skip(
   'Discover session API — visualization persistence',
   { tag: '@local-stateful-classic' },
   () => {

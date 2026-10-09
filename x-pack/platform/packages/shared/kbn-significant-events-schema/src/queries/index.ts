@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { lazySchema, z, isoDateTime } from '@kbn/zod/v4';
 import { NonEmptyString } from '@kbn/zod-helpers/v4';
 import type { Feature } from '../feature';
 import type { QueryWithOccurrences } from '../api/significant_events';
@@ -25,9 +25,11 @@ export interface EsqlQuery {
   query: string;
 }
 
-export const esqlQuerySchema: z.Schema<EsqlQuery> = z.object({
-  query: z.string().max(MAX_TEXT_LENGTH),
-});
+export const esqlQuerySchema: z.Schema<EsqlQuery> = lazySchema(() =>
+  z.object({
+    query: z.string().max(MAX_TEXT_LENGTH),
+  })
+);
 
 interface StreamQueryBase {
   id: string;
@@ -53,12 +55,14 @@ export const HIGH_SEVERITY_THRESHOLD = 60;
  */
 export const CRITICAL_SEVERITY_THRESHOLD = 80;
 
-export const queryTypeSchema = z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]);
+export const queryTypeSchema = lazySchema(() => z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]));
 
-export const queryFeatureSchema = z.object({
-  id: z.string().max(MAX_ID_LENGTH),
-  run_id: z.string().max(MAX_ID_LENGTH).optional(),
-});
+export const queryFeatureSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(MAX_ID_LENGTH),
+    run_id: z.string().max(MAX_ID_LENGTH).optional(),
+  })
+);
 
 export type QueryFeature = z.infer<typeof queryFeatureSchema>;
 
@@ -77,23 +81,27 @@ export interface StreamQuery extends StreamQueryBase {
  * omitted — the server derives it from the ES|QL content via `deriveQueryType`
  * on every write, so client-supplied values would be ignored.
  */
-export const upsertStreamQueryRequestSchema = z.object({
-  title: NonEmptyString,
-  esql: esqlQuerySchema,
-  severity_score: z.number().optional(),
-  evidence: z.array(z.string().max(MAX_TEXT_LENGTH)).optional(),
-  description: z.string().max(MAX_TEXT_LENGTH).default(''),
-  expires_at: isoDateTime().optional(),
-});
+export const upsertStreamQueryRequestSchema = lazySchema(() =>
+  z.object({
+    title: NonEmptyString,
+    esql: esqlQuerySchema,
+    severity_score: z.number().optional(),
+    evidence: z.array(z.string().max(MAX_TEXT_LENGTH)).optional(),
+    description: z.string().max(MAX_TEXT_LENGTH).default(''),
+    expires_at: isoDateTime().optional(),
+  })
+);
 
 /**
  * Wire schema for the bulk endpoint index operations.
  * Same as {@link upsertStreamQueryRequestSchema} but with `id` included,
  * and `type` intentionally omitted — derived server-side.
  */
-export const bulkStreamQueryInputSchema = upsertStreamQueryRequestSchema.extend({
-  id: NonEmptyString,
-});
+export const bulkStreamQueryInputSchema = lazySchema(() =>
+  upsertStreamQueryRequestSchema.extend({
+    id: NonEmptyString,
+  })
+);
 
 export interface QueriesGetResponse {
   queries: QueryWithOccurrences[];

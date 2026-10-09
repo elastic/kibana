@@ -104,4 +104,49 @@ describe('validateUnifiedAttachments', () => {
       })
     ).toThrow(/Invalid attachment payload for type 'comment'/);
   });
+
+  describe('owner consistency', () => {
+    const securityEventType = 'security.event';
+    const registryWithEvent = () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register({
+        id: securityEventType,
+        schema: z.object({ type: z.literal(securityEventType), owner: z.string() }).loose(),
+      });
+      return unifiedAttachmentTypeRegistry;
+    };
+
+    it('rejects a solution-scoped type under another solution owner', () => {
+      expect(() =>
+        validateUnifiedAttachments({
+          query: { type: securityEventType, owner: 'observability', attachmentId: 'event-1' },
+          unifiedAttachmentTypeRegistry: registryWithEvent(),
+        })
+      ).toThrow(/cannot be attached to a case with owner observability/);
+    });
+
+    it('accepts a solution-scoped type under its own owner', () => {
+      expect(() =>
+        validateUnifiedAttachments({
+          query: { type: securityEventType, owner: 'securitySolution', attachmentId: 'event-1' },
+          unifiedAttachmentTypeRegistry: registryWithEvent(),
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects before running the schema', () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register({
+        id: securityEventType,
+        schema: z.object({ never: z.literal('matches') }),
+      });
+
+      expect(() =>
+        validateUnifiedAttachments({
+          query: { type: securityEventType, owner: 'cases', attachmentId: 'event-1' },
+          unifiedAttachmentTypeRegistry,
+        })
+      ).toThrow(/cannot be attached to a case with owner cases/);
+    });
+  });
 });

@@ -1764,6 +1764,61 @@ describe('TaskStore', () => {
       expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
     });
 
+    test('ties the replaced API key to the current run when regenerating the key of a running task', async () => {
+      const startedAt = mockedDate;
+      const runningTask = {
+        ...bulkUpdateTask,
+        status: 'running' as TaskStatus,
+        startedAt,
+        apiKey: mockApiKey,
+        userScope: mockUserScope,
+      };
+      mockGetScopedClient.mockReturnValue({
+        bulkUpdate: jest.fn().mockResolvedValue({
+          saved_objects: [
+            {
+              id: 'task:324242',
+              type: 'task',
+              attributes: {
+                ...bulkUpdateTask,
+                status: 'running',
+                startedAt: startedAt.toISOString(),
+                state: '{"foo":"bar"}',
+                params: '{"hello":"world"}',
+              },
+              references: [],
+              version: '123',
+            },
+          ],
+        }),
+      });
+
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('task:324242', {
+        apiKey: Buffer.from('apiKeyIdUpdated:apiKey').toString('base64'),
+        userScope: { ...mockUserScope, apiKeyId: 'apiKeyIdUpdated' },
+      });
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+
+      await store.bulkUpdate([runningTask], {
+        validate: false,
+        mergeAttributes: false,
+        options: { request: mockRequest, regenerateApiKey: true },
+      });
+
+      expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: {
+            apiKeyId: 'apiKeyId',
+            createdAt: expect.any(String),
+            taskId: 'task:324242',
+            taskStartedAt: mockedDate.toISOString(),
+          },
+          type: 'api_key_to_invalidate',
+        },
+      ]);
+    });
+
     test('bulk update task with regenerated API key when api key but do not invalidate user created api keys', async () => {
       const mockScopedClient = {
         bulkUpdate: jest.fn().mockResolvedValue({

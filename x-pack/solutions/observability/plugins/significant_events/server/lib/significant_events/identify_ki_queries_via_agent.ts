@@ -24,9 +24,9 @@ import {
   NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
   NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
 } from '@kbn/nightshift-shared';
-import { EMPTY_TOKENS } from '@kbn/nightshift-ai';
+import { EMPTY_TOKENS, buildKIQueryGenerationUserMessage } from '@kbn/nightshift-ai';
 import type { Streams } from '@kbn/streams-schema';
-import type { AnalysisTarget, ExistingQuerySummary } from '@kbn/nightshift-ai';
+import type { ExistingQuerySummary } from '@kbn/nightshift-ai';
 import { KI_QUERY_GENERATION_AGENT_ID } from '../../agent_builder/agents/ki_query_generation';
 import {
   SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
@@ -36,8 +36,6 @@ import { chatTokenCountFromModelUsage } from './features/chat_token_count';
 import { streamToAnalysisTarget } from './stream_to_analysis_target';
 
 const QUERY_GENERATION_MAX_DURATION_MS = 300_000;
-export const MAX_EXISTING_QUERIES_FOR_CONTEXT = 50;
-const MAX_EXISTING_QUERY_DESCRIPTION_LENGTH = 200;
 
 interface FinalizedValidationData {
   target_id: string;
@@ -154,26 +152,4 @@ export async function executeKIQueryGenerationAgent({
   );
 
   return { queries, tokensUsed };
-}
-
-export function buildKIQueryGenerationUserMessage(
-  target: AnalysisTarget,
-  existingQueries: ExistingQuerySummary[] = []
-): string {
-  const parts: string[] = [];
-  parts.push(`\`target_id\`: ${target.id}`);
-  if (target.description) {
-    parts.push(`\`target_description\`: ${target.description}`);
-  }
-  if (existingQueries.length > 0) {
-    const existingQueriesContext = [...existingQueries]
-      .sort((a, b) => (b.severity_score ?? 0) - (a.severity_score ?? 0))
-      .slice(0, MAX_EXISTING_QUERIES_FOR_CONTEXT)
-      .map((query) => ({
-        ...query,
-        description: query.description.slice(0, MAX_EXISTING_QUERY_DESCRIPTION_LENGTH),
-      }));
-    parts.push(`\`existing_queries\`:\n${JSON.stringify(existingQueriesContext)}`);
-  }
-  return parts.join('\n\n');
 }

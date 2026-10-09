@@ -26,6 +26,7 @@ import type {
   ListEscalationsQuery,
   ListEscalationsResponse,
   ListLinkedInvestigationsResponse,
+  SyncEscalationResponse,
 } from '../../../common/escalations/escalation';
 import type {
   EscalationClosePreviewResponse,
@@ -51,8 +52,36 @@ import {
   NotAnEscalationError,
   TooManyLinkedInvestigationsError,
 } from './errors';
+import {
+  ESCALATION_ATTACHMENTS_SYNCED_EVENT_TYPE,
+  ESCALATION_CREATED_FROM_INVESTIGATION_EVENT_TYPE,
+  ESCALATION_INVESTIGATION_LINKED_EVENT_TYPE,
+  type EscalationAttachmentsSyncedEventData,
+  type EscalationInvestigationEventData,
+} from '../../../common/escalations/conversation_events';
 import { filterMetadataToTemplateFields } from './filter_template_metadata';
-import { copyInvestigationAttachments } from './copy_investigation_attachments';
+import {
+  copyInvestigationAttachments,
+  isCopyableAttachment,
+  toCopiedAttachmentId,
+} from './copy_investigation_attachments';
+
+/** Agent Builder rejects `addEvents` calls with more events than this. */
+const MAX_EVENTS_PER_REQUEST = 10;
+
+const toEventData = ({
+  id,
+  title,
+  agent_id: agentId,
+}: {
+  id: string;
+  title: string;
+  agent_id?: string;
+}): EscalationInvestigationEventData => ({
+  investigation_id: id,
+  title,
+  ...(agentId ? { agent_id: agentId } : {}),
+});
 
 /**
  * Builds the Elasticsearch filter clause for the list endpoint.
@@ -187,7 +216,7 @@ export class EscalationsService {
       `Creating escalation from investigation ${body.linked_investigation_id} with visibility ${body.visibility}`
     );
 
-    return client.create({
+    const escalation = await client.create({
       // Omit agentId so it defaults to the shared default agent, which all users can access.
       // Inheriting the investigation's agent_id would hide the escalation from collaborators
       // who lack access to that agent.
@@ -196,6 +225,15 @@ export class EscalationsService {
       metadata,
       accessControl,
     });
+
+    await this.addTimelineEvents(client, escalation.id, [
+      {
+        type: ESCALATION_CREATED_FROM_INVESTIGATION_EVENT_TYPE,
+        data: toEventData(investigation),
+      },
+    ]);
+
+    return escalation;
   }
 
   async link(
@@ -240,7 +278,48 @@ export class EscalationsService {
       { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: union },
       { access: 'converse' }
     );
+
+    const previouslyLinked = new Set(prev);
+    await this.addTimelineEvents(
+      client,
+      escalationId,
+      toAdd
+        .filter((id, index) => !previouslyLinked.has(id) && toAdd.indexOf(id) === index)
+        .map((id) => ({
+          type: ESCALATION_INVESTIGATION_LINKED_EVENT_TYPE,
+          data: toEventData(resolved.get(id)!),
+        }))
+    );
+
     return conversation;
+  }
+
+  /**
+   * Writes informational events to the escalation's timeline. Best-effort like `addAttachments`:
+   * a failed note is logged and never fails the escalation write that preceded it.
+   */
+  private async addTimelineEvents(
+    client: ConversationPublicClient,
+    escalationId: string,
+    events: Array<{
+      type: string;
+      data: EscalationInvestigationEventData | EscalationAttachmentsSyncedEventData;
+    }>
+  ): Promise<void> {
+    for (let i = 0; i < events.length; i += MAX_EVENTS_PER_REQUEST) {
+      try {
+        await client.addEvents({
+          conversationId: escalationId,
+          events: events.slice(i, i + MAX_EVENTS_PER_REQUEST),
+        });
+      } catch (error) {
+        this.logger.warn(
+          `Failed to add timeline events to escalation ${escalationId}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    }
   }
 
   /**
@@ -291,6 +370,82 @@ export class EscalationsService {
     }
 
     return { copied: totalCopied, failed: totalFailed };
+  }
+
+  /**
+   * Brings the escalation's attachments up to date with its linked investigations.
+   *
+   * An investigation needs syncing when it changed after the escalation (`updated_at`) or when
+   * one of its copyable attachments has no copy in the escalation yet. The id check catches what
+   * the timestamp can miss: escalation edits (assignees, status) also advance the escalation's
+   * `updated_at`. Copies are stored as `${investigationId}:${attachmentId}`. Ids rather than
+   * counts, so a replaced attachment is noticed even when the totals match. Changes to
+   * attachments that were already copied are not propagated.
+   *
+   * Linked investigations the user cannot access are skipped. Like `addAttachments` it is
+   * idempotent and never throws for individual attachment failures.
+   */
+  async sync(request: KibanaRequest, escalationId: string): Promise<SyncEscalationResponse> {
+    const client = await this.getConversationClient(request);
+    const escalation = await client.get(escalationId);
+    if (escalation.template_id !== ESCALATION_TEMPLATE_ID) {
+      throw new NotAnEscalationError(escalationId);
+    }
+
+    const linkedIds = (
+      (escalation.metadata?.[ESCALATION_LINKED_INVESTIGATIONS_FIELD] ?? []) as unknown[]
+    ).filter((v): v is string => typeof v === 'string' && v.length > 0);
+    if (linkedIds.length === 0) {
+      return { copied: 0, failed: 0 };
+    }
+
+    // Includes inactive attachments so a copy the user removed is not written again.
+    const existingIds = new Set((escalation.attachments ?? []).map((att) => att.id));
+
+    // `bulkGet` omits inaccessible / non-existent ids and returns attachment summaries (id and
+    // type), which is all the checks below need.
+    const resolved = await client.bulkGet(linkedIds);
+    const escalationUpdatedAt = Date.parse(escalation.updated_at);
+    const staleIds = linkedIds.filter((id) => {
+      const investigation = resolved.get(id);
+      if (!investigation || investigation.template_id !== INVESTIGATION_TEMPLATE_ID) return false;
+      return (
+        Date.parse(investigation.updated_at) > escalationUpdatedAt ||
+        (investigation.attachments ?? []).some(
+          (att) => isCopyableAttachment(att) && !existingIds.has(toCopiedAttachmentId(id, att.id))
+        )
+      );
+    });
+
+    const attachmentsClient = await this.getAttachmentsClient(request);
+    let copied = 0;
+    let failed = 0;
+
+    // Sequential: all copies target the same escalation document.
+    for (const investigationId of staleIds) {
+      const investigation = await client.get(investigationId);
+      const result = await copyInvestigationAttachments({
+        attachmentsClient,
+        escalation,
+        investigation,
+        logger: this.logger,
+        existingAttachmentIds: existingIds,
+        // Written before the copy so the event sits above the attachment cards in the timeline.
+        // Only investigations that actually gain attachments get one. The ids are the planned
+        // ones: a copy that then fails is logged, but stays listed.
+        onBeforeCopy: (attachmentIds) =>
+          this.addTimelineEvents(client, escalationId, [
+            {
+              type: ESCALATION_ATTACHMENTS_SYNCED_EVENT_TYPE,
+              data: { ...toEventData(investigation), attachment_ids: attachmentIds },
+            },
+          ]),
+      });
+      copied += result.copied;
+      failed += result.failed;
+    }
+
+    return { copied, failed };
   }
 
   async getClosePreview(

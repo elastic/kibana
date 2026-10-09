@@ -183,9 +183,7 @@ describe('assessRelevance', () => {
   });
 });
 
-// `withStructuredOutput` is mocked everywhere above, so the schema's own parsing of
-// model output is never exercised by those tests. These are the assertions that fail
-// if the bound is removed.
+// These assertions verify the transforms that withStructuredOutput applies.
 describe('relevanceOutputSchema bounds', () => {
   const valid = {
     is_intelligence: true,

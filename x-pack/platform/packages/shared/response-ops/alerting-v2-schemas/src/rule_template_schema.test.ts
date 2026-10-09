@@ -315,10 +315,20 @@ describe('rule template create-rule schema coupling', () => {
               "additionalProperties": false,
               "description": "Rule metadata.",
               "properties": Object {
-                "builder_type": Object {
+                "builder": Object {
+                  "additionalProperties": false,
                   "description": "Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES|QL.",
-                  "maxLength": 64,
-                  "type": "string",
+                  "properties": Object {
+                    "type": Object {
+                      "description": "Rule builder type.",
+                      "maxLength": 64,
+                      "type": "string",
+                    },
+                  },
+                  "required": Array [
+                    "type",
+                  ],
+                  "type": "object",
                 },
                 "description": Object {
                   "description": "Human-readable description of the rule.",
