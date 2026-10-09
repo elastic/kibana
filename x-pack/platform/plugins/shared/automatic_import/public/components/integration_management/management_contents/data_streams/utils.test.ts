@@ -11,6 +11,8 @@ import {
   flattenPipelineObject,
   isValidIp,
   diffPipelineLines,
+  unwrapPipelineDocument,
+  getFlyoutFooterState,
 } from './utils';
 
 describe('data stream utils', () => {
@@ -57,6 +59,23 @@ describe('data stream utils', () => {
 
     it('should return tokenBoolean for boolean type', () => {
       expect(getIconFromType('boolean')).toBe('tokenBoolean');
+    });
+
+    it.each([
+      ['constant_keyword', 'tokenConstant'],
+      ['wildcard', 'tokenString'],
+      ['text', 'tokenString'],
+      ['match_only_text', 'tokenString'],
+      ['byte', 'tokenNumber'],
+      ['short', 'tokenNumber'],
+      ['integer', 'tokenNumber'],
+      ['unsigned_long', 'tokenNumber'],
+      ['half_float', 'tokenNumber'],
+      ['double', 'tokenNumber'],
+      ['date_nanos', 'tokenDate'],
+      ['version', 'tokenTag'],
+    ])('should map %s to %s', (type, icon) => {
+      expect(getIconFromType(type)).toBe(icon);
     });
 
     it('should return tokenQuestion for undefined type', () => {
@@ -184,6 +203,27 @@ describe('data stream utils', () => {
       expect(isValidIp('not-an-ip')).toBe(false);
       expect(isValidIp('')).toBe(false);
       expect(isValidIp('hello world')).toBe(false);
+    });
+  });
+
+  describe('unwrapPipelineDocument', () => {
+    it('returns the document unchanged when it is already a source object', () => {
+      const document = { message: 'hello', 'source.ip': '10.0.0.1' };
+      expect(unwrapPipelineDocument(document)).toEqual(document);
+    });
+
+    it('unwraps an ingest _source document', () => {
+      expect(unwrapPipelineDocument({ _source: { message: 'hello' } })).toEqual({
+        message: 'hello',
+      });
+    });
+
+    it('unwraps a simulate wrapper document', () => {
+      expect(
+        unwrapPipelineDocument({
+          doc: { _id: '1', _source: { message: 'hello', status: 200 } },
+        })
+      ).toEqual({ message: 'hello', status: 200 });
     });
   });
 
@@ -390,6 +430,49 @@ describe('data stream utils', () => {
       expect(result.linesAdded).toBe(1);
       expect(result.linesRemoved).toBe(1);
       expect(result.netLineChange).toBe(0);
+    });
+  });
+
+  describe('getFlyoutFooterState', () => {
+    const base = {
+      mappingDirty: false,
+      mappingSaving: false,
+      pipelineDirty: false,
+      pipelineSaving: false,
+      pipelineText: '{ "processors": [] }',
+      isSaving: false,
+      showPipelineWarning: false,
+      showTableWarning: false,
+    };
+
+    it('enables save on the table tab only when mappings are dirty and the pipeline is clean', () => {
+      expect(getFlyoutFooterState({ ...base, isTableTab: true, mappingDirty: true })).toEqual({
+        isResetDisabled: false,
+        isSaveDisabled: false,
+        saveTestSubj: 'mappingEditorApplyButton',
+      });
+    });
+
+    it('disables table save when the pipeline has unsaved changes', () => {
+      const state = getFlyoutFooterState({
+        ...base,
+        isTableTab: true,
+        mappingDirty: true,
+        pipelineDirty: true,
+        showPipelineWarning: true,
+      });
+      expect(state.isResetDisabled).toBe(false);
+      expect(state.isSaveDisabled).toBe(true);
+      expect(state.saveTestSubj).toBe('mappingEditorApplyButton');
+      expect(state.warning).toBeDefined();
+    });
+
+    it('enables save on the pipeline tab only when the pipeline is dirty and mappings are clean', () => {
+      expect(getFlyoutFooterState({ ...base, isTableTab: false, pipelineDirty: true })).toEqual({
+        isResetDisabled: false,
+        isSaveDisabled: false,
+        saveTestSubj: 'editPipelineFlyoutSaveButton',
+      });
     });
   });
 });

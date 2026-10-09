@@ -12,7 +12,12 @@ import type {
   GetAllAutoImportIntegrationsResponse,
 } from '../../../common/model/api/integrations/integration.gen';
 
-import type { UploadSamplesToDataStreamResponse } from '../../../common/model/api/data_streams/data_stream.gen';
+import type {
+  DataStreamResults,
+  FieldTypeChange,
+  UploadSamplesToDataStreamResponse,
+  UpdateDataStreamFieldTypesResponse,
+} from '../../../common/model/api/data_streams/data_stream.gen';
 import type { DataStream, OriginalSource } from '../../../common/model/common_attributes.gen';
 import { getLangSmithOptions } from './lang_smith';
 import type { LangSmithOptions } from './lang_smith';
@@ -230,10 +235,7 @@ export interface GetDataStreamResultsRequest {
   dataStreamId: string;
 }
 
-export interface GetDataStreamResultsResponse {
-  ingest_pipeline: Record<string, unknown>;
-  results: Array<Record<string, unknown>>;
-}
+export type GetDataStreamResultsResponse = DataStreamResults;
 
 export const getDataStreamResults = async ({
   http,
@@ -255,6 +257,7 @@ export interface UpdateDataStreamPipelineRequest {
   integrationId: string;
   dataStreamId: string;
   ingestPipeline: string;
+  version: string;
 }
 
 export const updateDataStreamPipeline = async ({
@@ -263,6 +266,7 @@ export const updateDataStreamPipeline = async ({
   integrationId,
   dataStreamId,
   ingestPipeline,
+  version,
 }: RequestDeps & UpdateDataStreamPipelineRequest): Promise<GetDataStreamResultsResponse> =>
   http.patch<GetDataStreamResultsResponse>(
     `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
@@ -270,7 +274,33 @@ export const updateDataStreamPipeline = async ({
     )}/data_streams/${encodeURIComponent(dataStreamId)}`,
     {
       version: '1',
-      body: JSON.stringify({ ingest_pipeline: ingestPipeline }),
+      body: JSON.stringify({ ingest_pipeline: ingestPipeline, version }),
+      signal: abortSignal,
+    }
+  );
+
+export interface UpdateDataStreamFieldTypesRequest {
+  integrationId: string;
+  dataStreamId: string;
+  changes: FieldTypeChange[];
+  version: string;
+}
+
+export const updateDataStreamFieldTypes = async ({
+  http,
+  abortSignal,
+  integrationId,
+  dataStreamId,
+  changes,
+  version,
+}: RequestDeps & UpdateDataStreamFieldTypesRequest): Promise<UpdateDataStreamFieldTypesResponse> =>
+  http.put<UpdateDataStreamFieldTypesResponse>(
+    `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
+      integrationId
+    )}/data_streams/${encodeURIComponent(dataStreamId)}/field_types`,
+    {
+      version: '1',
+      body: JSON.stringify({ changes, version }),
       signal: abortSignal,
     }
   );

@@ -51,6 +51,9 @@ export function useUpdateDataStreamPipeline(): UseUpdateDataStreamPipelineResult
       queryClient.invalidateQueries({
         queryKey: ['dataStreamResults', variables.integrationId, variables.dataStreamId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['integration', variables.integrationId],
+      });
 
       notifications.toasts.addSuccess({
         title: i18n.SAVE_PIPELINE_SUCCESS,

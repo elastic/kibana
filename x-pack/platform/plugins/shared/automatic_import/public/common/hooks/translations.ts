@@ -37,6 +37,15 @@ export const SAVE_PIPELINE_ERROR = i18n.translate('xpack.automaticImport.savePip
   defaultMessage: 'Failed to save pipeline',
 });
 
+export const SAVE_FIELD_TYPES_SUCCESS = i18n.translate(
+  'xpack.automaticImport.saveFieldTypes.success',
+  { defaultMessage: 'Field types saved' }
+);
+
+export const SAVE_FIELD_TYPES_ERROR = i18n.translate('xpack.automaticImport.saveFieldTypes.error', {
+  defaultMessage: 'Failed to save field types',
+});
+
 export const SAVE_INTEGRATION_SUCCESS_DESCRIPTION = (integrationId: string) =>
   i18n.translate('xpack.automaticImport.saveIntegration.successDescription', {
     defaultMessage: 'Integration {integrationId} is now being processed.',

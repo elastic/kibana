@@ -43,7 +43,27 @@ export {
   ReanalyzeDataStreamRequestParams,
   ReanalyzeDataStreamRequestBody,
   UpdateDataStreamPipelineRequestBody,
+  UpdateDataStreamFieldTypesRequestBody,
+  UpdateDataStreamFieldTypesRequestParams,
 } from './model/api/data_streams/data_stream.gen';
+
+export type {
+  DataStreamResults,
+  FieldMapping,
+  FieldTypeChange,
+  FieldTypeError,
+  FieldTypeOverride,
+  UpdateDataStreamFieldTypesResponse,
+} from './model/api/data_streams/data_stream.gen';
+
+export {
+  SUPPORTED_FIELD_TYPES,
+  MAX_FIELD_TYPE_OVERRIDES,
+  isSupportedFieldType,
+  getFieldTypeCompatibility,
+  getFieldValue,
+} from './field_type_compatibility';
+export type { FieldTypeCompatibility, FieldTypeIssue } from './field_type_compatibility';
 
 export type {
   Integration,
@@ -86,6 +106,9 @@ export {
 } from './telemetry/types';
 
 export { MAX_STRING_LENGTH } from './constants';
+
+export { canEditDataStreamFieldTypes, getFieldTypeEditState } from './can_edit_field_types';
+export type { FieldTypeEditState } from './can_edit_field_types';
 
 export {
   DATA_STREAM_PHASES,

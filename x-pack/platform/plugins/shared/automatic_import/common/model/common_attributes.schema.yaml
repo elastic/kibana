@@ -202,6 +202,12 @@ components:
             status:
               description: The status of the integration
               $ref: "#/components/schemas/TaskStatus"
+            lastApprovedDataStreamIds:
+              description: Data stream IDs included in the most recently approved package.
+              type: array
+              maxItems: 100
+              items:
+                $ref: "../../common/model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
     AllIntegrationsResponseIntegration:
       description: The integration object with its settings.
       allOf:
