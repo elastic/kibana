@@ -603,6 +603,33 @@ export const pinAgenticConnector = async (fetch: HttpHandler, connectorId: strin
 };
 
 /**
+ * Enables the Worker, asserts the production workflows and pins the agentic connector, then
+ * returns the function that restores the inference settings. Setup runs before the caller's
+ * `try/finally`, so a failure here (workflow unavailable, pin rejected) would otherwise leave a
+ * Worker that was off before the suite enabled and scheduled. On failure this disables the
+ * Worker itself and rethrows the original error.
+ */
+export const installWorkerAndPinConnector = async (
+  runtime: AlertZeroRuntime,
+  fetch: HttpHandler,
+  workerId: string,
+  connectorId: string
+): Promise<() => Promise<unknown>> => {
+  try {
+    await runtime.installWorker(workerId);
+    await runtime.assertInstalled();
+    return await pinAgenticConnector(fetch, connectorId);
+  } catch (error) {
+    try {
+      await runtime.restoreWorker();
+    } catch {
+      // The setup failure is the actionable error; a failed rollback must not mask it.
+    }
+    throw error;
+  }
+};
+
+/**
  * Runs every cleanup step even when an earlier one throws, so a failed cancellation or fixture
  * teardown can never leave the shared inference settings pinned to the eval connector. The first
  * failure is rethrown once all steps have run.

@@ -17,7 +17,7 @@ import {
   AlertZeroRuntime,
   deleteDataStreamQuietly,
   ignore404,
-  pinAgenticConnector,
+  installWorkerAndPinConnector,
   runAllCleanups,
   seedAlertZeroEndpoint,
 } from '../src/runtime';
@@ -81,9 +81,12 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
     'L2 structured worker output and L3 real sweep composition',
     async ({ esClient, traceEsClient, fetch, log, connector, executorClient }) => {
       const runtime = new AlertZeroRuntime(fetch);
-      await runtime.installWorker(workerWorkflowId);
-      await runtime.assertInstalled();
-      const restoreInference = await pinAgenticConnector(fetch, connector.id);
+      const restoreInference = await installWorkerAndPinConnector(
+        runtime,
+        fetch,
+        workerWorkflowId,
+        connector.id
+      );
       let seededFixture: Awaited<ReturnType<typeof seedAlertZeroEndpoint>> | undefined;
       try {
         const fixture = await seedAlertZeroEndpoint(esClient, fetch);
@@ -192,9 +195,12 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
     'L2b benign fixture: no disruptive action on inconclusive ground truth',
     async ({ esClient, fetch, connector, executorClient, log }) => {
       const runtime = new AlertZeroRuntime(fetch);
-      await runtime.installWorker(workerWorkflowId);
-      await runtime.assertInstalled();
-      const restoreInference = await pinAgenticConnector(fetch, connector.id);
+      const restoreInference = await installWorkerAndPinConnector(
+        runtime,
+        fetch,
+        workerWorkflowId,
+        connector.id
+      );
       let seededFixture: Awaited<ReturnType<typeof seedAlertZeroEndpoint>> | undefined;
       try {
         // Same host shape as the malicious fixture, but a benign process tree: the

@@ -13,6 +13,7 @@ import {
 } from '@kbn/alertzero-common';
 import {
   AlertZeroRuntime,
+  installWorkerAndPinConnector,
   pinAgenticConnector,
   runAllCleanups,
   seedAlertZeroEndpoint,
@@ -403,6 +404,67 @@ describe('pinAgenticConnector', () => {
       .filter(([, options]) => options?.method === 'PUT')
       .map(([, options]) => JSON.parse((options as { body: string }).body).features);
     expect(restored[1]).toEqual(previous);
+  });
+});
+
+describe('installWorkerAndPinConnector', () => {
+  const WORKER = 'system-security-forensics-endpoint-analysis';
+  const settingsRoute = '/internal/search_inference_endpoints/settings';
+
+  const setup = ({
+    workflowValid = true,
+    pinFails = false,
+  }: { workflowValid?: boolean; pinFails?: boolean } = {}) => {
+    const fetch = createFetch((path, options) => {
+      if (path === '/internal/security/service_account' && !options?.method) {
+        return { serviceAccounts: [], nextPage: undefined };
+      }
+      if (path === '/internal/security/service_account' && options?.method === 'POST') {
+        return { id: 'sa-eval-1' };
+      }
+      if (path === '/internal/alertzero/workers' && !options?.method) {
+        return { workers: [{ id: WORKER, enabled: false, workflowId: `${WORKER}-default` }] };
+      }
+      if (path.startsWith('/api/workflows/workflow/')) {
+        return { id: decodeURIComponent(path.split('/').pop() ?? ''), valid: workflowValid };
+      }
+      if (path === settingsRoute && options?.method === 'PUT' && pinFails) {
+        throw new Error('pin rejected');
+      }
+      if (path === settingsRoute) return { data: { features: [] } };
+      return {};
+    });
+    const workerPatches = () =>
+      fetch.mock.calls
+        .filter(
+          ([path, options]) =>
+            String(path).startsWith('/internal/alertzero/workers/') && options?.method === 'PATCH'
+        )
+        .map(([, options]) => JSON.parse((options as { body: string }).body));
+    return { fetch, workerPatches, runtime: new AlertZeroRuntime(fetch) };
+  };
+
+  it('disables a previously-off worker when the workflow assertion fails', async () => {
+    const { fetch, runtime, workerPatches } = setup({ workflowValid: false });
+    await expect(
+      installWorkerAndPinConnector(runtime, fetch, WORKER, 'eval-connector')
+    ).rejects.toThrow('Required production workflow unavailable');
+    expect(workerPatches().map((body) => body.enabled)).toEqual([true, false]);
+  });
+
+  it('disables a previously-off worker when pinning the connector fails', async () => {
+    const { fetch, runtime, workerPatches } = setup({ pinFails: true });
+    await expect(
+      installWorkerAndPinConnector(runtime, fetch, WORKER, 'eval-connector')
+    ).rejects.toThrow('pin rejected');
+    expect(workerPatches().map((body) => body.enabled)).toEqual([true, false]);
+  });
+
+  it('keeps the worker enabled and returns the restore function on success', async () => {
+    const { fetch, runtime, workerPatches } = setup();
+    const restore = await installWorkerAndPinConnector(runtime, fetch, WORKER, 'eval-connector');
+    expect(workerPatches().map((body) => body.enabled)).toEqual([true]);
+    await restore();
   });
 });
 
