@@ -29,7 +29,7 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
   return (
     <>
       <EuiHorizontalRule margin="m" />
-      <EuiFlexGroup gutterSize="m" responsive={false} alignItems="stretch">
+      <EuiFlexGroup gutterSize="m" alignItems="stretch">
         <EuiFlexItem>
           <EuiCheckableCard
             id="createDatasetWizardInferSchema"

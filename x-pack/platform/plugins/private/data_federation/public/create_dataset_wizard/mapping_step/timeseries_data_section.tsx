@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiCode,
   EuiFieldText,
@@ -17,6 +17,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,6 +28,20 @@ import { DatetimeFormatHelpText } from '../components/datetime_format_help_text'
 import { TIMESTAMP_LOGICAL_FIELD_NAME } from '../constants';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import { fieldTypeSelectStrings } from './mapping_editor/field_type_select_i18n';
+import {
+  FORMAT_FIELD_BASIS,
+  NAME_FIELD_BASIS,
+  TYPE_FIELD_BASIS,
+  fieldRowContainerStyles,
+  getFieldGroupItemStyles,
+  getFixedFieldItemStyles,
+  getFixedUntilNarrowFieldItemStyles,
+  getTextFieldItemStyles,
+} from './field_row_layout';
+
+const TYPE_AND_PATH_FIELD_BASES = [TYPE_FIELD_BASIS, NAME_FIELD_BASIS] as const;
+const typeFieldItemStyles = getFixedFieldItemStyles(TYPE_FIELD_BASIS);
+const pathFieldItemStyles = getTextFieldItemStyles(NAME_FIELD_BASIS);
 
 export interface TimeseriesDataSectionProps {
   isEnabled: boolean;
@@ -45,6 +60,16 @@ export function TimeseriesDataSection({
 }: TimeseriesDataSectionProps) {
   const isTimestampPathMissing =
     shouldShowValidation && isEnabled && (timestampField?.path ?? '').trim() === '';
+  const { euiTheme } = useEuiTheme();
+  const gutter = euiTheme.size.base;
+  const typeAndPathGroupStyles = useMemo(
+    () => getFieldGroupItemStyles(TYPE_AND_PATH_FIELD_BASES, gutter),
+    [gutter]
+  );
+  const formatFieldItemStyles = useMemo(
+    () => getFixedUntilNarrowFieldItemStyles(FORMAT_FIELD_BASIS, TYPE_AND_PATH_FIELD_BASES, gutter),
+    [gutter]
+  );
 
   return (
     <>
@@ -88,70 +113,80 @@ export function TimeseriesDataSection({
       {isEnabled ? (
         <>
           <EuiSpacer size="m" />
-          <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
-            <EuiFlexItem grow={false} style={{ maxWidth: 200 }}>
-              <EuiFormRow
-                label={i18n.translate(
-                  'xpack.dataFederation.createDatasetWizard.timestampFieldTypeLabel',
-                  {
-                    defaultMessage: 'Field type',
-                  }
-                )}
-                fullWidth
-              >
-                <EuiSelect
-                  fullWidth
-                  value={timestampField?.type ?? 'date'}
-                  options={[
-                    { value: 'date', text: fieldTypeSelectStrings.dateOption },
-                    { value: 'date_nanos', text: fieldTypeSelectStrings.dateNanosOption },
-                  ]}
-                  onChange={(e) =>
-                    onChangeTimestampField({
-                      type: e.target.value as 'date' | 'date_nanos',
-                    })
-                  }
-                  data-test-subj="createDatasetWizardTimestampType"
-                />
-              </EuiFormRow>
+          <EuiFlexGroup
+            gutterSize="m"
+            alignItems="flexStart"
+            responsive={false}
+            wrap
+            css={fieldRowContainerStyles}
+          >
+            <EuiFlexItem css={typeAndPathGroupStyles}>
+              <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false} wrap>
+                <EuiFlexItem css={typeFieldItemStyles}>
+                  <EuiFormRow
+                    label={i18n.translate(
+                      'xpack.dataFederation.createDatasetWizard.timestampFieldTypeLabel',
+                      {
+                        defaultMessage: 'Field type',
+                      }
+                    )}
+                    fullWidth
+                  >
+                    <EuiSelect
+                      fullWidth
+                      value={timestampField?.type ?? 'date'}
+                      options={[
+                        { value: 'date', text: fieldTypeSelectStrings.dateOption },
+                        { value: 'date_nanos', text: fieldTypeSelectStrings.dateNanosOption },
+                      ]}
+                      onChange={(e) =>
+                        onChangeTimestampField({
+                          type: e.target.value as 'date' | 'date_nanos',
+                        })
+                      }
+                      data-test-subj="createDatasetWizardTimestampType"
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+
+                <EuiFlexItem css={pathFieldItemStyles}>
+                  <EuiFormRow
+                    label={i18n.translate(
+                      'xpack.dataFederation.createDatasetWizard.timestampFieldPathLabel',
+                      {
+                        defaultMessage: 'Field name',
+                      }
+                    )}
+                    helpText={i18n.translate(
+                      'xpack.dataFederation.createDatasetWizard.timestampFieldPathHelp',
+                      {
+                        defaultMessage: 'Source column or JSON path.',
+                      }
+                    )}
+                    isInvalid={isTimestampPathMissing}
+                    error={
+                      isTimestampPathMissing
+                        ? i18n.translate(
+                            'xpack.dataFederation.createDatasetWizard.timestampFieldPathRequired',
+                            { defaultMessage: 'Field name is required.' }
+                          )
+                        : undefined
+                    }
+                    fullWidth
+                  >
+                    <EuiFieldText
+                      isInvalid={isTimestampPathMissing}
+                      fullWidth
+                      value={timestampField?.path ?? ''}
+                      onChange={(e) => onChangeTimestampField({ path: e.target.value })}
+                      data-test-subj="createDatasetWizardTimestampPath"
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
 
-            <EuiFlexItem>
-              <EuiFormRow
-                label={i18n.translate(
-                  'xpack.dataFederation.createDatasetWizard.timestampFieldPathLabel',
-                  {
-                    defaultMessage: 'Field name',
-                  }
-                )}
-                helpText={i18n.translate(
-                  'xpack.dataFederation.createDatasetWizard.timestampFieldPathHelp',
-                  {
-                    defaultMessage: 'Source column or JSON path.',
-                  }
-                )}
-                isInvalid={isTimestampPathMissing}
-                error={
-                  isTimestampPathMissing
-                    ? i18n.translate(
-                        'xpack.dataFederation.createDatasetWizard.timestampFieldPathRequired',
-                        { defaultMessage: 'Field name is required.' }
-                      )
-                    : undefined
-                }
-                fullWidth
-              >
-                <EuiFieldText
-                  isInvalid={isTimestampPathMissing}
-                  fullWidth
-                  value={timestampField?.path ?? ''}
-                  onChange={(e) => onChangeTimestampField({ path: e.target.value })}
-                  data-test-subj="createDatasetWizardTimestampPath"
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-
-            <EuiFlexItem>
+            <EuiFlexItem css={formatFieldItemStyles}>
               <EuiFormRow
                 label={i18n.translate(
                   'xpack.dataFederation.createDatasetWizard.timestampFieldFormatLabel',
