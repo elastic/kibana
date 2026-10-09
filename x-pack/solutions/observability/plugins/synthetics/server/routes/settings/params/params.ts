@@ -17,32 +17,14 @@ import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { SyntheticsParams, SyntheticsParamsReadonly } from '../../../../common/runtime_types';
 
-type ParamsResponse =
-  | SyntheticsParams[]
-  | SyntheticsParamsReadonly[]
-  | SyntheticsParams
-  | SyntheticsParamsReadonly;
+type ParamResponse = ReturnType<typeof toClientResponse>;
 
-const getParamsHandler: SyntheticsRouteHandler<ParamsResponse, { id?: string }> = async (
-  routeContext
+const withSpaceNotFound = async <T>(
+  { response, spaceId }: RouteContext,
+  read: () => Promise<T>
 ) => {
-  const { savedObjectsClient, request, response, spaceId } = routeContext;
   try {
-    const { id: paramId } = request.params;
-
-    if (await canReadDecryptedParams(routeContext)) {
-      return getDecryptedParams(routeContext, paramId);
-    } else {
-      if (paramId) {
-        const savedObject = await savedObjectsClient.get<SyntheticsParamsReadonly>(
-          syntheticsParamType,
-          paramId
-        );
-        return toClientResponse(savedObject);
-      }
-
-      return findAllParams(routeContext);
-    }
+    return await read();
   } catch (error) {
     if (error.output?.statusCode === 404) {
       return response.notFound({ body: { message: `Kibana space '${spaceId}' does not exist` } });
@@ -52,11 +34,34 @@ const getParamsHandler: SyntheticsRouteHandler<ParamsResponse, { id?: string }> 
   }
 };
 
-export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<ParamsResponse> = () => ({
+const getParamListHandler: SyntheticsRouteHandler<ParamResponse[]> = async (routeContext) =>
+  withSpaceNotFound(routeContext, async () =>
+    (await canReadDecryptedParams(routeContext))
+      ? getDecryptedParamList(routeContext)
+      : findAllParams(routeContext)
+  );
+
+const getParamHandler: SyntheticsRouteHandler<ParamResponse, { id: string }> = async (
+  routeContext
+) =>
+  withSpaceNotFound(routeContext, async () => {
+    const { id } = routeContext.request.params;
+
+    if (await canReadDecryptedParams(routeContext)) {
+      return getDecryptedParam(routeContext, id);
+    }
+    const savedObject = await routeContext.savedObjectsClient.get<SyntheticsParamsReadonly>(
+      syntheticsParamType,
+      id
+    );
+    return toClientResponse(savedObject);
+  });
+
+export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<ParamResponse[]> = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.PARAMS,
   validate: {},
-  handler: getParamsHandler,
+  handler: getParamListHandler,
 });
 
 const RequestParamsSchema = z.strictObject({
@@ -64,7 +69,7 @@ const RequestParamsSchema = z.strictObject({
 });
 
 export const getSyntheticsParamRoute: SyntheticsRestApiRouteFactory<
-  ParamsResponse,
+  ParamResponse,
   z.infer<typeof RequestParamsSchema>
 > = () => ({
   method: 'GET',
@@ -75,7 +80,7 @@ export const getSyntheticsParamRoute: SyntheticsRestApiRouteFactory<
       params: RequestParamsSchema,
     },
   },
-  handler: getParamsHandler,
+  handler: getParamHandler,
 });
 
 const canReadDecryptedParams = async (routeContext: RouteContext) => {
@@ -88,18 +93,19 @@ const canReadDecryptedParams = async (routeContext: RouteContext) => {
   return capabilities.uptime?.canReadParamValues ?? false;
 };
 
-const getDecryptedParams = async ({ server, spaceId }: RouteContext, paramId?: string) => {
+const getDecryptedParam = async ({ server, spaceId }: RouteContext, paramId: string) => {
   const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
+  const savedObject =
+    await encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsParams>(
+      syntheticsParamType,
+      paramId,
+      { namespace: spaceId }
+    );
+  return toClientResponse(savedObject);
+};
 
-  if (paramId) {
-    const savedObject =
-      await encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsParams>(
-        syntheticsParamType,
-        paramId,
-        { namespace: spaceId }
-      );
-    return toClientResponse(savedObject);
-  }
+const getDecryptedParamList = async ({ server, spaceId }: RouteContext) => {
+  const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
   const finder =
     await encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsParams>(
       {
@@ -109,7 +115,7 @@ const getDecryptedParams = async ({ server, spaceId }: RouteContext, paramId?: s
       }
     );
 
-  const hits: Array<ReturnType<typeof toClientResponse>> = [];
+  const hits: ParamResponse[] = [];
   for await (const result of finder.find()) {
     hits.push(...result.saved_objects.map(toClientResponse));
   }

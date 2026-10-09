@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { IKibanaResponse } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod';
 import { MAX_MONITOR_BULK_SIZE, routeId } from '../zod_query';
@@ -12,7 +13,10 @@ import type { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import type { DeleteParamsResponse } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
-const deleteMonitors = async (routeContext: RouteContext, monitorIds: string[]): Promise<any> => {
+const deleteMonitors = async (
+  routeContext: RouteContext,
+  monitorIds: string[]
+): Promise<IKibanaResponse | DeleteParamsResponse[]> => {
   const { response } = routeContext;
   const deleteMonitorAPI = new DeleteMonitorAPI(routeContext);
   const { errors, res } = await deleteMonitorAPI.execute({ monitorIds });

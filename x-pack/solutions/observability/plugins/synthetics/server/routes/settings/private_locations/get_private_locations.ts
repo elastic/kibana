@@ -11,7 +11,11 @@ import { z } from '@kbn/zod';
 import { routeId } from '../../zod_query';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
 import type { AgentPolicyInfo } from '../../../../common/types';
-import type { SyntheticsRestApiRouteFactory, SyntheticsRouteHandler } from '../../types';
+import type {
+  RouteContext,
+  SyntheticsRestApiRouteFactory,
+  SyntheticsRouteHandler,
+} from '../../types';
 import type { PrivateLocation, SyntheticsPrivateLocations } from '../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
@@ -19,23 +23,33 @@ import type { SyntheticsPrivateLocationsAttributes } from '../../../runtime_type
 import type { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { allLocationsToClientContract } from './helpers';
 
-const getPrivateLocationsHandler: SyntheticsRouteHandler<
-  SyntheticsPrivateLocations | PrivateLocation,
-  { locationId?: string }
-> = async (routeContext) => {
-  const { savedObjectsClient, syntheticsMonitorClient, request, response, server } = routeContext;
-
+const loadPrivateLocations = async ({
+  savedObjectsClient,
+  syntheticsMonitorClient,
+  server,
+}: RouteContext): Promise<SyntheticsPrivateLocations> => {
   const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
   await migrateLegacyPrivateLocations(internalSOClient, server.logger);
-
-  const { locationId: id } = request.params;
 
   const { locations, agentPolicies } = await getPrivateLocationsAndAgentPolicies(
     savedObjectsClient,
     syntheticsMonitorClient
   );
-  const list = allLocationsToClientContract({ locations }, agentPolicies);
-  if (!id) return list;
+  return allLocationsToClientContract({ locations }, agentPolicies);
+};
+
+const getPrivateLocationsHandler: SyntheticsRouteHandler<SyntheticsPrivateLocations> = async (
+  routeContext
+) => loadPrivateLocations(routeContext);
+
+const getPrivateLocationHandler: SyntheticsRouteHandler<
+  PrivateLocation,
+  { locationId: string }
+> = async (routeContext) => {
+  const { request, response } = routeContext;
+  const { locationId: id } = request.params;
+
+  const list = await loadPrivateLocations(routeContext);
   const location = list.find((loc) => loc.id === id || loc.label === id);
   if (!location) {
     return response.notFound({
@@ -48,7 +62,7 @@ const getPrivateLocationsHandler: SyntheticsRouteHandler<
 };
 
 export const getPrivateLocationsRoute: SyntheticsRestApiRouteFactory<
-  SyntheticsPrivateLocations | PrivateLocation
+  SyntheticsPrivateLocations
 > = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS,
@@ -57,7 +71,7 @@ export const getPrivateLocationsRoute: SyntheticsRestApiRouteFactory<
 });
 
 export const getPrivateLocationRoute: SyntheticsRestApiRouteFactory<
-  SyntheticsPrivateLocations | PrivateLocation,
+  PrivateLocation,
   { locationId: string }
 > = () => ({
   method: 'GET',
@@ -70,7 +84,7 @@ export const getPrivateLocationRoute: SyntheticsRestApiRouteFactory<
       }),
     },
   },
-  handler: getPrivateLocationsHandler,
+  handler: getPrivateLocationHandler,
 });
 
 export const getPrivateLocationsAndAgentPolicies = async (
