@@ -13,31 +13,9 @@ describe('DispatchPlan', () => {
   const alert2 = createAlert({ rule_id: 'r2', group_hash: 'h2', alert_id: 'e2' });
   const alert3 = createAlert({ rule_id: 'r3', group_hash: 'h3', alert_id: 'e3' });
 
-  it('reports emptiness', () => {
-    const plan = DispatchPlan.of({
-      toDispatch: [createActionGroup({ id: 'g1', alerts: [alert1] })],
-      throttled: [createActionGroup({ id: 'g2', alerts: [alert2] })],
-      dispatchable: [alert1, alert2],
-    });
-
-    expect(plan.isEmpty()).toBe(false);
-    expect(DispatchPlan.empty().isEmpty()).toBe(true);
-  });
-
   describe('alreadyNotified', () => {
     it('defaults to an empty list', () => {
       expect(DispatchPlan.empty().alreadyNotified).toEqual([]);
-    });
-
-    it('is not empty when only already-notified groups are planned', () => {
-      const plan = DispatchPlan.of({
-        toDispatch: [],
-        throttled: [],
-        alreadyNotified: [createActionGroup({ id: 'g1', alerts: [alert1] })],
-        dispatchable: [alert1],
-      });
-
-      expect(plan.isEmpty()).toBe(false);
     });
 
     it('excludes already-notified alerts from unmatched', () => {
@@ -57,6 +35,7 @@ describe('DispatchPlan', () => {
       const plan = DispatchPlan.of({
         toDispatch: [createActionGroup({ id: 'g1', alerts: [alert1] })],
         throttled: [createActionGroup({ id: 'g2', alerts: [alert2] })],
+        alreadyNotified: [],
         dispatchable: [alert1, alert2, alert3],
       });
 
@@ -67,6 +46,7 @@ describe('DispatchPlan', () => {
       const plan = DispatchPlan.of({
         toDispatch: [],
         throttled: [],
+        alreadyNotified: [],
         dispatchable: [alert1, alert2],
       });
 
@@ -77,6 +57,7 @@ describe('DispatchPlan', () => {
       const plan = DispatchPlan.of({
         toDispatch: [createActionGroup({ id: 'g1', alerts: [alert1, alert2] })],
         throttled: [],
+        alreadyNotified: [],
         dispatchable: [alert1, alert2],
       });
 

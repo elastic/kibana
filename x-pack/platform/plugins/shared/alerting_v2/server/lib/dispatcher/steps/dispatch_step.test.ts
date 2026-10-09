@@ -7,7 +7,7 @@
 
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
-import type { BulkScheduleWorkflowResult, WorkflowDetailDto } from '@kbn/workflows';
+import type { BulkScheduleWorkflowResult } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { EventLogServiceContract } from '../../services/event_log_service/event_log_service';
@@ -26,6 +26,7 @@ import {
   createAlert,
   createDispatcherPipelineInput,
   createDispatcherPipelineState,
+  createWorkflowDetailDto,
 } from '../fixtures/test_utils';
 import type { DispatchFailure } from '../types';
 import { DISPATCH_FAILURE_REASONS } from './constants';
@@ -60,23 +61,6 @@ const createMockWorkflowsManagement = (): jest.Mocked<WorkflowsServerPluginSetup
     })),
   } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
 };
-
-const createWorkflowDetailDto = (
-  overrides: Partial<WorkflowDetailDto> = {}
-): WorkflowDetailDto => ({
-  id: 'workflow-1',
-  name: 'Test Workflow',
-  description: 'A test workflow',
-  enabled: true,
-  createdAt: '2026-01-01T00:00:00.000Z',
-  createdBy: 'elastic',
-  lastUpdatedAt: '2026-01-01T00:00:00.000Z',
-  lastUpdatedBy: 'elastic',
-  definition: null,
-  yaml: 'name: Test Workflow',
-  valid: true,
-  ...overrides,
-});
 
 const scheduled = (workflowExecutionId: string): BulkScheduleWorkflowResult[number] => ({
   status: 'scheduled',
@@ -113,10 +97,11 @@ describe('DispatchStep', () => {
 
   afterEach(() => jest.clearAllMocks());
 
-  const scheduleAll = () =>
-    mockWfm.bulkScheduleWorkflow.mockImplementation(async (items) =>
-      items.map((_, i) => scheduled(`exec-${i}`))
-    );
+  const scheduleAll = (onSchedule: () => void = () => {}) =>
+    mockWfm.bulkScheduleWorkflow.mockImplementation(async (items) => {
+      onSchedule();
+      return items.map((_, i) => scheduled(`exec-${i}`));
+    });
 
   it('dispatches each group to its workflow destinations', async () => {
     const step = createStep();
@@ -293,41 +278,6 @@ describe('DispatchStep', () => {
     expect(result).toEqual({ type: 'halt', reason: 'no_actions' });
     expect(mockLogger.debug).not.toHaveBeenCalled();
     expect(mockWfm.getWorkflowsByIdsForRequests).not.toHaveBeenCalled();
-  });
-
-  it('records fire and notified for a dispatched group after its chunk', async () => {
-    const step = createStep();
-    mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
-      { status: 'fulfilled', value: [createWorkflowDetailDto()] },
-    ]);
-    scheduleAll();
-    const alert = createAlert({ alert_id: 'alert-1', group_hash: 'hash-1' });
-
-    const result = await step.execute(
-      createDispatcherPipelineState({
-        dispatch: [createActionGroup({ id: 'g1', policyId: 'p1', alerts: [alert] })],
-        policies: new Map([['p1', createActionPolicy({ id: 'p1', apiKey: API_KEY })]]),
-      }),
-      loggerService
-    );
-
-    expect(result.type).toBe('continue');
-    expect(mockStorageService.bulkIndexDocs).toHaveBeenCalledTimes(1);
-    expect(committedDocs()).toEqual([
-      expect.objectContaining({
-        action_type: 'notified',
-        action_group_id: 'g1',
-        alert_id: 'alert-1',
-        last_series_event_timestamp: alert.last_event_timestamp,
-      }),
-      expect.objectContaining({
-        action_type: 'fire',
-        group_hash: 'hash-1',
-        reason: 'dispatched by policy p1',
-      }),
-    ]);
-    expect(mockEventLogger.logEvent).toHaveBeenCalledTimes(1);
-    expect(mockEventLogger.logEvent.mock.calls[0][0]?.event?.action).toBe('dispatched');
   });
 
   it('continues dispatching remaining groups when one group fails', async () => {
@@ -973,23 +923,13 @@ describe('DispatchStep', () => {
     mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
       { status: 'fulfilled', value: [createWorkflowDetailDto()] },
     ]);
-    mockWfm.bulkScheduleWorkflow.mockImplementation(async (items) => {
-      controller.abort();
-      return items.map((_, i) => scheduled(`exec-${i}`));
-    });
+    scheduleAll(() => controller.abort());
 
     const policy = createActionPolicy({ id: 'p1', apiKey: API_KEY });
-    const groups = Array.from({ length: DISPATCH_CHUNK_SIZE + 1 }, (_, i) =>
-      createActionGroup({
-        id: `g${i}`,
-        policyId: 'p1',
-        destinations: [{ type: 'workflow', id: 'workflow-1' }],
-      })
-    );
 
     const result = await step.execute(
       createDispatcherPipelineState({
-        dispatch: groups,
+        dispatch: createGroups(DISPATCH_CHUNK_SIZE + 1, 'p1'),
         policies: new Map([['p1', policy]]),
         input: createDispatcherPipelineInput({ signal: controller.signal }),
       }),
@@ -999,13 +939,6 @@ describe('DispatchStep', () => {
     expect(result).toEqual({ type: 'halt', reason: 'aborted' });
     expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
     expect(mockWfm.bulkScheduleWorkflow.mock.calls[0][0]).toHaveLength(DISPATCH_CHUNK_SIZE);
-    // Every group carries the default alert, so its series still waits for the last group.
-    const docs = committedDocs();
-    expect(docs).toHaveLength(DISPATCH_CHUNK_SIZE);
-    expect(docs.every(({ action_type: actionType }) => actionType === 'notified')).toBe(true);
-    expect(docs.map(({ action_group_id: groupId }) => groupId)).not.toContain(
-      `g${DISPATCH_CHUNK_SIZE}`
-    );
   });
 
   it('continues other API keys when one chunk throws', async () => {
@@ -1083,23 +1016,8 @@ describe('DispatchStep', () => {
         last_event_timestamp: '2026-01-22T07:00:00.000Z',
       });
 
-      it('halts with no_actions when every bucket is empty', async () => {
+      it('records a dispatched alert with notified and fire after its chunk', async () => {
         const result = await createStep().execute(
-          createDispatcherPipelineState({
-            dispatchable: [],
-            suppressed: [],
-            throttled: [],
-            dispatch: [],
-          }),
-          loggerService
-        );
-
-        expect(result).toEqual({ type: 'halt', reason: 'no_actions' });
-        expect(mockStorageService.bulkIndexDocs).not.toHaveBeenCalled();
-      });
-
-      it('records a dispatched alert with notified and fire', async () => {
-        await createStep().execute(
           createDispatcherPipelineState({
             dispatch: [createActionGroup({ id: 'group-1', policyId: 'p1', alerts: [alert] })],
             policies,
@@ -1107,6 +1025,8 @@ describe('DispatchStep', () => {
           loggerService
         );
 
+        expect(result.type).toBe('continue');
+        expect(mockStorageService.bulkIndexDocs).toHaveBeenCalledTimes(1);
         expect(committedDocs()).toEqual([
           {
             actor: { type: 'internal' },
@@ -1132,26 +1052,8 @@ describe('DispatchStep', () => {
             reason: 'dispatched by policy p1',
           },
         ]);
-      });
-
-      it('includes alert_status on the notified record for per_alert policies', async () => {
-        await createStep().execute(
-          createDispatcherPipelineState({
-            dispatch: [
-              createActionGroup({
-                id: 'group-1',
-                policyId: 'p1',
-                alerts: [{ ...alert, alert_status: 'recovering' }],
-              }),
-            ],
-            policies,
-          }),
-          loggerService
-        );
-
-        expect(committedDocs()).toContainEqual(
-          expect.objectContaining({ action_type: 'notified', alert_status: 'recovering' })
-        );
+        expect(mockEventLogger.logEvent).toHaveBeenCalledTimes(1);
+        expect(mockEventLogger.logEvent.mock.calls[0][0]?.event?.action).toBe('dispatched');
       });
 
       it('omits alert_status on the notified record for all policies', async () => {
@@ -1420,10 +1322,7 @@ describe('DispatchStep', () => {
     describe('abort', () => {
       it('keeps the commit of the chunk in flight and leaves a shared series unrecorded', async () => {
         const controller = new AbortController();
-        mockWfm.bulkScheduleWorkflow.mockImplementationOnce(async (items) => {
-          controller.abort();
-          return items.map((_, i) => scheduled(`exec-${i}`));
-        });
+        scheduleAll(() => controller.abort());
         const sharing = createActionGroup({ id: 'g-share', policyId: 'p1', alerts: [alertFor(0)] });
 
         const result = await createStep().execute(
@@ -1520,10 +1419,7 @@ describe('DispatchStep', () => {
 
       it('reports only what an aborted tick concluded and recorded', async () => {
         const controller = new AbortController();
-        mockWfm.bulkScheduleWorkflow.mockImplementationOnce(async (items) => {
-          controller.abort();
-          return items.map((_, i) => scheduled(`exec-${i}`));
-        });
+        scheduleAll(() => controller.abort());
         const throttledShared = createActionGroup({
           id: 'g-t1',
           policyId: 'p1',

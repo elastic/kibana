@@ -360,8 +360,9 @@ export const getAlertDataQueries = (
   });
 };
 
-// Returns one request per chunk (see ALREADY_NOTIFIED_IN_CLAUSE_LITERAL_BUDGET_BYTES). Safe to
-// concat: STATS keys on (action_group_id, alert_id), the pair used for chunking.
+// Returns one request per chunk (see ALREADY_NOTIFIED_IN_CLAUSE_LITERAL_BUDGET_BYTES). The two IN
+// lists can also match pairs that were not requested, and a pair can come back from two chunks:
+// the step looks up requested pairs only, and every row of a pair carries the same MAX.
 //
 // Matches only `notified` records carrying an alert_id. Records written before notified became
 // per-alert have none, so they never mark content as delivered: a legacy record can cause a

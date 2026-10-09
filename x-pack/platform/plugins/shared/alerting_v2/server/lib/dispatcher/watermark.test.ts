@@ -7,7 +7,7 @@
 
 import { computeNextWatermark } from './watermark';
 import { createAlert, createDispatcherPipelineInput } from './fixtures/test_utils';
-import { AlertScan, DispatchOutcome } from './state';
+import { AlertScan } from './state';
 import type { DispatcherPipelineResult } from './types';
 
 const BASE_INPUT = createDispatcherPipelineInput({
@@ -47,27 +47,6 @@ describe('computeNextWatermark', () => {
             input: BASE_INPUT,
             scan: AlertScan.of({
               alerts: [createAlert({ last_event_timestamp: '2026-01-22T07:34:00.000Z' })],
-            }),
-          },
-        }),
-      });
-
-      expect(result.toISOString()).toBe('2026-01-22T07:30:00.000Z');
-    });
-  });
-
-  describe('aborted after recording some alerts', () => {
-    it('holds even when the tick recorded alerts', () => {
-      const result = computeNextWatermark({
-        input: BASE_INPUT,
-        result: makeResult({
-          completed: false,
-          haltReason: 'aborted',
-          finalState: {
-            input: BASE_INPUT,
-            outcome: DispatchOutcome.of({
-              executionsByGroup: new Map([['g1', ['exec-1']]]),
-              failures: [],
             }),
           },
         }),

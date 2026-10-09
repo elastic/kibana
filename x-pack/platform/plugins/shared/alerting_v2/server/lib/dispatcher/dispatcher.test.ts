@@ -55,7 +55,11 @@ import {
   createLastNotifiedTimestampsResponse,
   createSeriesSuppressionsResponse,
 } from './fixtures/dispatcher';
-import { createAlert, createAlertSuppressionRow } from './fixtures/test_utils';
+import {
+  createAlert,
+  createAlertSuppressionRow,
+  createWorkflowDetailDto,
+} from './fixtures/test_utils';
 import { AlertScan } from './state';
 import { getDispatchableAlertEventsQuery } from './queries';
 import {
@@ -201,7 +205,12 @@ describe('DispatcherService', () => {
 
   const bulkOperations = () =>
     storageEsClient.bulk.mock.calls.flatMap(([{ operations }]) => operations ?? []);
-  const indexedDocs = () => bulkOperations().filter((_, index) => index % 2 === 1) as AlertAction[];
+  const docsOfBulkCall = (callIndex: number) =>
+    (storageEsClient.bulk.mock.calls[callIndex][0].operations ?? []).filter(
+      (_, index) => index % 2 === 1
+    ) as AlertAction[];
+  const indexedDocs = () =>
+    storageEsClient.bulk.mock.calls.flatMap((_, callIndex) => docsOfBulkCall(callIndex));
 
   beforeEach(() => {
     ({ queryService, mockEsClient: queryEsClient } = createQueryService());
@@ -1340,19 +1349,7 @@ describe('DispatcherService', () => {
   });
 
   describe('abort mid-dispatch', () => {
-    const workflow: WorkflowDetailDto = {
-      id: 'workflow-test-id',
-      name: 'Test Workflow',
-      description: 'A test workflow',
-      enabled: true,
-      createdAt: '2026-01-01T00:00:00.000Z',
-      createdBy: 'elastic',
-      lastUpdatedAt: '2026-01-01T00:00:00.000Z',
-      lastUpdatedBy: 'elastic',
-      definition: null,
-      yaml: 'name: Test Workflow',
-      valid: true,
-    };
+    const workflow = createWorkflowDetailDto({ id: 'workflow-test-id' });
     const alerts = Array.from({ length: DISPATCH_CHUNK_SIZE + 1 }, (_, i) =>
       createAlert({
         alert_id: `alert-${i}`,
@@ -1385,11 +1382,6 @@ describe('DispatcherService', () => {
         onSchedule();
         return items.map((_, i) => ({ status: 'scheduled', workflowExecutionId: `exec-${i}` }));
       });
-
-    const docsOfBulkCall = (index: number) =>
-      (storageEsClient.bulk.mock.calls[index][0].operations ?? []).filter(
-        (_, i) => i % 2 === 1
-      ) as AlertAction[];
 
     const buildAbortableService = (
       bulkScheduleWorkflow: jest.Mock,

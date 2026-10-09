@@ -95,23 +95,20 @@ const addMapSet = <K, V>(map: Map<K, Set<V>>, key: K, value: V): void => {
 /**
  * Packs schedule items into chunks of at most `maxItems` without splitting a group: once a chunk
  * returns, every destination of its groups has been attempted. A group with more destinations than
- * `maxItems` gets a chunk of its own. Relies on a group's items being adjacent in `pending`.
+ * `maxItems` gets a chunk of its own.
  */
-const chunkByGroup = (pending: PendingSchedule[], maxItems: number): PendingSchedule[][] => {
+const chunkByGroup = (
+  itemsByGroup: ReadonlyMap<ActionGroupId, PendingSchedule[]>,
+  maxItems: number
+): PendingSchedule[][] => {
   const chunks: PendingSchedule[][] = [];
   let current: PendingSchedule[] = [];
-  let start = 0;
-  while (start < pending.length) {
-    const groupId = pending[start].group.id;
-    let end = start + 1;
-    while (end < pending.length && pending[end].group.id === groupId) end++;
-    const groupItems = pending.slice(start, end);
+  for (const groupItems of itemsByGroup.values()) {
     if (current.length > 0 && current.length + groupItems.length > maxItems) {
       chunks.push(current);
       current = [];
     }
     current.push(...groupItems);
-    start = end;
   }
   if (current.length > 0) chunks.push(current);
   return chunks;
@@ -281,19 +278,21 @@ export class DispatchStep implements DispatcherStep {
     await this.prefetchWorkflows(batches);
     for (const { groups: batchGroups, request, workflowsBySpace, failedSpaces } of batches) {
       if (signal.aborted) return;
-      const pending = this.buildPendingSchedules(
-        batchGroups,
-        workflowsBySpace,
-        failedSpaces,
-        dispatchFailures,
-        logger
+      const pendingByGroup = Map.groupBy(
+        this.buildPendingSchedules(
+          batchGroups,
+          workflowsBySpace,
+          failedSpaces,
+          dispatchFailures,
+          logger
+        ),
+        ({ group }) => group.id
       );
-      const scheduledGroupIds = new Set(pending.map(({ group }) => group.id));
-      const unscheduledGroups = batchGroups.filter(({ id }) => !scheduledGroupIds.has(id));
+      const unscheduledGroups = batchGroups.filter(({ id }) => !pendingByGroup.has(id));
       if (unscheduledGroups.length > 0) {
         yield unscheduledGroups;
       }
-      for (const chunk of chunkByGroup(pending, DISPATCH_CHUNK_SIZE)) {
+      for (const chunk of chunkByGroup(pendingByGroup, DISPATCH_CHUNK_SIZE)) {
         if (signal.aborted) return;
         await withDispatcherSpan('dispatch_chunk', () =>
           this.dispatchChunk(

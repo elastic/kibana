@@ -629,7 +629,6 @@ describe('ApplyThrottlingStep alreadyNotified', () => {
     if (result.type !== 'continue') return;
     expect(result.data?.plan?.alreadyNotified).toEqual(alreadyNotified);
     expect(result.data?.plan?.unmatched).toEqual([]);
-    expect(result.data?.plan?.isEmpty()).toBe(false);
   });
 
   it('carries already-notified groups next to the throttling decision', async () => {
