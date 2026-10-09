@@ -65,6 +65,7 @@ export const FeedbackActions: React.FC<FeedbackActionsProps> = ({ executionId })
       agentId: conversation?.agent_id,
       connectorId: usage?.connector_id,
       model: usage?.model,
+      traceId: terminalEvent?.data.trace_id,
       inputTokens: usage?.input_tokens,
       outputTokens: usage?.output_tokens,
       llmCalls: usage?.llm_calls,

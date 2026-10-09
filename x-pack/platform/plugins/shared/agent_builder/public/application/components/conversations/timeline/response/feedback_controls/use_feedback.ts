@@ -55,6 +55,7 @@ interface FeedbackEbtContext {
   connectorId?: string;
   model?: string;
   agentId?: string;
+  traceId?: string | string[];
   inputTokens?: number;
   outputTokens?: number;
   llmCalls?: number;
@@ -67,6 +68,7 @@ const makeEbtPayload = (ctx: FeedbackEbtContext | undefined) => ({
   connector_id: ctx?.connectorId,
   model: ctx?.model,
   agent_id: ctx?.agentId,
+  trace_id: Array.isArray(ctx?.traceId) ? ctx.traceId[0] : ctx?.traceId,
   input_tokens: ctx?.inputTokens,
   output_tokens: ctx?.outputTokens,
   llm_calls: ctx?.llmCalls,
@@ -99,9 +101,13 @@ export const useFeedback = (
   const isSubmittingRef = useRef(false);
   const isSubmitInFlightRef = useRef(false);
   const voteRef = useRef(vote);
+  const chipsRef = useRef(chips);
+  const commentRef = useRef(comment);
   const timer1Ref = useRef<ReturnType<typeof setTimeout> | null>(null);
   const timer2Ref = useRef<ReturnType<typeof setTimeout> | null>(null);
   voteRef.current = vote;
+  chipsRef.current = chips;
+  commentRef.current = comment;
   isSubmittingRef.current = isSubmitting;
 
   const clearSubmittedTimers = useCallback(() => {
@@ -146,7 +152,7 @@ export const useFeedback = (
           .then(() => {
             invalidateConversation();
             services.analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.FeedbackRetracted, {
-              round_id: executionId,
+              execution_id: executionId,
               conversation_id: conversationId,
               ...makeEbtPayload(ebtContext),
             });
@@ -176,6 +182,15 @@ export const useFeedback = (
         .submitRoundFeedback({ conversationId, executionId, vote: next })
         .then(() => {
           invalidateConversation();
+          if (next === 'up') {
+            services.analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted, {
+              execution_id: executionId,
+              conversation_id: conversationId,
+              vote: next,
+              chips: [],
+              ...makeEbtPayload(ebtContext),
+            });
+          }
         })
         .catch(() => {
           addErrorToast({ title: labels.voteError });
@@ -210,7 +225,17 @@ export const useFeedback = (
 
   const closeModal = useCallback(() => {
     setModalOpen(false);
-  }, []);
+    if (!isSubmitInFlightRef.current && voteRef.current === 'down') {
+      services.analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted, {
+        execution_id: executionId,
+        conversation_id: conversationId,
+        vote: 'down',
+        chips: chipsRef.current as string[],
+        ...(commentRef.current.trim().length > 0 ? { comment: commentRef.current.trim() } : {}),
+        ...makeEbtPayload(ebtContext),
+      });
+    }
+  }, [conversationId, ebtContext, executionId, services.analytics]);
 
   const dismissInvite = useCallback(() => setInviteVisible(false), []);
 
@@ -227,7 +252,7 @@ export const useFeedback = (
       .then(() => {
         invalidateConversation();
         services.analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted, {
-          round_id: executionId,
+          execution_id: executionId,
           conversation_id: conversationId,
           vote: currentVote,
           chips: chips as string[],
