@@ -71,7 +71,7 @@ const mockManagedRule = {
   metadata: {
     name: 'Detection Rule',
     tags: [],
-    builder_type: 'security.detection.query',
+    builder: { type: 'security.detection.query' },
     ownership: { managed: true, solution: 'security', domain: 'detection' },
   },
   schedule: { every: '5m' },
@@ -734,7 +734,7 @@ describe('RulesListTable', () => {
       expect(screen.getByTestId('ruleEnabledSwitch-rule-unmanaged')).toBeInTheDocument();
     });
 
-    it('shows a type label badge with the builder_type for a managed rule', () => {
+    it('shows a type label badge with the builder type for a managed rule', () => {
       renderMixed();
 
       expect(screen.getByTestId('managedRuleTypeBadge-rule-managed')).toHaveTextContent(
@@ -742,13 +742,13 @@ describe('RulesListTable', () => {
       );
     });
 
-    it('falls back to "Managed" in the type label when builder_type is absent', () => {
+    it('falls back to "Managed" in the type label when builder is absent', () => {
       const managedRuleNoType = {
         ...mockManagedRule,
         id: 'rule-managed-notype',
         metadata: {
           ...mockManagedRule.metadata,
-          builder_type: undefined,
+          builder: undefined,
         },
       };
       renderTable({ items: [managedRuleNoType] as any, totalItemCount: 1 });

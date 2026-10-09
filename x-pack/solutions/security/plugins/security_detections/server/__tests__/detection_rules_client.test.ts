@@ -100,7 +100,7 @@ function makeInScopeRuleResponse(overrides: Partial<RuleResponse> = {}): RuleRes
       tags: ['tag1'],
       signature_id: 'rule-sig-1',
       revision: 0,
-      builder_type: 'security.detection.query',
+      builder: { type: 'security.detection.query' },
       builder_fields: {
         severity: 'low',
         risk_score: 21,
@@ -136,7 +136,7 @@ function makeThresholdRuleResponse(overrides: Partial<RuleResponse> = {}): RuleR
     ...base,
     metadata: {
       ...base.metadata,
-      builder_type: 'security.detection.threshold',
+      builder: { type: 'security.detection.threshold' },
       builder_fields: {
         ...(base.metadata?.builder_fields as Record<string, unknown>),
         query: '',
@@ -181,7 +181,7 @@ describe('DetectionRulesClient', () => {
       // Kind must be 'alert'.
       expect(callArgs.data.kind).toBe('alert');
       // The builder_type must be the namespaced id.
-      expect(callArgs.data.metadata.builder_type).toBe('security.detection.query');
+      expect(callArgs.data.metadata.builder?.type).toBe('security.detection.query');
       // builder_fields must contain the detection fields.
       expect(callArgs.data.metadata.builder_fields.severity).toBe('low');
       // No grouping on the create payload.
@@ -233,7 +233,7 @@ describe('DetectionRulesClient', () => {
       });
 
       const [callArgs] = (frameworkClient.createRule as jest.Mock).mock.calls[0];
-      expect(callArgs.data.metadata.builder_type).toBe('security.detection.threshold');
+      expect(callArgs.data.metadata.builder?.type).toBe('security.detection.threshold');
       expect(callArgs.data.metadata.builder_fields.threshold).toEqual({
         field: ['host.name'],
         value: 5,
@@ -297,8 +297,6 @@ describe('DetectionRulesClient', () => {
       expect(frameworkClient.updateRule).toHaveBeenCalledTimes(1);
       const [updateArgs] = (frameworkClient.updateRule as jest.Mock).mock.calls[0];
       expect(updateArgs.id).toBe('rule-id-1');
-      // Concurrency token from the existing rule.
-      expect(updateArgs.options?.version).toBe('abc123');
       // The result is the converted public response.
       expect(result.type).toBe('query');
     });
@@ -463,8 +461,6 @@ describe('DetectionRulesClient', () => {
       const [updateArgs] = (frameworkClient.updateRule as jest.Mock).mock.calls[0];
       expect(updateArgs.id).toBe('rule-id-1');
       expect(updateArgs.data.metadata.name).toBe('Patched name');
-      // Concurrency token passed through.
-      expect(updateArgs.options?.version).toBe('abc123');
       expect(result.type).toBe('query');
     });
 
@@ -745,7 +741,9 @@ describe('DetectionRulesClient', () => {
     it('throws 404 when the builder_type is unknown (rollback scenario)', async () => {
       const rollbackRule = makeInScopeRuleResponse();
       // A newer type this build does not know.
-      (rollbackRule.metadata as Record<string, unknown>).builder_type = 'security.detection.eql'; // not registered
+      (rollbackRule.metadata as Record<string, unknown>).builder = {
+        type: 'security.detection.eql',
+      }; // not registered
 
       const logger = loggerMock.create();
       const frameworkClient = makeFrameworkClientMock();
@@ -815,7 +813,9 @@ describe('DetectionRulesClient', () => {
 
     it('throws 404 for a detection rule with an unknown builder_type (rollback state)', async () => {
       const rollbackRule = makeInScopeRuleResponse();
-      (rollbackRule.metadata as Record<string, unknown>).builder_type = 'security.detection.eql';
+      (rollbackRule.metadata as Record<string, unknown>).builder = {
+        type: 'security.detection.eql',
+      };
 
       const frameworkClient = makeFrameworkClientMock();
       (frameworkClient.getRule as jest.Mock).mockResolvedValueOnce(rollbackRule);

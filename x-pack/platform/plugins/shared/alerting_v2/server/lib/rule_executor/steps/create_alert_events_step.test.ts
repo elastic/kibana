@@ -425,7 +425,7 @@ describe('CreateAlertEventsStep', () => {
       const rule = createRuleResponse({
         kind: 'signal',
         metadata: {
-          builder_type: 'test.enrichment',
+          builder: { type: 'test.enrichment' },
           builder_fields: { severity: 'high' },
           signature_id: 'sig-001',
         },
@@ -443,7 +443,7 @@ describe('CreateAlertEventsStep', () => {
 
       const rule = createRuleResponse({
         kind: 'signal',
-        metadata: { builder_type: 'test.enrichment', builder_fields: { severity: 'high' } },
+        metadata: { builder: { type: 'test.enrichment' }, builder_fields: { severity: 'high' } },
       });
       const esqlRowBatch = [{ 'host.name': 'host-a', severity: 'low' }];
       const state = createRulePipelineState({

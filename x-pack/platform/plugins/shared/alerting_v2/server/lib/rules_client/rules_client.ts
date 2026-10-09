@@ -105,6 +105,7 @@ import type {
 } from './types';
 import {
   assertBuilderTypeTransitionNotManaged,
+  requestedBuilderType,
   resolveCreateRuleBuilder,
   resolveReplaceRuleBuilder,
   resolveUpdateRuleBuilder,
@@ -220,8 +221,8 @@ const FIXED_SORT_FIELD_MAP: Record<string, string> = {
   // Targets the `.keyword` sub-field of the `text` mapping so sort is
   // lexicographic rather than score-based.
   name: 'metadata.name.keyword',
-  // Phase 4: builder_type is keyword-indexed (squashed model version '7';
-  // originally designed as a standalone model version '10' on this POC branch).
+  // Phase 4: builder_type is keyword-indexed (squashed model version '10';
+  // originally designed as a standalone model version '13' on this POC branch).
   builder_type: 'metadata.builder_type',
 };
 
@@ -497,13 +498,13 @@ export class RulesClient {
       registry: this.builderTypeRegistry,
       callerIdentity: this.callerIdentity,
       storedOwnership: undefined,
-      builderType: data.metadata?.builder_type,
+      builderType: data.metadata?.builder?.type,
     });
 
     // Kind-pin check: if the builder type's registration pins a kind, the
     // create body must supply that kind.
     // Ref: rule-type-registration.md "Registration-time checks" (check 5, per-write half)
-    assertKindPinMatch(this.builderTypeRegistry, data.kind, data.metadata?.builder_type);
+    assertKindPinMatch(this.builderTypeRegistry, data.kind, data.metadata?.builder?.type);
 
     const resolved = resolveCreateRuleBuilder(this.builderTypeRegistry, data, {
       validateBuilderFields,
@@ -517,7 +518,7 @@ export class RulesClient {
     // Ref: rule-ownership.md "Caller identity"
     const ownership = deriveOwnership(
       this.builderTypeRegistry,
-      data.metadata?.builder_type,
+      data.metadata?.builder?.type,
       this.callerIdentity?.app
     );
 
@@ -715,7 +716,7 @@ export class RulesClient {
    * Ref: rule-validation.md "Rules whose builder type is not registered"
    */
   private validateBuilderFieldsForRule(rule: RuleResponse): BuilderFieldsValidation {
-    const builderType = rule.metadata.builder_type;
+    const builderType = rule.metadata.builder?.type;
     const builderFields = rule.metadata.builder_fields;
 
     if (!builderType || builderFields == null) {
@@ -932,7 +933,7 @@ export class RulesClient {
   }
 
   @withApm
-  public async updateRule({ id, data }: UpdateRuleParams): Promise<RuleResponse> {
+  public async updateRule({ id, data, options }: UpdateRuleParams): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(updateRuleDataSchema, data, 'update');
     if (parsed.artifacts !== undefined) {
@@ -969,7 +970,7 @@ export class RulesClient {
     assertBuilderTypeTransitionNotManaged(
       this.builderTypeRegistry,
       id,
-      parsed.metadata?.builder_type,
+      requestedBuilderType(parsed.metadata),
       existingAttrs.metadata.builder_type,
       existingAttrs.metadata.ownership
     );
@@ -993,7 +994,7 @@ export class RulesClient {
     assertKindPinMatch(
       this.builderTypeRegistry,
       existingAttrs.kind,
-      parsed.metadata?.builder_type ?? existingAttrs.metadata.builder_type
+      parsed.metadata?.builder?.type ?? existingAttrs.metadata.builder_type
     );
 
     // Immutability check: omitted keeps stored value, equal passes, different rejects.
@@ -1400,7 +1401,7 @@ export class RulesClient {
     matcher,
     page,
     perPage,
-  }: FindMatchingRulesArgs = {}): Promise<FindRulesResponse> {
+  }: FindMatchingRulesArgs = {}): Promise<FindRulesResult> {
     return this.findRules({
       page,
       perPage,
@@ -2244,14 +2245,14 @@ export class RulesClient {
     const exists = await this.ruleExists({ id });
 
     if (!exists) {
-      // Normalise `null` → `undefined` for builder_type before the create path.
+      // Normalise `null` → `undefined` for the builder before the create path.
       // The null escape hatch is only meaningful in the replace branch; createRule
       // uses createRuleDataSchema which does not accept null.
       const createData: CreateRuleData = {
         ...data,
         metadata: {
           ...data.metadata,
-          builder_type: data.metadata.builder_type ?? undefined,
+          builder: data.metadata.builder ?? undefined,
         },
       };
       const rule = await this.createRule({
@@ -2286,7 +2287,7 @@ export class RulesClient {
     assertBuilderTypeTransitionNotManaged(
       this.builderTypeRegistry,
       id,
-      parsed.metadata?.builder_type,
+      requestedBuilderType(parsed.metadata),
       existingAttrs.metadata.builder_type,
       existingAttrs.metadata.ownership
     );
@@ -2302,7 +2303,7 @@ export class RulesClient {
     // parsed.kind equals the stored kind, so checking parsed.kind here is
     // equivalent to checking the stored kind.
     // Ref: rule-type-registration.md "Registration-time checks" (check 5, per-write half)
-    assertKindPinMatch(this.builderTypeRegistry, parsed.kind, parsed.metadata?.builder_type);
+    assertKindPinMatch(this.builderTypeRegistry, parsed.kind, parsed.metadata?.builder?.type);
     // PUT replaces the whole resource, but a stored builder relationship must
     // not be silently stripped. resolveReplaceRuleBuilder runs the same
     // BUILDER_TYPE_NOT_CLEARED guard as the PATCH path, for every builder rule,

@@ -259,9 +259,9 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         sortable: true,
         render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => {
           // The browser does not have the server-side builder type registry, so
-          // display name is not available. Fall back to the raw builder_type id.
+          // display name is not available. Fall back to the raw builder type id.
           // Ref: rule-ownership.md "Reads stay open"; step 5.5 orchestrator notes.
-          const managedTypeLabel = metadata?.builder_type ?? undefined;
+          const managedTypeLabel = metadata?.builder?.type ?? undefined;
           return (
             <div>
               <EuiLink

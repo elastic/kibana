@@ -190,7 +190,7 @@ function resolveExecutionTimeUpdate(
     // null signals buildUpdateRuleAttributes to clear any stale stored query,
     // including one left over from a previous write-time builder type.
     query: null,
-    metadata: { ...data.metadata, builder_type: effectiveType },
+    metadata: { ...data.metadata, builder: { type: effectiveType } },
   };
 
   if (!validateBuilderFields) {
@@ -238,6 +238,14 @@ function resolveExecutionTimeUpdate(
  *
  * Ref: rule-ownership.md "The write gate"
  */
+/**
+ * The builder type a write request names: `null` when the request clears the
+ * builder with `metadata.builder: null`, `undefined` when it omits the builder.
+ */
+export const requestedBuilderType = (
+  metadata: { builder?: { type: string } | null } | undefined
+): string | null | undefined => (metadata?.builder === null ? null : metadata?.builder?.type);
+
 export function assertBuilderTypeTransitionNotManaged(
   registry: BuilderTypeRegistry,
   ruleId: string,
@@ -315,7 +323,8 @@ export function resolveCreateRuleBuilder(
   data: CreateRuleData,
   options?: BuilderResolutionOptions
 ): ResolvedCreateRuleData {
-  const { builder_type: builderType, builder_fields: builderFields } = data.metadata;
+  const builderType = data.metadata.builder?.type;
+  const builderFields = data.metadata.builder_fields;
   const validateBuilderFields = options?.validateBuilderFields ?? true;
 
   if (builderType && builderFields) {
@@ -358,7 +367,7 @@ export function resolveUpdateRuleBuilder(
   existing: RuleSavedObjectAttributes,
   options?: BuilderResolutionOptions
 ): ResolvedUpdateRuleData {
-  const requestedType = data.metadata?.builder_type;
+  const requestedType = requestedBuilderType(data.metadata);
   const requestedFields = data.metadata?.builder_fields;
   const existingType = existing.metadata.builder_type;
   const validateBuilderFields = options?.validateBuilderFields ?? true;
@@ -366,7 +375,7 @@ export function resolveUpdateRuleBuilder(
   if (requestedType === null) {
     if (requestedFields != null) {
       throw Boom.badRequest(
-        `Rule "${ruleId}" cannot set metadata.builder_fields while clearing metadata.builder_type.`,
+        `Rule "${ruleId}" cannot set metadata.builder_fields while clearing metadata.builder.`,
         {
           code: ALERTING_ERROR_CODES.INVALID_BUILDER_FIELDS,
           details: { rule_id: ruleId },
@@ -376,7 +385,7 @@ export function resolveUpdateRuleBuilder(
 
     return {
       ...data,
-      metadata: { ...data.metadata, builder_type: null, builder_fields: null },
+      metadata: { ...data.metadata, builder: null, builder_fields: null },
     };
   }
 
@@ -384,7 +393,7 @@ export function resolveUpdateRuleBuilder(
 
   if (requestedFields === null && effectiveType) {
     throw Boom.badRequest(
-      `Rule "${ruleId}" cannot clear metadata.builder_fields without also clearing metadata.builder_type (send metadata.builder_type: null).`,
+      `Rule "${ruleId}" cannot clear metadata.builder_fields without also clearing metadata.builder (send metadata.builder: null).`,
       {
         code: ALERTING_ERROR_CODES.INVALID_BUILDER_FIELDS,
         details: { rule_id: ruleId, builder_type: effectiveType },
@@ -395,7 +404,7 @@ export function resolveUpdateRuleBuilder(
   if (requestedFields != null) {
     if (!effectiveType) {
       throw Boom.badRequest(
-        `Rule "${ruleId}" has no rule builder, so metadata.builder_fields cannot be set without metadata.builder_type.`,
+        `Rule "${ruleId}" has no rule builder, so metadata.builder_fields cannot be set without metadata.builder.`,
         {
           code: ALERTING_ERROR_CODES.INVALID_BUILDER_FIELDS,
           details: { rule_id: ruleId },
@@ -449,7 +458,7 @@ export function resolveUpdateRuleBuilder(
     const resolvedData = withGenerated(
       {
         ...data,
-        metadata: { ...data.metadata, builder_type: effectiveType },
+        metadata: { ...data.metadata, builder: { type: effectiveType } },
       },
       generated
     );
@@ -490,7 +499,7 @@ export function resolveUpdateRuleBuilder(
     // builder relationship.
     if (registry.get(effectiveType) !== undefined || !requestedType) {
       throw Boom.badRequest(
-        `Rule "${ruleId}" is authored by the "${effectiveType}" rule builder, so its query cannot be changed directly. Send metadata.builder_fields to regenerate it, or metadata.builder_type: null in the same request to confirm the transition to ES|QL mode.`,
+        `Rule "${ruleId}" is authored by the "${effectiveType}" rule builder, so its query cannot be changed directly. Send metadata.builder_fields to regenerate it, or metadata.builder: null in the same request to confirm the transition to ES|QL mode.`,
         {
           code: ALERTING_ERROR_CODES.BUILDER_TYPE_NOT_CLEARED,
           details: { rule_id: ruleId, builder_type: effectiveType },
@@ -532,12 +541,12 @@ export function resolveUpdateRuleBuilder(
  *
  * When the stored rule carries a `builder_type`, a plain PUT body must either
  * supply `metadata.builder_fields` (to regenerate the query through the
- * builder) or send `metadata.builder_type: null` (the explicit escape hatch
+ * builder) or send `metadata.builder: null` (the explicit escape hatch
  * that confirms the transition to ES|QL mode). Any other plain-query body
  * would silently strip the builder relationship, so it is rejected with
  * `BUILDER_TYPE_NOT_CLEARED`.
  *
- * The `metadata.builder_type: null` signal is normalised to `undefined` before
+ * The `metadata.builder: null` signal is normalised to `undefined` before
  * the call reaches `resolveCreateRuleBuilder`, so null never propagates to
  * storage.
  *
@@ -561,17 +570,17 @@ export function resolveReplaceRuleBuilder(
   // No stored builder type, or a stored type with no server-side registration
   // (a legacy client-side builder, whose query the client owns): the replace is
   // a straightforward create-shaped resolution with plain PUT semantics — the
-  // body is the full new state, so an omitted builder_type clears the marker.
+  // body is the full new state, so an omitted builder clears the marker.
   // The strict paths below protect server-generated queries, which only
   // registered types have.
   if (!existingType || registry.get(existingType) === undefined) {
-    // Cast: data.metadata.builder_type is `string | null | undefined` on
+    // Cast: data.metadata.builder is `{ type } | null | undefined` on
     // ReplaceRuleData. The null escape hatch is redundant here, but its
     // contract still holds: normalise null -> undefined so it never reaches
     // storage, exactly as the explicit-clear path below does.
     const normalized =
-      data.metadata?.builder_type === null
-        ? { ...data, metadata: { ...data.metadata, builder_type: undefined } }
+      data.metadata?.builder === null
+        ? { ...data, metadata: { ...data.metadata, builder: undefined } }
         : data;
     return resolveCreateRuleBuilder(registry, normalized as unknown as CreateRuleData, options);
   }
@@ -582,16 +591,16 @@ export function resolveReplaceRuleBuilder(
   //      the builder. The existing builder type is still the effective type;
   //      the create path handles generation.
   //
-  //   2. The PUT body sends `metadata.builder_type: null` — explicit
+  //   2. The PUT body sends `metadata.builder: null` — explicit
   //      transition to ES|QL mode. Strip the builder context before delegating
   //      so null never reaches storage.
   //
-  //   3. The PUT body carries the same `builder_type` as stored, the stored
+  //   3. The PUT body carries the same `builder.type` as stored, the stored
   //      rule has no `builder_fields` (nothing to drop), and the query is
   //      unchanged — faithful round-trip that only changes non-query metadata.
   //      Mirrors PATCH's `queryChanged && effectiveType` check.
   //
-  //   4. Anything else — the PUT body omits or changes `builder_type`, drops
+  //   4. Anything else — the PUT body omits or changes `builder.type`, drops
   //      stored `builder_fields`, or changes the query without any of the
   //      above signals. This would silently corrupt the builder relationship;
   //      reject.
@@ -600,17 +609,17 @@ export function resolveReplaceRuleBuilder(
 
   if (data.metadata?.builder_fields) {
     // Path 1: builder_fields provided → delegate to create-shaped resolution.
-    // The schema already rejected null builder_type together with builder_fields,
+    // The schema already rejected a null builder together with builder_fields,
     // so the cast is safe.
     return resolveCreateRuleBuilder(registry, data as unknown as CreateRuleData, options);
   }
 
-  if (data.metadata?.builder_type === null) {
+  if (data.metadata?.builder === null) {
     // Path 2: explicit clear. Normalise null → undefined so the create path
     // treats this as a plain rule, and null is never written to storage.
     const cleared: CreateRuleData = {
       ...(data as unknown as CreateRuleData),
-      metadata: { ...data.metadata, builder_type: undefined, builder_fields: undefined },
+      metadata: { ...data.metadata, builder: undefined, builder_fields: undefined },
     };
     return resolveCreateRuleBuilder(registry, cleared, options);
   }
@@ -619,14 +628,14 @@ export function resolveReplaceRuleBuilder(
   //
   // Check whether this is a faithful round-trip (Path 3) or a destructive
   // change (Path 4). The round-trip is accepted only when:
-  //   - the body carries the same builder_type as stored (not omitted),
+  //   - the body carries the same builder type as stored (not omitted),
   //   - the stored rule has no builder_fields to drop, and
   //   - the query is identical to the stored query.
   const storedBuilderFields = existing.metadata.builder_fields;
   const storedQuery = existing.query !== undefined ? toApiQuery(existing.query) : undefined;
   const bodyQuery = data.query;
   const queryChanged = !bodyQuery || !isEqual(bodyQuery, storedQuery);
-  const typePreserved = data.metadata?.builder_type === existingType;
+  const typePreserved = data.metadata?.builder?.type === existingType;
 
   if (typePreserved && !storedBuilderFields && !queryChanged) {
     // Path 3: faithful round-trip — pass through unchanged.
@@ -635,7 +644,7 @@ export function resolveReplaceRuleBuilder(
 
   // Path 4: reject.
   throw Boom.badRequest(
-    `Rule "${ruleId}" is authored by the "${existingType}" rule builder, so its query cannot be changed directly. Send metadata.builder_fields to regenerate it, or metadata.builder_type: null in the same request to confirm the transition to ES|QL mode.`,
+    `Rule "${ruleId}" is authored by the "${existingType}" rule builder, so its query cannot be changed directly. Send metadata.builder_fields to regenerate it, or metadata.builder: null in the same request to confirm the transition to ES|QL mode.`,
     {
       code: ALERTING_ERROR_CODES.BUILDER_TYPE_NOT_CLEARED,
       details: { rule_id: ruleId, builder_type: existingType },

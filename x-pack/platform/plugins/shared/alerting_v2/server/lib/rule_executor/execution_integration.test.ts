@@ -258,7 +258,7 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
         kind: 'signal',
         schedule: { every: '5m', lookback: '10m' },
         metadata: {
-          builder_type: FIXTURE_TYPE_ID,
+          builder: { type: FIXTURE_TYPE_ID },
           builder_fields: FIXTURE_FIELDS,
           signature_id: SIGNATURE_ID,
         },
@@ -395,7 +395,7 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
         grouping: undefined,
         schedule: { every: '5m', lookback: '10m' },
         metadata: {
-          builder_type: FIXTURE_TYPE_ID,
+          builder: { type: FIXTURE_TYPE_ID },
           builder_fields: ALERT_FIELDS,
           signature_id: ALERT_SIG_ID,
         },
@@ -471,7 +471,7 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
       const rule = createRuleResponse({
         kind: 'signal',
         metadata: {
-          builder_type: 'unknown.type.not.registered',
+          builder: { type: 'unknown.type.not.registered' },
           builder_fields: { q: 'foo', severity: 'high', risk_score: 10 },
         },
       });
@@ -491,7 +491,7 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
       const rule = createRuleResponse({
         kind: 'signal',
         metadata: {
-          builder_type: FIXTURE_TYPE_ID,
+          builder: { type: FIXTURE_TYPE_ID },
           // q must be a string; a number simulates fields that predate a schema tightening.
           builder_fields: { q: 12345, severity: 'high', risk_score: 10 },
         },
@@ -521,7 +521,7 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
       const rule = createRuleResponse({
         kind: 'signal',
         metadata: {
-          builder_type: FIXTURE_TYPE_ID,
+          builder: { type: FIXTURE_TYPE_ID },
           builder_fields: { q: 'host.name: test', severity: 'high', risk_score: 10 },
         },
       });
@@ -555,7 +555,7 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
       const rule = createRuleResponse({
         kind: 'signal',
         metadata: {
-          builder_type: FIXTURE_TYPE_ID,
+          builder: { type: FIXTURE_TYPE_ID },
           builder_fields: { q: 'host.name: test', severity: 'high', risk_score: 10 },
         },
       });
@@ -587,7 +587,7 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
         recovery: { strategy: 'condition', segment: 'WHERE count <= 10' },
         no_data: { strategy: 'ignore' },
         metadata: {
-          builder_type: FIXTURE_TYPE_ID,
+          builder: { type: FIXTURE_TYPE_ID },
           builder_fields: { q: 'host.name: test', severity: 'high', risk_score: 10 },
         },
       });

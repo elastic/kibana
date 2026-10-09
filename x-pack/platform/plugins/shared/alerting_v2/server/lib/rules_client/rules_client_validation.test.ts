@@ -117,7 +117,7 @@ const baseCreateData = {
   kind: 'signal' as const,
   metadata: {
     name: 'detection-rule',
-    builder_type: EXECUTION_TYPE_ID,
+    builder: { type: EXECUTION_TYPE_ID },
     builder_fields: VALID_FIELDS,
   },
   time_field: '@timestamp',
@@ -240,6 +240,7 @@ describe('RulesClient — builder fields validation switches (step 7.1)', () => 
       ruleEventPublisher,
       createLoggerService().loggerService,
       artifactTypeRegistry,
+      'user',
       builderTypeRegistry,
       callerIdentity
     );

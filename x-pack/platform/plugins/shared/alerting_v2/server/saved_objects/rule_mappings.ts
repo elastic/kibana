@@ -70,8 +70,8 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
           },
         },
 
-        // Mirrors the squashed model version '7' framework-fields mappings_addition verbatim.
-        // (Originally designed as a standalone model version '10' on this POC branch;
+        // Mirrors the squashed model version '10' framework-fields mappings_addition verbatim.
+        // (Originally designed as a standalone model version '13' on this POC branch;
         // see the commented block in rule_model_versions.ts for the per-version story.)
         // Kibana core validates at startup that every addition declared in
         // a model version is present verbatim in the static mappings.

@@ -153078,16 +153078,23 @@ components:
       additionalProperties: false
       type: object
       properties:
+        builder:
+          additionalProperties: false
+          description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL. Send null on a PUT replace to explicitly clear the builder relationship and switch the rule to ES|QL mode.
+          nullable: true
+          type: object
+          properties:
+            type:
+              description: Rule builder type.
+              maxLength: 64
+              minLength: 1
+              type: string
+          required:
+            - type
         builder_fields:
           additionalProperties: {}
-          description: Structured parameters for the rule builder identified by `builder_type`. The server generates the rule query from these fields.
+          description: Structured parameters for the rule builder identified by `builder.type`. The server generates the rule query from these fields.
           type: object
-        builder_type:
-          description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
-          maxLength: 64
-          minLength: 1
-          nullable: true
-          type: string
         description:
           description: Human-readable description of the rule.
           maxLength: 1024
@@ -153097,6 +153104,15 @@ components:
           maxLength: 256
           minLength: 1
           type: string
+        routing_tags:
+          description: Routing tags that link alerts from this rule to action policies. An action policy applies when its `matcher.tags` contains at least one of these tags. Only allowed when kind is "alert".
+          items:
+            maxLength: 128
+            minLength: 1
+            type: string
+          maxItems: 20
+          minItems: 1
+          type: array
         signature_id:
           description: Stable logical-rule identifier. Optional at creation — generated when absent. Immutable after creation.
           maxLength: 256
@@ -153751,7 +153767,7 @@ components:
               type: string
           description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
         metadata:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response_metadata'
         no_data:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
         query:
@@ -153798,15 +153814,22 @@ components:
       additionalProperties: false
       type: object
       properties:
+        builder:
+          additionalProperties: false
+          description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
+          type: object
+          properties:
+            type:
+              description: Rule builder type.
+              maxLength: 64
+              minLength: 1
+              type: string
+          required:
+            - type
         builder_fields:
           additionalProperties: {}
-          description: Structured parameters for the rule builder identified by `builder_type`. The server generates the rule query from these fields.
+          description: Structured parameters for the rule builder identified by `builder.type`. The server generates the rule query from these fields.
           type: object
-        builder_type:
-          description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
-          maxLength: 64
-          minLength: 1
-          type: string
         description:
           description: Human-readable description of the rule.
           maxLength: 1024
@@ -153852,6 +153875,15 @@ components:
           maximum: 9007199254740991
           minimum: 0
           type: integer
+        routing_tags:
+          description: Routing tags that link alerts from this rule to action policies. An action policy applies when its `matcher.tags` contains at least one of these tags. Only allowed when kind is "alert".
+          items:
+            maxLength: 128
+            minLength: 1
+            type: string
+          maxItems: 20
+          minItems: 1
+          type: array
         signature_id:
           description: Stable logical-rule identifier. Set at creation (caller-supplied or UUID v4). Immutable.
           maxLength: 256
