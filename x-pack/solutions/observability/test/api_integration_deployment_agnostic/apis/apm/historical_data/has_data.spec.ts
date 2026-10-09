@@ -10,9 +10,11 @@ import { apm, timerange } from '@kbn/synthtrace-client';
 import moment from 'moment';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { ARCHIVER_ROUTES } from '../constants/archiver';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
+  const esArchiver = getService('esArchiver');
   const synthtrace = getService('synthtrace');
 
   describe('Historical data ', () => {
@@ -57,6 +59,39 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const response = await apmApiClient.readUser({ endpoint: `GET /internal/apm/has_data` });
         expect(response.status).to.be(200);
         expect(response.body.hasData).to.be(true);
+      });
+
+      it('answers from the recent-data phase without running the fallback', async () => {
+        const { status, body } = await apmApiClient.readUser({
+          endpoint: `GET /internal/apm/has_data`,
+          params: { query: { _inspect: true } },
+        });
+
+        expect(status).to.be(200);
+        expect(body.hasData).to.be(true);
+        // Exactly one Elasticsearch call proves the recent-data phase matched and
+        // short-circuited; a second would mean it missed and the unbounded
+        // fallback produced the answer.
+        expect(body._inspect).to.have.length(1);
+      });
+    });
+
+    // The esArchiver fixture is timestamped well outside the recent-data window,
+    // so it can only be answered by the unbounded fallback. Without this case a
+    // fallback that stopped running would go unnoticed.
+    describe('when only old data is loaded', () => {
+      before(() => esArchiver.load(ARCHIVER_ROUTES['8.0.0']));
+      after(() => esArchiver.unload(ARCHIVER_ROUTES['8.0.0']));
+
+      it('returns hasData=true from the unbounded fallback', async () => {
+        const { status, body } = await apmApiClient.readUser({
+          endpoint: `GET /internal/apm/has_data`,
+          params: { query: { _inspect: true } },
+        });
+
+        expect(status).to.be(200);
+        expect(body.hasData).to.be(true);
+        expect(body._inspect).to.have.length(2);
       });
     });
   });
