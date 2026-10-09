@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { isImproved, type Direction, type EvaluationScoreDocument } from '@kbn/evals-common';
-import { computePairedTTestResults, pairScores } from './statistical_analysis';
+import type { Direction, EvaluationScoreDocument } from '../schemas/common_attributes.gen';
+import { compareScores } from './compare';
+import { isImproved, pairScores } from './pairing';
 
 const baseTaskModel = {
   id: 'gpt-4',
@@ -147,7 +148,122 @@ describe('pairScores', () => {
   });
 });
 
-describe('computePairedTTestResults', () => {
+describe('compareScores', () => {
+  const pairDocs = (target: EvaluationScoreDocument[], baseline: EvaluationScoreDocument[]) =>
+    pairScores(target, baseline).pairs;
+
+  const docs = (scores: number[]) =>
+    scores.map((score, index) => createMockScore({ exampleId: `ex-${index}`, score }));
+
+  it('selects the test per slice from the inferred metric type', () => {
+    const target = [
+      ...[1, 1, 1, 0].map((score, index) =>
+        createMockScore({ evaluatorName: 'Pass', exampleId: `ex-${index}`, score })
+      ),
+      ...[0.9, 0.8, 0.7, 0.95].map((score, index) =>
+        createMockScore({ evaluatorName: 'Quality', exampleId: `ex-${index}`, score })
+      ),
+    ];
+    const baseline = [
+      ...[0, 1, 0, 0].map((score, index) =>
+        createMockScore({ evaluatorName: 'Pass', exampleId: `ex-${index}`, score })
+      ),
+      ...[0.5, 0.4, 0.3, 0.2].map((score, index) =>
+        createMockScore({ evaluatorName: 'Quality', exampleId: `ex-${index}`, score })
+      ),
+    ];
+
+    const results = compareScores(pairDocs(target, baseline));
+
+    expect(
+      results.map(({ evaluatorName, metricType, hypothesisTest }) => ({
+        evaluatorName,
+        metricType,
+        id: hypothesisTest.id,
+        method: hypothesisTest.method,
+      }))
+    ).toEqual([
+      { evaluatorName: 'Pass', metricType: 'binary', id: 'mcnemar', method: 'mid-p' },
+      {
+        evaluatorName: 'Quality',
+        metricType: 'continuous_bounded',
+        id: 'wilcoxon_signed_rank',
+        method: 'exact',
+      },
+    ]);
+  });
+
+  it('upgrades a large normal-looking continuous slice to paired t', () => {
+    const differences = [-3, -2, -2, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 3].flatMap(
+      (value) => [value * 0.01 + 0.02, value * 0.011 + 0.021]
+    );
+    const baselineScores = Array.from({ length: 40 }, (_, index) => 0.5 + (index % 7) * 0.03);
+    const targetScores = baselineScores.map((value, index) => value + differences[index]);
+
+    const [result] = compareScores(pairDocs(docs(targetScores), docs(baselineScores)));
+
+    expect(result.metricType).toBe('continuous_bounded');
+    expect(result.hypothesisTest.id).toBe('paired_t');
+    expect(result.hypothesisTest.method).toBeUndefined();
+    expect(result.pValue).toBeCloseTo(2.022935136447288e-10, 15);
+  });
+
+  it('reports statistic and metric type', () => {
+    const target = docs([0.2, 0.4, 0.9]);
+    const baseline = docs([0.6, 1.0, 0.1]);
+
+    const [result] = compareScores(pairDocs(target, baseline));
+
+    expect(result.hypothesisTest.statistic).not.toBeNull();
+    expect(result.metricType).toBe('continuous_bounded');
+    expect(result.hypothesisTest.discordantPairs).toBeUndefined();
+  });
+
+  it('attaches discordant pairs to binary slices', () => {
+    const target = docs([1, 1, 1, 0, 0, 1]);
+    const baseline = docs([0, 1, 0, 1, 0, 1]);
+
+    const [result] = compareScores(pairDocs(target, baseline));
+
+    expect(result.metricType).toBe('binary');
+    expect(result.hypothesisTest.discordantPairs).toEqual({ targetOnly: 2, baselineOnly: 1 });
+  });
+
+  it('runs Wilcoxon on a single pair', () => {
+    const [result] = compareScores(
+      pairDocs([createMockScore({ score: 0.8 })], [createMockScore({ score: 0.9 })])
+    );
+
+    expect(result.hypothesisTest.id).toBe('wilcoxon_signed_rank');
+    expect(result.pValue).toBe(1);
+  });
+
+  it('produces one row per dataset and evaluator', () => {
+    const target = [
+      createMockScore({ evaluatorName: 'A', exampleId: 'ex-1', score: 1 }),
+      createMockScore({ evaluatorName: 'B', exampleId: 'ex-1', score: 0.4 }),
+      createMockScore({ datasetId: 'ds2', evaluatorName: 'A', exampleId: 'ex-1', score: 0 }),
+    ];
+    const baseline = [
+      createMockScore({ evaluatorName: 'A', exampleId: 'ex-1', score: 0 }),
+      createMockScore({ evaluatorName: 'B', exampleId: 'ex-1', score: 0.5 }),
+      createMockScore({ datasetId: 'ds2', evaluatorName: 'A', exampleId: 'ex-1', score: 1 }),
+    ];
+
+    const results = compareScores(pairDocs(target, baseline));
+
+    expect(results.map((result) => `${result.datasetId}|${result.evaluatorName}`)).toEqual([
+      'dataset-1|A',
+      'dataset-1|B',
+      'ds2|A',
+    ]);
+  });
+});
+
+describe('compareScores (grouping, means and direction)', () => {
+  const compare = (target: EvaluationScoreDocument[], baseline: EvaluationScoreDocument[]) =>
+    compareScores(pairScores(target, baseline).pairs);
+
   it('groups results by dataset and evaluator', () => {
     const targetScores = [
       createMockScore({ datasetId: 'ds1', evaluatorName: 'eval1', score: 0.8 }),
@@ -158,7 +274,7 @@ describe('computePairedTTestResults', () => {
       createMockScore({ datasetId: 'ds1', evaluatorName: 'eval2', score: 0.75 }),
     ];
 
-    const results = computePairedTTestResults(targetScores, baselineScores);
+    const results = compare(targetScores, baselineScores);
 
     expect(results).toHaveLength(2);
     expect(results.map((result) => result.evaluatorName).sort()).toEqual(['eval1', 'eval2']);
@@ -174,75 +290,21 @@ describe('computePairedTTestResults', () => {
       createMockScore({ datasetId: 'ds1', evaluatorName: 'eval1', score: 1.0, exampleId: 'ex2' }),
     ];
 
-    const [result] = computePairedTTestResults(targetScores, baselineScores);
+    const [result] = compare(targetScores, baselineScores);
 
     expect(result.meanTarget).toBeCloseTo(0.3, 5);
     expect(result.meanBaseline).toBeCloseTo(0.8, 5);
     expect(result.sampleSize).toBe(2);
   });
 
-  it('returns null p-value when sample size is under 2', () => {
-    const targetScores = [createMockScore({ score: 0.8 })];
-    const baselineScores = [createMockScore({ score: 0.9 })];
-
-    const [result] = computePairedTTestResults(targetScores, baselineScores);
-
-    expect(result.pValue).toBeNull();
-  });
-
-  it('computes p-value for paired differences', () => {
-    const targetScores = [
-      createMockScore({ exampleId: 'ex1', score: 1 }),
-      createMockScore({ exampleId: 'ex2', score: 2 }),
-      createMockScore({ exampleId: 'ex3', score: 3 }),
-      createMockScore({ exampleId: 'ex4', score: 4 }),
-      createMockScore({ exampleId: 'ex5', score: 5 }),
-    ];
-    const baselineScores = [
-      createMockScore({ exampleId: 'ex1', score: 0 }),
-      createMockScore({ exampleId: 'ex2', score: 0 }),
-      createMockScore({ exampleId: 'ex3', score: 0 }),
-      createMockScore({ exampleId: 'ex4', score: 0 }),
-      createMockScore({ exampleId: 'ex5', score: 0 }),
-    ];
-
-    const [result] = computePairedTTestResults(targetScores, baselineScores);
-
-    expect(result.pValue).not.toBeNull();
-    expect(result.pValue as number).toBeCloseTo(0.013, 2);
-  });
-
-  it('accepts pre-computed pairs and produces the same results', () => {
-    const targetScores = [
-      createMockScore({ exampleId: 'ex1', score: 1 }),
-      createMockScore({ exampleId: 'ex2', score: 2 }),
-      createMockScore({ exampleId: 'ex3', score: 3 }),
-      createMockScore({ exampleId: 'ex4', score: 4 }),
-      createMockScore({ exampleId: 'ex5', score: 5 }),
-    ];
-    const baselineScores = [
-      createMockScore({ exampleId: 'ex1', score: 0 }),
-      createMockScore({ exampleId: 'ex2', score: 0 }),
-      createMockScore({ exampleId: 'ex3', score: 0 }),
-      createMockScore({ exampleId: 'ex4', score: 0 }),
-      createMockScore({ exampleId: 'ex5', score: 0 }),
-    ];
-
-    const { pairs } = pairScores(targetScores, baselineScores);
-    const fromDocs = computePairedTTestResults(targetScores, baselineScores);
-    const fromPairs = computePairedTTestResults(pairs);
-
-    expect(fromPairs).toEqual(fromDocs);
-  });
-
   it('defaults direction via legacy name heuristic when score docs omit the field', () => {
-    const quality = computePairedTTestResults(
+    const quality = compare(
       [createMockScore({ evaluatorName: 'Correctness', score: 0.8 })],
       [createMockScore({ evaluatorName: 'Correctness', score: 0.9 })]
     );
     expect(quality[0].direction).toBe('maximize');
 
-    const latency = computePairedTTestResults(
+    const latency = compare(
       [createMockScore({ evaluatorName: 'Latency', score: 150 })],
       [createMockScore({ evaluatorName: 'Latency', score: 100 })]
     );
@@ -253,7 +315,7 @@ describe('computePairedTTestResults', () => {
     const targetScores = [createMockScore({ score: 0.7, direction: 'maximize' })];
     const baselineScores = [createMockScore({ score: 0.9, direction: 'maximize' })];
 
-    const [result] = computePairedTTestResults(targetScores, baselineScores);
+    const [result] = compare(targetScores, baselineScores);
 
     expect(result.direction).toBe('maximize');
   });
@@ -266,7 +328,7 @@ describe('computePairedTTestResults', () => {
       createMockScore({ evaluatorName: 'Latency', score: 100, direction: 'minimize' }),
     ];
 
-    const [result] = computePairedTTestResults(targetScores, baselineScores);
+    const [result] = compare(targetScores, baselineScores);
 
     expect(result.direction).toBe('minimize');
   });
@@ -279,7 +341,7 @@ describe('computePairedTTestResults', () => {
       createMockScore({ evaluatorName: 'Extracted feature count', score: 7, direction: 'neutral' }),
     ];
 
-    const [result] = computePairedTTestResults(targetScores, baselineScores);
+    const [result] = compare(targetScores, baselineScores);
 
     expect(result.direction).toBe('neutral');
   });
@@ -290,7 +352,7 @@ describe('computePairedTTestResults', () => {
     ];
     const baselineScores = [createMockScore({ evaluatorName: 'Latency', score: 100 })];
 
-    const [result] = computePairedTTestResults(targetScores, baselineScores);
+    const [result] = compare(targetScores, baselineScores);
 
     expect(result.direction).toBe('minimize');
   });
@@ -312,13 +374,13 @@ describe('computePairedTTestResults', () => {
       }),
     ];
 
-    const [result] = computePairedTTestResults(targetScores, baselineScores);
+    const [result] = compare(targetScores, baselineScores);
 
     expect(result.direction).toBe('maximize');
   });
 
   it('legacy name heuristic misclassifies Error handling quality when metadata is absent', () => {
-    const [result] = computePairedTTestResults(
+    const [result] = compare(
       [createMockScore({ evaluatorName: 'Error handling quality', score: 0.4 })],
       [createMockScore({ evaluatorName: 'Error handling quality', score: 0.8 })]
     );
@@ -340,7 +402,7 @@ describe('computePairedTTestResults', () => {
       }),
     ];
 
-    const results = computePairedTTestResults(scoresFor(0.9, 0.1), scoresFor(0.6, 0.4));
+    const results = compare(scoresFor(0.9, 0.1), scoresFor(0.6, 0.4));
 
     expect(
       results.map(({ evaluatorName, direction, meanTarget, meanBaseline }) => ({
