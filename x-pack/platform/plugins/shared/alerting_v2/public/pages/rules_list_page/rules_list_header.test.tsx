@@ -106,10 +106,12 @@ describe('RulesListHeader', () => {
 
     expect(v1Tab).toHaveAttribute('aria-selected', 'false');
     expect(v2Tab).toHaveAttribute('aria-selected', 'true');
+    expect(v1Tab).toHaveTextContent('Classic');
+    expect(v2Tab).toHaveTextContent('Universal');
     expect(await screen.findAllByRole('tab')).toHaveLength(2);
   });
 
-  it('orders the V2 rules tab before the V1 rules tab', async () => {
+  it('orders the Universal tab before the Classic tab', async () => {
     renderHeader();
 
     const tabs = await screen.findAllByRole('tab');

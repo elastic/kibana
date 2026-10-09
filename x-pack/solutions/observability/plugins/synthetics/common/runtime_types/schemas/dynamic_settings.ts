@@ -30,7 +30,6 @@ export const DynamicSettingsCodec = lazySchema(() =>
     defaultEmail: DefaultEmailCodec.optional(),
     defaultTLSRuleEnabled: z.boolean().optional(),
     defaultStatusRuleEnabled: z.boolean().optional(),
-    privateLocationsSyncInterval: z.number().optional(),
     rebalancePrivateLocationShardsEnabled: z.boolean().optional(),
   })
 );

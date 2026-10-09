@@ -17,6 +17,8 @@ const ALERTING_V2_ENABLED_SETTING = 'alerting:v2:enabled';
 const RULE_MANAGEMENT_SKILL_ID = 'rule-management';
 const ACTION_POLICY_MANAGEMENT_SKILL_ID = 'action-policy-management';
 const ALERTING_V2_SKILL_IDS = [RULE_MANAGEMENT_SKILL_ID, ACTION_POLICY_MANAGEMENT_SKILL_ID];
+// Several times the 10s uiSettings cache TTL, which a write only invalidates on the node serving it.
+const SETTINGS_PROPAGATION_TIMEOUT = 30_000;
 const RESTRICTED_SOLUTION_SPACES = [
   { id: 'alerting-v2-security-solution', solution: 'security' as const },
   { id: 'alerting-v2-search-solution', solution: 'es' as const },
@@ -177,12 +179,19 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
       );
       expect(setResponse).toHaveStatusCode(200);
 
-      const response = await apiClient.get(SKILLS_API, { headers, responseType: 'json' });
-      expect(response).toHaveStatusCode(200);
-      expect(Array.isArray(response.body.results)).toBe(true);
-      for (const skillId of ALERTING_V2_SKILL_IDS) {
-        expect(getSkillIds(response.body.results)).toContain(skillId);
-      }
+      await expect
+        .poll(
+          async () => {
+            const response = await apiClient.get(SKILLS_API, { headers, responseType: 'json' });
+            // Returned, not thrown: throwing inside expect.poll aborts polling instead of retrying.
+            if (response.statusCode !== 200) {
+              return `status ${response.statusCode}: ${JSON.stringify(response.body)}`;
+            }
+            return getSkillIds(response.body.results);
+          },
+          { timeout: SETTINGS_PROPAGATION_TIMEOUT, intervals: [1_000] }
+        )
+        .toStrictEqual(expect.arrayContaining(ALERTING_V2_SKILL_IDS));
     }
   );
 

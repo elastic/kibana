@@ -80,7 +80,51 @@ export const packageReportInputSchema = z.object({
     .describe(
       'Number of significant security event attachments the hunt child prepared for this run (its `sse_count` output). A packaging read that finds fewer than this is a partial attach, reported as `run_incomplete` rather than packaged. Omit to skip the shortfall check (e.g. an already-installed Worker that does not supply it yet).'
     ),
+  /**
+   * The coordinator result a clean run cannot carry on an attachment: the coordinator attaches
+   * an SSE only for a confirmed hit, so on a clean run `tier2_targets`, `actionable_indices`
+   * and the executed Tier 2 behaviors exist only on `hunt.yaml`'s coordinator step output.
+   * Optional for the same staleness reason as `expectedSseCount`: omitting them degrades the
+   * coverage KI's `data_sources` / `validated_esql`, never fails packaging.
+   */
+  reportIntentTargets: z
+    .array(z.string().max(512))
+    .max(200)
+    .optional()
+    .describe(
+      "The coordinator's `report_intent_targets`: the datasets the report itself points at, without Tier 1 hit indices or the process-bearing streams. Coverage KIs without hit events name these as `data_sources`."
+    ),
+  behaviors: z
+    .array(
+      z.object({
+        technique_id: z.string().max(64),
+        technique_name: z.string().max(256).optional(),
+        title: z.string().max(512).optional(),
+        evidence_quote: z.string().max(2000).optional(),
+        confidence: z.number(),
+        severity: z.string().max(32).optional(),
+        validated_esql: z.string().max(32_000),
+        execution: z
+          .object({
+            executed: z.boolean(),
+            row_count: z.number(),
+            hit: z.boolean(),
+            inconclusive_reason: z.string().max(64).optional(),
+          })
+          .optional(),
+      })
+    )
+    .max(20)
+    .optional()
+    .describe(
+      "The coordinator's `tier2.behaviors`. Clean-run coverage KIs carry the executed query as `validated_esql` with `esql_status: executed_no_rows`."
+    ),
 });
+
+/** One Tier 2 behavior as passed into packaging, for runs that left no SSE. */
+export type PackageReportBehavior = NonNullable<
+  z.infer<typeof packageReportInputSchema>['behaviors']
+>[number];
 
 const coverageWrittenSchema = z.object({
   kiId: z.string(),
@@ -145,6 +189,21 @@ export const packageReportOutputSchema = z.discriminatedUnion('status', [
      * for real instead of suppressing wholesale.
      */
     mintSuppression: z.enum(['none', 'existing_proposals', 'check_failed']),
+    /**
+     * `none` unless this run was a clean one (no confirmed hit) whose dismissal was withheld
+     * because the Investigation still carries an open (`pending`/`executing`) Proposal from an
+     * earlier run: closing it as benign would strand a decision or an in-flight action.
+     * `open_proposal` means the lookup found one; `check_failed` means the lookup itself failed,
+     * so the dismissal fails closed without asserting a Proposal exists. Either way `dismiss` is
+     * `false` and the Investigation stays open. Narrower than `mintSuppression` on purpose: settled
+     * Proposals never hold a dismissal.
+     *
+     * Not airtight: a gate's Proposal is created asynchronously, after the packaging workflow has
+     * released its concurrency slot, so a clean run that lands in that create window sees no open
+     * Proposal and still dismisses. Same gap, and same Proposals-side fix, as `mintSuppression`
+     * (see `hunt_package_report.yaml`'s concurrency comment).
+     */
+    dismissHold: z.enum(['none', 'open_proposal', 'check_failed']),
   }),
   z.object({
     status: z.literal('run_incomplete'),

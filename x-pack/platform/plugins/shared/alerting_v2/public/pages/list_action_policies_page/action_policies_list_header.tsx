@@ -10,7 +10,12 @@ import { EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { useContentListPhase } from '@kbn/content-list-provider';
+import { ALERTING_V2_ACTION_POLICIES_APP_ID } from '@kbn/alerting-v2-constants';
 import { i18n } from '@kbn/i18n';
+import {
+  UniversalRulesOnlyCallout,
+  universalRulesOnlyBadge,
+} from '../../components/universal_rules_only_notice';
 import {
   useAreAgentBuilderSkillsAvailable,
   useAgentBuilderSkillsRequirements,
@@ -85,6 +90,14 @@ export interface ActionPoliciesListHeaderProps {
   onCreateWithAgent: () => void;
 }
 
+const UNIVERSAL_RULES_ONLY_CALLOUT_BODY = i18n.translate(
+  'xpack.alertingV2.actionPolicies.universalRulesOnlyCalloutBody',
+  {
+    defaultMessage:
+      'Action policies only apply to alerts from Universal rules and external alerts.',
+  }
+);
+
 /**
  * App header that reads Content List phase so the create menu stays hidden
  * during the true empty state (create options live in that empty state).
@@ -132,10 +145,15 @@ export const ActionPoliciesListHeader = ({
       <AppHeader
         sticky={false}
         title={ACTION_POLICIES_LIST_PAGE_TITLE}
+        badges={[universalRulesOnlyBadge]}
         spacing="bleed"
         menu={headerMenu}
       />
       <EuiSpacer size="m" />
+      <UniversalRulesOnlyCallout
+        appId={ALERTING_V2_ACTION_POLICIES_APP_ID}
+        description={UNIVERSAL_RULES_ONLY_CALLOUT_BODY}
+      />
       {canWrite && <ActionPoliciesLicenseCallout />}
     </>
   );

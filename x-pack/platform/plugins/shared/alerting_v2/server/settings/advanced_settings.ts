@@ -19,7 +19,6 @@ import {
 
 // Mirrors the category identifiers in `kbn-management/settings/utilities/category/const.ts`,
 // a `shared-browser` package not consumable from plugin server code.
-const ALERTING_V2_CATEGORY = 'alertingV2';
 const ALERTING_CATEGORY = 'alerting';
 
 type AlertingV2AdvancedSettingsRegistration<K extends AlertingAdvancedSettingId> = {
@@ -29,14 +28,14 @@ type AlertingV2AdvancedSettingsRegistration<K extends AlertingAdvancedSettingId>
 // Global — gates the alerting v2 APIs and UI.
 export const alertingGlobalAdvancedSettings = {
   [ALERTING_V2_ENABLED_SETTING_ID]: {
-    category: [ALERTING_V2_CATEGORY],
+    category: [ALERTING_CATEGORY],
     name: i18n.translate('xpack.alertingVTwo.enabledSettingName', {
-      defaultMessage: 'Alerting V2',
+      defaultMessage: 'Universal Alerting',
     }),
     type: 'boolean',
     value: true,
     description: i18n.translate('xpack.alertingVTwo.enabledSettingDescription', {
-      defaultMessage: 'Enables the alerting V2 APIs and UI.',
+      defaultMessage: 'Enables the Universal Alerting APIs and UI.',
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
@@ -64,12 +63,12 @@ export const alertingSpaceAdvancedSettings = {
   [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: {
     category: [ALERTING_CATEGORY],
     name: i18n.translate('xpack.alertingV2.experimentalFeaturesSettingName', {
-      defaultMessage: 'Alerting V2: Experimental Features',
+      defaultMessage: 'Universal Alerting experimental features',
     }),
     type: 'boolean',
     value: false,
     description: i18n.translate('xpack.alertingV2.experimentalFeaturesSettingDescription', {
-      defaultMessage: 'Enables experimental features for Alerting V2.',
+      defaultMessage: 'Enables experimental features for Universal Alerting.',
     }),
     schema: schema.boolean(),
     requiresPageReload: true,

@@ -98,6 +98,15 @@ export const HuntCoordinatorResponse = lazySchema(() =>
         'Which signals contributed to `tier2_targets`, in a fixed order. Empty when `tier2_targets` is empty.'
       ),
     /**
+     * The datasets the report itself points at: the ones its vendor or product matched, or the model's match, without the indices Tier 1 hit or the process-bearing streams in `tier2_targets`. Hunt packaging names these as the data a detection would query when a run has no hit events to name. Empty when neither signal matched.
+     */
+    report_intent_targets: z
+      .array(z.string())
+      .max(200)
+      .describe(
+        "The datasets the report itself points at: the ones its vendor or product matched, or the model's match, without the indices Tier 1 hit or the process-bearing streams in `tier2_targets`. Hunt packaging names these as the data a detection would query when a run has no hit events to name. Empty when neither signal matched."
+      ),
+    /**
      * `*`-suffixed streams and indices in the hunt's universe whose mapping carries `process.entity_id` or `process.pid`: where a hit can become a Defend response action. A mapping says a host can report process telemetry, not that it is enrolled; packaging decides that later. Empty when the scope was blocked or no mapping carries either field.
      */
     actionable_indices: z

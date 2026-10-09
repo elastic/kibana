@@ -105,6 +105,44 @@ export function validateNewModelVersionSchemas(name: string, mv: ModelVersionSum
   }
 }
 
+/** Checks that once a model version defines an `update` schema, all later model versions define one too. */
+export function validateUpdateSchemaContinuity(name: string, registeredType: SavedObjectsType) {
+  const modelVersionMap =
+    typeof registeredType.modelVersions === 'function'
+      ? registeredType.modelVersions()
+      : registeredType.modelVersions ?? {};
+
+  const versions = Object.keys(modelVersionMap)
+    .map(Number)
+    .sort((a, b) => a - b);
+  const firstWithUpdate = versions.find(
+    (version) => modelVersionMap[String(version) as ModelVersionIdentifier]?.schemas?.update
+  );
+  if (firstWithUpdate === undefined) {
+    return;
+  }
+
+  const missing = versions.filter(
+    (version) =>
+      version > firstWithUpdate &&
+      !modelVersionMap[String(version) as ModelVersionIdentifier]?.schemas?.update
+  );
+  if (missing.length > 0) {
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.MODEL_VERSION_MISSING_UPDATE_SCHEMA,
+      severity: 'error',
+      typeName: name,
+      message: `The SO type '${name}' defines an 'update' schema in model version '${firstWithUpdate}', but model version(s) ${missing
+        .map((version) => `'${version}'`)
+        .join(', ')} do not.`,
+      fixHint: `Add 'schemas.update' to model version(s) ${missing
+        .map((version) => `'${version}'`)
+        .join(', ')}.`,
+      docsAnchor: '#defining-model-versions',
+    });
+  }
+}
+
 /**
  * Extracts logical field paths from flattened ES mapping keys, excluding multi-field subfields
  * (e.g. `properties.name.fields.keyword.type`) which have no independent schema counterpart.

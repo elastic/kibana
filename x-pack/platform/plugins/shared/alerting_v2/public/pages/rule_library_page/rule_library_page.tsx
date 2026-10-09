@@ -8,7 +8,12 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
+import { ALERTING_V2_RULE_LIBRARY_APP_ID } from '@kbn/alerting-v2-constants';
 import { i18n } from '@kbn/i18n';
+import {
+  UniversalRulesOnlyCallout,
+  universalRulesOnlyBadge,
+} from '../../components/universal_rules_only_notice';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useCreateFromTemplateQuery } from '../../hooks/use_create_from_template_query';
@@ -18,6 +23,13 @@ const RULE_LIBRARY_PAGE_TITLE = i18n.translate('xpack.alertingV2.ruleLibrary.pag
   defaultMessage: 'Rule library',
 });
 
+const UNIVERSAL_RULES_ONLY_CALLOUT_BODY = i18n.translate(
+  'xpack.alertingV2.ruleLibrary.universalRulesOnlyCalloutBody',
+  {
+    defaultMessage: 'Browse templates for Universal rules and create new rules from them.',
+  }
+);
+
 export const RuleLibraryPage = () => {
   useBreadcrumbs('rule_library_list');
   const { flyout, openCreateFromTemplateFlyout } = useComposeDiscoverFlyout();
@@ -25,8 +37,17 @@ export const RuleLibraryPage = () => {
 
   return (
     <div data-test-subj="ruleLibraryPage">
-      <AppHeader sticky={false} title={RULE_LIBRARY_PAGE_TITLE} spacing="bleed" />
+      <AppHeader
+        sticky={false}
+        title={RULE_LIBRARY_PAGE_TITLE}
+        badges={[universalRulesOnlyBadge]}
+        spacing="bleed"
+      />
       <EuiSpacer size="m" />
+      <UniversalRulesOnlyCallout
+        appId={ALERTING_V2_RULE_LIBRARY_APP_ID}
+        description={UNIVERSAL_RULES_ONLY_CALLOUT_BODY}
+      />
       <RuleLibraryList />
       {flyout}
     </div>

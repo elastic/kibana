@@ -12,11 +12,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useMemo } from 'react';
+import type { DataSource } from '@kbn/data-source';
 import type { DocMap } from '../../../types';
 
 export interface UseComparisonColumnsProps {
   wrapper: HTMLElement | null;
-  isPlainRecord: boolean;
+  dataSource: DataSource | undefined;
   fieldColumnId: string;
   selectedDocIds: string[];
   docMap: DocMap;
@@ -31,13 +32,14 @@ export const FIELD_COLUMN_NAME = i18n.translate('unifiedDataTable.fieldColumnTit
 
 export const useComparisonColumns = ({
   wrapper,
-  isPlainRecord,
+  dataSource,
   fieldColumnId,
   selectedDocIds,
   docMap,
   replaceSelectedDocs,
 }: UseComparisonColumnsProps) => {
   const comparisonColumns = useMemo<EuiDataGridColumn[]>(() => {
+    const isEsql = dataSource?.kind === 'esql';
     const fieldsColumn: EuiDataGridColumn = {
       id: fieldColumnId,
       displayAsText: FIELD_COLUMN_NAME,
@@ -117,7 +119,7 @@ export const useComparisonColumns = ({
 
       const displayAsText =
         selectedIndex === 0
-          ? isPlainRecord
+          ? isEsql
             ? i18n.translate('unifiedDataTable.comparisonColumnResultPinnedTooltip', {
                 defaultMessage: 'Pinned result: {resultNumber}',
                 values: { resultNumber: displayId },
@@ -126,7 +128,7 @@ export const useComparisonColumns = ({
                 defaultMessage: 'Pinned document: {documentId}',
                 values: { documentId: displayId },
               })
-          : isPlainRecord
+          : isEsql
           ? i18n.translate('unifiedDataTable.comparisonColumnResultTooltip', {
               defaultMessage: 'Comparison result: {resultNumber}',
               values: { resultNumber: displayId },
@@ -158,7 +160,7 @@ export const useComparisonColumns = ({
   }, [
     docMap,
     fieldColumnId,
-    isPlainRecord,
+    dataSource,
     selectedDocIds,
     replaceSelectedDocs,
     wrapper?.offsetWidth,
