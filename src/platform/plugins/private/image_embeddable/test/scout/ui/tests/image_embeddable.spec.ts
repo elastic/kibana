@@ -42,7 +42,9 @@ test.describe('Image embeddable', { tag: '@local-stateful-classic' }, () => {
       await page.testSubj.click('create-action-Image');
       await expect(page.testSubj.locator('createImageEmbeddableFlyout')).toBeVisible();
       await page.locator('.euiFilePicker__input').setInputFiles(ELASTIC_LOGO_PATH);
-      await expect(page.testSubj.locator('imageEmbeddableEditorSave')).toBeEnabled({ timeout: 15_000 });
+      await expect(page.testSubj.locator('imageEmbeddableEditorSave')).toBeEnabled({
+        timeout: 15_000,
+      });
       await page.testSubj.click('imageEmbeddableEditorSave');
       await expect.poll(() => pageObjects.dashboard.getPanelCount()).toBe(1);
       await pageObjects.dashboard.waitForRenderComplete();
