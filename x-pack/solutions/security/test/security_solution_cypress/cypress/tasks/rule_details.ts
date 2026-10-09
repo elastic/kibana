@@ -48,8 +48,9 @@ import {
   RULE_GAPS_DATE_PICKER_APPLY_REFRESH,
   RULE_GAPS_STATUS_FILTER,
   RULE_GAPS_TABLE,
+  RULE_ENABLED_BADGE,
+  RULE_ENABLED_TOGGLE,
   RULE_NAME_HEADER,
-  RULE_SWITCH,
 } from '../screens/rule_details';
 import type { RuleDetailsTabs } from '../urls/rule_details';
 import { ruleDetailsUrl } from '../urls/rule_details';
@@ -77,9 +78,7 @@ export function visitRuleDetailsPage(ruleId: string, options?: VisitRuleDetailsP
 export const clickEnableRuleSwitch = () => {
   // Rules get enabled via _bulk_action endpoint
   cy.intercept('POST', '/api/detection_engine/rules/_bulk_action?dry_run=false').as('bulk_action');
-  cy.get(RULE_SWITCH).scrollIntoView();
-  cy.get(RULE_SWITCH).should('be.visible');
-  cy.get(RULE_SWITCH).click();
+  toggleRuleEnabled();
   cy.wait('@bulk_action').then(({ response }) => {
     cy.wrap(response?.statusCode).should('eql', 200);
     cy.wrap(response?.body.attributes.results.updated[0].enabled).should('eql', true);
@@ -89,12 +88,24 @@ export const clickEnableRuleSwitch = () => {
 export const clickDisableRuleSwitch = () => {
   // Rules get enabled via _bulk_action endpoint
   cy.intercept('POST', '/api/detection_engine/rules/_bulk_action?dry_run=false').as('bulk_action');
-  cy.get(RULE_SWITCH).should('be.visible');
-  cy.get(RULE_SWITCH).click();
+  toggleRuleEnabled();
   cy.wait('@bulk_action').then(({ response }) => {
     cy.wrap(response?.statusCode).should('eql', 200);
     cy.wrap(response?.body.attributes.results.updated[0].enabled).should('eql', false);
   });
+};
+
+/**
+ * Enables a disabled rule or disables an enabled rule from the rule details header badge menu.
+ */
+export const toggleRuleEnabled = () => {
+  cy.get(RULE_ENABLED_BADGE).should('be.visible');
+  cy.get(RULE_ENABLED_BADGE).click();
+  cy.get(RULE_ENABLED_TOGGLE).click();
+};
+
+export const expectRuleEnabled = (enabled: boolean) => {
+  cy.get(RULE_ENABLED_BADGE).should('contain.text', enabled ? 'Enabled' : 'Disabled');
 };
 
 export const addsFieldsToTimeline = (search: string, fields: string[]) => {
@@ -182,7 +193,7 @@ export const waitForTheRuleToBeExecuted = () => {
     return cy
       .get(RULE_STATUS)
       .invoke('text')
-      .then((ruleStatus) => ruleStatus === 'succeeded');
+      .then((ruleStatus) => ruleStatus.startsWith('Succeeded'));
   });
 };
 

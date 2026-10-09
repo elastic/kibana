@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { isCustomizedPrebuiltRule } from '../../../../../common/api/detection_engine';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
@@ -44,14 +44,14 @@ import { useScheduleRuleRun } from '../../../rule_gaps/logic/use_schedule_rule_r
 import type { TimeRange } from '../../../rule_gaps/types';
 import * as actionI18n from '../../../common/translations';
 import * as i18n from './translations';
+import { useAddRuleToChatMenuItem } from './use_add_rule_to_chat_menu_item';
 
 interface UseRuleDetailsMenuProps {
   rule: Rule | null;
   ruleId: string;
   isExistingRule: boolean;
   hasActionsPrivileges: boolean;
-  onRuleEnabledChange: (enabled: boolean) => void;
-  startMlJobsIfNeeded: () => Promise<void>;
+  refreshRule: () => void;
   showBulkDuplicateExceptionsConfirmation: () => Promise<string | null>;
   showManualRuleRunConfirmation: () => Promise<TimeRange | null>;
   confirmDeletion: () => Promise<boolean>;
@@ -62,8 +62,7 @@ export const useRuleDetailsMenu = ({
   ruleId,
   isExistingRule,
   hasActionsPrivileges,
-  onRuleEnabledChange,
-  startMlJobsIfNeeded,
+  refreshRule,
   showBulkDuplicateExceptionsConfirmation,
   showManualRuleRunConfirmation,
   confirmDeletion,
@@ -86,7 +85,6 @@ export const useRuleDetailsMenu = ({
     rules: { edit: canEditRules, read: canReadRules },
     exceptions: { edit: canEditExceptions },
     manualRun: { edit: canManualRunRules },
-    enableDisable: { edit: canEnableDisableRules },
     customHighlightedFields: { edit: canEditCustomHighlightedFields },
     investigationGuide: { edit: canEditInvestigationGuides },
   } = useUserPrivileges().rulesPrivileges;
@@ -98,59 +96,15 @@ export const useRuleDetailsMenu = ({
     ruleChangesHistoryFFEnabled && ruleChangesHistoryAdvancedSetting;
   const mlCapabilities = useMlCapabilities();
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
-  const [isSwitchLoading, setIsSwitchLoading] = useState(false);
-  const isEnabled = isExistingRule && (rule?.enabled ?? false);
+  const addRuleToChatMenuItem = useAddRuleToChatMenuItem(rule);
   const canDuplicateRuleWithActions = canEditRuleWithActions(rule, hasActionsPrivileges);
   const isRuleEditButtonEnabled =
     canEditRules || canEditCustomHighlightedFields || canEditInvestigationGuides;
   const editDisabled =
     !isExistingRule || !isRuleEditButtonEnabled || (isMlRule(rule?.type) && !hasMlPermissions);
-  const switchDisabled =
-    !rule ||
-    !isExistingRule ||
-    !canDuplicateRuleWithActions ||
-    !canEnableDisableRules ||
-    (isMlRule(rule?.type) && !hasMlPermissions) ||
-    isSwitchLoading;
-
-  const onSwitchChange = useCallback(
-    async (enabled: boolean) => {
-      if (!rule) return;
-      setIsSwitchLoading(true);
-      try {
-        startTransaction({
-          name: enabled ? SINGLE_RULE_ACTIONS.ENABLE : SINGLE_RULE_ACTIONS.DISABLE,
-        });
-        if (enabled) await startMlJobsIfNeeded();
-        const result = await executeBulkAction({
-          type: enabled ? BulkActionTypeEnum.enable : BulkActionTypeEnum.disable,
-          ids: [rule.id],
-        });
-        const updated = result?.attributes.results.updated[0];
-        if (updated) onRuleEnabledChange(updated.enabled);
-      } finally {
-        setIsSwitchLoading(false);
-      }
-    },
-    [executeBulkAction, onRuleEnabledChange, rule, startMlJobsIfNeeded, startTransaction]
-  );
 
   return useMemo<AppHeaderMenu>(
     () => ({
-      switch: {
-        id: 'ruleEnabled',
-        label: i18n.ENABLE_RULE,
-        checked: isEnabled,
-        disabled: switchDisabled,
-        tooltipContent: explainLackOfPermission(
-          rule,
-          hasMlPermissions,
-          hasActionsPrivileges,
-          canEnableDisableRules
-        ),
-        onChange: onSwitchChange,
-        'data-test-subj': 'ruleSwitch',
-      },
       primaryActionItem: {
         id: 'editRule',
         label: actionI18n.EDIT_RULE_SETTINGS,
@@ -169,13 +123,20 @@ export const useRuleDetailsMenu = ({
         testId: 'editRuleSettingsLink',
       },
       items: [
+        {
+          id: 'refreshRuleStatus',
+          label: i18n.REFRESH_STATUS,
+          iconType: 'refresh',
+          disableButton: !isExistingRule,
+          testId: 'ruleLastExecutionStatusRefreshButton',
+          run: refreshRule,
+        },
         ...(isRuleChangesHistoryEnabled
           ? [
               {
                 id: 'ruleHistory',
                 label: actionI18n.RULE_CHANGES_HISTORY,
                 iconType: 'clock' as const,
-                overflow: true as const,
                 href: getSecuritySolutionUrl({
                   deepLinkId: SecurityPageName.rules,
                   path: getRuleChangesHistoryUrl(ruleId),
@@ -184,6 +145,7 @@ export const useRuleDetailsMenu = ({
               },
             ]
           : []),
+        ...(addRuleToChatMenuItem ? [addRuleToChatMenuItem] : []),
         ...(rule
           ? [
               {
@@ -295,12 +257,10 @@ export const useRuleDetailsMenu = ({
     [
       rule,
       ruleId,
-      isEnabled,
-      switchDisabled,
       hasMlPermissions,
       hasActionsPrivileges,
-      canEnableDisableRules,
-      onSwitchChange,
+      refreshRule,
+      addRuleToChatMenuItem,
       getSecuritySolutionUrl,
       editDisabled,
       isRuleEditButtonEnabled,

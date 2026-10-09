@@ -83,7 +83,9 @@ export const REMOVE_EXCEPTION_BTN = '[data-test-subj="exceptionItemCardHeader-ac
 
 export const EDIT_EXCEPTION_BTN = '[data-test-subj="exceptionItemCardHeader-actionItem-edit"]';
 
-export const RULE_SWITCH = '[data-test-subj="ruleSwitch"]';
+export const RULE_ENABLED_BADGE = '[data-test-subj="ruleDetailsEnabledBadge"]';
+
+export const RULE_ENABLED_TOGGLE = '[data-test-subj="ruleDetailsEnabledToggle"]';
 
 export const RULE_TYPE_DETAILS = 'Rule type';
 

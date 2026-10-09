@@ -19,7 +19,6 @@ import { useRuleCustomizationsContext } from '../../../rule_management/component
 import { useExecuteBulkAction } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 import { useBulkExport } from '../../../rule_management/logic/bulk_actions/use_bulk_export';
 import { mockRule } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
-import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { useRuleDetailsMenu } from './use_rule_details_menu';
 
 jest.mock('../../../../common/components/user_privileges');
@@ -38,9 +37,12 @@ jest.mock('../../../../common/components/app_header/use_ml_job_settings_menu_ite
 jest.mock('../../../../common/components/app_header/use_add_integrations_menu_item', () => ({
   useAddIntegrationsMenuItem: () => undefined,
 }));
+jest.mock('./use_add_rule_to_chat_menu_item', () => ({
+  useAddRuleToChatMenuItem: () => undefined,
+}));
 
 const confirmDeletion = jest.fn(async () => false);
-const onRuleEnabledChange = jest.fn();
+const refreshRule = jest.fn();
 const executeBulkAction = jest.fn();
 
 const RuleMenu = ({ rule = mockRule('rule-id') }: { rule?: ReturnType<typeof mockRule> }) => {
@@ -49,8 +51,7 @@ const RuleMenu = ({ rule = mockRule('rule-id') }: { rule?: ReturnType<typeof moc
     ruleId: 'rule-id',
     isExistingRule: true,
     hasActionsPrivileges: true,
-    onRuleEnabledChange,
-    startMlJobsIfNeeded: jest.fn(),
+    refreshRule,
     showBulkDuplicateExceptionsConfirmation: async () => null,
     showManualRuleRunConfirmation: async () => null,
     confirmDeletion,
@@ -115,7 +116,6 @@ describe('rule details app menu', () => {
     renderHeader();
 
     expect(await screen.findByTestId('editRuleSettingsLink')).toBeDisabled();
-    expect(screen.getByTestId('ruleSwitch')).toBeDisabled();
     await openAppMenuOverflow();
     expect(screen.getByTestId('rules-details-duplicate-rule')).toBeDisabled();
     expect(screen.getByTestId('rules-details-manual-rule-run')).toBeDisabled();
@@ -123,19 +123,13 @@ describe('rule details app menu', () => {
     expect(screen.getByTestId('rules-details-export-rule')).toBeEnabled();
   });
 
-  it('disables the rule through the app menu switch', async () => {
-    executeBulkAction.mockResolvedValue({
-      attributes: { results: { updated: [{ enabled: false }] } },
-    });
+  it('refreshes the rule status from the app menu', async () => {
     renderHeader();
+    await openAppMenuOverflow();
 
-    await userEvent.click(screen.getByTestId('ruleSwitch'));
+    await userEvent.click(screen.getByTestId('ruleLastExecutionStatusRefreshButton'));
 
-    expect(executeBulkAction).toHaveBeenCalledWith({
-      type: BulkActionTypeEnum.disable,
-      ids: ['rule-id'],
-    });
-    expect(onRuleEnabledChange).toHaveBeenCalledWith(false);
+    expect(refreshRule).toHaveBeenCalled();
   });
 
   it('keeps the rule when deletion is cancelled', async () => {
