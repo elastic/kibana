@@ -10,6 +10,36 @@ page_description: |
   Configure the following Security Solution settings in the `kibana.yml` file:
 
 groups:
+  - group: Attack Discovery settings
+    id: attack-discovery-settings
+    settings:
+
+      - setting: xpack.discoveries.enabled
+        description: |
+          Set to `false` to disable Attack Discovery Workflows for the whole deployment, which [Attack Discovery](docs-content://solutions/security/ai/attack-discovery/run-attack-discovery.md) uses to generate discoveries from the **Attacks** view, from workflows, and from Agent Builder. Set to `true` to keep them enabled.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga 9.5+
+          ech: unavailable
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: xpack.discoveries.connectorTimeout
+        description: |
+          How long, in milliseconds, Attack Discovery Workflows wait for the large language model connector to respond before a generation step fails.
+        datatype: int
+        default: 600000
+        applies_to:
+          stack: ga 9.5+
+          ech: unavailable
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
   - group: Cloud Security Posture settings
     id: cloud-security-posture-settings
     settings:
@@ -33,7 +63,7 @@ groups:
 
       - setting: xpack.lists.maxImportPayloadBytes
         description: |
-          Sets the maximum number of bytes allowed for uploading Security Solution [value lists](docs-content://solutions/security/detect-and-alert/value-lists-exceptions.md). For every 10 MB, it is recommended to have an additional 1 GB of RAM reserved for Kibana.
+          Sets the maximum number of bytes allowed for uploading Security Solution [value lists](docs-content://solutions/security/detect-and-alert/create-manage-value-lists.md). For every 10 MB, it is recommended to have an additional 1 GB of RAM reserved for Kibana.
         datatype: int
         default: 9000000
         applies_to:
@@ -49,7 +79,7 @@ groups:
 
       - setting: xpack.lists.importBufferSize
         description: |
-          Sets the buffer size used for uploading Security Solution [value lists](docs-content://solutions/security/detect-and-alert/value-lists-exceptions.md). Increase the value to improve upload throughput at the expense of higher Kibana memory usage; decrease it to reduce memory usage at the cost of throughput.
+          Sets the buffer size used for uploading Security Solution [value lists](docs-content://solutions/security/detect-and-alert/create-manage-value-lists.md). Increase the value to improve upload throughput at the expense of higher Kibana memory usage; decrease it to reduce memory usage at the cost of throughput.
         datatype: int
         default: 1000
         applies_to:
@@ -224,6 +254,36 @@ groups:
         applies_to:
           stack: ga
           ech: unavailable
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+  - group: Timeline settings
+    id: timeline-settings
+    settings:
+
+      - setting: xpack.securitySolution.maxTimelineImportExportSize
+        description: |
+          The maximum number of [Timelines](docs-content://solutions/security/investigate/timeline.md) that a single import or export request can contain.
+        datatype: int
+        default: 10000
+        applies_to:
+          stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: xpack.securitySolution.maxTimelineImportPayloadBytes
+        description: |
+          The maximum size, in bytes, of a [Timeline](docs-content://solutions/security/investigate/timeline.md) import file.
+        datatype: int
+        default: 10485760
+        applies_to:
+          stack: ga
+          ech: ga
           ece: ga
           eck: ga
           self: ga
