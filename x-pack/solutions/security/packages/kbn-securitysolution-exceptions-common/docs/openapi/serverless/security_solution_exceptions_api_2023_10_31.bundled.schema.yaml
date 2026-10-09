@@ -2792,11 +2792,17 @@ components:
     BlocklistPathOrFileNameEntry:
       properties:
         field:
-          description: File path or file name field (available on all OS)
+          description: >
+            File path or file name field (available on all OS).
+            `file.name.caseless` is used for
+
+            `wildcard` (Match) entries on Windows and macOS, since both have
+            case-insensitive filesystems.
           enum:
             - file.path
             - file.path.caseless
             - file.name
+            - file.name.caseless
           type: string
         operator:
           description: Must be the value "included"

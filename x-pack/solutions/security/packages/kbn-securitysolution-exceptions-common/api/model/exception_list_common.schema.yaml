@@ -318,7 +318,10 @@ components:
             - file.path
             - file.path.caseless
             - file.name
-          description: File path or file name field (available on all OS)
+            - file.name.caseless
+          description: |
+            File path or file name field (available on all OS). `file.name.caseless` is used for
+            `wildcard` (Match) entries on Windows and macOS, since both have case-insensitive filesystems.
         type:
           type: string
           enum: [match_any, wildcard]

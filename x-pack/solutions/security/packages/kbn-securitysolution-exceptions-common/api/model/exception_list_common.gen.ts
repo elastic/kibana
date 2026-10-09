@@ -312,11 +312,15 @@ export type BlocklistHashEntry = z.infer<typeof BlocklistHashEntry>;
 export const BlocklistPathOrFileNameEntry = lazySchema(() =>
   z.object({
     /**
-     * File path or file name field (available on all OS)
-     */
+      * File path or file name field (available on all OS). `file.name.caseless` is used for
+`wildcard` (Match) entries on Windows and macOS, since both have case-insensitive filesystems.
+
+      */
     field: z
-      .enum(['file.path', 'file.path.caseless', 'file.name'])
-      .describe('File path or file name field (available on all OS)'),
+      .enum(['file.path', 'file.path.caseless', 'file.name', 'file.name.caseless'])
+      .describe(
+        'File path or file name field (available on all OS). `file.name.caseless` is used for\n`wildcard` (Match) entries on Windows and macOS, since both have case-insensitive filesystems.\n'
+      ),
     /**
       * Must be `match_any` ("is one of") or `wildcard` ("Match", supports `*` and `?` wildcards)
 
