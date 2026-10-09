@@ -716,11 +716,9 @@ steps:
   #    with `workflow.executeAsync`. This run finishes in minutes. The review raises the
   #    proposal, applies the outcome (re-tag on dismissal) and closes the Investigation.
   #
-  #    The review drops a batch when the rule already has its limit of reviews waiting for a
-  #    decision. The engine decides that while starting the child, so the dispatch itself still
-  #    succeeds and `workflow.executeAsync` reports the child's status as `skipped`. That status
-  #    is read below, because nothing else closes the Investigation of a batch whose review never
-  #    ran.
+  #    The review has no concurrency limit, so every batch with confident false positives raises
+  #    its proposal. The dispatch status is still read below, because nothing else closes the
+  #    Investigation of a batch whose review never ran.
   #
   #    Autonomy (`manual` gates, `supervised` auto-approves) is passed to the review, which owns
   #    the mapping to `autoApprove`.
@@ -763,14 +761,13 @@ steps:
       #
       # One value per outcome so every branch below is a single comparison (if-conditions take
       # no filters, and `and`/`or` have no precedence).
-      #   limit   → skipped by the per-rule limit
-      #   failed  → the review never ran to a decision (rejected inputs, cancelled, timed out)
+      #   failed  → the review never ran to a decision (skipped, rejected inputs, cancelled, timed out)
       #   started → pending, running, parked or already finished
       - name: resolve_review_dispatch
         type: data.set
         with:
           review_dispatch: >-
-            {% if steps.start_fp_review.output.status == 'skipped' %}limit{% elsif steps.start_fp_review.output.status == 'failed' or steps.start_fp_review.output.status == 'cancelled' or steps.start_fp_review.output.status == 'timed_out' %}failed{% else %}started{% endif %}
+            {% if steps.start_fp_review.output.status == 'skipped' or steps.start_fp_review.output.status == 'failed' or steps.start_fp_review.output.status == 'cancelled' or steps.start_fp_review.output.status == 'timed_out' %}failed{% else %}started{% endif %}
 
       - name: handle_review_started
         type: if
@@ -787,41 +784,6 @@ steps:
                 Autonomy level: {{ inputs.autonomy }}.
                 {% if inputs.autonomy == 'supervised' %}The closure is approved automatically at this autonomy level; reopen any alert you disagree with.{% else %}A human decision is required.{% endif %}
                 The outcome is posted here and this Investigation is closed when it is decided.
-
-      # The rule is at its limit of closure proposals waiting for a decision, so this one is not
-      # raised. Same end state as a false positive below the confidence floor: the alerts stay
-      # open and tagged az:false_positive, and the Investigation closes.
-      - name: handle_review_limit
-        type: if
-        condition: "${{ variables.review_dispatch == 'limit' }}"
-        steps:
-          - name: close_investigation_review_limit
-            type: ai.conversation.metadata.patch
-            on-failure:
-              continue: true
-              fallback:
-                - name: log_review_limit_close_failed
-                  type: console
-                  with:
-                    message: >-
-                      The closure proposal was skipped by the per-rule limit, but the Investigation
-                      could not be marked closed: {{ error.message }}. Investigation
-                      {{ steps.create_investigation.output.conversation_id }} stays open.
-            with:
-              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-              updates:
-                status: closed
-
-          - name: post_comment_review_limit
-            type: ai.conversation.add_user_message
-            on-failure:
-              continue: true
-            with:
-              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-              message: >-
-                No closure proposal was created. Rule "{{ inputs.rule_name }}" already has 10 closure proposals waiting for a decision, the most that wait at once for one rule.
-                {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} classified as false positive at or above the {{ inputs.confidence_floor }} confidence floor {% if variables.fp_candidate_count == 1 %}stays{% else %}stay{% endif %} open and tagged az:false_positive.
-                Decide the pending proposals for this rule to let new ones through.
 
       - name: handle_review_failed
         type: if
