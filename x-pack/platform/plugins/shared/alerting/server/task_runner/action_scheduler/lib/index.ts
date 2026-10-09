@@ -6,6 +6,7 @@
  */
 
 export { buildRuleUrl } from './build_rule_url';
+export { collectAlertContextByUuid } from './collect_alert_context_by_uuid';
 export { formatActionToEnqueue } from './format_action_to_enqueue';
 export { getSummarizedAlerts } from './get_summarized_alerts';
 export {
