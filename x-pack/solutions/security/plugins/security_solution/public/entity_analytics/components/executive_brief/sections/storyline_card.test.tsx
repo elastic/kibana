@@ -10,7 +10,10 @@ import { EuiProvider, useEuiTheme } from '@elastic/eui';
 import { ThemeProvider } from '@emotion/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FIXTURE_JOB_SUCCEEDED } from '../../../../../common/entity_analytics/executive_brief/__fixtures__/brief';
-import type { BriefSnapshot } from '../../../../../common/entity_analytics/executive_brief/types';
+import type {
+  BriefSnapshot,
+  StoryEvent,
+} from '../../../../../common/entity_analytics/executive_brief/types';
 import { BriefContextProvider } from '../components/brief_context';
 import { StorylineCard } from './storyline_card';
 
@@ -88,6 +91,14 @@ const narrativeFor = (id: string) => {
   return narrative;
 };
 
+const manyEvents = (count: number): StoryEvent[] =>
+  Array.from(
+    { length: count },
+    (_, index): StoryEvent => ({
+      ...story1.events[0],
+      evidenceId: `EVT-${index + 1}`,
+    })
+  );
 const toggle = (rank: number) => screen.getByTestId(`executiveBriefStorylineToggle-${rank}`);
 
 describe('StorylineCard', () => {
@@ -162,7 +173,7 @@ describe('StorylineCard', () => {
     );
   });
 
-  it('toggles from the title and puts recommended actions first in the details', () => {
+  it('toggles from the title, keeps the next step and puts recommended actions last', () => {
     const [decision] = FIXTURE_JOB_SUCCEEDED.brief?.decisions ?? [];
     render(
       <StorylineCard
@@ -175,12 +186,48 @@ describe('StorylineCard', () => {
     fireEvent.click(screen.getByTestId(`executiveBriefStorylineTitle-${story2.rank}`));
     expect(toggle(story2.rank)).toHaveAttribute('aria-expanded', 'true');
     const body = screen.getByTestId(`executiveBriefStorylineBody-${story2.rank}`);
-    expect(screen.queryByTestId('executiveBriefStorylineNextStep')).not.toBeInTheDocument();
     if (decision) {
+      expect(screen.getByTestId('executiveBriefStorylineNextStep')).toBeInTheDocument();
       const text = body.textContent ?? '';
-      expect(text.indexOf('Recommended actions')).toBeLessThan(text.indexOf('Why it matters'));
+      expect(text.indexOf('Recommended actions')).toBeGreaterThan(text.indexOf('Timeline'));
       expect(screen.getByTestId('executiveBriefInvestigate-0-inline')).toBeInTheDocument();
     }
+  });
+
+  it('previews the first timeline events and expands to show the rest', () => {
+    const events = manyEvents(7);
+    render(
+      <StorylineCard
+        snapshot={snapshot}
+        storyline={{ ...story1, events, eventsTruncated: 0 }}
+        narrative={narrativeFor(story1.evidenceId)}
+        decisions={[]}
+      />
+    );
+    const steps = () => within(screen.getByTestId('executiveBriefSteps'));
+    expect(steps().getAllByTestId(/^executiveBriefEvent-/)).toHaveLength(4);
+    fireEvent.click(screen.getByTestId('executiveBriefStepsShowAll'));
+    expect(steps().getAllByTestId(/^executiveBriefEvent-/)).toHaveLength(7);
+    fireEvent.click(screen.getByTestId('executiveBriefStepsShowFewer'));
+    expect(steps().getAllByTestId(/^executiveBriefEvent-/)).toHaveLength(4);
+  });
+
+  it('shows every timeline event in print mode', () => {
+    const events = manyEvents(7);
+    render(
+      <BriefContextProvider snapshot={snapshot} isPrintMode>
+        <StorylineCard
+          snapshot={snapshot}
+          storyline={{ ...story1, events, eventsTruncated: 0 }}
+          narrative={narrativeFor(story1.evidenceId)}
+          decisions={[]}
+        />
+      </BriefContextProvider>
+    );
+    expect(
+      within(screen.getByTestId('executiveBriefSteps')).getAllByTestId(/^executiveBriefEvent-/)
+    ).toHaveLength(7);
+    expect(screen.queryByTestId('executiveBriefStepsShowAll')).not.toBeInTheDocument();
   });
 
   it('expands every card with forceExpanded', () => {

@@ -210,8 +210,7 @@ export const StorylineCard: React.FC<StorylineCardProps> = ({
           );
         })}
       </EuiFlexGroup>
-      {/* Expanded cards open on the recommended actions, so the next step would repeat them. */}
-      {topDecision && !expanded && (
+      {topDecision && (
         <>
           <EuiSpacer size="s" />
           <EuiText size="s" data-test-subj="executiveBriefStorylineNextStep">
@@ -268,21 +267,6 @@ export const StorylineCard: React.FC<StorylineCardProps> = ({
             {header}
             {expanded && (
               <div id={bodyId} data-test-subj={`executiveBriefStorylineBody-${storyline.rank}`}>
-                {decisions.length > 0 && (
-                  <>
-                    <EuiSpacer size="m" />
-                    <div {...CUT}>
-                      <EuiTitle size="xxs">
-                        <h5>{'Recommended actions'}</h5>
-                      </EuiTitle>
-                    </div>
-                    {decisions.map(({ decision, index }) => (
-                      <div key={`${decision.action}-${index}`} {...CUT}>
-                        <DecisionAccordion decision={decision} index={index} inline />
-                      </div>
-                    ))}
-                  </>
-                )}
                 <EuiSpacer size="m" />
                 <EuiText size="s">
                   <p>{narrative.narrative}</p>
@@ -317,6 +301,21 @@ export const StorylineCard: React.FC<StorylineCardProps> = ({
                 <div {...CUT}>
                   <ResponseRow response={storyline.response} />
                 </div>
+                {decisions.length > 0 && (
+                  <>
+                    <EuiSpacer size="m" />
+                    <div {...CUT}>
+                      <EuiTitle size="xxs">
+                        <h5>{'Recommended actions'}</h5>
+                      </EuiTitle>
+                    </div>
+                    {decisions.map(({ decision, index }) => (
+                      <div key={`${decision.action}-${index}`} {...CUT}>
+                        <DecisionAccordion decision={decision} index={index} inline />
+                      </div>
+                    ))}
+                  </>
+                )}
               </div>
             )}
           </EuiFlexItem>

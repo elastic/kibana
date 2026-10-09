@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiAvatar,
   EuiBadge,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -24,7 +25,11 @@ import type {
 } from '../../../../../common/entity_analytics/executive_brief/types';
 import { BRIEF_CUT_ATTRIBUTE } from '../constants';
 import { getTacticName } from '../utils/resolve_evidence';
+import { useIsPrintMode } from './brief_context';
 import { EvidenceChip } from './evidence_chip';
+
+/** Events shown before "Show more"; print and PDF always show every event. */
+export const PREVIEW_EVENT_COUNT = 4;
 
 export const EVENT_ICON: Record<StoryEventType, { iconType: string; color: EventColor }> = {
   alert_first: { iconType: 'warning', color: 'warning' },
@@ -44,13 +49,18 @@ const formatTime = (iso: string): string => {
   return `${date.toISOString().slice(0, 10)} ${date.toISOString().slice(11, 16)}Z`;
 };
 
-/** EuiTimeline of the storyline's events (capped, with a "+N more" note). */
+/** EuiTimeline of the storyline's events: a short preview that expands, capped server-side with a "+N more" note. */
 export const StorylineSteps: React.FC<{ storyline: Storyline; snapshot: BriefSnapshot }> = ({
   storyline,
   snapshot,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const events = storyline.events.slice(0, MAX_STORYLINE_EVENTS);
+  const isPrintMode = useIsPrintMode();
+  const [showAll, setShowAll] = useState(false);
+  const allEvents = storyline.events.slice(0, MAX_STORYLINE_EVENTS);
+  const hiddenCount = isPrintMode || showAll ? 0 : allEvents.length - PREVIEW_EVENT_COUNT;
+  const events = hiddenCount > 0 ? allEvents.slice(0, PREVIEW_EVENT_COUNT) : allEvents;
+  const canCollapse = !isPrintMode && showAll && allEvents.length > PREVIEW_EVENT_COUNT;
   const isSevere = storyline.severity === 'critical' || storyline.severity === 'high';
   const colorOf = (type: StoryEventType, color: EventColor): string => {
     if (type === 'alert_first' && isSevere) return euiTheme.colors.danger;
@@ -108,7 +118,29 @@ export const StorylineSteps: React.FC<{ storyline: Storyline; snapshot: BriefSna
   return (
     <div data-test-subj="executiveBriefSteps">
       <EuiTimeline items={items} />
-      {storyline.eventsTruncated > 0 && (
+      {hiddenCount > 0 && (
+        <EuiButtonEmpty
+          size="xs"
+          flush="left"
+          iconType="chevronSingleDown"
+          onClick={() => setShowAll(true)}
+          data-test-subj="executiveBriefStepsShowAll"
+        >
+          {`Show ${hiddenCount} more ${hiddenCount === 1 ? 'event' : 'events'}`}
+        </EuiButtonEmpty>
+      )}
+      {canCollapse && (
+        <EuiButtonEmpty
+          size="xs"
+          flush="left"
+          iconType="chevronSingleUp"
+          onClick={() => setShowAll(false)}
+          data-test-subj="executiveBriefStepsShowFewer"
+        >
+          {'Show fewer events'}
+        </EuiButtonEmpty>
+      )}
+      {hiddenCount <= 0 && storyline.eventsTruncated > 0 && (
         <EuiText size="xs" color="subdued" data-test-subj="executiveBriefStepsMore">
           {`+${storyline.eventsTruncated} more`}
         </EuiText>

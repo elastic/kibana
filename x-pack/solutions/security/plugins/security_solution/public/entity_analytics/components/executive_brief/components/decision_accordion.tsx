@@ -96,11 +96,11 @@ export const DecisionAccordion: React.FC<DecisionAccordionProps> = ({
         )
       }
       buttonContent={
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+        <EuiFlexGroup gutterSize="s" alignItems="baseline" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiBadge color={urgency.color}>{urgency.label}</EuiBadge>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem>
             <EuiText size="s">
               <strong>{decision.action}</strong>
             </EuiText>
