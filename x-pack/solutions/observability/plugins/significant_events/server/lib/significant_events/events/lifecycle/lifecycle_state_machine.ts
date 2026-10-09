@@ -9,7 +9,7 @@ import type {
   SignificantEventManualStatus,
   SignificantEventStatus,
 } from '@kbn/significant-events-schema';
-import { nextStatus, RECOVERING_COUNT, type StatusOutcome } from './status_transition';
+import { nextStatus, type StatusOutcome } from './status_transition';
 
 /**
  * The one place that decides a significant event's status. Every caller
@@ -78,11 +78,9 @@ const isLive = (status: SignificantEventStatus | undefined): boolean =>
 const decideEvaluation = ({
   state,
   outcome,
-  recoveringCount,
 }: {
   state: LifecycleState;
   outcome: StatusOutcome;
-  recoveringCount: number;
 }): LifecycleDecision => {
   const { status, evaluations } = state;
   if (status !== 'active' && status !== 'recovering') {
@@ -93,7 +91,6 @@ const decideEvaluation = ({
     current: status,
     outcome,
     statusCount: evaluations,
-    recoveringCount,
   });
   if (!transition.write) {
     return { write: false, reason: outcome === 'no_data' ? 'no_data' : 'unchanged' };
@@ -140,17 +137,15 @@ const decideAssessment = ({
 export const decideLifecycle = ({
   state,
   input,
-  recoveringCount = RECOVERING_COUNT,
 }: {
   state: LifecycleState;
   input: LifecycleInput;
-  recoveringCount?: number;
 }): LifecycleDecision => {
   const { status } = state;
 
   switch (input.kind) {
     case 'evaluation':
-      return decideEvaluation({ state, outcome: input.outcome, recoveringCount });
+      return decideEvaluation({ state, outcome: input.outcome });
 
     case 'assessment':
       return decideAssessment({ state, outcome: input.outcome });

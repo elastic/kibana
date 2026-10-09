@@ -10,7 +10,8 @@ import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 /**
  * The recovering count `N`, with the Alerting v2 director's semantics: an episode spends `N`
  * evaluations in `recovering` and resolves on the next one, so the `N+1`-th consecutive clean
- * evaluation writes `inactive`.
+ * evaluation writes `inactive`. Used by the `evaluation` input, which the target aggregate will
+ * drive; the interim discovery path derives its status from verdicts and does not count.
  */
 export const RECOVERING_COUNT = 3;
 

@@ -48,7 +48,6 @@ export const applyLifecycleInput = async ({
   assessmentNote,
   annotate,
   expectedTimestamp,
-  recoveringCount,
   alertEventsClient,
   emitTrigger,
 }: {
@@ -71,7 +70,6 @@ export const applyLifecycleInput = async ({
    * something else (e.g. a discovery write) changed the event since the caller read it.
    */
   expectedTimestamp?: string;
-  recoveringCount?: number;
   alertEventsClient: AlertEventsClientApi;
   emitTrigger?: TriggerEmitter;
 }): Promise<LifecycleControllerResult> => {
@@ -88,7 +86,6 @@ export const applyLifecycleInput = async ({
   const decision = decideLifecycle({
     state: { status: latest.status, evaluations: latest.status_evaluations ?? 0 },
     input,
-    recoveringCount,
   });
   if (!decision.write) {
     return { updated: 0, ignored: 1, status: latest.status, reason: decision.reason };
