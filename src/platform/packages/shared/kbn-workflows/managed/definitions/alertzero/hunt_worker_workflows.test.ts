@@ -101,6 +101,42 @@ const evaluateExpression = (expression: string, context: Record<string, unknown>
 };
 
 describe('Hunt Watch worker chain', () => {
+  it('records the hunt run on both new and reused investigations before attaching findings', () => {
+    const append = stepIn(findOrCreateInvestigation.steps, 'append_workflow_execution');
+    expect(append?.type).toBe('investigations.appendWorkflowExecutionId');
+    expect(append?.['on-failure']).toEqual({ continue: true });
+    expect(append?.with).toEqual({
+      conversationId: '{{ steps.find_or_create.output.investigationConversationId }}',
+      workflowExecutionId: '{{ inputs.runId }}',
+    });
+    const names = findOrCreateInvestigation.steps.map(({ name }) => name);
+    expect(names.indexOf('find_or_create')).toBeLessThan(
+      names.indexOf('append_workflow_execution')
+    );
+    expect(names.indexOf('append_workflow_execution')).toBeLessThan(
+      names.indexOf('attach_threat_report')
+    );
+  });
+
+  it.each([
+    ['conv-1', 'exec-1', true],
+    ['conv-1', '', false],
+    ['', 'exec-1', false],
+    [undefined, 'exec-1', false],
+  ])(
+    'only appends when a hunt conversation and run ID exist: %p, %p',
+    (conversationId, runId, expected) => {
+      const condition =
+        stepIn(findOrCreateInvestigation.steps, 'append_workflow_execution')?.if ?? '';
+      expect(
+        evaluateExpression(condition, {
+          inputs: { runId },
+          steps: { find_or_create: { output: { investigationConversationId: conversationId } } },
+        })
+      ).toBe(expected);
+    }
+  );
+
   // 1b: the two feature children carry exactly the shared tag pair, and neither the
   // Worker-only watch tags.
   it.each([
@@ -126,6 +162,37 @@ describe('Hunt Watch worker chain', () => {
       key: 'hunt-package-report-{{ inputs.investigationConversationId }}',
       strategy: 'queue',
       max: 1,
+    });
+  });
+
+  // A clean run whose dismissal was held (open Proposal) or failed closed (lookup error) must say
+  // so in the summary, and a lookup failure must surface as run_incomplete like the mint-side one:
+  // nothing waits to close that Investigation and no sweep retries it.
+  describe('dismissHold wiring', () => {
+    const dataSetWith = (name: string): Record<string, string> =>
+      (stepIn(packageReportSteps, name)?.with ?? {}) as Record<string, string>;
+
+    it('summarises each non-none dismissHold value', () => {
+      const summary = dataSetWith('resolve_package_summary').package_summary;
+      expect(summary).toContain("packaged.dismissHold == 'open_proposal'");
+      expect(summary).toContain("packaged.dismissHold == 'check_failed'");
+      // Held branches must precede the benign-close branch, or they would never render.
+      expect(summary.indexOf("dismissHold == 'open_proposal'")).toBeLessThan(
+        summary.indexOf('packaged.dismiss == true -%}')
+      );
+    });
+
+    it('marks a dismissHold lookup failure as run_incomplete with a reason', () => {
+      const { package_status: status, package_reason: reason } =
+        dataSetWith('resolve_package_status');
+      expect(status).toContain("output.dismissHold == 'check_failed'");
+      expect(reason).toContain("output.dismissHold == 'check_failed'");
+    });
+
+    it('only closes the Investigation when packaging decided to dismiss', () => {
+      expect(stepIn(packageReportSteps, 'dismiss_investigation_if_clean')?.if).toContain(
+        'output.dismiss == true'
+      );
     });
   });
 
@@ -505,6 +572,90 @@ describe('Hunt Watch worker chain', () => {
         });
         expect(message.trim()).toBe('Narrative.');
       });
+    });
+  });
+
+  describe('package report benign-close outcome', () => {
+    const statusWith = stepIn(packageReportSteps, 'resolve_package_status')?.with as Record<
+      string,
+      string
+    >;
+    const summaryWith = stepIn(packageReportSteps, 'resolve_package_summary')?.with as Record<
+      string,
+      string
+    >;
+    const liquid = createWorkflowLiquidEngine();
+    const render = (template: string, context: Record<string, unknown>) =>
+      liquid.parseAndRenderSync(template, context).trim();
+
+    const dismissOutcomeWith = stepIn(packageReportSteps, 'resolve_dismiss_outcome')
+      ?.with as Record<string, string>;
+
+    const dismissCase = (dismissStep: Record<string, unknown> | undefined) => {
+      const base = {
+        inputs: { investigationConversationId: 'conv-1' },
+        steps: {
+          decide_and_package: { output: { status: 'packaged', dismiss: true, proposals: [] } },
+          // A skipped step has no entry at all; a continued failure has an `error` and no `output`.
+          ...(dismissStep ? { dismiss_investigation_if_clean: dismissStep } : {}),
+        },
+      };
+      return {
+        ...base,
+        variables: {
+          dispatch_failed_count: 0,
+          dismiss_close_failed: evaluateExpression(dismissOutcomeWith.dismiss_close_failed, base),
+        },
+      };
+    };
+
+    it('resolves the dismiss attempt before the status and summary read it', () => {
+      const order = packageReport.steps.map((step) => step.name);
+      const dismissIdx = order.indexOf('dismiss_investigation_if_clean');
+
+      expect(dismissIdx).toBeGreaterThan(-1);
+      expect(dismissIdx).toBeLessThan(order.indexOf('resolve_package_status'));
+      expect(dismissIdx).toBeLessThan(order.indexOf('resolve_package_summary'));
+    });
+
+    it('reports run_incomplete and an open Investigation when the close patch failed', () => {
+      const ctx = dismissCase({ error: { message: 'patch rejected' } });
+      const status = render(statusWith.package_status, ctx);
+      const reason = render(statusWith.package_reason, ctx);
+      const summary = render(summaryWith.package_summary, {
+        ...ctx,
+        variables: { ...ctx.variables, package_status: status, package_reason: reason },
+      });
+
+      expect(ctx.variables.dismiss_close_failed).toBe(true);
+      expect(status).toBe('run_incomplete');
+      expect(reason).toContain('patch rejected');
+      // The Worker journal shows only `reason` on a run_incomplete packaging, so the
+      // retry guidance has to live here and not just in the summary.
+      expect(reason).toContain('still open');
+      expect(reason).toContain('manual run');
+      expect(summary).toContain('still open');
+      expect(summary).not.toContain('closed this Investigation as benign');
+    });
+
+    it('is unchanged when the close succeeded', () => {
+      const ctx = dismissCase({ output: {} });
+      const status = render(statusWith.package_status, ctx);
+      const summary = render(summaryWith.package_summary, {
+        ...ctx,
+        variables: { ...ctx.variables, package_status: status },
+      });
+
+      expect(ctx.variables.dismiss_close_failed).toBe(false);
+      expect(status).toBe('success');
+      expect(summary).toContain('closed this Investigation as benign');
+    });
+
+    it('is unchanged when the dismiss step never ran', () => {
+      const ctx = dismissCase(undefined);
+
+      expect(ctx.variables.dismiss_close_failed).toBe(false);
+      expect(render(statusWith.package_status, ctx)).toBe('success');
     });
   });
 });

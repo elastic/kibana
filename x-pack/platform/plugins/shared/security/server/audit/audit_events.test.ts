@@ -12,6 +12,8 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import {
   httpRequestEvent,
   savedObjectEvent,
+  ServiceAccountAuditAction,
+  serviceAccountAuditEvent,
   sessionCleanupConcurrentLimitEvent,
   sessionCleanupEvent,
   SpaceAuditAction,
@@ -744,6 +746,349 @@ describe('#spaceAuditEvent', () => {
           },
         },
         "message": "Failed attempt to create space [id=SPACE_ID]",
+      }
+    `);
+  });
+});
+
+describe('#serviceAccountAuditEvent', () => {
+  test('creates a `success` create event naming the account', () => {
+    expect(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.CREATE,
+        serviceAccount: { id: 'kibana/nightshift-relay', name: 'nightshift-relay' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "service_account_create",
+          "category": Array [
+            "iam",
+          ],
+          "outcome": "success",
+          "type": Array [
+            "user",
+            "creation",
+          ],
+        },
+        "message": "User has created service account [id=kibana/nightshift-relay, name=nightshift-relay]",
+        "user": Object {
+          "target": Object {
+            "id": "kibana/nightshift-relay",
+            "name": "nightshift-relay",
+          },
+        },
+      }
+    `);
+  });
+
+  test('creates a `failure` create event with the name when it is known', () => {
+    expect(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.CREATE,
+        serviceAccount: { name: 'nightshift-relay' },
+        error: new Error('ERROR_MESSAGE'),
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": Object {
+          "code": "Error",
+          "message": "ERROR_MESSAGE",
+        },
+        "event": Object {
+          "action": "service_account_create",
+          "category": Array [
+            "iam",
+          ],
+          "outcome": "failure",
+          "type": Array [
+            "user",
+            "creation",
+          ],
+        },
+        "message": "Failed attempt to create service account [name=nightshift-relay]",
+        "user": Object {
+          "target": Object {
+            "name": "nightshift-relay",
+          },
+        },
+      }
+    `);
+  });
+
+  test('creates an `unknown` create event when the failed create may have left the account behind', () => {
+    expect(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.CREATE,
+        serviceAccount: { id: 'kibana/nightshift-relay', name: 'nightshift-relay' },
+        outcome: 'unknown',
+        error: new Error('ERROR_MESSAGE'),
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": Object {
+          "code": "Error",
+          "message": "ERROR_MESSAGE",
+        },
+        "event": Object {
+          "action": "service_account_create",
+          "category": Array [
+            "iam",
+          ],
+          "outcome": "unknown",
+          "type": Array [
+            "user",
+            "creation",
+          ],
+        },
+        "message": "Failed attempt to create service account [id=kibana/nightshift-relay, name=nightshift-relay], which might have been left behind",
+        "user": Object {
+          "target": Object {
+            "id": "kibana/nightshift-relay",
+            "name": "nightshift-relay",
+          },
+        },
+      }
+    `);
+  });
+
+  test('creates a `failure` create event without `user.target` when the name is unknown', () => {
+    expect(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.CREATE,
+        error: new Error('ERROR_MESSAGE'),
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": Object {
+          "code": "Error",
+          "message": "ERROR_MESSAGE",
+        },
+        "event": Object {
+          "action": "service_account_create",
+          "category": Array [
+            "iam",
+          ],
+          "outcome": "failure",
+          "type": Array [
+            "user",
+            "creation",
+          ],
+        },
+        "message": "Failed attempt to create service account",
+      }
+    `);
+  });
+
+  test('creates an `unknown` bind event with the target and the workload', () => {
+    expect(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.WORKLOAD_BIND,
+        serviceAccount: { id: 'kibana/nightshift-relay' },
+        workload: { plugin_id: 'workflowsManagement', type: 'workflow', id: 'WORKFLOW_ID' },
+        outcome: 'unknown',
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "service_account_workload_bind",
+          "category": Array [
+            "iam",
+          ],
+          "outcome": "unknown",
+          "type": Array [
+            "user",
+            "change",
+          ],
+        },
+        "kibana": Object {
+          "workload": Object {
+            "id": "WORKFLOW_ID",
+            "plugin_id": "workflowsManagement",
+            "type": "workflow",
+          },
+        },
+        "message": "User is binding service account [id=kibana/nightshift-relay] to workload [workflowsManagement/workflow/WORKFLOW_ID]",
+        "user": Object {
+          "target": Object {
+            "id": "kibana/nightshift-relay",
+          },
+        },
+      }
+    `);
+  });
+
+  test('creates a `failure` bind event', () => {
+    expect(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.WORKLOAD_BIND,
+        serviceAccount: { id: 'kibana/nightshift-relay' },
+        workload: { plugin_id: 'workflowsManagement', type: 'workflow', id: 'WORKFLOW_ID' },
+        error: new Error('ERROR_MESSAGE'),
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": Object {
+          "code": "Error",
+          "message": "ERROR_MESSAGE",
+        },
+        "event": Object {
+          "action": "service_account_workload_bind",
+          "category": Array [
+            "iam",
+          ],
+          "outcome": "failure",
+          "type": Array [
+            "user",
+            "change",
+          ],
+        },
+        "kibana": Object {
+          "workload": Object {
+            "id": "WORKFLOW_ID",
+            "plugin_id": "workflowsManagement",
+            "type": "workflow",
+          },
+        },
+        "message": "Failed attempt to bind service account [id=kibana/nightshift-relay] to workload [workflowsManagement/workflow/WORKFLOW_ID]",
+        "user": Object {
+          "target": Object {
+            "id": "kibana/nightshift-relay",
+          },
+        },
+      }
+    `);
+  });
+
+  test('creates an `unknown` unbind event without `user`', () => {
+    expect(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.WORKLOAD_UNBIND,
+        workload: { plugin_id: 'workflowsManagement', type: 'workflow', id: 'WORKFLOW_ID' },
+        outcome: 'unknown',
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "service_account_workload_unbind",
+          "category": Array [
+            "iam",
+          ],
+          "outcome": "unknown",
+          "type": Array [
+            "user",
+            "change",
+          ],
+        },
+        "kibana": Object {
+          "workload": Object {
+            "id": "WORKFLOW_ID",
+            "plugin_id": "workflowsManagement",
+            "type": "workflow",
+          },
+        },
+        "message": "User is unbinding service account from workload [workflowsManagement/workflow/WORKFLOW_ID]",
+      }
+    `);
+  });
+
+  test('creates an `unknown` delete event', () => {
+    expect(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.DELETE,
+        serviceAccount: { id: 'kibana/nightshift-relay' },
+        outcome: 'unknown',
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "service_account_delete",
+          "category": Array [
+            "iam",
+          ],
+          "outcome": "unknown",
+          "type": Array [
+            "user",
+            "deletion",
+          ],
+        },
+        "message": "User is deleting service account [id=kibana/nightshift-relay]",
+        "user": Object {
+          "target": Object {
+            "id": "kibana/nightshift-relay",
+          },
+        },
+      }
+    `);
+  });
+
+  test('records a forced delete in the message', () => {
+    expect(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.DELETE,
+        serviceAccount: { id: 'kibana/nightshift-relay' },
+        force: true,
+        outcome: 'unknown',
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "service_account_delete",
+          "category": Array [
+            "iam",
+          ],
+          "outcome": "unknown",
+          "type": Array [
+            "user",
+            "deletion",
+          ],
+        },
+        "message": "User is deleting service account [id=kibana/nightshift-relay] [force=true]",
+        "user": Object {
+          "target": Object {
+            "id": "kibana/nightshift-relay",
+          },
+        },
+      }
+    `);
+  });
+
+  test('creates a `failure` delete event', () => {
+    expect(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.DELETE,
+        serviceAccount: { id: 'kibana/nightshift-relay' },
+        force: true,
+        error: new Error('ERROR_MESSAGE'),
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": Object {
+          "code": "Error",
+          "message": "ERROR_MESSAGE",
+        },
+        "event": Object {
+          "action": "service_account_delete",
+          "category": Array [
+            "iam",
+          ],
+          "outcome": "failure",
+          "type": Array [
+            "user",
+            "deletion",
+          ],
+        },
+        "message": "Failed attempt to delete service account [id=kibana/nightshift-relay] [force=true]",
+        "user": Object {
+          "target": Object {
+            "id": "kibana/nightshift-relay",
+          },
+        },
       }
     `);
   });

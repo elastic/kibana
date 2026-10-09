@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const babelEslint = require('@babel/eslint-parser');
-
-const { assert, normalizeWhitespace, init } = require('../lib');
+const { assert, normalizeWhitespace, init, parseLicense } = require('../lib');
 
 module.exports = {
   meta: {
@@ -29,7 +27,7 @@ module.exports = {
       },
     ],
   },
-  create: (context) => {
+  createOnce: (context) => {
     return {
       Program(program) {
         const licenses = init(context, program, () => {
@@ -39,24 +37,21 @@ module.exports = {
           assert(!!licenses, '"licenses" option is required');
 
           return licenses.map((license, i) => {
-            const parsed = babelEslint.parse(license, { requireConfigFile: false });
+            const { hasBody, commentCount, nodeValue } = parseLicense(license);
 
+            assert(!hasBody, `"licenses[${i}]" option must only include a single comment`);
             assert(
-              !parsed.body.length,
-              `"licenses[${i}]" option must only include a single comment`
-            );
-            assert(
-              parsed.comments.length === 1,
+              commentCount === 1,
               `"licenses[${i}]" option must only include a single comment`
             );
 
-            return normalizeWhitespace(parsed.comments[0].value);
+            return nodeValue;
           });
         });
 
         if (!licenses || !licenses.length) return;
 
-        const sourceCode = context.getSourceCode();
+        const sourceCode = context.sourceCode;
 
         sourceCode
           .getAllComments()

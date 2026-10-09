@@ -218,7 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
         esClient,
         indexName: ACTION_INDEX,
         ruleId: ruleWithActionId!,
-        retryOptions: { retryCount: 12, retryDelay: 2000 },
+        retryOptions: { retryDelay: 2000 },
       });
       expect(documentResponse.hits.hits.length).to.be.greaterThan(0);
       expect((documentResponse.hits.hits[0]._source as { ruleName: string }).ruleName).to.eql(

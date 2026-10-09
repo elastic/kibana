@@ -32,10 +32,7 @@ import {
 } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
-import {
-  NIGHTSHIFT_ENABLED_FLAG,
-  SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ,
-} from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import {
   getRelayAppConnectionSavedObjectType,
   RELAY_APP_CONNECTION_SO_TYPE,
@@ -81,7 +78,7 @@ import {
   createSignificantEventsServices,
 } from './lib/significant_events/significant_events_clients';
 import { detectionsDataStream } from './lib/significant_events/detections';
-import { eventsDataStream } from './lib/significant_events/events';
+import { deleteLegacyEventsDataStream } from './lib/significant_events/events';
 import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerSignificantEventsSkills } from './agent_builder/skills/register_skills';
 import { registerAgentBuilderSmlTypes } from './agent_builder/sml/register_sml_types';
@@ -177,7 +174,6 @@ export class SignificantEventsPlugin
     });
 
     core.dataStreams.registerDataStream(detectionsDataStream);
-    core.dataStreams.registerDataStream(eventsDataStream);
     core.dataStreams.registerDataStream(knowledgeIndicatorsDataStream);
 
     this.ebtTelemetryService.setup(core.analytics);
@@ -232,10 +228,6 @@ export class SignificantEventsPlugin
         dataStreams: coreStart.dataStreams,
         esClient: scopedClusterClient.asCurrentUser,
         space,
-        useRuleEventsRead$: coreStart.featureFlags.getBooleanValue$(
-          SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ,
-          false
-        ),
         triggerEmitter: createTriggerEmitter({
           workflowsExtensions: pluginsStart.workflowsExtensions,
           request,
@@ -246,18 +238,10 @@ export class SignificantEventsPlugin
       const getAlertingV2RulesClient = async () =>
         pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, DEFAULT_SPACE_ID);
 
-      let alertEventsClientPromise: Promise<AlertEventsClientApi | undefined> | undefined;
-      const getAlertEventsClient = (): Promise<AlertEventsClientApi | undefined> => {
-        alertEventsClientPromise ??= pluginsStart.alertingVTwo
-          .getAlertEventsClientWithRequest(request)
-          .catch((err) => {
-            this.logger.warn(
-              `Failed to acquire AlertEventsClient; .rule-events dual-write skipped: ${
-                err instanceof Error ? err.message : err
-              }`
-            );
-            return undefined;
-          });
+      let alertEventsClientPromise: Promise<AlertEventsClientApi> | undefined;
+      const getAlertEventsClient = (): Promise<AlertEventsClientApi> => {
+        alertEventsClientPromise ??=
+          pluginsStart.alertingVTwo.getAlertEventsClientWithRequest(request);
         return alertEventsClientPromise;
       };
 
@@ -435,6 +419,19 @@ export class SignificantEventsPlugin
       logger: this.logger,
       server: this.server,
       getScopedClients: this.getScopedClients,
+      internalRuleBackedRules: {
+        listRuleIds: async () => {
+          const [coreStart] = await core.getStartServices();
+          return knowledgeIndicatorService.listRuleBackedRuleIds(
+            coreStart.elasticsearch.client.asInternalUser
+          );
+        },
+        bulkDisableRules: async (params) => {
+          const [, pluginsStart] = await core.getStartServices();
+          const rulesClient = await pluginsStart.alertingVTwo.getUnsafeInternalRulesClient();
+          return rulesClient.bulkDisableRules(params);
+        },
+      },
     });
 
     const priceService = createPriceService({
@@ -487,6 +484,13 @@ export class SignificantEventsPlugin
       this.server.nightshiftInvestigations = plugins.nightshiftInvestigations;
 
       this.server.relayClient = plugins.actions.getRelayClient();
+
+      // Significant Events history moved to `.rule-events`; remove the retired stream without
+      // backfilling its history into the shared Alerting v2 stream.
+      void deleteLegacyEventsDataStream({
+        esClient: core.elasticsearch.client.asInternalUser,
+        logger: this.logger,
+      });
 
       // The Elastic Slack connector is in-memory, so it survives neither a restart nor a connect
       // handled by another node. The connection document is namespace-agnostic, so one internal
@@ -635,6 +639,7 @@ export class SignificantEventsPlugin
         streamsKIsOnboardingClient: this.streamsKIsOnboardingClient,
         maintenanceService: this.maintenanceService,
         getScopedClients: this.getScopedClients,
+        server: this.server,
         logger: this.logger,
         isAvailable,
         availability: createSignificantEventsAvailability({

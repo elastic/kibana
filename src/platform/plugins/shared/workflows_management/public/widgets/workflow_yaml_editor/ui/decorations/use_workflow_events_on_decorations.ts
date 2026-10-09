@@ -10,8 +10,8 @@
 import { useEffect, useRef } from 'react';
 import type { Document, LineCounter, Node, Pair, Scalar, YAMLMap } from 'yaml';
 import { isScalar } from 'yaml';
+import { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { monaco } from '@kbn/monaco';
 import { getTriggerNodes, getTriggerOnChainOptionPairs } from '../../../../../common/lib/yaml';
 import { getMonacoRangeFromYamlNode } from '../../lib/utils';
 

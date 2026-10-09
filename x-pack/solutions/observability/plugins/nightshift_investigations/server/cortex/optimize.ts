@@ -143,7 +143,11 @@ const boundToolCallResult = (_key: string, value: unknown): unknown => {
 // evidence, and echoing the wiki into its own optimizer would spend the budget on known pages.
 const SEEDED_WORKSPACE_ROOTS = [CORTEX_WORKSPACE_ROOT, DECISION_TREE_WORKSPACE_ROOT];
 
-const isSeededWorkspaceRead = ({ tool_id: toolId, params }: InvestigationToolCall): boolean => {
+/** True when the call reads back a Cortex or decision-tree file Nightshift seeded itself. */
+export const isSeededWorkspaceRead = ({
+  tool_id: toolId,
+  params,
+}: InvestigationToolCall): boolean => {
   const filePath = params?.file_path;
   if (toolId !== SANDBOX_VIEW_FILE_TOOL_ID || typeof filePath !== 'string') {
     return false;

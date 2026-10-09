@@ -215,6 +215,32 @@ describe('PersistedRuleEventsRecorder', () => {
     });
   });
 
+  it('counts a single-series run that shares one new episode id across rows as one episode', () => {
+    // A single-series (ungrouped) rule emits one rule event per returned row,
+    // all sharing one freshly opened episode id. That is one new episode, not
+    // one per row, so the counter must dedupe by episode id.
+    const row1 = episodeEvent('ep-ungrouped');
+    const row2 = episodeEvent('ep-ungrouped');
+    const row3 = episodeEvent('ep-ungrouped');
+
+    recorder.record(
+      collector,
+      buildContext({
+        state: createRulePipelineState({ newEpisodeIds: ['ep-ungrouped'] }),
+        meta: {
+          observations: {
+            bulkIndexResult: { attempted: 3, docs: [row1, row2, row3], errors: [] },
+          },
+        },
+      })
+    );
+
+    expect(collector.snapshot().counters).toEqual({
+      ruleEventsGenerated: 3,
+      newEpisodesGenerated: 1,
+    });
+  });
+
   it('does not count new episodes when state carries none (e.g. a signal rule)', () => {
     const persisted = [createAlertEvent({ type: 'signal' })];
 

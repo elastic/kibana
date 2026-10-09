@@ -82,6 +82,7 @@ export const createSubAgentExecutor = ({
         interactive: subAgentInteractivity,
         request,
         params: {
+          agentId: params.agentId,
           connectorId: params.connectorId,
           parentExecutionId: params.parentExecutionId,
           conversationId: params.conversationId,
