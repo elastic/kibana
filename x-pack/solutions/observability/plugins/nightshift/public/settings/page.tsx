@@ -45,12 +45,14 @@ type SettingsPageHeaderProps = Pick<
   | 'onManagementClick'
   | 'managementHref'
   | 'onSandboxSecretsClick'
-  | 'onCustomContextClick'
   | 'onAutomationsClick'
   | 'automationsHref'
->;
+> & {
+  onCustomContextClick?: () => void;
+};
 
 export function SettingsPage({ headerProps }: { headerProps: SettingsPageHeaderProps }) {
+  const { onCustomContextClick, ...appHeaderProps } = headerProps;
   const { application } = useKibana().services;
   const { tab } = useParams<{ tab?: string }>();
   const history = useHistory();
@@ -82,7 +84,7 @@ export function SettingsPage({ headerProps }: { headerProps: SettingsPageHeaderP
   return (
     <>
       <NightshiftAppHeader
-        {...headerProps}
+        {...appHeaderProps}
         page="settings"
         back={{
           href: application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' }),
@@ -94,7 +96,7 @@ export function SettingsPage({ headerProps }: { headerProps: SettingsPageHeaderP
         {tab === 'general' && <GeneralSettingsTab />}
         {tab === 'investigations' && (
           <InvestigationsSettingsTab
-            onCustomContextClick={headerProps.onCustomContextClick}
+            onCustomContextClick={onCustomContextClick}
             canEditCustomContext={canManage}
           />
         )}
