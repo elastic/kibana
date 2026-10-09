@@ -113,7 +113,7 @@ describe('TemplateBriefGenerator', () => {
           ])
         )
       ).storylines;
-      expect(first.narrative).toContain('Further links are shown in the storyline graph.');
+      expect(first.narrative).toContain('Further links are shown in the threat diagram.');
       // 3 pair sentences + the graph pointer + the stage sentence.
       expect(sentences(first.narrative)).toBe(5);
     });
@@ -137,7 +137,7 @@ describe('TemplateBriefGenerator', () => {
 
     it('mentions entities that have no edge', async () => {
       const [first] = (await run(withEdges([story.edges[0]]))).storylines;
-      expect(first.narrative).toContain('jump-box-01 is part of this storyline.');
+      expect(first.narrative).toContain('jump-box-01 is part of this threat.');
     });
 
     it.each<BriefNarrationMode>(['names', 'ids_only'])(
@@ -273,7 +273,7 @@ describe('TemplateBriefGenerator', () => {
   it('writes the cross-storyline conclusion about detection coverage, never "protected"', async () => {
     const { crossStorylineConclusion: conclusion } = await run();
     expect(conclusion?.statement).toBe(
-      'The most serious storyline passes through Lateral Movement, a stage with limited detection coverage.'
+      'The top priority threat passes through Lateral Movement, a stage with limited detection coverage.'
     );
     expect(conclusion?.evidence).toEqual(['STORY-1', 'TAC-TA0008']);
     expect(JSON.stringify(await run())).not.toMatch(/protected|defended/i);
@@ -388,9 +388,7 @@ describe('TemplateBriefGenerator', () => {
 
     it('says plainly that no storyline was found and omits decisions and conclusion', async () => {
       const brief = await run(emptySnapshot);
-      expect(brief.glance.headline).toBe(
-        'No connected threat storylines were found in this period'
-      );
+      expect(brief.glance.headline).toBe('No priority threats were found in this period');
       expect(brief.storylines).toEqual([]);
       expect(brief.decisions).toEqual([]);
       expect(brief.crossStorylineConclusion).toBeUndefined();

@@ -12,7 +12,7 @@ describe('briefToMarkdown', () => {
     const markdown = briefToMarkdown(FIXTURE_JOB_SUCCEEDED);
 
     expect(markdown).toContain('## At a glance');
-    expect(markdown).toContain('## Storylines');
+    expect(markdown).toContain('## Priority threats');
     expect(markdown).toContain('## Blind spots');
     expect(markdown).toContain('## Decisions');
     expect(markdown).toContain('a.rodriguez');

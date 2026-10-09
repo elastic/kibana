@@ -346,7 +346,7 @@ describe('runExecutiveBrief', () => {
         invalidEvidenceIds: ['RULE-99'],
       });
       // The model glance was dropped (invented number): the template glance is shown and flagged.
-      expect(store.doc.brief?.glance.threatNarrative).toContain('storylines are active');
+      expect(store.doc.brief?.glance.threatNarrative).toContain('threats are active');
       expect(store.doc.validation?.flags).toEqual([
         expect.objectContaining({ claimPath: 'glance.headline', reason: 'fallback' }),
         expect.objectContaining({ claimPath: 'glance.threatNarrative', reason: 'fallback' }),

@@ -25,7 +25,7 @@ export const buildDecisionPrompt = (
   if (entry?.kind === 'story') {
     const storyline = getStoryline(snapshot, relatesTo);
     if (storyline) {
-      lines.push(`Storyline ${storyline.rank} (${storyline.severity} severity)`);
+      lines.push(`Threat ${storyline.rank} (${storyline.severity} severity)`);
       lines.push(
         `Entities: ${storyline.entityEuids
           .map((euid) => getEntityByEuid(snapshot, euid)?.name ?? euid)

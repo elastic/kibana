@@ -478,7 +478,7 @@ describe('validateBrief against a real LLM run', () => {
       expect(brief.glance.headline.trim().length).toBeGreaterThan(0);
       expect(brief.glance.threatNarrative.trim().length).toBeGreaterThan(0);
       expect(brief.glance.headline).toBe(
-        'The most serious storyline centres on a.rodriguez and no one is working this yet'
+        'The top priority threat centres on a.rodriguez and no one is working this yet'
       );
       expect(validation.flags).toEqual(
         expect.arrayContaining([

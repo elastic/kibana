@@ -101,7 +101,7 @@ export const EvidenceChip: React.FC<{ id: EvidenceId }> = ({ id }) => {
     case 'story':
       return (
         <EuiBadge color="hollow" iconType="timeline">
-          {`Storyline ${entry.rank}`}
+          {`Threat ${entry.rank}`}
         </EuiBadge>
       );
     default:

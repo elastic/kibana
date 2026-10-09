@@ -107,7 +107,7 @@ describe('validateBrief', () => {
       expect(validation.inventedNumbers).toEqual(['57']);
       expect(brief.glance.threatNarrative).not.toContain('57');
       expect(brief.glance.headline).toBe(
-        'The most serious storyline centres on a.rodriguez and no one is working this yet'
+        'The top priority threat centres on a.rodriguez and no one is working this yet'
       );
       expect(validation.droppedClaims).toBe(2);
       expect(validation.flags).toEqual([

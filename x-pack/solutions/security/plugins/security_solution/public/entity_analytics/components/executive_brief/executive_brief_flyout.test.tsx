@@ -232,7 +232,7 @@ describe('ExecutiveBriefFlyout', () => {
     render(<ExecutiveBriefFlyout timeRange="7d" onClose={jest.fn()} />);
 
     expect(screen.getByTestId(TEST_IDS.progress)).toHaveTextContent(
-      'Connecting entities into storylines'
+      'Connecting entities into priority threats'
     );
     expect(screen.queryByTestId('executiveBriefStorylines')).not.toBeInTheDocument();
   });
@@ -420,7 +420,7 @@ describe('ExecutiveBriefFlyout', () => {
 
     const nav = screen.getByTestId('executiveBriefJumpNav');
     expect(within(nav).getByText('At a glance')).toBeInTheDocument();
-    expect(within(nav).getByText('Storylines (3)')).toBeInTheDocument();
+    expect(within(nav).getByText('Priority threats (3)')).toBeInTheDocument();
     expect(within(nav).getByText(/^Blind spots \(\d+ gaps\)$/)).toBeInTheDocument();
     expect(within(nav).getByText(/^Decisions \(\d+\)$/)).toBeInTheDocument();
     expect(within(nav).getByText('Details')).toBeInTheDocument();

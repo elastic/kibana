@@ -61,8 +61,8 @@ export const pickBlindSpotHeadline = (snapshot: BriefSnapshot): BlindSpotHeadlin
       storylineRank === undefined
         ? ''
         : storylineRank === 1
-        ? ', and the top storyline moved through this stage'
-        : ', and an unaddressed storyline moved through this stage';
+        ? ', and the top priority threat moved through this stage'
+        : ', and an unaddressed threat moved through this stage';
     return {
       stage: broken,
       reason: 'rules_not_working',

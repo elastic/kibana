@@ -39,7 +39,7 @@ const StorylineFlagNote: React.FC<{ index: number }> = ({ index }) => {
   return (
     <EuiText size="xs" color="subdued" data-test-subj="executiveBriefStorylineFlagNote">
       <ClaimFlag claimPath={`storylines[${index}]`} />
-      {' Some wording in this storyline could not be fully verified against the evidence.'}
+      {' Some wording in this threat could not be fully verified against the evidence.'}
     </EuiText>
   );
 };
@@ -62,14 +62,14 @@ export const Storylines: React.FC<StorylinesProps> = ({ snapshot, brief }) => {
       <div
         {...{ [BRIEF_BLOCK_ATTRIBUTE]: 'storylines-title', [BRIEF_KEEP_WITH_NEXT_ATTRIBUTE]: '' }}
       >
-        <SectionTitle index={2} title="Storylines" subtitle="What's happening?" />
+        <SectionTitle index={2} title="Priority threats" subtitle="What's happening?" />
       </div>
       {rendered.length === 0 ? (
         <EuiEmptyPrompt
           iconType="timeline"
           titleSize="xs"
           title={<h4>{'No connected activity'}</h4>}
-          body={<p>{'No entities were linked into a storyline in this time range.'}</p>}
+          body={<p>{'No priority threats were found in this time range.'}</p>}
           data-test-subj={TEST_IDS.empty}
         />
       ) : (
@@ -78,7 +78,7 @@ export const Storylines: React.FC<StorylinesProps> = ({ snapshot, brief }) => {
             <EuiFlexItem key={storyline.evidenceId}>
               <div {...{ [BRIEF_BLOCK_ATTRIBUTE]: 'storyline' }}>
                 <SectionErrorBoundary
-                  fallbackText={`Storyline ${storyline.rank} could not be displayed`}
+                  fallbackText={`Threat ${storyline.rank} could not be displayed`}
                 >
                   <StorylineCard
                     snapshot={snapshot}

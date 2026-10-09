@@ -221,12 +221,12 @@ const buildNarrative = (ctx: TemplateContext, storyline: Storyline): string => {
     sentences.push(`${edgeClause(edge.type, ctx.label(edge.from), ctx.label(edge.to))}.`);
   });
   if (strongestByPair.size > MAX_PAIR_SENTENCES) {
-    sentences.push('Further links are shown in the storyline graph.');
+    sentences.push('Further links are shown in the threat diagram.');
   }
 
   storyline.entityEuids
     .filter((euid) => !covered.has(euid))
-    .forEach((euid) => sentences.push(`${ctx.label(euid)} is part of this storyline.`));
+    .forEach((euid) => sentences.push(`${ctx.label(euid)} is part of this threat.`));
 
   const stageNames = storyline.tacticIds.flatMap((id) => {
     const name = ctx.tacticName(id);
@@ -237,7 +237,7 @@ const buildNarrative = (ctx: TemplateContext, storyline: Storyline): string => {
   }
 
   if (sentences.length === 0) {
-    return 'No entities were resolved for this storyline.';
+    return 'No entities were resolved for this threat.';
   }
   return sentences.join(' ');
 };
@@ -313,10 +313,10 @@ const buildWhyItMatters = (ctx: TemplateContext, storyline: Storyline): string =
       sentences.push('No case is open and no one is working this yet.');
       break;
     case 'in_progress':
-      sentences.push('A case is already in progress for this storyline.');
+      sentences.push('A case is already in progress for this threat.');
       break;
     default:
-      sentences.push('This storyline has been contained.');
+      sentences.push('This threat has been contained.');
   }
   if (response.alerts.open > 0) {
     sentences.push(`${response.alerts.open} alerts are still open.`);
@@ -394,28 +394,28 @@ const buildGlance = (ctx: TemplateContext): ExecutiveBrief['glance'] => {
   const topPrimary = top ? primaryEuid(top) : undefined;
 
   const headline = top
-    ? `The most serious storyline${
+    ? `The top priority threat${
         topPrimary ? ` centres on ${ctx.label(topPrimary)}` : ''
       } and ${responsePhrase(top)}`
-    : 'No connected threat storylines were found in this period';
+    : 'No priority threats were found in this period';
 
   const sentences: string[] = [];
   if (storylines.length > 0) {
     sentences.push(
-      `${capitalise(numberWord(storylines.length))} connected ${
-        storylines.length === 1 ? 'storyline is' : 'storylines are'
+      `${capitalise(numberWord(storylines.length))} priority ${
+        storylines.length === 1 ? 'threat is' : 'threats are'
       } active in the last ${ctx.rangePhrase}.`
     );
     storylines.forEach((storyline) => {
       const primary = primaryEuid(storyline);
       sentences.push(
-        `The ${ordinalWord(storyline.rank)} storyline (${storyline.severity}) ${
+        `The ${ordinalWord(storyline.rank)} threat (${storyline.severity}) ${
           primary ? `centres on ${ctx.label(primary)} and ` : ''
         }${responsePhrase(storyline)}.`
       );
     });
   } else {
-    sentences.push(`No connected threat storylines were found in the last ${ctx.rangePhrase}.`);
+    sentences.push(`No priority threats were found in the last ${ctx.rangePhrase}.`);
   }
 
   const material = snapshot.glance.stats.find(({ id }) => id === 'materialRiskEntities');
@@ -478,7 +478,7 @@ const buildCrossStorylineConclusion = (
         ? 'no working detection coverage'
         : 'limited detection coverage';
     return {
-      statement: `The most serious storyline passes through ${flagged.tacticName}, a stage with ${coverage}.`,
+      statement: `The top priority threat passes through ${flagged.tacticName}, a stage with ${coverage}.`,
       confidence: ctx.hasDataGaps ? 'low' : 'medium',
       evidence: ctx.valid([top.evidenceId, flagged.evidenceId]),
     };
@@ -562,7 +562,7 @@ const buildDecisions = (ctx: TemplateContext): ExecutiveBriefDecision[] => {
       }
       const facts = rankedFactEntities(ctx, storyline).slice(0, 2);
       const rationale = [
-        `No one is working this storyline yet, and it is ranked ${ordinalWord(storyline.rank)}.`,
+        `No one is working this threat yet, and it is ranked ${ordinalWord(storyline.rank)}.`,
         ...facts.map((entity) => entityFactSentence(ctx, entity)),
       ].join(' ');
       const urgent = storyline.severity === 'critical' || storyline.severity === 'high';

@@ -44,7 +44,7 @@ export const briefToMarkdown = (job: ExecutiveBriefJob): string => {
   });
   lines.push('', brief.glance.threatNarrative, '');
 
-  lines.push('## Storylines', '');
+  lines.push('## Priority threats', '');
   if (brief.storylines.length === 0) lines.push('No connected activity.', '');
   brief.storylines.forEach((story) => {
     const computed = getStoryline(snapshot, story.storylineId);

@@ -57,7 +57,7 @@ import { briefToMarkdown } from './utils/brief_to_markdown';
 
 const STAGE_LABEL: Record<BriefJobStage, string> = {
   snapshot: 'Collecting entity, alert and detection data',
-  storylines: 'Connecting entities into storylines',
+  storylines: 'Connecting entities into priority threats',
   blind_spots: 'Checking attack-stage coverage and visibility gaps',
   generate: 'Writing the brief',
   validate: 'Checking every claim against the evidence',
@@ -322,7 +322,7 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
                 { id: EXECUTIVE_BRIEF_SECTION_IDS.atAGlance, label: 'At a glance' },
                 {
                   id: EXECUTIVE_BRIEF_SECTION_IDS.storylines,
-                  label: `Storylines (${succeeded.brief.storylines.length})`,
+                  label: `Priority threats (${succeeded.brief.storylines.length})`,
                 },
                 {
                   id: EXECUTIVE_BRIEF_SECTION_IDS.blindSpots,
@@ -368,7 +368,7 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
                 <AtAGlance snapshot={succeeded.snapshot} glance={succeeded.brief.glance} />
               </SectionErrorBoundary>
               <EuiSpacer size="xl" />
-              <SectionErrorBoundary fallbackText="Storylines could not be displayed">
+              <SectionErrorBoundary fallbackText="Priority threats could not be displayed">
                 <Storylines snapshot={succeeded.snapshot} brief={succeeded.brief} />
               </SectionErrorBoundary>
               <EuiSpacer size="xl" />
