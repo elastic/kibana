@@ -159,7 +159,7 @@ export const chatAnswerRecall: Evaluator = {
   direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     const { c } = asCase(expected);
-    const { answers } = asOutput(output);
+    const { answers, answerErrors } = asOutput(output);
     let hit = 0;
     let total = 0;
     const details: string[] = [];
@@ -181,14 +181,15 @@ export const chatAnswerRecall: Evaluator = {
         }
       } else {
         total += 1;
-        details.push(`✘ ${q.id}: no answer (chat round failed)`);
+        const error = answerErrors?.[q.id];
+        details.push(`✘ ${q.id}: no answer (chat round failed${error ? `: ${error}` : ''})`);
       }
     }
     return {
       score: total === 0 ? 0 : hit / total,
       label: `${hit}/${total}`,
       explanation: details.join('\n'),
-      metadata: { hit, total },
+      metadata: { hit, total, ...(answerErrors ? { answerErrors } : {}) },
     };
   },
 };

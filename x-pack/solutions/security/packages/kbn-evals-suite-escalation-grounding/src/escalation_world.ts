@@ -14,17 +14,45 @@
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
-import type { EscalationCase, EscalationTaskOutput } from './types';
+import { v4 as uuidv4 } from 'uuid';
+import { AGENTIC_INVESTIGATIONS_API_VERSION } from '@kbn/agentic-investigations-plugin/common/constants';
+import {
+  ESCALATIONS_INTERNAL_URL,
+  ESCALATION_LINK_URL,
+  ESCALATION_SYNC_URL,
+} from '@kbn/agentic-investigations-plugin/common/escalations/constants';
+import type { SyncEscalationResponse } from '@kbn/agentic-investigations-plugin/common/escalations/escalation';
+import type { EscalationCase, EscalationTaskOutput, SeededEvent } from './types';
 
 const PUBLIC_API_VERSION = '2023-10-31';
-const AGENTIC_API_VERSION = '2026-10-01';
 
 const publicHeaders = { 'elastic-api-version': PUBLIC_API_VERSION } as const;
 const internalHeaders = {
   'kbn-xsrf': 'escalation-grounding-eval',
   'x-elastic-internal-origin': 'kibana',
-  'elastic-api-version': AGENTIC_API_VERSION,
+  'elastic-api-version': AGENTIC_INVESTIGATIONS_API_VERSION,
 } as const;
+
+const escalationUrl = (template: string, escalationId: string): string =>
+  template.replace('{id}', encodeURIComponent(escalationId));
+
+/** Thrown when the eval world cannot be built; the run must fail instead of scoring the harness. */
+export class EscalationWorldSetupError extends Error {
+  constructor(message: string, cause?: unknown) {
+    super(cause instanceof Error ? `${message}: ${cause.message}` : message);
+    this.name = 'EscalationWorldSetupError';
+  }
+}
+
+const setupStep = async <T>(description: string, step: () => Promise<T>): Promise<T> => {
+  try {
+    return await step();
+  } catch (error) {
+    throw error instanceof EscalationWorldSetupError
+      ? error
+      : new EscalationWorldSetupError(description, error);
+  }
+};
 
 const json = (body: unknown) => JSON.stringify(body);
 
@@ -57,6 +85,7 @@ const get = async <T>(fetch: HttpHandler, path: string): Promise<T> =>
   (await fetch(path, { method: 'GET', version: PUBLIC_API_VERSION, headers: publicHeaders })) as T;
 
 interface ConversationResponse {
+  id?: string;
   conversation_id?: string;
   user?: { id?: string };
 }
@@ -66,10 +95,46 @@ interface ConversationGetResponse {
   metadata?: Record<string, unknown>;
 }
 
-const newConversationId = (): string =>
-  `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}-${Math.random()
-    .toString(36)
-    .slice(2, 10)}`;
+// The create route rejects ids that are not UUIDs.
+const newConversationId = (): string => uuidv4();
+
+/**
+ * Timeline events never leave their investigation; only attachments are copied
+ * into the escalation. Each planted event is therefore also attached as a text
+ * attachment, which is what `_sync_attachments` carries over. The summary story
+ * labels an attachment by its `description` (max 2048 chars on the create route),
+ * so the full text goes there too.
+ */
+const ATTACHMENT_DESCRIPTION_MAX_LENGTH = 2048;
+
+const eventToTextAttachment = (
+  event: SeededEvent
+): { type: 'text'; data: { content: string }; description: string } => {
+  const content = event.data.message ?? event.data.text ?? Object.values(event.data).join('\n');
+  return {
+    type: 'text',
+    data: { content: event.data.title ? `${event.data.title}\n${content}` : content },
+    description: content.slice(0, ATTACHMENT_DESCRIPTION_MAX_LENGTH),
+  };
+};
+
+/** A sync that copied nothing, or lost attachments, means the planted facts never reached the escalation. */
+const assertSyncCopiedAll = (
+  caseId: string,
+  sync: Partial<SyncEscalationResponse>,
+  expectedCopies: number
+): void => {
+  if (typeof sync.copied !== 'number' || typeof sync.failed !== 'number') {
+    throw new EscalationWorldSetupError(
+      `Attachment sync for ${caseId} returned no counts: ${JSON.stringify(sync)}`
+    );
+  }
+  if (sync.failed > 0 || sync.copied === 0 || sync.copied < expectedCopies) {
+    throw new EscalationWorldSetupError(
+      `Attachment sync for ${caseId} copied ${sync.copied}/${expectedCopies} (failed ${sync.failed}); planted facts are not in the escalation`
+    );
+  }
+};
 
 const createConversation = async (
   fetch: HttpHandler,
@@ -162,69 +227,104 @@ export const runEscalationCase = async ({
 }): Promise<RunEscalationCaseResult> => {
   const drop = mutation?.dropInvestigation;
   const investigationIds: string[] = [];
+  let assigneeId: string | undefined;
 
   try {
-    // 1. Create the investigations and plant their timelines.
+    // 1. Create the investigations and plant their timelines. Setup failures
+    // throw: a broken world must fail the run, not get scored as a bad product.
     for (const investigation of c.investigations) {
-      const created = await pRetry(
-        () =>
-          createConversation(fetch, {
-            title: `${investigation.title} [${c.id}]`,
-            templateId: 'investigation',
-            metadata: { status: 'open' },
-          }),
-        { retries: 3, minTimeout: 2_000 }
+      const created = await setupStep(`create investigation ${investigation.id} of ${c.id}`, () =>
+        pRetry(
+          () =>
+            createConversation(fetch, {
+              title: `${investigation.title} [${c.id}]`,
+              templateId: 'investigation',
+              metadata: { status: 'open' },
+            }),
+          { retries: 3, minTimeout: 2_000 }
+        )
       );
-      if (!created.conversation_id) {
-        throw new Error(`Investigation creation returned no id for ${investigation.id}`);
+      const investigationId = created.id ?? created.conversation_id;
+      if (!investigationId) {
+        throw new EscalationWorldSetupError(
+          `Investigation creation returned no id for ${investigation.id} of ${c.id}`
+        );
       }
-      await addEvents(fetch, created.conversation_id, investigation.events);
-      investigationIds.push(created.conversation_id);
+      assigneeId = assigneeId ?? created.user?.id;
+      await setupStep(`seed timeline events of ${investigation.id} of ${c.id}`, () =>
+        addEvents(fetch, investigationId, investigation.events)
+      );
+      investigationIds.push(investigationId);
+    }
+    if (!assigneeId) {
+      throw new EscalationWorldSetupError(
+        `Investigation creation returned no user id for ${c.id}; the escalation needs an assignee`
+      );
     }
 
     // The escalation is opened FROM the first investigation (required by the
-    // create route); the creator id doubles as the assignee. For the mutation,
-    // the dropped investigation is never linked (when it is the first, the
-    // escalation opens from the next one instead).
+    // create route). For the mutation, the dropped investigation is never
+    // linked (when it is the first, the escalation opens from the next one).
     const linkedIndices = c.investigations
       .map((_, index) => index)
       .filter((index) => index !== drop);
-    const anchorIndex = linkedIndices[0];
-    const anchorId = investigationIds[anchorIndex];
+    const anchorId = investigationIds[linkedIndices[0]];
 
-    const escalation = await postInternal<{ id?: string; conversation_id?: string }>(
-      fetch,
-      '/internal/investigations/escalations',
-      {
+    const escalation = await setupStep(`create escalation for ${c.id}`, () =>
+      postInternal<{ id?: string }>(fetch, ESCALATIONS_INTERNAL_URL, {
         linked_investigation_id: anchorId,
         title: `Escalation ${c.id}`,
         visibility: 'public',
-      }
+        assignees: [assigneeId],
+      })
     );
-    const esclId = escalation.conversation_id ?? escalation.id;
+    const esclId = escalation.id;
     if (!esclId) {
-      throw new Error(`Escalation creation returned no id for ${c.id}`);
+      throw new EscalationWorldSetupError(`Escalation creation returned no id for ${c.id}`);
     }
 
-    // 2. Link the remaining investigations and sync attachments.
+    // 2. Link the remaining investigations.
     for (const index of linkedIndices.slice(1)) {
-      await postInternal(
-        fetch,
-        `/internal/investigations/escalations/${encodeURIComponent(esclId)}/_link`,
-        { linked_investigations: [investigationIds[index]] }
+      await setupStep(`link ${c.investigations[index].id} to escalation of ${c.id}`, () =>
+        postInternal(fetch, escalationUrl(ESCALATION_LINK_URL, esclId), {
+          linked_investigations: [investigationIds[index]],
+        })
       );
     }
-    await postInternal(
-      fetch,
-      `/internal/investigations/escalations/${encodeURIComponent(esclId)}/_sync`,
-      {}
-    ).catch((error: Error) => log.warning(`sync failed for ${c.id}: ${error.message}`));
 
-    // 3. Wait for the summarize workflow to write metadata.summary.
+    // 3. Plant the facts as text attachments on the linked investigations AFTER
+    // linking, so `_sync_attachments` (not the create/link auto-copy) is what
+    // brings them into the escalation. Timeline events never leave their
+    // investigation; attachments are what the escalation sees.
+    let expectedCopies = 0;
+    for (const index of linkedIndices) {
+      const attachments = c.investigations[index].events.map(eventToTextAttachment);
+      await setupStep(`attach facts of ${c.investigations[index].id} of ${c.id}`, async () => {
+        for (const attachment of attachments) {
+          await post(
+            fetch,
+            `/api/agent_builder/conversations/${encodeURIComponent(
+              investigationIds[index]
+            )}/attachments`,
+            attachment
+          );
+        }
+      });
+      expectedCopies += attachments.length;
+    }
+
+    const sync = await setupStep(`sync attachments of escalation for ${c.id}`, () =>
+      postInternal<SyncEscalationResponse>(fetch, escalationUrl(ESCALATION_SYNC_URL, esclId), {})
+    );
+    assertSyncCopiedAll(c.id, sync, expectedCopies);
+
+    // 4. Wait for the summarize workflow to write metadata.summary.
     const summary = await waitForSummary(fetch, esclId);
 
-    // 4. Ask the escalation-context chat every question.
+    // 5. Ask the escalation-context chat every question. A failed round is a
+    // scored failure (kept in the denominator, error recorded), never dropped.
     const answers: Record<string, string | undefined> = {};
+    const answerErrors: Record<string, string> = {};
     for (const q of c.questions) {
       // The mutation drops an investigation; questions whose facts live only
       // there are still asked (the interesting failure mode) unless the caller
@@ -238,8 +338,10 @@ export const runEscalationCase = async ({
         });
         answers[q.id] = response.response?.message ?? undefined;
       } catch (error) {
-        log.warning(`converse failed for ${c.id}/${q.id}: ${(error as Error).message}`);
+        const message = error instanceof Error ? error.message : String(error);
+        log.warning(`converse failed for ${c.id}/${q.id}: ${message}`);
         answers[q.id] = undefined;
+        answerErrors[q.id] = message;
       }
     }
 
@@ -255,6 +357,7 @@ export const runEscalationCase = async ({
       investigationIds,
       summary,
       answers,
+      answerErrors,
     };
   } finally {
     // Conversations are left in place: the evals runner cleans the space.

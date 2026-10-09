@@ -548,6 +548,20 @@
         "evals:siem-readiness"
       ],
       "serverConfigSet": "evals_tracing"
+    },
+    {
+      "id": "security-escalation-grounding",
+      "name": "Escalation Grounded QA",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-escalation-grounding/playwright.config.ts",
+      "tags": [
+        "security",
+        "escalation-grounding"
+      ],
+      "ciLabels": [
+        "evals:security-escalation-grounding"
+      ],
+      "serverConfigSet": "evals_attack_discovery_fp_tp"
     }
   ]
 }

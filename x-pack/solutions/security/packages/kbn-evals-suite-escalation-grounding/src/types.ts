@@ -72,4 +72,6 @@ export interface EscalationTaskOutput {
   summary: string | undefined;
   /** Chat answers keyed by question id; undefined when the round failed. */
   answers: Record<string, string | undefined>;
+  /** Error message per question whose converse round failed; those score 0. */
+  answerErrors?: Record<string, string>;
 }
