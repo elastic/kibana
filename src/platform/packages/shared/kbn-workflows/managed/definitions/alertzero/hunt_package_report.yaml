@@ -65,6 +65,23 @@ triggers:
         hasConfirmedHit:
           type: boolean
           description: Whether the hunt cleared the confirmed-hit bar.
+        # Number of SSE attachments the hunt child prepared (hunt.yaml's `sse_count` output).
+        # `attach_sse`'s foreach swallows a per-item attach failure with `continue`, so without
+        # this count, packaging has no way to tell a partial attach (some items landed, some
+        # did not) from a complete one -- it would read whatever current-run state exists and
+        # proceed as if the run were complete. Compared against what read_current_run_state
+        # actually finds; a shortfall reports run_incomplete instead of packaging.
+        #
+        # Not required: this workflow is a plain `yaml` definition, so its own content hash
+        # propagates to every space on the next reconciliation regardless of version, but the
+        # Worker calling it is a `yamlTemplate` definition whose hash does not cover the
+        # imported YAML it renders -- an already-installed Worker only starts sending this
+        # field once its own `version` bumps. Requiring it here would fail every such Worker's
+        # packaging call in that gap; the step itself treats a missing value as skip-the-check,
+        # not as an error.
+        expectedSseCount:
+          type: number
+          description: Number of significant security event attachments the hunt child prepared for this run (its `sse_count` output). Omit to skip the shortfall check.
       required:
         - reportId
         - investigationConversationId
@@ -101,6 +118,7 @@ steps:
       # `${{ }}`, not `{{ }}`: the step schema types this as a boolean, and the text form
       # renders it as the string "false", which fails input validation.
       hasConfirmedHit: "${{ inputs.hasConfirmedHit }}"
+      expectedSseCount: "${{ inputs.expectedSseCount }}"
     on-failure:
       fallback:
         - name: emit_package_failed
@@ -132,6 +150,7 @@ steps:
         type: workflow.executeAsync
         with:
           workflow-id: system-security-hunt-proposal-gate
+          run-as-mode: inherit
           inputs:
             conversationId: "{{ foreach.item.conversationId }}"
             title: "{{ foreach.item.title }}"
@@ -154,6 +173,32 @@ steps:
     with:
       dispatch_failed_count: "${{ steps.start_proposal_gates.output.failed | default: 0 }}"
 
+  # Benign close: only when packaging actually ran and decided to dismiss
+  # (clean run, no hits). A packaging failure or skip never reaches `dismiss`
+  # (steps.decide_and_package.output stays nil in both cases), so this cannot
+  # close an Investigation packaging never evaluated.
+  # Runs before resolve_package_status/resolve_package_summary on purpose: `continue: true`
+  # swallows a failed patch, so those steps must read this step's error to avoid reporting
+  # a close that never happened.
+  - name: dismiss_investigation_if_clean
+    type: ai.conversation.metadata.patch
+    if: "${{ steps.decide_and_package.output.status == 'packaged' and steps.decide_and_package.output.dismiss == true }}"
+    with:
+      conversation_id: "{{ inputs.investigationConversationId }}"
+      updates:
+        status: closed
+        close_reason: benign
+        summary: "{{ steps.decide_and_package.output.closureSummary }}"
+    on-failure:
+      continue: true
+
+  # The one place the dismiss outcome is read: status, reason and summary below key off this
+  # flag so the three cannot drift apart. False when the step was skipped (no error entry).
+  - name: resolve_dismiss_outcome
+    type: data.set
+    with:
+      dismiss_close_failed: "${{ steps.dismiss_investigation_if_clean.error.message != nil and steps.dismiss_investigation_if_clean.error.message != empty }}"
+
   # A partial gate launch (k of N dispatched) marks the packaging stage
   # `partial`, same as a `run_incomplete` native result — the
   # Worker's own outcome derivation only checks this child's status for
@@ -168,6 +213,10 @@ steps:
         run_incomplete
         {%- elsif steps.decide_and_package.output.mintSuppression == 'check_failed' -%}
         run_incomplete
+        {%- elsif variables.dismiss_close_failed == true -%}
+        run_incomplete
+        {%- elsif steps.decide_and_package.output.dismissHold == 'check_failed' -%}
+        run_incomplete
         {%- elsif variables.dispatch_failed_count > 0 -%}
         run_incomplete
         {%- else -%}
@@ -180,8 +229,12 @@ steps:
         {{ steps.decide_and_package.output.reason }}
         {%- elsif steps.decide_and_package.output.mintSuppression == 'check_failed' -%}
         could not verify whether the Investigation already has a Proposal, so no Proposal was minted
+        {%- elsif steps.decide_and_package.output.dismissHold == 'check_failed' -%}
+        could not verify whether the Investigation has an open Proposal, so it was left open instead of being closed
         {%- elsif steps.decide_and_package.error.message != nil and steps.decide_and_package.error.message != empty -%}
         {{ steps.decide_and_package.error.message }}
+        {%- elsif variables.dismiss_close_failed == true -%}
+        could not close the Investigation as benign ({{ steps.dismiss_investigation_if_clean.error.message }}), so it is still open. It will not be swept again on its own; a manual run targeting this reportId retries the close
         {%- elsif variables.dispatch_failed_count > 0 -%}
         {{ variables.dispatch_failed_count }} of {{ steps.decide_and_package.output.proposals | size }} gate dispatch(es) failed to launch
         {%- endif -%}
@@ -206,6 +259,12 @@ steps:
         {% assign packaged = steps.decide_and_package.output -%}
         {% if variables.package_status != 'success' and packaged.status != 'packaged' -%}
         Packaging did not complete: {{ variables.package_reason }}. No proposals were created and the Investigation stays open for a retry.
+        {% elsif packaged.dismiss == true and variables.dismiss_close_failed == true -%}
+        No confirmed hits, but packaging could not close this Investigation as benign ({{ steps.dismiss_investigation_if_clean.error.message }}), so it is still open. A manual run targeting this reportId retries the close.
+        {% elsif packaged.dismissHold == 'open_proposal' -%}
+        No confirmed hits this run, but the Investigation still has a Proposal from an earlier run that is pending or executing, so packaging left it open rather than closing it as benign. Decide the existing Proposal first{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
+        {% elsif packaged.dismissHold == 'check_failed' -%}
+        No confirmed hits this run, but packaging could not verify whether the Investigation has an open Proposal, so it left the Investigation open rather than risk closing it over one{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
         {% elsif packaged.dismiss == true -%}
         No confirmed hits, so packaging closed this Investigation as benign{% if packaged.coverage.written != nil and packaged.coverage.written != empty %} and recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
         {% elsif packaged.mintSuppression == 'check_failed' -%}
@@ -214,9 +273,12 @@ steps:
         This run found something mint-worthy, but the Investigation already has a Proposal from an earlier run, so no new one was created. Review the existing Proposal{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; also recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
         {% else -%}
         Packaging prepared {{ packaged.proposals | size }} proposal{% if packaged.proposals.size != 1 %}s{% endif %} for analyst review and launched an approval gate for each; the gate is what creates the Proposal.{% if variables.dispatch_failed_count > 0 %} {{ variables.dispatch_failed_count }} of the approval gates failed to launch.{% else %} The Investigation stays open until every gate is decided.{% endif %}
-        {% for p in packaged.proposals -%}
-          - **{{ p.title | default: p.category }}**{% if p.hostName != nil and p.hostName != empty %} on `{{ p.hostName }}`{% endif %}{% if p.actionWorkflowId != nil and p.actionWorkflowId != empty %}: runs `{{ p.actionWorkflowId }}` on approval{% else %}: recommendation only{% endif %}
+        {% for bullet in packaged.proposalBullets -%}
+          {{ bullet }}
         {% endfor -%}
+        {% if packaged.omittedProposalCount > 0 -%}
+          - ...and {{ packaged.omittedProposalCount }} more proposal{% if packaged.omittedProposalCount != 1 %}s{% endif %} not listed here.
+        {% endif -%}
         {% if packaged.coverage.written != nil and packaged.coverage.written != empty -%}
           - Recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch.
         {% endif -%}
@@ -224,22 +286,6 @@ steps:
           - {{ packaged.coverage.skipped | size }} coverage knowledge item{% if packaged.coverage.skipped.size != 1 %}s were{% else %} was{% endif %} not written ({{ packaged.coverage.skipped | map: "reason" | uniq | join: ", " | replace: "_", " " }}).
         {% endif -%}
         {% endif -%}
-
-  # Benign close: only when packaging actually ran and decided to dismiss
-  # (clean run, no hits). A packaging failure or skip never reaches `dismiss`
-  # (steps.decide_and_package.output stays nil in both cases), so this cannot
-  # close an Investigation packaging never evaluated.
-  - name: dismiss_investigation_if_clean
-    type: ai.conversation.metadata.patch
-    if: "${{ steps.decide_and_package.output.status == 'packaged' and steps.decide_and_package.output.dismiss == true }}"
-    with:
-      conversation_id: "{{ inputs.investigationConversationId }}"
-      updates:
-        status: closed
-        close_reason: benign
-        summary: "{{ steps.decide_and_package.output.closureSummary }}"
-    on-failure:
-      continue: true
 
   - name: emit_result
     type: workflow.output

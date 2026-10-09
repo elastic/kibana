@@ -17,22 +17,13 @@ const OUTPUT_DIRECTORY = resolve('common', 'detection_engine', 'mitre');
 // Every release we should update the version of MITRE ATT&CK content and regenerate the model in our code.
 // This version must correspond to the one used for prebuilt rules in https://github.com/elastic/detection-rules.
 // This version is basically a tag on https://github.com/mitre/cti/tags, or can be a branch name like `master`.
-const MITRE_CONTENT_VERSION = 'ATT&CK-v19.1'; // last updated when preparing for 9.5 release
+const MITRE_CONTENT_VERSION = 'ATT&CK-v19.2'; // last updated when preparing for 9.6 release
 const MITRE_CONTENT_URL = `https://raw.githubusercontent.com/mitre/cti/${MITRE_CONTENT_VERSION}/enterprise-attack/enterprise-attack.json`;
 
 // Display-friendly version string (e.g. "v19.1") derived from MITRE_CONTENT_VERSION by stripping
 // the "ATT&CK-" prefix. Exported from the generated file so the UI can reference the currently
 // bundled version without having to update it separately.
 const MITRE_ATTACK_VERSION = MITRE_CONTENT_VERSION.replace(/^ATT&CK-/, '');
-
-/**
- * An ID for a technique that exists in multiple tactics. This may change in further updates and on MITRE
- * version upgrade, this ID should be double-checked to make sure it still represents these parameters.
- *
- * We have this in order to cover edge cases with our mock data that can't be achieved by simply generating
- * data from the MITRE api.
- */
-const MOCK_DUPLICATE_TECHNIQUE_ID = 'T1546';
 
 const getTacticsOptions = (tactics) =>
   tactics.map((t) =>
@@ -199,51 +190,6 @@ const extractSubtechniques = (mitreData) => {
   return sortBy(subtechniques, 'name');
 };
 
-const buildMockThreatData = (tacticsData, techniques, subtechniques) => {
-  const numberOfThreatsToGenerate = 4;
-  const mockThreatData = [];
-  const generatedTechniqueIds = new Set();
-  for (let i = 0; i < numberOfThreatsToGenerate; i++) {
-    let subtechnique;
-    let count = i * 50;
-    /**
-     * Since we're building from the subtechnique level -> up, we make sure there are no
-     * dupilicate techniques in the generated MITRE test data. This can cause flakiness in
-     * the tests as we don't expect the data to duplicated in the table
-     */
-    while (subtechnique == null || generatedTechniqueIds.has(subtechnique.techniqueId)) {
-      subtechnique = subtechniques[count++];
-    }
-    generatedTechniqueIds.add(subtechnique.techniqueId);
-    const technique = techniques.find((technique) => technique.id === subtechnique.techniqueId);
-    const tactic = tacticsData.find((tactic) => tactic.shortName === technique.tactics[0]);
-
-    mockThreatData.push({
-      tactic: normalizeTacticsData([tactic])[0],
-      technique,
-      subtechnique,
-    });
-  }
-  return mockThreatData;
-};
-
-const buildDuplicateTechniqueMockThreatData = (tacticsData, techniques) => {
-  const technique = techniques.find((technique) => technique.id === MOCK_DUPLICATE_TECHNIQUE_ID);
-  const tacticOne = tacticsData.find((tactic) => tactic.shortName === technique.tactics[0]);
-  const tacticTwo = tacticsData.find((tactic) => tactic.shortName === technique.tactics[1]);
-
-  return [
-    {
-      tactic: normalizeTacticsData([tacticOne])[0],
-      technique,
-    },
-    {
-      tactic: normalizeTacticsData([tacticTwo])[0],
-      technique,
-    },
-  ];
-};
-
 async function main() {
   fetch(MITRE_CONTENT_URL)
     .then((res) => res.json())
@@ -285,32 +231,6 @@ async function main() {
             ${JSON.stringify(getSubtechniquesOptions(subtechniques), null, 2)
               .replace(/}"/g, '}')
               .replace(/"{/g, '{')};
-
-          /**
-           * An array of full Mitre Attack Threat objects that are taken directly from the \`mitre_tactics_techniques.ts\` file
-           *
-           * Is built alongside and sampled from the data in the file so to always be valid with the most up to date MITRE ATT&CK data
-           */
-          export const getMockThreatData = () => (${JSON.stringify(
-            buildMockThreatData(tacticsData, techniques, subtechniques),
-            null,
-            2
-          )
-            .replace(/}"/g, '}')
-            .replace(/"{/g, '{')});
-
-          /**
-           * An array of specifically chosen Mitre Attack Threat objects that is taken directly from the \`mitre_tactics_techniques.ts\` file
-           *
-           * These objects have identical technique fields but are assigned to different tactics
-           */
-          export const getDuplicateTechniqueThreatData = () => (${JSON.stringify(
-            buildDuplicateTechniqueMockThreatData(tacticsData, techniques),
-            null,
-            2
-          )
-            .replace(/}"/g, '}')
-            .replace(/"{/g, '{')});
       `;
 
       fs.writeFileSync(`${OUTPUT_DIRECTORY}/mitre_tactics_techniques.ts`, body, 'utf-8');

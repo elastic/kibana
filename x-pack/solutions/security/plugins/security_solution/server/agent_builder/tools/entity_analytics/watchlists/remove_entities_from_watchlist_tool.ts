@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -25,21 +25,23 @@ import { getWatchlistToolAvailability } from './watchlist_availability';
 
 const MAX_ENTITIES_PER_CALL = 100;
 
-const schema = z.object({
-  watchlistId: z
-    .string()
-    .min(1)
-    .describe(
-      'The id of the watchlist to remove entities from. Use `security.list_watchlists` to resolve a watchlist name to its id first, passing `nameContains` when the user referred to the watchlist by name.'
-    ),
-  entityIds: z
-    .array(z.string().min(1))
-    .min(1)
-    .max(MAX_ENTITIES_PER_CALL)
-    .describe(
-      `EUIDs (entity unique ids) to remove from the watchlist, e.g. ["user:jsmith123", "host:server01"]. Up to ${MAX_ENTITIES_PER_CALL} per call.`
-    ),
-});
+const schema = lazySchema(() =>
+  z.object({
+    watchlistId: z
+      .string()
+      .min(1)
+      .describe(
+        'The id of the watchlist to remove entities from. Use `security.list_watchlists` to resolve a watchlist name to its id first, passing `nameContains` when the user referred to the watchlist by name.'
+      ),
+    entityIds: z
+      .array(z.string().min(1))
+      .min(1)
+      .max(MAX_ENTITIES_PER_CALL)
+      .describe(
+        `EUIDs (entity unique ids) to remove from the watchlist, e.g. ["user:jsmith123", "host:server01"]. Up to ${MAX_ENTITIES_PER_CALL} per call.`
+      ),
+  })
+);
 
 export const SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID = securityTool(
   'remove_entities_from_watchlist'
@@ -57,7 +59,7 @@ export const removeEntitiesFromWatchlistTool = (
 
 Use when the user asks to remove entities from a named or known watchlist (e.g. "remove this user from the Privileged Users watchlist", "take host:server01 off watchlist X"). Resolve the watchlist id via \`security.list_watchlists\` first when the user named the watchlist.
 
-This tool only removes entities that were **manually assigned** to the watchlist. Entities that came in via an entity source are reported as \`not_found\` in the result with the message "Entity not manually assigned to this watchlist" — to remove those, the user must reconfigure or remove the entity source in the UI.`,
+This tool only removes entities that were **manually assigned** to the watchlist. Entities that came in via an entity source are reported as \`not_found\` in the result with the message "Entity not manually assigned to this watchlist" — those cannot be removed entity-by-entity; use \`security.remove_watchlist_rule_based_data_source\` to stop the query that's adding them (they are then removed automatically on the next watchlist sync), or \`security.list_watchlist_data_sources\` to see what's adding them first.`,
     schema,
     tags: ['security', 'entity-analytics', 'watchlists'],
     annotations: {
@@ -136,7 +138,7 @@ This tool only removes entities that were **manually assigned** to the watchlist
               '',
               formatEntityIdsForPrompt(params.entityIds),
               '',
-              'Only manually-assigned entities will be removed. Entities added via an entity source will be reported as not found — to remove those, reconfigure or remove the entity source in the UI.',
+              'Only manually-assigned entities will be removed. Entities added via an entity source will be reported as not found — use security.remove_watchlist_rule_based_data_source to stop that source instead.',
             ].join('\n'),
             confirm_text: 'Remove',
             cancel_text: 'Cancel',

@@ -9,12 +9,7 @@ import { ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { SelfClientResponse } from '../../../../common/self_client/self_client';
 
-/**
- * Builds a standard tool error result from a failed self-client response.
- * Extracts the `message` field from the Kibana error body shape
- * (`{ statusCode, error, message }`) when present, otherwise formats a
- * fallback from the HTTP status and response message.
- */
+/** Builds a tool error result from a failed self-client response, extracting its message body. */
 export const createToolErrorResult = (
   response: SelfClientResponse & { ok: false },
   fallbackMessage: string
@@ -23,19 +18,24 @@ export const createToolErrorResult = (
     response.body && typeof response.body === 'object' && 'message' in response.body
       ? String((response.body as { message: unknown }).message)
       : undefined;
-  return {
-    results: [
-      {
-        tool_result_id: getToolResultId(),
-        type: ToolResultType.error,
-        data: {
-          message:
-            bodyMessage ?? `${fallbackMessage} (HTTP ${response.status}): ${response.message}`,
-        },
-      },
-    ],
-  };
+  const message =
+    bodyMessage ?? `${fallbackMessage} (HTTP ${response.status}): ${response.message}`;
+
+  return createToolError(message);
 };
+
+/** Builds a tool error result from a plain message. */
+export const createToolError = (message: string) => ({
+  results: [
+    {
+      tool_result_id: getToolResultId(),
+      type: ToolResultType.error,
+      data: {
+        message,
+      },
+    },
+  ],
+});
 
 /**
  * Builds a privilege-denied error result for mutating SIEM migration actions.

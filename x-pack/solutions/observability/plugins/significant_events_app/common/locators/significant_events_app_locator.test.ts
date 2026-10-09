@@ -20,16 +20,6 @@ describe('SignificantEventsAppLocatorDefinition', () => {
     });
   });
 
-  it('builds a clean path for the standalone Settings page', async () => {
-    const { path } = await locator.getLocation({
-      tab: 'settings',
-      rangeFrom: 'now-24h',
-      rangeTo: 'now',
-    });
-
-    expect(path).toBe('/settings');
-  });
-
   it('builds a path for the cortex tab', async () => {
     const { path } = await locator.getLocation({ tab: 'cortex' });
 
