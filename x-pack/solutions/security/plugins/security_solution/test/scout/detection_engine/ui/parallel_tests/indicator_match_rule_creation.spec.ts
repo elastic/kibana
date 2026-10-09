@@ -72,7 +72,7 @@ spaceTest.describe(
           await expect(ruleCreateWizard.aboutRuleName).toBeEnabled({ timeout: 60_000 });
           await ruleCreateWizard.aboutRuleName.fill(RULE.name);
           await ruleCreateWizard.aboutRuleDescription.fill(RULE.description);
-          await ruleCreateWizard.selectSeverity('Critical');
+          await ruleCreateWizard.selectSeverity('critical');
           await ruleCreateWizard.aboutRiskScoreInput.fill(String(RULE.risk_score));
           await ruleCreateWizard.addTags(TAGS);
           await ruleCreateWizard.expandAdvancedSettings();

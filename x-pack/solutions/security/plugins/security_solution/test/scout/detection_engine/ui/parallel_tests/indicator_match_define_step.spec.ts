@@ -25,118 +25,70 @@ spaceTest.describe(
       });
     });
 
-    spaceTest('index patterns: contains the default index patterns', async ({ pageObjects }) => {
-      await expect(pageObjects.threatMatchRuleCreatePage.ruleIndexInput).toHaveText(
-        DEFAULT_SECURITY_SOLUTION_INDEXES.join('')
-      );
-    });
+    spaceTest('validates the index patterns and the queries', async ({ pageObjects }) => {
+      const { threatMatchRuleCreatePage } = pageObjects;
 
-    spaceTest(
-      'index patterns: does not show the index pattern error when the indicator index is filled out',
-      async ({ pageObjects }) => {
-        const { threatMatchRuleCreatePage } = pageObjects;
+      await spaceTest.step('shows the default index patterns and queries', async () => {
+        await expect(threatMatchRuleCreatePage.ruleIndexInput).toHaveText(
+          DEFAULT_SECURITY_SOLUTION_INDEXES.join('')
+        );
+        await expect(threatMatchRuleCreatePage.indicatorIndexInput).toHaveText(
+          DEFAULT_THREAT_INDEX_PATTERNS.join('')
+        );
+        await expect(threatMatchRuleCreatePage.customQueryInput).toHaveText('*:*');
+        await expect(threatMatchRuleCreatePage.indicatorQueryInput).toHaveText(
+          DEFAULT_THREAT_MATCH_QUERY
+        );
+      });
+
+      await spaceTest.step('requires an indicator mapping, not index patterns', async () => {
         await threatMatchRuleCreatePage.continueFromDefineStep();
         // The mapping is still empty, which proves validation ran
         await expect(threatMatchRuleCreatePage.atLeastOneMatchMessage).toBeVisible();
         await expect(threatMatchRuleCreatePage.atLeastOneIndexPatternMessage).toBeHidden();
-      }
-    );
+      });
 
-    spaceTest(
-      'index patterns: shows the index pattern error when continuing without index patterns',
-      async ({ pageObjects }) => {
-        const { threatMatchRuleCreatePage } = pageObjects;
-        await threatMatchRuleCreatePage.clearRuleIndexPatterns();
-        await threatMatchRuleCreatePage.clearIndicatorIndexPatterns();
-        await threatMatchRuleCreatePage.continueFromDefineStep();
-        await expect(threatMatchRuleCreatePage.atLeastOneIndexPatternMessage).not.toHaveCount(0);
-      }
-    );
-
-    spaceTest(
-      'indicator index patterns: contains the default indicator index pattern',
-      async ({ pageObjects }) => {
-        await expect(pageObjects.threatMatchRuleCreatePage.indicatorIndexInput).toHaveText(
-          DEFAULT_THREAT_INDEX_PATTERNS.join('')
-        );
-      }
-    );
-
-    spaceTest(
-      'indicator index patterns: does not show the index pattern error on initial page load',
-      async ({ pageObjects }) => {
-        const { threatMatchRuleCreatePage } = pageObjects;
-        await expect(threatMatchRuleCreatePage.indicatorIndexInput).toHaveText(
-          DEFAULT_THREAT_INDEX_PATTERNS.join('')
-        );
-        await expect(threatMatchRuleCreatePage.atLeastOneIndexPatternMessage).toBeHidden();
-      }
-    );
-
-    spaceTest(
-      'indicator index patterns: shows the index pattern error when continuing without an indicator index',
-      async ({ pageObjects }) => {
-        const { threatMatchRuleCreatePage } = pageObjects;
-        await threatMatchRuleCreatePage.clearIndicatorIndexPatterns();
-        await threatMatchRuleCreatePage.continueFromDefineStep();
-        await expect(threatMatchRuleCreatePage.atLeastOneIndexPatternMessage).toBeVisible();
-      }
-    );
-
-    spaceTest('custom query input: defaults to *:*', async ({ pageObjects }) => {
-      await expect(pageObjects.threatMatchRuleCreatePage.customQueryInput).toHaveText('*:*');
-    });
-
-    spaceTest(
-      'custom query input: shows an error when the query is removed',
-      async ({ pageObjects }) => {
-        const { threatMatchRuleCreatePage } = pageObjects;
+      await spaceTest.step('requires a custom query', async () => {
         await threatMatchRuleCreatePage.clearQuery(threatMatchRuleCreatePage.customQueryInput);
         await expect(threatMatchRuleCreatePage.customQueryRequiredMessage).toBeVisible();
-      }
-    );
+      });
 
-    spaceTest(
-      'indicator query input: defaults to the last 30 days filter',
-      async ({ pageObjects }) => {
-        await expect(pageObjects.threatMatchRuleCreatePage.indicatorQueryInput).toHaveText(
-          DEFAULT_THREAT_MATCH_QUERY
-        );
-      }
-    );
-
-    spaceTest(
-      'indicator query input: shows an error when the query is removed',
-      async ({ pageObjects }) => {
-        const { threatMatchRuleCreatePage } = pageObjects;
+      await spaceTest.step('requires an indicator query', async () => {
         await threatMatchRuleCreatePage.clearQuery(threatMatchRuleCreatePage.indicatorQueryInput);
         await expect(threatMatchRuleCreatePage.indicatorQueryRequiredMessage).toBeVisible();
-      }
-    );
+      });
 
-    spaceTest(
-      'schedule step: defaults to a 1h interval and 5m lookback',
-      async ({ pageObjects }) => {
-        const { threatMatchRuleCreatePage, ruleCreateWizard } = pageObjects;
-        await threatMatchRuleCreatePage.setIndexPatterns({
-          index: ['auditbeat-suspicious-*'],
-          threatIndex: ['filebeat-*'],
-        });
-        await threatMatchRuleCreatePage.fillMappingRow({
-          indexField: VALID_INDEX_FIELD,
-          indicatorField: VALID_INDICATOR_FIELD,
-        });
+      await spaceTest.step('requires index patterns', async () => {
+        await threatMatchRuleCreatePage.clearRuleIndexPatterns();
         await threatMatchRuleCreatePage.continueFromDefineStep();
+        await expect(threatMatchRuleCreatePage.atLeastOneIndexPatternMessage).toHaveCount(1);
 
-        await ruleCreateWizard.aboutRuleName.fill('Indicator match schedule defaults');
-        await ruleCreateWizard.aboutRuleDescription.fill('Checks the schedule defaults');
-        await ruleCreateWizard.aboutContinue.click();
+        await threatMatchRuleCreatePage.clearIndicatorIndexPatterns();
+        await threatMatchRuleCreatePage.continueFromDefineStep();
+        await expect(threatMatchRuleCreatePage.atLeastOneIndexPatternMessage).toHaveCount(2);
+      });
+    });
 
-        await expect(threatMatchRuleCreatePage.scheduleIntervalAmount).toHaveValue('1');
-        await expect(threatMatchRuleCreatePage.scheduleIntervalUnit).toHaveValue('h');
-        await expect(threatMatchRuleCreatePage.scheduleLookbackAmount).toHaveValue('5');
-        await expect(threatMatchRuleCreatePage.scheduleLookbackUnit).toHaveValue('m');
-      }
-    );
+    spaceTest('defaults the schedule to a 1h interval and 5m lookback', async ({ pageObjects }) => {
+      const { threatMatchRuleCreatePage, ruleCreateWizard } = pageObjects;
+      await threatMatchRuleCreatePage.setIndexPatterns({
+        index: ['auditbeat-suspicious-*'],
+        threatIndex: ['filebeat-*'],
+      });
+      await threatMatchRuleCreatePage.fillMappingRow({
+        indexField: VALID_INDEX_FIELD,
+        indicatorField: VALID_INDICATOR_FIELD,
+      });
+      await threatMatchRuleCreatePage.continueFromDefineStep();
+
+      await ruleCreateWizard.aboutRuleName.fill('Indicator match schedule defaults');
+      await ruleCreateWizard.aboutRuleDescription.fill('Checks the schedule defaults');
+      await ruleCreateWizard.aboutContinue.click();
+
+      await expect(threatMatchRuleCreatePage.scheduleIntervalAmount).toHaveValue('1');
+      await expect(threatMatchRuleCreatePage.scheduleIntervalUnit).toHaveValue('h');
+      await expect(threatMatchRuleCreatePage.scheduleLookbackAmount).toHaveValue('5');
+      await expect(threatMatchRuleCreatePage.scheduleLookbackUnit).toHaveValue('m');
+    });
   }
 );

@@ -6,7 +6,7 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
-import { APP_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
+import { APP_LOAD_TIMEOUT_MS, DATA_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
 import { expect } from '../../../../../ui';
 
 /**
@@ -169,74 +169,73 @@ export class ThreatMatchRuleCreatePage {
     index: readonly string[];
     threatIndex: readonly string[];
   }): Promise<void> {
-    await this.replaceComboBoxValues('detectionEngineStepDefineRuleIndices', index);
-    await this.replaceComboBoxValues('ruleThreatMatchIndicesField', threatIndex);
-  }
-
-  private async replaceComboBoxValues(
-    containerTestSubj: string,
-    values: readonly string[]
-  ): Promise<void> {
-    const container = this.page.testSubj.locator(containerTestSubj);
-    await container.locator('[data-test-subj="comboBoxClearButton"]').click();
-    const input = container.locator('[data-test-subj="comboBoxInput"] input');
-    for (const value of values) {
-      await input.fill(value);
-      await input.press('Enter');
+    const patterns = [
+      { containerTestSubj: 'detectionEngineStepDefineRuleIndices', values: index },
+      { containerTestSubj: 'ruleThreatMatchIndicesField', values: threatIndex },
+    ];
+    for (const { containerTestSubj, values } of patterns) {
+      const comboBox = this.getIndexPatternsComboBox(containerTestSubj);
+      await comboBox.clear();
+      await comboBox.setCustomSelectedOptions([...values]);
     }
   }
 
-  /** The "index field" combo boxes of all mapping rows. */
-  public get indexFieldInputs(): Locator {
-    return this.page.testSubj.locator('entryItemFieldInputFormRow').locator('input');
-  }
-
-  /** The "indicator index field" combo boxes of all mapping rows. */
-  public get indicatorFieldInputs(): Locator {
-    return this.page.testSubj.locator('threatFieldInputFormRow').locator('input');
+  private getIndexPatternsComboBox(containerTestSubj: string) {
+    return this.page.components.comboBox('input', this.page.testSubj.locator(containerTestSubj));
   }
 
   /**
    * Fills the mapping row at the given 1-based position, waiting for it to be rendered.
-   * When `select` is false for a column the typed value is left as free text instead of
-   * picking the suggestion, which produces an invalid mapping.
+   * By default each column picks the matching suggestion from the dropdown. Set a
+   * `pick...Suggestion` flag to false to leave the typed text unselected, which produces an
+   * invalid mapping.
    */
   async fillMappingRow({
     row = 1,
     indexField,
     indicatorField,
-    selectIndexField = true,
-    selectIndicatorField = true,
+    pickIndexFieldSuggestion = true,
+    pickIndicatorFieldSuggestion = true,
   }: {
     row?: number;
     indexField: string;
     indicatorField: string;
-    selectIndexField?: boolean;
-    selectIndicatorField?: boolean;
+    pickIndexFieldSuggestion?: boolean;
+    pickIndicatorFieldSuggestion?: boolean;
   }): Promise<void> {
-    await this.fillComboBox(
-      await this.getRowInput(this.indexFieldInputs, row),
+    await this.fillMappingField(
+      'entryItemFieldInputFormRow',
+      row,
       indexField,
-      selectIndexField
+      pickIndexFieldSuggestion
     );
-    await this.fillComboBox(
-      await this.getRowInput(this.indicatorFieldInputs, row),
+    await this.fillMappingField(
+      'threatFieldInputFormRow',
+      row,
       indicatorField,
-      selectIndicatorField
+      pickIndicatorFieldSuggestion
     );
   }
 
-  private async getRowInput(inputs: Locator, row: number): Promise<Locator> {
-    await expect.poll(() => inputs.count()).toBeGreaterThanOrEqual(row);
-    return (await inputs.all())[row - 1];
-  }
+  private async fillMappingField(
+    column: 'entryItemFieldInputFormRow' | 'threatFieldInputFormRow',
+    row: number,
+    value: string,
+    pickSuggestion: boolean
+  ): Promise<void> {
+    const rows = this.page.testSubj.locator(column);
+    await expect.poll(() => rows.count()).toBeGreaterThanOrEqual(row);
+    const [container] = (await rows.all()).slice(row - 1);
 
-  private async fillComboBox(input: Locator, value: string, select: boolean): Promise<void> {
-    // fill() waits for the input to be enabled, which happens once the field list has loaded
-    await input.fill(value);
-    if (select) {
-      await this.page.testSubj.locator(`filterFieldOption-${value}`).click();
+    if (pickSuggestion) {
+      // The field list loads asynchronously, so the option can take a while to show up
+      await this.page.components
+        .comboBox('fieldAutocompleteComboBox', container)
+        .setSelectedOptions([value], { timeout: DATA_LOAD_TIMEOUT_MS });
+      return;
     }
+    // The component object has no method for leaving typed text unselected
+    await container.locator('input').fill(value);
   }
 
   async addAndRow(): Promise<void> {
@@ -253,18 +252,12 @@ export class ThreatMatchRuleCreatePage {
 
   /** Removes every pill of the source index patterns field. */
   async clearRuleIndexPatterns(): Promise<void> {
-    await this.page.testSubj
-      .locator('detectionEngineStepDefineRuleIndices')
-      .locator('[data-test-subj="comboBoxClearButton"]')
-      .click();
+    await this.getIndexPatternsComboBox('detectionEngineStepDefineRuleIndices').clear();
   }
 
   /** Removes every pill of the indicator index patterns field. */
   async clearIndicatorIndexPatterns(): Promise<void> {
-    await this.page.testSubj
-      .locator('ruleThreatMatchIndicesField')
-      .locator('[data-test-subj="comboBoxClearButton"]')
-      .click();
+    await this.getIndexPatternsComboBox('ruleThreatMatchIndicesField').clear();
   }
 
   /** Empties a query bar input, which has no clear button. */
@@ -272,11 +265,22 @@ export class ThreatMatchRuleCreatePage {
     await input.click();
     await input.press('ControlOrMeta+a');
     await input.press('Delete');
+    await this.closeSuggestions(input);
   }
 
   /** Replaces the text of a query bar input. QueryStringInput ignores fill(), so keys are typed. */
   async setQuery(input: Locator, query: string): Promise<void> {
     await this.clearQuery(input);
+    await input.click();
     await input.pressSequentially(query);
+    await this.closeSuggestions(input);
+  }
+
+  /**
+   * Closes the autocomplete suggestions of a query bar. The popover is rendered in a portal and
+   * would otherwise cover the controls below the query bar, which blocks later clicks.
+   */
+  private async closeSuggestions(input: Locator): Promise<void> {
+    await input.press('Escape');
   }
 }

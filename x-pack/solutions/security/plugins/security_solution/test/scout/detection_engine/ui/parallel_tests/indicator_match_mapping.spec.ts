@@ -18,85 +18,83 @@ spaceTest.describe(
   'Indicator match rule creation: indicator mapping',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    spaceTest.beforeEach(async ({ browserAuth, kbnUrl, scoutSpace, pageObjects }) => {
+    // Each step opens a fresh form, which makes the whole test longer than the default timeout
+    spaceTest.setTimeout(3 * 60_000);
+
+    spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsPlatformEngineer();
-      const { threatMatchRuleCreatePage } = pageObjects;
-      await threatMatchRuleCreatePage.gotoCreateIndicatorMatchRule({
-        kbnUrl,
-        spaceId: scoutSpace.id,
-      });
-      await threatMatchRuleCreatePage.setIndexPatterns({
-        index: INDEX_PATTERNS,
-        threatIndex: THREAT_INDEX_PATTERNS,
-      });
     });
 
     spaceTest(
-      'shows invalidation text when continuing without filling anything out',
-      async ({ pageObjects }) => {
+      'validates the indicator mapping when continuing',
+      async ({ kbnUrl, scoutSpace, pageObjects }) => {
         const { threatMatchRuleCreatePage } = pageObjects;
-        await threatMatchRuleCreatePage.continueFromDefineStep();
-        await expect(threatMatchRuleCreatePage.atLeastOneMatchMessage).toBeVisible();
-      }
-    );
 
-    spaceTest(
-      'shows invalidation text when the AND button is pressed and both mappings are blank',
-      async ({ pageObjects }) => {
-        const { threatMatchRuleCreatePage } = pageObjects;
-        await threatMatchRuleCreatePage.addAndRow();
-        await expect(threatMatchRuleCreatePage.invalidMappingMessage).toBeVisible();
-      }
-    );
+        // Used to open the form for every step, otherwise a message from an earlier step makes later assertions pass
+        const openForm = async () => {
+          await threatMatchRuleCreatePage.gotoCreateIndicatorMatchRule({
+            kbnUrl,
+            spaceId: scoutSpace.id,
+          });
+          await threatMatchRuleCreatePage.setIndexPatterns({
+            index: INDEX_PATTERNS,
+            threatIndex: THREAT_INDEX_PATTERNS,
+          });
+        };
 
-    spaceTest(
-      'shows invalidation text when the OR button is pressed and both mappings are blank',
-      async ({ pageObjects }) => {
-        const { threatMatchRuleCreatePage } = pageObjects;
-        await threatMatchRuleCreatePage.addOrRow();
-        await expect(threatMatchRuleCreatePage.invalidMappingMessage).toBeVisible();
-      }
-    );
+        await spaceTest.step(
+          'requires a mapping when continuing without filling anything',
+          async () => {
+            await openForm();
+            await threatMatchRuleCreatePage.continueFromDefineStep();
+            await expect(threatMatchRuleCreatePage.atLeastOneMatchMessage).toBeVisible();
+          }
+        );
 
-    spaceTest(
-      'does not show invalidation text with a valid index field and a valid indicator index field',
-      async ({ pageObjects }) => {
-        const { threatMatchRuleCreatePage } = pageObjects;
-        await threatMatchRuleCreatePage.fillMappingRow({
-          indexField: VALID_INDEX_FIELD,
-          indicatorField: VALID_INDICATOR_FIELD,
+        await spaceTest.step('rejects blank mappings when the AND button is pressed', async () => {
+          await openForm();
+          await threatMatchRuleCreatePage.addAndRow();
+          await expect(threatMatchRuleCreatePage.invalidMappingMessage).toBeVisible();
         });
-        await threatMatchRuleCreatePage.continueFromDefineStep();
-        await expect(threatMatchRuleCreatePage.defineEditButton).toBeVisible();
-        await expect(threatMatchRuleCreatePage.invalidMappingMessage).toBeHidden();
-      }
-    );
 
-    spaceTest(
-      'shows invalidation text with an invalid index field and a valid indicator index field',
-      async ({ pageObjects }) => {
-        const { threatMatchRuleCreatePage } = pageObjects;
-        await threatMatchRuleCreatePage.fillMappingRow({
-          indexField: 'non-existent-value',
-          indicatorField: VALID_INDICATOR_FIELD,
-          selectIndexField: false,
+        await spaceTest.step('rejects blank mappings when the OR button is pressed', async () => {
+          await openForm();
+          await threatMatchRuleCreatePage.addOrRow();
+          await expect(threatMatchRuleCreatePage.invalidMappingMessage).toBeVisible();
         });
-        await threatMatchRuleCreatePage.continueFromDefineStep();
-        await expect(threatMatchRuleCreatePage.invalidMappingMessage).toBeVisible();
-      }
-    );
 
-    spaceTest(
-      'shows invalidation text with a valid index field and an invalid indicator index field',
-      async ({ pageObjects }) => {
-        const { threatMatchRuleCreatePage } = pageObjects;
-        await threatMatchRuleCreatePage.fillMappingRow({
-          indexField: VALID_INDEX_FIELD,
-          indicatorField: 'non-existent-value',
-          selectIndicatorField: false,
+        await spaceTest.step('accepts a valid index field and indicator index field', async () => {
+          await openForm();
+          await threatMatchRuleCreatePage.fillMappingRow({
+            indexField: VALID_INDEX_FIELD,
+            indicatorField: VALID_INDICATOR_FIELD,
+          });
+          await threatMatchRuleCreatePage.continueFromDefineStep();
+          await expect(threatMatchRuleCreatePage.defineEditButton).toBeVisible();
+          await expect(threatMatchRuleCreatePage.invalidMappingMessage).toBeHidden();
         });
-        await threatMatchRuleCreatePage.continueFromDefineStep();
-        await expect(threatMatchRuleCreatePage.invalidMappingMessage).toBeVisible();
+
+        await spaceTest.step('rejects an invalid index field', async () => {
+          await openForm();
+          await threatMatchRuleCreatePage.fillMappingRow({
+            indexField: 'non-existent-value',
+            indicatorField: VALID_INDICATOR_FIELD,
+            pickIndexFieldSuggestion: false,
+          });
+          await threatMatchRuleCreatePage.continueFromDefineStep();
+          await expect(threatMatchRuleCreatePage.invalidMappingMessage).toBeVisible();
+        });
+
+        await spaceTest.step('rejects an invalid indicator index field', async () => {
+          await openForm();
+          await threatMatchRuleCreatePage.fillMappingRow({
+            indexField: VALID_INDEX_FIELD,
+            indicatorField: 'non-existent-value',
+            pickIndicatorFieldSuggestion: false,
+          });
+          await threatMatchRuleCreatePage.continueFromDefineStep();
+          await expect(threatMatchRuleCreatePage.invalidMappingMessage).toBeVisible();
+        });
       }
     );
   }

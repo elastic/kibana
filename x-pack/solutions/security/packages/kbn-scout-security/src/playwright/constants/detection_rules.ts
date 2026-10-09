@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export type RuleSeverity = 'low' | 'medium' | 'high' | 'critical';
+
 export interface CustomQueryRuleResponseAction {
   action_type_id: '.endpoint';
   params: {
@@ -24,7 +26,7 @@ export interface CustomQueryRule {
   description: string;
   risk_score: number;
   rule_id: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: RuleSeverity;
   type: 'query';
   query: string;
   from: string;
@@ -40,7 +42,7 @@ export interface ThreatMatchRule {
   enabled: boolean;
   risk_score: number;
   rule_id: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: RuleSeverity;
   type: 'threat_match';
   query: string;
   index: string[];

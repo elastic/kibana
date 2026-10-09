@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import type { RuleSeverity } from '../../../constants/detection_rules';
 import { APP_LOAD_TIMEOUT_MS, DATA_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
 import { expect } from '../../../../../ui';
 
@@ -23,7 +24,6 @@ export class RuleCreateWizardPage {
   readonly createAndEnable: Locator;
   readonly aboutSeveritySelect: Locator;
   readonly aboutRiskScoreInput: Locator;
-  readonly aboutTagsInput: Locator;
   readonly aboutReferenceUrls: Locator;
   readonly aboutAddReferenceUrlButton: Locator;
   readonly aboutFalsePositives: Locator;
@@ -64,9 +64,6 @@ export class RuleCreateWizardPage {
     this.aboutRiskScoreInput = this.page.testSubj
       .locator('detectionEngineStepAboutRuleRiskScore-defaultRiskRange')
       .and(this.page.locator('[type="number"]'));
-    this.aboutTagsInput = this.page.testSubj
-      .locator('detectionEngineStepAboutRuleTags')
-      .locator('[data-test-subj="comboBoxSearchInput"]');
     const referenceUrls = this.page.testSubj.locator('detectionEngineStepAboutRuleReferenceUrls');
     this.aboutReferenceUrls = referenceUrls.locator('input');
     this.aboutAddReferenceUrlButton = referenceUrls.getByRole('button', { name: /add/i });
@@ -217,17 +214,16 @@ export class RuleCreateWizardPage {
       .selectOptionByValue(subtechniqueId);
   }
 
-  /** Picks a severity, e.g. `Critical`, in the About step. */
-  async selectSeverity(severity: string): Promise<void> {
+  /** Picks a severity in the About step. */
+  async selectSeverity(severity: RuleSeverity): Promise<void> {
     await this.aboutSeveritySelect.click();
-    await this.page.getByRole('option', { name: severity }).click();
+    await this.page.testSubj.locator(`severityOption-${severity}`).click();
   }
 
   async addTags(tagNames: readonly string[]): Promise<void> {
-    for (const tag of tagNames) {
-      await this.aboutTagsInput.fill(tag);
-      await this.aboutTagsInput.press('Enter');
-    }
+    await this.page.components
+      .comboBox('input', this.page.testSubj.locator('detectionEngineStepAboutRuleTags'))
+      .setCustomSelectedOptions([...tagNames]);
   }
 
   /** Types each URL into the reference URLs list, adding a row for every one but the last. */

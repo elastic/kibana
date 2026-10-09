@@ -39,6 +39,8 @@ spaceTest.describe(
     spaceTest.afterEach(async ({ apiServices }) => {
       await apiServices.detectionRule.deleteAll();
       await apiServices.detectionAlerts.deleteAll();
+      // Removes the prepackaged timeline templates installed in beforeEach
+      await apiServices.timeline.deleteAll();
     });
 
     spaceTest(
