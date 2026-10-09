@@ -31,10 +31,7 @@ import type { TriggerEventsDataStreamClient } from './event_logs/trigger_events_
 import { findMatchingWorkflowTrigger } from './filter_workflows_by_trigger_condition';
 import { resolveWorkflowEventsModeFromOn } from './lib/resolve_workflow_events_mode_from_on';
 import { groupSubscribedWorkflows, matchSubscriptionGroups } from './subscription_groups';
-import {
-  type InvalidateSubscriptionCacheParams,
-  SubscriptionResolutionCache,
-} from './subscription_resolution_cache';
+import { SubscriptionResolutionCache } from './subscription_resolution_cache';
 import {
   createEmptyTriggerScheduleStats,
   type TriggerEventScheduleStats,
@@ -48,7 +45,7 @@ import {
 } from '../lib/telemetry/utils/extract_execution_metadata';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import type { ScheduleWorkflow } from '../types';
+import type { InvalidateSubscriptionCacheRequest, ScheduleWorkflow } from '../types';
 
 export interface EmitEventParams {
   triggerId: string;
@@ -195,8 +192,12 @@ export class TriggerEventHandler {
     });
   }
 
-  /** Drops this node's cached subscribers for the given space and triggers. */
-  invalidateSubscriptionCache(params: InvalidateSubscriptionCacheParams): void {
+  /** Drops this node's cached subscribers for the given triggers, or the whole cache. */
+  invalidateSubscriptionCache(params: InvalidateSubscriptionCacheRequest): void {
+    if ('all' in params) {
+      this.subscriptionCache.invalidateAll();
+      return;
+    }
     this.subscriptionCache.invalidate(params);
   }
 

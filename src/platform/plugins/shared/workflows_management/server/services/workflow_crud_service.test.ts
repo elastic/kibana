@@ -19,6 +19,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { EsWorkflow } from '@kbn/workflows';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type {
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
@@ -131,6 +132,7 @@ const makeDeps = (
     getSecurity: () => makeSecurityMock('alice'),
     workflowsExtensions: undefined,
     getTaskScheduler: () => null,
+    getInvalidateSubscriptionCache: () => null,
     executionQueryService,
     validationService,
     getCoreStart: () => coreMock.createStart(),
@@ -4392,6 +4394,170 @@ describe('managed orphan cleanup without a request', () => {
         'authenticated request'
       );
       expect(client.index).not.toHaveBeenCalled();
+    });
+  });
+});
+
+describe('subscription cache invalidation', () => {
+  const request = { auth: { credentials: { username: 'alice' } } } as any;
+  const manualYaml = [
+    'name: My Workflow',
+    'enabled: true',
+    'triggers:',
+    '  - type: manual',
+    'steps:',
+    '  - name: step-one',
+    '    type: console',
+    '    with:',
+    '      message: "hi"',
+  ].join('\n');
+
+  const serviceWithInvalidate = () => {
+    const invalidate = jest.fn();
+    const { deps, client } = makeDeps(undefined, {
+      getInvalidateSubscriptionCache: () => invalidate,
+    });
+    return { invalidate, deps, client, service: new WorkflowCrudService(deps) };
+  };
+
+  it('drops the new workflow triggers after create', async () => {
+    const { invalidate, client, service } = serviceWithInvalidate();
+    client.search.mockResolvedValue({ hits: { hits: [] } });
+
+    await service.createWorkflow({ yaml: manualYaml }, 'default', request);
+
+    expect(invalidate).toHaveBeenCalledWith({
+      spaceId: 'default',
+      triggerIds: ['manual'],
+    });
+  });
+
+  it('drops a global workflow trigger in every space', async () => {
+    const { invalidate, client, service } = serviceWithInvalidate();
+    client.search.mockResolvedValue({ hits: { hits: [] } });
+
+    await service.createWorkflow({ yaml: manualYaml }, GLOBAL_WORKFLOW_SPACE_ID, request);
+
+    expect(invalidate).toHaveBeenCalledWith({
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      triggerIds: ['manual'],
+      allSpaces: true,
+    });
+  });
+
+  it('leaves the cache in place when the write fails', async () => {
+    const { invalidate, client, service } = serviceWithInvalidate();
+    client.search.mockResolvedValue({ hits: { hits: [] } });
+    client.index.mockRejectedValue(new Error('index down'));
+
+    await expect(service.createWorkflow({ yaml: manualYaml }, 'default', request)).rejects.toThrow(
+      'index down'
+    );
+    expect(invalidate).not.toHaveBeenCalled();
+  });
+
+  it('drops the union of the previous and next trigger types on update', async () => {
+    const { invalidate, client, service } = serviceWithInvalidate();
+    client.index.mockResolvedValue({ result: 'updated', _seq_no: 6, _primary_term: 1 });
+
+    await service.indexWorkflowDocument('wf-1', makeSource({ triggerTypes: ['alert.fired'] }), {
+      previousDocument: makeSource({ triggerTypes: ['cases.updated'] }),
+    });
+
+    expect(invalidate).toHaveBeenCalledWith({
+      spaceId: 'default',
+      triggerIds: ['cases.updated', 'alert.fired'],
+    });
+  });
+
+  it('drops the workflow triggers when it is disabled', async () => {
+    const { invalidate, client, service } = serviceWithInvalidate();
+    client.search.mockResolvedValue({
+      hits: { hits: [occSearchHit('wf-1', { triggerTypes: ['cases.updated'] })] },
+    });
+    client.index.mockResolvedValue({ result: 'updated', _seq_no: 8, _primary_term: 2 });
+
+    await service.disableWorkflow('wf-1', 'default');
+
+    expect(invalidate).toHaveBeenCalledWith({
+      spaceId: 'default',
+      triggerIds: ['cases.updated'],
+    });
+  });
+
+  it('drops triggers for workflows disabled in one space', async () => {
+    const { invalidate, deps } = serviceWithInvalidate();
+    mockedDisableAllWorkflowsLib.mockResolvedValue({
+      total: 2,
+      disabled: 2,
+      failures: [],
+      disabledWorkflows: [
+        { id: 'wf-1', document: makeSource({ triggerTypes: ['cases.updated'] }) },
+        {
+          id: 'wf-2',
+          document: makeSource({ spaceId: 'other', triggerTypes: ['alert.fired'] }),
+        },
+      ],
+    });
+
+    await new WorkflowCrudService(deps).disableAllWorkflows('default');
+
+    expect(invalidate).toHaveBeenCalledWith({
+      spaceId: 'default',
+      triggerIds: ['cases.updated'],
+    });
+    expect(invalidate).toHaveBeenCalledWith({
+      spaceId: 'other',
+      triggerIds: ['alert.fired'],
+    });
+  });
+
+  it('drops the whole cache when every space is disabled', async () => {
+    const { invalidate, deps } = serviceWithInvalidate();
+    mockedDisableAllWorkflowsLib.mockResolvedValue({
+      total: 1,
+      disabled: 1,
+      failures: [],
+      disabledWorkflows: [
+        { id: 'wf-1', document: makeSource({ triggerTypes: ['cases.updated'] }) },
+      ],
+    });
+
+    await new WorkflowCrudService(deps).disableAllWorkflows();
+
+    expect(invalidate).toHaveBeenCalledTimes(1);
+    expect(invalidate).toHaveBeenCalledWith({ all: true });
+  });
+
+  it('drops the deleted workflow triggers', async () => {
+    const { invalidate, client, service } = serviceWithInvalidate();
+    client.search.mockResolvedValue({
+      hits: {
+        hits: [
+          occSearchHit('wf-1', { triggerTypes: ['cases.updated'] }, 1, 1),
+          occSearchHit(
+            'wf-2',
+            { spaceId: GLOBAL_WORKFLOW_SPACE_ID, triggerTypes: ['alert.fired'] },
+            2,
+            1
+          ),
+        ],
+      },
+    });
+    client.bulk.mockResolvedValue({
+      items: [{ index: { _id: 'wf-1', status: 200 } }, { index: { _id: 'wf-2', status: 200 } }],
+    });
+
+    await service.deleteWorkflows(['wf-1', 'wf-2'], 'default');
+
+    expect(invalidate).toHaveBeenCalledWith({
+      spaceId: 'default',
+      triggerIds: ['cases.updated'],
+    });
+    expect(invalidate).toHaveBeenCalledWith({
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      triggerIds: ['alert.fired'],
+      allSpaces: true,
     });
   });
 });
