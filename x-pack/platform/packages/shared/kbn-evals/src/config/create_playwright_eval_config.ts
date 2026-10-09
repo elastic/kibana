@@ -36,6 +36,7 @@ export function createPlaywrightEvalsConfig({
   timeout,
   runGlobalSetup,
   workers,
+  tracesUnavailableForSuiteMode,
 }: {
   testDir: string;
   testIgnore?: PlaywrightTestConfig['testIgnore'];
@@ -43,7 +44,17 @@ export function createPlaywrightEvalsConfig({
   timeout?: number;
   runGlobalSetup?: boolean;
   workers?: 1 | 2 | 3;
+  /**
+   * Explicit declaration that this suite's generation path cannot export traces to
+   * TRACING_ES_URL (e.g. Agent Builder spans exported elsewhere by design). Trace-based
+   * evaluators then report `unavailable`/`no_spans_for_suite_mode` for an empty readable
+   * store instead of failing after retries.
+   */
+  tracesUnavailableForSuiteMode?: boolean;
 }): PlaywrightTestConfig<{}, EvaluationTestOptions> {
+  if (tracesUnavailableForSuiteMode) {
+    process.env.KBN_EVALS_TRACES_UNAVAILABLE = 'true';
+  }
   const { reporter, use, outputDir, projects, ...config } = createPlaywrightConfig({
     testDir,
     runGlobalSetup,

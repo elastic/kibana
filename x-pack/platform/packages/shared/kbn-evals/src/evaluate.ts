@@ -413,6 +413,11 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         connectorId: evaluationConnector.id,
       });
 
+      // Suites whose generation path cannot export traces to the queried trace store
+      // (TRACING_ES_URL) opt in explicitly; their trace-based evaluators then report
+      // `unavailable`/`no_spans_for_suite_mode` instead of failing after retries.
+      const tracesUnavailableForSuiteMode = process.env.KBN_EVALS_TRACES_UNAVAILABLE === 'true';
+
       // These judges run in-process against `evaluationConnector`, so unlike the
       // `_evaluate`-backed ones they know their model up front.
       const evaluationModel = toScoreModel(buildModelFromConnector(evaluationConnector));
@@ -451,22 +456,27 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           inputTokens: createInputTokensEvaluator({
             traceEsClient,
             log,
+            tracesUnavailableForSuiteMode,
           }),
           outputTokens: createOutputTokensEvaluator({
             traceEsClient,
             log,
+            tracesUnavailableForSuiteMode,
           }),
           cachedTokens: createCachedTokensEvaluator({
             traceEsClient,
             log,
+            tracesUnavailableForSuiteMode,
           }),
           toolCalls: createToolCallsEvaluator({
             traceEsClient,
             log,
+            tracesUnavailableForSuiteMode,
           }),
           latency: createLatencyEvaluator({
             traceEsClient,
             log,
+            tracesUnavailableForSuiteMode,
           }),
         },
       };

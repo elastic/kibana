@@ -248,4 +248,96 @@ describe('createTraceBasedEvaluator', () => {
     expect(result.label).toBe('error');
     expect(result.explanation).toContain('Failed to retrieve Test Evaluator');
   });
+
+  it('should report unavailable/trace_store_unreadable when ES|QL rejects trace.id', async () => {
+    const query = mockEsClient.esql.query as jest.Mock;
+    // Shape observed from a key without traces-* read privilege: the ES client folds the
+    // verification_exception root cause into `message`.
+    query.mockRejectedValue(
+      new Error('verification_exception: Unknown column [trace.id] in [WHERE trace.id == "..."]')
+    );
+
+    const evaluator = createTraceBasedEvaluator({
+      traceEsClient: mockEsClient,
+      log: mockLog,
+      config: mockConfig,
+    });
+
+    const result = await evaluateWith(evaluator, VALID_TRACE_ID);
+
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('unavailable');
+    expect(result.metadata).toEqual({ reason: 'trace_store_unreadable' });
+    // Deterministic failure: no retry budget burned.
+    expect(query).toHaveBeenCalledTimes(1);
+    // Loud, not a quiet skip.
+    expect(mockLog.warning).toHaveBeenCalledWith(
+      expect.stringContaining('trace store is unreadable')
+    );
+    expect(mockLog.error).not.toHaveBeenCalled();
+  });
+
+  it('should report unavailable/no_spans_for_suite_mode for an empty readable store when the suite opted in', async () => {
+    const query = mockEsClient.esql.query as jest.Mock;
+    query.mockResolvedValue({
+      columns: [{ name: 'result', type: 'number' }],
+      values: [],
+    } as any);
+
+    const evaluator = createTraceBasedEvaluator({
+      traceEsClient: mockEsClient,
+      log: mockLog,
+      config: { ...mockConfig, tracesUnavailableForSuiteMode: true },
+    });
+
+    const result = await evaluateWith(evaluator, VALID_TRACE_ID);
+
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('unavailable');
+    expect(result.metadata).toEqual({ reason: 'no_spans_for_suite_mode' });
+    expect(query).toHaveBeenCalledTimes(1);
+    expect(mockLog.error).not.toHaveBeenCalled();
+  });
+
+  it('should keep failing after retries when the store is empty but the suite did not opt in', async () => {
+    const query = mockEsClient.esql.query as jest.Mock;
+    query.mockResolvedValue({
+      columns: [{ name: 'result', type: 'number' }],
+      values: [],
+    } as any);
+
+    const evaluator = createTraceBasedEvaluator({
+      traceEsClient: mockEsClient,
+      log: mockLog,
+      config: { ...mockConfig, tracesUnavailableForSuiteMode: false },
+    });
+
+    const promise = evaluateWith(evaluator, VALID_TRACE_ID);
+    await exhaustRetries();
+    const result = await promise;
+
+    expect(result.label).toBe('error');
+    expect(result.metadata).toBeUndefined();
+    expect(query).toHaveBeenCalledTimes(6);
+  });
+
+  it('should still surface other unknown-column errors as failures', async () => {
+    const query = mockEsClient.esql.query as jest.Mock;
+    query.mockRejectedValue(
+      new Error('verification_exception: Unknown column [attributes.gen_ai.usage.output_tokens]')
+    );
+
+    const evaluator = createTraceBasedEvaluator({
+      traceEsClient: mockEsClient,
+      log: mockLog,
+      config: mockConfig,
+    });
+
+    const promise = evaluateWith(evaluator, VALID_TRACE_ID);
+    await exhaustRetries();
+    const result = await promise;
+
+    expect(result.label).toBe('error');
+    expect(mockLog.error).toHaveBeenCalled();
+  });
 });
