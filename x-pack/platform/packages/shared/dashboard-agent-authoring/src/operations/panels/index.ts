@@ -28,10 +28,10 @@ import { attachmentPanelInputSchema } from './attachment_source';
  * - `'config'`: authored by value, discriminated by `type`.
  * - `'attachment'`: an existing visualization attachment from the conversation.
  *
- * Each kind's module describes it once, as an object declared `as const satisfies ConfigPanelKind` or
- * `as const satisfies RequestPanelKind`. Registering it in one of the lists below derives its members of the per-operation item schemas, the
- * embeddable-type lookups, and the type lists in descriptions and errors. List order is the order
- * of the schema unions sent to the model.
+ * Each kind's module describes it once, with `defineConfigPanelKind` or `defineRequestPanelKind`.
+ * Registering it in one of the lists below derives its members of the per-operation item schemas,
+ * the embeddable-type lookups, and the type lists in descriptions and errors. List order is the
+ * order of the schema unions sent to the model.
  */
 export { attachmentPanelInputSchema } from './attachment_source';
 export type { AttachmentPanelInput } from './attachment_source';

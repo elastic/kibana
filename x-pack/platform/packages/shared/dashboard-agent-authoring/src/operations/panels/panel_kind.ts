@@ -30,12 +30,7 @@ interface PanelKindBase {
   readonly editInputSchema: z.ZodObject;
 }
 
-/**
- * A panel kind the agent authors by value (`source: 'config'`), discriminated by `type`.
- *
- * Declare kinds with `as const satisfies ConfigPanelKind`: `satisfies` checks the shape, and
- * `as const` keeps the literal `type` and the exact schema types the registry builds unions from.
- */
+/** A panel kind the agent authors by value (`source: 'config'`), discriminated by `type`. Declare with `defineConfigPanelKind`. */
 export interface ConfigPanelKind extends PanelKindBase {
   readonly source: 'config';
   readonly type: string;
@@ -45,11 +40,68 @@ export interface ConfigPanelKind extends PanelKindBase {
 
 /**
  * A panel kind generated server-side (`source: 'request'`), discriminated by `renderer`. The host's
- * `ResolvePanelContent` implementation turns its requests into panel content.
- *
- * Declare kinds with `as const satisfies RequestPanelKind`, as for `ConfigPanelKind`.
+ * `ResolvePanelContent` implementation turns its requests into panel content. Declare with
+ * `defineRequestPanelKind`.
  */
 export interface RequestPanelKind extends PanelKindBase {
   readonly source: 'request';
   readonly renderer: string;
 }
+
+interface ConfigDiscriminator<Type extends string> {
+  source: z.ZodLiteral<'config'>;
+  type: z.ZodLiteral<Type>;
+}
+
+/**
+ * Declares a by-value panel kind. The input schemas must carry the kind's `type` literal, and
+ * `addPanelsInputSchema` is derived from `addInputSchema`.
+ */
+export const defineConfigPanelKind = <
+  const Type extends string,
+  AddShape extends ConfigDiscriminator<Type> & z.ZodRawShape,
+  EditShape extends ConfigDiscriminator<Type> & z.ZodRawShape
+>(kind: {
+  type: Type;
+  embeddableType: string;
+  label: string;
+  addInputSchema: z.ZodObject<AddShape>;
+  editInputSchema: z.ZodObject<EditShape>;
+  toEmbeddableConfig?: ConfigPanelKind['toEmbeddableConfig'];
+}) =>
+  ({
+    source: 'config',
+    ...kind,
+    addPanelsInputSchema: kind.addInputSchema.extend({ sectionId: sectionIdField }),
+  } as const satisfies ConfigPanelKind);
+
+/** Lens is the default renderer, so its `renderer` field may be optional. */
+type RendererField<Renderer extends string> =
+  | z.ZodLiteral<Renderer>
+  | z.ZodOptional<z.ZodLiteral<Renderer>>;
+
+interface RequestDiscriminator<Renderer extends string> {
+  source: z.ZodLiteral<'request'>;
+  renderer: RendererField<Renderer>;
+}
+
+/**
+ * Declares a server-side generated panel kind. The input schemas must carry the kind's `renderer`
+ * literal, and `addPanelsInputSchema` is derived from `addInputSchema`.
+ */
+export const defineRequestPanelKind = <
+  const Renderer extends string,
+  AddShape extends RequestDiscriminator<Renderer> & z.ZodRawShape,
+  EditShape extends RequestDiscriminator<Renderer> & z.ZodRawShape
+>(kind: {
+  renderer: Renderer;
+  embeddableType: string;
+  label: string;
+  addInputSchema: z.ZodObject<AddShape>;
+  editInputSchema: z.ZodObject<EditShape>;
+}) =>
+  ({
+    source: 'request',
+    ...kind,
+    addPanelsInputSchema: kind.addInputSchema.extend({ sectionId: sectionIdField }),
+  } as const satisfies RequestPanelKind);

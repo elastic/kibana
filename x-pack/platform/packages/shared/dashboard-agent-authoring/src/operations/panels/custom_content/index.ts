@@ -13,7 +13,7 @@ import {
 } from '@kbn/custom-content-common';
 import { z } from '@kbn/zod/v4';
 import type { PanelResolutionRequestBase } from '../../../resolve_panel';
-import { sectionIdField, type RequestPanelKind } from '../panel_kind';
+import { defineRequestPanelKind } from '../panel_kind';
 
 /**
  * Custom content panel requests.
@@ -102,12 +102,10 @@ const customContentEditPanelRequestSchema = z
     message: 'At least one of query or esql must be provided.',
   });
 
-export const customContentPanelKind = {
-  source: 'request',
+export const customContentPanelKind = defineRequestPanelKind({
   renderer: 'custom_content',
   embeddableType: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   label: 'custom content',
   addInputSchema: customContentPanelRequestSchema,
-  addPanelsInputSchema: customContentPanelRequestSchema.extend({ sectionId: sectionIdField }),
   editInputSchema: customContentEditPanelRequestSchema,
-} as const satisfies RequestPanelKind;
+});
