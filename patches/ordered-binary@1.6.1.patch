@@ -1,0 +1,54 @@
+diff --git a/dist/index.cjs b/dist/index.cjs
+index 043c1ebe8251aa5d8bb81fb7fb3a496ef6e2068d..17a4f6b298a3357c138a6b6a8de63203cb7679f8 100644
+--- a/dist/index.cjs
++++ b/dist/index.cjs
+@@ -382,7 +382,21 @@ const readString =
+ 			'setPosition(p) { position = p },' +
+ 			'getPosition() { return position },' +
+ 			'readString }'))(fromCharCode)) :
+-		eval(makeStringBuilder());
++		(source) => {
++			const codes = [];
++			for (let index = 0; index < 0x30; index++) {
++				let code = source[position++];
++				if (code > 4) {
++					if (code >= 0x80) code = finishUtf8(code, source);
++				} else if (code === 4) {
++					code = source[position++];
++				} else {
++					return fromCharCode(...codes);
++				}
++				codes.push(code);
++			}
++			return fromCharCode(...codes) + readString(source);
++		};
+ function readStringSafely(source, end) {
+ 	if (source[end] > 0) {
+ 		let previous = source[end];
+diff --git a/index.js b/index.js
+index 1a8dbec568d56432d539df5380b5efde9eebbc38..8be37312db8188d5d337aa0bcc3775936dda2825 100644
+--- a/index.js
++++ b/index.js
+@@ -378,7 +378,21 @@ const readString =
+ 			'setPosition(p) { position = p },' +
+ 			'getPosition() { return position },' +
+ 			'readString }'))(fromCharCode)) :
+-		eval(makeStringBuilder())
++		(source) => {
++			const codes = [];
++			for (let index = 0; index < 0x30; index++) {
++				let code = source[position++];
++				if (code > 4) {
++					if (code >= 0x80) code = finishUtf8(code, source);
++				} else if (code === 4) {
++					code = source[position++];
++				} else {
++					return fromCharCode(...codes);
++				}
++				codes.push(code);
++			}
++			return fromCharCode(...codes) + readString(source);
++		}
+ function readStringSafely(source, end) {
+ 	if (source[end] > 0) {
+ 		let previous = source[end]

@@ -11,7 +11,7 @@ const { writeFileSync, readFileSync, copyFileSync, mkdirSync } = require('fs');
 const { resolve, extname, dirname } = require('path');
 
 const { optimize } = require('svgo');
-const { transformFileSync } = require('@swc/core');
+const { transformSync } = require('@swc/core');
 // the /node subpath keeps worker threads free of imports that need a runtime transpiler
 const { getNodeSwcConfig } = require('@kbn/swc-config/node');
 
@@ -33,9 +33,10 @@ module.exports = async ({ source }) => {
     case '.js':
     case '.ts':
     case '.tsx':
-      const output = transformFileSync(
-        absoluteSource,
-        getNodeSwcConfig(absoluteSource, { production: true })
+      const sourceText = readFileSync(absoluteSource, 'utf8');
+      const output = transformSync(
+        sourceText,
+        getNodeSwcConfig(absoluteSource, { production: true, source: sourceText })
       );
 
       if (output.code) {

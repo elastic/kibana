@@ -155,6 +155,18 @@ export function translate(
       throw new Error('Missing `defaultMessage`.');
     }
 
+    // Literal English defaults do not need an ICU parser or a cached formatter.
+    if (
+      intl.locale === defaultLocale &&
+      !Object.hasOwn(intl.messages, id) &&
+      typeof defaultMessage === 'string' &&
+      !/[{}'<]/.test(defaultMessage) &&
+      Object.keys(values).length === 0 &&
+      !formatters
+    ) {
+      return defaultMessage;
+    }
+
     return intl.formatMessage(
       {
         id,

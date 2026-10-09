@@ -38,6 +38,11 @@ export const CreatePackageJson: Task = {
         })
     );
 
+    const { dependencies, usedDependencyNames } = await findUsedDependencies(
+      transformedDeps,
+      build.resolvePath('.'),
+      plugins
+    );
     const newPkg = {
       name: pkg.name,
       private: true,
@@ -58,7 +63,7 @@ export const CreatePackageJson: Task = {
       },
       dependencies: {
         // include dependencies which are explicitly used
-        ...(await findUsedDependencies(transformedDeps, build.resolvePath('.'), plugins)),
+        ...dependencies,
         // also include all plugin packages
         ...Object.fromEntries(
           plugins.map((p) => [p.manifest.id, `file:${p.normalizedRepoRelativeDir}`])
@@ -72,7 +77,10 @@ export const CreatePackageJson: Task = {
     // Reuse the repo's authored settings, minus the generated `packages:` block,
     // so the build dir is its own workspace root. Removed by CleanPackageManagerRelatedFiles.
     const rootWorkspace = await read(config.resolveFromRepo('pnpm-workspace.yaml'));
-    await write(build.resolvePath('pnpm-workspace.yaml'), renderPnpmWorkspace(rootWorkspace));
+    await write(
+      build.resolvePath('pnpm-workspace.yaml'),
+      renderPnpmWorkspace(rootWorkspace, usedDependencyNames)
+    );
   },
 };
 

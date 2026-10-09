@@ -11,6 +11,7 @@ import type * as i18nModule from './i18n';
 import type { Translation, TranslationInput } from '../translation';
 import type { Formats } from './formats';
 import { defaultEnFormats } from './formats';
+import { createIntl } from '@formatjs/intl';
 
 const createExpectedTranslations = (
   locale: string,
@@ -756,5 +757,64 @@ describe('i18n.initDefault', () => {
       i18n.initDefault();
     }).not.toThrow();
     expect(i18n.getIsInitialized()).toBe(true);
+  });
+});
+
+describe('literal defaults and translation precedence', () => {
+  let i18n: typeof i18nModule;
+
+  beforeEach(() => {
+    i18n = jest.requireActual('./i18n');
+  });
+
+  afterEach(() => {
+    jest.resetModules();
+  });
+
+  test.each(['en', 'fr', 'en-US'])('matches the formatter in %s', (locale) => {
+    i18n.activateTranslation({ locale, messages: { translated: 'Translated {value}' } });
+    const reference = createIntl({ ...i18n.getTranslation(), onError: () => void 0 });
+    const cases: Array<{ id: string; options: i18nModule.TranslateArguments }> = [
+      { id: 'literal', options: { defaultMessage: 'Plain text' } },
+      { id: 'quoted', options: { defaultMessage: "Quoted '{value}'" } },
+      { id: 'apostrophe', options: { defaultMessage: "Don't change apostrophes" } },
+      {
+        id: 'plural',
+        options: {
+          defaultMessage: '{count, plural, one {# item} other {# items}}',
+          values: { count: 2 },
+        },
+      },
+      {
+        id: 'translated',
+        options: { defaultMessage: 'Default', values: { value: 'value' } },
+      },
+      { id: 'tag', options: { defaultMessage: '<b>Literal</b>', ignoreTag: true } },
+      { id: 'ast', options: { defaultMessage: [{ type: 0, value: 'AST literal' }] } },
+    ];
+    for (const { id, options } of cases) {
+      expect(i18n.translate(id, options)).toEqual(
+        reference.formatMessage(
+          { id, defaultMessage: options.defaultMessage },
+          options.values ?? {},
+          {
+            ignoreTag: options.ignoreTag,
+            shouldParseSkeletons: true,
+          }
+        )
+      );
+    }
+  });
+
+  test('uses English translation overrides and empty-translation fallback', () => {
+    i18n.activateTranslation({ locale: 'en', messages: { translated: 'Override', empty: '' } });
+    expect(i18n.translate('translated', { defaultMessage: 'Default' })).toBe('Override');
+    expect(i18n.translate('empty', { defaultMessage: 'Fallback' })).toBe('Fallback');
+  });
+
+  test('ignores inherited translation keys', () => {
+    const messages = Object.create({ inherited: 'Inherited translation' });
+    i18n.activateTranslation({ locale: 'en', messages });
+    expect(i18n.translate('inherited', { defaultMessage: 'Default' })).toBe('Default');
   });
 });

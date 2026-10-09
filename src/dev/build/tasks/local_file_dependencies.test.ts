@@ -49,3 +49,25 @@ it.each(['file:../outside.tgz', 'file:/outside.tgz'])(
     );
   }
 );
+
+it('includes unique dependency patches alongside local archives', () => {
+  expect(
+    getLocalFileDependencyPaths(
+      { dependencies: { local: 'file:./archives/dependency.tgz' } },
+      `patchedDependencies:
+  first@1.0.0: patches/first.patch
+  second@1.0.0: ./patches/first.patch
+  third@1.0.0: patches/third.patch
+`
+    )
+  ).toEqual(['archives/dependency.tgz', 'patches/first.patch', 'patches/third.patch']);
+});
+
+it.each(['', '../outside.patch', '/outside.patch'])(
+  'rejects dependency patches outside the repository: %s',
+  (path) => {
+    expect(() =>
+      getLocalFileDependencyPaths({}, `patchedDependencies:\n  dependency@1.0.0: '${path}'`)
+    ).toThrow(`local dependency must reference a file inside the repository: ${path}`);
+  }
+);

@@ -1687,3 +1687,7 @@ packages:
 
 # Keep a last field entry, because a trailing comment might be removed by some parsers.
 lockfile: true
+patchedDependencies:
+  '@elastic/eui@123.0.0': patches/@elastic__eui@123.0.0.patch
+  ordered-binary@1.6.1: patches/ordered-binary@1.6.1.patch
+  zod@4.4.3: patches/zod@4.4.3.patch
