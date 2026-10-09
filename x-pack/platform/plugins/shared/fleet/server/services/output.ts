@@ -67,7 +67,6 @@ import {
   kafkaSaslMechanism,
   kafkaPartitionType,
   kafkaCompressionType,
-  kafkaAuthType,
   kafkaAcknowledgeReliabilityLevel,
   otlpProtocol,
   OTLP_GRPC_ONLY_COMPRESSION_TYPES,
@@ -104,6 +103,7 @@ import {
   isOutputSecretStorageEnabled,
 } from './secrets';
 import { findAgentlessPolicies, checkOtlpOutputAllowed } from './outputs/helpers';
+import { clearKafkaAuthFieldsForType } from './outputs/kafka_auth';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
 import {
   validateOutputSslPaths,
@@ -837,13 +837,7 @@ class OutputService {
         data.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
       }
       // Clear fields that are only valid for specific auth_type values
-      if (output.auth_type !== kafkaAuthType.None) {
-        data.connection_type = undefined;
-      }
-      if (output.auth_type !== kafkaAuthType.Userpass) {
-        data.username = undefined;
-        data.password = undefined;
-      }
+      clearKafkaAuthFieldsForType(data, output.auth_type, undefined);
       // Kafka does not support proxies — clear any proxy_id silently (#267281)
       data.proxy_id = null;
     }
@@ -1400,12 +1394,8 @@ class OutputService {
           updateData.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
         }
         // Clear fields that are only valid for specific auth_type values
-        if (updateData.auth_type && updateData.auth_type !== kafkaAuthType.None) {
-          updateData.connection_type = null;
-        }
-        if (updateData.auth_type && updateData.auth_type !== kafkaAuthType.Userpass) {
-          updateData.username = null;
-          updateData.password = null;
+        if (updateData.auth_type) {
+          clearKafkaAuthFieldsForType(updateData, updateData.auth_type, null);
         }
       }
 

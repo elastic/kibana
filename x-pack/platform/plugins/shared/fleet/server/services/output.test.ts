@@ -1335,6 +1335,88 @@ describe('Output Service', () => {
       });
     });
 
+    describe('kafka output authentication fields', () => {
+      const createKafkaOutput = async (kafkaFields: Record<string, unknown>) => {
+        const soClient = getMockedSoClient({
+          defaultOutputId: 'output-test',
+        });
+        mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+          canEncrypt: true,
+        } as any);
+        mockedAgentPolicyService.list.mockResolvedValue(
+          mockedAgentPolicyWithFleetServerResolvedValue
+        );
+        mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
+
+        await outputService.create(
+          soClient,
+          esClientMock,
+          {
+            is_default: false,
+            is_default_monitoring: false,
+            name: 'Test',
+            type: 'kafka',
+            ...kafkaFields,
+          } as any,
+          { id: 'output-1' }
+        );
+
+        return soClient.create.mock.calls[0][1] as Record<string, unknown>;
+      };
+
+      it('should clear the credentials and keep connection_type for the none auth type', async () => {
+        const saved = await createKafkaOutput({
+          auth_type: 'none',
+          connection_type: 'encryption',
+          username: 'user',
+          password: 'pass',
+        });
+
+        expect(saved.connection_type).toEqual('encryption');
+        expect(saved.username).toBeUndefined();
+        expect(saved.password).toBeUndefined();
+      });
+
+      it('should clear connection_type and keep the credentials for the user_pass auth type', async () => {
+        const saved = await createKafkaOutput({
+          auth_type: 'user_pass',
+          connection_type: 'encryption',
+          username: 'user',
+          password: 'pass',
+        });
+
+        expect(saved.connection_type).toBeUndefined();
+        expect(saved.username).toEqual('user');
+        expect(saved.password).toEqual('pass');
+        expect(saved.sasl).toEqual({ mechanism: 'PLAIN' });
+      });
+
+      it('should clear the credentials and connection_type for the ssl auth type', async () => {
+        const saved = await createKafkaOutput({
+          auth_type: 'ssl',
+          connection_type: 'encryption',
+          username: 'user',
+          password: 'pass',
+        });
+
+        expect(saved.connection_type).toBeUndefined();
+        expect(saved.username).toBeUndefined();
+        expect(saved.password).toBeUndefined();
+      });
+
+      it.each(['none', 'ssl'])(
+        'should keep a sasl mechanism sent with the %s auth type, as before',
+        async (authType) => {
+          const saved = await createKafkaOutput({
+            auth_type: authType,
+            sasl: { mechanism: 'SCRAM-SHA-256' },
+          });
+
+          expect(saved.sasl).toEqual({ mechanism: 'SCRAM-SHA-256' });
+        }
+      );
+    });
+
     describe('remote elasticsearch output', () => {
       beforeEach(() => {
         mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({

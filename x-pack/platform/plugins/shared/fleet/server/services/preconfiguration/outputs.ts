@@ -9,7 +9,8 @@ import crypto from 'node:crypto';
 import utils from 'node:util';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { isEqual } from 'lodash';
+import { get, isEqual } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { stringify } from 'yaml';
 import pMap from 'p-map';
 
@@ -45,6 +46,7 @@ import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
 import { checkOtlpOutputAllowed } from '../outputs/helpers';
+import { getKafkaSecretLeaves } from '../secrets/outputs';
 import {
   isAgentlessEnabled,
   isManagedBulkEnabled,
@@ -328,11 +330,10 @@ async function hashSecrets(output: PreconfiguredOutput) {
   if (output.type === 'kafka') {
     const kafkaOutput = output as KafkaOutput;
 
-    if (typeof kafkaOutput.secrets?.password === 'string') {
-      const password = await hashSecret(kafkaOutput.secrets?.password);
-      secrets = {
-        password,
-      };
+    for (const { path, value } of getKafkaSecretLeaves(kafkaOutput.secrets)) {
+      if (typeof value === 'string') {
+        set(secrets, path, await hashSecret(value));
+      }
     }
   }
 
@@ -518,10 +519,17 @@ async function isPreconfiguredOutputDifferentFromCurrent(
       return false;
     }
 
-    const passwordHashIsDifferent = await isSecretDifferent(
-      preconfiguredOutput.secrets?.password,
-      existingOutput.secrets?.password
+    // every secret of the preconfigured and of the existing output, whatever its depth
+    const secretPaths = new Set([
+      ...getKafkaSecretLeaves(preconfiguredOutput.secrets).map(({ path }) => path),
+      ...getKafkaSecretLeaves(existingOutput.secrets).map(({ path }) => path),
+    ]);
+    const secretsDifferences = await Promise.all(
+      [...secretPaths].map((path) =>
+        isSecretDifferent(get(preconfiguredOutput.secrets, path), get(existingOutput.secrets, path))
+      )
     );
+    const secretsAreDifferent = secretsDifferences.some(Boolean);
 
     return (
       isDifferent(existingOutput.client_id, preconfiguredOutput.client_id) ||
@@ -547,7 +555,7 @@ async function isPreconfiguredOutputDifferentFromCurrent(
         existingOutput.write_to_logs_streams,
         preconfiguredOutput.write_to_logs_streams
       ) ||
-      passwordHashIsDifferent
+      secretsAreDifferent
     );
   };
 

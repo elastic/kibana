@@ -360,6 +360,82 @@ describe('EditOutputFlyout', () => {
     });
   });
 
+  it('should not render username and password inputs for an authentication method this form cannot edit', async () => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'kafka',
+      name: 'kafka output',
+      id: 'outputK',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['kafka:443'],
+      topic: 'topic',
+      // an authentication method the form has no inputs for, e.g. set through the API
+      auth_type: 'unsupported_auth' as any,
+      version: '1.0.0',
+      compression: 'none',
+    });
+
+    expect(
+      utils.getByTestId('settingsOutputsFlyout.kafkaAuthenticationManagedElsewhereCallout')
+    ).toBeInTheDocument();
+    expect(utils.queryByTestId('settingsOutputsFlyout.kafkaUsernameInput')).not.toBeInTheDocument();
+    expect(
+      utils.queryByTestId('settingsOutputsFlyout.kafkaPasswordSecretInput')
+    ).not.toBeInTheDocument();
+
+    mockSendPutOutput.mockResolvedValue({ data: {} } as any);
+
+    fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+      target: { value: 'kafka output updated' },
+    });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await waitFor(() => {
+      // the authentication settings of the output are kept as they are
+      expect(mockSendPutOutput).toHaveBeenCalledWith(
+        'outputK',
+        expect.objectContaining({ auth_type: 'unsupported_auth' })
+      );
+      const payload = mockSendPutOutput.mock.calls[0][1] as any;
+      expect(payload.username).toBeUndefined();
+      expect(payload.password).toBeUndefined();
+      expect(payload.secrets?.password).toBeUndefined();
+    });
+  });
+
+  it('should render the username and password inputs for user_pass authentication', async () => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+
+    const { utils } = renderFlyout({
+      type: 'kafka',
+      name: 'kafka output',
+      id: 'outputK',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['kafka:443'],
+      topic: 'topic',
+      auth_type: 'user_pass',
+      version: '1.0.0',
+      username: 'user',
+      password: 'pass',
+      compression: 'none',
+    });
+
+    expect(utils.getByTestId('settingsOutputsFlyout.kafkaUsernameInput')).toBeInTheDocument();
+    expect(
+      utils.queryByTestId('settingsOutputsFlyout.kafkaAuthenticationManagedElsewhereCallout')
+    ).not.toBeInTheDocument();
+  });
+
   it('should populate secret input with plain text value when editing logstash output', async () => {
     jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
 

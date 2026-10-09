@@ -10,3 +10,6 @@ export const ENABLE_IAC_PROVISIONER_FLAG = 'fleet.enableIacProvisioner';
 
 /** LaunchDarkly flag that gates the Restart Agent action in the Fleet UI. Fallback is false. */
 export const ENABLE_RESTART_AGENT_ACTION_FLAG = 'fleet.enableRestartAgentAction';
+
+/** Feature flag that gates the OAuth2 authentication method of the Kafka output. Fallback is false. */
+export const ENABLE_KAFKA_OAUTH2_AUTH_FLAG = 'fleet.enableKafkaOAuth2Auth';

@@ -47,6 +47,7 @@ import {
   PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
 } from '../../../common/constants';
 import { createManagedBulkOutputMatcher } from '../preconfiguration/outputs';
+import { buildKafkaAuthData } from '../outputs/kafka_auth';
 import { getSettingsValuesForAgentPolicy } from '../form_settings';
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
@@ -685,6 +686,7 @@ export function transformOutputToFullPolicyOutput(
       key,
       compression,
       compression_level,
+      auth_type,
       username,
       password,
       sasl,
@@ -730,9 +732,7 @@ export function transformOutputToFullPolicyOutput(
       key,
       compression,
       ...(compression === kafkaCompressionType.Gzip ? { compression_level } : {}),
-      ...(username ? { username } : {}),
-      ...(password ? { password } : {}),
-      ...(sasl ? { sasl } : {}),
+      ...buildKafkaAuthData({ auth_type, username, password, sasl }),
       partition: transformPartition(),
       topic,
       headers: (headers ?? []).filter((item) => item.key !== '' || item.value !== ''),
