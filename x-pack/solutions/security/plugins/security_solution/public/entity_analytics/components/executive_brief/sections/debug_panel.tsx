@@ -20,6 +20,7 @@ import type {
   ExecutiveBriefJob,
 } from '../../../../../common/entity_analytics/executive_brief/types';
 import { TEST_IDS } from '../test_ids';
+import { UsageBlock } from './debug_panel_usage';
 
 interface DebugPanelProps {
   job: ExecutiveBriefJob;
@@ -52,12 +53,9 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ job, mode, onModeChange 
           <EuiBadge color="hollow">{`${stage}: ${ms}`}</EuiBadge>
         </EuiFlexItem>
       ))}
-      {job.tokens && (
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">{`tokens: ${job.tokens.prompt} in / ${job.tokens.completion} out`}</EuiBadge>
-        </EuiFlexItem>
-      )}
     </EuiFlexGroup>
+    <EuiSpacer size="m" />
+    <UsageBlock job={job} />
     <EuiSpacer size="m" />
     <EuiText size="xs">
       <h5>{'Validation'}</h5>

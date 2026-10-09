@@ -431,4 +431,71 @@ describe('ExecutiveBriefFlyout', () => {
     expect(within(nav).getByText(/^Decisions \(\d+\)$/)).toBeInTheDocument();
     expect(within(nav).getByText('Details')).toBeInTheDocument();
   });
+
+  describe('usage line in the footer', () => {
+    const tokens = { prompt: 17000, completion: 1200, total: 18200 };
+    const estimate = { promptTokens: 17900, payloadBytes: 60000, method: 'tokenizer' as const };
+
+    it('shows tokens and model for an AI run', () => {
+      mockUseExecutiveBrief.mockReturnValue({
+        ...baseResult,
+        job: {
+          ...FIXTURE_JOB_SUCCEEDED,
+          params: {
+            ...FIXTURE_JOB_SUCCEEDED.params,
+            generator: 'inference',
+            connectorId: 'sonnet',
+          },
+          model: 'Claude Sonnet 5',
+          tokens,
+          estimate,
+        },
+      });
+      render(<ExecutiveBriefFlyout timeRange="7d" onClose={jest.fn()} />);
+      expect(screen.getByTestId('executiveBriefUsageLine')).toHaveTextContent(
+        '≈ 18.2k tokens · Claude Sonnet 5'
+      );
+    });
+
+    it('shows the would-send estimate for the template generator', () => {
+      mockUseExecutiveBrief.mockReturnValue({
+        ...baseResult,
+        job: {
+          ...FIXTURE_JOB_SUCCEEDED,
+          params: { ...FIXTURE_JOB_SUCCEEDED.params, generator: 'template' },
+          tokens: undefined,
+          estimate,
+        },
+      });
+      render(<ExecutiveBriefFlyout timeRange="7d" onClose={jest.fn()} />);
+      expect(screen.getByTestId('executiveBriefUsageLine')).toHaveTextContent(
+        'Template · would send ≈ 17.9k tokens'
+      );
+    });
+
+    it('is absent without tokens or an estimate', () => {
+      mockUseExecutiveBrief.mockReturnValue({
+        ...baseResult,
+        job: { ...FIXTURE_JOB_SUCCEEDED, tokens: undefined, estimate: undefined },
+      });
+      render(<ExecutiveBriefFlyout timeRange="7d" onClose={jest.fn()} />);
+      expect(screen.queryByTestId('executiveBriefUsageLine')).not.toBeInTheDocument();
+    });
+
+    it('is hidden during print mode', async () => {
+      mockUseExecutiveBrief.mockReturnValue({
+        ...baseResult,
+        job: { ...FIXTURE_JOB_SUCCEEDED, tokens, estimate },
+      });
+      const seen: Record<string, boolean> = {};
+      const onExportPdf = jest.fn(async () => {
+        seen.hidden = screen.queryByTestId('executiveBriefUsageLine') === null;
+      });
+      render(<ExecutiveBriefFlyout timeRange="7d" onClose={jest.fn()} onExportPdf={onExportPdf} />);
+      expect(screen.getByTestId('executiveBriefUsageLine')).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId(TEST_IDS.exportPdf));
+      await waitFor(() => expect(onExportPdf).toHaveBeenCalled());
+      expect(seen.hidden).toBe(true);
+    });
+  });
 });

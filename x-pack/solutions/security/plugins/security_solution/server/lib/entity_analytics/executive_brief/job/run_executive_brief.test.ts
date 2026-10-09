@@ -467,6 +467,54 @@ describe('runExecutiveBrief', () => {
       expect((await run()).store.doc.model).toBeUndefined();
     });
 
+    it('persists tokens, attempts and the pre-call estimate, and logs one usage line', async () => {
+      const estimate = { promptTokens: 1234, payloadBytes: 4321, method: 'tokenizer' as const };
+      const tokens = { prompt: 1300, completion: 200, cached: 100, total: 1500 };
+      const inference: BriefGenerator = {
+        kind: 'inference',
+        estimate: jest.fn(() => estimate),
+        generate: jest.fn(async () => ({
+          brief: FIXTURE_BRIEF,
+          model: 'Claude Sonnet 5',
+          tokens,
+          attempts: 2,
+        })),
+      };
+      const { store, context } = await run({ generator: inference });
+      expect(store.doc).toMatchObject({ estimate, tokens, attempts: 2, model: 'Claude Sonnet 5' });
+      // The estimate is written before the model call (with the generate stage).
+      const generatePatch = store.patches.find(({ stage }) => stage === 'generate');
+      expect(generatePatch?.estimate).toEqual(estimate);
+
+      const usageLines = jest
+        .mocked(context.logger.info)
+        .mock.calls.map(([line]) => String(line))
+        .filter((line) => line.includes('usage'));
+      expect(usageLines).toHaveLength(1);
+      expect(JSON.parse(usageLines[0].slice(usageLines[0].indexOf('{')))).toMatchObject({
+        briefId: 'job-1',
+        generator: 'inference',
+        model: 'Claude Sonnet 5',
+        estimate,
+        tokens,
+        attempts: 2,
+        storylines: FIXTURE_BRIEF.storylines.length,
+        entities: Object.keys(FIXTURE_SNAPSHOT.entities).length,
+      });
+    });
+
+    it('records the estimate but no tokens or attempts for the template generator', async () => {
+      const { store } = await run();
+      expect(store.doc.estimate).toEqual({
+        promptTokens: expect.any(Number),
+        payloadBytes: expect.any(Number),
+        method: 'tokenizer',
+      });
+      expect(store.doc.estimate?.promptTokens).toBeGreaterThan(0);
+      expect(store.doc.tokens).toBeUndefined();
+      expect(store.doc.attempts).toBeUndefined();
+    });
+
     it('does not record a model when an inference generator returns none', async () => {
       const inference: BriefGenerator = {
         kind: 'inference',

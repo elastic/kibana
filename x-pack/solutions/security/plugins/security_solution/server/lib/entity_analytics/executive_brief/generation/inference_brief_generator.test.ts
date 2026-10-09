@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { createInferenceRequestError } from '@kbn/inference-common';
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
+import {
+  MessageRole,
+  createInferenceRequestError,
+  ChatCompletionErrorCode,
+  InferenceTaskError,
+} from '@kbn/inference-common';
 import { FIXTURE_BRIEF } from '../../../../../common/entity_analytics/executive_brief/__fixtures__/brief';
 import { FIXTURE_SNAPSHOT } from '../../../../../common/entity_analytics/executive_brief/__fixtures__/snapshot';
 import type { BriefSnapshot } from '../../../../../common/entity_analytics/executive_brief/types';
@@ -14,22 +20,43 @@ import { BriefJobError, toJobError } from '../job/job_errors';
 import { LLM_RUN_SNAPSHOT } from '../validation/__fixtures__/llm_sonnet5_names_run';
 import { validateBrief } from '../validation/validate_brief';
 import { BRIEF_OUTPUT_SCHEMA, BRIEF_SYSTEM_PROMPT, buildBriefPayload } from './brief_prompt';
-import { EXECUTIVE_BRIEF_INFERENCE_ID, InferenceBriefGenerator } from './inference_brief_generator';
-import type { BriefOutputClient, BriefOutputRequest } from './inference_brief_generator';
+import { buildBriefInput, estimateBriefPrompt } from './brief_request';
+import {
+  EXECUTIVE_BRIEF_INFERENCE_ID,
+  InferenceBriefGenerator,
+  sumTokens,
+} from './inference_brief_generator';
+import type {
+  BriefChatCompleteClient,
+  BriefChatCompleteRequest,
+} from './inference_brief_generator';
 
-const clientReturning = (output: object | undefined) => {
-  const calls: BriefOutputRequest[] = [];
-  const client: BriefOutputClient = {
-    output: jest.fn(async (request: BriefOutputRequest) => {
+const clientReturning = (output: object | undefined, tokens?: ChatCompletionTokenCount) => {
+  const calls: BriefChatCompleteRequest[] = [];
+  const client: BriefChatCompleteClient = {
+    chatComplete: jest.fn(async (request: BriefChatCompleteRequest) => {
       calls.push(request);
-      return { output };
+      return {
+        toolCalls: output ? [{ function: { name: 'structuredOutput', arguments: output } }] : [],
+        tokens,
+      };
     }),
   };
   return { client, calls };
 };
 
+const validationError = () =>
+  new InferenceTaskError(ChatCompletionErrorCode.ToolValidationError, 'bad tool call', {
+    toolCalls: [
+      {
+        toolCallId: 'call-1',
+        function: { name: 'structuredOutput', arguments: '{"glance":1}' },
+      },
+    ],
+  });
+
 describe('InferenceBriefGenerator (mocked inference client)', () => {
-  it('calls output() once with the fixed id, prompt, schema, retry and abort signal', async () => {
+  it('calls chatComplete() once with a single forced tool, the prompt, schema and abort signal', async () => {
     const { client, calls } = clientReturning(FIXTURE_BRIEF);
     const controller = new AbortController();
     const generator = new InferenceBriefGenerator(client, 'my-connector');
@@ -40,14 +67,28 @@ describe('InferenceBriefGenerator (mocked inference client)', () => {
     });
 
     expect(calls).toHaveLength(1);
+    expect(EXECUTIVE_BRIEF_INFERENCE_ID).toBe('ea-executive-brief-poc');
     expect(calls[0]).toMatchObject({
-      id: EXECUTIVE_BRIEF_INFERENCE_ID,
       system: BRIEF_SYSTEM_PROMPT,
-      retry: { onValidationError: 1 },
+      toolChoice: { function: 'structuredOutput' },
       abortSignal: controller.signal,
     });
-    expect(calls[0].schema.required).toEqual(['glance', 'storylines', 'blindSpots', 'decisions']);
-    expect(calls[0].input).toContain(buildBriefPayload(FIXTURE_SNAPSHOT, 'names'));
+    expect(Object.keys(calls[0].tools)).toEqual(['structuredOutput']);
+    expect(calls[0].tools.structuredOutput.schema).toBe(BRIEF_OUTPUT_SCHEMA);
+    expect(calls[0].tools.structuredOutput.schema.required).toEqual([
+      'glance',
+      'storylines',
+      'blindSpots',
+      'decisions',
+    ]);
+    expect(calls[0].messages).toEqual([
+      {
+        role: MessageRole.User,
+        content: expect.stringContaining(buildBriefPayload(FIXTURE_SNAPSHOT, 'names')),
+      },
+    ]);
+    expect(result.attempts).toBe(1);
+    expect(result.tokens).toBeUndefined();
     expect(result.model).toBe('my-connector');
     expect(result.brief).toEqual(FIXTURE_BRIEF);
   });
@@ -141,8 +182,8 @@ describe('InferenceBriefGenerator (mocked inference client)', () => {
   });
 
   it('lets connector errors through unchanged so the job maps them to connector', async () => {
-    const client: BriefOutputClient = {
-      output: jest.fn(async () => {
+    const client: BriefChatCompleteClient = {
+      chatComplete: jest.fn(async () => {
         throw createInferenceRequestError('no such connector', 404);
       }),
     };
@@ -150,6 +191,111 @@ describe('InferenceBriefGenerator (mocked inference client)', () => {
       .generate({ snapshot: FIXTURE_SNAPSHOT, mode: 'names' })
       .catch((e: Error) => e);
     expect(toJobError(error).code).toBe('connector');
+  });
+});
+
+describe('token usage, attempts and retry', () => {
+  const generator = (client: BriefChatCompleteClient) => new InferenceBriefGenerator(client);
+  const run = (client: BriefChatCompleteClient) =>
+    generator(client).generate({ snapshot: FIXTURE_SNAPSHOT, mode: 'names' });
+
+  it('returns the response tokens, including cached', async () => {
+    const { client } = clientReturning(FIXTURE_BRIEF, {
+      prompt: 1000,
+      completion: 200,
+      total: 1200,
+      cached: 400,
+    });
+    expect(await run(client)).toMatchObject({
+      tokens: { prompt: 1000, completion: 200, total: 1200, cached: 400 },
+      attempts: 1,
+    });
+  });
+
+  it('leaves optional fields undefined when the provider does not report them', async () => {
+    const { client } = clientReturning(FIXTURE_BRIEF, { prompt: 10, completion: 5, total: 15 });
+    const { tokens } = await run(client);
+    expect(tokens).toEqual({ prompt: 10, completion: 5, total: 15 });
+    expect(tokens).not.toHaveProperty('cached');
+  });
+
+  it('retries once on a tool validation error, with the failed call and its error in the conversation', async () => {
+    const calls: BriefChatCompleteRequest[] = [];
+    const responses: Array<() => ReturnType<BriefChatCompleteClient['chatComplete']>> = [
+      () => Promise.reject(validationError()),
+      async () => ({
+        toolCalls: [{ function: { name: 'structuredOutput', arguments: FIXTURE_BRIEF } }],
+        tokens: { prompt: 900, completion: 100, total: 1000, cached: 50 },
+      }),
+    ];
+    const client: BriefChatCompleteClient = {
+      chatComplete: jest.fn((request: BriefChatCompleteRequest) => {
+        calls.push(request);
+        return (responses.shift() as () => ReturnType<BriefChatCompleteClient['chatComplete']>)();
+      }),
+    };
+    const result = await run(client);
+    expect(result.attempts).toBe(2);
+    expect(result.brief).toEqual(FIXTURE_BRIEF);
+    expect(calls).toHaveLength(2);
+    expect(calls[1].messages.map((message) => message.role)).toEqual([
+      MessageRole.User,
+      MessageRole.Assistant,
+      MessageRole.Tool,
+    ]);
+    // Only the successful attempt reports usage (a failed attempt's usage is not on the error).
+    expect(result.tokens).toEqual({ prompt: 900, completion: 100, total: 1000, cached: 50 });
+  });
+
+  it('sums usage across attempts, keeping undefined fields undefined', () => {
+    expect(sumTokens(undefined, undefined)).toBeUndefined();
+    expect(sumTokens(undefined, { prompt: 10, completion: 5, total: 15 })).toEqual({
+      prompt: 10,
+      completion: 5,
+      total: 15,
+    });
+    expect(
+      sumTokens(
+        { prompt: 10, completion: 5, total: 15 },
+        { prompt: 20, completion: 6, total: 26, cached: 8 }
+      )
+    ).toEqual({ prompt: 30, completion: 11, total: 41, cached: 8 });
+  });
+
+  it('throws after the single retry also fails validation', async () => {
+    const client: BriefChatCompleteClient = {
+      chatComplete: jest.fn(() => Promise.reject(validationError())),
+    };
+    const error = await run(client).catch((e: Error) => e);
+    expect(client.chatComplete).toHaveBeenCalledTimes(2);
+    expect(toJobError(error).code).toBe('llm_output');
+  });
+
+  it('does not retry malformed output (the same as output(): only validation errors retry)', async () => {
+    const { client } = clientReturning({ ...FIXTURE_BRIEF, glance: undefined });
+    await expect(run(client)).rejects.toBeInstanceOf(BriefJobError);
+    expect(client.chatComplete).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('estimate', () => {
+  it('counts payload bytes of the exact input and a positive token count', () => {
+    const estimate = new InferenceBriefGenerator(clientReturning(FIXTURE_BRIEF).client).estimate({
+      snapshot: FIXTURE_SNAPSHOT,
+      mode: 'names',
+    });
+    expect(estimate).toEqual({
+      promptTokens: expect.any(Number),
+      payloadBytes: Buffer.byteLength(buildBriefInput(FIXTURE_SNAPSHOT, 'names'), 'utf8'),
+      method: 'tokenizer',
+    });
+    expect(estimate?.promptTokens).toBeGreaterThan(estimate ? estimate.payloadBytes / 8 : 0);
+  });
+
+  it('ids_only is smaller than names', () => {
+    const names = estimateBriefPrompt(FIXTURE_SNAPSHOT, 'names');
+    const idsOnly = estimateBriefPrompt(FIXTURE_SNAPSHOT, 'ids_only');
+    expect(idsOnly.payloadBytes).toBeLessThan(names.payloadBytes);
   });
 });
 
@@ -277,8 +423,12 @@ describe('assessment in the prompt and payload', () => {
   it('is sent to the model by the generator', async () => {
     const { client, calls } = clientReturning(FIXTURE_BRIEF);
     await new InferenceBriefGenerator(client).generate({ snapshot, mode: 'names' });
-    expect(calls[0].input).toContain('"attentionAssessment":{"level":"urgent"');
-    expect(calls[0].input).toContain('9 high/critical alerts have no case');
+    expect((calls[0].messages[0] as { content: string }).content).toContain(
+      '"attentionAssessment":{"level":"urgent"'
+    );
+    expect((calls[0].messages[0] as { content: string }).content).toContain(
+      '9 high/critical alerts have no case'
+    );
   });
 
   it('omits it for a snapshot without an assessment instead of inventing one', () => {

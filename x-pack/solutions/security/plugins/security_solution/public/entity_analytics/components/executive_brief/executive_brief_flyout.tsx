@@ -51,6 +51,7 @@ import { useExecutiveBrief } from './hooks/use_executive_brief';
 import { AtAGlance } from './sections/at_a_glance';
 import { BlindSpots } from './sections/blind_spots';
 import { DebugPanel } from './sections/debug_panel';
+import { USAGE_TEST_IDS, getUsageLine } from './sections/debug_panel_usage';
 import { Decisions } from './sections/decisions';
 import { Details } from './sections/details';
 import { Storylines } from './sections/storylines';
@@ -222,6 +223,8 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
     if (succeeded.params.generator !== 'inference') return 'Template generator';
     return succeeded.model ?? getConnectorName(succeeded.params.connectorId) ?? 'AI generator';
   }, [succeeded, getConnectorName]);
+
+  const usageLine = !isPrintMode && succeeded ? getUsageLine(succeeded, modelLabel) : undefined;
 
   const connectorOptions = useMemo(
     () => [
@@ -434,7 +437,7 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
                 <EuiCopy textToCopy={markdown}>
                   {(copy) => (
                     <EuiButtonEmpty
-                      iconType="copyClipboard"
+                      iconType="copy"
                       onClick={copy}
                       isDisabled={!succeeded}
                       data-test-subj={TEST_IDS.copyMarkdown}
@@ -459,6 +462,13 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
+          {usageLine && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued" data-test-subj={USAGE_TEST_IDS.footerLine}>
+                {usageLine}
+              </EuiText>
+            </EuiFlexItem>
+          )}
           {hasRequested && (
             <EuiFlexItem grow={false}>
               <EuiButton

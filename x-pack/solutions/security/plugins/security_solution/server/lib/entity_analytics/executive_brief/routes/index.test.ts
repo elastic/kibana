@@ -199,7 +199,7 @@ describe('executive brief routes', () => {
 
     it('binds the inference client to the connector when it resolves', async () => {
       getConnectorById.mockResolvedValue({ connectorId: 'c1' });
-      getClient.mockReturnValue({ output: jest.fn() });
+      getClient.mockReturnValue({ chatComplete: jest.fn() });
       const response = await post({ ...validBody, generator: 'inference', connectorId: 'c1' });
       expect(response.status).toBe(202);
       expect(getClient).toHaveBeenCalledWith(
@@ -210,7 +210,17 @@ describe('executive brief routes', () => {
 
     it("hands the connector's display name to the generator as the model", async () => {
       getConnectorById.mockResolvedValue({ connectorId: 'c1', name: 'Anthropic Claude Sonnet 5' });
-      getClient.mockReturnValue({ output: jest.fn(async () => ({ output: FIXTURE_BRIEF })) });
+      getClient.mockReturnValue({
+        chatComplete: jest.fn(async () => ({
+          content: '',
+          toolCalls: [
+            {
+              toolCallId: 't1',
+              function: { name: 'structuredOutput', arguments: FIXTURE_BRIEF },
+            },
+          ],
+        })),
+      });
       await post({ ...validBody, generator: 'inference', connectorId: 'c1' });
       const { generator } = mockRun.mock.calls[0][0];
       const result = await generator.generate({ snapshot: FIXTURE_SNAPSHOT, mode: 'names' });
@@ -219,7 +229,17 @@ describe('executive brief routes', () => {
 
     it('uses the connector id as the model when the connector has no name', async () => {
       getConnectorById.mockResolvedValue({ connectorId: 'c1', name: '' });
-      getClient.mockReturnValue({ output: jest.fn(async () => ({ output: FIXTURE_BRIEF })) });
+      getClient.mockReturnValue({
+        chatComplete: jest.fn(async () => ({
+          content: '',
+          toolCalls: [
+            {
+              toolCallId: 't1',
+              function: { name: 'structuredOutput', arguments: FIXTURE_BRIEF },
+            },
+          ],
+        })),
+      });
       await post({ ...validBody, generator: 'inference', connectorId: 'c1' });
       const { generator } = mockRun.mock.calls[0][0];
       const result = await generator.generate({ snapshot: FIXTURE_SNAPSHOT, mode: 'names' });

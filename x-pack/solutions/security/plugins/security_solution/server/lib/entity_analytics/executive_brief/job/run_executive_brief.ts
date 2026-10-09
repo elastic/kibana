@@ -226,10 +226,16 @@ export const runExecutiveBrief = async ({
       sources,
     };
 
-    await store.update(briefId, { stage: 'generate', snapshot, timings: { ...timings } });
-    const generated = await timed('generate', () =>
-      generator.generate({ snapshot, mode: params.mode, abortSignal })
-    );
+    const generationInput = { snapshot, mode: params.mode, abortSignal };
+    // Computed before the call so it is on the job even if the model call fails.
+    const estimate = generator.estimate?.(generationInput);
+    await store.update(briefId, {
+      stage: 'generate',
+      snapshot,
+      ...(estimate ? { estimate } : {}),
+      timings: { ...timings },
+    });
+    const generated = await timed('generate', () => generator.generate(generationInput));
 
     await store.update(briefId, { stage: 'validate', timings: { ...timings } });
     const { brief, validation } = await timed('validate', async () =>
@@ -242,6 +248,7 @@ export const runExecutiveBrief = async ({
         brief,
         validation,
         ...(generated.tokens ? { tokens: generated.tokens } : {}),
+        ...(generated.attempts !== undefined ? { attempts: generated.attempts } : {}),
         // Only a model-written brief has a model; the template generator is not one.
         ...(generator.kind === 'inference' && generated.model ? { model: generated.model } : {}),
       })
@@ -256,6 +263,19 @@ export const runExecutiveBrief = async ({
       `[ExecutiveBrief] ${briefId} succeeded in ${now() - startedAtMs}ms (dropped ${
         validation.droppedClaims
       }/${validation.totalClaims} claims)`
+    );
+    logger.info(
+      `[ExecutiveBrief] usage ${JSON.stringify({
+        briefId,
+        generator: generator.kind,
+        model: generator.kind === 'inference' ? generated.model : undefined,
+        estimate,
+        tokens: generated.tokens,
+        attempts: generated.attempts,
+        storylines: brief.storylines.length,
+        entities: Object.keys(snapshot.entities).length,
+        generateMs: timings.generate,
+      })}`
     );
   } catch (error) {
     const jobError = toJobError(error, abortSignal);

@@ -47,6 +47,7 @@ export const BRIEF_JOB_MAPPINGS: MappingTypeMapping = {
     validation: { type: 'object', enabled: false },
     timings: { type: 'object', enabled: false },
     tokens: { type: 'object', enabled: false },
+    estimate: { type: 'object', enabled: false },
     error: { type: 'object', enabled: false },
   },
 };

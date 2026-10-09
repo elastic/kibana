@@ -17,6 +17,7 @@ import type {
   BlindSpotGap,
   EvidenceId,
   ExecutiveBrief,
+  ExecutiveBriefJob,
   ExecutiveBriefDecision,
   ExecutiveBriefStoryline,
   StoryEdge,
@@ -24,6 +25,7 @@ import type {
   Storyline,
 } from '../../../../../common/entity_analytics/executive_brief/types';
 import { ATTENTION_LEVEL_RANK } from '../assessment';
+import { estimateBriefPrompt } from './brief_request';
 import type { BriefGenerationInput, BriefGenerationResult, BriefGenerator } from './types';
 
 const MAX_PAIR_SENTENCES = 3;
@@ -703,6 +705,11 @@ export const buildTemplateGlance = (
  */
 export class TemplateBriefGenerator implements BriefGenerator {
   public readonly kind = 'template' as const;
+
+  /** What an LLM run of this snapshot would send; the template itself sends nothing. */
+  public estimate({ snapshot, mode }: BriefGenerationInput): ExecutiveBriefJob['estimate'] {
+    return estimateBriefPrompt(snapshot, mode);
+  }
 
   public async generate({ snapshot, mode }: BriefGenerationInput): Promise<BriefGenerationResult> {
     const ctx = createTemplateContext(snapshot, mode);

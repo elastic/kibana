@@ -10,6 +10,7 @@ import type {
   BriefNarrationMode,
   BriefSnapshot,
   ExecutiveBrief,
+  ExecutiveBriefJob,
 } from '../../../../../common/entity_analytics/executive_brief/types';
 
 export interface BriefGenerationInput {
@@ -21,11 +22,16 @@ export interface BriefGenerationInput {
 export interface BriefGenerationResult {
   brief: ExecutiveBrief;
   model?: string;
-  tokens?: { prompt: number; completion: number };
+  /** Actual usage summed over attempts; fields the provider did not report stay undefined. */
+  tokens?: ExecutiveBriefJob['tokens'];
+  /** LLM calls made (1 + validation retries). */
+  attempts?: number;
 }
 
 /** Turns a deterministic snapshot into an `ExecutiveBrief`. The output is always validated after. */
 export interface BriefGenerator {
   readonly kind: BriefGeneratorKind;
   generate: (input: BriefGenerationInput) => Promise<BriefGenerationResult>;
+  /** Pre-call estimate of what an LLM run would send for this input. */
+  estimate?: (input: BriefGenerationInput) => ExecutiveBriefJob['estimate'];
 }
