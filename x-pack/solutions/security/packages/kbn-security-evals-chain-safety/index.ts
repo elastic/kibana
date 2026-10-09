@@ -22,7 +22,4 @@ export {
   type WorkerAutonomy,
 } from './src/evaluators';
 
-export type {
-  ChainHopRecord,
-  ChainRunRecord,
-} from './src/chain_run_record';
+export type { ChainHopRecord, ChainRunRecord } from './src/chain_run_record';
