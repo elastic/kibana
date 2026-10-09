@@ -30,7 +30,11 @@ import { parse } from 'hjson';
 import { BehaviorSubject } from 'rxjs';
 import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
 import type { VegaByValueState, VegaReadResponseBody } from '../../server';
-import { VegaEditorBody, vegaEditorFlyoutBodyCss } from '../components/vega_editor_body';
+import {
+  VegaEditorBody,
+  hasTooManyFilters,
+  vegaEditorFlyoutBodyCss,
+} from '../components/vega_editor_body';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { fromDraft, isSameDraft, toDraft } from '../lib/library_draft';
 import type { VegaDraft } from '../lib/library_draft';
@@ -69,6 +73,8 @@ export interface VegaLibraryEditorProps {
   defaultDataView?: DataView;
   /** Whether the user may save library items. Without it, the editor can still be used to explore. */
   canSave: boolean;
+  /** Whether "Save as new" is offered. Dashboard panels can't switch to the new item. */
+  allowSaveAsNew?: boolean;
   closeFlyout: () => void;
   ariaLabelledBy: string;
 }
@@ -92,6 +98,7 @@ export const VegaLibraryEditor = ({
   item,
   defaultDataView,
   canSave,
+  allowSaveAsNew = true,
   closeFlyout,
   ariaLabelledBy,
 }: VegaLibraryEditorProps) => {
@@ -250,23 +257,27 @@ export const VegaLibraryEditor = ({
         hideSave={!canSave}
         onSave={saveChanges}
         saveButtonLabel={saveLabel}
-        isSaveDisabled={!isDirty}
+        isSaveDisabled={!isDirty || hasTooManyFilters(draft.filters)}
         isSaving={isSaving}
         saveButtonDataTestSubj="vegaLibraryEditorSaveButton"
-        saveMenuItems={[
-          {
-            name: i18n.translate('visTypeVega.libraryEditor.saveAsNewButtonLabel', {
-              defaultMessage: 'Save as new…',
-            }),
-            onClick: () =>
-              saveAsNewItem({
-                title: item.data.title,
-                description: item.data.description,
-                tags: item.data.tags,
-              }),
-            'data-test-subj': 'vegaLibraryEditorSaveAsNewButton',
-          },
-        ]}
+        saveMenuItems={
+          allowSaveAsNew
+            ? [
+                {
+                  name: i18n.translate('visTypeVega.libraryEditor.saveAsNewButtonLabel', {
+                    defaultMessage: 'Save as new…',
+                  }),
+                  onClick: () =>
+                    saveAsNewItem({
+                      title: item.data.title,
+                      description: item.data.description,
+                      tags: item.data.tags,
+                    }),
+                  'data-test-subj': 'vegaLibraryEditorSaveAsNewButton',
+                },
+              ]
+            : undefined
+        }
       />
       {isPreviewOpen ? (
         <EmbeddableEditorPreview<VegaByValueState, VegaPreviewApi, VegaPreviewParentApi>

@@ -15,6 +15,7 @@ import {
   MAX_DESCRIPTION_LENGTH,
   MAX_TITLE_LENGTH,
 } from '@kbn/as-code-shared-schemas';
+import { VEGA_MAX_FILTERS } from '../../common/constants';
 
 export const vegaSpecSchema = z
   .discriminatedUnion('format', [
@@ -45,7 +46,7 @@ export const vegaSpecSchema = z
 
 export const vegaQuerySchema = asCodeQuerySchema.optional();
 
-export const vegaFiltersSchema = z.array(asCodeFilterSchema).max(100).optional();
+export const vegaFiltersSchema = z.array(asCodeFilterSchema).max(VEGA_MAX_FILTERS).optional();
 
 export const vegaLibraryItemSchema = z
   .object({

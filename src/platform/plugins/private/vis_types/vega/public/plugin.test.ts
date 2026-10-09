@@ -27,6 +27,7 @@ import {
   VEGA_API_ENABLED_FLAG,
   VEGA_EMBEDDABLE_TYPE,
   VEGA_SAVED_OBJECT_TYPE,
+  VEGA_STANDALONE_EMBEDDABLE_FLAG,
 } from '../common/constants';
 import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
 import { VegaPlugin, type VegaPluginStartDependencies } from './plugin';
@@ -183,6 +184,61 @@ describe('VegaPlugin', () => {
         id: 'item-1',
       });
     });
+  });
+
+  describe('Add from library', () => {
+    const startPluginWithFlags = async (enabledFlags: string[]) => {
+      const setupResult = setup();
+      setupResult.startCore.featureFlags.getBooleanValue$ = jest
+        .fn()
+        .mockImplementation((flag: string) => new BehaviorSubject(enabledFlags.includes(flag)));
+      setupResult.plugin.start(setupResult.startCore, {
+        data: dataPluginMock.createStartContract(),
+        dataViews: dataViewPluginMocks.createStartContract(),
+        embeddable: embeddablePluginMock.createStartContract(),
+        expressions: expressionsPluginMock.createStartContract(),
+        inspector: inspectorPluginMock.createStartContract(),
+        uiActions: uiActionsPluginMock.createStartContract(),
+        unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+        mapsEms: {} as MapsEmsPluginPublicStart,
+        usageCollection: {} as UsageCollectionStart,
+      });
+      // Registration waits for the feature flags.
+      await new Promise(process.nextTick);
+      return setupResult;
+    };
+
+    it('adds library items as by-reference panels when both flags are enabled', async () => {
+      const { embeddable } = await startPluginWithFlags([
+        VEGA_STANDALONE_EMBEDDABLE_FLAG,
+        VEGA_API_ENABLED_FLAG,
+      ]);
+
+      expect(embeddable.registerAddFromLibraryType).toHaveBeenCalledWith(
+        expect.objectContaining({ savedObjectType: VEGA_SAVED_OBJECT_TYPE })
+      );
+      const { onAdd } = jest.mocked(embeddable.registerAddFromLibraryType).mock.calls[0][0];
+      const container = { addNewPanel: jest.fn() };
+      await onAdd(
+        container as unknown as Parameters<typeof onAdd>[0],
+        {
+          id: 'item-1',
+        } as Parameters<typeof onAdd>[1]
+      );
+      expect(container.addNewPanel).toHaveBeenCalledWith(
+        { panelType: VEGA_EMBEDDABLE_TYPE, serializedState: { ref_id: 'item-1' } },
+        { displaySuccessMessage: true }
+      );
+    });
+
+    it.each([[[VEGA_STANDALONE_EMBEDDABLE_FLAG]], [[VEGA_API_ENABLED_FLAG]]])(
+      'does not offer library items when only %s is enabled',
+      async (enabledFlags) => {
+        const { embeddable } = await startPluginWithFlags(enabledFlags);
+
+        expect(embeddable.registerAddFromLibraryType).not.toHaveBeenCalled();
+      }
+    );
   });
 
   describe('Vega add action feature flag', () => {

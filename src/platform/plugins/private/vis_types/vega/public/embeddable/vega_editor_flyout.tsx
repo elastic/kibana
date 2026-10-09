@@ -23,7 +23,11 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { isEqual } from 'lodash';
 import type { VegaByValueState } from '../../server';
 import type { VegaPluginStartDependencies } from '../plugin';
-import { VegaEditorBody, vegaEditorFlyoutBodyCss } from '../components/vega_editor_body';
+import {
+  VegaEditorBody,
+  hasTooManyFilters,
+  vegaEditorFlyoutBodyCss,
+} from '../components/vega_editor_body';
 import { specFromEditor, specToEditorValue } from '../lib/editor_spec';
 import { vegaTitleInWizard } from '../vega_icon';
 import type { VegaEmbeddableApi } from './vega_embeddable';
@@ -149,7 +153,7 @@ export const VegaEditorFlyout = ({
         saveButtonLabel={i18n.translate('visTypeVega.dashboard.applyAndCloseButtonLabel', {
           defaultMessage: 'Apply and close',
         })}
-        isSaveDisabled={!canSave}
+        isSaveDisabled={!canSave || hasTooManyFilters(search.filters)}
         saveButtonDataTestSubj="vegaEditorFlyoutSaveButton"
       />
     </>

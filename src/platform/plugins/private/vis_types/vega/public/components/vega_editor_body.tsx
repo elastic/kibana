@@ -9,11 +9,18 @@
 
 import React, { Suspense, lazy, useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, euiFullHeight } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSkeletonText,
+  euiFullHeight,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { isCombinedFilter, isOfQueryType, type Filter, type Query } from '@kbn/es-query';
 import { omit } from 'lodash';
+import { VEGA_MAX_FILTERS } from '../../common/constants';
 import type { VegaByValueState } from '../../server';
 import type { VegaPluginStartDependencies } from '../plugin';
 import { getData } from '../services';
@@ -52,6 +59,14 @@ export const bindDataViewId = (filter: Filter, dataViewId: string): Filter => ({
       params: filter.meta.params.map((child) => bindDataViewId(child, dataViewId)),
     }),
   },
+});
+
+/** Whether there are more filters than a panel or library item can store. */
+export const hasTooManyFilters = (filters?: unknown[]) => (filters?.length ?? 0) > VEGA_MAX_FILTERS;
+
+export const tooManyFiltersMessage = i18n.translate('visTypeVega.editor.tooManyFiltersMessage', {
+  defaultMessage: 'A Vega visualization can have at most {max} filters. Remove some to save.',
+  values: { max: VEGA_MAX_FILTERS },
 });
 
 export interface VegaEditorBodyProps {
@@ -134,6 +149,18 @@ export const VegaEditorBody = ({
           dataTestSubj="editorFlyoutSearchBar"
         />
       </EuiFlexItem>
+      {hasTooManyFilters(filters) ? (
+        <EuiFlexItem grow={false}>
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            iconType="error"
+            size="s"
+            title={tooManyFiltersMessage}
+            data-test-subj="vegaEditorTooManyFiltersCallout"
+          />
+        </EuiFlexItem>
+      ) : null}
       <EuiFlexItem css={{ minHeight: 0 }}>
         <Suspense
           fallback={
