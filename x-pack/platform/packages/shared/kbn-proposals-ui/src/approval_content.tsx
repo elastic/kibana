@@ -284,6 +284,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
             isPending={approvalPhase === 'pending'}
             previousExecutionError={proposal.previousExecutionError}
             isExpired={isExpired}
+            expiredReason={proposal.rationale}
             data-test-subj={dataTestSubj}
           />
         )}

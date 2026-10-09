@@ -11,6 +11,7 @@ import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DataSource } from '@kbn/data-source';
 import type { DocumentsDisplayMode, ValueToStringConverter } from './types';
 import type { UseSelectedDocsState } from './hooks/use_selected_docs';
 
@@ -24,7 +25,7 @@ export interface DataTableContext {
   selectedDocsState: UseSelectedDocsState;
   valueToStringConverter: ValueToStringConverter;
   componentsTourSteps?: Record<string, string>;
-  isPlainRecord?: boolean;
+  dataSource?: DataSource;
   documentsDisplayMode?: DocumentsDisplayMode;
   pageIndex: number | undefined; // undefined when the pagination is disabled
   pageSize: number | undefined;
