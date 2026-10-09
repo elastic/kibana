@@ -36,7 +36,8 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
       margin-bottom: ${layoutVar('application.marginBottom')};
       margin-right: ${layoutVar('application.marginRight')};
       // Grid items default to min-width/min-height: auto; without 0 the wrapper would grow with
-      // the content (e.g. push flyout padding) instead of constraining the scroll container.
+      // the content instead of constraining the scroll container.
+      // Push flyouts pad this wrapper (it's the EuiFlyout container), so breakpoints react to them.
       min-width: 0;
       min-height: 0;
 
