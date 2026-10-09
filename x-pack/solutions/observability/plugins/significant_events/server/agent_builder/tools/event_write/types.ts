@@ -38,8 +38,7 @@ export interface EventsWriteResult {
    *  since `.rule-events` itself never leaves the customer's cluster. `severity` and `effect` are
    *  the coarse, low-cardinality pair that lets a tier skew be told apart from an effect-
    *  classification skew; breadth, fan-out, and `severity_score` are numeric and only
-   *  interpretable alongside the full document, so they're left to `.rule-events` analysis
-   *  (#1758/#1770) instead of duplicated here. */
+   *  interpretable alongside the full document, so they're left to `.rule-events` analysis */
   severity: Severity;
   effect: SignalEffect;
 }
