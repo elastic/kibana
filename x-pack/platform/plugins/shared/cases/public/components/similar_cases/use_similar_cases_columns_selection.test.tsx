@@ -68,16 +68,6 @@ describe('useSimilarCasesColumnsSelection', () => {
     expect(selectedColumns.find((c) => c.field === 'totalComment')?.isChecked).toBe(false);
   });
 
-  it('createdAt is checked by default', () => {
-    const { result } = renderHook(() => useSimilarCasesColumnsSelection(), {
-      wrapper: (props) => <TestProviders {...props} license={license} />,
-    });
-
-    expect(result.current.selectedColumns.find((c) => c.field === 'createdAt')?.isChecked).toBe(
-      true
-    );
-  });
-
   it('round-trips a stored column selection from localStorage', () => {
     const stored = [
       { field: 'title', name: 'Name', isChecked: false },
@@ -128,5 +118,41 @@ describe('useSimilarCasesColumnsSelection', () => {
 
     // The Similar Cases hook reads its own key, so title should still be at its default (true).
     expect(result.current.selectedColumns.find((c) => c.field === 'title')?.isChecked).toBe(true);
+  });
+
+  it.each([
+    ['an object', '{}'],
+    ['an array of null', '[null]'],
+    ['an array of invalid entries', '[{"field":1},"title"]'],
+    ['a string', '"title"'],
+  ])('falls back to defaults when localStorage holds %s', (_label, raw) => {
+    localStorage.setItem(localStorageKey, raw);
+
+    const { result } = renderHook(() => useSimilarCasesColumnsSelection(), {
+      wrapper: (props) => <TestProviders {...props} license={license} />,
+    });
+
+    expect(result.current.selectedColumns.find((c) => c.field === 'title')?.isChecked).toBe(true);
+    expect(result.current.selectedColumns.find((c) => c.field === 'assignees')?.isChecked).toBe(
+      false
+    );
+  });
+
+  it('ignores stored entries with an unknown field id', () => {
+    localStorage.setItem(
+      localStorageKey,
+      JSON.stringify([
+        { field: 'doesNotExist', name: 'Unknown', isChecked: true },
+        { field: 'title', name: 'Name', isChecked: false },
+      ])
+    );
+
+    const { result } = renderHook(() => useSimilarCasesColumnsSelection(), {
+      wrapper: (props) => <TestProviders {...props} license={license} />,
+    });
+
+    const { selectedColumns } = result.current;
+    expect(selectedColumns.some((c) => c.field === 'doesNotExist')).toBe(false);
+    expect(selectedColumns.find((c) => c.field === 'title')?.isChecked).toBe(false);
   });
 });

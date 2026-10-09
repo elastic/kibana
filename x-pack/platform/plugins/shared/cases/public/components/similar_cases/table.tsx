@@ -59,15 +59,7 @@ export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
     []
   );
 
-  return isLoading ? (
-    <div
-      css={css`
-        margin-top: ${euiTheme.size.m};
-      `}
-    >
-      <EuiSkeletonText data-test-subj="similar-cases-table-loading" lines={10} />
-    </div>
-  ) : (
+  return (
     <>
       <EuiFlexGroup
         justifyContent="spaceBetween"
@@ -88,23 +80,33 @@ export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
           <SidebarToggleButton />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiBasicTable
-        tableCaption={i18n.TABLE_CAPTION}
-        onChange={onChange}
-        pagination={pagination}
-        columns={columns}
-        data-test-subj="similar-cases-table"
-        itemId="id"
-        items={cases}
-        noItemsMessage={
-          <EuiEmptyPrompt
-            title={<h3>{i18n.NO_CASES}</h3>}
-            titleSize="xs"
-            body={i18n.NO_CASES_BODY}
-          />
-        }
-        rowProps={tableRowProps}
-      />
+      {isLoading ? (
+        <div
+          css={css`
+            margin-top: ${euiTheme.size.m};
+          `}
+        >
+          <EuiSkeletonText data-test-subj="similar-cases-table-loading" lines={10} />
+        </div>
+      ) : (
+        <EuiBasicTable
+          tableCaption={i18n.TABLE_CAPTION}
+          onChange={onChange}
+          pagination={pagination}
+          columns={columns}
+          data-test-subj="similar-cases-table"
+          itemId="id"
+          items={cases}
+          noItemsMessage={
+            <EuiEmptyPrompt
+              title={<h3>{i18n.NO_CASES}</h3>}
+              titleSize="xs"
+              body={i18n.NO_CASES_BODY}
+            />
+          }
+          rowProps={tableRowProps}
+        />
+      )}
     </>
   );
 };

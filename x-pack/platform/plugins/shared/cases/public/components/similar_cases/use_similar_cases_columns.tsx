@@ -16,6 +16,8 @@ import { EuiBadgeGroup, EuiBadge, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/e
 import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
+import type { ActionConnector } from '../../../common/types/domain';
+
 import type {
   CaseUI,
   SimilarCaseUI,
@@ -53,6 +55,9 @@ const SIMILARITIES_FIELD = 'similarities' as const;
 
 // Stable empty map: user profiles are not fetched for the Similar Cases table.
 const EMPTY_PROFILES: Map<string, UserProfileWithAvatar> = new Map();
+
+// Stable empty list: connectors are not fetched for the Similar Cases table.
+const NO_CONNECTORS: ActionConnector[] = [];
 
 export interface UseSimilarCasesColumnsReturnValue {
   columns: SimilarCasesColumns[];
@@ -227,9 +232,9 @@ export const useSimilarCasesColumns = ({
         name: casesColumnsConfig.externalIncident.name,
         render: (theCase: SimilarCaseUI) => {
           if (theCase.id != null) {
-            // ExternalServiceColumn expects CaseUI; SimilarCaseUI carries the same
-            // externalService fields but omits `comments`, which the component does not access.
-            return <ExternalServiceColumn theCase={theCase as unknown as CaseUI} connectors={[]} />;
+            // Connectors are not fetched for this table, so every pushed case shows the
+            // fallback connector icon. This is intentional.
+            return <ExternalServiceColumn theCase={theCase} connectors={NO_CONNECTORS} />;
           }
           return getEmptyCellValue();
         },
@@ -357,8 +362,7 @@ export const useSimilarCasesColumns = ({
     []
   );
 
-  // When no selection is provided (hook called without args from table.tsx before Step 3
-  // wires the picker), fall back to the default visible field set.
+  // When no selection is provided, fall back to the default visible field set.
   const effectiveSelection = useMemo((): CasesColumnSelection[] => {
     if (selectedColumns && selectedColumns.length > 0) {
       return selectedColumns;
