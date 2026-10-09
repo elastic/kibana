@@ -13,10 +13,10 @@ export {
   monaco,
   jsonDefaults,
   isCancellationError,
-  defaultThemesResolvers,
   CODE_EDITOR_DEFAULT_THEME_ID,
   CODE_EDITOR_TRANSPARENT_THEME_ID,
-  initializeCodeEditorThemes,
+  initializeRegisteredLanguagesTheme,
+  defaultThemesResolvers,
 } from './src/monaco_imports';
 
 /* eslint-disable-next-line @kbn/eslint/module_migration */

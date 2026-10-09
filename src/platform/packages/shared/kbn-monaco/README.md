@@ -1,235 +1,149 @@
 # @kbn/monaco
 
-Kibana's curated build of [Monaco Editor](https://microsoft.github.io/monaco-editor/). It decides
-which Monaco features ship, registers Kibana's own languages, owns editor theming, and builds the
-web worker bundles. Importing it configures Monaco as a side effect — see
-[Import side effects](#import-side-effects).
+`@kbn/monaco` configures Kibana's shared [Monaco Editor](https://microsoft.github.io/monaco-editor/)
+runtime: editor features, language support, syntax themes, and web workers. It is shared across
+plugins through `@kbn/ui-shared-deps-npm` / `@kbn/ui-shared-deps-src` so they use one configured copy.
 
-Monaco is a large, global-by-design dependency, so this package exists to keep exactly one
-configured copy in the browser. It is shared with every plugin through `@kbn/ui-shared-deps-npm` /
-`@kbn/ui-shared-deps-src`.
+Consumers import from the **root of `@kbn/code-editor`**, which provides the React editor,
+accessibility behaviour, and EUI theme lifecycle. Only that package and `@kbn/monaco` itself should
+import `@kbn/monaco` directly. `@kbn/imports/no_direct_monaco_import` warns on violations; if a symbol
+is missing, export it from `@kbn/code-editor`'s index.
 
-## Who should import what
+## How it works
 
+Importing the browser entry:
 
-| You are                                    | Import                            |
-| ------------------------------------------ | --------------------------------- |
-| A plugin or package that wants an editor   | `@kbn/code-editor`, **root only** |
-| `@kbn/code-editor` itself, or this package | `@kbn/monaco`                     |
+1. Loads the editor contributions and upstream language registrations in `src/monaco_imports.ts`.
+2. Installs `monaco.editor.registerLanguageThemeResolver` / `getLanguageThemeResolver` and the
+   token-matching patch used for language-scoped syntax colours.
+3. Sets `window.MonacoEnvironment` to create workers through `getWorker`.
 
+`@kbn/code-editor` calls `initializeSupportedLanguages()` at module scope to register Kibana's
+language definitions. `registerLanguage` registers the language and theme resolver immediately,
+then installs its tokenizer, configuration, folding provider, and `onLanguage` hook on first use.
+This defers setup; deferring code loading also requires a dynamic `import()`.
 
-`@kbn/imports/no_direct_monaco_import` enforces this (as a warning). If a symbol you need isn't
-exported from `@kbn/code-editor`, add it to that package's index rather than reaching past it.
-`@kbn/code-editor` owns the React component, the theme lifecycle and the accessibility affordances;
-bypassing it gets you a bare Monaco with none of that.
+Monaco's active theme is global. Kibana namespaces custom token rules by language and includes them
+in every theme it defines, preventing one language's syntax colours from affecting another.
+Editor backgrounds and widget colours still follow the global theme.
 
-## Module layout
+## File map
 
-
-| Path                              | What lives there                                                                                        |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `index.ts`                        | Public entry. Also imports `src/register_globals` for its side effects.                                 |
-| `server.ts`                       | Resolves the worker bundle directory for the server to serve.                                           |
-| `src/monaco_imports.ts`           | The curated list of Monaco contributions that ship, and the single funnel re-exporting the theming API. |
-| `src/register_globals.ts`         | `window.MonacoEnvironment`, and the TypeScript augmentation of the `monaco.editor` namespace.           |
-| `src/languages/helpers.ts`        | `registerLanguage`, `handleInterruptibleMonacoOperation`.                                               |
-| `src/languages/definitions/`      | One directory per language. `definitions/index.ts` is the registry.                                     |
-| `src/languages/theming/`          | Everything theming — see below.                                                                         |
-| `src/languages/worker_factory.ts` | Maps a language id to its worker bundle URL.                                                            |
-| `src/common/`                     | Shared helpers: worker proxy, diagnostics adapter, error listener, base lexer rules.                    |
-| `src/ace_migration/`              | Worker-backed annotation plumbing from the Ace era, still used by xjson.                                |
-| `src/__jest__/`                   | Jest mocks for `monaco_imports`.                                                                        |
-| `webpack.config.js`               | Builds the worker bundles into `target_workers/` (gitignored).                                          |
-| `scripts/`                        | ANTLR and autocomplete-definition generators (Painless, ES\|QL).                                        |
-
-Theming sits under `src/languages/` because it is a property of languages, not of editors — see
-[Theming](#theming):
-
-| Path                               | What lives there                                                                      |
-| ---------------------------------- | ------------------------------------------------------------------------------------- |
-| `src/languages/theming/index.ts`   | The `monaco.editor` theme API, language scoping, and theme registration.              |
-| `src/languages/theming/theme.ts`   | The shared Kibana palette, built from the EUI theme.                                  |
-| `src/languages/theming/helpers.ts` | `themeRuleGroupBuilderFactory`, for languages that build rules in groups.             |
-| `src/languages/theming/constants.ts` | The two default theme ids.                                                          |
-
-
-
-
-## Import side effects
-
-`import '@kbn/monaco'` is not inert. Loading the package:
-
-1. Pulls in every contribution listed in `src/monaco_imports.ts` (folding, suggest, hover, find,
-  clipboard actions, …). **Anything not imported there does not exist at runtime.** A missing
-   contribution usually shows up as a feature silently doing nothing, or as a
-   `depends on UNKNOWN service` error.
-2. Loads `src/languages/theming/index.ts` (via `monaco_imports`), which adds
-  `registerLanguageThemeResolver` / `getLanguageThemeResolver` to `monaco.editor` and installs the
-   `TokenTheme.prototype.match` patch that makes theming language-scoped (see [Theming](#theming)).
-3. Sets `window.MonacoEnvironment` so Monaco resolves workers through `getWorker`.
-
-Step 2 is why the theming module imports `monaco-editor/editor/editor.api.js` directly instead of
-going through `monaco_imports`: `monaco_imports` re-exports the theming API, so routing the import
-back through it would be a cycle.
-
-Languages are *not* registered by importing the package. `@kbn/code-editor` calls
-`initializeSupportedLanguages()` at module scope; call it yourself only if you are not going through
-that package.
+| Path | Responsibility |
+| --- | --- |
+| `index.ts`, `src/register_globals.ts` | Browser exports, runtime globals, and Monaco type augmentations. |
+| `src/monaco_imports.ts` | Curated editor contributions and shared Monaco imports. |
+| `src/languages/definitions/index.ts` | Language exports and `initializeSupportedLanguages` registry. |
+| `src/languages/helpers.ts` | Language registration and cancellation helper. |
+| `src/languages/theming/` | Theme API, token scoping, and EUI palette. |
+| `src/languages/worker_factory.ts`, `webpack.config.js` | Worker routing and bundle entries. |
+| `server.ts` | Worker bundle directory for the server to serve. |
 
 ## Adding a language
 
-A language is an object satisfying `LangModuleType` (or `CustomLangModuleType` when it also provides
-completion/hover/validation), exported from `src/languages/definitions/<lang>/`:
+1. Export a `LangModuleType` from `src/languages/definitions/<lang>/` with its `ID` and optional
+   `lexerRules`, `languageConfiguration`, `foldingRangeProvider`, `languageThemeResolver`, and
+   `onLanguage` hook. Use `CustomLangModuleType` when exposing provider factories and validation.
+2. Export the definition and language id from `src/languages/definitions/index.ts`, and add the
+   definition to its `initializeSupportedLanguages` list.
+3. Wire completion, hover, and other providers through the corresponding `CodeEditor` props;
+   wire validation explicitly. `registerLanguage` does not install these from the module's
+   provider factories or `validate` method.
+4. If it needs a dedicated worker, add both the worker entry and routing id (see [Workers](#workers)).
 
-```ts
-export const MyLang: LangModuleType = {
-  ID,                       // the Monaco language id
-  lexerRules,               // IMonarchLanguage
-  languageConfiguration,    // brackets, comments, auto-closing pairs
-  foldingRangeProvider,
-  languageThemeResolver,    // optional — see Theming
-  onLanguage: async () => { /* lazy: runs the first time the language is used */ },
-};
-```
+Monarch normally appends `.<languageId>` to token names. Some languages use `tokenPostfix: ''`,
+so inspect the actual tokenizer output when authoring theme rules. Inlined rules use the host
+language's postfix; languages entered through `nextEmbedded` retain their own tokenization.
 
-Register it in `src/languages/definitions/index.ts` (both the exports and the
-`initializeSupportedLanguages` list). `registerLanguage` wires the rest up, deferring everything
-inside `onLanguage` until Monaco actually needs the language, which keeps the initial bundle small.
-
-Two things worth knowing before you write Monarch rules:
-
-- **Monarch appends a token postfix.** It defaults to `.<languageId>`, so a rule emitting `keyword`
-produces `keyword.esql`. Several Kibana languages set `tokenPostfix: ''` (xjson, sql, hjson,
-handlebars) and therefore emit bare, highly collidable token names.
-- **Nested languages.** Console inlines xjson/SQL/Painless/ES|QL rule builders rather than embedding
-them as separate languages, so those tokens carry Console's postfix. Embedded languages entered
-via `nextEmbedded` keep their own.
-
-
-
-## Workers
-
-Monaco runs language services in web workers. This package builds them itself.
-
-- `webpack.config.js` has an explicit entry list, emitting `target_workers/<id>.editor.worker.js`.
-- `src/languages/worker_factory.ts` maps a language id to a bundle, falling back to the generic
-`editorWorkerService` worker for languages without one.
-- **The entry list in** `webpack.config.js` **and** `langSpecificWorkerIds` **in** `worker_factory.ts` **must
-stay in sync.** Adding one without the other yields either a dead bundle or a 404 at runtime.
-- Worker entry files (`<lang>/worker/<lang>.worker.ts`) run outside the main bundle. They import
-Monaco's worker runtime directly and are exempt from the usual module rules.
-- `target_workers/` is gitignored and produced by the moon `build-webpack` task. At runtime the URL
-comes from `window.__kbnPublicPath__['kbn-monaco']`; `server.ts` prefers a local build over the
-distributable one.
-
-
+Use `handleInterruptibleMonacoOperation` for cancellable provider work. It rejects with Monaco's
+`CancellationError` when cancelled; it does not stop the underlying operation.
 
 ## Theming
 
-This is the subtlest part of the package. **Monaco applies one theme to the entire page.**
-`IStandaloneEditorConstructionOptions.theme` looks like per-editor state but is a direct call to
-`IStandaloneThemeService.setTheme`, so whichever editor mounts last would otherwise dictate colours
-for every editor on the page ([monaco-editor#1289](https://github.com/microsoft/monaco-editor/issues/1289),
-open since 2019).
+`src/languages/theming/index.ts` patches `TokenTheme.prototype.match` to prefix tokens with the
+language id for languages with a registered resolver. For example, `variable` becomes
+`esql.variable` at lookup. Token colours are associated with models, which can be shared by editors,
+so this isolates syntax colours by language rather than by editor.
 
-Per-editor isolation is not expressible: token colours are resolved during tokenization and cached
-on the *model*, and Monaco lets several editors share one model. The granularity Monaco *can*
-express is the language, because `TokenTheme.match(languageId, token)` receives it.
+- Set `languageThemeResolver` on the language definition to opt into scoping. Author rules using
+  the tokenizer's original token names; the package adds the namespace.
+- `initializeRegisteredLanguagesTheme(euiTheme)` seeds each namespace with the shared EUI palette,
+  then applies the language's overrides, and registers the result into both Kibana themes
+  (`codeEditorDefaultTheme`, `codeEditorTransparentTheme`). No language-named theme ids are
+  registered; use this initializer instead of defining themes directly.
+- Theme `rules` are scoped; `colors` (backgrounds, widgets, etc.) remain global.
+  `@kbn/code-editor` reruns the initializer when the EUI theme changes.
+- The `defaultThemesResolvers` builders are memoised per palette, so a light → dark → light
+  round-trip never recomputes a theme. The initializer is a no-op while Monaco already holds themes
+  for the current palette — every mount after the first — which avoids Monaco's theme refresh
+  (stylesheet regeneration and re-tokenising every model) per mount. A mode switch does
+  re-register, necessarily: Monaco keeps one theme per id. The palette key is `colorMode`,
+  `highContrastMode` and a fingerprint of two computed colours — not object identity (EUI issues a
+  new theme object per mode change) and not mode alone: on a live switch `useEuiTheme()` has one
+  render where `colorMode` has flipped but the computed colours haven't. That render still
+  registers a mismatched theme momentarily; the point of the design is that the consistent render
+  right after it is never mistaken for a repeat and always overwrites it. Builders return a shared
+  object: spread it before changing anything.
+- Language ids matching `/\b(comment|string|regex|regexp)\b/` are rejected for scoping because
+  Monaco derives token types from these words in the token string.
 
-So `src/languages/theming/index.ts` prefixes a token with its language before the theme's trie
-lookup, and `initializeCodeEditorThemes` gives every registered theme one rule set containing the shared
-rules plus one namespace per language (`esql.variable`, `console.method`, …). A language's rules can
-then only ever colour its own tokens.
+The theming module imports Monaco directly to avoid a cycle with `monaco_imports.ts`, which
+re-exports its API. Prefer the centralized imports for browser contributions; workers and isolated
+internal adapters also have direct imports where needed.
 
-That one module is the whole theming surface — the `monaco.editor` theme API, the scoping patch and
-theme registration all live there, because they only make sense together. It also owns the types:
-`KbnMonacoThemingLanguageThemeResolver` is what `LangModuleType.languageThemeResolver` is typed as,
-and `register_globals.ts` declares the two `monaco.editor` functions to TypeScript using the
-`KbnMonacoTheming` interface. The runtime values are installed by the theming module itself.
+## Workers
 
-What this means when you touch theming:
+`webpack.config.js` emits `target_workers/<id>.editor.worker.js`.
+`src/languages/worker_factory.ts` selects the language's worker or falls back to
+`editorWorkerService`.
 
-- **Registering a** `languageThemeResolver` **opts the language into scoping.** There is no separate
-call. Rules stay authored exactly as before — the prefix is applied at registration.
-- **A scoped language no longer inherits shared rules by prefix matching.** `esql.string` does not
-match a `string` rule, so `initializeCodeEditorThemes` seeds each namespace with the shared palette
-first and lets the language override it.
-- `rules` **are scoped;** `colors` **are not.** Theme `colors` are editor chrome — backgrounds, the
-suggest widget — which Monaco only expresses globally. They still follow the active theme.
-- **Call** `initializeCodeEditorThemes(euiTheme)`**, don't hand-roll the loop.** It is the only place that
-knows the namespacing rules.
-- A language id containing `comment`, `string`, `regex` or `regexp` is rejected: Monaco derives
-`StandardTokenType` by regexing the token string, so such a prefix would mis-classify every token
-in that language.
+**Keep the webpack entry list and `langSpecificWorkerIds` in sync**, including the generic worker
+in webpack. A missing entry causes a runtime 404; an unused entry ships a redundant bundle.
+Custom worker entry files live at `src/languages/definitions/<lang>/worker/<lang>.worker.ts` and
+import Monaco's worker runtime directly.
 
-`src/languages/theming/index.test.ts` asserts each language renders identically whichever theme is active. It
-uses `monaco.editor.colorize` and compares the emitted `mtk*` classes, which is the most direct way
-to test colour resolution without a DOM editor. If you change anything in this area, check the test
-still fails when you undo your change — it is easy to write a theming assertion that passes because
-everything collapsed to one colour.
+The moon `build-webpack` task produces the bundles. At runtime their base URL comes from
+`window.__kbnPublicPath__['kbn-monaco']`; `server.ts` prefers local `target_workers/` over the
+built distribution. `target_workers/` is gitignored.
 
-## Monaco internals this package depends on
+## Upgrading Monaco
 
-These are not public API. Each is load-bearing, and each is a thing to re-verify on upgrade.
+- Check the curated contribution list and import paths against the new version. Missing
+  contributions can silently disable features or cause `depends on UNKNOWN service` errors.
+- Recheck worker builds and third-party compatibility aliases in `webpack.config.js`.
+- Verify the internal APIs below and their declarations in `src/typings.d.ts`; a passing build
+  does not establish runtime compatibility.
 
-
-| Internal                                        | Used for                                         | Symptom if it changes              |
-| ----------------------------------------------- | ------------------------------------------------ | ---------------------------------- |
-| `TokenTheme.prototype.match(languageId, token)` | Language-scoped theming (`src/languages/theming/`) | Guarded — throws at import time  |
-| `MonarchTokenizer` token postfix behaviour      | Theme rule naming                                | Wrong or missing token colours     |
-| `HoverParticipantRegistry`                      | Hover customisation                              | Hover behaviour regressions        |
-| `MenuRegistry` / `MenuId.EditorContext`         | Translated clipboard context-menu actions        | Untranslated or missing menu items |
-| `StandaloneServices` / `IUndoRedoService`       | `getUndoRedoService`                             | Undo/redo integration breaks       |
-
-
-Deep internals are typed in `src/typings.d.ts`, since Monaco only ships declarations for its public
-API.
-
-## Upgrading monaco-editor
-
-A checklist drawn from the 0.44 → 0.56 upgrade:
-
-1. **Import specifiers move.** 0.56 added an `exports` map (`"./*": "./esm/vs/*.js"`), so
-  `monaco-editor/esm/vs/...` became `monaco-editor/editor/...`. Third-party packages still using
-   the old specifiers need a webpack alias — `webpack.config.js` has one for `monaco-worker-manager`
-   and `monaco-yaml`.
-2. **Re-verify every row in the table above**, not just that the build passes. Most of these fail
-  silently.
-3. Run the theming tests — they catch token-resolution changes that type checks cannot.
-4. Check the contribution list in `src/monaco_imports.ts` against the new version; contributions get
-  renamed and split.
-
-
-
-## Conventions
-
-- Deep `monaco-editor/...` imports need `/* eslint-disable @kbn/eslint/module_migration */`. Prefer
-re-exporting from `src/monaco_imports.ts` so each internal has exactly one import site. The theming
-module is the one exception, and only because routing back through `monaco_imports` would be a cycle.
-- Give a language a theme by setting `languageThemeResolver` on its module, never by calling
-`monaco.editor.defineTheme` yourself. A resolver is re-run whenever the EUI theme changes and opts
-the language into scoping; a hand-defined theme gets neither.
-- Long-running provider work should go through `handleInterruptibleMonacoOperation` so Monaco's
-cancellation tokens are honoured.
-
-
+| Internal | Behaviour to verify |
+| --- | --- |
+| `TokenTheme.prototype.match` and Monarch token postfixes | Language-scoped syntax colours; the import-time guard only checks the match function's shape. |
+| `HoverParticipantRegistry` | Hover customisation. |
+| `MenuRegistry` / `MenuId.EditorContext` | Translated clipboard actions. |
+| `StandaloneServices` / `IUndoRedoService` | Custom undo/redo integration. |
 
 ## Development
 
-The side-effectful parts are covered by three suites worth knowing about:
-`src/languages/theming/index.test.ts` (colour resolution), `src/monaco_imports.test.ts` (the
-`monaco.editor` theme API is installed), and `src/register_globals.test.ts`
-(`window.MonacoEnvironment`). The last two `await import(...)` the module under test so the side
-effects are observable per test file.
+The key runtime suites are `src/languages/theming/index.test.ts` (syntax colour isolation),
+`src/monaco_imports.test.ts` (theme API installation), and `src/register_globals.test.ts`
+(worker environment). The theming tests compare rendered token classes across themes and check
+that tokens retain distinct colours.
+
+**Browser changes need a shared-deps rebuild.** `@kbn/monaco` ships inside the
+`kbn-ui-shared-deps-src` bundle, which the dev server does *not* rebuild when sources change — plugin
+HMR will report "Updated" while the page keeps running the old `@kbn/monaco`. After editing this
+package, rebuild it and hard-reload:
 
 ```bash
-# unit tests
-node scripts/jest src/platform/packages/shared/kbn-monaco
-
-# type check
-node scripts/type_check --project src/platform/packages/shared/kbn-monaco/tsconfig.json
-
-# regenerate the Painless ANTLR parser (requires `brew bundle` from scripts/antlr4_tools)
-pnpm --filter @kbn/monaco build:antlr4
+pnpm --filter @kbn/ui-shared-deps-src run build
 ```
 
+```bash
+# Unit tests
+node scripts/jest src/platform/packages/shared/kbn-monaco
+
+# Scoped type check
+node scripts/type_check --project src/platform/packages/shared/kbn-monaco/tsconfig.json
+
+# Regenerate the Painless ANTLR parser (requires Homebrew; runs brew bundle)
+pnpm --filter @kbn/monaco build:antlr4
+```

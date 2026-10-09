@@ -25,7 +25,7 @@
  * So prefix the token with its language before the trie lookup. A single theme can then carry one
  * namespace per language (`esql.variable`, `console.method`, ...) and no language's rules can reach
  * another's tokens. Rules stay authored exactly as they are today; the prefix is applied here and
- * in `initializeCodeEditorThemes`, never by hand.
+ * in `initializeRegisteredLanguagesTheme`, never by hand.
  */
 
 /* eslint-disable @kbn/eslint/module_migration */
@@ -35,6 +35,7 @@ import * as monaco from 'monaco-editor/editor/editor.api.js';
 import { TokenTheme } from 'monaco-editor/editor/common/languages/supports/tokenization.js';
 /* eslint-enable @kbn/eslint/module_migration */
 import type { UseEuiTheme } from '@elastic/eui';
+import memoize from 'lodash/memoize';
 import { CODE_EDITOR_DEFAULT_THEME_ID, CODE_EDITOR_TRANSPARENT_THEME_ID } from './constants';
 import { buildTheme, buildTransparentTheme } from './theme';
 
@@ -59,13 +60,20 @@ export interface KbnMonacoTheming {
 
 const languageThemeResolverDefinitions = new Map<string, KbnMonacoThemingLanguageThemeResolver>();
 
-// Monaco reserves 0 for the Null language and 1 for plaintext. Neither is ever scoped, and
-// `encodeLanguageId` returns 0 for languages it doesn't know — so ids below this are never a match.
+/**
+ * Monaco reserves 0 for the Null language and 1 for
+ * plaintext {@link https://github.com/microsoft/vscode/blob/main/src/vs/editor/common/encodedTokenAttributes.ts#L10 | see encodedTokenAttributes.ts}.
+ * Neither is ever scoped, and {@link https://github.com/microsoft/vscode/blob/main/src/vs/editor/common/services/languagesRegistry.ts#L57-L59 | encodeLanguageId} returns 0
+ * for languages it doesn't know — so ids below this are never a match.
+ */
 const FIRST_SCOPEABLE_ENCODED_LANGUAGE_ID = 2;
 
-// Monaco derives `StandardTokenType` by regexing the token string we hand it, which drives bracket
-// matching and comment/string-aware behaviour. A language id containing one of these words would
-// mis-classify every token in that language once used as a prefix.
+/**
+ * We duplicate the same regex from
+ * Monaco's {@link https://github.com/microsoft/vscode/blob/main/src/vs/editor/common/languages/supports/tokenization.ts#L248 | tokenization.ts}.
+ * Monaco derives `StandardTokenType` by regexing the token string we hand it, which drives bracket matching and comment/string-aware behaviour.
+ * A language id containing one of these words would mis-classify every token in that language once used as a prefix.
+ */
 const RESERVED_TOKEN_WORDS = /\b(comment|string|regex|regexp)\b/;
 
 const scopedLanguageIds = new Set<string>();
@@ -142,7 +150,7 @@ export const scopeLanguageTheme = (languageId: string): void => {
 // add custom methods to monaco editor
 Object.defineProperties(monaco.editor, {
   /**
-   * @description Registration for implementation of {@link monaco.editor.registerLanguageThemeResolver}
+   * @description Registration of implementation for {@link monaco.editor.registerLanguageThemeResolver}
    */
   registerLanguageThemeResolver: {
     value: ((langId, languageThemeDefinition, forceOverride) => {
@@ -159,7 +167,7 @@ Object.defineProperties(monaco.editor, {
     configurable: false,
   },
   /**
-   * @description Registration for implementation of {@link monaco.editor.getLanguageThemeResolver}
+   * @description Registration of implementation for {@link monaco.editor.getLanguageThemeResolver}
    */
   getLanguageThemeResolver: {
     value: ((langId) =>
@@ -170,12 +178,6 @@ Object.defineProperties(monaco.editor, {
     configurable: false,
   },
 });
-
-// export these so that they are consumed by the actual code editor implementation
-const defaultThemesResolvers = {
-  [CODE_EDITOR_DEFAULT_THEME_ID]: buildTheme,
-  [CODE_EDITOR_TRANSPARENT_THEME_ID]: buildTransparentTheme,
-};
 
 /**
  * Namespaces a rule to a language. `background` is dropped from the root rule (`''`): Monaco treats
@@ -195,40 +197,73 @@ const scopeRule = (
 };
 
 /**
- * Registers to monaco every configured language theme for the given EUI theme.
+ * Identifies a palette by mode plus a fingerprint of the computed colours, not by object identity:
+ * EUI hands out a fresh `euiTheme` object on every colour-mode change, so identity would miss on
+ * the way back from dark to light.
+ *
+ * The fingerprint is not optional. `useEuiTheme()` reads `colorMode` and the computed theme from
+ * separate contexts, and on a live mode switch there is a render where `colorMode` has already
+ * flipped but `euiTheme.colors` still belong to the previous mode. Keyed on mode alone, that
+ * transitional render caches a theme with the new base and the old colours, and every consistent
+ * render afterwards hits it — the editor keeps the previous mode's background until reload.
+ * With the fingerprint the transitional entry sits under a key no consistent render produces.
  */
-const initializeCodeEditorThemes = (euiTheme: UseEuiTheme): void => {
-  const sharedRules = defaultThemesResolvers[CODE_EDITOR_DEFAULT_THEME_ID](euiTheme).rules;
+const paletteKey = ({ colorMode, highContrastMode, euiTheme }: UseEuiTheme): string =>
+  `${colorMode}:${highContrastMode}:${euiTheme.colors.backgroundBasePlain}:${euiTheme.colors.textParagraph}`;
 
-  const languageThemes = monaco.languages.getLanguages().flatMap(({ id: languageId }) => {
-    const languageThemeResolver = monaco.editor.getLanguageThemeResolver(languageId);
-    return languageThemeResolver ? [[languageId, languageThemeResolver(euiTheme)] as const] : [];
-  });
-
-  // A scoped language no longer prefix-matches the shared rules — `esql.string` doesn't match a
-  // `string` rule — so seed each namespace with the shared palette and let the language override it.
-  const scopedRules = languageThemes.flatMap(([languageId, languageTheme]) =>
-    [...sharedRules, ...languageTheme.rules].map((rule) => scopeRule(languageId, rule))
-  );
-
-  Object.entries(defaultThemesResolvers).forEach(([themeId, themeResolver]) => {
-    const theme = themeResolver(euiTheme);
-    monaco.editor.defineTheme(themeId, { ...theme, rules: [...theme.rules, ...scopedRules] });
-  });
-
-  // Language-named themes stay registered so callers passing `theme: ESQL_LANG_ID` keep working.
-  // They now differ from the defaults only in `colors`; the rules are the same shared set.
-  languageThemes.forEach(([languageId, languageTheme]) => {
-    monaco.editor.defineTheme(languageId, {
-      ...languageTheme,
-      rules: [...sharedRules, ...scopedRules],
-    });
-  });
+/**
+ * Shared theme builders, memoised per palette so a given EUI theme is computed once for the life
+ * of the page. Consumers that build on top of these (Console's resolver, `@kbn/workflows-ui`) get
+ * the same win for free. The returned object is shared between callers — spread it before changing
+ * anything.
+ */
+const defaultThemesResolvers = {
+  [CODE_EDITOR_DEFAULT_THEME_ID]: memoize(
+    (euiTheme: UseEuiTheme) => buildTheme(euiTheme),
+    paletteKey
+  ),
+  [CODE_EDITOR_TRANSPARENT_THEME_ID]: memoize(
+    (euiTheme: UseEuiTheme) => buildTransparentTheme(euiTheme),
+    paletteKey
+  ),
 };
+
+/**
+ * Registers every configured code editor theme with Monaco for the given EUI theme.
+ *
+ * A no-op when the themes Monaco holds were already built for this palette and language set —
+ * which is every editor mount after the first, and that matters beyond saving the computation:
+ * `defineTheme` on the active theme makes Monaco regenerate its colour stylesheet and re-tokenise
+ * every live model. The theme data itself comes from the memoised builders, so a light → dark →
+ * light round-trip re-registers (it has to; one slot per theme id) but never recomputes.
+ * A language registering a theme later changes the key and re-runs it.
+ */
+const initializeRegisteredLanguagesTheme = memoize(
+  (euiTheme: UseEuiTheme): void => {
+    const sharedRules = defaultThemesResolvers[CODE_EDITOR_DEFAULT_THEME_ID](euiTheme).rules;
+
+    const languageThemes = monaco.languages.getLanguages().flatMap(({ id: languageId }) => {
+      const languageThemeResolver = monaco.editor.getLanguageThemeResolver(languageId);
+      return languageThemeResolver ? [[languageId, languageThemeResolver(euiTheme)] as const] : [];
+    });
+
+    // A scoped language no longer prefix-matches the shared rules — `esql.string` doesn't match a
+    // `string` rule — so seed each namespace with the shared palette and let the language override it.
+    const scopedRules = languageThemes.flatMap(([languageId, languageTheme]) =>
+      [...sharedRules, ...languageTheme.rules].map((rule) => scopeRule(languageId, rule))
+    );
+
+    Object.entries(defaultThemesResolvers).forEach(([themeId, themeResolver]) => {
+      const theme = themeResolver(euiTheme);
+      monaco.editor.defineTheme(themeId, { ...theme, rules: [...theme.rules, ...scopedRules] });
+    });
+  },
+  (euiTheme: UseEuiTheme) => paletteKey(euiTheme)
+);
 
 export {
   CODE_EDITOR_DEFAULT_THEME_ID,
   CODE_EDITOR_TRANSPARENT_THEME_ID,
   defaultThemesResolvers,
-  initializeCodeEditorThemes,
+  initializeRegisteredLanguagesTheme,
 };
