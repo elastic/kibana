@@ -18,6 +18,7 @@ import {
   generateApiConstantsContent,
   generateApiFixturesIndexContent,
   generateApiSpecContent,
+  tagsExpressionFor,
   generateConfigContent,
   generateUiConstantsContent,
   generateUiDemoPageContent,
@@ -178,6 +179,7 @@ async function createDirectoryStructure(
   const contentRootDir = opts.namespace ? Path.resolve(scoutRootDir, opts.namespace) : scoutRootDir;
   const scoutPackage = getScoutPackageImport(basePath);
   const copyrightHeader = getCopyrightHeader(basePath);
+  const tagsExpression = tagsExpressionFor(opts.scoutRoot);
 
   if (opts.generateApi) {
     const apiTestDir = Path.resolve(contentRootDir, 'api');
@@ -202,7 +204,7 @@ async function createDirectoryStructure(
     const apiFixturesIndexContent = generateApiFixturesIndexContent(scoutPackage, copyrightHeader);
     await Fsp.writeFile(apiFixturesIndexPath, apiFixturesIndexContent);
     // create scout/api/tests/example.spec.ts file
-    const apiSpecContent = generateApiSpecContent(scoutPackage, copyrightHeader);
+    const apiSpecContent = generateApiSpecContent(scoutPackage, copyrightHeader, tagsExpression);
     await Fsp.writeFile(apiExampleSpecPath, apiSpecContent);
   }
 
@@ -256,7 +258,11 @@ async function createDirectoryStructure(
       const uiPageObjectsIndexContent = generateUiPageObjectsIndexContent(copyrightHeader);
       await Fsp.writeFile(uiPageObjectsIndexPath, uiPageObjectsIndexContent);
       // create scout/ui/parallel_tests/example_one.spec.ts file
-      const uiParallelSpecContent = generateUiParallelSpecContent(scoutPackage, copyrightHeader);
+      const uiParallelSpecContent = generateUiParallelSpecContent(
+        scoutPackage,
+        copyrightHeader,
+        tagsExpression
+      );
       await Fsp.writeFile(uiParallelSpecPathOne, uiParallelSpecContent);
       // create scout/ui/parallel_tests/example_two.spec.ts file
       await Fsp.writeFile(uiParallelSpecPathTwo, uiParallelSpecContent);
@@ -297,7 +303,7 @@ async function createDirectoryStructure(
       const uiPageObjectsIndexContent = generateUiPageObjectsIndexContent(copyrightHeader);
       await Fsp.writeFile(uiPageObjectsIndexPath, uiPageObjectsIndexContent);
       // create scout/ui/tests/example.spec.ts file
-      const uiSpecContent = generateUiSpecContent(scoutPackage, copyrightHeader);
+      const uiSpecContent = generateUiSpecContent(scoutPackage, copyrightHeader, tagsExpression);
       await Fsp.writeFile(uiSpecPath, uiSpecContent);
     }
   }

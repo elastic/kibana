@@ -103,13 +103,25 @@ globalSetupHook('Ingest data to Elasticsearch', async ({ esArchiver, log }) => {
 `;
 }
 
-export function generateApiSpecContent(scoutPackage: string, copyrightHeader: string): string {
+/**
+ * Custom server config sets (`test/scout_<configSet>`) only run locally, so their specs must use
+ * the local-only tag sets (enforced by ESLint).
+ */
+export function tagsExpressionFor(scoutRoot: string): string {
+  return scoutRoot === 'scout' ? 'tags.deploymentAgnostic' : 'tags.local.deploymentAgnostic';
+}
+
+export function generateApiSpecContent(
+  scoutPackage: string,
+  copyrightHeader: string,
+  tagsExpression: string
+): string {
   return `${copyrightHeader}import type { RoleApiCredentials } from '${scoutPackage}';
 import { tags } from '${scoutPackage}';
 import { expect } from '${scoutPackage}/api';
 import { apiTest, testData } from '../fixtures';
 
-apiTest.describe('Scout API test suite example', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('Scout API test suite example', { tag: ${tagsExpression} }, () => {
   let viewerApiCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
@@ -153,12 +165,16 @@ export * as testData from './constants';
 `;
 }
 
-export function generateUiSpecContent(scoutPackage: string, copyrightHeader: string): string {
+export function generateUiSpecContent(
+  scoutPackage: string,
+  copyrightHeader: string,
+  tagsExpression: string
+): string {
   return `${copyrightHeader}import { tags } from '${scoutPackage}';
 import { expect } from '${scoutPackage}/ui';
 import { test, testData } from '../fixtures';
 
-test.describe('Scout ui test suite example', { tag: tags.deploymentAgnostic }, () => {
+test.describe('Scout ui test suite example', { tag: ${tagsExpression} }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient }) => {
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.SOME_ARCHIVE);
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.SOME_ARCHIVE);
@@ -178,7 +194,8 @@ test.describe('Scout ui test suite example', { tag: tags.deploymentAgnostic }, (
 
 export function generateUiParallelSpecContent(
   scoutPackage: string,
-  copyrightHeader: string
+  copyrightHeader: string,
+  tagsExpression: string
 ): string {
   return `${copyrightHeader}import { tags } from '${scoutPackage}';
 import { expect } from '${scoutPackage}/ui';
@@ -186,7 +203,7 @@ import { spaceTest, testData } from '../fixtures';
 
 spaceTest.describe(
   'Scout parallel UI test suite example',
-  { tag: tags.deploymentAgnostic },
+  { tag: ${tagsExpression} },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.SOME_ARCHIVE);
