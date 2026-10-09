@@ -168,7 +168,7 @@ export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
       [_labels]
     );
     const maskProps = useMemo(
-      () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 4}` }),
+      () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 4}` }), // we need this flyout to be above the timeline flyout (which has a z-index of 1003)
       [euiTheme.levels.flyout]
     );
 
