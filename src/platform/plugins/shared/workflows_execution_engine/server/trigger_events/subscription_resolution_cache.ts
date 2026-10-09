@@ -72,6 +72,7 @@ const copyEntry = (entry: SubscriptionCacheEntry): SubscriptionCacheEntry => ({
 export class SubscriptionResolutionCache {
   private readonly entries = new Map<string, SubscriptionCacheEntry>();
   private readonly generations = new Map<string, number>();
+  private readonly loads = new Map<string, number>();
   private readonly inflight = new Map<string, Promise<SubscriptionCacheEntry>>();
   private readonly ttlMs: number;
   private readonly maxEntries: number;
@@ -136,12 +137,16 @@ export class SubscriptionResolutionCache {
 
   /** Drops every cached entry. */
   invalidateAll(): void {
-    const keys = new Set<string>([...this.entries.keys(), ...this.inflight.keys()]);
-    for (const key of keys) {
+    for (const key of this.loads.keys()) {
       this.bump(key);
     }
     this.entries.clear();
     this.inflight.clear();
+    for (const key of [...this.generations.keys()]) {
+      if ((this.loads.get(key) ?? 0) === 0) {
+        this.generations.delete(key);
+      }
+    }
   }
 
   private readKey(key: string): SubscriptionCacheEntry | undefined {
@@ -161,15 +166,20 @@ export class SubscriptionResolutionCache {
     generationAtStart: number,
     fetchGroups: () => Promise<readonly SubscriptionCacheGroup[]>
   ): Promise<SubscriptionCacheEntry> {
-    const groups = await fetchGroups();
-    const entry: SubscriptionCacheEntry = {
-      expiresAt: this.now() + this.ttlMs,
-      groups: copyGroups(groups),
-    };
-    if (this.generationOf(key) === generationAtStart) {
-      this.write(key, entry);
+    this.loads.set(key, (this.loads.get(key) ?? 0) + 1);
+    try {
+      const groups = await fetchGroups();
+      const entry: SubscriptionCacheEntry = {
+        expiresAt: this.now() + this.ttlMs,
+        groups: copyGroups(groups),
+      };
+      if (this.generationOf(key) === generationAtStart) {
+        this.write(key, entry);
+      }
+      return entry;
+    } finally {
+      this.releaseLoad(key);
     }
-    return entry;
   }
 
   private write(key: string, entry: SubscriptionCacheEntry): void {
@@ -188,7 +198,7 @@ export class SubscriptionResolutionCache {
     const keys = new Set<string>([
       ...this.entries.keys(),
       ...this.inflight.keys(),
-      ...this.generations.keys(),
+      ...this.loads.keys(),
     ]);
     for (const key of keys) {
       if (splitKey(key).triggerId === triggerId) {
@@ -198,9 +208,23 @@ export class SubscriptionResolutionCache {
   }
 
   private dropKey(key: string): void {
-    this.bump(key);
     this.entries.delete(key);
     this.inflight.delete(key);
+    if ((this.loads.get(key) ?? 0) > 0) {
+      this.bump(key);
+    } else {
+      this.generations.delete(key);
+    }
+  }
+
+  private releaseLoad(key: string): void {
+    const remaining = (this.loads.get(key) ?? 1) - 1;
+    if (remaining > 0) {
+      this.loads.set(key, remaining);
+      return;
+    }
+    this.loads.delete(key);
+    this.generations.delete(key);
   }
 
   private generationOf(key: string): number {

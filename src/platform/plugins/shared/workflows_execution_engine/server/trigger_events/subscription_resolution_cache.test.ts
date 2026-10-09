@@ -14,6 +14,9 @@ const groups = (workflowIds: string[], condition = 'host.name: a'): Subscription
   { condition, workflowIds },
 ];
 
+const retainedGenerations = (cache: SubscriptionResolutionCache): number =>
+  (cache as unknown as { generations: Map<string, number> }).generations.size;
+
 const createCache = (
   overrides: { ttlMs?: number; maxEntries?: number; now?: () => number } = {}
 ): { cache: SubscriptionResolutionCache; now: { value: number } } => {
@@ -184,6 +187,48 @@ describe('SubscriptionResolutionCache', () => {
 
     expect(cache.read('space-a', 'alert.fired')).toBeUndefined();
     expect(cache.read('space-b', 'cases.updated')).toBeUndefined();
+  });
+
+  it('forgets a generation once nothing is left that might store', async () => {
+    const { cache } = createCache();
+    for (let index = 0; index < 20; index++) {
+      await cache.load(`space-${index}`, 'alert.fired', async () => groups(['1']));
+      cache.invalidate({ spaceId: `space-${index}`, triggerIds: ['alert.fired'] });
+    }
+    expect(retainedGenerations(cache)).toBe(0);
+
+    let release: (value: SubscriptionCacheGroup[]) => void = () => {};
+    const gate = new Promise<SubscriptionCacheGroup[]>((resolve) => {
+      release = resolve;
+    });
+    const inflight = cache.load('default', 'alert.fired', () => gate);
+    cache.invalidate({ spaceId: 'default', triggerIds: ['alert.fired'] });
+    expect(retainedGenerations(cache)).toBe(1);
+
+    release(groups(['stale']));
+    await inflight;
+
+    expect(cache.read('default', 'alert.fired')).toBeUndefined();
+    expect(retainedGenerations(cache)).toBe(0);
+  });
+
+  it('stores a load that starts after an invalidate while the previous load is still running', async () => {
+    const { cache } = createCache();
+    let releaseStale: (value: SubscriptionCacheGroup[]) => void = () => {};
+    const staleGate = new Promise<SubscriptionCacheGroup[]>((resolve) => {
+      releaseStale = resolve;
+    });
+
+    const stale = cache.load('default', 'alert.fired', () => staleGate);
+    cache.invalidate({ spaceId: 'default', triggerIds: ['alert.fired'] });
+    const fresh = cache.load('default', 'alert.fired', async () => groups(['fresh']));
+    releaseStale(groups(['stale']));
+
+    await stale;
+    await fresh;
+
+    expect(cache.read('default', 'alert.fired')?.groups).toEqual(groups(['fresh']));
+    expect(retainedGenerations(cache)).toBe(0);
   });
 
   it('evicts the oldest entry when the cap is reached', async () => {
