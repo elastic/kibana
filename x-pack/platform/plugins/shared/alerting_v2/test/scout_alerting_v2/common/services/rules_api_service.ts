@@ -19,18 +19,9 @@ import type {
   CreateRuleData,
   FindRulesRequest,
   FindRulesResponse,
-  ListRuleChangeHistoryRequest,
-  ListRuleChangeHistoryResponse,
-  RuleChangeHistoryDetail,
   RuleResponse,
 } from '@kbn/alerting-v2-schemas';
-import {
-  COMMON_HEADERS,
-  INTERNAL_CHANGE_HISTORY_RULES_API_PATH,
-  POLL_INTERVAL_MS,
-  POLL_TIMEOUT_MS,
-  RULE_API_PATH,
-} from '../constants';
+import { COMMON_HEADERS, POLL_INTERVAL_MS, POLL_TIMEOUT_MS, RULE_API_PATH } from '../constants';
 
 export interface WaitForEnabledStateParams {
   id: string;
@@ -58,11 +49,6 @@ export interface RulesApiService {
   enableByQuery: (params: BulkByQueryParams) => Promise<BulkByQueryResult>;
   disableByQuery: (params: BulkByQueryParams) => Promise<BulkByQueryResult>;
   bulkGet: (id: string[]) => Promise<BulkGetRulesResponse>;
-  listChangeHistory: (
-    id: string,
-    query?: Partial<ListRuleChangeHistoryRequest>
-  ) => Promise<ListRuleChangeHistoryResponse>;
-  getChangeHistoryEvent: (eventId: string) => Promise<RuleChangeHistoryDetail>;
   waitForEnabledState: (params: WaitForEnabledStateParams) => Promise<void>;
   cleanUp: () => Promise<void>;
 }
@@ -254,23 +240,6 @@ export const getRulesApiService = ({
           path: `${RULE_API_PATH}/_bulk_get`,
           headers: COMMON_HEADERS,
           body: { ids },
-        });
-        return response.data;
-      }),
-    listChangeHistory: (id, query = {}) =>
-      measurePerformanceAsync(log, 'rules.listChangeHistory', async () => {
-        const response = await kbnClient.request<ListRuleChangeHistoryResponse>({
-          method: 'GET',
-          path: INTERNAL_CHANGE_HISTORY_RULES_API_PATH,
-          query: { rule_id: id, ...stripUndefined(query) },
-        });
-        return response.data;
-      }),
-    getChangeHistoryEvent: (changeId) =>
-      measurePerformanceAsync(log, 'rules.getChangeHistoryEvent', async () => {
-        const response = await kbnClient.request<RuleChangeHistoryDetail>({
-          method: 'GET',
-          path: `${INTERNAL_CHANGE_HISTORY_RULES_API_PATH}/${encodeURIComponent(changeId)}`,
         });
         return response.data;
       }),
