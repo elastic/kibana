@@ -6,6 +6,7 @@
  */
 
 import {
+  addWhereToEsqlQuery,
   buildEsqlCategorizeQuery,
   buildEsqlCategoryDocsQuery,
   categoryKeyFromPattern,
@@ -100,6 +101,34 @@ describe('build_esql_analysis_queries', () => {
         'SPARKLINE(COUNT(*), `@timestamp`, 40, TO_DATETIME("2024-01-01T00:00:00.000Z"), TO_DATETIME("2024-01-01T20:00:00.000Z"))'
       );
       expect(query).toContain('SORT Count DESC');
+    });
+  });
+
+  describe('addWhereToEsqlQuery', () => {
+    it('inserts the WHERE before a trailing LIMIT', () => {
+      const query = addWhereToEsqlQuery('FROM logs-* | WHERE a == 1 | LIMIT 100', 'MATCH(x, "y")');
+      const limitAt = query.indexOf('LIMIT 100');
+
+      expect(query.indexOf('WHERE MATCH(x, "y")')).toBeGreaterThan(-1);
+      expect(query.indexOf('WHERE MATCH(x, "y")')).toBeLessThan(limitAt);
+      expect(query.trim().endsWith('LIMIT 100')).toBe(true);
+    });
+
+    it('inserts the WHERE before STATS and KEEP', () => {
+      const stats = addWhereToEsqlQuery(
+        'FROM logs-* | STATS c = COUNT(*) BY host',
+        'MATCH(x, "y")'
+      );
+      expect(stats.indexOf('MATCH')).toBeLessThan(stats.indexOf('STATS'));
+
+      const keep = addWhereToEsqlQuery('FROM logs-* | KEEP host', 'MATCH(x, "y")');
+      expect(keep.indexOf('MATCH')).toBeLessThan(keep.indexOf('KEEP'));
+    });
+
+    it('appends a separate WHERE without touching an existing OR condition', () => {
+      expect(addWhereToEsqlQuery('FROM logs-* | WHERE a == 1 OR b == 2', 'MATCH(x, "y")')).toBe(
+        'FROM logs-* | WHERE a == 1 OR b == 2\n| WHERE MATCH(x, "y")'
+      );
     });
   });
 

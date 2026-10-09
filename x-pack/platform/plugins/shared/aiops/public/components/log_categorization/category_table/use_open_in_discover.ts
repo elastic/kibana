@@ -15,12 +15,13 @@ import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { QueryStringContract, TimefilterContract } from '@kbn/data-plugin/public';
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
-import { appendToESQLQuery } from '@kbn/esql-utils';
-import { Parser } from '@elastic/esql';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import { useDiscoverLinks, createFilter } from '../use_discover_links';
 import type { LogCategorizationAppState } from '../../../application/url_state/log_pattern_analysis';
-import { buildMatchFilterExpression } from '../reverse_categorization/build_esql_analysis_queries';
+import {
+  addWhereToEsqlQuery,
+  buildMatchFilterExpression,
+} from '../reverse_categorization/build_esql_analysis_queries';
 import { getLabels } from './labels';
 
 export interface OpenInDiscover {
@@ -41,13 +42,7 @@ export function onPopulateWhereClause(
   }
 
   const filterExpression = buildMatchFilterExpression(field.name, value, mode);
-  const { root } = Parser.parse(query.esql);
-  const lastCommand = root.commands[root.commands.length - 1];
-  const isLastCommandWhere = lastCommand.name === 'where';
-
-  const updatedQuery = isLastCommandWhere
-    ? appendToESQLQuery(query.esql, `AND ${filterExpression}`)
-    : appendToESQLQuery(query.esql, `| WHERE ${filterExpression}`);
+  const updatedQuery = addWhereToEsqlQuery(query.esql, filterExpression);
 
   queryString.setQuery({
     esql: updatedQuery,

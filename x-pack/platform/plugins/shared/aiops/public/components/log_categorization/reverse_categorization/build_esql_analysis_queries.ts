@@ -113,6 +113,36 @@ export function buildMatchFilterExpression(
   return `${notPrefix}MATCH(${field}, "${escapedValue}", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})`;
 }
 
+/** Commands that truncate, aggregate or project rows; a filter on documents must come before them. */
+const COMMANDS_TO_FILTER_BEFORE = new Set(['limit', 'sample', 'stats', 'keep', 'drop']);
+
+/**
+ * Adds a filter as its own WHERE command, placed before any LIMIT / SAMPLE / STATS / KEEP / DROP
+ * so it applies to documents rather than to the truncated or aggregated rows. A separate WHERE is
+ * ANDed with existing ones, so OR conditions in the query keep their precedence.
+ */
+export function addWhereToEsqlQuery(esql: string, expression: string): string {
+  const { root, errors } = Parser.parse(esql);
+  const insertIndex = root.commands.findIndex((command) =>
+    COMMANDS_TO_FILTER_BEFORE.has(command.name)
+  );
+
+  if (errors.length > 0 || insertIndex < 0) {
+    return appendToESQLQuery(esql, `| WHERE ${expression}`);
+  }
+
+  const before = BasicPrettyPrinter.print({
+    ...root,
+    commands: root.commands.slice(0, insertIndex),
+  });
+  const after = root.commands
+    .slice(insertIndex)
+    .map((command) => BasicPrettyPrinter.print(command))
+    .join('\n| ');
+
+  return `${before.trim()}\n| WHERE ${expression}\n| ${after}`;
+}
+
 /**
  * Builds an ES|QL docs query for documents matching a categorize pattern within the Discover scope.
  */
