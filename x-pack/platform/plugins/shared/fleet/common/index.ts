@@ -117,6 +117,9 @@ export {
   findFirstVarEntry,
   // Version-specific policies helpers
   hasVersionSuffix,
+  hasAgentVersionSuffix,
+  hasSentinelVersionSuffix,
+  getSentinelVersionPolicyId,
   removeVersionSuffixFromPolicyId,
   buildPolicyIdOrVariantsKuery,
   buildPolicyIdsOrVariantsKuery,

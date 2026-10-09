@@ -22,9 +22,13 @@ import type { PackageInfo, PackagePolicyAssetsMap } from '../../../common/types'
 import {
   AGENT_POLICY_INDEX,
   AGENT_POLICY_VERSION_SEPARATOR,
+  AGENT_POLICY_SENTINEL_VERSION,
   AGENTS_INDEX,
 } from '../../../common/constants';
-import { splitVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
+import {
+  splitVersionSuffixFromPolicyId,
+  hasAgentVersionSuffix,
+} from '../../../common/services/version_specific_policies_utils';
 
 /** Field on `.fleet-agents` / `.fleet-policies` holding the canonical (suffix-stripped) policy id. */
 const POLICY_BASE_ID_FIELD = 'policy_base_id';
@@ -319,7 +323,8 @@ export async function reassignAgentsFromVersionSpecificPolicies(
  */
 export async function deleteVersionSpecificFleetServerPolicies(
   esClient: ElasticsearchClient,
-  parentPolicyId: string
+  parentPolicyId: string,
+  { keepPolicyIds = [] }: { keepPolicyIds?: string[] } = {}
 ): Promise<void> {
   await esClient.deleteByQuery({
     index: AGENT_POLICY_INDEX,
@@ -331,7 +336,7 @@ export async function deleteVersionSpecificFleetServerPolicies(
     query: {
       bool: {
         filter: [{ term: { [POLICY_BASE_ID_FIELD]: parentPolicyId } }],
-        must_not: [{ term: { policy_id: parentPolicyId } }],
+        must_not: [{ terms: { policy_id: [parentPolicyId, ...keepPolicyIds] } }],
       },
     },
     // Cleanup only; no reader needs the deletion visible synchronously, so avoid forcing a refresh.
@@ -419,7 +424,7 @@ export async function getAgentAssignedVersionsForPolicies(
 
   const variantIds = (policiesResponse.aggregations?.variant_policy_ids?.buckets ?? [])
     .map((b) => b.key)
-    .filter((id) => splitVersionSuffixFromPolicyId(id).version !== null);
+    .filter((id) => hasAgentVersionSuffix(id));
 
   if (variantIds.length === 0) {
     return result;
@@ -452,7 +457,8 @@ export async function getAgentAssignedVersionsForPolicies(
   const buckets = agentsResponse.aggregations?.agents_by_policy_id?.buckets ?? [];
   for (const { key } of buckets) {
     const { baseId, version } = splitVersionSuffixFromPolicyId(key);
-    if (version === null) continue;
+    // The sentinel is not an agent version to compile a variant for.
+    if (version === null || version === AGENT_POLICY_SENTINEL_VERSION) continue;
     if (!result.has(baseId)) result.set(baseId, new Set());
     result.get(baseId)!.add(version);
   }

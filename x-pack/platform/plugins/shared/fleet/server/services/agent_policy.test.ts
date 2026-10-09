@@ -8,6 +8,8 @@ import apm from 'elastic-apm-node';
 import { SpanStatusCode, trace } from '@opentelemetry/api';
 import { tracing } from '@elastic/opentelemetry-node/sdk';
 import type { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { of } from 'rxjs';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -3224,6 +3226,85 @@ describe('Agent policy', () => {
 
       expect(getByIdsSpy.mock.calls[0][2]?.spaceId).toBeUndefined();
       expect(getFullAgentPolicySpy.mock.calls[0][2]?.spaceId).toBeUndefined();
+    });
+
+    describe('sentinel policy version', () => {
+      const deploy = async ({
+        sentinelVersionFlag,
+        options,
+      }: {
+        sentinelVersionFlag: boolean;
+        options?: Parameters<typeof agentPolicyService.deployPolicies>[3];
+      }) => {
+        const soClient = createSavedObjectClientMock();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        esClient.bulk.mockResolvedValue({ errors: false, items: [] } as any);
+        esClient.search.mockResolvedValue({ hits: { hits: [] }, aggregations: {} } as any);
+        mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
+        mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+          enableVersionSpecificPolicies: true,
+        } as any);
+        mockedAppContextService.getFeatureFlags.mockReturnValue({
+          getBooleanValue$: jest.fn().mockReturnValue(of(sentinelVersionFlag)),
+        } as any);
+        mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default-output');
+        mockedGetFullAgentPolicy.mockResolvedValue({
+          id: 'policy-1',
+          revision: 2,
+          namespaces: ['default'],
+          inputs: [],
+        } as any);
+        soClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            {
+              id: 'policy-1',
+              type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+              attributes: {
+                name: 'Policy 1',
+                revision: 2,
+                has_agent_version_conditions: false,
+                schema_version: '99.0.0',
+              },
+              references: [],
+            },
+          ],
+        });
+
+        await agentPolicyService.deployPolicies(soClient, ['policy-1'], undefined, options);
+
+        return esClient.bulk.mock.calls.flatMap(([request]) =>
+          (request.operations as any[]).filter((op) => op.policy_id)
+        );
+      };
+
+      it('deploys the base and the #sentinel policy when the flag is enabled', async () => {
+        const docs = await deploy({ sentinelVersionFlag: true });
+
+        expect(docs.map((doc) => doc.policy_id)).toEqual(['policy-1', 'policy-1#sentinel']);
+        const [base, sentinel] = docs;
+        expect(sentinel).toEqual({
+          ...base,
+          policy_id: 'policy-1#sentinel',
+          policy_base_id: 'policy-1',
+          data: { ...base.data, id: 'policy-1#sentinel' },
+        });
+        expect(base.data.id).toEqual('policy-1');
+      });
+
+      it('deploys only the base policy when the flag is disabled', async () => {
+        const docs = await deploy({ sentinelVersionFlag: false });
+
+        expect(docs.map((doc) => doc.policy_id)).toEqual(['policy-1']);
+      });
+
+      it('does not deploy the #sentinel policy when deploying specific agent versions', async () => {
+        const docs = await deploy({
+          sentinelVersionFlag: true,
+          options: { agentVersions: ['9.4'] },
+        });
+
+        expect(docs).toEqual([]);
+      });
     });
   });
 

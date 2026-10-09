@@ -21,6 +21,7 @@ import { getPackageInfo } from '../services/epm/packages';
 import { getAgentTemplateAssetsMap } from '../services/epm/packages/get';
 import { hasAgentVersionConditionInInputTemplate } from '../services/utils/version_specific_policies';
 import { AGENT_POLICY_VERSION_SEPARATOR } from '../constants';
+import { AGENT_POLICY_SENTINEL_VERSION } from '../../common/constants';
 import { getPackagePolicySavedObjectType } from '../services/package_policy';
 
 const AGENT_POLICY_IDS_BATCH_SIZE = 100;
@@ -137,6 +138,14 @@ export const getVersionSpecificPoliciesUsage = async (
           filter: [
             { term: { active: 'true' } },
             { wildcard: { policy_id: `*${AGENT_POLICY_VERSION_SEPARATOR}*` } },
+          ],
+          // `<id>#sentinel` is the non-version-specific copy of a policy
+          must_not: [
+            {
+              wildcard: {
+                policy_id: `*${AGENT_POLICY_VERSION_SEPARATOR}${AGENT_POLICY_SENTINEL_VERSION}`,
+              },
+            },
           ],
         },
       },

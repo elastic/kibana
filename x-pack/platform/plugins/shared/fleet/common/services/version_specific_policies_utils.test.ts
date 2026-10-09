@@ -7,6 +7,9 @@
 
 import {
   hasVersionSuffix,
+  hasAgentVersionSuffix,
+  hasSentinelVersionSuffix,
+  getSentinelVersionPolicyId,
   removeVersionSuffixFromPolicyId,
   splitVersionSuffixFromPolicyId,
   buildVersionVariantsKueryFragment,
@@ -80,6 +83,42 @@ describe('splitVersionSuffixFromPolicyId', () => {
     const policyIdWithHashButNoVersion = 'policy#123';
     const result = splitVersionSuffixFromPolicyId(policyIdWithHashButNoVersion);
     expect(result).toEqual({ baseId: 'policy#123', version: null });
+  });
+});
+
+describe('sentinel version suffix', () => {
+  it('is a version suffix', () => {
+    expect(hasVersionSuffix('policy123#sentinel')).toBe(true);
+    expect(hasSentinelVersionSuffix('policy123#sentinel')).toBe(true);
+    expect(hasAgentVersionSuffix('policy123#sentinel')).toBe(false);
+  });
+
+  it('is not matched when it is not the suffix', () => {
+    expect(hasVersionSuffix('policy123#sentinel#other')).toBe(false);
+    expect(hasVersionSuffix('policy123#sentinelx')).toBe(false);
+    expect(hasSentinelVersionSuffix('policy123')).toBe(false);
+    expect(hasSentinelVersionSuffix('')).toBe(false);
+  });
+
+  it('is distinguished from an agent version suffix', () => {
+    expect(hasAgentVersionSuffix('policy123#9.2')).toBe(true);
+    expect(hasAgentVersionSuffix('policy123')).toBe(false);
+  });
+
+  it('is removed by removeVersionSuffixFromPolicyId', () => {
+    expect(removeVersionSuffixFromPolicyId('policy123#sentinel')).toBe('policy123');
+    expect(removeVersionSuffixFromPolicyId('policy#123#sentinel')).toBe('policy#123');
+  });
+
+  it('is split by splitVersionSuffixFromPolicyId', () => {
+    expect(splitVersionSuffixFromPolicyId('policy123#sentinel')).toEqual({
+      baseId: 'policy123',
+      version: 'sentinel',
+    });
+  });
+
+  it('is built by getSentinelVersionPolicyId', () => {
+    expect(getSentinelVersionPolicyId('policy123')).toBe('policy123#sentinel');
   });
 });
 

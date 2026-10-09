@@ -7,16 +7,32 @@
 
 import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 
-import { AGENT_POLICY_VERSION_SEPARATOR } from '../constants';
+import { AGENT_POLICY_SENTINEL_VERSION, AGENT_POLICY_VERSION_SEPARATOR } from '../constants';
 
 const DEFAULT_POLICY_ID_FIELD = 'policy_id';
+
+// 'policy123#9.2' or the sentinel 'policy123#sentinel'
+const VERSION_SUFFIX_REGEX = new RegExp(`#(\\d+\\.\\d+|${AGENT_POLICY_SENTINEL_VERSION})$`);
 
 export function hasVersionSuffix(policyId: string): boolean {
   if (!policyId) {
     return false;
   }
-  // policy ends with version suffix e.g. 'policy123#9.2'
-  return Boolean(policyId.match(/#\d+\.\d+$/));
+  return VERSION_SUFFIX_REGEX.test(policyId);
+}
+
+/** Whether the policy id ends with the sentinel suffix, e.g. 'policy123#sentinel'. */
+export function hasSentinelVersionSuffix(policyId: string): boolean {
+  return Boolean(policyId) && policyId.endsWith(`#${AGENT_POLICY_SENTINEL_VERSION}`);
+}
+
+/** Whether the policy id ends with an agent version suffix e.g. 'policy123#9.2', not the sentinel. */
+export function hasAgentVersionSuffix(policyId: string): boolean {
+  return hasVersionSuffix(policyId) && !hasSentinelVersionSuffix(policyId);
+}
+
+export function getSentinelVersionPolicyId(baseId: string): string {
+  return `${baseId}${AGENT_POLICY_VERSION_SEPARATOR}${AGENT_POLICY_SENTINEL_VERSION}`;
 }
 
 export function splitVersionSuffixFromPolicyId(policyId: string): {
