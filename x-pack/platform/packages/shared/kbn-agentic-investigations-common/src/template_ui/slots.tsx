@@ -6,16 +6,15 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Conversation } from '@kbn/agent-builder-common';
 import {
   ConversationDetailsFlyoutHeader,
   ConversationDetailsFlyoutFooter,
   EscalationFlyoutHeader,
+  EscalationOverviewTab,
   type ConversationDetailsFlyoutFooterProps,
   OverviewTab,
 } from '../components/details';
-import { ImpactSection } from '../components/details/impact_section';
 import type { FlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
 import {
   conversationToInvestigation,
@@ -220,34 +219,35 @@ export const EscalationHeaderSlot = ({
 
 export interface EscalationOverviewSlotProps {
   conversation: Conversation;
+  groupedAttachments: FlyoutGroupedAttachmentsRegistry;
   renderLinkedInvestigations?: RenderLinkedInvestigations;
   onOpenInvestigation: (args: { conversationId: string; agentId: string }) => void;
 }
 
 /**
- * The body tab for the escalation details flyout. Renders the linked investigations list via
- * `renderLinkedInvestigations` (supplied by the consuming plugin so it can use HTTP hooks), then
- * the Impact copied over from the linked investigations.
+ * The body tab for the escalation details flyout: the summary and grouped attachments, then the
+ * linked investigations list via `renderLinkedInvestigations` (supplied by the consuming plugin so
+ * it can use HTTP hooks), then the Impact copied over from the linked investigations. The list is
+ * omitted when no render prop is provided.
  */
 export const EscalationOverviewSlot = ({
   conversation,
+  groupedAttachments,
   renderLinkedInvestigations,
   onOpenInvestigation,
 }: EscalationOverviewSlotProps) => {
-  const { linkedInvestigationIds } = conversationToEscalationHeader(conversation);
+  const { linkedInvestigationIds, summary } = conversationToEscalationHeader(conversation);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      {renderLinkedInvestigations && (
-        <EuiFlexItem>
-          {renderLinkedInvestigations({
-            escalationId: conversation.id,
-            linkedInvestigationIds,
-            onOpenInvestigation,
-          })}
-        </EuiFlexItem>
-      )}
-      <ImpactSection attachments={conversation.attachments} />
-    </EuiFlexGroup>
+    <EscalationOverviewTab
+      summary={summary}
+      attachments={conversation.attachments}
+      groupedAttachments={groupedAttachments}
+      linkedInvestigationsContent={renderLinkedInvestigations?.({
+        escalationId: conversation.id,
+        linkedInvestigationIds,
+        onOpenInvestigation,
+      })}
+    />
   );
 };

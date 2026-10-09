@@ -155,10 +155,10 @@ describe('OverviewTab', () => {
     expect(screen.getByText("What's happened")).toBeInTheDocument();
   });
 
-  it('renders the card on its own when there is no narrative', () => {
+  it('renders the card under the heading when there is no narrative', () => {
     renderTab({ attachments: [attachment], investigationOverrides: { summary: undefined } });
 
-    expect(screen.queryByText("What's happened")).not.toBeInTheDocument();
+    expect(screen.getByText("What's happened")).toBeInTheDocument();
     expect(screen.getByTestId('groupedAttachmentsSection')).toBeInTheDocument();
   });
 
@@ -198,5 +198,11 @@ describe('OverviewTab', () => {
     expect(screen.queryByText('Impact')).not.toBeInTheDocument();
     expect(screen.queryByText('Conclusion')).not.toBeInTheDocument();
     expect(screen.queryByText('Investigation trace')).not.toBeInTheDocument();
+  });
+
+  it('renders no "What\'s happened" block without a narrative or attachments', () => {
+    renderTab({ attachments: [], investigationOverrides: { summary: undefined } });
+
+    expect(screen.queryByText("What's happened")).not.toBeInTheDocument();
   });
 });
