@@ -15,6 +15,7 @@ export {
   type AlertingV2CapabilityFeature,
   type AlertingV2CapabilityLevel,
 } from './is_alerting_v2_enabled';
+export { normalizeMatcher } from './normalize_matcher';
 export { normalizeTags } from './normalize_tags';
 export { resolveArtifactId } from './resolve_artifact_id';
 export { resolveTimeField, type ResolveTimeFieldParams } from './time_field';

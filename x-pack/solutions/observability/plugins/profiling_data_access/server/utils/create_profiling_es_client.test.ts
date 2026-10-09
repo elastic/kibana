@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import { createProfilingEsClient } from './create_profiling_es_client';
 import type { ProfilingESClient } from './profiling_es_client';
 
@@ -33,6 +34,7 @@ const createEsClientMock = () => {
   return {
     esClient,
     getSignal: () => signals[signals.length - 1],
+    getRequestParams: () => handleEsCall.mock.calls[handleEsCall.mock.calls.length - 1][0],
     resolveAll: () => resolvers.forEach((resolve) => resolve()),
   };
 };
@@ -49,6 +51,25 @@ const methods: ReadonlyArray<[string, (client: ProfilingESClient) => Promise<unk
   ],
   ['topNFunctions', (client) => client.topNFunctions({ query: {}, durationSeconds: 1 })],
   ['universalProfiling.status', (client) => client.universalProfiling.status()],
+];
+
+const schemaMethods: ReadonlyArray<
+  [string, (client: ProfilingESClient, schema?: ProfilingSchema) => Promise<unknown>]
+> = [
+  [
+    'profilingStacktraces',
+    (client, schema) =>
+      client.profilingStacktraces({ query: {}, sampleSize: 1, durationSeconds: 1, schema }),
+  ],
+  [
+    'profilingFlamegraph',
+    (client, schema) =>
+      client.profilingFlamegraph({ query: {}, sampleSize: 1, durationSeconds: 1, schema }),
+  ],
+  [
+    'topNFunctions',
+    (client, schema) => client.topNFunctions({ query: {}, durationSeconds: 1, schema }),
+  ],
 ];
 
 describe('createProfilingEsClient', () => {
@@ -77,6 +98,36 @@ describe('createProfilingEsClient', () => {
 
       await expect(promise).resolves.toBeDefined();
       expect(getSignal()).toBeUndefined();
+    });
+  });
+
+  describe.each(schemaMethods)('%s schema', (_name, callMethod) => {
+    it.each([
+      [ProfilingSchema.ECS, 'ecs'],
+      [ProfilingSchema.OTEL, 'otel'],
+    ])('sends the %s schema in the request body', async (schema, expectedSchema) => {
+      const { esClient, getRequestParams, resolveAll } = createEsClientMock();
+
+      const promise = callMethod(createProfilingEsClient({ esClient }), schema);
+      await flushPromises();
+      resolveAll();
+      await promise;
+
+      expect(getRequestParams()).toEqual(
+        expect.objectContaining({ body: expect.objectContaining({ schema: expectedSchema }) })
+      );
+    });
+
+    it('does not send a schema when none is provided', async () => {
+      const { esClient, getRequestParams, resolveAll } = createEsClientMock();
+
+      const promise = callMethod(createProfilingEsClient({ esClient }));
+      await flushPromises();
+      resolveAll();
+      await promise;
+
+      // Serialise the request like the ES client does, which drops `undefined` body values.
+      expect(JSON.parse(JSON.stringify(getRequestParams()))).not.toHaveProperty('body.schema');
     });
   });
 });

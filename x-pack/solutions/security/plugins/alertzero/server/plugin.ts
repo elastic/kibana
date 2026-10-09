@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERTZERO_REASONING_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
 import {
   DEFAULT_APP_CATEGORIES,
   type CoreSetup,
@@ -18,6 +19,11 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentService } from '@kbn/fleet-plugin/server';
 import { SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED } from '@kbn/management-settings-ids';
+import {
+  ALERTZERO_ENABLED_SETTING_ID,
+  TEMPLATE_ID_ESCALATION,
+  TEMPLATE_ID_INVESTIGATION,
+} from '@kbn/alertzero-common';
 import { getSubscriptionAvailability } from '../common/availability';
 import {
   ALERTZERO_API_PRIVILEGE_READ,
@@ -94,6 +100,10 @@ export class AlertZeroPlugin
   private agentBuilderConversations?: NonNullable<
     AlertZeroStartDependencies['agentBuilder']
   >['conversations'];
+  private agentBuilderExecution?: NonNullable<
+    AlertZeroStartDependencies['agentBuilder']
+  >['execution'];
+  private searchInferenceEndpoints?: AlertZeroStartDependencies['searchInferenceEndpoints'];
   private huntServices?: HuntServices;
   private fleetAgentService?: AgentService;
   private coreStart?: CoreStart;
@@ -161,6 +171,17 @@ export class AlertZeroPlugin
         ...listActionsTool(() => this.requireActionsService(), assertAlertZeroAccess),
       });
       agentBuilder.skills.register(createActionDiscoverySkill(assertAlertZeroAccess));
+      // `ai.conversation.updated` is opt-in, so Agent Builder only emits it where a consumer
+      // subscribes. Scoped per space, like the routes, so spaces without AlertZero stay quiet.
+      agentBuilder.conversations.enableUpdatedTrigger({
+        templateIds: [TEMPLATE_ID_INVESTIGATION, TEMPLATE_ID_ESCALATION],
+        isEnabled: async (request) => {
+          const [{ savedObjects, uiSettings }] = await coreSetup.getStartServices();
+          return uiSettings
+            .asScopedToClient(savedObjects.getScopedClient(request))
+            .get<boolean>(ALERTZERO_ENABLED_SETTING_ID);
+        },
+      });
     }
 
     registerAlertZeroInferenceFeatures(searchInferenceEndpoints, this.logger.get('inference'));
@@ -170,6 +191,8 @@ export class AlertZeroPlugin
       workflowsExtensions,
       getActionsService: () => this.requireActionsService(),
       getConversations: () => this.requireAgentBuilderConversations(),
+      getExecution: (params) => this.requireAgentBuilderExecution().executeAgent(params),
+      resolveConnectorId: (request) => this.resolveSummaryConnectorId(request),
       getHuntServices: () => this.requireHuntServices(),
       getResolveHostEnrollment: makeScopedResolveHostEnrollment(
         () => this.fleetAgentService,
@@ -251,6 +274,8 @@ export class AlertZeroPlugin
     this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;
+    this.agentBuilderExecution = plugins.agentBuilder?.execution;
+    this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
 
     if (!this.config.enabled) {
       return {
@@ -382,6 +407,33 @@ export class AlertZeroPlugin
     AlertZeroStartDependencies['agentBuilder']
   >['conversations'] {
     return this.requireStarted(this.agentBuilderConversations, 'agentBuilder.conversations');
+  }
+
+  private requireAgentBuilderExecution(): NonNullable<
+    AlertZeroStartDependencies['agentBuilder']
+  >['execution'] {
+    return this.requireStarted(this.agentBuilderExecution, 'agentBuilder.execution');
+  }
+
+  private async resolveSummaryConnectorId(request: KibanaRequest): Promise<string | undefined> {
+    const searchInferenceEndpoints = this.searchInferenceEndpoints;
+    if (!searchInferenceEndpoints) {
+      return undefined;
+    }
+    try {
+      const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
+        ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+        request
+      );
+      return endpoints[0]?.connectorId;
+    } catch (error) {
+      this.logger.warn(
+        `AlertZero investigation summary connector could not be resolved. ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return undefined;
+    }
   }
 
   private requireHuntServices(): HuntServices {
