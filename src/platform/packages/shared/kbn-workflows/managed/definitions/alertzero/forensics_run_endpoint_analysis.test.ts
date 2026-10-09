@@ -1053,10 +1053,14 @@ describe('Endpoint analysis run', () => {
         ignore_unavailable: true,
         size: 1,
         _source: false,
-        query: [
-          { term: { 'host.name': '{{ steps.resolve_host.output.host_name }}' } },
-          { range: { '@timestamp': { gte: 'now-72h' } } },
-        ],
+        query: {
+          bool: {
+            filter: [
+              { term: { 'host.name': '{{ steps.resolve_host.output.host_name }}' } },
+              { range: { '@timestamp': { gte: 'now-72h' } } },
+            ],
+          },
+        },
       });
       // A read error is a gap, not "no telemetry": the run fails and the indicator stays
       // pending for a cheap retry, like the alert lookups.
