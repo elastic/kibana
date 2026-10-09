@@ -131,6 +131,14 @@ export interface EscalationsServiceDeps {
   conversationTemplates: ConversationTemplatesStart;
   getInvestigationStatusService: () => InvestigationStatusService;
   getImpactClient: (request: KibanaRequest) => ImpactReadClient;
+  /**
+   * Pending proposals per conversation id, absent ids having none. Undefined when proposals are
+   * unavailable or the caller may not read them.
+   */
+  countPendingProposals?: (
+    request: KibanaRequest,
+    conversationIds: string[]
+  ) => Promise<Map<string, number> | undefined>;
 }
 
 export class EscalationsService {
@@ -144,6 +152,7 @@ export class EscalationsService {
   ) => Promise<AttachmentPublicClient>;
   private readonly conversationTemplates: ConversationTemplatesStart;
   private readonly getInvestigationStatusService: () => InvestigationStatusService;
+  private readonly countPendingProposals: EscalationsServiceDeps['countPendingProposals'];
 
   constructor({
     logger,
@@ -152,6 +161,7 @@ export class EscalationsService {
     conversationTemplates,
     getInvestigationStatusService,
     getImpactClient,
+    countPendingProposals,
   }: EscalationsServiceDeps) {
     this.logger = logger;
     this.getImpactClient = getImpactClient;
@@ -159,6 +169,7 @@ export class EscalationsService {
     this.getAttachmentsClient = getAttachmentsClient;
     this.conversationTemplates = conversationTemplates;
     this.getInvestigationStatusService = getInvestigationStatusService;
+    this.countPendingProposals = countPendingProposals;
   }
 
   async create(
@@ -672,6 +683,7 @@ export class EscalationsService {
    * that are inaccessible to the current user are silently dropped by `client.bulkGet`.
    *
    * Status follows the same "missing or non-closed ⇒ open" rule as the escalations list filter.
+   * Open investigations also carry `pending_proposal_count`, from one aggregation over their ids.
    */
   async listLinkedInvestigations(
     request: KibanaRequest,
@@ -696,7 +708,7 @@ export class EscalationsService {
 
     // Preserve stored order; silently omit ids that bulkGet couldn't resolve or that resolved to
     // a non-investigation conversation (stale/corrupt linked_investigations entries).
-    const results: LinkedInvestigationSummary[] = linkedIds.flatMap((id) => {
+    const summaries: LinkedInvestigationSummary[] = linkedIds.flatMap((id) => {
       const conv = resolved.get(id);
       if (!conv || conv.template_id !== INVESTIGATION_TEMPLATE_ID) return [];
       const rawStatus = conv.metadata?.status;
@@ -704,6 +716,18 @@ export class EscalationsService {
         typeof rawStatus === 'string' && rawStatus === 'closed' ? 'closed' : 'open';
       return [{ id: conv.id, title: conv.title, status, agent_id: conv.agent_id }];
     });
+
+    // A closed investigation has nothing left to decide, so only open ones are counted.
+    const openIds = summaries.filter(({ status }) => status === 'open').map(({ id }) => id);
+    const pendingCounts =
+      openIds.length > 0 ? await this.countPendingProposals?.(request, openIds) : undefined;
+    const results = pendingCounts
+      ? summaries.map((summary) => ({
+          ...summary,
+          pending_proposal_count:
+            summary.status === 'open' ? pendingCounts.get(summary.id) ?? 0 : 0,
+        }))
+      : summaries;
 
     return { results };
   }

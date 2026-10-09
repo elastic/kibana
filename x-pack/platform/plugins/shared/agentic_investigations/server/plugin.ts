@@ -274,6 +274,19 @@ export class AgenticInvestigationsPlugin
           plugins.agentBuilder.attachments.getScopedClient({ request }),
         conversationTemplates: plugins.agentBuilder.conversationTemplates,
         getInvestigationStatusService: () => this.requireInvestigationStatusService(),
+        countPendingProposals: async (request, conversationIds) => {
+          const proposals = plugins.proposals;
+          if (!proposals) return undefined;
+          try {
+            await proposals.getProposalPrivileges().assertCanRead(request);
+            return await proposals
+              .getProposalsService()
+              .countPendingByConversationIds(conversationIds, this.getSpaceId(request));
+          } catch (error) {
+            this.logger.debug(`Could not count pending proposals: ${error}`);
+            return undefined;
+          }
+        },
       });
     }
 
