@@ -67,6 +67,11 @@ describe('getRunningProcessesTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     service = createMockEndpointAppContext().service;
+    // Hostname resolution also reads the Defend metadata index on origin, so
+    // tests that only stub Fleet get an empty metadata index by default.
+    jest.spyOn(service, 'getEndpointMetadataService').mockImplementation((() => ({
+      getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
+    })) as unknown as EndpointAppContextService['getEndpointMetadataService']);
   });
 
   it('returns a valid builtin tool definition', () => {
@@ -116,7 +121,9 @@ describe('getRunningProcessesTool', () => {
 
   it('calls responseActionsClient.runningProcesses when agent found', async () => {
     const mockAgentService = {
-      listAgents: jest.fn().mockResolvedValue({ agents: [{ id: 'agent-123' }] }),
+      listAgents: jest.fn().mockResolvedValue({
+        agents: [{ id: 'agent-123', packages: ['endpoint'] }],
+      }),
     };
     const mockResponseActionsClient = {
       runningProcesses: jest.fn().mockResolvedValue({

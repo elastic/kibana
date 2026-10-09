@@ -86,7 +86,7 @@ export const isolateHostTool = (
               {
                 tool_result_id: getToolResultId(),
                 type: ToolResultType.other,
-                data: endpointNotFoundData(hostName),
+                data: endpointNotFoundData({ hostName }),
               },
             ],
           };

@@ -42,12 +42,13 @@ When a counter shows dropped items, say that only a sample is shown and give the
 ## Best Practices
 
 - When the analyst asks which hosts are available, call \`list_endpoints\` first.
-- To confirm a host's identity and current isolation state, call \`get_endpoint_status\`.
+- Before isolate or release, call \`get_endpoint_status\` to confirm identity and current isolation state.
+- Always surface the action ID from write tools — it is the audit anchor in Response Actions history.
 - For follow-up on a prior action ("what happened to scan X?"), use \`get_response_action_status\` with the action ID.
 - For this skill's status and response action lookups, use \`list_endpoints\`, \`get_endpoint_status\`, and \`get_response_action_status\` instead of \`platform.core.search\` or raw Elasticsearch queries. Other skills' diagnostic queries are unaffected.
 
-## Scope
+## Scope (Slice 1)
 
-This skill is **read-only** and currently covers: list endpoints, host status, response action status lookup.
+Supported: list endpoints, isolate, release, host status, running processes, malware scan, action status lookup.
 
-Not available from chat: isolate, release/unisolate, scan, running processes, execute, kill-process, suspend-process, get-file, upload, runscript, memory-dump. Do not attempt these with this skill or any other tool — direct the analyst to the Response Actions UI instead.`;
+Not supported yet: execute, kill-process, suspend-process, get-file, upload, runscript, memory-dump. Do not attempt these.`;

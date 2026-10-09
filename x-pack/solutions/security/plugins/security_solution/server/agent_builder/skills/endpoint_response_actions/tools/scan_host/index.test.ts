@@ -67,6 +67,11 @@ describe('scanHostTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     service = createMockEndpointAppContext().service;
+    // Hostname resolution also reads the Defend metadata index on origin, so
+    // tests that only stub Fleet get an empty metadata index by default.
+    jest.spyOn(service, 'getEndpointMetadataService').mockImplementation((() => ({
+      getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
+    })) as unknown as EndpointAppContextService['getEndpointMetadataService']);
   });
 
   it('returns a valid write builtin tool definition requiring a path', () => {
@@ -128,7 +133,9 @@ describe('scanHostTool', () => {
 
   it('calls responseActionsClient.scan with parameters.path when agent found', async () => {
     const mockAgentService = {
-      listAgents: jest.fn().mockResolvedValue({ agents: [{ id: 'agent-123' }] }),
+      listAgents: jest.fn().mockResolvedValue({
+        agents: [{ id: 'agent-123', packages: ['endpoint'] }],
+      }),
     };
     const mockResponseActionsClient = {
       scan: jest.fn().mockResolvedValue({
@@ -214,7 +221,9 @@ describe('scanHostTool', () => {
 
   it('returns an error result when the response actions client throws', async () => {
     const mockAgentService = {
-      listAgents: jest.fn().mockResolvedValue({ agents: [{ id: 'agent-123' }] }),
+      listAgents: jest.fn().mockResolvedValue({
+        agents: [{ id: 'agent-123', packages: ['endpoint'] }],
+      }),
     };
     const mockResponseActionsClient = {
       scan: jest.fn().mockRejectedValue(new Error('scan failed')),

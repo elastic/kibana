@@ -66,6 +66,13 @@ describe('isolateHostTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockEndpointAppContextService = createMockEndpointAppContext().service;
+    // Hostname resolution also reads the Defend metadata index on origin, so
+    // tests that only stub Fleet get an empty metadata index by default.
+    jest
+      .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+      .mockImplementation((() => ({
+        getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
+      })) as unknown as EndpointAppContextService['getEndpointMetadataService']);
   });
 
   describe('tool definition', () => {
@@ -166,7 +173,7 @@ describe('isolateHostTool', () => {
 
         expect(mockAgentService.listAgents).toHaveBeenCalledWith({
           showInactive: true,
-          kuery: 'local_metadata.host.name: my-host',
+          kuery: 'local_metadata.host.name.keyword: "my-host"',
           page: 1,
           perPage: 25,
         });
@@ -178,7 +185,7 @@ describe('isolateHostTool', () => {
     it('calls responseActionsClient.isolate with endpoint_ids and comment when agent found', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({
-          agents: [{ id: 'agent-123' }],
+          agents: [{ id: 'agent-123', packages: ['endpoint'] }],
         }),
       };
 
@@ -256,7 +263,7 @@ describe('isolateHostTool', () => {
     it('uses a default comment when none is provided', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({
-          agents: [{ id: 'agent-123' }],
+          agents: [{ id: 'agent-123', packages: ['endpoint'] }],
         }),
       };
 
@@ -390,7 +397,7 @@ describe('isolateHostTool', () => {
     it('defaults agentType to endpoint when the agent has no recognized package', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({
-          agents: [{ id: 'agent-123' }],
+          agents: [{ id: 'agent-123', packages: ['endpoint'] }],
         }),
       };
 
@@ -477,7 +484,7 @@ describe('isolateHostTool', () => {
     it('returns an error result when the response actions client throws', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({
-          agents: [{ id: 'agent-123' }],
+          agents: [{ id: 'agent-123', packages: ['endpoint'] }],
         }),
       };
 
