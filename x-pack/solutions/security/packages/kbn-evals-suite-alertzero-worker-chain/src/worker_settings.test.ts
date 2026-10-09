@@ -67,4 +67,26 @@ describe('worker settings round trip (B3/B4)', () => {
       }
     }
   });
+
+  it('N8: restores the captured serviceAccountId, not just autonomy', async () => {
+    const { fetch, current } = makeFetch();
+    const ctx = { fetch, spaceId: 'default' };
+    await restoreWorker(ctx, {
+      workerId: 'w1',
+      enabled: false,
+      settingsRevision: 3,
+      settings: { autonomy: 'manual', serviceAccountId: 'sa-original' },
+    });
+    expect((current().settings as { serviceAccountId?: string }).serviceAccountId).toBe(
+      'sa-original'
+    );
+
+    const snapshot = await captureWorker(ctx, 'w1');
+    await writeWorkerAutonomy(ctx, 'w1', 'supervised', 'sa-eval');
+    expect((current().settings as { serviceAccountId?: string }).serviceAccountId).toBe('sa-eval');
+    await restoreWorker(ctx, snapshot);
+    expect((current().settings as { serviceAccountId?: string }).serviceAccountId).toBe(
+      'sa-original'
+    );
+  });
 });

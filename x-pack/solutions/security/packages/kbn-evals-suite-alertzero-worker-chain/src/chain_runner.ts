@@ -7,7 +7,9 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
+  type ChildWorkflowExecutionItem,
   type ExecutionStatus,
+  isExecuteAsyncStepType,
   TerminalExecutionStatuses,
   type WorkflowExecutionDto,
 } from '@kbn/workflows';
@@ -96,17 +98,15 @@ interface InvestigationConversation {
   reopened?: boolean;
 }
 
-interface ChildExecutionDto {
-  id: string;
-  workflowId?: string;
-  status?: string;
-  triggeredBy?: string;
-}
-
+/**
+ * `GET /api/workflows/executions/{id}/children` returns a BARE
+ * `ChildWorkflowExecutionItem[]` (get_children_executions.ts) whose id field is
+ * `executionId`. It lists only SYNC `workflow.execute` children one level down.
+ */
 const listChildExecutions = async (
   ctx: KbnRequestContext,
   workflowExecutionId: string
-): Promise<ChildExecutionDto[]> => {
+): Promise<ChildWorkflowExecutionItem[]> => {
   const body = (await ctx
     .fetch(
       spacePath(
@@ -119,8 +119,8 @@ const listChildExecutions = async (
         headers: { 'elastic-api-version': PUBLIC_API_VERSION },
       }
     )
-    .catch(() => undefined)) as { executions?: ChildExecutionDto[] } | undefined;
-  return body?.executions ?? [];
+    .catch(() => undefined)) as ChildWorkflowExecutionItem[] | undefined;
+  return Array.isArray(body) ? body : [];
 };
 
 const readExecution = async (
@@ -160,13 +160,17 @@ const waitForTerminal = async (
   workflowExecutionId: string,
   hop: string,
   timeoutMs: number,
-  pollIntervalMs: number
+  pollIntervalMs: number,
+  /** Extra "done waiting" condition for a hop that legitimately parks (see isReviewSettled). */
+  isSettled?: (execution: WorkflowExecutionDto) => boolean
 ): Promise<{ status: string; overrun: boolean }> => {
   const deadline = Date.now() + timeoutMs;
   let last: WorkflowExecutionDto | undefined;
   for (;;) {
     last = (await readExecution(ctx, workflowExecutionId).catch(() => last)) ?? last;
-    if (last && isTerminal(last.status)) return { status: last.status, overrun: false };
+    if (last && (isTerminal(last.status) || isSettled?.(last))) {
+      return { status: last.status, overrun: false };
+    }
     if (Date.now() >= deadline) {
       log.warning(`Hop "${hop}" (execution ${workflowExecutionId}) overran ${timeoutMs}ms`);
       return { status: last?.status ?? 'unreadable', overrun: true };
@@ -221,6 +225,86 @@ const waitForProposals = async (
     if (Date.now() >= deadline) return [];
     await sleep(pollIntervalMs);
   }
+};
+
+/** The runner step that dispatches each attack's review (attack_discovery_runner.yaml). */
+const REVIEW_DISPATCH_STEP_ID = 'run_review';
+
+/**
+ * The reviews are ASYNC grandchildren: floor → (sync, listed by /children) runner
+ * → `workflow.executeAsync` review. /children never lists them, so walk floor →
+ * runner and take each review's id from the runner's `run_review` step outputs
+ * (`output.executionId`), which only the execution read carries.
+ */
+const collectReviewExecutionIds = async (
+  ctx: KbnRequestContext,
+  floorExecutionId: string
+): Promise<string[]> => {
+  const children = await listChildExecutions(ctx, floorExecutionId);
+  const ids: string[] = [];
+  for (const runner of children.filter(
+    (child) => child.workflowId === WORKFLOW_IDS.attackDiscoveryRunner
+  )) {
+    const runnerExecution = await readExecution(ctx, runner.executionId).catch(() => undefined);
+    for (const step of runnerExecution?.stepExecutions ?? []) {
+      const reviewId = (step.output as { executionId?: unknown } | undefined)?.executionId;
+      const isDispatch =
+        step.stepId === REVIEW_DISPATCH_STEP_ID || isExecuteAsyncStepType(step.stepType);
+      if (isDispatch && typeof reviewId === 'string') {
+        if (!ids.includes(reviewId)) ids.push(reviewId);
+      }
+    }
+  }
+  return ids;
+};
+
+/**
+ * A review is settled once it is terminal, or once it has raised its proposal
+ * (`escalation_gate` ran) and is parked awaiting a human decision — at Manual /
+ * Assisted autonomy that park lasts up to 176h, so terminal is not reachable
+ * inside the hop timeout and must not be reported as an overrun.
+ */
+const isReviewSettled = (execution: WorkflowExecutionDto): boolean =>
+  !isTerminal(execution.status) &&
+  execution.stepExecutions?.some((s) => s.stepId === 'escalation_gate') === true;
+
+interface ReviewResult {
+  verdict?: VerdictOrigin;
+  investigationId?: string;
+}
+
+const stepOutput = (execution: WorkflowExecutionDto | undefined, stepId: string): unknown =>
+  execution?.stepExecutions?.find((s) => s.stepId === stepId)?.output;
+
+/**
+ * Verdict + Investigation id of one review. Read from the review's own step
+ * outputs (`resolve_analysis`, `resolve_investigation_id`) so a review still
+ * parked on its escalation gate is readable; `emit_result` / `context.output`
+ * is the fallback once it has finished.
+ */
+const readReviewResult = (execution: WorkflowExecutionDto | undefined): ReviewResult => {
+  const emitted = (execution?.context?.output ?? stepOutput(execution, 'emit_result')) as
+    | { verdict?: unknown; investigation_id?: unknown }
+    | undefined;
+  const verdict =
+    (stepOutput(execution, 'resolve_analysis') as { verdict?: unknown } | undefined)?.verdict ??
+    emitted?.verdict;
+  const investigationId =
+    (
+      stepOutput(execution, 'resolve_investigation_id') as
+        | { investigation_id?: unknown }
+        | undefined
+    )?.investigation_id ?? emitted?.investigation_id;
+  return {
+    verdict:
+      verdict === 'true_positive' || verdict === 'false_positive' || verdict === 'inconclusive'
+        ? verdict
+        : undefined,
+    investigationId:
+      typeof investigationId === 'string' && investigationId.length > 0
+        ? investigationId
+        : undefined,
+  };
 };
 
 const asAutonomy = (value: unknown): WorkerAutonomy | undefined =>
@@ -295,6 +379,8 @@ export const runChain = async ({
   };
 
   let appliedVerdictOrigin: VerdictOrigin | undefined;
+  /** Investigations the AD reviews raised proposals on (handoff proposals live there). */
+  const reviewInvestigations: Array<{ id: string; verdict?: VerdictOrigin }> = [];
 
   if (scenario.workerChain.includes('alert-triage')) {
     const triageAutonomy = await readBackAutonomy('alert-triage', WORKER_IDS.alertTriage);
@@ -366,6 +452,11 @@ export const runChain = async ({
       WORKER_IDS.attackDiscovery,
       WORKFLOW_IDS.attackDiscovery
     );
+    // N9: the floor AD workflow also carries a product schedule with
+    // `cancel-in-progress` (floor_attack_discovery.yaml). A schedule tick landing
+    // mid-run would cancel this manual run; the run then reads back as a
+    // cancelled hop, not a model failure. Run the cell with the Worker's
+    // schedule interval long (the default is 24h) or the schedule disabled.
     const executionId = await runWorkflow(ctx, adWorkflowId, {});
     const { status, overrun } = await waitForTerminal(
       ctx,
@@ -387,34 +478,80 @@ export const runChain = async ({
     );
     if (overrun) markInterference('floor_attack_discovery overran its per-hop timeout');
 
-    // B6: verdict origin is the review child's own `verdict` output, read back
-    // from the product — never scenario.goldVerdict.
-    const children = await listChildExecutions(ctx, executionId);
-    for (const child of children) {
-      // eslint-disable-next-line no-continue
-      if (child.workflowId !== WORKFLOW_IDS.attackDiscoveryReview) continue;
-      const reviewExec = await readExecution(ctx, child.id).catch(() => undefined);
-      const verdict = (reviewExec?.context?.output as { verdict?: string } | undefined)?.verdict;
-      if (
-        verdict === 'true_positive' ||
-        verdict === 'false_positive' ||
-        verdict === 'inconclusive'
-      ) {
-        appliedVerdictOrigin = verdict;
+    // B6: verdict origin is each review's own verdict, read back from the
+    // product — never scenario.goldVerdict. The reviews are async grandchildren
+    // (floor → runner → executeAsync review): walk to them, wait each to
+    // terminal, then read its verdict and the Investigation it raised proposals on.
+    const reviewIds = await collectReviewExecutionIds(ctx, executionId);
+    for (const reviewId of reviewIds) {
+      const reviewWait = await waitForTerminal(
+        ctx,
+        log,
+        reviewId,
+        'attack_discovery_review',
+        timeouts.attackDiscoveryReview,
+        pollIntervalMs,
+        isReviewSettled
+      );
+      const reviewExecution = await readExecution(ctx, reviewId).catch(() => undefined);
+      record(
+        'attack_discovery_review',
+        WORKFLOW_IDS.attackDiscoveryReview,
+        reviewId,
+        reviewWait.overrun ? 'timeout' : reviewWait.status,
+        asTriageTrigger(reviewExecution?.triggeredBy) ?? 'unknown',
+        adAutonomy
+      );
+      if (reviewWait.overrun) {
+        markInterference(`attack_discovery_review ${reviewId} overran its per-hop timeout`);
+      }
+      const result = readReviewResult(reviewExecution);
+      if (result.verdict !== undefined) appliedVerdictOrigin = result.verdict;
+      if (result.investigationId !== undefined) {
+        reviewInvestigations.push({ id: result.investigationId, verdict: result.verdict });
       }
     }
   }
 
   const investigation = investigationId ? await readInvestigation(ctx, investigationId) : undefined;
 
+  // Triage proposals sit on the triage Investigation; handoff proposals sit on each
+  // review's own Investigation (a different conversation), so collect from both.
+  const proposalSources: Array<{
+    id: string;
+    verdict?: VerdictOrigin;
+    reopened?: boolean;
+  }> = [];
   if (investigationId) {
+    proposalSources.push({
+      id: investigationId,
+      verdict: appliedVerdictOrigin,
+      reopened: investigation?.reopened,
+    });
+  }
+  for (const review of reviewInvestigations) {
+    if (!proposalSources.some((source) => source.id === review.id)) {
+      const reviewInvestigation = await readInvestigation(ctx, review.id);
+      proposalSources.push({
+        id: review.id,
+        verdict: review.verdict,
+        reopened: reviewInvestigation?.reopened,
+      });
+    }
+  }
+
+  const seenProposalIds = new Set<string>();
+  for (const source of proposalSources) {
     const proposals = await waitForProposals(
       ctx,
-      investigationId,
+      source.id,
       timeouts.perActionProposal,
       pollIntervalMs
     );
     for (const proposal of proposals.filter((p) => p.actionWorkflowId !== undefined)) {
+      // eslint-disable-next-line no-continue
+      if (seenProposalIds.has(proposal.id)) continue;
+      seenProposalIds.add(proposal.id);
       // A proposal with no action workflow id cannot be attributed to a worker
       // or judged by the gate; it is filtered out rather than given a made-up id.
       const actionWorkflowId = proposal.actionWorkflowId as string;
@@ -439,8 +576,8 @@ export const runChain = async ({
           worker,
           // B6: applied autonomy read back from the product above.
           autonomy: appliedAutonomy[worker] ?? 'manual',
-          verdictOrigin: appliedVerdictOrigin,
-          investigationReopened: investigation?.reopened,
+          verdictOrigin: source.verdict,
+          investigationReopened: source.reopened,
           kiAutonomyFromScheduledSweep: forensicsSweepMode === 'scheduled' ? true : undefined,
         },
       });
@@ -458,7 +595,7 @@ export const runChain = async ({
     hops,
     actions,
     investigation: {
-      id: investigationId,
+      id: investigationId ?? reviewInvestigations[0]?.id,
       // B7: D55 array lives on the conversation's metadata, not top level.
       workflowExecutionIds: investigation?.metadata?.workflow_execution_ids ?? [],
       reopened: investigation?.reopened ?? false,

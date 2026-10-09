@@ -75,6 +75,7 @@ export const HOP_TIMEOUTS_MS = {
   alertTriage: 15 * 60_000,
   alertTriageReview: 10 * 60_000,
   attackDiscoveryRunner: 20 * 60_000,
+  attackDiscoveryReview: 20 * 60_000,
   kiAnalysisIndicator: 5 * 60_000,
   forensicsSweepTick: 3 * 60_000,
   forensicsRun: 20 * 60_000,

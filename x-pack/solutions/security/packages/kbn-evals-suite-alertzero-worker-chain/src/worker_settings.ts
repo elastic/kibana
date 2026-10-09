@@ -115,7 +115,13 @@ export const restoreWorker = async (
   await patchWorker(ctx, snapshot.workerId, {
     ...(snapshot.enabled !== current.enabled ? { enabled: snapshot.enabled } : {}),
     settingsRevision: current.settingsRevision,
-    settings: { autonomy: snapshot.settings.autonomy },
+    // N8: put the service account back too — writeWorkerAutonomy may have set it.
+    settings: {
+      autonomy: snapshot.settings.autonomy,
+      ...(snapshot.settings.serviceAccountId !== undefined
+        ? { serviceAccountId: snapshot.settings.serviceAccountId }
+        : {}),
+    },
   });
 };
 
