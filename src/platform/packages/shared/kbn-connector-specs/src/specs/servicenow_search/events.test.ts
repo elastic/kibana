@@ -180,6 +180,27 @@ describe('ServiceNow inbound events', () => {
     expect(validateEmittedEvents(events.definitions, result.events)).toEqual({ ok: true });
   });
 
+  it('keeps an empty changed-field value so a cleared field stays distinct from an omitted one', async () => {
+    const result = expectEmit(
+      await events.handleEvents(
+        createContext({
+          occurrence: SERVICENOW_OCCURRENCE_INCIDENT_UPDATED,
+          table: 'incident',
+          sys_id: SYS_ID,
+          changed_fields: [{ field: 'assignment_group', previous: 'group-1', current: '' }],
+          sys_updated_on: SYS_UPDATED_ON,
+        })
+      )
+    );
+
+    expect(result.events[0]?.payload).toEqual({
+      table: 'incident',
+      sys_id: SYS_ID,
+      changed_fields: [{ field: 'assignment_group', previous: 'group-1', current: '' }],
+    });
+    expect(validateEmittedEvents(events.definitions, result.events)).toEqual({ ok: true });
+  });
+
   it('keeps an incident update when changed fields are absent', async () => {
     const result = expectEmit(
       await events.handleEvents(
@@ -358,6 +379,24 @@ describe('ServiceNow inbound events', () => {
   it.each([
     ['non-object body', null],
     ['unknown occurrence', { occurrence: 'problem.created', table: 'problem', sys_id: SYS_ID }],
+    [
+      'inherited occurrence constructor',
+      {
+        occurrence: 'constructor',
+        table: 'incident',
+        sys_id: SYS_ID,
+        number: 'INC0010001',
+      },
+    ],
+    [
+      'inherited occurrence __proto__',
+      {
+        occurrence: '__proto__',
+        table: 'incident',
+        sys_id: SYS_ID,
+        number: 'INC0010001',
+      },
+    ],
     [
       'incident created without a number',
       { occurrence: SERVICENOW_OCCURRENCE_INCIDENT_CREATED, table: 'incident', sys_id: SYS_ID },

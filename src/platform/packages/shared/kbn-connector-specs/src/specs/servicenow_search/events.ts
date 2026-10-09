@@ -156,6 +156,14 @@ const readId = (value: unknown): string | undefined => readBoundedString(value, 
 const readValue = (value: unknown): string | undefined =>
   readBoundedString(value, SERVICENOW_VALUE_MAX);
 
+/** Keeps an empty string so a cleared ServiceNow value stays distinct from an omitted one. */
+const readOptionalValue = (value: unknown): string | undefined => {
+  if (typeof value !== 'string' || value.length > SERVICENOW_VALUE_MAX) {
+    return undefined;
+  }
+  return value;
+};
+
 const readText = (value: unknown): string | undefined =>
   readBoundedString(value, SERVICENOW_TEXT_MAX);
 
@@ -192,8 +200,8 @@ const readChangedFields = (value: unknown): ChangedField[] | undefined => {
       if (field === undefined) {
         return [];
       }
-      const previous = readValue(entry.previous);
-      const current = readValue(entry.current);
+      const previous = readOptionalValue(entry.previous);
+      const current = readOptionalValue(entry.current);
       const changed: ChangedField = {
         field,
         ...(previous !== undefined ? { previous } : {}),
@@ -343,14 +351,10 @@ const parseServicenowOccurrence = (
   body: Record<string, unknown>
 ): ParsedServicenowEvent | undefined => {
   const occurrence = readBoundedString(body.occurrence, SERVICENOW_OCCURRENCE_MAX);
-  if (occurrence === undefined) {
+  if (occurrence === undefined || !Object.hasOwn(parseByOccurrence, occurrence)) {
     return undefined;
   }
-  const parse = parseByOccurrence[occurrence];
-  if (parse === undefined) {
-    return undefined;
-  }
-  return parse(body);
+  return parseByOccurrence[occurrence](body);
 };
 
 const handleServicenowEvents = async (

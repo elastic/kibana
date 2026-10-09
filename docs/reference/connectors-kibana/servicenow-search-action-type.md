@@ -74,7 +74,7 @@ Change-approval events
 :   Change Management, which provides `change_request`. Approval rows are stored in the platform table `sysapproval_approver`. An instance without Change Management can still use the incident and journal triggers.
 
 Roles
-:   Creating the business rules and the REST message requires the admin role. The user who changes the record must be able to read that row. Work notes require a role that can read them, such as `itil`. If that user cannot read the work note, {{sn}} sends no text and {{kib}} does not start a work-note workflow.
+:   Creating the business rules and the REST message requires the admin role. The user who changes the record must be able to read that row. The journal rule sends a work note only when that user can read `work_notes` on the incident. Otherwise it does not call {{kib}}.
 
 ### Ingest URL [servicenow-search-inbound-url]
 
@@ -196,7 +196,7 @@ When `state` changes to the resolved or closed value, it sends `incident.resolve
 
 ### Journal rule [servicenow-search-inbound-journal-rule]
 
-Create an **after** business rule on `sys_journal_field` with **Insert** selected. Set the condition to `name=incident` and `element` in `comments`, `work_notes`. `comments` sends `comment.added`. `work_notes` sends `work_note.added`. `table` and `sys_id` identify the parent incident (`name` and `element_id`). `author` is `sys_created_by` on the journal row.
+Create an **after** business rule on `sys_journal_field` with **Insert** selected. Set the condition to `name=incident` and `element` in `comments`, `work_notes`. `comments` sends `comment.added`. `work_notes` sends `work_note.added` only when the user who saved the record can read `work_notes` on the parent incident. `table` and `sys_id` identify that incident (`name` and `element_id`). `author` is `sys_created_by` on the journal row.
 
 ```javascript
 (function executeRule(current, previous) {
@@ -208,6 +208,12 @@ Create an **after** business rule on `sys_journal_field` with **Insert** selecte
   } else if (element == 'work_notes') {
     occurrence = 'work_note.added';
   } else {
+    return;
+  }
+
+  var parent = new GlideRecord(current.getValue('name'));
+  var parentFound = parent.get(current.getValue('element_id'));
+  if (element == 'work_notes' && (!parentFound || !parent.work_notes.canRead())) {
     return;
   }
 
@@ -226,8 +232,7 @@ Create an **after** business rule on `sys_journal_field` with **Insert** selecte
     text: text,
     timestamp: current.getValue('sys_created_on')
   };
-  var parent = new GlideRecord(body.table);
-  if (parent.get(body.sys_id)) {
+  if (parentFound) {
     body.number = parent.getValue('number');
   }
 
