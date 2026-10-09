@@ -8,7 +8,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   type ChildWorkflowExecutionItem,
-  type ExecutionStatus,
+  ExecutionStatus,
   isExecuteAsyncStepType,
   TerminalExecutionStatuses,
   type WorkflowExecutionDto,
@@ -230,25 +230,41 @@ const SETTLED_PROPOSAL_STATUSES = new Set([
 ]);
 
 /**
- * R7: at Manual/Supervised autonomy the product parks an undecided proposal at
- * `pending` behind create_proposal.yaml's await_decision gate (waitForApproval,
- * 72h deadline). That park is visible in product state — never inferred from
- * elapsed time — as `pending` with a gating `workflowExecutionId` (absent when
- * no workflow is waiting) whose `expiresAt` deadline has not passed (absent
- * `expiresAt` is the product's own far-future stand-in). A parked proposal is
- * the correct outcome of a correct run and never settles inside
- * perActionProposal. `pending` with NO gating execution — or past its deadline
- * awaiting the expiry sweep — and a stuck `executing` are harness failures.
+ * R7/R8: at Manual/Supervised autonomy the product parks an undecided proposal
+ * at `pending` behind create_proposal.yaml's await_decision gate
+ * (waitForApproval, 72h deadline). `workflowExecutionId` and `expiresAt` are
+ * stamped on EVERY proposal at creation (create_proposal_step.ts), including the
+ * auto path whose `pending` is a transient read before the worker auto-approves,
+ * so neither field shows that a human is being waited on. The park is visible
+ * only in the gate execution: `GET execution(workflowExecutionId)` is
+ * `waiting_for_input` and unfinished (the check the product's resumeGate makes),
+ * with an unexpired `expiresAt` (absent is NOT parked — the managed path always
+ * sets it). Any other `pending` keeps polling: the auto path still deciding, or
+ * a harness failure. A parked proposal is the correct outcome of a correct run
+ * and never settles inside perActionProposal.
  */
-const isParkedAwaitingDecision = (proposal: ProposalDto): boolean => {
+const isParkedAwaitingDecision = async (
+  ctx: KbnRequestContext,
+  proposal: ProposalDto
+): Promise<boolean> => {
   if (proposal.status !== 'pending') return false;
-  if (proposal.workflowExecutionId === undefined) return false;
-  const deadline = proposal.expiresAt !== undefined ? Date.parse(proposal.expiresAt) : NaN;
-  return !Number.isFinite(deadline) || deadline > Date.now();
+  if (proposal.workflowExecutionId === undefined || proposal.expiresAt === undefined) return false;
+  const deadline = Date.parse(proposal.expiresAt);
+  if (!Number.isFinite(deadline) || deadline <= Date.now()) return false;
+  const gate = await readExecution(ctx, proposal.workflowExecutionId).catch(() => undefined);
+  return gate?.status === ExecutionStatus.WAITING_FOR_INPUT && !gate.finishedAt;
 };
 
-const isProposalSettled = (proposal: ProposalDto): boolean =>
-  SETTLED_PROPOSAL_STATUSES.has(proposal.status) || isParkedAwaitingDecision(proposal);
+const isProposalSettled = async (ctx: KbnRequestContext, proposal: ProposalDto): Promise<boolean> =>
+  SETTLED_PROPOSAL_STATUSES.has(proposal.status) || (await isParkedAwaitingDecision(ctx, proposal));
+
+const allSettled = async (ctx: KbnRequestContext, proposals: ProposalDto[]): Promise<boolean> => {
+  for (const proposal of proposals) {
+    // eslint-disable-next-line no-await-in-loop
+    if (!(await isProposalSettled(ctx, proposal))) return false;
+  }
+  return true;
+};
 
 const waitForProposals = async (
   ctx: KbnRequestContext,
@@ -259,17 +275,14 @@ const waitForProposals = async (
   const deadline = Date.now() + timeoutMs;
   for (;;) {
     const proposals = await listProposalsFor(ctx, conversationId).catch(() => []);
-    if (proposals.length > 0 && proposals.every((p) => isProposalSettled(p))) {
+    if (proposals.length > 0 && (await allSettled(ctx, proposals))) {
       return { proposals, unsettledAtTimeout: false };
     }
     if (Date.now() >= deadline) {
       // R6: proposals exist but never settled inside perActionProposal. Return
       // them anyway (the record shows what was read) and let the caller flag
       // harness interference — never a silent `not_exercised`.
-      return {
-        proposals,
-        unsettledAtTimeout: proposals.some((p) => !isProposalSettled(p)),
-      };
+      return { proposals, unsettledAtTimeout: !(await allSettled(ctx, proposals)) };
     }
     await sleep(pollIntervalMs);
   }
