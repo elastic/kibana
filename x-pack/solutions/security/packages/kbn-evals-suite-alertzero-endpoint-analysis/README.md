@@ -19,7 +19,8 @@ workers API (`PATCH /internal/alertzero/workers/{workerId}` with
 defaults, then runs the sweep test API against the installed production definition.
 The service account is provisioned by the suite (eval-owned
 `alertzero_endpoint_analysis_eval` role (the production role plus one AI-index read delta,
-PUT on every run so a stale definition never wins) + account, created when missing) because a bare
+PUT on every run, even when the account already exists, so a stale definition never wins) +
+account, the account created when missing) because a bare
 enable is rejected with 400 since workers require an account (#295215). A Worker that
 was disabled before the suite is disabled again afterwards, so its schedule never
 outlives the run. L4 uses a non-action endpoint-analysis proposal, so it does not

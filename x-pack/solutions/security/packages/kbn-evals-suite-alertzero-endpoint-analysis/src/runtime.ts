@@ -194,7 +194,8 @@ export class AlertZeroRuntime {
    * `ensureWorkerServiceAccounts` performs for the UI, against the same public APIs — and
    * passes its id in the same PATCH. The workflow test API refuses a disabled workflow, so the
    * Worker stays enabled until `restoreWorker()`. Idempotent: a second PATCH with
-   * the same body is a no-op revision bump, and an existing role/account is reused as is.
+   * the same body is a no-op revision bump. The role is re-PUT on every run (a stale definition
+   * never wins) and an existing account is reused.
    */
   async installWorker(id: string): Promise<void> {
     const serviceAccountId = await ensureWorkerServiceAccount(this.fetch, id);
@@ -272,8 +273,8 @@ const isConflict = (error: unknown) =>
 
 /**
  * Ensures the eval-owned role + service account exist and returns the account id. The role is
- * PUT on every run (no `createOnly`) so a stale definition never wins; an existing account with
- * the same name is reused.
+ * PUT on every run (no `createOnly`), even when the account already exists, so a stale
+ * definition never wins; only the account is reused when one with the same name exists.
  */
 const ensureWorkerServiceAccount = async (
   fetch: HttpHandler,
@@ -282,6 +283,14 @@ const ensureWorkerServiceAccount = async (
   if (workerId !== SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID) {
     throw new Error(`No service account provisioning implemented for worker: ${workerId}`);
   }
+  // No createOnly: unlike production's onboarding path, the eval OWNS this role, so it is
+  // PUT on every run, BEFORE the account lookup. An account left by an earlier run must not
+  // let a stale role definition win.
+  await fetch(buildSecurityRoleUrl(SERVICE_ACCOUNT_ROLE_NAME), {
+    method: 'PUT',
+    headers: { 'elastic-api-version': SECURITY_ROLE_API_VERSION, 'kbn-xsrf': 'true' },
+    body: JSON.stringify(WORKER_ROLE),
+  });
   const accounts: ServiceAccountEntry[] = [];
   let after: string | undefined;
   do {
@@ -297,15 +306,6 @@ const ensureWorkerServiceAccount = async (
   } while (after);
   const existing = accounts.find((account) => account.name === SERVICE_ACCOUNT_ROLE_NAME);
   if (existing) return existing.id;
-
-  await fetch(buildSecurityRoleUrl(SERVICE_ACCOUNT_ROLE_NAME), {
-    method: 'PUT',
-    headers: { 'elastic-api-version': SECURITY_ROLE_API_VERSION, 'kbn-xsrf': 'true' },
-    // No createOnly: unlike production's onboarding path, the eval OWNS this role, so it
-    // is PUT unconditionally — a stale definition from an earlier run is overwritten
-    // rather than silently winning the collision.
-    body: JSON.stringify(WORKER_ROLE),
-  });
   try {
     const created = await fetch<{ id: string }>(SECURITY_SERVICE_ACCOUNT_URL, {
       method: 'POST',

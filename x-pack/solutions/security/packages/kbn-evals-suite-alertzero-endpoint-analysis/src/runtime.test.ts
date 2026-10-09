@@ -175,6 +175,48 @@ describe('AlertZeroRuntime.installWorker', () => {
     });
   });
 
+  it('re-PUTs the eval role even when the eval service account already exists', async () => {
+    // A stale role definition from an earlier run must not win just because the account
+    // was already created: the role PUT runs before (and regardless of) the account lookup.
+    const fetch = createFetch((path, options) => {
+      if (path === '/internal/security/service_account' && !options?.method) {
+        return {
+          serviceAccounts: [{ id: 'sa-existing', name: 'alertzero_endpoint_analysis_eval' }],
+        };
+      }
+      return {};
+    });
+    await new AlertZeroRuntime(fetch).installWorker(WORKER);
+
+    const rolePuts = fetch.mock.calls.filter(
+      ([path, options]) =>
+        String(path).startsWith('/api/security/role/') && options?.method === 'PUT'
+    );
+    expect(rolePuts).toHaveLength(1);
+    const [rolePath, roleOptions] = rolePuts[0];
+    expect(rolePath).toBe('/api/security/role/alertzero_endpoint_analysis_eval');
+    expect((roleOptions as { query?: unknown }).query).toBeUndefined();
+    const production = WORKER_ROLE_DEFINITIONS[WORKER].role;
+    expect(JSON.parse((roleOptions as { body: string }).body)).toEqual({
+      ...production,
+      description: `${production.description} Eval variant.`,
+      elasticsearch: {
+        ...production.elasticsearch,
+        indices: [
+          ...production.elasticsearch.indices,
+          { names: ['ai-index-idx-alertzero-eval-*'], privileges: ['read', 'view_index_metadata'] },
+        ],
+      },
+    });
+    // The existing account is still reused, not recreated.
+    expect(
+      fetch.mock.calls.some(
+        ([path, options]) =>
+          path === '/internal/security/service_account' && options?.method === 'POST'
+      )
+    ).toBe(false);
+  });
+
   it('provisions the role with read access to the seeded AI index backing pattern', async () => {
     // The worker sweeps `ai-index-idx-alertzero-eval-*` as the service account; a role
     // without that pattern cannot find or dispatch the fixture (no hits, no privilege).
@@ -228,15 +270,27 @@ describe('AlertZeroRuntime.installWorker', () => {
     expect(rolePut).toBeDefined();
     const evalRole = JSON.parse((rolePut![1] as { body: string }).body);
     const production = structuredClone(WORKER_ROLE_DEFINITIONS[WORKER].role) as typeof evalRole;
+    interface IndexEntry {
+      names: string[];
+      privileges: string[];
+    }
+    const isDelta = (entry: IndexEntry) => entry.names.includes('ai-index-idx-alertzero-eval-*');
+    // Pin the delta itself: it must be exactly one read-only entry on exactly that pattern.
+    // Filtering it out of the comparison without asserting it would let a widened grant
+    // (extra privileges or names, or additional write entries) pass.
+    expect(evalRole.elasticsearch.indices.filter(isDelta)).toEqual([
+      { names: ['ai-index-idx-alertzero-eval-*'], privileges: ['read', 'view_index_metadata'] },
+    ]);
+    // Everything outside the delta must equal production, so extra entries (e.g. a
+    // `.kibana*` write grant) are caught by the comparison below.
+    expect(production.elasticsearch.indices.filter(isDelta)).toEqual([]);
     const normalize = (role: typeof evalRole) => ({
       ...role,
       description: undefined,
       elasticsearch: {
         ...role.elasticsearch,
         indices: role.elasticsearch.indices
-          .filter(
-            (entry: { names: string[] }) => !entry.names.includes('ai-index-idx-alertzero-eval-*')
-          )
+          .filter((entry: IndexEntry) => !isDelta(entry))
           .map((entry: { names: string[]; privileges: string[] }) => ({
             names: [...entry.names].sort(),
             privileges: [...entry.privileges].sort(),
