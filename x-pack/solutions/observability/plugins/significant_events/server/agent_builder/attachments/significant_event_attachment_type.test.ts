@@ -14,6 +14,7 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '../../../common';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../routes/types';
+import { createSignificantEventsServer } from '../utils/test_helpers';
 import {
   createSignificantEventAttachmentType,
   formatSignificantEventAsText,
@@ -21,15 +22,14 @@ import {
 
 const event: SignificantEvent = {
   '@timestamp': '2026-01-01T00:00:00.000Z',
-  event_uuid: 'event-1',
   event_id: 'payment-outage',
-  status: 'open',
+  status: 'active',
   workflow_execution_id: 'workflow-1',
   stream_names: ['logs.payment'],
   title: 'Payment outage',
   symptom_hypothesis: 'Payment gateway timeout.',
   summary: 'Payments are failing.',
-  severity: '60-high',
+  severity: 'high',
   confidence: 0.8,
 };
 
@@ -40,14 +40,9 @@ const createGetScopedClients = (
   const getEventSearchClient = jest.fn(() => ({
     findLatestByEventId,
   }));
-  // Canonical client — used by isStale to compare against the authoritative write source.
-  const getEventClient = jest.fn(() => ({
-    findLatestByEventId,
-  }));
 
   return jest.fn().mockResolvedValue({
     getEventSearchClient,
-    getEventClient,
   } as unknown as RouteHandlerScopedClients) as jest.MockedFunction<GetScopedClients>;
 };
 
@@ -73,6 +68,7 @@ describe('createSignificantEventAttachmentType', () => {
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([]),
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
     });
 
     await expect(Promise.resolve(type.validate(event))).resolves.toEqual({
@@ -85,10 +81,11 @@ describe('createSignificantEventAttachmentType', () => {
   });
 
   it('resolves the latest event by event_id', async () => {
-    const updatedEvent = { ...event, event_uuid: 'event-2', status: 'closed' as const };
+    const updatedEvent = { ...event, status: 'inactive' as const };
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([event, updatedEvent]),
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
     });
 
     await expect(
@@ -101,13 +98,13 @@ describe('createSignificantEventAttachmentType', () => {
     // cannot happen in production. Use a realistic update that bumps @timestamp.
     const updatedEvent = {
       ...event,
-      event_uuid: 'event-2',
-      status: 'closed' as const,
+      status: 'inactive' as const,
       '@timestamp': '2026-01-01T00:01:00.000Z',
     };
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([updatedEvent]),
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
     });
 
     await expect(
@@ -123,6 +120,7 @@ describe('createSignificantEventAttachmentType', () => {
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([updatedEvent]),
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
     });
 
     await expect(
@@ -138,6 +136,7 @@ describe('createSignificantEventAttachmentType', () => {
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([updatedEvent]),
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
     });
 
     await expect(
@@ -152,6 +151,7 @@ describe('createSignificantEventAttachmentType', () => {
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([]),
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
     });
 
     expect(formatSignificantEventAsText(event)).toContain('Payment outage');
@@ -159,5 +159,19 @@ describe('createSignificantEventAttachmentType', () => {
     expect(type.isReadonly).toBe(true);
     expect(type.getTools?.()).toEqual([]);
     expect(type.getAgentDescription?.()).toContain('significant event attachment');
+  });
+
+  it('does not read an event without the Nightshift read privilege', async () => {
+    const getScopedClients = createGetScopedClients([event]);
+    const type = createSignificantEventAttachmentType({
+      logger: loggingSystemMock.createLogger(),
+      getScopedClients,
+      server: createSignificantEventsServer({ featurePrivilege: 'none' }),
+    });
+    const context = agentBuilderMocks.attachments.createResolveContextMock();
+
+    await expect(type.resolve?.(event.event_id, context)).resolves.toBeUndefined();
+    await expect(type.isStale?.(createVersionedAttachment(event), context)).resolves.toBe(true);
+    expect(getScopedClients).not.toHaveBeenCalled();
   });
 });

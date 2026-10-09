@@ -10,13 +10,7 @@
 import type { Locator } from '@playwright/test';
 import type { ScoutPage } from '..';
 import { AppMenu } from './app_menu';
-
-export type InspectorView = 'Requests' | 'Data';
-
-const VIEW_CHOOSER_TEST_SUBJECTS: Record<InspectorView, string> = {
-  Requests: 'inspectorViewChooserRequests',
-  Data: 'inspectorViewChooserData',
-};
+import { KibanaCodeEditorWrapper } from '../ui_components';
 
 export class InspectorPage {
   private readonly appMenu: AppMenu;
@@ -25,6 +19,7 @@ export class InspectorPage {
   public readonly viewChooser: Locator;
   public readonly tablePaginationPopoverButton: Locator;
   public readonly searchSessionId: Locator;
+  private readonly codeEditor: KibanaCodeEditorWrapper;
 
   public readonly requests: {
     readonly requestChooser: Locator;
@@ -38,6 +33,7 @@ export class InspectorPage {
 
   constructor(private readonly page: ScoutPage) {
     this.appMenu = new AppMenu(page);
+    this.codeEditor = new KibanaCodeEditorWrapper(this.page);
     this.panel = page.testSubj.locator('inspectorPanel');
     this.closeButton = page.testSubj.locator('euiFlyoutCloseButton');
     this.viewChooser = page.testSubj.locator('inspectorViewChooser');
@@ -55,6 +51,13 @@ export class InspectorPage {
     };
   }
 
+  /**
+   * Opens the inspector panel. Guards against re-opening if already visible.
+   * Handles the overflow menu when the open button is collapsed.
+   *
+   * @param openButtonTestSubj - `data-test-subj` of the button that opens the inspector.
+   *   Defaults to `'openInspectorButton'`.
+   */
   async open(openButtonTestSubj: string = 'openInspectorButton') {
     await this.appMenu.clickItem(openButtonTestSubj);
     await this.panel.waitFor({ state: 'visible' });
@@ -77,6 +80,9 @@ export class InspectorPage {
       .waitFor({ state: 'visible' });
   }
 
+  /**
+   * Closes the inspector panel. No-ops if already closed.
+   */
   async close() {
     await this.closeButton.click();
     await this.panel.waitFor({ state: 'hidden' });
@@ -87,12 +93,25 @@ export class InspectorPage {
     return this.requests.timestamp.innerText();
   }
 
-  async openInspectorView(view: InspectorView) {
+  /**
+   * Opens a specific inspector view by name (e.g. `'Requests'`, `'Data'`).
+   * No-ops when the inspector renders only a single view (no view chooser).
+   */
+  async openInspectorView(viewId: string) {
     await this.panel.waitFor({ state: 'visible' });
+    if (!(await this.viewChooser.isVisible())) {
+      return;
+    }
     await this.viewChooser.click();
-    await this.page.testSubj.click(VIEW_CHOOSER_TEST_SUBJECTS[view]);
+    const item = this.page.testSubj.locator(`inspectorViewChooser${viewId}`);
+    await item.waitFor({ state: 'visible' });
+    await item.click();
   }
 
+  /**
+   * Switches the inspector to its Requests view.
+   * No-ops when the inspector renders only a single view (no view chooser).
+   */
   async openInspectorRequestsView() {
     await this.openInspectorView('Requests');
   }
@@ -136,6 +155,9 @@ export class InspectorPage {
     await this.requests.statisticsTab.click();
   }
 
+  /**
+   * Returns the table rows as a nested string array. Each inner array is one row's cell texts.
+   */
   async getTableData(): Promise<string[][]> {
     await this.panel.locator('tbody').waitFor({ state: 'visible' });
     const tableRows = this.panel.locator('tbody tr');
@@ -148,5 +170,18 @@ export class InspectorPage {
         })
       )
     );
+  }
+
+  /**
+   * Clicks the Response tab, reads the Monaco editor content, and returns the
+   * parsed JSON response object.
+   */
+  async getResponse(): Promise<Record<string, any>> {
+    await this.page.testSubj.locator('inspectorRequestDetailResponse').click();
+    await this.codeEditor.waitCodeEditorReady('inspectorRequestCodeViewerContainer');
+    const responseString = await this.codeEditor.getCodeEditorValueByTestSubj(
+      'inspectorRequestCodeViewerContainer'
+    );
+    return JSON.parse(responseString);
   }
 }

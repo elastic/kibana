@@ -13,10 +13,11 @@ import useDebounce from 'react-use/lib/useDebounce';
 import {
   AGENTIC_INVESTIGATIONS_API_VERSION,
   ESCALATION_ASSIGN_URL,
+  ESCALATION_LINK_URL,
   ESCALATION_LINKED_INVESTIGATIONS_URL,
   ESCALATIONS_INTERNAL_URL,
-  ESCALATION_BY_ID_URL,
   ESCALATION_STATUS_URL,
+  ESCALATION_SYNC_URL,
   ESCALATION_CLOSE_PREVIEW_URL,
   MAX_ESCALATIONS_PAGE_SIZE,
 } from '../../../common';
@@ -29,6 +30,7 @@ import type {
   SetEscalationStatusRequest,
   SetEscalationStatusResponse,
   EscalationClosePreviewResponse,
+  SyncEscalationResponse,
 } from '../../../common';
 import { retryOnTransientError } from '../../retry_on_transient_error';
 import { escalationQueryKeys } from '../query_keys';
@@ -133,8 +135,8 @@ export const useAttachToEscalation = () => {
       escalationId: string;
       linkedInvestigationId: string;
     }): Promise<EscalationConversation> =>
-      services.http.patch<EscalationConversation>(
-        ESCALATION_BY_ID_URL.replace('{id}', encodeURIComponent(escalationId)),
+      services.http.post<EscalationConversation>(
+        ESCALATION_LINK_URL.replace('{id}', encodeURIComponent(escalationId)),
         {
           version: AGENTIC_INVESTIGATIONS_API_VERSION,
           body: JSON.stringify({ linked_investigations: [linkedInvestigationId] }),
@@ -257,5 +259,25 @@ export const useEscalationClosePreview = (
     cacheTime: 0,
     // Keep the list current while the dialog is open.
     refetchInterval: 10_000,
+  });
+};
+
+/**
+ * Syncs the escalation's attachments with its linked investigations. Resolves with how many
+ * attachments were copied; invalidates the escalation queries only when something changed.
+ */
+export const useSyncEscalation = () => {
+  const { services } = useKibana<CoreStart>();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ escalationId }: { escalationId: string }): Promise<SyncEscalationResponse> =>
+      services.http.post<SyncEscalationResponse>(
+        ESCALATION_SYNC_URL.replace('{id}', encodeURIComponent(escalationId)),
+        { version: AGENTIC_INVESTIGATIONS_API_VERSION }
+      ),
+    onSuccess: ({ copied }) => {
+      if (copied > 0) invalidateEscalations(queryClient);
+    },
   });
 };

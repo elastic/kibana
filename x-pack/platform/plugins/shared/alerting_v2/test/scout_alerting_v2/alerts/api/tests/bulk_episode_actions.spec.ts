@@ -55,18 +55,18 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHashOne,
-          episode: { id: episodeIdOne, status: 'active' },
+          alert: { id: episodeIdOne, status: 'active' },
         }),
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHashTwo,
-          episode: { id: episodeIdTwo, status: 'active' },
+          alert: { id: episodeIdTwo, status: 'active' },
         }),
       ]);
 
       const response = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
         headers: writerHeaders,
-        body: { items: [{ episode_id: episodeIdOne }, { episode_id: episodeIdTwo }] },
+        body: { items: [{ alert_id: episodeIdOne }, { alert_id: episodeIdTwo }] },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -78,20 +78,20 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       });
       expect(actions).toHaveLength(2);
 
-      const firstAction = actions.find((doc) => doc.episode_id === episodeIdOne);
-      const secondAction = actions.find((doc) => doc.episode_id === episodeIdTwo);
+      const firstAction = actions.find((doc) => doc.alert_id === episodeIdOne);
+      const secondAction = actions.find((doc) => doc.alert_id === episodeIdTwo);
 
       // The group_hash is resolved server-side from the episode's events.
       expect(firstAction).toMatchObject({
         action_type: 'ack',
         group_hash: groupHashOne,
-        episode_id: episodeIdOne,
+        alert_id: episodeIdOne,
         rule_id: ruleId,
       });
       expect(secondAction).toMatchObject({
         action_type: 'ack',
         group_hash: groupHashTwo,
-        episode_id: episodeIdTwo,
+        alert_id: episodeIdTwo,
         rule_id: ruleId,
       });
     }
@@ -110,12 +110,12 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHashOne,
-          episode: { id: episodeIdOne, status: 'active' },
+          alert: { id: episodeIdOne, status: 'active' },
         }),
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHashTwo,
-          episode: { id: episodeIdTwo, status: 'active' },
+          alert: { id: episodeIdTwo, status: 'active' },
         }),
       ]);
 
@@ -123,8 +123,8 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
         headers: writerHeaders,
         body: {
           items: [
-            { episode_id: episodeIdOne, tags: ['production'] },
-            { episode_id: episodeIdTwo, tags: ['important', 'reviewed'] },
+            { alert_id: episodeIdOne, tags: ['production'] },
+            { alert_id: episodeIdTwo, tags: ['important', 'reviewed'] },
           ],
         },
       });
@@ -138,21 +138,21 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       });
       expect(actions).toHaveLength(2);
 
-      const firstAction = actions.find((doc) => doc.episode_id === episodeIdOne);
-      const secondAction = actions.find((doc) => doc.episode_id === episodeIdTwo);
+      const firstAction = actions.find((doc) => doc.alert_id === episodeIdOne);
+      const secondAction = actions.find((doc) => doc.alert_id === episodeIdTwo);
 
       // The group_hash is resolved server-side from the episode's events.
       expect(firstAction).toMatchObject({
         action_type: 'tag',
         group_hash: groupHashOne,
-        episode_id: episodeIdOne,
+        alert_id: episodeIdOne,
         rule_id: ruleId,
         tags: ['production'],
       });
       expect(secondAction).toMatchObject({
         action_type: 'tag',
         group_hash: groupHashTwo,
-        episode_id: episodeIdTwo,
+        alert_id: episodeIdTwo,
         rule_id: ruleId,
         tags: ['important', 'reviewed'],
       });
@@ -168,13 +168,19 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       buildAlertEvent({
         rule: { id: ruleId, version: 1 },
         group_hash: groupHash,
-        episode: { id: episodeId, status: 'active' },
+        alert: { id: episodeId, status: 'active' },
       }),
     ]);
 
+    const ackResponse = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
+      headers: writerHeaders,
+      body: { items: [{ alert_id: episodeId }] },
+    });
+    expect(ackResponse).toHaveStatusCode(200);
+
     const response = await apiClient.post(BULK_UNACK_EPISODE_ACTION_URL, {
       headers: writerHeaders,
-      body: { items: [{ episode_id: episodeId }] },
+      body: { items: [{ alert_id: episodeId }] },
     });
 
     expect(response).toHaveStatusCode(200);
@@ -188,7 +194,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
     expect(actions[0]).toMatchObject({
       action_type: 'unack',
       group_hash: groupHash,
-      episode_id: episodeId,
+      alert_id: episodeId,
       rule_id: ruleId,
     });
   });
@@ -204,13 +210,13 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: episodeId, status: 'active' },
+          alert: { id: episodeId, status: 'active' },
         }),
       ]);
 
       const response = await apiClient.post(BULK_ASSIGN_EPISODE_ACTION_URL, {
         headers: writerHeaders,
-        body: { items: [{ episode_id: episodeId, assignee_uid: 'u_someone' }] },
+        body: { items: [{ alert_id: episodeId, assignee_uid: 'u_someone' }] },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -224,7 +230,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       expect(actions[0]).toMatchObject({
         action_type: 'assign',
         group_hash: groupHash,
-        episode_id: episodeId,
+        alert_id: episodeId,
         rule_id: ruleId,
         assignee_uid: 'u_someone',
       });
@@ -232,7 +238,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
   );
 
   apiTest(
-    'partial success: reports ALERT_EPISODE_NOT_FOUND when some episode_ids are unknown',
+    'partial success: reports ALERT_NOT_FOUND when some alert_ids are unknown',
     async ({ apiClient, apiServices }) => {
       const ruleId = 'bulk-episode-partial-rule';
       const knownGroup = 'bulk-episode-partial-known-group';
@@ -242,17 +248,14 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: knownGroup,
-          episode: { id: knownEpisode, status: 'active' },
+          alert: { id: knownEpisode, status: 'active' },
         }),
       ]);
 
       const response = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
         headers: writerHeaders,
         body: {
-          items: [
-            { episode_id: knownEpisode },
-            { episode_id: 'bulk-episode-partial-unknown-episode' },
-          ],
+          items: [{ alert_id: knownEpisode }, { alert_id: 'bulk-episode-partial-unknown-episode' }],
         },
       });
 
@@ -260,7 +263,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       expect(response.body.affected_count).toBe(1);
       expect(response.body.errors).toHaveLength(1);
       expect(response.body.errors[0].id).toBe('bulk-episode-partial-unknown-episode');
-      expect(response.body.errors[0].error.code).toBe('ALERT_EPISODE_NOT_FOUND');
+      expect(response.body.errors[0].error.code).toBe('ALERT_NOT_FOUND');
 
       const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
@@ -270,13 +273,13 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       expect(actions[0]).toMatchObject({
         action_type: 'ack',
         group_hash: knownGroup,
-        episode_id: knownEpisode,
+        alert_id: knownEpisode,
       });
     }
   );
 
   apiTest(
-    'partial success: bulk tag reports ALERT_EPISODE_NOT_FOUND keyed by the unknown episode_id',
+    'partial success: bulk tag reports ALERT_NOT_FOUND keyed by the unknown alert_id',
     async ({ apiClient, apiServices }) => {
       const ruleId = 'bulk-tag-partial-rule';
       const knownGroup = 'bulk-tag-partial-known-group';
@@ -286,7 +289,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: knownGroup,
-          episode: { id: knownEpisode, status: 'active' },
+          alert: { id: knownEpisode, status: 'active' },
         }),
       ]);
 
@@ -294,8 +297,8 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
         headers: writerHeaders,
         body: {
           items: [
-            { episode_id: knownEpisode, tags: ['production'] },
-            { episode_id: 'bulk-tag-partial-unknown-episode', tags: ['x'] },
+            { alert_id: knownEpisode, tags: ['production'] },
+            { alert_id: 'bulk-tag-partial-unknown-episode', tags: ['x'] },
           ],
         },
       });
@@ -304,7 +307,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       expect(response.body.affected_count).toBe(1);
       expect(response.body.errors).toHaveLength(1);
       expect(response.body.errors[0].id).toBe('bulk-tag-partial-unknown-episode');
-      expect(response.body.errors[0].error.code).toBe('ALERT_EPISODE_NOT_FOUND');
+      expect(response.body.errors[0].error.code).toBe('ALERT_NOT_FOUND');
 
       const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
@@ -314,21 +317,21 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       expect(actions[0]).toMatchObject({
         action_type: 'tag',
         group_hash: knownGroup,
-        episode_id: knownEpisode,
+        alert_id: knownEpisode,
         tags: ['production'],
       });
     }
   );
 
   apiTest(
-    'partial success: reports a per-item error for every item when every episode_id is unknown',
+    'partial success: reports a per-item error for every item when every alert_id is unknown',
     async ({ apiClient, apiServices }) => {
       const response = await apiClient.post(BULK_UNACK_EPISODE_ACTION_URL, {
         headers: writerHeaders,
         body: {
           items: [
-            { episode_id: 'bulk-episode-allinvalid-1' },
-            { episode_id: 'bulk-episode-allinvalid-2' },
+            { alert_id: 'bulk-episode-allinvalid-1' },
+            { alert_id: 'bulk-episode-allinvalid-2' },
           ],
         },
       });
@@ -338,7 +341,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       expect(response.body.errors).toHaveLength(2);
       expect(
         response.body.errors.map((e: { error: { code: string } }) => e.error.code)
-      ).toStrictEqual(['ALERT_EPISODE_NOT_FOUND', 'ALERT_EPISODE_NOT_FOUND']);
+      ).toStrictEqual(['ALERT_NOT_FOUND', 'ALERT_NOT_FOUND']);
 
       const actions = await apiServices.alertingV2.alertActionsEvents.find({
         actionTypes: ['unack'],
@@ -361,13 +364,13 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
           status: 'breached',
           source: 'engine-x',
           type: 'alert',
-          episode: { id: episodeId, status: 'active' },
+          alert: { id: episodeId, status: 'active' },
         }),
       ]);
 
       const response = await apiClient.post(BULK_DEACTIVATE_EPISODE_ACTION_URL, {
         headers: writerHeaders,
-        body: { items: [{ episode_id: episodeId, reason: 'bulk deactivate' }] },
+        body: { items: [{ alert_id: episodeId, reason: 'bulk deactivate' }] },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -381,7 +384,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       expect(actions[0]).toMatchObject({
         action_type: 'deactivate',
         group_hash: groupHash,
-        episode_id: episodeId,
+        alert_id: episodeId,
         rule_id: ruleId,
         reason: 'bulk deactivate',
       });
@@ -398,7 +401,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
         status: 'recovered',
         source: 'engine-x',
         type: 'alert',
-        episode: { id: episodeId, status: 'inactive' },
+        alert: { id: episodeId, status: 'inactive' },
       });
     }
   );
@@ -417,13 +420,13 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
           status: 'recovered',
           source: 'engine-x',
           type: 'alert',
-          episode: { id: episodeId, status: 'inactive' },
+          alert: { id: episodeId, status: 'inactive' },
         }),
       ]);
 
       const response = await apiClient.post(BULK_ACTIVATE_EPISODE_ACTION_URL, {
         headers: writerHeaders,
-        body: { items: [{ episode_id: episodeId, reason: 'bulk activate' }] },
+        body: { items: [{ alert_id: episodeId, reason: 'bulk activate' }] },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -437,7 +440,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       expect(actions[0]).toMatchObject({
         action_type: 'activate',
         group_hash: groupHash,
-        episode_id: episodeId,
+        alert_id: episodeId,
         reason: 'bulk activate',
       });
 
@@ -451,13 +454,13 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
         status: 'breached',
         source: 'engine-x',
         type: 'alert',
-        episode: { id: episodeId, status: 'active' },
+        alert: { id: episodeId, status: 'active' },
       });
     }
   );
 
   apiTest(
-    'lifecycle: reports INVALID_EPISODE_STATE_TRANSITION for a bulk deactivate item whose episode is already inactive',
+    'lifecycle: reports INVALID_ALERT_STATE_TRANSITION for a bulk deactivate item whose episode is already inactive',
     async ({ apiClient, apiServices }) => {
       const ruleId = 'bulk-skip-deactivate-rule';
       const episodeIdOk = 'bulk-skip-deactivate-ok-episode';
@@ -469,14 +472,14 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
           group_hash: buildGroupHash('bulk-skip-deactivate-ok-group'),
           status: 'breached',
           type: 'alert',
-          episode: { id: episodeIdOk, status: 'active' },
+          alert: { id: episodeIdOk, status: 'active' },
         }),
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: buildGroupHash('bulk-skip-deactivate-inactive-group'),
           status: 'recovered',
           type: 'alert',
-          episode: { id: episodeIdInactive, status: 'inactive' },
+          alert: { id: episodeIdInactive, status: 'inactive' },
         }),
       ]);
 
@@ -484,8 +487,8 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
         headers: writerHeaders,
         body: {
           items: [
-            { episode_id: episodeIdOk, reason: 'should write' },
-            { episode_id: episodeIdInactive, reason: 'should be skipped' },
+            { alert_id: episodeIdOk, reason: 'should write' },
+            { alert_id: episodeIdInactive, reason: 'should be skipped' },
           ],
         },
       });
@@ -494,7 +497,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       expect(response.body.affected_count).toBe(1);
       expect(response.body.errors).toHaveLength(1);
       expect(response.body.errors[0].id).toBe(episodeIdInactive);
-      expect(response.body.errors[0].error.code).toBe('INVALID_EPISODE_STATE_TRANSITION');
+      expect(response.body.errors[0].error.code).toBe('INVALID_ALERT_STATE_TRANSITION');
 
       const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
@@ -502,7 +505,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       });
       expect(actions).toHaveLength(1);
       expect(actions[0]).toMatchObject({
-        episode_id: episodeIdOk,
+        alert_id: episodeIdOk,
         action_type: 'deactivate',
         reason: 'should write',
       });
@@ -510,7 +513,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
   );
 
   apiTest(
-    'lifecycle: reports INVALID_EPISODE_STATE_TRANSITION for a bulk activate item whose episode is still active',
+    'lifecycle: reports INVALID_ALERT_STATE_TRANSITION for a bulk activate item whose episode is still active',
     async ({ apiClient, apiServices }) => {
       const ruleId = 'bulk-skip-activate-rule';
       const groupHash = 'bulk-skip-activate-group';
@@ -522,20 +525,20 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
           group_hash: groupHash,
           status: 'breached',
           type: 'alert',
-          episode: { id: episodeId, status: 'active' },
+          alert: { id: episodeId, status: 'active' },
         }),
       ]);
 
       const response = await apiClient.post(BULK_ACTIVATE_EPISODE_ACTION_URL, {
         headers: writerHeaders,
-        body: { items: [{ episode_id: episodeId, reason: 'precondition will fail' }] },
+        body: { items: [{ alert_id: episodeId, reason: 'precondition will fail' }] },
       });
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.affected_count).toBe(0);
       expect(response.body.errors).toHaveLength(1);
       expect(response.body.errors[0].id).toBe(episodeId);
-      expect(response.body.errors[0].error.code).toBe('INVALID_EPISODE_STATE_TRANSITION');
+      expect(response.body.errors[0].error.code).toBe('INVALID_ALERT_STATE_TRANSITION');
 
       const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
@@ -546,16 +549,16 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       // The latest .rule-events state must remain unchanged.
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
       expect(latestStates.get(groupHash)).toMatchObject({
-        episode: { id: episodeId, status: 'active' },
+        alert: { id: episodeId, status: 'active' },
       });
     }
   );
 
   apiTest(
-    'lifecycle: reports ALERT_EPISODE_NOT_LATEST for a bulk activate item targeting a superseded episode',
+    'lifecycle: reports ALERT_NOT_LATEST for a bulk activate item targeting a superseded episode',
     async ({ apiClient, apiServices }) => {
       // Lifecycle actions are guarded to the latest episode of the series;
-      // in bulk the guard is reported per item, keyed by the episode_id.
+      // in bulk the guard is reported per item, keyed by the alert_id.
       const ruleId = 'bulk-not-latest-rule';
       const groupHash = 'bulk-not-latest-group';
       const olderEpisodeId = 'bulk-not-latest-older';
@@ -568,27 +571,30 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
           status: 'recovered',
-          episode: { id: olderEpisodeId, status: 'inactive' },
+          alert: { id: olderEpisodeId, status: 'inactive' },
         }),
         buildAlertEvent({
           '@timestamp': new Date(now).toISOString(),
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: newerEpisodeId, status: 'active' },
+          alert: { id: newerEpisodeId, status: 'active' },
         }),
       ]);
 
       const response = await apiClient.post(BULK_ACTIVATE_EPISODE_ACTION_URL, {
         headers: writerHeaders,
-        body: { items: [{ episode_id: olderEpisodeId, reason: 'reopen old' }] },
+        body: { items: [{ alert_id: olderEpisodeId, reason: 'reopen old' }] },
       });
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.affected_count).toBe(0);
       expect(response.body.errors).toHaveLength(1);
       expect(response.body.errors[0].id).toBe(olderEpisodeId);
-      expect(response.body.errors[0].error.code).toBe('ALERT_EPISODE_NOT_LATEST');
-      expect(response.body.errors[0].error.details).toMatchObject({ group_hash: groupHash });
+      expect(response.body.errors[0].error.code).toBe('ALERT_NOT_LATEST');
+      expect(response.body.errors[0].error.details).toMatchObject({
+        alert_id: olderEpisodeId,
+        group_hash: groupHash,
+      });
 
       const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
@@ -615,19 +621,19 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
           status: 'recovered',
-          episode: { id: olderEpisodeId, status: 'inactive' },
+          alert: { id: olderEpisodeId, status: 'inactive' },
         }),
         buildAlertEvent({
           '@timestamp': new Date(now).toISOString(),
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: newerEpisodeId, status: 'active' },
+          alert: { id: newerEpisodeId, status: 'active' },
         }),
       ]);
 
       const response = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
         headers: writerHeaders,
-        body: { items: [{ episode_id: olderEpisodeId }] },
+        body: { items: [{ alert_id: olderEpisodeId }] },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -641,9 +647,57 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       expect(actions[0]).toMatchObject({
         action_type: 'ack',
         group_hash: groupHash,
-        episode_id: olderEpisodeId,
+        alert_id: olderEpisodeId,
         rule_id: ruleId,
       });
+    }
+  );
+
+  apiTest(
+    'precondition: reports INVALID_ALERT_STATE_TRANSITION for an already acknowledged item',
+    async ({ apiClient, apiServices }) => {
+      // The honest bulk answer for a no-op: the item is counted as an error
+      // rather than silently inflating affected_count with a duplicate doc.
+      const ruleId = 'bulk-ack-no-op-rule';
+      const acknowledgedEpisodeId = 'bulk-ack-no-op-acknowledged-episode';
+      const freshEpisodeId = 'bulk-ack-no-op-fresh-episode';
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: buildGroupHash('bulk-ack-no-op-acknowledged-group'),
+          alert: { id: acknowledgedEpisodeId, status: 'active' },
+        }),
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: buildGroupHash('bulk-ack-no-op-fresh-group'),
+          alert: { id: freshEpisodeId, status: 'active' },
+        }),
+      ]);
+
+      const firstResponse = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
+        headers: writerHeaders,
+        body: { items: [{ alert_id: acknowledgedEpisodeId }] },
+      });
+      expect(firstResponse).toHaveStatusCode(200);
+
+      const response = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
+        headers: writerHeaders,
+        body: { items: [{ alert_id: acknowledgedEpisodeId }, { alert_id: freshEpisodeId }] },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.affected_count).toBe(1);
+      expect(response.body.errors).toHaveLength(1);
+      expect(response.body.errors[0].id).toBe(acknowledgedEpisodeId);
+      expect(response.body.errors[0].error.code).toBe('INVALID_ALERT_STATE_TRANSITION');
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['ack'],
+      });
+      expect(actions).toHaveLength(2);
+      expect(actions.filter((doc) => doc.alert_id === acknowledgedEpisodeId)).toHaveLength(1);
     }
   );
 
@@ -651,7 +705,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
     // The body must be an `{ items: [...] }` envelope, not a bare array.
     const response = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
       headers: writerHeaders,
-      body: [{ episode_id: 'any-episode' }],
+      body: [{ alert_id: 'any-episode' }],
     });
 
     expect(response).toHaveStatusCode(400);
@@ -668,9 +722,42 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
+  apiTest(
+    'schema: rejects items repeating an alert_id with 400 and writes nothing',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'bulk-ack-duplicate-item-rule';
+      const episodeId = 'bulk-ack-duplicate-item-episode';
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: buildGroupHash('bulk-ack-duplicate-item-group'),
+          alert: { id: episodeId, status: 'active' },
+        }),
+      ]);
+
+      const response = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
+        headers: writerHeaders,
+        body: { items: [{ alert_id: episodeId }, { alert_id: episodeId }] },
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+      expect(response.body.message).toContain(
+        `Each alert_id can appear at most once per request; [${episodeId}] is repeated`
+      );
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['ack'],
+      });
+      expect(actions).toHaveLength(0);
+    }
+  );
+
   apiTest('schema: rejects more than 100 items with 400', async ({ apiClient }) => {
     const items = Array.from({ length: 101 }, (_v, i) => ({
-      episode_id: `bulk-episode-too-many-${i}`,
+      alert_id: `bulk-episode-too-many-${i}`,
     }));
 
     const response = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
@@ -686,14 +773,14 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
     // The envelope is strict: only `items` is accepted.
     const response = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
       headers: writerHeaders,
-      body: { items: [{ episode_id: 'any-episode' }], dry_run: true },
+      body: { items: [{ alert_id: 'any-episode' }], dry_run: true },
     });
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('schema: rejects an item missing episode_id with 400', async ({ apiClient }) => {
+  apiTest('schema: rejects an item missing alert_id with 400', async ({ apiClient }) => {
     const response = await apiClient.post(BULK_ASSIGN_EPISODE_ACTION_URL, {
       headers: writerHeaders,
       body: { items: [{ assignee_uid: 'u_someone' }] },
@@ -708,7 +795,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
     // for the strict item schema.
     const response = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
       headers: writerHeaders,
-      body: { items: [{ episode_id: 'any-episode', action_type: 'ack' }] },
+      body: { items: [{ alert_id: 'any-episode', action_type: 'ack' }] },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -716,11 +803,11 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('schema: rejects an item carrying group_hash with 400', async ({ apiClient }) => {
-    // Episode items are identified by episode_id only; the group_hash is
+    // Episode items are identified by alert_id only; the group_hash is
     // resolved server-side, so sending it is an unrecognized key.
     const response = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
       headers: writerHeaders,
-      body: { items: [{ episode_id: 'any-episode', group_hash: buildGroupHash('any-group') }] },
+      body: { items: [{ alert_id: 'any-episode', group_hash: buildGroupHash('any-group') }] },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -728,7 +815,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('schema: rejects a bulk tag item keyed by group_hash with 400', async ({ apiClient }) => {
-    // Tag moved to the episode routes: items are `{ episode_id, tags }`,
+    // Tag moved to the episode routes: items are `{ alert_id, tags }`,
     // so a series-style group_hash key is rejected by the strict schema.
     const response = await apiClient.post(BULK_TAG_EPISODE_ACTION_URL, {
       headers: writerHeaders,
@@ -746,7 +833,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
       // validation.
       const response = await apiClient.post(BULK_ASSIGN_EPISODE_ACTION_URL, {
         headers: writerHeaders,
-        body: { items: [{ episode_id: 'any-episode' }] },
+        body: { items: [{ alert_id: 'any-episode' }] },
       });
 
       expect(response).toHaveStatusCode(400);
@@ -754,10 +841,10 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
     }
   );
 
-  apiTest('schema: rejects an item with empty episode_id with 400', async ({ apiClient }) => {
+  apiTest('schema: rejects an item with empty alert_id with 400', async ({ apiClient }) => {
     const response = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
       headers: writerHeaders,
-      body: { items: [{ episode_id: '' }] },
+      body: { items: [{ alert_id: '' }] },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -765,11 +852,11 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
   });
 
   apiTest(
-    'schema: rejects an item with episode_id over 150 chars with 400',
+    'schema: rejects an item with alert_id over 150 chars with 400',
     async ({ apiClient }) => {
       const response = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
         headers: writerHeaders,
-        body: { items: [{ episode_id: 'a'.repeat(151) }] },
+        body: { items: [{ alert_id: 'a'.repeat(151) }] },
       });
 
       expect(response).toHaveStatusCode(400);
@@ -782,7 +869,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
     async ({ apiClient }) => {
       const response = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
         headers: writerHeaders,
-        body: { items: [{ episode_id: 'any-episode', unknownField: 'x' }] },
+        body: { items: [{ alert_id: 'any-episode', unknownField: 'x' }] },
       });
 
       expect(response).toHaveStatusCode(400);
@@ -799,7 +886,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
 
       const response = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
-        body: { items: [{ episode_id: 'bulk-episode-authz-read-episode' }] },
+        body: { items: [{ alert_id: 'bulk-episode-authz-read-episode' }] },
       });
 
       expect(response).toHaveStatusCode(403);
@@ -813,7 +900,7 @@ apiTest.describe('Bulk episode actions API', { tag: '@local-stateful-classic' },
 
       const response = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
-        body: { items: [{ episode_id: 'bulk-episode-authz-none-episode' }] },
+        body: { items: [{ alert_id: 'bulk-episode-authz-none-episode' }] },
       });
 
       expect(response).toHaveStatusCode(403);

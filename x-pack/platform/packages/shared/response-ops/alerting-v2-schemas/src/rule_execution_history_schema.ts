@@ -66,9 +66,9 @@ export const listRuleExecutionsRequestSchema = z
     page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_RESULT_WINDOW })
       .default(1)
       .describe(`Page number.`),
-    per_page: queryIntSchema({ min: 0, max: EXECUTION_HISTORY_MAX_PER_PAGE })
+    per_page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_PER_PAGE })
       .default(EXECUTION_HISTORY_DEFAULT_PER_PAGE)
-      .describe(`Number of results per page. Pass 0 for a count-only read.`),
+      .describe(`Number of results per page.`),
   })
   .strict()
   .refine(({ page, per_page: perPage }) => page * perPage <= EXECUTION_HISTORY_MAX_RESULT_WINDOW, {
@@ -82,7 +82,13 @@ export const ruleExecutionViewSchema = z
     id: z.string(),
     rule: z.object({
       id: z.string(),
-      version: z.number().int().nullable(),
+      version: z
+        .number()
+        .int()
+        .optional()
+        .describe(
+          'The rule version this run executed. Omitted until the rule executor emits its own event; the `task-run` event does not carry one.'
+        ),
     }),
     space_id: z.string(),
     started_at: z.iso.datetime(),
@@ -101,13 +107,19 @@ export const ruleExecutionViewSchema = z
         ),
     }),
     outcome: ruleExecutionOutcomeSchema,
-    reason: z.string().nullable(),
+    reason: z
+      .string()
+      .optional()
+      .describe('Why the run ended the way it did. Omitted when the source recorded no reason.'),
     error: z
       .object({
         message: z.string(),
-        stack_trace: z.string().nullable(),
+        stack_trace: z.string().optional().describe('Omitted when the source recorded no trace.'),
       })
-      .nullable(),
+      .optional()
+      .describe(
+        'Failure details. Omitted on a successful run, or when the failure was unclassified.'
+      ),
   })
   .meta({ id: 'alerting_rule_execution' });
 
@@ -122,7 +134,7 @@ export const listRuleExecutionsResponseSchema = z
       .nonnegative()
       .describe(`The number of rule executions matching the query. ${ESTIMATED_COUNT_NOTE}`),
     page: z.number().int().min(1),
-    per_page: z.number().int().min(0),
+    per_page: z.number().int().min(1),
   })
   .meta({ id: 'alerting_rule_executions_response' });
 

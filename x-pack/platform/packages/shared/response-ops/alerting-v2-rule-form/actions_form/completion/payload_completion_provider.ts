@@ -8,7 +8,7 @@
 import { monaco } from '@kbn/code-editor';
 import { parseLineForCompletion } from '@kbn/workflows-yaml';
 import type { PayloadVariable } from '../registry';
-import { DISPATCH_PAYLOAD_VARIABLES, ALERT_EPISODE_FIELDS } from '../registry';
+import { DISPATCH_PAYLOAD_VARIABLES, PAYLOAD_ALERT_FIELDS } from '../registry';
 
 // All dispatcher payload variables are nested under `context.inputs.payload` at render time.
 const TOP_LEVEL_PREFIX = 'inputs.payload.';
@@ -42,11 +42,11 @@ const getParentPath = (pathSegments: string[] | null, lastPathSegment: string | 
   return lastPathSegment === null ? pathSegments : pathSegments.slice(0, -1);
 };
 
-const isEpisodeContext = (parent: string[]): boolean =>
+const isAlertContext = (parent: string[]): boolean =>
   parent.length >= 4 &&
   parent[0] === 'inputs' &&
   parent[1] === 'payload' &&
-  parent[2] === 'episodes' &&
+  parent[2] === 'alerts' &&
   /^\d+$/.test(parent[3]);
 
 const isPayloadContext = (parent: string[]): boolean =>
@@ -83,8 +83,8 @@ export const createPayloadCompletionProvider = (): monaco.languages.CompletionIt
 
     let candidates: readonly PayloadVariable[];
     let prefix = '';
-    if (isEpisodeContext(parent)) {
-      candidates = ALERT_EPISODE_FIELDS;
+    if (isAlertContext(parent)) {
+      candidates = PAYLOAD_ALERT_FIELDS;
     } else if (isPayloadContext(parent)) {
       candidates = DISPATCH_PAYLOAD_VARIABLES;
     } else if (isInputsContext(parent)) {

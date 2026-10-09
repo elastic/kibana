@@ -1,5 +1,5 @@
 {
-  "sha1": "0e906c6ec6ceabbf11a32cb6c91508beab4e4cea",
+  "sha1": "8d022eb5ec04ec52c26e6e17857372dc1d7be687",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -728,8 +728,36 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
-        "line": 160,
-        "column": 12
+        "line": 169,
+        "column": 11
+      }
+    },
+    {
+      "id": "01ef9b7d0fce753-8d81a4f3934d1b0",
+      "title": "context engine KI lifecycle filter keeps the filters when a query only displays a lifecycle field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
+        "line": 176,
+        "column": 27
+      }
+    },
+    {
+      "id": "01ef9b7d0fce753-33d34c52c26d21a",
+      "title": "context engine KI lifecycle filter keeps KIs that share an id across targets",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
+        "line": 203,
+        "column": 4
       }
     },
     {
@@ -742,13 +770,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
-        "line": 169,
-        "column": 19
+        "line": 221,
+        "column": 72
       }
     },
     {
-      "id": "01ef9b7d0fce753-142793d74c5389b",
-      "title": "context engine KI lifecycle filter applies the filter through a pattern and keeps the score",
+      "id": "01ef9b7d0fce753-a50299d0ff3d165",
+      "title": "context engine KI lifecycle filter applies the filter through a pattern",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -756,8 +784,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
-        "line": 304,
-        "column": 27
+        "line": 234,
+        "column": 11
       }
     },
     {
@@ -770,7 +798,35 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
-        "line": 311,
+        "line": 338,
+        "column": 27
+      }
+    },
+    {
+      "id": "01ef9b7d0fce753-88fc1c544be307e",
+      "title": "context engine KI lifecycle filter scores a full text match after the revision collapse",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
+        "line": 355,
+        "column": 27
+      }
+    },
+    {
+      "id": "01ef9b7d0fce753-830f9ae3aded205",
+      "title": "context engine KI lifecycle filter describe counts only the newest active revisions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
+        "line": 364,
         "column": 27
       }
     },
@@ -784,7 +840,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
-        "line": 328,
+        "line": 375,
         "column": 27
       }
     }

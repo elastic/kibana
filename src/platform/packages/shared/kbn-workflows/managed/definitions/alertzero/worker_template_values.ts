@@ -12,13 +12,36 @@ import type { ManagedWorkflowTemplateValues } from '../../types';
 export interface CommonWorkerTemplateValues extends ManagedWorkflowTemplateValues {
   settingsVersion: number;
   autonomyLevel: 'manual' | 'assisted' | 'supervised';
+  /** Absent until an admin selects an account. Omitted from YAML rather than written empty. */
+  serviceAccountId?: string;
 }
+
+const RUN_AS_LINE_TOKEN = '  __WORKER_RUN_AS_LINE__:\n';
+
+/**
+ * Workers enabled before a service account was required have no account id stored. Upgrade and
+ * boot re-render their YAML from those stored values, and they must stay valid so they keep
+ * running until an admin selects an account. Alert Triage, Rule Tuning, and Rule Coverage have
+ * no other settings key, so omitting `run_as` would leave a bare `settings:`. That parses as
+ * null and fails workflow validation, which would mark the worker unavailable. `settings: {}`
+ * is valid because every settings field is optional.
+ */
+const EMPTY_ONLY_RUN_AS_SETTINGS = /settings:\n {2}__WORKER_RUN_AS_LINE__:\n(?=\S|$)/g;
+
+const renderRunAs = (yaml: string, serviceAccountId: string | undefined): string => {
+  if (serviceAccountId) {
+    return yaml.replaceAll(RUN_AS_LINE_TOKEN, `  run_as: ${JSON.stringify(serviceAccountId)}\n`);
+  }
+  return yaml
+    .replaceAll(EMPTY_ONLY_RUN_AS_SETTINGS, 'settings: {}\n')
+    .replaceAll(RUN_AS_LINE_TOKEN, '');
+};
 
 export const renderCommonWorkerYaml = (
   yaml: string,
-  { settingsVersion, autonomyLevel }: CommonWorkerTemplateValues
+  { settingsVersion, autonomyLevel, serviceAccountId }: CommonWorkerTemplateValues
 ): string =>
-  yaml
+  renderRunAs(yaml, serviceAccountId)
     .replaceAll('__WORKER_SETTINGS_VERSION__', String(settingsVersion))
     .replaceAll('__WORKER_AUTONOMY_LEVEL__', autonomyLevel);
 
@@ -61,6 +84,58 @@ export const renderRuleTuningWorkerYaml = (
     '__WORKER_EXTRAS__',
     JSON.stringify(values.extras)
   );
+
+export type HuntWorkerTemplateValues = ScheduledWorkerTemplateValues;
+
+/**
+ * Hunt Watch Continuous Threat Hunt has no configurable dials: enabled/disabled
+ * (autonomy) and the schedule interval are its only settings. tier2When, candidateLimit,
+ * and fanOutMax are fixed implementation constants.
+ */
+const HUNT_WORKER_DEFAULTS = {
+  tier2When: 'always' as const,
+  candidateLimit: 10,
+  fanOutMax: 10,
+};
+
+/**
+ * The manual trigger's optional `reportIds` input: a manual-bypass
+ * fan-out over named reports, capped at 10 to match `create_proposal.yaml`'s
+ * trigger-input shape and the candidates route's own `report_ids` bound. Present on
+ * every autonomy level's manual trigger, scheduled or not.
+ */
+const MANUAL_TRIGGER_WITH_REPORT_IDS_INPUT = [
+  '  - type: manual',
+  '    inputs:',
+  '      properties:',
+  '        reportIds:',
+  '          type: array',
+  '          items:',
+  '            type: string',
+  '          maxItems: 10',
+].join('\n');
+
+/**
+ * Manual autonomy: manual trigger only. Assisted/supervised: 4h (or configured)
+ * schedule plus manual.
+ */
+export const renderHuntWorkerYaml = (yaml: string, values: HuntWorkerTemplateValues): string => {
+  const triggers =
+    values.autonomyLevel === 'manual'
+      ? MANUAL_TRIGGER_WITH_REPORT_IDS_INPUT
+      : [
+          '  - type: scheduled',
+          '    with:',
+          `      every: ${JSON.stringify(values.scheduleInterval)}`,
+          MANUAL_TRIGGER_WITH_REPORT_IDS_INPUT,
+        ].join('\n');
+
+  return renderScheduledWorkerYaml(yaml, values)
+    .replaceAll('__WORKER_TRIGGERS__', `\n${triggers}`)
+    .replaceAll('__WORKER_TIER2_WHEN__', JSON.stringify(HUNT_WORKER_DEFAULTS.tier2When))
+    .replaceAll('__WORKER_CANDIDATE_LIMIT__', String(HUNT_WORKER_DEFAULTS.candidateLimit))
+    .replaceAll('__WORKER_FAN_OUT_MAX__', String(HUNT_WORKER_DEFAULTS.fanOutMax));
+};
 
 export interface AlertTriageWorkerTemplateValues extends CommonWorkerTemplateValues {
   extras: {

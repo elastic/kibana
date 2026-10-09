@@ -15,6 +15,7 @@ import { SIGNIFICANT_EVENTS_TAB } from '../../../common';
 import { useKibana } from '../../hooks/use_kibana';
 import { useDeveloperMode } from '../../hooks/use_developer_mode';
 import { getFormattedError } from '../../util/errors';
+import type { FeatureAvailability } from '../../util/feature_availability';
 import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
 import { useSignificantEventsAppRouter } from '../../hooks/use_significant_events_app_router';
 import { useSignificantEventsAvailability } from '../../hooks/use_significant_events_availability';
@@ -37,7 +38,9 @@ import { StreamsView } from './components/streams_view/streams_view';
 import { CortexTab } from './components/cortex/tab';
 import { useCortexEnabled } from './components/cortex/use_cortex';
 import { DecisionTreesTab } from './components/decision_trees/tab';
+import { MemoryTab } from './components/memory/tab';
 import { useDecisionTreesEnabled } from './components/decision_trees/use_decision_trees';
+import { useMemoryEnabled } from './components/memory/use_memory';
 import { DetectionsTab } from './components/detections_tab';
 import { SignificantEventsTab } from './components/significant_events_tab';
 import { RunLimitsBanner } from './components/run_limits_banner';
@@ -50,6 +53,7 @@ const significantEventsTabs = [
   SIGNIFICANT_EVENTS_TAB,
   'cortex',
   'decision_trees',
+  'memory',
 ] as const;
 type SignificantEventsTabId = (typeof significantEventsTabs)[number];
 
@@ -74,12 +78,24 @@ export function SignificantEventsPage() {
     },
   } = useKibana();
 
-  const { canShow, canManage, canConfigure } = getNightshiftCapabilities(nightshift);
+  const { canShow, canManageAndConfigure } = getNightshiftCapabilities(nightshift);
   const { isDeveloperMode } = useDeveloperMode();
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
-  const isCortexEnabled = useCortexEnabled();
-  const isDecisionTreesEnabled = useDecisionTreesEnabled();
+  const cortexAvailability = useCortexEnabled();
+  const decisionTreesAvailability = useDecisionTreesEnabled();
+  const memoryAvailability = useMemoryEnabled();
+  const isCortexEnabled = cortexAvailability.isEnabled;
+  const isDecisionTreesEnabled = decisionTreesAvailability.isEnabled;
+  const isMemoryEnabled = memoryAvailability.isEnabled;
+
+  // A gated tab reads "off" until its query answers, so wait for the URL tab's own gate
+  // before redirecting; Detections is synchronous and needs no gate.
+  const availabilityGateByTab: Partial<Record<SignificantEventsTabId, FeatureAvailability>> = {
+    cortex: cortexAvailability,
+    memory: memoryAvailability,
+    decision_trees: decisionTreesAvailability,
+  };
   const {
     isBlocked,
     isLoading: isMaintenanceStatusLoading,
@@ -107,10 +123,14 @@ export function SignificantEventsPage() {
     defaultMessage: 'Settings',
   });
   const nightshiftHref = getUrlForApp(NIGHTSHIFT_APP_ID);
+  const settingsHref = getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/settings' });
+  const detectionSettingsHref = getUrlForApp(NIGHTSHIFT_APP_ID, {
+    path: '/settings/detections',
+  });
 
   const menu = useMemo<AppHeaderMenu | undefined>(
     () =>
-      canConfigure
+      canManageAndConfigure
         ? {
             items: [
               {
@@ -118,13 +138,13 @@ export function SignificantEventsPage() {
                 order: 1,
                 label: settingsLabel,
                 iconType: 'gear',
-                href: router.link('/settings'),
-                testId: 'significantEventsSettingsLink',
+                href: settingsHref,
+                testId: 'nightshiftSettingsLink',
               },
             ],
           }
         : undefined,
-    [canConfigure, router, settingsLabel]
+    [canManageAndConfigure, settingsHref, settingsLabel]
   );
 
   useEffect(() => {
@@ -193,6 +213,18 @@ export function SignificantEventsPage() {
             },
           ]
         : []),
+      ...(isMemoryEnabled
+        ? [
+            {
+              id: 'memory',
+              label: i18n.translate('xpack.significantEventsApp.memoryTab', {
+                defaultMessage: 'Memory',
+              }),
+              href: router.link('/{tab}', { path: { tab: 'memory' } }),
+              isSelected: tab === 'memory',
+            },
+          ]
+        : []),
       ...(isDecisionTreesEnabled
         ? [
             {
@@ -206,7 +238,7 @@ export function SignificantEventsPage() {
           ]
         : []),
     ],
-    [tab, router, isCortexEnabled, isDecisionTreesEnabled]
+    [tab, router, isCortexEnabled, isMemoryEnabled, isDecisionTreesEnabled]
   );
   const tabs = useMemo(
     () => allTabs.filter((item) => item.id !== 'detections' || isDeveloperMode),
@@ -226,9 +258,12 @@ export function SignificantEventsPage() {
     );
   }
 
-  // Legacy alias from an earlier tab name; keep until bookmarks are gone.
   if (tab === 'discoveries') {
     return <RedirectTo path="/{tab}" params={{ path: { tab: SIGNIFICANT_EVENTS_TAB } }} />;
+  }
+
+  if (availabilityGateByTab[tab as SignificantEventsTabId]?.isLoading) {
+    return <SignificantEventsAppLoading />;
   }
 
   if (!isValidSignificantEventsTab(tab) || !tabs.some((item) => item.id === tab)) {
@@ -282,9 +317,9 @@ export function SignificantEventsPage() {
                       'Manual triggers stay disabled until status can be loaded. Open Settings to retry, or refresh the page.',
                   })}
                 </p>
-                {canManage && canConfigure && (
+                {canManageAndConfigure && (
                   <EuiButton
-                    href={router.link('/settings')}
+                    href={detectionSettingsHref}
                     color="danger"
                     size="s"
                     data-test-subj="significantEventsStatusErrorBannerSettingsLink"
@@ -310,7 +345,7 @@ export function SignificantEventsPage() {
                 })}
               >
                 <p>
-                  {canManage && canConfigure
+                  {canManageAndConfigure
                     ? i18n.translate('xpack.significantEventsApp.pausedBannerBody', {
                         defaultMessage:
                           'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
@@ -328,9 +363,9 @@ export function SignificantEventsPage() {
                     })}
                   </p>
                 )}
-                {canManage && canConfigure && (
+                {canManageAndConfigure && (
                   <EuiButton
-                    href={router.link('/settings')}
+                    href={detectionSettingsHref}
                     color="warning"
                     size="s"
                     data-test-subj="significantEventsPausedBannerSettingsLink"
@@ -356,6 +391,7 @@ export function SignificantEventsPage() {
           {tab === SIGNIFICANT_EVENTS_TAB && <SignificantEventsTab />}
           {tab === 'cortex' && isCortexEnabled && <CortexTab />}
           {tab === 'decision_trees' && isDecisionTreesEnabled && <DecisionTreesTab />}
+          {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
         </SignificantEventsAppPageTemplate.Body>
       </SignificantEventsPageProvider>
     </>

@@ -90,7 +90,6 @@
     "@kbn/rule-data-utils",
     "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/shared-ux-link-redirect-app",
     "@kbn/expressions-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/field-formats-plugin",
@@ -98,6 +97,7 @@
     "@kbn/charts-plugin",
     "@kbn/unified-data-table",
     "@kbn/unified-histogram",
+    "@kbn/data-source",
     "@kbn/cell-actions",
     "@kbn/discover-utils",
     "@kbn/shared-ux-page-kibana-template",
@@ -136,7 +136,6 @@
     "@kbn/core-application-browser-mocks",
     "@kbn/alerts-ui-shared",
     "@kbn/es-types",
-    "@kbn/announcement-banner",
     "@kbn/app-header",
     "@kbn/flyout-template",
     "@kbn/flyout-sections",
@@ -155,7 +154,13 @@
     "@kbn/content-list-common",
     "@kbn/core-ui-settings-server",
     "@kbn/licensing-plugin",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/workflows-yaml",
+    "@kbn/tooling-log",
+    "@kbn/test",
+    "@kbn/cloud-plugin",
+    "@kbn/core-overlays-browser-mocks",
+    "@kbn/core-rendering-browser-mocks"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

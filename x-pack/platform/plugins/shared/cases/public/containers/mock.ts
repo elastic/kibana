@@ -371,21 +371,6 @@ export const basicCasePost: CaseUI = {
   updatedBy: null,
 };
 
-export const basicCommentPatch: AttachmentUI = {
-  ...basicComment,
-  updatedAt: basicUpdatedAt,
-  updatedBy: {
-    username: 'elastic',
-    email: 'elastic@elastic.co',
-    fullName: 'Elastic',
-  },
-};
-
-export const basicCaseCommentPatch = {
-  ...basicCase,
-  comments: [basicCommentPatch],
-};
-
 export const casesMetrics: CasesMetrics = {
   mttr: 12,
   status: {

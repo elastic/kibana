@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_FEATURE_ARRAY_ITEMS,
   MAX_ID_LENGTH,
@@ -25,6 +25,7 @@ import dedent from 'dedent';
 import { DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE } from '@kbn/nightshift-ai';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
+import { assertCanReadSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import {
   KNOWLEDGE_INDICATOR_FEATURE_TYPES,
@@ -39,83 +40,85 @@ export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID =
 const MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE = 50;
 const KI_SEARCH_MAX_PER_PAGE_FULL = 10;
 
-const searchKnowledgeIndicatorsSchema = z.object({
-  stream_names: z
-    .array(z.string().max(MAX_ID_LENGTH))
-    .optional()
-    .describe('Optional. If omitted, search across all accessible streams.'),
-  search_text: z
-    .string()
-    .max(MAX_TEXT_LENGTH)
-    .optional()
-    .describe(
-      'Optional. Natural-language search with semantic ranking (hybrid keyword + vector). Descriptive phrases work better than single keywords.'
-    ),
-  kind: z
-    .array(z.enum(['feature', 'query']))
-    .optional()
-    .default([])
-    .describe(
-      dedent`What to return.
-      - ['query']: queries-only KIs
-      - ['feature']: feature-based KIs only
-      - default (empty array or omitted): both features and queries`
-    ),
-  feature_types: z
-    .array(z.enum(KNOWLEDGE_INDICATOR_FEATURE_TYPES))
-    .optional()
-    .describe(
-      'Return only feature KIs whose feature.type matches one of these values. Use only when `kind: ["feature"]` is specified.'
-    ),
-  feature_ids: z
-    .array(z.string().max(MAX_ID_LENGTH))
-    .optional()
-    .describe(
-      'Seed the topology search with these IDs. Features whose feature.id matches are always returned. When `feature_types` includes `"dependency"` and `"entity"`, dependency features matching these IDs by source or target endpoint are also returned, along with entity features connected through those dependency edges. Use only when `kind: ["feature"]` is specified.'
-    ),
-  query_types: z
-    .array(z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]))
-    .optional()
-    .describe(
-      'Return only query KIs whose query.type matches one of these values. Use only when `kind: ["query"]` is specified.'
-    ),
-  query_ids: z
-    .array(z.string().max(MAX_ID_LENGTH))
-    .optional()
-    .describe(
-      'Return only query KIs whose query.id matches one of these values. Use only when `kind: ["query"]` is specified.'
-    ),
-  rule_ids: z
-    .array(z.string().max(MAX_ID_LENGTH))
-    .optional()
-    .describe(
-      'Return only query KIs linked to one of these exact rule IDs. Use only when `kind: ["query"]` is specified.'
-    ),
-  rule_backed: z
-    .boolean()
-    .optional()
-    .describe(
-      'Return only query KIs with the requested rule-backing state (`true` = rule-backed only, `false` = unbacked only). Use only when `kind: ["query"]` is specified. Omit to include all.'
-    ),
-  page: z.number().int().min(1).optional().default(1).describe('Current page. Defaults to 1.'),
-  per_page: z
-    .number()
-    .int()
-    .min(1)
-    .max(MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE)
-    .optional()
-    .default(DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE)
-    .describe(`Number of Knowledge Indicators to return per page.`),
-  view: z
-    .enum(['compact', 'full'])
-    .optional()
-    .default('compact')
-    .describe(
-      dedent`Response detail level.
-      - 'compact' (default): strips unused metadata fields and truncates computed feature types (dataset_analysis, error_logs, log_patterns, log_samples). Bounds \`evidence\` and \`tags\` to ${MAX_FEATURE_ARRAY_ITEMS} items on all feature KIs; \`evidence_count\` and \`tags_count\` are present when those arrays were truncated. \`meta\` is a flat key→value map; keeps the first ${MAX_COMPACT_META_KEYS} keys in JavaScript property-enumeration order, samples array values to ${MAX_COMPACT_META_ARRAY_SAMPLE} items, and records omitted array items in \`meta_array_items_omitted\`. \`meta_keys_omitted\` counts dropped keys. Maximum ${MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE} per page.
-      - 'full': returns all fields verbatim. Use with specific \`feature_ids\` to retrieve untruncated evidence, tags, metadata, and computed-type properties. Maximum ${KI_SEARCH_MAX_PER_PAGE_FULL} per page.`
-    ),
-});
+const searchKnowledgeIndicatorsSchema = lazySchema(() =>
+  z.object({
+    stream_names: z
+      .array(z.string().max(MAX_ID_LENGTH))
+      .optional()
+      .describe('Optional. If omitted, search across all accessible streams.'),
+    search_text: z
+      .string()
+      .max(MAX_TEXT_LENGTH)
+      .optional()
+      .describe(
+        'Optional. Natural-language search with semantic ranking (hybrid keyword + vector). Descriptive phrases work better than single keywords.'
+      ),
+    kind: z
+      .array(z.enum(['feature', 'query']))
+      .optional()
+      .default([])
+      .describe(
+        dedent`What to return.
+        - ['query']: queries-only KIs
+        - ['feature']: feature-based KIs only
+        - default (empty array or omitted): both features and queries`
+      ),
+    feature_types: z
+      .array(z.enum(KNOWLEDGE_INDICATOR_FEATURE_TYPES))
+      .optional()
+      .describe(
+        'Return only feature KIs whose feature.type matches one of these values. Use only when `kind: ["feature"]` is specified.'
+      ),
+    feature_ids: z
+      .array(z.string().max(MAX_ID_LENGTH))
+      .optional()
+      .describe(
+        'Seed the topology search with these IDs. Features whose feature.id matches are always returned. When `feature_types` includes `"dependency"` and `"entity"`, dependency features matching these IDs by source or target endpoint are also returned, along with entity features connected through those dependency edges. Use only when `kind: ["feature"]` is specified.'
+      ),
+    query_types: z
+      .array(z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]))
+      .optional()
+      .describe(
+        'Return only query KIs whose query.type matches one of these values. Use only when `kind: ["query"]` is specified.'
+      ),
+    query_ids: z
+      .array(z.string().max(MAX_ID_LENGTH))
+      .optional()
+      .describe(
+        'Return only query KIs whose query.id matches one of these values. Use only when `kind: ["query"]` is specified.'
+      ),
+    rule_ids: z
+      .array(z.string().max(MAX_ID_LENGTH))
+      .optional()
+      .describe(
+        'Return only query KIs linked to one of these exact rule IDs. Use only when `kind: ["query"]` is specified.'
+      ),
+    rule_backed: z
+      .boolean()
+      .optional()
+      .describe(
+        'Return only query KIs with the requested rule-backing state (`true` = rule-backed only, `false` = unbacked only). Use only when `kind: ["query"]` is specified. Omit to include all.'
+      ),
+    page: z.number().int().min(1).optional().default(1).describe('Current page. Defaults to 1.'),
+    per_page: z
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE)
+      .optional()
+      .default(DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE)
+      .describe(`Number of Knowledge Indicators to return per page.`),
+    view: z
+      .enum(['compact', 'full'])
+      .optional()
+      .default('compact')
+      .describe(
+        dedent`Response detail level.
+        - 'compact' (default): strips unused metadata fields and truncates computed feature types (dataset_analysis, error_logs, log_patterns, log_samples). Bounds \`evidence\` and \`tags\` to ${MAX_FEATURE_ARRAY_ITEMS} items on all feature KIs; \`evidence_count\` and \`tags_count\` are present when those arrays were truncated. \`meta\` is a flat key→value map; keeps the first ${MAX_COMPACT_META_KEYS} keys in JavaScript property-enumeration order, samples array values to ${MAX_COMPACT_META_ARRAY_SAMPLE} items, and records omitted array items in \`meta_array_items_omitted\`. \`meta_keys_omitted\` counts dropped keys. Maximum ${MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE} per page.
+        - 'full': returns all fields verbatim. Use with specific \`feature_ids\` to retrieve untruncated evidence, tags, metadata, and computed-type properties. Maximum ${KI_SEARCH_MAX_PER_PAGE_FULL} per page.`
+      ),
+  })
+);
 
 export function createSearchKnowledgeIndicatorsTool({
   getScopedClients,
@@ -188,6 +191,7 @@ export function createSearchKnowledgeIndicatorsTool({
           server,
           licensing: scopedClients.licensing,
         });
+        await assertCanReadSignificantEvents({ request, server });
 
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 

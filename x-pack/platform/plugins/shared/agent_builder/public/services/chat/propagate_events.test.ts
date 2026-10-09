@@ -19,16 +19,21 @@ const messageChunkEvent = (chunk: string): ChatEvent =>
 const setup = () => {
   const eventsService = new EventsService();
   const propagated: Array<[string, ChatEvent]> = [];
+  const runsStarted: string[] = [];
   const runsEnded: string[] = [];
   jest
     .spyOn(eventsService, 'propagateChatEvent')
     .mockImplementation((conversationId, event) => propagated.push([conversationId, event]));
+  jest
+    .spyOn(eventsService, 'notifyStreamStarted')
+    .mockImplementation((conversationId) => runsStarted.push(conversationId));
   jest
     .spyOn(eventsService, 'notifyStreamEnded')
     .mockImplementation((conversationId) => runsEnded.push(conversationId));
   return {
     operator: propagateEvents({ eventsService, conversationId: 'A' }),
     propagated,
+    runsStarted,
     runsEnded,
   };
 };
@@ -43,6 +48,20 @@ describe('propagateEvents', () => {
       ['A', 'one'],
       ['A', 'two'],
     ]);
+  });
+
+  it('reports the run as started once, on subscribe, before any event', () => {
+    const { operator, runsStarted } = setup();
+    const source$ = new Subject<ChatEvent>();
+
+    const sub = source$.pipe(operator).subscribe();
+    // Fires on subscribe, even though no event has arrived yet.
+    expect(runsStarted).toEqual(['A']);
+
+    source$.next(messageChunkEvent('one'));
+    // Still just the one start - it does not fire per event.
+    expect(runsStarted).toEqual(['A']);
+    sub.unsubscribe();
   });
 
   // The three ways a run ends. All must report, or the fold keeps an abandoned draft.
