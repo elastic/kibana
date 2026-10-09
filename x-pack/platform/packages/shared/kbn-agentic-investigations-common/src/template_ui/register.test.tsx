@@ -22,6 +22,11 @@ import {
   registerEscalationTemplateUI,
 } from './register';
 import type { RenderAssignees, RenderLinkedInvestigations } from './types';
+import { ACTIONS_TRANSLATIONS } from '../components/actions/translations';
+import {
+  FlyoutGroupedAttachments,
+  createFlyoutGroupedAttachmentsRegistry,
+} from '../components/grouped_attachments';
 
 const conversation: Conversation = {
   id: 'conversation-1',
@@ -54,10 +59,15 @@ const createFakeService = () => {
   const tabs = new Map<string, ConversationTemplateTabDefinition>();
   const templates = new Map<string, ConversationTemplateUIDefinition>();
   const openFullscreenConversation = jest.fn();
+  const getConversationUrl = jest.fn(
+    ({ conversationId, agentId }: { conversationId: string; agentId: string }) =>
+      `http://localhost/app/agent_builder/agents/${agentId}/conversations/${conversationId}?openConversationDetails=true`
+  );
   const context: ConversationTemplateUIContext = {
     attachmentsService,
     openSidebarConversation: jest.fn(),
     openFullscreenConversation,
+    getConversationUrl,
   };
 
   const contract: ConversationTemplateServiceStartContract = {
@@ -100,8 +110,10 @@ const register = (
   registerAgenticInvestigationTemplateUI({
     conversationTemplates: contract,
     templateId: 'investigation',
+    groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
     name: 'Investigation',
     icon: 'securitySignalDetected',
+    onCopyLink: () => true,
     ...overrides,
   });
 
@@ -169,6 +181,22 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     expect(definition?.detailsFlyout?.footer).toBeDefined();
   });
 
+  it('adds a Copy link flyout action that calls onCopyLink', () => {
+    const onCopyLink = jest.fn().mockReturnValue(true);
+    const { contract } = createFakeService();
+    register(contract, { onCopyLink });
+
+    const getActions =
+      contract.getTemplateUIDefinition('investigation')?.detailsFlyout?.trailingActions;
+    const [action] = getActions?.({ conversation }) ?? [];
+
+    expect(action).toMatchObject({ iconType: 'link', 'aria-label': 'Copy link' });
+    action.onClick?.({} as never);
+    expect(onCopyLink).toHaveBeenCalledWith(
+      'http://localhost/app/agent_builder/agents/agent/conversations/conversation-1?openConversationDetails=true'
+    );
+  });
+
   it('gives each solution its own tab ids, so a second one does not collide', () => {
     const { contract } = createFakeService();
 
@@ -232,6 +260,20 @@ describe('registerAgenticInvestigationTemplateUI', () => {
       agentId: 'agent',
       openDetails: true,
     });
+  });
+
+  it('hides the footer slot Open in chat when the flyout was opened from within chat', async () => {
+    const { contract } = createFakeService();
+    // The escalation button loads on the same lazy chunk as Open in chat; wiring one in gives a
+    // reliable element to await, so the assertion below cannot pass merely because the chunk
+    // has not resolved yet (the Suspense fallback is `null`).
+    register(contract, { renderEscalationModal: jest.fn(() => <div>Escalation modal</div>) });
+    const Footer = getSlot(contract, 'investigation', 'footer');
+
+    renderWithKibanaRenderContext(<Footer conversation={conversation} isOpenedFromChat />);
+
+    await screen.findByText(ACTIONS_TRANSLATIONS.buttons.openEscalation);
+    expect(screen.queryByTestId('investigationFlyoutOpenChat')).not.toBeInTheDocument();
   });
 
   it('calls renderAssignees with the conversation id, templateId, uids, and refetchConversation', async () => {
@@ -303,6 +345,7 @@ describe('registerEscalationTemplateUI', () => {
     registerEscalationTemplateUI({
       conversationTemplates: contract,
       templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
       name: 'Escalation',
     });
 
@@ -319,6 +362,7 @@ describe('registerEscalationTemplateUI', () => {
     registerEscalationTemplateUI({
       conversationTemplates: contract,
       templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
       name: 'Escalation',
       renderAssignees,
     });
@@ -353,6 +397,7 @@ describe('registerEscalationTemplateUI', () => {
     registerEscalationTemplateUI({
       conversationTemplates: contract,
       templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
       name: 'Escalation',
     });
 
@@ -373,6 +418,7 @@ describe('registerEscalationTemplateUI', () => {
     registerEscalationTemplateUI({
       conversationTemplates: contract,
       templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
       name: 'Escalation',
     });
 
@@ -388,6 +434,7 @@ describe('registerEscalationTemplateUI', () => {
     registerEscalationTemplateUI({
       conversationTemplates: contract,
       templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
       name: 'Escalation',
       renderLinkedInvestigations,
     });
@@ -414,6 +461,47 @@ describe('registerEscalationTemplateUI', () => {
     );
   });
 
+  it('renders the summary and grouped attachments in the overview tab', async () => {
+    const { contract } = createFakeService();
+    const groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
+    groupedAttachments.register(FlyoutGroupedAttachments.ALERTS, ['security.alert'], () => (
+      <li>Session cookie replayed</li>
+    ));
+
+    registerEscalationTemplateUI({
+      conversationTemplates: contract,
+      templateId: 'escalation',
+      groupedAttachments,
+      name: 'Escalation',
+    });
+
+    const TabContent = contract.getTab('escalation.overview')?.content;
+    if (!TabContent) throw new Error('Expected escalation.overview tab');
+
+    renderWithKibanaRenderContext(
+      <TabContent
+        conversation={{
+          ...escalationConversation,
+          metadata: { status: 'open', summary: 'Escalated narrative' },
+          attachments: [
+            {
+              id: 'attachment-1',
+              type: 'security.alert',
+              current_version: 1,
+              versions: [
+                { version: 1, data: {}, created_at: '2024-01-01T00:00:00Z', content_hash: 'a' },
+              ],
+            },
+          ],
+        }}
+        isOpenedFromChat={false}
+      />
+    );
+
+    expect(await screen.findByText('Escalated narrative')).toBeInTheDocument();
+    expect(screen.getByText('Session cookie replayed')).toBeInTheDocument();
+  });
+
   it('navigates via openFullscreenConversation with openDetails:true when onOpenInvestigation is called', async () => {
     const { contract, openFullscreenConversation } = createFakeService();
     let capturedOnOpen: ((args: { conversationId: string; agentId: string }) => void) | undefined;
@@ -425,6 +513,7 @@ describe('registerEscalationTemplateUI', () => {
     registerEscalationTemplateUI({
       conversationTemplates: contract,
       templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
       name: 'Escalation',
       renderLinkedInvestigations,
     });

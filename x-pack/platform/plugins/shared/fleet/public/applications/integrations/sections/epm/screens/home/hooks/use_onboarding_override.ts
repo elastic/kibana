@@ -13,7 +13,7 @@ import { useStartServices } from '../../../../../hooks';
 
 import type { IntegrationCardItem } from '..';
 
-// Keep in sync with @kbn/ingest-hub-plugin/common/constants
+// Keep in sync with @kbn/ingest-hub-plugin/common/core/constants
 const ONBOARDING_ENABLED_FLAG = 'ingestHub.onboardingEnabled';
 const ONBOARDING_APP_ID = 'onboarding';
 const ONBOARDING_AWS_PATH = '/aws';
@@ -31,12 +31,13 @@ const HIDDEN_TILE_NAMES = new Set([
   'aws',
   'aws_bedrock',
   'aws_bedrock_agentcore',
+  'aws_billing',
   'aws_cloudwatch_input_otel',
   'aws_logs',
   'aws_mq',
-  'awsfargate',
-  'awsfirehose',
   'aws_securityhub',
+  'amazon_security_lake',
+  'awsfargate',
   'aws_cloudtrail_otel',
   'aws_ec2_otel',
   'aws_ecs_otel',
@@ -49,6 +50,31 @@ const HIDDEN_TILE_NAMES = new Set([
   'aws_waf_otel',
 ]);
 const HIDDEN_TILE_IDS = new Set(['epr:aws']);
+
+// The services to name when a search matches the tile: one entry per title, only real services.
+// OpenTelemetry and content packages are left out, they are variants or assets of those services.
+// `aws` package policy templates come first so their titles win over any remaining duplicate.
+function getSearchMembers(hidden: IntegrationCardItem[]): IntegrationCardItem['searchMembers'] {
+  const sorted = [...hidden]
+    .filter(
+      (card) =>
+        !HIDDEN_TILE_IDS.has(card.id) && !card.name.endsWith('_otel') && card.type !== 'content'
+    )
+    .sort(
+      (a, b) =>
+        Number(b.name === AWS_ONBOARDING_PACKAGE_NAME) -
+        Number(a.name === AWS_ONBOARDING_PACKAGE_NAME)
+    );
+  const seen = new Set<string>();
+  const members: Array<{ name: string; title: string }> = [];
+  for (const card of sorted) {
+    const key = card.title.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    members.push({ name: card.integration || card.name, title: card.title });
+  }
+  return members;
+}
 
 export function useOnboardingOverride() {
   const { featureFlags, application } = useStartServices();
@@ -73,9 +99,24 @@ export function useOnboardingOverride() {
         return cards;
       }
 
-      const filtered = cards.filter(
-        (card) => !HIDDEN_TILE_NAMES.has(card.name) && !HIDDEN_TILE_IDS.has(card.id)
-      );
+      const filtered: IntegrationCardItem[] = [];
+      const hidden: IntegrationCardItem[] = [];
+      for (const card of cards) {
+        if (HIDDEN_TILE_NAMES.has(card.name) || HIDDEN_TILE_IDS.has(card.id)) {
+          hidden.push(card);
+        } else {
+          filtered.push(card);
+        }
+      }
+
+      // The hidden tiles are the services the onboarding flow covers. Index their text on the
+      // onboarding tile so searching for a service still finds it.
+      const members = getSearchMembers(hidden);
+      const searchableContent = hidden
+        .flatMap((card) => [card.integration, card.title, card.description])
+        .filter(Boolean)
+        .join(' ');
+      const categories = [...new Set(['aws', ...hidden.flatMap((card) => card.categories)])];
 
       const onboardingAwsTile: IntegrationCardItem = {
         id: 'epr:aws',
@@ -86,7 +127,9 @@ export function useOnboardingOverride() {
         integration: 'aws',
         name: 'aws-onboarding',
         version: '',
-        categories: ['aws'],
+        categories,
+        searchableContent,
+        searchMembers: members,
         onCardClick: navigateToOnboarding,
       };
 

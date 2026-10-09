@@ -39,31 +39,11 @@ const discoverSessionTabPresentationSchema = z
       .boolean()
       .default(false)
       .meta({ description: 'When `true`, the data table is hidden.' }),
-    hide_aggregated_preview: z
-      .boolean()
-      .optional()
-      .meta({ description: 'When `true`, aggregated preview panels are hidden.' }),
     breakdown_field: z
       .string()
       .max(MAX_BREAKDOWN_FIELD_LENGTH)
       .optional()
       .meta({ description: 'Field name used to split chart data into series.' }),
-    chart_interval: z
-      .union([
-        z.literal('auto'),
-        z.literal('ms'),
-        z.literal('s'),
-        z.literal('m'),
-        z.literal('h'),
-        z.literal('d'),
-        z.literal('w'),
-        z.literal('M'),
-        z.literal('y'),
-      ])
-      .optional()
-      .meta({
-        description: 'Time interval for the chart histogram on this tab.',
-      }),
     time_range: timeRangeSchema.optional().meta({
       description:
         'Time range to restore when the tab is opened. When omitted, Discover uses the global time settings.',
@@ -102,6 +82,31 @@ export const discoverSessionApiClassicTabSchema = z
     ...discoverSessionTabIdentitySchema.shape,
     ...discoverSessionApiClassicTabBaseSchema.shape,
     ...discoverSessionTabPresentationSchema.shape,
+    chart_interval: z
+      .union([
+        z.literal('auto'),
+        z.literal('ms'),
+        z.literal('s'),
+        z.literal('m'),
+        z.literal('h'),
+        z.literal('d'),
+        z.literal('w'),
+        z.literal('M'),
+        z.literal('y'),
+      ])
+      .optional()
+      .meta({
+        description: 'Time interval for the chart histogram on this tab.',
+      }),
+    hide_aggregated_preview: z
+      .boolean()
+      .optional()
+      .meta({
+        description:
+          'Applies to the field statistics view. ' +
+          'When `true`, hides the distribution preview shown for each field. ' +
+          'If omitted, previews are shown.',
+      }),
     ...discoverSessionApiDefaultTabTypeStateSchema.shape,
   })
   .strict();
@@ -109,7 +114,7 @@ export const discoverSessionApiClassicTabSchema = z
 export const discoverSessionApiEsqlTabSchema = z
   .object({
     ...discoverSessionTabIdentitySchema.shape,
-    ...discoverSessionApiEsqlTabBaseSchema.shape,
+    ...discoverSessionApiEsqlTabBaseSchema.omit({ sample_size: true }).shape,
     ...discoverSessionTabPresentationSchema.shape,
     ...asCodeEsqlApproximationSchema.shape,
     ...discoverSessionApiDefaultTabTypeStateSchema.shape,

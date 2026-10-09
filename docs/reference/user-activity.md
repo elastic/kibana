@@ -34,7 +34,7 @@ user_activity:
 - `user_activity.appenders`: Logging appenders used by the service. This uses the same appender schema as Kibana logging. For more details, refer to [Logging settings](/reference/configuration-reference/logging-settings.md). By default, it uses a JSON console appender.
 - `user_activity.filters`: Optional list of filter rules applied to `event.action`.
 
-When enabled, events are logged under the logger context `user_activity.event` and include the fields `{ message, event, metadata, error, user, kibana.session.id, kibana.space.id, kibana.object, ...}`.
+When enabled, events are logged under the logger context `user_activity.event` and include the fields `{ message, event, error, user, kibana.session.id, kibana.space.id, kibana.object, ...}`. Action-specific metadata is logged under a per-producer `kibana.*` bucket (for example, `kibana.dashboard`).
 
 ### Filters
 
@@ -72,18 +72,18 @@ The action also populates the following metadata fields:
 
 | **Field** | **Description** |
 | --- | --- |
-| `metadata.time_range` | (Optional) Dashboard time range at the time of the refresh. |
-| `metadata.refresh_interval` | (Optional) Auto-refresh interval in milliseconds. This field is omitted when auto-refresh is paused. |
-| `metadata.query` | (Optional) Dashboard query, including its expression and language. The language is `kql` or `lucene`. |
-| `metadata.filters` | (Optional) List of dashboard filters. |
-| `metadata.panel_count` | Number of panels on the dashboard. |
-| `metadata.errors` | List of panels with blocking errors. Each item contains the panel ID in `panel_id` and the error message in `error`. The list is empty when no panels return blocking errors. |
+| `kibana.dashboard.time_range` | (Optional) Dashboard time range at the time of the refresh. |
+| `kibana.dashboard.refresh_interval` | (Optional) Auto-refresh interval in milliseconds. This field is omitted when auto-refresh is paused. |
+| `kibana.dashboard.query` | (Optional) Dashboard query, including its expression and language. The language is `kql` or `lucene`. |
+| `kibana.dashboard.filters` | (Optional) List of dashboard filters. |
+| `kibana.dashboard.panel_count` | Number of panels on the dashboard. |
+| `kibana.dashboard.errors` | List of panels with blocking errors. Each item contains the panel ID in `panel_id` and the error message in `error`. The list is empty when no panels return blocking errors. |
 
 :::::{note}
 Dashboard query expressions and filter values are recorded without redaction. Manage access to and retention of user activity logs according to your organization's data-handling requirements.
 :::::
 
-When `metadata.errors` is not empty, `error.type` is `panel_errors` and `error.message` contains the error list as JSON.
+When `kibana.dashboard.errors` is not empty, `error.type` is `panel_errors` and `error.message` contains the error list as JSON.
 
 :::::{image} images/dashboard_user_activity_errors.png
 :alt: Discover results for dashboard refresh events with blocking panel errors
@@ -104,6 +104,7 @@ User activity events are written as JSON log entries. When using the JSON loggin
 | --- | --- |
 | `@timestamp` | The timestamp of the event. |
 | `message` | Human readable description of the action performed. |
+| `log.type` | Set to `user_activity`. Only present when events are shipped through an `otel` appender. |
 
 ### Event fields
 
@@ -172,7 +173,7 @@ Some actions, such as `log_in_user` and `log_out_user`, are recorded on unauthen
 
 | **Field** | **Description** |
 | --- | --- |
-| `metadata` | (Optional) Additional bucket of non-standard metadata specific to the Kibana usage log. For dashboard refresh metadata, refer to [Dashboard event fields](#dashboard-event-fields). |
+| `kibana.<bucket>` | (Optional) Additional bucket of non-standard metadata specific to the Kibana usage log. Each producer provides its own bucket (for example, `kibana.dashboard`). |
 
 ### Error fields
 
@@ -188,7 +189,24 @@ Some actions, such as `log_in_user` and `log_out_user`, are recorded on unauthen
 | **Field**            | **Description**                                |
 |----------------------|------------------------------------------------|
 | `service.id`         | The cluster ID.                                |
+| `service.name`       | Identifies the deployment type: `serverless-kibana` on {{serverless-full}}, `hosted-kibana` on {{ech}}, and `self-managed-kibana` for self-managed deployments. Only present in the OpenTelemetry output. |
 | `service.node.roles` | Roles of Kibana: `["ui", "background_tasks"]`. |
 | `service.state`      | The status of Kibana.                          |
 | `service.type`       | `kibana`.                                      |
 | `service.version`    | Version of Kibana that emitted the event.      |
+
+When events are shipped through an `otel` appender, only `service.name` and `service.type` are emitted, and they are carried on the OTel resource rather than on each record. To override the detected `service.name`, use the appender `attributes` setting, values set there take precedence:
+
+```yaml
+user_activity:
+  appenders:
+    otlp:
+      type: otel
+      url: https://collector:4318/v1/logs
+      attributes:
+        '[service.name]': hosted-kibana
+```
+
+:::::{note}
+When user activity events are indexed into {{es}} through an OpenTelemetry ingest pipeline, per-record fields are stored under `attributes.*` (for example, `attributes.event.action`). Elastic's OpenTelemetry mappings are pass-through, so the fields remain queryable by the names documented on this page. On {{serverless-full}}, each record also carries a `project.id` attribute identifying the project that emitted it.
+:::::

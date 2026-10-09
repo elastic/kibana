@@ -12,12 +12,13 @@ import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import pRetry from 'p-retry';
 import { z } from '@kbn/zod/v4';
 import type { Evaluator, Example, TaskOutput } from '@kbn/evals';
+import type { JudgeModel } from '../evaluator_utils';
 import { normalizeEsqlForEquivalence } from './normalize_esql_for_equivalence';
 
 export const ESQL_CALIBRATED_EQUIVALENCE_EVALUATOR_NAME = 'ES|QL Functional Equivalence';
 
 // Stamp results with judgeVersion so future rubric changes can be filtered in the golden cluster.
-export const ESQL_CALIBRATED_EQUIVALENCE_JUDGE_VERSION = 'calibrated-v3';
+export const ESQL_CALIBRATED_EQUIVALENCE_JUDGE_VERSION = 'calibrated-v4';
 
 /**
  * Three-point judgement returned by the LLM judge. Mapped to a numeric
@@ -58,6 +59,7 @@ TREAT THE FOLLOWING AS EQUIVALENT (do NOT penalise):
 - Output column ordering or extra cosmetic \`KEEP\`/\`DROP\` clauses that don't change the answer.
 - Presence vs absence of \`SORT <time bucket> ASC\` on a time-series query — charts order the time axis; do NOT penalise either form.
 - Different but compatible bucketing where the granularity is interchangeable for the question (e.g. \`BUCKET(@timestamp, 1h)\` vs \`BUCKET(@timestamp, 50, ?_tstart, ?_tend)\` over the same window when the question is "by hour").
+- \`@timestamp\` time series: \`TBUCKET(100, ?_tstart, ?_tend)\` and \`BUCKET(@timestamp, <count>, ?_tstart, ?_tend)\` are equivalent, including presence vs absence of \`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend\`. Kibana supplies the \`@timestamp\` window, and passing \`?_tstart\` / \`?_tend\` to \`TBUCKET\` sizes the same buckets. A non-\`@timestamp\` date field (e.g. \`order_date\`) must still use \`BUCKET(<field>, <count>, ?_tstart, ?_tend)\`; \`TBUCKET\` there is not equivalent, because it buckets \`@timestamp\` instead.
 - Broader index patterns that still cover the same logical dataset: \`logs-*\` vs \`logs-endpoint.*\` when the gold uses the broader pattern.
 - Different but equivalent ordering of clauses (\`SORT ... | LIMIT n\` vs \`LIMIT n | SORT ...\` when the result set fits in n).
 
@@ -158,16 +160,19 @@ export function createCalibratedEsqlEquivalenceEvaluator<
   log,
   predictionExtractor,
   groundTruthExtractor,
+  judgeModel,
 }: {
   inferenceClient: BoundInferenceClient;
   log: ToolingLog;
   predictionExtractor: (output: TTaskOutput) => string;
   groundTruthExtractor: (expected: TExample['output']) => string;
+  judgeModel?: JudgeModel;
 }): Evaluator<TExample, TTaskOutput> {
   return {
     name: ESQL_CALIBRATED_EQUIVALENCE_EVALUATOR_NAME,
     kind: 'LLM',
     direction: 'maximize',
+    getModel: () => judgeModel,
     evaluate: async ({ output, expected }) => {
       const prediction = predictionExtractor(output);
       const groundTruth = groundTruthExtractor(expected);

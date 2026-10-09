@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import pLimit from 'p-limit';
 import { v4 as uuidv4 } from 'uuid';
 import type {
@@ -22,6 +22,7 @@ import {
 } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { deriveQueryType, MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
+import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { sortQueryLinksForTable } from '../../../../lib/significant_events/utils';
 import { generateKIQueries } from '../../../../lib/significant_events/ki_queries_generation_service';
 import { createServerRoute } from '../../../create_server_route';
@@ -323,11 +324,11 @@ const bulkDeleteQueriesRoute = createServerRoute({
       try {
         const { rulesClient } = await scopedClients.getSignificantEventsAlertingContext();
         await cleanupStaleEvents({
-          eventClient: await scopedClients.getEventClient(),
+          eventSearchClient: await scopedClients.getEventSearchClient(),
           rulesClient,
           candidateRuleIds: [...candidateRuleIds],
           alertEventsClient: await scopedClients.getAlertEventsClient(),
-          logger: sigEventsLogger,
+          emitTrigger: scopedClients.emitTrigger,
         });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
@@ -621,7 +622,7 @@ const generateQueriesRoute = createServerRoute({
           .max(MAX_ID_LENGTH)
           .optional()
           .describe(
-            'Optional connector ID override. When omitted the connector is resolved via the Inference Feature Registry.'
+            'Optional chat model connector or inference endpoint ID. When omitted the Significant Events default is used.'
           ),
         runId: z.string().trim().min(1).max(MAX_ID_LENGTH).optional(),
       })
@@ -672,7 +673,15 @@ const generateQueriesRoute = createServerRoute({
         streamsClient,
         kiClient,
         agentBuilder: server.agentBuilder,
-        searchInferenceEndpoints: server.searchInferenceEndpoints,
+        resolveModel: (requestedId) =>
+          resolveNightshiftModelForRequest({
+            request,
+            inference: server.inference,
+            savedObjects: server.core.savedObjects,
+            uiSettings: server.core.uiSettings,
+            step: 'kiQueryGeneration',
+            requestedId,
+          }),
         request,
         logger: logger.get('significant_events_queries_generation'),
         signal: getRequestAbortSignal(request),
@@ -755,16 +764,18 @@ const upsertQueryRoute = createServerRoute({
     path: z.object({
       queryId: z.string().max(MAX_ID_LENGTH).describe('The identifier of the query.'),
     }),
-    body: upsertStreamQueryRequestSchema.extend({
-      target_name: z
-        .string()
-        .min(1)
-        .max(MAX_STREAM_NAME_LENGTH)
-        .optional()
-        .describe(
-          'Optional analysis target (stream name). Required when creating a query; omitted updates resolve the target from the existing query.'
-        ),
-    }),
+    body: lazySchema(() =>
+      upsertStreamQueryRequestSchema.extend({
+        target_name: z
+          .string()
+          .min(1)
+          .max(MAX_STREAM_NAME_LENGTH)
+          .optional()
+          .describe(
+            'Optional analysis target (stream name). Required when creating a query; omitted updates resolve the target from the existing query.'
+          ),
+      })
+    ),
   }),
   handler: async ({
     params,

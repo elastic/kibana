@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, useEuiTheme } from '@elastic/eui';
 import type { FlyoutFooterProps } from '../types';
 import { flyoutAssembly, footerAssembly, partsOf } from '../assembly';
 import { resolveZoneTestSubj, useFlyoutTemplateConfig } from '../context';
@@ -41,6 +41,7 @@ export const Footer = Object.assign(BaseFooter, {
 
 /** Internal renderer for optional primary/secondary footer actions. */
 export const FooterZone = ({ children, 'data-test-subj': dataTestSubj }: FlyoutFooterProps) => {
+  const { euiTheme } = useEuiTheme();
   const { dataTestSubj: rootTestSubj } = useFlyoutTemplateConfig();
   const items = footerAssembly.parseChildren(children);
 
@@ -73,7 +74,13 @@ export const FooterZone = ({ children, 'data-test-subj': dataTestSubj }: FlyoutF
   }
 
   return (
-    <EuiFlyoutFooter data-test-subj={resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Footer')}>
+    <EuiFlyoutFooter
+      data-test-subj={resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Footer')}
+      // EUI pads the footer less vertically than horizontally, from a flyout-scoped rule that
+      // outranks a single class, so the even padding is set inline. `size.base` is the padding
+      // `EuiFlyout` applies to the other zones for the template's `paddingSize="m"`.
+      style={{ padding: euiTheme.size.base }}
+    >
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
         {secondaryAction && <EuiFlexItem grow={false}>{secondaryAction}</EuiFlexItem>}
         {primarySlot && <EuiFlexItem grow={false}>{primarySlot}</EuiFlexItem>}

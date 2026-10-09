@@ -14,11 +14,7 @@ import { containProps } from './hooks';
 
 const POPOVER_WIDTH = 400;
 
-/**
- * The frame of the layer's popovers, filling the panel (which is why the padding
- * is here): a column of a fixed width that never grows past the room available;
- * content that has to scroll does so within it.
- */
+/** The frame of the layer's popovers: a column of a fixed width, no taller than the room available, within which content scrolls. */
 export const PopoverBody = ({
   children,
   maxHeight,

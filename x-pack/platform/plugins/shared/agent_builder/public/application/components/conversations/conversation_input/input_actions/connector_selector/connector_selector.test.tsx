@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { type PropsWithChildren } from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { AIConnector } from '@kbn/elastic-assistant';
@@ -34,6 +34,14 @@ jest.mock('../../../../../hooks/use_ui_privileges', () => ({
   useUiPrivileges: () => ({ write: true }),
 }));
 
+jest.mock('../../../../../hooks/use_conversation', () => ({
+  useAgentId: () => 'agent-1',
+}));
+
+jest.mock('../../../../../hooks/agents/use_agent_model', () => ({
+  useAgentModel: jest.fn(),
+}));
+
 jest.mock('../input_actions.styles', () => ({
   getMaxListHeight: () => 200,
   selectorPopoverPanelStyles: undefined,
@@ -43,21 +51,24 @@ jest.mock('../input_actions.styles', () => ({
 jest.mock('../input_popover_button', () => ({
   InputPopoverButton: ({
     disabled,
+    hasAriaDisabled,
     children,
     onClick,
     'aria-label': ariaLabel,
-  }: {
-    disabled?: boolean;
-    children: React.ReactNode;
-    onClick: () => void;
-    'aria-label'?: string;
-  }) => (
+    onFocus,
+    onBlur,
+    'aria-describedby': ariaDescribedBy,
+  }: PropsWithChildren<InputPopoverButtonProps>) => (
     <button
       type="button"
       data-test-subj="agentBuilderConnectorSelectorButton"
-      disabled={disabled}
+      disabled={disabled && !hasAriaDisabled}
+      aria-disabled={disabled && hasAriaDisabled ? true : undefined}
       onClick={onClick}
       aria-label={ariaLabel}
+      onFocus={onFocus}
+      onBlur={onBlur}
+      aria-describedby={ariaDescribedBy}
     >
       {children}
     </button>
@@ -76,6 +87,11 @@ import { useLoadConnectors } from '@kbn/inference-connectors';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useConnectorSelection } from '../../../../../hooks/chat/use_connector_selection';
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
+import {
+  useAgentModel,
+  type UseAgentModelResult,
+} from '../../../../../hooks/agents/use_agent_model';
+import type { InputPopoverButtonProps } from '../input_popover_button';
 import { ConnectorSelector } from './connector_selector';
 
 const mockUseLoadConnectors = useLoadConnectors as jest.MockedFunction<typeof useLoadConnectors>;
@@ -86,6 +102,7 @@ const mockUseConnectorSelection = useConnectorSelection as jest.MockedFunction<
 const mockUseDefaultConnector = useDefaultConnector as jest.MockedFunction<
   typeof useDefaultConnector
 >;
+const mockUseAgentModel = jest.mocked(useAgentModel);
 
 const mkConnector = (id: string, isPreconfigured = true): AIConnector =>
   ({
@@ -108,6 +125,7 @@ interface RenderOptions {
   defaultConnectorId?: string;
   defaultConnectorOnly?: boolean;
   initialConnectorId?: string;
+  agentModel?: UseAgentModelResult;
 }
 
 const setup = ({
@@ -117,7 +135,10 @@ const setup = ({
   defaultConnectorId,
   defaultConnectorOnly = false,
   initialConnectorId,
+  agentModel = { isLoading: false, isLocked: false },
 }: RenderOptions = {}) => {
+  mockUseAgentModel.mockReturnValue(agentModel);
+
   mockUseKibana.mockReturnValue({
     services: {
       http: {} as any,
@@ -223,7 +244,7 @@ describe('ConnectorSelector sync effect', () => {
     expect(selectConnector).toHaveBeenCalledWith('B');
   });
 
-  it('switches to the default when an admin sets a default for the first time', () => {
+  it('does not override the user selection when the default resolves for the first time', () => {
     const connectors = [mkConnector('A'), mkConnector('saved')];
     const { selectConnector, updateContext } = setup({
       connectors,
@@ -234,7 +255,22 @@ describe('ConnectorSelector sync effect', () => {
 
     updateContext({ defaultConnectorId: 'A' });
 
-    expect(selectConnector).toHaveBeenCalledWith('A');
+    expect(selectConnector).not.toHaveBeenCalled();
+  });
+
+  it('reverts to the new default when the admin changes it after settings have resolved', () => {
+    const connectors = [mkConnector('A'), mkConnector('B'), mkConnector('saved')];
+    const { selectConnector, updateContext } = setup({
+      connectors,
+      selectedConnector: 'saved',
+      defaultConnectorId: undefined,
+    });
+
+    updateContext({ defaultConnectorId: 'A' });
+    expect(selectConnector).not.toHaveBeenCalled();
+
+    updateContext({ defaultConnectorId: 'B' });
+    expect(selectConnector).toHaveBeenCalledWith('B');
   });
 
   it('keeps the current pick when the admin unsets the default', () => {
@@ -311,5 +347,71 @@ describe('ConnectorSelector sync effect', () => {
     setup({ connectors: [], selectedConnector: undefined });
     const button = screen.getByTestId('agentBuilderConnectorSelectorButton');
     expect(button).toHaveAttribute('aria-label', 'Select connector, LLM');
+  });
+
+  describe('while the agent is loading', () => {
+    it('shows a disabled button without touching the stored connector selection', () => {
+      const { selectConnector } = setup({
+        connectors: [mkConnector('A')],
+        selectedConnector: undefined,
+        defaultConnectorId: 'A',
+        agentModel: { isLoading: true, isLocked: false },
+      });
+      const button = screen.getByTestId('agentBuilderConnectorSelectorButton');
+      expect(button).toBeDisabled();
+      expect(button).toHaveAttribute('aria-label', 'Select connector, LLM');
+      expect(selectConnector).not.toHaveBeenCalled();
+      expect(mockUseLoadConnectors).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when the agent sets its own model', () => {
+    const lockedAgentModel: UseAgentModelResult = {
+      isLoading: false,
+      isLocked: true,
+      connectorName: 'Agent Model',
+    };
+
+    it('disables the button and shows the model resolved for the agent', () => {
+      setup({
+        connectors: [mkConnector('A')],
+        selectedConnector: 'A',
+        agentModel: lockedAgentModel,
+      });
+      const button = screen.getByTestId('agentBuilderConnectorSelectorButton');
+      expect(button).toHaveAttribute('aria-disabled', 'true');
+      expect(button).toHaveAttribute('aria-label', 'Select connector, Agent Model');
+      expect(mockUseAgentModel).toHaveBeenCalledWith('agent-1');
+    });
+
+    it('explains why the model cannot be changed when the button receives keyboard focus', async () => {
+      setup({ agentModel: lockedAgentModel });
+      const button = screen.getByTestId('agentBuilderConnectorSelectorButton');
+
+      act(() => button.focus());
+
+      const tooltip = await screen.findByRole('tooltip');
+      expect(tooltip).toHaveTextContent(
+        'This agent uses a preconfigured model, so it cannot be changed here.'
+      );
+      expect(button).toHaveAttribute('aria-describedby', tooltip.id);
+    });
+
+    it('does not change the stored connector selection', () => {
+      const { selectConnector } = setup({
+        connectors: [mkConnector('A')],
+        selectedConnector: undefined,
+        defaultConnectorId: 'A',
+        agentModel: lockedAgentModel,
+      });
+      expect(selectConnector).not.toHaveBeenCalled();
+      expect(mockUseLoadConnectors).not.toHaveBeenCalled();
+    });
+
+    it('uses the fallback label while the model is still resolving', () => {
+      setup({ agentModel: { isLoading: false, isLocked: true } });
+      const button = screen.getByTestId('agentBuilderConnectorSelectorButton');
+      expect(button).toHaveAttribute('aria-label', 'Select connector, LLM');
+    });
   });
 });
