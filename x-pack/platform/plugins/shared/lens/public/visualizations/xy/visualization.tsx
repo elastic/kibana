@@ -72,7 +72,12 @@ import type {
   XYByValueAnnotationLayerConfig,
   XYVisualizationState,
 } from './types';
-import { visualizationSubtypes, visualizationTypes, defaultSeriesType } from './types';
+import {
+  visualizationSubtypes,
+  visualizationTypes,
+  defaultSeriesType,
+  defaultAreaFill,
+} from './types';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import {
   getAccessorColorConfigs,
@@ -81,6 +86,7 @@ import {
 } from './color_assignment';
 import { getDefaultPalette } from './default_palette';
 import {
+  AREA_SERIES,
   getAnnotationLayerErrors,
   isHorizontalChart,
   isHorizontalSeries,
@@ -301,13 +307,16 @@ export const getXyVisualization = ({
         compatibleSeriesType
       );
 
-    return {
-      ...state,
-      preferredSeriesType: compatibleSeriesType,
-      layers: layerId
-        ? state.layers.map((layer) => (layer.layerId === layerId ? switchLayer(layer) : layer))
-        : state.layers.map(switchLayer),
-    };
+    return applyChartDefaultsIfNeeded(
+      {
+        ...state,
+        preferredSeriesType: compatibleSeriesType,
+        layers: layerId
+          ? state.layers.map((layer) => (layer.layerId === layerId ? switchLayer(layer) : layer))
+          : state.layers.map(switchLayer),
+      },
+      compatibleSeriesType
+    );
   },
 
   getSuggestions,
@@ -824,10 +833,13 @@ export const getXyVisualization = ({
         layer={layer}
         setLayerState={(newLayer: XYDataLayerConfig) =>
           setState(
-            updateLayer(
-              state,
-              applySeriesDefaultsIfNeeded(newLayer, layer.seriesType, newLayer.seriesType),
-              index
+            applyChartDefaultsIfNeeded(
+              updateLayer(
+                state,
+                applySeriesDefaultsIfNeeded(newLayer, layer.seriesType, newLayer.seriesType),
+                index
+              ),
+              newLayer.seriesType
             )
           )
         }
@@ -1340,6 +1352,23 @@ function applySeriesDefaultsIfNeeded(
   }
   return updated;
 }
+
+/**
+ * Applies chart-type-specific defaults after a type switch.
+ */
+export const applyChartDefaultsIfNeeded = (
+  state: XYVisualizationState,
+  toSeriesType: SeriesType
+): XYVisualizationState => {
+  if (!AREA_SERIES.includes(toSeriesType) || state.areaFill !== undefined) {
+    return state;
+  }
+
+  return {
+    ...state,
+    areaFill: defaultAreaFill,
+  };
+};
 
 /**
  * Resolves the default palette when switching between series types.

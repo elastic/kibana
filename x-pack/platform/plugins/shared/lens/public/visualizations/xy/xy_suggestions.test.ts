@@ -1697,8 +1697,8 @@ describe('xy_suggestions', () => {
       changeType: 'unchanged',
     };
 
-    test('leaves areaFill undefined when suggesting area from a chart without area layers', () => {
-      const suggestions = getSuggestions({
+    const getAreaSuggestion = (areaFill?: XYVisualizationState['areaFill']) =>
+      getSuggestions({
         table: bytesOverTimeTable,
         keptLayerIds: ['first'],
         subVisualizationId: 'area',
@@ -1706,6 +1706,7 @@ describe('xy_suggestions', () => {
           legend: { isVisible: true, position: 'bottom' },
           valueLabels: 'hide',
           preferredSeriesType: 'bar',
+          areaFill,
           layers: [
             {
               layerId: 'first',
@@ -1716,22 +1717,22 @@ describe('xy_suggestions', () => {
             },
           ],
         },
-      });
+      }).find(({ state }) => getVisualizationSubtypeId(state) === 'area');
 
-      const areaSuggestion = suggestions.find(
-        ({ state }) => getVisualizationSubtypeId(state) === 'area'
-      );
-      expect(areaSuggestion).toBeDefined();
-      expect(areaSuggestion?.state.areaFill).toBeUndefined();
+    test('applies the default areaFill when suggesting area from a chart without one', () => {
+      expect(getAreaSuggestion()?.state.areaFill).toBe('gradient');
     });
 
-    test('leaves areaFill undefined for non-area suggestions without a current state', () => {
-      const suggestions = getSuggestions({
+    test('keeps the current chart areaFill when suggesting area', () => {
+      expect(getAreaSuggestion('solid')?.state.areaFill).toBe('solid');
+    });
+
+    test('does not add an areaFill to non-area suggestions', () => {
+      const [suggestion] = getSuggestions({
         table: bytesOverTimeTable,
         keptLayerIds: [],
       });
 
-      const [suggestion] = suggestions;
       expect(getVisualizationSubtypeId(suggestion.state)).toBe('bar_stacked');
       expect(suggestion.state.areaFill).toBeUndefined();
     });

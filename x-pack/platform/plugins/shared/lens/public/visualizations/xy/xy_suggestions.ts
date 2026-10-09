@@ -22,8 +22,8 @@ import type {
 } from '@kbn/lens-common';
 import { getColorMappingDefaults } from '../../utils';
 import type { XYVisualizationState, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
-import { visualizationSubtypes, defaultSeriesType } from './types';
-import { flipSeriesType, getIconForSeries } from './state_helpers';
+import { visualizationSubtypes, defaultSeriesType, defaultAreaFill } from './types';
+import { flipSeriesType, getIconForSeries, hasAreaSeries } from './state_helpers';
 import { getDefaultPalette } from './default_palette';
 import { getDataLayers, isDataLayer, isDateHistogramOperation } from './visualization_helpers';
 
@@ -641,13 +641,16 @@ function buildSuggestion({
         )
     : [];
 
+  const layers =
+    existingLayer && Object.keys(existingLayer).length ? keptLayers : [...keptLayers, newLayer];
+
   const state: XYVisualizationState = {
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     valueLabels: currentState?.valueLabels || 'hide',
     fittingFunction: currentState?.fittingFunction ?? FittingFunctions.LINEAR,
     curveType: currentState?.curveType,
     fillOpacity: currentState?.fillOpacity,
-    areaFill: currentState?.areaFill,
+    areaFill: currentState?.areaFill ?? (hasAreaSeries(layers) ? defaultAreaFill : undefined),
     pointVisibility: currentState?.pointVisibility,
     xTitle: currentState?.xTitle,
     yTitle: currentState?.yTitle,
@@ -680,8 +683,7 @@ function buildSuggestion({
       yRight: true,
     },
     preferredSeriesType: seriesType,
-    layers:
-      existingLayer && Object.keys(existingLayer).length ? keptLayers : [...keptLayers, newLayer],
+    layers,
   };
 
   const isIncomplete = yValues.length === 0;
