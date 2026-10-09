@@ -17,7 +17,7 @@ tags:
 settings:
   timeout: "30m"
   concurrency:
-    key: "nightshift-source-onboarding-{{ inputs.sourceSlug }}"
+    key: "nightshift-source-onboarding-{{ inputs.sourceSlug }}:{{ inputs.sourceId }}"
     strategy: drop
     max: 1
 triggers:
@@ -34,7 +34,7 @@ triggers:
       - name: sourceSlug
         type: string
         required: true
-        description: "Slug of the target source, used to key concurrency."
+        description: "Slug of the target source. Together with the source id it keys concurrency."
       - name: skipFeatures
         type: boolean
         default: false

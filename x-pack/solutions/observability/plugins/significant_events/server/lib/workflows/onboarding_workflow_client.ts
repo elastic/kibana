@@ -186,28 +186,6 @@ const parseWorkflowOutput = (
 });
 
 const CONCURRENCY_KEY_PREFIX = 'nightshift-source-onboarding-';
-
-/**
- * Builds the concurrency group key used to correlate workflow executions with
- * a specific source. Must stay in sync with the `settings.concurrency.key`
- * template in the onboarding YAML definition.
- *
- * Keyed by slug rather than source id so execution lists stay readable. A slug
- * is unique among the live sources of a space (the engine scopes concurrency
- * groups by space), but deleting a source frees it: a new source created with
- * the same title reuses the slug and shows the deleted source's last run until
- * its own first run.
- */
-export const buildConcurrencyKey = (sourceSlug: string) => `${CONCURRENCY_KEY_PREFIX}${sourceSlug}`;
-
-/** Extracts the source slug from a concurrency key, or returns null if the prefix doesn't match. */
-export const parseSourceSlugFromConcurrencyKey = (key: string): string | null => {
-  if (!key.startsWith(CONCURRENCY_KEY_PREFIX)) {
-    return null;
-  }
-  return key.slice(CONCURRENCY_KEY_PREFIX.length);
-};
-
 const FEATURES_IDENTIFICATION_CONCURRENCY_KEY_PREFIX = 'nightshift-source-features-identification-';
 const QUERIES_GENERATION_CONCURRENCY_KEY_PREFIX = 'nightshift-source-queries-generation-';
 
@@ -217,13 +195,55 @@ const KI_CONCURRENCY_KEY_PREFIXES = [
   QUERIES_GENERATION_CONCURRENCY_KEY_PREFIX,
 ];
 
+/** Joins the slug and the id in a concurrency key. A source id never contains it. */
+const SOURCE_ID_SEPARATOR = ':';
+
+/** The two values a concurrency key carries for a source. */
+export interface ISourceRunIdentity {
+  sourceId: string;
+  sourceSlug: string;
+}
+
+const formatSourceIdentity = ({ sourceSlug, sourceId }: ISourceRunIdentity): string =>
+  `${sourceSlug}${SOURCE_ID_SEPARATOR}${sourceId}`;
+
+const parseSourceIdentity = (suffix: string): ISourceRunIdentity | null => {
+  const separatorIndex = suffix.lastIndexOf(SOURCE_ID_SEPARATOR);
+  if (separatorIndex <= 0 || separatorIndex === suffix.length - 1) {
+    return null;
+  }
+  return {
+    sourceSlug: suffix.slice(0, separatorIndex),
+    sourceId: suffix.slice(separatorIndex + 1),
+  };
+};
+
 /**
- * Like {@link parseSourceSlugFromConcurrencyKey}, but also accepts the keys of the onboarding
- * sub-workflows (features identification, queries generation), which carry the same slug.
+ * Builds the concurrency group key used to correlate workflow executions with
+ * a specific source. Must stay in sync with the `settings.concurrency.key`
+ * template in the onboarding YAML definition.
+ *
+ * The key carries the slug so execution lists stay readable, and the source id because the id is
+ * the only value that stays unique: deleting a source frees its slug, so a source created later
+ * with the same title reuses it. Keyed by slug alone, that source would inherit the deleted
+ * source's runs and be dropped by its concurrency limit.
  */
-export const parseSourceSlugFromKiConcurrencyKey = (key: string): string | null => {
+export const buildConcurrencyKey = (identity: ISourceRunIdentity) =>
+  `${CONCURRENCY_KEY_PREFIX}${formatSourceIdentity(identity)}`;
+
+/** Extracts the source from an onboarding concurrency key, or returns null if it does not match. */
+export const parseSourceFromConcurrencyKey = (key: string): ISourceRunIdentity | null =>
+  key.startsWith(CONCURRENCY_KEY_PREFIX)
+    ? parseSourceIdentity(key.slice(CONCURRENCY_KEY_PREFIX.length))
+    : null;
+
+/**
+ * Like {@link parseSourceFromConcurrencyKey}, but also accepts the keys of the onboarding
+ * sub-workflows (features identification, queries generation), which carry the same identity.
+ */
+export const parseSourceFromKiConcurrencyKey = (key: string): ISourceRunIdentity | null => {
   const prefix = KI_CONCURRENCY_KEY_PREFIXES.find((candidate) => key.startsWith(candidate));
-  return prefix === undefined ? null : key.slice(prefix.length);
+  return prefix === undefined ? null : parseSourceIdentity(key.slice(prefix.length));
 };
 
 export const MAX_SOURCES_PER_QUERY = 10000;
@@ -232,15 +252,15 @@ export const MAX_SOURCES_PER_QUERY = 10000;
  * interface for running, querying, and canceling KI onboarding workflows.
  *
  * Executions live in the space of the request. Each source's onboarding
- * execution is keyed by a concurrency group derived from its slug, so at most
+ * execution is keyed by a concurrency group derived from its slug and id, so at most
  * one onboarding run is active per source in a space.
  */
 export class SignificantEventsKIsOnboardingClient {
   private readonly workflowExecutionService: WorkflowExecutionService<OnboardingWorkflowInputPayload>;
   /**
-   * The sub-workflows an onboarding run starts. They are keyed by the source slug with `drop`
+   * The sub-workflows an onboarding run starts. They are keyed by the source slug and id with `drop`
    * concurrency and keep running for a while after their parent is cancelled, so a new run for
-   * the slug is dropped at its first sub-workflow until they have stopped.
+   * the source is dropped at its first sub-workflow until they have stopped.
    */
   private readonly subWorkflowExecutionServices: Array<{
     service: WorkflowExecutionService;
@@ -342,7 +362,7 @@ export class SignificantEventsKIsOnboardingClient {
     sourceSlug?: string;
     /**
      * The source's `esql_updated_at`, set at creation and moved on every query change. Runs that
-     * started earlier ran another query, or belonged to a deleted source with the same slug.
+     * started earlier ran another query.
      */
     queryUpdatedAt?: string;
     request: KibanaRequest;
@@ -351,7 +371,7 @@ export class SignificantEventsKIsOnboardingClient {
     const result = await this.workflowExecutionService.getStatus({
       request,
       spaceId: request.spaceId,
-      queryParams: { concurrencyGroupKey: buildConcurrencyKey(slug) },
+      queryParams: { concurrencyGroupKey: buildConcurrencyKey({ sourceId, sourceSlug: slug }) },
       ignoreStartedBefore: queryUpdatedAt,
     });
 
@@ -387,8 +407,7 @@ export class SignificantEventsKIsOnboardingClient {
     request,
   }: {
     /**
-     * `esql_updated_at`, when set, drops runs that started before the current query, including
-     * runs of a deleted source that had the same slug.
+     * `esql_updated_at`, when set, drops runs that started before the current query.
      */
     sources: Array<{ id: string; slug: string; esql_updated_at?: string }>;
     request: KibanaRequest;
@@ -398,10 +417,10 @@ export class SignificantEventsKIsOnboardingClient {
     }
 
     const statuses: Record<string, SignificantEventsWorkflowStatusResult> = {};
-    const sourcesBySlug = new Map<string, { id: string; esql_updated_at?: string }>();
+    const sourcesById = new Map<string, { id: string; esql_updated_at?: string }>();
 
-    for (const { id, slug, esql_updated_at: queryUpdatedAt } of sources) {
-      sourcesBySlug.set(slug, { id, esql_updated_at: queryUpdatedAt });
+    for (const { id, esql_updated_at: queryUpdatedAt } of sources) {
+      sourcesById.set(id, { id, esql_updated_at: queryUpdatedAt });
       statuses[id] = {
         status: SignificantEventsWorkflowStatus.NotStarted,
         executionId: null,
@@ -414,8 +433,8 @@ export class SignificantEventsKIsOnboardingClient {
       if (execution.concurrencyGroupKey === undefined) {
         continue;
       }
-      const slug = parseSourceSlugFromConcurrencyKey(execution.concurrencyGroupKey);
-      const source = slug === null ? undefined : sourcesBySlug.get(slug);
+      const identity = parseSourceFromConcurrencyKey(execution.concurrencyGroupKey);
+      const source = identity === null ? undefined : sourcesById.get(identity.sourceId);
       if (
         source === undefined ||
         (source.esql_updated_at !== undefined && isStartedBefore(execution, source.esql_updated_at))
@@ -447,35 +466,36 @@ export class SignificantEventsKIsOnboardingClient {
     request: KibanaRequest;
   }): Promise<string | null> {
     const slug = await this.resolveSourceSlug({ sourceId, sourceSlug, request });
-    return this.cancelBySourceSlug({ sourceSlug: slug, request });
+    return this.cancelBySource({ sourceId, sourceSlug: slug, request });
   }
 
   /**
-   * Cancels all non-terminal onboarding executions for a slug, then the sub-workflow executions
+   * Cancels all non-terminal onboarding executions for a source, then the sub-workflow executions
    * they started. Unlike {@link cancel} it needs no catalog lookup, so it also works for sources
    * that were already deleted.
    *
    * Cancelling the parent leaves its running sub-workflow to wind down on its own, which can take
    * a while; cancelling it directly asks it to stop right away.
    */
-  async cancelBySourceSlug({
+  async cancelBySource({
+    sourceId,
     sourceSlug,
     request,
-  }: {
-    sourceSlug: string;
-    request: KibanaRequest;
-  }): Promise<string | null> {
+  }: ISourceRunIdentity & { request: KibanaRequest }): Promise<string | null> {
     const executionId = await this.workflowExecutionService.cancelActive({
       spaceId: request.spaceId,
       request,
-      concurrencyGroupKey: buildConcurrencyKey(sourceSlug),
+      concurrencyGroupKey: buildConcurrencyKey({ sourceId, sourceSlug }),
     });
     await Promise.all(
       this.subWorkflowExecutionServices.map(({ service, concurrencyKeyPrefix }) =>
         service.cancelActive({
           spaceId: request.spaceId,
           request,
-          concurrencyGroupKey: `${concurrencyKeyPrefix}${sourceSlug}`,
+          concurrencyGroupKey: `${concurrencyKeyPrefix}${formatSourceIdentity({
+            sourceId,
+            sourceSlug,
+          })}`,
         })
       )
     );

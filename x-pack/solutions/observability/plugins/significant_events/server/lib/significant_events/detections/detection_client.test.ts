@@ -233,3 +233,85 @@ describe('DetectionClient.bulkCreate', () => {
     ).rejects.toThrow('Bulk create operation failed for 1 out of 1 items');
   });
 });
+
+describe('DetectionClient.markSourceDetectionsProcessed', () => {
+  const createSweepClient = ({
+    detections,
+    processedIds = [],
+  }: {
+    detections: Array<Record<string, unknown>>;
+    processedIds?: string[];
+  }) => {
+    const query = jest.fn(async (request: { query: string }) => {
+      if (request.query.includes('STATS total')) {
+        return countResponse(detections.length);
+      }
+      if (request.query.includes('processed_by')) {
+        return markerResponse(processedIds);
+      }
+      return sourceResponse(detections);
+    });
+    const create = jest.fn(
+      async (): Promise<BulkResponse> => ({ errors: false, items: [], took: 1 })
+    );
+    const client = new DetectionClient({
+      dataStreamClient: { create },
+      esClient: { esql: { query } } as never,
+      space: 'default',
+    });
+    return { client, create };
+  };
+
+  it('marks only the unprocessed detections of the deleted source', async () => {
+    const { client, create } = createSweepClient({
+      detections: [
+        createDetection({
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+          detection_id: 'd-gone',
+          source_id: 'gone',
+        }),
+        createDetection({
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+          detection_id: 'd-live',
+          source_id: 'live',
+        }),
+        createDetection({
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+          detection_id: 'd-done',
+          source_id: 'gone',
+        }),
+      ],
+      processedIds: ['d-done'],
+    });
+
+    await expect(
+      client.markSourceDetectionsProcessed({ sourceId: 'gone', processedBy: 'source-deleted' })
+    ).resolves.toBe(1);
+
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(create).toHaveBeenCalledWith({
+      space: 'default',
+      documents: [
+        expect.objectContaining({ detection_id: 'd-gone', processed_by: 'source-deleted' }),
+      ],
+    });
+  });
+
+  it('writes nothing when the source has no unprocessed detections', async () => {
+    const { client, create } = createSweepClient({
+      detections: [
+        createDetection({
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+          detection_id: 'd-live',
+          source_id: 'live',
+        }),
+      ],
+    });
+
+    await expect(
+      client.markSourceDetectionsProcessed({ sourceId: 'gone', processedBy: 'source-deleted' })
+    ).resolves.toBe(0);
+
+    expect(create).not.toHaveBeenCalled();
+  });
+});

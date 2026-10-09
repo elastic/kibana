@@ -101,6 +101,7 @@ const eligibleStreamsRoute = createServerRoute({
       getKnowledgeIndicatorClient,
       sourceKnowledgeState,
       scheduleSourceOnboarding,
+      getDetectionClient,
     } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
@@ -128,6 +129,7 @@ const eligibleStreamsRoute = createServerRoute({
       kiClient,
       sourceKnowledgeState,
       scheduleSourceOnboarding,
+      getDetectionClient,
       maxScheduled: maxStreams,
       onboardingClient: streamsKIsOnboardingClient,
       maintenanceService,

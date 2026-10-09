@@ -11,14 +11,18 @@ import type { SourceChangeListener, SourcesClient } from '@kbn/nightshift-source
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
+import type { DetectionClient } from '../../../lib/significant_events/detections/detection_client';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators/knowledge_indicator_client/knowledge_indicator_client';
-import { parseSourceSlugFromKiConcurrencyKey } from '../../../lib/workflows/onboarding_workflow_client';
+import {
+  parseSourceFromKiConcurrencyKey,
+  type ISourceRunIdentity,
+} from '../../../lib/workflows/onboarding_workflow_client';
 import { listAllSources } from '../../utils/list_all_sources';
 import type { SourceKnowledgeStateClient } from '../../../lib/knowledge_indicators/source_knowledge_state';
 import { StatusError } from '../../../lib/errors/status_error';
 
 interface OnboardingClient {
-  cancelBySourceSlug: (args: { sourceSlug: string; request: KibanaRequest }) => Promise<unknown>;
+  cancelBySource: (args: ISourceRunIdentity & { request: KibanaRequest }) => Promise<unknown>;
   getNonTerminalExecutions?: (args: {
     request: KibanaRequest;
   }) => Promise<WorkflowExecutionListItemDto[]>;
@@ -33,6 +37,33 @@ type CatalogKiClient = Pick<
   | 'deleteAllQueries'
   | 'deleteIndicators'
 >;
+
+/** The `processed_by` of the markers written for the detections of a deleted source. */
+export const SOURCE_DELETED_PROCESSED_BY = 'source-deleted';
+
+type DetectionRetirementClient = Pick<DetectionClient, 'markSourceDetectionsProcessed'>;
+
+/**
+ * Marks the unprocessed detections of a deleted source as processed. Deleting a source keeps its
+ * detections, and the discovery batch keeps offering them: the agent would write events for a
+ * source that is gone, and the whole write is rejected for the unknown source.
+ */
+export async function retireSourceDetections({
+  sourceId,
+  getDetectionClient,
+}: {
+  sourceId: string;
+  getDetectionClient?: () => Promise<DetectionRetirementClient>;
+}): Promise<void> {
+  if (!getDetectionClient) {
+    return;
+  }
+  const detectionClient = await getDetectionClient();
+  await detectionClient.markSourceDetectionsProcessed({
+    sourceId,
+    processedBy: SOURCE_DELETED_PROCESSED_BY,
+  });
+}
 
 /**
  * Drops the owned rules, queries and knowledge indicators of a source id. Onboarding runs, the view
@@ -58,19 +89,23 @@ export async function retireSourceKnowledge({
  */
 async function cancelOnboardingThen({
   onboardingClient,
-  sourceSlug,
+  source,
   request,
   cleanup,
 }: {
-  onboardingClient?: Pick<OnboardingClient, 'cancelBySourceSlug'>;
-  sourceSlug: string;
+  onboardingClient?: Pick<OnboardingClient, 'cancelBySource'>;
+  source: Pick<NightshiftSource, 'id' | 'slug'>;
   request: KibanaRequest;
   cleanup: () => Promise<void>;
 }): Promise<void> {
   let cancelError: unknown;
   try {
     // Cancel first: a run left going could write indicators or rules back after the cleanup.
-    await onboardingClient?.cancelBySourceSlug({ sourceSlug, request });
+    await onboardingClient?.cancelBySource({
+      sourceId: source.id,
+      sourceSlug: source.slug,
+      request,
+    });
   } catch (error) {
     cancelError = error;
   }
@@ -96,12 +131,12 @@ export async function resetSourceKnowledge({
   source: Pick<NightshiftSource, 'id' | 'slug'>;
   kiClient: Pick<CatalogKiClient, 'deleteOwnedRules' | 'deleteAllQueries' | 'deleteIndicators'>;
   sourceKnowledgeState?: SourceKnowledgeStateClient;
-  onboardingClient?: Pick<OnboardingClient, 'cancelBySourceSlug'>;
+  onboardingClient?: Pick<OnboardingClient, 'cancelBySource'>;
   request: KibanaRequest;
 }): Promise<void> {
   await cancelOnboardingThen({
     onboardingClient,
-    sourceSlug: source.slug,
+    source,
     request,
     cleanup: () =>
       sourceKnowledgeState
@@ -150,8 +185,8 @@ export async function reconcileSourceRevision({
         (isRevisionChanged || !state.onboardingScheduled) &&
         scheduleSourceOnboarding
       ) {
-        const runningSlugs = await loadRunningSourceSlugs(onboardingClient, request);
-        if (runningSlugs.has(current.slug)) {
+        const runningSources = await loadRunningSources(onboardingClient, request);
+        if (runningSources.has(current.id)) {
           throw new StatusError('Waiting for the previous onboarding execution to finish', 409);
         }
         if (await scheduleSourceOnboarding(current)) {
@@ -179,7 +214,7 @@ export async function applySourceEnabled({
 }: {
   source: Pick<NightshiftSource, 'id' | 'slug' | 'enabled'>;
   kiClient: Pick<CatalogKiClient, 'setSourceRulesEnabled'>;
-  onboardingClient?: Pick<OnboardingClient, 'cancelBySourceSlug'>;
+  onboardingClient?: Pick<OnboardingClient, 'cancelBySource'>;
   /** Read only when the source is enabled: a failed read must not stop a disable. */
   getMaintenanceState: () => Promise<SignificantEventsMaintenanceState>;
   request: KibanaRequest;
@@ -195,7 +230,11 @@ export async function applySourceEnabled({
     let cancelError: unknown;
     if (!source.enabled && !skipCancel) {
       try {
-        await onboardingClient?.cancelBySourceSlug({ sourceSlug: source.slug, request });
+        await onboardingClient?.cancelBySource({
+          sourceId: source.id,
+          sourceSlug: source.slug,
+          request,
+        });
       } catch (error) {
         cancelError = error;
       }
@@ -221,7 +260,7 @@ export async function applySourceEnabled({
   if (!source.enabled) {
     await cancelOnboardingThen({
       onboardingClient: skipCancel ? undefined : onboardingClient,
-      sourceSlug: source.slug,
+      source,
       request,
       cleanup: async () => {
         if (!skipRuleToggle) {
@@ -297,11 +336,14 @@ export async function reconcileSourceCatalog({
   sourceKnowledgeState,
   scheduleSourceOnboarding,
   maxScheduled,
+  getDetectionClient,
 }: {
   sourcesClient: SourcesClient;
   kiClient: CatalogKiClient;
   onboardingClient?: OnboardingClient;
   sourceKnowledgeState?: SourceKnowledgeStateClient;
+  /** Reads the detections of ids that left the catalog, so they are marked processed as well. */
+  getDetectionClient?: () => Promise<DetectionRetirementClient>;
   scheduleSourceOnboarding?: (source: NightshiftSource) => Promise<boolean>;
   /**
    * Caps concurrent onboarding runs for this sweep, counting the runs already going. Without it a
@@ -311,14 +353,14 @@ export async function reconcileSourceCatalog({
   maintenanceService: Pick<SignificantEventsMaintenanceService, 'getState'>;
   request: KibanaRequest;
 }): Promise<{ sources: NightshiftSource[]; reconcileIds: string[] }> {
-  const [sources, ownedRuleIds, maintenanceState, runningSourceSlugs] = await Promise.all([
+  const [sources, ownedRuleIds, maintenanceState, runningSources] = await Promise.all([
     listAllSources(sourcesClient),
     kiClient.findSourceIdsWithOwnedRules(),
     maintenanceService.getState({ request }),
-    loadRunningSourceSlugs(onboardingClient, request),
+    loadRunningSources(onboardingClient, request),
   ]);
   let remainingSlots =
-    maxScheduled === undefined ? Infinity : Math.max(0, maxScheduled - runningSourceSlugs.size);
+    maxScheduled === undefined ? Infinity : Math.max(0, maxScheduled - runningSources.size);
   // Once the budget is spent the scheduler declines, which leaves the source unscheduled so the
   // next sweep picks it up.
   const scheduleWithinBudget = scheduleSourceOnboarding
@@ -334,7 +376,6 @@ export async function reconcileSourceCatalog({
       }
     : undefined;
   const catalogIds = new Set(sources.map((source) => source.id));
-  const catalogSlugs = new Set(sources.map((source) => source.slug));
   const ownedRuleSourceIds = new Set(ownedRuleIds);
 
   // One failing source must not leave the others' rules firing or skip the steps below, so
@@ -360,7 +401,7 @@ export async function reconcileSourceCatalog({
         getMaintenanceState: () => Promise.resolve(maintenanceState),
         request,
         sourceKnowledgeState,
-        skipCancel: !runningSourceSlugs.has(source.slug),
+        skipCancel: !runningSources.has(source.id),
         skipRuleToggle: !ownedRuleSourceIds.has(source.id),
       });
     } catch (error) {
@@ -373,15 +414,15 @@ export async function reconcileSourceCatalog({
   }
 
   // Cancel before retiring: a run left going could write indicators or rules back for a
-  // source that is gone. A run that fails to cancel does not stop the retire: its slug cannot be
-  // matched to a source id once the row is gone, and the next reconcile cancels and retires again.
+  // source that is gone. A run that fails to cancel does not stop the retire; the next reconcile
+  // cancels and retires again.
   if (onboardingClient) {
-    for (const sourceSlug of runningSourceSlugs) {
-      if (catalogSlugs.has(sourceSlug)) {
+    for (const [runningSourceId, runningSource] of runningSources) {
+      if (catalogIds.has(runningSourceId)) {
         continue;
       }
       try {
-        await onboardingClient.cancelBySourceSlug({ sourceSlug, request });
+        await onboardingClient.cancelBySource({ ...runningSource, request });
       } catch (error) {
         failures.push(error);
       }
@@ -404,6 +445,7 @@ export async function reconcileSourceCatalog({
       } else {
         await retireSourceKnowledge({ sourceId, kiClient });
       }
+      await retireSourceDetections({ sourceId, getDetectionClient });
     } catch (error) {
       failures.push(error);
     }
@@ -418,20 +460,21 @@ export async function reconcileSourceCatalog({
   return { sources, reconcileIds: survivingReconcileIds };
 }
 
-async function loadRunningSourceSlugs(
+/** The sources with a run going, by source id. A run carries the slug its source had at the time. */
+async function loadRunningSources(
   onboardingClient: OnboardingClient | undefined,
   request: KibanaRequest
-): Promise<Set<string>> {
+): Promise<Map<string, ISourceRunIdentity>> {
   const executions = (await onboardingClient?.getNonTerminalExecutions?.({ request })) ?? [];
-  const sourceSlugs = new Set<string>();
+  const runningSources = new Map<string, ISourceRunIdentity>();
   for (const execution of executions) {
     if (!execution.concurrencyGroupKey) {
       continue;
     }
-    const sourceSlug = parseSourceSlugFromKiConcurrencyKey(execution.concurrencyGroupKey);
-    if (sourceSlug) {
-      sourceSlugs.add(sourceSlug);
+    const identity = parseSourceFromKiConcurrencyKey(execution.concurrencyGroupKey);
+    if (identity) {
+      runningSources.set(identity.sourceId, identity);
     }
   }
-  return sourceSlugs;
+  return runningSources;
 }

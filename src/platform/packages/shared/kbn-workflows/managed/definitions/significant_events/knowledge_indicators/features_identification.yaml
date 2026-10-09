@@ -24,7 +24,7 @@ tags:
 settings:
   timeout: "15m"
   concurrency:
-    key: "nightshift-source-features-identification-{{ inputs.sourceSlug }}"
+    key: "nightshift-source-features-identification-{{ inputs.sourceSlug }}:{{ inputs.sourceId }}"
     strategy: drop
     max: 1
 triggers:
@@ -41,7 +41,7 @@ triggers:
       - name: sourceSlug
         type: string
         required: true
-        description: "Slug of the target source, used to key concurrency."
+        description: "Slug of the target source. Together with the source id it keys concurrency."
       - name: start
         type: number
         description: "Start timestamp (epoch ms) for the document sampling window. Defaults to 24 h ago."

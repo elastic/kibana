@@ -18,8 +18,8 @@ import {
 import {
   SignificantEventsKIsOnboardingClient,
   buildConcurrencyKey,
-  parseSourceSlugFromConcurrencyKey,
-  parseSourceSlugFromKiConcurrencyKey,
+  parseSourceFromConcurrencyKey,
+  parseSourceFromKiConcurrencyKey,
 } from './onboarding_workflow_client';
 const statusRequest = httpServerMock.createKibanaRequest();
 
@@ -42,6 +42,8 @@ const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => {
 };
 
 const slugOf = (sourceId: string): string => `${sourceId}-slug`;
+const onboardingKeyOf = (sourceId: string): string =>
+  `nightshift-source-onboarding-${slugOf(sourceId)}:${sourceId}`;
 
 const createClient = (overrides: Record<string, jest.Mock> = {}) => {
   const managementApi = createMockManagementApi(overrides);
@@ -60,57 +62,87 @@ const createClient = (overrides: Record<string, jest.Mock> = {}) => {
 
 describe('SignificantEventsKIsOnboardingClient', () => {
   describe('buildConcurrencyKey', () => {
-    it('prepends the prefix to the source slug', () => {
-      expect(buildConcurrencyKey('my-source')).toBe('nightshift-source-onboarding-my-source');
-    });
-  });
-
-  describe('parseSourceSlugFromConcurrencyKey', () => {
-    it('extracts the source slug from a valid key', () => {
-      expect(parseSourceSlugFromConcurrencyKey('nightshift-source-onboarding-my-source')).toBe(
-        'my-source'
+    it('joins the slug and the source id after the prefix', () => {
+      expect(buildConcurrencyKey({ sourceSlug: 'my-source', sourceId: 'id-1' })).toBe(
+        'nightshift-source-onboarding-my-source:id-1'
       );
     });
 
-    it('returns null for keys with a different prefix', () => {
-      expect(parseSourceSlugFromConcurrencyKey('other-prefix-my-source')).toBeNull();
-    });
-
-    it('round-trips with buildConcurrencyKey', () => {
-      const sourceSlug = 'logs.nginx';
-      expect(parseSourceSlugFromConcurrencyKey(buildConcurrencyKey(sourceSlug))).toBe(sourceSlug);
+    it('gives a recreated source with the same slug a different key', () => {
+      expect(buildConcurrencyKey({ sourceSlug: 'my-source', sourceId: 'id-2' })).not.toBe(
+        buildConcurrencyKey({ sourceSlug: 'my-source', sourceId: 'id-1' })
+      );
     });
   });
 
-  describe('parseSourceSlugFromKiConcurrencyKey', () => {
+  describe('parseSourceFromConcurrencyKey', () => {
+    it('extracts the slug and the id from a valid key', () => {
+      expect(parseSourceFromConcurrencyKey('nightshift-source-onboarding-my-source:id-1')).toEqual({
+        sourceSlug: 'my-source',
+        sourceId: 'id-1',
+      });
+    });
+
+    it('returns null for keys with a different prefix', () => {
+      expect(parseSourceFromConcurrencyKey('other-prefix-my-source:id-1')).toBeNull();
+    });
+
+    it('returns null for a key written before the id was added', () => {
+      expect(parseSourceFromConcurrencyKey('nightshift-source-onboarding-my-source')).toBeNull();
+    });
+
+    it('round-trips with buildConcurrencyKey', () => {
+      const identity = {
+        sourceSlug: 'logs.nginx',
+        sourceId: '0b6f9a44-3c1e-4b7a-9d52-1f8e3c7a2b10',
+      };
+      expect(parseSourceFromConcurrencyKey(buildConcurrencyKey(identity))).toEqual(identity);
+    });
+  });
+
+  describe('parseSourceFromKiConcurrencyKey', () => {
     it.each([
       'nightshift-source-onboarding-',
       'nightshift-source-features-identification-',
       'nightshift-source-queries-generation-',
-    ])('extracts the slug from a key with the %s prefix', (prefix) => {
-      expect(parseSourceSlugFromKiConcurrencyKey(`${prefix}my-source`)).toBe('my-source');
+    ])('extracts the slug and the id from a key with the %s prefix', (prefix) => {
+      expect(parseSourceFromKiConcurrencyKey(`${prefix}my-source:id-1`)).toEqual({
+        sourceSlug: 'my-source',
+        sourceId: 'id-1',
+      });
     });
 
     it('returns null for keys of other workflows', () => {
-      expect(parseSourceSlugFromKiConcurrencyKey('significant-events-ki-sync')).toBeNull();
+      expect(parseSourceFromKiConcurrencyKey('significant-events-ki-sync')).toBeNull();
     });
   });
 
-  describe('concurrency key sync with onboarding YAML', () => {
-    it('buildConcurrencyKey produces keys that match the YAML concurrency template', () => {
-      const definition = getManagedWorkflowDefinition(SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID);
-      expect(definition).toBeDefined();
-      expect(definition!.yaml).toBeDefined();
+  describe('concurrency key sync with the workflow YAML', () => {
+    const yamlKeyTemplate = (workflowId: Parameters<typeof getManagedWorkflowDefinition>[0]) => {
+      const definition = getManagedWorkflowDefinition(workflowId);
+      expect(definition?.yaml).toBeDefined();
+      return (parse(definition!.yaml!) as { settings: { concurrency: { key: string } } }).settings
+        .concurrency.key;
+    };
+    const fillTemplate = (template: string) =>
+      template
+        .replace('{{ inputs.sourceSlug }}', 'test-source')
+        .replace('{{ inputs.sourceId }}', 'source-id-1');
 
-      const parsed = parse(definition!.yaml!) as {
-        settings: { concurrency: { key: string } };
-      };
-      const yamlTemplate = parsed.settings.concurrency.key;
+    it('buildConcurrencyKey produces keys that match the onboarding YAML concurrency template', () => {
+      expect(buildConcurrencyKey({ sourceSlug: 'test-source', sourceId: 'source-id-1' })).toBe(
+        fillTemplate(yamlKeyTemplate(SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID))
+      );
+    });
 
-      const sourceSlug = 'test-source';
-      const expectedKey = yamlTemplate.replace('{{ inputs.sourceSlug }}', sourceSlug);
-
-      expect(buildConcurrencyKey(sourceSlug)).toBe(expectedKey);
+    it.each([
+      ['features identification', SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID],
+      ['queries generation', SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID],
+    ] as const)('the %s YAML key carries the slug and the id the parser reads', (_, workflowId) => {
+      expect(parseSourceFromKiConcurrencyKey(fillTemplate(yamlKeyTemplate(workflowId)))).toEqual({
+        sourceSlug: 'test-source',
+        sourceId: 'source-id-1',
+      });
     });
   });
 
@@ -381,7 +413,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
 
       expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
         expect.objectContaining({
-          concurrencyGroupKey: `nightshift-source-onboarding-${slugOf('logs.nginx')}`,
+          concurrencyGroupKey: onboardingKeyOf('logs.nginx'),
           size: 1,
         }),
         'default'
@@ -422,6 +454,32 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       );
     });
 
+    it('ignores a run of a deleted source that had the same slug as a live one', async () => {
+      const { client } = createClient({
+        getWorkflowExecutions: jest.fn().mockResolvedValue({
+          results: [
+            {
+              id: 'exec-of-deleted-source',
+              status: ExecutionStatus.COMPLETED,
+              concurrencyGroupKey: `nightshift-source-onboarding-${slugOf(
+                'logs.nginx'
+              )}:deleted-id`,
+            },
+          ],
+        }),
+      });
+
+      const result = await client.getStatuses({
+        request: statusRequest,
+        sources: [source('logs.nginx')],
+      });
+
+      expect(result['logs.nginx']).toEqual({
+        status: SignificantEventsWorkflowStatus.NotStarted,
+        executionId: null,
+      });
+    });
+
     it('maps each execution to a status keyed by source id and fills missing sources with NotStarted', async () => {
       const { client } = createClient({
         getWorkflowExecutions: jest.fn().mockResolvedValue({
@@ -429,18 +487,18 @@ describe('SignificantEventsKIsOnboardingClient', () => {
             {
               id: 'exec-1',
               status: ExecutionStatus.RUNNING,
-              concurrencyGroupKey: `nightshift-source-onboarding-${slugOf('logs.nginx')}`,
+              concurrencyGroupKey: onboardingKeyOf('logs.nginx'),
             },
             {
               id: 'exec-2',
               status: ExecutionStatus.COMPLETED,
-              concurrencyGroupKey: `nightshift-source-onboarding-${slugOf('logs.apache')}`,
+              concurrencyGroupKey: onboardingKeyOf('logs.apache'),
             },
             {
               id: 'exec-3',
               status: ExecutionStatus.FAILED,
               error: { message: 'boom' },
-              concurrencyGroupKey: `nightshift-source-onboarding-${slugOf('logs.haproxy')}`,
+              concurrencyGroupKey: onboardingKeyOf('logs.haproxy'),
             },
           ],
         }),
@@ -476,7 +534,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
             {
               id: 'exec-1',
               status: ExecutionStatus.COMPLETED,
-              concurrencyGroupKey: `nightshift-source-onboarding-${slugOf('logs.nginx')}`,
+              concurrencyGroupKey: onboardingKeyOf('logs.nginx'),
             },
           ],
         }),
@@ -502,7 +560,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
             {
               id: 'exec-2',
               status: ExecutionStatus.RUNNING,
-              concurrencyGroupKey: 'nightshift-source-onboarding-not-requested',
+              concurrencyGroupKey: 'nightshift-source-onboarding-not-requested:not-requested',
             },
           ],
         }),
@@ -526,7 +584,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
               id: 'exec-of-deleted-source',
               status: ExecutionStatus.FAILED,
               startedAt: '2026-09-01T00:00:00.000Z',
-              concurrencyGroupKey: `nightshift-source-onboarding-${slugOf('logs.nginx')}`,
+              concurrencyGroupKey: onboardingKeyOf('logs.nginx'),
             },
           ],
         }),
@@ -571,9 +629,9 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     });
   });
 
-  describe('cancelBySourceSlug', () => {
+  describe('cancelBySource', () => {
     // A cancelled parent leaves its sub-workflow running for a while. The sub-workflows use
-    // `drop` concurrency keyed by slug, so a replacement run is dropped until they have stopped.
+    // `drop` concurrency keyed by slug and id, so a replacement run is dropped until they have stopped.
     const runningExecutionOf = (workflowId: string, concurrencyGroupKey: string) => {
       const ids: Record<string, string> = {
         [SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID]: 'onboarding-exec',
@@ -585,7 +643,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       };
     };
 
-    it('cancels the onboarding run, then the feature identification and query generation runs of the slug', async () => {
+    it('cancels the onboarding run, then the feature identification and query generation runs of the source', async () => {
       const getWorkflowExecutions = jest.fn(
         async ({
           workflowId,
@@ -598,21 +656,21 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       const { client, managementApi } = createClient({ getWorkflowExecutions });
       const request = httpServerMock.createKibanaRequest();
 
-      await expect(client.cancelBySourceSlug({ sourceSlug: 'nginx', request })).resolves.toBe(
-        'onboarding-exec'
-      );
+      await expect(
+        client.cancelBySource({ sourceId: 'nginx-id', sourceSlug: 'nginx', request })
+      ).resolves.toBe('onboarding-exec');
 
       expect(getWorkflowExecutions).toHaveBeenCalledWith(
         expect.objectContaining({
           workflowId: SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
-          concurrencyGroupKey: 'nightshift-source-features-identification-nginx',
+          concurrencyGroupKey: 'nightshift-source-features-identification-nginx:nginx-id',
         }),
         'default'
       );
       expect(getWorkflowExecutions).toHaveBeenCalledWith(
         expect.objectContaining({
           workflowId: SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
-          concurrencyGroupKey: 'nightshift-source-queries-generation-nginx',
+          concurrencyGroupKey: 'nightshift-source-queries-generation-nginx:nginx-id',
         }),
         'default'
       );
@@ -632,7 +690,9 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       const { client, managementApi } = createClient({ getWorkflowExecutions });
       const request = httpServerMock.createKibanaRequest();
 
-      await expect(client.cancelBySourceSlug({ sourceSlug: 'nginx', request })).resolves.toBeNull();
+      await expect(
+        client.cancelBySource({ sourceId: 'nginx-id', sourceSlug: 'nginx', request })
+      ).resolves.toBeNull();
 
       expect(managementApi.cancelWorkflowExecution.mock.calls.map(([id]) => id)).toEqual([
         'features-exec',

@@ -23,7 +23,7 @@ tags:
 settings:
   timeout: "10m"
   concurrency:
-    key: "nightshift-source-queries-generation-{{ inputs.sourceSlug }}"
+    key: "nightshift-source-queries-generation-{{ inputs.sourceSlug }}:{{ inputs.sourceId }}"
     strategy: drop
     max: 1
 triggers:
@@ -40,7 +40,7 @@ triggers:
       - name: sourceSlug
         type: string
         required: true
-        description: "Slug of the target source, used to key concurrency."
+        description: "Slug of the target source. Together with the source id it keys concurrency."
       - name: connectorId
         type: string
         description: "Optional connector ID override. When omitted the code-owned Nightshift default is used."

@@ -52,6 +52,9 @@ export interface DetectionsPaginatedSearchOptions extends PaginatedSearchOptions
 
 const PROCESSED_MARKER_CHUNK_SIZE = 250;
 
+// Page size and write batch size of the sweep that marks a deleted source's detections processed.
+const SOURCE_SWEEP_PAGE_SIZE = 1000;
+
 // Cap the per-rule detection history (flyout timeline) to the most recent N transitions so a churny
 // rule doesn't produce an unbounded scroll.
 const DETECTION_HISTORY_LIMIT = 20;
@@ -178,6 +181,47 @@ export class DetectionClient {
     });
 
     return { ...result, hits: await this.withDerivedProcessed(result.hits) };
+  }
+
+  /**
+   * Marks the unprocessed latest detection of every rule of a source as processed, and returns how
+   * many it marked. A deleted source leaves its detections behind, and the discovery batch keeps
+   * offering them, so the agent writes events for a source that no longer exists.
+   *
+   * `source_id` is stored but not mapped, so it cannot be filtered in the query: the latest
+   * detection of every rule is read and matched here.
+   */
+  async markSourceDetectionsProcessed({
+    sourceId,
+    processedBy,
+  }: {
+    sourceId: string;
+    processedBy: string;
+  }): Promise<number> {
+    const detectionIds: string[] = [];
+    for (let page = 1; ; page++) {
+      const result = await this.findLatestPaginated({ page, perPage: SOURCE_SWEEP_PAGE_SIZE });
+      for (const detection of result.hits) {
+        if (detection.source_id === sourceId && !detection.processed && detection.detection_id) {
+          detectionIds.push(detection.detection_id);
+        }
+      }
+      if (page * SOURCE_SWEEP_PAGE_SIZE >= result.total) {
+        break;
+      }
+    }
+
+    const timestamp = new Date().toISOString();
+    for (let start = 0; start < detectionIds.length; start += SOURCE_SWEEP_PAGE_SIZE) {
+      await this.bulkCreate(
+        detectionIds.slice(start, start + SOURCE_SWEEP_PAGE_SIZE).map((detectionId) => ({
+          '@timestamp': timestamp,
+          detection_id: detectionId,
+          processed_by: processedBy,
+        }))
+      );
+    }
+    return detectionIds.length;
   }
 
   private async withDerivedProcessed(rawHits: RawDetection[]): Promise<Detection[]> {

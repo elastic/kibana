@@ -11,6 +11,7 @@ import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import {
   reconcileSourceCatalog,
+  retireSourceDetections,
   reconcileSourceRevision,
   resetSourceKnowledge,
   applySourceEnabled,
@@ -53,6 +54,7 @@ export const streamsWithIndicatorsRoute = createServerRoute({
       sourcesClient,
       sourceKnowledgeState,
       scheduleSourceOnboarding,
+      getDetectionClient,
     } = await getScopedClients({
       request,
     });
@@ -65,6 +67,7 @@ export const streamsWithIndicatorsRoute = createServerRoute({
       kiClient,
       sourceKnowledgeState,
       scheduleSourceOnboarding,
+      getDetectionClient,
       onboardingClient: workflowClients.streamsKIsOnboardingClient,
       maintenanceService,
       request,
@@ -100,6 +103,7 @@ const reconcileSourceRoute = createServerRoute({
       sourceKnowledgeState,
       scheduleSourceOnboarding,
       getKnowledgeIndicatorClient,
+      getDetectionClient,
     } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
     const kiClient = await getKnowledgeIndicatorClient();
@@ -118,6 +122,7 @@ const reconcileSourceRoute = createServerRoute({
         sourceKnowledgeState,
         request,
       });
+      await retireSourceDetections({ sourceId: params.path.sourceId, getDetectionClient });
       return { reconciled: true };
     }
     await reconcileSourceRevision({

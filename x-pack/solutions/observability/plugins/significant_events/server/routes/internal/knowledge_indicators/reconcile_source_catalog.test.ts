@@ -21,9 +21,12 @@ import {
 
 const request = { spaceId: 'default' } as KibanaRequest;
 
+// `makeSource` derives a slug as `<id>-slug`, so the id is recovered by stripping the suffix.
+const idOfSlug = (sourceSlug: string) => sourceSlug.replace(/-slug$/, '');
+
 const runningExecution = (sourceSlug: string) => ({
   status: ExecutionStatus.RUNNING,
-  concurrencyGroupKey: `nightshift-source-onboarding-${sourceSlug}`,
+  concurrencyGroupKey: `nightshift-source-onboarding-${sourceSlug}:${idOfSlug(sourceSlug)}`,
 });
 
 const makeSource = (
@@ -64,14 +67,14 @@ const makeKiClient = (reconcileIds: string[] = [], ownedRuleIds: string[] = reco
 });
 
 describe('reconcileSourceCatalog', () => {
-  const cancelBySourceSlug = jest.fn().mockResolvedValue(null);
+  const cancelBySource = jest.fn().mockResolvedValue(null);
   const onboardingWithRuns = (sourceSlugs: string[]) => ({
-    cancelBySourceSlug,
+    cancelBySource,
     getNonTerminalExecutions: jest.fn().mockResolvedValue(sourceSlugs.map(runningExecution)),
   });
 
   beforeEach(() => {
-    cancelBySourceSlug.mockClear();
+    cancelBySource.mockClear();
   });
 
   it('disables rules and cancels onboarding by slug for a disabled source', async () => {
@@ -84,12 +87,13 @@ describe('reconcileSourceCatalog', () => {
       request,
     });
 
-    expect(cancelBySourceSlug).toHaveBeenCalledWith({
+    expect(cancelBySource).toHaveBeenCalledWith({
+      sourceId: 'disabled-source',
       sourceSlug: 'disabled-source-slug',
       request,
     });
     expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('disabled-source', false);
-    expect(cancelBySourceSlug.mock.invocationCallOrder[0]).toBeLessThan(
+    expect(cancelBySource.mock.invocationCallOrder[0]).toBeLessThan(
       kiClient.setSourceRulesEnabled.mock.invocationCallOrder[0]
     );
     expect(kiClient.deleteOwnedRules).not.toHaveBeenCalled();
@@ -97,7 +101,7 @@ describe('reconcileSourceCatalog', () => {
 
   it('aligns the remaining sources and sweeps orphans before reporting a failing source', async () => {
     const kiClient = makeKiClient(['first', 'second']);
-    cancelBySourceSlug.mockRejectedValueOnce(new Error('cancel rejected'));
+    cancelBySource.mockRejectedValueOnce(new Error('cancel rejected'));
 
     await expect(
       reconcileSourceCatalog({
@@ -114,7 +118,11 @@ describe('reconcileSourceCatalog', () => {
 
     expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('first', false);
     expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('second', false);
-    expect(cancelBySourceSlug).toHaveBeenCalledWith({ sourceSlug: 'orphan-slug', request });
+    expect(cancelBySource).toHaveBeenCalledWith({
+      sourceId: 'orphan',
+      sourceSlug: 'orphan-slug',
+      request,
+    });
   });
 
   it('skips a source whose lease is held and still aligns the others', async () => {
@@ -188,7 +196,7 @@ describe('reconcileSourceCatalog', () => {
   it('cancels a disabled source run before waiting for its lease', async () => {
     const kiClient = makeKiClient(['disabled-source']);
     const order: string[] = [];
-    cancelBySourceSlug.mockImplementationOnce(async () => {
+    cancelBySource.mockImplementationOnce(async () => {
       order.push('cancel');
       return null;
     });
@@ -219,7 +227,7 @@ describe('reconcileSourceCatalog', () => {
 
   it('cancels the other orphan runs and retires gone sources when one orphan cancel fails', async () => {
     const kiClient = makeKiClient(['gone-1']);
-    cancelBySourceSlug.mockRejectedValueOnce(new Error('orphan cancel rejected'));
+    cancelBySource.mockRejectedValueOnce(new Error('orphan cancel rejected'));
 
     await expect(
       reconcileSourceCatalog({
@@ -231,7 +239,11 @@ describe('reconcileSourceCatalog', () => {
       })
     ).rejects.toThrow('orphan cancel rejected');
 
-    expect(cancelBySourceSlug).toHaveBeenCalledWith({ sourceSlug: 'orphan-b-slug', request });
+    expect(cancelBySource).toHaveBeenCalledWith({
+      sourceId: 'orphan-b',
+      sourceSlug: 'orphan-b-slug',
+      request,
+    });
     expect(kiClient.deleteOwnedRules).toHaveBeenCalledWith('gone-1');
   });
 
@@ -263,7 +275,7 @@ describe('reconcileSourceCatalog', () => {
     });
 
     expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('enabled-source', true);
-    expect(cancelBySourceSlug).not.toHaveBeenCalled();
+    expect(cancelBySource).not.toHaveBeenCalled();
     expect(kiClient.deleteIndicators).not.toHaveBeenCalled();
   });
 
@@ -282,7 +294,8 @@ describe('reconcileSourceCatalog', () => {
 
     expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledTimes(1);
     expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('disabled-source', false);
-    expect(cancelBySourceSlug).toHaveBeenCalledWith({
+    expect(cancelBySource).toHaveBeenCalledWith({
+      sourceId: 'disabled-source',
       sourceSlug: 'disabled-source-slug',
       request,
     });
@@ -298,7 +311,7 @@ describe('reconcileSourceCatalog', () => {
     });
 
     expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('disabled-source', false);
-    expect(cancelBySourceSlug).not.toHaveBeenCalled();
+    expect(cancelBySource).not.toHaveBeenCalled();
   });
 
   it('cancels a disabled source that owns no rules without toggling rules', async () => {
@@ -311,7 +324,8 @@ describe('reconcileSourceCatalog', () => {
       request,
     });
 
-    expect(cancelBySourceSlug).toHaveBeenCalledWith({
+    expect(cancelBySource).toHaveBeenCalledWith({
+      sourceId: 'disabled-source',
       sourceSlug: 'disabled-source-slug',
       request,
     });
@@ -328,7 +342,7 @@ describe('reconcileSourceCatalog', () => {
       request,
     });
 
-    expect(cancelBySourceSlug).not.toHaveBeenCalled();
+    expect(cancelBySource).not.toHaveBeenCalled();
     expect(kiClient.setSourceRulesEnabled).not.toHaveBeenCalled();
   });
 
@@ -348,6 +362,25 @@ describe('reconcileSourceCatalog', () => {
     expect(kiClient.deleteOwnedRules).not.toHaveBeenCalledWith('enabled-source');
   });
 
+  it('marks the detections of an id that is no longer in the catalog as processed', async () => {
+    const markSourceDetectionsProcessed = jest.fn().mockResolvedValue(0);
+
+    await reconcileSourceCatalog({
+      sourcesClient: makeSourcesClient([makeSource({ id: 'enabled-source' })]),
+      kiClient: makeKiClient(['gone-source', 'enabled-source']),
+      onboardingClient: onboardingWithRuns([]),
+      getDetectionClient: jest.fn().mockResolvedValue({ markSourceDetectionsProcessed }),
+      maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
+      request,
+    });
+
+    expect(markSourceDetectionsProcessed).toHaveBeenCalledTimes(1);
+    expect(markSourceDetectionsProcessed).toHaveBeenCalledWith({
+      sourceId: 'gone-source',
+      processedBy: 'source-deleted',
+    });
+  });
+
   it('cancels a running execution whose slug has no catalog row', async () => {
     const kiClient = makeKiClient([]);
     await reconcileSourceCatalog({
@@ -358,8 +391,12 @@ describe('reconcileSourceCatalog', () => {
       request,
     });
 
-    expect(cancelBySourceSlug).toHaveBeenCalledTimes(1);
-    expect(cancelBySourceSlug).toHaveBeenCalledWith({ sourceSlug: 'gone-source-slug', request });
+    expect(cancelBySource).toHaveBeenCalledTimes(1);
+    expect(cancelBySource).toHaveBeenCalledWith({
+      sourceId: 'gone-source',
+      sourceSlug: 'gone-source-slug',
+      request,
+    });
     expect(kiClient.deleteOwnedRules).not.toHaveBeenCalled();
   });
 
@@ -373,9 +410,13 @@ describe('reconcileSourceCatalog', () => {
       request,
     });
 
-    expect(cancelBySourceSlug).toHaveBeenCalledWith({ sourceSlug: 'gone-source-slug', request });
+    expect(cancelBySource).toHaveBeenCalledWith({
+      sourceId: 'gone-source',
+      sourceSlug: 'gone-source-slug',
+      request,
+    });
     expect(kiClient.deleteOwnedRules).toHaveBeenCalledWith('gone-source');
-    expect(cancelBySourceSlug.mock.invocationCallOrder[0]).toBeLessThan(
+    expect(cancelBySource.mock.invocationCallOrder[0]).toBeLessThan(
       kiClient.deleteOwnedRules.mock.invocationCallOrder[0]
     );
   });
@@ -391,7 +432,8 @@ describe('reconcileSourceCatalog', () => {
       request: otherRequest,
     });
 
-    expect(cancelBySourceSlug).toHaveBeenCalledWith({
+    expect(cancelBySource).toHaveBeenCalledWith({
+      sourceId: 'gone-source',
       sourceSlug: 'gone-source-slug',
       request: otherRequest,
     });
@@ -399,22 +441,26 @@ describe('reconcileSourceCatalog', () => {
 });
 
 describe('resetSourceKnowledge', () => {
-  it('cancels the onboarding run by slug before dropping rules, queries and indicators', async () => {
+  it('cancels the onboarding run by slug and id before dropping rules, queries and indicators', async () => {
     const kiClient = makeKiClient();
-    const cancelBySourceSlug = jest.fn().mockResolvedValue(null);
+    const cancelBySource = jest.fn().mockResolvedValue(null);
 
     await resetSourceKnowledge({
       source: { id: 'source-1', slug: 'nginx-errors' },
       kiClient,
-      onboardingClient: { cancelBySourceSlug },
+      onboardingClient: { cancelBySource },
       request,
     });
 
-    expect(cancelBySourceSlug).toHaveBeenCalledWith({ sourceSlug: 'nginx-errors', request });
+    expect(cancelBySource).toHaveBeenCalledWith({
+      sourceId: 'source-1',
+      sourceSlug: 'nginx-errors',
+      request,
+    });
     expect(kiClient.deleteOwnedRules).toHaveBeenCalledWith('source-1');
     expect(kiClient.deleteAllQueries).toHaveBeenCalledWith('source-1');
     expect(kiClient.deleteIndicators).toHaveBeenCalledWith('source-1');
-    expect(cancelBySourceSlug.mock.invocationCallOrder[0]).toBeLessThan(
+    expect(cancelBySource.mock.invocationCallOrder[0]).toBeLessThan(
       kiClient.deleteOwnedRules.mock.invocationCallOrder[0]
     );
   });
@@ -433,13 +479,13 @@ describe('resetSourceKnowledge', () => {
 
   it('drops the knowledge even when cancelling the run fails, then reports the failure', async () => {
     const kiClient = makeKiClient();
-    const cancelBySourceSlug = jest.fn().mockRejectedValue(new Error('no workflows privilege'));
+    const cancelBySource = jest.fn().mockRejectedValue(new Error('no workflows privilege'));
 
     await expect(
       resetSourceKnowledge({
         source: { id: 'source-1', slug: 'nginx-errors' },
         kiClient,
-        onboardingClient: { cancelBySourceSlug },
+        onboardingClient: { cancelBySource },
         request,
       })
     ).rejects.toThrow('no workflows privilege');
@@ -532,7 +578,7 @@ describe('durable source revision reconciliation', () => {
     const scheduleSourceOnboarding = jest.fn(async () => true);
     const kiClient = makeKiClient();
     const onboardingClient = {
-      cancelBySourceSlug: jest.fn(async () => null),
+      cancelBySource: jest.fn(async () => null),
       getNonTerminalExecutions: jest.fn().mockResolvedValue([]),
     };
     const sourcesClient = { get: jest.fn(async () => ({ source })) } as unknown as SourcesClient;

@@ -78,7 +78,10 @@ describe('reconcileSourceRoute', () => {
 
   const SOURCE = { id: 'source-1', slug: 'nginx', enabled: true, esql_updated_at: 'rev-2' };
 
-  const makeReconcileParams = () => {
+  const makeReconcileParams = ({
+    sources = [SOURCE],
+    getDetectionClient,
+  }: { sources?: Array<typeof SOURCE>; getDetectionClient?: jest.Mock } = {}) => {
     const scheduleSourceOnboarding = jest.fn().mockResolvedValue(true);
     const sourceKnowledgeState = {
       runExclusive: jest.fn(
@@ -92,11 +95,12 @@ describe('reconcileSourceRoute', () => {
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         sourcesClient: {
-          list: jest.fn().mockResolvedValue({ sources: [SOURCE] }),
+          list: jest.fn().mockResolvedValue({ sources }),
           get: jest.fn().mockResolvedValue({ source: SOURCE }),
         },
         sourceKnowledgeState,
         scheduleSourceOnboarding,
+        getDetectionClient,
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
           setSourceRulesEnabled: jest.fn().mockResolvedValue(undefined),
           deleteOwnedRules: jest.fn().mockResolvedValue(undefined),
@@ -119,5 +123,31 @@ describe('reconcileSourceRoute', () => {
     expect(scheduleSourceOnboarding).toHaveBeenCalledWith(SOURCE, {
       ignoreContinuousSetting: true,
     });
+  });
+
+  it('marks the detections of a deleted source as processed', async () => {
+    const markSourceDetectionsProcessed = jest.fn().mockResolvedValue(2);
+    const { handlerParams } = makeReconcileParams({
+      sources: [],
+      getDetectionClient: jest.fn().mockResolvedValue({ markSourceDetectionsProcessed }),
+    });
+
+    await expect(reconcileSource.handler(handlerParams)).resolves.toEqual({ reconciled: true });
+
+    expect(markSourceDetectionsProcessed).toHaveBeenCalledWith({
+      sourceId: SOURCE.id,
+      processedBy: 'source-deleted',
+    });
+  });
+
+  it('leaves the detections of a live source alone', async () => {
+    const markSourceDetectionsProcessed = jest.fn();
+    const { handlerParams } = makeReconcileParams({
+      getDetectionClient: jest.fn().mockResolvedValue({ markSourceDetectionsProcessed }),
+    });
+
+    await reconcileSource.handler(handlerParams);
+
+    expect(markSourceDetectionsProcessed).not.toHaveBeenCalled();
   });
 });

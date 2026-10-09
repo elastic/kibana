@@ -25,7 +25,7 @@ const makeExecution = (
     error: null,
     workflowId: 'streams_ki/onboarding',
     duration: 300000,
-    concurrencyGroupKey: `nightshift-source-onboarding-${slugFor(sourceId)}`,
+    concurrencyGroupKey: `nightshift-source-onboarding-${slugFor(sourceId)}:${sourceId}`,
     ...overrides,
   } as WorkflowExecutionListItemDto);
 
@@ -44,6 +44,21 @@ describe('classifySources', () => {
     executions: [] as WorkflowExecutionListItemDto[],
     intervalHours: 12,
   };
+
+  it('does not credit a source with the run of a deleted source that had the same slug', () => {
+    const result = classifySources({
+      ...defaultArgs,
+      sources: [makeSource('source-a')],
+      executions: [
+        makeExecution('deleted-source', {
+          concurrencyGroupKey: `nightshift-source-onboarding-${slugFor('source-a')}:deleted-source`,
+        }),
+      ],
+    });
+
+    expect(candidateNames(result)).toEqual(['source-a']);
+    expect(result.upToDate).toEqual([]);
+  });
 
   it('treats sources without an execution as never-processed candidates', () => {
     const result = classifySources({

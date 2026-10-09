@@ -8,7 +8,7 @@
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
-import { parseSourceSlugFromConcurrencyKey } from '../../../../lib/workflows/onboarding_workflow_client';
+import { parseSourceFromConcurrencyKey } from '../../../../lib/workflows/onboarding_workflow_client';
 
 const MILLISECONDS_PER_HOUR = 3_600_000;
 
@@ -92,13 +92,13 @@ export const classifySources = ({
 
 /**
  * Executions arrive newest-first. The first row whose concurrency key carries
- * the slug of a known source is that source's latest run.
+ * the id of a known source is that source's latest run.
  */
 const latestExecutionBySource = (
   sources: ClassifySourcesArgs['sources'],
   executions: WorkflowExecutionListItemDto[]
 ): Map<ClassifySourcesArgs['sources'][number], WorkflowExecutionListItemDto> => {
-  const sourcesBySlug = new Map(sources.map((source) => [source.slug, source]));
+  const sourcesById = new Map(sources.map((source) => [source.id, source]));
   const latestBySource = new Map<
     ClassifySourcesArgs['sources'][number],
     WorkflowExecutionListItemDto
@@ -108,8 +108,8 @@ const latestExecutionBySource = (
     if (!execution.concurrencyGroupKey) {
       continue;
     }
-    const slug = parseSourceSlugFromConcurrencyKey(execution.concurrencyGroupKey);
-    const source = slug === null ? undefined : sourcesBySlug.get(slug);
+    const identity = parseSourceFromConcurrencyKey(execution.concurrencyGroupKey);
+    const source = identity === null ? undefined : sourcesById.get(identity.sourceId);
     if (source === undefined || latestBySource.has(source)) {
       continue;
     }
