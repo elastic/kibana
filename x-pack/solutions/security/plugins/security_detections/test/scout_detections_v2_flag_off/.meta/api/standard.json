@@ -1,0 +1,125 @@
+{
+  "sha1": "f397c59185a8a67b116a3c5759d0fe74284cac46",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "1b646e3eeeab5db-4f6c83cf8fea59f",
+      "title": "Detection Engine v2 — feature-flag-off routes return 404 POST /rules returns 404 when flag is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2_flag_off/api/tests/routes_404.spec.ts",
+        "line": 58,
+        "column": 32
+      }
+    },
+    {
+      "id": "1b646e3eeeab5db-9517f381a375fb5",
+      "title": "Detection Engine v2 — feature-flag-off routes return 404 GET /rules returns 404 when flag is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2_flag_off/api/tests/routes_404.spec.ts",
+        "line": 70,
+        "column": 26
+      }
+    },
+    {
+      "id": "1b646e3eeeab5db-974af8c3a17ce83",
+      "title": "Detection Engine v2 — feature-flag-off routes return 404 GET /rules/{id} returns 404 when flag is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2_flag_off/api/tests/routes_404.spec.ts",
+        "line": 76,
+        "column": 14
+      }
+    },
+    {
+      "id": "1b646e3eeeab5db-0749faba6b2f908",
+      "title": "Detection Engine v2 — feature-flag-off routes return 404 PUT /rules/{id} returns 404 when flag is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2_flag_off/api/tests/routes_404.spec.ts",
+        "line": 86,
+        "column": 18
+      }
+    },
+    {
+      "id": "1b646e3eeeab5db-4269c9b2dca58c0",
+      "title": "Detection Engine v2 — feature-flag-off routes return 404 PATCH /rules/{id} returns 404 when flag is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2_flag_off/api/tests/routes_404.spec.ts",
+        "line": 108,
+        "column": 28
+      }
+    },
+    {
+      "id": "1b646e3eeeab5db-f4afc3dd0d09f33",
+      "title": "Detection Engine v2 — feature-flag-off routes return 404 DELETE /rules/{id} returns 404 when flag is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2_flag_off/api/tests/routes_404.spec.ts",
+        "line": 122,
+        "column": 24
+      }
+    },
+    {
+      "id": "1b646e3eeeab5db-c90067e9e3b4add",
+      "title": "Detection Engine v2 — feature-flag-off routes return 404 GET /tags returns 404 when flag is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2_flag_off/api/tests/routes_404.spec.ts",
+        "line": 132,
+        "column": 14
+      }
+    },
+    {
+      "id": "1b646e3eeeab5db-04808deb3e2c4d9",
+      "title": "Detection Engine v2 — feature-flag-off routes return 404 POST /rules/{id}/_enable returns 404 when flag is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2_flag_off/api/tests/routes_404.spec.ts",
+        "line": 137,
+        "column": 18
+      }
+    },
+    {
+      "id": "1b646e3eeeab5db-437346878d70eb2",
+      "title": "Detection Engine v2 — feature-flag-off routes return 404 POST /rules/{id}/_disable returns 404 when flag is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2_flag_off/api/tests/routes_404.spec.ts",
+        "line": 149,
+        "column": 24
+      }
+    }
+  ]
+}

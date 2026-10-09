@@ -121,7 +121,11 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.query).toStrictEqual({ base: 'FROM new-index-* | LIMIT 100' });
-      expect(response.body.metadata).toStrictEqual(created.metadata);
+      expect(response.body.metadata).toStrictEqual({
+        ...created.metadata,
+        // A query edit is a meaningful change: revision bumps by one.
+        revision: created.metadata.revision + 1,
+      });
       expect(response.body.schedule).toStrictEqual(created.schedule);
     }
   );
@@ -706,7 +710,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.code).toBe('INVALID_RULE_QUERY_CONFIG');
       // The rejected update must not have persisted: the breach block stays.
       const stored = await apiServices.alertingV2.rules.get(created.id);
-      expect(stored.query.breach).toStrictEqual({ segment: 'WHERE count >= 10' });
+      expect(stored.query!.breach).toStrictEqual({ segment: 'WHERE count >= 10' });
     }
   );
 

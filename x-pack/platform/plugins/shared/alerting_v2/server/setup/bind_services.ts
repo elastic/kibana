@@ -37,6 +37,7 @@ import { EventOriginToken } from '../lib/event_origin/token';
 import { InternalRulesClient, InternalRulesClientProvider } from '../lib/internal_rules_client';
 import { RulesClient } from '../lib/rules_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
+import { BuilderTypeRegistry } from '../lib/builder_types';
 import {
   RuleTemplatesClient,
   RuleTemplateSavedObjectsClientToken,
@@ -50,6 +51,7 @@ import {
   RuleChangesHistoryServiceToken,
 } from '../lib/rule_changes_history';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
+import { CallerIdentityToken } from '../lib/rules_client/caller_identity';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
 import {
   EsServiceInternalToken,
@@ -131,12 +133,21 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(InternalRulesClient).toSelf().inSingletonScope();
   bind(EventOriginToken).toConstantValue('user');
   bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
+  bind(BuilderTypeRegistry).toSelf().inSingletonScope();
   bind(RequestSpaceIdToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);
       const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
       return spaces.spacesService.getSpaceId(request);
     })
+    .inRequestScope();
+  // Default caller identity is absent. Framework HTTP routes never override
+  // this, so the generic API surface is identity-less by construction.
+  // In-process callers that pass `options.onBehalfOf` to
+  // `getRulesClientWithRequest` override this in buildScope.
+  // Ref: rule-ownership.md "Caller identity"
+  bind(CallerIdentityToken)
+    .toDynamicValue(() => undefined)
     .inRequestScope();
   bind(ActionPolicyNamespaceToken)
     .toDynamicValue(({ get }) => {

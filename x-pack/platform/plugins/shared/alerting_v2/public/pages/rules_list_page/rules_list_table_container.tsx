@@ -71,6 +71,18 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
 
   const items = contentItems.map((item) => (item as RuleContentListItem).rule);
 
+  // Managed rules are read-only: their lifecycle belongs to the owning solution
+  // and the generic bulk actions (delete, enable, disable) must not reach them.
+  // Exclude them from the selectable set so the header "select all on page"
+  // checkbox cannot pull them into a bulk operation.
+  //
+  // Ref: rule-ownership.md "Reads stay open" — "read-only in the rule listing,
+  // with no edit, delete, enable, or disable affordances"
+  const selectableItems = useMemo(
+    () => items.filter((rule) => rule.metadata?.ownership?.managed !== true),
+    [items]
+  );
+
   const tableSortField = API_SORT_TO_TABLE_FIELD[sortField];
 
   const onTableChange = ({ page: tablePage, sort }: Criteria<RuleApiResponse>) => {
@@ -123,7 +135,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
     getBulkParams,
   } = useBulkSelect({
     totalItemCount: totalItems,
-    items,
+    items: selectableItems,
     filter,
     search,
   });

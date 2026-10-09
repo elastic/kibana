@@ -41,8 +41,111 @@ import {
   MAX_ARTIFACT_DATA_LENGTH,
   FIND_DEFAULT_PER_PAGE,
   FIND_MAX_RESULT_WINDOW,
+  MAX_BUILDER_FIELDS_KEYS,
+  MAX_BUILDER_TYPE_LENGTH,
+  MAX_SIGNATURE_ID_LENGTH,
 } from './constants';
 import { bulkErrorSchema } from './bulk_operation_schema';
+
+/** Rule ownership — discriminated union (rule-ownership.md "The ownership object"). */
+
+/** A rule whose lifecycle the owning solution manages. Writes are gated. */
+export const managedRuleOwnershipSchema = z
+  .object({
+    managed: z.literal(true),
+    /** The solution that manages the rule's lifecycle. 'security' for detection rules. */
+    solution: z.string(),
+    /** The domain within the solution. 'detection' for detection rules; 'cloud' or 'benchmark' are plausible later. */
+    domain: z.string(),
+  })
+  .strict();
+
+/** A rule that any caller may write through the generic API. */
+export const unmanagedRuleOwnershipSchema = z
+  .object({
+    managed: z.literal(false),
+    /**
+     * Who initiated the create, when known. For in-process callers, the id the
+     * calling plugin declares (e.g. 'significantEvents'). Absent for direct
+     * API requests. Max 128 chars.
+     */
+    app: z.string().max(128).optional(),
+  })
+  .strict();
+
+/**
+ * Server-derived ownership union. Immutable for the rule's life. Never accepted
+ * from a request body — appears only in the response schema.
+ *
+ * Ref: rule-ownership.md "The ownership object"
+ */
+export const ruleOwnershipSchema = z.discriminatedUnion('managed', [
+  managedRuleOwnershipSchema,
+  unmanagedRuleOwnershipSchema,
+]);
+
+export type ManagedRuleOwnership = z.infer<typeof managedRuleOwnershipSchema>;
+export type UnmanagedRuleOwnership = z.infer<typeof unmanagedRuleOwnershipSchema>;
+export type RuleOwnership = z.infer<typeof ruleOwnershipSchema>;
+
+/** Rule source — three-variant discriminated union (rule-source.md). */
+
+/** The rule's content is the user's own. The default. */
+export const internalRuleSourceSchema = z
+  .object({
+    type: z.literal('internal'),
+    /** The rule's content version. Starts at 1; moved only by the rule's owner. */
+    version: z.number().int().min(1).describe('Content version. Starts at 1.'),
+  })
+  .strict();
+
+/** The rule was created from a rule template and the content is the user's since. */
+export const templateRuleSourceSchema = z
+  .object({
+    type: z.literal('template'),
+    version: z.number().int().min(1).describe('Content version. Starts at 1.'),
+    /** The id of the template the rule was created from. */
+    id: z
+      .string()
+      .min(1)
+      .max(ID_MAX_LENGTH)
+      .describe('The id of the template the rule was created from.'),
+  })
+  .strict();
+
+/** The rule's content is distributed content, installed from an external asset. */
+export const externalRuleSourceSchema = z
+  .object({
+    type: z.literal('external'),
+    /** The version of the asset the rule was installed from or last upgraded to. */
+    version: z.number().int().min(1).describe('Asset version the rule is synced to.'),
+    /** The stable id of the external asset. */
+    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The stable id of the external asset.'),
+  })
+  .strict();
+
+/**
+ * Discriminated union of the three rule source variants.
+ *
+ * `internal` — user-created rule; content belongs to the user.
+ * `template` — rule instantiated from a template; records where the starting
+ *              content came from but the user owns it from that point on.
+ * `external` — rule whose content is distributed content, installed from an
+ *              external asset such as an Elastic prebuilt rule package.
+ *
+ * Every variant carries a content `version`. `template` and `external` also
+ * carry the `id` of the asset the rule originates from. `type` and `id` are
+ * immutable after creation; only `version` is owner-writable.
+ *
+ * Ref: rule-source.md "The three variants"
+ */
+export const ruleSourceSchema = z.discriminatedUnion('type', [
+  internalRuleSourceSchema,
+  templateRuleSourceSchema,
+  externalRuleSourceSchema,
+]);
+
+export type RuleSource = z.infer<typeof ruleSourceSchema>;
 
 /** Primitives */
 
@@ -88,14 +191,40 @@ const METADATA_ROUTING_TAGS_DESCRIPTION =
   'Routing tags that link alerts from this rule to action policies. An action policy applies when its `matcher.tags` contains at least one of these tags. Only allowed when kind is "alert".';
 const METADATA_BUILDER_DESCRIPTION =
   'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL; send `null` on PATCH to clear it.';
+const METADATA_SIGNATURE_ID_DESCRIPTION =
+  'Stable logical-rule identifier. Optional at creation — generated when absent. Immutable after creation.';
+const METADATA_BUILDER_FIELDS_DESCRIPTION =
+  'Structured parameters for the rule builder identified by `builder.type`. The server generates the rule query from these fields.';
 
 const metadataNameSchema = z.string().min(1).max(MAX_NAME_LENGTH);
 const metadataDescriptionSchema = z.string().max(MAX_DESCRIPTION_LENGTH).trim().min(1);
 const metadataTagsSchema = tagsSchema.min(1);
 const metadataRoutingTagsSchema = tagsSchema.min(1);
+/**
+ * Stable logical-rule identifier. Callers may supply an opaque string (1–256
+ * chars) at creation; when absent the framework generates a UUID v4. The value
+ * is immutable after creation: an update or PUT-replace omitting the field
+ * keeps the stored value, and sending a differing value is rejected with 409.
+ * Unique within a space (same value in two spaces represents the same logical
+ * rule installed twice, which is the expected cross-space use case).
+ */
+const metadataSignatureIdSchema = z.string().min(1).max(MAX_SIGNATURE_ID_LENGTH);
 const metadataBuilderSchema = z
-  .object({ type: z.string().max(64).trim().min(1).describe('Rule builder type.') })
+  .object({
+    type: z.string().max(MAX_BUILDER_TYPE_LENGTH).trim().min(1).describe('Rule builder type.'),
+  })
   .strict();
+const metadataBuilderFieldsSchema = z
+  .record(z.string().min(1).max(MAX_FIELD_NAME_LENGTH), z.unknown())
+  .check((ctx) => {
+    if (Object.keys(ctx.value).length > MAX_BUILDER_FIELDS_KEYS) {
+      ctx.issues.push({
+        code: 'custom',
+        message: `builder_fields must have at most ${MAX_BUILDER_FIELDS_KEYS} top-level fields.`,
+        input: ctx.value,
+      });
+    }
+  });
 
 export const metadataSchema = z
   .object({
@@ -103,7 +232,29 @@ export const metadataSchema = z
     description: metadataDescriptionSchema.optional().describe(METADATA_DESCRIPTION_DESCRIPTION),
     tags: metadataTagsSchema.optional().describe(METADATA_TAGS_DESCRIPTION),
     routing_tags: metadataRoutingTagsSchema.optional().describe(METADATA_ROUTING_TAGS_DESCRIPTION),
+    signature_id: metadataSignatureIdSchema.optional().describe(METADATA_SIGNATURE_ID_DESCRIPTION),
+    // `builder.type` is stored as `metadata.builder_type`, which is indexed and
+    // filterable: the Detections API needs to filter by it. On the PUT (upsert
+    // replace) path `null` explicitly clears a stored builder relationship; that
+    // path uses `replaceRuleBodySchema`, which extends this schema with a nullable
+    // override. This base schema does not accept null so that POST (create) and
+    // the rule response never advertise it.
+    // Ref: rule-types.md "The discriminator must be indexed and filterable"
+    //      rule-types.md "What this design needs from the framework"
     builder: metadataBuilderSchema.optional().describe(METADATA_BUILDER_DESCRIPTION),
+    builder_fields: metadataBuilderFieldsSchema
+      .optional()
+      .describe(METADATA_BUILDER_FIELDS_DESCRIPTION),
+    /**
+     * Provenance of the rule's content. Optional on create — defaults to
+     * `{ type: 'internal', version: 1 }` when absent. `type` and `id` are
+     * immutable after creation; only `version` is owner-writable. Response-only
+     * in the sense that it is always present in responses (the framework stamps
+     * it at create time if the caller omits it).
+     *
+     * Ref: rule-source.md "Who writes the source"
+     */
+    source: ruleSourceSchema.optional(),
   })
   .strict()
   .describe(METADATA_DESCRIPTION)
@@ -122,7 +273,16 @@ const metadataPatchSchema = z
       .nullable()
       .optional()
       .describe(METADATA_ROUTING_TAGS_DESCRIPTION),
+    // Immutable: the rules client rejects a value that differs from the stored one.
+    signature_id: metadataSignatureIdSchema.optional().describe(METADATA_SIGNATURE_ID_DESCRIPTION),
     builder: metadataBuilderSchema.nullable().optional().describe(METADATA_BUILDER_DESCRIPTION),
+    // Replaced whole rather than merged key by key: the builder's own schema validates the record.
+    builder_fields: metadataBuilderFieldsSchema
+      .nullable()
+      .optional()
+      .describe(METADATA_BUILDER_FIELDS_DESCRIPTION),
+    // Replaced whole. Only `version` moves; the rules client rejects a change to `type` or `id`.
+    source: ruleSourceSchema.optional(),
   })
   .strict()
   .meta({ id: 'alerting_rule_metadata_patch', description: METADATA_DESCRIPTION });
@@ -780,8 +940,51 @@ export const isRecoveryTransitionConsistentWithStrategy = (data: RuleLifecycleSh
 /** The create-rule fields the refinements below read. */
 type CreateRuleRefinementFields = Pick<
   z.infer<typeof createRuleDataBaseSchema>,
-  'kind' | 'metadata' | 'query' | 'recovery' | 'no_data' | 'state_transition'
->;
+  'kind' | 'recovery' | 'no_data' | 'state_transition'
+> & {
+  // Nullable `builder` because the PUT body accepts `null` to clear a stored
+  // builder relationship.
+  metadata: Omit<z.infer<typeof metadataSchema>, 'builder'> & {
+    builder?: z.infer<typeof metadataBuilderSchema> | null;
+  };
+  // Optional because a builder-authored body carries its parameters instead of
+  // a query; the builder refinements below keep exactly one of the two present.
+  query?: z.infer<typeof querySchema>;
+};
+
+/** Builder invariants — shared between the create and update schemas. */
+
+interface BuilderMetadataLike {
+  metadata?: { builder?: { type: string } | null; builder_fields?: unknown };
+  query?: unknown;
+}
+
+/**
+ * The server generates the query from `metadata.builder_fields`, so a request
+ * cannot carry both. Sending `builder_fields: null` releases the query for
+ * direct edits in the same request.
+ */
+const isQueryAbsentForBuilderFields = (data: BuilderMetadataLike): boolean =>
+  data.metadata?.builder_fields == null || data.query == null;
+
+/** `builder.type` names the schema that validates `builder_fields`, so it is required with them. */
+const isBuilderTypeProvidedForBuilderFields = (data: BuilderMetadataLike): boolean =>
+  data.metadata?.builder_fields == null || Boolean(data.metadata?.builder);
+
+const rejectQueryWithBuilderFields = {
+  message:
+    'query cannot be set together with metadata.builder_fields — the server generates the query from those fields. Send metadata.builder_fields: null in the same request to stop using the builder and set query directly.',
+  path: ['query'],
+};
+
+const rejectBuilderFieldsWithoutBuilderType = {
+  message: 'metadata.builder_fields requires metadata.builder.',
+  path: ['metadata', 'builder_fields'],
+};
+
+/** A rule that is not builder-generated has to carry its own query. */
+const isQueryProvidedWithoutBuilderFields = (data: BuilderMetadataLike): boolean =>
+  data.metadata?.builder_fields != null || data.query != null;
 
 /**
  * Shared create-rule cross-field refinements. Applied to both the single-create
@@ -853,14 +1056,69 @@ const applyCreateRuleRefinements = <T extends z.ZodType<CreateRuleRefinementFiel
           input: recovery.segment,
         });
       }
+    })
+    .refine(isQueryAbsentForBuilderFields, rejectQueryWithBuilderFields)
+    .refine(isBuilderTypeProvidedForBuilderFields, rejectBuilderFieldsWithoutBuilderType)
+    .refine(isQueryProvidedWithoutBuilderFields, {
+      message: 'query is required unless metadata.builder_fields is set.',
+      path: ['query'],
     });
 
-export const createRuleDataSchema = applyCreateRuleRefinements(createRuleDataBaseSchema).meta({
+// Builder-authored rules omit `query`: the server generates it from
+// `metadata.builder_fields`. The refinements above keep exactly one of the two
+// sources present.
+export const createRuleDataSchema = applyCreateRuleRefinements(
+  createRuleDataBaseSchema.extend({ query: querySchema.optional() })
+).meta({
   id: 'alerting_new_rule',
 });
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 export type CreateRuleDataInput = z.input<typeof createRuleDataSchema>;
+
+// ---------------------------------------------------------------------------
+// PUT (upsert replace) body schema
+//
+// Identical to `createRuleDataSchema` except that `metadata.builder`
+// accepts `null` as an explicit escape hatch: the PUT caller sends null to
+// confirm they want to clear a stored builder relationship and switch the rule
+// to direct ES|QL editing. The replace branch of `upsertRule` normalises null
+// to `undefined` before writing to storage, so null never reaches the SO and
+// the response schema never advertises it.
+//
+// The shared `createRuleDataSchema` (POST) does not accept null because there
+// is no builder relationship to clear on initial creation. The response schema
+// inherits the non-nullable definition from `metadataSchema`.
+//
+// Ref: rule-types.md "What this design needs from the framework"
+// ---------------------------------------------------------------------------
+
+export const replaceRuleMetadataSchema = metadataSchema
+  .extend({
+    // Override: accept null on PUT to clear a stored builder relationship.
+    builder: metadataBuilderSchema
+      .optional()
+      .nullable()
+      .describe(
+        'Identifies the rule builder that authored this rule (e.g. "threshold"). ' +
+          'Absent for rules authored directly in ES|QL. ' +
+          'Send null on a PUT replace to explicitly clear the builder relationship ' +
+          'and switch the rule to ES|QL mode.'
+      ),
+  })
+  .meta({ id: 'alerting_replace_rule_metadata' });
+
+// The refinement chain is `applyCreateRuleRefinements`, shared with POST and
+// bulk create, so the three write paths cannot drift apart.
+export const replaceRuleBodySchema = applyCreateRuleRefinements(
+  createRuleDataBaseSchema.extend({
+    // Builder-authored rules omit `query`, exactly as single create allows.
+    query: querySchema.optional(),
+    metadata: replaceRuleMetadataSchema,
+  })
+).meta({ id: 'alerting_replace_rule' });
+
+export type ReplaceRuleData = z.infer<typeof replaceRuleBodySchema>;
 
 /**
  * Top-level fields of the create-rule schema that cannot be changed after the
@@ -913,9 +1171,77 @@ export const updateRuleDataSchema = z
   })
   .strict()
   .refine(isNoDataStrategyWritable, rejectAlertNoDataStrategy)
+  .check((ctx) => {
+    if (!isQueryAbsentForBuilderFields(ctx.value)) {
+      ctx.issues.push({
+        code: 'custom',
+        path: rejectQueryWithBuilderFields.path,
+        message: rejectQueryWithBuilderFields.message,
+        input: ctx.value.query,
+      });
+    }
+
+    if (ctx.value.metadata?.builder === null && ctx.value.metadata?.builder_fields != null) {
+      ctx.issues.push({
+        code: 'custom',
+        path: ['metadata', 'builder_fields'],
+        message:
+          'metadata.builder_fields cannot be set while metadata.builder is being cleared with null.',
+        input: ctx.value.metadata.builder_fields,
+      });
+    }
+  })
   .meta({ id: 'alerting_update_rule' });
 
 export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
+
+/** Rule response metadata — write-path fields plus server-managed fields. */
+export const ruleResponseMetadataSchema = metadataSchema
+  .extend({
+    /**
+     * `signature_id` is optional on write (generated when absent) but the
+     * framework always sets it at create time, so responses always carry it.
+     */
+    signature_id: z
+      .string()
+      .min(1)
+      .max(MAX_SIGNATURE_ID_LENGTH)
+      .describe(
+        'Stable logical-rule identifier. Set at creation (caller-supplied or UUID v4). Immutable.'
+      ),
+    /**
+     * Meaningful-edit counter. Incremented by at most one per write, only when
+     * the write changes a field that is meaningful to the rule configuration.
+     * Technical mutations (enable, disable, API-key rotation) never bump it.
+     * Starts at 0 on create. Response-only: no request body may set this field.
+     *
+     * Ref: rule-versions.md "metadata.revision: the meaningful-edit counter"
+     */
+    revision: z
+      .number()
+      .int()
+      .min(0)
+      .describe(
+        'Number of meaningful configuration edits. Incremented only when rule data changes, not on technical mutations like enable/disable. Starts at 0.'
+      ),
+    /**
+     * Provenance of the rule's content. Always present in responses — the
+     * framework stamps `{ type: 'internal', version: 1 }` at create time when
+     * the caller omits it.
+     *
+     * Ref: rule-source.md "The three variants"
+     */
+    source: ruleSourceSchema,
+    /**
+     * Server-derived ownership — stamped on every create from the builder type's
+     * registration for managed types, or `{ managed: false }` otherwise. Immutable
+     * for the rule's life. Never accepted from a request body.
+     *
+     * Ref: rule-ownership.md "The ownership object"
+     */
+    ownership: ruleOwnershipSchema,
+  })
+  .meta({ id: 'alerting_rule_response_metadata' });
 
 /**
  * Schema for rule response data returned from the API.
@@ -923,7 +1249,13 @@ export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
  */
 export const ruleResponseSchema = createRuleDataBaseSchema
   .extend({
+    /**
+     * Absent on execution-compiled builder rules, which persist no query at all
+     * (rule-execution-logic.md "A rule without a persisted query").
+     */
+    query: querySchema.optional(),
     id: z.string().describe('Unique rule identifier.'),
+    metadata: ruleResponseMetadataSchema,
     version: z
       .number()
       .int()
@@ -941,8 +1273,25 @@ export const ruleResponseSchema = createRuleDataBaseSchema
 
 export type RuleResponse = z.infer<typeof ruleResponseSchema>;
 
-/** Sort field for find rules API. */
-export const findRulesSortFieldSchema = z.enum(['kind', 'enabled', 'name']);
+/**
+ * Sort field for find rules API.
+ *
+ * Phase 4 additions:
+ *   - `builder_type`: sort by the builder type discriminator (keyword).
+ *   - `builder_fields.risk_score`: sort by the detection risk_score sub-field
+ *     (integer). The dot-separated name is the API alias; the SO path resolved
+ *     by mapSortField is `metadata.builder_fields.risk_score`.
+ *
+ * Ref: rule-types.md "The discriminator must be indexed and filterable"
+ *      rule-data-model.md "The shared detection fragment"
+ */
+export const findRulesSortFieldSchema = z.enum([
+  'kind',
+  'enabled',
+  'name',
+  'builder_type',
+  'builder_fields.risk_score',
+]);
 export type FindRulesSortField = z.infer<typeof findRulesSortFieldSchema>;
 
 /** Query parameters for the find rules (list) API. */
@@ -997,6 +1346,13 @@ export const ruleTagsParamsSchema = z
       .optional()
       .describe('Prefix to filter tags by. Returns all most-used tags when omitted.'),
     kind: ruleKindSchema.optional().describe('Restrict tags to rules of the given kind.'),
+    filter: z
+      .string()
+      .max(MAX_KQL_LENGTH)
+      .optional()
+      .describe(
+        'KQL filter to scope the tags aggregation. Validated against the find-filter allowlist.'
+      ),
   })
   .strict();
 
@@ -1053,6 +1409,8 @@ export type BulkGetRulesResponse = z.infer<typeof bulkGetRulesResponseSchema>;
  */
 export const bulkCreateRuleItemSchema = applyCreateRuleRefinements(
   createRuleDataBaseSchema.extend({
+    // Builder-authored rules omit `query`, exactly as single create allows.
+    query: querySchema.optional(),
     id: ruleIdSchema
       .optional()
       .describe(
