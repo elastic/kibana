@@ -268,7 +268,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
           aria-label={i18n.translate('workflows.workflowDetailEditor.runWorkflow', {
             defaultMessage: 'Run workflow',
           })}
-          data-test-subj="workflowBottomBarRunButtonCompact"
+          data-test-subj="workflowBottomBarRunButton"
         />
       </EuiToolTip>
     ),
