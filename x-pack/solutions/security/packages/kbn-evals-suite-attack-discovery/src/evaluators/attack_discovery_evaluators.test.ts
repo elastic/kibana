@@ -41,7 +41,13 @@ const run = async (
   evaluator: Evaluator<AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput>,
   output: AttackDiscoveryTaskOutput,
   expected: AttackDiscoveryDatasetExample['output']
-) => evaluator.evaluate({ input: {} as AttackDiscoveryDatasetExample['input'], output, expected, metadata: {} });
+) =>
+  evaluator.evaluate({
+    input: {} as AttackDiscoveryDatasetExample['input'],
+    output,
+    expected,
+    metadata: {},
+  });
 
 describe('AttackDiscoveryBasic', () => {
   const evaluator = createAttackDiscoveryBasicEvaluator();
@@ -53,29 +59,41 @@ describe('AttackDiscoveryBasic', () => {
   });
 
   it('scores camelCase direct-inference insights as valid', async () => {
-    const result = await run(evaluator, {
-      insights: [
-        {
-          alertIds: ['alert-1'],
-          title: 'Title',
-          summaryMarkdown: 'Summary',
-          detailsMarkdown: 'Details',
-        },
-      ],
-    }, { attackDiscoveries: [] });
+    const result = await run(
+      evaluator,
+      {
+        insights: [
+          {
+            alertIds: ['alert-1'],
+            title: 'Title',
+            summaryMarkdown: 'Summary',
+            detailsMarkdown: 'Details',
+          },
+        ],
+      },
+      { attackDiscoveries: [] }
+    );
     expect(result.score).toBe(1);
     expect(result.label).toBe('ok');
   });
 
   it('still returns invalid_shape for docs missing required fields in both shapes', async () => {
-    const snake = await run(evaluator, { insights: [{ alert_ids: ['a'], title: 't' }] }, {
-      attackDiscoveries: [],
-    });
+    const snake = await run(
+      evaluator,
+      { insights: [{ alert_ids: ['a'], title: 't' }] },
+      {
+        attackDiscoveries: [],
+      }
+    );
     expect(snake.label).toBe('invalid_shape');
 
-    const camel = await run(evaluator, { insights: [{ alertIds: ['a'], title: 't' }] }, {
-      attackDiscoveries: [],
-    });
+    const camel = await run(
+      evaluator,
+      { insights: [{ alertIds: ['a'], title: 't' }] },
+      {
+        attackDiscoveries: [],
+      }
+    );
     expect(camel.label).toBe('invalid_shape');
   });
 

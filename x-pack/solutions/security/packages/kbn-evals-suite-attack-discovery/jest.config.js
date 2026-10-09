@@ -8,7 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: [
-    '<rootDir>/x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery/src',
-  ],
+  roots: ['<rootDir>/x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery/src'],
 };
