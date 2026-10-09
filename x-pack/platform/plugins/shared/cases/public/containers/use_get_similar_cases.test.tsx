@@ -37,13 +37,14 @@ describe('useGetSimilarCases', () => {
       expect(spyOnGetCases).toHaveBeenCalled();
     });
 
-    expect(spyOnGetCases).toHaveBeenCalledWith(
-      expect.objectContaining({
-        caseId: mockCase.id,
-        page: 0,
-        perPage: 10,
-      })
-    );
+    expect(spyOnGetCases).toHaveBeenCalledWith({
+      caseId: mockCase.id,
+      signal: expect.any(AbortSignal),
+      page: 0,
+      perPage: 10,
+      sortField: undefined,
+      sortOrder: undefined,
+    });
   });
 
   it('passes sort params to getSimilarCases', async () => {
