@@ -11,12 +11,15 @@ import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema'
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
+  SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
   SignificantEventsKIsOnboardingClient,
   buildConcurrencyKey,
   parseSourceSlugFromConcurrencyKey,
+  parseSourceSlugFromKiConcurrencyKey,
 } from './onboarding_workflow_client';
 const statusRequest = httpServerMock.createKibanaRequest();
 
@@ -76,6 +79,20 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     it('round-trips with buildConcurrencyKey', () => {
       const sourceSlug = 'logs.nginx';
       expect(parseSourceSlugFromConcurrencyKey(buildConcurrencyKey(sourceSlug))).toBe(sourceSlug);
+    });
+  });
+
+  describe('parseSourceSlugFromKiConcurrencyKey', () => {
+    it.each([
+      'nightshift-source-onboarding-',
+      'nightshift-source-features-identification-',
+      'nightshift-source-queries-generation-',
+    ])('extracts the slug from a key with the %s prefix', (prefix) => {
+      expect(parseSourceSlugFromKiConcurrencyKey(`${prefix}my-source`)).toBe('my-source');
+    });
+
+    it('returns null for keys of other workflows', () => {
+      expect(parseSourceSlugFromKiConcurrencyKey('significant-events-ki-sync')).toBeNull();
     });
   });
 
@@ -551,6 +568,94 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       await client.cancel({ sourceId: 'logs.nginx', request });
 
       expect(managementApi.cancelWorkflowExecution).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('cancelBySourceSlug', () => {
+    // A cancelled parent leaves its sub-workflow running for a while. The sub-workflows use
+    // `drop` concurrency keyed by slug, so a replacement run is dropped until they have stopped.
+    const runningExecutionOf = (workflowId: string, concurrencyGroupKey: string) => {
+      const ids: Record<string, string> = {
+        [SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID]: 'onboarding-exec',
+        [SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID]: 'features-exec',
+        [SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID]: 'queries-exec',
+      };
+      return {
+        results: [{ id: ids[workflowId], status: ExecutionStatus.RUNNING, concurrencyGroupKey }],
+      };
+    };
+
+    it('cancels the onboarding run, then the feature identification and query generation runs of the slug', async () => {
+      const getWorkflowExecutions = jest.fn(
+        async ({
+          workflowId,
+          concurrencyGroupKey,
+        }: {
+          workflowId: string;
+          concurrencyGroupKey: string;
+        }) => runningExecutionOf(workflowId, concurrencyGroupKey)
+      );
+      const { client, managementApi } = createClient({ getWorkflowExecutions });
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(client.cancelBySourceSlug({ sourceSlug: 'nginx', request })).resolves.toBe(
+        'onboarding-exec'
+      );
+
+      expect(getWorkflowExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowId: SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
+          concurrencyGroupKey: 'nightshift-source-features-identification-nginx',
+        }),
+        'default'
+      );
+      expect(getWorkflowExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowId: SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
+          concurrencyGroupKey: 'nightshift-source-queries-generation-nginx',
+        }),
+        'default'
+      );
+      expect(managementApi.cancelWorkflowExecution.mock.calls.map(([id]) => id)).toEqual([
+        'onboarding-exec',
+        'features-exec',
+        'queries-exec',
+      ]);
+    });
+
+    it('cancels the sub-workflow runs even when no onboarding run is active', async () => {
+      const getWorkflowExecutions = jest.fn(async ({ workflowId }: { workflowId: string }) =>
+        workflowId === SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID
+          ? { results: [] }
+          : runningExecutionOf(workflowId, 'key')
+      );
+      const { client, managementApi } = createClient({ getWorkflowExecutions });
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(client.cancelBySourceSlug({ sourceSlug: 'nginx', request })).resolves.toBeNull();
+
+      expect(managementApi.cancelWorkflowExecution.mock.calls.map(([id]) => id)).toEqual([
+        'features-exec',
+        'queries-exec',
+      ]);
+    });
+  });
+
+  describe('getNonTerminalExecutions', () => {
+    it('includes the sub-workflow runs that still hold a source concurrency slot', async () => {
+      const getWorkflowExecutions = jest.fn(async ({ workflowId }: { workflowId: string }) => ({
+        results: [{ id: `${workflowId}-exec`, status: ExecutionStatus.RUNNING }],
+      }));
+      const { client } = createClient({ getWorkflowExecutions });
+      const request = httpServerMock.createKibanaRequest();
+
+      const executions = await client.getNonTerminalExecutions({ request });
+
+      expect(executions.map(({ id }) => id)).toEqual([
+        `${SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID}-exec`,
+        `${SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID}-exec`,
+        `${SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID}-exec`,
+      ]);
     });
   });
 

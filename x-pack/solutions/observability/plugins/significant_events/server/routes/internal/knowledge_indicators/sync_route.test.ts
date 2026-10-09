@@ -71,3 +71,53 @@ describe('streamsWithIndicatorsRoute', () => {
     expect(assertSignificantEventsAccess).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('reconcileSourceRoute', () => {
+  const reconcileSource = syncRoutes['POST /internal/streams/{sourceId}/_reconcile_source'];
+  type ReconcileParams = Parameters<typeof reconcileSource.handler>[0];
+
+  const SOURCE = { id: 'source-1', slug: 'nginx', enabled: true, esql_updated_at: 'rev-2' };
+
+  const makeReconcileParams = () => {
+    const scheduleSourceOnboarding = jest.fn().mockResolvedValue(true);
+    const sourceKnowledgeState = {
+      runExclusive: jest.fn(
+        async ({ run }: { run: (state: object, checkpoint: jest.Mock) => Promise<unknown> }) =>
+          run({ revision: 'rev-1' }, jest.fn())
+      ),
+    };
+    const handlerParams = {
+      params: { path: { sourceId: SOURCE.id }, body: { sourceSlug: SOURCE.slug } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        sourcesClient: {
+          list: jest.fn().mockResolvedValue({ sources: [SOURCE] }),
+          get: jest.fn().mockResolvedValue({ source: SOURCE }),
+        },
+        sourceKnowledgeState,
+        scheduleSourceOnboarding,
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+          setSourceRulesEnabled: jest.fn().mockResolvedValue(undefined),
+          deleteOwnedRules: jest.fn().mockResolvedValue(undefined),
+          deleteAllQueries: jest.fn().mockResolvedValue(undefined),
+          deleteIndicators: jest.fn().mockResolvedValue(undefined),
+        }),
+      }),
+      workflowClients: {},
+      maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
+      server: {} as ReconcileParams['server'],
+    } as unknown as ReconcileParams;
+    return { handlerParams, scheduleSourceOnboarding };
+  };
+
+  it('schedules the new revision even when continuous onboarding is off', async () => {
+    const { handlerParams, scheduleSourceOnboarding } = makeReconcileParams();
+
+    await expect(reconcileSource.handler(handlerParams)).resolves.toEqual({ reconciled: true });
+
+    expect(scheduleSourceOnboarding).toHaveBeenCalledWith(SOURCE, {
+      ignoreContinuousSetting: true,
+    });
+  });
+});
