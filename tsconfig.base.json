@@ -2713,6 +2713,8 @@
       "@kbn/task-manager-performance-plugin/*": ["./x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance/*"],
       "@kbn/task-manager-plugin": ["./x-pack/platform/plugins/shared/task_manager"],
       "@kbn/task-manager-plugin/*": ["./x-pack/platform/plugins/shared/task_manager/*"],
+      "@kbn/task-manager-service-accounts-test-plugin": ["./x-pack/platform/test/task_manager/plugins/service_accounts"],
+      "@kbn/task-manager-service-accounts-test-plugin/*": ["./x-pack/platform/test/task_manager/plugins/service_accounts/*"],
       "@kbn/telemetry": ["./src/platform/packages/shared/kbn-telemetry"],
       "@kbn/telemetry/*": ["./src/platform/packages/shared/kbn-telemetry/*"],
       "@kbn/telemetry-collection-manager-plugin": ["./src/platform/plugins/shared/telemetry_collection_manager"],
