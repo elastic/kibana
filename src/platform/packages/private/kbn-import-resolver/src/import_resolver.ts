@@ -28,6 +28,7 @@ export class ImportResolver {
   }
 
   private safeStat = memoize(safeStat);
+  private readonly resolveCache = new Map<string, Map<string, ResolveResult | null>>();
 
   private baseResolveOpts = {
     extensions: ['.js', '.json', '.ts', '.tsx', '.d.ts'],
@@ -324,6 +325,23 @@ export class ImportResolver {
    * Resolve an import request from a file in the given dirname
    */
   resolve(req: string, dirname: string): ResolveResult | null {
+    let requestsByDirectory = this.resolveCache.get(dirname);
+    if (!requestsByDirectory) {
+      requestsByDirectory = new Map();
+      this.resolveCache.set(dirname, requestsByDirectory);
+    }
+
+    const cached = requestsByDirectory.get(req);
+    if (cached !== undefined) {
+      return cached;
+    }
+
+    const result = this.resolveUncached(req, dirname);
+    requestsByDirectory.set(req, result);
+    return result;
+  }
+
+  private resolveUncached(req: string, dirname: string): ResolveResult | null {
     // transform webpack loader requests and focus on the actual file selected
     const lastExI = req.lastIndexOf('!');
     const quesI = req.lastIndexOf('?');
