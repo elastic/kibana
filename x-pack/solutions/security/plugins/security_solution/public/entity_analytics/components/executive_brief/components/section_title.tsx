@@ -18,6 +18,7 @@ export const SectionTitle: React.FC<SectionTitleProps> = ({ index, title, subtit
     <EuiTitle size="s">
       <h3>{`${index}. ${title}`}</h3>
     </EuiTitle>
+    <EuiSpacer size="xs" />
     <EuiText size="s" color="subdued">
       <p>{subtitle}</p>
     </EuiText>

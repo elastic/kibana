@@ -14,6 +14,7 @@ import type { ExecutiveBriefJob } from '../../../../common/entity_analytics/exec
 import realJob from './__fixtures__/real_job.json';
 import type { UseExecutiveBriefResult } from './hooks/use_executive_brief';
 import { ExecutiveBriefFlyout } from './executive_brief_flyout';
+import { EXECUTIVE_BRIEF_SECTION_IDS } from './constants';
 import { TEST_IDS } from './test_ids';
 
 const ThemeBridge: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
@@ -299,7 +300,7 @@ describe('ExecutiveBriefFlyout', () => {
     consoleError.mockRestore();
   });
 
-  it('shows the model name in the header and a connector picker with a template option', () => {
+  it('shows the connector picker (no repeated model) and a template option with a template option', () => {
     mockUseExecutiveBrief.mockReturnValue({
       ...baseResult,
       job: {
@@ -310,8 +311,23 @@ describe('ExecutiveBriefFlyout', () => {
     });
     render(<ExecutiveBriefFlyout timeRange="7d" onClose={jest.fn()} />);
 
-    expect(screen.getByTestId('executiveBriefMeta')).toHaveTextContent('· Claude Sonnet 5');
+    // The picker already shows the same model, so the meta line does not repeat it.
+    expect(screen.getByTestId('executiveBriefMeta')).not.toHaveTextContent('Claude Sonnet 5');
     expect(screen.getByTestId('executiveBriefConnectorPicker')).toBeInTheDocument();
+  });
+
+  it('names the generating model in the meta line when it differs from the selected one', () => {
+    mockUseExecutiveBrief.mockReturnValue({
+      ...baseResult,
+      job: {
+        ...FIXTURE_JOB_SUCCEEDED,
+        model: 'GPT 5',
+        params: { ...FIXTURE_JOB_SUCCEEDED.params, generator: 'inference' },
+      },
+    });
+    render(<ExecutiveBriefFlyout timeRange="7d" onClose={jest.fn()} />);
+
+    expect(screen.getByTestId('executiveBriefMeta')).toHaveTextContent('with GPT 5');
   });
 
   it('shows "Template generator" for template jobs', () => {
@@ -426,9 +442,19 @@ describe('ExecutiveBriefFlyout', () => {
 
     const nav = screen.getByTestId('executiveBriefJumpNav');
     expect(within(nav).getByText('At a glance')).toBeInTheDocument();
-    expect(within(nav).getByText('Priority threats (3)')).toBeInTheDocument();
-    expect(within(nav).getByText(/^Blind spots \(\d+ gaps\)$/)).toBeInTheDocument();
-    expect(within(nav).getByText(/^Decisions \(\d+\)$/)).toBeInTheDocument();
+    expect(within(nav).getByText('Priority threats')).toBeInTheDocument();
+    expect(
+      within(nav).getByTestId(
+        `executiveBriefJumpNavCount-${EXECUTIVE_BRIEF_SECTION_IDS.storylines}`
+      )
+    ).toHaveTextContent('3');
+    expect(within(nav).getByText('Blind spots')).toBeInTheDocument();
+    expect(
+      within(nav).getByTestId(
+        `executiveBriefJumpNavCount-${EXECUTIVE_BRIEF_SECTION_IDS.blindSpots}`
+      )
+    ).toHaveTextContent(/^\d+$/);
+    expect(within(nav).getByText('Decisions')).toBeInTheDocument();
     expect(within(nav).getByText('Details')).toBeInTheDocument();
   });
 

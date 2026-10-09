@@ -102,8 +102,9 @@ describe('AtAGlance attention verdict', () => {
     const rows = ['threats', 'response', 'coverage', 'visibility'].map((id) =>
       screen.getByTestId(`executiveBriefAttentionRow-${id}`)
     );
-    const names = rows.map((row) => row.querySelector('strong')?.textContent);
-    expect(names).toEqual(['Active threats', 'Response', 'Detection coverage', 'Visibility']);
+    ['Active threats', 'Response', 'Detection coverage', 'Visibility'].forEach((name, index) => {
+      expect(within(rows[index]).getByText(name)).toBeInTheDocument();
+    });
     expect(within(rows[0]).getByText('Urgent')).toBeInTheDocument();
     expect(within(rows[0]).getByText('1 critical threat unaddressed')).toBeInTheDocument();
     expect(within(rows[3]).getByText('Watch')).toBeInTheDocument();

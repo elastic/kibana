@@ -24,15 +24,17 @@ describe('BriefJumpNav', () => {
         <div id="sectionB" />
         <BriefJumpNav
           items={[
-            { id: 'sectionA', label: 'Priority threats (3)' },
-            { id: 'sectionB', label: 'Blind spots (4 gaps)' },
+            { id: 'sectionA', label: 'Priority threats', count: 3 },
+            { id: 'sectionB', label: 'Blind spots', count: 4, countColor: 'accent' },
           ]}
         />
       </EuiProvider>
     );
 
-    expect(screen.getByText('Priority threats (3)')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('Blind spots (4 gaps)'));
+    expect(screen.getByText('Priority threats')).toBeInTheDocument();
+    expect(screen.getByTestId('executiveBriefJumpNavCount-sectionA')).toHaveTextContent('3');
+    expect(screen.getByTestId('executiveBriefJumpNavCount-sectionB')).toHaveTextContent('4');
+    fireEvent.click(screen.getByText('Blind spots'));
     expect(scrollIntoView).toHaveBeenCalledTimes(1);
     expect(scrollIntoView.mock.contexts[0]).toBe(document.getElementById('sectionB'));
   });

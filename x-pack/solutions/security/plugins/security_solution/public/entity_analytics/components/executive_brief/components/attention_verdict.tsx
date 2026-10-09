@@ -5,8 +5,17 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { EuiPanelProps } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type {
   AttentionAssessment,
   AttentionLevel,
@@ -17,6 +26,8 @@ interface LevelDisplay {
   label: string;
   icon: string;
   iconColor: 'danger' | 'warning' | 'primary' | 'success';
+  /** Theme colour key used for the accent border. */
+  borderColor: 'danger' | 'warning' | 'primary' | 'success';
   panelColor: EuiPanelProps['color'];
 }
 
@@ -25,19 +36,28 @@ export const ATTENTION_LEVEL_DISPLAY: Record<AttentionLevel, LevelDisplay> = {
     label: 'Urgent attention needed',
     icon: 'warning',
     iconColor: 'danger',
+    borderColor: 'danger',
     panelColor: 'danger',
   },
   action: {
     label: 'Attention needed',
     icon: 'alert',
     iconColor: 'warning',
+    borderColor: 'warning',
     panelColor: 'warning',
   },
-  watch: { label: 'Keep watching', icon: 'eye', iconColor: 'primary', panelColor: 'primary' },
+  watch: {
+    label: 'Keep watching',
+    icon: 'eye',
+    iconColor: 'primary',
+    borderColor: 'primary',
+    panelColor: 'primary',
+  },
   clear: {
     label: 'No action needed',
     icon: 'checkCircle',
     iconColor: 'success',
+    borderColor: 'success',
     panelColor: 'success',
   },
 };
@@ -57,31 +77,36 @@ interface AttentionVerdictProps {
 
 type AssessmentLike = Pick<AttentionAssessment, 'level' | 'trend'>;
 
-/** Large level label with icon and colour, plus a trend hint; children render below (the headline). */
+/** Compact level label with icon and a coloured accent border, plus a trend hint; children render below (the headline). */
 export const AttentionVerdict: React.FC<AttentionVerdictProps> = ({ assessment, children }) => {
+  const { euiTheme } = useEuiTheme();
   const display = assessment ? ATTENTION_LEVEL_DISPLAY[assessment.level] : undefined;
   const trend = assessment?.trend;
   return (
     <EuiPanel
       color={display?.panelColor ?? 'subdued'}
       hasShadow={false}
-      paddingSize="l"
+      paddingSize="m"
+      css={css`
+        border-left: ${euiTheme.size.xs} solid
+          ${display ? euiTheme.colors[display.borderColor] : euiTheme.colors.mediumShade};
+      `}
       data-test-subj={TEST_IDS.attentionVerdict}
       data-level={assessment?.level ?? 'unavailable'}
     >
-      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} wrap>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <EuiIcon
             type={display?.icon ?? 'questionInCircle'}
             color={display?.iconColor ?? 'subdued'}
-            size="xl"
+            size="m"
             aria-hidden="true"
             data-test-subj="executiveBriefAttentionIcon"
             data-icon-type={display?.icon ?? 'questionInCircle'}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiTitle size="m">
+          <EuiTitle size="xs">
             <h4 data-test-subj="executiveBriefAttentionLabel">
               {display?.label ?? UNAVAILABLE_LABEL}
             </h4>

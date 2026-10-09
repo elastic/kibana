@@ -5,12 +5,16 @@
  * 2.0.
  */
 import React, { useEffect, useState } from 'react';
-import { EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiNotificationBadge, EuiTab, EuiTabs } from '@elastic/eui';
 
 export interface BriefNavItem {
   /** DOM id of the section the entry scrolls to. */
   id: string;
   label: string;
+  /** Optional count shown as a pill after the label. */
+  count?: number;
+  /** Pill colour: 'accent' highlights something that needs attention; default is subdued. */
+  countColor?: 'accent' | 'subdued';
 }
 
 /** Tracks which section is nearest the top of the viewport while the body scrolls. */
@@ -49,7 +53,7 @@ export const BriefJumpNav: React.FC<{ items: readonly BriefNavItem[] }> = ({ ite
 
   return (
     <EuiTabs size="s" bottomBorder={false} data-test-subj="executiveBriefJumpNav">
-      {items.map(({ id, label }) => (
+      {items.map(({ id, label, count, countColor = 'subdued' }) => (
         <EuiTab
           key={id}
           isSelected={(clicked ?? active) === id}
@@ -58,6 +62,17 @@ export const BriefJumpNav: React.FC<{ items: readonly BriefNavItem[] }> = ({ ite
             document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             setTimeout(() => setClicked(undefined), 800);
           }}
+          append={
+            count === undefined ? undefined : (
+              <EuiNotificationBadge
+                color={countColor}
+                size="s"
+                data-test-subj={`executiveBriefJumpNavCount-${id}`}
+              >
+                {count}
+              </EuiNotificationBadge>
+            )
+          }
           data-test-subj={`executiveBriefJumpNav-${id}`}
         >
           {label}

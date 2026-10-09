@@ -17,8 +17,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiProgress,
-  EuiSkeletonText,
   EuiSpacer,
   EuiSuperSelect,
   EuiText,
@@ -31,14 +29,14 @@ import { css } from '@emotion/react';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { AiButton, AiIcon } from '@kbn/shared-ux-ai-components';
 import type {
-  BriefJobStage,
-  BriefSnapshot,
   BriefTimeRangeKey,
   ExecutiveBriefJob,
 } from '../../../../common/entity_analytics/executive_brief/types';
 import { documentFlyoutHistoryKey } from '../../../flyout_v2/shared/constants/flyout_history';
 import { SectionErrorBoundary } from './components/section_error_boundary';
+import { BasedOn } from './components/based_on';
 import { BriefJumpNav } from './components/brief_jump_nav';
+import { BriefLoading } from './components/brief_loading';
 import { BriefContextProvider } from './components/brief_context';
 import {
   BRIEF_BLOCK_ATTRIBUTE,
@@ -58,15 +56,6 @@ import { Storylines } from './sections/storylines';
 import { TEST_IDS } from './test_ids';
 import { briefToMarkdown } from './utils/brief_to_markdown';
 
-const STAGE_LABEL: Record<BriefJobStage, string> = {
-  snapshot: 'Collecting entity, alert and detection data',
-  storylines: 'Connecting entities into priority threats',
-  blind_spots: 'Checking attack-stage coverage and visibility gaps',
-  generate: 'Writing the brief',
-  validate: 'Checking every claim against the evidence',
-  persist: 'Saving the brief',
-};
-
 const TIME_RANGE_LABEL: Record<BriefTimeRangeKey, string> = {
   '24h': 'Last 24 hours',
   '7d': 'Last 7 days',
@@ -74,58 +63,6 @@ const TIME_RANGE_LABEL: Record<BriefTimeRangeKey, string> = {
 };
 
 const formatDateTime = (iso: string): string => new Date(iso).toLocaleString();
-
-const countByKind = (snapshot: BriefSnapshot, kind: string): number =>
-  Object.values(snapshot.catalog).filter((entry) => entry.kind === kind).length;
-
-const BasedOn: React.FC<{ snapshot: BriefSnapshot }> = ({ snapshot }) => {
-  const entityTypes = new Set(Object.values(snapshot.entities).map(({ type }) => type));
-  const badges = [
-    `${Object.keys(snapshot.entities).length} entities`,
-    `${entityTypes.size} entity types`,
-    `${countByKind(snapshot, 'rule')} rules`,
-    `${countByKind(snapshot, 'attack_discovery')} attack discoveries`,
-    `${countByKind(snapshot, 'lead')} hunting leads`,
-    `${countByKind(snapshot, 'anomaly')} anomaly groups`,
-  ];
-  return (
-    <EuiFlexGroup gutterSize="xs" wrap responsive={false} data-test-subj={TEST_IDS.basedOn}>
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued">
-          {'Based on'}
-        </EuiText>
-      </EuiFlexItem>
-      {badges.map((label) => (
-        <EuiFlexItem grow={false} key={label}>
-          <EuiBadge color="hollow">{label}</EuiBadge>
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
-  );
-};
-
-interface ProgressProps {
-  job: ExecutiveBriefJob | undefined;
-}
-
-const stageLabel = (stage: BriefJobStage, modelName: string | undefined): string =>
-  stage === 'generate' && modelName
-    ? 'Writing the brief… this usually takes about 30 seconds'
-    : STAGE_LABEL[stage];
-
-const Progress: React.FC<ProgressProps & { modelName?: string }> = ({ job, modelName }) => (
-  <div data-test-subj={TEST_IDS.progress}>
-    <EuiProgress size="xs" color="accent" />
-    <EuiSpacer size="m" />
-    <EuiText size="s">
-      <p>{job?.stage ? stageLabel(job.stage, modelName) : 'Starting the brief'}</p>
-    </EuiText>
-    <EuiSpacer size="m" />
-    <EuiSkeletonText lines={4} />
-    <EuiSpacer size="l" />
-    <EuiSkeletonText lines={8} />
-  </div>
-);
 
 export interface ExecutiveBriefFlyoutProps {
   /** Page time range (24h | 7d | 30d). */
@@ -201,7 +138,6 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
     selectedId,
     setSelectedId,
     selection,
-    selectedName,
     getConnectorName,
   } = useBriefConnectors();
   const { job, hasRequested, isGenerating, requestError, mode, regenerate } = useExecutiveBrief(
@@ -223,6 +159,10 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
     if (succeeded.params.generator !== 'inference') return 'Template generator';
     return succeeded.model ?? getConnectorName(succeeded.params.connectorId) ?? 'AI generator';
   }, [succeeded, getConnectorName]);
+
+  // The picker already shows the selected model; only name the generator when it differs (or in print).
+  const showGeneratedModel =
+    Boolean(modelLabel) && (isPrintMode || modelLabel !== getConnectorName(selectedId));
 
   const usageLine = !isPrintMode && succeeded ? getUsageLine(succeeded, modelLabel) : undefined;
 
@@ -274,33 +214,32 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
         id={EXECUTIVE_BRIEF_SECTION_IDS.header}
         {...{ [BRIEF_BLOCK_ATTRIBUTE]: 'header' }}
       >
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexGroup
+          gutterSize="m"
+          alignItems="center"
+          justifyContent="spaceBetween"
+          responsive={false}
+          wrap
+        >
           <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
-              <h2 id={titleId}>{'Executive brief'}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow" iconType="sparkles">
-              {'AI'}
-            </EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="xs" />
-        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} wrap>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued" data-test-subj="executiveBriefMeta">
-              {succeeded?.snapshot
-                ? `Generated ${formatDateTime(succeeded.snapshot.generatedAt)} · ${
-                    TIME_RANGE_LABEL[succeeded.snapshot.timeRange.range]
-                  } · ${modelLabel}`
-                : TIME_RANGE_LABEL[timeRange]}
-            </EuiText>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="m">
+                  <h2 id={titleId}>{'Executive brief'}</h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow" iconType="sparkles">
+                  {'AI'}
+                </EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           {!isPrintMode && (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} css={{ width: 300 }}>
               <EuiSuperSelect
                 compressed
+                fullWidth
                 options={connectorOptions}
                 valueOfSelected={selectedId}
                 onChange={setSelectedId}
@@ -313,29 +252,46 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiText size="xs" color="subdued" data-test-subj="executiveBriefMeta">
+          {succeeded?.snapshot
+            ? `Generated ${formatDateTime(succeeded.snapshot.generatedAt)}${
+                showGeneratedModel ? ` with ${modelLabel}` : ''
+              } · ${TIME_RANGE_LABEL[succeeded.snapshot.timeRange.range]}`
+            : TIME_RANGE_LABEL[timeRange]}
+        </EuiText>
         {succeeded?.snapshot && (
           <>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="m" />
             <BasedOn snapshot={succeeded.snapshot} />
           </>
         )}
         {succeeded?.snapshot && succeeded.brief && !isPrintMode && (
           <>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="m" />
             <BriefJumpNav
               items={[
                 { id: EXECUTIVE_BRIEF_SECTION_IDS.atAGlance, label: 'At a glance' },
                 {
                   id: EXECUTIVE_BRIEF_SECTION_IDS.storylines,
-                  label: `Priority threats (${succeeded.brief.storylines.length})`,
+                  label: 'Priority threats',
+                  count: succeeded.brief.storylines.length,
+                  countColor: succeeded.brief.storylines.length > 0 ? 'accent' : 'subdued',
                 },
                 {
                   id: EXECUTIVE_BRIEF_SECTION_IDS.blindSpots,
-                  label: `Blind spots (${succeeded.snapshot.blindSpots.gaps.length} gaps)`,
+                  label: 'Blind spots',
+                  count: succeeded.snapshot.blindSpots.gaps.length,
+                  countColor: succeeded.snapshot.blindSpots.gaps.some(
+                    ({ severity }) => severity === 'danger'
+                  )
+                    ? 'accent'
+                    : 'subdued',
                 },
                 {
                   id: EXECUTIVE_BRIEF_SECTION_IDS.decisions,
-                  label: `Decisions (${succeeded.brief.decisions.length})`,
+                  label: 'Decisions',
+                  count: succeeded.brief.decisions.length,
                 },
                 { id: EXECUTIVE_BRIEF_SECTION_IDS.details, label: 'Details' },
               ]}
@@ -384,12 +340,7 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
               {failureMessage}
             </KbnDangerCallout>
           )}
-          {!hasFailed && !succeeded && isGenerating && (
-            <Progress
-              job={job}
-              modelName={selectedName ?? getConnectorName(job?.params.connectorId)}
-            />
-          )}
+          {!hasFailed && !succeeded && isGenerating && <BriefLoading job={job} />}
           {succeeded?.snapshot && succeeded.brief && (
             <BriefContextProvider
               snapshot={succeeded.snapshot}

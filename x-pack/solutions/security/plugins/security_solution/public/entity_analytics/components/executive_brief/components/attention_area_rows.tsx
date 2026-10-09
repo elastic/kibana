@@ -99,8 +99,13 @@ export const AttentionAreaRows: React.FC<{ areas: readonly AttentionArea[] }> = 
           >
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false} css={{ width: '10.5em' }}>
-                <EuiText size="s">
-                  <strong>{AREA_NAMES[area.id]}</strong>
+                <EuiText
+                  size="s"
+                  css={css`
+                    font-weight: ${euiTheme.font.weight.semiBold};
+                  `}
+                >
+                  {AREA_NAMES[area.id]}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false} css={{ width: '6.5em' }}>
