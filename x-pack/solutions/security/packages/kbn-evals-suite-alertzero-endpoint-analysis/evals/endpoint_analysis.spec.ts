@@ -23,7 +23,11 @@ import {
 } from '../src/runtime';
 import { assertActionSafety } from '../src/action_safety';
 import { reportActionSafety } from '../src/report_action_safety';
-import { assertAnalysisExecution, assertPersistedProposal } from '../src/assertions';
+import {
+  assertAnalysisExecution,
+  assertEndpointForensicToolCall,
+  assertPersistedProposal,
+} from '../src/assertions';
 import { analysisWorkflowId, gateWorkflowId, workerWorkflowId } from '../src/contracts';
 
 evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.classic }, () => {
@@ -66,14 +70,7 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
         agentId: agentBuilderDefaultAgentId,
         input: `Perform an endpoint forensic analysis of AZ-ROUTING in ${index} for the last hour. Reconstruct the process timeline and IoCs; use the endpoint forensic analysis skill.`,
       });
-      const calls = getToolCallSteps(result.steps);
-      assert(
-        calls.some(
-          (call) =>
-            call.tool_id === 'security.endpoint_forensic.discover_telemetry' && call.results?.length
-        ),
-        'No successful production endpoint forensic tool call'
-      );
+      assertEndpointForensicToolCall(getToolCallSteps(result));
     } finally {
       await deleteDataStreamQuietly(esClient, index);
       await ignore404(() => esClient.indices.deleteIndexTemplate({ name: template }));

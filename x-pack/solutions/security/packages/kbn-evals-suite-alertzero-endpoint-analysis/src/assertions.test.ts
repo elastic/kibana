@@ -9,6 +9,7 @@ import {
   assertPersistedProposal,
   assertStructuredEvidence,
   assertAnalysisExecution,
+  assertEndpointForensicToolCall,
 } from './assertions';
 import {
   analysisInputValidator,
@@ -19,6 +20,7 @@ import {
   workerWorkflowId,
 } from './contracts';
 import { getCompleteWorkerSettingsSchema } from '@kbn/alertzero-common';
+import { getToolCallSteps } from '@kbn/evals';
 import { ExecutionStatus, type WorkflowStepExecutionDto } from '@kbn/workflows';
 
 const expected = {
@@ -341,5 +343,54 @@ describe('AlertZero L4 durable proposal evidence', () => {
     expect(() =>
       assertPersistedProposal({ ...proposal(), ...mutation }, proposalExpectation)
     ).toThrow();
+  });
+});
+
+describe('AlertZero L1 endpoint forensic routing', () => {
+  const converseResponse = {
+    message: 'done',
+    steps: [
+      { type: 'reasoning', reasoning: 'use the skill' },
+      {
+        type: 'tool_call',
+        tool_id: 'security.endpoint_forensic.discover_telemetry',
+        results: [
+          { type: 'other', data: { recommended_indices: ['logs-endpoint.events.process-*'] } },
+        ],
+      },
+    ],
+  };
+
+  it('accepts a successful discover_telemetry call from the whole converse response', () => {
+    expect(() => assertEndpointForensicToolCall(getToolCallSteps(converseResponse))).not.toThrow();
+  });
+
+  it('rejects a call that returned no results', () => {
+    const empty = {
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: 'security.endpoint_forensic.discover_telemetry',
+          results: [],
+        },
+      ],
+    };
+    expect(() => assertEndpointForensicToolCall(getToolCallSteps(empty))).toThrow(
+      /No successful production endpoint forensic tool call \(saw: security\.endpoint_forensic\.discover_telemetry\)/
+    );
+  });
+
+  it('names the tools it did see when the skill was never used', () => {
+    const wrongTool = {
+      steps: [{ type: 'tool_call', tool_id: 'platform.core.search', results: [{}] }],
+    };
+    expect(() => assertEndpointForensicToolCall(getToolCallSteps(wrongTool))).toThrow(
+      /saw: platform\.core\.search/
+    );
+  });
+
+  it('documents why the whole response is required: the bare steps array yields no calls', () => {
+    expect(getToolCallSteps(converseResponse.steps)).toEqual([]);
+    expect(getToolCallSteps(converseResponse)).toHaveLength(1);
   });
 });

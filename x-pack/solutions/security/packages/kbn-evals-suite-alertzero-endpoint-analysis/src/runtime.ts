@@ -190,7 +190,7 @@ export class AlertZeroRuntime {
    * PATCH /internal/alertzero/workers/{workerId}. Since #295215 the PATCH is REJECTED while
    * the Worker has no service account (`nextEnabled && !nextAccount` → 400), so on a fresh
    * stack a bare `{"enabled":true}` never installs anything. The eval therefore creates the
-   * prebuilt `alertzero_endpoint_analysis` role + service account — the same setup
+   * eval-owned `alertzero_endpoint_analysis_eval` role (production role + one AI-index delta) and service account — the same setup
    * `ensureWorkerServiceAccounts` performs for the UI, against the same public APIs — and
    * passes its id in the same PATCH. The workflow test API refuses a disabled workflow, so the
    * Worker stays enabled until `restoreWorker()`. Idempotent: a second PATCH with
@@ -271,10 +271,9 @@ const isConflict = (error: unknown) =>
     (error as { response?: { status?: number } }).response?.status === 409);
 
 /**
- * Ensures the prebuilt role + service account exist and returns the account id. Mirrors
- * `ensureWorkerServiceAccounts` (AlertZero's onboarding path): the role is created with
- * `createOnly` so an existing one is never overwritten, and an existing account with the
- * same name is reused.
+ * Ensures the eval-owned role + service account exist and returns the account id. The role is
+ * PUT on every run (no `createOnly`) so a stale definition never wins; an existing account with
+ * the same name is reused.
  */
 const ensureWorkerServiceAccount = async (
   fetch: HttpHandler,

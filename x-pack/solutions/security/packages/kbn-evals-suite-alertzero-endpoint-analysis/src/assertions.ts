@@ -103,3 +103,29 @@ export const assertPersistedProposal = (
   }
   return proposal;
 };
+
+export const ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID =
+  'security.endpoint_forensic.discover_telemetry';
+
+/**
+ * L1: the default agent must route to the production endpoint-forensic skill and its inline
+ * `discover_telemetry` tool must return results. `calls` must come from
+ * `getToolCallSteps(<whole converse response>)`: the helper reads `output.steps`, so passing
+ * `response.steps` (the array itself) yields `[]` and fails every run whatever the agent did.
+ */
+export const assertEndpointForensicToolCall = (
+  calls: Array<{ tool_id?: string; results?: unknown[] }>
+) => {
+  if (
+    !calls.some(
+      (call) =>
+        call.tool_id === ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID && call.results?.length
+    )
+  ) {
+    throw new Error(
+      `No successful production endpoint forensic tool call (saw: ${
+        calls.map((call) => call.tool_id ?? '<unknown>').join(', ') || 'no tool calls'
+      })`
+    );
+  }
+};
