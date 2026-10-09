@@ -28,7 +28,7 @@ describe('runAdapter', () => {
 
     await expect(runAdapter(source, buildContext())).rejects.toMatchObject({
       name: UnknownAdapterError.name,
-      message: expect.stringContaining('Known adapter types: rss, text_indicator_list, kev'),
+      message: expect.stringContaining('Known adapter types: rss'),
     });
   });
 });

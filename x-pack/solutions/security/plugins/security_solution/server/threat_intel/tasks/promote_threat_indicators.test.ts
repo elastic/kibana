@@ -62,7 +62,7 @@ const EXTRACTED_AT = '2024-05-31T12:00:00.000Z';
 const makeReport = ({
   id,
   iocs,
-  sourceName = 'maltrail',
+  sourceName = 'indicator list',
   sourceUrl = 'https://example.com/trail.txt',
   trailLabel,
   extractedAt = EXTRACTED_AT,
@@ -275,12 +275,12 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
     });
   });
 
-  describe('maltrail report', () => {
+  describe('indicator-list report', () => {
     it('carries trail label + per-IOC reference in scriptParams when present', () => {
       const ops = buildBulkOpsForTest(
         [
           makeReport({
-            id: 'r-maltrail',
+            id: 'r-indicator-list',
             iocs: [
               {
                 type: 'ip',
@@ -288,10 +288,9 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
                 reference: 'https://blog.example.com/malware-analysis',
               },
             ],
-            sourceName: 'maltrail',
-            sourceUrl:
-              'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt',
-            trailLabel: 'cobaltstrike',
+            sourceName: 'indicator list',
+            sourceUrl: 'https://feeds.example.test/indicators.txt',
+            trailLabel: 'test-indicators',
           }),
         ],
         NOW
@@ -299,8 +298,8 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
 
       expect(ops).toHaveLength(1);
       const { scriptParams } = ops[0];
-      expect(scriptParams.provider).toBe('maltrail');
-      expect(scriptParams.trail).toBe('cobaltstrike');
+      expect(scriptParams.provider).toBe('indicator list');
+      expect(scriptParams.trail).toBe('test-indicators');
       // Per-IOC reference wins over source.url
       expect(scriptParams.reference).toBe('https://blog.example.com/malware-analysis');
     });
@@ -309,20 +308,17 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       const ops = buildBulkOpsForTest(
         [
           makeReport({
-            id: 'r-maltrail-noref',
+            id: 'r-indicator-list-noref',
             iocs: [{ type: 'ip', value: '9.9.9.9' }],
-            sourceName: 'maltrail',
-            sourceUrl:
-              'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt',
-            trailLabel: 'cobaltstrike',
+            sourceName: 'indicator list',
+            sourceUrl: 'https://feeds.example.test/indicators.txt',
+            trailLabel: 'test-indicators',
           }),
         ],
         NOW
       );
 
-      expect(ops[0].scriptParams.reference).toBe(
-        'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt'
-      );
+      expect(ops[0].scriptParams.reference).toBe('https://feeds.example.test/indicators.txt');
     });
 
     it('removes credentials from report and IOC provenance before promotion', () => {
@@ -368,7 +364,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
     });
   });
 
-  describe('non-maltrail report (back-compat)', () => {
+  describe('report without indicator-list metadata (back-compat)', () => {
     it('produces a valid op with a single sources[] entry and no trail field', () => {
       const ops = buildBulkOpsForTest(
         [
@@ -550,7 +546,7 @@ describe('promote task runner', () => {
     _id: id,
     sort: [extractedAt, 1],
     _source: {
-      source: { name: 'maltrail', url: 'https://example.com/trail.txt' },
+      source: { name: 'indicator list', url: 'https://example.com/trail.txt' },
       severity: { level: 'high' },
       // Needs a promotable tier: only `discriminating` and `contextual` reach the
       // index, so an untiered IOC produces no bulk operations at all.

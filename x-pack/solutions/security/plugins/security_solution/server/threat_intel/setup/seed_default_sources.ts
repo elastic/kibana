@@ -17,9 +17,8 @@ import {
  * Approved sources seeded into `.kibana-threat-intel-sources` on first boot.
  *
  * Fetch URLs live in `common/threat_intel/catalog_source_urls.ts`, not in the
- * sources index. This is a fixed, approved catalog. Eight sources ship enabled;
- * the optional AWS and FortiGuard packs ship disabled for an operator to turn
- * on per design partner. Operators can only list and enable / disable entries.
+ * sources index. This is a fixed, approved catalog containing only Elastic
+ * Security Labs. Operators can only list and enable / disable entries.
  */
 interface DefaultSource {
   id: string;
@@ -27,99 +26,19 @@ interface DefaultSource {
   name: string;
   tags: string[];
   /**
-   * Declared default state. Eight approved sources ship `true`; the optional
-   * AWS and FortiGuard packs ship `false` so an operator opts in per design
-   * partner. Reconciliation preserves an operator's later choice across boots.
+   * Declared default state. Reconciliation preserves an operator's later choice
+   * across boots.
    */
   enabled: boolean;
 }
 
 export const DEFAULT_SOURCES: readonly DefaultSource[] = [
   {
-    id: 'kev:cisa-known-exploited-vulnerabilities',
-    adapter_type: 'kev',
-    name: 'CISA Known Exploited Vulnerabilities',
-    tags: ['vulnerability', 'cisa', 'kev', 'government'],
-    enabled: true,
-  },
-  {
     id: 'vendor_api:elastic-security-labs',
     adapter_type: 'rss',
     name: 'Elastic Security Labs',
     tags: ['vendor', 'elastic', 'research', 'research-tools'],
     enabled: true,
-  },
-  {
-    id: 'rss:mandiant-research',
-    adapter_type: 'rss',
-    name: 'Mandiant / Google Cloud Threat Intelligence',
-    tags: ['vendor', 'research', 'apt'],
-    enabled: true,
-  },
-  {
-    id: 'rss:unit42',
-    adapter_type: 'rss',
-    name: 'Palo Alto Networks Unit 42',
-    tags: ['vendor', 'research', 'malware', 'apt'],
-    enabled: true,
-  },
-  {
-    id: 'rss:talos',
-    adapter_type: 'rss',
-    name: 'Cisco Talos Intelligence',
-    tags: ['vendor', 'research', 'malware'],
-    enabled: true,
-  },
-  {
-    id: 'rss:crowdstrike',
-    adapter_type: 'rss',
-    name: 'CrowdStrike Blog',
-    tags: ['vendor', 'research', 'apt'],
-    enabled: true,
-  },
-  {
-    id: 'rss:cisa-alerts',
-    adapter_type: 'rss',
-    name: 'CISA Alerts and Advisories',
-    tags: ['government', 'advisories', 'vulnerability', 'government-policy'],
-    enabled: true,
-  },
-  {
-    id: 'text_indicator_list:maltrail-cobaltstrike',
-    adapter_type: 'text_indicator_list',
-    name: 'Maltrail — CobaltStrike C2 indicators',
-    tags: ['malware', 'research-tools', 'feed'],
-    enabled: true,
-  },
-  // Optional technology packs, seeded disabled. An operator enables a pack for a
-  // design partner (e.g. the AWS IAM pair) without turning on any other pack.
-  {
-    id: 'rss:aws-security',
-    adapter_type: 'rss',
-    name: 'AWS Security Blog',
-    tags: ['vendor', 'aws', 'cloud', 'iam', 'pack:aws-iam'],
-    enabled: false,
-  },
-  {
-    id: 'rss:aws-security-bulletins',
-    adapter_type: 'rss',
-    name: 'AWS Security Bulletins',
-    tags: ['vendor', 'aws', 'cloud', 'iam', 'advisories', 'pack:aws-iam'],
-    enabled: false,
-  },
-  {
-    id: 'rss:fortiguard-advisories',
-    adapter_type: 'rss',
-    name: 'FortiGuard Advisories',
-    tags: ['vendor', 'fortinet', 'fortigate', 'advisories', 'pack:fortigate'],
-    enabled: false,
-  },
-  {
-    id: 'rss:fortiguard-threat-signal',
-    adapter_type: 'rss',
-    name: 'FortiGuard Threat Signal',
-    tags: ['vendor', 'fortinet', 'fortigate', 'pack:fortigate'],
-    enabled: false,
   },
 ];
 
