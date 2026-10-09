@@ -15,9 +15,9 @@
  *
  *   1. Seeds a real persisted AD document via the dev-only data generator route
  *      `POST /internal/elastic_assistant/data_generator/attack_discoveries/_create`,
- *      which writes through the alerting framework into
- *      `.adhoc.alerts-security.attack.discovery.alerts-<space>` (the exact index
- *      the workflow searches by id) and returns the persisted docs in `data`.
+ *      which writes through the alerting framework into the space-scoped
+ *      SCHEDULED index `.alerts-security.attack.discovery.alerts-<space>` (the
+ *      same index the workflow searches by id, alongside the ad-hoc one).
  *
  *      Corpus→AD-field mapping (payload is GUIDE incident-level evidence):
  *        title                → `GUIDE <IncidentId>: <first DetectorName/category summary>` (plain text)
@@ -58,6 +58,21 @@ import {
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
 import { FP_TP_ANALYSIS_WORKFLOW_ID, WORKFLOWS_API_VERSION } from './constants';
+
+/**
+ * The seeder→reader contract this module must honor: the data generator route
+ * persists through the scheduled AD rule, so every seeded document lands in the
+ * space-scoped SCHEDULED index. The workflow's `load_attack_discovery` step
+ * searches by id across BOTH the scheduled and the ad-hoc aliases, so a document
+ * here is always found. If the workflow YAML ever narrows its read back to one
+ * alias, `workflow_task.test.ts` fails this constant's guard test before any
+ * smoke run burns a budget on 0/156 executions (the 63363fcbffe failure mode).
+ *
+ * Kept as a literal (mirroring ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX in
+ * @kbn/elastic-assistant-common, which is not a dependency of this package) so
+ * the guard fails on drift in EITHER direction.
+ */
+export const SEED_ATTACK_DISCOVERY_INDEX_PREFIX = '.alerts-security.attack.discovery.alerts-';
 
 /** The `ai.agent` step whose structured output we grade. */
 const AGENT_STEP_TYPE = 'ai.agent';
@@ -667,8 +682,10 @@ export interface SeedingClients {
  *
  * The route runs a real alerting rule (`runSoon`) that persists via the alerting
  * framework, polls for the documents, and backdates timestamps — so the response
- * `data` entries carry the final persisted document ids in
- * `.adhoc.alerts-security.attack.discovery.alerts-<space>`.
+ * `data` entries carry the final persisted document ids in the space-scoped
+ * SCHEDULED index `.alerts-security.attack.discovery.alerts-<space>` (NOT the
+ * ad-hoc one: the data generator goes through the scheduled AD rule). The
+ * workflow reads both aliases, so this is the seeder→reader contract.
  */
 export const seedAttackDiscovery = async (
   { fetch, log }: SeedingClients,

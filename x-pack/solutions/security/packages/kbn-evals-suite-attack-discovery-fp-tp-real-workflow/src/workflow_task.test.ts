@@ -7,7 +7,10 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import { TerminalExecutionStatuses, type WorkflowStepExecutionDto } from '@kbn/workflows';
+import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
+import { parse } from 'yaml';
 
+import { FP_TP_ANALYSIS_WORKFLOW_ID } from './constants';
 import {
   buildAttackDiscoveryFromPayload,
   deriveInvestigationId,
@@ -16,9 +19,36 @@ import {
   readAgentVerdict,
   readWorkflowOutput,
   runAttackDiscoveryWorkflow,
+  SEED_ATTACK_DISCOVERY_INDEX_PREFIX,
   seedAttackDiscovery,
   seedInvestigation,
 } from './workflow_task';
+
+describe('seeder→reader index contract', () => {
+  // The data generator route persists through the SCHEDULED AD rule, so the
+  // seeder's write index is the scheduled alias, never the ad-hoc one. Ties
+  // SEED_ATTACK_DISCOVERY_INDEX_PREFIX (product code) to the workflow's
+  // `load_attack_discovery` read: a regression that narrows the read back to a
+  // single alias (63363fcbffe) fails here instead of burning a smoke budget on
+  // executions that never reach the agent.
+  it('the workflow reads every index the seeder can write', () => {
+    const definition = getManagedWorkflowDefinition(FP_TP_ANALYSIS_WORKFLOW_ID ?? '');
+
+    expect(definition).toBeDefined();
+    const workflow = parse(definition!.yaml!) as {
+      steps: Array<{ name?: string; with?: { index?: string } }>;
+    };
+    const loadStep = workflow.steps.find((s) => s.name === 'load_attack_discovery');
+    const readIndexes = (loadStep?.with?.index ?? '')
+      .split(',')
+      .map((i) => i.trim())
+      .filter((i) => i !== '');
+    // The template suffix `-{{ workflow.spaceId }}` becomes `-default` etc. at
+    // runtime; the seeder's prefix (already trailing-dash) must appear verbatim
+    // among the reads.
+    expect(readIndexes).toContain(`${SEED_ATTACK_DISCOVERY_INDEX_PREFIX}{{ workflow.spaceId }}`);
+  });
+});
 
 const agentStep = (overrides: Partial<WorkflowStepExecutionDto>): WorkflowStepExecutionDto =>
   ({
