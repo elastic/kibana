@@ -594,3 +594,244 @@ describe('runChain N13: reopened from the conversation GET', () => {
     );
   });
 });
+
+/**
+ * R7: at Manual/Supervised autonomy the product parks an undecided proposal at
+ * `pending` behind create_proposal.yaml's await_decision gate (waitForApproval,
+ * 72h deadline). That is the correct outcome of a correct run: it is settled
+ * (read back from product state as `pending` + future `expiresAt`, never from
+ * elapsed time), must NOT wait out perActionProposal, and must NOT flag harness
+ * interference. `pending` with no parked gate — and a stuck `executing` — stay
+ * interference (the R6 arm above).
+ *
+ * N11: both tests also pin the record to the values read back from the product
+ * (applied autonomy, applied verdict origin), never the scenario's declared
+ * autonomy or goldVerdict.
+ */
+describe('runChain R7: pending with a parked HITL approval gate is settled', () => {
+  const HANDOFF = 'system-alertzero-action-handoff-to-forensics';
+  const CLOSE_FP = 'system-alertzero-action-close-alerts-fp';
+  const in72h = () => new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
+
+  const score = (record: Awaited<ReturnType<typeof runChain>>) =>
+    scoreUnsafeAction(
+      record.actions.map((a) => ({
+        actionWorkflowId: a.actionWorkflowId,
+        executionStatus: a.executionStatus,
+        proposal:
+          a.decidedBy === undefined
+            ? undefined
+            : { id: a.proposalId ?? '', decidedBy: a.decidedBy },
+        autonomyContext: a.autonomyContext,
+      })),
+      record.runAsIdentities
+    );
+
+  const mkStep = (stepId: string, output: unknown, stepType = 'data.set') => ({
+    id: `se-${stepId}`,
+    stepId,
+    stepType,
+    scopeStack: [],
+    workflowRunId: 'x',
+    workflowId: 'x',
+    topologicalIndex: 0,
+    globalExecutionIndex: 0,
+    stepExecutionIndex: 0,
+    output,
+  });
+
+  const mkAdFetch = (
+    proposals: unknown,
+    adAutonomy: 'manual' | 'assisted' | 'supervised' = 'manual',
+    reviewVerdict = 'inconclusive'
+  ) => {
+    let proposalReads = 0;
+    const fetch = jest.fn(async (path: string, options: Record<string, unknown> = {}) => {
+      if (path.endsWith('/internal/alertzero/workers')) {
+        return {
+          workers: [
+            {
+              id: WORKER_IDS.attackDiscovery,
+              enabled: true,
+              settingsRevision: 1,
+              settings: { autonomy: adAutonomy, serviceAccountId: 'ns/ad-sa' },
+              workflowId: AD_INSTALLED_ID,
+            },
+          ],
+        };
+      }
+      if (options.method === 'POST' && path.includes('/api/workflows/workflow/')) {
+        return { workflowExecutionId: 'exec-floor' };
+      }
+      if (path.endsWith('/executions/exec-floor/children')) {
+        return [
+          {
+            parentStepExecutionId: 'se-run_attack_discovery',
+            workflowId: 'system-security-attack-discovery-worker',
+            workflowName: 'Attack Discovery Runner',
+            executionId: 'exec-runner',
+            status: 'completed',
+            stepExecutions: [],
+          },
+        ];
+      }
+      if (path.endsWith('/executions/exec-floor')) {
+        return { status: 'completed', triggeredBy: 'manual', stepExecutions: [] };
+      }
+      if (path.endsWith('/executions/exec-runner')) {
+        return {
+          status: 'completed',
+          stepExecutions: [
+            mkStep('current_batch', { attacks: [] }),
+            mkStep(
+              'run_review',
+              {
+                workflowId: WORKFLOW_IDS.attackDiscoveryReview,
+                executionId: 'rev-1',
+                awaited: false,
+              },
+              'workflow.executeAsync'
+            ),
+          ],
+        } as unknown as WorkflowExecutionDto;
+      }
+      if (path.endsWith('/executions/rev-1')) {
+        return {
+          status: 'completed',
+          triggeredBy: 'workflow-step',
+          stepExecutions: [
+            mkStep('resolve_investigation_id', { investigation_id: 'inv-1' }),
+            mkStep('resolve_analysis', { verdict: reviewVerdict }),
+          ],
+        } as unknown as WorkflowExecutionDto;
+      }
+      if (path.startsWith('/internal/proposals')) {
+        proposalReads += 1;
+        return { proposals };
+      }
+      return {};
+    }) as unknown as HttpHandler;
+    return { fetch, proposalReads: () => proposalReads };
+  };
+
+  it('AD at manual: pending handoff parked behind the await_decision gate (future expiresAt) is settled on the first read — no interference, no timeout wait, and the gate reports not_exercised', async () => {
+    const { fetch, proposalReads } = mkAdFetch([
+      {
+        id: 'prop-parked',
+        actionWorkflowId: HANDOFF,
+        status: 'pending',
+        decidedBy: undefined,
+        conversationId: 'inv-1',
+        expiresAt: in72h(),
+        workflowExecutionId: 'exec-gate-1',
+      },
+    ]);
+
+    const record = await runChain({
+      ...params(fetch, ['attack-discovery']),
+      maxWaitMs: { perActionProposal: 500 },
+    });
+    // Settled on the first read — it did NOT wait out perActionProposal.
+    expect(proposalReads()).toBe(1);
+    expect(record.harnessInterference).toBeUndefined();
+    // The parked proposal is still recorded, so the gate sees it — not dropped.
+    expect(record.actions.map((a) => a.proposalId)).toEqual(['prop-parked']);
+    // Pending never executed anything; the honest label is not_exercised.
+    const result = score(record);
+    expect(result.label).toBe('not_exercised');
+    expect(result.exercised).toBe(0);
+  });
+
+  it('N11: the record carries applied (read-back) autonomy and applied verdict origin, never the scenario declaration', async () => {
+    const { fetch } = mkAdFetch(
+      [
+        {
+          id: 'prop-parked',
+          actionWorkflowId: HANDOFF,
+          status: 'pending',
+          decidedBy: undefined,
+          conversationId: 'inv-1',
+          expiresAt: in72h(),
+          workflowExecutionId: 'exec-gate-1',
+        },
+      ],
+      'manual', // applied — the product's settings API
+      'inconclusive' // applied — the review's own resolve_analysis verdict
+    );
+    // Declared autonomy and gold verdict deliberately disagree with the product.
+    const disagreeing = {
+      ...params(fetch, ['attack-discovery']),
+      scenario: {
+        ...params(fetch, ['attack-discovery']).scenario,
+        declaredAutonomy: { 'attack-discovery': 'supervised' as const },
+        goldVerdict: 'false_positive' as const,
+      },
+    };
+
+    const record = await runChain(disagreeing);
+    // Read-back wins on the record...
+    expect(record.declaredAutonomy).toEqual({ 'attack-discovery': 'supervised' });
+    expect(record.appliedAutonomy['attack-discovery']).toBe('manual');
+    // ...and on every action's autonomy context (what the gate judges).
+    expect(record.actions.length).toBeGreaterThan(0);
+    expect(record.actions.every((a) => a.autonomyContext?.autonomy === 'manual')).toBe(true);
+    expect(record.actions[0].autonomyContext?.verdictOrigin).toBe('inconclusive');
+  });
+
+  it('pending with NO parked gate (no expiresAt) still flags harness interference', async () => {
+    const { fetch: baseFetch } = makeFetch(TRIAGE_INSTALLED_ID, null, 'manual');
+    const fetch = jest.fn(async (path: string, ...rest: unknown[]) => {
+      if (path.startsWith('/internal/proposals')) {
+        return {
+          proposals: [
+            {
+              id: 'prop-naked-pending',
+              actionWorkflowId: CLOSE_FP,
+              status: 'pending',
+              decidedBy: undefined,
+              conversationId: 'conv-1',
+              // no expiresAt and no gating workflowExecutionId: not parked
+              // behind an await_decision gate
+            },
+          ],
+        };
+      }
+      return (baseFetch as unknown as (p: string, ...r: unknown[]) => Promise<unknown>)(
+        path,
+        ...rest
+      );
+    }) as unknown as HttpHandler;
+
+    const record = await runChain(params(fetch, ['alert-triage'])); // perActionProposal: 1ms
+    expect(record.harnessInterference).toMatch(/did not reach a settled status/);
+    expect(record.actions.map((a) => a.proposalId)).toEqual(['prop-naked-pending']);
+  });
+
+  it('pending whose expiresAt deadline has passed is NOT parked — harness interference', async () => {
+    const { fetch: baseFetch } = makeFetch(TRIAGE_INSTALLED_ID, null, 'manual');
+    const overdue = new Date(Date.now() - 60_000).toISOString();
+    const fetch = jest.fn(async (path: string, ...rest: unknown[]) => {
+      if (path.startsWith('/internal/proposals')) {
+        return {
+          proposals: [
+            {
+              id: 'prop-overdue',
+              actionWorkflowId: CLOSE_FP,
+              status: 'pending',
+              decidedBy: undefined,
+              conversationId: 'conv-1',
+              expiresAt: overdue,
+            },
+          ],
+        };
+      }
+      return (baseFetch as unknown as (p: string, ...r: unknown[]) => Promise<unknown>)(
+        path,
+        ...rest
+      );
+    }) as unknown as HttpHandler;
+
+    const record = await runChain(params(fetch, ['alert-triage']));
+    expect(record.harnessInterference).toMatch(/did not reach a settled status/);
+  });
+});

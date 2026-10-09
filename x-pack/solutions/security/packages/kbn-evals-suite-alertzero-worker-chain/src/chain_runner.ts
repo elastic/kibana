@@ -89,6 +89,10 @@ interface ProposalDto {
   decision?: string;
   decidedBy?: unknown;
   conversationId: string;
+  /** Decision deadline the product parked the proposal under (R7). */
+  expiresAt?: string;
+  /** Gating execution to resume; absent when no workflow is waiting (R7). */
+  workflowExecutionId?: string;
 }
 
 interface InvestigationConversation {
@@ -225,6 +229,27 @@ const SETTLED_PROPOSAL_STATUSES = new Set([
   'superseded',
 ]);
 
+/**
+ * R7: at Manual/Supervised autonomy the product parks an undecided proposal at
+ * `pending` behind create_proposal.yaml's await_decision gate (waitForApproval,
+ * 72h deadline). That park is visible in product state — never inferred from
+ * elapsed time — as `pending` with a gating `workflowExecutionId` (absent when
+ * no workflow is waiting) whose `expiresAt` deadline has not passed (absent
+ * `expiresAt` is the product's own far-future stand-in). A parked proposal is
+ * the correct outcome of a correct run and never settles inside
+ * perActionProposal. `pending` with NO gating execution — or past its deadline
+ * awaiting the expiry sweep — and a stuck `executing` are harness failures.
+ */
+const isParkedAwaitingDecision = (proposal: ProposalDto): boolean => {
+  if (proposal.status !== 'pending') return false;
+  if (proposal.workflowExecutionId === undefined) return false;
+  const deadline = proposal.expiresAt !== undefined ? Date.parse(proposal.expiresAt) : NaN;
+  return !Number.isFinite(deadline) || deadline > Date.now();
+};
+
+const isProposalSettled = (proposal: ProposalDto): boolean =>
+  SETTLED_PROPOSAL_STATUSES.has(proposal.status) || isParkedAwaitingDecision(proposal);
+
 const waitForProposals = async (
   ctx: KbnRequestContext,
   conversationId: string,
@@ -234,7 +259,7 @@ const waitForProposals = async (
   const deadline = Date.now() + timeoutMs;
   for (;;) {
     const proposals = await listProposalsFor(ctx, conversationId).catch(() => []);
-    if (proposals.length > 0 && proposals.every((p) => SETTLED_PROPOSAL_STATUSES.has(p.status))) {
+    if (proposals.length > 0 && proposals.every((p) => isProposalSettled(p))) {
       return { proposals, unsettledAtTimeout: false };
     }
     if (Date.now() >= deadline) {
@@ -243,7 +268,7 @@ const waitForProposals = async (
       // harness interference — never a silent `not_exercised`.
       return {
         proposals,
-        unsettledAtTimeout: proposals.some((p) => !SETTLED_PROPOSAL_STATUSES.has(p.status)),
+        unsettledAtTimeout: proposals.some((p) => !isProposalSettled(p)),
       };
     }
     await sleep(pollIntervalMs);
@@ -572,9 +597,10 @@ export const runChain = async ({
       pollIntervalMs
     );
     if (unsettledAtTimeout) {
-      // R6: a proposal stuck in pending/executing past perActionProposal would
-      // be dropped by the gate as not executed — that is a harness timing
-      // failure, not a clean run; never a silent `not_exercised`.
+      // R6/R7: a proposal stuck in executing, or pending with no parked
+      // decision gate, past perActionProposal would be dropped by the gate as
+      // not executed — that is a harness timing failure, not a clean run;
+      // never a silent `not_exercised`.
       markInterference(
         `proposals on ${source.id} did not reach a settled status within perActionProposal`
       );
