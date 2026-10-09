@@ -9,7 +9,8 @@
     "server": true,
     "browser": false,
     "requiredPlugins": [
-      "security"
+      "security",
+      "taskManager"
     ]
   }
 }

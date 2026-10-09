@@ -168,7 +168,7 @@ describe('getMonitorAgentAssignment route', () => {
       {
         locationId: 'loc-1',
         locationLabel: 'Location 1',
-        isAgentSharding: false,
+        isShardingActive: false,
         agentPolicyId: 'policy-1',
         agentPolicyName: 'Policy One',
         agents: [
@@ -221,7 +221,7 @@ describe('getMonitorAgentAssignment route', () => {
     const result = (await run(routeContext)) as MonitorLocationAssignment[];
 
     expect(result).toHaveLength(1);
-    expect(result[0].isAgentSharding).toBe(true);
+    expect(result[0].isShardingActive).toBe(true);
     expect(result[0].agents).toEqual([
       {
         agentId: 'agent-2',
@@ -383,7 +383,7 @@ describe('getMonitorAgentAssignment route', () => {
 
     const result = (await run(routeContext)) as MonitorLocationAssignment[];
 
-    expect(result[0].isAgentSharding).toBe(false);
+    expect(result[0].isShardingActive).toBe(false);
     expect(result[0].agents.map(({ agentId }) => agentId)).toEqual(['agent-1', 'agent-2']);
     expect(mockGetByIds).not.toHaveBeenCalled();
   });

@@ -44,6 +44,36 @@ triggers:
           type: string
           maxLength: 500
           description: Optional chat model connector or inference endpoint id for this run.
+        notificationDestinations:
+          type: array
+          maxItems: 5
+          description: Destinations that receive investigation lifecycle messages.
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - type
+              - connector_id
+              - params
+            properties:
+              type:
+                type: string
+                minLength: 1
+                maxLength: 100
+              connector_id:
+                type: string
+                minLength: 1
+                maxLength: 500
+              params:
+                type: object
+                additionalProperties: true
+                description: Connector-specific destination properties, validated by the notification handler at runtime. Limited to 4096 JSON characters, three container levels, and 20 entries per object or array.
+              automation_id:
+                type: string
+                maxLength: 500
+              automation_name:
+                type: string
+                maxLength: 500
         investigation_id:
           type: string
           description: >
@@ -101,6 +131,14 @@ steps:
     on-failure:
       continue: true
 
+  - name: notify_started
+    type: nightshift.sendNotifications
+    with:
+      investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+      phase: started
+    on-failure:
+      continue: true
+
   - name: investigate
     type: ai.agent
     agent-id: nightshift.investigation
@@ -109,8 +147,6 @@ steps:
     aggregate-by: 'nightshift'
     product-solution: 'observability'
     product-feature: 'nightshift'
-    create-conversation: true
-    public-conversation: true
     timeout: 1800s
     with:
       # Correlates the workflow and generated agent executions for live progress lookup.
@@ -724,6 +760,25 @@ steps:
         x-elastic-internal-origin: 'kibana'
       body:
         status: 'failed'
+    on-failure:
+      continue: true
+
+  - name: notify_completed
+    type: nightshift.sendNotifications
+    if: '${{ steps.investigate.error == null }}'
+    with:
+      investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+      phase: completed
+    on-failure:
+      continue: true
+
+  - name: notify_failed
+    type: nightshift.sendNotifications
+    if: '${{ steps.investigate.error != null }}'
+    with:
+      investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+      phase: failed
+      reason: "${{ steps.investigate.error.message | default: 'Investigation failed' | truncate: 10000 }}"
     on-failure:
       continue: true
 

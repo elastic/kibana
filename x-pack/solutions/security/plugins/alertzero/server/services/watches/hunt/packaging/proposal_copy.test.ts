@@ -11,9 +11,27 @@ import {
   buildProposalTitle,
   buildRecommendationComment,
 } from './proposal_copy';
-import type { CurrentRunHost, CurrentRunState, ProcessSelector } from './types';
+import type { CurrentRunHost, CurrentRunState, ProcessSelector, Subject } from './types';
 
 const host: CurrentRunHost = { name: 'WIN-ANALYST01', enrolled: true, agentId: 'agent-1' };
+const hostSubject: Subject = { kind: 'host', value: host.name, reachable: true, host };
+const processSubject = (processSelector: ProcessSelector): Subject => ({
+  kind: 'process',
+  value: processSelector.processName,
+  reachable: true,
+  host,
+  processSelector,
+});
+const actionInput = { endpoint_ids: ['agent-1'] };
+const userSubject: Subject = { kind: 'user', value: 'dev-user', reachable: true };
+const serviceSubject: Subject = { kind: 'service', value: 'escalated-role', reachable: true };
+
+const setAssetCriticality: ActionCatalogEntry = {
+  workflowId: 'system-alertzero-action-set-asset-criticality',
+  name: 'Set asset criticality',
+  category: 'respond',
+  subjects: ['user', 'service'],
+};
 
 const killProcess: ActionCatalogEntry = {
   workflowId: 'system-security-action-kill-process',
@@ -67,11 +85,15 @@ const baseState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState =>
   titles: ['Hunt: PowerShell (T1059.001) [ti-repor]'],
   evidenceLines: [],
   techniques: ['T1059.001'],
+  findings: [],
+  techniqueNames: {},
+  users: [],
   corroboratedTechniques: ['T1059.001'],
   hosts: [host],
   processSelectors: [],
-  hasNonHostEntity: false,
+  services: [],
   hasIocIndicator: false,
+  hasUnnamedIdentityEntity: false,
   allEventsActionable: true,
   hasProcessBearingEvent: false,
   manualRemediation: [],
@@ -81,35 +103,80 @@ const baseState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState =>
 
 describe('buildProposalTitle', () => {
   it('names the process and pid when the selector has a pid', () => {
-    expect(buildProposalTitle({ entry: killProcess, host, processSelector: withPid })).toBe(
-      'Kill powershell.exe (PID 4212) on WIN-ANALYST01'
-    );
+    expect(
+      buildProposalTitle({ entry: killProcess, subject: processSubject(withPid), actionInput })
+    ).toBe('Kill powershell.exe (PID 4212) on WIN-ANALYST01');
   });
 
   it('names the process only when the selector has no pid', () => {
     expect(
-      buildProposalTitle({ entry: suspendProcess, host, processSelector: withEntityOnly })
+      buildProposalTitle({
+        entry: suspendProcess,
+        subject: processSubject(withEntityOnly),
+        actionInput,
+      })
     ).toBe('Suspend aws.exe on WIN-ANALYST01');
   });
 
   it('builds a host-scoped title for a host action', () => {
-    expect(buildProposalTitle({ entry: isolateHost, host })).toBe('Isolate host WIN-ANALYST01');
-  });
-
-  it('falls back to a generic "on host" title for any other action', () => {
-    expect(buildProposalTitle({ entry: configureSomething, host })).toBe(
-      'Configure something on WIN-ANALYST01'
+    expect(buildProposalTitle({ entry: isolateHost, subject: hostSubject, actionInput })).toBe(
+      'Isolate host WIN-ANALYST01'
     );
   });
 
+  it('falls back to a generic "on host" title for any other action', () => {
+    expect(
+      buildProposalTitle({ entry: configureSomething, subject: hostSubject, actionInput })
+    ).toBe('Configure something on WIN-ANALYST01');
+  });
+
   it('gives two processes on the same host distinct titles', () => {
-    const titleA = buildProposalTitle({ entry: killProcess, host, processSelector: withPid });
+    const titleA = buildProposalTitle({
+      entry: killProcess,
+      subject: processSubject(withPid),
+      actionInput,
+    });
     const titleB = buildProposalTitle({
       entry: killProcess,
-      host,
-      processSelector: withEntityOnly,
+      subject: processSubject(withEntityOnly),
+      actionInput,
     });
     expect(titleA).not.toBe(titleB);
+  });
+
+  it('names the identity and the level for an asset-criticality proposal', () => {
+    expect(
+      buildProposalTitle({
+        entry: setAssetCriticality,
+        subject: userSubject,
+        actionInput: {
+          id_field: 'user.name',
+          id_value: 'dev-user',
+          criticality_level: 'high_impact',
+        },
+      })
+    ).toBe('Mark user dev-user high impact');
+    expect(
+      buildProposalTitle({
+        entry: setAssetCriticality,
+        subject: serviceSubject,
+        actionInput: {
+          id_field: 'service.name',
+          id_value: 'escalated-role',
+          criticality_level: 'extreme_impact',
+        },
+      })
+    ).toBe('Mark service escalated-role extreme impact');
+  });
+
+  it('falls back to a generic "for <kind> <value>" title for an identity action without a level', () => {
+    expect(
+      buildProposalTitle({
+        entry: { ...setAssetCriticality, name: 'Suspend Okta user' },
+        subject: userSubject,
+        actionInput: { id_field: 'user.name', id_value: 'dev-user' },
+      })
+    ).toBe('Suspend Okta user for user dev-user');
   });
 
   it('caps the title at 256 characters', () => {
@@ -117,7 +184,11 @@ describe('buildProposalTitle', () => {
       ...withPid,
       processName: 'p'.repeat(400),
     };
-    const title = buildProposalTitle({ entry: killProcess, host, processSelector: longSelector });
+    const title = buildProposalTitle({
+      entry: killProcess,
+      subject: processSubject(longSelector),
+      actionInput,
+    });
     expect(title.length).toBeLessThanOrEqual(256);
   });
 });
@@ -127,9 +198,9 @@ describe('buildProposalComment', () => {
     const state = baseState();
     const comment = buildProposalComment({
       entry: killProcess,
-      host,
+      subject: processSubject(withPid),
       state,
-      processSelector: withPid,
+      actionInput,
     });
 
     expect(comment).toContain(
@@ -157,9 +228,9 @@ describe('buildProposalComment', () => {
     });
     const comment = buildProposalComment({
       entry: killProcess,
-      host,
+      subject: processSubject(withTechnique),
       state,
-      processSelector: withTechnique,
+      actionInput,
     });
     expect(comment).toContain(
       'Implicated in T1059.001 (PowerShell): 3 rows of matching activity confirmed in the hunt window.'
@@ -171,15 +242,15 @@ describe('buildProposalComment', () => {
     const state = baseState();
     const killComment = buildProposalComment({
       entry: killProcess,
-      host,
+      subject: processSubject(withPid),
       state,
-      processSelector: withPid,
+      actionInput,
     });
     const suspendComment = buildProposalComment({
       entry: suspendProcess,
-      host,
+      subject: processSubject(withPid),
       state,
-      processSelector: withPid,
+      actionInput,
     });
     expect(killComment).toContain('Killing it stops execution immediately.');
     expect(suspendComment).toContain(
@@ -189,7 +260,12 @@ describe('buildProposalComment', () => {
 
   it('builds the Action / Why body for a host-scoped action', () => {
     const state = baseState();
-    const comment = buildProposalComment({ entry: isolateHost, host, state });
+    const comment = buildProposalComment({
+      entry: isolateHost,
+      subject: hostSubject,
+      state,
+      actionInput,
+    });
     expect(comment).toContain('**Action:** Isolate host **WIN-ANALYST01** with Elastic Defend.');
     expect(comment).toContain(
       'Hunt Watch confirmed *Hunt: PowerShell (T1059.001) [ti-repor]* on WIN-ANALYST01.'
@@ -203,11 +279,16 @@ describe('buildProposalComment', () => {
     const state = baseState();
     const killComment = buildProposalComment({
       entry: killProcess,
-      host,
+      subject: processSubject(withPid),
       state,
-      processSelector: withPid,
+      actionInput,
     });
-    const isolateComment = buildProposalComment({ entry: isolateHost, host, state });
+    const isolateComment = buildProposalComment({
+      entry: isolateHost,
+      subject: hostSubject,
+      state,
+      actionInput,
+    });
     expect(killComment).not.toBe(isolateComment);
     expect(killComment).toContain('Killing it stops execution immediately.');
     expect(isolateComment).toContain('Isolating the host cuts off its network access');
@@ -220,9 +301,9 @@ describe('buildProposalComment', () => {
     });
     const comment = buildProposalComment({
       entry: killProcess,
-      host,
+      subject: processSubject(withPid),
       state,
-      processSelector: withPid,
+      actionInput,
     });
     const tier1Lines = comment.split('\n').filter((line) => line.includes('Tier 1 matched'));
     expect(tier1Lines).toHaveLength(1);
@@ -232,9 +313,9 @@ describe('buildProposalComment', () => {
     const state = baseState();
     const comment = buildProposalComment({
       entry: killProcess,
-      host,
+      subject: processSubject(withPid),
       state,
-      processSelector: withPid,
+      actionInput,
     });
     expect(comment).not.toContain('per_index');
     expect(comment).not.toContain('hunt_result');
@@ -250,19 +331,56 @@ describe('buildProposalComment', () => {
         ],
       },
     });
-    const comment = buildProposalComment({ entry: isolateHost, host, state });
+    const comment = buildProposalComment({
+      entry: isolateHost,
+      subject: hostSubject,
+      state,
+      actionInput,
+    });
     expect(comment).toContain('Tier 2 confirmed T1059.001 (3 rows) and T1078.004 (4 rows)');
   });
 
   it('falls back to the plain technique list on a host-scoped proposal when no Tier 2 behavior is confirmed', () => {
     const state = baseState({ techniques: ['T1078.004'], evidence: { tier2Confirmed: [] } });
-    const comment = buildProposalComment({ entry: isolateHost, host, state });
+    const comment = buildProposalComment({
+      entry: isolateHost,
+      subject: hostSubject,
+      state,
+      actionInput,
+    });
     expect(comment).toContain('Techniques: T1078.004');
+  });
+
+  it('builds the Action / Why body for an identity proposal without a host suffix', () => {
+    const state = baseState({ titles: ['Shadow admin AssumeRole'] });
+    const comment = buildProposalComment({
+      entry: setAssetCriticality,
+      subject: userSubject,
+      state,
+      actionInput: {
+        id_field: 'user.name',
+        id_value: 'dev-user',
+        criticality_level: 'high_impact',
+      },
+    });
+    expect(comment).toContain(
+      '**Action:** Set asset criticality for user **dev-user** to high_impact.'
+    );
+    expect(comment).toContain('Hunt Watch confirmed *Shadow admin AssumeRole*.');
+    expect(comment).not.toContain('on WIN-ANALYST01');
+    expect(comment).toContain('Tier 1 matched 4 events');
+    expect(comment).toContain('Raising its asset criticality lifts its risk score');
+    expect(comment).not.toContain('Elastic Defend');
   });
 
   it('omits the process last-seen line when there is no process selector', () => {
     const state = baseState();
-    const comment = buildProposalComment({ entry: isolateHost, host, state });
+    const comment = buildProposalComment({
+      entry: isolateHost,
+      subject: hostSubject,
+      state,
+      actionInput,
+    });
     expect(comment).not.toContain('last seen');
   });
 });

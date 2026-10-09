@@ -27,13 +27,13 @@ export const PolicyName = ({
   agentPolicyId,
   locationStats,
   hideAgentCount = false,
-  isAgentSharding = false,
+  isShardingActive = false,
 }: {
   agentPolicyId: string;
   locationStats?: LocationAgentStats;
   /** Suppress the "Agents: N" badge when the caller already renders an agent count. */
   hideAgentCount?: boolean;
-  isAgentSharding?: boolean;
+  isShardingActive?: boolean;
 }) => {
   const { canReadAgentPolicies } = useFleetPermissions();
   const [flyoutOpen, setFlyoutOpen] = useState(false);
@@ -43,15 +43,15 @@ export const PolicyName = ({
   const policy = policies?.find((policyT) => policyT.id === agentPolicyId);
   const agentCount = locationStats?.agents.length ?? policy?.agents ?? 0;
   const showClassicAgentCount =
-    canReadAgentPolicies && Boolean(policy) && !hideAgentCount && !isAgentSharding;
+    canReadAgentPolicies && Boolean(policy) && !hideAgentCount && !isShardingActive;
 
-  if (loading && !isAgentSharding) {
+  if (loading && !isShardingActive) {
     return <EuiLoadingSpinner size="s" />;
   }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
-      {isAgentSharding && (
+      {isShardingActive && (
         <EuiFlexItem grow={false}>
           <EuiBadge
             color="primary"

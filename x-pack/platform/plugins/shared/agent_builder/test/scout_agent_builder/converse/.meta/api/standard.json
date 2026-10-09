@@ -1,5 +1,5 @@
 {
-  "sha1": "b3afbc0ae73378a7664cbec9dc90f444bb11905e",
+  "sha1": "c563455037583b98e5c62fd3b9c57985ee849dde",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -583,7 +583,7 @@
     {
       "id": "69411a87481f950-3869981e6c97b56",
       "title": "Agent Builder - converse callback API delivers completed response to callback URL",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -593,13 +593,13 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
         "line": 134,
-        "column": 23
+        "column": 24
       }
     },
     {
       "id": "69411a87481f950-92f5e782bc9e4c1",
       "title": "Agent Builder - converse callback API stores callback origin authorship on list and get conversation responses",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -608,14 +608,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 197,
-        "column": 29
+        "line": 196,
+        "column": 14
       }
     },
     {
       "id": "69411a87481f950-edfb8df4e3d1793",
       "title": "Agent Builder - converse callback API delivers failed response to callback URL",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -625,13 +625,13 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
         "line": 292,
-        "column": 22
+        "column": 11
       }
     },
     {
       "id": "69411a87481f950-0dffc761e12b7ef",
       "title": "Agent Builder - converse callback API delivers aborted response to callback URL",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -640,14 +640,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 328,
-        "column": 48
+        "line": 329,
+        "column": 31
       }
     },
     {
       "id": "69411a87481f950-82a75a6c138a614",
       "title": "Agent Builder - converse callback API returns the existing execution for a replayed idempotency key",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -657,13 +657,13 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
         "line": 369,
-        "column": 15
+        "column": 18
       }
     },
     {
       "id": "69411a87481f950-e3a4852c5eeefc2",
       "title": "Agent Builder - converse callback API schedules a single execution for concurrent duplicate deliveries",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -673,13 +673,13 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
         "line": 432,
-        "column": 13
+        "column": 23
       }
     },
     {
       "id": "69411a87481f950-be5f9d8b14fa9ea",
       "title": "Agent Builder - converse callback API schedules separate executions for the same key on different origins",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -689,13 +689,13 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
         "line": 497,
-        "column": 25
+        "column": 18
       }
     },
     {
       "id": "69411a87481f950-a98d347436e2dcf",
       "title": "Agent Builder - converse callback API prefers a caller-provided execution id over the idempotency key",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -705,13 +705,13 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
         "line": 556,
-        "column": 17
+        "column": 31
       }
     },
     {
       "id": "69411a87481f950-8077e4c805574b4",
       "title": "Agent Builder - converse callback API continues conversation for repeated Slack origin",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -721,7 +721,21 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
         "line": 595,
-        "column": 16
+        "column": 9
+      }
+    },
+    {
+      "id": "bca2309a02a613a-e12e2371ba1dd9a",
+      "title": "Agent Builder — ephemeral ai.agent workflow step runs on top of the conversation without modifying it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_ephemeral_workflow_step_api.spec.ts",
+        "line": 67,
+        "column": 37
       }
     },
     {
