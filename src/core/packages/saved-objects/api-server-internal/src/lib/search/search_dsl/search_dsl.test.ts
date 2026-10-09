@@ -47,6 +47,15 @@ describe('getSearchDsl', () => {
         });
       }).toThrow(/sortOrder requires a sortField/);
     });
+    it('throws when sort is combined with sortField', () => {
+      expect(() => {
+        getSearchDsl(mappings, registry, {
+          type: 'foo',
+          sortField: 'title',
+          sort: [{ field: '_id', order: 'asc' }],
+        });
+      }).toThrow(/sort cannot be combined with sortField or sortOrder/);
+    });
   });
 
   describe('passes control', () => {
@@ -106,7 +115,26 @@ describe('getSearchDsl', () => {
         opts.type,
         opts.sortField,
         opts.sortOrder,
-        opts.pit
+        opts.pit,
+        undefined
+      );
+    });
+
+    it('passes a sort list through to getSortingParams', () => {
+      getSortingParams.mockReturnValue({});
+      const sort = [
+        { field: 'updated_at', order: 'desc' as const },
+        { field: '_id', order: 'asc' as const },
+      ];
+
+      getSearchDsl(mappings, registry, { type: 'foo', sort });
+      expect(getSortingParams).toHaveBeenCalledWith(
+        mappings,
+        'foo',
+        undefined,
+        undefined,
+        undefined,
+        sort
       );
     });
 

@@ -42,6 +42,21 @@ export interface SavedObjectsPitParams {
 }
 
 /**
+ * One field in a {@link SavedObjectsFindOptions.sort} list.
+ *
+ * @public
+ */
+export interface SavedObjectsFindSort {
+  /**
+   * Field to sort by. Attribute names are resolved against the saved object type.
+   * `_id` and `_score` are root fields.
+   */
+  field: string;
+  /** Sort direction for this field. Omitted values use Elasticsearch's default. */
+  order?: SortOrder;
+}
+
+/**
  * Options for finding saved objects
  *
  * @public
@@ -53,10 +68,34 @@ export interface SavedObjectsFindOptions {
   page?: number;
   /** the number of objects per page */
   perPage?: number;
-  /** which field to sort by */
+  /**
+   * Which field to sort by.
+   * Mutually exclusive with {@link SavedObjectsFindOptions.sort}.
+   */
   sortField?: string;
-  /** sort order, ascending or descending */
+  /**
+   * Sort order, ascending or descending. Requires `sortField`.
+   * Mutually exclusive with {@link SavedObjectsFindOptions.sort}.
+   */
   sortOrder?: SortOrder;
+  /**
+   * Sort by one or more fields, applied in order. Later entries break ties from earlier ones,
+   * including tied `_score` values. Pass `_id` last when pages must keep a stable order.
+   *
+   * Mutually exclusive with `sortField` and `sortOrder`. At most 10 entries.
+   *
+   * @example
+   * ```ts
+   * savedObjectsClient.find({
+   *   type: 'dashboard',
+   *   sort: [
+   *     { field: 'updated_at', order: 'desc' },
+   *     { field: '_id', order: 'asc' },
+   *   ],
+   * });
+   * ```
+   */
+  sort?: SavedObjectsFindSort[];
   /**
    * An array of attributes to fetch and include in the results. If unspecified, all attributes will be fetched.
    *
