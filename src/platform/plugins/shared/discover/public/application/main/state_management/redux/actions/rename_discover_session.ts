@@ -52,8 +52,7 @@ export const renameDiscoverSession = createInternalStateAsyncThunk(
       rememberDiscoverSession(services.core.http, services.chrome, discoverSession);
     }
 
-    // When the session was saved elsewhere, the local tabs keep the opened version, so a reload
-    // still restores the newer saved tabs
+    // If someone else saved in the meantime, keep the old version so a reload picks up their tabs
     const isSavedElsewhere = latestVersion !== persistedDiscoverSession.version;
 
     dispatch(

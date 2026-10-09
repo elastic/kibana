@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { differenceBy, isEqual, orderBy, pick, uniqBy, omit } from 'lodash';
+import { differenceBy, orderBy, pick, uniqBy, omit } from 'lodash';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   createStateContainer,
@@ -19,8 +19,6 @@ import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import {
   LOCALLY_PERSISTED_PROFILE_STATE_TYPES,
-  ProfileStateType,
-  type ProfileStateMap,
   type ProfileStateRegistry,
 } from '../../../../common/context_awareness';
 import {
@@ -137,9 +135,13 @@ export const createTabsStorageManager = ({
   enabled?: boolean;
 }): TabsStorageManager => {
   const urlStateContainer = createStateContainer<TabsUrlState>({});
-  const sessionInfo: Pick<TabsStateInLocalStorage, 'userId' | 'spaceId'> = {
+  const sessionInfo: Pick<
+    TabsStateInLocalStorage,
+    'userId' | 'spaceId' | 'discoverSessionVersion'
+  > = {
     userId: '',
     spaceId: '',
+    discoverSessionVersion: undefined,
   };
 
   // Used to avoid triggering onChanged during programmatic tab ID URL updates
@@ -194,6 +196,9 @@ export const createTabsStorageManager = ({
   ) => {
     const nextState: TabsUrlState = {
       tabId: selectedTabId,
+      ...(sessionInfo.discoverSessionVersion && {
+        sessionVersion: sessionInfo.discoverSessionVersion,
+      }),
     };
     const previousState = getTabsStateFromURL();
     // If the previous tab was a "new" (unsaved) tab, we replace the URL state instead of pushing a new history entry.
@@ -206,6 +211,39 @@ export const createTabsStorageManager = ({
     } finally {
       isPushingTabIdToUrl = false;
     }
+  };
+
+  const updateUrlSessionVersion = async (discoverSessionVersion: string | undefined) => {
+    if (discoverSessionVersion === sessionInfo.discoverSessionVersion) {
+      return;
+    }
+
+    sessionInfo.discoverSessionVersion = discoverSessionVersion;
+
+    // No tab in the URL means we already left Discover
+    const selectedTabId = getTabsStateFromURL()?.tabId;
+    if (selectedTabId) {
+      await pushSelectedTabIdToUrl(selectedTabId, { replace: true });
+    }
+  };
+
+  const discardOutdatedUrlState = (
+    persistedDiscoverSession: DiscoverSession,
+    selectedTabId: string | undefined
+  ) => {
+    // Drop the URL time only if the saved tab brings its own. Global filters belong to other apps
+    // too, so they stay. If the selected tab is gone, the first saved tab takes its place.
+    const persistedSelectedTab =
+      persistedDiscoverSession.tabs.find((tab) => tab.id === selectedTabId) ??
+      persistedDiscoverSession.tabs[0];
+
+    const urlGlobalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
+    if (urlGlobalState && persistedSelectedTab?.timeRestore) {
+      const urlGlobalFilters = omit(urlGlobalState, 'time', 'refreshInterval');
+      urlStateStorage.set(GLOBAL_STATE_URL_KEY, urlGlobalFilters, { replace: true });
+    }
+    urlStateStorage.set(APP_STATE_URL_KEY, undefined, { replace: true });
+    urlStateStorage.set(PROFILE_STATE_URL_KEY, undefined, { replace: true });
   };
 
   const toTabStateInStorage = (
@@ -250,33 +288,6 @@ export const createTabsStorageManager = ({
         defaultsHandling: 'expand',
       })
     );
-
-  const getUrlProfileState = (profileState: ProfileStateMap | null | undefined) =>
-    profileStateRegistry.pickStateByType({
-      profileStateMap: profileState ?? undefined,
-      stateTypes: [ProfileStateType.Url],
-      defaultsHandling: 'strip',
-    });
-
-  const isUrlStateFromStoredTab = ({
-    appState,
-    globalState,
-    profileState,
-  }: TabStateInLocalStorage) => {
-    const urlProfileState = getUrlProfileState(
-      urlStateStorage.get<ProfileStateMap>(PROFILE_STATE_URL_KEY)
-    );
-
-    const urlGlobalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
-
-    return (
-      isEqual(urlStateStorage.get(APP_STATE_URL_KEY) ?? {}, appState ?? {}) &&
-      isEqual(urlGlobalState?.time, globalState?.timeRange) &&
-      isEqual(urlGlobalState?.refreshInterval, globalState?.refreshInterval) &&
-      // The URL only holds the active profile state, while the stored tab keeps every profile.
-      isEqual(urlProfileState, pick(getUrlProfileState(profileState), Object.keys(urlProfileState)))
-    );
-  };
 
   const toTabState = (
     tabStateInStorage: TabStateInLocalStorage,
@@ -412,6 +423,9 @@ export const createTabsStorageManager = ({
     discoverSessionVersion,
     draftSessionTitle
   ) => {
+    // Every save bumps the version, keep the URL in sync
+    await updateUrlSessionVersion(discoverSessionVersion);
+
     if (!enabled) {
       return;
     }
@@ -497,6 +511,7 @@ export const createTabsStorageManager = ({
 
     sessionInfo.userId = userId;
     sessionInfo.spaceId = spaceId;
+    sessionInfo.discoverSessionVersion = persistedDiscoverSession?.version;
 
     const previousOpenTabs = storedTabsState.openTabs.map((tab) =>
       toTabState(tab, defaultTabState)
@@ -504,43 +519,17 @@ export const createTabsStorageManager = ({
     let openTabs = shouldClearAllTabs ? [] : previousOpenTabs;
     let updatedDiscoverSession = persistedDiscoverSession;
 
-    // Local tabs are discarded when the session was saved again since they were stored,
-    // for example via the API, so Discover does not hide the newer saved state.
-    const { discoverSessionId: storedSessionId, discoverSessionVersion: storedSessionVersion } =
-      storedTabsState;
-    const persistedSessionVersion = persistedDiscoverSession?.version;
+    // Local tabs or URL state from an older version (e.g. the session was saved via the API) would
+    // hide the newer saved state, so we drop them. No version means a link or old local tabs: keep.
+    const persistedVersion = persistedDiscoverSession?.version;
+    const isOutdatedVersion = (version: string | undefined) =>
+      Boolean(version && persistedVersion && version !== persistedVersion);
     const hasStoredSessionChanged =
-      persistedDiscoverSession?.id !== storedSessionId ||
-      (persistedSessionVersion !== undefined &&
-        storedSessionVersion !== undefined &&
-        persistedSessionVersion !== storedSessionVersion);
+      persistedDiscoverSession?.id !== storedTabsState.discoverSessionId ||
+      isOutdatedVersion(storedTabsState.discoverSessionVersion);
 
-    // URL state written for the older version would override the newer saved state on reload.
-    // URL state from a link differs from the stored tab, so it is kept.
-    const storedSelectedTab = storedTabsState.openTabs.find((tab) => tab.id === selectedTabId);
-    if (
-      hasStoredSessionChanged &&
-      persistedDiscoverSession?.id === storedSessionId &&
-      storedSelectedTab &&
-      isUrlStateFromStoredTab(storedSelectedTab)
-    ) {
-      // Only a saved time range can replace the URL time and refresh interval. Global filters are
-      // shared with other apps, so they stay in _g.
-      // When the stored tab was removed, the first saved tab is selected, unless the URL asks
-      // for a new tab with a label.
-      const persistedSelectedTab =
-        persistedDiscoverSession?.tabs.find((tab) => tab.id === selectedTabId) ??
-        (tabsStateFromURL?.tabLabel ? undefined : persistedDiscoverSession?.tabs[0]);
-      if (persistedSelectedTab?.timeRestore) {
-        const urlGlobalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
-        void urlStateStorage.set(
-          GLOBAL_STATE_URL_KEY,
-          omit(urlGlobalState, ['time', 'refreshInterval']),
-          { replace: true }
-        );
-      }
-      void urlStateStorage.set(APP_STATE_URL_KEY, undefined, { replace: true });
-      void urlStateStorage.set(PROFILE_STATE_URL_KEY, undefined, { replace: true });
+    if (persistedDiscoverSession && isOutdatedVersion(tabsStateFromURL?.sessionVersion)) {
+      discardOutdatedUrlState(persistedDiscoverSession, selectedTabId);
     }
 
     // Prepare before mapping tabs so inline views can reuse matching local IDs. Return the same

@@ -18,11 +18,12 @@ import {
   TABS_LOCAL_STORAGE_KEY,
   type TabsInternalStatePayload,
 } from './tabs_storage_manager';
-import type { DiscoverAppState, RecentlyClosedTabState, TabState } from './redux';
+import type { RecentlyClosedTabState, TabState } from './redux';
 import {
   APP_STATE_URL_KEY,
   GLOBAL_STATE_URL_KEY,
   NEW_TAB_ID,
+  PROFILE_STATE_URL_KEY,
   TAB_STATE_URL_KEY,
 } from '../../../../common/constants';
 import { DEFAULT_TAB_STATE, fromSavedSearchToSavedObjectTab } from './redux';
@@ -33,6 +34,7 @@ import {
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { TEST_PROFILE_STATE_DEF } from '../../../context_awareness/__mocks__/profile_state';
+import type { TabsUrlState } from '../../../../common/types';
 
 const mockUserId = 'testUserId';
 const mockSpaceId = 'testSpaceId';
@@ -240,35 +242,6 @@ describe('TabsStorageManager', () => {
       closedTabs: [toStoredTab(mockRecentlyClosedTab)],
       discoverSessionId: 'testDiscoverSessionId',
     });
-  });
-
-  it('should persist the discover session version to local storage', async () => {
-    const {
-      tabsStorageManager,
-      services: { storage },
-    } = create();
-    tabsStorageManager.loadLocally({
-      userId: mockUserId,
-      spaceId: mockSpaceId,
-      defaultTabState: DEFAULT_TAB_STATE,
-    });
-
-    jest.spyOn(storage, 'set');
-
-    await tabsStorageManager.persistLocally(
-      { allTabs: [mockTab1], recentlyClosedTabs: [] },
-      mockGetInternalState,
-      'testDiscoverSessionId',
-      'version-1'
-    );
-
-    expect(storage.set).toHaveBeenCalledWith(
-      TABS_LOCAL_STORAGE_KEY,
-      expect.objectContaining({
-        discoverSessionId: 'testDiscoverSessionId',
-        discoverSessionVersion: 'version-1',
-      })
-    );
   });
 
   it('should persist persistent and url profile state to local storage', async () => {
@@ -1088,129 +1061,54 @@ describe('TabsStorageManager', () => {
     expect(loadedProps.allTabs.find((t) => t.id === mockTab1.id)).toBeUndefined();
   });
 
-  it('should load open tabs from storage when the persisted discover session version matches the stored version', () => {
-    const {
-      tabsStorageManager,
-      urlStateStorage,
-      services: { storage },
-    } = create();
+  describe('discover session version', () => {
+    const urlGlobalState = {
+      time: mockTab1.globalState.timeRange,
+      refreshInterval: mockTab1.globalState.refreshInterval,
+      filters: [],
+    };
 
-    const sessionId = 'session-match';
-
-    storage.set(TABS_LOCAL_STORAGE_KEY, {
-      userId: mockUserId,
-      spaceId: mockSpaceId,
-      discoverSessionId: sessionId,
-      discoverSessionVersion: 'version-1',
-      openTabs: [toStoredTab(mockTab1), toStoredTab(mockTab2)],
-      closedTabs: [],
-    });
-
-    urlStateStorage.set(TAB_STATE_URL_KEY, {
-      tabId: mockTab2.id,
-    });
-
-    const loadedProps = tabsStorageManager.loadLocally({
-      userId: mockUserId,
-      spaceId: mockSpaceId,
-      persistedDiscoverSession: {
-        id: sessionId,
-        version: 'version-1',
-        title: 'title',
-        description: 'description',
-        managed: false,
-        tabs: [],
-      },
-      defaultTabState: DEFAULT_TAB_STATE,
-    });
-
-    expect(loadedProps.allTabs.map((t) => t.id)).toEqual([mockTab1.id, mockTab2.id]);
-    expect(loadedProps.selectedTabId).toBe(mockTab2.id);
-  });
-
-  it('should load persisted tabs when the persisted discover session was saved again after the stored tabs', () => {
-    const { tabsStorageManager, urlStateStorage, services } = create();
-    const { storage } = services;
-
-    const sessionId = 'session-match';
-
-    storage.set(TABS_LOCAL_STORAGE_KEY, {
-      userId: mockUserId,
-      spaceId: mockSpaceId,
-      discoverSessionId: sessionId,
-      discoverSessionVersion: 'version-1',
-      openTabs: [toStoredTab(mockTab1)],
-      closedTabs: [],
-    });
-
-    urlStateStorage.set(TAB_STATE_URL_KEY, {
-      tabId: mockTab1.id,
-    });
-
-    const persistedTab = fromSavedSearchToSavedObjectTab({
-      tab: { id: mockTab1.id, label: 'Updated tab' },
-      savedSearch: savedSearchMock,
-      services,
-    });
-
-    const loadedProps = tabsStorageManager.loadLocally({
-      userId: mockUserId,
-      spaceId: mockSpaceId,
-      persistedDiscoverSession: {
-        id: sessionId,
-        version: 'version-2',
-        title: 'title',
-        description: 'description',
-        managed: false,
-        tabs: [persistedTab],
-      },
-      defaultTabState: DEFAULT_TAB_STATE,
-    });
-
-    expect(loadedProps.allTabs.map((t) => t.label)).toEqual(['Updated tab']);
-    expect(loadedProps.selectedTabId).toBe(mockTab1.id);
-  });
-
-  describe('URL state when the persisted discover session was saved again', () => {
-    const loadWithUrlAppState = (
-      urlAppState: DiscoverAppState,
-      storedProfileState?: TabState['profileState'],
-      timeRestore = true,
+    const load = ({
+      urlTabState = { tabId: mockTab1.id, sessionVersion: 'version-1' },
+      persistedVersion = 'version-2',
       persistedTabId = mockTab1.id,
-      tabLabel?: string,
-      urlRefreshInterval = mockTab1.globalState.refreshInterval
-    ) => {
+      timeRestore = true,
+    }: {
+      urlTabState?: TabsUrlState;
+      persistedVersion?: string;
+      persistedTabId?: string;
+      timeRestore?: boolean;
+    } = {}) => {
       const { tabsStorageManager, urlStateStorage, services } = create();
 
       services.storage.set(TABS_LOCAL_STORAGE_KEY, {
         userId: mockUserId,
         spaceId: mockSpaceId,
-        discoverSessionId: 'session-match',
+        discoverSessionId: 'session-id',
         discoverSessionVersion: 'version-1',
-        openTabs: [{ ...toStoredTab(mockTab1), profileState: storedProfileState }],
+        openTabs: [toStoredTab(mockTab1)],
         closedTabs: [],
       });
-      urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: mockTab1.id, tabLabel });
-      urlStateStorage.set(APP_STATE_URL_KEY, urlAppState);
-      urlStateStorage.set(GLOBAL_STATE_URL_KEY, {
-        time: mockTab1.globalState.timeRange,
-        refreshInterval: urlRefreshInterval,
-        filters: [],
+      urlStateStorage.set(TAB_STATE_URL_KEY, urlTabState);
+      urlStateStorage.set(APP_STATE_URL_KEY, { columns: ['from-url'] });
+      urlStateStorage.set(GLOBAL_STATE_URL_KEY, urlGlobalState);
+      urlStateStorage.set(PROFILE_STATE_URL_KEY, {
+        [TEST_PROFILE_STATE_DEF.key]: { urlValue: 'urlProfileValue' },
       });
 
-      tabsStorageManager.loadLocally({
+      const loadedProps = tabsStorageManager.loadLocally({
         userId: mockUserId,
         spaceId: mockSpaceId,
         persistedDiscoverSession: {
-          id: 'session-match',
-          version: 'version-2',
+          id: 'session-id',
+          version: persistedVersion,
           title: 'title',
           description: 'description',
           managed: false,
           tabs: [
             {
               ...fromSavedSearchToSavedObjectTab({
-                tab: { id: persistedTabId, label: mockTab1.label },
+                tab: { id: persistedTabId, label: 'Saved tab' },
                 savedSearch: savedSearchMock,
                 services,
               }),
@@ -1221,79 +1119,78 @@ describe('TabsStorageManager', () => {
         defaultTabState: DEFAULT_TAB_STATE,
       });
 
-      return urlStateStorage;
+      return { tabsStorageManager, urlStateStorage, services, loadedProps };
     };
 
-    it('should clear the URL time when the stored tab was removed and the first saved tab restores time', () => {
-      const urlStateStorage = loadWithUrlAppState(mockTab1.appState, undefined, true, 'other-tab');
+    it('should keep local tabs and URL state written for the current version', () => {
+      const { loadedProps, urlStateStorage } = load({ persistedVersion: 'version-1' });
 
-      expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({ filters: [] });
+      expect(loadedProps.allTabs.map((tab) => tab.label)).toEqual([mockTab1.label]);
+      expect(urlStateStorage.get(APP_STATE_URL_KEY)).toEqual({ columns: ['from-url'] });
     });
 
-    it('should keep the URL time when the stored tab was removed and the URL asks for a new labeled tab', () => {
-      const urlStateStorage = loadWithUrlAppState(
-        mockTab1.appState,
-        undefined,
-        true,
-        'other-tab',
-        'New tab'
-      );
+    it('should discard local tabs and URL state written for an older version, keeping global filters', () => {
+      const { loadedProps, urlStateStorage } = load();
 
-      expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({
-        time: mockTab1.globalState.timeRange,
-        refreshInterval: mockTab1.globalState.refreshInterval,
-        filters: [],
-      });
+      expect(loadedProps.allTabs.map((tab) => tab.label)).toEqual(['Saved tab']);
+      expect(urlStateStorage.get(APP_STATE_URL_KEY)).toBeNull();
+      expect(urlStateStorage.get(PROFILE_STATE_URL_KEY)).toBeNull();
+      expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({ filters: [] });
     });
 
     it('should keep the URL time when the saved tab does not restore time', () => {
-      const urlStateStorage = loadWithUrlAppState(mockTab1.appState, undefined, false);
+      const { urlStateStorage } = load({ timeRestore: false });
 
       expect(urlStateStorage.get(APP_STATE_URL_KEY)).toBeNull();
-      expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({
-        time: mockTab1.globalState.timeRange,
-        refreshInterval: mockTab1.globalState.refreshInterval,
-        filters: [],
-      });
+      expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual(urlGlobalState);
     });
 
-    it('should clear URL state and time written for the stored tab, keeping global filters', () => {
-      const urlStateStorage = loadWithUrlAppState(mockTab1.appState);
+    it('should clear the URL time when the selected tab was removed and the first saved tab restores time', () => {
+      const { urlStateStorage } = load({ persistedTabId: 'other-tab' });
 
-      expect(urlStateStorage.get(APP_STATE_URL_KEY)).toBeNull();
       expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({ filters: [] });
     });
 
-    it('should keep URL state that differs from the stored tab only in refresh interval, e.g. from a shared link', () => {
-      const urlStateStorage = loadWithUrlAppState(
-        mockTab1.appState,
-        undefined,
-        true,
-        mockTab1.id,
-        undefined,
-        { pause: false, value: 5000 }
+    it('should keep URL state from a link, which has no session version', () => {
+      const { urlStateStorage } = load({ urlTabState: { tabId: mockTab1.id } });
+
+      expect(urlStateStorage.get(APP_STATE_URL_KEY)).toEqual({ columns: ['from-url'] });
+    });
+
+    it('should write the session version to the URL and local storage, updating it on save', async () => {
+      const { tabsStorageManager, urlStateStorage, services } = load();
+
+      await tabsStorageManager.pushSelectedTabIdToUrl(mockTab1.id);
+      expect(urlStateStorage.get(TAB_STATE_URL_KEY)).toEqual({
+        tabId: mockTab1.id,
+        sessionVersion: 'version-2',
+      });
+
+      await tabsStorageManager.persistLocally(
+        { allTabs: [mockTab1], recentlyClosedTabs: [] },
+        mockGetInternalState,
+        'session-id',
+        'version-3'
+      );
+      expect(urlStateStorage.get(TAB_STATE_URL_KEY)).toEqual({
+        tabId: mockTab1.id,
+        sessionVersion: 'version-3',
+      });
+      expect(services.storage.get(TABS_LOCAL_STORAGE_KEY).discoverSessionVersion).toBe('version-3');
+    });
+
+    it('should not add a tab to the URL when the session is saved after leaving Discover', async () => {
+      const { tabsStorageManager, urlStateStorage } = load();
+      await urlStateStorage.set(TAB_STATE_URL_KEY, undefined);
+
+      await tabsStorageManager.persistLocally(
+        { allTabs: [mockTab1], recentlyClosedTabs: [] },
+        mockGetInternalState,
+        'session-id',
+        'version-3'
       );
 
-      expect(urlStateStorage.get(APP_STATE_URL_KEY)).toEqual(mockTab1.appState);
-      expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({
-        time: mockTab1.globalState.timeRange,
-        refreshInterval: { pause: false, value: 5000 },
-        filters: [],
-      });
-    });
-
-    it('should clear URL state when the stored tab also keeps state for an inactive profile', () => {
-      const urlStateStorage = loadWithUrlAppState(mockTab1.appState, {
-        [TEST_PROFILE_STATE_DEF.key]: { urlValue: 'inactiveProfileValue' },
-      });
-
-      expect(urlStateStorage.get(APP_STATE_URL_KEY)).toBeNull();
-    });
-
-    it('should keep URL state that differs from the stored tab, e.g. from a shared link', () => {
-      const urlStateStorage = loadWithUrlAppState({ columns: ['from-link'] });
-
-      expect(urlStateStorage.get(APP_STATE_URL_KEY)).toEqual({ columns: ['from-link'] });
+      expect(urlStateStorage.get(TAB_STATE_URL_KEY)).toBeNull();
     });
   });
 

@@ -18,4 +18,9 @@ export interface TabsUrlState {
    * (Optional) Label for the tab, used when creating a new tab via locator URL or opening a shared link.
    */
   tabLabel?: string;
+  /**
+   * (Optional) Session version the URL state belongs to. Only Discover writes it, so links never
+   * have one and always win.
+   */
+  sessionVersion?: string;
 }
