@@ -8,20 +8,15 @@ import { SUMMARY_DESTINATION_INDEX_NAME } from '@kbn/slo-plugin/common/constants
 import { TOTAL_INDEX_PRIVILEGE_SET_EDITOR } from '@kbn/slo-plugin/server/services/get_diagnosis';
 import type {
   CreateSLOInput,
-  fetchHistoricalSummaryParamsSchema,
+  FetchHistoricalSummaryInput,
   FetchHistoricalSummaryResponse,
   FindSLODefinitionsResponse,
 } from '@kbn/slo-schema';
-import type * as t from 'io-ts';
 import type { Client } from '@elastic/elasticsearch';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { retryForSuccess } from '@kbn/ftr-common-functional-services';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { FtrProviderContext } from '../ftr_provider_context';
-
-type FetchHistoricalSummaryParams = t.OutputOf<
-  typeof fetchHistoricalSummaryParamsSchema.props.body
->;
 
 const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
 
@@ -138,7 +133,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
       await waitForIndexToBeEmpty({ esClient, indexName: SUMMARY_DESTINATION_INDEX_NAME });
     },
     async fetchHistoricalSummary(
-      params: FetchHistoricalSummaryParams
+      params: FetchHistoricalSummaryInput
     ): Promise<FetchHistoricalSummaryResponse> {
       const { body } = await supertest
         .post(`/internal/observability/slos/_historical_summary`)

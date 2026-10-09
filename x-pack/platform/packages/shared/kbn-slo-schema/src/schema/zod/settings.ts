@@ -7,15 +7,12 @@
 
 import { z } from '@kbn/zod';
 
-import { MAX_ARRAY_LENGTH, MAX_KEYWORD_LENGTH } from './limits';
-
 const sloSettingsSchema = z.object({
   useAllRemoteClusters: z
     .boolean()
     .describe('Indicates if the remote clusters are all used for the summary'),
   selectedRemoteClusters: z
-    .array(z.string().max(MAX_KEYWORD_LENGTH))
-    .max(MAX_ARRAY_LENGTH)
+    .array(z.string())
     .describe('The list of remote clusters used for the summary'),
   staleThresholdInHours: z
     .number()

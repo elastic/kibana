@@ -7,19 +7,19 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
+import { isSchema, safeParseResult } from '@kbn/zod-helpers';
 import {
-  budgetingMethodSchema,
-  dashboardsWithIdSchema,
-  indicatorSchema,
-  objectiveSchema,
-  optionalSettingsSchema,
-  tagsSchema,
-  timeWindowSchema,
+  budgetingMethodSchemaZod,
+  dashboardsWithIdSchemaZod,
+  indicatorSchemaZod,
+  objectiveSchemaZod,
+  optionalSettingsSchemaZod,
+  tagsSchemaZod,
+  timeWindowSchemaZod,
   type Paginated,
   type Pagination,
 } from '@kbn/slo-schema';
-import { isRight } from 'fp-ts/Either';
 import type { SLOTemplate, StoredSLOTemplate } from '../domain/models';
 import { SLOTemplateNotFound } from '../errors';
 import { SO_SLO_TEMPLATE_TYPE } from '../saved_objects';
@@ -101,8 +101,8 @@ export class DefaultSLOTemplateRepository implements SLOTemplateRepository {
     return aggs?.tagsAggs?.buckets?.map(({ key }) => key) ?? [];
   }
 
-  // We use .decode() instead of .is() when objects contains durationType fields
-  // stored as "1h", decoded as { unit: "h", value: 1 }
+  // isSchema keeps the stored value as-is; safeParseResult is needed for the fields holding
+  // durationType values stored as "1h" and decoded as Duration.
   private toSloTemplate(id: string, stored: StoredSLOTemplate): SLOTemplate {
     try {
       const template: SLOTemplate = { templateId: id };
@@ -117,44 +117,38 @@ export class DefaultSLOTemplateRepository implements SLOTemplateRepository {
       // TODO: Consider using individual indicator schemas based on indicator.type with fallback for the required fields
       // e.g. for 'sli.kql.custom' we can validate only against the custom indicator schema using
       // Object.assign({}, { filter: "", good: "", total: "", ... }, stored.indicator.params)
-      if (stored.indicator && indicatorSchema.is(stored.indicator)) {
+      if (stored.indicator && isSchema(indicatorSchemaZod, stored.indicator)) {
         template.indicator = stored.indicator;
       }
 
-      if (stored.budgetingMethod && budgetingMethodSchema.is(stored.budgetingMethod)) {
+      if (stored.budgetingMethod && isSchema(budgetingMethodSchemaZod, stored.budgetingMethod)) {
         template.budgetingMethod = stored.budgetingMethod;
       }
 
-      if (stored.objective) {
-        const decoded = objectiveSchema.decode(stored.objective);
-        if (isRight(decoded)) {
-          template.objective = decoded.right;
-        }
+      const objective = safeParseResult(stored.objective, objectiveSchemaZod);
+      if (objective) {
+        template.objective = objective;
       }
 
-      if (stored.timeWindow) {
-        const decoded = timeWindowSchema.decode(stored.timeWindow);
-        if (isRight(decoded)) {
-          template.timeWindow = decoded.right;
-        }
+      const timeWindow = safeParseResult(stored.timeWindow, timeWindowSchemaZod);
+      if (timeWindow) {
+        template.timeWindow = timeWindow;
       }
 
-      if (stored.tags && tagsSchema.is(stored.tags)) {
+      if (stored.tags && isSchema(tagsSchemaZod, stored.tags)) {
         template.tags = stored.tags;
       }
 
-      if (stored.settings) {
-        const decoded = optionalSettingsSchema.decode(stored.settings);
-        if (isRight(decoded)) {
-          template.settings = decoded.right;
-        }
+      const settings = safeParseResult(stored.settings, optionalSettingsSchemaZod);
+      if (settings) {
+        template.settings = settings;
       }
 
-      if (stored.groupBy && t.array(t.string).is(stored.groupBy)) {
+      if (stored.groupBy && isSchema(z.array(z.string()), stored.groupBy)) {
         template.groupBy = stored.groupBy;
       }
 
-      if (stored.artifacts && dashboardsWithIdSchema.is(stored.artifacts)) {
+      if (stored.artifacts && isSchema(dashboardsWithIdSchemaZod, stored.artifacts)) {
         template.artifacts = stored.artifacts;
       }
 

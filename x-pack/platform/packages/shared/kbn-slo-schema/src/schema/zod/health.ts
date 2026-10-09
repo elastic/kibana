@@ -1,0 +1,39 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z } from '@kbn/zod';
+
+/**
+ * IMPORTANT: Any changes to this file must be carefully checked against both usage
+ * from the SLO definitions API and the SLO Health API, as both depend on these shared types.
+ * One is a public API, the other is an internal API.
+ * If types need to diverge, they should be split into separate files.
+ */
+
+const transformHealthSchema = z.object({
+  isProblematic: z.boolean(),
+  missing: z.boolean(),
+  status: z.union([z.literal('healthy'), z.literal('unhealthy'), z.literal('unavailable')]),
+  state: z.union([
+    z.literal('stopped'),
+    z.literal('started'),
+    z.literal('stopping'),
+    z.literal('aborting'),
+    z.literal('failed'),
+    z.literal('indexing'),
+    z.literal('unavailable'),
+  ]),
+  stateMatches: z.boolean().optional(),
+});
+
+const sloHealthSchema = z.object({
+  isProblematic: z.boolean(),
+  rollup: transformHealthSchema,
+  summary: transformHealthSchema,
+});
+
+export { sloHealthSchema, transformHealthSchema };
