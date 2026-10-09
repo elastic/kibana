@@ -51,4 +51,15 @@ describe('resolveContentTitle', () => {
       'ES|QL rules'
     );
   });
+
+  it('reads a closed heading and a longer hash run', () => {
+    expect(resolveContentTitle('Use ES', '## Use ES|QL in the Kibana UI ##\nBody')).toBe(
+      'Use ES|QL in the Kibana UI'
+    );
+    expect(resolveContentTitle('Use ES', '####### Use ES|QL\nBody')).toBe('Use ES|QL');
+  });
+
+  it('restores a title from a heading after a non-heading line', () => {
+    expect(resolveContentTitle('Use ES', 'Not a heading\n# Use ES|QL')).toBe('Use ES|QL');
+  });
 });
