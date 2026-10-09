@@ -11,14 +11,23 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { DeveloperToolbarSetup } from '@kbn/developer-toolbar-plugin/public';
+import { ModeSwitcher } from './mode_switcher';
 import { sidebarAppId } from './sidebar_app';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
+  developerToolbar?: DeveloperToolbarSetup;
 }
 
 export class ResponsiveAppAreaExamplePlugin implements Plugin<void, void, SetupDeps> {
-  public setup(core: CoreSetup, { developerExamples }: SetupDeps) {
+  public setup(core: CoreSetup, { developerExamples, developerToolbar }: SetupDeps) {
+    developerToolbar?.registerItem({
+      id: 'responsiveAppAreaModeSwitcher',
+      priority: 1,
+      children: <ModeSwitcher />,
+    });
+
     core.chrome.sidebar.registerApp({
       appId: sidebarAppId,
       restoreOnReload: false,
