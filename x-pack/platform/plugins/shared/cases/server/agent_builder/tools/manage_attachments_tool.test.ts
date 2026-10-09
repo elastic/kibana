@@ -77,6 +77,11 @@ describe('manageAttachmentsTool', () => {
     });
   });
 
+  it('is exposed over MCP', () => {
+    const tool = buildTool(buildRegistry([]), true);
+    expect(tool.excludeFromMcp).toBeUndefined();
+  });
+
   it('does not include get_all in mode enum', () => {
     const tool = buildTool(buildRegistry([]), true);
     const modeDescription = tool.schema.shape.mode.description ?? '';

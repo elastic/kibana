@@ -471,6 +471,13 @@ describe.each(NON_AGENT_CALL_SOURCES)('searchCasesTool handler — %s caller', (
 // Tests: availability
 // ---------------------------------------------------------------------------
 
+describe('searchCasesTool MCP exposure', () => {
+  it('is exposed over MCP', () => {
+    const { tool } = buildTool(createCasesClientMock());
+    expect(tool.excludeFromMcp).toBeUndefined();
+  });
+});
+
 describe('searchCasesTool availability', () => {
   it('returns unavailable for es solution', async () => {
     const coreSetup = makeCoreWithSolution('es');

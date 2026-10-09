@@ -137,7 +137,6 @@ export const manageAttachmentsTool = (
     },
     schema,
     tags: ['cases'],
-    excludeFromMcp: true,
     handler: async (args, toolContext) => {
       const { mode, case_id, attachments, ...rest } = args;
 

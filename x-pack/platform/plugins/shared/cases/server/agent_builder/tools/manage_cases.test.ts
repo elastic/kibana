@@ -46,6 +46,10 @@ describe('manageCasesTool handler — attachment emission by caller', () => {
     });
   });
 
+  it('is exposed over MCP', () => {
+    expect(manageCasesTool(jest.fn(), false).excludeFromMcp).toBeUndefined();
+  });
+
   it('emits a case attachment for an Agent Builder conversation call', async () => {
     const attachments = buildMockAttachments();
     const tool = manageCasesTool(jest.fn(), false);
