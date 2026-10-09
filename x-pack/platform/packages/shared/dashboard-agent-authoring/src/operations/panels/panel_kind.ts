@@ -14,6 +14,22 @@ type OptionalField<TField extends z.core.SomeType> = TField extends z.ZodOptiona
   ? TField
   : z.ZodOptional<TField>;
 
+/** An add field merged with its edit field: optional unless both require it. */
+type MergedRequiredness<
+  TAddField extends z.core.SomeType,
+  TEditField extends z.core.SomeType
+> = TEditField extends z.ZodOptional ? OptionalField<TAddField> : TAddField;
+
+/** Nullable when only the edit field accepts `null` (e.g. to clear a value). */
+type MergedField<
+  TAddField extends z.core.SomeType,
+  TEditField extends z.core.SomeType
+> = null extends z.input<TEditField>
+  ? null extends z.input<TAddField>
+    ? MergedRequiredness<TAddField, TEditField>
+    : z.ZodNullable<MergedRequiredness<TAddField, TEditField>>
+  : MergedRequiredness<TAddField, TEditField>;
+
 /** Type of the merged shape built by `toUpsertContentSchema`. */
 type UpsertContentShape<TAddShape extends z.ZodRawShape, TEditShape extends z.ZodRawShape> = {
   [TKey in Exclude<
@@ -21,9 +37,7 @@ type UpsertContentShape<TAddShape extends z.ZodRawShape, TEditShape extends z.Zo
     'grid' | 'panelId'
   >]: TKey extends keyof TAddShape
     ? TKey extends keyof TEditShape
-      ? TEditShape[TKey] extends z.ZodOptional
-        ? OptionalField<TAddShape[TKey]>
-        : TAddShape[TKey]
+      ? MergedField<TAddShape[TKey], TEditShape[TKey]>
       : OptionalField<TAddShape[TKey]>
     : TKey extends keyof TEditShape
     ? OptionalField<TEditShape[TKey]>
@@ -32,11 +46,17 @@ type UpsertContentShape<TAddShape extends z.ZodRawShape, TEditShape extends z.Zo
 
 const isOptional = (field: z.core.$ZodType): boolean => z.safeParse(field, undefined).success;
 
+const acceptsNull = (field: z.core.$ZodType): boolean => z.safeParse(field, null).success;
+
+const getDescription = (field: z.core.$ZodType): string | undefined =>
+  z.globalRegistry.get(field)?.description;
+
 /**
  * Merges a kind's add and edit inputs into one content shape for upsert items, which create or
  * edit depending on whether the panel id exists. Placement fields (`grid`, `panelId`) are left
- * out, add descriptions win, and a field stays required only when both inputs require it. Upsert
- * re-parses the content with the add or edit input once it knows which one applies.
+ * out, add descriptions win, and a field stays required only when both inputs require it. A field
+ * only the edit input accepts `null` for (e.g. to clear a value) stays nullable, with the edit
+ * description appended. Upsert re-parses the content with the add or edit input once it knows which one applies.
  */
 const toUpsertContentSchema = <TAddShape extends z.ZodRawShape, TEditShape extends z.ZodRawShape>(
   addShape: TAddShape,
@@ -57,7 +77,20 @@ const toUpsertContentSchema = <TAddShape extends z.ZodRawShape, TEditShape exten
           editField !== undefined &&
           !isOptional(addField) &&
           !isOptional(editField);
-        return [key, isRequired || isOptional(field) ? field : z.optional(field)];
+        const mergedField = isRequired || isOptional(field) ? field : z.optional(field);
+        if (!addField || !editField || !acceptsNull(editField) || acceptsNull(addField)) {
+          return [key, mergedField];
+        }
+        return [
+          key,
+          z
+            .nullable(mergedField)
+            .describe(
+              [getDescription(addField), getDescription(editField)]
+                .filter(Boolean)
+                .join(' On an existing panel: ')
+            ),
+        ];
       })
     )
   ) as z.ZodObject<UpsertContentShape<TAddShape, TEditShape>>;
