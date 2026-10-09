@@ -19,37 +19,34 @@ export const QUEUE_PAGE_INFO = Object.freeze({
   }),
 });
 
-/** Keyed by the HTTP status the proposals route returns for a refused decision. */
-export const DECISION_ERRORS: Readonly<Record<number | 'default', string>> = Object.freeze({
-  400: i18n.translate('xpack.alertzero.queue.decisionInvalidInput', {
-    defaultMessage: 'The action rejected its inputs, so nothing was run.',
+export const COPY_LINK_TOASTS = Object.freeze({
+  copied: i18n.translate('xpack.alertzero.queue.copyLinkCopied', {
+    defaultMessage: 'Link copied',
   }),
-  404: i18n.translate('xpack.alertzero.queue.decisionMissing', {
-    defaultMessage: 'This action no longer exists. Reload to see the current queue.',
-  }),
-  // Covers every way a decision can be refused once the proposal is no longer `pending` —
-  // already decided, settled as expired, or otherwise superseded — since the route maps all
-  // of those to the same conflict.
-  409: i18n.translate('xpack.alertzero.queue.decisionConflict', {
-    defaultMessage:
-      'This action is no longer available to decide. Reload to see the current queue.',
-  }),
-  default: i18n.translate('xpack.alertzero.queue.decisionFailed', {
-    defaultMessage: 'The decision could not be submitted. Try again.',
+  failed: i18n.translate('xpack.alertzero.queue.copyLinkFailed', {
+    defaultMessage: 'Could not copy the link',
   }),
 });
 
-export const PROPOSED_ACTIONS_EMPTY_LABEL = i18n.translate(
-  'xpack.alertzero.detailsFlyout.proposedActions.empty',
-  { defaultMessage: 'No proposed actions for this investigation.' }
-);
-
-export const PROPOSED_ACTIONS_LOAD_ERROR_LABEL = i18n.translate(
-  'xpack.alertzero.detailsFlyout.proposedActions.loadError',
-  { defaultMessage: 'Unable to load proposed actions. Try refreshing the page.' }
-);
-
-export const PROPOSED_ACTIONS_SHOW_MORE_LABEL = i18n.translate(
-  'xpack.alertzero.detailsFlyout.proposedActions.showMore',
-  { defaultMessage: 'Show more proposed actions' }
-);
+export const IDLE_HEADER = {
+  greeting: i18n.translate('xpack.alertzero.queue.idleHeader.greeting', {
+    defaultMessage: 'Your Watches are running.',
+  }),
+  title: i18n.translate('xpack.alertzero.queue.idleHeader.title', {
+    defaultMessage: 'No actions need you',
+  }),
+  subtitle: ({
+    watchCount,
+    enabledWorkerCount,
+    workerCount,
+  }: {
+    watchCount: number;
+    enabledWorkerCount: number;
+    workerCount: number;
+  }) =>
+    i18n.translate('xpack.alertzero.queue.idleHeader.subtitle', {
+      defaultMessage:
+        '{watchCount, plural, one {# Watch is} other {# Watches are}} running right now · {enabledWorkerCount} of {workerCount} {workerCount, plural, one {Worker is} other {Workers are}} enabled',
+      values: { watchCount, enabledWorkerCount, workerCount },
+    }),
+};

@@ -146,6 +146,31 @@ describe('SyntheticsMonitorClient', () => {
     expect(getMaintenanceWindows).not.toHaveBeenCalled();
   });
 
+  it('creates package policies only for the given private location', async () => {
+    const client = new SyntheticsMonitorClient(serviceManagedLocations, serverMock);
+    client.privateLocationAPI.createPackagePolicies = jest
+      .fn()
+      .mockResolvedValue({ created: [], failed: [] });
+    const monitorOnTwoLocations = {
+      ...monitor,
+      locations: [
+        { id: 'loc-0', isServiceManaged: false },
+        { id: 'loc-1', isServiceManaged: false },
+        { id: 'loc-0', isServiceManaged: true },
+      ],
+    } as unknown as MonitorFields;
+
+    await client.addPrivateLocationPackagePolicies({
+      monitors: [{ monitor: monitorOnTwoLocations, id: 'test-id-1' }],
+      locationId: 'loc-0',
+      allPrivateLocations: privateLocations,
+      spaceId: 'test-space',
+    });
+
+    const [[configs]] = (client.privateLocationAPI.createPackagePolicies as jest.Mock).mock.calls;
+    expect(configs[0].config.locations).toEqual([{ id: 'loc-0', isServiceManaged: false }]);
+  });
+
   it('should edit a monitor', async () => {
     locations[1].isServiceManaged = false;
 
@@ -215,6 +240,13 @@ describe('SyntheticsMonitorClient', () => {
       undefined
     );
     expect(serviceManagedLocations.deleteMonitors).toHaveBeenCalledTimes(1);
+    // only the public location that was removed from the monitor is deleted at the service
+    expect(serviceManagedLocations.deleteMonitors).toHaveBeenCalledWith([
+      expect.objectContaining({
+        spaceId: 'test-space',
+        monitor: expect.objectContaining({ locations: [locations[0]] }),
+      }),
+    ]);
     expect(client.privateLocationAPI.editMonitors).toHaveBeenCalledTimes(1);
   });
 
@@ -228,6 +260,14 @@ describe('SyntheticsMonitorClient', () => {
     await client.deleteMonitors([monitor as unknown as SyntheticsMonitorWithId], 'test-space');
 
     expect(serviceManagedLocations.deleteMonitors).toHaveBeenCalledTimes(1);
+    expect(serviceManagedLocations.deleteMonitors).toHaveBeenCalledWith([
+      {
+        spaceId: 'test-space',
+        monitor,
+        configId: (monitor as any).config_id,
+        params: {},
+      },
+    ]);
     expect(client.privateLocationAPI.deleteMonitors).toHaveBeenCalledTimes(1);
   });
 

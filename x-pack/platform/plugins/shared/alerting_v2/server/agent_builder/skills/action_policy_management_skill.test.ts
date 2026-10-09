@@ -12,9 +12,12 @@ import {
 } from '@kbn/alerting-v2-constants';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
+import { createAlertingV2Availability } from './alerting_v2_experimental_availability';
 import { createActionPolicyManagementSkill } from './action_policy_management_skill';
 
-const createDeps = (): ManageActionPolicyToolDeps => ({
+const createDeps = (): ManageActionPolicyToolDeps & {
+  availability: ReturnType<typeof createAlertingV2Availability>;
+} => ({
   logger: {
     debug: jest.fn(),
     info: jest.fn(),
@@ -24,6 +27,9 @@ const createDeps = (): ManageActionPolicyToolDeps => ({
   } as unknown as LoggerServiceContract,
   getWorkflowClient: jest.fn(() => ({ getWorkflow: jest.fn(async () => null) })),
   getAvailableConnectors: jest.fn(async () => ({ connectorTypes: {} })),
+  availability: createAlertingV2Availability({
+    getActiveSpace: jest.fn().mockResolvedValue({}),
+  }),
 });
 
 describe('createActionPolicyManagementSkill', () => {
@@ -118,7 +124,7 @@ describe('createActionPolicyManagementSkill', () => {
     );
 
     expect(byName['action-policy-matchers']).toContain('# Action Policy Matchers');
-    expect(byName['action-policy-matchers']).toContain('`episode_status`');
+    expect(byName['action-policy-matchers']).toContain('`alert_status`');
     expect(byName['action-policy-matchers']).toContain('matcher.tags');
     // rule.id/rule.tags appear in an exclusion note, not as usable KQL field:value syntax
     expect(byName['action-policy-matchers']).not.toContain('rule.id:');

@@ -36,7 +36,6 @@ import type { ServiceData } from './synthetics_service_http_client';
 import { SyntheticsServiceHttpClient } from './synthetics_service_http_client';
 import type { MonitorSyncState } from './incremental_sync';
 import {
-  MONITOR_SAVED_OBJECT_TYPES,
   getChangedMonitorsFilter,
   getChangedSince,
   getParamsVersion,
@@ -44,18 +43,22 @@ import {
   needsFullSync,
 } from './incremental_sync';
 
+import { syntheticsMonitorSOTypes } from '../../common/types/saved_objects';
 import type {
+  EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
   ServiceLocationErrors,
   ServiceLocations,
   SyntheticsMonitorWithSecretsAttributes,
   ThrottlingOptions,
 } from '../../common/runtime_types';
+import { ConfigKey } from '../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
 
 import type { ConfigData } from './formatters/public_formatters/format_configs';
 import {
   formatMonitorConfigs,
+  formatMonitorsToDelete,
   formatSavedMonitors,
 } from './formatters/public_formatters/format_configs';
 
@@ -276,12 +279,30 @@ export class ServiceManagedLocations {
 
     return await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
       {
-        type: MONITOR_SAVED_OBJECT_TYPES,
+        type: syntheticsMonitorSOTypes,
         perPage: pageSize,
         namespaces: [ALL_SPACES_ID],
         filter,
       }
     );
+  }
+
+  /** Pages through every monitor without decrypting it, reading only what a delete request needs. */
+  private getDeleteSOClientFinder({ pageSize }: { pageSize: number }) {
+    return this.server.coreStart.savedObjects
+      .createInternalRepository()
+      .createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
+        type: syntheticsMonitorSOTypes,
+        perPage: pageSize,
+        namespaces: [ALL_SPACES_ID],
+        fields: [
+          ConfigKey.MONITOR_QUERY_ID,
+          ConfigKey.MONITOR_TYPE,
+          ConfigKey.LOCATIONS,
+          ConfigKey.SCHEDULE,
+          ConfigKey.NAMESPACE,
+        ],
+      });
   }
 
   private getESClient() {
@@ -479,7 +500,7 @@ export class ServiceManagedLocations {
     let changedSince: string | undefined;
     if (soClient && syncState?.lastSyncedAt) {
       const { total } = await soClient.find({
-        type: MONITOR_SAVED_OBJECT_TYPES,
+        type: syntheticsMonitorSOTypes,
         perPage: 0,
         namespaces: [ALL_SPACES_ID],
       });
@@ -697,11 +718,7 @@ export class ServiceManagedLocations {
 
         const data = {
           output,
-          monitors: formatMonitorConfigs({
-            configs,
-            maintenanceWindows: [],
-            logger: this.logger,
-          }),
+          monitors: formatMonitorsToDelete({ configs, logger: this.logger }),
           license,
         };
         return await this.httpClient.deleteMonitors(data);
@@ -713,22 +730,20 @@ export class ServiceManagedLocations {
 
   async deleteAllMonitors() {
     const license = await this.getLicense();
-    const finder = await this.getSOClientFinder({ pageSize: 100 });
+    const finder = this.getDeleteSOClientFinder({ pageSize: 100 });
     const { output } = await this.getOutput();
     if (!output) {
       return;
     }
 
+    const pushErrors: ServiceLocationErrors = [];
     for await (const result of finder.find()) {
-      const monitors = formatSavedMonitors({
-        monitors: result.saved_objects,
-        paramsBySpace: {},
-        maintenanceWindows: [],
-        kibanaUrl: this.server.basePath.publicBaseUrl ?? undefined,
+      const monitors = formatMonitorsToDelete({
+        configs: result.saved_objects.map(({ attributes }) => ({ monitor: attributes })),
         logger: this.logger,
       });
       const hasPublicLocations = monitors.some((config) =>
-        config.locations.some(({ isServiceManaged }) => isServiceManaged)
+        config.locations?.some(({ isServiceManaged }) => isServiceManaged)
       );
 
       if (hasPublicLocations) {
@@ -737,9 +752,12 @@ export class ServiceManagedLocations {
           monitors,
           license,
         };
-        return await this.httpClient.deleteMonitors(data);
+        pushErrors.push(...(await this.httpClient.deleteMonitors(data)));
       }
     }
+
+    finder.close().catch(() => {});
+    return pushErrors;
   }
 }
 

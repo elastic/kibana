@@ -43,6 +43,7 @@ import type {
   ScopedRunnerRunAgentParams,
   SubAgentExecutor,
   WritableToolResultStore,
+  ExecutionConversationAccess,
 } from '@kbn/agent-builder-server';
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
@@ -142,6 +143,8 @@ export interface CreateScopedRunnerDeps {
   interactivity: InteractivityConfig;
   /** Id of the parent execution that spawned this one, if any. */
   parentExecutionId?: string;
+  /** How this run relates to its conversation. */
+  conversationAccess: ExecutionConversationAccess;
   /** Sub-agent executor for spawning child executions. */
   subAgentExecutor: SubAgentExecutor;
   /** Experimental features enabled for this runner context. */
@@ -179,6 +182,7 @@ export type CreateRunnerDeps = Omit<
   | 'executionMode'
   | 'interactivity'
   | 'parentExecutionId'
+  | 'conversationAccess'
   | 'experimentalFeatures'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
@@ -278,6 +282,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     executionMode,
     interactivity,
     parentExecutionId,
+    conversationAccess = 'readWrite',
   }: {
     request: KibanaRequest;
     /** Agent id for this run; used to lazily resolve Deductive-only config. */
@@ -294,6 +299,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     executionMode: AgentExecutionMode;
     interactivity: InteractivityConfig;
     parentExecutionId?: string;
+    conversationAccess?: ExecutionConversationAccess;
   }): Promise<ScopedRunner> => {
     const resultStore = createResultStore({ conversation });
     const skillsStore = createSkillsStore({ skills: [] });
@@ -340,7 +346,6 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       aiIndices: experimentalEnabled && contextEngineEnabled,
       relevantSkills: experimentalEnabled,
       todos: experimentalEnabled,
-      datasets: experimentalEnabled,
       // forcefully disabled until the UI is implemented
       bash: bashEnabled,
       apiDiscovery: apiDiscoveryEnabled,
@@ -377,6 +382,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       executionMode,
       interactivity,
       parentExecutionId,
+      conversationAccess,
       subAgentExecutor,
       experimentalFeatures,
       ...(deductive ? { deductive } : {}),
@@ -425,6 +431,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         executionMode = AgentExecutionMode.conversation,
         interactive,
         parentExecutionId,
+        conversationAccess = 'readWrite',
         ...otherParams
       } = params;
       const { agentId } = params;
@@ -444,9 +451,11 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         executionMode,
         interactivity,
         parentExecutionId,
+        conversationAccess,
         promptState: getAgentPromptStorageState({
           input: nextInput,
           conversation,
+          allowResume: conversationAccess === 'readWrite',
         }),
       });
       return runner.runAgent(otherParams);

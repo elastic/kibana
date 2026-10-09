@@ -6,6 +6,7 @@
  */
 
 import type { Error as ApmError } from '@kbn/apm-types';
+import { MAX_UNPROCESSED_OTEL_ERRORS } from '@kbn/apm-api-shared';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { AT_TIMESTAMP, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
@@ -18,15 +19,7 @@ import {
 } from '../../lib/helpers/unprocessed_otel_errors';
 import { compactMap } from '../../utils/compact_map';
 
-/**
- * Maximum number of unprocessed OTel error rows returned per request.
- *
- * The logs client cannot aggregate, so unlike `main_statistics` there is no grouping
- * and no occurrence counts — every raw exception log is its own row. Capped at 500
- * (the most recent, sorted by `@timestamp desc`) to avoid overloading the browser with
- * a flat list. Surfaced to the caller via the `maxCountExceeded` flag.
- */
-export const MAX_UNPROCESSED_OTEL_ERRORS = 500;
+export { MAX_UNPROCESSED_OTEL_ERRORS };
 
 export interface UnprocessedOtelErrorsByServiceResponse {
   unprocessedOtelErrors: ApmError[];
@@ -57,6 +50,7 @@ export async function getUnprocessedOtelErrorsByService({
   kuery,
   start,
   end,
+  maxRows = MAX_UNPROCESSED_OTEL_ERRORS,
 }: {
   logsClient: LogsClient;
   serviceName: string;
@@ -64,9 +58,10 @@ export async function getUnprocessedOtelErrorsByService({
   kuery: string;
   start: number;
   end: number;
+  maxRows?: number;
 }): Promise<UnprocessedOtelErrorsByServiceResponse> {
   // Over-fetch by one to detect truncation without a separate count phase.
-  const fetchSize = MAX_UNPROCESSED_OTEL_ERRORS + 1;
+  const fetchSize = maxRows + 1;
 
   const response = await logsClient.search({
     query: unprocessedOtelExceptionQuery([
@@ -81,9 +76,9 @@ export async function getUnprocessedOtelErrorsByService({
   });
 
   const hits = response.hits.hits;
-  const maxCountExceeded = hits.length > MAX_UNPROCESSED_OTEL_ERRORS;
+  const maxCountExceeded = hits.length > maxRows;
   // Slice to the cap; the over-fetched extra is only used to detect truncation.
-  const cappedHits = maxCountExceeded ? hits.slice(0, MAX_UNPROCESSED_OTEL_ERRORS) : hits;
+  const cappedHits = maxCountExceeded ? hits.slice(0, maxRows) : hits;
 
   const unprocessedOtelErrors = compactMap(cappedHits, (hit) => toUnprocessedOtelError(hit));
 

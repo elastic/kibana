@@ -24,7 +24,7 @@ import type {
   SyntheticsMonitorWithSecretsAttributes,
   TLSFields,
 } from '../../../../common/runtime_types';
-import { ConfigKey } from '../../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
 import { publicFormatters } from '.';
 
 const UI_KEYS_TO_SKIP = [
@@ -246,3 +246,47 @@ export const formatSavedMonitors = ({
 
   return formatMonitorConfigs({ configs, maintenanceWindows, logger }) as MonitorFields[];
 };
+
+type MonitorToDelete = Pick<
+  MonitorFields,
+  | ConfigKey.MONITOR_QUERY_ID
+  | ConfigKey.MONITOR_TYPE
+  | ConfigKey.LOCATIONS
+  | ConfigKey.SCHEDULE
+  | ConfigKey.NAMESPACE
+>;
+
+/**
+ * The service finds the monitors to delete by id and type alone, so unlike the other pushes the
+ * body is never formatted: it carries no config, params or secrets. `locations` only routes the
+ * request and is dropped before it is sent. The namespace is kept so the body never claims the
+ * default one for a monitor that has its own. Browser monitors keep their schedule because services
+ * older than synthetics-service#2049 (v1.13.14) take it from the request to unschedule the monitor.
+ */
+export const formatMonitorsToDelete = ({
+  configs,
+  logger,
+}: {
+  configs: Array<{ monitor: MonitorToDelete; heartbeatId?: string }>;
+  logger: Logger;
+}): Array<Partial<MonitorFields>> =>
+  configs.map(({ monitor, heartbeatId }) => {
+    const type = monitor[ConfigKey.MONITOR_TYPE];
+    const schedule = monitor[ConfigKey.SCHEDULE];
+
+    return {
+      [ConfigKey.MONITOR_QUERY_ID]: heartbeatId ?? monitor[ConfigKey.MONITOR_QUERY_ID],
+      [ConfigKey.MONITOR_TYPE]: type,
+      [ConfigKey.NAMESPACE]: monitor[ConfigKey.NAMESPACE],
+      [ConfigKey.LOCATIONS]: monitor[ConfigKey.LOCATIONS],
+      ...(type === MonitorTypeEnum.BROWSER && schedule
+        ? formatMonitorConfigFields(
+            [ConfigKey.SCHEDULE],
+            { [ConfigKey.SCHEDULE]: schedule },
+            logger,
+            {},
+            []
+          )
+        : {}),
+    };
+  });

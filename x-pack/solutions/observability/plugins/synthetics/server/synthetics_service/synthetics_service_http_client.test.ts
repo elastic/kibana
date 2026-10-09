@@ -13,7 +13,7 @@ import { SyntheticsServiceHttpClient } from './synthetics_service_http_client';
 import type { ServiceConfig } from '../config';
 import axios from 'axios';
 import type { PublicLocations } from '../../common/runtime_types';
-import { LocationStatus } from '../../common/runtime_types';
+import { LocationStatus, MonitorTypeEnum } from '../../common/runtime_types';
 import type { LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SyntheticsServerSetup } from '../types';
 import { getSanitizedError } from './utils/sanitize_error';
@@ -762,6 +762,74 @@ describe('callAPI', () => {
       method: 'PUT',
       url: 'https://service.dev/monitors/sync',
     });
+  });
+
+  it('sends a DELETE request with only the monitors it is given and without their locations', async () => {
+    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as any);
+
+    const httpClient = new SyntheticsServiceHttpClient(logger, config, {
+      isDev: true,
+      stackVersion: '8.7.0',
+      coreStart: mockCoreStart,
+    } as SyntheticsServerSetup);
+    httpClient.locations = testLocations;
+
+    const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
+
+    await httpClient.deleteMonitors({
+      monitors: [
+        {
+          id: 'mon-1',
+          type: MonitorTypeEnum.HTTP,
+          locations: [{ id: 'us_central', label: 'US Central', isServiceManaged: true }],
+        },
+        {
+          id: 'mon-2',
+          type: MonitorTypeEnum.BROWSER,
+          locations: [{ id: 'us_central', label: 'US Central', isServiceManaged: true }],
+        },
+      ],
+      output,
+      license: licenseMock.license,
+    });
+
+    expect(axiosSpy).toHaveBeenCalledTimes(1);
+    expect(axiosSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'DELETE',
+        url: 'https://service.dev/monitors',
+        data: {
+          monitors: [
+            {
+              id: 'mon-1',
+              type: 'http',
+              enabled: true,
+              data_stream: { namespace: 'default' },
+              streams: [
+                { data_stream: { dataset: 'http', type: 'synthetics' }, id: 'mon-1', type: 'http' },
+              ],
+            },
+            {
+              id: 'mon-2',
+              type: 'browser',
+              enabled: true,
+              data_stream: { namespace: 'default' },
+              streams: [
+                {
+                  data_stream: { dataset: 'browser', type: 'synthetics' },
+                  id: 'mon-2',
+                  type: 'browser',
+                },
+              ],
+            },
+          ],
+          output,
+          stack_version: '8.7.0',
+          license_level: licenseMock.license.type,
+          license_issued_to: licenseMock.license.issued_to,
+        },
+      })
+    );
   });
 
   it('splits the payload into multiple requests if the payload is too large', async () => {

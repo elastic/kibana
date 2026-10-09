@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
@@ -17,24 +17,28 @@ import {
 
 export const CreateNoteStepId = 'security.createNote' as const;
 
-export const createNoteInputSchema = z.object({
-  text: z
-    .string()
-    .min(1)
-    .max(MAX_NOTE_TEXT_LENGTH)
-    .describe('The text content of the note. Markdown is supported.'),
-  document_id: z
-    .string()
-    .min(1)
-    .max(MAX_DOCUMENT_ID_LENGTH)
-    .describe('The Elasticsearch `_id` of the alert, attack, or document to attach the note to.'),
-});
+export const createNoteInputSchema = lazySchema(() =>
+  z.object({
+    text: z
+      .string()
+      .min(1)
+      .max(MAX_NOTE_TEXT_LENGTH)
+      .describe('The text content of the note. Markdown is supported.'),
+    document_id: z
+      .string()
+      .min(1)
+      .max(MAX_DOCUMENT_ID_LENGTH)
+      .describe('The Elasticsearch `_id` of the alert, attack, or document to attach the note to.'),
+  })
+);
 
-export const createNoteOutputSchema = z.object({
-  success: z.boolean(),
-  note_id: z.string().optional().describe('The `savedObjectId` of the newly created note.'),
-  message: z.string().max(MAX_WORKFLOW_MESSAGE_LENGTH).optional(),
-});
+export const createNoteOutputSchema = lazySchema(() =>
+  z.object({
+    success: z.boolean(),
+    note_id: z.string().optional().describe('The `savedObjectId` of the newly created note.'),
+    message: z.string().max(MAX_WORKFLOW_MESSAGE_LENGTH).optional(),
+  })
+);
 
 export const createNoteStepCommonDefinition: BaseStepDefinition<
   typeof createNoteInputSchema,

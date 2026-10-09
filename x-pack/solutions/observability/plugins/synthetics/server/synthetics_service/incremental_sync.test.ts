@@ -114,7 +114,7 @@ describe('changed monitors', () => {
 
   it('filters on the updated time of both monitor types', () => {
     expect(getChangedMonitorsFilter('2026-10-05T11:54:00.000Z')).toBe(
-      '(synthetics-monitor.updated_at >= "2026-10-05T11:54:00.000Z" or synthetics-monitor-multi-space.updated_at >= "2026-10-05T11:54:00.000Z")'
+      '(synthetics-monitor-multi-space.updated_at >= "2026-10-05T11:54:00.000Z" or synthetics-monitor.updated_at >= "2026-10-05T11:54:00.000Z")'
     );
   });
 

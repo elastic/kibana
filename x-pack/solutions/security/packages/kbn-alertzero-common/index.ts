@@ -45,6 +45,7 @@ export {
   WRITE_HUNT_EVIDENCE_URL,
   SYSTEM_SECURITY_HUNT_PACKAGE_REPORT_ID,
   SYSTEM_SECURITY_HUNT_PROPOSAL_GATE_ID,
+  SECURITY_SERVICE_ACCOUNT_URL,
   SYSTEM_SECURITY_WATCH_CATALOG,
   SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
@@ -72,6 +73,7 @@ export {
   WATCH_OFFICER_TAG,
   WATCH_TAG,
   WATCH_TIER_TAGS,
+  buildServiceAccountUrl,
   buildWatchUrl,
   buildWorkerUrl,
 } from './constants';
@@ -118,6 +120,7 @@ export {
   AutoCloseConfidenceScoreMinThreshold,
   AlertTriageWorkerExtras,
   Worker,
+  WorkerBlockingReason,
   WorkerRunState,
   WorkerScheduleInterval,
   WorkerSettings,
@@ -157,6 +160,8 @@ export {
   WriteHuntEvidenceResponse,
 } from './impl/schemas';
 
+export { isWorkerEnableBlocked } from './impl/workers/blocking_reasons';
+
 export {
   compareWatchesForDisplay,
   coverageFromSchedule,
@@ -190,7 +195,6 @@ export {
   RULE_COVERAGE_DEFAULT_EXTRAS,
   RULE_TUNING_DEFAULT_EXTRAS,
   WORKER_SETTINGS_DECLARATIONS,
-  applyMissingWorkerSettingDefaults,
   applyWorkerSettingsWrite,
   createDefaultWorkerSettings,
   diffWorkerSettings,
@@ -198,8 +202,9 @@ export {
   getAllowedAutonomyLevels,
   getCompleteWorkerSettingsSchema,
   getWorkerSettingsDeclaration,
-  projectStoredAutonomyLevel,
+  nearestLowerAutonomyLevel,
   touchesWorkerSettings,
+  upgradeStoredWorkerSettings,
 } from './impl/worker_settings';
 export type { WorkerSettingsDeclaration } from './impl/worker_settings';
 export type {

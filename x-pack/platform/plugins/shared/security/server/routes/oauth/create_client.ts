@@ -8,11 +8,16 @@
 import { createClientBodySchema } from './schemas';
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
-import { KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE } from '../../uiam';
+import {
+  getProtectedResource,
+  getRequestSpacePrefix,
+  KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE,
+} from '../../uiam';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 export function defineCreateOAuthClientRoute({
   router,
+  basePath,
   config,
   getAuthenticationService,
   serverlessProjectId,
@@ -44,8 +49,8 @@ export function defineCreateOAuthClientRoute({
           });
         }
 
-        const resource = config.mcp?.oauth2?.metadata?.resource;
-        if (!resource) {
+        const configuredResource = config.mcp?.oauth2?.metadata?.resource;
+        if (!configuredResource) {
           return response.notFound({
             body: {
               message:
@@ -53,6 +58,11 @@ export function defineCreateOAuthClientRoute({
             },
           });
         }
+
+        const resource = getProtectedResource(
+          configuredResource,
+          getRequestSpacePrefix(basePath, request)
+        );
 
         if (!serverlessProjectId) {
           return response.notFound({

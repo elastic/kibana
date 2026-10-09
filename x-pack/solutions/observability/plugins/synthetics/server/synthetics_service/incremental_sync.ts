@@ -8,16 +8,7 @@
 import { createHash } from 'crypto';
 import type { ISavedObjectsRepository } from '@kbn/core/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import {
-  legacySyntheticsMonitorTypeSingle,
-  syntheticsMonitorSavedObjectType,
-  syntheticsParamType,
-} from '../../common/types/saved_objects';
-
-export const MONITOR_SAVED_OBJECT_TYPES = [
-  legacySyntheticsMonitorTypeSingle,
-  syntheticsMonitorSavedObjectType,
-];
+import { syntheticsMonitorSOTypes, syntheticsParamType } from '../../common/types/saved_objects';
 
 /**
  * Every monitor is sent in full at least this often, even when nothing changed. Retaining a
@@ -118,9 +109,9 @@ export const getChangedSince = (lastSyncedAt: string): string =>
   new Date(Date.parse(lastSyncedAt) - CHANGED_SINCE_MARGIN_MS).toISOString();
 
 export const getChangedMonitorsFilter = (changedSince: string): string =>
-  `(${MONITOR_SAVED_OBJECT_TYPES.map((type) => `${type}.updated_at >= "${changedSince}"`).join(
-    ' or '
-  )})`;
+  `(${syntheticsMonitorSOTypes
+    .map((type) => `${type}.updated_at >= "${changedSince}"`)
+    .join(' or ')})`;
 
 /** Negated rather than `updated_at < since`, so a monitor without the field is never skipped. */
 export const getUnchangedMonitorsFilter = (changedSince: string): string =>

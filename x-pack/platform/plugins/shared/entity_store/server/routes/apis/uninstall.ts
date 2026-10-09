@@ -6,7 +6,7 @@
  */
 
 import path from 'node:path';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
@@ -14,13 +14,15 @@ import type { EntityStorePluginRouter } from '../../types';
 import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions/entity_schema';
 import { wrapMiddlewares } from '../middleware';
 
-const bodySchema = z.object({
-  entityTypes: z
-    .array(EntityType)
-    .optional()
-    .default(ALL_ENTITY_TYPES)
-    .describe('Entity types to uninstall. Defaults to all installed types.'),
-});
+const bodySchema = lazySchema(() =>
+  z.object({
+    entityTypes: z
+      .array(EntityType)
+      .optional()
+      .default(ALL_ENTITY_TYPES)
+      .describe('Entity types to uninstall. Defaults to all installed types.'),
+  })
+);
 
 export function registerUninstall(router: EntityStorePluginRouter) {
   router.versioned

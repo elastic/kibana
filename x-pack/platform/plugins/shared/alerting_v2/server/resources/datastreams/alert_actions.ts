@@ -11,7 +11,7 @@ import { z } from '@kbn/zod/v4';
 import { getIngestTimestampPipeline } from './ingest_timestamp_pipeline';
 import type { ResourceDefinition } from './types';
 
-export const ALERT_ACTIONS_DATA_STREAM_VERSION = 7;
+export const ALERT_ACTIONS_DATA_STREAM_VERSION = 8;
 export const ALERT_ACTIONS_BACKING_INDEX = '.ds-.alert-actions-*';
 export const ALERT_ACTIONS_RESOURCE_KEY = `data_stream:${ALERT_ACTIONS_DATA_STREAM}`;
 
@@ -32,8 +32,8 @@ const mappings: MappingsDefinition = {
     assignee_uid: { type: 'keyword' },
     action_type: { type: 'keyword' },
     group_hash: { type: 'keyword' },
-    episode_id: { type: 'keyword' },
-    episode_status: { type: 'keyword' },
+    alert_id: { type: 'keyword' },
+    alert_status: { type: 'keyword' },
     rule_id: { type: 'keyword' },
     tags: { type: 'keyword' },
     action_group_id: { type: 'keyword' },
@@ -62,9 +62,9 @@ export const alertActionSchema = z.object({
   assignee_uid: z.string().nullable().optional(),
   action_type: z.string(),
   // Null for series-level actions (tag/snooze/unsnooze): they target the
-  // series as a whole, not one episode.
-  episode_id: z.string().nullable().optional(),
-  episode_status: z.string().optional(),
+  // series as a whole, not one alert.
+  alert_id: z.string().nullable().optional(),
+  alert_status: z.string().optional(),
   rule_id: z.string().nullable(),
   action_group_id: z.string().optional(),
   source: z.string().optional(),
@@ -85,7 +85,8 @@ export const getAlertActionsResourceDefinition = (): ResourceDefinition => ({
   mappings,
   lifecycle: {},
   finalPipeline: getIngestTimestampPipeline(ALERT_ACTIONS_DATA_STREAM),
-  // Data streams created from v6 or below map `actor` as a keyword, which cannot be turned into
-  // an object in place. Keep this at 6 when bumping the version.
-  forceReset: { version: 6 },
+  // Data streams created from v7 or below store the alert id and status as `episode_id` and
+  // `episode_status`, which v8 readers ignore, and those created from v6 or below map `actor` as a
+  // keyword, which cannot be turned into an object in place. Keep this at 7 when bumping the version.
+  forceReset: { version: 7 },
 });

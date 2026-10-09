@@ -16,7 +16,8 @@ import type {
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../common/runtime_types';
 import { ConfigKey } from '../../common/runtime_types';
-import { MONITOR_SAVED_OBJECT_TYPES, getUnchangedMonitorsFilter } from './incremental_sync';
+import { syntheticsMonitorSOTypes } from '../../common/types/saved_objects';
+import { getUnchangedMonitorsFilter } from './incremental_sync';
 import type {
   RetainedMonitor,
   ServiceData,
@@ -101,7 +102,7 @@ export const retainUnchangedMonitors = async ({
   };
 
   const finder = soClient.createPointInTimeFinder<RetainableMonitorAttributes>({
-    type: MONITOR_SAVED_OBJECT_TYPES,
+    type: syntheticsMonitorSOTypes,
     perPage: RETAIN_PAGE_SIZE,
     namespaces: [ALL_SPACES_ID],
     filter: getUnchangedMonitorsFilter(changedSince),

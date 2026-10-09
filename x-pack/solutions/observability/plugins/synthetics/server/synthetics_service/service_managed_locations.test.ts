@@ -15,6 +15,7 @@ import axios from 'axios';
 import times from 'lodash/times';
 import type { HeartbeatConfig } from '../../common/runtime_types';
 import { LocationStatus } from '../../common/runtime_types';
+import { syntheticsMonitorSOTypes } from '../../common/types/saved_objects';
 import { mockEncryptedSO } from './utils/mocks';
 import { getSyntheticsParams } from './get_synthetics_params';
 import { getMaintenanceWindows } from './maintenance_windows/get_maintenance_windows';
@@ -22,7 +23,7 @@ import * as apiKeys from './get_api_key';
 import * as monitorUpgradeSender from '../routes/telemetry/monitor_upgrade_sender';
 import type { SyntheticsServerSetup } from '../types';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
+import { SyntheticsTelemetry } from '../telemetry/synthetics_telemetry';
 
 jest.mock('axios', () => jest.fn());
 jest.mock('./get_synthetics_params');
@@ -72,6 +73,9 @@ const getFakePayload = (locations: HeartbeatConfig['locations']) => {
   };
 };
 
+const getServiceRequests = () =>
+  (axios as jest.MockedFunction<typeof axios>).mock.calls.map(([request]) => request as any);
+
 describe('ServiceManagedLocations', () => {
   const mockEsClient = {
     search: jest.fn(),
@@ -79,7 +83,7 @@ describe('ServiceManagedLocations', () => {
 
   const logger = loggerMock.create();
 
-  const telemetry = createMockTelemetryEventsSender(true);
+  const telemetry = new SyntheticsTelemetry(coreMock.createSetup().analytics, loggerMock.create());
 
   const serverMock: SyntheticsServerSetup = {
     logger,
@@ -670,14 +674,14 @@ describe('ServiceManagedLocations', () => {
           expect.objectContaining({
             namespaces: ['*'],
             filter:
-              'not (synthetics-monitor.updated_at >= "2026-10-05T11:59:00.000Z" or synthetics-monitor-multi-space.updated_at >= "2026-10-05T11:59:00.000Z")',
+              'not (synthetics-monitor-multi-space.updated_at >= "2026-10-05T11:59:00.000Z" or synthetics-monitor.updated_at >= "2026-10-05T11:59:00.000Z")',
             fields: ['id', 'type', 'enabled', 'locations'],
           })
         );
         expect(
           encryptedClient.createPointInTimeFinderDecryptedAsInternalUser.mock.calls[0][0].filter
         ).toBe(
-          '(synthetics-monitor.updated_at >= "2026-10-05T11:59:00.000Z" or synthetics-monitor-multi-space.updated_at >= "2026-10-05T11:59:00.000Z")'
+          '(synthetics-monitor-multi-space.updated_at >= "2026-10-05T11:59:00.000Z" or synthetics-monitor.updated_at >= "2026-10-05T11:59:00.000Z")'
         );
       });
 
@@ -940,6 +944,400 @@ describe('ServiceManagedLocations', () => {
         await expectFullSync(service, state, { changed: [monitorSO('a'), monitorSO('b')] });
         expect(state.lastFullSyncAt).toBe('2026-10-06T12:00:00.000Z');
       });
+    });
+  });
+
+  describe('deleteMonitors', () => {
+    const SECRETS = [
+      'hunter2',
+      's3cr3t-script',
+      'abc-token',
+      'Bearer token-xyz',
+      'secret-body',
+      'My very private monitor',
+    ];
+
+    const getDeleteConfig = (
+      locations: HeartbeatConfig['locations'],
+      overrides: Record<string, unknown> = {}
+    ) => ({
+      spaceId: 'default',
+      configId: 'so-id-1',
+      params: { token: 'abc-token' },
+      monitor: {
+        ...getFakePayload(locations),
+        name: 'My very private monitor',
+        username: 'elastic',
+        password: 'hunter2',
+        'check.request.headers': { Authorization: 'Bearer token-xyz' },
+        'check.request.body': { type: 'text', value: 'secret-body' },
+        'source.inline.script':
+          'step("login", async () => { await page.fill("#pw", "s3cr3t-script") })',
+        ...overrides,
+      },
+    });
+
+    beforeEach(() => {
+      mockLicense();
+      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+    });
+
+    it('sends only the id and type of an http monitor, never its config or secrets', async () => {
+      const { service, locations } = getMockedService();
+
+      await service.deleteMonitors([getDeleteConfig([locations[0]]) as any]);
+
+      expect(axios).toHaveBeenCalledTimes(1);
+      const [request] = getServiceRequests();
+      expect(request).toEqual(
+        expect.objectContaining({ method: 'DELETE', url: `${locations[0].url}/monitors` })
+      );
+      expect(request.data.monitors).toEqual([
+        {
+          type: 'http',
+          id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
+          enabled: true,
+          data_stream: { namespace: 'default' },
+          streams: [
+            {
+              data_stream: { dataset: 'http', type: 'synthetics' },
+              type: 'http',
+              id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
+            },
+          ],
+        },
+      ]);
+      const wireBody = JSON.stringify(request.data);
+      SECRETS.forEach((secret) => expect(wireBody).not.toContain(secret));
+    });
+
+    it('keeps the output and license on the request', async () => {
+      const { service, locations } = getMockedService();
+
+      await service.deleteMonitors([getDeleteConfig([locations[0]]) as any]);
+
+      const [request] = getServiceRequests();
+      expect(request.data).toEqual(
+        expect.objectContaining({
+          output: { hosts: ['es'], api_key: 'i:k' },
+          license_level: 'platinum',
+          stack_version: '9.5.0',
+        })
+      );
+    });
+
+    it('sends the id, type and schedule of a browser monitor, never its script or params', async () => {
+      const { service, locations } = getMockedService();
+
+      await service.deleteMonitors([
+        getDeleteConfig([locations[0]], {
+          type: 'browser',
+          params: '{"token":"abc-token"}',
+        }) as any,
+      ]);
+
+      const [request] = getServiceRequests();
+      expect(request.data.monitors).toEqual([
+        {
+          type: 'browser',
+          id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
+          schedule: '@every 3m',
+          enabled: true,
+          data_stream: { namespace: 'default' },
+          streams: [
+            {
+              data_stream: { dataset: 'browser', type: 'synthetics' },
+              type: 'browser',
+              id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
+              schedule: '@every 3m',
+            },
+          ],
+        },
+      ]);
+      const wireBody = JSON.stringify(request.data);
+      SECRETS.forEach((secret) => expect(wireBody).not.toContain(secret));
+    });
+
+    it.each([
+      ['a custom namespace', { namespace: 'custom-ns' }, 'custom-ns'],
+      ['a space id used as the namespace', { namespace: 'my-space' }, 'my-space'],
+      ['no namespace', {}, 'default'],
+    ])('sends the monitor namespace for %s', async (_label, overrides, expectedNamespace) => {
+      const { service, locations } = getMockedService();
+
+      await service.deleteMonitors([getDeleteConfig([locations[0]], overrides) as any]);
+
+      const [monitor] = getServiceRequests()[0].data.monitors;
+      expect(monitor.data_stream).toEqual({ namespace: expectedNamespace });
+    });
+
+    it('identifies the monitor by its heartbeat id when one is given', async () => {
+      const { service, locations } = getMockedService();
+
+      await service.deleteMonitors([
+        { ...getDeleteConfig([locations[0]]), heartbeatId: 'heartbeat-id' } as any,
+      ]);
+
+      const [request] = getServiceRequests();
+      expect(request.data.monitors[0].id).toBe('heartbeat-id');
+    });
+
+    it('sends monitors that share a location in a single request', async () => {
+      const { service, locations } = getMockedService();
+
+      await service.deleteMonitors([
+        getDeleteConfig([locations[0]], { id: 'http-1' }) as any,
+        getDeleteConfig([locations[0]], { id: 'http-2', type: 'tcp' }) as any,
+        getDeleteConfig([locations[0]], { id: 'http-3', type: 'icmp' }) as any,
+      ]);
+
+      expect(axios).toHaveBeenCalledTimes(1);
+      const [request] = getServiceRequests();
+      expect(request.data.monitors.map(({ id, type }: any) => ({ id, type }))).toEqual([
+        { id: 'http-1', type: 'http' },
+        { id: 'http-2', type: 'tcp' },
+        { id: 'http-3', type: 'icmp' },
+      ]);
+    });
+
+    it('sends the monitor to each service location it runs in, without the locations', async () => {
+      const { service, locations } = getMockedService(3);
+
+      await service.deleteMonitors([getDeleteConfig([locations[0], locations[2]]) as any]);
+
+      const requests = getServiceRequests();
+      expect(requests.map(({ url }) => url).sort()).toEqual([
+        `${locations[0].url}/monitors`,
+        `${locations[2].url}/monitors`,
+      ]);
+      requests.forEach(({ data }) => {
+        expect(JSON.stringify(data)).not.toContain('loc-');
+        expect(data.monitors).toHaveLength(1);
+      });
+    });
+
+    it('only calls the service locations of a monitor that also runs in a private location', async () => {
+      const { service, locations } = getMockedService(2);
+
+      await service.deleteMonitors([
+        getDeleteConfig([
+          locations[1],
+          { id: 'my-private-location', label: 'Private', isServiceManaged: false },
+        ]) as any,
+      ]);
+
+      expect(axios).toHaveBeenCalledTimes(1);
+      expect(getServiceRequests()[0].url).toBe(`${locations[1].url}/monitors`);
+    });
+
+    it('does not call the service for a monitor that only runs in a private location', async () => {
+      const { service } = getMockedService();
+
+      await service.deleteMonitors([
+        getDeleteConfig([
+          { id: 'my-private-location', label: 'Private', isServiceManaged: false },
+        ]) as any,
+      ]);
+
+      expect(axios).not.toHaveBeenCalled();
+    });
+
+    it('does not resolve params or maintenance windows to delete', async () => {
+      const { service, locations } = getMockedService();
+
+      await service.deleteMonitors([getDeleteConfig([locations[0]]) as any]);
+
+      expect(getSyntheticsParams).not.toHaveBeenCalled();
+      expect(getMaintenanceWindows).not.toHaveBeenCalled();
+    });
+
+    it('does not call the service when there is no valid API key', async () => {
+      const { service, locations } = getMockedService();
+      jest.spyOn(service, 'getOutput').mockResolvedValue({ output: null });
+
+      await service.deleteMonitors([getDeleteConfig([locations[0]]) as any]);
+
+      expect(axios).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('deleteAllMonitors', () => {
+    const SECRETS = ['hunter2', 's3cr3t-script', 'My very private monitor'];
+
+    const mockMonitorPages = (pages: unknown[][]) => {
+      const close = jest.fn(async () => {});
+      const createPointInTimeFinder = jest.fn().mockReturnValue({
+        close,
+        find: jest.fn().mockReturnValue({
+          async *[Symbol.asyncIterator]() {
+            for (const page of pages) {
+              yield { saved_objects: page };
+            }
+          },
+        }),
+      });
+      (mockCoreStart.savedObjects.createInternalRepository as jest.Mock).mockReturnValue({
+        createPointInTimeFinder,
+      });
+      return { createPointInTimeFinder, close };
+    };
+
+    const readMonitor = (
+      id: string,
+      type: string,
+      locations: HeartbeatConfig['locations'],
+      namespace?: string
+    ) => ({
+      id: `so-${id}`,
+      type: 'synthetics-monitor-multi-space',
+      attributes: { id, type, locations, schedule: { number: '5', unit: 'm' }, namespace },
+    });
+    const privateLocation = {
+      id: 'my-private-location',
+      label: 'Private',
+      isServiceManaged: false,
+    };
+
+    beforeEach(() => {
+      mockLicense();
+      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+    });
+
+    it('reads the monitors without decrypting them and only the fields a delete needs', async () => {
+      const { service, locations } = getMockedService();
+      const { createPointInTimeFinder } = mockMonitorPages([
+        [readMonitor('mon-1', 'http', [locations[0]])],
+      ]);
+      const decryptedFinder = (serverMock.encryptedSavedObjects.getClient() as any)
+        .createPointInTimeFinderDecryptedAsInternalUser;
+      decryptedFinder.mockClear();
+
+      await service.deleteAllMonitors();
+
+      expect(decryptedFinder).not.toHaveBeenCalled();
+      expect(createPointInTimeFinder).toHaveBeenCalledWith({
+        type: syntheticsMonitorSOTypes,
+        perPage: 100,
+        namespaces: [ALL_SPACES_ID],
+        fields: ['id', 'type', 'locations', 'schedule', 'namespace'],
+      });
+    });
+
+    it('sends the id and type of every monitor with a service location, nothing else', async () => {
+      const { service, locations } = getMockedService();
+      mockMonitorPages([
+        [
+          readMonitor('mon-1', 'http', [locations[0]]),
+          readMonitor('mon-2', 'icmp', [locations[0]]),
+          readMonitor('mon-private', 'tcp', [
+            { id: 'my-private-location', label: 'Private', isServiceManaged: false },
+          ]),
+        ],
+      ]);
+
+      await service.deleteAllMonitors();
+
+      expect(axios).toHaveBeenCalledTimes(1);
+      const [request] = getServiceRequests();
+      expect(request).toEqual(
+        expect.objectContaining({ method: 'DELETE', url: `${locations[0].url}/monitors` })
+      );
+      expect(request.data.monitors.map(({ id, type }: any) => ({ id, type }))).toEqual([
+        { id: 'mon-1', type: 'http' },
+        { id: 'mon-2', type: 'icmp' },
+      ]);
+      const wireBody = JSON.stringify(request.data);
+      SECRETS.forEach((secret) => expect(wireBody).not.toContain(secret));
+    });
+
+    it('skips pages that only hold private location monitors', async () => {
+      const { service, locations } = getMockedService();
+      mockMonitorPages([
+        [readMonitor('mon-private', 'http', [privateLocation])],
+        [readMonitor('mon-public', 'http', [locations[0]])],
+      ]);
+
+      await service.deleteAllMonitors();
+
+      expect(axios).toHaveBeenCalledTimes(1);
+      expect(getServiceRequests()[0].data.monitors.map(({ id }: any) => id)).toEqual([
+        'mon-public',
+      ]);
+    });
+
+    it('sends every page that holds a service location monitor, not only the first', async () => {
+      const { service, locations } = getMockedService();
+      mockMonitorPages([
+        [readMonitor('mon-1', 'http', [locations[0]]), readMonitor('mon-2', 'tcp', [locations[0]])],
+        [readMonitor('mon-private', 'http', [privateLocation])],
+        [readMonitor('mon-3', 'browser', [locations[0]])],
+        [readMonitor('mon-4', 'icmp', [locations[0]])],
+      ]);
+
+      await service.deleteAllMonitors();
+
+      const requests = getServiceRequests();
+      expect(requests).toHaveLength(3);
+      expect(requests.map(({ data }) => data.monitors.map(({ id }: any) => id))).toEqual([
+        ['mon-1', 'mon-2'],
+        ['mon-3'],
+        ['mon-4'],
+      ]);
+    });
+
+    it('keeps going and returns the errors when the service rejects a page', async () => {
+      const { service, locations } = getMockedService();
+      mockMonitorPages([
+        [readMonitor('mon-1', 'http', [locations[0]])],
+        [readMonitor('mon-2', 'http', [locations[0]])],
+      ]);
+      (axios as jest.MockedFunction<typeof axios>)
+        .mockRejectedValueOnce({ response: { status: 500, data: { reason: 'boom' } } })
+        .mockResolvedValueOnce({} as AxiosResponse);
+
+      const errors = await service.deleteAllMonitors();
+
+      expect(axios).toHaveBeenCalledTimes(2);
+      expect(errors).toEqual([{ locationId: locations[0].id, error: { reason: 'boom' } }]);
+    });
+
+    it('sends the namespace each monitor has', async () => {
+      const { service, locations } = getMockedService();
+      mockMonitorPages([
+        [
+          readMonitor('mon-1', 'http', [locations[0]], 'custom-ns'),
+          readMonitor('mon-2', 'http', [locations[0]]),
+        ],
+      ]);
+
+      await service.deleteAllMonitors();
+
+      const { monitors } = getServiceRequests()[0].data;
+      expect(
+        monitors.map(({ id, data_stream: dataStream }: any) => [id, dataStream.namespace])
+      ).toEqual([
+        ['mon-1', 'custom-ns'],
+        ['mon-2', 'default'],
+      ]);
+    });
+
+    it('closes the finder once every page was read', async () => {
+      const { service, locations } = getMockedService();
+      const { close } = mockMonitorPages([[readMonitor('mon-1', 'http', [locations[0]])]]);
+
+      await service.deleteAllMonitors();
+
+      expect(close).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not call the service when there is no valid API key', async () => {
+      const { service, locations } = getMockedService();
+      mockMonitorPages([[readMonitor('mon-1', 'http', [locations[0]])]]);
+      jest.spyOn(service, 'getOutput').mockResolvedValue({ output: null });
+
+      await service.deleteAllMonitors();
+
+      expect(axios).not.toHaveBeenCalled();
     });
   });
 

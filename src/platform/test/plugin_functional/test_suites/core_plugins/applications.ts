@@ -8,6 +8,10 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import type { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObject }: PluginFunctionalProviderContext) {
@@ -18,6 +22,7 @@ export default function ({ getService, getPageObject }: PluginFunctionalProvider
   const find = getService('find');
   const deployment = getService('deployment');
   const esArchiver = getService('esArchiver');
+  const supertest = getService('supertest');
   const log = getService('log');
 
   const clickAppLink = async (app: string) => {
@@ -47,8 +52,15 @@ export default function ({ getService, getPageObject }: PluginFunctionalProvider
   describe('ui applications', function describeIndexTests() {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
+      // Opt out so the telemetry banner never renders: it shrinks `.kbnAppWrapper` even when chrome is hidden.
+      await supertest
+        .post('/internal/telemetry/optIn')
+        .set('kbn-xsrf', 'xxx')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send({ enabled: false })
+        .expect(200);
       await common.navigateToApp('foo');
-      await common.dismissBanner();
     });
 
     it('starts on home page', async () => {

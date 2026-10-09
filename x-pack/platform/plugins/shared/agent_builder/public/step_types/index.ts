@@ -9,6 +9,7 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import {
   conversationMetadataUpdatedTriggerCommonDefinition,
+  conversationUpdatedTriggerCommonDefinition,
   attachmentTriggerCommonDefinitions,
 } from '../../common/workflows/triggers';
 
@@ -56,6 +57,7 @@ export function registerWorkflowSteps(
   );
 
   workflowsExtensions.registerTriggerDefinition(conversationMetadataUpdatedTriggerCommonDefinition);
+  workflowsExtensions.registerTriggerDefinition(conversationUpdatedTriggerCommonDefinition);
   for (const definition of attachmentTriggerCommonDefinitions) {
     workflowsExtensions.registerTriggerDefinition(definition);
   }

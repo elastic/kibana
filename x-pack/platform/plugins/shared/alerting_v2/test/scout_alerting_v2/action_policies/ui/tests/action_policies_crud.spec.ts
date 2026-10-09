@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout/ui';
 import {
   ALERTING_V2_ACTION_POLICY_FORM_ROLE,
   buildCreateActionPolicyData,
+  buildCreateRuleData,
   buildWorkflowYaml,
   test,
 } from '../fixtures';
@@ -27,11 +28,13 @@ test.describe('Action Policies - create and edit', { tag: ['@local-stateful-clas
   const EDITED_POLICY_NAME = `scout-action-policy-edited-${RUN_ID}`;
   // Intentionally includes a legacy `rule.*` field: with no form validation (AC#3) the expression
   // round-trips through the edit form unchanged, proving backward compatibility.
-  const MATCHER = 'episode_status: "active" and rule.tags: "scout"';
+  const MATCHER = 'alert_status: "active" and rule.tags: "scout"';
+  const ROUTING_TAG = `scout-routing-${RUN_ID}`;
 
   let workflowId: string;
   let workflowName: string;
   const createdPolicyIds: string[] = [];
+  let routingTagRuleId: string;
 
   test.beforeAll(async ({ apiServices }) => {
     // Action policy destinations are workflow references, so the form's
@@ -39,6 +42,13 @@ test.describe('Action Policies - create and edit', { tag: ['@local-stateful-clas
     workflowName = `scout-action-policy-destination-${Date.now()}`;
     const workflow = await apiServices.alertingV2.workflows.create(buildWorkflowYaml(workflowName));
     workflowId = workflow.id;
+    // A rule carrying the routing tag, so the form recommends it.
+    const rule = await apiServices.alertingV2.rules.create(
+      buildCreateRuleData({
+        metadata: { name: `scout-routing-tag-rule-${RUN_ID}`, routing_tags: [ROUTING_TAG] },
+      })
+    );
+    routingTagRuleId = rule.id;
   });
 
   test.afterAll(async ({ apiServices }) => {
@@ -46,6 +56,7 @@ test.describe('Action Policies - create and edit', { tag: ['@local-stateful-clas
       await apiServices.alertingV2.actionPolicies.delete(id);
     }
     await apiServices.alertingV2.workflows.bulkDelete([workflowId]);
+    await apiServices.alertingV2.rules.delete(routingTagRuleId);
   });
 
   test(
@@ -68,6 +79,7 @@ test.describe('Action Policies - create and edit', { tag: ['@local-stateful-clas
         await expect(actionPolicyForm.workflowsDisabledCallout).toHaveCount(0);
 
         await actionPolicyForm.setName(CREATED_POLICY_NAME);
+        await actionPolicyForm.selectRoutingTag(ROUTING_TAG);
         await actionPolicyForm.setMatcher(MATCHER);
         await actionPolicyForm.selectWorkflow(workflowName);
         await actionPolicyForm.submit();
@@ -92,7 +104,7 @@ test.describe('Action Policies - create and edit', { tag: ['@local-stateful-clas
         expect(items).toHaveLength(1);
         expect(items[0]).toMatchObject({
           name: CREATED_POLICY_NAME,
-          matcher: { expression: MATCHER },
+          matcher: { tags: [ROUTING_TAG], expression: MATCHER },
           grouping_mode: 'per_alert',
           throttle: { strategy: 'on_status_change' },
           destinations: [{ type: 'workflow', id: workflowId }],
