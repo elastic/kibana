@@ -16,12 +16,14 @@ import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import { transformDashboardIn } from '../transforms';
 import type { DashboardCreateResponseBody } from './types';
+import { addToHistory } from '../../change_history/util';
 
 export async function create(
   requestCtx: RequestHandlerContext,
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   createBody: DashboardState,
   serverTiming?: RequestTiming,
+  spaceId: string = 'default',
   isDashboardAppRequest: boolean = false,
   id?: string
 ): Promise<DashboardCreateResponseBody> {
@@ -51,6 +53,17 @@ export async function create(
         }),
     }
   );
+
+  await addToHistory({
+    ctx: requestCtx,
+    dashboardId: savedObject.id,
+    snapshot: createBody,
+    spaceId,
+    sequence: {
+      current: INITIAL_HISTORY_SEQUENCE,
+    },
+    timestamp: savedObject.updated_at ?? new Date(Date.now()).toISOString(),
+  });
 
   return getDashboardCRUResponseBody(
     savedObject,

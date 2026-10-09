@@ -21,6 +21,7 @@ import { getRouteConfig } from '../get_route_config';
 import { TransformPanelsInError } from '../transforms/in/transform_panels_in_error';
 import { create } from './create';
 import { getCreateResponseBodySchema } from './schemas';
+import { spacesService } from '../../kibana_services';
 
 export function registerCreateRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -79,6 +80,7 @@ export function registerCreateRoute(
             getCachedDashboardStateSchema(),
             req.body,
             req.serverTiming,
+            spacesService?.getSpaceId(req),
             isDashboardAppRequest
           );
           try {
