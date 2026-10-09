@@ -153,4 +153,33 @@ describe('SlackChannelSelector', () => {
   it('handles missing channel field in params without crashing', () => {
     expect(() => renderSelector({ params: 'text: "hello"\n' })).not.toThrow();
   });
+
+  it('marks the selector invalid', () => {
+    renderSelector({ isInvalid: true });
+    expect(screen.getByRole('combobox')).toHaveAttribute('aria-invalid', 'true');
+  });
+
+  it('keeps comments and quoting when writing the channel', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    const { onParamsChange } = renderSelector({
+      params: '# notify ops\ntext: "{{ inputs.payload.policyId }}"\n',
+    });
+
+    await user.click(screen.getByRole('combobox'));
+    await user.click(screen.getByText('#general'));
+
+    expect(onParamsChange).toHaveBeenCalledWith(
+      '# notify ops\ntext: "{{ inputs.payload.policyId }}"\nchannel: general\n'
+    );
+  });
+
+  it('only patches the channel of malformed params YAML', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    const { onParamsChange } = renderSelector({ params: 'channel: ""\ntext: "unterminated\n' });
+
+    await user.click(screen.getByRole('combobox'));
+    await user.click(screen.getByText('#general'));
+
+    expect(onParamsChange).toHaveBeenCalledWith('channel: general\ntext: "unterminated\n');
+  });
 });

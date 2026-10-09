@@ -45,6 +45,7 @@
     "@kbn/cps-utils",
     "@kbn/cps",
     "@kbn/core-ui-settings-browser-mocks",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/actions-plugin"
   ]
 }

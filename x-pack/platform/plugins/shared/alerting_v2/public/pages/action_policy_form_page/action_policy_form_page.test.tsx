@@ -103,15 +103,18 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
     value,
     onChange,
     connectorCreationConfig,
+    forceShowErrors,
   }: {
     value: { id: string; connectorId: string | null; params: string };
     onChange: (next: { id: string; connectorId: string | null; params: string }) => void;
     connectorCreationConfig?: { mode: string; href?: string };
+    forceShowErrors?: boolean;
   }) => (
     <div
       data-test-subj={`inlineWorkflowEditor-${value.id}`}
       data-connector-creation-mode={connectorCreationConfig?.mode}
       data-connector-creation-href={connectorCreationConfig?.href}
+      data-force-show-errors={String(Boolean(forceShowErrors))}
     >
       <button
         type="button"
@@ -382,6 +385,39 @@ describe('ActionPolicyFormPage', () => {
 
       await waitFor(() => expect(mockRollbackWorkflows).toHaveBeenCalledWith(['wf-new']));
       expect(mockLocators.actionPolicyLocators.navigateSync).not.toHaveBeenCalled();
+    });
+
+    it('reveals the errors and focuses the first invalid field instead of saving an empty form', async () => {
+      const user = userEvent.setup({ delay: null });
+      renderPage();
+
+      const saveButton = screen.getByTestId(TEST_SUBJ.submitButton);
+      expect(saveButton).toBeEnabled();
+      await user.click(saveButton);
+
+      expect(await screen.findByText('Name is required.')).toBeInTheDocument();
+      expect(screen.getByText('At least one destination is required')).toBeInTheDocument();
+      expect(screen.getByTestId(TEST_SUBJ.nameInput)).toHaveFocus();
+      expect(mockCreateInlineWorkflows).not.toHaveBeenCalled();
+      expect(mockCreateMutateAsync).not.toHaveBeenCalled();
+    });
+
+    it('does not create anything while a simple workflow draft is incomplete', async () => {
+      const user = userEvent.setup({ delay: null });
+      renderPage();
+
+      await user.type(screen.getByTestId(TEST_SUBJ.nameInput), 'Inline policy');
+      await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
+      await user.click(screen.getByTestId(TEST_SUBJ.submitButton));
+
+      await waitFor(() =>
+        expect(screen.getByTestId(/inlineWorkflowEditor-/)).toHaveAttribute(
+          'data-force-show-errors',
+          'true'
+        )
+      );
+      expect(mockCreateInlineWorkflows).not.toHaveBeenCalled();
+      expect(mockCreateMutateAsync).not.toHaveBeenCalled();
     });
 
     it('navigates to listing page on cancel', async () => {

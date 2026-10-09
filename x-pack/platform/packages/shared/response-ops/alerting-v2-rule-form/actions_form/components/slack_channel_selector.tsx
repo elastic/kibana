@@ -8,21 +8,24 @@
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { parse, stringify } from 'yaml';
+import { updateYamlField } from '@kbn/workflows-yaml';
+import { parse } from 'yaml';
 import React, { useState } from 'react';
 import { useFetchSlackChannels } from '../hooks/use_fetch_slack_channels';
-import type { InlineWorkflowActionDraft } from '../types';
+import type { InlineActionParamError, InlineWorkflowActionDraft } from '../types';
 
 interface SlackChannelSelectorProps {
   connectorId: string | null;
   params: string;
   onParamsChange: (params: string) => void;
+  isInvalid?: boolean;
 }
 
 export const SlackChannelSelector = ({
   connectorId,
   params,
   onParamsChange,
+  isInvalid = false,
 }: SlackChannelSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { data: channels = [], isFetching } = useFetchSlackChannels({
@@ -35,20 +38,10 @@ export const SlackChannelSelector = ({
     value: channel.name,
   }));
 
+  // Patches only the `channel` value, keeping the rest of the params (comments,
+  // quoting, even malformed YAML) as the user wrote them.
   const handleChange = (selected: Array<EuiComboBoxOptionOption<string>>) => {
-    const channelName = selected[0]?.value ?? '';
-
-    let parsed: Record<string, unknown> = {};
-    try {
-      const result = parse(params);
-      if (result !== null && typeof result === 'object' && !Array.isArray(result)) {
-        parsed = result as Record<string, unknown>;
-      }
-    } catch {
-      // leave parsed as empty — the YAML is malformed, we still write the channel
-    }
-
-    onParamsChange(stringify({ ...parsed, channel: channelName }));
+    onParamsChange(updateYamlField(params, 'channel', selected[0]?.value ?? ''));
   };
 
   const selectedOptions = (() => {
@@ -67,6 +60,7 @@ export const SlackChannelSelector = ({
         { defaultMessage: 'Channel' }
       )}
       fullWidth
+      isInvalid={isInvalid}
     >
       <EuiComboBox
         fullWidth
@@ -74,6 +68,7 @@ export const SlackChannelSelector = ({
         singleSelection={{ asPlainText: true }}
         data-test-subj="slackChannelSelector"
         isLoading={isFetching}
+        isInvalid={isInvalid}
         isDisabled={connectorId === null}
         placeholder={i18n.translate(
           'xpack.responseOps.alertingV2RuleForm.actionForm.slackChannelSelector.placeholder',
@@ -92,13 +87,16 @@ export const SlackChannelSelector = ({
 export const SlackChannelSelectorWrapper = ({
   value,
   onChange,
+  paramErrors,
 }: {
   value: InlineWorkflowActionDraft;
   onChange: (value: InlineWorkflowActionDraft) => void;
+  paramErrors: readonly InlineActionParamError[];
 }) => (
   <SlackChannelSelector
     connectorId={value.connectorId}
     params={value.params}
     onParamsChange={(params) => onChange({ ...value, params })}
+    isInvalid={paramErrors.some(({ key }) => key === 'channel')}
   />
 );

@@ -43,7 +43,7 @@
       "cps",
       "cloud"
     ],
-    "requiredBundles": ["alerting", "kibanaReact", "agentBuilder", "esql"],
+    "requiredBundles": ["actions", "alerting", "kibanaReact", "agentBuilder", "esql"],
     "extraPublicDirs": []
   }
 }

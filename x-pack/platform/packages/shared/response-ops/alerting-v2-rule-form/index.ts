@@ -71,6 +71,7 @@ export {
 export type {
   ActionDraft,
   ConnectorCreationConfig,
+  InlineActionParamError,
   InlineActionStepDefinition,
   InlineActionStepType,
   InlineWorkflowActionDraft,

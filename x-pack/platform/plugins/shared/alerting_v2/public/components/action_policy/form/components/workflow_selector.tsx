@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiComboBox, EuiFormRow, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiComboBox, EuiFormErrorText, EuiFormRow, EuiLink } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
@@ -22,10 +22,45 @@ interface SelectedWorkflow {
   name: string;
 }
 
+const WorkflowsDisabledCallout = () => {
+  const application = useService(CoreStart('application'));
+  const settingsUrl = application.getUrlForApp('management', {
+    path: `/kibana/settings?query=${encodeURIComponent(WORKFLOWS_UI_SETTING_ID)}`,
+  });
+
+  return (
+    <EuiCallOut
+      announceOnMount={false}
+      title={i18n.translate(
+        'xpack.alertingV2.actionPolicy.form.destination.workflowsDisabled.title',
+        { defaultMessage: 'Workflows are not enabled' }
+      )}
+      color="warning"
+      iconType="warning"
+      data-test-subj="workflowsDisabledCallout"
+    >
+      <FormattedMessage
+        id="xpack.alertingV2.actionPolicy.form.destination.workflowsDisabled.description"
+        defaultMessage="Action policies use Workflows for destinations, you'll need to enable them first. Enable the {settingName} setting in {advancedSettingsLink}, then refresh this page."
+        values={{
+          settingName: WORKFLOWS_UI_SETTING_ID,
+          advancedSettingsLink: (
+            <EuiLink href={settingsUrl} data-test-subj="workflowsDisabledSettingsLink">
+              <FormattedMessage
+                id="xpack.alertingV2.actionPolicy.form.destination.workflowsDisabled.advancedSettingsLink"
+                defaultMessage="Advanced Settings"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    </EuiCallOut>
+  );
+};
+
 export const WorkflowSelector = () => {
   const { control } = useFormContext<ActionPolicyFormState>();
   const destinations = useWatch({ control, name: 'destinations' });
-  const inlineActions = useWatch({ control, name: 'inlineActions' });
   const application = useService(CoreStart('application'));
   const uiSettings = useService(CoreStart('uiSettings'));
   const isWorkflowsEnabled = uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID);
@@ -59,99 +94,80 @@ export const WorkflowSelector = () => {
     value: w.id,
   }));
 
-  if (!isWorkflowsEnabled) {
-    const settingsUrl = application.getUrlForApp('management', {
-      path: `/kibana/settings?query=${encodeURIComponent(WORKFLOWS_UI_SETTING_ID)}`,
-    });
-
-    return (
-      <EuiCallOut
-        announceOnMount={false}
-        title={i18n.translate(
-          'xpack.alertingV2.actionPolicy.form.destination.workflowsDisabled.title',
-          { defaultMessage: 'Workflows are not enabled' }
-        )}
-        color="warning"
-        iconType="warning"
-        data-test-subj="workflowsDisabledCallout"
-      >
-        <FormattedMessage
-          id="xpack.alertingV2.actionPolicy.form.destination.workflowsDisabled.description"
-          defaultMessage="Action policies use Workflows for destinations, you'll need to enable them first. Enable the {settingName} setting in {advancedSettingsLink}, then refresh this page."
-          values={{
-            settingName: WORKFLOWS_UI_SETTING_ID,
-            advancedSettingsLink: (
-              <EuiLink href={settingsUrl} data-test-subj="workflowsDisabledSettingsLink">
-                <FormattedMessage
-                  id="xpack.alertingV2.actionPolicy.form.destination.workflowsDisabled.advancedSettingsLink"
-                  defaultMessage="Advanced Settings"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiCallOut>
-    );
-  }
-
   const createWorkflowUrl = application.getUrlForApp(WORKFLOWS_APP_ID, { path: '/create' });
 
+  // The Controller stays mounted when workflows are disabled so its rule still
+  // blocks submitting a policy without destinations.
   return (
     <Controller
       name="destinations"
       control={control}
       rules={{
-        validate: (value) =>
+        validate: (value, { inlineActions }) =>
           value.length > 0 || inlineActions.length > 0
             ? true
             : i18n.translate('xpack.alertingV2.actionPolicy.form.destination.required', {
                 defaultMessage: 'At least one destination is required',
               }),
       }}
-      render={({ field, fieldState: { error } }) => (
-        <EuiFormRow
-          label={i18n.translate('xpack.alertingV2.actionPolicy.form.destination.workflows', {
-            defaultMessage: 'Workflows',
-          })}
-          fullWidth
-          isInvalid={!!error}
-          error={error?.message}
-          labelAppend={
-            <EuiLink
-              href={createWorkflowUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-test-subj="createWorkflowLink"
-            >
-              {i18n.translate('xpack.alertingV2.actionPolicy.form.destination.createWorkflow', {
-                defaultMessage: 'Create a workflow',
-              })}
-            </EuiLink>
-          }
-        >
-          <EuiComboBox
+      render={({ field, fieldState: { error } }) => {
+        if (!isWorkflowsEnabled) {
+          return (
+            <>
+              <WorkflowsDisabledCallout />
+              {error && <EuiFormErrorText>{error.message}</EuiFormErrorText>}
+            </>
+          );
+        }
+
+        return (
+          <EuiFormRow
+            label={i18n.translate('xpack.alertingV2.actionPolicy.form.destination.workflows', {
+              defaultMessage: 'Workflows',
+            })}
             fullWidth
-            async
-            isLoading={isLoading}
             isInvalid={!!error}
-            data-test-subj="destinationsInput"
-            placeholder={i18n.translate(
-              'xpack.alertingV2.actionPolicy.form.destination.placeholder',
-              { defaultMessage: 'Search and select workflows' }
-            )}
-            selectedOptions={selectedWorkflows.map((w) => ({ label: w.name, value: w.id }))}
-            onFocus={() => refetch()}
-            onSearchChange={setSearchQuery}
-            onChange={(options) => {
-              setSelectedWorkflows(options.map((o) => ({ id: o.value as string, name: o.label })));
-              field.onChange(
-                options.map((o) => ({ type: 'workflow' as const, id: o.value as string }))
-              );
-            }}
-            options={workflowOptions}
-          />
-        </EuiFormRow>
-      )}
+            error={error?.message}
+            labelAppend={
+              <EuiLink
+                href={createWorkflowUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-test-subj="createWorkflowLink"
+              >
+                {i18n.translate('xpack.alertingV2.actionPolicy.form.destination.createWorkflow', {
+                  defaultMessage: 'Create a workflow',
+                })}
+              </EuiLink>
+            }
+          >
+            <EuiComboBox
+              fullWidth
+              async
+              inputRef={field.ref}
+              isLoading={isLoading}
+              isInvalid={!!error}
+              data-test-subj="destinationsInput"
+              placeholder={i18n.translate(
+                'xpack.alertingV2.actionPolicy.form.destination.placeholder',
+                { defaultMessage: 'Search and select workflows' }
+              )}
+              selectedOptions={selectedWorkflows.map((w) => ({ label: w.name, value: w.id }))}
+              onFocus={() => refetch()}
+              onSearchChange={setSearchQuery}
+              onChange={(options) => {
+                setSelectedWorkflows(
+                  options.map((o) => ({ id: o.value as string, name: o.label }))
+                );
+                field.onChange(
+                  options.map((o) => ({ type: 'workflow' as const, id: o.value as string }))
+                );
+              }}
+              options={workflowOptions}
+            />
+          </EuiFormRow>
+        );
+      }}
     />
   );
 };
