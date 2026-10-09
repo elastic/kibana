@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { apiClientFixture, mergeTests, test as baseTest } from '@kbn/scout';
+import { defaultRolesFixture, mergeTests, requestAuthFixture, test as baseTest } from '@kbn/scout';
 import type { BrowserAuthFixture, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { extendPageObjects, type AlertingPageObjects } from './page_objects';
-import { createAdminApiKey } from './admin_api_key';
 import {
   buildAlertingApiServices,
   type AlertingApiServicesFixture,
@@ -30,7 +29,7 @@ export interface UiWorkerFixtures extends ScoutWorkerFixtures {
   apiServices: AlertingApiServicesFixture;
 }
 
-export const test = mergeTests(baseTest, apiClientFixture).extend<
+export const test = mergeTests(baseTest, defaultRolesFixture, requestAuthFixture).extend<
   {
     browserAuth: AlertingBrowserAuthFixture;
     pageObjects: AlertingPageObjects;
@@ -53,17 +52,9 @@ export const test = mergeTests(baseTest, apiClientFixture).extend<
   },
   apiServices: [
     async (
-      { apiServices, esClient, kbnClient, log, config, samlAuth, apiClient },
-      use: (extendedApiServices: AlertingApiServicesFixture) => Promise<void>,
-      workerInfo
+      { apiServices, esClient, kbnClient, log, config, requestAuth },
+      use: (extendedApiServices: AlertingApiServicesFixture) => Promise<void>
     ) => {
-      const adminApiKey = createAdminApiKey({
-        samlAuth,
-        apiClient,
-        log,
-        name: `alerting-v2-ui-admin-worker-${workerInfo.parallelIndex + 1}`,
-      });
-
       const extendedApiServices: AlertingApiServicesFixture = {
         ...apiServices,
         alertingV2: buildAlertingApiServices({
@@ -71,11 +62,10 @@ export const test = mergeTests(baseTest, apiClientFixture).extend<
           kbnClient,
           log,
           config,
-          getActionPolicyAuthHeaders: adminApiKey.getHeaders,
+          requestAuth,
         }),
       };
       await use(extendedApiServices);
-      await adminApiKey.invalidate();
     },
     { scope: 'worker' },
   ],

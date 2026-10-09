@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KbnClient, ScoutLogger } from '@kbn/scout';
+import type { ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import type {
   ActionPolicyResponse,
@@ -16,6 +16,7 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '@kbn/alerting-v2-constants';
 import { COMMON_HEADERS } from '../constants';
+import type { KbnRequester } from './authenticated_kbn_client';
 
 export interface ActionPolicyApiSpaceOptions {
   spaceId?: string;
@@ -42,36 +43,19 @@ export interface ActionPoliciesApiService {
   cleanUp: (options?: ActionPolicyApiSpaceOptions) => Promise<void>;
 }
 
-/** Resolves the headers that authenticate action policy requests. */
-export type AuthHeadersProvider = () => Promise<Record<string, string>>;
-
-const noAuthHeaders: AuthHeadersProvider = async () => ({});
-
 const withSpace = (path: string, spaceId: string | undefined): string =>
   spaceId ? `/s/${encodeURIComponent(spaceId)}${path}` : path;
 
 export const getActionPoliciesApiService = ({
   log,
   kbnClient,
-  getAuthHeaders = noAuthHeaders,
 }: {
   log: ScoutLogger;
-  kbnClient: KbnClient;
-  /**
-   * Action policy writes grant an API key for the caller. On serverless that grant goes through
-   * UIAM, which rejects kbnClient's basic credentials, so callers there must send an API key.
-   */
-  getAuthHeaders?: AuthHeadersProvider;
+  kbnClient: KbnRequester;
 }): ActionPoliciesApiService => {
-  const request = async <T>(options: Parameters<KbnClient['request']>[0]) =>
-    kbnClient.request<T>({
-      ...options,
-      headers: { ...options.headers, ...(await getAuthHeaders()) },
-    });
-
   const get: ActionPoliciesApiService['get'] = (id) =>
     measurePerformanceAsync(log, 'actionPolicies.get', async () => {
-      const response = await request<ActionPolicyResponse>({
+      const response = await kbnClient.request<ActionPolicyResponse>({
         method: 'GET',
         path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}`,
       });
@@ -80,7 +64,7 @@ export const getActionPoliciesApiService = ({
 
   const list: ActionPoliciesApiService['list'] = (query = {}, options) =>
     measurePerformanceAsync(log, 'actionPolicies.list', async () => {
-      const response = await request<FindActionPoliciesResponse>({
+      const response = await kbnClient.request<FindActionPoliciesResponse>({
         method: 'GET',
         path: withSpace(ALERTING_V2_ACTION_POLICY_API_PATH, options?.spaceId),
         query,
@@ -94,7 +78,7 @@ export const getActionPoliciesApiService = ({
     options?: ActionPolicyApiSpaceOptions
   ) =>
     measurePerformanceAsync(log, `actionPolicies.${operation}`, async () => {
-      const response = await request<BulkResponse>({
+      const response = await kbnClient.request<BulkResponse>({
         method: 'POST',
         path: withSpace(`${ALERTING_V2_ACTION_POLICY_API_PATH}/_${operation}`, options?.spaceId),
         headers: COMMON_HEADERS,
@@ -105,7 +89,7 @@ export const getActionPoliciesApiService = ({
 
   const patch: ActionPoliciesApiService['patch'] = (id, data) =>
     measurePerformanceAsync(log, 'actionPolicies.patch', async () => {
-      const response = await request<ActionPolicyResponse>({
+      const response = await kbnClient.request<ActionPolicyResponse>({
         method: 'PATCH',
         path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}`,
         headers: COMMON_HEADERS,
@@ -117,7 +101,7 @@ export const getActionPoliciesApiService = ({
   return {
     create: (data, options) =>
       measurePerformanceAsync(log, 'actionPolicies.create', async () => {
-        const response = await request<ActionPolicyResponse>({
+        const response = await kbnClient.request<ActionPolicyResponse>({
           method: 'POST',
           path: withSpace(ALERTING_V2_ACTION_POLICY_API_PATH, options?.spaceId),
           headers: COMMON_HEADERS,
@@ -128,7 +112,7 @@ export const getActionPoliciesApiService = ({
 
     upsert: (id, data) =>
       measurePerformanceAsync(log, 'actionPolicies.upsert', async () => {
-        const response = await request<ActionPolicyResponse>({
+        const response = await kbnClient.request<ActionPolicyResponse>({
           method: 'PUT',
           path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}`,
           headers: COMMON_HEADERS,
@@ -143,7 +127,7 @@ export const getActionPoliciesApiService = ({
 
     enable: (id) =>
       measurePerformanceAsync(log, 'actionPolicies.enable', async () => {
-        const response = await request<ActionPolicyResponse>({
+        const response = await kbnClient.request<ActionPolicyResponse>({
           method: 'POST',
           path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}/_enable`,
           headers: COMMON_HEADERS,
@@ -152,7 +136,7 @@ export const getActionPoliciesApiService = ({
       }),
     disable: (id) =>
       measurePerformanceAsync(log, 'actionPolicies.disable', async () => {
-        const response = await request<ActionPolicyResponse>({
+        const response = await kbnClient.request<ActionPolicyResponse>({
           method: 'POST',
           path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}/_disable`,
           headers: COMMON_HEADERS,
@@ -161,7 +145,7 @@ export const getActionPoliciesApiService = ({
       }),
     snooze: (id, snoozedUntil) =>
       measurePerformanceAsync(log, 'actionPolicies.snooze', async () => {
-        const response = await request<ActionPolicyResponse>({
+        const response = await kbnClient.request<ActionPolicyResponse>({
           method: 'POST',
           path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}/_snooze`,
           headers: COMMON_HEADERS,
@@ -172,7 +156,7 @@ export const getActionPoliciesApiService = ({
 
     unsnooze: (id) =>
       measurePerformanceAsync(log, 'actionPolicies.unsnooze', async () => {
-        await request({
+        await kbnClient.request({
           method: 'POST',
           path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}/_unsnooze`,
           headers: COMMON_HEADERS,
@@ -186,7 +170,7 @@ export const getActionPoliciesApiService = ({
 
     delete: (id) =>
       measurePerformanceAsync(log, 'actionPolicies.delete', async () => {
-        await request({
+        await kbnClient.request({
           method: 'DELETE',
           path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}`,
           headers: COMMON_HEADERS,

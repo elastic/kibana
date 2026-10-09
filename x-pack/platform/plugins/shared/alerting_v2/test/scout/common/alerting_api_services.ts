@@ -7,6 +7,7 @@
 
 import type {
   ApiServicesFixture,
+  RequestAuthFixture,
   EsClient,
   KbnClient,
   ScoutLogger,
@@ -27,9 +28,9 @@ import {
   getTaskManagerService,
   getTelemetryService,
   getWorkflowsApiService,
+  withAdminApiKey,
   type ActionPoliciesApiService,
   type AlertActionsApiService,
-  type AuthHeadersProvider,
   type AlertActionsEventsService,
   type DispatcherApiService,
   type MaintenanceWindowsApiService,
@@ -81,13 +82,13 @@ export const buildAlertingApiServices = ({
   kbnClient,
   log,
   config,
-  getActionPolicyAuthHeaders,
+  requestAuth,
 }: {
   esClient: EsClient;
   kbnClient: KbnClient;
   log: ScoutLogger;
   config: ScoutTestConfig;
-  getActionPolicyAuthHeaders?: AuthHeadersProvider;
+  requestAuth: RequestAuthFixture;
 }): AlertingApiServices => {
   const taskManager = getTaskManagerService({ kbnClient, log });
   const rules = getRulesApiService({ kbnClient, log });
@@ -102,9 +103,8 @@ export const buildAlertingApiServices = ({
     alertActionsEvents: getAlertActionsEventsService({ esClient, log }),
     alertActions: getAlertActionsApiService({ kbnClient, log }),
     actionPolicies: getActionPoliciesApiService({
-      kbnClient,
+      kbnClient: withAdminApiKey(kbnClient, requestAuth),
       log,
-      getAuthHeaders: getActionPolicyAuthHeaders,
     }),
     maintenanceWindows: getMaintenanceWindowsApiService({ kbnClient, log }),
     sourceIndex: getSourceIndexApiService({ esClient, log }),

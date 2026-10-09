@@ -38,8 +38,11 @@ export type {
 } from './alert_actions_api_service';
 export { getAlertActionsApiService } from './alert_actions_api_service';
 
-export type { ActionPoliciesApiService, AuthHeadersProvider } from './action_policies_api_service';
+export type { ActionPoliciesApiService } from './action_policies_api_service';
 export { getActionPoliciesApiService } from './action_policies_api_service';
+
+export type { KbnRequester } from './authenticated_kbn_client';
+export { withAdminApiKey } from './authenticated_kbn_client';
 
 export type { MaintenanceWindowsApiService } from './maintenance_windows_api_service';
 export { getMaintenanceWindowsApiService } from './maintenance_windows_api_service';

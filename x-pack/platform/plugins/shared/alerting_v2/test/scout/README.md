@@ -47,7 +47,7 @@ Specs that seed `.rule-events` directly (`ruleEvents.seed`), such as the dispatc
 
 ## Serverless
 
-- Action policy writes grant an API key for the caller, and on serverless that grant goes through UIAM, which rejects kbnClient's basic credentials. Both fixtures therefore send `apiServices.alertingV2.actionPolicies` requests with an admin API key: the API fixture gets it from `requestAuth`, the UI fixture mints it from the admin SAML session (`common/ui/fixtures/admin_api_key.ts`).
+- Action policy writes grant an API key for the caller, and on serverless that grant goes through UIAM, which rejects kbnClient's basic credentials. `actionPolicies` is therefore built on `withAdminApiKey(kbnClient, requestAuth)`, a wrapper that puts an admin API key on every request. The key is asked for on first use and `requestAuth` invalidates the keys it created once the worker finishes. The UI `test` merges Scout's `requestAuthFixture`, which only `apiTest` wires in by default.
 - Internal routes (`/internal/...`) are restricted on serverless; requests through `apiClient` must send `testData.COMMON_HEADERS` (it carries `x-elastic-internal-origin`).
 
 ## Layout
