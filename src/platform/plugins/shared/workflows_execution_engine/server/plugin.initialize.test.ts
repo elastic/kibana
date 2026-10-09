@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import moment from 'moment';
 import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -31,7 +32,12 @@ jest.mock('./repositories/data_access_layer', () => {
 const createPlugin = (): WorkflowsExecutionEnginePlugin => {
   const initializerContext = coreMock.createPluginInitializerContext({
     logging: { console: false },
-    eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+    eventDriven: {
+      enabled: true,
+      logEvents: true,
+      maxChainDepth: 10,
+      subscriptionCacheTtl: moment.duration(60, 's'),
+    },
   });
   return new WorkflowsExecutionEnginePlugin(initializerContext);
 };
