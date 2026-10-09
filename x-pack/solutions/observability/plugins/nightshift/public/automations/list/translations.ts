@@ -52,6 +52,9 @@ export const listLabels = {
   clone: i18n.translate('xpack.nightshift.automations.cloneAction', { defaultMessage: 'Clone' }),
   delete: i18n.translate('xpack.nightshift.automations.deleteAction', { defaultMessage: 'Delete' }),
   cancel: i18n.translate('xpack.nightshift.automations.cancelButton', { defaultMessage: 'Cancel' }),
+  deletedToast: i18n.translate('xpack.nightshift.automations.deletedToast', {
+    defaultMessage: 'Automation deleted',
+  }),
   deleteBody: i18n.translate('xpack.nightshift.automations.deleteConfirmBody', {
     defaultMessage:
       "This automation and its backing workflow will be deleted. You can't undo this action.",

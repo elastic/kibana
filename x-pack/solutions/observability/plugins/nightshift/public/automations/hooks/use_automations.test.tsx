@@ -107,7 +107,9 @@ describe('use_automations', () => {
 
     act(() => result.current.mutate(body));
 
-    await waitFor(() => expect(addSuccess).toHaveBeenCalledWith({ title: "Saved 'Triage'" }));
+    await waitFor(() =>
+      expect(addSuccess).toHaveBeenCalledWith({ title: 'Automation created', text: 'Triage' })
+    );
     expect(investigationsFetch).toHaveBeenCalledWith('POST /internal/nightshift/automations', {
       params: { body },
       signal: null,

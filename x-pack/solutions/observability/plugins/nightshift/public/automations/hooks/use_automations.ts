@@ -176,13 +176,12 @@ export const useCreateAutomation = (isClone = false) => {
       notifications.toasts.addSuccess({
         title: isClone
           ? i18n.translate('xpack.nightshift.automations.cloneSuccess', {
-              defaultMessage: "Created ''{name}'' (paused)",
-              values: { name: body.name },
+              defaultMessage: 'Automation duplicated (paused)',
             })
           : i18n.translate('xpack.nightshift.automations.createSuccess', {
-              defaultMessage: "Saved ''{name}''",
-              values: { name: body.name },
+              defaultMessage: 'Automation created',
             }),
+        text: body.name,
       })
   );
 };
@@ -206,13 +205,12 @@ export const useToggleAutomation = () => {
       notifications.toasts.addSuccess({
         title: isEnabled
           ? i18n.translate('xpack.nightshift.automations.enabledToast', {
-              defaultMessage: "Enabled ''{name}''",
-              values: { name },
+              defaultMessage: 'Automation enabled',
             })
           : i18n.translate('xpack.nightshift.automations.pausedToast', {
-              defaultMessage: "Paused ''{name}''",
-              values: { name },
+              defaultMessage: 'Automation paused',
             }),
+        text: name,
       })
   );
 };
@@ -238,9 +236,9 @@ export const useUpdateAutomation = () => {
     ({ body }) =>
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.nightshift.automations.updateSuccess', {
-          defaultMessage: "Updated ''{name}''",
-          values: { name: body.name },
+          defaultMessage: 'Automation updated',
         }),
+        text: body.name,
       })
   );
 };
