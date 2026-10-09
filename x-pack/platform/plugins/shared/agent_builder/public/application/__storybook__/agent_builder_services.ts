@@ -13,7 +13,11 @@ import {
   AttachmentType,
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
 } from '@kbn/agent-builder-common/attachments';
-import type { ImageAttachmentData, UnknownAttachment } from '@kbn/agent-builder-common/attachments';
+import type {
+  ImageAttachmentData,
+  PdfAttachmentData,
+  UnknownAttachment,
+} from '@kbn/agent-builder-common/attachments';
 import type {
   AttachmentUIDefinition,
   ConversationEventUIDefinition,
@@ -86,6 +90,13 @@ storybookAttachmentsService.addAttachmentType(
   AttachmentType.image,
   storybookImageAttachmentDefinition
 );
+
+type StorybookPdfAttachment = UnknownAttachment & { data?: Partial<PdfAttachmentData> };
+const storybookPdfAttachmentDefinition: AttachmentUIDefinition<StorybookPdfAttachment> = {
+  getLabel: ({ data, description }) => data?.name ?? description ?? 'PDF',
+  getIcon: () => 'document',
+};
+storybookAttachmentsService.addAttachmentType(AttachmentType.pdf, storybookPdfAttachmentDefinition);
 
 /**
  * Type of the attachment the inline-card stories use. Mirrors the platform's text type, which
@@ -177,6 +188,7 @@ storybookConversationEventsService.register(storyNoteWithHeaderEventDefinition);
 
 const defaultServices: AgentBuilderInternalService = {
   filesClient: storybookFilesClient,
+  pdfFilesClient: storybookFilesClient,
   agentService: {
     list: () =>
       Promise.resolve([

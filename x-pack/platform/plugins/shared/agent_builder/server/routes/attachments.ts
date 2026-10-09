@@ -35,6 +35,9 @@ const ATTACHMENT_TYPE_MAX_LENGTH = 256;
 const ATTACHMENT_ORIGIN_MAX_LENGTH = 2048;
 const ATTACHMENT_DESCRIPTION_MAX_LENGTH = 2048;
 
+// adding a PDF waits for OCR, which can take up to 3 minutes. The default socket timeout is 2 minutes.
+const CREATE_ATTACHMENT_SOCKET_TIMEOUT_MS = 4 * 60 * 1000;
+
 export function registerAttachmentRoutes({
   router,
   getInternalServices,
@@ -261,6 +264,9 @@ export function registerAttachmentRoutes({
       summary: 'Create conversation attachment',
       description: 'Create a new attachment for a conversation with version tracking.',
       options: {
+        timeout: {
+          idleSocket: CREATE_ATTACHMENT_SOCKET_TIMEOUT_MS,
+        },
         tags: ['attachment', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',

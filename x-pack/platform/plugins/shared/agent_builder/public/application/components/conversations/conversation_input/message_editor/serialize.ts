@@ -6,7 +6,12 @@
  */
 
 import { isElementCommandBadge, serializeCommandBadge } from './command_badge';
-import { IMAGE_ATTACHMENT_SCHEME, isElementImagePlaceholder } from './image_placeholder';
+import {
+  getPlaceholderKind,
+  IMAGE_ATTACHMENT_SCHEME,
+  isElementAttachmentPlaceholder,
+  PDF_ATTACHMENT_SCHEME,
+} from './attachment_placeholder';
 import { stripZeroWidthSpaces } from './utils';
 
 /**
@@ -20,7 +25,7 @@ export const encodeImageName = (name: string): string =>
 /**
  * Walks child nodes of the editor element and serializes to text.
  * Badge spans are converted to `[/label](scheme://metadataValue)`.
- * Image placeholders are converted to `[name](image://encodedName)`.
+ * Image and pdf placeholders are converted to `[name](image://encodedName)` and `[name](pdf://encodedName)`.
  * Text nodes are appended as-is, with caret-target ZWS characters stripped.
  */
 export const serializeEditorContent = (editorElement: HTMLElement): string => {
@@ -36,10 +41,12 @@ export const serializeEditorContent = (editorElement: HTMLElement): string => {
       continue;
     }
     const element = node as HTMLElement;
-    if (isElementImagePlaceholder(element)) {
+    if (isElementAttachmentPlaceholder(element)) {
       const name = element.getAttribute('aria-label') ?? '';
       const displayName = name.replace(/[\[\]]/g, '');
-      result += `[${displayName}](${IMAGE_ATTACHMENT_SCHEME}://${encodeImageName(name)})`;
+      const scheme =
+        getPlaceholderKind(element) === 'pdf' ? PDF_ATTACHMENT_SCHEME : IMAGE_ATTACHMENT_SCHEME;
+      result += `[${displayName}](${scheme}://${encodeImageName(name)})`;
     } else if (isElementCommandBadge(element)) {
       result += serializeCommandBadge(element);
     } else if (element.tagName === 'BR') {

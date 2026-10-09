@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 
-const IMAGE_LINK_RE = /\[[^\]]*\]\(image:\/\/[^)]*\)/g;
+const ATTACHMENT_LINK_RE = /\[[^\]]*\]\((?:image|pdf):\/\/[^)]*\)/g;
 
 const buildKey = (
   spaceId: string,
@@ -70,7 +70,7 @@ export const useInputDraft = ({
   const saveDraft = useCallback(
     (content: string) => {
       if (!key) return;
-      const stripped = content.replace(IMAGE_LINK_RE, '');
+      const stripped = content.replace(ATTACHMENT_LINK_RE, '');
       if (stripped.trim()) {
         writeToStorage(key, stripped);
       } else {

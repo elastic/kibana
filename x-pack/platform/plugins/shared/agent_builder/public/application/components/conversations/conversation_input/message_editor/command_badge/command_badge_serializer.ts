@@ -9,7 +9,7 @@ import type { CommandBadgeData } from './types';
 import { getCommandDefinition } from '../command_menu';
 import { COMMAND_ID_ATTRIBUTE, COMMAND_METADATA_ATTRIBUTE } from './attributes';
 import { getCommandDefinitionByScheme } from '../command_menu/command_definitions';
-import { IMAGE_ATTACHMENT_SCHEME } from '../image_placeholder';
+import { IMAGE_ATTACHMENT_SCHEME, PDF_ATTACHMENT_SCHEME } from '../attachment_placeholder';
 
 interface TextSegment {
   type: 'text';
@@ -23,7 +23,11 @@ interface ImageSegment {
   type: 'image';
   name: string;
 }
-export type ContentSegment = TextSegment | BadgeSegment | ImageSegment;
+interface PdfSegment {
+  type: 'pdf';
+  name: string;
+}
+export type ContentSegment = TextSegment | BadgeSegment | ImageSegment | PdfSegment;
 
 export class CommandBadgeSerializationError extends Error {
   constructor(message: string, options?: ErrorOptions) {
@@ -82,8 +86,8 @@ export const serializeCommandBadge = (element: HTMLElement): string => {
 const BADGE_PATTERN = /\[([^\]]+)\]\((\w+):\/\/([^?)]+)(?:\?([^)]*))?\)/g;
 
 /**
- * Parses text containing serialized badge and image markdown-links into segments.
- * Used to restore badges and image chips from serialized content.
+ * Parses text containing serialized badge, image and pdf markdown-links into segments.
+ * Used to restore badges and image and pdf chips from serialized content.
  */
 export const deserializeInputSegments = (text: string): ContentSegment[] => {
   const segments: ContentSegment[] = [];
@@ -99,9 +103,12 @@ export const deserializeInputSegments = (text: string): ContentSegment[] => {
 
     const [_, displayText, scheme, path, queryString] = match;
 
-    if (scheme === IMAGE_ATTACHMENT_SCHEME) {
+    if (scheme === IMAGE_ATTACHMENT_SCHEME || scheme === PDF_ATTACHMENT_SCHEME) {
       try {
-        segments.push({ type: 'image', name: decodeURIComponent(path) });
+        segments.push({
+          type: scheme === PDF_ATTACHMENT_SCHEME ? 'pdf' : 'image',
+          name: decodeURIComponent(path),
+        });
       } catch {
         // Malformed percent-encoding, preserve as text
         segments.push({ type: 'text', value: match[0] });

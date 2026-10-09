@@ -304,6 +304,13 @@ describe('UserMessageText', () => {
       expect(screen.getByText('photo.png')).toBeInTheDocument();
     });
 
+    it('renders a pdf badge for pdf scheme links, with the name decoded', () => {
+      renderWithProvider(<UserMessageText text="Read [My invoice.pdf](pdf://My%20invoice.pdf)" />);
+
+      expect(screen.getByText('My invoice.pdf')).toBeInTheDocument();
+      expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    });
+
     it('renders image badge alongside plain text', () => {
       renderWithProvider(
         <UserMessageText text="See [screenshot.png](image://screenshot.png) for details" />
