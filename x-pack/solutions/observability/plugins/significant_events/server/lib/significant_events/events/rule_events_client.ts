@@ -67,10 +67,10 @@ interface RuleEventSourceRow {
 type RuleEventSourceRowWithCreatedAt = RuleEventSourceRow & { created_at: string };
 
 /**
- * `.rule-events` doesn't guarantee `stream_names` is an array — bridge docs write a scalar
+ * `.rule-events` doesn't guarantee `source_ids` is an array — bridge docs write a scalar
  * string, and the field can be absent. Normalize so callers always get `string[]`.
  */
-const normalizeStreamNames = (value: unknown): string[] => {
+const normalizeSourceIds = (value: unknown): string[] => {
   if (typeof value === 'string') return [value];
   if (Array.isArray(value)) return value.filter((item): item is string => typeof item === 'string');
   return [];
@@ -88,7 +88,7 @@ const decodeSignificantEvent = (row: RuleEventSourceRow): SignificantEvent => {
   const severity = row.severity ?? 'medium';
   return {
     ...data,
-    stream_names: normalizeStreamNames(data.stream_names),
+    source_ids: normalizeSourceIds(data.source_ids),
     '@timestamp': row['@timestamp'],
     status: isSignificantEventStatus(alertStatus) ? alertStatus : 'active',
     severity: isSignificantEventSeverity(severity) ? severity : 'medium',
@@ -153,13 +153,13 @@ const eventIdIn = (eventIds: string[]): ESQLAstExpression =>
 
 /**
  * Multi-value "contains any" filter targeting `FIELD_EXTRACT(data,
- * "stream_names")` instead of a top-level column. `MV_INTERSECTS` works correctly against
+ * "source_ids")` instead of a top-level column. `MV_INTERSECTS` works correctly against
  * `FIELD_EXTRACT`'s output for array, scalar-string, and absent-field shapes (verified live
  * against `.rule-events` on nightshift-program#1492) — no extra normalization is needed here.
  */
-const streamNamesIntersects = (values: string[]): ESQLAstExpression =>
+const sourceIdsIntersects = (values: string[]): ESQLAstExpression =>
   esql.exp`MV_INTERSECTS(FIELD_EXTRACT(${esql.col('data')}, ${esql.str(
-    'stream_names'
+    'source_ids'
   )}), [${values.map((value) => esql.str(value))}])`;
 
 /**
@@ -240,8 +240,8 @@ export class RuleEventsClient {
         esql.str(severity)
       )})`;
     }
-    if (options.stream?.length) {
-      query = query.where`${streamNamesIntersects(options.stream)}`;
+    if (options.sourceIds?.length) {
+      query = query.where`${sourceIdsIntersects(options.sourceIds)}`;
     }
     if (options.eventIds?.length) {
       query = query.where`${eventIdIn(options.eventIds)}`;
@@ -337,16 +337,16 @@ export class RuleEventsClient {
 
   /**
    * Returns the latest version per `group_hash` for all active ("open") events within the given
-   * time range, optionally narrowed to candidate stream/rule identities so the scan stays
+   * time range, optionally narrowed to candidate source/rule identities so the scan stays
    * proportional to the write batch instead of the whole space. Filters on the persisted
-   * `alert.status` column instead of a top-level `status` column, and reads `stream_names` /
+   * `alert.status` column instead of a top-level `status` column, and reads `source_ids` /
    * `signals.metadata.rule_uuid` through `FIELD_EXTRACT` since both live in the flattened `data`
    * column.
    *
    * Capped at MAX_DEDUP_SCAN_LIMIT distinct active events.
    */
   async findLatestActive(
-    options: CommonSearchOptions & { streamNames?: string[]; ruleUuids?: string[] }
+    options: CommonSearchOptions & { sourceIds?: string[]; ruleUuids?: string[] }
   ): Promise<{ hits: SignificantEvent[] }> {
     let query = applyTimeRange({
       query: buildBaseQuery(this.clients.space),
@@ -360,8 +360,8 @@ export class RuleEventsClient {
       'alert.status'
     )} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((status) => esql.str(status))})`;
 
-    if (options.streamNames?.length) {
-      query = query.where`${streamNamesIntersects(options.streamNames)}`;
+    if (options.sourceIds?.length) {
+      query = query.where`${sourceIdsIntersects(options.sourceIds)}`;
     }
     if (options.ruleUuids?.length) {
       query = query.where`${ruleUuidsIntersects(options.ruleUuids)}`;

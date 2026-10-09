@@ -858,11 +858,18 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable Streams Canvas',
     },
   },
-  'observability:streamsSigEventsIndexPatterns': {
-    type: 'keyword',
+  'observability:nightshiftContinuousOnboardingEnabled': {
+    type: 'boolean',
     _meta: {
       description:
-        'Comma-separated index patterns used for Significant Events stream filtering and analysis.',
+        'Non-default value of whether continuous knowledge indicator onboarding is enabled.',
+    },
+  },
+  'observability:nightshiftContinuousOnboardingIntervalHours': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the minimum hours between continuous knowledge indicator onboarding runs per source.',
     },
   },
   'observability:streamsSigEventsScheduledDiscoveryEnabled': {

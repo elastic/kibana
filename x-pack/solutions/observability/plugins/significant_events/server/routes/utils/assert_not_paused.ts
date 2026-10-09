@@ -11,7 +11,7 @@ import { SignificantEventsPausedError } from '../../lib/errors/significant_event
 import type { SignificantEventsMaintenanceService } from '../../lib/maintenance/maintenance_service';
 
 /**
- * Blocks routes that start new background activity when the deployment is
+ * Blocks routes that start new background activity when the request's space is
  * paused. Reads the persisted state and throws a 409 when `state === 'paused'`.
  * Never apply this to the resume route, or Pause could not be undone.
  */

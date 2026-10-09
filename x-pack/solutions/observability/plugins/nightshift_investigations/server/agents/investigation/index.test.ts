@@ -68,8 +68,8 @@ describe('Nightshift investigation agent type', () => {
     expect(base.instructions).toContain('<alert_data>');
     expect(base.instructions).toContain('Affected entity');
     expect(base.instructions).not.toContain('inputs.context.alerts');
-    expect(base.instructions).toContain('FROM $.<stream-name>');
-    expect(base.instructions).toContain('FROM <stream-name>, <stream-name>.*');
+    expect(base.instructions).toContain('`- <slug> (id <id>): FROM <view_name>`');
+    expect(base.instructions).toContain('FROM <view_name> | LIMIT 0');
   });
 
   it('adds Semantic Memory context and workflows when memory is enabled', () => {

@@ -60,8 +60,8 @@ const pauseRoute = createServerRoute({
     access: 'internal',
     summary: 'Pause Significant Events activity',
     description:
-      'Disables all Significant Events managed workflows across every Kibana space, cancels their in-flight executions, and disables the alerting rules backing knowledge indicator queries. Existing data is kept. Idempotent while paused. ' +
-      'This is a deployment-wide control (agnostic saved object), not per-space. Authorization uses the caller’s space-scoped Nightshift manage privilege; there is no separate cluster-level privilege today — treat manage as sufficient to pause the whole deployment. ' +
+      'Pauses Significant Events activity in the current space only: disables that space’s scheduled workflows, cancels their in-flight executions (including executions of the shared workflows running in that space), turns off its continuous onboarding and scheduled discovery settings, and disables the alerting rules backing knowledge indicator queries in that space. Other spaces are not affected. The shared workflows stay enabled because every space uses them. Existing data is kept. Idempotent while paused. ' +
+      'The state is stored per space. Authorization uses the caller’s space-scoped Nightshift manage privilege, which is enough to pause that space. ' +
       'Stays available while the Nightshift feature flag is off, so background activity can be stopped without turning Nightshift back on.',
   },
   security: {
@@ -90,7 +90,7 @@ const resumeRoute = createServerRoute({
     access: 'internal',
     summary: 'Resume Significant Events activity',
     description:
-      'Re-enables the managed workflows and alerting rules that Pause disabled across the deployment. Does not restart cancelled executions. Idempotent while enabled.',
+      'Re-enables the workflows and alerting rules that Pause disabled in the current space, and restores the settings it turned off there. Other spaces are not affected. Does not restart cancelled executions. Idempotent while enabled.',
   },
   security: {
     authz: {
@@ -119,7 +119,7 @@ const resetRoute = createServerRoute({
     summary: 'Reset Significant Events activity and data',
     description:
       'Cancels Significant Events activity and permanently deletes generated data across every Kibana space. The operation is best-effort, irreversible, and idempotent. ' +
-      'This is a deployment-wide control (agnostic saved object), not per-space. Authorization requires the caller’s space-scoped Nightshift manage and configure privileges; there is no separate cluster-level privilege today. As with pause, the workflow and settings sweep covers the spaces visible to the caller. ' +
+      'Unlike pause and resume, this is deployment-wide: every space is paused while the data is deleted and returned to enabled afterwards. Authorization requires the Nightshift manage and configure privileges in every space, not only the one the request is sent to, and the request is rejected with 403 before anything changes when any space lacks them; there is no separate cluster-level privilege today. The workflow and settings sweep covers every space, and spaces that were already paused are returned to enabled too. If the final write fails in a space after the data was deleted, that space stays paused and the error names it; run reset again to return it to enabled. ' +
       'Data streams are refreshed and deleted as the calling user and recreated by the Kibana system user, so the caller also needs the Elasticsearch `delete_index` and `maintenance` index privileges on `.significant_events-*`; missing privileges are reported in `partialFailures` rather than as an error status. ' +
       'NOTE: Significant Events documents stored in `.rule-events` (owned by alerting_v2) are NOT cleared by this operation. Alerting v2 does not yet expose a scoped delete-by-source API; a direct deleteByQuery on the shared stream would bypass the owner abstraction and require delete privileges not granted by the Nightshift manage+configure role, failing silently for non-admins. Track the follow-up in the alerting_v2 team.',
   },
@@ -149,7 +149,7 @@ const statusRoute = createServerRoute({
     access: 'internal',
     summary: 'Get Significant Events maintenance status',
     description:
-      'Returns the current maintenance state of Significant Events activity (e.g. enabled or paused). Stays available while the Nightshift feature flag is off.',
+      'Returns the maintenance state of Significant Events activity in the current space (e.g. enabled or paused). Stays available while the Nightshift feature flag is off.',
   },
   security: {
     authz: {

@@ -136,11 +136,11 @@ describe('NightshiftPage', () => {
     await openAppMenuOverflow();
 
     const managementLink = await screen.findByTestId('nightshiftManagementLink');
-    expect(managementLink).toHaveAttribute('href', '/app/significant_events/streams');
+    expect(managementLink).toHaveAttribute('href', '/app/significant_events/sources');
 
     await act(async () => fireEvent.click(managementLink));
 
-    expect(navigateToUrl).toHaveBeenCalledWith('/app/significant_events/streams');
+    expect(navigateToUrl).toHaveBeenCalledWith('/app/significant_events/sources');
   });
 
   it('hides the settings link without both Nightshift manage and configure', async () => {

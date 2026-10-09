@@ -6,15 +6,7 @@
  */
 
 import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
-import {
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
-} from '@kbn/management-settings-ids';
-import {
-  SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-} from '@kbn/workflows/managed';
+import { SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../knowledge_indicators';
 import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
 import { DETECTIONS_DATA_STREAM } from '../significant_events/detections/data_stream';
@@ -24,7 +16,13 @@ import {
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
 } from './saved_object';
 import {
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+} from '@kbn/management-settings-ids';
+import {
   REQUEST,
+  cleanupDocumentId,
+  continuousDocumentId,
   makeManagementApi,
   makeV2RulesClient,
   makeService,
@@ -48,11 +46,11 @@ describe('SignificantEventsMaintenanceService', () => {
         management: api,
         indicatorStreams: ['logs.web'],
         ownedRuleStreams: ['logs.web', 'logs.orphan'],
-        queryLinksByStream: {
+        queryLinksBySource: {
           'logs.web': [{ rule_backed: true, rule_id: 'linked-rule' }, { rule_backed: false }],
         },
         knowledgeIndicatorCounts: { [KI_TYPE_FEATURE]: 2, [KI_TYPE_QUERY]: 2 },
-        ownedRuleIdsByStream: {
+        ownedRuleIdsBySource: {
           'logs.web': ['linked-rule', 'owned-rule'],
           'logs.orphan': ['orphan-rule'],
         },
@@ -125,16 +123,14 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(soClient.create.mock.invocationCallOrder[0]).toBeLessThan(
         esClient.indices.deleteDataStream.mock.invocationCallOrder[0]
       );
-      expect(soClient.create).toHaveBeenLastCalledWith(
+      // The space was never paused, so the document reset created to block it is removed
+      // again once there is nothing left to restore.
+      expect(soClient.delete).toHaveBeenCalledWith(
         SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-        expect.objectContaining({
-          state: 'enabled',
-          updatedBy: 'marco',
-          disabledWorkflows: [],
-          disabledRuleIds: [],
-        }),
-        { id: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID, overwrite: true }
+        SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID
       );
+      expect(soClient.readDocument('default')).toBeUndefined();
+      await expect(service.getState({ request: REQUEST })).resolves.toBe('enabled');
     });
 
     it('initializes missing registered streams and reports a clean zero-count reset', async () => {
@@ -269,7 +265,7 @@ describe('SignificantEventsMaintenanceService', () => {
 
     it('restores non-settings workflows after a paused reset but leaves settings-backed workflows off', async () => {
       const { api, updateWorkflow } = makeManagementApi();
-      const { service, globalUiSettingsClient, spaceUiSettingsClient, soClient } = makeService({
+      const { service, spaceUiSettingsClient, soClient } = makeService({
         management: api,
         continuousOnboardingEnabled: true,
         scheduledDiscoveryEnabled: true,
@@ -283,15 +279,14 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(summary.state).toBe('enabled');
       expect(summary.workflowsDisabled).toBe(0);
       expect(updateWorkflow).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+        cleanupDocumentId('default'),
         { enabled: true },
         expect.any(String),
         REQUEST
       );
       expect(
         updateWorkflow.mock.calls.some(
-          ([id, patch]) =>
-            id === SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID && patch.enabled === true
+          ([id, patch]) => id === continuousDocumentId('default') && patch.enabled === true
         )
       ).toBe(false);
       expect(
@@ -302,7 +297,7 @@ describe('SignificantEventsMaintenanceService', () => {
         )
       ).toBe(false);
       expect(
-        globalUiSettingsClient._store.get(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED)
+        spaceUiSettingsClient._store.get(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED)
       ).toBe(false);
       expect(
         spaceUiSettingsClient._store.get(
@@ -324,10 +319,10 @@ describe('SignificantEventsMaintenanceService', () => {
       const summary = await service.reset({ request: REQUEST });
 
       expect(summary.partialFailures).toContainEqual(
-        expect.objectContaining({ target: 'settings:continuous-onboarding' })
+        expect.objectContaining({ target: 'settings:continuous-onboarding@default' })
       );
       expect(updateWorkflow).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+        continuousDocumentId('default'),
         { enabled: true },
         expect.any(String),
         REQUEST
@@ -342,7 +337,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(summary.workflowsDisabled).toBe(0);
     });
 
-    it('leaves a settings-backed workflow off when its toggle write fails but the toggle is already off', async () => {
+    it('leaves the continuous onboarding document off when its toggle was already off', async () => {
       const { api, updateWorkflow } = makeManagementApi();
       const { service } = makeService({
         management: api,
@@ -352,19 +347,43 @@ describe('SignificantEventsMaintenanceService', () => {
 
       const summary = await service.reset({ request: REQUEST });
 
-      expect(summary.partialFailures).toContainEqual(
-        expect.objectContaining({ target: 'settings:continuous-onboarding' })
+      // The toggle reads off, so no write is attempted and nothing needs restoring.
+      expect(summary.partialFailures).not.toContainEqual(
+        expect.objectContaining({ target: 'settings:continuous-onboarding@default' })
       );
       expect(
         updateWorkflow.mock.calls.some(
-          ([id, patch]) =>
-            id === SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID && patch.enabled === true
+          ([id, patch]) => id === continuousDocumentId('default') && patch.enabled === true
         )
       ).toBe(false);
     });
 
+    it('restores the continuous onboarding document only in spaces whose toggle is still on', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, getInternalSpaceUiSettingsClient } = makeService({
+        management: api,
+        spaceIds: ['default', 'space-a'],
+        continuousOnboardingEnabled: true,
+      });
+      // Only space-a refuses to turn the toggle off.
+      const spaceA = getInternalSpaceUiSettingsClient('space-a');
+      spaceA.set.mockImplementation(async (key: string) => {
+        if (key === OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED) {
+          throw new Error('set failed for continuous');
+        }
+      });
+
+      await service.reset({ request: REQUEST });
+
+      const reEnabledIds = updateWorkflow.mock.calls
+        .filter(([, patch]) => patch.enabled === true)
+        .map(([id]) => id);
+      expect(reEnabledIds).toContain(continuousDocumentId('space-a'));
+      expect(reEnabledIds).not.toContain(continuousDocumentId('default'));
+    });
+
     it('keeps failed workflow re-enables as retry inventory for Resume', async () => {
-      const failEnableFor: { id?: string } = { id: SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID };
+      const failEnableFor: { id?: string } = { id: cleanupDocumentId('default') };
       const { api, updateWorkflow } = makeManagementApi({ failEnableFor });
       const { service, soClient } = makeService({ management: api });
 
@@ -372,9 +391,17 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(resetSummary.state).toBe('enabled');
       expect(resetSummary.workflowsDisabled).toBe(1);
       expect(resetSummary.partialFailures).toContainEqual({
-        target: expect.stringContaining(SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID),
+        spaceId: 'default',
+        target: expect.stringContaining(cleanupDocumentId('default')),
         error: expect.stringContaining('enable failed'),
       });
+      // What could not be restored stays on the space's document, even though reset created it.
+      expect(soClient.readDocument('default')).toEqual(
+        expect.objectContaining({
+          state: 'enabled',
+          disabledWorkflows: [{ id: cleanupDocumentId('default'), spaceId: 'default' }],
+        })
+      );
 
       failEnableFor.id = undefined;
       updateWorkflow.mockClear();
@@ -382,7 +409,7 @@ describe('SignificantEventsMaintenanceService', () => {
 
       expect(resumeSummary.workflowsDisabled).toBe(0);
       expect(updateWorkflow).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+        cleanupDocumentId('default'),
         { enabled: true },
         expect.any(String),
         REQUEST
@@ -411,7 +438,7 @@ describe('SignificantEventsMaintenanceService', () => {
         management: api,
         v2RulesClient,
         ownedRuleStreams: ['logs.rules'],
-        ownedRuleIdsByStream: {
+        ownedRuleIdsBySource: {
           'logs.rules': ['ok-rule', 'missing-rule', 'failed-rule'],
         },
       });
@@ -420,6 +447,7 @@ describe('SignificantEventsMaintenanceService', () => {
 
       expect(summary.deleted?.rules).toBe(1);
       expect(summary.partialFailures).toContainEqual({
+        spaceId: 'default',
         target: 'rule:failed-rule',
         error: 'delete failed',
       });
@@ -447,7 +475,7 @@ describe('SignificantEventsMaintenanceService', () => {
         v2RulesClient,
         ruleBackedRuleIds: ['paused-rule'],
         ownedRuleStreams: ['logs.rules'],
-        ownedRuleIdsByStream: { 'logs.rules': ['new-rule'] },
+        ownedRuleIdsBySource: { 'logs.rules': ['new-rule'] },
       });
       await service.pause({ request: REQUEST });
 
@@ -457,7 +485,10 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(summary.rulesDisabled).toBe(1);
       expect(soClient.create).toHaveBeenLastCalledWith(
         SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
-        expect.objectContaining({ state: 'enabled', disabledRuleIds: ['paused-rule'] }),
+        expect.objectContaining({
+          state: 'enabled',
+          disabledRules: [{ id: 'paused-rule', spaceId: 'default' }],
+        }),
         expect.anything()
       );
     });
@@ -499,6 +530,39 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
     });
 
+    it('aborts before destructive work when a toggle cannot be read, instead of treating it as off', async () => {
+      const { api } = makeManagementApi();
+      const { service, esClient, getInternalSpaceUiSettingsClient } = makeService({
+        management: api,
+        continuousOnboardingEnabled: true,
+      });
+      getInternalSpaceUiSettingsClient('default').get.mockRejectedValueOnce(
+        new Error('settings read failed')
+      );
+
+      await expect(service.reset({ request: REQUEST })).rejects.toThrow('settings read failed');
+
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+    });
+
+    it('rejects a caller who cannot manage every space before changing anything', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, soClient, esClient } = makeService({
+        management: api,
+        spaceIds: ['default', 'space-a'],
+        unauthorizedSpaceIds: ['space-a'],
+      });
+
+      await expect(service.reset({ request: REQUEST })).rejects.toMatchObject({
+        output: { statusCode: 403 },
+        message: expect.stringContaining('"space-a"'),
+      });
+
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(updateWorkflow).not.toHaveBeenCalled();
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+    });
+
     it('persists the swept workflows while still paused before destroying data', async () => {
       const { api } = makeManagementApi();
       const { service, soClient, esClient } = makeService({
@@ -514,7 +578,7 @@ describe('SignificantEventsMaintenanceService', () => {
       };
       expect(inventoryWrite.state).toBe('paused');
       expect(inventoryWrite.disabledWorkflows.map(({ id }) => id)).toContain(
-        SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID
+        cleanupDocumentId('default')
       );
       expect(soClient.create.mock.invocationCallOrder[1]).toBeLessThan(
         esClient.indices.deleteDataStream.mock.invocationCallOrder[0]
@@ -535,13 +599,13 @@ describe('SignificantEventsMaintenanceService', () => {
 
       // The sweep is rolled back so the unrecorded workflows are not stranded.
       expect(updateWorkflow).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+        cleanupDocumentId('default'),
         { enabled: false },
         expect.any(String),
         REQUEST
       );
       expect(updateWorkflow).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+        cleanupDocumentId('default'),
         { enabled: true },
         expect.any(String),
         REQUEST
@@ -550,7 +614,8 @@ describe('SignificantEventsMaintenanceService', () => {
     });
 
     it('throws when the final maintenance state write fails after destructive side effects', async () => {
-      const { api } = makeManagementApi();
+      // A workflow that cannot be restored stays on the document, so the final write is needed.
+      const { api } = makeManagementApi({ failEnableFor: cleanupDocumentId('default') });
       const { service, soClient, esClient } = makeService({
         management: api,
         dataStreams: {
@@ -563,7 +628,9 @@ describe('SignificantEventsMaintenanceService', () => {
         .mockResolvedValueOnce({} as never) // swept inventory
         .mockRejectedValueOnce(new Error('reset state write failed'));
 
-      await expect(service.reset({ request: REQUEST })).rejects.toThrow('reset state write failed');
+      await expect(service.reset({ request: REQUEST })).rejects.toThrow(
+        'Significant Events reset persist failed in space: "default" (reset state write failed). The data was already deleted and these spaces stay paused; run Reset again to return them to enabled'
+      );
       expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith(
         {
           name: DETECTIONS_DATA_STREAM,

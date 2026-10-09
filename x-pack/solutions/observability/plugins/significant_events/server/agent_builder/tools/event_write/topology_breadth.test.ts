@@ -11,14 +11,14 @@ import { computeTopologyBreadth, computeTopologyFanOut, hasCascadePath } from '.
 const causalFeature = (featureId: string): CausalFeature => ({
   feature_id: featureId,
   name: featureId,
-  stream_name: 'logs.test',
+  source_id: 'logs.test',
 });
 
 const blastRadiusEntity = (featureId: string): BlastRadiusEntry => ({
   type: 'entity',
   feature_id: featureId,
   name: featureId,
-  stream_name: 'logs.test',
+  source_id: 'logs.test',
 });
 
 const dependencyEntry = (
@@ -30,7 +30,7 @@ const dependencyEntry = (
   feature_id: featureId,
   source,
   target,
-  stream_name: 'logs.test',
+  source_id: 'logs.test',
 });
 
 describe('computeTopologyBreadth', () => {

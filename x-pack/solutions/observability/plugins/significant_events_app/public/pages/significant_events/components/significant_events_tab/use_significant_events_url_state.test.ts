@@ -36,7 +36,7 @@ describe('useSignificantEventsUrlState', () => {
 
       expect(result.current.statusFilter).toEqual(['active']);
       expect(result.current.severityFilter).toEqual(['critical', 'high']);
-      expect(result.current.streamFilter).toEqual([]);
+      expect(result.current.sourceFilter).toEqual([]);
       expect(result.current.serviceFilter).toEqual([]);
     });
 
@@ -59,8 +59,18 @@ describe('useSignificantEventsUrlState', () => {
 
       expect(result.current.statusFilter).toEqual(['inactive']);
       expect(result.current.severityFilter).toEqual(['medium', 'low']);
-      expect(result.current.streamFilter).toEqual(['logs']);
+      expect(result.current.sourceFilter).toEqual(['logs']);
       expect(result.current.serviceFilter).toEqual(['svc-a', 'svc-b']);
+    });
+
+    it('reads the source param and prefers it over the legacy stream param', () => {
+      mockQuery = { source: ['logs'] };
+      const { result, rerender } = renderHook(() => useSignificantEventsUrlState());
+      expect(result.current.sourceFilter).toEqual(['logs']);
+
+      mockQuery = { source: 'metrics', stream: 'logs' };
+      rerender();
+      expect(result.current.sourceFilter).toEqual(['metrics']);
     });
 
     it('drops unknown values and canonicalises the order', () => {
@@ -98,7 +108,7 @@ describe('useSignificantEventsUrlState', () => {
           openEvent: 'event-1',
           status: ['inactive'],
           severity: 'low',
-          stream: ['logs'],
+          source: ['logs'],
         },
       });
     });
@@ -106,12 +116,12 @@ describe('useSignificantEventsUrlState', () => {
     it('leaves untouched filters absent so they keep meaning "default"', () => {
       const { result } = renderHook(() => useSignificantEventsUrlState());
 
-      act(() => result.current.setFilters({ stream: ['logs'] }));
+      act(() => result.current.setFilters({ source: ['logs'] }));
 
       expect(lastReplaceQuery()).toEqual({
         rangeFrom: 'now-24h',
         rangeTo: 'now',
-        stream: ['logs'],
+        source: ['logs'],
       });
     });
 
@@ -127,7 +137,7 @@ describe('useSignificantEventsUrlState', () => {
       mockQuery = { stream: ['logs'] };
       const { result } = renderHook(() => useSignificantEventsUrlState());
 
-      act(() => result.current.setFilters({ stream: [] }));
+      act(() => result.current.setFilters({ source: [] }));
 
       expect(lastReplaceQuery()).not.toHaveProperty('stream');
     });
@@ -138,8 +148,8 @@ describe('useSignificantEventsUrlState', () => {
       act(() => result.current.setFilters({ service: ['svc-a'] }));
       expect(lastReplaceQuery()).toMatchObject({ service: ['svc-a'] });
 
-      act(() => result.current.setFilters({ stream: ['logs'] }));
-      expect(lastReplaceQuery()).toMatchObject({ service: ['svc-a'], stream: ['logs'] });
+      act(() => result.current.setFilters({ source: ['logs'] }));
+      expect(lastReplaceQuery()).toMatchObject({ service: ['svc-a'], source: ['logs'] });
 
       act(() => result.current.setFilters({ service: [] }));
       expect(lastReplaceQuery()).not.toHaveProperty('service');
@@ -153,7 +163,7 @@ describe('useSignificantEventsUrlState', () => {
 
       act(() =>
         result.current.setFilters(
-          { status: ['active'], severity: ['medium'], stream: ['logs'] },
+          { status: ['active'], severity: ['medium'], source: ['logs'] },
           { keepSelectedEvent: true }
         )
       );
@@ -163,7 +173,7 @@ describe('useSignificantEventsUrlState', () => {
         openEvent: 'event-1',
         status: ['active'],
         severity: ['medium'],
-        stream: ['logs'],
+        source: ['logs'],
       });
     });
 

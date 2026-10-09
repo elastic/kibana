@@ -64,7 +64,7 @@ const collectStepsByType = (steps: WorkflowStep[], type: string): WorkflowStep[]
 describe('Nightshift investigation workflow', () => {
   it('persists the shared investigation output without sig-events write-back', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.id).toBe('system-nightshift-investigation');
-    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(2);
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(3);
     expect(investigation.name).toBe('Nightshift Investigation');
     expect(investigation.steps.map((step) => step.name)).toEqual([
       'resolve_model',
@@ -72,6 +72,8 @@ describe('Nightshift investigation workflow', () => {
       'persist_investigation_started',
       'emit_investigation_started',
       'notify_started',
+      'list_investigation_sources',
+      'resolve_investigation_sources',
       'investigate',
       'persist_investigation_completed',
       'render_investigation_canvas',
@@ -172,6 +174,10 @@ describe('Nightshift investigation workflow', () => {
     });
   });
 
+  it('loads every requested source on one page', () => {
+    expect(requireStep('list_investigation_sources').with?.path).toContain('per_page=100&');
+  });
+
   it('passes WorkflowSchema normalization', () => {
     const result = WorkflowSchema.safeParse(parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml));
     expect(result.success ? null : result.error.issues).toBeNull();
@@ -255,7 +261,10 @@ describe('Nightshift investigation workflow', () => {
   });
 
   it('addresses a continued investigation by its id rather than the run', () => {
-    const requestSteps = collectStepsByType(investigation.steps, 'kibana.request');
+    // The source lookup lists sources by id and never touches the investigation document.
+    const requestSteps = collectStepsByType(investigation.steps, 'kibana.request').filter(
+      ({ name }) => name !== 'list_investigation_sources'
+    );
 
     for (const { with: params } of requestSteps) {
       expect(params?.path).toContain('{{ inputs.investigation_id | default: execution.id }}');

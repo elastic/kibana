@@ -6,7 +6,6 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { Streams } from '@kbn/streams-schema';
 import {
   createQueryValidationContext,
   validateKIQueries,
@@ -17,6 +16,7 @@ import {
   createMockToolContext,
   createSignificantEventsServer,
   invokeHandler,
+  mockSourcesClient,
 } from '../../../utils/test_helpers';
 import { createValidateQueriesTool } from './tool';
 
@@ -33,26 +33,15 @@ const validateKIQueriesMock = validateKIQueries as jest.MockedFunction<typeof va
 
 describe('ki_queries_validate tool', () => {
   const logger = loggingSystemMock.createLogger();
-  const stream: Streams.QueryStream.Definition = {
-    name: 'logs.test',
-    description: 'Test logs',
-    type: 'query',
-    updated_at: new Date().toISOString(),
-    query: {
-      view: '$.logs.test',
-      esql: 'FROM $.logs.test',
-    },
-  };
   const streamDataEsClient = { esql: { query: jest.fn() } };
-  const getStream = jest.fn().mockResolvedValue(stream);
   const getFeatures = jest.fn();
-  const getStreamToQueryLinksMap = jest.fn();
+  const getSourceToQueryLinksMap = jest.fn();
   const getScopedClients = jest.fn(async () => {
     return {
-      streamsClient: { getStream },
+      sourcesClient: mockSourcesClient(['logs.test']),
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
         getFeatures,
-        getStreamToQueryLinksMap,
+        getSourceToQueryLinksMap,
       }),
       streamDataEsClient,
       tuningConfig: { query_validation_timeout_ms: 12_000 },
@@ -85,7 +74,7 @@ describe('ki_queries_validate tool', () => {
     getFeatures.mockResolvedValue({
       hits: [{ id: 'feature-1', run_id: 'run-1', type: 'entity' }],
     });
-    getStreamToQueryLinksMap.mockResolvedValue({
+    getSourceToQueryLinksMap.mockResolvedValue({
       'logs.test': [
         {
           query: {
@@ -127,36 +116,33 @@ describe('ki_queries_validate tool', () => {
     }
 
     const { expects_matches: _expectsMatches, ...withoutIntent } = candidate;
-    expect(tool.schema.safeParse({ target_id: 'logs.test', queries: [candidate] }).success).toBe(
+    expect(tool.schema.safeParse({ slug: 'logs.test', queries: [candidate] }).success).toBe(true);
+    expect(tool.schema.safeParse({ slug: 'logs.test', queries: [withoutIntent] }).success).toBe(
       true
     );
+    expect(tool.schema.safeParse({ slug: 'logs.test', queries: [] }).success).toBe(true);
     expect(
-      tool.schema.safeParse({ target_id: 'logs.test', queries: [withoutIntent] }).success
-    ).toBe(true);
-    expect(tool.schema.safeParse({ target_id: 'logs.test', queries: [] }).success).toBe(true);
-    expect(
-      tool.schema.safeParse({ target_id: 'logs.test', queries: Array(101).fill(candidate) }).success
+      tool.schema.safeParse({ slug: 'logs.test', queries: Array(101).fill(candidate) }).success
     ).toBe(false);
   });
 
   it('resolves an analysis target, queries KI state, and returns validated results', async () => {
     const result = await invokeHandler(
       createTool(),
-      { target_id: 'logs.test', queries: [candidate] },
+      { slug: 'logs.test', queries: [candidate] },
       createMockToolContext()
     );
     if (!('results' in result)) {
       throw new Error('Expected a standard tool result');
     }
 
-    expect(getStream).toHaveBeenCalledWith('logs.test');
     expect(getFeatures).toHaveBeenCalledWith('logs.test', {
       featureIds: ['feature-1'],
       excludedType: ['log_samples'],
     });
     expect(createQueryValidationContextMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        sources: ['$.logs.test'],
+        sources: ['$.nightshift.sources.default.logs.test'],
         esClient: streamDataEsClient,
         existingQueries: [
           expect.objectContaining({
@@ -180,7 +166,9 @@ describe('ki_queries_validate tool', () => {
       {
         type: 'other',
         data: {
-          target_id: 'logs.test',
+          slug: 'logs.test',
+          title: 'logs.test',
+          view_name: '$.nightshift.sources.default.logs.test',
           queries: [{ query: candidate, valid: true, status: 'Added' }],
           finalized: true,
           finalized_queries: [
@@ -210,7 +198,7 @@ describe('ki_queries_validate tool', () => {
 
     const result = await invokeHandler(
       createTool(),
-      { target_id: 'logs.test', queries: [candidate] },
+      { slug: 'logs.test', queries: [candidate] },
       createMockToolContext()
     );
     if (!('results' in result)) {
@@ -221,7 +209,9 @@ describe('ki_queries_validate tool', () => {
       {
         type: 'other',
         data: {
-          target_id: 'logs.test',
+          slug: 'logs.test',
+          title: 'logs.test',
+          view_name: '$.nightshift.sources.default.logs.test',
           queries: [{ query: candidate, valid: false, status: 'Failed to add' }],
           finalized: false,
         },
@@ -229,22 +219,25 @@ describe('ki_queries_validate tool', () => {
     ]);
   });
 
-  it('finalizes an explicit empty batch without loading target state', async () => {
+  it('finalizes an explicit empty batch with the resolved source and no KI reads', async () => {
     const result = await invokeHandler(
       createTool(),
-      { target_id: 'logs.test', queries: [] },
+      { slug: 'logs.test', queries: [] },
       createMockToolContext()
     );
     if (!('results' in result)) {
       throw new Error('Expected a standard tool result');
     }
 
-    expect(getScopedClients).not.toHaveBeenCalled();
+    expect(getFeatures).not.toHaveBeenCalled();
+    expect(getSourceToQueryLinksMap).not.toHaveBeenCalled();
     expect(result.results).toEqual([
       {
         type: 'other',
         data: {
-          target_id: 'logs.test',
+          slug: 'logs.test',
+          title: 'logs.test',
+          view_name: '$.nightshift.sources.default.logs.test',
           queries: [],
           finalized: true,
           finalized_queries: [],
@@ -253,12 +246,27 @@ describe('ki_queries_validate tool', () => {
     ]);
   });
 
+  it('rejects an empty batch for an unknown slug instead of finalizing it', async () => {
+    const result = await invokeHandler(
+      createTool(),
+      { slug: 'logs.missing', queries: [] },
+      createMockToolContext()
+    );
+    if (!('results' in result)) {
+      throw new Error('Expected a standard tool result');
+    }
+
+    expect(result.results).toEqual([
+      { type: 'error', data: { message: 'Source not found in this space: logs.missing' } },
+    ]);
+  });
+
   it('returns an Agent Builder error result when state loading fails', async () => {
     getFeatures.mockRejectedValueOnce(new Error('KI storage unavailable'));
 
     const result = await invokeHandler(
       createTool(),
-      { target_id: 'logs.test', queries: [candidate] },
+      { slug: 'logs.test', queries: [candidate] },
       createMockToolContext()
     );
     if (!('results' in result)) {
@@ -279,7 +287,7 @@ describe('ki_queries_validate tool', () => {
 
     const result = await invokeHandler(
       tool,
-      { target_id: 'logs.test', queries: [] },
+      { slug: 'logs.test', queries: [] },
       createMockToolContext()
     );
 

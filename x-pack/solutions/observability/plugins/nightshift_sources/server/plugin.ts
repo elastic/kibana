@@ -18,6 +18,7 @@ import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { NIGHTSHIFT_FEATURE_ID } from '@kbn/nightshift-shared';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { EsqlViewsClient } from './lib/esql_views_client';
+import { createSourceChangeEmitter, type SourceChangeEmitter } from './lib/source_change_emitter';
 import { SourcesClient } from './lib/sources_client';
 import { nightshiftSourcesRouteRepository } from './routes';
 import {
@@ -33,7 +34,8 @@ import type {
 const createSourcesClient = (
   core: CoreStart,
   request: KibanaRequest,
-  logger: Logger
+  logger: Logger,
+  sourceChangeEmitter: SourceChangeEmitter
 ): SourcesClient => {
   // Hidden types are left out of the scoped client unless named. Nightshift `all` / `read`
   // grant this type, so the security extension authorizes the call and writes the audit event.
@@ -57,6 +59,7 @@ const createSourcesClient = (
     logger,
     username: core.security.authc.getCurrentUser(request)?.username ?? '<system>',
     spaceId: request.spaceId,
+    onChange: (change) => sourceChangeEmitter.emit({ ...change, request }),
   });
 };
 
@@ -65,10 +68,12 @@ export class NightshiftSourcesPlugin
 {
   private readonly logger: Logger;
   private readonly isDev: boolean;
+  private readonly sourceChangeEmitter: SourceChangeEmitter;
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
     this.isDev = context.env.mode.dev;
+    this.sourceChangeEmitter = createSourceChangeEmitter(this.logger.get('source-changes'));
   }
 
   public setup(core: CoreSetup): NightshiftSourcesServerSetup {
@@ -76,7 +81,12 @@ export class NightshiftSourcesPlugin
 
     const getSourcesClient: GetSourcesClient = async ({ request }) => {
       const [coreStart] = await core.getStartServices();
-      return createSourcesClient(coreStart, request, this.logger.get('sources'));
+      return createSourcesClient(
+        coreStart,
+        request,
+        this.logger.get('sources'),
+        this.sourceChangeEmitter
+      );
     };
 
     registerRoutes({
@@ -86,6 +96,8 @@ export class NightshiftSourcesPlugin
       logger: this.logger,
       runDevModeChecks: this.isDev,
     });
+
+    return { onSourceChange: this.sourceChangeEmitter.subscribe };
   }
 
   public start(
@@ -107,7 +119,7 @@ export class NightshiftSourcesPlugin
 
     return {
       getSourcesClient: async ({ request }) =>
-        createSourcesClient(core, request, this.logger.get('sources')),
+        createSourcesClient(core, request, this.logger.get('sources'), this.sourceChangeEmitter),
     };
   }
 

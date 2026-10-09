@@ -47,8 +47,10 @@ jest.mock('../../hooks/use_significant_events_app_params', () => ({
 }));
 jest.mock('../../hooks/use_significant_events_app_router', () => ({
   useSignificantEventsAppRouter: () => ({
-    link: (path: string, params?: { path: { tab: string } }) =>
-      params ? `/${params.path.tab}` : path,
+    link: (path: string, params?: { path?: { tab: string }; query?: Record<string, string> }) =>
+      params?.path
+        ? `/${params.path.tab}`
+        : `${path}${params?.query ? `?${new URLSearchParams(params.query)}` : ''}`,
   }),
 }));
 jest.mock('../../hooks/use_significant_events_availability', () => ({
@@ -109,8 +111,8 @@ jest.mock('./components/knowledge_indicators_table', () => ({
 jest.mock('./components/queries_table/queries_table', () => ({
   QueriesTable: () => null,
 }));
-jest.mock('./components/streams_view/streams_view', () => ({
-  StreamsView: () => <div data-test-subj="streams-tab-content" />,
+jest.mock('./components/sources_view/sources_view', () => ({
+  SourcesView: () => <div data-test-subj="sources-tab-content" />,
 }));
 jest.mock('./components/cortex/tab', () => ({
   CortexTab: () => <div data-test-subj="cortex-tab-content" />,
@@ -189,14 +191,14 @@ describe('SignificantEventsPage developer mode', () => {
   });
 
   it('hides the Detections tab when developer mode is off', () => {
-    setup({ tab: 'streams', isDeveloperMode: false });
+    setup({ tab: 'sources', isDeveloperMode: false });
 
-    expect(screen.getByTestId('app-header-tab-streams')).toBeInTheDocument();
+    expect(screen.getByTestId('app-header-tab-sources')).toBeInTheDocument();
     expect(screen.queryByTestId('app-header-tab-detections')).not.toBeInTheDocument();
   });
 
   it('shows the Detections tab with a code icon badge when developer mode is on', () => {
-    setup({ tab: 'streams', isDeveloperMode: true });
+    setup({ tab: 'sources', isDeveloperMode: true });
 
     const detectionsTab = screen.getByTestId('app-header-tab-detections');
     expect(detectionsTab).toBeInTheDocument();
@@ -206,7 +208,7 @@ describe('SignificantEventsPage developer mode', () => {
   it('redirects /detections away when developer mode is off', () => {
     setup({ tab: 'detections', isDeveloperMode: false });
 
-    expect(screen.getByTestId('redirect-to')).toHaveTextContent('streams');
+    expect(screen.getByTestId('redirect-to')).toHaveTextContent('sources');
     expect(screen.queryByTestId('detections-tab-content')).not.toBeInTheDocument();
   });
 });
@@ -255,7 +257,7 @@ describe('SignificantEventsPage gated tabs', () => {
       settleGates({ [tab]: { isEnabled: false, isLoading: false } });
       setup({ tab, isDeveloperMode: false });
 
-      expect(screen.getByTestId('redirect-to')).toHaveTextContent('streams');
+      expect(screen.getByTestId('redirect-to')).toHaveTextContent('sources');
     }
   );
 
@@ -263,9 +265,9 @@ describe('SignificantEventsPage gated tabs', () => {
     // Only the gate that governs the requested tab matters. Making every cold load
     // wait for all three would blank the page for tabs that need none of them.
     settleGates({ memory: { isEnabled: false, isLoading: true } });
-    setup({ tab: 'streams', isDeveloperMode: false });
+    setup({ tab: 'sources', isDeveloperMode: false });
 
-    expect(screen.getByTestId('streams-tab-content')).toBeInTheDocument();
+    expect(screen.getByTestId('sources-tab-content')).toBeInTheDocument();
     expect(screen.queryByTestId('app-loading')).not.toBeInTheDocument();
   });
 });

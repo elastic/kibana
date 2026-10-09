@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { MAX_ID_LENGTH, type QueryOccurrencesResponse } from '@kbn/significant-events-schema';
-import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { BUCKET_SIZE_PATTERN } from '../../../../lib/significant_events/helpers/fill_bucket_gaps';
@@ -13,7 +12,11 @@ import { createSignificantEventsTracedEsClient } from '../../../../lib/significa
 import { fetchQueryOccurrencesFromAlerts } from '../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
 import { searchModeSchema } from '../../../utils/search_mode';
 import { assertValidDateRange, makeIsoDateFromString } from '../../../utils/iso_date_param';
-import { resolveStreamNames } from '../../../utils/resolve_stream_names';
+import {
+  MAX_SOURCE_IDS_PER_REQUEST,
+  requestedOrAllSourceIds,
+  sourceIdsQuerySchema,
+} from '../../../utils/resolve_source_ids';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 
@@ -30,17 +33,10 @@ const readQueryOccurrencesRoute = createServerRoute({
         .max(20)
         .regex(BUCKET_SIZE_PATTERN)
         .describe('Size of time buckets for aggregation'),
-      query: z.string().max(4096).optional().describe('Query string to filter stream queries'),
-      streamNames: z
-        .union([
-          z
-            .string()
-            .max(MAX_STREAM_NAME_LENGTH)
-            .transform((val) => [val]),
-          z.array(z.string().max(MAX_STREAM_NAME_LENGTH)),
-        ])
-        .optional()
-        .describe('Stream names to filter results by'),
+      query: z.string().max(4096).optional().describe('Query string to filter source queries'),
+      sourceIds: sourceIdsQuerySchema(MAX_SOURCE_IDS_PER_REQUEST).describe(
+        'Source ids to filter results by'
+      ),
       rule_uuid: z
         .union([
           z
@@ -85,14 +81,15 @@ const readQueryOccurrencesRoute = createServerRoute({
       to,
       bucketSize,
       query,
-      streamNames,
+      sourceIds: requestedSourceIds,
       rule_uuid: ruleUuids,
       searchMode,
     } = params.query;
     assertValidDateRange(from, to);
 
-    const resolvedStreamNames = await resolveStreamNames(streamNames, () =>
-      scopedClients.streamsClient.listStreams()
+    const sourceIds = await requestedOrAllSourceIds(
+      requestedSourceIds,
+      scopedClients.sourcesClient
     );
 
     const [kiClient, { alertsReader }] = await Promise.all([
@@ -105,7 +102,7 @@ const readQueryOccurrencesRoute = createServerRoute({
         to,
         bucketSize,
         query,
-        streamNames: resolvedStreamNames,
+        sourceIds,
         ruleUuids,
         searchMode,
         alertsReader,

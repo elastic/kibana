@@ -19,11 +19,12 @@ import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import React, { useMemo } from 'react';
 import { SparkPlot } from '../../../../components/spark_plot';
+import { useSourcesById } from '../../../../hooks/use_sources_by_id';
 import { DurabilityBadge } from '../durability_badge/durability_badge';
 import { getKnowledgeIndicatorExpiresAt } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_expires_at';
 import { KnowledgeIndicatorActionsCell } from '../../../../components/knowledge_indicators/knowledge_indicator_actions_cell';
 import { getKnowledgeIndicatorItemId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_item_id';
-import { getKnowledgeIndicatorStreamName } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_stream_name';
+import { getKnowledgeIndicatorSourceId } from '../../../../components/knowledge_indicators/utils/get_knowledge_indicator_source_id';
 import { getKnowledgeIndicatorTitle } from './use_knowledge_indicators_table';
 import {
   TITLE_COLUMN_LABEL,
@@ -81,6 +82,8 @@ export const useKnowledgeIndicatorsColumns = ({
   setKnowledgeIndicatorsToDelete,
   canManage,
 }: UseKnowledgeIndicatorsColumnsParams) => {
+  const { getSourceTitle } = useSourcesById();
+
   return useMemo(() => {
     const columns: Array<EuiBasicTableColumn<KnowledgeIndicator>> = [
       {
@@ -175,7 +178,8 @@ export const useKnowledgeIndicatorsColumns = ({
         name: STREAM_COLUMN_LABEL,
         width: '192px',
         render: (ki: KnowledgeIndicator) => {
-          return <EuiBadge color="hollow">{getKnowledgeIndicatorStreamName(ki)}</EuiBadge>;
+          const sourceId = getKnowledgeIndicatorSourceId(ki);
+          return <EuiBadge color="hollow">{getSourceTitle(sourceId)}</EuiBadge>;
         },
       },
       {
@@ -191,7 +195,7 @@ export const useKnowledgeIndicatorsColumns = ({
         align: 'right',
         render: (ki: KnowledgeIndicator) => (
           <KnowledgeIndicatorActionsCell
-            streamName={getKnowledgeIndicatorStreamName(ki)}
+            sourceId={getKnowledgeIndicatorSourceId(ki)}
             knowledgeIndicator={ki}
             onDeleteRequest={(item) => setKnowledgeIndicatorsToDelete([item])}
           />
@@ -206,6 +210,7 @@ export const useKnowledgeIndicatorsColumns = ({
     return columns;
   }, [
     canManage,
+    getSourceTitle,
     occurrencesByQueryId,
     selectedKnowledgeIndicatorId,
     toggleSelectedKnowledgeIndicator,

@@ -21,6 +21,7 @@ import {
   MAX_SYMPTOM_HYPOTHESIS_LENGTH,
   significantEventSchema,
 } from '@kbn/significant-events-schema';
+import { nightshiftSourceSlugsField } from '@kbn/nightshift-shared';
 import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
@@ -36,7 +37,9 @@ import {
   trackTelemetryBestEffort,
 } from '../bulk_write';
 import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '../../agents/discovery/discovery';
-import { eventsWriteBulkHandler } from './handler';
+import { eventsWriteBulkHandler, type EventsWriteInput } from './handler';
+import { loadSourceCatalog, toSourceRef } from '../../utils/resolve_source_slugs';
+import { assignStoredSourceIds } from '../../utils/stored_source_fields';
 
 export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEventsTools.eventsWrite;
 
@@ -45,7 +48,6 @@ export const eventsWriteItemSchema = lazySchema(() =>
     .pick({
       event_id: true,
       status: true,
-      stream_names: true,
       title: true,
       symptom_hypothesis: true,
       summary: true,
@@ -59,6 +61,9 @@ export const eventsWriteItemSchema = lazySchema(() =>
       conversation_id: true,
     })
     .extend({
+      slugs: nightshiftSourceSlugsField(
+        'This event covers these sources. Nested signal, causal feature, and blast radius `source_id` values are slugs too. Disabled sources are accepted.'
+      ),
       event_id: z
         .string()
         .optional()
@@ -72,7 +77,7 @@ export const eventsWriteItemSchema = lazySchema(() =>
 
           Omit to trigger find-or-create. When the item has confirmed rules, the handler scans
           all currently-active events for one that confirms every submitted confirmed rule and
-          shares at least one stream name; non-confirming co-signals do not affect the identity.
+          shares at least one source; non-confirming co-signals do not affect the identity.
           When the item has no confirmed rules, every submitted rule is used instead. If found,
           the write is skipped and the existing event_id is returned (written: false,
           reason: existing_active_event). Otherwise a new event is created with a generated
@@ -191,10 +196,10 @@ export const eventsWriteSchema = lazySchema(() =>
 export type EventsWriteParams = z.infer<typeof eventsWriteSchema>;
 
 const enrichCausalFeatures = async (
-  items: EventsWriteParams['items'],
+  items: EventsWriteInput[],
   getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient>,
   logger: Logger
-): Promise<EventsWriteParams['items']> => {
+): Promise<EventsWriteInput[]> => {
   const causalFeatures = items.flatMap(({ causal_features: features = [] }) => features);
   const blastRadiusEntries = items.flatMap(({ blast_radius: entries = [] }) => entries);
   if (causalFeatures.length === 0 && blastRadiusEntries.length === 0) {
@@ -205,21 +210,21 @@ const enrichCausalFeatures = async (
     // `featureIds` matches slug-style references and `id` matches uuid-style references.
     const references = [...causalFeatures, ...blastRadiusEntries];
     const featureIds = [...new Set(references.map(({ feature_id: featureId }) => featureId))];
-    const streamNames = [
+    const sourceIds = [
       ...new Set([
-        ...items.flatMap(({ stream_names: names }) => names),
-        ...references.flatMap(({ stream_name: streamName }) => streamName ?? []),
+        ...items.flatMap(({ source_ids: ids }) => ids),
+        ...references.flatMap(({ source_id: sourceId }) => sourceId ?? []),
       ]),
     ];
     const kiClient = await getKnowledgeIndicatorClient();
     const hits = (
       await Promise.all([
-        kiClient.getFeatures(streamNames, {
+        kiClient.getFeatures(sourceIds, {
           featureIds,
           includeExcluded: true,
           includeExpired: true,
         }),
-        kiClient.getFeatures(streamNames, {
+        kiClient.getFeatures(sourceIds, {
           id: featureIds,
           includeExcluded: true,
           includeExpired: true,
@@ -230,24 +235,24 @@ const enrichCausalFeatures = async (
     const uniqueHits = [...new Map(hits.map((feature) => [feature.uuid, feature])).values()];
     const featuresByReference = new Map(
       uniqueHits.flatMap((feature) => [
-        [`${feature.stream_name}:${feature.id}`, feature] as const,
-        [`${feature.stream_name}:${feature.uuid}`, feature] as const,
+        [`${feature.source_id}:${feature.id}`, feature] as const,
+        [`${feature.source_id}:${feature.uuid}`, feature] as const,
       ])
     );
 
     const resolveFeature = (
       featureId: string,
-      explicitStream: string | undefined,
-      itemStreamNames: string[]
+      explicitSourceId: string | undefined,
+      itemSourceIds: string[]
     ) => {
-      if (explicitStream !== undefined) {
-        return featuresByReference.get(`${explicitStream}:${featureId}`);
+      if (explicitSourceId !== undefined) {
+        return featuresByReference.get(`${explicitSourceId}:${featureId}`);
       }
-      // Without an explicit stream: an unambiguous match wins; otherwise restrict to the
-      // event's own streams so a shared slug on another stream cannot stamp the wrong
+      // Without an explicit source: an unambiguous match wins; otherwise restrict to the
+      // event's own sources so a shared slug on another source cannot stamp the wrong
       // classification.
       const matches = uniqueHits.filter(({ id, uuid }) => id === featureId || uuid === featureId);
-      const scoped = matches.filter(({ stream_name }) => itemStreamNames.includes(stream_name));
+      const scoped = matches.filter(({ source_id: sourceId }) => itemSourceIds.includes(sourceId));
       return (scoped.length === 1 ? scoped : matches.length === 1 ? matches : [])[0];
     };
 
@@ -256,8 +261,8 @@ const enrichCausalFeatures = async (
       causal_features: item.causal_features?.map((causalFeature) => {
         const feature = resolveFeature(
           causalFeature.feature_id,
-          causalFeature.stream_name,
-          item.stream_names
+          causalFeature.source_id,
+          item.source_ids
         );
         return feature
           ? {
@@ -271,7 +276,7 @@ const enrichCausalFeatures = async (
       // Blast radius rows carry their own row-shape discriminator in `type`; only the
       // indicator's subtype is enriched.
       blast_radius: item.blast_radius?.map((entry) => {
-        const feature = resolveFeature(entry.feature_id, entry.stream_name, item.stream_names);
+        const feature = resolveFeature(entry.feature_id, entry.source_id, item.source_ids);
         return feature
           ? {
               ...entry,
@@ -324,7 +329,7 @@ export function createEventsWriteTool({
 
       **Without event_id**: find-or-create. When the item has confirmed rules, scans all
       currently-active events for one that confirms every submitted confirmed rule and shares at
-      least one stream name; non-confirming co-signals do not affect the identity. When the item
+      least one source; non-confirming co-signals do not affect the identity. When the item
       has no confirmed rules, every submitted rule is used instead. If found, returns it without
       writing (written: false, reason: existing_active_event). Otherwise creates a new event with
       a generated event_id.
@@ -341,6 +346,7 @@ export function createEventsWriteTool({
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
+      let storedItems: EventsWriteInput[] | undefined;
       try {
         const {
           getEventSearchClient,
@@ -348,13 +354,17 @@ export function createEventsWriteTool({
           getAlertEventsClient,
           emitTrigger,
           licensing,
+          sourcesClient,
         } = await getScopedClients({
           request,
         });
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
+        const catalog = await loadSourceCatalog(sourcesClient);
+        const resolvedItems = toolParams.items.map((item) => assignStoredSourceIds(catalog, item));
+        storedItems = resolvedItems;
         const items = await enrichCausalFeatures(
-          toolParams.items,
+          resolvedItems,
           getKnowledgeIndicatorClient,
           logger
         );
@@ -372,7 +382,7 @@ export function createEventsWriteTool({
         });
 
         data.forEach((result) => {
-          const input = toolParams.items[result.index];
+          const input = resolvedItems[result.index];
           if (input === undefined) return;
           const isSkipped = !result.written && 'skipped' in result;
           const isBulkError = !result.written && 'error' in result;
@@ -385,19 +395,39 @@ export function createEventsWriteTool({
                 event_id: result.event_id ?? 'unknown',
                 status: result.status,
                 written: result.written,
-                stream_names: input.stream_names,
+                source_ids: input.source_ids,
                 error_message: isBulkError ? result.error.reason : undefined,
               }),
           });
         });
 
         return {
-          results: [{ type: ToolResultType.other, data: { results: data } }],
+          results: [
+            {
+              type: ToolResultType.other,
+              data: {
+                results: data.map((result) => {
+                  const input = resolvedItems[result.index];
+                  if (!input) {
+                    return result;
+                  }
+                  return {
+                    ...result,
+                    sources: input.source_ids.flatMap((sourceId) => {
+                      const source = catalog.byId.get(sourceId);
+                      return source ? [toSourceRef(source)] : [];
+                    }),
+                  };
+                }),
+              },
+            },
+          ],
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         logger.error(`Error running events_write: ${message}`);
-        toolParams.items.forEach((input) => {
+        // Source ids exist only once the slugs resolved; earlier failures report none.
+        (storedItems ?? toolParams.items).forEach((input) => {
           trackTelemetryBestEffort({
             logger,
             description: 'failed events_write telemetry',
@@ -407,7 +437,7 @@ export function createEventsWriteTool({
                 event_id: input.event_id ?? 'unknown',
                 status: input.status,
                 written: false,
-                stream_names: input.stream_names,
+                source_ids: 'source_ids' in input ? input.source_ids : [],
                 error_message: message,
               }),
           });

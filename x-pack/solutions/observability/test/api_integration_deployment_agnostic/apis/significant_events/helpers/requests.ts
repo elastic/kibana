@@ -174,7 +174,7 @@ const LIST_QUERIES_RANGE = {
 } as const;
 
 function toListedQuery(query: QueryWithOccurrences): StreamQuery {
-  return omit(query, ['occurrences', 'change_points', 'rule_backed', 'rule_uuid', 'stream_name']);
+  return omit(query, ['occurrences', 'change_points', 'rule_backed', 'rule_uuid', 'source_id']);
 }
 
 /**
@@ -191,7 +191,7 @@ export async function getQueries(
       params: {
         query: {
           ...LIST_QUERIES_RANGE,
-          streamNames: [name],
+          sourceIds: [name],
           status: ['active', 'draft'],
           perPage: 1000,
         },
@@ -205,6 +205,33 @@ export async function getQueries(
   };
 }
 
+const WRITE_LEASE_RETRY_ATTEMPTS = 20;
+const WRITE_LEASE_RETRY_DELAY_MS = 1_000;
+
+/**
+ * Creating a source starts its reconciliation, which holds the source's write lease; writes in
+ * that window answer 409 "retry after the current write finishes". Retries on that 409 only
+ * when the caller expects a success, so tests asserting a 409 still see the first response.
+ */
+async function retryOnWriteLease<T extends { status: number; body: unknown }>(
+  expectedStatusCode: number,
+  send: () => PromiseLike<T>
+): Promise<T['body']> {
+  for (let attempt = 1; ; attempt++) {
+    const response = await send();
+    if (
+      response.status === 409 &&
+      expectedStatusCode !== 409 &&
+      attempt < WRITE_LEASE_RETRY_ATTEMPTS
+    ) {
+      await new Promise((resolve) => setTimeout(resolve, WRITE_LEASE_RETRY_DELAY_MS));
+    } else {
+      expect(response.status).to.eql(expectedStatusCode);
+      return response.body;
+    }
+  }
+}
+
 export async function upsertQuery(
   apiClient: SignificantEventsSupertestRepositoryClient,
   streamName: string,
@@ -212,18 +239,17 @@ export async function upsertQuery(
   body: Omit<BulkQueryIndexInput, 'id'>,
   expectStatusCode: number = 200
 ) {
-  return apiClient
-    .fetch('PUT /internal/significant_events/queries/{queryId}', {
+  return retryOnWriteLease(expectStatusCode, () =>
+    apiClient.fetch('PUT /internal/significant_events/queries/{queryId}', {
       params: {
         path: { queryId },
         body: {
           ...body,
-          target_name: streamName,
+          source_id: streamName,
         },
       },
     })
-    .expect(expectStatusCode)
-    .then((response) => response.body);
+  );
 }
 
 export async function deleteQueries(
@@ -273,14 +299,14 @@ export async function upsertFeature(
   feature: BaseFeature,
   expectedStatusCode = 200
 ): Promise<{ id: string; uuid: string }> {
-  await client
-    .fetch('POST /internal/streams/{name}/features', {
+  await retryOnWriteLease(expectedStatusCode, () =>
+    client.fetch('POST /internal/streams/{sourceId}/features', {
       params: {
-        path: { name: streamName },
+        path: { sourceId: streamName },
         body: feature,
       },
     })
-    .expect(expectedStatusCode);
+  );
 
   const { features } = await listFeatures(client, streamName);
   const created = features.find((f) => f.id === feature.id);
@@ -299,9 +325,9 @@ export async function listFeatures(
   expectedStatusCode = 200
 ) {
   return client
-    .fetch('GET /internal/streams/{name}/features', {
+    .fetch('GET /internal/streams/{sourceId}/features', {
       params: {
-        path: { name: streamName },
+        path: { sourceId: streamName },
         query: opts?.includeExcluded ? { include_excluded: true } : undefined,
       },
     })
@@ -321,9 +347,9 @@ export async function bulkFeatures(
   expectedStatusCode = 200
 ) {
   return client
-    .fetch('POST /internal/streams/{name}/features/_bulk', {
+    .fetch('POST /internal/streams/{sourceId}/features/_bulk', {
       params: {
-        path: { name: streamName },
+        path: { sourceId: streamName },
         body: { operations },
       },
     })
@@ -338,9 +364,9 @@ export async function deleteFeature(
   expectedStatusCode = 200
 ) {
   return client
-    .fetch('DELETE /internal/streams/{name}/features/{id}', {
+    .fetch('DELETE /internal/streams/{sourceId}/features/{id}', {
       params: {
-        path: { name: streamName, id },
+        path: { sourceId: streamName, id },
       },
     })
     .expect(expectedStatusCode)

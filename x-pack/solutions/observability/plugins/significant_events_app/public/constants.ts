@@ -7,3 +7,10 @@
 
 /** How often to poll the server (status + result data) while a significant events pipeline is running. */
 export const RUNNING_POLL_INTERVAL_MS = 5 * 1000;
+
+/**
+ * How long to keep polling a created or edited source for its onboarding run. The server starts
+ * the run asynchronously (source-change workflow, with retries while a previous write finishes),
+ * so the first status read usually still shows no run.
+ */
+export const ONBOARDING_START_GRACE_MS = 60 * 1000;

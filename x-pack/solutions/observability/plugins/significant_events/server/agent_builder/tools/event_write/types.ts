@@ -11,7 +11,7 @@ import { createBulkWriteOutcomeUnknownError, type CompactBulkError } from '../bu
 export type EventsWriteInput = Pick<
   SignificantEvent,
   | 'status'
-  | 'stream_names'
+  | 'source_ids'
   | 'title'
   | 'symptom_hypothesis'
   | 'summary'

@@ -115,7 +115,7 @@ const buildPendingWrite = (
   const episodeContext = isContinuation
     ? mergeEpisodeContext(priorDocs, rest, timestamp)
     : {
-        streamNames: rest.stream_names,
+        sourceIds: rest.source_ids,
         causalFeatures: rest.causal_features ?? [],
         blastRadius: rest.blast_radius ?? [],
       };
@@ -152,7 +152,7 @@ const buildPendingWrite = (
       event_id: candidate.eventId,
       investigations: latestEvent?.investigations,
       signals,
-      stream_names: episodeContext.streamNames,
+      source_ids: episodeContext.sourceIds,
       causal_features: episodeContext.causalFeatures,
       blast_radius: episodeContext.blastRadius,
       severity: candidate.input.severity,
@@ -199,7 +199,7 @@ const applyWriteOutcomes = (
  *
  * Find-or-create items (no `event_id`):
  *  - Scan all currently-active events for one whose confirmed rules contain the candidate's
- *    confirmed rules and whose streams overlap the candidate streams.
+ *    confirmed rules and whose sources overlap the candidate sources.
  *  - If the candidate has no confirmed rules, compare all rules instead.
  *  - If found, skip the write and return the existing event_id (existing_active_event).
  *  - Otherwise write a new event with the caller-supplied status.

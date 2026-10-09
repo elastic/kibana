@@ -7,11 +7,13 @@
 
 import { createHash } from 'crypto';
 import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '@kbn/significant-events-plugin/common';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
 import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
+import { createEvalSource, deleteEvalSource } from '../../src/eval_source';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   SIGEVENTS_WIRED_ROOTS,
@@ -114,6 +116,7 @@ evaluate.describe(
       }
 
       evaluate.describe(dataset.id, () => {
+        let evalSource: NightshiftSource | undefined;
         interface CollectedExample {
           scenario: DiscoveryScenario;
           detections: Detection[];
@@ -189,7 +192,7 @@ evaluate.describe(
             // Change points are re-stamped onto the replayed timeline inside each task, using
             // the shift of the replay the agent actually queries.
             const detections = canonicalDetectionsFromGroundTruth({
-              streamName: scenario.input.stream_name,
+              sourceId: scenario.input.source_id,
               rules: scenario.input.detections,
             });
 
@@ -210,9 +213,16 @@ evaluate.describe(
             evaluators,
             esClient,
             agentBuilderClient,
+            fetch,
             apiServices,
             log,
           }) => {
+            evalSource ??= await createEvalSource({
+              fetch,
+              title: `Discovery evaluation ${dataset.id}`,
+              esql: `FROM ${MANAGED_STREAM_SEARCH_PATTERN}`,
+            });
+            const sourceForEvaluation = evalSource;
             // Concurrency must remain 1 — this variable is not safe under concurrent tasks.
             // Raising concurrency requires replacing it with a per-invocation approach or a proper lock.
             let lastReplayedSnapshotKey: string | undefined;
@@ -303,7 +313,12 @@ evaluate.describe(
                     esClient,
                     log,
                     snapshotSource.snapshotName,
-                    snapshotSource.gcs
+                    snapshotSource.gcs,
+                    {
+                      sourceId: sourceForEvaluation.id,
+                      spaceId: 'default',
+                      viewName: sourceForEvaluation.view_name,
+                    }
                   );
 
                   // Stamp detection change points onto the timeline of the replay the agent will
@@ -317,7 +332,9 @@ evaluate.describe(
                     const seeded = await seedChronicBackground({
                       esClient,
                       log,
-                      streamName: input.stream_name,
+                      streamName: input.source_id,
+                      sourceId: sourceForEvaluation.id,
+                      spaceId: 'default',
                       ruleUuid: rule.rule_uuid,
                       ruleName: rule.rule_name ?? rule.rule_uuid,
                       config: input.chronic_seed,
@@ -328,12 +345,16 @@ evaluate.describe(
                     }));
                   } else if (lastReplayShift) {
                     stampedDetections = canonicalDetectionsFromGroundTruth({
-                      streamName: input.stream_name,
+                      sourceId: input.source_id,
                       rules: input.detections,
                       shift: lastReplayShift,
                     });
                   }
 
+                  stampedDetections = stampedDetections.map((detection) => ({
+                    ...detection,
+                    source_id: sourceForEvaluation.id,
+                  }));
                   // Same message shape as the production batch.
                   const agentInput = buildDiscoveryInput({ detections: stampedDetections });
 
@@ -397,9 +418,16 @@ evaluate.describe(
               evaluators,
               esClient,
               agentBuilderClient,
+              fetch,
               apiServices,
               log,
             }) => {
+              evalSource ??= await createEvalSource({
+                fetch,
+                title: `Discovery evaluation ${dataset.id}`,
+                esql: `FROM ${MANAGED_STREAM_SEARCH_PATTERN}`,
+              });
+              const sourceForEvaluation = evalSource;
               // One run per (scenario × path): rule-uuid re-fires the anchor; cascade resolves the
               // declared ordered rule_name chain to detections. Keep runs with ≥2 cycles (one
               // establishing + one gradable follow-up).
@@ -544,7 +572,12 @@ evaluate.describe(
                       esClient,
                       log,
                       snapshotSource.snapshotName,
-                      snapshotSource.gcs
+                      snapshotSource.gcs,
+                      {
+                        sourceId: sourceForEvaluation.id,
+                        spaceId: 'default',
+                        viewName: sourceForEvaluation.view_name,
+                      }
                     );
 
                     const cycles: ContinuationCycle[] = [];
@@ -570,6 +603,7 @@ evaluate.describe(
                         )?.['@timestamp'];
                         const detection: Detection = {
                           ...base,
+                          source_id: sourceForEvaluation.id,
                           ...(authored && lastReplayShift
                             ? {
                                 '@timestamp': shiftSnapshotTimestamp({
@@ -650,7 +684,7 @@ evaluate.describe(
                                 rule_name: seededEvent.title,
                                 title: seededEvent.title,
                                 summary: seededEvent.summary,
-                                stream_names: seededEvent.stream_names,
+                                source_ids: seededEvent.source_ids,
                                 confidence: seededEvent.confidence,
                                 symptom_hypothesis: seededEvent.symptom_hypothesis,
                                 signals: seededEvent.signals,
@@ -695,7 +729,10 @@ evaluate.describe(
           );
         }
 
-        evaluate.afterAll(async ({ esClient, apiServices, log }) => {
+        evaluate.afterAll(async ({ esClient, apiServices, log, fetch }) => {
+          if (evalSource) {
+            await deleteEvalSource({ fetch, source: evalSource });
+          }
           log.debug('Cleaning up discovery test data');
           await deleteTemporaryReplayIndices(esClient, log);
           await apiServices.streams.disable().catch(() => {});

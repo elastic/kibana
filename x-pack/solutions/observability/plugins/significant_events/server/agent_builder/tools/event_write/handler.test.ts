@@ -29,7 +29,7 @@ const TS_EARLIER = '2024-01-01T00:00:00.000Z';
 
 const baseInput: EventsWriteInput = {
   status: 'active',
-  stream_names: ['logs.checkout'],
+  source_ids: ['logs.checkout'],
   title: 'Checkout latency',
   symptom_hypothesis: 'Checkout requests are delayed because the payment dependency is timing out.',
   summary: 'P99 latency breached SLO',
@@ -51,7 +51,7 @@ const makeStoredEvent = (
     event_id: eventId,
     status: 'active',
     severity: 'high',
-    stream_names: ['logs.checkout'],
+    source_ids: ['logs.checkout'],
     signals: [],
     title: 'Test event',
     symptom_hypothesis: 'Test hypothesis',
@@ -240,7 +240,7 @@ describe('eventsWriteHandler', () => {
     it('writes when an unchanged snapshot adds a detection rule not present in its history', async () => {
       const ruleOne: SignalEntry = {
         type: 'detection',
-        stream_name: 'logs.checkout',
+        source_id: 'logs.checkout',
         description: 'Rule one detected an issue',
         verdict: 'confirms',
         metadata: {
@@ -252,7 +252,7 @@ describe('eventsWriteHandler', () => {
       };
       const ruleTwo: SignalEntry = {
         type: 'detection',
-        stream_name: 'logs.checkout',
+        source_id: 'logs.checkout',
         description: 'Rule two detected an issue',
         verdict: 'confirms',
         metadata: {
@@ -289,7 +289,7 @@ describe('eventsWriteHandler', () => {
     it('skips when an unchanged snapshot resubmits a rule absent from the latest version', async () => {
       const ruleOne: SignalEntry = {
         type: 'detection',
-        stream_name: 'logs.checkout',
+        source_id: 'logs.checkout',
         description: 'Rule one detected an issue',
         verdict: 'confirms',
         metadata: {
@@ -410,7 +410,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     verdict: DetectionSignal['verdict'] = 'confirms'
   ): DetectionSignal => ({
     type: 'detection',
-    stream_name: 'logs.checkout',
+    source_id: 'logs.checkout',
     description: 'High Latency',
     verdict,
     metadata: {
@@ -426,7 +426,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
   const makeDedupInput = (overrides: Partial<EventsWriteInput> = {}): EventsWriteInput => ({
     ...baseInput,
     status: 'active',
-    stream_names: ['logs.checkout'],
+    source_ids: ['logs.checkout'],
     signals: [makeDetectionSignal()],
     ...overrides,
   });
@@ -514,7 +514,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
       existing_event_id: 'existing-event-id',
     });
     expect(findLatestActive).toHaveBeenCalledWith({
-      streamNames: ['logs.checkout'],
+      sourceIds: ['logs.checkout'],
       ruleUuids: ['A'],
     });
     expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
@@ -790,7 +790,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     expect(writtenDocs()).toHaveLength(1);
   });
 
-  it('treats two in-batch dedup items with same streams+rules as duplicate_in_batch regardless of change_point_type', async () => {
+  it('treats two in-batch dedup items with same sources+rules as duplicate_in_batch regardless of change_point_type', async () => {
     const eventClient = makeEventSearchClient({
       findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
     });
@@ -852,19 +852,19 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
       alertEventsClient,
-      inputs: [dedupInput, { ...dedupInput, stream_names: ['logs.payments'] }],
+      inputs: [dedupInput, { ...dedupInput, source_ids: ['logs.payments'] }],
     });
 
     expect(findLatestActive).toHaveBeenCalledTimes(1);
     expect(findLatestActive).toHaveBeenCalledWith({
-      streamNames: expect.arrayContaining(['logs.checkout', 'logs.payments']),
+      sourceIds: expect.arrayContaining(['logs.checkout', 'logs.payments']),
       ruleUuids: ['rule-abc'],
     });
   });
 
-  it.each<{ field: 'ruleUuids' | 'streamNames'; override: Partial<EventsWriteInput> }>([
-    { field: 'ruleUuids', override: { stream_names: ['logs.payments'], signals: [] } },
-    { field: 'streamNames', override: { stream_names: [] } },
+  it.each<{ field: 'ruleUuids' | 'sourceIds'; override: Partial<EventsWriteInput> }>([
+    { field: 'ruleUuids', override: { source_ids: ['logs.payments'], signals: [] } },
+    { field: 'sourceIds', override: { source_ids: [] } },
   ])(
     'omits $field from the scan when any candidate in the batch has none',
     async ({ field, override }) => {
@@ -883,10 +883,10 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     }
   );
 
-  it('deduplicates when candidate rule set is a subset of an active event and streams overlap', async () => {
+  it('deduplicates when candidate rule set is a subset of an active event and sources overlap', async () => {
     // Existing event covers rules [rule-abc, rule-xyz]; candidate carries only [rule-abc].
     // Co-detection noise: rule-xyz was a co-fire last cycle but not this one.
-    // Candidate rules ⊆ event rules AND stream overlaps → existing_active_event, not a new event.
+    // Candidate rules ⊆ event rules AND source overlaps → existing_active_event, not a new event.
     const widerRuleEvent = makeActiveDedupEvent({
       signals: [
         makeDetectionSignal(),
@@ -933,19 +933,19 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
   });
 
-  it('deduplicates when candidate stream set is a subset of an active event streams and rules match', async () => {
-    // Existing covers [checkout, payments]; candidate on [payments] only — stream overlap, same rules.
-    const widerStreamEvent = makeActiveDedupEvent({
-      stream_names: ['logs.checkout', 'logs.payments'],
+  it('deduplicates when candidate source set is a subset of an active event sources and rules match', async () => {
+    // Existing covers [checkout, payments]; candidate on [payments] only — source overlap, same rules.
+    const widerSourceEvent = makeActiveDedupEvent({
+      source_ids: ['logs.checkout', 'logs.payments'],
     });
     const eventClient = makeEventSearchClient({
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [widerStreamEvent] }),
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [widerSourceEvent] }),
     });
 
     const results = await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
       alertEventsClient,
-      inputs: [{ ...dedupInput, stream_names: ['logs.payments'] }],
+      inputs: [{ ...dedupInput, source_ids: ['logs.payments'] }],
     });
 
     expect(results[0]).toMatchObject({
@@ -957,9 +957,9 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
   });
 
-  it('creates a new event when no stream overlap exists even if rule set matches', async () => {
-    // Existing on [checkout]; candidate on [payments] — no stream intersection, no match.
-    const checkoutEvent = makeActiveDedupEvent({ stream_names: ['logs.checkout'] });
+  it('creates a new event when no source overlap exists even if rule set matches', async () => {
+    // Existing on [checkout]; candidate on [payments] — no source intersection, no match.
+    const checkoutEvent = makeActiveDedupEvent({ source_ids: ['logs.checkout'] });
     const eventClient = makeEventSearchClient({
       findLatestActive: jest.fn().mockResolvedValue({ hits: [checkoutEvent] }),
     });
@@ -967,7 +967,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     const results = await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
       alertEventsClient,
-      inputs: [{ ...dedupInput, stream_names: ['logs.payments'] }],
+      inputs: [{ ...dedupInput, source_ids: ['logs.payments'] }],
     });
 
     expect(results[0]).toMatchObject({ index: 0, written: true });
@@ -1080,7 +1080,7 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
     verdict: Extract<SignalEntry, { type: 'detection' }>['verdict'] = 'confirms'
   ): Extract<SignalEntry, { type: 'detection' }> => ({
     type: 'detection',
-    stream_name: 'logs.checkout',
+    source_id: 'logs.checkout',
     description: `Signal for ${ruleUuid}`,
     verdict,
     metadata: {
@@ -1198,10 +1198,11 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
 describe('eventsWriteItemSchema', () => {
   const validItem = {
     ...baseInput,
+    slugs: ['logs.checkout'],
     signals: [
       {
         type: 'detection',
-        stream_name: 'logs.test',
+        source_id: 'logs.test',
         description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH),
         verdict: 'not_checked',
         metadata: {
@@ -1240,7 +1241,7 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
 
   const makeDetectionSignal = (ruleUuid: string): DetectionSignal => ({
     type: 'detection',
-    stream_name: 'logs.app',
+    source_id: 'logs.app',
     description: `Signal for ${ruleUuid}`,
     verdict: 'confirms',
     metadata: {
@@ -1257,7 +1258,7 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
     type: 'entity',
     subtype: 'service',
     name: featureId,
-    stream_name: 'logs.app',
+    source_id: 'logs.app',
   });
 
   const makeSnapshotInput = (

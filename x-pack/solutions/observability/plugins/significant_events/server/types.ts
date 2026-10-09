@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { StreamsPluginSetup, StreamsPluginStart } from '@kbn/streams-plugin/server';
 import type {
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
@@ -41,6 +40,10 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import type {
+  NightshiftSourcesServerSetup,
+  NightshiftSourcesServerStart,
+} from '@kbn/nightshift-sources-plugin/server';
 
 export interface SignificantEventsPluginSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
@@ -59,7 +62,7 @@ export interface SignificantEventsPluginSetupDependencies {
   cps?: CPSServerSetup;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
-  streams: StreamsPluginSetup;
+  nightshiftSources: NightshiftSourcesServerSetup;
   nightshiftInvestigations?: NightshiftInvestigationsServerSetup;
 }
 
@@ -76,7 +79,7 @@ export interface SignificantEventsPluginStartDependencies {
   agentBuilderSml?: AgentBuilderSmlPluginStart;
   spaces?: SpacesPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
-  streams: StreamsPluginStart;
+  nightshiftSources: NightshiftSourcesServerStart;
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
 }
 

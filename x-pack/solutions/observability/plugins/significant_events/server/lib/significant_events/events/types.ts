@@ -12,7 +12,7 @@ import type { PaginatedSearchOptions } from '../query_utils';
 export interface EventsFilterOptions {
   status?: SignificantEventStatus[];
   severity?: Severity[];
-  stream?: string[];
+  sourceIds?: string[];
   search?: string;
   eventIds?: string[];
   ruleUuids?: string[];

@@ -13,7 +13,7 @@ jest.mock('../event_write/handler', () => ({
 }));
 
 const baseInput = {
-  stream_names: ['logs.checkout'],
+  source_ids: ['logs.checkout'],
   title: 'Checkout latency',
   symptom_hypothesis: 'Checkout requests are delayed because the payment dependency is timing out.',
   summary: 'P99 latency breached SLO',

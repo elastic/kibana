@@ -18,6 +18,7 @@ import type { LifecycleDetection } from '@kbn/significant-events-schema';
 import React, { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { useKibana } from '../hooks/use_kibana';
+import { useSourceEsql } from '../hooks/use_source_esql';
 import {
   DETECTION_OCCURRENCE_BUCKET_SIZE,
   getChangePointLabel,
@@ -32,16 +33,21 @@ const OCCURRENCE_QUERY_LIMIT = 100;
 
 type LensESQLConfig = LensConfig & { dataset: LensESQLDataset };
 
-const getStreamTypeLabel = (streamName?: string): string => {
-  if (streamName?.startsWith('metrics')) {
-    return i18n.translate('xpack.nightshift.detectionFlyout.trend.metricsLabel', {
-      defaultMessage: '[Metrics]',
-    });
-  }
-  return i18n.translate('xpack.nightshift.detectionFlyout.trend.logsLabel', {
-    defaultMessage: '[Logs]',
-  });
+/** First index of a FROM or TS command. Anything else is treated as logs. */
+const readSourceIndexPattern = (esql: string | undefined): string => {
+  const match = esql?.match(/^\s*(?:FROM|TS)\s+([^\s|,]+)/i);
+  return match?.[1]?.replace(/['"]/g, '') ?? '';
 };
+
+/** `[Metrics]` when the source FROM starts with metrics, otherwise `[Logs]`. */
+export const getSourceDataTypeLabel = (esql: string | undefined): string =>
+  readSourceIndexPattern(esql).startsWith('metrics')
+    ? i18n.translate('xpack.nightshift.detectionFlyout.trend.metricsLabel', {
+        defaultMessage: '[Metrics]',
+      })
+    : i18n.translate('xpack.nightshift.detectionFlyout.trend.logsLabel', {
+        defaultMessage: '[Logs]',
+      });
 
 export const buildDetectionOccurrencesEsql = ({
   ruleUuid,
@@ -137,8 +143,9 @@ export function ChangePointLensChart({
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { dataViews, lens, spaces } = useKibana().services;
+  const { esql, isResolved } = useSourceEsql(detection.source_id);
   const changePointLabel = getChangePointLabel(detection.change_point_type);
-  const title = `${getStreamTypeLabel(detection.stream_name)} ${changePointLabel}`;
+  const title = `${getSourceDataTypeLabel(esql)} ${changePointLabel}`;
   const timeRange = useMemo(() => {
     const range = getDetectionOccurrenceTimeRange(detection['@timestamp']);
     return range
@@ -153,7 +160,10 @@ export function ChangePointLensChart({
     error,
     loading,
     value: attributes,
-  } = useAsync(async (): Promise<LensAttributes> => {
+  } = useAsync(async (): Promise<LensAttributes | undefined> => {
+    if (!isResolved) {
+      return undefined;
+    }
     if (!timeRange) {
       throw new Error('Invalid detection timestamp');
     }
@@ -186,6 +196,7 @@ export function ChangePointLensChart({
     detection,
     euiTheme.colors.danger,
     euiTheme.colors.vis.euiColorVis0,
+    isResolved,
     spaces,
     timeRange,
     title,

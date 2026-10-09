@@ -75,7 +75,7 @@ describe('triggerInvestigationStepDefinition', () => {
     );
   });
 
-  it('forwards an explicit prompt and stream names unchanged', async () => {
+  it('forwards an explicit prompt and source ids unchanged', async () => {
     const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
     const { definition } = createDefinition(start);
 
@@ -85,14 +85,14 @@ describe('triggerInvestigationStepDefinition', () => {
         subject_id: 'event-1',
         title: 'Checkout latency breach',
         message: 'Checkout latency breach\n\nThe probable cause is Redis saturation.',
-        stream_names: ['logs.checkout', 'metrics.checkout'],
+        source_ids: ['logs.checkout', 'metrics.checkout'],
       })
     );
 
     expect(start).toHaveBeenCalledWith(
       expect.objectContaining({
         message: 'Checkout latency breach\n\nThe probable cause is Redis saturation.',
-        stream_names: ['logs.checkout', 'metrics.checkout'],
+        source_ids: ['logs.checkout', 'metrics.checkout'],
       })
     );
   });
@@ -138,7 +138,7 @@ describe('triggerInvestigationStepDefinition', () => {
     expect(start).not.toHaveBeenCalled();
   });
 
-  it('rejects invalid prompt and stream inputs before starting', async () => {
+  it('rejects invalid prompt and source inputs before starting', async () => {
     const start = jest.fn();
     const { definition } = createDefinition(start);
 
@@ -158,7 +158,7 @@ describe('triggerInvestigationStepDefinition', () => {
           subject_type: 'significant_event',
           subject_id: 'event-1',
           title: 'Checkout latency breach',
-          stream_names: Array.from({ length: MAX_ARRAY_LENGTH + 1 }, () => 'logs.checkout'),
+          source_ids: Array.from({ length: MAX_ARRAY_LENGTH + 1 }, () => 'logs.checkout'),
         })
       )
     ).rejects.toThrow();
@@ -169,7 +169,7 @@ describe('triggerInvestigationStepDefinition', () => {
           subject_id: 'event-1',
           title: 'Checkout latency breach',
           message: 'x'.repeat(MAX_TEXT_LENGTH + 1),
-          stream_names: ['x'.repeat(MAX_ID_LENGTH + 1)],
+          source_ids: ['x'.repeat(MAX_ID_LENGTH + 1)],
         })
       )
     ).rejects.toThrow();

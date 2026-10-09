@@ -56,9 +56,9 @@ const ERROR_WHERE_CONDITION = esql.exp`QSTR(${esql.str(ERROR_QUERY_STRING)})`;
 export const errorLogsGenerator: ComputedFeatureGenerator = {
   type: ERROR_LOGS_FEATURE_TYPE,
 
-  description: 'Sample error logs extracted from the stream',
+  description: 'Sample error logs extracted from the source',
 
-  llmInstructions: `Contains sample error logs from the stream, filtered by log.level: error or messages containing error/exception keywords.
+  llmInstructions: `Contains sample error logs from the source, filtered by log.level: error or messages containing error/exception keywords.
 Use the \`properties.samples\` array to see actual error log entries.
 This is useful for understanding error patterns, identifying recurring issues, and diagnosing problems in the system.`,
 

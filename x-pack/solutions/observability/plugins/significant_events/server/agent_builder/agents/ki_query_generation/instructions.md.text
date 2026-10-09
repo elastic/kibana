@@ -1,6 +1,6 @@
 ## Prior Significant Events
 
-`platform_sig_events_event_search` is only available when Significant Events history is enabled for this deployment; check the tool list after `load_skill`. When it is available, call it at least once for the current stream after fetching features and before proposing queries. Search `inactive` events (`status: "inactive"`) when checking for known noise or demoted patterns, and use the full view when assessment notes or linked investigation outcomes matter. An empty result is acceptable; skipping the check when the tool is available is not. When the tool is not available, continue without this history check — do not attempt to call it.
+`platform_sig_events_event_search` is only available when Significant Events history is enabled for this deployment; check the tool list after `load_skill`. When it is available, call it at least once for the current source after fetching features and before proposing queries. Search `inactive` events (`status: "inactive"`) when checking for known noise or demoted patterns, and use the full view when assessment notes or linked investigation outcomes matter. An empty result is acceptable; skipping the check when the tool is available is not. When the tool is not available, continue without this history check — do not attempt to call it.
 
 ## Semantic Code Search
 
@@ -8,7 +8,7 @@
 
 Selecting the repository — every `scs_*` tool takes a single `repository` label per call:
 - If the user message provides `preferred_repository`, pass that value as `repository` and skip discovery.
-- Otherwise call `scs_list_repos` and pick the repository whose code produces this stream, using the stream name, description, and `dataset_analysis` (service names, languages, dependency calls). Pass the label exactly as listed (in backticks) as `repository`. If nothing clearly matches, do not select anything and continue without direct code grounding.
+- Otherwise call `scs_list_repos` and pick the repository whose code produces this source, using the source name, description, and `dataset_analysis` (service names, languages, dependency calls). Pass the label exactly as listed (in backticks) as `repository`. If nothing clearly matches, do not select anything and continue without direct code grounding.
 - One repository per call; if two candidates are plausible, issue separate calls rather than guessing.
 
 What each tool is for:
@@ -19,7 +19,7 @@ What each tool is for:
 
 Using the results:
 - Confirm precise message wording before choosing `MATCH_PHRASE` vs `:`.
-- The indexed code may be a different version than what is running: it is a hint, not ground truth, and must never override current stream features or `dataset_analysis`.
+- The indexed code may be a different version than what is running: it is a hint, not ground truth, and must never override current source features or `dataset_analysis`.
 - When a query is grounded in code, record it in that query's `evidence` as `code: <file>:<line> <snippet>`.
 
 ## Query generation workflow
@@ -29,7 +29,7 @@ Run these steps directly, in order. This sequence is fixed and short: do not use
 1. **Load skill** — call `load_skill` with `ki-query-generation` to unlock the query-generation tools. Note which optional tools (`platform_sig_events_event_search`, `scs_*`) are present.
 2. **Fetch features** — call `platform_sig_events_ki_features_get` (without filters).
 3. **Evaluate existing queries** — for each entry in the user message's `existing_queries` (if any), determine SKIP / REPLACE / NEW QUERY based on the current features (see the system prompt checklist).
-4. **Search prior events (when available)** — if `platform_sig_events_event_search` is available, call it for the current stream and use relevant assessment or investigation outcomes to avoid known-noisy query paths.
+4. **Search prior events (when available)** — if `platform_sig_events_event_search` is available, call it for the current source and use relevant assessment or investigation outcomes to avoid known-noisy query paths.
 5. **Verify against source (when available and useful)** — if `scs_*` tools are available and the features leave a specific source-code hypothesis unresolved, verify it with SCS as described above.
 6. **Generate candidates** — produce candidate queries grounded in the retrieved features. Every query must reference at least one `feature_id`.
 7. **Validate / repair / finalize** — call `platform_sig_events_ki_queries_validate` with the full batch. If `finalized` is false, repair rejected queries and resubmit the full batch. Finish only after the latest call returns `finalized: true`. Pass an empty `queries` array to finalize when no queries are justified by the evidence.

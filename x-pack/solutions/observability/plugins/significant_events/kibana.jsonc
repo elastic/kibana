@@ -17,8 +17,8 @@
       "encryptedSavedObjects",
       "inference",
       "licensing",
+      "nightshiftSources",
       "security",
-      "streams",
       "fieldsMetadata",
     ],
     "optionalPlugins": [

@@ -57,10 +57,10 @@ const blastRadiusDependencySchema = lazySchema(() =>
       .describe(
         'Communication protocol used between source and target (e.g. "HTTP", "gRPC", "TCP").'
       ),
-    stream_name: z
+    source_id: z
       .string()
       .max(MAX_ID_LENGTH)
-      .describe('Data stream associated with this dependency.'),
+      .describe('Nightshift source id associated with this dependency.'),
   })
 );
 
@@ -92,10 +92,10 @@ const blastRadiusInfrastructureSchema = lazySchema(() =>
       .max(MAX_ARRAY_LENGTH)
       .optional()
       .describe('Workload names (pods, services) that make up this infrastructure component.'),
-    stream_name: z
+    source_id: z
       .string()
       .max(MAX_ID_LENGTH)
-      .describe('Data stream associated with this infrastructure component.'),
+      .describe('Nightshift source id associated with this infrastructure component.'),
   })
 );
 
@@ -114,7 +114,10 @@ const blastRadiusEntitySchema = lazySchema(() =>
         "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
       ),
     name: z.string().max(MAX_TITLE_LENGTH).describe('Human-readable name of the affected entity.'),
-    stream_name: z.string().max(MAX_ID_LENGTH).describe('Data stream associated with this entity.'),
+    source_id: z
+      .string()
+      .max(MAX_ID_LENGTH)
+      .describe('Nightshift source id associated with this entity.'),
   })
 );
 
@@ -166,11 +169,11 @@ export const causalFeatureSchema = lazySchema(() =>
       .describe(
         'Human-readable name of the causal entity (e.g. service or component name). Not a UUID.'
       ),
-    stream_name: z
+    source_id: z
       .string()
       .max(MAX_ID_LENGTH)
       .optional()
-      .describe('Data stream associated with this causal feature.'),
+      .describe('Nightshift source id associated with this causal feature.'),
   })
 );
 export type CausalFeature = z.infer<typeof causalFeatureSchema>;
@@ -246,10 +249,10 @@ export const EFFECT_CONTRACT_RULE = dedent`
 
 const signalBaseSchema = lazySchema(() =>
   z.object({
-    stream_name: z
+    source_id: z
       .string()
       .max(MAX_ID_LENGTH)
-      .describe('Data stream this signal was collected from.'),
+      .describe('Nightshift source id this signal was collected from.'),
     description: z
       .string()
       .max(MAX_TEXT_LENGTH)
@@ -296,7 +299,7 @@ const detectionSignalMetadataSchema = lazySchema(() =>
       alert_index: true,
       workflow_execution_id: true,
       processed: true,
-      stream_name: true,
+      source_id: true,
     })
     .describe(
       'Immutable detection identity and alert metadata. Copy the complete metadata object verbatim from the matching input detection; do not reconstruct or alter its fields.'
@@ -453,7 +456,7 @@ export const significantEventBaseSchema = lazySchema(() =>
       .describe(
         dedent`
       Stable incident label. Format: "<Affected scope> — <observed condition>".
-      Choose the narrowest stable affected scope that this event's assigned signals directly evidence: operation, then unique service/entity, then flow, then domain. Use flow or domain only when multiple distinct services or operations are grouped in this same event. A single-detection or single-service event must not use a customer journey, product flow, or domain label when a narrower service or operation is confirmed. Never use a generic stream name.
+      Choose the narrowest stable affected scope that this event's assigned signals directly evidence: operation, then unique service/entity, then flow, then domain. Use flow or domain only when multiple distinct services or operations are grouped in this same event. A single-detection or single-service event must not use a customer journey, product flow, or domain label when a narrower service or operation is confirmed. Never use a generic source name.
       The observed condition names the concrete failure, degradation, or exposure shown in grounding — a specific operation, endpoint, error class, or connection path. Do not use broad umbrellas such as "backend connection failures", "transaction flows", or "submission flows" when evidence names a narrower mechanism. Do not state lifecycle or tense (e.g. "continues", "detected", "active", "resolved").
       Preserve the title verbatim across continuation and recovery when no new detection rule UUIDs are introduced; a continuation that adds related rules may update title and symptom_hypothesis. Exclude IPs, counts, measurements, and current-cycle-only details.
 
@@ -500,10 +503,10 @@ export const significantEventBaseSchema = lazySchema(() =>
         'symptom_hypothesis correctness 0.0–1.0 float. Higher values reflect stronger evidence grounding and more corroboration. ' +
           'causal_features ceiling: cap at 0.65 when causal_features is empty (applies to open status only).'
       ),
-    stream_names: z
+    source_ids: z
       .array(z.string().max(MAX_ID_LENGTH))
       .max(MAX_ARRAY_LENGTH)
-      .describe('Data streams associated with this event.'),
+      .describe('Nightshift source ids associated with this event.'),
 
     // entities that may contribute to the incident
     causal_features: z

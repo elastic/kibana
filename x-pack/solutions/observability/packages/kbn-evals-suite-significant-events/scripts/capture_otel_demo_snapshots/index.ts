@@ -41,6 +41,8 @@ import {
   logExtractedKIFeatures,
   persistKIFeaturesForSnapshot,
   persistKnowledgeIndicatorsForSnapshot,
+  createCaptureSource,
+  deleteCaptureSource,
   triggerKIExtraction,
   waitForKIExtraction,
 } from '../lib/significant_events_workflow';
@@ -283,6 +285,7 @@ async function processScenario(
   onboardingSteps: KIsOnboardingStep[] = [KIsOnboardingStep.FeaturesIdentification]
 ): Promise<void> {
   const isFailure = isFailureScenario(scenario);
+  let captureSource: Awaited<ReturnType<typeof createCaptureSource>> | undefined;
 
   const snapshotIndices: string[] = ['logs*'];
 
@@ -307,6 +310,8 @@ async function processScenario(
     // deployDemo (Step 2) which enables Kibana Streams and its settings APIs.
     log.info('[3/8] Configuring significant events...');
     await enableSignificantEvents(config, log);
+    captureSource = await createCaptureSource(config, logsIndex);
+    const sourceId = captureSource.id;
 
     // Step 4 — Accumulate baseline traffic
     log.info('[4/8] Accumulating baseline traffic...');
@@ -325,14 +330,15 @@ async function processScenario(
 
     // Step 6 — Run KI onboarding (persists features for the snapshot)
     log.info(`[6/8] Running KI onboarding (${onboardingSteps.join(', ')})...`);
-    await triggerKIExtraction(config, log, connectorId, logsIndex, onboardingSteps);
-    await waitForKIExtraction(config, log, logsIndex, extractionTimeoutMs);
-    await logExtractedKIFeatures(config, log, logsIndex);
+    await triggerKIExtraction(config, log, connectorId, sourceId, onboardingSteps);
+    await waitForKIExtraction(config, log, sourceId, extractionTimeoutMs);
+    await logExtractedKIFeatures(config, log, sourceId);
     const featuresResult = await persistKIFeaturesForSnapshot(
       config,
       esClient,
       log,
       scenario.id,
+      sourceId,
       logsIndex
     );
     log.info(`[6/8] Persisted ${featuresResult.count} feature KI(s)`);
@@ -344,7 +350,9 @@ async function processScenario(
       esClient,
       log,
       scenario.id,
-      logsIndex
+      sourceId,
+      logsIndex,
+      captureSource.view_name
     );
     log.info(`[6/8] Persisted ${knowledgeIndicatorsResult.count} knowledge indicators`);
     snapshotIndices.push(knowledgeIndicatorsResult.index);
@@ -384,6 +392,11 @@ async function processScenario(
     });
   } finally {
     log.info('[8/8] Cleaning up...');
+    if (captureSource) {
+      await deleteCaptureSource(config, captureSource.id).catch((error) =>
+        log.error(`deleteCaptureSource failed: ${error}`)
+      );
+    }
     await disableStreams(config, log).catch((e) => log.error(`disableStreams failed: ${e}`));
     await cleanupExtractedData(esClient, log).catch((e) =>
       log.error(`cleanupSigEventsExtractedData failed: ${e}`)

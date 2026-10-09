@@ -9,11 +9,12 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import { DETECTIONS_DATA_STREAM } from '../../significant_events/detections/data_stream';
+import { GLOBAL_MAINTENANCE_WORKFLOW_IDS } from '../../maintenance/managed_workflow_targets';
 import { createManagedWorkflowsInstaller } from './managed_workflows_installer';
 
 // Significant events is gated solely by the availability flag now, so the installer always writes
-// the full set: 9 base workflows (via `installWorkflows`).
-const TOTAL_WORKFLOW_COUNT = 9;
+// the full global set (via `installWorkflows`). Derived so adding a workflow can't leave it stale.
+const TOTAL_WORKFLOW_COUNT = GLOBAL_MAINTENANCE_WORKFLOW_IDS.length;
 
 const createClientMock = () => {
   const client = {

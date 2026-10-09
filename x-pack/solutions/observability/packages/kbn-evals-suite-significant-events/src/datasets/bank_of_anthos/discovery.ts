@@ -23,7 +23,7 @@ const toInputDetections = (events: Array<Partial<SignificantEvent>>): Array<Part
       detection_id: signal.metadata?.detection_id,
       rule_name: signal.metadata?.rule_name,
       rule_uuid: signal.metadata?.rule_uuid,
-      stream_name: signal.stream_name,
+      source_id: signal.source_id,
       change_point_type: signal.metadata?.change_point_type ?? 'spike',
       p_value: signal.metadata?.p_value ?? 0.0001,
     }));
@@ -47,11 +47,11 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     'Frontend requests to transactionhistory, balancereader, and ledgerwriter fail with connection refused on the observed paths. Cache errors affect balance and transaction-history lookups, while transactionhistory also reports SQLState 08001. Users cannot view account balances or transaction history and cannot submit payments or deposits. Onset ~14:30 UTC with no sign of recovery.',
   severity: 'critical',
   confidence: 0.82,
-  stream_names: ['logs'],
+  source_ids: ['logs'],
   signals: [
     {
       type: 'detection',
-      stream_name: 'logs',
+      source_id: 'logs',
       verdict: 'confirms',
       description:
         'Found: SQLState 08001 connection refused from transactionhistory. Impact: transaction-history reads blocked.',
@@ -70,7 +70,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     },
     {
       type: 'detection',
-      stream_name: 'logs',
+      source_id: 'logs',
       verdict: 'confirms',
       description:
         'Found: connection refused to transactionhistory:8080 on /transactions. Impact: users cannot view transaction history.',
@@ -89,7 +89,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     },
     {
       type: 'detection',
-      stream_name: 'logs',
+      source_id: 'logs',
       verdict: 'confirms',
       description:
         'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances.',
@@ -108,7 +108,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     },
     {
       type: 'detection',
-      stream_name: 'logs',
+      source_id: 'logs',
       verdict: 'confirms',
       description:
         'Found: Cache error from transactionhistory and balancereader. Impact: balance and transaction-history lookups degraded.',
@@ -127,7 +127,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     },
     {
       type: 'detection',
-      stream_name: 'logs',
+      source_id: 'logs',
       verdict: 'confirms',
       description:
         'Found: Failed to retrieve account balance. Impact: payment and deposit submissions fail.',
@@ -146,7 +146,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     },
     {
       type: 'detection',
-      stream_name: 'logs',
+      source_id: 'logs',
       verdict: 'confirms',
       description:
         'Found: connection refused to ledgerwriter:8080 on deposit /transactions. Impact: users cannot complete deposits.',
@@ -165,7 +165,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     },
     {
       type: 'detection',
-      stream_name: 'logs',
+      source_id: 'logs',
       verdict: 'confirms',
       description:
         'Found: connection refused to ledgerwriter:8080 on payment /transactions. Impact: users cannot complete payments.',
@@ -189,21 +189,21 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
       type: 'entity',
       subtype: 'service',
       name: 'transactionhistory',
-      stream_name: 'logs',
+      source_id: 'logs',
     },
     {
       feature_id: 'balancereader',
       type: 'entity',
       subtype: 'service',
       name: 'balancereader',
-      stream_name: 'logs',
+      source_id: 'logs',
     },
     {
       feature_id: 'ledgerwriter',
       type: 'entity',
       subtype: 'service',
       name: 'ledgerwriter',
-      stream_name: 'logs',
+      source_id: 'logs',
     },
   ],
   blast_radius: [
@@ -214,7 +214,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
       source: 'frontend',
       target: 'balancereader',
       protocol: 'http',
-      stream_name: 'logs',
+      source_id: 'logs',
     },
     {
       type: 'dependency',
@@ -223,7 +223,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
       source: 'frontend',
       target: 'transactionhistory',
       protocol: 'http',
-      stream_name: 'logs',
+      source_id: 'logs',
     },
     {
       type: 'dependency',
@@ -232,7 +232,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
       source: 'frontend',
       target: 'ledgerwriter',
       protocol: 'http',
-      stream_name: 'logs',
+      source_id: 'logs',
     },
     {
       type: 'dependency',
@@ -241,7 +241,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
       source: 'ledgerwriter',
       target: 'balancereader',
       protocol: 'http',
-      stream_name: 'logs',
+      source_id: 'logs',
     },
   ],
 };
@@ -263,7 +263,7 @@ const BENIGN_LOGIN_EVENT: Partial<SignificantEvent> = {
   signals: [
     {
       type: 'detection',
-      stream_name: 'logs',
+      source_id: 'logs',
       verdict: 'refutes',
       description: 'Found: successful login activity. Impact: none observed.',
       evidence: {
@@ -295,7 +295,7 @@ const BENIGN_SIGNUP_EVENT: Partial<SignificantEvent> = {
   signals: [
     {
       type: 'detection',
-      stream_name: 'logs',
+      source_id: 'logs',
       verdict: 'refutes',
       description: 'Found: successful account creation activity. Impact: none observed.',
       evidence: {
@@ -324,11 +324,11 @@ const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
     'The frontend returns connection-refused errors to balancereader:8080 on /balances. Users who reach this path cannot view account balances. Evidence is confined to this lookup path rather than a multi-service cascade.',
   severity: 'high',
   confidence: 0.68,
-  stream_names: ['logs'],
+  source_ids: ['logs'],
   signals: [
     {
       type: 'detection',
-      stream_name: 'logs',
+      source_id: 'logs',
       verdict: 'confirms',
       description:
         'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
@@ -352,7 +352,7 @@ const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
       type: 'entity',
       subtype: 'service',
       name: 'balancereader',
-      stream_name: 'logs',
+      source_id: 'logs',
     },
   ],
   blast_radius: [
@@ -362,7 +362,7 @@ const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
       feature_id: 'frontend-balancereader-http',
       source: 'frontend',
       target: 'balancereader',
-      stream_name: 'logs',
+      source_id: 'logs',
     },
   ],
 };
@@ -375,7 +375,7 @@ const BALANCE_READER_WEAK_DETECTION_EVENT: Partial<SignificantEvent> = {
   signals: [
     {
       type: 'detection',
-      stream_name: 'logs',
+      source_id: 'logs',
       verdict: 'confirms',
       description:
         'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
@@ -395,7 +395,7 @@ export const discovery: DatasetConfig['discovery'] = [
   {
     input: {
       scenario_id: 'ledger-db-disconnect',
-      stream_name: 'logs',
+      source_id: 'logs',
       detections: toInputDetections([
         LEDGER_DB_CASCADE_EVENT,
         BENIGN_LOGIN_EVENT,
@@ -482,7 +482,7 @@ export const discovery: DatasetConfig['discovery'] = [
   {
     input: {
       scenario_id: 'ledger-balancereader-weak-detection',
-      stream_name: 'logs',
+      source_id: 'logs',
       detections: toInputDetections([BALANCE_READER_WEAK_DETECTION_EVENT]),
     },
     output: {

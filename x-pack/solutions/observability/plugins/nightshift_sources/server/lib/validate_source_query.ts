@@ -6,11 +6,13 @@
  */
 
 import { badRequest } from '@hapi/boom';
-import { validateSourceQuery as validate } from '@kbn/nightshift-shared';
+import { analyzeSourceQuery, type SourceType } from '@kbn/nightshift-shared';
 
-export const validateSourceQuery = (esql: string): void => {
-  const error = validate(esql);
-  if (error) {
-    throw badRequest(error);
+/** Structural rules, then the one-type rule. Throws a 400 Boom; returns the type to store. */
+export const validateSourceQuery = ({ esql }: { esql: string }): SourceType => {
+  const analysis = analyzeSourceQuery({ esql });
+  if ('error' in analysis) {
+    throw badRequest(analysis.error);
   }
+  return analysis.type;
 };

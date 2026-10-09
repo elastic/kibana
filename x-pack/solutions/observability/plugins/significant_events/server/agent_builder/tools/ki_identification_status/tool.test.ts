@@ -12,6 +12,7 @@ import { createKiIdentificationStatusTool } from './tool';
 import {
   createMockToolContext,
   createSignificantEventsServer,
+  mockSourcesClient,
   type NightshiftFeaturePrivilege,
 } from '../../utils/test_helpers';
 
@@ -47,11 +48,17 @@ describe('createKiIdentificationStatusTool', () => {
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry: { trackOnboardingScheduled: jest.fn() } as never,
+      getSourcesClient: jest.fn().mockResolvedValue({
+        get: jest.fn().mockResolvedValue({ source: { id: 'logs.nginx', slug: 'logs-nginx' } }),
+      }),
     });
 
     const tool = createKiIdentificationStatusTool({
       server: createSignificantEventsServer({ featurePrivilege }),
       streamsKIsOnboardingClient,
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: mockSourcesClient(['logs.nginx']),
+      }) as never,
     });
     const context = createMockToolContext();
     return { tool, context, managementApi };
@@ -60,13 +67,13 @@ describe('createKiIdentificationStatusTool', () => {
   it('returns onboarding status for stream', async () => {
     const { tool, context } = setup();
 
-    const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
+    const result = await tool.handler({ slug: 'logs.nginx' }, context);
 
     if ('results' in result) {
       expect(result.results[0].type).toBe('other');
       expect(result.results[0].data).toEqual(
         expect.objectContaining({
-          stream_name: 'logs.nginx',
+          slug: 'logs.nginx',
           status: SignificantEventsWorkflowStatus.Completed,
         })
       );
@@ -77,7 +84,7 @@ describe('createKiIdentificationStatusTool', () => {
     const { tool, context, managementApi } = setup();
     managementApi.getWorkflowExecutions.mockRejectedValueOnce(new Error('boom'));
 
-    const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
+    const result = await tool.handler({ slug: 'logs.nginx' }, context);
 
     if ('results' in result) {
       expect(result.results[0].type).toBe('error');
@@ -90,7 +97,7 @@ describe('createKiIdentificationStatusTool', () => {
   it('does not read onboarding status without the Nightshift read privilege', async () => {
     const { tool, context, managementApi } = setup({ featurePrivilege: 'none' });
 
-    const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
+    const result = await tool.handler({ slug: 'logs.nginx' }, context);
 
     expect(managementApi.getWorkflowExecutions).not.toHaveBeenCalled();
     expect(result).toMatchObject({ results: [{ type: 'error' }] });

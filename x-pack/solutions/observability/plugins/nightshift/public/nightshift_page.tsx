@@ -45,7 +45,7 @@ export function NightshiftPage(): React.ReactElement | null {
     path: '/settings',
   });
   const managementHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
-    path: '/streams',
+    path: '/sources',
   });
   const nightshiftEnabled = featureFlags.useBooleanValue(NIGHTSHIFT_ENABLED_FLAG, false);
   const canUseAutomations =

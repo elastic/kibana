@@ -53,7 +53,7 @@ export const detectionSchema = lazySchema(() =>
       .max(MAX_RULE_NAME_LENGTH)
       .optional()
       .describe('Human-readable name of the alerting rule.'),
-    stream_name: z.string().max(MAX_ID_LENGTH),
+    source_id: z.string().max(MAX_ID_LENGTH),
     change_point_type: z.enum(CHANGE_POINT_TYPES).describe(
       dedent`
         "spike" = Sudden increase in alert volume. May reflect increased failures, higher traffic or load, or a noisy rule.

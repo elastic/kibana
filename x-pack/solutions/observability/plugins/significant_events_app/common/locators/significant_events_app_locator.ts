@@ -13,7 +13,7 @@ import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public'
 import type { SerializableRecord } from '@kbn/utility-types';
 
 export type SignificantEventsAppTab =
-  | 'streams'
+  | 'sources'
   | 'knowledge_indicators'
   | 'queries'
   | 'detections'
@@ -33,7 +33,8 @@ export interface SignificantEventsAppLocatorParams extends SerializableRecord {
   severity?: string | string[];
   type?: string | string[];
   subtype?: string | string[];
-  stream?: string | string[];
+  /** Source ids to filter the knowledge indicators by. */
+  source?: string | string[];
   showComputed?: string;
   selectedItem?: string;
   selectedEvent?: string;
@@ -53,7 +54,7 @@ export class SignificantEventsAppLocatorDefinition
   public readonly id = SIGNIFICANT_EVENTS_APP_LOCATOR_ID;
 
   public readonly getLocation = async ({
-    tab = 'streams',
+    tab = 'sources',
     ...query
   }: SignificantEventsAppLocatorParams) => {
     const searchParams = new URLSearchParams();

@@ -56,7 +56,12 @@ export interface StartInvestigationRequest {
   title: string;
   trigger_type: InvestigationTriggerType;
   message?: string;
-  stream_names?: string[];
+  /**
+   * Nightshift source ids the investigation should scope its queries to. The
+   * investigation workflow resolves them to slug and ES|QL view.
+   */
+  source_ids?: string[];
+  /** Optional chat model connector or inference endpoint id for this run. */
   connector_id?: string;
   /**
    * Passed to the workflow engine as `concurrency_key`. Two starts with the same key

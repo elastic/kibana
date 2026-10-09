@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import type { Client } from '@elastic/elasticsearch';
 import type {
   MappingTypeMapping,
@@ -41,15 +42,15 @@ const RAW_DATA_STREAM_SEARCH_LIMIT = 1000;
 
 /**
  * Features snapshot mapping. `dynamic: false` with `properties`/`meta` as `enabled: false` keeps
- * the index lean and prevents mapping explosions from those free-form objects; `stream_name` is a
- * keyword for per-stream filtering. Not reused from `knowledgeIndicatorsMappings` because features
+ * the index lean and prevents mapping explosions from those free-form objects; `source_id` is a
+ * keyword for per-source filtering. Not reused from `knowledgeIndicatorsMappings` because features
  * arrive flattened from the features API, not in the raw KI shape that mapping describes.
  */
 const FEATURES_SNAPSHOT_MAPPING: MappingTypeMapping = {
   dynamic: false,
   properties: {
     id: { type: 'keyword' },
-    stream_name: { type: 'keyword' },
+    source_id: { type: 'keyword' },
     type: { type: 'keyword' },
     subtype: { type: 'keyword' },
     title: { type: 'keyword' },
@@ -92,20 +93,54 @@ export async function enableSignificantEvents(
   throw new Error(`Failed to enable significant events: ${status} ${JSON.stringify(data)}`);
 }
 
+/** Creates the source used by the capture's onboarding and discovery runs. */
+export async function createCaptureSource(
+  config: ConnectionConfig,
+  logsIndex: string
+): Promise<{ id: string; view_name: string }> {
+  const { status, data } = await kibanaRequest(config, 'POST', '/internal/nightshift/sources', {
+    title: `Snapshot capture ${logsIndex}`,
+    esql: `FROM ${logsIndex},${logsIndex}.*`,
+  });
+  if (status < 200 || status >= 300) {
+    throw new Error(`Failed to create capture source: ${status} ${JSON.stringify(data)}`);
+  }
+  return z
+    .object({
+      source: z.object({ id: z.string().min(1).max(255), view_name: z.string().min(1).max(1024) }),
+    })
+    .parse(data).source;
+}
+
+/** Removes the capture source and its ES|QL view. */
+export async function deleteCaptureSource(
+  config: ConnectionConfig,
+  sourceId: string
+): Promise<void> {
+  const { status, data } = await kibanaRequest(
+    config,
+    'DELETE',
+    `/internal/nightshift/sources/${sourceId}`
+  );
+  if (status < 200 || status >= 300) {
+    throw new Error(`Failed to delete capture source: ${status} ${JSON.stringify(data)}`);
+  }
+}
+
 export async function triggerKIExtraction(
   config: ConnectionConfig,
   log: ToolingLog,
   connectorId: string,
-  streamName: string = DEFAULT_LOGS_INDEX,
+  sourceId: string,
   steps: KIsOnboardingStep[] = [KIsOnboardingStep.FeaturesIdentification]
 ): Promise<void> {
-  log.info(`Triggering KI onboarding (${steps.join(', ')}) on stream ${streamName}...`);
+  log.info(`Triggering KI onboarding (${steps.join(', ')}) on source ${sourceId}...`);
 
   const now = Date.now();
   const { status, data } = await kibanaRequest(
     config,
     'POST',
-    `/internal/streams/${streamName}/onboarding/_execute`,
+    `/internal/streams/${sourceId}/onboarding/_execute`,
     {
       action: 'schedule',
       from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
@@ -129,7 +164,7 @@ export async function triggerKIExtraction(
 export async function waitForKIExtraction(
   config: ConnectionConfig,
   log: ToolingLog,
-  streamName: string = DEFAULT_LOGS_INDEX,
+  sourceId: string,
   timeoutMs: number = KI_FEATURE_EXTRACTION_TIMEOUT_MS
 ): Promise<void> {
   log.info(`Polling onboarding status for KI extraction (timeout ${timeoutMs / 1000}s)...`);
@@ -140,7 +175,7 @@ export async function waitForKIExtraction(
     const { data } = await kibanaRequest(
       config,
       'GET',
-      `/internal/streams/${streamName}/onboarding/_status`
+      `/internal/streams/${sourceId}/onboarding/_status`
     );
 
     const taskStatus = (data as Record<string, unknown>)?.status;
@@ -170,9 +205,9 @@ export async function waitForKIExtraction(
 export async function logExtractedKIFeatures(
   config: ConnectionConfig,
   log: ToolingLog,
-  streamName: string = DEFAULT_LOGS_INDEX
+  sourceId: string
 ): Promise<void> {
-  const kis = await fetchKIFeatures(config, log, streamName);
+  const kis = await fetchKIFeatures(config, log, sourceId);
   log.info(`Extracted ${kis.length} KIs:`);
   for (const f of kis) {
     log.info(`  - ${f.title || f.description} (${f.type})`);
@@ -182,9 +217,9 @@ export async function logExtractedKIFeatures(
 async function fetchKIFeatures(
   config: ConnectionConfig,
   log: ToolingLog,
-  streamName: string
+  sourceId: string
 ): Promise<Feature[]> {
-  const { data } = await kibanaRequest(config, 'GET', `/internal/streams/${streamName}/features`);
+  const { data } = await kibanaRequest(config, 'GET', `/internal/streams/${sourceId}/features`);
   const features = (data as Record<string, unknown>)?.features;
   if (!Array.isArray(features)) {
     throw new Error(`Expected "features" array from Kibana, got: ${JSON.stringify(data)}`);
@@ -197,14 +232,15 @@ export async function persistKIFeaturesForSnapshot(
   esClient: Client,
   log: ToolingLog,
   snapshotName: string,
-  streamName: string = DEFAULT_LOGS_INDEX
+  sourceId: string,
+  snapshotSourceId: string
 ): Promise<{ index: string; count: number }> {
-  const features = await fetchKIFeatures(config, log, streamName);
+  const features = await fetchKIFeatures(config, log, sourceId);
   return persistDocsForSnapshot(
     esClient,
     log,
     getSnapshotKIFeaturesIndex(snapshotName),
-    features as unknown as Array<Record<string, unknown>>,
+    features.map((feature) => ({ ...feature, source_id: snapshotSourceId })),
     'id',
     'feature KI(s)',
     FEATURES_SNAPSHOT_MAPPING
@@ -236,13 +272,15 @@ export async function persistKnowledgeIndicatorsForSnapshot(
   esClient: Client,
   log: ToolingLog,
   snapshotName: string,
-  streamName: string = DEFAULT_LOGS_INDEX
+  sourceId: string,
+  snapshotSourceId: string,
+  sourceView: string
 ): Promise<{ index: string; count: number }> {
   const kiDocs = await withTempSuperuser(esClient, log, config, (sysClient) =>
     readRawDataStreamDocs(
       sysClient,
       KNOWLEDGE_INDICATORS_DATA_STREAM,
-      { term: { 'stream.name': streamName } },
+      { term: { 'source.id': sourceId } },
       'knowledge indicator(s)'
     )
   );
@@ -251,7 +289,12 @@ export async function persistKnowledgeIndicatorsForSnapshot(
     esClient,
     log,
     getSnapshotKnowledgeIndicatorsIndex(snapshotName),
-    kiDocs,
+    kiDocs.map((doc) => ({
+      ...doc,
+      snapshot_source_view: sourceView,
+      source: { id: snapshotSourceId },
+      'source.id': snapshotSourceId,
+    })),
     'id',
     'knowledge indicator(s)'
   );

@@ -77,17 +77,23 @@ function featureMatchesTopology(
   return false;
 }
 
+/** Orders sources by slug, which people read, and falls back to the id for unknown sources. */
+type SourceSortKey = (sourceId: string) => string;
+
 const compareFeatures = (
   current: KnowledgeIndicatorFeature,
-  next: KnowledgeIndicatorFeature
+  next: KnowledgeIndicatorFeature,
+  sourceSortKey: SourceSortKey
 ): number => {
   const byConfidence = (next.feature.confidence ?? 0) - (current.feature.confidence ?? 0);
   if (byConfidence !== 0) {
     return byConfidence;
   }
-  const byStream = current.feature.stream_name.localeCompare(next.feature.stream_name);
-  if (byStream !== 0) {
-    return byStream;
+  const bySource = sourceSortKey(current.feature.source_id).localeCompare(
+    sourceSortKey(next.feature.source_id)
+  );
+  if (bySource !== 0) {
+    return bySource;
   }
 
   const byId = current.feature.id.localeCompare(next.feature.id);
@@ -96,15 +102,16 @@ const compareFeatures = (
 
 const compareQueries = (
   current: KnowledgeIndicatorQuery,
-  next: KnowledgeIndicatorQuery
+  next: KnowledgeIndicatorQuery,
+  sourceSortKey: SourceSortKey
 ): number => {
   const byScore = (next.query.severity_score ?? -1) - (current.query.severity_score ?? -1);
   if (byScore !== 0) {
     return byScore;
   }
-  const byStream = current.stream_name.localeCompare(next.stream_name);
-  if (byStream !== 0) {
-    return byStream;
+  const bySource = sourceSortKey(current.source_id).localeCompare(sourceSortKey(next.source_id));
+  if (bySource !== 0) {
+    return bySource;
   }
 
   const byId = current.query.id.localeCompare(next.query.id);
@@ -130,47 +137,49 @@ function normalizeParams(params: SearchKnowledgeIndicatorsInput): NormalizedPara
   };
 }
 
-async function resolveStreamNames(
+async function resolveSourceIds(
   params: SearchKnowledgeIndicatorsInput,
-  getStreamNames: () => Promise<string[]>
+  getSourceIds: () => Promise<string[]>
 ): Promise<string[]> {
-  const accessible = await getStreamNames();
-  const requested = params.stream_names?.length
-    ? intersection(uniq(params.stream_names), accessible)
+  const accessible = await getSourceIds();
+  const requested = params.source_ids?.length
+    ? intersection(uniq(params.source_ids), accessible)
     : accessible;
-  return compact(requested.filter((name) => typeof name === 'string' && name.length > 0));
+  return compact(
+    requested.filter((sourceId) => typeof sourceId === 'string' && sourceId.length > 0)
+  );
 }
 
 async function fetchFeatureIndicators({
-  streamNames,
+  sourceIds,
   searchText,
   featureTypes,
   featureIds,
   getFeatures,
   onFeatureFetchError,
 }: {
-  streamNames: string[];
+  sourceIds: string[];
   searchText: string | undefined;
   featureTypes: SearchKnowledgeIndicatorsInput['feature_types'];
   featureIds: string[] | undefined;
   getFeatures: (
-    streamName: string,
+    sourceId: string,
     options: {
       searchText?: string;
       featureTypes?: SearchKnowledgeIndicatorsInput['feature_types'];
       featureIds?: string[];
     }
   ) => Promise<Feature[]>;
-  onFeatureFetchError?: (streamName: string, error: unknown) => void;
+  onFeatureFetchError?: (sourceId: string, error: unknown) => void;
 }): Promise<KnowledgeIndicatorFeature[]> {
   const results = await Promise.allSettled(
-    streamNames.map((name) => getFeatures(name, { searchText, featureTypes, featureIds }))
+    sourceIds.map((sourceId) => getFeatures(sourceId, { searchText, featureTypes, featureIds }))
   );
 
   const indicators: KnowledgeIndicatorFeature[] = [];
   results.forEach((result, index) => {
     if (result.status === 'rejected') {
-      onFeatureFetchError?.(streamNames[index], result.reason);
+      onFeatureFetchError?.(sourceIds[index], result.reason);
       return;
     }
     result.value.forEach((feature) => indicators.push(featureToKnowledgeIndicatorFeature(feature)));
@@ -180,7 +189,7 @@ async function fetchFeatureIndicators({
 }
 
 async function fetchQueryIndicators(
-  streamNames: string[],
+  sourceIds: string[],
   options: {
     searchText: string | undefined;
     queryTypes: SearchKnowledgeIndicatorsInput['query_types'];
@@ -189,7 +198,7 @@ async function fetchQueryIndicators(
     ruleBacked: boolean | undefined;
   },
   getQueries: (
-    streamNames: string[],
+    sourceIds: string[],
     options: {
       searchText?: string;
       queryTypes?: SearchKnowledgeIndicatorsInput['query_types'];
@@ -199,7 +208,7 @@ async function fetchQueryIndicators(
     }
   ) => Promise<QueryLink[]>
 ): Promise<KnowledgeIndicatorQuery[]> {
-  const links = await getQueries(streamNames, options);
+  const links = await getQueries(sourceIds, options);
   return links.map(queryLinkToKnowledgeIndicatorQuery);
 }
 
@@ -229,25 +238,31 @@ function filterIndicators(
   });
 }
 
-function sortIndicators(indicators: KnowledgeIndicator[]): KnowledgeIndicator[] {
+function sortIndicators(
+  indicators: KnowledgeIndicator[],
+  sourceSortKey: SourceSortKey
+): KnowledgeIndicator[] {
   return [...indicators].sort((a, b) => {
     if (a.kind !== b.kind) return a.kind === 'feature' ? -1 : 1;
-    if (isFeatureIndicator(a) && isFeatureIndicator(b)) return compareFeatures(a, b);
-    if (isQueryIndicator(a) && isQueryIndicator(b)) return compareQueries(a, b);
+    if (isFeatureIndicator(a) && isFeatureIndicator(b)) return compareFeatures(a, b, sourceSortKey);
+    if (isQueryIndicator(a) && isQueryIndicator(b)) return compareQueries(a, b, sourceSortKey);
     return 0;
   });
 }
 
 export async function searchKnowledgeIndicators({
-  getStreamNames,
+  getSourceIds,
+  getSourceSlug,
   getFeatures,
   getQueries,
   onFeatureFetchError,
   params,
 }: {
-  getStreamNames(): Promise<string[]>;
+  getSourceIds(): Promise<string[]>;
+  /** Slug of a source id, used to order results. Ids sort as is when it is omitted. */
+  getSourceSlug?(sourceId: string): string | undefined;
   getFeatures(
-    streamName: string,
+    sourceId: string,
     options: {
       searchText?: string;
       featureTypes?: SearchKnowledgeIndicatorsInput['feature_types'];
@@ -255,7 +270,7 @@ export async function searchKnowledgeIndicators({
     }
   ): Promise<Feature[]>;
   getQueries(
-    streamNames: string[],
+    sourceIds: string[],
     options: {
       searchText?: string;
       queryTypes?: SearchKnowledgeIndicatorsInput['query_types'];
@@ -264,18 +279,17 @@ export async function searchKnowledgeIndicators({
       ruleBacked?: boolean;
     }
   ): Promise<QueryLink[]>;
-  onFeatureFetchError?: (streamName: string, error: unknown) => void;
+  onFeatureFetchError?: (sourceId: string, error: unknown) => void;
   params: SearchKnowledgeIndicatorsInput;
 }): Promise<SearchKnowledgeIndicatorsOutput> {
   // Step 1: Normalize inputs.
   const normalized = normalizeParams(params);
 
-  // Step 2: Resolve streams (requested ∩ accessible).
-  const streamNames = await resolveStreamNames(params, getStreamNames);
-  const hasRequestedStreamNames =
-    Array.isArray(params.stream_names) && params.stream_names.length > 0;
-  // Handle the case where no streams are accessible and streams were requested.
-  if (hasRequestedStreamNames && streamNames.length === 0) {
+  // Step 2: Resolve sources (requested ∩ accessible).
+  const sourceIds = await resolveSourceIds(params, getSourceIds);
+  const hasRequestedSourceIds = Array.isArray(params.source_ids) && params.source_ids.length > 0;
+  // Handle the case where no sources are accessible and sources were requested.
+  if (hasRequestedSourceIds && sourceIds.length === 0) {
     return {
       knowledge_indicators: [],
       page: normalized.page,
@@ -290,7 +304,7 @@ export async function searchKnowledgeIndicators({
   // Step 3: Fetch features.
   const features = normalized.includeFeatures
     ? await fetchFeatureIndicators({
-        streamNames,
+        sourceIds,
         searchText: normalized.searchText,
         featureTypes: params.feature_types,
         featureIds: params.feature_ids,
@@ -302,7 +316,7 @@ export async function searchKnowledgeIndicators({
   // Step 4: Fetch queries.
   const queries = normalized.includeQueries
     ? await fetchQueryIndicators(
-        streamNames,
+        sourceIds,
         {
           searchText: normalized.searchText,
           queryTypes: params.query_types,
@@ -315,7 +329,10 @@ export async function searchKnowledgeIndicators({
     : [];
 
   // Step 5: Filter defensively, sort deterministically, and paginate.
-  const sorted = sortIndicators(filterIndicators([...features, ...queries], params));
+  const sorted = sortIndicators(
+    filterIndicators([...features, ...queries], params),
+    (sourceId) => getSourceSlug?.(sourceId) ?? sourceId
+  );
   const offset = (normalized.page - 1) * normalized.perPage;
   const knowledgeIndicators = sorted.slice(offset, offset + normalized.perPage);
   const hasMore = normalized.page * normalized.perPage < sorted.length;

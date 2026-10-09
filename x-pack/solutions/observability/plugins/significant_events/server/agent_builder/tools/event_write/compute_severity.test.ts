@@ -19,7 +19,7 @@ const makeSignal = (overrides: Partial<SignalEntry> & { ruleUuid?: string } = {}
   const { ruleUuid = 'rule-1', ...rest } = overrides;
   return {
     type: 'detection',
-    stream_name: 'logs.test',
+    source_id: 'logs.test',
     description: 'Found: payment refused. Impact: checkout blocked.',
     verdict: 'confirms',
     metadata: {
@@ -204,14 +204,14 @@ describe('computeSeverity', () => {
           feature_id: 'postgres',
           source: 'orders-api',
           target: 'postgres',
-          stream_name: 'logs.orders',
+          source_id: 'logs.orders',
         },
         {
           type: 'dependency',
           feature_id: 'redis',
           source: 'orders-api',
           target: 'redis',
-          stream_name: 'logs.orders',
+          source_id: 'logs.orders',
         },
       ];
 

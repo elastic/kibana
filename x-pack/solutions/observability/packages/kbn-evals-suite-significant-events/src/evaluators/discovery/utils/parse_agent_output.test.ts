@@ -349,7 +349,7 @@ describe('extractWriteItemsFromToolCall', () => {
             {
               event_id: 'event-1',
               causal_features: [
-                { feature_id: 'ledgerwriter', name: 'ledgerwriter', stream_name: 'logs' },
+                { feature_id: 'ledgerwriter', name: 'ledgerwriter', source_id: 'logs' },
               ],
               blast_radius: [],
             },
@@ -362,9 +362,7 @@ describe('extractWriteItemsFromToolCall', () => {
     expect(extractWriteItemsFromToolCall(steps)).toEqual([
       {
         event_id: 'event-1',
-        causal_features: [
-          { feature_id: 'ledgerwriter', name: 'ledgerwriter', stream_name: 'logs' },
-        ],
+        causal_features: [{ feature_id: 'ledgerwriter', name: 'ledgerwriter', source_id: 'logs' }],
         blast_radius: [],
       },
       { status: 'inactive', causal_features: [], blast_radius: [] },

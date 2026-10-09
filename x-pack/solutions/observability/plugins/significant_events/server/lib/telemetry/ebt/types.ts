@@ -6,7 +6,6 @@
  */
 
 import type { SignificantEventsToolUsage } from '@kbn/nightshift-ai';
-import type { StreamType } from '@kbn/streams-schema';
 import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 
 interface KnowledgeIndicatorQueriesGeneratedProps {
@@ -16,8 +15,7 @@ interface KnowledgeIndicatorQueriesGeneratedProps {
   output_tokens_used: number;
   cached_tokens_used: number;
   duration_ms: number;
-  stream_name: string;
-  stream_type: StreamType;
+  source_id: string;
   tool_usage?: SignificantEventsToolUsage;
   external_content_tool_continuations?: number;
 }
@@ -41,8 +39,7 @@ interface KnowledgeIndicatorFeaturesIdentifiedProps {
   excluded_features_count: number;
   llm_ignored_count: number;
   code_ignored_count: number;
-  stream_name: string;
-  stream_type: StreamType;
+  source_id: string;
   state: 'success' | 'failure' | 'canceled';
 }
 
@@ -50,20 +47,19 @@ interface AgentBuilderKnowledgeIndicatorCreatedProps {
   ki_kind: 'feature' | 'query';
   tool_id: 'ki_feature_create' | 'ki_query_create';
   success: boolean;
-  stream_name: string;
-  stream_type: StreamType | 'unknown';
+  source_id: string;
   error_message?: string;
 }
 
 interface AgentToolKnowledgeIndicatorIdentificationStartedProps {
   success: boolean;
-  stream_name: string;
+  source_id: string;
   error_message?: string;
 }
 
 interface AgentToolEventCreateProps {
   success: boolean;
-  stream_names: string[];
+  source_ids: string[];
   error_message?: string;
 }
 
@@ -93,8 +89,7 @@ interface AgentToolEventInvestigationAttachProps {
 }
 
 interface CodeAnalysisGroundingProps {
-  stream_name: string;
-  stream_type: string;
+  source_id: string;
   /**
    * Outcome of the code_analysis computed feature: `feature` (a repository was
    * selected and a feature emitted), `no_match` (candidates existed but none
@@ -142,7 +137,7 @@ interface DetectionScanProps {
 }
 
 interface KnowledgeIndicatorOnboardingScheduledProps {
-  stream_name: string;
+  source_id: string;
   execution_id: string;
   workflow_id: string;
   space_id: string;
@@ -155,7 +150,7 @@ interface AgentToolEventWriteProps {
   event_id: string;
   status: SignificantEventStatus;
   written: boolean;
-  stream_names: string[];
+  source_ids: string[];
   error_message?: string;
 }
 
@@ -163,7 +158,7 @@ interface AgentToolEventSearchProps {
   success: boolean;
   result_count: number;
   has_query: boolean;
-  has_stream_filter: boolean;
+  has_source_filter: boolean;
   status_filter?: SignificantEventStatus;
   view: 'compact' | 'full';
   page: number;

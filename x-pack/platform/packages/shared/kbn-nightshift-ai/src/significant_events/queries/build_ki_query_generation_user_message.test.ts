@@ -11,15 +11,10 @@ import {
 } from './build_ki_query_generation_user_message';
 
 describe('buildKIQueryGenerationUserMessage', () => {
-  const target = {
-    id: 'logs.test',
-    name: 'logs.test',
-    sources: ['logs.test'],
-    samplingSource: 'logs.test',
-  };
+  const target = { slug: 'logs-test' };
 
   it('omits existing_queries when there are none', () => {
-    expect(buildKIQueryGenerationUserMessage(target, [])).toBe('`target_id`: logs.test');
+    expect(buildKIQueryGenerationUserMessage(target, [])).toBe('`slug`: logs-test');
   });
 
   it('bounds existing queries by severity, count and description length', () => {

@@ -19,7 +19,7 @@ const detection = {
   detection_id: 'rule-1-exec-1',
   rule_uuid: 'rule-1',
   rule_name: 'Checkout errors',
-  stream_name: 'logs.test',
+  source_id: 'logs.test',
   change_point_type: 'spike',
 };
 

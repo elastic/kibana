@@ -25,7 +25,7 @@ const event: SignificantEvent = {
   event_id: 'payment-outage',
   status: 'active',
   workflow_execution_id: 'workflow-1',
-  stream_names: ['logs.payment'],
+  source_ids: ['logs.payment'],
   title: 'Payment outage',
   symptom_hypothesis: 'Payment gateway timeout.',
   summary: 'Payments are failing.',

@@ -16,16 +16,31 @@ const route = syncRoutes['GET /internal/streams/_knowledge_indicators/_streams_w
 
 type HandlerParams = Parameters<typeof route.handler>[0];
 
-const makeHandlerParams = ({ streamNames }: { streamNames: string[] }): HandlerParams =>
+const makeHandlerParams = ({ sourceIds }: { sourceIds: string[] }): HandlerParams =>
   ({
     params: {},
     request: {},
     getScopedClients: jest.fn().mockResolvedValue({
       licensing: {},
+      sourcesClient: {
+        list: jest.fn().mockResolvedValue({
+          sources: sourceIds.map((id) => ({ id, enabled: true })),
+          total: sourceIds.length,
+          page: 1,
+          per_page: 100,
+        }),
+      },
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
-        getStreamNamesToReconcile: jest.fn().mockResolvedValue(streamNames),
+        getSourceIdsToReconcile: jest.fn().mockResolvedValue(sourceIds),
+        findSourceIdsWithOwnedRules: jest.fn().mockResolvedValue(sourceIds),
+        setSourceRulesEnabled: jest.fn().mockResolvedValue(undefined),
+        deleteOwnedRules: jest.fn().mockResolvedValue(undefined),
+        deleteAllQueries: jest.fn().mockResolvedValue(undefined),
+        deleteIndicators: jest.fn().mockResolvedValue(undefined),
       }),
     }),
+    workflowClients: {},
+    maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
     server: {} as HandlerParams['server'],
   } as unknown as HandlerParams);
 
@@ -34,25 +49,105 @@ describe('streamsWithIndicatorsRoute', () => {
     (assertSignificantEventsAccess as jest.Mock).mockClear();
   });
 
-  it('maps stream names to the foreach item shape', async () => {
+  it('maps source ids to the foreach item shape', async () => {
     const result = await route.handler(
-      makeHandlerParams({ streamNames: ['logs.nginx', 'logs.app'] })
+      makeHandlerParams({ sourceIds: ['logs.nginx', 'logs.app'] })
     );
 
     expect(result).toEqual({
-      streams: [{ streamName: 'logs.nginx' }, { streamName: 'logs.app' }],
+      sources: [{ sourceId: 'logs.nginx' }, { sourceId: 'logs.app' }],
     });
   });
 
   it('returns an empty list when there is nothing to reconcile', async () => {
-    const result = await route.handler(makeHandlerParams({ streamNames: [] }));
+    const result = await route.handler(makeHandlerParams({ sourceIds: [] }));
 
-    expect(result).toEqual({ streams: [] });
+    expect(result).toEqual({ sources: [] });
   });
 
   it('enforces significant events access', async () => {
-    await route.handler(makeHandlerParams({ streamNames: [] }));
+    await route.handler(makeHandlerParams({ sourceIds: [] }));
 
     expect(assertSignificantEventsAccess).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('reconcileSourceRoute', () => {
+  const reconcileSource = syncRoutes['POST /internal/streams/{sourceId}/_reconcile_source'];
+  type ReconcileParams = Parameters<typeof reconcileSource.handler>[0];
+
+  const SOURCE = { id: 'source-1', slug: 'nginx', enabled: true, esql_updated_at: 'rev-2' };
+
+  const makeReconcileParams = ({
+    sources = [SOURCE],
+    getDetectionClient,
+  }: { sources?: Array<typeof SOURCE>; getDetectionClient?: jest.Mock } = {}) => {
+    const scheduleSourceOnboarding = jest.fn().mockResolvedValue(true);
+    const sourceKnowledgeState = {
+      runExclusive: jest.fn(
+        async ({ run }: { run: (state: object, checkpoint: jest.Mock) => Promise<unknown> }) =>
+          run({ revision: 'rev-1' }, jest.fn())
+      ),
+    };
+    const handlerParams = {
+      params: { path: { sourceId: SOURCE.id }, body: { sourceSlug: SOURCE.slug } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        sourcesClient: {
+          list: jest.fn().mockResolvedValue({ sources }),
+          get: jest.fn().mockResolvedValue({ source: SOURCE }),
+        },
+        sourceKnowledgeState,
+        scheduleSourceOnboarding,
+        getDetectionClient,
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+          setSourceRulesEnabled: jest.fn().mockResolvedValue(undefined),
+          deleteOwnedRules: jest.fn().mockResolvedValue(undefined),
+          deleteAllQueries: jest.fn().mockResolvedValue(undefined),
+          deleteIndicators: jest.fn().mockResolvedValue(undefined),
+        }),
+      }),
+      workflowClients: {},
+      maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
+      server: {} as ReconcileParams['server'],
+    } as unknown as ReconcileParams;
+    return { handlerParams, scheduleSourceOnboarding };
+  };
+
+  it('schedules the new revision even when continuous onboarding is off', async () => {
+    const { handlerParams, scheduleSourceOnboarding } = makeReconcileParams();
+
+    await expect(reconcileSource.handler(handlerParams)).resolves.toEqual({ reconciled: true });
+
+    expect(scheduleSourceOnboarding).toHaveBeenCalledWith(SOURCE, {
+      ignoreContinuousSetting: true,
+    });
+  });
+
+  it('marks the detections of a deleted source as processed', async () => {
+    const markSourceDetectionsProcessed = jest.fn().mockResolvedValue(2);
+    const { handlerParams } = makeReconcileParams({
+      sources: [],
+      getDetectionClient: jest.fn().mockResolvedValue({ markSourceDetectionsProcessed }),
+    });
+
+    await expect(reconcileSource.handler(handlerParams)).resolves.toEqual({ reconciled: true });
+
+    expect(markSourceDetectionsProcessed).toHaveBeenCalledWith({
+      sourceId: SOURCE.id,
+      processedBy: 'source-deleted',
+    });
+  });
+
+  it('leaves the detections of a live source alone', async () => {
+    const markSourceDetectionsProcessed = jest.fn();
+    const { handlerParams } = makeReconcileParams({
+      getDetectionClient: jest.fn().mockResolvedValue({ markSourceDetectionsProcessed }),
+    });
+
+    await reconcileSource.handler(handlerParams);
+
+    expect(markSourceDetectionsProcessed).not.toHaveBeenCalled();
   });
 });

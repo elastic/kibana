@@ -15,16 +15,17 @@ import {
   EVENTS_ENDPOINT,
   EVENT_SEARCH_TOOL_ID,
   KI_FEATURE_CREATE_TOOL_ID,
-  KI_STREAM_NAME,
   MARK_SCANNED_ENDPOINT,
   POLL_OPTIONS,
-  STREAM_FEATURES_ENDPOINT,
   TOOL_API_HEADERS,
   TOOL_EXECUTE_ENDPOINT,
   buildDetection,
   buildFeature,
+  createAccessSource,
+  deleteAccessSource,
   deleteDetections,
   deleteFeature,
+  getFeaturesEndpoint,
   deleteSignificantEvent,
   seedDetection,
   seedFeature,
@@ -40,6 +41,8 @@ apiTest.describe(
     const eventId = `viewer-access-${uuidv4()}`;
     const ruleUuid = `viewer-access-${uuidv4()}`;
     const featureId = `viewer-access-${uuidv4()}`;
+    let sourceId: string;
+    let sourceSlug: string;
     let headers: Record<string, string>;
     let toolHeaders: Record<string, string>;
 
@@ -47,8 +50,12 @@ apiTest.describe(
       // Detection writes are rejected while Significant Events is paused.
       await apiServices.significantEventsTest.resumeSignificantEvents();
       await seedSignificantEvent(esClient, eventId);
-      await seedDetection(kbnClient, ruleUuid);
-      await seedFeature(kbnClient, featureId);
+      ({ id: sourceId, slug: sourceSlug } = await createAccessSource({
+        kbnClient,
+        title: `viewer-access-${uuidv4()}`,
+      }));
+      await seedDetection({ kbnClient, ruleUuid, sourceId });
+      await seedFeature({ kbnClient, sourceId, featureId });
       const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
       headers = { ...COMMON_API_HEADERS, ...cookieHeader };
       toolHeaders = { ...TOOL_API_HEADERS, ...cookieHeader };
@@ -57,7 +64,8 @@ apiTest.describe(
     apiTest.afterAll(async ({ esClient, kbnClient }) => {
       await deleteSignificantEvent(esClient, eventId);
       await deleteDetections(esClient, ruleUuid);
-      await deleteFeature(kbnClient, featureId);
+      await deleteFeature({ kbnClient, sourceId, featureId });
+      await deleteAccessSource({ kbnClient, sourceId });
     });
 
     apiTest('lists and opens significant events', async ({ apiClient }) => {
@@ -102,15 +110,13 @@ apiTest.describe(
     });
 
     apiTest('lists knowledge indicators', async ({ apiClient }) => {
-      const response = await apiClient.get(STREAM_FEATURES_ENDPOINT, {
+      const response = await apiClient.get(getFeaturesEndpoint(sourceId), {
         headers,
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
       expect(response.body.features).toStrictEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ id: featureId, stream_name: KI_STREAM_NAME }),
-        ])
+        expect.arrayContaining([expect.objectContaining({ id: featureId, source_id: sourceId })])
       );
     });
 
@@ -132,7 +138,7 @@ apiTest.describe(
     apiTest('cannot write detections', async ({ apiClient }) => {
       const createResponse = await apiClient.post(DETECTIONS_ENDPOINT, {
         headers,
-        body: { detections: [buildDetection(`viewer-denied-${uuidv4()}`)] },
+        body: { detections: [buildDetection(`viewer-denied-${uuidv4()}`, sourceId)] },
         responseType: 'json',
       });
       expect(createResponse).toHaveStatusCode(403);
@@ -146,17 +152,20 @@ apiTest.describe(
     });
 
     apiTest('cannot create or delete knowledge indicators', async ({ apiClient }) => {
-      const createResponse = await apiClient.post(STREAM_FEATURES_ENDPOINT, {
+      const createResponse = await apiClient.post(getFeaturesEndpoint(sourceId), {
         headers,
         body: buildFeature(`viewer-denied-${uuidv4()}`),
         responseType: 'json',
       });
       expect(createResponse).toHaveStatusCode(403);
 
-      const deleteResponse = await apiClient.delete(`${STREAM_FEATURES_ENDPOINT}/${featureId}`, {
-        headers,
-        responseType: 'json',
-      });
+      const deleteResponse = await apiClient.delete(
+        `${getFeaturesEndpoint(sourceId)}/${featureId}`,
+        {
+          headers,
+          responseType: 'json',
+        }
+      );
       expect(deleteResponse).toHaveStatusCode(403);
     });
 
@@ -183,7 +192,7 @@ apiTest.describe(
           headers: toolHeaders,
           body: {
             tool_id: KI_FEATURE_CREATE_TOOL_ID,
-            tool_params: buildFeature(`viewer-denied-${uuidv4()}`),
+            tool_params: { ...buildFeature(`viewer-denied-${uuidv4()}`), slug: sourceSlug },
           },
           responseType: 'json',
         });

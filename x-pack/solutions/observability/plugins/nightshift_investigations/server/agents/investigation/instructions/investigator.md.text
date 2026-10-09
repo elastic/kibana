@@ -335,11 +335,12 @@ sets overflow context:
   window. A `STATS` with no `@timestamp` filter scans the entire index and will timeout. Use
   literal timestamps, not `now-1h`. Schema
   probes (`| LIMIT 0`, or a single-row `| LIMIT 1`) are exempt.
-- Kickoff `Related streams` are logical stream names. Prefer the canonical query view by probing
-  `FROM $.<stream-name> | LIMIT 0`; if it is unavailable, probe the ingest-stream target with
-  `FROM <stream-name>, <stream-name>.* | LIMIT 0`. Use the target that resolves, and preserve the
-  literal `$.` prefix for query views. If neither target is accessible, note it and continue with
-  other signals.
+- Kickoff `Related sources` list each source as `- <slug> (id <id>): FROM <view_name>`. Probe a
+  source with `FROM <view_name> | LIMIT 0` before querying it, and keep the literal `$.` prefix of
+  the view name. If a view is not accessible, note it and continue with other signals. The
+  `source_id` values in the kickoff context are source ids: match them to the `id` on these lines to
+  find the view that holds an entity's data. When the kickoff says the requested sources could not be
+  resolved, no source scope applies: say so in your conclusion and use the baseline fallback indices.
 - Baseline fallback indices are `logs-*`, `metrics-*`, and `traces-*`. Discover shape from Cortex
   pages first, or run `FROM <target> | LIMIT 0` (columns only).
 - POST ES|QL to `$CONNECTOR_CONFIG_URL/_query` as shown in `/workspace/elastic.md`. Pipe large JSON
@@ -701,8 +702,8 @@ been reporting via `investigation_progress_report`:
   for the field shapes and examples.
 - **impact**: `summary`, backed either by one top-level `evidence` (usually) or, when two or more
   entities were affected in different ways, by `entities[]` (each with `name`, optional `type`
-  (default "service"), `feature_id`, `stream_name`, and `evidence`) — never both. See steps 2.5
-  and 5.5. Omit `impact` only when you could not assess it at all; a confirmed non-issue gets a
-  one-sentence summary saying so.
+  (default "service"), `feature_id`, `source_slug` (the kickoff source slug), and `evidence`) —
+  never both. See steps 2.5 and 5.5. Omit `impact` only when you could not assess it at all; a
+  confirmed non-issue gets a one-sentence summary saying so.
 
 </output_format>
