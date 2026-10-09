@@ -10,7 +10,7 @@ on:
 # is the issue *author*, not whoever applied the label — so we check org membership directly.)
 
 permissions:
-  issues: write # post the backlink comment and apply ralph-mirrored on this repo's issue
+  issues: write # apply ralph-mirrored on this repo's issue
 
 concurrency:
   # Every `labeled` event on an issue (`Team:*`, `bug`, anything) queues a run that claims this group
@@ -70,30 +70,12 @@ jobs:
             --jq '[.labels[].name] | contains(["ralph-mirrored"])')
 
           if [[ "$ALREADY_MIRRORED" == "true" ]]; then
-            # ralph-mirrored is set but the backlink comment may still be missing if a prior
-            # run applied the label but the comment step failed. Reconcile it here so the
-            # source issue always ends up with a link to the investigation.
-            HAS_COMMENT=$(gh api "repos/elastic/kibana/issues/$ISSUE_NUMBER/comments" \
-              --jq '[.[] | select(.user.login == "kibanamachine" and (.body | test("error backlog")))] | length > 0')
-            if [[ "$HAS_COMMENT" == "false" ]]; then
-              echo "::notice::ralph-mirrored set but backlink comment missing; reconciling."
-              MIRROR_URL=$(gh api \
-                "search/issues?q=repo:elastic/observability-error-backlog+in:body+https://github.com/elastic/kibana/issues/$ISSUE_NUMBER" \
-                --jq '.items[0].html_url // ""')
-              if [[ -n "$MIRROR_URL" ]]; then
-                gh issue comment "$ISSUE_NUMBER" --repo "elastic/kibana" \
-                  --body "Detective Ralph is investigating this in the error backlog (Elastic-internal): $MIRROR_URL"
-              else
-                echo "::warning::Could not locate mirror issue in the backlog; post the backlink manually."
-              fi
-            fi
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Create the mirror issue and start Detective Ralph
-        id: mirror
         if: steps.livecheck.outputs.skip != 'true'
         env:
           # kibanamachine, not GITHUB_TOKEN: events created by GITHUB_TOKEN do not trigger
@@ -129,7 +111,6 @@ jobs:
 
           MIRROR_URL=$(gh issue create --repo "$TARGET_REPO" \
             --title "${PREFIX}${ISSUE_TITLE}" --body-file "$RUNNER_TEMP/body.md")
-          echo "url=$MIRROR_URL" >> "$GITHUB_OUTPUT"
 
           # Separate call on purpose. This label is what starts Detective Ralph; labels set at
           # creation time are not reliably delivered as a `labeled` event.
@@ -141,20 +122,14 @@ jobs:
             exit 1
           }
 
-      - name: Mark mirrored and post backlink
+      - name: Mark mirrored
         if: steps.livecheck.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }} # own-repo writes only; no PAT needed
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-          MIRROR_URL: ${{ steps.mirror.outputs.url }}
         run: |
           set -euo pipefail
-          # Post the backlink comment first. Non-fatal: a transient failure here is recoverable
-          # because ralph-mirrored is applied below regardless. The live-state check reconciles
-          # the missing comment the next time this workflow runs for the issue.
-          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" \
-            --body "Detective Ralph is investigating this in the error backlog (Elastic-internal): $MIRROR_URL" \
-            || echo "::warning::Backlink comment failed; ralph-mirrored will still be applied. The comment will be reconciled on the next workflow run for this issue."
-          # Apply ralph-mirrored last. This is the idempotency guard; applying it after the
-          # comment means both writes must be attempted before the guard is set.
+          # Apply ralph-mirrored only after the mirror issue exists. This is the idempotency
+          # guard: if the mirror step failed, the label is never set and re-applying
+          # ralph-investigate retries safely.
           gh issue edit "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --add-label 'ralph-mirrored'

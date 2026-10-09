@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { zipObject, isEqual } from 'lodash';
 import type { UnifiedDataTableRenderCustomToolbarProps } from '@kbn/unified-data-table';
 import {
@@ -24,7 +24,8 @@ import type { ESQLRow } from '@kbn/es-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
-import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { EsqlSource } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -76,13 +77,25 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     setActiveColumns(columns);
   }, []);
 
+  const [esqlSource, setEsqlSource] = useState<EsqlSource>();
+  useEffect(() => {
+    let cancelled = false;
+    EsqlSource.create({ query: props.query.esql }).then((source) => {
+      if (!cancelled) {
+        setEsqlSource(source);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [props.query.esql]);
+  const dataSource = useMemo(
+    () => esqlSource?.withColumns(props.columns),
+    [esqlSource, props.columns]
+  );
+
   const renderDocumentView = useCallback(
-    (
-      hit: DataTableRecord,
-      displayedRows: DataTableRecord[],
-      displayedColumns: string[],
-      customColumnsMeta?: DataTableColumnsMeta
-    ) => (
+    (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) => (
       <RowViewer
         dataView={props.dataView}
         notifications={props.core.notifications}
@@ -90,7 +103,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         hit={hit}
         hits={displayedRows}
         columns={displayedColumns}
-        columnsMeta={customColumnsMeta}
+        dataSource={dataSource}
         flyoutType={props.flyoutType ?? 'push'}
         onRemoveColumn={(column) => {
           setActiveColumns(activeColumns.filter((c) => c !== column));
@@ -102,18 +115,15 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         setExpandedDoc={setExpandedDoc}
       />
     ),
-    [activeColumns, props.core.notifications, props.core.chrome, props.dataView, props.flyoutType]
+    [
+      activeColumns,
+      dataSource,
+      props.core.notifications,
+      props.core.chrome,
+      props.dataView,
+      props.flyoutType,
+    ]
   );
-
-  const columnsMeta = useMemo(() => {
-    return props.columns.reduce((acc, column) => {
-      acc[column.id] = {
-        type: column.meta?.type,
-        esType: column.meta?.esType ?? column.meta?.type,
-      };
-      return acc;
-    }, {} as DataTableColumnsMeta);
-  }, [props.columns]);
 
   const rows: DataTableRecord[] = useMemo(() => {
     const columnNames = props.columns?.map(({ name }) => name);
@@ -211,6 +221,10 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     ]
   );
 
+  if (!dataSource) {
+    return null;
+  }
+
   return (
     <UnifiedDataTable
       columns={activeColumns}
@@ -220,10 +234,9 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         }
       `}
       rows={rows}
-      columnsMeta={columnsMeta}
+      dataSource={dataSource}
       services={services}
       enableInTableSearch
-      isPlainRecord
       isSortEnabled={false}
       loadingState={DataLoadingState.loaded}
       dataView={props.dataView}

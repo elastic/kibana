@@ -23,10 +23,13 @@ export const kibanaRules: DummyRuleMap = {
   '@kbn/eslint/no_this_in_property_initializers': 'error',
   '@kbn/eslint/no_conditional_saved_object_type_registration': 'error',
   '@kbn/eslint/no_unsafe_console': 'error',
+  '@kbn/eslint/no_unsafe_hash': 'error',
   '@kbn/eslint/no_unsafe_dynamic_http_path': 'warn',
   '@kbn/eslint/no_wrapped_error_in_logger': 'error',
   '@kbn/eslint/no_npx_playwright': 'error',
   '@kbn/eslint/module_migration': moduleMigrationRule,
+  '@kbn/disable/no_protected_eslint_disable': 'error',
+  '@kbn/disable/no_naked_eslint_disable': 'error',
 };
 
 export const kibanaOverrides: OxlintOverride[] = [
@@ -146,6 +149,18 @@ export const kibanaOverrides: OxlintOverride[] = [
     excludeFiles: ['**/test/**'],
     rules: {
       '@kbn/eslint/no_sync_import_from_plugin': 'error',
+    },
+  },
+  {
+    // Plugin and core index files must list the APIs they expose instead of using `export *`.
+    files: [
+      'src/core/{server,public,common}/index.ts',
+      'src/platform/plugins/**/{server,public,common}/index.ts',
+      'x-pack/platform/plugins/**/{server,public,common}/index.ts',
+      'x-pack/solutions/*/plugins/**/{server,public,common}/index.ts',
+    ],
+    rules: {
+      '@kbn/eslint/no_export_all': 'error',
     },
   },
 ];
