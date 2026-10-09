@@ -11,8 +11,6 @@ import { parse } from 'yaml';
 import ACTION_CLOSE_ALERTS_FALSE_POSITIVE_YAML from './actions/action_close_alerts_false_positive.yaml';
 import FLOOR_ALERT_TRIAGE_REVIEW_YAML from './floor_alert_triage_review.yaml';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
-import { ConcurrencySettingsSchema } from '../../../spec/schema';
-import { ConcurrencySlotOccupyingExecutionStatuses, ExecutionStatus } from '../../../types/latest';
 
 interface YamlStep {
   name: string;
@@ -27,7 +25,7 @@ interface YamlStep {
 }
 
 interface ParsedReview {
-  settings: { timeout: string; concurrency: { key: string; strategy: string; max: number } };
+  settings: { timeout: string; concurrency?: { key: string; strategy: string; max: number } };
   triggers: Array<{
     type: string;
     inputs?: { properties: Record<string, unknown>; required?: string[] };
@@ -62,7 +60,7 @@ const evalExpr = (expr: string, context: Record<string, unknown>): unknown => {
 };
 
 // ---------------------------------------------------------------------------
-// Inputs and the per-rule limit
+// Inputs
 // ---------------------------------------------------------------------------
 
 describe('floor_alert_triage_review — inputs', () => {
@@ -72,7 +70,7 @@ describe('floor_alert_triage_review — inputs', () => {
     expect(parsed.triggers.map(({ type }) => type)).toEqual(['manual']);
   });
 
-  it('requires what the proposal and the per-rule limit cannot do without', () => {
+  it('requires what the proposal cannot do without', () => {
     expect(trigger?.inputs?.required).toEqual(
       expect.arrayContaining(['conversation_id', 'rule_id', 'fp_candidate_ids', 'confidence_floor'])
     );
@@ -93,57 +91,12 @@ describe('floor_alert_triage_review — inputs', () => {
   });
 });
 
-describe('floor_alert_triage_review — per-rule concurrency', () => {
-  const { concurrency } = parsed.settings;
-
-  it('allows 10 reviews waiting for a decision per rule', () => {
-    expect(concurrency.max).toBe(10);
-  });
-
-  // `queue` holds a batch behind analyst decisions and expires it after 24h. `cancel-in-progress`
-  // cancels a review parked on its proposal, which strands the proposal `pending` forever.
-  it('drops the newest review instead of queueing or cancelling an older one', () => {
-    expect(concurrency.strategy).toBe('drop');
-  });
-
-  it('keys the limit on the rule id input, so two rules never share a limit', () => {
-    expect(concurrency.key).toBe('alert-triage-review-{{ inputs.rule_id }}');
-    expect(renderString(concurrency.key, { inputs: { rule_id: 'rule-a' } })).toBe(
-      'alert-triage-review-rule-a'
-    );
-    expect(renderString(concurrency.key, { inputs: { rule_id: 'rule-b' } })).not.toBe(
-      renderString(concurrency.key, { inputs: { rule_id: 'rule-a' } })
-    );
-  });
-});
-
-// The limit only works if the engine counts what this workflow does. The engine's own tests cover
-// the drop strategy and the skip itself (concurrency_manager.test.ts); these pin the pieces of that
-// contract this definition depends on, so a change on either side fails here and not in production.
-describe('floor_alert_triage_review — what the per-rule limit relies on in the engine', () => {
-  const { concurrency } = parsed.settings;
-
-  it('is a concurrency setting the engine accepts', () => {
-    expect(ConcurrencySettingsSchema.safeParse(concurrency).success).toBe(true);
-  });
-
-  // The review parks in WAITING_FOR_CHILD on its proposal for as long as an analyst takes; if that
-  // status stopped counting, the limit would only ever see the brief pending and running window.
-  it.each([ExecutionStatus.PENDING, ExecutionStatus.RUNNING, ExecutionStatus.WAITING_FOR_CHILD])(
-    'counts a review that is %s against the limit',
-    (status) => {
-      expect(ConcurrencySlotOccupyingExecutionStatuses).toContain(status);
-    }
-  );
-
-  it.each([
-    ExecutionStatus.SKIPPED,
-    ExecutionStatus.COMPLETED,
-    ExecutionStatus.FAILED,
-    ExecutionStatus.CANCELLED,
-    ExecutionStatus.TIMED_OUT,
-  ])('frees the slot of a review that is %s', (status) => {
-    expect(ConcurrencySlotOccupyingExecutionStatuses).not.toContain(status);
+describe('floor_alert_triage_review — no concurrency limit', () => {
+  // A per-rule cap on waiting reviews used to skip further proposals and strand their alerts, which
+  // carry a verdict and are never planned again. It was removed on purpose; noisy rules are to be
+  // identified separately. Adding a concurrency setting back is a product decision, not a tweak.
+  it('does not limit how many reviews wait for a decision', () => {
+    expect(parsed.settings.concurrency).toBeUndefined();
   });
 });
 

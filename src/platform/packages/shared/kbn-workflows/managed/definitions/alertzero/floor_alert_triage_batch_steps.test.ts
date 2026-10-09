@@ -913,13 +913,10 @@ describe('floor_alert_triage_batch — ai.conversation.metadata.patch failure ha
   const patchSteps = allSteps.filter((step) => step.type === 'ai.conversation.metadata.patch');
 
   it('finds every conversation-close step this workflow defines', () => {
-    expect(patchSteps.map((step) => step.name).sort()).toEqual([
-      'close_investigation_review_limit',
-      'close_no_fp',
-    ]);
+    expect(patchSteps.map((step) => step.name).sort()).toEqual(['close_no_fp']);
   });
 
-  it.each(['close_no_fp', 'close_investigation_review_limit'])(
+  it.each(['close_no_fp'])(
     '"%s" survives a patch failure via fallback + continue, so the step after it still runs',
     (name) => {
       const step = stepByName(name);
@@ -934,13 +931,9 @@ describe('floor_alert_triage_batch — ai.conversation.metadata.patch failure ha
 //
 // The closure proposal waits for an analyst, so it lives in its own workflow started with
 // `workflow.executeAsync`. This run must not wait for it, must start it only after the tags and
-// notes exist, and must close the Investigation of a batch whose review the per-rule limit
-// skipped, because no review runs to do that.
+// notes exist.
 // ---------------------------------------------------------------------------
 describe('floor_alert_triage_batch — closure review hand-off', () => {
-  const review = parse(FLOOR_ALERT_TRIAGE_REVIEW_YAML) as {
-    settings: { concurrency: { max: number } };
-  };
   const stepIndex = (name: string) => parsed.steps.findIndex((step) => step.name === name);
 
   it('never waits for the closure proposal or its outcome', () => {
@@ -1024,7 +1017,7 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
     });
 
     it.each([
-      ['skipped', 'limit'],
+      ['skipped', 'failed'],
       ['failed', 'failed'],
       ['cancelled', 'failed'],
       ['timed_out', 'failed'],
@@ -1050,7 +1043,6 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
 
     it.each([
       ['handle_review_started', 'started'],
-      ['handle_review_limit', 'limit'],
       ['handle_review_failed', 'failed'],
     ])('"%s" runs only for the "%s" dispatch', (branchName, dispatch) => {
       expect(stepByName(branchName)?.condition).toBe(
@@ -1059,15 +1051,14 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
     });
   });
 
-  describe('a batch skipped by the per-rule limit', () => {
+  describe('a batch whose review ended without a decision', () => {
     const branchStepNames = (branchName: string) =>
       flatten(stepByName(branchName)?.steps ?? []).map((step) => step.name);
 
-    it('closes the Investigation, since no review is left to do it', () => {
-      expect(branchStepNames('handle_review_limit')).toContain('close_investigation_review_limit');
-      expect(stepByName('close_investigation_review_limit')?.with?.updates).toEqual({
-        status: 'closed',
-      });
+    // The per-rule limit that used to skip a review, and close the Investigation here, is gone.
+    it('has no limit branch, since the review no longer skips a batch', () => {
+      expect(stepByName('handle_review_limit')).toBeUndefined();
+      expect(stepByName('close_investigation_review_limit')).toBeUndefined();
     });
 
     it('leaves the Investigation open when the review failed', () => {
@@ -1128,54 +1119,6 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
         expect(rendered).not.toContain('may already be closed');
       }
     );
-
-    it.each([
-      [1, 'stays open', '1 alert classified'],
-      [4, 'stay open', '4 alerts classified'],
-    ])(
-      'says why no proposal exists for %i alert(s), and that they stay open',
-      (count, stays, counted) => {
-        const template = (stepByName('post_comment_review_limit')?.with as { message: string })
-          .message;
-        const rendered = renderString(template, {
-          inputs: { rule_name: 'Noisy rule', confidence_floor: 0.85 },
-          variables: { fp_candidate_count: count },
-        });
-
-        expect(rendered).toContain('No closure proposal was created');
-        expect(rendered).toContain('Rule "Noisy rule"');
-        expect(rendered).toContain(counted);
-        expect(rendered).toContain(stays);
-        expect(rendered).toContain('tagged az:false_positive');
-      }
-    );
-
-    // The number in the comment is typed by hand; the limit is enforced by the review.
-    it('quotes the limit the review enforces', () => {
-      const template = (stepByName('post_comment_review_limit')?.with as { message: string })
-        .message;
-      expect(template).toContain(
-        `already has ${review.settings.concurrency.max} closure proposals`
-      );
-    });
-
-    // Every other message that mentions the limit does so without a number, so the one above is
-    // the only one that can go stale.
-    it('does not hard-code the limit in any other hand-off message', () => {
-      const messagesOf = (steps: YamlStep[] | undefined): string[] =>
-        (steps ?? []).flatMap((step) => [
-          ...(typeof step.with?.message === 'string' ? [step.with.message] : []),
-          ...messagesOf(step.steps),
-          ...messagesOf(step['on-failure']?.fallback),
-        ]);
-      const others = messagesOf(stepByName('gate_fp_close')?.steps).filter(
-        (message) => !message.includes('closure proposals waiting for a decision')
-      );
-      expect(others.length).toBeGreaterThan(0);
-      others.forEach((message) => {
-        expect(message).not.toMatch(new RegExp(`\\b${review.settings.concurrency.max}\\b`));
-      });
-    });
   });
 
   it('does not claim the proposal was decided when the hand-off comment is written', () => {
