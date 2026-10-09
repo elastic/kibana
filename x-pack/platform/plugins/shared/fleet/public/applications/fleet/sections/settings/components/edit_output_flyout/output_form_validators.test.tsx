@@ -14,6 +14,10 @@ import {
   validateCATrustedFingerPrint,
   validateKafkaHeaders,
   validateKafkaHosts,
+  validateKafkaOAuth2ClientId,
+  validateKafkaOAuth2ClientSecretSecret,
+  validateKafkaOAuth2EndpointParams,
+  validateKafkaOAuth2TokenUrl,
   validateKibanaURL,
   validateKibanaAPIKey,
   validateSSLCertificate,
@@ -473,6 +477,78 @@ describe('Output form validation', () => {
       expect(res).toEqual([
         'The topic should have a matching number of opening and closing brackets',
       ]);
+    });
+  });
+
+  describe('Kafka OAuth2 validators', () => {
+    describe('validateKafkaOAuth2ClientId', () => {
+      it('should require a client id', () => {
+        expect(validateKafkaOAuth2ClientId('')).toEqual(['Client ID is required']);
+        expect(validateKafkaOAuth2ClientId('   ')).toEqual(['Client ID is required']);
+      });
+
+      it('should accept a client id', () => {
+        expect(validateKafkaOAuth2ClientId('my-client')).toBeUndefined();
+      });
+    });
+
+    describe('validateKafkaOAuth2ClientSecretSecret', () => {
+      it('should require a client secret', () => {
+        expect(validateKafkaOAuth2ClientSecretSecret('')).toEqual(['Client secret is required']);
+        expect(validateKafkaOAuth2ClientSecretSecret(undefined)).toEqual([
+          'Client secret is required',
+        ]);
+      });
+
+      it('should accept a new client secret and a saved one', () => {
+        expect(validateKafkaOAuth2ClientSecretSecret('my-secret')).toBeUndefined();
+        expect(validateKafkaOAuth2ClientSecretSecret({ id: 'secret-id' })).toBeUndefined();
+      });
+    });
+
+    describe('validateKafkaOAuth2TokenUrl', () => {
+      it('should require a token url', () => {
+        expect(validateKafkaOAuth2TokenUrl('')).toEqual(['Token URL is required']);
+      });
+
+      it('should accept an http or https url', () => {
+        expect(validateKafkaOAuth2TokenUrl('https://idp.example.com/oauth2/token')).toBeUndefined();
+        expect(validateKafkaOAuth2TokenUrl('http://localhost:8080/token')).toBeUndefined();
+      });
+
+      it('should reject another protocol', () => {
+        expect(validateKafkaOAuth2TokenUrl('ftp://idp.example.com')).toEqual([
+          'Token URL must start with http:// or https://',
+        ]);
+      });
+
+      it('should reject something that is not a url', () => {
+        expect(validateKafkaOAuth2TokenUrl('idp.example.com/token')).toEqual(['Invalid URL']);
+        expect(validateKafkaOAuth2TokenUrl('not a url')).toEqual(['Invalid URL']);
+      });
+    });
+
+    describe('validateKafkaOAuth2EndpointParams', () => {
+      it('should accept complete parameters and the empty row', () => {
+        expect(
+          validateKafkaOAuth2EndpointParams([
+            { key: 'audience', value: 'kafka' },
+            { key: '', value: '' },
+          ])
+        ).toBeUndefined();
+      });
+
+      it('should flag a parameter without value or without name', () => {
+        expect(
+          validateKafkaOAuth2EndpointParams([
+            { key: 'audience', value: '' },
+            { key: '', value: 'kafka' },
+          ])
+        ).toEqual([
+          expect.objectContaining({ index: 0, hasKeyError: false, hasValueError: true }),
+          expect.objectContaining({ index: 1, hasKeyError: true, hasValueError: false }),
+        ]);
+      });
     });
   });
 });

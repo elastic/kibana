@@ -139,6 +139,141 @@ describe('Output model', () => {
       });
     });
 
+    describe('KafkaSchema with OAuth2 authentication', () => {
+      const oauth2Output = (fields: Record<string, unknown> = {}) => ({
+        name: 'test-kafka-output',
+        type: 'kafka',
+        hosts: ['kafka.example.com:9092'],
+        auth_type: kafkaAuthType.OAuth2,
+        oauth2: {
+          client_id: 'my-client',
+          token_url: 'https://idp.example.com/oauth2/token',
+        },
+        secrets: { oauth2: { client_secret: 'my-secret' } },
+        ...fields,
+      });
+
+      it('should accept the OAuth2 settings and secrets', () => {
+        expect(() => schema.object(KafkaSchema).validate(oauth2Output())).not.toThrow();
+      });
+
+      it('should accept every setting of the oauth2clientauthextension', () => {
+        expect(() =>
+          schema.object(KafkaSchema).validate(
+            oauth2Output({
+              oauth2: {
+                grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                client_id: 'my-client',
+                client_id_file: '/etc/client_id',
+                client_secret_file: '/etc/client_secret',
+                token_url: 'https://idp.example.com/oauth2/token',
+                scopes: ['read', 'write'],
+                endpoint_params: { audience: ['kafka'], resource: ['a', 'b'] },
+                tls: {
+                  ca_file: '/etc/ca.pem',
+                  cert_file: '/etc/cert.pem',
+                  key_file: '/etc/key.pem',
+                  insecure_skip_verify: false,
+                  server_name_override: 'idp.example.com',
+                  min_version: '1.2',
+                  max_version: '1.3',
+                },
+                client_certificate_key_id: 'key-1',
+                client_certificate_key_file: '/etc/jwt_key.pem',
+                signature_algorithm: 'RS256',
+                iss: 'issuer',
+                audience: 'audience',
+                claims: { sub: 'user', nested: { a: 1 } },
+              },
+              secrets: {
+                oauth2: {
+                  client_secret: { id: 'secret-id' },
+                  client_certificate_key: { id: 'key-id', hash: 'hash' },
+                },
+              },
+            })
+          )
+        ).not.toThrow();
+      });
+
+      it('should accept removing the oauth2 settings', () => {
+        expect(() =>
+          schema
+            .object(KafkaSchema)
+            .validate({ ...oauth2Output({ auth_type: kafkaAuthType.Ssl }), oauth2: null })
+        ).not.toThrow();
+      });
+
+      it('should require a token url', () => {
+        expect(() =>
+          schema.object(KafkaSchema).validate(oauth2Output({ oauth2: { client_id: 'my-client' } }))
+        ).toThrow();
+        expect(() =>
+          schema
+            .object(KafkaSchema)
+            .validate(oauth2Output({ oauth2: { client_id: 'my-client', token_url: '' } }))
+        ).toThrow();
+      });
+
+      it('should reject an unknown grant type or signature algorithm', () => {
+        const oauth2 = { client_id: 'my-client', token_url: 'https://idp.example.com/token' };
+
+        expect(() =>
+          schema
+            .object(KafkaSchema)
+            .validate(oauth2Output({ oauth2: { ...oauth2, grant_type: 'password' } }))
+        ).toThrow();
+        expect(() =>
+          schema
+            .object(KafkaSchema)
+            .validate(oauth2Output({ oauth2: { ...oauth2, signature_algorithm: 'HS256' } }))
+        ).toThrow();
+      });
+
+      it('should require the values of the endpoint parameters to be lists', () => {
+        expect(() =>
+          schema.object(KafkaSchema).validate(
+            oauth2Output({
+              oauth2: {
+                client_id: 'my-client',
+                token_url: 'https://idp.example.com/token',
+                endpoint_params: { audience: 'kafka' },
+              },
+            })
+          )
+        ).toThrow();
+      });
+
+      it('should reject an unknown OAuth2 setting', () => {
+        expect(() =>
+          schema.object(KafkaSchema).validate(
+            oauth2Output({
+              oauth2: {
+                client_id: 'my-client',
+                token_url: 'https://idp.example.com/token',
+                unknown_setting: true,
+              },
+            })
+          )
+        ).toThrow();
+      });
+
+      it('should accept the oauth2 auth type in an update payload', () => {
+        expect(() =>
+          UpdateOutputSchema.validate({
+            name: 'test-kafka-output',
+            type: 'kafka',
+            auth_type: kafkaAuthType.OAuth2,
+            oauth2: {
+              client_id: 'my-client',
+              token_url: 'https://idp.example.com/oauth2/token',
+            },
+            secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+          })
+        ).not.toThrow();
+      });
+    });
+
     describe('update payloads (UpdateOutputSchema)', () => {
       // UpdateOutputSchema is schema.oneOf over the four private *UpdateSchema variants.
       // Every field on those variants is optional, so `type` must be set to the

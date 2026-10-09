@@ -298,6 +298,73 @@ export function validateKafkaPassword(value: string) {
 
 export const validateKafkaPasswordSecret = toSecretValidator(validateKafkaPassword);
 
+export function validateKafkaOAuth2ClientId(value: string) {
+  if (!value || value.trim() === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2ClientIdIsRequired', {
+        defaultMessage: 'Client ID is required',
+      }),
+    ];
+  }
+}
+
+export function validateKafkaOAuth2ClientSecret(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2ClientSecretIsRequired', {
+        defaultMessage: 'Client secret is required',
+      }),
+    ];
+  }
+}
+
+export const validateKafkaOAuth2ClientSecretSecret = toSecretValidator(
+  validateKafkaOAuth2ClientSecret
+);
+
+export function validateKafkaOAuth2TokenUrl(value: string) {
+  if (!value || value.trim() === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2TokenUrlIsRequired', {
+        defaultMessage: 'Token URL is required',
+      }),
+    ];
+  }
+
+  try {
+    const url = new URL(value.trim());
+    if (!['http:', 'https:'].includes(url.protocol)) {
+      return [
+        i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2TokenUrlInvalidProtocol', {
+          defaultMessage: 'Token URL must start with http:// or https://',
+        }),
+      ];
+    }
+  } catch (error) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2TokenUrlInvalid', {
+        defaultMessage: 'Invalid URL',
+      }),
+    ];
+  }
+}
+
+export function validateKafkaOAuth2EndpointParams(value: Array<{ key: string; value: string }>) {
+  const errors = value
+    .map((row, index) => ({ row, index }))
+    .filter(({ row }) => (row.key === '') !== (row.value === ''))
+    .map(({ row, index }) => ({
+      message: i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2EndpointParamsError', {
+        defaultMessage: 'Specify both the name and the value of the parameter',
+      }),
+      index,
+      hasKeyError: row.key === '',
+      hasValueError: row.value === '',
+    }));
+
+  return errors.length ? errors : undefined;
+}
+
 export function validateCATrustedFingerPrint(value: string) {
   if (value !== '' && !value.match(/^[a-zA-Z0-9]+$/)) {
     return [

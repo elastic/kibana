@@ -773,6 +773,7 @@ export const getSavedObjectTypes = (
               mechanism: { type: 'text' },
             },
           },
+          oauth2: { type: 'object', dynamic: false },
           partition: { type: 'keyword' },
           random: {
             dynamic: false,
@@ -1018,6 +1019,23 @@ export const getSavedObjectTypes = (
                 is_default_otel: __,
                 ...rest
               } = unknownAttributes as Record<string, unknown>;
+              return rest;
+            },
+            create: schema.object({}, { unknowns: 'allow' }),
+          },
+        },
+        '12': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                oauth2: { type: 'object', dynamic: false },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: (unknownAttributes: unknown) => {
+              const { oauth2: _, ...rest } = unknownAttributes as Record<string, unknown>;
               return rest;
             },
             create: schema.object({}, { unknowns: 'allow' }),

@@ -22,6 +22,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 
+import { useKafkaAuthMethods } from '../../../../hooks';
+
 import { MultiRowInput } from '../multi_row_input';
 
 import {
@@ -33,6 +35,7 @@ import {
 
 import type { OutputFormInputsType } from './use_output_form';
 import { SecretFormRow } from './output_form_secret_form_row';
+import { OutputFormKafkaOAuth2 } from './output_form_kafka_oauth2';
 
 const kafkaSaslOptions = [
   {
@@ -70,12 +73,19 @@ const kafkaAuthenticationsOptions = [
   },
 ];
 
+const kafkaOAuth2AuthenticationOption = {
+  id: kafkaAuthType.OAuth2,
+  label: 'OAuth2',
+  'data-test-subj': 'kafkaAuthenticationOAuth2RadioButton',
+};
+
 export const OutputFormKafkaAuthentication: React.FunctionComponent<{
   inputs: OutputFormInputsType;
   useSecretsStorage: boolean;
   onToggleSecretStorage: (secretEnabled: boolean) => void;
 }> = (props) => {
   const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
+  const { isOAuth2Enabled } = useKafkaAuthMethods();
   const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
     kafkaAuthPassword: false,
     kafkaSslKey: false,
@@ -147,8 +157,34 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
     []
   );
 
+  // Authentication method that cannot be edited from this form, e.g. set through the API.
+  // Saving the output keeps its authentication settings unchanged.
+  const renderManagedElsewhereCallout = () => (
+    <KbnInfoCallout
+      title={
+        <FormattedMessage
+          id="xpack.fleet.settings.editOutputFlyout.kafkaAuthenticationManagedElsewhereTitle"
+          defaultMessage="This authentication method is configured outside of this form"
+        />
+      }
+      text={
+        <FormattedMessage
+          id="xpack.fleet.settings.editOutputFlyout.kafkaAuthenticationManagedElsewhereText"
+          defaultMessage="Its authentication settings are kept as they are when you save the output. Select another method to replace them."
+        />
+      }
+      data-test-subj="settingsOutputsFlyout.kafkaAuthenticationManagedElsewhereCallout"
+    />
+  );
+
   const renderAuthentication = () => {
     switch (inputs.kafkaAuthMethodInput.value) {
+      case kafkaAuthType.OAuth2:
+        return isOAuth2Enabled ? (
+          <OutputFormKafkaOAuth2 inputs={inputs} />
+        ) : (
+          renderManagedElsewhereCallout()
+        );
       case kafkaAuthType.None:
         return (
           <EuiFormRow
@@ -334,25 +370,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
           </>
         );
       default:
-        // Authentication method that cannot be edited from this form, e.g. set through the API.
-        // Saving the output keeps its authentication settings unchanged.
-        return (
-          <KbnInfoCallout
-            title={
-              <FormattedMessage
-                id="xpack.fleet.settings.editOutputFlyout.kafkaAuthenticationManagedElsewhereTitle"
-                defaultMessage="This authentication method is configured outside of this form"
-              />
-            }
-            text={
-              <FormattedMessage
-                id="xpack.fleet.settings.editOutputFlyout.kafkaAuthenticationManagedElsewhereText"
-                defaultMessage="Its authentication settings are kept as they are when you save the output. Select another method to replace them."
-              />
-            }
-            data-test-subj="settingsOutputsFlyout.kafkaAuthenticationManagedElsewhereCallout"
-          />
-        );
+        return renderManagedElsewhereCallout();
     }
   };
 
@@ -430,7 +448,11 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
             name="kafkaAuthMethod"
             style={{ display: 'flex', gap: 30 }}
             data-test-subj={'settingsOutputsFlyout.kafkaAuthenticationRadioInput'}
-            options={kafkaAuthenticationsOptions}
+            options={
+              isOAuth2Enabled
+                ? [...kafkaAuthenticationsOptions, kafkaOAuth2AuthenticationOption]
+                : kafkaAuthenticationsOptions
+            }
             compressed
             {...inputs.kafkaAuthMethodInput.props}
           />

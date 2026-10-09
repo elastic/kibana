@@ -25,7 +25,11 @@ import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
 import { packagePolicyService } from './package_policy';
 import { auditLoggingService } from './audit_logging';
-import { findAgentlessPolicies, checkOtlpOutputAllowed } from './outputs/helpers';
+import {
+  findAgentlessPolicies,
+  checkOtlpOutputAllowed,
+  checkKafkaOAuth2Allowed,
+} from './outputs/helpers';
 import { outputSavedObjectToOutput } from './output';
 import {
   extractAndWriteOutputSecrets,
@@ -54,6 +58,9 @@ const mockedBuildAgentStatusRuntimeField = buildAgentStatusRuntimeField as jest.
 
 const mockedFindAgentlessPolicies = findAgentlessPolicies as jest.MockedFunction<
   typeof findAgentlessPolicies
+>;
+const mockedCheckKafkaOAuth2Allowed = checkKafkaOAuth2Allowed as jest.MockedFunction<
+  typeof checkKafkaOAuth2Allowed
 >;
 const mockedCheckOtlpOutputAllowed = checkOtlpOutputAllowed as jest.MockedFunction<
   typeof checkOtlpOutputAllowed
@@ -564,6 +571,7 @@ describe('Output Service', () => {
     mockedPackagePolicyService.fetchAllItems.mockResolvedValue((async function* () {})());
     mockedFindAgentlessPolicies.mockResolvedValue([]);
     mockedCheckOtlpOutputAllowed.mockResolvedValue({ result: true });
+    mockedCheckKafkaOAuth2Allowed.mockResolvedValue({ result: true });
     mockedIsOutputSecretStorageEnabled.mockResolvedValue(false);
   });
 
@@ -1415,6 +1423,150 @@ describe('Output Service', () => {
           expect(saved.sasl).toEqual({ mechanism: 'SCRAM-SHA-256' });
         }
       );
+    });
+
+    describe('kafka output with OAuth2 authentication', () => {
+      const oauth2Output = (fields: Record<string, unknown> = {}) =>
+        ({
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'kafka',
+          auth_type: 'oauth2',
+          oauth2: {
+            client_id: 'my-client',
+            token_url: 'https://idp.example.com/oauth2/token',
+          },
+          secrets: { oauth2: { client_secret: 'my-secret' } },
+          ...fields,
+        } as any);
+
+      beforeEach(() => {
+        mockedCheckKafkaOAuth2Allowed.mockClear();
+        mockedExtractAndWriteOutputSecrets.mockReset();
+        mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+          canEncrypt: true,
+        } as any);
+        mockedAgentPolicyService.list.mockResolvedValue(
+          mockedAgentPolicyWithFleetServerResolvedValue
+        );
+        mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
+        mockedIsOutputSecretStorageEnabled.mockResolvedValue(true);
+        mockedExtractAndWriteOutputSecrets.mockImplementation(
+          async ({ output }) => ({ output, secretReferences: [] } as any)
+        );
+      });
+
+      it('should create the output when OAuth2 is allowed, with its settings and no credentials', async () => {
+        const soClient = getMockedSoClient({ defaultOutputId: 'output-test' });
+
+        await outputService.create(
+          soClient,
+          esClientMock,
+          oauth2Output({ username: 'user', password: 'pass', sasl: { mechanism: 'PLAIN' } }),
+          { id: 'output-1' }
+        );
+
+        expect(mockedCheckKafkaOAuth2Allowed).toHaveBeenCalledWith(esClientMock, soClient);
+        const saved = soClient.create.mock.calls[0][1] as Record<string, unknown>;
+        expect(saved.auth_type).toEqual('oauth2');
+        expect(saved.oauth2).toEqual({
+          client_id: 'my-client',
+          token_url: 'https://idp.example.com/oauth2/token',
+        });
+        expect(saved.username).toBeUndefined();
+        expect(saved.password).toBeUndefined();
+        expect(saved.sasl).toBeUndefined();
+        // the secrets are not part of the saved attributes, they are stored apart
+        expect(saved.secrets).toEqual({ oauth2: { client_secret: 'my-secret' } });
+      });
+
+      it('should not create the output when OAuth2 is not allowed', async () => {
+        const soClient = getMockedSoClient({ defaultOutputId: 'output-test' });
+        mockedCheckKafkaOAuth2Allowed.mockResolvedValueOnce({
+          result: false,
+          error: 'OAuth2 authentication of Kafka outputs is not enabled',
+        });
+
+        await expect(
+          outputService.create(soClient, esClientMock, oauth2Output(), { id: 'output-1' })
+        ).rejects.toThrow('OAuth2 authentication of Kafka outputs is not enabled');
+        expect(soClient.create).not.toHaveBeenCalled();
+      });
+
+      it('should not check the output when it does not use OAuth2', async () => {
+        const soClient = getMockedSoClient({ defaultOutputId: 'output-test' });
+
+        await outputService.create(
+          soClient,
+          esClientMock,
+          {
+            is_default: false,
+            is_default_monitoring: false,
+            name: 'Test',
+            type: 'kafka',
+            auth_type: 'ssl',
+          },
+          { id: 'output-1' }
+        );
+
+        expect(mockedCheckKafkaOAuth2Allowed).not.toHaveBeenCalled();
+      });
+
+      it('should not check a preconfigured output, it is checked before it is created', async () => {
+        const soClient = getMockedSoClient({ defaultOutputId: 'output-test' });
+
+        await outputService.create(soClient, esClientMock, oauth2Output(), {
+          id: 'output-1',
+          fromPreconfiguration: true,
+        });
+
+        expect(mockedCheckKafkaOAuth2Allowed).not.toHaveBeenCalled();
+        expect(soClient.create).toHaveBeenCalled();
+      });
+
+      it('should not store the oauth2 secrets of an output that does not use OAuth2', async () => {
+        const soClient = getMockedSoClient({ defaultOutputId: 'output-test' });
+
+        await outputService.create(
+          soClient,
+          esClientMock,
+          oauth2Output({
+            auth_type: 'ssl',
+            secrets: { oauth2: { client_secret: 'my-secret' }, password: 'pass' },
+          }),
+          { id: 'output-1' }
+        );
+
+        const saved = soClient.create.mock.calls[0][1] as Record<string, unknown>;
+        expect(saved.oauth2).toBeUndefined();
+        expect(mockedExtractAndWriteOutputSecrets.mock.calls[0][0].output).toEqual(
+          expect.objectContaining({ secrets: { password: 'pass' } })
+        );
+      });
+
+      it('should require the secrets storage, there is no plain text setting for the secrets', async () => {
+        const soClient = getMockedSoClient({ defaultOutputId: 'output-test' });
+        mockedIsOutputSecretStorageEnabled.mockResolvedValue(false);
+
+        await expect(
+          outputService.create(soClient, esClientMock, oauth2Output(), { id: 'output-1' })
+        ).rejects.toThrow('can only be stored as secrets');
+        expect(soClient.create).not.toHaveBeenCalled();
+      });
+
+      it('should require the settings the OAuth2 authentication needs', async () => {
+        const soClient = getMockedSoClient({ defaultOutputId: 'output-test' });
+
+        await expect(
+          outputService.create(
+            soClient,
+            esClientMock,
+            oauth2Output({ oauth2: { token_url: 'https://idp.example.com/oauth2/token' } }),
+            { id: 'output-1' }
+          )
+        ).rejects.toThrow('oauth2.client_id or oauth2.client_id_file is required');
+      });
     });
 
     describe('remote elasticsearch output', () => {
@@ -2745,6 +2897,7 @@ describe('Output Service', () => {
         random: null,
         round_robin: null,
         sasl: null,
+        oauth2: null,
         ssl: null,
         timeout: null,
         topic: null,
@@ -2804,6 +2957,127 @@ describe('Output Service', () => {
         expect.anything(),
         expect.objectContaining({ proxy_id: null })
       );
+    });
+
+    describe('kafka output with OAuth2 authentication', () => {
+      const oauth2Update = (fields: Record<string, unknown> = {}) =>
+        ({
+          auth_type: 'oauth2',
+          oauth2: {
+            client_id: 'my-client',
+            token_url: 'https://idp.example.com/oauth2/token',
+          },
+          secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+          ...fields,
+        } as any);
+
+      beforeEach(() => {
+        mockedCheckKafkaOAuth2Allowed.mockClear();
+        mockedExtractAndUpdateOutputSecrets.mockReset();
+        mockedAgentPolicyService.list.mockResolvedValue({
+          items: [{}],
+        } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+        mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+        mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
+        mockedIsOutputSecretStorageEnabled.mockResolvedValue(true);
+        mockedExtractAndUpdateOutputSecrets.mockImplementation(
+          async ({ outputUpdate }) =>
+            ({ outputUpdate, secretReferences: [], secretsToDelete: [] } as any)
+        );
+      });
+
+      it('should switch the output to OAuth2, clearing the credentials and the sasl mechanism', async () => {
+        const soClient = getMockedSoClient({});
+
+        await outputService.update(soClient, esClientMock, 'existing-kafka-output', oauth2Update());
+
+        expect(mockedCheckKafkaOAuth2Allowed).toHaveBeenCalledWith(esClientMock, soClient);
+        expect(soClient.update).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({
+            auth_type: 'oauth2',
+            oauth2: { client_id: 'my-client', token_url: 'https://idp.example.com/oauth2/token' },
+            username: null,
+            password: null,
+            sasl: null,
+          })
+        );
+      });
+
+      it('should not update the output when OAuth2 is not allowed', async () => {
+        const soClient = getMockedSoClient({});
+        mockedCheckKafkaOAuth2Allowed.mockResolvedValueOnce({
+          result: false,
+          error:
+            'OAuth2 authentication of Kafka outputs requires all Fleet Servers to be on version 9.6.0 or later.',
+        });
+
+        await expect(
+          outputService.update(soClient, esClientMock, 'existing-kafka-output', oauth2Update())
+        ).rejects.toThrow('requires all Fleet Servers to be on version 9.6.0 or later');
+        expect(soClient.update).not.toHaveBeenCalled();
+      });
+
+      it('should not check an update that does not use OAuth2', async () => {
+        const soClient = getMockedSoClient({});
+
+        await outputService.update(soClient, esClientMock, 'existing-kafka-output', {
+          name: 'updated kafka',
+        });
+
+        expect(mockedCheckKafkaOAuth2Allowed).not.toHaveBeenCalled();
+      });
+
+      it('should clear the oauth2 settings when the output stops using OAuth2', async () => {
+        const soClient = getMockedSoClient({});
+
+        await outputService.update(soClient, esClientMock, 'existing-kafka-output', {
+          auth_type: 'ssl',
+          oauth2: { client_id: 'my-client', token_url: 'https://idp.example.com/oauth2/token' },
+          secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+        } as any);
+
+        expect(soClient.update).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({ auth_type: 'ssl', oauth2: null })
+        );
+        // the secrets of the previous authentication method are not kept
+        expect(mockedExtractAndUpdateOutputSecrets.mock.calls[0][0].outputUpdate.secrets).toEqual(
+          {}
+        );
+      });
+
+      it('should remove the oauth2 settings when the output stops being a Kafka output', async () => {
+        const soClient = getMockedSoClient({});
+
+        await outputService.update(soClient, esClientMock, 'existing-kafka-output', {
+          type: 'logstash',
+          hosts: ['test:4343'],
+        } as any);
+
+        expect(soClient.update).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({ oauth2: null })
+        );
+      });
+
+      it('should require the secrets storage, there is no plain text setting for the secrets', async () => {
+        const soClient = getMockedSoClient({});
+        mockedIsOutputSecretStorageEnabled.mockResolvedValue(false);
+
+        await expect(
+          outputService.update(
+            soClient,
+            esClientMock,
+            'existing-kafka-output',
+            oauth2Update({ secrets: { oauth2: { client_secret: 'my-secret' } } })
+          )
+        ).rejects.toThrow('can only be stored as secrets');
+        expect(soClient.update).not.toHaveBeenCalled();
+      });
     });
 
     // With logstash output
@@ -2925,6 +3199,7 @@ describe('Output Service', () => {
         random: null,
         round_robin: null,
         sasl: null,
+        oauth2: null,
         timeout: null,
         topic: null,
         headers: null,
@@ -3254,6 +3529,7 @@ describe('Output Service', () => {
         username: null,
         ssl: null,
         sasl: null,
+        oauth2: null,
         broker_timeout: 10,
         required_acks: 1,
         client_id: 'Elastic',
@@ -3295,6 +3571,7 @@ describe('Output Service', () => {
         username: null,
         ssl: null,
         sasl: null,
+        oauth2: null,
         client_id: 'Elastic',
         compression: 'gzip',
         compression_level: 4,
@@ -3334,6 +3611,7 @@ describe('Output Service', () => {
         username: null,
         ssl: null,
         sasl: null,
+        oauth2: null,
         client_id: 'Elastic',
         compression: 'gzip',
         compression_level: 4,
@@ -3389,6 +3667,7 @@ describe('Output Service', () => {
         username: null,
         ssl: null,
         sasl: null,
+        oauth2: null,
         client_id: 'Elastic',
         compression: 'gzip',
         compression_level: 4,
@@ -3434,6 +3713,7 @@ describe('Output Service', () => {
         username: null,
         ssl: null,
         sasl: null,
+        oauth2: null,
         client_id: 'Elastic',
         compression: 'gzip',
         compression_level: 4,
@@ -3487,6 +3767,7 @@ describe('Output Service', () => {
         username: null,
         ssl: null,
         sasl: null,
+        oauth2: null,
         client_id: 'Elastic',
         compression: 'gzip',
         compression_level: 4,
@@ -3533,6 +3814,7 @@ describe('Output Service', () => {
         username: null,
         ssl: null,
         sasl: null,
+        oauth2: null,
         client_id: 'Elastic',
         compression: 'gzip',
         compression_level: 4,
@@ -3587,6 +3869,7 @@ describe('Output Service', () => {
         username: null,
         ssl: null,
         sasl: null,
+        oauth2: null,
         client_id: 'Elastic',
         compression: 'gzip',
         compression_level: 4,

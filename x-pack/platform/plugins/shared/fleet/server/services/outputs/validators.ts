@@ -9,7 +9,7 @@ import deepEqual from 'fast-deep-equal';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { isBeatsOutput } from '../../../common/services/output_helpers';
-import { outputType } from '../../../common/constants';
+import { kafkaAuthType, kafkaOAuth2GrantType, outputType } from '../../../common/constants';
 import { SERVERLESS_DEFAULT_OUTPUT_ID, SERVERLESS_PRIVATE_OUTPUT_ID } from '../../constants';
 import type { NewBeatsOutput, UpdateTypedOutput } from '../../../common/types';
 import type { NewOutput } from '../../../common';
@@ -28,6 +28,54 @@ export const validateOutputSslPaths = (output: Partial<NewBeatsOutput>): void =>
     ],
     (m) => new OutputInvalidError(m)
   );
+};
+
+/**
+ * Checks the settings the OAuth2 authentication method of a Kafka output needs, as the
+ * `oauth2clientauthextension` of the collector does: an id, a secret (or a private key for the
+ * jwt-bearer grant) and a token URL.
+ */
+export const validateKafkaOAuth2 = (output: UpdateTypedOutput | NewOutput): void => {
+  if (output.type !== outputType.Kafka || output.auth_type !== kafkaAuthType.OAuth2) {
+    return;
+  }
+
+  const { oauth2, secrets } = output;
+  if (!oauth2) {
+    throw new OutputInvalidError('oauth2 is required when auth_type is oauth2');
+  }
+  if (!oauth2.client_id && !oauth2.client_id_file) {
+    throw new OutputInvalidError('oauth2.client_id or oauth2.client_id_file is required');
+  }
+
+  if (oauth2.grant_type === kafkaOAuth2GrantType.JwtBearer) {
+    if (!secrets?.oauth2?.client_certificate_key && !oauth2.client_certificate_key_file) {
+      throw new OutputInvalidError(
+        'secrets.oauth2.client_certificate_key or oauth2.client_certificate_key_file is required for the jwt-bearer grant'
+      );
+    }
+  } else if (!secrets?.oauth2?.client_secret && !oauth2.client_secret_file) {
+    throw new OutputInvalidError(
+      'secrets.oauth2.client_secret or oauth2.client_secret_file is required'
+    );
+  }
+};
+
+/**
+ * The secrets of the OAuth2 authentication method have no plain text setting to fall back to, so
+ * they can only be stored with the output secrets storage.
+ */
+export const ensureSecretStorageForOAuth2Secrets = (
+  output: UpdateTypedOutput | NewOutput
+): void => {
+  if (
+    output.type === outputType.Kafka &&
+    (output.secrets?.oauth2?.client_secret || output.secrets?.oauth2?.client_certificate_key)
+  ) {
+    throw new OutputInvalidError(
+      'The OAuth2 client secret and client certificate key can only be stored as secrets, and the output secrets storage is not enabled yet: it needs all Fleet Servers to be on a version that supports it'
+    );
+  }
 };
 
 export const ensureNoDuplicateSecrets = (output: UpdateTypedOutput | NewOutput): void => {

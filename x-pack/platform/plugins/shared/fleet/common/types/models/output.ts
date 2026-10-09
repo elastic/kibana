@@ -10,6 +10,8 @@ import type { BaseSSLSecrets, ValueOf } from '..';
 import type {
   kafkaAuthType,
   kafkaCompressionType,
+  kafkaOAuth2GrantType,
+  kafkaOAuth2SignatureAlgorithm,
   kafkaSaslMechanism,
   otlpProtocol,
   otlpCompressionType,
@@ -26,6 +28,8 @@ export type KafkaCompressionType = typeof kafkaCompressionType;
 export type KafkaAuthType = typeof kafkaAuthType;
 export type KafkaConnectionTypeType = typeof kafkaConnectionType;
 export type KafkaSaslMechanism = typeof kafkaSaslMechanism;
+export type KafkaOAuth2GrantType = typeof kafkaOAuth2GrantType;
+export type KafkaOAuth2SignatureAlgorithm = typeof kafkaOAuth2SignatureAlgorithm;
 export type KafkaPartitionType = typeof kafkaPartitionType;
 export type KafkaTopicWhenType = typeof kafkaTopicWhenType;
 export type KafkaAcknowledgeReliabilityLevel = typeof kafkaAcknowledgeReliabilityLevel;
@@ -271,6 +275,7 @@ export interface KafkaOutput extends BeatsBaseOutput {
   sasl?: {
     mechanism?: ValueOf<KafkaSaslMechanism>;
   } | null;
+  oauth2?: KafkaOAuth2Config | null;
   partition?: ValueOf<KafkaPartitionType>;
   random?: {
     group_events?: number;
@@ -293,8 +298,42 @@ export interface KafkaOutput extends BeatsBaseOutput {
   secrets?: KafkaOutputSecrets;
 }
 
+/**
+ * Settings of the OAuth2 authentication method, they follow the `oauth2clientauthextension` of the
+ * OpenTelemetry collector. The client secret and the client certificate key are in `secrets`.
+ */
+export interface KafkaOAuth2Config {
+  grant_type?: ValueOf<KafkaOAuth2GrantType>;
+  client_id?: string;
+  client_id_file?: string;
+  client_secret_file?: string;
+  token_url: string;
+  scopes?: string[];
+  endpoint_params?: Record<string, string[]>;
+  tls?: {
+    ca_file?: string;
+    cert_file?: string;
+    key_file?: string;
+    insecure_skip_verify?: boolean;
+    server_name_override?: string;
+    min_version?: string;
+    max_version?: string;
+  };
+  // jwt-bearer grant only
+  client_certificate_key_id?: string;
+  client_certificate_key_file?: string;
+  signature_algorithm?: ValueOf<KafkaOAuth2SignatureAlgorithm>;
+  iss?: string;
+  audience?: string;
+  claims?: Record<string, unknown>;
+}
+
 interface KafkaOutputSecrets extends BaseSSLSecrets {
   password?: SOSecret;
+  oauth2?: {
+    client_secret?: SOSecret;
+    client_certificate_key?: SOSecret;
+  };
 }
 interface RemoteESOutputSecrets extends BaseSSLSecrets {
   service_token?: SOSecret;

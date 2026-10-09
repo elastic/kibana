@@ -72,6 +72,7 @@ export const kafkaAuthType = {
   Userpass: 'user_pass',
   Ssl: 'ssl',
   Kerberos: 'kerberos',
+  OAuth2: 'oauth2',
   None: 'none',
 } as const;
 
@@ -85,6 +86,24 @@ export const kafkaSaslMechanism = {
   ScramSha256: 'SCRAM-SHA-256',
   ScramSha512: 'SCRAM-SHA-512',
 } as const;
+
+// SASL mechanism sent to the agent for the OAuth2 authentication method. It is not part of
+// `kafkaSaslMechanism` because users never select it: it comes with `auth_type: oauth2`.
+export const KAFKA_OAUTHBEARER_SASL_MECHANISM = 'OAUTHBEARER';
+
+export const kafkaOAuth2GrantType = {
+  ClientCredentials: 'client_credentials',
+  JwtBearer: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+} as const;
+
+export const kafkaOAuth2SignatureAlgorithm = {
+  Rs256: 'RS256',
+  Rs384: 'RS384',
+  Rs512: 'RS512',
+} as const;
+
+// Elastic Agent supports OAUTHBEARER for the Kafka output from this version.
+export const KAFKA_OAUTH2_MINIMUM_FLEET_SERVER_VERSION = '9.6.0';
 
 export const kafkaPartitionType = {
   Random: 'random',

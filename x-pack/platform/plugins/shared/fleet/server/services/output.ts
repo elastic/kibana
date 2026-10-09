@@ -46,6 +46,7 @@ import type {
   BeatsOutputSOAttributes,
 } from '../types';
 import type {
+  KafkaOutput,
   NewBeatsOutput,
   OtlpGrpcExporterConfig,
   OtlpHttpExporterConfig,
@@ -64,6 +65,7 @@ import {
 import {
   SO_SEARCH_LIMIT,
   outputType,
+  kafkaAuthType,
   kafkaSaslMechanism,
   kafkaPartitionType,
   kafkaCompressionType,
@@ -102,12 +104,22 @@ import {
   extractAndWriteOutputSecrets,
   isOutputSecretStorageEnabled,
 } from './secrets';
-import { findAgentlessPolicies, checkOtlpOutputAllowed } from './outputs/helpers';
-import { clearKafkaAuthFieldsForType } from './outputs/kafka_auth';
+import {
+  findAgentlessPolicies,
+  checkOtlpOutputAllowed,
+  checkKafkaOAuth2Allowed,
+} from './outputs/helpers';
+import {
+  clearKafkaAuthFieldsForType,
+  omitKafkaSecretsOfOtherAuthTypes,
+  usesKafkaOAuth2,
+} from './outputs/kafka_auth';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
 import {
   validateOutputSslPaths,
   ensureNoDuplicateSecrets,
+  ensureSecretStorageForOAuth2Secrets,
+  validateKafkaOAuth2,
   validateOutputServerless,
 } from './outputs/validators';
 
@@ -503,6 +515,18 @@ class OutputService {
     }
   }
 
+  private async assertKafkaOAuth2Allowed(
+    output: Parameters<typeof usesKafkaOAuth2>[0],
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract
+  ): Promise<void> {
+    if (!usesKafkaOAuth2(output)) return;
+    const { result, error } = await checkKafkaOAuth2Allowed(esClient, soClient);
+    if (!result) {
+      throw new OutputInvalidError(error!);
+    }
+  }
+
   private async _getDefaultDataOutputsSO() {
     const outputs = await this.soClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
@@ -688,6 +712,18 @@ class OutputService {
     validateFleetSavedObjectId(options?.id);
 
     await this.assertOtlpOutputAllowed(output, esClient, soClient);
+    // preconfigured outputs are checked before they are created, so Fleet setup does not fail
+    if (!options?.fromPreconfiguration) {
+      await this.assertKafkaOAuth2Allowed(output, esClient, soClient);
+    }
+
+    if (output.type === outputType.Kafka && output.secrets) {
+      // do not store the secrets of an authentication method the output does not use
+      output = {
+        ...output,
+        secrets: omitKafkaSecretsOfOtherAuthTypes(output.secrets, output.auth_type),
+      };
+    }
 
     await validateOutputServerless(this, output);
     const isPreconfigured =
@@ -873,6 +909,7 @@ class OutputService {
       }
 
       if (output.type === outputType.Kafka && data.type === outputType.Kafka) {
+        ensureSecretStorageForOAuth2Secrets(output);
         if (!output.password && output.secrets?.password) {
           data.password = output.secrets?.password as string;
         }
@@ -1181,6 +1218,21 @@ class OutputService {
     const isTypeChanged = mergedType !== originalOutput.type;
 
     await this.assertOtlpOutputAllowed({ type: mergedType }, esClient, soClient);
+    if (!fromPreconfiguration) {
+      await this.assertKafkaOAuth2Allowed({ ...data, type: mergedType }, esClient, soClient);
+    }
+
+    if (mergedType === outputType.Kafka && (data as { secrets?: object }).secrets) {
+      // do not store the secrets of an authentication method the output does not use
+      data = {
+        ...data,
+        secrets: omitKafkaSecretsOfOtherAuthTypes(
+          (data as { secrets?: object }).secrets,
+          (data as { auth_type?: KafkaOutput['auth_type'] }).auth_type ??
+            (originalOutput as KafkaOutput).auth_type
+        ),
+      } as UpdateOutput;
+    }
 
     const typedFullUpdateData = { ...data, type: mergedType } as UpdateTypedOutput;
     await validateOutputServerless(this, typedFullUpdateData, id);
@@ -1238,6 +1290,7 @@ class OutputService {
       target.username = null;
       target.password = null;
       target.sasl = null;
+      target.oauth2 = null;
       target.partition = null;
       target.random = null;
       target.round_robin = null;
@@ -1457,6 +1510,14 @@ class OutputService {
       if (!typedFullUpdateData.sasl) {
         updateData.sasl = null;
       }
+      if (typedFullUpdateData.auth_type === kafkaAuthType.OAuth2) {
+        // the credentials and the sasl mechanism do not apply to OAuth2
+        updateData.username = null;
+        updateData.password = null;
+        updateData.sasl = null;
+      } else if (typedFullUpdateData.auth_type || !typedFullUpdateData.oauth2) {
+        updateData.oauth2 = null;
+      }
       if (!typedFullUpdateData.ssl) {
         updateData.ssl = null;
       }
@@ -1550,6 +1611,7 @@ class OutputService {
         }
       }
       if (updateData.type === outputType.Kafka && typedFullUpdateData.type === outputType.Kafka) {
+        ensureSecretStorageForOAuth2Secrets(typedFullUpdateData);
         if (!typedFullUpdateData.password && typedFullUpdateData.secrets?.password) {
           updateData.password = typedFullUpdateData.secrets.password as string;
         }
@@ -1755,6 +1817,7 @@ class OutputService {
         validateOutputSslPaths(output);
       }
       ensureNoDuplicateSecrets(output);
+      validateKafkaOAuth2(output);
     } catch (e) {
       if (isPreconfigured && e instanceof OutputInvalidError) {
         appContextService.getLogger().warn(`Preconfigured output failed validation: ${e.message}`);

@@ -45,8 +45,9 @@ import { AGENTLESS_MANAGED_BULK_OUTPUT_IDS, outputType } from '../../../common/c
 import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
-import { checkOtlpOutputAllowed } from '../outputs/helpers';
-import { getKafkaSecretLeaves } from '../secrets/outputs';
+import { checkKafkaOAuth2Allowed, checkOtlpOutputAllowed } from '../outputs/helpers';
+import { usesKafkaOAuth2 } from '../outputs/kafka_auth';
+import { getKafkaSecretLeaves, isOutputSecretStorageEnabled } from '../secrets/outputs';
 import {
   isAgentlessEnabled,
   isManagedBulkEnabled,
@@ -230,10 +231,32 @@ export async function createOrUpdatePreconfiguredOutputs(
     ? await checkOtlpOutputAllowed(esClient, soClient)
     : { result: true as const };
 
+  // Same for the Kafka outputs using OAuth2, that also need the output secrets storage because
+  // their secrets have no plain text setting to fall back to.
+  const kafkaOAuth2Check = outputs.some(usesKafkaOAuth2)
+    ? await checkKafkaOAuth2Allowed(esClient, soClient)
+    : { result: true as const, error: undefined };
+  const isSecretStorageEnabled = outputs.some(usesKafkaOAuth2)
+    ? await isOutputSecretStorageEnabled(esClient, soClient)
+    : true;
+
   const updateOrConfigureOutput = async (output: PreconfiguredOutput) => {
     if (isOtlpOutput(output) && !otlpCheck.result) {
       logger.warn(`Skipping preconfigured OTLP output ${output.id}: ${otlpCheck.error}`);
       return;
+    }
+
+    if (usesKafkaOAuth2(output)) {
+      if (!kafkaOAuth2Check.result) {
+        logger.warn(`Skipping preconfigured Kafka output ${output.id}: ${kafkaOAuth2Check.error}`);
+        return;
+      }
+      if (!isSecretStorageEnabled) {
+        logger.warn(
+          `Skipping preconfigured Kafka output ${output.id}: OAuth2 authentication needs the output secrets storage`
+        );
+        return;
+      }
     }
 
     const existingOutput = existingOutputs.find((o) => o.id === output.id);
@@ -542,6 +565,7 @@ async function isPreconfiguredOutputDifferentFromCurrent(
       isDifferent(existingOutput.username, preconfiguredOutput.username) ||
       isDifferent(existingOutput.password, preconfiguredOutput.password) ||
       isDifferent(existingOutput.sasl, preconfiguredOutput.sasl) ||
+      isDifferent(existingOutput.oauth2, preconfiguredOutput.oauth2) ||
       isDifferent(existingOutput.partition, preconfiguredOutput.partition) ||
       isDifferent(existingOutput.random, preconfiguredOutput.random) ||
       isDifferent(existingOutput.round_robin, preconfiguredOutput.round_robin) ||
