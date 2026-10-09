@@ -41,6 +41,7 @@ import type {
 import type { VersionedAttachment } from '../attachments';
 import type { ConversationAccessControl } from './access_control';
 import type { UserIdAndName } from '../base/users';
+import type { ApiReference } from '../apis/known_apis';
 
 export enum ChatEventType {
   toolCall = 'tool_call',
@@ -603,6 +604,32 @@ export const isTodosUpdatedEvent = (event: AgentBuilderEvent<string, any>) => {
   return isToolUiEvent<typeof TODOS_UPDATED_UI_EVENT, TodosUpdatedUiEventData>(
     event,
     TODOS_UPDATED_UI_EVENT
+  );
+};
+
+/**
+ * Custom type of the `tool_ui` event `execute_api` sends after a successful call to an API that
+ * is not read-only, in a conversation execution.
+ */
+export const API_STATE_CHANGED_UI_EVENT = 'api_state_changed' as const;
+
+/**
+ * Payload of an {@link API_STATE_CHANGED_UI_EVENT} event, including the operation that ran and
+ * the request it was dispatched as.
+ */
+export interface ApiStateChangedEventData extends ApiReference {
+  /** HTTP method the operation was dispatched with, e.g. `POST`. */
+  method: string;
+  /** Request path the operation was dispatched to, with path parameters resolved. */
+  path: string;
+}
+
+export const isApiStateChangedEvent = (
+  event: ChatEvent
+): event is ToolUiEvent<typeof API_STATE_CHANGED_UI_EVENT, ApiStateChangedEventData> => {
+  return isToolUiEvent<typeof API_STATE_CHANGED_UI_EVENT, ApiStateChangedEventData>(
+    event,
+    API_STATE_CHANGED_UI_EVENT
   );
 };
 

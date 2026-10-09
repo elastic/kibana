@@ -10,4 +10,5 @@ export type {
   EventsServiceStartContract,
   ChatUiEventsContract,
   ActiveConversation,
+  ApiStateChangesOptions,
 } from './contract';

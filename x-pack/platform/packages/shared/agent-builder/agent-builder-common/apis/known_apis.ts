@@ -110,6 +110,20 @@ export const matchesApiSelector = (selector: string, api: string): boolean => {
 };
 
 /**
+ * Whether any of a list of target/selector pairs covers a specific operation.
+ *
+ * @param selectors - Pairs to match against. Each selector is `*`, a namespace wildcard such as
+ *   `indices.*`, or an exact identifier, and only covers operations on its own target.
+ * @param reference - Target and exact operation identifier to look up.
+ * @returns True when at least one pair covers the operation. False for an empty list.
+ */
+export const matchesAnyApiSelector = (
+  selectors: readonly ApiReference[],
+  { target, api }: ApiReference
+): boolean =>
+  selectors.some((selector) => selector.target === target && matchesApiSelector(selector.api, api));
+
+/**
  * Filters a list of target/selector pairs down to the ones that name nothing grantable.
  *
  * @param apis - Pairs to check, in caller order.
