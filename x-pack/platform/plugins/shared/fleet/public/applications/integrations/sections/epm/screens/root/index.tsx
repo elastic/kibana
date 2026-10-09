@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-// PROTOTYPE: root package page. Redirects straight to the create-package-policy page for the
-// default schema's child, passing `?root=<name>`. The ECS / OTel toggle lives on that page.
+// PROTOTYPE: root package page. Nginx gets the hard-coded onboarding wizard. Other roots redirect
+// straight to the create-package-policy page for the default schema's child, passing
+// `?root=<name>`; the ECS / OTel toggle lives on that page.
 
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
@@ -17,6 +18,9 @@ import { useStartServices } from '../../../../hooks';
 import { useRootPackage } from '../../../../../../hooks/use_root_package';
 
 import { useRootSchemaPath } from './schema_toggle';
+import { NginxOnboardingWizard } from './nginx_wizard';
+import type { NginxSchema } from './nginx_wizard/model';
+import { NGINX_ROOT_NAME } from './nginx_wizard/model';
 
 export { RootSchemaToggle } from './schema_toggle';
 
@@ -28,13 +32,23 @@ export const RootPackagePage: React.FC = () => {
 
   const option =
     options.find((o) => o.schema === defaultSchema && o.child) ?? options.find((o) => o.child);
-  const path = root && option ? getSchemaPath(root.name, option) : undefined;
+  const isNginx = rootName === NGINX_ROOT_NAME;
+  const path = root && option && !isNginx ? getSchemaPath(root.name, option) : undefined;
 
   useEffect(() => {
     if (path) application.navigateToApp(INTEGRATIONS_PLUGIN_ID, { path, replace: true });
   }, [application, path]);
 
   if (isLoading || path) return <EuiSkeletonText lines={6} />;
+  if (isNginx && root && options.some((o) => o.child)) {
+    return (
+      <NginxOnboardingWizard
+        root={root}
+        options={options}
+        defaultSchema={(defaultSchema as NginxSchema) ?? 'otel'}
+      />
+    );
+  }
   return (
     <EuiCallOut
       announceOnMount
