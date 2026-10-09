@@ -11,8 +11,8 @@ import type {
   DashboardSection,
 } from '@kbn/agent-builder-dashboards-common';
 import { isSection } from '@kbn/agent-builder-dashboards-common';
-import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
-import type { OperationFailure } from './utils';
+import { DASHBOARD_FAILURE_TYPES } from './failure_types';
+import type { DashboardFailure } from './utils';
 
 export interface DashboardValidationIssue {
   /** Location of the invalid value in the dashboard payload, e.g. `['panels', 0, 'config']`. */
@@ -34,7 +34,7 @@ type PinnedPanel = NonNullable<DashboardAttachmentData['pinned_panels']>[number]
 
 interface ValidationResult {
   dashboardData: DashboardAttachmentData;
-  failures: OperationFailure[];
+  failures: DashboardFailure[];
   /** Ids of panels that were dropped or restored. */
   discardedPanelIds: ReadonlySet<string>;
 }
@@ -70,7 +70,7 @@ const isDashboardField = (
 /**
  * Finds the unit an issue path points into. Panels are keyed by id, so they match their original
  * after moving. Controls have no stable id and are keyed by content, which is enough because no
- * operation edits a control in place.
+ * change edits a control in place.
  */
 const getIssueUnit = (
   dashboardData: DashboardAttachmentData,
@@ -137,13 +137,13 @@ const formatIssues = (
 
 const MAX_REPORTED_ISSUES = 10;
 
-const toFailure = (identifier: string, messages: string[], outcome: string): OperationFailure => {
+const toFailure = (identifier: string, messages: string[], outcome: string): DashboardFailure => {
   const reportedMessages = messages.slice(0, MAX_REPORTED_ISSUES);
   if (messages.length > MAX_REPORTED_ISSUES) {
     reportedMessages.push(`and ${messages.length - MAX_REPORTED_ISSUES} more`);
   }
   return {
-    type: DASHBOARD_OPERATION_FAILURE_TYPES.validateDashboard,
+    type: DASHBOARD_FAILURE_TYPES.validateDashboard,
     identifier,
     error: `${outcome} because the result does not match the dashboard schema: ${reportedMessages.join(
       '; '
@@ -166,7 +166,7 @@ const restoreField = (
 
 /**
  * Groups issues by unit, leaving out units that were already invalid in the original dashboard:
- * the operations did not make those worse, so existing invalid content never blocks an update.
+ * the change did not make those worse, so existing invalid content never blocks an update.
  */
 const getNewInvalidUnits = (
   originalDashboardData: DashboardAttachmentData,
@@ -195,7 +195,7 @@ const getNewInvalidUnits = (
  * Discards the changes behind validation issues, one unit (panel, control or dashboard field) at a
  * time:
  * - a unit invalid only in the result is dropped when it is new, or restored to its original;
- * - a unit that was already invalid before the operations is kept as is;
+ * - a unit that was already invalid before the change is kept as is;
  * - a new issue that belongs to no single unit (e.g. in a section) discards every change.
  */
 export const discardInvalidChanges = ({
@@ -248,7 +248,7 @@ export const discardInvalidChanges = ({
     originalDashboardData.panels.filter(isSection).map(({ id }) => id)
   );
 
-  const failures: OperationFailure[] = [];
+  const failures: DashboardFailure[] = [];
   const discardedPanelIds = new Set<string>();
 
   const resolvePanel = (panel: AttachmentPanel): AttachmentPanel[] => {
@@ -283,7 +283,7 @@ export const discardInvalidChanges = ({
       sectionPanels.length === 0
     ) {
       failures.push({
-        type: DASHBOARD_OPERATION_FAILURE_TYPES.validateDashboard,
+        type: DASHBOARD_FAILURE_TYPES.validateDashboard,
         identifier: section.id,
         error: `Section "${section.title}" was not added because none of its panels are valid.`,
       });

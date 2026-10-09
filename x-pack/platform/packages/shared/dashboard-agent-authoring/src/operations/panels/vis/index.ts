@@ -6,7 +6,7 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
+import { panelGridSchema, type AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
@@ -29,7 +29,7 @@ import { defineRequestPanelKind } from '../panel_kind';
  */
 export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
   /**
-   * Which engine renders the panel; Lens when omitted. On edits, `edit_panels`
+   * Which engine renders the panel; Lens when omitted. On edits, upsert
    * sets it from the existing panel, and the resolver trusts it.
    */
   renderer?: 'lens' | 'vega';
@@ -140,6 +140,23 @@ export const lensEditPanelRequestSchema = visEditPanelRequestBaseSchema.extend({
 export const vegaEditPanelRequestSchema = visEditPanelRequestBaseSchema.extend({
   renderer: z.literal('vega').describe('The panel is a Vega panel.'),
 });
+
+const isEsqlDataSourceCarrier = (carrier: unknown): boolean => {
+  const dataSource = (carrier as { data_source?: { type?: unknown } } | null)?.data_source;
+  return dataSource?.type === 'esql';
+};
+
+/**
+ * Whether a Lens panel reads its data through ES|QL. Only those can be edited; other Lens panels
+ * (data views, by reference) can only be replaced.
+ */
+export const isEsqlLensPanel = ({ type, config }: AttachmentPanel): boolean => {
+  if (type !== LENS_EMBEDDABLE_TYPE) {
+    return false;
+  }
+  const { layers } = (config ?? {}) as { layers?: unknown };
+  return (Array.isArray(layers) ? layers : [config]).some(isEsqlDataSourceCarrier);
+};
 
 export const lensPanelKind = defineRequestPanelKind({
   renderer: 'lens',

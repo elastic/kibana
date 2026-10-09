@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { DashboardOperation } from './operations';
-import { type DashboardOperationFailureType } from './failure_types';
+import { type DashboardFailureType } from './failure_types';
 
 /**
- * Failure record for tracking dashboard operation errors.
+ * Failure record for tracking dashboard update errors.
  */
-export interface OperationFailure {
-  type: DashboardOperationFailureType;
+export interface DashboardFailure {
+  type: DashboardFailureType;
   identifier: string;
   error: string;
 }
@@ -23,23 +22,3 @@ export interface OperationFailure {
 export const getErrorMessage = (error: unknown): string => {
   return error instanceof Error ? error.message : String(error);
 };
-
-const hasNonEmptyValue = (value: string | undefined): value is string =>
-  value !== undefined && value.trim().length > 0;
-
-const hasRequiredCreateTitleOperation = (operations: DashboardOperation[]): boolean =>
-  operations.some(
-    (operation) => operation.operation === 'set_metadata' && hasNonEmptyValue(operation.title)
-  );
-
-const hasBlankTitleUpdate = (operations: DashboardOperation[]): boolean =>
-  operations.some((operation) => {
-    if (operation.operation !== 'set_metadata') {
-      return false;
-    }
-
-    return operation.title !== undefined && !hasNonEmptyValue(operation.title);
-  });
-
-export const hasValidCreateMetadataOperations = (operations: DashboardOperation[]): boolean =>
-  hasRequiredCreateTitleOperation(operations) && !hasBlankTitleUpdate(operations);

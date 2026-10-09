@@ -47,7 +47,7 @@ const resolveCustomContentState = async (
 /**
  * Resolves custom content panel requests. New panels get a template generated
  * from the request; edits refine the existing panel's template, keeping its
- * ES|QL query unless the request replaces or removes it. On edits, `edit_panels`
+ * ES|QL query unless the request replaces or removes it. On edits, upsert
  * has already checked that the existing panel is custom content.
  */
 export const createCustomContentPanelResolver = ({
@@ -56,7 +56,7 @@ export const createCustomContentPanelResolver = ({
   resolveTemplate: CustomContentTemplateResolver;
 }) => {
   return async (request: CustomContentPanelResolutionRequest): Promise<PanelContentAttempt> => {
-    const { operationType, identifier } = request;
+    const { identifier } = request;
 
     try {
       return {
@@ -67,7 +67,7 @@ export const createCustomContentPanelResolver = ({
         },
       };
     } catch (error) {
-      return createPanelFailureResult(operationType, identifier, getErrorMessage(error));
+      return createPanelFailureResult(identifier, getErrorMessage(error));
     }
   };
 };
