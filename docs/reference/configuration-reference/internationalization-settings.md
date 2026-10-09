@@ -113,4 +113,4 @@ Chrome and Microsoft Edge can move text nodes when they translate a page, which 
 - On a self-managed deployment, open **Profile** and turn on **Browser translation compatibility** in the Language section.
 - On Elastic Cloud, open the user menu, choose **Language**, and turn on the same switch.
 
-The patch stays inactive until the browser translates the page. Reload Kibana after saving. The switch defaults to off, and it stays available when language selection is disabled with `i18n.locales: []`.
+The patch stays inactive until the browser translates the page. Reload Kibana after saving. The switch defaults to off.
