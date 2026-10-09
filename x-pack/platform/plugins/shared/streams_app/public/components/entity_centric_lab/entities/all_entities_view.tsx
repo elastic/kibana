@@ -667,30 +667,21 @@ const AddDataOverlay = ({ onClose }: { readonly onClose: () => void }) => {
   );
 };
 
-/**
- * Purge all prototype-owned localStorage and sessionStorage keys, then
- * hard-reload. Every key we write is prefixed with `entityCentricLab.`,
- * `entityCentricLab_`, or `elasticOn_`, so the wipe is surgical.
- */
-const resetPrototypeState = (): void => {
-  const prefixes = ['entityCentricLab.', 'entityCentricLab_', 'elasticOn_'];
-  const isOurs = (key: string) => prefixes.some((p) => key.startsWith(p));
-  try {
-    const lsKeys = Object.keys(localStorage).filter(isOurs);
-    for (const key of lsKeys) localStorage.removeItem(key);
-    const ssKeys = Object.keys(sessionStorage).filter(isOurs);
-    for (const key of ssKeys) sessionStorage.removeItem(key);
-  } catch {
-    // Storage unavailable — the reload will still help.
-  }
-  window.location.reload();
-};
+const ADVANCED_SETTINGS_NEW_INFRA_PATH =
+  '/app/management/kibana/settings?query=newInfraExperience';
 
-const MoreActionsMenu = () => {
+const MoreActionsMenu = ({
+  onPlayTour,
+  onRevertToSettings,
+}: {
+  onPlayTour: () => void;
+  /** When set, shows the revert action (admins only — not banner-user). */
+  onRevertToSettings?: () => void;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const button = (
     <EuiButtonIcon
-      iconType="boxesHorizontal"
+      iconType="boxesVertical"
       aria-label={i18n.translate(
         'xpack.streams.entityCentricLab.entities.moreActions',
         { defaultMessage: 'More actions' }
@@ -713,6 +704,38 @@ const MoreActionsMenu = () => {
       <EuiContextMenuPanel
         size="s"
         items={[
+          <EuiContextMenuItem
+            key="play-tour"
+            icon="play"
+            onClick={() => {
+              setIsOpen(false);
+              onPlayTour();
+            }}
+            data-test-subj="entityCentricLabMoreActionsPlayTour"
+          >
+            {i18n.translate(
+              'xpack.streams.entityCentricLab.entities.moreActions.playTour',
+              { defaultMessage: 'Play feature tour' }
+            )}
+          </EuiContextMenuItem>,
+          ...(onRevertToSettings
+            ? [
+                <EuiContextMenuItem
+                  key="revert"
+                  icon="undo"
+                  onClick={() => {
+                    setIsOpen(false);
+                    onRevertToSettings();
+                  }}
+                  data-test-subj="entityCentricLabMoreActionsRevert"
+                >
+                  {i18n.translate(
+                    'xpack.streams.entityCentricLab.entities.moreActions.revert',
+                    { defaultMessage: 'Revert back to old UX in Settings' }
+                  )}
+                </EuiContextMenuItem>,
+              ]
+            : []),
           <EuiContextMenuItem
             key="documentation"
             icon="documentation"
@@ -739,20 +762,6 @@ const MoreActionsMenu = () => {
               { defaultMessage: 'Feedback' }
             )}
           </EuiContextMenuItem>,
-          <EuiHorizontalRule key="sep" margin="none" />,
-          <EuiContextMenuItem
-            key="reset"
-            icon="refresh"
-            onClick={() => {
-              setIsOpen(false);
-              resetPrototypeState();
-            }}
-          >
-            {i18n.translate(
-              'xpack.streams.entityCentricLab.entities.moreActions.reset',
-              { defaultMessage: 'Reset prototype state' }
-            )}
-          </EuiContextMenuItem>,
         ]}
       />
     </EuiPopover>
@@ -773,7 +782,12 @@ const AllEntitiesViewInner = ({
   const location = useLocation();
   const history = useHistory();
   const {
-    core: { notifications, uiSettings },
+    core: {
+      application,
+      http: { basePath },
+      notifications,
+      uiSettings,
+    },
     dependencies: {
       start: { agentBuilder, charts, unifiedSearch, observability },
     },
@@ -1005,6 +1019,13 @@ const AllEntitiesViewInner = ({
     setIsTourActive(true);
     setTourStep(1);
   }, [dismissScenarioBanner]);
+
+  // Admins (default / transition / banner-admin) can revert; banner-user cannot.
+  const canRevertToClassicUx = scenarioVariation !== 'banner-user';
+
+  const openRevertSettings = useCallback(() => {
+    application.navigateToUrl(basePath.prepend(ADVANCED_SETTINGS_NEW_INFRA_PATH));
+  }, [application, basePath]);
 
   const prevScenarioRef = useRef(scenarioVariation);
   useEffect(() => {
@@ -2470,7 +2491,12 @@ const AllEntitiesViewInner = ({
                         }
                         anchorPosition="downRight"
                       >
-                        <MoreActionsMenu />
+                        <MoreActionsMenu
+                          onPlayTour={startScenarioTour}
+                          onRevertToSettings={
+                            canRevertToClassicUx ? openRevertSettings : undefined
+                          }
+                        />
                       </EuiTourStep>,
                     ]
                   : []),
@@ -2797,8 +2823,8 @@ const AllEntitiesViewInner = ({
                       title="Toggle between views"
                       content={
                         <p>
-                          Switch between the hexagon map for an at-a-glance overview and
-                          the list view when you need to find something specific.
+                          Switch between the list view when you need to find something
+                          specific and the hexagon map for an at-a-glance overview.
                         </p>
                       }
                       onFinish={closeTour}
@@ -2868,9 +2894,11 @@ const AllEntitiesViewInner = ({
                         <EuiFlexItem grow={false}>
                           <EuiLink onClick={startScenarioTour}>Take a tour</EuiLink>
                         </EuiFlexItem>
-                        {scenarioVariation === 'transition' || scenarioVariation === 'banner-admin' ? (
+                        {canRevertToClassicUx ? (
                           <EuiFlexItem grow={false}>
-                            <EuiLink onClick={() => {}}>Revert in Advanced Settings</EuiLink>
+                            <EuiLink onClick={openRevertSettings}>
+                              Revert in Advanced Settings
+                            </EuiLink>
                           </EuiFlexItem>
                         ) : null}
                         <EuiFlexItem grow={false}>
@@ -3081,9 +3109,11 @@ const AllEntitiesViewInner = ({
                         <EuiFlexItem grow={false}>
                           <EuiLink onClick={startScenarioTour}>Take a tour</EuiLink>
                         </EuiFlexItem>
-                        {scenarioVariation === 'transition' || scenarioVariation === 'banner-admin' ? (
+                        {canRevertToClassicUx ? (
                           <EuiFlexItem grow={false}>
-                            <EuiLink onClick={() => {}}>Revert in Advanced Settings</EuiLink>
+                            <EuiLink onClick={openRevertSettings}>
+                              Revert in Advanced Settings
+                            </EuiLink>
                           </EuiFlexItem>
                         ) : null}
                         <EuiFlexItem grow={false}>

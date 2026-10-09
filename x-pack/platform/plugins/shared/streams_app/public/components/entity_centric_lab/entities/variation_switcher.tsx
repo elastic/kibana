@@ -30,6 +30,12 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useVariationContext } from './variation_context';
 import type { VariationDimension } from './variation_registry';
 
+/**
+ * Lab prototype build number shown in the variation selector.
+ * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
+ */
+export const PROTOTYPE_VERSION = '1.00';
+
 // ---------------------------------------------------------------------------
 // Per-dimension row
 // ---------------------------------------------------------------------------
@@ -166,6 +172,55 @@ const SeedDemoDataButton = () => {
 };
 
 // ---------------------------------------------------------------------------
+// Reset prototype state
+// ---------------------------------------------------------------------------
+
+/**
+ * Purge all prototype-owned localStorage and sessionStorage keys, then
+ * hard-reload. Every key we write is prefixed with `entityCentricLab.`,
+ * `entityCentricLab_`, or `elasticOn_`, so the wipe is surgical.
+ */
+const resetPrototypeState = (): void => {
+  const prefixes = ['entityCentricLab.', 'entityCentricLab_', 'elasticOn_'];
+  const isOurs = (key: string) => prefixes.some((p) => key.startsWith(p));
+  try {
+    const lsKeys = Object.keys(localStorage).filter(isOurs);
+    for (const key of lsKeys) localStorage.removeItem(key);
+    const ssKeys = Object.keys(sessionStorage).filter(isOurs);
+    for (const key of ssKeys) sessionStorage.removeItem(key);
+  } catch {
+    // Storage unavailable — the reload will still help.
+  }
+  window.location.reload();
+};
+
+const ResetPrototypeStateButton = () => (
+  <>
+    <EuiHorizontalRule margin="s" />
+    <EuiFormRow
+      label="Prototype state"
+      fullWidth
+      helpText={
+        <EuiText size="xs" color="subdued">
+          <p>Clears lab storage (saved views, tour flags, scenario progress) and reloads.</p>
+        </EuiText>
+      }
+    >
+      <EuiButton
+        size="s"
+        fullWidth
+        iconType="refresh"
+        color="text"
+        onClick={resetPrototypeState}
+        data-test-subj="entityCentricLabResetPrototypeState"
+      >
+        Reset prototype state
+      </EuiButton>
+    </EuiFormRow>
+  </>
+);
+
+// ---------------------------------------------------------------------------
 // Floating switcher button + popover
 // ---------------------------------------------------------------------------
 
@@ -217,7 +272,23 @@ export const VariationSwitcher = () => {
           }
         `}
       >
-        <EuiPopoverTitle>Prototype variations</EuiPopoverTitle>
+        <EuiPopoverTitle>
+          <EuiFlexGroup
+            alignItems="baseline"
+            justifyContent="spaceBetween"
+            gutterSize="s"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>Prototype variations</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                <span data-test-subj="entityCentricLabPrototypeVersion">
+                  v{PROTOTYPE_VERSION}
+                </span>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPopoverTitle>
         <EuiFlexGroup
           direction="column"
           gutterSize="m"
@@ -236,6 +307,9 @@ export const VariationSwitcher = () => {
           ))}
           <EuiFlexItem grow={false}>
             <SeedDemoDataButton />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ResetPrototypeStateButton />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopover>
