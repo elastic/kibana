@@ -17,13 +17,8 @@ import type { UISession } from '@kbn/data-plugin/public';
 import type { OpenInNewTabParams } from '../../../../../context_awareness/types';
 import { ProfileStateType, type ProfileStateMap } from '../../../../../../common/context_awareness';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
-import type { DiscoverAppState, RecentlyClosedTabState, TabState } from '../types';
-import {
-  selectAllTabs,
-  selectRecentlyClosedTabs,
-  selectTab,
-  selectTabHasUnsavedChangesForPersistence,
-} from '../selectors';
+import type { DiscoverAppState, TabState } from '../types';
+import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
   internalStateSlice,
   discardFlyoutsOnTabChange,
@@ -58,7 +53,10 @@ import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
 import { initializeAndSync, stopSyncing } from './tab_sync';
 import { assignSessionDataViewIds } from '../../utils/assign_session_data_view_ids';
 import { showSessionWarnings } from '../../../../../session';
-import { clearUrlStateWrittenForTab } from '../../utils/cleanup_url_state';
+import {
+  clearUrlStateWrittenForTab,
+  withoutUnsavedChangesFlag,
+} from '../../utils/restore_clean_tabs';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -87,14 +85,10 @@ export const setTabs: InternalStateThunkActionCreator<
     const addedTabs = discoverSessionChanged
       ? params.allTabs
       : differenceBy(params.allTabs, previousTabs, differenceIterateeByTabId);
-    const justRemovedTabs: Array<Omit<RecentlyClosedTabState, 'closedAt'>> = [];
+    const justRemovedTabs: TabState[] = [];
 
     for (const tab of removedTabs) {
-      const newRecentlyClosedTab = {
-        ...tab,
-        hasUnsavedChanges: selectTabHasUnsavedChangesForPersistence(previousState, tab.id),
-        savedSessionId: previousState.persistedDiscoverSession?.id,
-      };
+      const newRecentlyClosedTab: TabState = withoutUnsavedChangesFlag(tab);
       // make sure to get the latest internal and app state from runtime state manager before deleting the runtime state
       newRecentlyClosedTab.initialInternalState =
         selectTabRuntimeInternalState({ runtimeStateManager, tabState: tab, services }) ??

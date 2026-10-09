@@ -273,7 +273,6 @@ export interface TabState extends TabItem {
 
 export interface RecentlyClosedTabState extends TabState {
   closedAt: number;
-  savedSessionId?: string;
 }
 
 export enum TabsBarVisibility {

@@ -11,34 +11,9 @@ import { createSelector } from '@reduxjs/toolkit';
 import { isOfAggregateQueryType, type Filter } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
 import type { DiscoverInternalState, TabState } from '../types';
-import { TabInitializationStatus, TabsBarVisibility } from '../types';
+import { TabsBarVisibility } from '../types';
 
 export const selectTab = (state: DiscoverInternalState, tabId: string) => state.tabs.byId[tabId];
-
-/** Uses current unsaved changes for initialized tabs, retaining the restored flag for other drafts. */
-export const selectTabHasUnsavedChangesForPersistence = (
-  state: DiscoverInternalState,
-  tabId: string
-): boolean | undefined => {
-  const tab = selectTab(state, tabId);
-  if (!tab) {
-    return undefined;
-  }
-
-  const { initializationStatus } = tab.initializationState;
-  if (state.tabs.areInitializing || initializationStatus === TabInitializationStatus.InProgress) {
-    return undefined;
-  }
-
-  if (
-    !state.persistedDiscoverSession?.tabs.some(({ id }) => id === tabId) ||
-    state.tabs.unsavedIds.includes(tabId)
-  ) {
-    return true;
-  }
-
-  return initializationStatus === TabInitializationStatus.Complete ? false : tab.hasUnsavedChanges;
-};
 
 export const selectTabAppState = (state: DiscoverInternalState, tabId: string) =>
   selectTab(state, tabId).appState;

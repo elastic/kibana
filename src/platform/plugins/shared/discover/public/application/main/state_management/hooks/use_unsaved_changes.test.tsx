@@ -21,7 +21,7 @@ import type { AppLeaveActionFactory } from '@kbn/core-application-browser';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { selectTabHasUnsavedChangesForPersistence } from '../redux/selectors';
+import { selectTabHasUnsavedChangesForPersistence } from '../utils/restore_clean_tabs';
 
 const mockSelectHasUnsavedChanges = jest.mocked(selectHasUnsavedChanges);
 

@@ -37,56 +37,74 @@ describe('InternalStateStore', () => {
     beforeEach(() => jest.useFakeTimers());
     afterEach(() => jest.useRealTimers());
 
-    it('does not write drafts until session initialization finishes', () => {
+    const tab = getTabStateMock({
+      id: 'tab',
+      initializationState: { initializationStatus: TabInitializationStatus.Complete },
+    });
+    const setTabs = internalStateSlice.actions.setTabs({
+      allTabs: [tab],
+      selectedTabId: tab.id,
+      recentlyClosedTabs: [],
+    });
+    const setUnsaved = (unsavedTabIds: string[]) =>
+      internalStateActions.setUnsavedChanges({
+        hasUnsavedChanges: unsavedTabIds.length > 0,
+        unsavedTabIds,
+      });
+    const createStore = () => {
       const { internalState, services } = getDiscoverInternalStateMock({
         tabsStorageEnabled: true,
       });
-      const storageSet = jest.spyOn(services.storage, 'set');
-      const tab = getTabStateMock({
-        id: 'tab',
-        initializationState: { initializationStatus: TabInitializationStatus.Complete },
-      });
+      return { dispatch: internalState.dispatch, storageSet: jest.spyOn(services.storage, 'set') };
+    };
+    const expectFlagWritten = (
+      storageSet: jest.SpyInstance,
+      hasUnsavedChanges: boolean | undefined
+    ) =>
+      expect(storageSet).toHaveBeenLastCalledWith(
+        TABS_LOCAL_STORAGE_KEY,
+        expect.objectContaining({
+          openTabs: [expect.objectContaining({ id: tab.id, hasUnsavedChanges })],
+        })
+      );
+
+    it('does not write the unsaved changes flag until session initialization finishes', () => {
+      const { dispatch, storageSet } = createStore();
       const args = { discoverSessionId: undefined };
-      internalState.dispatch(internalStateActions.initializeTabs.pending('request', args));
-      internalState.dispatch(
-        internalStateSlice.actions.setTabs({
-          allTabs: [tab],
-          selectedTabId: tab.id,
-          recentlyClosedTabs: [],
-        })
-      );
-      internalState.dispatch(
-        internalStateActions.setUnsavedChanges({
-          hasUnsavedChanges: true,
-          unsavedTabIds: [tab.id],
-        })
-      );
-      internalState.dispatch(internalStateActions.syncLocallyPersistedTabState({ tabId: tab.id }));
+      dispatch(internalStateActions.initializeTabs.pending('request', args));
+      dispatch(setTabs);
+      dispatch(setUnsaved([tab.id]));
       jest.advanceTimersByTime(300);
 
-      expect(storageSet).not.toHaveBeenCalled();
+      expectFlagWritten(storageSet, undefined);
 
-      internalState.dispatch(
+      dispatch(
         internalStateActions.initializeTabs.fulfilled(
           { userId: 'user', spaceId: 'space', persistedDiscoverSession: undefined },
           'request',
           args
         )
       );
-      internalState.dispatch(
-        internalStateActions.setUnsavedChanges({
-          hasUnsavedChanges: true,
-          unsavedTabIds: [tab.id],
-        })
-      );
       jest.advanceTimersByTime(300);
 
-      expect(storageSet).toHaveBeenCalledWith(
-        TABS_LOCAL_STORAGE_KEY,
-        expect.objectContaining({
-          openTabs: [expect.objectContaining({ id: tab.id, hasUnsavedChanges: true })],
-        })
-      );
+      expectFlagWritten(storageSet, true);
+    });
+
+    it('writes on unsaved changes only when the unsaved tabs change', () => {
+      const { dispatch, storageSet } = createStore();
+      dispatch(setTabs);
+      jest.advanceTimersByTime(300);
+      storageSet.mockClear();
+
+      dispatch(setUnsaved([]));
+      jest.advanceTimersByTime(300);
+
+      expect(storageSet).not.toHaveBeenCalled();
+
+      dispatch(setUnsaved([tab.id]));
+      jest.advanceTimersByTime(300);
+
+      expectFlagWritten(storageSet, true);
     });
   });
 

@@ -13,10 +13,9 @@ import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plug
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DiscoverTabType } from '@kbn/discover-session-constants';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { isEqual, isObject, isUndefined, omitBy, pick } from 'lodash';
+import { isEqual, isObject, isUndefined, omitBy } from 'lodash';
 import { createDataSource } from '../../../../../common/data_sources';
 import type { ProfileStateRegistry } from '../../../../../common/context_awareness';
-import { ProfileStateType } from '../../../../../common/context_awareness';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState, TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
@@ -26,11 +25,14 @@ import { createSearchSource } from '../utils/create_search_source';
 
 export const fromSavedObjectTabToAppState = ({
   tab,
+  localAppState,
 }: {
   tab: DiscoverSessionTab;
+  localAppState?: DiscoverAppState;
 }): DiscoverAppState => {
   return omitBy<DiscoverAppState>(
     {
+      ...localAppState,
       columns: tab.columns,
       filters: tab.serializedSearchSource.filter,
       grid: tab.grid,
@@ -112,43 +114,6 @@ export const fromSavedObjectTabToTabState = ({
       timeRestore: tab.timeRestore ?? false,
       visContext: tab.visContext,
       controlGroupState,
-    },
-  };
-};
-
-/** Restores saved content for a clean draft while preserving its local-only profile and global state. */
-export const restoreUnmodifiedSavedTab = <T extends TabState>({
-  tab,
-  savedTab,
-  profileStateRegistry,
-}: {
-  tab: T;
-  savedTab: DiscoverSessionTab | undefined;
-  profileStateRegistry: ProfileStateRegistry;
-}): T => {
-  if (tab.hasUnsavedChanges !== false || !savedTab) {
-    return tab;
-  }
-
-  const restoredTab = fromSavedObjectTabToTabState({ tab: savedTab, profileStateRegistry });
-  // The saved query is not part of the saved tab, so it never counts as an unsaved change
-  const appState = { ...restoredTab.appState, ...pick(tab.appState, 'savedQuery') };
-
-  return {
-    ...tab,
-    ...restoredTab,
-    appState,
-    previousAppState: appState,
-    profileState: profileStateRegistry.mergeState(
-      profileStateRegistry.pickStateByType({
-        profileStateMap: tab.profileState,
-        stateTypes: [ProfileStateType.Url],
-      }),
-      restoredTab.profileState
-    ),
-    globalState: {
-      ...tab.globalState,
-      ...(savedTab.timeRestore ? restoredTab.globalState : {}),
     },
   };
 };

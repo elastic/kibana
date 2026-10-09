@@ -31,7 +31,7 @@ import {
   type TabState,
 } from './redux';
 import type { TabsUrlState } from '../../../../common/types';
-import { restoreUnmodifiedSavedTab } from './redux/tab_mapping_utils';
+import { restoreUnmodifiedSavedTabs, withoutUnsavedChangesFlag } from './utils/restore_clean_tabs';
 
 export const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
 export const RECENTLY_CLOSED_TABS_LIMIT = 50;
@@ -45,7 +45,7 @@ export type TabStateInLocalStorage = Pick<TabState, 'id' | 'label' | 'hasUnsaved
 };
 
 type RecentlyClosedTabStateInLocalStorage = TabStateInLocalStorage &
-  Pick<RecentlyClosedTabState, 'closedAt' | 'savedSessionId'>;
+  Pick<RecentlyClosedTabState, 'closedAt'>;
 
 interface TabsStateInLocalStorage {
   userId: string;
@@ -78,24 +78,14 @@ export interface TabsStorageManager {
   startUrlSync: (props: { onChanged?: (nextState: TabsUrlState) => void }) => () => void;
   pushSelectedTabIdToUrl: (selectedTabId: string, options?: { replace?: boolean }) => Promise<void>;
   persistLocally: (
-    props: Omit<TabsInternalStatePayload, 'selectedTabId'> & {
-      getTabHasUnsavedChanges: (tabId: string) => boolean | undefined;
-    },
+    props: Omit<TabsInternalStatePayload, 'selectedTabId'>,
     getInternalState: (tabId: string) => TabState['initialInternalState'] | undefined,
     discoverSessionId: string | undefined,
     draftSessionTitle?: string
   ) => Promise<void>;
   updateTabStateLocally: (
     tabId: string,
-    tabState: Pick<
-      TabStateInLocalStorage,
-      | 'internalState'
-      | 'attributes'
-      | 'appState'
-      | 'globalState'
-      | 'profileState'
-      | 'hasUnsavedChanges'
-    >
+    tabState: Omit<TabStateInLocalStorage, 'id' | 'label'>
   ) => void;
   loadLocally: (props: {
     userId: string;
@@ -208,15 +198,14 @@ export const createTabsStorageManager = ({
 
   const toTabStateInStorage = (
     tabState: TabState,
-    getInternalState: ((tabId: string) => TabState['initialInternalState'] | undefined) | undefined,
-    hasUnsavedChanges: boolean | undefined
+    getInternalState: ((tabId: string) => TabState['initialInternalState'] | undefined) | undefined
   ): TabStateInLocalStorage => {
     const getInternalStateForTabWithoutRuntimeState = (tabId: string) =>
       getInternalState?.(tabId) || tabState.initialInternalState;
     return {
       id: tabState.id,
       label: tabState.label,
-      hasUnsavedChanges,
+      hasUnsavedChanges: tabState.hasUnsavedChanges,
       internalState: getInternalStateForTabWithoutRuntimeState(tabState.id),
       attributes: tabState.attributes,
       appState: tabState.appState,
@@ -228,11 +217,10 @@ export const createTabsStorageManager = ({
   const toRecentlyClosedTabStateInStorage = (
     tabState: RecentlyClosedTabState
   ): RecentlyClosedTabStateInLocalStorage => {
-    const state = toTabStateInStorage(tabState, undefined, tabState.hasUnsavedChanges);
+    const state = toTabStateInStorage(withoutUnsavedChangesFlag(tabState), undefined);
     return {
       ...state,
       closedAt: tabState.closedAt,
-      savedSessionId: tabState.savedSessionId,
     };
   };
 
@@ -320,7 +308,6 @@ export const createTabsStorageManager = ({
   ): RecentlyClosedTabState => ({
     ...toTabState(tabStateInStorage, defaultTabState),
     closedAt: tabStateInStorage.closedAt,
-    savedSessionId: tabStateInStorage.savedSessionId,
   });
 
   const readFromLocalStorage = (): TabsStateInLocalStorage => {
@@ -380,7 +367,7 @@ export const createTabsStorageManager = ({
   };
 
   const persistLocally: TabsStorageManager['persistLocally'] = async (
-    { allTabs, recentlyClosedTabs, getTabHasUnsavedChanges },
+    { allTabs, recentlyClosedTabs },
     getInternalState,
     discoverSessionId,
     draftSessionTitle
@@ -390,7 +377,7 @@ export const createTabsStorageManager = ({
     }
 
     const openTabs: TabsStateInLocalStorage['openTabs'] = allTabs.map((tab) =>
-      toTabStateInStorage(tab, getInternalState, getTabHasUnsavedChanges(tab.id))
+      toTabStateInStorage(tab, getInternalState)
     );
     const closedTabs: TabsStateInLocalStorage['closedTabs'] = recentlyClosedTabs.map((tab) =>
       toRecentlyClosedTabStateInStorage(tab)
@@ -488,34 +475,16 @@ export const createTabsStorageManager = ({
     const persistedTabs = updatedDiscoverSession?.tabs.map((tab) =>
       fromSavedObjectTabToTabState({ tab, profileStateRegistry })
     );
-    const getSavedTab = (tabId: string) =>
-      updatedDiscoverSession?.tabs.find(({ id }) => id === tabId);
 
     if (updatedDiscoverSession?.id !== storedTabsState.discoverSessionId) {
       // if the discover session has changed, use the tabs from the session
       openTabs = persistedTabs ?? [];
     } else {
-      openTabs = openTabs.map((tab) =>
-        restoreUnmodifiedSavedTab({
-          tab,
-          savedTab: getSavedTab(tab.id),
-          profileStateRegistry,
-        })
-      );
+      openTabs = restoreUnmodifiedSavedTabs(openTabs, updatedDiscoverSession, profileStateRegistry);
     }
-
-    const closedTabs = storedTabsState.closedTabs.map((storedTab) => {
-      const tab = toRecentlyClosedTabState(storedTab, defaultTabState);
-      if (!tab.savedSessionId || tab.savedSessionId !== updatedDiscoverSession?.id) {
-        return tab;
-      }
-
-      return restoreUnmodifiedSavedTab({
-        tab,
-        savedTab: getSavedTab(tab.id),
-        profileStateRegistry,
-      });
-    });
+    const closedTabs = storedTabsState.closedTabs.map((tab) =>
+      toRecentlyClosedTabState(tab, defaultTabState)
+    );
     // The draft title belongs to the unsaved session, so only keep it when restoring its open tabs
     const restoredDraftSessionTitle =
       !updatedDiscoverSession && !storedTabsState.discoverSessionId
