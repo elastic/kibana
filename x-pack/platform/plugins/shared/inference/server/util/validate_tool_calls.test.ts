@@ -182,4 +182,71 @@ describe('validateToolCalls', () => {
       },
     ]);
   });
+
+  describe('when an object or array argument is sent as a JSON string', () => {
+    const tools = {
+      my_function: {
+        description: 'description',
+        schema: {
+          type: 'object',
+          properties: {
+            response: {
+              type: 'object',
+              properties: {
+                verdicts: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: { id: { type: 'string' } },
+                    required: ['id'],
+                  },
+                },
+                note: { type: 'string' },
+              },
+              required: ['verdicts'],
+            },
+          },
+          required: ['response'],
+        },
+      },
+    } as const;
+
+    const validate = (args: unknown) =>
+      validateToolCalls({
+        toolCalls: [
+          { function: { name: 'my_function', arguments: JSON.stringify(args) }, toolCallId: '1' },
+        ],
+        tools,
+      });
+
+    it('parses a whole object sent as a string', () => {
+      const response = { verdicts: [{ id: 'a' }], note: 'n' };
+
+      expect(validate({ response: JSON.stringify(response) })[0].function.arguments).toEqual({
+        response,
+      });
+    });
+
+    it('parses a nested array sent as a string', () => {
+      expect(
+        validate({ response: { verdicts: JSON.stringify([{ id: 'a' }]) } })[0].function.arguments
+      ).toEqual({ response: { verdicts: [{ id: 'a' }] } });
+    });
+
+    it('keeps a string that the schema expects as a string', () => {
+      expect(
+        validate({ response: { verdicts: [], note: '{"a":1}' } })[0].function.arguments
+      ).toEqual({ response: { verdicts: [], note: '{"a":1}' } });
+    });
+
+    it('still throws when the parsed value does not match the schema', () => {
+      expect(() => validate({ response: JSON.stringify({ verdicts: [{ id: 1 }] }) })).toThrow(
+        'were invalid'
+      );
+    });
+
+    it('still throws when the string is not valid JSON', () => {
+      expect(() => validate({ response: '{not json' })).toThrow('were invalid');
+    });
+  });
 });
