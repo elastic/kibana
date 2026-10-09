@@ -44,6 +44,12 @@ export interface FlyoutSessionContextValue {
    * preference. `undefined` leaves the stored preference in charge.
    */
   type?: OverlaySystemFlyoutOpenOptions['type'];
+  /**
+   * Pins the size of the flyouts opened in scope, ahead of the persisted Security width.
+   * A number is a pixel width; a string is an EUI flyout size. `undefined` leaves the persisted
+   * width in charge. Child flyouts (`session: 'inherit'`) ignore it.
+   */
+  size?: OverlaySystemFlyoutOpenOptions['size'];
 }
 
 const FlyoutSessionContext = createContext<FlyoutSessionContextValue>({ session: 'start' });
@@ -60,17 +66,20 @@ export const FlyoutSessionContextProvider: FC<
  * default - shared by alert/event/IOC flyouts when inside Security, or Discover's document viewer
  * key when outside it.
  */
-export const useFlyoutSessionContext = (): Required<Omit<FlyoutSessionContextValue, 'type'>> &
-  Pick<FlyoutSessionContextValue, 'type'> => {
+export const useFlyoutSessionContext = (): Required<
+  Omit<FlyoutSessionContextValue, 'type' | 'size'>
+> &
+  Pick<FlyoutSessionContextValue, 'type' | 'size'> => {
   const {
     session,
     historyKey: ambientHistoryKey,
     isChildFlyout,
     type,
+    size,
   } = useContext(FlyoutSessionContext);
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey =
     ambientHistoryKey ??
     (isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY);
-  return { session, historyKey, isChildFlyout: isChildFlyout ?? false, type };
+  return { session, historyKey, isChildFlyout: isChildFlyout ?? false, type, size };
 };

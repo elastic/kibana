@@ -32,7 +32,7 @@ const OpenIocsOnMount = ({ categories }: { categories: IocCategoryRow[] }) => {
     }
     hasOpened.current = true;
     // A new push flyout on the conversation history, so Back
-    // returns to the conversation flyout. Size is that flyout's current width.
+    // returns to the conversation flyout.
     openFlyout(
       <InvestigationIocsFlyout categories={categories} />,
       {
@@ -40,8 +40,6 @@ const OpenIocsOnMount = ({ categories }: { categories: IocCategoryRow[] }) => {
         historyKey,
         session,
         type: 'push',
-        size: getOpenConversationFlyoutWidth() ?? 's',
-        maxWidth: false,
         resizable: true,
         paddingSize: 'l',
         title: INVESTIGATION_IOCS_FLYOUT_TITLE,
@@ -51,9 +49,7 @@ const OpenIocsOnMount = ({ categories }: { categories: IocCategoryRow[] }) => {
         flyoutType: FLYOUT_TYPE.INVESTIGATION_IOCS,
         session,
         origin: FLYOUT_ORIGIN.ATTACHMENTS_OVERVIEW,
-      },
-      undefined,
-      { persistWidth: false }
+      }
     );
   }, [categories, defaultProperties, historyKey, openFlyout, session]);
 
@@ -104,6 +100,7 @@ export const InvestigationIocsFlyoutOpener = ({
           session: 'start',
           historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
           type: 'push',
+          size: getOpenConversationFlyoutWidth() ?? 's',
         }}
       >
         <OpenIocsOnMount categories={categories} />

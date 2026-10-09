@@ -35,7 +35,7 @@ const OpenTimelineOnMount = ({ events }: { events: InvestigationTimelineEvent[] 
     }
     hasOpened.current = true;
     // A new push flyout on the conversation history, so Back
-    // returns to the conversation flyout. Size is that flyout's current width.
+    // returns to the conversation flyout.
     openFlyout(
       <InvestigationTimelineFlyout events={events} />,
       {
@@ -43,8 +43,6 @@ const OpenTimelineOnMount = ({ events }: { events: InvestigationTimelineEvent[] 
         historyKey,
         session,
         type: 'push',
-        size: getOpenConversationFlyoutWidth() ?? 's',
-        maxWidth: false,
         resizable: true,
         paddingSize: 'l',
         title: INVESTIGATION_TIMELINE_FLYOUT_TITLE,
@@ -54,9 +52,7 @@ const OpenTimelineOnMount = ({ events }: { events: InvestigationTimelineEvent[] 
         flyoutType: FLYOUT_TYPE.INVESTIGATION_TIMELINE,
         session,
         origin: FLYOUT_ORIGIN.ATTACHMENTS_OVERVIEW,
-      },
-      undefined,
-      { persistWidth: false }
+      }
     );
   }, [defaultProperties, events, historyKey, openFlyout, session]);
 
@@ -107,6 +103,7 @@ export const InvestigationTimelineFlyoutOpener = ({
           session: 'start',
           historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
           type: 'push',
+          size: getOpenConversationFlyoutWidth() ?? 's',
         }}
       >
         <OpenTimelineOnMount events={events} />
