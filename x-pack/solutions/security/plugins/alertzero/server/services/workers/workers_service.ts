@@ -36,15 +36,6 @@ import { workerRegistry, type WorkerRegistration } from '../../managed_workflows
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import type { AgentLookup } from '../utils';
 import { buildAgentLookup, projectSkillsFromDefinition } from '../utils';
-import type {
-  AlertTriageAttachmentService,
-  AlertTriageAttachmentServiceProvider,
-} from '../../types';
-import {
-  attachAlertTriageWorkerToAllRules,
-  detachAlertTriageWorkerFromAllRules,
-  detachRuleIdChunks,
-} from './alert_triage_rule_attachments';
 import {
   ThreatIntelSupplyHardGateError,
   ThreatIntelSupplyNotInstalledError,
@@ -53,7 +44,6 @@ import {
 import type { GetWorkerBlockingReasons } from './worker_blocking_reasons';
 
 interface AlertTriageOpts {
-  getAttachmentService?: AlertTriageAttachmentServiceProvider;
   /**
    * Whether the Alert Analysis workflow will actually analyse anything in the caller's space.
    * Distinct from its `enabled` flag: the workflow installs enabled, but its own guard also
@@ -99,8 +89,7 @@ export type SpaceEnableBlockedReason = 'noModel';
 /** Why an Alert Triage Worker enable was refused before anything was written. */
 export type AlertTriageEnableBlockedReason =
   | 'alertAnalysisWorkflowDisabled'
-  | 'alertAnalysisRuntimeDisabled'
-  | 'ruleAttachmentUnavailable';
+  | 'alertAnalysisRuntimeDisabled';
 
 /** Why Continuous Threat Hunt enable was refused before anything was written. */
 export type HuntSupplyEnableBlockedReason =
@@ -301,11 +290,6 @@ export class WorkersService {
 
     const isAlertTriageWorker = workerId === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
     const isHuntWorker = workerId === SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
-    // Rules the caller cannot edit (ML rules without ML authz), so this call could not attach or
-    // detach them. Reported to the caller: on enable those rules are silently not triaged, and on
-    // disable they keep firing the Worker's action against a disabled workflow.
-    let skippedRuleCount = 0;
-    let alertTriageAttachmentService: AlertTriageAttachmentService | undefined;
 
     // Validate the enable half before writing anything: a combined settings-and-enable PATCH
     // must not persist new settings (below) when the enable half is refused, or the operator
@@ -315,14 +299,6 @@ export class WorkersService {
       const blockedReason = await this.checkAlertAnalysisPreflight(request);
       if (blockedReason) {
         return { outcome: 'blocked', reason: blockedReason };
-      }
-
-      alertTriageAttachmentService = await this.getAlertTriageAttachmentService(
-        request,
-        status.workflowId
-      );
-      if (!alertTriageAttachmentService) {
-        return { outcome: 'blocked', reason: 'ruleAttachmentUnavailable' };
       }
     }
 
@@ -455,42 +431,6 @@ export class WorkersService {
           }
         }
 
-        if (isAlertTriageWorker && patch.enabled && alertTriageAttachmentService) {
-          // Attach-then-enable: the Worker only fires from rules carrying its action, so enabling
-          // without attaching produces a Worker that never runs. Preflight and attachment-service
-          // resolution already ran above, before anything was written.
-          // A failed bulk edit leaves the Worker off, not enabled-but-unattached: attach runs in
-          // passes (see alert_triage_rule_attachments.ts), so a later pass can throw after an
-          // earlier one already attached some rules. Roll those back on failure — best-effort, so
-          // a failed rollback does not mask the original error — rather than leave rules carrying
-          // the action while the Worker itself stays (or is reported) disabled.
-          // Only the rule IDs *this attempt* attached are compensated (via onRulesAttached +
-          // detachRuleIdChunks): a re-enable of an already-attached Worker must not detach rules
-          // that were attached before this call, which detachAlertTriageWorkerFromAllRules would
-          // do by re-querying every currently-attached rule.
-          const attachedRuleIdChunks: string[][] = [];
-          const attachResult = await attachAlertTriageWorkerToAllRules(
-            alertTriageAttachmentService,
-            (ruleIds) => attachedRuleIdChunks.push(ruleIds)
-          ).catch(async (err: Error) => {
-            this.logger.error(`Alert Triage Worker: rule attachment failed: ${err.message}`);
-            await detachRuleIdChunks(alertTriageAttachmentService, attachedRuleIdChunks).catch(
-              (rollbackErr: Error) => {
-                this.logger.error(
-                  `Alert Triage Worker: rollback detach after failed attach also failed: ${rollbackErr.message}`
-                );
-              }
-            );
-            throw err;
-          });
-          skippedRuleCount = attachResult.skippedRuleCount;
-          if (skippedRuleCount > 0) {
-            this.logger.warn(
-              `Alert Triage Worker: ${skippedRuleCount} rule(s) were not attached because the current user cannot edit them`
-            );
-          }
-        }
-
         await management.updateWorkflow(
           status.workflowId,
           { enabled: patch.enabled },
@@ -508,39 +448,6 @@ export class WorkersService {
           } catch (err) {
             this.logger.error(
               `Hunt Watch: threat intel supply re-ensure after enable failed: ${
-                err instanceof Error ? err.message : String(err)
-              }`
-            );
-          }
-        }
-
-        if (isAlertTriageWorker && !patch.enabled) {
-          // Detach after disabling; don't let a partial detach — or a failure resolving the
-          // attachment service itself — fail the disable, which has already been persisted above.
-          // Resolving the service can throw (it builds scoped rules/actions clients and
-          // calculates rule authorization), so it shares this try/catch rather than only the
-          // detach call.
-          try {
-            const attachmentService = await this.getAlertTriageAttachmentService(
-              request,
-              status.workflowId
-            );
-            if (attachmentService) {
-              const detachResult = await detachAlertTriageWorkerFromAllRules(attachmentService);
-              skippedRuleCount = detachResult.skippedRuleCount;
-              if (skippedRuleCount > 0) {
-                this.logger.warn(
-                  `Alert Triage Worker: ${skippedRuleCount} rule(s) still carry the Worker action because the current user cannot edit them`
-                );
-              }
-            } else {
-              this.logger.warn(
-                'Alert Triage Worker: disabled without detaching rules; the rule-attachment service is unavailable'
-              );
-            }
-          } catch (err) {
-            this.logger.error(
-              `Alert Triage Worker: rule detachment failed: ${
                 err instanceof Error ? err.message : String(err)
               }`
             );
@@ -574,10 +481,7 @@ export class WorkersService {
       blockingReasons,
       agentLookup
     );
-    return {
-      outcome: 'updated',
-      response: { worker, ...(skippedRuleCount > 0 ? { skippedRuleCount } : {}) },
-    };
+    return { outcome: 'updated', response: { worker } };
   }
 
   /**
@@ -645,14 +549,6 @@ export class WorkersService {
     }
 
     return null;
-  }
-
-  private async getAlertTriageAttachmentService(
-    request: KibanaRequest,
-    installedWorkflowId: string
-  ): Promise<AlertTriageAttachmentService | undefined> {
-    const { getAttachmentService } = this.alertTriageOpts;
-    return getAttachmentService?.(request, installedWorkflowId);
   }
 
   private async projectWorker(
