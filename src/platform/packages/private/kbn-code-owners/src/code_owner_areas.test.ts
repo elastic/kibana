@@ -56,7 +56,6 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
   ],
   search: ['elastic/jinastic', 'elastic/search-design', 'elastic/search-ml-ux'],
   observability: [
-    'elastic/actionable-obs-team',
     'elastic/apm-agent-approvers',
     'elastic/nightshift',
     'elastic/nightshift-context-and-research-team',
@@ -68,11 +67,9 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/obs-knowledge-team',
     'elastic/obs-onboarding-team',
     'elastic/obs-signals-traces-team',
-    'elastic/obs-ux-management-team',
     'elastic/observability-bi',
     'elastic/observability-design',
     'elastic/observability-ui',
-    'elastic/obs-signals-ai-o11y',
     'elastic/obs-signals-logs-team',
     'elastic/obs-signals-metrics-team',
     'elastic/observablt-robots',
@@ -80,6 +77,7 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/streams-ui',
   ],
   security: [
+    'elastic/alertzero-common-layer',
     'elastic/contextual-security-apps',
     'elastic/core-analysis',
     'elastic/siem-conduit',

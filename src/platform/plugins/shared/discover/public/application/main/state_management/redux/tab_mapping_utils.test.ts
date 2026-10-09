@@ -11,6 +11,8 @@ import { omit } from 'lodash';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
+import { ESQLVariableType } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
@@ -75,6 +77,7 @@ const tab2 = getTabStateMock({
   },
   appState: { columns: ['column2'] },
 });
+const staleEsqlVariable = { key: 'ext', type: ESQLVariableType.VALUES, value: 'zip' };
 
 describe('tab mapping utils', () => {
   describe('fromSavedObjectTabToAppState', () => {
@@ -152,7 +155,6 @@ describe('tab mapping utils', () => {
           "cascadedDocumentsState": Object {
             "availableCascadeGroups": Array [],
             "cascadedDocumentsMap": Object {},
-            "columnsMeta": Object {},
             "selectedCascadeGroups": Array [],
           },
           "dataRequestParams": Object {
@@ -243,7 +245,6 @@ describe('tab mapping utils', () => {
           "cascadedDocumentsState": Object {
             "availableCascadeGroups": Array [],
             "cascadedDocumentsMap": Object {},
-            "columnsMeta": Object {},
             "selectedCascadeGroups": Array [],
           },
           "dataRequestParams": Object {
@@ -330,6 +331,67 @@ describe('tab mapping utils', () => {
           type: ESQL_CONTROL,
         },
       });
+    });
+
+    it('derives ES|QL variables from the saved controls instead of the existing tab', () => {
+      const controlsTab = getTabStateMock({
+        id: 'controls-tab',
+        label: 'Controls tab',
+        initialInternalState: {
+          serializedSearchSource: { index: 'test-data-view-controls' },
+        },
+        attributes: {
+          controlGroupState: mockControlState,
+          visContext: undefined,
+        },
+      });
+
+      const tabState = fromSavedObjectTabToTabState({
+        tab: fromTabStateToSavedObjectTab({
+          tab: controlsTab,
+          services,
+          currentDataView: undefined,
+          tabType: undefined,
+        }),
+        existingTab: { ...tab1, esqlVariables: [staleEsqlVariable] },
+        profileStateRegistry: services.profileStateRegistry,
+      });
+
+      expect(tabState.esqlVariables).toEqual([
+        expect.objectContaining({ key: 'foo', type: ESQLVariableType.VALUES }),
+      ]);
+    });
+
+    it('clears ES|QL variables of the existing tab when the saved tab has no controls', () => {
+      const tabState = fromSavedObjectTabToTabState({
+        tab: fromTabStateToSavedObjectTab({
+          tab: tab2,
+          services,
+          currentDataView: undefined,
+          tabType: undefined,
+        }),
+        existingTab: { ...tab1, esqlVariables: [staleEsqlVariable] },
+        profileStateRegistry: services.profileStateRegistry,
+      });
+
+      expect(tabState.attributes.controlGroupState).toBeUndefined();
+      expect(tabState.esqlVariables).toEqual([]);
+    });
+
+    it('keeps the existing empty ES|QL variables when the saved tab has no controls', () => {
+      const existingEsqlVariables: ESQLControlVariable[] = [];
+      const tabState = fromSavedObjectTabToTabState({
+        tab: fromTabStateToSavedObjectTab({
+          tab: tab2,
+          services,
+          currentDataView: undefined,
+          tabType: undefined,
+        }),
+        existingTab: { ...tab1, esqlVariables: existingEsqlVariables },
+        profileStateRegistry: services.profileStateRegistry,
+      });
+
+      expect(tabState.esqlVariables).toBe(existingEsqlVariables);
     });
   });
 

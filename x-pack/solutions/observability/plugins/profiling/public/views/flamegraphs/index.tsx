@@ -55,6 +55,7 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
   return (
     <ProfilingAppPageTemplate
       tabs={tabs}
+      showSchemaSelector
       customSearchBar={isDifferentialView ? <DifferentialFlameGraphSearchPanel /> : undefined}
       pageTitle={i18n.translate('xpack.profiling.flameGraphsView.pageTitle', {
         defaultMessage: 'Flamegraphs',

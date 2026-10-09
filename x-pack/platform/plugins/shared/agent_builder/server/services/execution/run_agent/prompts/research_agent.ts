@@ -59,7 +59,8 @@ const renderFieldValue = (value: SerializedMetadataValue | undefined): string =>
 const getConversationMetadataSection = async (
   templateId: string | undefined,
   metadata: Record<string, SerializedMetadataValue> | undefined,
-  conversationTemplates: ConversationTemplatesService
+  conversationTemplates: ConversationTemplatesService,
+  writable: boolean
 ): Promise<string> => {
   const template = templateId ? await conversationTemplates.get(templateId) : undefined;
   if (!template) return '';
@@ -84,7 +85,11 @@ const getConversationMetadataSection = async (
 
 This conversation uses the **${template.name}** template.${templateDesc}
 
-The list below shows the metadata fields for this conversation. Fields marked _not yet set_ should be captured from the user as the conversation progresses and written back using the \`set_conversation_metadata\` tool.
+The list below shows the metadata fields for this conversation.${
+    writable
+      ? ' Fields marked _not yet set_ should be captured from the user as the conversation progresses and written back using the `set_conversation_metadata` tool.'
+      : ''
+  }
 
 ${fieldLines}
 `;
@@ -101,6 +106,7 @@ const getAgentSystemMessage = async ({
   renderers,
   processedConversation,
   conversationTemplates,
+  conversationMetadataWritable,
 }: ResearchAgentPromptParams): Promise<string> => {
   const conversationTemplateId = processedConversation.template_id;
   const conversationMetadata = processedConversation.metadata as
@@ -110,7 +116,8 @@ const getAgentSystemMessage = async ({
   const conversationMetadataSection = await getConversationMetadataSection(
     conversationTemplateId,
     conversationMetadata,
-    conversationTemplates
+    conversationTemplates,
+    conversationMetadataWritable
   );
 
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
