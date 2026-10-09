@@ -44,17 +44,51 @@ const titleCase = (s: string): string =>
 /**
  * The R-beh narrative: the chain's step descriptions joined into prose.
  * Technique ATT&CK names are not restated (Tier 2 must extract them), and no
- * E+ token (host, user, zone, hash, rule name) appears.
+ * E+ token (host, user, zone, hash, rule name) appears: the vendored step
+ * texts mention the chains' users and hosts, so every token that also occurs
+ * in the seeded samples is redacted here (same leaf flattening and token
+ * family as the C2 audit in harness/phases.ts; duplicated because fixtures
+ * cannot import the harness — the harness imports the fixtures).
  */
-const behaviourNarrative = (chainSteps: ReadonlyArray<Record<string, unknown>>): string =>
-  `${chainSteps
-    .map((s) => String(s.step ?? ''))
-    .filter((s) => s.length > 0)
-    .map((s) => s.replace(/\(.*?\)/g, '').trim())
-    .filter((s) => s.length > 0)
-    .join(
-      '. '
-    )}. Observations are consistent with a multi-stage intrusion; the report describes execution flow only.`;
+const redactSeededTokens = (text: string, seededTexts: string[]): string => {
+  const tokens = new Set<string>();
+  for (const seeded of seededTexts) {
+    for (const m of seeded.matchAll(/(?:^|\.)((?:user|host)\.name): ([A-Za-z0-9._\\-]+)\s*$/gm)) {
+      tokens.add(m[2].split('@')[0]);
+      tokens.add(m[2]);
+    }
+  }
+  let out = text;
+  for (const t of tokens) {
+    if (t.length > 3) out = out.split(t).join('[redacted]');
+  }
+  return out;
+};
+
+/** `user.name: value` / `host.name: value` lines for every leaf of a nested doc. */
+const flattenLeaves = (doc: unknown, prefix = ''): string => {
+  if (Array.isArray(doc)) return doc.map((x) => flattenLeaves(x, prefix)).join('\n');
+  if (typeof doc === 'object' && doc !== null) {
+    return Object.entries(doc)
+      .map(([k, v]) => flattenLeaves(v, prefix ? `${prefix}.${k}` : k))
+      .join('\n');
+  }
+  return `${prefix}: ${String(doc)}`;
+};
+
+const behaviourNarrative = (
+  chainSteps: ReadonlyArray<Record<string, unknown>>,
+  seededTexts: string[]
+): string =>
+  `${redactSeededTokens(
+    chainSteps
+      .map((s) => String(s.step ?? ''))
+      .filter((s) => s.length > 0)
+      .map((s) => s.replace(/\(.*?\)/g, '').trim())
+      .filter((s) => s.length > 0)
+      .join('. '),
+    seededTexts
+  )}. Observations are consistent with a multi-stage intrusion; the report describes execution flow only.`;
 
 const DECOY_NARRATIVES: Record<string, string> = {
   // (b): a technique narrative with no planted counterpart.
@@ -120,7 +154,10 @@ export const buildReportSpecs = (
       sampleBase: firstBase,
       document: {
         'content.title': `Behaviour report: ${titleCase(chain.key)} campaign`,
-        'content.body_text': behaviourNarrative(chain.steps ?? []),
+        'content.body_text': behaviourNarrative(
+          chain.steps ?? [],
+          Object.values(samples).map((s) => flattenLeaves(s))
+        ),
         'source.name': 'g5-ad2-seeded-recall',
         'severity.level': 'high',
         ...(arm === 'B' && firstBase

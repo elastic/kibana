@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KbnClient } from '@kbn/kbn-client';
+import { KbnClientRequesterError, type KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { HUNT_WORKER_ACCOUNT_NAME, HUNT_WORKER_ID, ensureHuntWorkerEnabled } from './worker_setup';
 
@@ -134,7 +134,8 @@ describe('ensureHuntWorkerEnabled (B4)', () => {
     const original = (kbnClient.request as jest.Mock).getMockImplementation()!;
     (kbnClient.request as jest.Mock).mockImplementation(async (req: Req) => {
       if (req.path.startsWith('/api/security/role/')) {
-        throw Object.assign(new Error('conflict'), { response: { status: 409 } });
+        // The real error shape: status on the error itself, as kbn-client throws it.
+        throw new KbnClientRequesterError('conflict', { status: 409 });
       }
       return original(req);
     });

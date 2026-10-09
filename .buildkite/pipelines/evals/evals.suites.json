@@ -320,7 +320,7 @@
       "ciLabels": [
         "evals:alertzero-hunt-watch"
       ],
-      "serverConfigSet": "evals_threat_intel"
+      "serverConfigSet": "evals_alertzero_hunt_watch"
     },
     {
       "id": "attack-discovery",

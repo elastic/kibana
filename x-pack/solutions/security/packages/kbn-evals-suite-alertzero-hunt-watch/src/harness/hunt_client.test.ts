@@ -75,8 +75,15 @@ const makeServer = ({
         data: {
           status: 'completed',
           context: full ? { inputs: { reportId: child.reportId } } : undefined,
+          // Real shape (captured live): `run_hunt_coordinator` names a `fallback` wrapper step
+          // with a null output, THEN the inner `kibana.request` step holding the coordinator body.
           stepExecutions: [
-            { stepId: 'run_hunt_coordinator', output: full ? child.output : undefined },
+            { stepId: 'run_hunt_coordinator', stepType: 'fallback', output: null },
+            {
+              stepId: 'run_hunt_coordinator',
+              stepType: 'kibana.request',
+              output: full ? child.output : undefined,
+            },
           ],
         },
       };
@@ -92,6 +99,28 @@ const makeServer = ({
   });
   return { client, requests, refresh };
 };
+
+describe('HuntWatchClient.ingestThreatReport', () => {
+  it('sends the document with nested objects, because the hunt reads _source nested', async () => {
+    const request = jest.fn(async (_req: Record<string, unknown>) => ({
+      data: { reportId: 'r1' },
+    }));
+    const client = new HuntWatchClient({ request } as unknown as KbnClient, log, {
+      huntWorkerWorkflowId: 'worker-1',
+      esClient: { indices: { refresh: jest.fn() } },
+    });
+    await client.ingestThreatReport({
+      'content.body_text': 'text',
+      'extracted.iocs': [{ type: 'domain', value: 'a.example' }],
+    });
+    expect(request.mock.calls[0][0].body).toEqual({
+      document: {
+        content: { body_text: 'text' },
+        extracted: { iocs: [{ type: 'domain', value: 'a.example' }] },
+      },
+    });
+  });
+});
 
 describe('isTerminal (B8)', () => {
   it.each(['completed', 'failed', 'cancelled', 'skipped', 'timed_out'])('%s is terminal', (s) => {

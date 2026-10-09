@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KbnClient } from '@kbn/kbn-client';
+import { KbnClientRequesterError, type KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 /**
@@ -95,10 +95,9 @@ interface WorkerEntry {
   blockingReasons?: unknown[];
 }
 
-const isConflict = (e: unknown): boolean => {
-  const status = (e as { response?: { status?: number } })?.response?.status;
-  return status === 409;
-};
+/** `KbnClientRequesterError` carries the HTTP status on `.status` (there is no `.response`). */
+const isConflict = (e: unknown): boolean =>
+  e instanceof KbnClientRequesterError && e.status === 409;
 
 export const ensureHuntWorkerEnabled = async (
   kbnClient: KbnClient,

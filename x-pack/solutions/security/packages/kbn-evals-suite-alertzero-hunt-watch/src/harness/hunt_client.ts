@@ -9,6 +9,7 @@ import type { KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { TerminalExecutionStatuses } from '@kbn/workflows';
 import type { CoordinatorRun } from '../types';
+import { nestDottedKeys } from './nest_document';
 import { isCoordinatorResponse, wireToCoordinatorRun } from './wire_adapter';
 
 const WORKFLOWS_API_VERSION = '2023-10-31';
@@ -87,7 +88,7 @@ export class HuntWatchClient {
         'x-elastic-internal-origin': 'Kibana',
         'kbn-xsrf': 'true',
       },
-      body: { document },
+      body: { document: nestDottedKeys(document) },
     });
     return { reportId: response.data.reportId };
   }
@@ -245,8 +246,14 @@ export class HuntWatchClient {
       const inputs = isRecord(context?.inputs) ? context?.inputs : undefined;
       const reportId = typeof inputs?.reportId === 'string' ? inputs.reportId : undefined;
       const steps = Array.isArray(execution.stepExecutions) ? execution.stepExecutions : [];
-      const coordinatorStep = steps.find((s) => isRecord(s) && s.stepId === 'run_hunt_coordinator');
-      const output = isRecord(coordinatorStep) ? coordinatorStep.output : undefined;
+      // `run_hunt_coordinator` names TWO step executions: a `fallback` wrapper (output null)
+      // that comes first, and the inner `kibana.request` step holding the raw coordinator
+      // body. Taking the first match read the wrapper and dropped every output; pick the
+      // step whose output is the coordinator response.
+      const output = steps
+        .filter((s) => isRecord(s) && s.stepId === 'run_hunt_coordinator')
+        .map((s) => (s as Record<string, unknown>).output)
+        .find(isCoordinatorResponse);
       if (reportId !== undefined && isCoordinatorResponse(output)) {
         runs.set(reportId, wireToCoordinatorRun(output));
       }

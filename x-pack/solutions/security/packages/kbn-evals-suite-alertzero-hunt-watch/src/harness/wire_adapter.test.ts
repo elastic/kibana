@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import type { HuntCoordinatorResponse } from '@kbn/alertzero-common';
 import { isCoordinatorResponse, wireToCoordinatorRun } from './wire_adapter';
 
@@ -204,6 +206,38 @@ describe('wireToCoordinatorRun', () => {
 describe('isCoordinatorResponse', () => {
   it('accepts a coordinator response', () => {
     expect(isCoordinatorResponse(wire)).toBe(true);
+  });
+
+  /**
+   * Captured from a real completed `run_hunt_coordinator` step output (the
+   * inner `kibana.request` step of a `system-security-hunt-execute` child,
+   * E+ / R-ioc[encoded-powershell], 1 tier1 hit), read over
+   * GET /api/workflows/executions/{id}?includeInput&includeOutput. Pins the
+   * real wire shape: raw coordinator body, no kibana.request {data}/{body}
+   * wrapper — isCoordinatorResponse would drop a wrapped output and every
+   * cell would score INVALID.
+   */
+  const captured = JSON.parse(
+    readFileSync(resolve(__dirname, '__fixtures__/coordinator_output.captured.json'), 'utf8')
+  );
+
+  it('type-checks the captured output against the wire type', () => {
+    const typed: HuntCoordinatorResponse = captured;
+    expect(typeof typed.run_id === 'string').toBe(true);
+  });
+
+  it('accepts the captured real output (no kibana.request wrapper)', () => {
+    expect(isCoordinatorResponse(captured)).toBe(true);
+  });
+
+  it('adapts the captured real output to a CoordinatorRun', () => {
+    const run = wireToCoordinatorRun(captured);
+    expect(run.tier1_status).toBe('environment_hits_found');
+    expect(run.tier1_hits?.length ?? 0).toBeGreaterThan(0);
+    expect(run.tier1_hits?.[0]).toMatchObject({
+      _id: expect.any(String),
+      _index: expect.any(String),
+    });
   });
 
   it.each([
