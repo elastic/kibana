@@ -317,10 +317,12 @@ export class VersionSpecificPolicyAssignmentTask {
         throwIfAborted(signal);
         for (const agent of agentsBatch) {
           if (!agent.policy_id) continue;
-          agentIdsByPolicyId.set(agent.policy_id, [
-            ...(agentIdsByPolicyId.get(agent.policy_id) ?? []),
-            agent.id,
-          ]);
+          const agentIds = agentIdsByPolicyId.get(agent.policy_id);
+          if (agentIds) {
+            agentIds.push(agent.id);
+          } else {
+            agentIdsByPolicyId.set(agent.policy_id, [agent.id]);
+          }
         }
       }
       if (agentIdsByPolicyId.size === 0) {
