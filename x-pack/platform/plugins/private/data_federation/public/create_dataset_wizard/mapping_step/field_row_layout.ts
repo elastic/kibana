@@ -7,53 +7,67 @@
 
 import { css, type SerializedStyles } from '@emotion/react';
 
-export const TYPE_FIELD_BASIS = 200;
-export const NAME_FIELD_BASIS = 240;
-export const PATH_FIELD_BASIS = 260;
-export const FORMAT_FIELD_BASIS = 260;
-
-// Fixed-size fields keep their basis width while sharing a row (the much larger grow weight of
-// text fields absorbs the free space), yet still fill the row when wrapped onto a line alone.
-const FIXED_FIELD_GROW = 1;
-const TEXT_FIELD_GROW = 10000;
-
-/** Flex item styles for a fixed-width field that fills its row only when alone on it. */
-export const getFixedFieldItemStyles = (basis: number): SerializedStyles =>
-  css({ flex: `${FIXED_FIELD_GROW} 1 ${basis}px` });
-
-/** Flex item styles for a text field that absorbs the free space of the row it shares. */
-export const getTextFieldItemStyles = (basis: number): SerializedStyles =>
-  css({ flex: `${TEXT_FIELD_GROW} 1 ${basis}px` });
-
-const getCombinedBasis = (fieldBases: readonly number[], gutter: string): string =>
-  `calc(${fieldBases.map((basis) => `${basis}px`).join(' + ')} + ${gutter} * ${
-    fieldBases.length - 1
-  })`;
+const TYPE_FIELD_BASIS = 200;
+const FIELD_MIN_WIDTH = 200;
+const DEFAULT_INSET = '0px';
 
 /**
- * Flex item styles for a group of fields that wraps as a unit: its basis covers every field plus
- * the gutters between them, so groups only share a row when all of their fields fit.
+ * Width needed by `fieldCount` fields and the gutters between them. `inset` is extra width to
+ * require, so a row that renders in a wider container than another (for example without the
+ * padding the field mapping editor puts around its form) switches layouts at the same viewport
+ * width.
  */
-export const getFieldGroupItemStyles = (
-  fieldBases: readonly number[],
-  gutter: string
-): SerializedStyles => css({ flex: `1 1 ${getCombinedBasis(fieldBases, gutter)}` });
+const getCombinedMinWidth = (fieldCount: number, gutter: string, inset: string): string =>
+  `calc(${fieldCount * FIELD_MIN_WIDTH}px + ${gutter} * ${fieldCount - 1} + ${inset})`;
 
-/** Styles for a flex group whose children query its width via `@container`. */
+/**
+ * Styles for the flex group holding a row of fields: it is the size container that the field type
+ * and remaining fields styles query.
+ */
 export const fieldRowContainerStyles = css({ containerType: 'inline-size' });
 
 /**
- * Flex item styles for a fixed-width field that keeps its width even when wrapped onto a row alone,
- * and only fills the row once the container is too narrow for the given sibling group to fit.
+ * Flex item styles for the field type: it keeps its width, so on narrow screens it sits alone on the
+ * first row. Once the remaining fields stack into a single column it spans the full width.
  */
-export const getFixedUntilNarrowFieldItemStyles = (
-  basis: number,
-  siblingGroupBases: readonly number[],
-  gutter: string
+export const getTypeFieldItemStyles = (
+  remainingFieldCount: number,
+  gutter: string,
+  inset: string = DEFAULT_INSET
 ): SerializedStyles =>
   css({
-    flex: `0 1 ${basis}px`,
-    [`@container (width < ${getCombinedBasis(siblingGroupBases, gutter)})`]: {
+    flex: `0 1 ${TYPE_FIELD_BASIS}px`,
+    [`@container (width < ${getCombinedMinWidth(remainingFieldCount, gutter, inset)})`]: {
       flexGrow: 1,
+    },
+  });
+
+/**
+ * Flex item styles for the group of every field except the field type. The group's basis covers all
+ * of its fields plus the gutters between them, so it shares a row with the field type only when
+ * they all fit, and otherwise wraps onto the next row.
+ */
+export const getRemainingFieldsGroupItemStyles = (
+  fieldCount: number,
+  gutter: string,
+  inset: string = DEFAULT_INSET
+): SerializedStyles => css({ flex: `1 1 ${getCombinedMinWidth(fieldCount, gutter, inset)}` });
+
+/**
+ * Grid styles for the remaining fields: equal columns while they all fit on one line, otherwise one
+ * field per line (never a partially filled line).
+ */
+export const getRemainingFieldsGridStyles = (
+  fieldCount: number,
+  gutter: string,
+  inset: string = DEFAULT_INSET
+): SerializedStyles =>
+  css({
+    display: 'grid',
+    alignItems: 'start',
+    gap: gutter,
+    gridTemplateColumns: `repeat(${fieldCount}, minmax(0, 1fr))`,
+    [`@container (width < ${getCombinedMinWidth(fieldCount, gutter, inset)})`]: {
+      gridTemplateColumns: 'minmax(0, 1fr)',
     },
   });
