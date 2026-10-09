@@ -10,8 +10,8 @@ import type {
   SignificantEventStatus,
 } from '@kbn/significant-events-schema';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
-import { applyLifecycleInput } from '../../../lib/significant_events/events/lifecycle_controller';
-import { operatorInputFor } from '../../../lib/significant_events/events/lifecycle_state_machine';
+import { applyLifecycleInput } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
+import { operatorInputFor } from '../../../lib/significant_events/events/lifecycle/lifecycle_state_machine';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 
