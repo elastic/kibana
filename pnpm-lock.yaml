@@ -5507,6 +5507,9 @@ importers:
       '@kbn/evals-suite-alerts-rag':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag
+      '@kbn/evals-suite-alertzero-hunt-watch':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-evals-suite-alertzero-hunt-watch
       '@kbn/evals-suite-attack-discovery':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery
@@ -9746,6 +9749,8 @@ importers:
   x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag: {}
+
+  x-pack/solutions/security/packages/kbn-evals-suite-alertzero-hunt-watch: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery: {}
 

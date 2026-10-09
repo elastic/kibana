@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more
- * contributor license agreements. Licensed under the Elastic License 2.0.
- */
-
 import type { Evaluator } from '@kbn/evals';
 import type { CoordinatorRun, ReportClass } from '../types';
 import { InvalidCell } from '../types';
@@ -159,7 +154,7 @@ export interface M1Tier1Input {
 export const seededHitRecallTier1 = ({
   matchedIocs,
   plantedIocs,
-}: M1Tier1Input): { recall: number; denominator: number; matched: string[] } => {
+}: M1Tier1Input): { recall: number | null; denominator: number; matched: string[] } => {
   const hitIdsByValue = new Map(matchedIocs.map((m) => [m.value, m.hitIds]));
   const matched = plantedIocs.filter(
     (p) =>
@@ -168,7 +163,8 @@ export const seededHitRecallTier1 = ({
   );
   const denominator = plantedIocs.length;
   return {
-    recall: denominator === 0 ? 0 : matched.length / denominator,
+    // [NB-8] null on zero denominator, matching Tier 2.
+    recall: denominator === 0 ? null : matched.length / denominator,
     denominator,
     matched: matched.map((m) => m.value),
   };
@@ -183,7 +179,7 @@ export interface M1Tier2Input {
 export const seededHitRecallTier2 = ({
   behaviours,
   plantedBehaviours,
-}: M1Tier2Input): { recall: number; denominator: number } => {
+}: M1Tier2Input): { recall: number | null; denominator: number } => {
   const recalled = plantedBehaviours.filter((planted) =>
     behaviours.some(
       (b) =>
@@ -194,7 +190,10 @@ export const seededHitRecallTier2 = ({
     )
   );
   const denominator = plantedBehaviours.length;
-  return { recall: denominator === 0 ? 0 : recalled.length / denominator, denominator };
+  // [NB-8] Zero denominator means "not applicable", not "recalled nothing":
+  // null, never 0 (0 would drag a pooled mean down with cells that measure
+  // nothing).
+  return { recall: denominator === 0 ? null : recalled.length / denominator, denominator };
 };
 
 /**

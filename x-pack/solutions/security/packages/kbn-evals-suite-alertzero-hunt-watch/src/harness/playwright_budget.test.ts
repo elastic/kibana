@@ -5,35 +5,26 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more
- * contributor license agreements. Licensed under the Elastic License 2.0.
- */
-
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { PER_HUNT_MS, HUNT_REPORTS_PER_PHASE } from './phases';
 
 /**
- * Sizes the Playwright budget from the fixture count: playwright.config.ts
- * sets `timeout: 30 * 60_000`, and this test pins that the timeout covers the
- * full sweep (reports x phases) at the per-hunt budget. Adding fixtures
- * without raising the timeout fails here. The config module itself needs a
- * live connector env to import, so the 30-minute value is asserted via the
- * constant the config uses — this file owns the contract.
+ * Sizes the Playwright budget from the fixture count. The shipped
+ * playwright.config.ts needs a live connector env to import
+ * (createPlaywrightEvalsConfig throws without EVAL_CONNECTOR_ID), so the
+ * timeout literal is read textually from the file itself (NB-9: a local
+ * constant tests nothing about the shipped config). If the config moves to
+ * dynamic construction this regex stops matching and the suite goes red.
  */
 const PHASES = 3;
-const CONFIG_TIMEOUT_MS = 30 * 60_000;
+const configSource = readFileSync(join(__dirname, '../../playwright.config.ts'), 'utf8');
+const match = configSource.match(/timeout:\s*([\d\s*_*]+?),\s*\n/);
+const CONFIG_TIMEOUT_MS = match ? eval(match[1]) : NaN; // eslint-disable-line no-eval
 
 describe('playwright budget sized from the fixture count', () => {
-  it(`timeout ${
-    CONFIG_TIMEOUT_MS / 60_000
-  } min covers ${HUNT_REPORTS_PER_PHASE} reports x ${PHASES} phases at ${
-    PER_HUNT_MS / 60_000
-  } min/hunt`, () => {
-    // The sweep runs per phase, not all phases inside one test timeout: the
-    // per-test budget must cover one phase of reports at the per-hunt budget,
-    // with the config-level 30 min as the suite-level ceiling.
-    expect(CONFIG_TIMEOUT_MS).toBeGreaterThanOrEqual(HUNT_REPORTS_PER_PHASE * PER_HUNT_MS);
-    expect(HUNT_REPORTS_PER_PHASE).toBe(14);
-    expect(PER_HUNT_MS).toBe(60_000);
+  it(`timeout ${CONFIG_TIMEOUT_MS}ms covers reports x phases at the per-hunt budget`, () => {
+    expect(Number.isNaN(CONFIG_TIMEOUT_MS)).toBe(false);
+    expect(CONFIG_TIMEOUT_MS).toBeGreaterThanOrEqual(PER_HUNT_MS * HUNT_REPORTS_PER_PHASE * PHASES);
   });
 });

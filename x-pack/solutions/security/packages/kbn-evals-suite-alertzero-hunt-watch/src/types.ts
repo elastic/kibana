@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more
- * contributor license agreements. Licensed under the Elastic License 2.0.
- */
-
 /** Report fixture classes of the ad2-v1 corpus (design v1 §1, v5 T2 applicability). */
 export type ReportClass = 'R-ioc' | 'R-beh-A' | 'R-beh-B' | 'R-decoy(a)' | 'R-decoy(bcd)-A';
 
@@ -43,9 +38,16 @@ export interface BehaviourRun {
 }
 
 /** The coordinator step-output shape the harness reads (run_hunt_coordinator step output). */
+export interface Tier1HitRef {
+  _id: string;
+  _index: string;
+}
+
 export interface CoordinatorRun {
   tier1_status: HuntTier1Status;
   tier1_incomplete?: HuntIncompleteReason[];
+  tier1_hits?: Tier1HitRef[];
+  tier1_matched_iocs?: Array<{ value: string; hits?: Tier1HitRef[] }>;
   tier2_skipped_reason?: HuntIncompleteReason;
   behaviours: BehaviourRun[];
   completeness?: HuntCompleteness;

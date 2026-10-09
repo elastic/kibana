@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more
- * contributor license agreements. Licensed under the Elastic License 2.0.
- */
-
 import { loadManifest, loadSamples } from '../fixtures/load_corpus';
 import {
   buildLabels,
@@ -17,7 +12,14 @@ import {
   techniqueRelated,
   deriveRIocZoneChains,
 } from '../datasets/labels';
-import { m3Verdict, T1_APPLICABLE, T2_APPLICABLE, classifyHitIds } from './clean_validity';
+import {
+  m3Verdict,
+  T1_APPLICABLE,
+  T2_APPLICABLE,
+  classifyHitIds,
+  seededHitRecallTier1,
+  seededHitRecallTier2,
+} from './clean_validity';
 import { InvalidCell, type ReportClass } from '../types';
 import { sut, behNone, behExecNoHit, behExecHit, T2_FAILURES } from './sut_mirror';
 import {
@@ -612,5 +614,33 @@ describe('labels invariants over the vendored corpus', () => {
 
   it('sampleBase takes the first 8 chars', () => {
     expect(sampleBase('f3475224-wmi-incoming.json')).toBe('f3475224');
+  });
+});
+
+describe('NB-8: recall is null, not 0, on a zero denominator', () => {
+  it('Tier 2 with no planted behaviours returns null recall', () => {
+    const { recall, denominator } = seededHitRecallTier2({
+      behaviours: [{ techniqueId: 'T1047', hit: true, hitIds: ['x#0#positive'] }],
+      plantedBehaviours: [],
+    });
+    expect(denominator).toBe(0);
+    expect(recall).toBeNull();
+  });
+
+  it('Tier 1 with no planted IoCs returns null recall', () => {
+    const { recall, denominator } = seededHitRecallTier1({
+      matchedIocs: [{ value: 'a.example.com', hitIds: ['x#0#positive'] }],
+      plantedIocs: [],
+    });
+    expect(denominator).toBe(0);
+    expect(recall).toBeNull();
+  });
+
+  it('MUTANT: zero-denominator returns 0 instead of null', () => {
+    const base = seededHitRecallTier2({ behaviours: [], plantedBehaviours: [] }).recall;
+    const mutant = 0;
+    expect(base).toBeNull();
+    expect(mutant).toBe(0);
+    expect(base).not.toBe(mutant);
   });
 });

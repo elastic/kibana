@@ -1627,6 +1627,7 @@ packages:
   - 'x-pack/solutions/security/packages/kbn-discoveries-schemas'
   - 'x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow'
   - 'x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag'
+  - 'x-pack/solutions/security/packages/kbn-evals-suite-alertzero-hunt-watch'
   - 'x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery'
   - 'x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder'
   - 'x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp'

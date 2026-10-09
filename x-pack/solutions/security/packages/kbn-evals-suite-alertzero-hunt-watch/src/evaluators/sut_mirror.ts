@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more
- * contributor license agreements. Licensed under the Elastic License 2.0.
- */
-
 /**
  * SUT-faithful fixture builder for the M3/CleanValidity tests. This mirrors
  * completeness.ts / hunt_coordinator.ts gap semantics ONLY so fixtures carry a
