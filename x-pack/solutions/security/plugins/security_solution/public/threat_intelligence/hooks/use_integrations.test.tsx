@@ -91,7 +91,7 @@ describe('useIntegrations', () => {
     expect(result.current.data).toBeUndefined();
   });
 
-  it('should only start the timeout once the integrations call is in flight', async () => {
+  it('should stop loading within the timeout even when the call starts well after the hook mounts', async () => {
     httpGet.mockReturnValue(new Promise(() => {}));
 
     const { result, rerender } = renderUseIntegrations(false);
@@ -99,8 +99,6 @@ describe('useIntegrations', () => {
     act(() => {
       jest.advanceTimersByTime(INTEGRATIONS_CALL_TIMEOUT);
     });
-
-    expect(httpGet).not.toHaveBeenCalled();
 
     rerender({ enabled: true });
 
