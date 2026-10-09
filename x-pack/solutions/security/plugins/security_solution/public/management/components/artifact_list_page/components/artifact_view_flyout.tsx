@@ -85,6 +85,10 @@ export const ARTIFACT_VIEW_FLYOUT_LABELS = Object.freeze({
     'xpack.securitySolution.artifactListPage.viewFlyoutTakeActionButtonLabel',
     { defaultMessage: 'Take action' }
   ),
+  viewFlyoutAriaLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.viewFlyoutAriaLabel',
+    { defaultMessage: 'Artifact details' }
+  ),
   viewFlyoutItemLoadFailure: (errorMessage: string): string =>
     i18n.translate('xpack.securitySolution.artifactListPage.viewFlyoutItemLoadFailure', {
       defaultMessage: 'Failed to retrieve artifact. Reason: {errorMessage}',
@@ -203,13 +207,7 @@ export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
         onClose={onClose}
         data-test-subj={dataTestSubj}
         aria-labelledby={item ? titleId : undefined}
-        aria-label={
-          item
-            ? undefined
-            : i18n.translate('xpack.securitySolution.artifactListPage.viewFlyoutAriaLabel', {
-                defaultMessage: 'Artifact details',
-              })
-        }
+        aria-label={item ? undefined : labels.viewFlyoutAriaLabel}
         size={size}
         maskProps={maskProps}
       >
