@@ -24,7 +24,7 @@ import {
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { z } from '@kbn/zod/v4';
+import { isoDateTime, z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 import { createMemoryToolsAvailability } from '../ai_index_tools_availability';
@@ -78,8 +78,7 @@ const rememberSchema = z.object({
     .describe(
       'Optional lowercase index names, feature areas, or tools associated with the memory. When revising, omit to preserve existing tags or pass an empty array to clear them.'
     ),
-  expires_at: z.iso
-    .datetime({ offset: true })
+  expires_at: isoDateTime({ offset: true })
     .nullable()
     .optional()
     .describe(

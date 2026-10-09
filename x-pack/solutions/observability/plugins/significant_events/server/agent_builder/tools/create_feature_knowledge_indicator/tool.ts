@@ -13,7 +13,7 @@ import type {
   ToolAvailabilityResult,
 } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import { lazySchema, z } from '@kbn/zod/v4';
+import { lazySchema, isoDateTime } from '@kbn/zod/v4';
 import { getStreamTypeFromDefinition, type StreamType } from '@kbn/streams-schema';
 import { baseFeatureSchema } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
@@ -29,8 +29,7 @@ export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID =
 
 const createFeatureKISchema = lazySchema(() =>
   baseFeatureSchema.extend({
-    expires_at: z.iso
-      .datetime()
+    expires_at: isoDateTime()
       .optional()
       .describe(
         'Optional expiry deadline (ISO 8601). Provide to create a managed KI that expires at this date. ' +

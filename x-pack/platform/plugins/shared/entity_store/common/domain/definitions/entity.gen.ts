@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 /**
  * One relationship direction: a dynamic `raw_identifiers` object (ECS-style dotted keys → string arrays, no enumerated sub-properties) and canonical target EUIDs under `ids`.
@@ -212,25 +212,15 @@ export const EntityField = lazySchema(() =>
           /**
            * When the entity was first observed.
            */
-          first_seen: z
-            .string()
-            .datetime()
-            .optional()
-            .describe('When the entity was first observed.'),
+          first_seen: isoDateTime().optional().describe('When the entity was first observed.'),
           /**
            * When the entity was last observed.
            */
-          last_seen: z
-            .string()
-            .datetime()
-            .optional()
-            .describe('When the entity was last observed.'),
+          last_seen: isoDateTime().optional().describe('When the entity was last observed.'),
           /**
            * When the entity last generated activity.
            */
-          last_activity: z
-            .string()
-            .datetime()
+          last_activity: isoDateTime()
             .optional()
             .describe('When the entity last generated activity.'),
         })
@@ -481,9 +471,7 @@ export const UserEntity = lazySchema(() =>
       /**
        * The time the entity record was last updated.
        */
-      '@timestamp': z
-        .string()
-        .datetime()
+      '@timestamp': isoDateTime()
         .optional()
         .describe('The time the entity record was last updated.'),
       entity: EntityField.optional(),
@@ -543,9 +531,7 @@ export const UserEntity = lazySchema(() =>
           /**
            * When the event was ingested into Elasticsearch.
            */
-          ingested: z
-            .string()
-            .datetime()
+          ingested: isoDateTime()
             .optional()
             .describe('When the event was ingested into Elasticsearch.'),
         })
@@ -565,9 +551,7 @@ export const HostEntity = lazySchema(() =>
       /**
        * The time the entity record was last updated.
        */
-      '@timestamp': z
-        .string()
-        .datetime()
+      '@timestamp': isoDateTime()
         .optional()
         .describe('The time the entity record was last updated.'),
       entity: EntityField.optional(),
@@ -649,9 +633,7 @@ export const HostEntity = lazySchema(() =>
           /**
            * When the event was ingested into Elasticsearch.
            */
-          ingested: z
-            .string()
-            .datetime()
+          ingested: isoDateTime()
             .optional()
             .describe('When the event was ingested into Elasticsearch.'),
         })
@@ -671,9 +653,7 @@ export const ServiceEntity = lazySchema(() =>
       /**
        * The time the entity record was last updated.
        */
-      '@timestamp': z
-        .string()
-        .datetime()
+      '@timestamp': isoDateTime()
         .optional()
         .describe('The time the entity record was last updated.'),
       entity: EntityField.optional(),
@@ -761,9 +741,7 @@ export const ServiceEntity = lazySchema(() =>
           /**
            * When the event was ingested into Elasticsearch.
            */
-          ingested: z
-            .string()
-            .datetime()
+          ingested: isoDateTime()
             .optional()
             .describe('When the event was ingested into Elasticsearch.'),
         })
@@ -783,9 +761,7 @@ export const GenericEntity = lazySchema(() =>
       /**
        * The time the entity record was last updated.
        */
-      '@timestamp': z
-        .string()
-        .datetime()
+      '@timestamp': isoDateTime()
         .optional()
         .describe('The time the entity record was last updated.'),
       entity: EntityField.optional(),
@@ -880,7 +856,7 @@ export const GenericEntity = lazySchema(() =>
       tags: z.array(z.string()).optional(),
       event: z
         .object({
-          ingested: z.string().datetime().optional(),
+          ingested: isoDateTime().optional(),
         })
         .strict()
         .optional(),

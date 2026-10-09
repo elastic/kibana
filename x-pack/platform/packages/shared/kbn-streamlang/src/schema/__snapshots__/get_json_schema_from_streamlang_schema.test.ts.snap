@@ -1969,8 +1969,9 @@ Object {
               "type": "object",
             },
             Object {
-              "allOf": Array [
+              "anyOf": Array [
                 Object {
+                  "additionalProperties": false,
                   "properties": Object {
                     "action": Object {
                       "const": "network_direction",
@@ -1996,6 +1997,12 @@ Object {
                     "ignore_missing": Object {
                       "type": "boolean",
                     },
+                    "internal_networks": Object {
+                      "items": Object {
+                        "type": "string",
+                      },
+                      "type": "array",
+                    },
                     "source_ip": Object {
                       "minLength": 1,
                       "type": "string",
@@ -2017,38 +2024,65 @@ Object {
                     "action",
                     "source_ip",
                     "destination_ip",
+                    "internal_networks",
                   ],
                   "type": "object",
                 },
                 Object {
-                  "anyOf": Array [
-                    Object {
-                      "properties": Object {
-                        "internal_networks": Object {
-                          "items": Object {
-                            "type": "string",
-                          },
-                          "type": "array",
-                        },
-                      },
-                      "required": Array [
-                        "internal_networks",
-                      ],
-                      "type": "object",
+                  "additionalProperties": false,
+                  "properties": Object {
+                    "action": Object {
+                      "const": "network_direction",
+                      "type": "string",
                     },
-                    Object {
-                      "properties": Object {
-                        "internal_networks_field": Object {
-                          "minLength": 1,
-                          "type": "string",
-                        },
-                      },
-                      "required": Array [
-                        "internal_networks_field",
-                      ],
-                      "type": "object",
+                    "customIdentifier": Object {
+                      "description": "Custom identifier to correlate this processor across outputs",
+                      "minLength": 1,
+                      "type": "string",
                     },
+                    "description": Object {
+                      "description": "Human-readable notes about this processor step",
+                      "type": "string",
+                    },
+                    "destination_ip": Object {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                    "ignore_failure": Object {
+                      "description": "Continue pipeline execution if this processor fails",
+                      "type": "boolean",
+                    },
+                    "ignore_missing": Object {
+                      "type": "boolean",
+                    },
+                    "internal_networks_field": Object {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                    "source_ip": Object {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                    "target_field": Object {
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                    "where": Object {
+                      "allOf": Array [
+                        Object {
+                          "$ref": "#/definitions/Condition",
+                        },
+                      ],
+                      "description": "Conditional expression controlling whether this processor runs",
+                    },
+                  },
+                  "required": Array [
+                    "action",
+                    "source_ip",
+                    "destination_ip",
+                    "internal_networks_field",
                   ],
+                  "type": "object",
                 },
               ],
               "description": "Calculates the network direction given a source IP address, destination IP address, and a list of internal networks.",
@@ -3617,8 +3651,9 @@ Object {
                 "type": "object",
               },
               Object {
-                "allOf": Array [
+                "anyOf": Array [
                   Object {
+                    "additionalProperties": false,
                     "properties": Object {
                       "action": Object {
                         "const": "network_direction",
@@ -3644,6 +3679,12 @@ Object {
                       "ignore_missing": Object {
                         "type": "boolean",
                       },
+                      "internal_networks": Object {
+                        "items": Object {
+                          "type": "string",
+                        },
+                        "type": "array",
+                      },
                       "source_ip": Object {
                         "minLength": 1,
                         "type": "string",
@@ -3665,38 +3706,65 @@ Object {
                       "action",
                       "source_ip",
                       "destination_ip",
+                      "internal_networks",
                     ],
                     "type": "object",
                   },
                   Object {
-                    "anyOf": Array [
-                      Object {
-                        "properties": Object {
-                          "internal_networks": Object {
-                            "items": Object {
-                              "type": "string",
-                            },
-                            "type": "array",
-                          },
-                        },
-                        "required": Array [
-                          "internal_networks",
-                        ],
-                        "type": "object",
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "action": Object {
+                        "const": "network_direction",
+                        "type": "string",
                       },
-                      Object {
-                        "properties": Object {
-                          "internal_networks_field": Object {
-                            "minLength": 1,
-                            "type": "string",
-                          },
-                        },
-                        "required": Array [
-                          "internal_networks_field",
-                        ],
-                        "type": "object",
+                      "customIdentifier": Object {
+                        "description": "Custom identifier to correlate this processor across outputs",
+                        "minLength": 1,
+                        "type": "string",
                       },
+                      "description": Object {
+                        "description": "Human-readable notes about this processor step",
+                        "type": "string",
+                      },
+                      "destination_ip": Object {
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "ignore_failure": Object {
+                        "description": "Continue pipeline execution if this processor fails",
+                        "type": "boolean",
+                      },
+                      "ignore_missing": Object {
+                        "type": "boolean",
+                      },
+                      "internal_networks_field": Object {
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "source_ip": Object {
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "target_field": Object {
+                        "minLength": 1,
+                        "type": "string",
+                      },
+                      "where": Object {
+                        "allOf": Array [
+                          Object {
+                            "$ref": "#/definitions/Condition",
+                          },
+                        ],
+                        "description": "Conditional expression controlling whether this processor runs",
+                      },
+                    },
+                    "required": Array [
+                      "action",
+                      "source_ip",
+                      "destination_ip",
+                      "internal_networks_field",
                     ],
+                    "type": "object",
                   },
                 ],
                 "description": "Calculates the network direction given a source IP address, destination IP address, and a list of internal networks.",

@@ -60,39 +60,39 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'alerting.actions.alertAcked',
-    schemaHash: 'efcf6a9900c7c4019ef80cd061cda7e3ddad910bede8180240f4750da6b09373',
+    schemaHash: '4d4610d1b9e373ebb499bcd869422085d603f4518c2c2e684a31a571f2a2e954',
   },
   {
     id: 'alerting.actions.alertActivated',
-    schemaHash: '07ee0fd838d1d21ae735b5060d4529e1242bb156f83c85b86ed336053780bdfc',
+    schemaHash: '136c0fcf0b387b97bac050127c4b14244efd82a31400d28fc4cd2837fae330ca',
   },
   {
     id: 'alerting.actions.alertAssigned',
-    schemaHash: '91e8aea06c5d64a463a4d785a813cf010b08781d4e1fd6dca56bd1f71da62e81',
+    schemaHash: '0516506647c941f5cd0b255fee04fa9eb0254e85291a9e51c4f78cc07c9ae65c',
   },
   {
     id: 'alerting.actions.alertDeactivated',
-    schemaHash: '44071e937ad35416cc28959c12df5dbbc5edff8a2950f1218bfc11c7803834f5',
+    schemaHash: 'bb9a246794512ad64c03b1da1a61f727fa6b64083d0bd4860c3bf02b2ee03c4f',
   },
   {
     id: 'alerting.actions.alertSnoozed',
-    schemaHash: '1bc74f115b351daa1f6c04ccc4d50949112b974b5a1d0aea2e043d73472fd143',
+    schemaHash: 'a13f06208bb87f375480ca8f6c4c3e00665154bd192080a3a6b43d8d4a20fd26',
   },
   {
     id: 'alerting.actions.alertTagged',
-    schemaHash: 'd75b12a1fa3e7770bb15a3d63c1985b8c17006a652b8b2f32ab1569600d6a97c',
+    schemaHash: 'dc756297ccd64a6df4f36a97b293f2da6701687067416e2007be08b8607f799c',
   },
   {
     id: 'alerting.actions.alertUnacked',
-    schemaHash: 'efcf6a9900c7c4019ef80cd061cda7e3ddad910bede8180240f4750da6b09373',
+    schemaHash: '4d4610d1b9e373ebb499bcd869422085d603f4518c2c2e684a31a571f2a2e954',
   },
   {
     id: 'alerting.actions.alertUnassigned',
-    schemaHash: 'efcf6a9900c7c4019ef80cd061cda7e3ddad910bede8180240f4750da6b09373',
+    schemaHash: '4d4610d1b9e373ebb499bcd869422085d603f4518c2c2e684a31a571f2a2e954',
   },
   {
     id: 'alerting.actions.alertUnsnoozed',
-    schemaHash: 'efcf6a9900c7c4019ef80cd061cda7e3ddad910bede8180240f4750da6b09373',
+    schemaHash: '4d4610d1b9e373ebb499bcd869422085d603f4518c2c2e684a31a571f2a2e954',
   },
   {
     id: 'alerting.ruleCreated',
@@ -160,7 +160,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'entityStore.entityRiskScoreChanged',
-    schemaHash: '9f825d6e3cd79ed834759edfec89c88eef2be3a3e33b5872f53bddc365915593',
+    schemaHash: '4607f3ede66bbd24d6200e61707fda9aeaeae4306f0662bce7f52b726f7c75a9',
   },
   {
     id: 'nightshift-investigations.completed',

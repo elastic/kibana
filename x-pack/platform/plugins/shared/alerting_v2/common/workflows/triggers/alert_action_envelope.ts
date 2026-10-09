@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 
 export const alertActionEnvelopeSchema = z
   .object({
-    occurredAt: z.iso.datetime().describe(
+    occurredAt: isoDateTime().describe(
       i18n.translate('xpack.alertingVTwo.triggers.alertAction.schema.occurredAt', {
         defaultMessage: 'ISO timestamp of when the action occurred.',
       })

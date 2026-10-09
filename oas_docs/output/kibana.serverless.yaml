@@ -12577,7 +12577,6 @@ paths:
           required: false
           schema:
             format: date-time
-            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
             type: string
         - description: Inclusive ISO datetime upper bound on the event timestamp.
           in: query
@@ -12585,7 +12584,6 @@ paths:
           required: false
           schema:
             format: date-time
-            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
             type: string
         - description: Alert filter. Narrows events to those referencing at least one of the provided alert IDs.
           in: query
@@ -12804,7 +12802,6 @@ paths:
           required: false
           schema:
             format: date-time
-            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
             type: string
         - description: Inclusive ISO datetime upper bound on event.start.
           in: query
@@ -12812,7 +12809,6 @@ paths:
           required: false
           schema:
             format: date-time
-            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
             type: string
         - description: Sort field. Defaults to started_at.
           in: query
@@ -68423,7 +68419,6 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
-                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                       type: string
                     asset:
                       additionalProperties: false
@@ -68537,17 +68532,14 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -68969,7 +68961,6 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
-                          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                           type: string
                     labels:
                       additionalProperties: {}
@@ -69046,7 +69037,6 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
-                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                       type: string
                     asset:
                       additionalProperties: false
@@ -69160,17 +69150,14 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -69592,7 +69579,6 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
-                          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                           type: string
                     host:
                       additionalProperties: false
@@ -69701,7 +69687,6 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
-                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                       type: string
                     asset:
                       additionalProperties: false
@@ -69815,17 +69800,14 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -70247,7 +70229,6 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
-                          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                           type: string
                     labels:
                       additionalProperties: {}
@@ -70331,7 +70312,6 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
-                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                       type: string
                     asset:
                       additionalProperties: false
@@ -70492,17 +70472,14 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -70923,7 +70900,6 @@ paths:
                       properties:
                         ingested:
                           format: date-time
-                          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                           type: string
                     labels:
                       additionalProperties: {}
@@ -71117,7 +71093,6 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
-                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                       type: string
                     asset:
                       additionalProperties: false
@@ -71231,17 +71206,14 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -71663,7 +71635,6 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
-                          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                           type: string
                     labels:
                       additionalProperties: {}
@@ -71740,7 +71711,6 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
-                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                       type: string
                     asset:
                       additionalProperties: false
@@ -71854,17 +71824,14 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -72286,7 +72253,6 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
-                          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                           type: string
                     host:
                       additionalProperties: false
@@ -72395,7 +72361,6 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
-                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                       type: string
                     asset:
                       additionalProperties: false
@@ -72509,17 +72474,14 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -72941,7 +72903,6 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
-                          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                           type: string
                     labels:
                       additionalProperties: {}
@@ -73025,7 +72986,6 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
-                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                       type: string
                     asset:
                       additionalProperties: false
@@ -73186,17 +73146,14 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
-                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -73617,7 +73574,6 @@ paths:
                       properties:
                         ingested:
                           format: date-time
-                          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                           type: string
                     labels:
                       additionalProperties: {}
@@ -73811,7 +73767,6 @@ paths:
                               '@timestamp':
                                 description: The time the entity record was last updated.
                                 format: date-time
-                                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                 type: string
                               asset:
                                 additionalProperties: false
@@ -73925,17 +73880,14 @@ paths:
                                       first_seen:
                                         description: When the entity was first observed.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                       last_activity:
                                         description: When the entity last generated activity.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                       last_seen:
                                         description: When the entity was last observed.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                   name:
                                     description: Human-readable name of the entity.
@@ -74357,7 +74309,6 @@ paths:
                                   ingested:
                                     description: When the event was ingested into Elasticsearch.
                                     format: date-time
-                                    pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                     type: string
                               labels:
                                 additionalProperties: {}
@@ -74434,7 +74385,6 @@ paths:
                               '@timestamp':
                                 description: The time the entity record was last updated.
                                 format: date-time
-                                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                 type: string
                               asset:
                                 additionalProperties: false
@@ -74548,17 +74498,14 @@ paths:
                                       first_seen:
                                         description: When the entity was first observed.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                       last_activity:
                                         description: When the entity last generated activity.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                       last_seen:
                                         description: When the entity was last observed.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                   name:
                                     description: Human-readable name of the entity.
@@ -74980,7 +74927,6 @@ paths:
                                   ingested:
                                     description: When the event was ingested into Elasticsearch.
                                     format: date-time
-                                    pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                     type: string
                               host:
                                 additionalProperties: false
@@ -75089,7 +75035,6 @@ paths:
                               '@timestamp':
                                 description: The time the entity record was last updated.
                                 format: date-time
-                                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                 type: string
                               asset:
                                 additionalProperties: false
@@ -75203,17 +75148,14 @@ paths:
                                       first_seen:
                                         description: When the entity was first observed.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                       last_activity:
                                         description: When the entity last generated activity.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                       last_seen:
                                         description: When the entity was last observed.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                   name:
                                     description: Human-readable name of the entity.
@@ -75635,7 +75577,6 @@ paths:
                                   ingested:
                                     description: When the event was ingested into Elasticsearch.
                                     format: date-time
-                                    pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                     type: string
                               labels:
                                 additionalProperties: {}
@@ -75719,7 +75660,6 @@ paths:
                               '@timestamp':
                                 description: The time the entity record was last updated.
                                 format: date-time
-                                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                 type: string
                               asset:
                                 additionalProperties: false
@@ -75880,17 +75820,14 @@ paths:
                                       first_seen:
                                         description: When the entity was first observed.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                       last_activity:
                                         description: When the entity last generated activity.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                       last_seen:
                                         description: When the entity was last observed.
                                         format: date-time
-                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                         type: string
                                   name:
                                     description: Human-readable name of the entity.
@@ -76311,7 +76248,6 @@ paths:
                                 properties:
                                   ingested:
                                     format: date-time
-                                    pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
                                     type: string
                               labels:
                                 additionalProperties: {}
@@ -128950,7 +128886,7 @@ paths:
                   maxLength: 1000
                   type: string
                 include:
-                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_54___schema0'
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_379___schema0'
                 name:
                   maxLength: 256
                   type: string
@@ -143293,7 +143229,7 @@ components:
           type: boolean
       required:
         - data_view
-    Kibana_HTTP_APIs__zod_v4_54___schema0:
+    Kibana_HTTP_APIs__zod_v4_379___schema0:
       anyOf:
         - additionalProperties: false
           type: object
@@ -143322,7 +143258,7 @@ components:
                 routing:
                   items:
                     allOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_54___schema0'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_379___schema0'
                       - type: object
                         properties:
                           destination:
@@ -143905,7 +143841,6 @@ components:
         created_at:
           description: The ISO datetime when the action policy was created.
           format: date-time
-          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
         created_by:
           allOf:
@@ -143999,7 +143934,6 @@ components:
         updated_at:
           description: The ISO datetime when the action policy was last updated.
           format: date-time
-          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
         updated_by:
           allOf:
@@ -144413,7 +144347,6 @@ components:
         snoozed_until:
           description: The ISO datetime until which the targeted action policies should be snoozed.
           format: date-time
-          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
       required:
         - ids
@@ -144678,7 +144611,6 @@ components:
           type: array
         dispatched_at:
           format: date-time
-          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
         error:
           additionalProperties: false
@@ -144905,7 +144837,6 @@ components:
       properties:
         ended_at:
           format: date-time
-          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
         error:
           additionalProperties: false
@@ -144948,7 +144879,6 @@ components:
           type: string
         started_at:
           format: date-time
-          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
         timings:
           additionalProperties: false
@@ -145257,7 +145187,6 @@ components:
         created_at:
           description: ISO timestamp when the rule was created.
           format: date-time
-          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
         created_by:
           allOf:
@@ -145304,7 +145233,6 @@ components:
         updated_at:
           description: ISO timestamp when the rule was last updated.
           format: date-time
-          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
         updated_by:
           allOf:
@@ -145399,7 +145327,6 @@ components:
         snoozed_until:
           description: The ISO datetime until which the action policy should be snoozed.
           format: date-time
-          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
       required:
         - snoozed_until
@@ -152768,6 +152695,7 @@ components:
           description: Minimum width of the control panel.
       required:
         - type
+        - config
       title: options_list_control
       type: object
     Kibana_HTTP_APIs_kbn-controls-schemas-controls-group-schema-range-slider-control:
@@ -152808,6 +152736,7 @@ components:
           description: Minimum width of the control panel.
       required:
         - type
+        - config
       title: range_slider_control
       type: object
     Kibana_HTTP_APIs_kbn-controls-schemas-controls-group-schema-time-slider-control:
@@ -153717,40 +153646,35 @@ components:
                 drilldowns:
                   items:
                     anyOf:
-                      - allOf:
-                          - additionalProperties: false
-                            type: object
-                            properties:
-                              encode_url:
-                                default: true
-                                description: When true, URL is escaped using percent encoding
-                                type: boolean
-                              open_in_new_tab:
-                                default: true
-                                type: boolean
-                              url:
-                                description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                      - properties:
+                          encode_url:
+                            default: true
+                            description: When true, URL is escaped using percent encoding
+                            type: boolean
+                          label:
+                            type: string
+                          open_in_new_tab:
+                            default: true
+                            type: boolean
+                          trigger:
+                            anyOf:
+                              - enum:
+                                  - on_open_panel_menu
                                 type: string
-                            required:
-                              - url
-                          - type: object
-                            properties:
-                              label:
-                                type: string
-                              trigger:
-                                anyOf:
-                                  - enum:
-                                      - on_open_panel_menu
-                                    type: string
-                              type:
-                                enum:
-                                  - url_drilldown
-                                type: string
-                            required:
-                              - label
-                              - trigger
-                              - type
+                          type:
+                            enum:
+                              - url_drilldown
+                            type: string
+                          url:
+                            description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                            type: string
+                        required:
+                          - url
+                          - label
+                          - trigger
+                          - type
                         title: url_drilldown
+                        type: object
                   maxItems: 100
                   type: array
                 hide_border:
@@ -154193,40 +154117,35 @@ components:
                 drilldowns:
                   items:
                     anyOf:
-                      - allOf:
-                          - additionalProperties: false
-                            type: object
-                            properties:
-                              encode_url:
-                                default: true
-                                description: When true, URL is escaped using percent encoding
-                                type: boolean
-                              open_in_new_tab:
-                                default: true
-                                type: boolean
-                              url:
-                                description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                      - properties:
+                          encode_url:
+                            default: true
+                            description: When true, URL is escaped using percent encoding
+                            type: boolean
+                          label:
+                            type: string
+                          open_in_new_tab:
+                            default: true
+                            type: boolean
+                          trigger:
+                            anyOf:
+                              - enum:
+                                  - on_open_panel_menu
                                 type: string
-                            required:
-                              - url
-                          - type: object
-                            properties:
-                              label:
-                                type: string
-                              trigger:
-                                anyOf:
-                                  - enum:
-                                      - on_open_panel_menu
-                                    type: string
-                              type:
-                                enum:
-                                  - url_drilldown
-                                type: string
-                            required:
-                              - label
-                              - trigger
-                              - type
+                          type:
+                            enum:
+                              - url_drilldown
+                            type: string
+                          url:
+                            description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                            type: string
+                        required:
+                          - url
+                          - label
+                          - trigger
+                          - type
                         title: url_drilldown
+                        type: object
                   maxItems: 100
                   type: array
                 hide_border:
@@ -154472,43 +154391,38 @@ components:
                           - trigger
                           - type
                     title: dashboard_drilldown
-                  - allOf:
-                      - additionalProperties: false
-                        type: object
-                        properties:
-                          encode_url:
-                            default: true
-                            description: When true, URL is escaped using percent encoding
-                            type: boolean
-                          open_in_new_tab:
-                            default: true
-                            type: boolean
-                          url:
-                            description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                  - properties:
+                      encode_url:
+                        default: true
+                        description: When true, URL is escaped using percent encoding
+                        type: boolean
+                      label:
+                        type: string
+                      open_in_new_tab:
+                        default: true
+                        type: boolean
+                      trigger:
+                        anyOf:
+                          - enum:
+                              - on_click_image
                             type: string
-                        required:
-                          - url
-                      - type: object
-                        properties:
-                          label:
+                          - enum:
+                              - on_open_panel_menu
                             type: string
-                          trigger:
-                            anyOf:
-                              - enum:
-                                  - on_click_image
-                                type: string
-                              - enum:
-                                  - on_open_panel_menu
-                                type: string
-                          type:
-                            enum:
-                              - url_drilldown
-                            type: string
-                        required:
-                          - label
-                          - trigger
-                          - type
+                      type:
+                        enum:
+                          - url_drilldown
+                        type: string
+                      url:
+                        description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                        type: string
+                    required:
+                      - url
+                      - label
+                      - trigger
+                      - type
                     title: url_drilldown
+                    type: object
               maxItems: 100
               type: array
             hide_border:
@@ -154834,6 +154748,7 @@ components:
       required:
         - type
         - grid
+        - config
       title: Options list control
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-range_slider_control:
@@ -154859,6 +154774,7 @@ components:
       required:
         - type
         - grid
+        - config
       title: Range slider control
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_alerts:
@@ -155096,40 +155012,35 @@ components:
             drilldowns:
               items:
                 anyOf:
-                  - allOf:
-                      - additionalProperties: false
-                        type: object
-                        properties:
-                          encode_url:
-                            default: true
-                            description: When true, URL is escaped using percent encoding
-                            type: boolean
-                          open_in_new_tab:
-                            default: true
-                            type: boolean
-                          url:
-                            description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                  - properties:
+                      encode_url:
+                        default: true
+                        description: When true, URL is escaped using percent encoding
+                        type: boolean
+                      label:
+                        type: string
+                      open_in_new_tab:
+                        default: true
+                        type: boolean
+                      trigger:
+                        anyOf:
+                          - enum:
+                              - on_open_panel_menu
                             type: string
-                        required:
-                          - url
-                      - type: object
-                        properties:
-                          label:
-                            type: string
-                          trigger:
-                            anyOf:
-                              - enum:
-                                  - on_open_panel_menu
-                                type: string
-                          type:
-                            enum:
-                              - url_drilldown
-                            type: string
-                        required:
-                          - label
-                          - trigger
-                          - type
+                      type:
+                        enum:
+                          - url_drilldown
+                        type: string
+                      url:
+                        description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                        type: string
+                    required:
+                      - url
+                      - label
+                      - trigger
+                      - type
                     title: url_drilldown
+                    type: object
               maxItems: 100
               type: array
             filters:
@@ -155343,74 +155254,65 @@ components:
                                   - trigger
                                   - type
                             title: dashboard_drilldown
-                          - allOf:
-                              - additionalProperties: false
-                                type: object
-                                properties:
-                                  open_in_new_tab:
-                                    default: true
-                                    type: boolean
-                              - type: object
-                                properties:
-                                  label:
+                          - properties:
+                              label:
+                                type: string
+                              open_in_new_tab:
+                                default: true
+                                type: boolean
+                              trigger:
+                                anyOf:
+                                  - enum:
+                                      - on_apply_filter
                                     type: string
-                                  trigger:
-                                    anyOf:
-                                      - enum:
-                                          - on_apply_filter
-                                        type: string
-                                  type:
-                                    enum:
-                                      - discover_drilldown
-                                    type: string
-                                required:
-                                  - label
-                                  - trigger
-                                  - type
+                              type:
+                                enum:
+                                  - discover_drilldown
+                                type: string
+                            required:
+                              - label
+                              - trigger
+                              - type
                             title: discover_drilldown
-                          - allOf:
-                              - additionalProperties: false
-                                type: object
-                                properties:
-                                  encode_url:
-                                    default: true
-                                    description: When true, URL is escaped using percent encoding
-                                    type: boolean
-                                  open_in_new_tab:
-                                    default: true
-                                    type: boolean
-                                  url:
-                                    description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                            type: object
+                          - properties:
+                              encode_url:
+                                default: true
+                                description: When true, URL is escaped using percent encoding
+                                type: boolean
+                              label:
+                                type: string
+                              open_in_new_tab:
+                                default: true
+                                type: boolean
+                              trigger:
+                                anyOf:
+                                  - enum:
+                                      - on_click_row
                                     type: string
-                                required:
-                                  - url
-                              - type: object
-                                properties:
-                                  label:
+                                  - enum:
+                                      - on_click_value
                                     type: string
-                                  trigger:
-                                    anyOf:
-                                      - enum:
-                                          - on_click_row
-                                        type: string
-                                      - enum:
-                                          - on_click_value
-                                        type: string
-                                      - enum:
-                                          - on_open_panel_menu
-                                        type: string
-                                      - enum:
-                                          - on_select_range
-                                        type: string
-                                  type:
-                                    enum:
-                                      - url_drilldown
+                                  - enum:
+                                      - on_open_panel_menu
                                     type: string
-                                required:
-                                  - label
-                                  - trigger
-                                  - type
+                                  - enum:
+                                      - on_select_range
+                                    type: string
+                              type:
+                                enum:
+                                  - url_drilldown
+                                type: string
+                              url:
+                                description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                                type: string
+                            required:
+                              - url
+                              - label
+                              - trigger
+                              - type
                             title: url_drilldown
+                            type: object
                       maxItems: 100
                       type: array
                     hide_border:
@@ -155483,74 +155385,65 @@ components:
                               - trigger
                               - type
                         title: dashboard_drilldown
-                      - allOf:
-                          - additionalProperties: false
-                            type: object
-                            properties:
-                              open_in_new_tab:
-                                default: true
-                                type: boolean
-                          - type: object
-                            properties:
-                              label:
+                      - properties:
+                          label:
+                            type: string
+                          open_in_new_tab:
+                            default: true
+                            type: boolean
+                          trigger:
+                            anyOf:
+                              - enum:
+                                  - on_apply_filter
                                 type: string
-                              trigger:
-                                anyOf:
-                                  - enum:
-                                      - on_apply_filter
-                                    type: string
-                              type:
-                                enum:
-                                  - discover_drilldown
-                                type: string
-                            required:
-                              - label
-                              - trigger
-                              - type
+                          type:
+                            enum:
+                              - discover_drilldown
+                            type: string
+                        required:
+                          - label
+                          - trigger
+                          - type
                         title: discover_drilldown
-                      - allOf:
-                          - additionalProperties: false
-                            type: object
-                            properties:
-                              encode_url:
-                                default: true
-                                description: When true, URL is escaped using percent encoding
-                                type: boolean
-                              open_in_new_tab:
-                                default: true
-                                type: boolean
-                              url:
-                                description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                        type: object
+                      - properties:
+                          encode_url:
+                            default: true
+                            description: When true, URL is escaped using percent encoding
+                            type: boolean
+                          label:
+                            type: string
+                          open_in_new_tab:
+                            default: true
+                            type: boolean
+                          trigger:
+                            anyOf:
+                              - enum:
+                                  - on_click_row
                                 type: string
-                            required:
-                              - url
-                          - type: object
-                            properties:
-                              label:
+                              - enum:
+                                  - on_click_value
                                 type: string
-                              trigger:
-                                anyOf:
-                                  - enum:
-                                      - on_click_row
-                                    type: string
-                                  - enum:
-                                      - on_click_value
-                                    type: string
-                                  - enum:
-                                      - on_open_panel_menu
-                                    type: string
-                                  - enum:
-                                      - on_select_range
-                                    type: string
-                              type:
-                                enum:
-                                  - url_drilldown
+                              - enum:
+                                  - on_open_panel_menu
                                 type: string
-                            required:
-                              - label
-                              - trigger
-                              - type
+                              - enum:
+                                  - on_select_range
+                                type: string
+                          type:
+                            enum:
+                              - url_drilldown
+                            type: string
+                          url:
+                            description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                            type: string
+                        required:
+                          - url
+                          - label
+                          - trigger
+                          - type
                         title: url_drilldown
+                        type: object
                   maxItems: 100
                   type: array
                 hide_border:
@@ -166465,40 +166358,35 @@ components:
         drilldowns:
           items:
             anyOf:
-              - allOf:
-                  - additionalProperties: false
-                    type: object
-                    properties:
-                      encode_url:
-                        default: true
-                        description: When true, URL is escaped using percent encoding
-                        type: boolean
-                      open_in_new_tab:
-                        default: true
-                        type: boolean
-                      url:
-                        description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+              - properties:
+                  encode_url:
+                    default: true
+                    description: When true, URL is escaped using percent encoding
+                    type: boolean
+                  label:
+                    type: string
+                  open_in_new_tab:
+                    default: true
+                    type: boolean
+                  trigger:
+                    anyOf:
+                      - enum:
+                          - on_open_panel_menu
                         type: string
-                    required:
-                      - url
-                  - type: object
-                    properties:
-                      label:
-                        type: string
-                      trigger:
-                        anyOf:
-                          - enum:
-                              - on_open_panel_menu
-                            type: string
-                      type:
-                        enum:
-                          - url_drilldown
-                        type: string
-                    required:
-                      - label
-                      - trigger
-                      - type
+                  type:
+                    enum:
+                      - url_drilldown
+                    type: string
+                  url:
+                    description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                    type: string
+                required:
+                  - url
+                  - label
+                  - trigger
+                  - type
                 title: url_drilldown
+                type: object
           maxItems: 100
           type: array
         hide_border:
@@ -166541,40 +166429,35 @@ components:
         drilldowns:
           items:
             anyOf:
-              - allOf:
-                  - additionalProperties: false
-                    type: object
-                    properties:
-                      encode_url:
-                        default: true
-                        description: When true, URL is escaped using percent encoding
-                        type: boolean
-                      open_in_new_tab:
-                        default: true
-                        type: boolean
-                      url:
-                        description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+              - properties:
+                  encode_url:
+                    default: true
+                    description: When true, URL is escaped using percent encoding
+                    type: boolean
+                  label:
+                    type: string
+                  open_in_new_tab:
+                    default: true
+                    type: boolean
+                  trigger:
+                    anyOf:
+                      - enum:
+                          - on_open_panel_menu
                         type: string
-                    required:
-                      - url
-                  - type: object
-                    properties:
-                      label:
-                        type: string
-                      trigger:
-                        anyOf:
-                          - enum:
-                              - on_open_panel_menu
-                            type: string
-                      type:
-                        enum:
-                          - url_drilldown
-                        type: string
-                    required:
-                      - label
-                      - trigger
-                      - type
+                  type:
+                    enum:
+                      - url_drilldown
+                    type: string
+                  url:
+                    description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                    type: string
+                required:
+                  - url
+                  - label
+                  - trigger
+                  - type
                 title: url_drilldown
+                type: object
           maxItems: 100
           type: array
         duration:
@@ -166613,40 +166496,35 @@ components:
         drilldowns:
           items:
             anyOf:
-              - allOf:
-                  - additionalProperties: false
-                    type: object
-                    properties:
-                      encode_url:
-                        default: true
-                        description: When true, URL is escaped using percent encoding
-                        type: boolean
-                      open_in_new_tab:
-                        default: true
-                        type: boolean
-                      url:
-                        description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+              - properties:
+                  encode_url:
+                    default: true
+                    description: When true, URL is escaped using percent encoding
+                    type: boolean
+                  label:
+                    type: string
+                  open_in_new_tab:
+                    default: true
+                    type: boolean
+                  trigger:
+                    anyOf:
+                      - enum:
+                          - on_open_panel_menu
                         type: string
-                    required:
-                      - url
-                  - type: object
-                    properties:
-                      label:
-                        type: string
-                      trigger:
-                        anyOf:
-                          - enum:
-                              - on_open_panel_menu
-                            type: string
-                      type:
-                        enum:
-                          - url_drilldown
-                        type: string
-                    required:
-                      - label
-                      - trigger
-                      - type
+                  type:
+                    enum:
+                      - url_drilldown
+                    type: string
+                  url:
+                    description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                    type: string
+                required:
+                  - url
+                  - label
+                  - trigger
+                  - type
                 title: url_drilldown
+                type: object
           maxItems: 100
           type: array
         hide_border:
@@ -166680,40 +166558,35 @@ components:
         drilldowns:
           items:
             anyOf:
-              - allOf:
-                  - additionalProperties: false
-                    type: object
-                    properties:
-                      encode_url:
-                        default: true
-                        description: When true, URL is escaped using percent encoding
-                        type: boolean
-                      open_in_new_tab:
-                        default: true
-                        type: boolean
-                      url:
-                        description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+              - properties:
+                  encode_url:
+                    default: true
+                    description: When true, URL is escaped using percent encoding
+                    type: boolean
+                  label:
+                    type: string
+                  open_in_new_tab:
+                    default: true
+                    type: boolean
+                  trigger:
+                    anyOf:
+                      - enum:
+                          - on_open_panel_menu
                         type: string
-                    required:
-                      - url
-                  - type: object
-                    properties:
-                      label:
-                        type: string
-                      trigger:
-                        anyOf:
-                          - enum:
-                              - on_open_panel_menu
-                            type: string
-                      type:
-                        enum:
-                          - url_drilldown
-                        type: string
-                    required:
-                      - label
-                      - trigger
-                      - type
+                  type:
+                    enum:
+                      - url_drilldown
+                    type: string
+                  url:
+                    description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                    type: string
+                required:
+                  - url
+                  - label
+                  - trigger
+                  - type
                 title: url_drilldown
+                type: object
           maxItems: 100
           type: array
         group_filters:
@@ -166948,40 +166821,35 @@ components:
         drilldowns:
           items:
             anyOf:
-              - allOf:
-                  - additionalProperties: false
-                    type: object
-                    properties:
-                      encode_url:
-                        default: true
-                        description: When true, URL is escaped using percent encoding
-                        type: boolean
-                      open_in_new_tab:
-                        default: true
-                        type: boolean
-                      url:
-                        description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+              - properties:
+                  encode_url:
+                    default: true
+                    description: When true, URL is escaped using percent encoding
+                    type: boolean
+                  label:
+                    type: string
+                  open_in_new_tab:
+                    default: true
+                    type: boolean
+                  trigger:
+                    anyOf:
+                      - enum:
+                          - on_open_panel_menu
                         type: string
-                    required:
-                      - url
-                  - type: object
-                    properties:
-                      label:
-                        type: string
-                      trigger:
-                        anyOf:
-                          - enum:
-                              - on_open_panel_menu
-                            type: string
-                      type:
-                        enum:
-                          - url_drilldown
-                        type: string
-                    required:
-                      - label
-                      - trigger
-                      - type
+                  type:
+                    enum:
+                      - url_drilldown
+                    type: string
+                  url:
+                    description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                    type: string
+                required:
+                  - url
+                  - label
+                  - trigger
+                  - type
                 title: url_drilldown
+                type: object
           maxItems: 100
           type: array
         hide_border:
@@ -167832,7 +167700,7 @@ components:
                 - action
                 - from
                 - to
-            - allOf:
+            - anyOf:
                 - additionalProperties: false
                   type: object
                   properties:
@@ -167855,6 +167723,10 @@ components:
                       type: boolean
                     ignore_missing:
                       type: boolean
+                    internal_networks:
+                      items:
+                        type: string
+                      type: array
                     source_ip:
                       minLength: 1
                       type: string
@@ -167868,24 +167740,46 @@ components:
                     - action
                     - source_ip
                     - destination_ip
-                - anyOf:
-                    - additionalProperties: false
-                      type: object
-                      properties:
-                        internal_networks:
-                          items:
-                            type: string
-                          type: array
-                      required:
-                        - internal_networks
-                    - additionalProperties: false
-                      type: object
-                      properties:
-                        internal_networks_field:
-                          minLength: 1
-                          type: string
-                      required:
-                        - internal_networks_field
+                    - internal_networks
+                - additionalProperties: false
+                  type: object
+                  properties:
+                    action:
+                      enum:
+                        - network_direction
+                      type: string
+                    customIdentifier:
+                      description: Custom identifier to correlate this processor across outputs
+                      minLength: 1
+                      type: string
+                    description:
+                      description: Human-readable notes about this processor step
+                      type: string
+                    destination_ip:
+                      minLength: 1
+                      type: string
+                    ignore_failure:
+                      description: Continue pipeline execution if this processor fails
+                      type: boolean
+                    ignore_missing:
+                      type: boolean
+                    internal_networks_field:
+                      minLength: 1
+                      type: string
+                    source_ip:
+                      minLength: 1
+                      type: string
+                    target_field:
+                      minLength: 1
+                      type: string
+                    where:
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_Condition'
+                      description: Conditional expression controlling whether this processor runs
+                  required:
+                    - action
+                    - source_ip
+                    - destination_ip
+                    - internal_networks_field
             - additionalProperties: false
               description: JsonExtract processor - Extract values from JSON strings using JSONPath-like selectors
               type: object

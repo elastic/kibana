@@ -14,7 +14,7 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import { getTacticMetadata } from '@kbn/elastic-assistant-common';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 import { ATTACK_DISCOVERY_ATTACHMENT_TYPE } from '../../../../common/constants';
 import { transformSearchResponseToAlerts } from '../../../routes/post/validate/helpers/transform_search_response_to_alerts';
@@ -69,7 +69,7 @@ export const attackDiscoveryAttachmentDataSchema = lazySchema(() =>
     summary_markdown: z.string().max(MAX_SUMMARY_LENGTH),
     // The discovery's `@timestamp`, so its "Open in Attacks" link can set the Attacks page's time
     // range to include it.
-    timestamp: z.string().datetime({ offset: true }).optional(),
+    timestamp: isoDateTime({ offset: true }).optional(),
     title: z.string().max(MAX_TITLE_LENGTH),
   })
 );

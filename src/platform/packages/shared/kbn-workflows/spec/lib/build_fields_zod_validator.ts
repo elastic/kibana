@@ -20,8 +20,8 @@ const schemaTypeList = (jsonSchema: JSONSchema7): string[] => {
 };
 
 /**
- * `fromJSONSchema` only compiles a single `type`. A type array becomes `z.unknown()`,
- * so a typed map on that node has to be rebuilt as a union of one branch per type.
+ * `fromJSONSchema` compiles a type array without the node's `additionalProperties`, so a
+ * typed map on that node has to be rebuilt as a union of one branch per type.
  */
 const compileTypedMapBranch = (jsonSchema: JSONSchema7, valueSchema: z.ZodType): z.ZodType => {
   const compiled = fromJSONSchema({ ...jsonSchema, type: 'object' } as Record<string, unknown>);
@@ -89,7 +89,7 @@ function applyAdditionalProperties(
   const impliedObject =
     types.includes('object') ||
     (types.length === 0 && (!!jsonSchema.properties || !!jsonSchema.additionalProperties));
-  if (zodResult instanceof z.ZodUnknown && impliedObject) {
+  if (impliedObject && (zodResult instanceof z.ZodUnknown || Array.isArray(jsonSchema.type))) {
     const branches = [
       compileTypedMapBranch(jsonSchema, valueSchema),
       ...types

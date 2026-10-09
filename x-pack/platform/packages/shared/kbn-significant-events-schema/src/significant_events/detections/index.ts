@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { lazySchema, z } from '@kbn/zod/v4';
+import { lazySchema, z, isoDateTime } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import { MAX_ID_LENGTH, MAX_RULE_NAME_LENGTH } from '../constants';
 
@@ -37,7 +37,7 @@ export type ChangePointType = (typeof CHANGE_POINT_TYPES)[number];
  */
 export const detectionSchema = lazySchema(() =>
   z.object({
-    '@timestamp': z.iso.datetime({ offset: true }),
+    '@timestamp': isoDateTime({ offset: true }),
     detection_id: z
       .string()
       .max(MAX_ID_LENGTH)

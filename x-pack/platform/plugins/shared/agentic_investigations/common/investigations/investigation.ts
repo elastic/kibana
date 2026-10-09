@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import type { ProposalConfidence, ProposalImpact, ProposalStatus } from '@kbn/proposals-common';
 import type { InvestigationEvidence } from '../evidence/evidence';
 import type { Hypothesis } from '../hypotheses/hypotheses';
@@ -76,8 +76,8 @@ export const investigationFiltersSchema = z.object({
   entity: z.string().min(1).max(MAX_FILTER_TEXT_LENGTH).optional(),
   /** Case-insensitive text matched against the title, summary, and verdict. */
   query: z.string().trim().min(1).max(MAX_FILTER_TEXT_LENGTH).optional(),
-  created_after: z.iso.datetime({ offset: true }).optional(),
-  created_before: z.iso.datetime({ offset: true }).optional(),
+  created_after: isoDateTime({ offset: true }).optional(),
+  created_before: isoDateTime({ offset: true }).optional(),
 });
 export type InvestigationFiltersInput = z.input<typeof investigationFiltersSchema>;
 export type InvestigationFilters = z.output<typeof investigationFiltersSchema>;

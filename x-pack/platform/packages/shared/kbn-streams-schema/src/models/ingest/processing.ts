@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   streamlangDSLSchema,
@@ -61,14 +61,14 @@ export const getIngestProcessingItemCount = (processing: ClassicIngestStreamProc
 
 const nativeIngestStreamProcessingObjectSchema = z.object({
   processors: z.array(z.record(z.string(), z.any())),
-  updated_at: z.iso.datetime(),
+  updated_at: isoDateTime(),
 });
 
 const nativeIngestStreamProcessingSchema =
   nativeIngestStreamProcessingObjectSchema as z.ZodType<NativeIngestStreamProcessing>;
 
 export const streamlangIngestStreamProcessingSchema = streamlangDSLSchema.merge(
-  z.object({ updated_at: z.iso.datetime() })
+  z.object({ updated_at: isoDateTime() })
 );
 
 export const streamlangIngestStreamProcessingUpsertSchema =

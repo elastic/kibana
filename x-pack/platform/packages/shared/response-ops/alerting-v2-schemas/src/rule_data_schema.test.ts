@@ -7,7 +7,7 @@
 
 import { Parser } from '@elastic/esql';
 import { RUNBOOK_ARTIFACT_TYPE, RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-constants';
-import { z } from '@kbn/zod/v4';
+import { z, inlineRootJsonSchemaRef } from '@kbn/zod/v4';
 import {
   createRuleDataBaseSchema,
   createRuleDataSchema,
@@ -1655,10 +1655,9 @@ describe('getRootEsqlQuery', () => {
 
 describe('updateRuleDataSchema OpenAPI descriptions', () => {
   it('documents PATCH omission for time_field and the recovery/no_data contracts', () => {
-    const json = z.toJSONSchema(updateRuleDataSchema, {
-      target: 'draft-7',
-      unrepresentable: 'any',
-    }) as {
+    const json = inlineRootJsonSchemaRef(
+      z.toJSONSchema(updateRuleDataSchema, { target: 'draft-7', unrepresentable: 'any' })
+    ) as {
       properties?: Record<string, { description?: string }>;
       definitions?: Record<string, { description?: string }>;
     };

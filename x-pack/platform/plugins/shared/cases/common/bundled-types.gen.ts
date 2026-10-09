@@ -14,7 +14,7 @@
  *   version: 0.1
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 /**
  * An array containing users that are assigned to the case.
@@ -548,7 +548,7 @@ export type CaseResponseClosedByProperties = z.infer<typeof CaseResponseClosedBy
 export const AlertCommentResponseProperties = lazySchema(() =>
   z.object({
     alertId: z.array(z.string()).optional(),
-    created_at: z.string().datetime().optional(),
+    created_at: isoDateTime().optional(),
     created_by: z
       .object({
         email: z.string().nullable(),
@@ -560,7 +560,7 @@ export const AlertCommentResponseProperties = lazySchema(() =>
     id: z.string().optional(),
     index: z.array(z.string()).optional(),
     owner: Owner.optional(),
-    pushed_at: z.string().datetime().nullable().optional(),
+    pushed_at: isoDateTime().nullable().optional(),
     pushed_by: z
       .object({
         email: z.string().nullable(),
@@ -583,7 +583,7 @@ export const AlertCommentResponseProperties = lazySchema(() =>
       })
       .optional(),
     type: z.literal('alert'),
-    updated_at: z.string().datetime().nullable().optional(),
+    updated_at: isoDateTime().nullable().optional(),
     updated_by: z
       .object({
         email: z.string().nullable(),
@@ -634,16 +634,16 @@ export type CaseResponseUpdatedByProperties = z.infer<typeof CaseResponseUpdated
 
 export const EventCommentResponseProperties = lazySchema(() =>
   z.object({
-    created_at: z.string().datetime().optional(),
+    created_at: isoDateTime().optional(),
     created_by: CaseResponseCreatedByProperties.optional(),
     eventId: z.array(z.string()).optional(),
     id: z.string().optional(),
     index: z.array(z.string()).optional(),
     owner: Owner.optional(),
-    pushed_at: z.string().datetime().nullable().optional(),
+    pushed_at: isoDateTime().nullable().optional(),
     pushed_by: CaseResponsePushedByProperties.optional(),
     type: z.literal('event'),
-    updated_at: z.string().datetime().nullable().optional(),
+    updated_at: isoDateTime().nullable().optional(),
     updated_by: CaseResponseUpdatedByProperties.optional(),
     version: z.string().optional(),
   })
@@ -653,14 +653,14 @@ export type EventCommentResponseProperties = z.infer<typeof EventCommentResponse
 export const UserCommentResponseProperties = lazySchema(() =>
   z.object({
     comment: z.string().optional(),
-    created_at: z.string().datetime().optional(),
+    created_at: isoDateTime().optional(),
     created_by: CaseResponseCreatedByProperties.optional(),
     id: z.string().optional(),
     owner: Owner.optional(),
-    pushed_at: z.string().datetime().nullable().optional(),
+    pushed_at: isoDateTime().nullable().optional(),
     pushed_by: CaseResponsePushedByProperties.optional(),
     type: z.literal('user'),
-    updated_at: z.string().datetime().nullable().optional(),
+    updated_at: isoDateTime().nullable().optional(),
     updated_by: CaseResponseUpdatedByProperties.optional(),
     version: z.string().optional(),
   })
@@ -675,7 +675,7 @@ export const ExternalService = lazySchema(() =>
       external_id: z.string().optional(),
       external_title: z.string().optional(),
       external_url: z.string().optional(),
-      pushed_at: z.string().datetime().optional(),
+      pushed_at: isoDateTime().optional(),
       pushed_by: z
         .object({
           email: z.string().nullable().optional(),
@@ -714,11 +714,11 @@ export const CaseObservable = lazySchema(() =>
     /**
      * When the observable was created.
      */
-    createdAt: z.string().datetime().describe('When the observable was created.'),
+    createdAt: isoDateTime().describe('When the observable was created.'),
     /**
      * When the observable was last updated.
      */
-    updatedAt: z.string().datetime().nullable().describe('When the observable was last updated.'),
+    updatedAt: isoDateTime().nullable().describe('When the observable was last updated.'),
   })
 );
 export type CaseObservable = z.infer<typeof CaseObservable>;
@@ -738,7 +738,7 @@ export const CaseResponseProperties = lazySchema(() =>
      * The case category.
      */
     category: z.string().nullable().optional().describe('The case category.'),
-    closed_at: z.string().datetime().nullable(),
+    closed_at: isoDateTime().nullable(),
     closed_by: CaseResponseClosedByProperties,
     /**
      * An array of comment objects for the case.
@@ -762,7 +762,7 @@ export const CaseResponseProperties = lazySchema(() =>
       ConnectorPropertiesServicenowSir,
       ConnectorPropertiesSwimlane,
     ]),
-    created_at: z.string().datetime(),
+    created_at: isoDateTime(),
     created_by: CaseResponseCreatedByProperties,
     /**
      * Custom field values for the case.
@@ -865,7 +865,7 @@ export const CaseResponseProperties = lazySchema(() =>
      * The number of events attached to the case.
      */
     totalEvents: z.number().int().optional().describe('The number of events attached to the case.'),
-    updated_at: z.string().datetime().nullable(),
+    updated_at: isoDateTime().nullable(),
     updated_by: CaseResponseUpdatedByProperties,
     version: z.string(),
   })
@@ -1061,7 +1061,7 @@ export const RelatedCase = lazySchema(() =>
     /**
      * When the case was created.
      */
-    createdAt: z.string().datetime().describe('When the case was created.'),
+    createdAt: isoDateTime().describe('When the case was created.'),
     totals: AttachmentTotals,
   })
 );
@@ -1487,9 +1487,7 @@ export const TemplateV2Response = lazySchema(() =>
     /**
      * The date the template was soft-deleted, or null if active.
      */
-    deletedAt: z
-      .string()
-      .datetime()
+    deletedAt: isoDateTime()
       .nullable()
       .describe('The date the template was soft-deleted, or null if active.'),
     /**
@@ -1538,9 +1536,7 @@ export const TemplateV2Response = lazySchema(() =>
     /**
      * The date the template was last used to create a case.
      */
-    lastUsedAt: z
-      .string()
-      .datetime()
+    lastUsedAt: isoDateTime()
       .optional()
       .describe('The date the template was last used to create a case.'),
     /**
@@ -1982,7 +1978,7 @@ export const CaseResponseGetCase = lazySchema(() =>
      * The case category.
      */
     category: z.string().nullable().optional().describe('The case category.'),
-    closed_at: z.string().datetime().nullable(),
+    closed_at: isoDateTime().nullable(),
     closed_by: CaseResponseClosedByProperties,
     connector: z.discriminatedUnion('type', [
       ConnectorPropertiesNone,
@@ -1993,7 +1989,7 @@ export const CaseResponseGetCase = lazySchema(() =>
       ConnectorPropertiesServicenowSir,
       ConnectorPropertiesSwimlane,
     ]),
-    created_at: z.string().datetime(),
+    created_at: isoDateTime(),
     created_by: CaseResponseCreatedByProperties,
     /**
      * Custom field values for the case.
@@ -2093,7 +2089,7 @@ export const CaseResponseGetCase = lazySchema(() =>
      * The number of events attached to the case.
      */
     totalEvents: z.number().int().optional().describe('The number of events attached to the case.'),
-    updated_at: z.string().datetime().nullable(),
+    updated_at: isoDateTime().nullable(),
     updated_by: CaseResponseUpdatedByProperties,
     version: z.string(),
   })
@@ -2102,7 +2098,7 @@ export type CaseResponseGetCase = z.infer<typeof CaseResponseGetCase>;
 
 export const AlertResponseProperties = lazySchema(() =>
   z.object({
-    attached_at: z.string().datetime().optional(),
+    attached_at: isoDateTime().optional(),
     /**
      * The alert identifier.
      */
@@ -2838,7 +2834,7 @@ export const UserActionsFindResponseProperties = lazySchema(() =>
   z.object({
     action: Actions,
     comment_id: z.string().nullable(),
-    created_at: z.string().datetime(),
+    created_at: isoDateTime(),
     created_by: z.object({
       email: z.string().nullable(),
       full_name: z.string().nullable(),

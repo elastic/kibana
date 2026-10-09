@@ -198,7 +198,20 @@ describe('rule template create-rule schema coupling', () => {
       target: 'draft-7',
       unrepresentable: 'any',
     }) as Record<string, unknown>;
-    return rest;
+    const {
+      $ref: ref,
+      definitions = {},
+      ...root
+    } = rest as {
+      $ref?: string;
+      definitions?: Record<string, Record<string, unknown>>;
+    };
+    if (typeof ref !== 'string') {
+      return rest;
+    }
+    const { [ref.replace('#/definitions/', '')]: rootDefinition, ...otherDefinitions } =
+      definitions;
+    return { ...root, ...rootDefinition, definitions: otherDefinitions };
   };
 
   it('top-level keys are engine and rule', () => {

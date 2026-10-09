@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import { DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
 import {
   validateEsqlQuery,
@@ -838,9 +838,9 @@ export const ruleResponseSchema = createRuleDataBaseSchema
       ),
     enabled: z.boolean().describe('Whether the rule is enabled.'),
     created_by: actorSchema.nullable().describe('Actor who created the rule.'),
-    created_at: z.iso.datetime().describe('ISO timestamp when the rule was created.'),
+    created_at: isoDateTime().describe('ISO timestamp when the rule was created.'),
     updated_by: actorSchema.nullable().describe('Actor who last updated the rule.'),
-    updated_at: z.iso.datetime().describe('ISO timestamp when the rule was last updated.'),
+    updated_at: isoDateTime().describe('ISO timestamp when the rule was last updated.'),
   })
   .meta({ id: 'alerting_rule_response' });
 

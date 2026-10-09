@@ -81,6 +81,16 @@ describe('assertBoundedSchema', () => {
         )
       ).not.toThrow();
     });
+
+    it('accepts a nullable boolean field', () => {
+      expect(() => assert(z.object({ enabled: z.boolean().nullable() }).strict())).not.toThrow();
+    });
+
+    it('accepts a nullable bounded string field', () => {
+      expect(() =>
+        assert(z.object({ label: z.string().max(32).nullable() }).strict())
+      ).not.toThrow();
+    });
   });
 
   describe('per-node caps', () => {
@@ -191,6 +201,62 @@ describe('assertBoundedSchema', () => {
                 z.object({ a: z.string().max(8) }).strict(),
                 z.object({ b: z.string().max(8) }).strict()
               ),
+            })
+            .strict()
+        )
+      ).toThrow(/allOf\/not; supported constructs/);
+    });
+
+    it('rejects an intersection nested inside an object property', () => {
+      expect(() =>
+        assert(
+          z
+            .object({
+              nested: z
+                .object({
+                  value: z.intersection(
+                    z.object({ a: z.string().max(8) }).strict(),
+                    z.object({ b: z.string().max(8) }).strict()
+                  ),
+                })
+                .strict(),
+            })
+            .strict()
+        )
+      ).toThrow(/allOf\/not; supported constructs/);
+    });
+
+    it('rejects an intersection nested inside an array element', () => {
+      expect(() =>
+        assert(
+          z
+            .object({
+              items: z
+                .array(
+                  z.intersection(
+                    z.object({ a: z.string().max(8) }).strict(),
+                    z.object({ b: z.string().max(8) }).strict()
+                  )
+                )
+                .max(2),
+            })
+            .strict()
+        )
+      ).toThrow(/allOf\/not; supported constructs/);
+    });
+
+    it('rejects an intersection nested inside a union branch', () => {
+      expect(() =>
+        assert(
+          z
+            .object({
+              value: z.union([
+                z.string().max(8),
+                z.intersection(
+                  z.object({ a: z.string().max(8) }).strict(),
+                  z.object({ b: z.string().max(8) }).strict()
+                ),
+              ]),
             })
             .strict()
         )

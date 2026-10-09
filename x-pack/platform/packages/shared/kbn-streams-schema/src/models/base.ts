@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import type { OmitUpsertProps } from './core';
 
 /* eslint-disable @typescript-eslint/no-namespace */
@@ -60,7 +60,7 @@ export namespace BaseStream {
 export const baseStreamDefinitionSchema = z.object({
   name: z.string(),
   description: z.string(),
-  updated_at: z.iso.datetime(),
+  updated_at: isoDateTime(),
   query_streams: z
     .array(
       z.object({
