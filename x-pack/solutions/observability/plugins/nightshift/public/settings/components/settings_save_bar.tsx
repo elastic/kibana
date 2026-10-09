@@ -17,24 +17,20 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const DetectionSettingsSaveBar = ({
+export const SettingsSaveBar = ({
   hasChanges,
   isSaving,
-  handleCancel,
-  handleSave,
-  canEditSettings,
-  isDeveloperModeSaving,
-  saveBlockedByPause,
-  activityBlockTooltip,
+  onCancel,
+  onSave,
+  isSaveDisabled,
+  disabledTooltip,
 }: {
   hasChanges: boolean;
   isSaving: boolean;
-  handleCancel: () => void;
-  handleSave: () => void;
-  canEditSettings: boolean;
-  isDeveloperModeSaving: boolean;
-  saveBlockedByPause: boolean;
-  activityBlockTooltip?: ReactNode;
+  onCancel: () => void;
+  onSave: () => void | Promise<void>;
+  isSaveDisabled: boolean;
+  disabledTooltip?: ReactNode;
 }) =>
   hasChanges ? (
     <EuiBottomBar data-test-subj="streams-significant-events-settings-bottom-bar">
@@ -46,7 +42,7 @@ export const DetectionSettingsSaveBar = ({
                 data-test-subj="streams-settings-cancel-button"
                 color="text"
                 size="s"
-                onClick={handleCancel}
+                onClick={onCancel}
                 isDisabled={isSaving}
               >
                 {i18n.translate('xpack.nightshift.settings.cancelButton', {
@@ -55,16 +51,16 @@ export const DetectionSettingsSaveBar = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={saveBlockedByPause ? activityBlockTooltip : undefined}>
+              <EuiToolTip content={disabledTooltip}>
                 <EuiButton
                   data-test-subj="streams-settings-save-button"
                   color="primary"
                   fill
                   size="s"
-                  onClick={handleSave}
+                  onClick={() => void onSave()}
                   isLoading={isSaving}
-                  isDisabled={!canEditSettings || isDeveloperModeSaving || saveBlockedByPause}
-                  hasAriaDisabled={saveBlockedByPause}
+                  isDisabled={isSaveDisabled}
+                  hasAriaDisabled={disabledTooltip !== undefined}
                 >
                   {i18n.translate('xpack.nightshift.settings.saveChangesButton', {
                     defaultMessage: 'Save changes',
