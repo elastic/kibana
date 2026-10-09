@@ -14,6 +14,7 @@ import {
   runPackageReport,
 } from './run_package_report';
 import type { RunPackageReportDeps } from './run_package_report';
+import type { CoverageSubject } from './types';
 
 const reportId = 'rpt-package-1';
 const conversationId = buildHuntInvestigationConversationId(reportId);
@@ -60,12 +61,32 @@ const suspendProcess: ActionCatalogEntry = {
   },
 };
 
+const setAssetCriticality: ActionCatalogEntry = {
+  workflowId: 'system-alertzero-action-set-asset-criticality',
+  name: 'Set asset criticality',
+  category: 'respond',
+  subjects: ['user', 'service'],
+  inputSchema: {
+    type: 'object',
+    properties: {
+      id_field: { type: 'string' },
+      id_value: { type: 'string' },
+      criticality_level: { type: 'string' },
+    },
+    required: ['id_field', 'id_value'],
+  },
+};
+
 const sseAttachment = ({
   hit,
   hostName,
+  hypothesis = 'test',
+  userName,
 }: {
   hit: boolean;
   hostName?: string;
+  hypothesis?: string;
+  userName?: string;
 }): VersionedAttachment => ({
   id: 'sse-1',
   type: 'security.significant_security_event',
@@ -87,9 +108,12 @@ const sseAttachment = ({
         security_knowledge_indicators: hit
           ? [{ type: 'technique', value: 'T1078.004', technique_id: 'T1078.004' }]
           : [],
-        entities: hostName ? [{ field: 'host.name', value: hostName }] : [],
+        entities: [
+          ...(hostName ? [{ field: 'host.name', value: hostName }] : []),
+          ...(userName ? [{ field: 'user.name', value: userName }] : []),
+        ],
         timeline: [],
-        hypothesis_tested: 'test',
+        hypothesis_tested: hypothesis,
         evidence_for: hit ? ['Tier 1 hit'] : [],
         evidence_against: [],
         evaluation_record_ref: 'eval-1',
@@ -207,6 +231,170 @@ describe('runPackageReport', () => {
     // not the synthetic clean-with-SSE case below -- and it must still write coverage.
     expect(result.coverage.written.length).toBeGreaterThan(0);
     expect(result.coverage.skipped).toEqual([]);
+  });
+
+  describe('coverage subjects', () => {
+    const writeCoverageKis = jest.fn(async (subjects: CoverageSubject[]) => ({
+      written: subjects.map((s) => ({ kiId: s.kiId, subject: s.reportId })),
+      skipped: [],
+    }));
+    const getEsReportContextClient = jest.fn(() => ({
+      search: jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                content: { title: 'CloudTrail brief', body_text: 'AssumeRole into a shadow role.' },
+                severity: { level: 'medium' },
+              },
+            },
+          ],
+        },
+      }),
+    }));
+
+    beforeEach(() => {
+      writeCoverageKis.mockClear();
+      getEsReportContextClient.mockClear();
+    });
+
+    const cleanRun = () =>
+      runPackageReport({
+        spaceId: 'default',
+        reportId,
+        investigationConversationId: conversationId,
+        runId,
+        huntStatus: 'success',
+        hasConfirmedHit: false,
+        attachments: [],
+        expectedSseCount: 0,
+        coordinator: {
+          reportIntentTargets: ['logs-aws.cloudtrail-*'],
+          behaviors: [
+            {
+              technique_id: 'T1110.003',
+              technique_name: 'Password Spraying',
+              confidence: 0.9,
+              validated_esql: 'FROM logs-aws.cloudtrail-* | LIMIT 25',
+              execution: { executed: true, row_count: 0, hit: false },
+            },
+          ],
+        },
+        deps: deps({ writeCoverageKis, getEsReportContextClient }),
+      });
+
+    it('writes a report-scoped subject and one per executed technique on a clean run', async () => {
+      await cleanRun();
+
+      expect(writeCoverageKis.mock.calls[0][0].map((s) => s.technique)).toEqual([
+        undefined,
+        'T1110.003',
+      ]);
+    });
+
+    it('derives a clean run data source from the coordinator inputs', async () => {
+      await cleanRun();
+
+      expect(writeCoverageKis.mock.calls[0][0][0].dataSources).toEqual(['logs-aws.cloudtrail-*']);
+    });
+
+    it('carries the executed query on a clean run', async () => {
+      await cleanRun();
+
+      expect(writeCoverageKis.mock.calls[0][0][0].esqlStatus).toBe('executed_no_rows');
+    });
+
+    it('does not load the report on a hit when the finding has a hypothesis', async () => {
+      await runPackageReport({
+        spaceId: 'default',
+        reportId,
+        investigationConversationId: conversationId,
+        runId,
+        huntStatus: 'success',
+        hasConfirmedHit: true,
+        attachments: [sseAttachment({ hit: true, hostName: 'h1' })],
+        expectedSseCount: 1,
+        deps: deps({ writeCoverageKis, getEsReportContextClient }),
+      });
+
+      expect(getEsReportContextClient).not.toHaveBeenCalled();
+    });
+
+    it('loads the report on a hit when the finding only has the generic hypothesis', async () => {
+      await runPackageReport({
+        spaceId: 'default',
+        reportId,
+        investigationConversationId: conversationId,
+        runId,
+        huntStatus: 'success',
+        hasConfirmedHit: true,
+        attachments: [
+          sseAttachment({
+            hit: true,
+            hostName: 'h1',
+            hypothesis: 'Hunt Watch evaluated report rpt against the environment.',
+          }),
+        ],
+        expectedSseCount: 1,
+        deps: deps({ writeCoverageKis, getEsReportContextClient }),
+      });
+
+      expect(getEsReportContextClient).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the SSE severity on a hit even when the report is loaded and has its own', async () => {
+      await runPackageReport({
+        spaceId: 'default',
+        reportId,
+        investigationConversationId: conversationId,
+        runId,
+        huntStatus: 'success',
+        hasConfirmedHit: true,
+        attachments: [
+          sseAttachment({
+            hit: true,
+            hostName: 'h1',
+            hypothesis: 'Hunt Watch evaluated report rpt against the environment.',
+          }),
+        ],
+        expectedSseCount: 1,
+        deps: deps({ writeCoverageKis, getEsReportContextClient }),
+      });
+
+      expect(getEsReportContextClient).toHaveBeenCalledTimes(1);
+      const [subjects] = writeCoverageKis.mock.calls[0];
+      expect(subjects.map((subject) => subject.severity)).toEqual(subjects.map(() => 'high'));
+    });
+
+    it('does not claim actions were proposed when the existing-Proposal guard suppressed the mint', async () => {
+      await runPackageReport({
+        spaceId: 'default',
+        reportId,
+        investigationConversationId: conversationId,
+        runId,
+        huntStatus: 'success',
+        hasConfirmedHit: true,
+        attachments: [sseAttachment({ hit: true, hostName: 'h1' })],
+        expectedSseCount: 1,
+        deps: deps({
+          writeCoverageKis,
+          getEsReportContextClient,
+          countExistingProposals: async () => 1,
+        }),
+      });
+
+      expect(writeCoverageKis.mock.calls[0][0][0].investigationSummary).toContain(
+        'Packaging: no new proposals, the Investigation already has proposals from an earlier run'
+      );
+    });
+
+    it('keeps the full investigation summary on the written subjects', async () => {
+      await cleanRun();
+
+      expect(writeCoverageKis.mock.calls[0][0][0].investigationSummary).toContain(
+        'Behaviors executed: Password Spraying (T1110.003) (0 rows)'
+      );
+    });
   });
 
   // A hunt that did not complete may leave its report eligible, in which case a later sweep
@@ -400,6 +588,46 @@ describe('runPackageReport', () => {
       expect(proposal.actionInput?.parameters).toEqual({ entity_id: 'ent-abc' });
       expect(proposal.actionInput?.endpoint_ids).toEqual(['agent-1']);
     }
+  });
+
+  it('mints an asset-criticality proposal for an implicated user alongside the host action', async () => {
+    const result = await runPackageReport({
+      spaceId: 'default',
+      reportId,
+      investigationConversationId: conversationId,
+      runId,
+      huntStatus: 'success',
+      hasConfirmedHit: true,
+      expectedSseCount: 1,
+      attachments: [sseAttachment({ hit: true, hostName: 'host-a', userName: 'dev-user' })],
+      deps: deps({
+        listRespondActions: async () => ({ ok: true, actions: [isolateHost, setAssetCriticality] }),
+      }),
+    });
+    expect(result.status).toBe('packaged');
+    if (result.status !== 'packaged') {
+      return;
+    }
+    // Host action, identity action, then the recommendation that says credential
+    // revocation is still manual.
+    expect(result.proposals.map((p) => p.actionWorkflowId)).toEqual([
+      isolateHost.workflowId,
+      setAssetCriticality.workflowId,
+      undefined,
+    ]);
+    expect(result.proposals[2].title).toBe('Analyst recommendation');
+    expect(result.proposals[2].comment).toContain(
+      'Asset criticality is proposed for dev-user (user)'
+    );
+    expect(result.expectedProposalCount).toBe(3);
+    const identity = result.proposals[1];
+    expect(identity.hostName).toBeUndefined();
+    expect(identity.subject).toEqual({ kind: 'user', value: 'dev-user' });
+    expect(identity.actionInput).toEqual({
+      id_field: 'user.name',
+      id_value: 'dev-user',
+      criticality_level: 'high_impact',
+    });
   });
 
   describe('open-Proposal dismiss guard', () => {

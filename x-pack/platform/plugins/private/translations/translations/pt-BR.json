@@ -39098,8 +39098,6 @@
     "xpack.searchInferenceEndpoints.eisModelCard.previewStatusBadge.content": "Prévia",
     "xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.button": "Visualizar uso da nuvem",
     "xpack.searchInferenceEndpoints.eisModelsPage.description": "Gerenciar modelos e endpoints para o Elastic Inference Service",
-    "xpack.searchInferenceEndpoints.eisModelspage.error.body": "Ocorreu um erro ao buscar os dados do modelo.",
-    "xpack.searchInferenceEndpoints.eisModelspage.error.title": "Não é possível carregar modelos",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.embedding": "Embedding",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.llm": "LLM",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.rerank": "Reclassificar",

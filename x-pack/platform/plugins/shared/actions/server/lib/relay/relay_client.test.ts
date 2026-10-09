@@ -206,6 +206,30 @@ describe('RelayClient', () => {
     });
   });
 
+  it('returns the workspace name and URL from a complete claim', async () => {
+    requestMock.mockResolvedValueOnce({
+      status: 200,
+      data: { tenant_key: 'T0123ABC', tenant_name: 'Acme', tenant_url: 'https://acme.slack.com/' },
+    } as never);
+    await expect(createClient().fetchClaim('claim-1')).resolves.toEqual({
+      status: 'complete',
+      tenant_key: 'T0123ABC',
+      tenant_name: 'Acme',
+      tenant_url: 'https://acme.slack.com/',
+    });
+  });
+
+  it('drops non-string workspace name and URL from a complete claim', async () => {
+    requestMock.mockResolvedValueOnce({
+      status: 200,
+      data: { tenant_key: 'T0123ABC', tenant_name: 42, tenant_url: null },
+    } as never);
+    await expect(createClient().fetchClaim('claim-1')).resolves.toEqual({
+      status: 'complete',
+      tenant_key: 'T0123ABC',
+    });
+  });
+
   it('unbind posts the tenant key to the uninstall endpoint', async () => {
     requestMock.mockResolvedValue({ status: 200, data: {} } as never);
 

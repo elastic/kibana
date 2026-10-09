@@ -33,7 +33,10 @@ export class WorkflowsAppPage {
     this.yamlEditor = this.page.testSubj.locator('workflowYamlEditor');
     this.saveButton = this.page.testSubj.locator('saveWorkflowHeaderButton');
     this.runButton = this.page.testSubj.locator('workflowBottomBarRunButton');
-    this.executionPanel = this.page.testSubj.locator('workflowExecutionPanel');
+    // The executions view opens a flyout by default. The inline panel remains when that view is off.
+    this.executionPanel = this.page.testSubj
+      .locator('workflowExecutionFlyout')
+      .or(this.page.testSubj.locator('workflowExecutionPanel'));
   }
 
   /** Open the editor for a brand-new workflow. */
@@ -118,7 +121,9 @@ export class WorkflowsAppPage {
     await this.executionPanel.waitFor({ state: 'visible' });
 
     const withStatus = (s: string) =>
-      this.executionPanel.and(this.page.locator(`[data-execution-status="${s}"]`));
+      this.executionPanel
+        .locator(`[data-execution-status="${s}"]`)
+        .or(this.executionPanel.and(this.page.locator(`[data-execution-status="${s}"]`)));
 
     if (status === 'completed') {
       const winner = await Promise.race([
@@ -130,19 +135,33 @@ export class WorkflowsAppPage {
           .then(() => 'failed' as const),
       ]);
       if (winner === 'failed') {
+        await this.dismissToasts();
         const errorDetails = await this.extractFailedStepError();
         throw new Error(
           `Expected execution status "completed" but got "failed".\n\n${errorDetails}`
         );
       }
+      await this.dismissToasts();
       return;
     }
     await withStatus(status).waitFor({ state: 'visible', timeout });
+    await this.dismissToasts();
   }
 
-  /** Every top-level step button in the execution tree. */
+  /** Success toasts sit over the flyout and block clicks on the step tree. */
+  private async dismissToasts(): Promise<void> {
+    await this.page.evaluate(() => {
+      document.querySelectorAll('.euiGlobalToastList').forEach((node) => {
+        node.remove();
+      });
+    });
+  }
+
+  /** Flyout rows are tree items; the inline panel uses buttons. */
   private getStepButtons(): Locator {
-    return this.executionPanel.locator('button:has(span[data-test-subj="workflowStepName"])');
+    return this.executionPanel.locator(
+      '[role="treeitem"]:has([data-test-subj="workflowStepName"]), button:has(span[data-test-subj="workflowStepName"])'
+    );
   }
 
   /** Locate a top-level step button in the execution tree by its step name. */
@@ -184,12 +203,33 @@ export class WorkflowsAppPage {
    * expected shape.
    */
   async getStepResultJson<T>(stepName: string, type: 'output' | 'error'): Promise<T> {
+    await this.dismissToasts();
     await this.getStep(stepName).click();
     return this.readStepResultJson<T>(type);
   }
 
   /** Read the result JSON of whichever step is currently selected in the execution tree. */
   private async readStepResultJson<T>(type: 'output' | 'error'): Promise<T> {
+    const legacyDetails = this.page.testSubj.locator('workflowStepExecutionDetails');
+    if (await legacyDetails.isVisible()) {
+      return this.readLegacyStepResultJson(type);
+    }
+
+    const section = this.executionPanel.locator(
+      `[data-test-subj="workflowStepDataSection_${type}"]`
+    );
+    await section.waitFor({ state: 'visible' });
+    const code = section.locator('[data-test-subj="workflowStepResultJsonCode"]');
+    if (!(await code.isVisible())) {
+      await section.locator('[data-test-subj="workflowStepDataViewToggle"]').click();
+      await this.page.testSubj.locator('workflowViewMode_json').click();
+      await code.waitFor({ state: 'visible' });
+    }
+
+    return JSON.parse((await code.innerText()).trim()) as T;
+  }
+
+  private async readLegacyStepResultJson<T>(type: 'output' | 'error'): Promise<T> {
     const details = this.page.testSubj.locator('workflowStepExecutionDetails');
     await details.locator(`button[data-test-subj="workflowStepTab_${type}"]`).click();
     await details.locator('button[data-test-subj="workflowViewMode_json"]').click();

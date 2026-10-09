@@ -38904,8 +38904,6 @@
     "xpack.searchInferenceEndpoints.eisModelCard.previewStatusBadge.content": "Aperçu",
     "xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.button": "Afficher l'utilisation du Cloud",
     "xpack.searchInferenceEndpoints.eisModelsPage.description": "Gérer les modèles et les points de terminaison pour Elastic Inference Service",
-    "xpack.searchInferenceEndpoints.eisModelspage.error.body": "Une erreur est survenue lors de la récupération des données du modèle.",
-    "xpack.searchInferenceEndpoints.eisModelspage.error.title": "Impossible de charger les modèles",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.embedding": "Plongement",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.llm": "LLM",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.rerank": "Reclasser",
