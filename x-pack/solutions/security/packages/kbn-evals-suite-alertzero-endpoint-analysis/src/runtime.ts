@@ -153,17 +153,21 @@ export class AlertZeroRuntime {
    */
   async installWorker(id: string): Promise<void> {
     const serviceAccountId = await ensureWorkerServiceAccount(this.fetch, id);
-    const response = await this.fetch<{ workers?: Array<{ id: string; enabled?: boolean }> }>(
-      ALERTZERO_WORKERS_URL,
-      {
-        headers: {
-          'elastic-api-version': API_VERSIONS.internal.v1,
-          'kbn-xsrf': 'true',
-          'x-elastic-internal-origin': INTERNAL_API_ACCESS,
-        },
-      }
-    );
-    const wasEnabled = response.workers?.find((worker) => worker.id === id)?.enabled ?? false;
+    const response = await this.fetch<{
+      workers?: Array<{ id: string; enabled?: boolean; settingsRevision?: number | null }>;
+    }>(ALERTZERO_WORKERS_URL, {
+      headers: {
+        'elastic-api-version': API_VERSIONS.internal.v1,
+        'kbn-xsrf': 'true',
+        'x-elastic-internal-origin': INTERNAL_API_ACCESS,
+      },
+    });
+    const existing = response.workers?.find((worker) => worker.id === id);
+    const wasEnabled = existing?.enabled ?? false;
+    // A settings patch must carry the revision it was built from: the workers service rejects
+    // any `settings` update without a matching `settingsRevision` (conflict-check), so a bare
+    // `{enabled: true, settings}` fails during setup on a Worker installed by an earlier run.
+    const settingsRevision = existing?.settingsRevision ?? null;
     await this.fetch(ALERTZERO_WORKER_URL_TEMPLATE.replace('{workerId}', encodeURIComponent(id)), {
       method: 'PATCH',
       headers: {
@@ -171,7 +175,11 @@ export class AlertZeroRuntime {
         'kbn-xsrf': 'true',
         'x-elastic-internal-origin': INTERNAL_API_ACCESS,
       },
-      body: JSON.stringify({ enabled: true, settings: { serviceAccountId } }),
+      body: JSON.stringify({
+        enabled: true,
+        settings: { serviceAccountId },
+        settingsRevision,
+      }),
     });
     // A Worker that was off before the suite must be off after it: the per-space schedule
     // would otherwise keep sweeping the stack's indicators for unrelated alerts every
@@ -305,6 +313,12 @@ const WORKER_ROLE = {
       },
       { names: ['.alerts-security.alerts-default'], privileges: ['read'] },
       { names: ['.alerts-security.attack.discovery.alerts-default'], privileges: ['read'] },
+      {
+        // Backing index of the AI index the eval seeds (`ai-index-idx-alertzero-eval-<id>`).
+        // The worker executes as this service account and must read the fixture it sweeps.
+        names: ['ai-index-idx-alertzero-eval-*'],
+        privileges: ['read', 'view_index_metadata'],
+      },
       {
         names: [
           'logs-endpoint.events.process-*',

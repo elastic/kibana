@@ -94,6 +94,8 @@ describe('AlertZeroRuntime.installWorker', () => {
     expect(JSON.parse(patchCalls[0][1].body)).toEqual({
       enabled: true,
       settings: { serviceAccountId: 'sa-eval-1' },
+      // A settings patch without settingsRevision is rejected by the workers service.
+      settingsRevision: null,
     });
     // The Worker was disabled before the suite, so the suite must leave it disabled.
     expect(JSON.parse(patchCalls[1][1].body)).toEqual({ enabled: false });
@@ -121,7 +123,65 @@ describe('AlertZeroRuntime.installWorker', () => {
     expect(patchBodies[0]).toEqual({
       enabled: true,
       settings: { serviceAccountId: 'sa-existing' },
+      settingsRevision: null,
     });
+  });
+
+  it('passes through the current settingsRevision on an already-installed worker', async () => {
+    // A second run against an installed worker must send that worker's revision, or the
+    // PATCH is rejected as a conflict by the workers service.
+    const fetch = createFetch((path, options) => {
+      if (path === '/internal/security/service_account' && !options?.method) {
+        return { serviceAccounts: [{ id: 'sa-existing', name: 'alertzero_endpoint_analysis' }] };
+      }
+      if (path === '/internal/alertzero/workers' && !options?.method) {
+        return {
+          workers: [{ id: WORKER, enabled: true, settingsRevision: 7 }],
+          canModifyWorkers: true,
+        };
+      }
+      return {};
+    });
+    await new AlertZeroRuntime(fetch).installWorker(WORKER);
+
+    const patchBodies = fetch.mock.calls
+      .filter(
+        ([path, options]) =>
+          String(path).startsWith('/internal/alertzero/workers/') && options?.method === 'PATCH'
+      )
+      .map(([, options]) => JSON.parse((options as { body: string }).body));
+    expect(patchBodies).toHaveLength(1);
+    expect(patchBodies[0]).toEqual({
+      enabled: true,
+      settings: { serviceAccountId: 'sa-existing' },
+      settingsRevision: 7,
+    });
+  });
+
+  it('provisions the role with read access to the seeded AI index backing pattern', async () => {
+    // The worker sweeps `ai-index-idx-alertzero-eval-*` as the service account; a role
+    // without that pattern cannot find or dispatch the fixture (no hits, no privilege).
+    const fetch = createFetch((path, options) => {
+      if (path === '/internal/security/service_account' && !options?.method) {
+        return { serviceAccounts: [], nextPage: undefined };
+      }
+      if (path === '/internal/security/service_account' && options?.method === 'POST') {
+        return { id: 'sa-eval-1' };
+      }
+      return {};
+    });
+    await new AlertZeroRuntime(fetch).installWorker(WORKER);
+
+    const rolePut = fetch.mock.calls.find(
+      ([path, options]) =>
+        String(path).startsWith('/api/security/role/') && options?.method === 'PUT'
+    );
+    expect(rolePut).toBeDefined();
+    const role = JSON.parse((rolePut![1] as { body: string }).body);
+    const patterns = role.elasticsearch.indices.flatMap(
+      (entry: { names: string[] }) => entry.names
+    );
+    expect(patterns).toContain('ai-index-idx-alertzero-eval-*');
   });
 });
 
