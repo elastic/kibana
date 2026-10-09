@@ -25,7 +25,7 @@ describe('BriefJumpNav', () => {
         <BriefJumpNav
           items={[
             { id: 'sectionA', label: 'Priority threats', count: 3 },
-            { id: 'sectionB', label: 'Blind spots', count: 4, countColor: 'accent' },
+            { id: 'sectionB', label: 'Blind spots', count: 4 },
           ]}
         />
       </EuiProvider>

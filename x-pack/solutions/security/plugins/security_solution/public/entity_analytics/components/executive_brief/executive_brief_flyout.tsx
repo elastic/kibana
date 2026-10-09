@@ -276,17 +276,11 @@ export const ExecutiveBriefFlyout: React.FC<ExecutiveBriefFlyoutProps> = ({
                   id: EXECUTIVE_BRIEF_SECTION_IDS.storylines,
                   label: 'Priority threats',
                   count: succeeded.brief.storylines.length,
-                  countColor: succeeded.brief.storylines.length > 0 ? 'accent' : 'subdued',
                 },
                 {
                   id: EXECUTIVE_BRIEF_SECTION_IDS.blindSpots,
                   label: 'Blind spots',
                   count: succeeded.snapshot.blindSpots.gaps.length,
-                  countColor: succeeded.snapshot.blindSpots.gaps.some(
-                    ({ severity }) => severity === 'danger'
-                  )
-                    ? 'accent'
-                    : 'subdued',
                 },
                 {
                   id: EXECUTIVE_BRIEF_SECTION_IDS.decisions,

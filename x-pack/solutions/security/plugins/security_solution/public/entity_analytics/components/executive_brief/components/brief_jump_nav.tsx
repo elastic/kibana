@@ -13,8 +13,6 @@ export interface BriefNavItem {
   label: string;
   /** Optional count shown as a pill after the label. */
   count?: number;
-  /** Pill colour: 'accent' highlights something that needs attention; default is subdued. */
-  countColor?: 'accent' | 'subdued';
 }
 
 /** Tracks which section is nearest the top of the viewport while the body scrolls. */
@@ -53,7 +51,7 @@ export const BriefJumpNav: React.FC<{ items: readonly BriefNavItem[] }> = ({ ite
 
   return (
     <EuiTabs size="s" bottomBorder={false} data-test-subj="executiveBriefJumpNav">
-      {items.map(({ id, label, count, countColor = 'subdued' }) => (
+      {items.map(({ id, label, count }) => (
         <EuiTab
           key={id}
           isSelected={(clicked ?? active) === id}
@@ -65,7 +63,7 @@ export const BriefJumpNav: React.FC<{ items: readonly BriefNavItem[] }> = ({ ite
           append={
             count === undefined ? undefined : (
               <EuiNotificationBadge
-                color={countColor}
+                color="subdued"
                 size="s"
                 data-test-subj={`executiveBriefJumpNavCount-${id}`}
               >

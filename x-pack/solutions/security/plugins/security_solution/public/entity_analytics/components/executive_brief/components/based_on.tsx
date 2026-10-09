@@ -16,7 +16,6 @@ interface SourcePill {
   plural: string;
   /** Text for a zero count, so an absent source reads as absent. */
   none: string;
-  color: string;
   icon: string;
 }
 
@@ -32,7 +31,6 @@ export const getSourcePills = (snapshot: BriefSnapshot): SourcePill[] => {
       singular: 'entity',
       plural: 'entities',
       none: 'No entities',
-      color: 'primary',
       icon: 'user',
     },
     {
@@ -41,7 +39,6 @@ export const getSourcePills = (snapshot: BriefSnapshot): SourcePill[] => {
       singular: 'entity type',
       plural: 'entity types',
       none: 'No entity types',
-      color: 'primary',
       icon: 'storage',
     },
     {
@@ -50,7 +47,6 @@ export const getSourcePills = (snapshot: BriefSnapshot): SourcePill[] => {
       singular: 'rule',
       plural: 'rules',
       none: 'No rules',
-      color: 'warning',
       icon: 'securitySignalDetected',
     },
     {
@@ -59,7 +55,6 @@ export const getSourcePills = (snapshot: BriefSnapshot): SourcePill[] => {
       singular: 'attack discovery',
       plural: 'attack discoveries',
       none: 'No attack discoveries',
-      color: 'accent',
       icon: 'sparkles',
     },
     {
@@ -68,7 +63,6 @@ export const getSourcePills = (snapshot: BriefSnapshot): SourcePill[] => {
       singular: 'hunting lead',
       plural: 'hunting leads',
       none: 'No hunting leads',
-      color: 'success',
       icon: 'search',
     },
     {
@@ -77,7 +71,6 @@ export const getSourcePills = (snapshot: BriefSnapshot): SourcePill[] => {
       singular: 'anomaly group',
       plural: 'anomaly groups',
       none: 'No anomaly groups',
-      color: 'default',
       icon: 'machineLearningApp',
     },
   ];
@@ -97,7 +90,7 @@ export const BasedOn: React.FC<{ snapshot: BriefSnapshot }> = ({ snapshot }) => 
         {'Based on'}
       </EuiText>
     </EuiFlexItem>
-    {getSourcePills(snapshot).map(({ key, count, singular, plural, none, color, icon }) => (
+    {getSourcePills(snapshot).map(({ key, count, singular, plural, none, icon }) => (
       <EuiFlexItem grow={false} key={key}>
         {count === 0 ? (
           <EuiBadge color="hollow" data-test-subj={`executiveBriefBasedOn-${key}-empty`}>
@@ -106,7 +99,7 @@ export const BasedOn: React.FC<{ snapshot: BriefSnapshot }> = ({ snapshot }) => 
             </EuiText>
           </EuiBadge>
         ) : (
-          <EuiBadge color={color} iconType={icon} data-test-subj={`executiveBriefBasedOn-${key}`}>
+          <EuiBadge color="default" iconType={icon} data-test-subj={`executiveBriefBasedOn-${key}`}>
             {`${count} ${count === 1 ? singular : plural}`}
           </EuiBadge>
         )}
