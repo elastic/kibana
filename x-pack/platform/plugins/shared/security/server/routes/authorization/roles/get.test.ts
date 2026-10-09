@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 
+import type { BuildFlavor } from '@kbn/config';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
@@ -27,6 +28,7 @@ interface TestOptions {
   apiResponse?: () => unknown;
   asserts: { statusCode: number; result?: Record<string, any> };
   query?: Record<string, unknown>;
+  buildFlavor?: BuildFlavor;
 }
 
 const features: KibanaFeature[] = [
@@ -145,10 +147,18 @@ const features: KibanaFeature[] = [
 describe('GET role', () => {
   const getRoleTest = (
     description: string,
-    { name, licenseCheckResult = { state: 'valid' }, apiResponse, asserts, query }: TestOptions
+    {
+      name,
+      licenseCheckResult = { state: 'valid' },
+      apiResponse,
+      asserts,
+      query,
+      buildFlavor = 'traditional',
+    }: TestOptions
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
+      mockRouteDefinitionParams.buildFlavor = buildFlavor;
       const versionedRouterMock = mockRouteDefinitionParams.router
         .versioned as MockedVersionedRouter;
       mockRouteDefinitionParams.authz.applicationName = application;
@@ -287,6 +297,31 @@ describe('GET role', () => {
             ],
             run_as: ['other_user'],
           },
+          kibana: [],
+          _transform_error: [],
+          _unrecognized_applications: [],
+        },
+      },
+    });
+
+    getRoleTest(`returns a role that Serverless hides from role listings`, {
+      name: '_alertzero_alert_triage',
+      buildFlavor: 'serverless',
+      apiResponse: () => ({
+        _alertzero_alert_triage: {
+          cluster: [],
+          indices: [],
+          applications: [],
+          run_as: [],
+          metadata: { _reserved: true },
+        },
+      }),
+      asserts: {
+        statusCode: 200,
+        result: {
+          name: '_alertzero_alert_triage',
+          metadata: { _reserved: true },
+          elasticsearch: { cluster: [], indices: [], run_as: [] },
           kibana: [],
           _transform_error: [],
           _unrecognized_applications: [],

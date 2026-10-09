@@ -14,6 +14,7 @@ import { AuthzDisabled } from '@kbn/core-security-server';
 import { getRolesResponseSchema } from './model';
 import type { RouteDefinitionParams } from '../..';
 import { API_VERSIONS } from '../../../../common/constants';
+import { isRoleHiddenOnServerless } from '../../../../common/model';
 import { compareRolesByName, transformElasticsearchRoleToRole } from '../../../authorization';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
@@ -169,6 +170,9 @@ export function defineGetAllRolesRoutes({
                 })
               )
               .filter((role) => {
+                if (buildFlavor === 'serverless' && isRoleHiddenOnServerless(role)) {
+                  return false;
+                }
                 return !hideReservedRoles || !role.metadata?._reserved;
               })
               .sort(compareRolesByName),
