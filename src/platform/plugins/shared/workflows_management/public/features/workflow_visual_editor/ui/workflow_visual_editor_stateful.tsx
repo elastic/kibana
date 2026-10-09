@@ -62,11 +62,9 @@ import {
   type WorkflowSettingsBPanelKind,
 } from './workflow_settings_b_panel';
 import { WorkflowSettingsCSurface } from './workflow_settings_c_surface';
-import { WorkflowSettingsSurfaceSwitcher } from './workflow_settings_surface_switcher';
 import {
   getWorkflowSettingsBNodeLayout,
   getWorkflowSettingsSurfaceVariant,
-  setWorkflowSettingsSurfaceVariant,
   subscribeWorkflowSettingsSurfaceVariant,
   type WorkflowSettingsBNodeLayout,
   type WorkflowSettingsSurfaceVariant,
@@ -379,12 +377,6 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       }),
     []
   );
-
-  const handleSettingsSurfaceVariantChange = useCallback((next: WorkflowSettingsSurfaceVariant) => {
-    setWorkflowSettingsSurfaceVariant(next);
-    setSettingsSurfaceVariantState(next);
-    setSettingsBKind(null);
-  }, []);
 
   const openSettingsBPanel = useCallback(
     (kind: WorkflowSettingsBPanelKind) => {
@@ -1238,12 +1230,6 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
           canEdit && settingsSurfaceVariant === 'b' ? handleSettingsNodeSelect : undefined
         }
       />
-      {canEdit ? (
-        <WorkflowSettingsSurfaceSwitcher
-          value={settingsSurfaceVariant}
-          onChange={handleSettingsSurfaceVariantChange}
-        />
-      ) : null}
       {canEdit && settingsSurfaceVariant === 'c' ? (
         <WorkflowSettingsCSurface
           workflowId={workflowId}

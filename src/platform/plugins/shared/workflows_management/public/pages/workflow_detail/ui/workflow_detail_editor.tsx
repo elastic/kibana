@@ -25,7 +25,10 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
 import { isMac } from '@kbn/shared-ux-utility';
-import { WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID } from '@kbn/workflows';
+import {
+  WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
+  WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
+} from '@kbn/workflows';
 import {
   ReactFlowProvider,
   useWorkflowsCapabilities,
@@ -181,6 +184,9 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
     ]
   );
 
+  const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
+    WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
+  );
   const isExecutionGraphEnabled = useWorkflowsExperimentalUiSetting(
     WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID
   );
@@ -196,6 +202,9 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
 
   const handleEditorViewChange = useCallback(
     (next: 'yaml' | 'graph') => {
+      if (!isVisualEditorEnabled) {
+        return;
+      }
       // When switching to graph, focus it on whichever step or trigger block
       // the cursor is currently in — derived entirely from Redux state.
       if (next === 'graph') {
@@ -206,7 +215,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
       }
       setEditorView(next);
     },
-    [dispatch, focusedStepId, focusedTriggerId, setEditorView]
+    [dispatch, focusedStepId, focusedTriggerId, isVisualEditorEnabled, setEditorView]
   );
 
   const openTestModal = useCallback(() => {
