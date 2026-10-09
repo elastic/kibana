@@ -26,6 +26,7 @@ import type { ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
 import type { ServiceAccountBoundWorkload } from '../../common/service_accounts';
 import { ServiceAccountAuditAction, serviceAccountAuditEvent } from '../audit';
+import { getDetailedErrorMessage } from '../errors';
 
 /** How many bindings are re-read at once when checking whether an account can be deleted. */
 const VERIFY_CONCURRENCY = 10;
@@ -247,9 +248,7 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
       return new Map(bindings.map((binding, index) => [binding, resolved[index] ?? {}]));
     } catch (e) {
       this.logger.warn(
-        `Unable to resolve ${bindings.length} bound workload(s): ${
-          e instanceof Error ? e.message : String(e)
-        }`
+        `Unable to resolve ${bindings.length} bound workload(s): ${getDetailedErrorMessage(e)}`
       );
       return new Map();
     }

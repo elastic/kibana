@@ -336,29 +336,20 @@ export class WorkflowRepository {
     for (let start = 0; start < ids.length; start += WORKFLOW_NAMES_CHUNK_SIZE) {
       signal?.throwIfAborted();
 
-      let response: estypes.MgetResponse<
+      const response = await this.options.esClient.mget<
         Pick<EsWorkflow, 'name'> & { spaceId?: string; deleted_at?: string | null }
-      >;
-      try {
-        response = await this.options.esClient.mget<
-          Pick<EsWorkflow, 'name'> & { spaceId?: string; deleted_at?: string | null }
-        >(
-          {
-            index: this.options.indexName,
-            ids: ids.slice(start, start + WORKFLOW_NAMES_CHUNK_SIZE),
-            _source_includes: ['name', 'spaceId', 'deleted_at'],
-          },
-          { signal }
-        );
-      } catch (error) {
-        if (error.statusCode === 404) {
-          return result;
-        }
-        throw error;
-      }
+      >(
+        {
+          index: this.options.indexName,
+          ids: ids.slice(start, start + WORKFLOW_NAMES_CHUNK_SIZE),
+          _source_includes: ['name', 'spaceId', 'deleted_at'],
+        },
+        { signal }
+      );
 
       for (const doc of response.docs) {
-        // A missing index means there are no workflows to name, not that the read failed.
+        // `_mget` reports a missing index on each document rather than failing the request. That
+        // means there are no workflows to name, not that the read failed.
         if ('error' in doc && doc.error.type !== 'index_not_found_exception') {
           throw new Error(`Could not load the name of workflow [${doc._id}]: ${doc.error.type}`);
         }

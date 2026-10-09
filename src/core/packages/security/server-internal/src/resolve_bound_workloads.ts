@@ -18,7 +18,7 @@ import type {
   ServiceAccountWorkloadResolver,
 } from '@kbn/core-security-server';
 import { addSpaceIdToPath, asSpaceId, getSpaceUrlPrefix } from '@kbn/core-spaces-common';
-import { isInternalURL } from '@kbn/std';
+import { isInternalURL, withTimeout } from '@kbn/std';
 import type { WorkloadTypeRegistry } from './workload_type_registry';
 
 /**
@@ -59,9 +59,10 @@ export const buildWorkloadHref = (
     return undefined;
   }
 
-  const basePath = serverBasePath.endsWith('/') ? serverBasePath.slice(0, -1) : serverBasePath;
-  const href = addSpaceIdToPath(basePath, spaceId, path);
-  return isInternalURL(href, `${basePath}${spacePrefix}/app`) ? href : undefined;
+  const href = addSpaceIdToPath(serverBasePath, spaceId, path);
+  return isInternalURL(href, `${serverBasePath.replace(/\/$/, '')}${spacePrefix}/app`)
+    ? href
+    : undefined;
 };
 
 const isNonBlankString = (value: unknown): value is string =>
@@ -142,23 +143,18 @@ const callWithTimeout = async (
   timeoutMs: number
 ): Promise<unknown> => {
   const controller = new AbortController();
-  let timer: NodeJS.Timeout | undefined;
-  const timeout = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => {
-      const error = new WorkloadResolutionTimeoutError(`Timed out after ${timeoutMs}ms.`);
-      controller.abort(error);
-      reject(error);
-    }, timeoutMs);
+  const result = await withTimeout({
+    promise: Promise.resolve().then(() => resolver(workloads, { signal: controller.signal })),
+    timeoutMs,
   });
 
-  try {
-    return await Promise.race([
-      Promise.resolve().then(() => resolver(workloads, { signal: controller.signal })),
-      timeout,
-    ]);
-  } finally {
-    clearTimeout(timer);
+  if (result.timedout) {
+    const error = new WorkloadResolutionTimeoutError(`Timed out after ${timeoutMs}ms.`);
+    controller.abort(error);
+    throw error;
   }
+
+  return result.value;
 };
 
 interface WorkloadGroup {

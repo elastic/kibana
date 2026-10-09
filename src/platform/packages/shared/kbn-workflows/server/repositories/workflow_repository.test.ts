@@ -832,14 +832,9 @@ describe('WorkflowRepository.getWorkflowNames', () => {
     await expect(
       repository.getWorkflowNames([{ workflowId: 'w-1', spaceId: 'default' }])
     ).resolves.toEqual(new Map());
-
-    esClient.mget.mockRejectedValue({ statusCode: 404 });
-    await expect(
-      repository.getWorkflowNames([{ workflowId: 'w-1', spaceId: 'default' }])
-    ).resolves.toEqual(new Map());
   });
 
-  it('propagates any other failure', async () => {
+  it('propagates a failed request', async () => {
     const error = Object.assign(new Error('boom'), { statusCode: 500 });
     esClient.mget.mockRejectedValue(error);
 
