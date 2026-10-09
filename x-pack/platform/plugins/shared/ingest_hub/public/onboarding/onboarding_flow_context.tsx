@@ -504,8 +504,15 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   // agent-based needs the package's own vars. Every step reads the matrix through the context, so
   // applying the method view here keeps Step 2, the Step 3 gates and the deploy builders consistent.
   const awsServiceMatrix = useMemo(
-    () => rawAwsServiceMatrix?.map((s) => applyDeploymentMethodView(s, deploymentMethod)),
-    [rawAwsServiceMatrix, deploymentMethod]
+    () =>
+      rawAwsServiceMatrix?.map((s) => {
+        const view = applyDeploymentMethodView(s, deploymentMethod);
+        // ECF-only services have no agent-based route and ECF needs cloud, so self-managed has no
+        // way to deploy them: they are not offered at all.
+        // return view;
+        return isSelfManaged && s.ecfOnly ? { ...view, showInUI: false } : view;
+      }),
+    [rawAwsServiceMatrix, deploymentMethod, isSelfManaged]
   );
   const awsServicesMap = useMemo(
     () => (awsServiceMatrix ? new Map(awsServiceMatrix.map((s) => [s.id, s])) : undefined),
