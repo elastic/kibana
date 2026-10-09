@@ -140,6 +140,7 @@ export type CaseAggregationResult = Record<
   counts: Buckets;
   syncAlerts: Buckets;
   extractObservables: Buckets;
+  extractObservablesSource: Buckets;
   observables: ObservablesAggregationResult;
   status: Buckets;
   users: Cardinality;
@@ -317,6 +318,10 @@ export interface CasesTelemetry {
         syncAlertsOff: number;
         extractObservablesOn: number;
         extractObservablesOff: number;
+        extractObservablesSourceExplicit: number;
+        extractObservablesSourceTemplate: number;
+        extractObservablesSourceSpaceDefault: number;
+        extractObservablesSourceRule: number;
         observables: ObservablesTelemetry;
         totalWithMaxObservables: number;
         totalUsers: number;
@@ -353,6 +358,8 @@ export interface CasesTelemetry {
         manually: number;
         automatic: number;
       };
+      extractObservablesDefaultOn: number;
+      extractObservablesDefaultOff: number;
       customFields: CustomFieldsTelemetry;
     };
     sec: CustomFieldsSolutionTelemetry;
