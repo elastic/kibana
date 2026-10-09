@@ -26,8 +26,8 @@ interface EpisodesKqlInputProps {
 }
 
 const EPISODE_BASE_FIELDS: EpisodeSearchField[] = [
-  'episode.status',
-  'episode.id',
+  'alert.status',
+  'alert.id',
   'severity',
   'rule.id',
   'group_hash',

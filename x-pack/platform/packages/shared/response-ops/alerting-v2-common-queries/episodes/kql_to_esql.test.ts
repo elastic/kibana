@@ -9,7 +9,8 @@ import { convertKqlToEsqlExpression } from './kql_to_esql';
 
 describe('convertKqlToEsqlExpression', () => {
   it.each([
-    ['episode.status: active', '`episode.status` == "active"'],
+    ['alert.status: active', '`episode.status` == "active"'],
+    ['alert.id: alert-1', '`episode.id` == "alert-1"'],
     ['severity: critical', 'severity == "critical"'],
     ['data.host.name: web-01', 'JSON_EXTRACT(episode_data, "host.name") == "web-01"'],
     ['data.host.name: *', 'JSON_EXTRACT(episode_data, "host.name") IS NOT NULL'],
@@ -30,23 +31,29 @@ describe('convertKqlToEsqlExpression', () => {
   it('converts boolean expressions', () => {
     expect(
       convertKqlToEsqlExpression(
-        'episode.status: active AND (severity: critical OR NOT data.host.name: web-*)'
+        'alert.status: active AND (severity: critical OR NOT data.host.name: web-*)'
       )
     ).toBe(
       '(`episode.status` == "active" AND (severity == "critical" OR COALESCE(NOT (JSON_EXTRACT(episode_data, "host.name") LIKE "web-*"), true)))'
     );
   });
 
-  it.each(['kibana.alert.rule.name: test', 'message: test', 'data.*: test', 'test'])(
-    'does not apply unsupported KQL to v2 episodes: %s',
-    (kql) => {
-      expect(convertKqlToEsqlExpression(kql)).toBe('false');
-    }
-  );
+  it.each([
+    'episode.id: test',
+    'episode.status: active',
+    'id: test',
+    'status: active',
+    'kibana.alert.rule.name: test',
+    'message: test',
+    'data.*: test',
+    'test',
+  ])('does not apply unsupported KQL to v2 episodes: %s', (kql) => {
+    expect(convertKqlToEsqlExpression(kql)).toBe('false');
+  });
 
   it('keeps the boolean structure when a predicate only applies to classic alerts', () => {
-    expect(
-      convertKqlToEsqlExpression('episode.status: active OR kibana.alert.status: active')
-    ).toBe('(`episode.status` == "active" OR false)');
+    expect(convertKqlToEsqlExpression('alert.status: active OR kibana.alert.status: active')).toBe(
+      '(`episode.status` == "active" OR false)'
+    );
   });
 });

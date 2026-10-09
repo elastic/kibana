@@ -277,7 +277,7 @@ describe('buildEpisodesQuery', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
-      { queryString: 'episode.status: active' }
+      { queryString: 'alert.status: active' }
     );
     const queryString = query.print('basic');
 

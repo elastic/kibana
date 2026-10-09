@@ -20,8 +20,8 @@ const ESQL_RANGE_OPERATORS: Readonly<Record<string, string>> = {
 
 const EPISODE_FIELD_EXPRESSIONS: Readonly<Record<string, string>> = {
   '@timestamp': '@timestamp',
-  'episode.id': '`episode.id`',
-  'episode.status': '`episode.status`',
+  'alert.id': '`episode.id`',
+  'alert.status': '`episode.status`',
   'rule.id': '`rule.id`',
   group_hash: 'group_hash',
   severity: 'severity',

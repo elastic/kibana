@@ -108,11 +108,15 @@ describe('EpisodesKqlInput', () => {
       };
       expect(latestProps.indexPatterns[0].fields.map(({ name }) => name)).toEqual(
         expect.arrayContaining([
-          'episode.status',
+          'alert.id',
+          'alert.status',
           'severity',
           'data.host.name',
           'kibana.alert.rule.name',
         ])
+      );
+      expect(latestProps.indexPatterns[0].fields.map(({ name }) => name)).not.toEqual(
+        expect.arrayContaining(['episode.id', 'episode.status'])
       );
       expect(latestProps.suggestionsAbstraction.valueSuggestionTypeByField).toEqual({
         'kibana.alert.rule.name': 'alerts',

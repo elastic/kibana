@@ -60,6 +60,20 @@ describe('MatcherSuggestionsService.getSuggestions', () => {
       })
     );
   });
+
+  it('suggests alert.id values using the v2 search field', async () => {
+    esClient.search.mockResolvedValue({
+      ...buildSearchResponse([]),
+      aggregations: { suggestions: { buckets: [{ key: 'alert-1' }] } },
+    } as SearchResponse<unknown>);
+
+    expect(await service.getSuggestions('alert.id', 'al')).toEqual(['alert-1']);
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        aggs: { suggestions: { terms: expect.objectContaining({ field: 'alert.id' }) } },
+      })
+    );
+  });
 });
 
 describe('MatcherSuggestionsService.getRuleEventFieldNames', () => {
@@ -158,6 +172,10 @@ describe('MatcherSuggestionsService.getSuggestions for episode fields', () => {
 
   it('suggests episode status values using the episode index field name', async () => {
     await expect(service.getSuggestions('episode.status', 'act')).resolves.toEqual(['active']);
+  });
+
+  it('suggests episode status values using the canonical alert field name', async () => {
+    await expect(service.getSuggestions('alert.status', 'act')).resolves.toEqual(['active']);
   });
 
   it('suggests severity values', async () => {
