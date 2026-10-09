@@ -89,26 +89,17 @@ export const CardCompressedHeader = memo<CardCompressedHeaderProps>(
 );
 CardCompressedHeader.displayName = 'CardCompressedHeader';
 
-const Columns = styled.div`
-  display: grid;
-  align-items: center;
-  justify-items: stretch;
-  column-gap: ${({ theme }) => theme.euiTheme.size.l};
-  width: 100%;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) minmax(0, 1fr);
-
-  &.showEnabled {
-    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) minmax(0, 1fr) 6.5rem;
-  }
-`;
-
-const ColumnCell = styled.div`
+/**
+ * `grow` sets flex-basis to 0, but the default min-width is the content size.
+ * A long value then widens that column on one row, so the header labels no longer line up.
+ */
+const ColumnFlexItem = styled(EuiFlexItem)`
   min-width: 0;
   max-width: 100%;
 `;
 
-const EnabledStatusHolder = styled.div`
-  justify-self: start;
+const EnabledColumn = styled.div`
+  width: 6.5rem;
   max-width: 100%;
 `;
 
@@ -181,36 +172,38 @@ export const CardCompressedHeaderLayout = memo<CardCompressedHeaderLayoutProps>(
           {expandToggle}
         </EuiFlexItem>
         <EuiFlexItem className={cssClassNames + flushTopCssClassname}>
-          <Columns
-            className={`${flushTopCssClassname}${enabledStatus != null ? ' showEnabled' : ''}`}
-          >
-            <ColumnCell
+          <EuiFlexGroup alignItems="center" className={flushTopCssClassname}>
+            <ColumnFlexItem
+              grow={2}
               className={cssClassNames + flushTopCssClassname}
               data-test-subj={getTestId('titleHolder')}
             >
               {name}
-            </ColumnCell>
-            <ColumnCell
+            </ColumnFlexItem>
+            <ColumnFlexItem
+              grow={3}
               className={cssClassNames + flushTopCssClassname}
               data-test-subj={getTestId('descriptionHolder')}
             >
               {description}
-            </ColumnCell>
-            <ColumnCell
+            </ColumnFlexItem>
+            <ColumnFlexItem
+              grow={1}
               data-test-subj={getTestId('effectScopeHolder')}
               className={flushTopCssClassname}
             >
               {effectScope}
-            </ColumnCell>
+            </ColumnFlexItem>
             {enabledStatus != null && (
-              <EnabledStatusHolder
+              <EuiFlexItem
+                grow={false}
                 data-test-subj={getTestId('enabledHolder')}
                 className={flushTopCssClassname}
               >
-                {enabledStatus}
-              </EnabledStatusHolder>
+                <EnabledColumn>{enabledStatus}</EnabledColumn>
+              </EuiFlexItem>
             )}
-          </Columns>
+          </EuiFlexGroup>
         </EuiFlexItem>
         {actionMenu === true ? (
           <EuiFlexItem
