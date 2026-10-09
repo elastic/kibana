@@ -43,7 +43,10 @@ export interface PackageReportStepDependencies {
    * bound to the space the step runs in. Defaults to treating every host as unenrolled when not
    * provided (e.g. no Fleet plugin).
    */
-  getResolveHostEnrollment?: (spaceId: string) => RunPackageReportDeps['resolveHostEnrollment'];
+  getResolveHostEnrollment?: (
+    spaceId: string,
+    esClient: ElasticsearchClient
+  ) => RunPackageReportDeps['resolveHostEnrollment'];
   /**
    * Defaults to the real `mget`-backed rehydrator built from the step's own scoped client, so
    * the calling user's privileges apply. Overridable for tests and Fleet-less deployments.
@@ -105,7 +108,7 @@ export const getPackageReportStepDefinition = ({
 
         const listRespondActions: RunPackageReportDeps['listRespondActions'] = async (sid) => {
           try {
-            const listed = await getActionsService().list(sid, request, ['respond']);
+            const listed = await getActionsService().list(sid, request, ['respond', 'investigate']);
             return { ok: true, actions: listed.actions };
           } catch {
             return { ok: false, reason: 'catalog_error' };
@@ -118,10 +121,8 @@ export const getPackageReportStepDefinition = ({
           isContextEngineEnabled: () => isContextEngineEnabled(request),
         });
 
-        const rehydrateProcessSelectors = getRehydrateProcessSelectors(
-          context.contextManager.getScopedEsClient(),
-          logger
-        );
+        const scopedEsClient = context.contextManager.getScopedEsClient();
+        const rehydrateProcessSelectors = getRehydrateProcessSelectors(scopedEsClient, logger);
 
         const countExistingProposals = createExistingProposalsCounter({
           proposalsService: getHuntServices().getProposalsService(),
@@ -153,7 +154,7 @@ export const getPackageReportStepDefinition = ({
           deps: {
             listRespondActions,
             writeCoverageKis,
-            resolveHostEnrollment: getResolveHostEnrollment(spaceId),
+            resolveHostEnrollment: getResolveHostEnrollment(spaceId, scopedEsClient),
             rehydrateProcessSelectors,
             countExistingProposals,
             getEsReportContextClient: getInternalEsClient,
