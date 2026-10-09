@@ -147,6 +147,8 @@ These are **separate** from the legacy `flyout` param and the pre-existing `atta
   keeps the root and sets the child slot.
 - `buildOnClose(fallback)` — returns the `onClose` handler. Writes `[fallback]` (or clears the param when `null`) unless
   a newer open is still on screen.
+- `readRootDescriptor()` — the current root descriptor (or `null`), read from the same storage the writer writes to.
+  Use it to compute the `buildOnClose` fallback of child opens.
 
 Two invariants worth understanding before you touch this file:
 
@@ -180,17 +182,28 @@ because tools open as `'start'` and don't persist their parent.
 ### Discover doc viewer (`use_flyout_v2_doc_viewer_state.ts`)
 
 In Discover, the chain is not written to `flyoutV2`. Discover deep-links the expanded document and its doc viewer
-state (`_a.docViewerState`), so the alert/event Overview tab stores the chain as its own doc view state instead:
+state (`_a.docViewerState`), so the alert/event, attack and IOC Overview tabs store the chain as their own doc view
+state instead:
 
-- `useFlyoutV2DocViewerState` registers a `FlyoutV2StateSink` (`flyout_v2_state_sink.ts`) for
-  `DOC_VIEWER_FLYOUT_HISTORY_KEY`. While it is registered, the writer reads/writes the stack through the sink, which
-  reports it via the doc view's `onInitialStateChange`. Registration is module-scoped because flyouts render in their
-  own React roots.
-- `flyoutV2DocViewerStateSchema` (`flyout_v2_doc_viewer_state_schema.ts`) is exposed as the overview tab feature's
-  `shareableStateSchema`, so Discover puts the chain in the URL and validates it on read.
-- On mount the hook reopens the chain from `initialState`, unless the writer still tracks it as open (the tab
-  remounts on doc viewer tab switches). Tools targeting the displayed document reuse its record; others fall back to
-  their document flyout.
+- Flyouts of `DOC_VIEWER_FLYOUT_HISTORY_KEY` (only used outside the Security app) never touch the URL:
+  `useFlyoutV2UrlWriter` reads and writes the chain kept in `docViewerFlyoutChain`
+  (`flyout_v2_doc_viewer_chain.ts`). The store is module-scoped because flyouts render in their own React roots, and
+  because it outlives the Overview tab: flyouts can open and close while another doc viewer tab is selected.
+- While an Overview tab is mounted, `useFlyoutV2DocViewerState` attaches a reporter to the store that forwards the
+  chain to the doc view's `onInitialStateChange`. It is detached on unmount, so a tab that is no longer mounted never
+  calls into the host (its setter would overwrite the other tabs' state).
+- `flyoutV2DocViewerStateSchema` (`flyout_v2_doc_viewer_state_schema.ts`) is exposed as the `shareableStateSchema` of
+  the three overview tab features, so Discover puts the chain in the URL and validates it on read.
+- `FlyoutV2DocViewerStateSync` (`one_discover/flyout_v2_doc_viewer_state_sync.tsx`) is the single component the three
+  tabs render inside their flyout providers; it is a no-op inside the Security app.
+- On mount for a new document the hook seeds the store from `initialState` and reopens the chain. Descriptors
+  targeting the displayed document reuse its record (document, attack or IOC); others fall back to their document
+  flyout. On remount for the same document (a doc viewer tab switch) the live chain wins: it is handed back to the
+  host if it differs from `initialState` and nothing is reopened.
+- While another doc viewer tab is selected, `_a.docViewerState` lags behind the chain until the Overview tab mounts
+  again.
+- Code computing a child's close fallback must use `FlyoutUrlWriter.readRootDescriptor()` instead of reading the URL,
+  so it sees the chain wherever it is stored.
 
 ## Providers (`shared/components/flyout_provider.tsx`)
 

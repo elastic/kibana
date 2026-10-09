@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { DocViewRestorableStateProps } from '@kbn/unified-doc-viewer/types';
 import type { FlyoutV2UrlParamValue } from './flyout_v2_url_param';
 import { FLYOUT_DESCRIPTOR_KIND } from './flyout_v2_url_param';
 
@@ -34,3 +35,6 @@ export const flyoutV2DocViewerStateSchema = z.object({
 export interface FlyoutV2DocViewerState {
   flyoutV2?: FlyoutV2UrlParamValue;
 }
+
+/** The doc view state props of Security overview tabs rendered in Discover's doc viewer. */
+export type FlyoutV2DocViewerStateProps = DocViewRestorableStateProps<FlyoutV2DocViewerState>;

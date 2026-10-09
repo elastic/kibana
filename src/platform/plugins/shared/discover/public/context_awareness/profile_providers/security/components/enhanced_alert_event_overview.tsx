@@ -11,7 +11,7 @@ import type {
   DocViewRenderProps,
   DocViewRestorableStateProps,
 } from '@kbn/unified-doc-viewer/types';
-import type { ProfileProviderServices } from '../../profile_provider_services';
+import type { SecuritySolutionAlertFlyoutOverviewTabFeature } from '@kbn/discover-shared-plugin/public';
 
 const noop = () => {};
 
@@ -24,21 +24,19 @@ const noop = () => {};
 export interface EnhancedAlertEventOverviewProps
   extends DocViewRenderProps,
     DocViewRestorableStateProps {
-  providerServices: ProfileProviderServices;
+  overviewTab?: SecuritySolutionAlertFlyoutOverviewTabFeature;
   refreshData?: () => void;
 }
 
 export const EnhancedAlertEventOverview = ({
   hit,
-  providerServices,
+  overviewTab,
   refreshData,
   ...docViewProps
 }: EnhancedAlertEventOverviewProps) => {
-  const alertFlyoutOverviewTabFeature = providerServices.discoverShared.features.registry.getById(
-    'security-solution-alert-flyout-overview-tab'
-  );
   const handleAlertUpdated = refreshData ?? noop;
 
-  const render = alertFlyoutOverviewTabFeature?.render;
-  return render ? render({ hit, ...docViewProps, onAlertUpdated: handleAlertUpdated }) : null;
+  return overviewTab
+    ? overviewTab.render({ hit, ...docViewProps, onAlertUpdated: handleAlertUpdated })
+    : null;
 };

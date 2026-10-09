@@ -6,31 +6,59 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import { isEqual } from 'lodash/fp';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import type { DocViewRestorableStateProps } from '@kbn/unified-doc-viewer/types';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../use_flyout_api';
-import type { FlyoutV2UrlParamValue } from './flyout_v2_url_param';
-import { urlParamKeyForHistoryKey } from './flyout_v2_url_param';
-import type { FlyoutV2DocViewerState } from './flyout_v2_doc_viewer_state_schema';
-import { registerFlyoutV2StateSink } from './flyout_v2_state_sink';
-import { hasOpenFlyoutV2 } from './flyout_v2_url_writer';
-import { openDescriptorAsChild, openDescriptorAsStart } from './use_flyout_v2_restore';
+import { docViewerFlyoutChain } from './flyout_v2_doc_viewer_chain';
+import type { FlyoutV2DocViewerStateProps } from './flyout_v2_doc_viewer_state_schema';
+import type { FlyoutDescriptor, FlyoutV2UrlParamValue } from './flyout_v2_url_param';
+import type { RestoreContext } from './use_flyout_v2_restore';
+import {
+  openDescriptorAsChild,
+  openDescriptorAsStart,
+  recordToIndicator,
+} from './use_flyout_v2_restore';
 
-export interface UseFlyoutV2DocViewerStateParams
-  extends DocViewRestorableStateProps<FlyoutV2DocViewerState> {
-  /** The document displayed by the doc viewer, reused when a restored tool targets it. */
+export interface UseFlyoutV2DocViewerStateParams extends FlyoutV2DocViewerStateProps {
+  /** The document displayed by the doc viewer, reused when a restored flyout targets it. */
   hit: DataTableRecord;
 }
 
-const historyKey = DOC_VIEWER_FLYOUT_HISTORY_KEY;
-const urlParamKey = urlParamKeyForHistoryKey(historyKey);
+/**
+ * Tools need the full record (or indicator) of the document they target; only the displayed one
+ * is at hand, so descriptors targeting any other document fall back to opening their own flyout.
+ */
+const getRestoreContext = (descriptor: FlyoutDescriptor, hit: DataTableRecord): RestoreContext => {
+  const { _id: hitId, _index: hitIndex } = hit.raw;
+
+  if ('documentId' in descriptor) {
+    return descriptor.documentId === hitId && descriptor.indexName === hitIndex
+      ? { docHit: hit }
+      : {};
+  }
+  if ('attackId' in descriptor) {
+    return descriptor.attackId === hitId && descriptor.indexName === hitIndex
+      ? { attackHit: hit }
+      : {};
+  }
+  if (descriptor.kind === 'ioc') {
+    return descriptor.indicatorId === hitId && descriptor.indicatorIndex === hitIndex
+      ? { iocIndicator: recordToIndicator(hit) }
+      : {};
+  }
+  return {};
+};
 
 /**
- * Keeps the flyout chain opened from Discover's doc viewer in the doc view's restorable state
- * (instead of the `flyoutV2` URL param), so Discover can persist it alongside the expanded
- * document, and reopens that chain when the doc view mounts from a shared link.
+ * Keeps the flyout chain opened from Discover's doc viewer in the doc view's state (instead of the
+ * `flyoutV2` URL param), so Discover can persist it alongside the expanded document, and reopens
+ * that chain when the doc view mounts for a document from a shared link.
+ *
+ * The chain lives in `docViewerFlyoutChain`, which outlives this tab: flyouts can open and close
+ * while another doc viewer tab is selected. The chain is only reported to the host while the tab
+ * is mounted (a detached tab's `onInitialStateChange` would overwrite the other tabs' state), and
+ * on remount for the same document the live chain wins over `initialState`.
  */
 export const useFlyoutV2DocViewerState = ({
   hit,
@@ -38,70 +66,74 @@ export const useFlyoutV2DocViewerState = ({
   onInitialStateChange,
 }: UseFlyoutV2DocViewerStateParams): void => {
   const flyoutApi = useFlyoutApi();
-  const [initialStack] = useState(() => initialState?.flyoutV2 ?? []);
-  const stackRef = useRef<FlyoutV2UrlParamValue>(initialStack);
+  const [initialStack] = useState<FlyoutV2UrlParamValue>(() => initialState?.flyoutV2 ?? []);
+  const flyoutApiRef = useRef(flyoutApi);
+  const hitRef = useRef(hit);
   const onInitialStateChangeRef = useRef(onInitialStateChange);
-  const hasRestoredRef = useRef(false);
 
   useEffect(() => {
+    flyoutApiRef.current = flyoutApi;
+    hitRef.current = hit;
     onInitialStateChangeRef.current = onInitialStateChange;
-  }, [onInitialStateChange]);
+  }, [flyoutApi, hit, onInitialStateChange]);
 
-  // Registered before the restore effect runs, so restored opens are recorded through the sink.
-  useEffect(
-    () =>
-      registerFlyoutV2StateSink(historyKey, {
-        read: () => stackRef.current,
-        write: (stack) => {
-          stackRef.current = stack ?? [];
-          onInitialStateChangeRef.current?.({ flyoutV2: stack?.length ? stack : undefined });
-        },
-      }),
-    []
-  );
+  const { id: hitId } = hit;
 
   useEffect(() => {
-    if (hasRestoredRef.current) {
-      return;
-    }
+    const report = (stack: FlyoutV2UrlParamValue) =>
+      onInitialStateChangeRef.current?.({ flyoutV2: stack.length > 0 ? stack : undefined });
 
-    const [first, second] = initialStack;
+    let restoreTimeout: ReturnType<typeof setTimeout> | undefined;
+    let isRestorePending = false;
 
-    // The doc view remounts on tab switches while its state is kept, so only reopen the chain
-    // when it isn't already open (i.e. it came from a shared link or a page reload).
-    if (!first || hasOpenFlyoutV2(urlParamKey)) {
-      hasRestoredRef.current = true;
-      return;
-    }
-
-    // Tools need the full document; only the displayed one is at hand, so others fall back to
-    // opening their document flyout.
-    const { _id: hitId, _index: hitIndex } = hit.raw;
-    const getRestoreContext = (descriptor: FlyoutV2UrlParamValue[number]) => ({
-      docHit:
-        'documentId' in descriptor &&
-        'indexName' in descriptor &&
-        descriptor.documentId === hitId &&
-        descriptor.indexName === hitIndex
-          ? hit
-          : undefined,
-    });
-
-    // Deferred so the doc viewer flyout is registered with the EUI flyout manager first, letting
-    // the restored flyouts open on top of it within the same history group.
-    const timeout = setTimeout(() => {
-      hasRestoredRef.current = true;
-      openDescriptorAsStart(first, getRestoreContext(first), flyoutApi, FLYOUT_ORIGIN.URL_RESTORE);
-      if (second) {
-        openDescriptorAsChild(
-          second,
-          getRestoreContext(second),
-          flyoutApi,
-          FLYOUT_ORIGIN.URL_RESTORE
-        );
+    if (docViewerFlyoutChain.hitId === hitId) {
+      // The tab remounted (doc viewer tab switch) while the host state was kept: flyouts may have
+      // opened or closed meanwhile, so hand the live chain to the host instead of reopening it.
+      if (!isEqual(docViewerFlyoutChain.stack, initialStack)) {
+        report(docViewerFlyoutChain.stack);
       }
-    }, 0);
+    } else {
+      docViewerFlyoutChain.hitId = hitId;
+      docViewerFlyoutChain.stack = initialStack;
+      const [first, second] = initialStack;
 
-    return () => clearTimeout(timeout);
-  }, [flyoutApi, hit, initialStack]);
+      if (first) {
+        isRestorePending = true;
+        // Deferred so the doc viewer flyout is registered with the EUI flyout manager first,
+        // letting the restored flyouts open on top of it within the same history group.
+        restoreTimeout = setTimeout(() => {
+          isRestorePending = false;
+          const { current: api } = flyoutApiRef;
+          const { current: displayedHit } = hitRef;
+          openDescriptorAsStart(
+            first,
+            getRestoreContext(first, displayedHit),
+            api,
+            FLYOUT_ORIGIN.URL_RESTORE
+          );
+          if (second) {
+            openDescriptorAsChild(
+              second,
+              getRestoreContext(second, displayedHit),
+              api,
+              FLYOUT_ORIGIN.URL_RESTORE
+            );
+          }
+        }, 0);
+      }
+    }
+
+    docViewerFlyoutChain.report = report;
+
+    return () => {
+      clearTimeout(restoreTimeout);
+      if (docViewerFlyoutChain.report === report) {
+        docViewerFlyoutChain.report = undefined;
+      }
+      // Unmounted before the chain was reopened: let the next mount restore it.
+      if (isRestorePending && docViewerFlyoutChain.hitId === hitId) {
+        docViewerFlyoutChain.hitId = undefined;
+      }
+    };
+  }, [hitId, initialStack]);
 };
