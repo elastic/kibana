@@ -1933,6 +1933,17 @@ describe('UnifiedDataTable', () => {
       EXTENDED_JEST_TIMEOUT
     );
 
+    it('should hide the Summary column tooltip in print mode', async () => {
+      await renderComponent({
+        ...getProps(),
+        columns: [],
+        renderMode: 'print',
+      });
+
+      expect(screen.getByText('Summary')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDataTable_headerSummaryIcon')).not.toBeInTheDocument();
+    });
+
     it('should hide column actions and resize when in print mode', async () => {
       await renderComponent({
         ...getProps(),

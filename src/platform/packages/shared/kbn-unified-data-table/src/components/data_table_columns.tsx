@@ -298,8 +298,8 @@ function buildEuiGridColumn({
       <DataTableSourceColumnHeaderMemoized
         columnDisplayName={columnDisplayName}
         headerRowHeight={headerRowHeight}
-        // JSON mode do not display a tooltip, Summary mode sets undefined so the default one is displayed.
-        tooltipContent={documentsDisplayMode === 'json' ? null : undefined}
+        // JSON and print modes do not display a tooltip, Summary mode sets undefined so the default one is displayed.
+        tooltipContent={documentsDisplayMode === 'json' || !isInteractive ? null : undefined}
       />
     );
     if (documentsDisplayMode === 'json') {
