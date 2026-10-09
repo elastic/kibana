@@ -49,7 +49,9 @@ for manifest in REPO.rglob('kibana.jsonc'):
     if entry is None:
         skipped.append(rel + ' (no server/index)')
         continue
-    plugins.append(rel)
+    pkg_id_match = re.search(r'"id"\s*:\s*"([^"]+)"', text)
+    pkg_id = pkg_id_match.group(1) if pkg_id_match else ''
+    plugins.append((rel, pkg_id))
 
 plugins.sort()
 repo_literal = str(REPO)
@@ -57,18 +59,20 @@ lines = [
     "const path = require('path');",
     f"const REPO = {repo_literal!r};",
     'const modules = Object.create(null);',
-    'function add(rootRel, mod) {',
+    'function add(rootRel, pkgId, mod) {',
     "  modules[path.join(REPO, rootRel, 'server')] = mod;",
     "  modules[rootRel + '/server'] = mod;",
+    # Distributable package-map.json points plugins at node_modules/<id>.
+    "  if (pkgId) modules['node_modules/' + pkgId + '/server'] = mod;",
     '}',
 ]
-for rel in plugins:
+for rel, pkg_id in plugins:
     abs_entry = REPO / rel / 'server' / 'index.ts'
     if not abs_entry.is_file():
         abs_entry = REPO / rel / 'server' / 'index.js'
     if not abs_entry.is_file():
         abs_entry = REPO / rel / 'server' / 'index.tsx'
-    lines.append(f"add({rel!r}, require({str(abs_entry)!r}));")
+    lines.append(f"add({rel!r}, {pkg_id!r}, require({str(abs_entry)!r}));")
 lines += [
     'globalThis.__KBN_PLUGIN_MODULES = modules;',
     'module.exports = modules;',

@@ -50,6 +50,28 @@ if (process.env.KBN_PLUGIN_BUNDLE === '1' && process.env.isDevCliChild !== 'true
   var url = require('url');
   var v8 = require('v8');
   var shortCircuits = 0;
+  var misses = 0;
+  var shimSeq = 0;
+  var shimPathByKey = Object.create(null);
+  var keyByShimPath = Object.create(null);
+
+  function shimUrlFor(key) {
+    var shimPath = shimPathByKey[key];
+    if (!shimPath) {
+      shimSeq += 1;
+      shimPath = '/tmp/kbn-plugin-bundle-shim/' + shimSeq + '.js';
+      shimPathByKey[key] = shimPath;
+      keyByShimPath[shimPath] = key;
+    }
+    return url.pathToFileURL(shimPath).href;
+  }
+  var registered = global.__KBN_PLUGIN_MODULES ? Object.keys(global.__KBN_PLUGIN_MODULES) : [];
+  var distKeyCount = 0;
+  var registeredIndex;
+  for (registeredIndex = 0; registeredIndex < registered.length; registeredIndex++) {
+    if (registered[registeredIndex].indexOf('node_modules/') === 0) distKeyCount++;
+  }
+  console.log('[kbn-plugin-bundle] registered', registered.length, 'dist keys', distKeyCount);
 
   function moduleKey(specifier) {
     var trimmed;
@@ -66,7 +88,7 @@ if (process.env.KBN_PLUGIN_BUNDLE === '1' && process.env.isDevCliChild !== 'true
     mods = global.__KBN_PLUGIN_MODULES;
     if (!mods) return trimmed;
     if (mods[trimmed]) return trimmed;
-    // Distributable plugins live at <dist>/<repo-relative>/server, not the checkout path.
+    // Built plugins are <dist>/node_modules/@kbn/<id>/server, not the checkout path.
     keys = Object.keys(mods);
     best = undefined;
     bestLen = -1;
@@ -87,29 +109,67 @@ if (process.env.KBN_PLUGIN_BUNDLE === '1' && process.env.isDevCliChild !== 'true
     return best;
   }
 
+  // import() of CJS only exposes names the lexer can see statically.
+  // `module.exports = obj` becomes { default } and drops plugin/config.
+  function shimSource(key) {
+    var exported = global.__KBN_PLUGIN_MODULES[key];
+    var lines = ['var m = global.__KBN_PLUGIN_MODULES[' + JSON.stringify(key) + '];'];
+    var name;
+    var names = [];
+    var i;
+    if (exported && typeof exported === 'object') {
+      for (name in exported) {
+        if (
+          Object.prototype.hasOwnProperty.call(exported, name) &&
+          name !== 'default' &&
+          /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(name)
+        ) {
+          names.push(name);
+        }
+      }
+    }
+    for (i = 0; i < names.length; i++) {
+      lines.push('module.exports.' + names[i] + ' = m.' + names[i] + ';');
+    }
+    lines.push('module.exports = m;');
+    return lines.join('\n') + '\n';
+  }
+
   moduleHooks.registerHooks({
     resolve: function (specifier, context, nextResolve) {
       var key = moduleKey(specifier);
       if (key && global.__KBN_PLUGIN_MODULES && global.__KBN_PLUGIN_MODULES[key]) {
         shortCircuits += 1;
-        console.log('[kbn-plugin-bundle] short-circuit', shortCircuits, key);
+        if (shortCircuits <= 5 || shortCircuits % 50 === 0) {
+          console.log('[kbn-plugin-bundle] short-circuit', shortCircuits, key);
+        }
         return {
-          url: url.pathToFileURL(key + '/index.js').href,
+          url: shimUrlFor(key),
           shortCircuit: true,
           format: 'commonjs',
         };
+      }
+      if (
+        typeof specifier === 'string' &&
+        specifier.charAt(0) === '/' &&
+        specifier.replace(/\/index\.(ts|js)$/, '').slice(-7) === '/server'
+      ) {
+        misses += 1;
+        if (misses <= 20) console.log('[kbn-plugin-bundle] miss', specifier);
       }
       return nextResolve(specifier, context);
     },
     load: function (moduleUrl, context, nextLoad) {
       var key;
+      var filePath;
       if (moduleUrl.indexOf('file:') === 0 && global.__KBN_PLUGIN_MODULES) {
-        key = moduleKey(url.fileURLToPath(moduleUrl));
+        filePath = url.fileURLToPath(moduleUrl);
+        key = keyByShimPath[filePath] || moduleKey(filePath);
         if (key && global.__KBN_PLUGIN_MODULES[key]) {
           return {
             format: 'commonjs',
             shortCircuit: true,
-            source: 'module.exports = global.__KBN_PLUGIN_MODULES[' + JSON.stringify(key) + '];\n',
+            source: shimSource(key),
           };
         }
       }
