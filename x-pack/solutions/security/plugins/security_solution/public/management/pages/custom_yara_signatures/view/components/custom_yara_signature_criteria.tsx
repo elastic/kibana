@@ -36,10 +36,7 @@ const YARA_RULE_ARIA_LABEL = i18n.translate(
 export const CustomYaraSignatureCriteria = memo<CriteriaConditionsProps>(
   ({ os, entries, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const osLabel = useMemo(
-      () => os.map((osValue) => OS_LABELS[osValue as keyof typeof OS_LABELS] ?? osValue).join(', '),
-      [os]
-    );
+    const osLabel = useMemo(() => os.map((osValue) => OS_LABELS[osValue]).join(', '), [os]);
     const rule = useMemo(() => entries[0]?.value ?? '', [entries]);
 
     return (
