@@ -755,6 +755,83 @@ describe('EsqlSource', () => {
     });
   });
 
+  describe('resolveDataset', () => {
+    const createHttp = () =>
+      ({
+        post: jest.fn(async (path: string) =>
+          path === TIMEFIELD_ROUTE ? { timeField: '@timestamp' } : { columns: [] }
+        ),
+      } as unknown as HttpStart);
+
+    it('resolves the time field without requesting the schema', async () => {
+      const http = createHttp();
+
+      const dataset = await EsqlSource.resolveDataset({
+        query: 'FROM dataset-time | LIMIT 5',
+        http,
+      });
+
+      expect(dataset.title).toBe('dataset-time');
+      expect(dataset.timeFieldName).toBe('@timestamp');
+      expect(postedPathsOf(http)).toEqual([TIMEFIELD_ROUTE]);
+    });
+
+    it('has the same datasetId as the source of the same dataset', async () => {
+      const http = createHttp();
+      const dataset = await EsqlSource.resolveDataset({
+        query: 'FROM same-dataset | LIMIT 5',
+        http,
+      });
+
+      const source = await EsqlSource.create({
+        query: 'FROM same-dataset | WHERE a > 1',
+        http,
+      });
+
+      expect(dataset.datasetId).toBe(source.datasetId);
+      expect(dataset.datasetId).toBe(
+        await getESQLAdHocDataviewId({
+          indexPattern: 'same-dataset',
+          timeFieldName: '@timestamp',
+          projectRouting: undefined,
+        })
+      );
+    });
+
+    it('does not request the time field when it is given', async () => {
+      const http = createHttp();
+
+      const dataset = await EsqlSource.resolveDataset({
+        query: 'FROM given-time',
+        timeFieldName: 'event.created',
+        http,
+      });
+
+      expect(dataset.timeFieldName).toBe('event.created');
+      expect(postedPathsOf(http)).toEqual([]);
+    });
+
+    it('prefers SET project_routing over the picker arg', async () => {
+      const dataset = await EsqlSource.resolveDataset({
+        query: 'SET project_routing = "_alias:project-a"; FROM logs-*',
+        timeFieldName: '@timestamp',
+        projectRouting: 'project-b',
+      });
+
+      expect(dataset.projectRouting).toBe('_alias:project-a');
+    });
+
+    it('does not populate the instance cache, so a later create still resolves the schema', async () => {
+      const http = createHttp();
+      await EsqlSource.resolveDataset({ query: 'FROM no-poison', http });
+      (http.post as jest.Mock).mockClear();
+
+      await EsqlSource.create({ query: 'FROM no-poison', http });
+
+      expect(postedPathsOf(http)).toContain(SOURCE_INFO_ROUTE);
+    });
+  });
+
   describe('getFilterableFields', () => {
     const createSchemaHttp = (schemas: Record<string, string[]>): HttpStart =>
       ({
