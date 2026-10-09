@@ -29,7 +29,7 @@ describe('summarizeRebalance', () => {
     expect(result.failedOver).toBe(0);
   });
 
-  it('counts monitors pinned to an unhealthy or missing agent as failed over', () => {
+  it('separates monitors on an unhealthy agent from unpinned ones', () => {
     const result = summarizeRebalance({
       monitors: [
         { id: 'm1', cost: http, currentAgentId: 'dead' },
@@ -44,15 +44,16 @@ describe('summarizeRebalance', () => {
       healthyAgentIds: ['a'],
     });
 
-    expect(result.failedOver).toBe(2);
+    expect(result.failedOver).toBe(1);
+    expect(result.unpinned).toBe(1);
     expect(result.monitorsPerAgent).toEqual({ a: 3 });
   });
 
-  it('counts browser monitors by cost', () => {
+  it('counts browser monitors by type, not cost', () => {
     const result = summarizeRebalance({
       monitors: [
-        { id: 'm1', cost: browser, currentAgentId: 'a' },
-        { id: 'm2', cost: http, currentAgentId: 'a' },
+        { id: 'm1', type: 'browser', cost: 1, currentAgentId: 'a' },
+        { id: 'm2', type: 'http', cost: browser, currentAgentId: 'a' },
       ],
       assignment: new Map(),
       healthyAgentIds: ['a'],

@@ -158,6 +158,8 @@ export interface MonitorPlacement {
   id: string;
   /** Memory cost weight (MiB); see {@link getMonitorCostMib}. */
   cost: number;
+  /** Monitor type, used for telemetry counts. */
+  type?: string;
   /** Agent the monitor is currently pinned to; undefined/stale ⇒ needs placing. */
   currentAgentId?: string;
 }

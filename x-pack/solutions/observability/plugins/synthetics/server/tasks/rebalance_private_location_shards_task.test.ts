@@ -489,7 +489,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
       const result = await run({ keep: 1 });
 
       expect(mockLogger.error).toHaveBeenCalled();
-      expect(result.state).toEqual({ keep: 1 });
+      expect(result.state).toEqual({ keep: 1, shardingMode: 'active' });
     });
 
     it('throws without work when the task signal is already aborted', async () => {
@@ -553,7 +553,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
   });
 
   describe('sharding telemetry', () => {
-    const SNAPSHOT_STATE = { lastSnapshotAt: NOW };
+    const SNAPSHOT_STATE = { snapshotAt: { 'loc-1': NOW } };
     const eventsOf = (eventType: string) =>
       mockReportEvent.mock.calls.filter(([type]) => type === eventType).map(([, event]) => event);
 
@@ -630,6 +630,53 @@ describe('RebalancePrivateLocationShardsTask', () => {
       ]);
     });
 
+    it('reports recovery when a location returns from having no healthy agents', async () => {
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
+      jest
+        .spyOn(getAgentInfoModule, 'getAgentInfo')
+        .mockResolvedValueOnce(new Map([['agent-1', agentInfo(NOW - STALE_CHECKIN_MS - 1)]]));
+      jest.spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds').mockResolvedValue(new Set());
+      const first = await run(SNAPSHOT_STATE);
+
+      givenHealthyLocation();
+      mockRebalanceShards.mockResolvedValue(rebalanceResult({ total: 4 }));
+      await run({ ...SNAPSHOT_STATE, ...first.state });
+
+      expect(eventsOf(PL_REBALANCE_EVENT_TYPE)).toEqual([
+        expect.objectContaining({ reason: 'no_healthy_agents' }),
+        expect.objectContaining({ reason: 'recovery', agentsRecovered: 2 }),
+      ]);
+    });
+
+    it('retries a failed location snapshot instead of waiting 24h', async () => {
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
+      jest.spyOn(getAgentInfoModule, 'getAgentInfo').mockRejectedValueOnce(new Error('boom'));
+
+      const first = await run();
+      expect(first.state.snapshotAt).toEqual({});
+
+      givenHealthyLocation();
+      mockRebalanceShards.mockResolvedValue(rebalanceResult({ total: 4 }));
+      await run({ ...first.state });
+
+      expect(eventsOf(PL_SHARDING_SNAPSHOT_EVENT_TYPE)).toHaveLength(1);
+    });
+
+    it('persists the mode when listing locations fails so the change is not re-reported', async () => {
+      jest
+        .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
+        .mockRejectedValue(new Error('so down'));
+      mockGetLicense.mockResolvedValue(licenseMock.createLicense({ license: { type: 'basic' } }));
+      mockClearShardConditions.mockResolvedValue({ cleared: 0, failed: 0 });
+      jest
+        .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
+        .mockRejectedValue(new Error('x'));
+
+      const first = await run({ shardingMode: 'active' });
+
+      expect(first.state.shardingMode).toBe('unlicensed');
+    });
+
     it('reports a location error once, then again after it recovers and fails anew', async () => {
       jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
       jest.spyOn(getAgentInfoModule, 'getAgentInfo').mockRejectedValue(new Error('fleet boom'));
@@ -666,7 +713,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
           skewRatio: 1.6,
         }),
       ]);
-      expect(first.state.lastSnapshotAt).toBe(NOW);
+      expect(first.state.snapshotAt).toEqual({ 'loc-1': NOW });
     });
 
     it('reports mode changes and the pin drain when the license is lost', async () => {

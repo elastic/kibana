@@ -121,6 +121,7 @@ const ZERO_COUNTS: RebalanceCounts = {
   monitorsTotal: 0,
   monitorsMoved: 0,
   monitorsFailedOver: 0,
+  monitorsUnpinned: 0,
   moveFailures: 0,
 };
 

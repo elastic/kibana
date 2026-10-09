@@ -55,6 +55,7 @@ export interface PrivateLocationRebalanceEvent {
   monitorsTotal: number;
   monitorsMoved: number;
   monitorsFailedOver: number;
+  monitorsUnpinned: number;
   moveFailures: number;
   durationMs: number;
   stackVersion: string;

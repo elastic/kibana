@@ -79,8 +79,8 @@ interface RebalanceTaskState extends Record<string, unknown> {
   pinClearAttempts?: number;
   /** Telemetry only: last sharding mode, to report mode changes. */
   shardingMode?: PrivateLocationShardingMode;
-  /** Telemetry only: epoch ms of the last daily snapshot. */
-  lastSnapshotAt?: number;
+  /** Telemetry only: epoch ms of each location's last daily snapshot. */
+  snapshotAt?: Record<string, number>;
   /** Telemetry only: locations already reported as broken, so a persistent fault is reported once. */
   locationIssues?: Record<string, PrivateLocationRebalanceReason>;
 }
@@ -128,6 +128,7 @@ export class RebalancePrivateLocationShardsTask {
       (taskInstance.schedule as IntervalSchedule | undefined)?.interval ??
       DEFAULT_REBALANCE_SCHEDULE;
     const schedule = { interval };
+    let currentMode: PrivateLocationShardingMode | undefined;
 
     try {
       signal.throwIfAborted();
@@ -144,6 +145,7 @@ export class RebalancePrivateLocationShardsTask {
         : licenseStatus === 'licensed'
         ? 'active'
         : 'unlicensed';
+      currentMode = mode;
       this.reportModeChange(taskInstance, mode);
       if (licenseStatus === 'unlicensed') {
         return {
@@ -168,7 +170,8 @@ export class RebalancePrivateLocationShardsTask {
 
       const now = Date.now();
       const taskState = taskInstance.state as RebalanceTaskState;
-      const snapshotDue = isSnapshotDue(taskState.lastSnapshotAt, now);
+      const priorSnapshotAt = taskState.snapshotAt ?? {};
+      const nextSnapshotAt: Record<string, number> = {};
       const priorIssues = taskState.locationIssues ?? {};
       const nextIssues: Record<string, PrivateLocationRebalanceReason> = {};
       const { stackVersion, telemetry } = this.serverSetup;
@@ -182,6 +185,10 @@ export class RebalancePrivateLocationShardsTask {
       for (const location of locations) {
         signal.throwIfAborted();
         const locationStartedAt = Date.now();
+        const lastSnapshotAt = priorSnapshotAt[location.id];
+        if (lastSnapshotAt !== undefined) {
+          nextSnapshotAt[location.id] = lastSnapshotAt;
+        }
         let agentsTotal = 0;
         try {
           const agents = await getAgentInfo(this.serverSetup, location.agentPolicyId, signal);
@@ -261,11 +268,16 @@ export class RebalancePrivateLocationShardsTask {
             `location ${location.id}: moved ${result.moved}/${result.total} monitor(s)`
           );
 
-          const { evicted, recovered } = diffHealthyAgents({
+          const { evicted, recovered: recoveredByDiff } = diffHealthyAgents({
             priorHealthySince,
             agentPolicyId: location.agentPolicyId,
             healthyAgentIds,
           });
+          // `healthySince` is empty after an all-unhealthy run, so the diff can't see the return.
+          const recovered =
+            priorIssues[location.id] === 'no_healthy_agents'
+              ? healthyAgentIds.length
+              : recoveredByDiff;
           const reason = getRebalanceReason({
             evicted,
             recovered,
@@ -296,12 +308,14 @@ export class RebalancePrivateLocationShardsTask {
                   monitorsTotal: result.total,
                   monitorsMoved: result.moved,
                   monitorsFailedOver: result.failedOver,
+                  monitorsUnpinned: result.unpinned,
                   moveFailures: result.failed,
                 },
               })
             );
           }
-          if (snapshotDue) {
+          if (isSnapshotDue(lastSnapshotAt, now)) {
+            nextSnapshotAt[location.id] = now;
             reportShardingEvent(telemetry, logger, PL_SHARDING_SNAPSHOT_EVENT_TYPE, {
               locationHash: hashLocationId(location.id),
               agentsTotal,
@@ -342,7 +356,7 @@ export class RebalancePrivateLocationShardsTask {
           ...PIN_DRAIN_RESET,
           shardingMode: mode,
           locationIssues: nextIssues,
-          ...(snapshotDue ? { lastSnapshotAt: now } : {}),
+          snapshotAt: nextSnapshotAt,
         }),
         schedule,
       };
@@ -356,7 +370,13 @@ export class RebalancePrivateLocationShardsTask {
       );
     }
 
-    return { state: await this.returnedState(taskInstance), schedule };
+    return {
+      state: await this.returnedState(
+        taskInstance,
+        currentMode ? { shardingMode: currentMode } : {}
+      ),
+      schedule,
+    };
   }
 
   async start() {
