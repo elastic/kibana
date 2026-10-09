@@ -9,7 +9,7 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { WorkflowRepository } from './workflow_repository';
-import { WORKFLOW_INDEX_NAME } from '../constants';
+import { GLOBAL_WORKFLOW_SPACE_ID, WORKFLOW_INDEX_NAME } from '../constants';
 
 describe('stored workflow ACLs', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -714,6 +714,15 @@ describe('getWorkflowsByIds', () => {
             must: expect.arrayContaining([
               { ids: { values: ['wf-1', 'wf-2', 'wf-missing'] } },
               { term: { enabled: true } },
+              {
+                bool: {
+                  should: [
+                    { term: { spaceId: 'default' } },
+                    { term: { spaceId: GLOBAL_WORKFLOW_SPACE_ID } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
             ]),
             must_not: [{ exists: { field: 'deleted_at' } }],
           },
@@ -735,5 +744,66 @@ describe('getWorkflowsByIds', () => {
     await expect(repository.getWorkflowsByIds(['wf-1'], 'default')).rejects.toThrow(
       'Could not load workflows [wf-1] for trigger subscription resolution.'
     );
+  });
+});
+
+describe('getWorkflowsSubscribedToTrigger', () => {
+  const logger = loggingSystemMock.create().get();
+
+  const searchHit = (id: string) => ({
+    _index: WORKFLOW_INDEX_NAME,
+    _id: id,
+    _source: {
+      name: id,
+      enabled: true,
+      yaml: 'steps: []',
+      definition: { steps: [] },
+      valid: true,
+      created_at: '2026-01-01T00:00:00.000Z',
+      updated_at: '2026-01-01T00:00:00.000Z',
+    },
+    sort: [1],
+  });
+
+  const completePage = (hits: unknown[]) => ({
+    took: 1,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, failed: 0 },
+    hits: { hits },
+  });
+
+  it('returns subscribers from a complete page', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const repository = new WorkflowRepository({ esClient, logger });
+    esClient.openPointInTime.mockResolvedValue({ id: 'pit-1' } as never);
+    esClient.search.mockResolvedValue(completePage([searchHit('wf-1')]) as never);
+
+    const result = await repository.getWorkflowsSubscribedToTrigger('cases.updated', 'default');
+
+    expect(result.map((workflow) => workflow.id)).toEqual(['wf-1']);
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({ allow_partial_search_results: false })
+    );
+    expect(esClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-1' });
+  });
+
+  it.each([
+    { timed_out: true, failed: 0 },
+    { timed_out: false, failed: 1 },
+  ])('fails the read when a page is incomplete: %j', async ({ timed_out, failed }) => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const repository = new WorkflowRepository({ esClient, logger });
+    esClient.openPointInTime.mockResolvedValue({ id: 'pit-1' } as never);
+    esClient.search.mockResolvedValue({
+      took: 1,
+      timed_out,
+      _shards: { total: 1, successful: 1 - failed, failed },
+      hits: { hits: [searchHit('wf-1')] },
+    } as never);
+
+    await expect(
+      repository.getWorkflowsSubscribedToTrigger('cases.updated', 'default')
+    ).rejects.toThrow('Could not load subscribers for trigger cases.updated in space default.');
+    expect(esClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-1' });
   });
 });

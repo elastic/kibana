@@ -423,6 +423,12 @@ export class TriggerEventHandler {
       triggerId,
     });
     const workflows = await this.loadMatchedWorkflows(matchedIds, spaceId, loadedWorkflows);
+    if (resolution.outcome === 'hit' && workflows.length < matchedIds.length) {
+      this.logger.debug(
+        `Dropping subscriber cache for trigger ${triggerId} in space ${spaceId}: matched ${matchedIds.length} workflows and loaded ${workflows.length}`
+      );
+      this.subscriptionCache.invalidate({ spaceId, triggerIds: [triggerId] });
+    }
     return { workflows, stats, subscriptionCacheOutcome: resolution.outcome };
   }
 

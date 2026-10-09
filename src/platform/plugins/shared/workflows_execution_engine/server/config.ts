@@ -31,7 +31,7 @@ const EventTriggersConfigSchema = schema.object({
    * How long this node keeps a cached subscriber set for one space and trigger.
    * A hit does not extend it. Other nodes keep the previous set until their own TTL.
    */
-  subscriptionCacheTtl: schema.duration({ defaultValue: '3m', min: '1s' }),
+  subscriptionCacheTtl: schema.duration({ defaultValue: '60s', min: '1s' }),
 });
 
 const configSchema = schema.object({

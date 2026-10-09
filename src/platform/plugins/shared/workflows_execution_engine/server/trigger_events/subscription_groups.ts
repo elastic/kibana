@@ -32,18 +32,14 @@ export const groupSubscribedWorkflows = (
   triggerId: string,
   requiresConnectorId: boolean
 ): SubscriptionCacheGroup[] => {
-  const groups: SubscriptionCacheGroup[] = [];
+  const groups: Array<{ condition: string; workflowIds: string[]; connectorId?: string }> = [];
   const indexByKey = new Map<string, number>();
 
   const add = (workflowId: string, condition: string, connectorId?: string) => {
     const key = connectorId === undefined ? condition : `${connectorId}\0${condition}`;
     const existingIndex = indexByKey.get(key);
     if (existingIndex !== undefined) {
-      const existing = groups[existingIndex];
-      groups[existingIndex] = {
-        ...existing,
-        workflowIds: [...existing.workflowIds, workflowId],
-      };
+      groups[existingIndex].workflowIds.push(workflowId);
       return;
     }
     indexByKey.set(key, groups.length);

@@ -408,11 +408,18 @@ export class WorkflowRepository {
         const searchResponse = await this.options.esClient.search({
           pit: { id: pitId, keep_alive: keepAlive },
           size: pageSize,
+          allow_partial_search_results: false,
           _source,
           query,
           sort,
           ...(searchAfter ? { search_after: searchAfter } : {}),
         });
+
+        if (searchResponse.timed_out || searchResponse._shards.failed > 0) {
+          throw new Error(
+            `Could not load subscribers for trigger ${triggerId} in space ${spaceId}.`
+          );
+        }
 
         const hits = searchResponse.hits.hits;
         for (const hit of hits) {
