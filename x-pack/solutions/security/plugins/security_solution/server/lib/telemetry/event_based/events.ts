@@ -2562,6 +2562,7 @@ export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
   workflowEnabled: boolean;
   autoCloseEnabled: boolean;
   createConversation: boolean;
+  usePrompt: boolean;
   connectorConfigured: boolean;
   customAgent: boolean;
   autoCloseConfidenceScoreMinThreshold: number;
@@ -2584,6 +2585,12 @@ export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
     createConversation: {
       type: 'boolean',
       _meta: { description: 'Whether a new AI conversation is created per alert analysis' },
+    },
+    usePrompt: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the workflow classifies with a single prompt instead of an AI agent',
+      },
     },
     connectorConfigured: {
       type: 'boolean',

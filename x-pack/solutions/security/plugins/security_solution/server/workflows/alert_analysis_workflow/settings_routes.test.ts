@@ -21,6 +21,7 @@ import {
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_USE_PROMPT,
 } from '@kbn/management-settings-ids';
 import type { StartPlugins } from '../../plugin';
 import type {
@@ -148,6 +149,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
         .mockResolvedValueOnce('connector-abc') // connectorId
         .mockResolvedValueOnce('elastic-ai-agent') // agentId
         .mockResolvedValueOnce(true) // createConversation
+        .mockResolvedValueOnce(true) // usePrompt
         .mockResolvedValueOnce('alert-analysis'); // tagPrefix
     };
 
@@ -169,6 +171,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
             connectorId: 'connector-abc',
             agentId: 'elastic-ai-agent',
             createConversation: true,
+            usePrompt: true,
             tagPrefix: 'alert-analysis',
           },
           workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
@@ -209,6 +212,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
       connectorId: 'connector-xyz',
       agentId: 'my-custom-agent',
       createConversation: false,
+      usePrompt: true,
       tagPrefix: 'alert-analysis',
     };
 
@@ -230,6 +234,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
         [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID]: settings.agentId,
         [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION]:
           settings.createConversation,
+        [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_USE_PROMPT]: settings.usePrompt,
         [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX]: settings.tagPrefix,
       });
       // The globally-installed workflow reads settings from uiSettings on its next run, so saving
@@ -259,6 +264,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
           workflowEnabled: settings.workflowEnabled,
           autoCloseEnabled: settings.autoCloseEnabled,
           createConversation: settings.createConversation,
+          usePrompt: settings.usePrompt,
           connectorConfigured: true,
           customAgent: true,
         })
@@ -304,6 +310,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
         .mockResolvedValueOnce('connector-abc') // connectorId
         .mockResolvedValueOnce('elastic-ai-agent') // agentId
         .mockResolvedValueOnce(true) // createConversation
+        .mockResolvedValueOnce(true) // usePrompt
         .mockResolvedValueOnce('alert-analysis'); // tagPrefix
     };
 
@@ -327,6 +334,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
           connectorId: 'connector-abc',
           agentId: 'elastic-ai-agent',
           createConversation: true,
+          usePrompt: true,
           tagPrefix: 'alert-analysis',
         },
       });

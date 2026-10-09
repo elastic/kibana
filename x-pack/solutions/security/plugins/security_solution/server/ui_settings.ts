@@ -20,6 +20,7 @@ import {
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_USE_PROMPT,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE,
@@ -920,7 +921,7 @@ export const getAlertAnalysisWorkflowSettings = (): SettingsConfig => ({
       'xpack.securitySolution.uiSettings.alertAnalysisWorkflowAgentIdDescription',
       {
         defaultMessage:
-          'The Agent Builder agent used by the alert analysis workflow to classify alerts.',
+          'The Agent Builder agent used by the alert analysis workflow to classify alerts. Only used when the prompt option is off. Not used by the Alert Triage Worker, which always uses a prompt.',
       }
     ),
     type: 'string',
@@ -941,7 +942,27 @@ export const getAlertAnalysisWorkflowSettings = (): SettingsConfig => ({
       'xpack.securitySolution.uiSettings.alertAnalysisWorkflowCreateConversationDescription',
       {
         defaultMessage:
-          'When enabled, the AI agent step creates a new conversation for each batch of alerts it analyzes. Disable to prevent large numbers of conversations from being created.',
+          'When enabled, the AI agent step creates a new conversation for each batch of alerts it analyzes. Disable to prevent large numbers of conversations from being created. Only used when the prompt option is off. Not used by the Alert Triage Worker, which always uses a prompt.',
+      }
+    ),
+    type: 'boolean',
+    category: [APP_ID],
+    requiresPageReload: false,
+    schema: schema.boolean(),
+    solutionViews: ['classic', 'security'],
+    technicalPreview: true,
+    readonly: true,
+  },
+  [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_USE_PROMPT]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.alertAnalysisWorkflowUsePromptLabel', {
+      defaultMessage: 'Classify alerts with a prompt instead of an AI agent',
+    }),
+    value: false,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowUsePromptDescription',
+      {
+        defaultMessage:
+          'When enabled, the alert analysis workflow classifies each batch of alerts with a single prompt to the AI connector instead of running an AI agent. This is faster and uses fewer tokens, but the selected agent and conversations are not used. The Alert Triage Worker always uses a prompt.',
       }
     ),
     type: 'boolean',

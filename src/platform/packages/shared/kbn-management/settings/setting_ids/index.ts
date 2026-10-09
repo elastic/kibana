@@ -281,6 +281,8 @@ export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID =
   'securitySolution:alertAnalysisWorkflowAgentId' as const;
 export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION =
   'securitySolution:alertAnalysisWorkflowCreateConversation' as const;
+export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_USE_PROMPT =
+  'securitySolution:alertAnalysisWorkflowUsePrompt' as const;
 export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED =
   'securitySolution:alertAnalysisWorkflowEnabled' as const;
 export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX =
