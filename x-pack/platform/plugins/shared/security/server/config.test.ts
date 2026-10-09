@@ -70,7 +70,7 @@ describe('config schema', () => {
         "public": Object {},
         "secureCookies": false,
         "serviceAccounts": Object {
-          "enabled": false,
+          "enabled": true,
           "requestLifetime": "PT10M",
         },
         "session": Object {
@@ -132,7 +132,7 @@ describe('config schema', () => {
         "public": Object {},
         "secureCookies": false,
         "serviceAccounts": Object {
-          "enabled": false,
+          "enabled": true,
           "requestLifetime": "PT10M",
         },
         "session": Object {
@@ -193,7 +193,7 @@ describe('config schema', () => {
         "public": Object {},
         "secureCookies": false,
         "serviceAccounts": Object {
-          "enabled": false,
+          "enabled": true,
           "requestLifetime": "PT10M",
         },
         "session": Object {
@@ -258,7 +258,7 @@ describe('config schema', () => {
         "roleManagementEnabled": true,
         "secureCookies": false,
         "serviceAccounts": Object {
-          "enabled": false,
+          "enabled": true,
           "requestLifetime": "PT10M",
         },
         "session": Object {
@@ -1747,9 +1747,9 @@ describe('config schema', () => {
       ).toMatchObject({ enabled: true });
     });
 
-    it('should be disabled by default outside of the serverless context', () => {
+    it('should be enabled by default outside of the serverless context', () => {
       expect(ConfigSchema.validate({}, { serverless: false }).serviceAccounts).toMatchObject({
-        enabled: false,
+        enabled: true,
       });
     });
 
@@ -1764,9 +1764,9 @@ describe('config schema', () => {
       ).toMatchObject({ enabled: true });
     });
 
-    it('should be disabled by default inside of the serverless context', () => {
+    it('should be enabled by default inside of the serverless context', () => {
       expect(ConfigSchema.validate({}, { serverless: true }).serviceAccounts).toMatchObject({
-        enabled: false,
+        enabled: true,
       });
     });
     it('defaults to a ten-minute request refresh lifetime', () => {
