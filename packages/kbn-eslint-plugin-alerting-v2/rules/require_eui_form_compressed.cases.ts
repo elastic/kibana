@@ -7,21 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RuleTester } from 'eslint';
-import { RequireEuiFormCompressed } from './require_eui_form_compressed';
-
-const tester = new RuleTester({
-  parser: require.resolve('@typescript-eslint/parser'),
-  parserOptions: {
-    sourceType: 'module',
-    ecmaVersion: 2018,
-    ecmaFeatures: {
-      jsx: true,
-    },
-  },
-});
-
-tester.run('@kbn/alerting-v2/require_eui_form_compressed', RequireEuiFormCompressed, {
+/** Rule test cases, replayed through Oxlint's RuleTester by `__fixtures__/run_rule_tests.mjs`. */
+export const requireEuiFormCompressedCases = {
   valid: [
     {
       code: '<EuiFieldText compressed />',
@@ -112,4 +99,4 @@ tester.run('@kbn/alerting-v2/require_eui_form_compressed', RequireEuiFormCompres
       name: 'EuiButtonGroup with non-compressed buttonSize is flagged',
     },
   ],
-});
+};

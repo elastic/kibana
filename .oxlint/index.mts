@@ -26,6 +26,7 @@ import { reactRules } from './react.mts';
 import { kibanaOverrides, kibanaRules } from './kibana.mts';
 import { licenseHeaderOverrides } from './license_headers.mts';
 import { scoutOverrides } from './scout.mts';
+import { alertingV2Overrides } from './alerting_v2.mts';
 import { securityImportsOverrides } from './security_imports.mts';
 
 export default defineConfig<OxlintConfig>({
@@ -38,6 +39,10 @@ export default defineConfig<OxlintConfig>({
     {
       name: '@kbn/disable',
       specifier: './packages/kbn-eslint-plugin-disable/oxlint_plugin.js',
+    },
+    {
+      name: '@kbn/alerting-v2',
+      specifier: './packages/kbn-eslint-plugin-alerting-v2/oxlint_plugin.js',
     },
   ],
   categories: {
@@ -55,6 +60,7 @@ export default defineConfig<OxlintConfig>({
     ...kibanaOverrides,
     ...scoutOverrides,
     ...securityImportsOverrides,
+    ...alertingV2Overrides,
   ],
   // oxlint's parser rejects TypeScript grammar errors (TS1016: required parameter after an
   // optional one) that ESLint's parser and tsc's `skipLibCheck` let through in this declaration.
