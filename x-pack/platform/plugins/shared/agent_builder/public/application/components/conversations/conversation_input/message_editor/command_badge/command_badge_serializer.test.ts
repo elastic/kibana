@@ -144,6 +144,15 @@ describe('serializeEditorContent', () => {
     );
   });
 
+  it('serializes a pdf placeholder element with the pdf scheme', () => {
+    const div = document.createElement('div');
+    div.appendChild(createImagePlaceholderElement('My invoice (1).pdf', 'pdf'));
+
+    expect(serializeEditorContent(div)).toBe(
+      '[My invoice (1).pdf](pdf://My%20invoice%20%281%29.pdf)'
+    );
+  });
+
   it('strips brackets from image display name', () => {
     const div = document.createElement('div');
     div.appendChild(createImagePlaceholderElement('file[1].png'));
@@ -271,6 +280,18 @@ describe('deserializeInputSegments', () => {
     const segments = deserializeInputSegments('[photo.png](image://photo.png)');
 
     expect(segments).toEqual([{ type: 'image', name: 'photo.png' }]);
+  });
+
+  it('parses a pdf segment', () => {
+    const segments = deserializeInputSegments('[My invoice.pdf](pdf://My%20invoice.pdf)');
+
+    expect(segments).toEqual([{ type: 'pdf', name: 'My invoice.pdf' }]);
+  });
+
+  it('preserves a pdf link with malformed percent-encoding as text', () => {
+    const segments = deserializeInputSegments('[x](pdf://bad%.pdf)');
+
+    expect(segments).toEqual([{ type: 'text', value: '[x](pdf://bad%.pdf)' }]);
   });
 
   it('decodes percent-encoded image names', () => {

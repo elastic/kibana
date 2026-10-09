@@ -28,6 +28,8 @@ import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useSendUserMessage } from '../../../hooks/use_send_user_message';
 import { useToasts } from '../../../hooks/use_toasts';
 import { useMessageEditor } from './message_editor';
+import { usePdfUpload } from './use_pdf_upload';
+import { useIsPdfUploadAvailable } from '../../../hooks/use_is_pdf_upload_available';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useInputDraft } from '../../../hooks/use_input_draft';
@@ -69,13 +71,37 @@ jest.mock('../../../hooks/use_send_user_message', () => ({
 jest.mock('../../../hooks/use_toasts', () => ({
   useToasts: jest.fn(),
 }));
+const mockHandlePasteImage = jest.fn();
+jest.mock('./use_image_upload', () => {
+  const actual = jest.requireActual('./use_image_upload');
+  return {
+    useImageUpload: (params: unknown) => ({
+      ...actual.useImageUpload(params),
+      handlePasteFile: mockHandlePasteImage,
+    }),
+  };
+});
+jest.mock('./use_pdf_upload', () => ({ usePdfUpload: jest.fn() }));
+jest.mock('../../../hooks/use_is_pdf_upload_available', () => ({
+  useIsPdfUploadAvailable: jest.fn(),
+}));
+let mockMessageEditorProps: {
+  onSubmit?: () => void;
+  onPasteFile?: (file: File) => string | undefined;
+  onAfterInput?: () => void;
+  acceptPdf?: boolean;
+  uploadingPdfNames?: Set<string>;
+} = {};
 jest.mock('./message_editor', () => ({
   useMessageEditor: jest.fn(),
-  MessageEditor: ({ onSubmit }: { onSubmit: () => void }) => (
-    <button data-test-subj="mock-message-editor-submit" type="button" onClick={onSubmit}>
-      submit
-    </button>
-  ),
+  MessageEditor: (props: typeof mockMessageEditorProps) => {
+    mockMessageEditorProps = props;
+    return (
+      <button data-test-subj="mock-message-editor-submit" type="button" onClick={props.onSubmit}>
+        submit
+      </button>
+    );
+  },
   CommandBadgeSerializationError: class extends Error {},
 }));
 jest.mock('./input_actions/connector_selector', () => ({
@@ -173,8 +199,26 @@ const mockedUseToasts = jest.mocked(useToasts);
 const mockedUseMessageEditor = jest.mocked(useMessageEditor);
 const mockedUseAgentBuilderServices = jest.mocked(useAgentBuilderServices);
 const mockedUseInputDraft = jest.mocked(useInputDraft);
+const mockedUsePdfUpload = jest.mocked(usePdfUpload);
+const mockedUseIsPdfUploadAvailable = jest.mocked(useIsPdfUploadAvailable);
 
 const submitMessage = jest.fn();
+const createConversation = jest.fn();
+const handlePastePdf = jest.fn();
+const handleAfterPdfInput = jest.fn();
+const handleRemovePdf = jest.fn();
+const handlePdfSubmitted = jest.fn();
+const pdfUploadState = (
+  overrides: Partial<ReturnType<typeof usePdfUpload>> = {}
+): ReturnType<typeof usePdfUpload> => ({
+  loadingPdfNames: new Set(),
+  pendingConversationId: undefined,
+  handlePastePdf,
+  handleAfterInput: handleAfterPdfInput,
+  handleRemovePdf,
+  handleSubmitted: handlePdfSubmitted,
+  ...overrides,
+});
 const sendUserMessage = jest.fn();
 const addErrorToast = jest.fn();
 const editorController = {
@@ -228,7 +272,13 @@ describe('ConversationInput', () => {
         upload: jest.fn().mockResolvedValue(undefined),
       },
     } as never);
-    mockedUseSubmitMessage.mockReturnValue({ submitMessage, isCreatingConversation: false });
+    mockedUseSubmitMessage.mockReturnValue({
+      submitMessage,
+      createConversation,
+      isCreatingConversation: false,
+    });
+    mockedUseIsPdfUploadAvailable.mockReturnValue(true);
+    mockedUsePdfUpload.mockReturnValue(pdfUploadState());
     sendUserMessage.mockResolvedValue({ id: 'conv-1' });
     mockedUseSendUserMessage.mockReturnValue({
       mutateAsync: sendUserMessage,
@@ -264,7 +314,7 @@ describe('ConversationInput', () => {
     fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
     expect(submitMessage).toHaveBeenCalledTimes(1);
-    expect(submitMessage).toHaveBeenCalledWith('hello agent');
+    expect(submitMessage).toHaveBeenCalledWith('hello agent', { conversationId: undefined });
     expect(editorController.clear).toHaveBeenCalledTimes(1);
   });
 
@@ -355,7 +405,7 @@ describe('ConversationInput', () => {
 
       fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
-      expect(submitMessage).toHaveBeenCalledWith('hello agent');
+      expect(submitMessage).toHaveBeenCalledWith('hello agent', { conversationId: undefined });
       expect(sendUserMessage).not.toHaveBeenCalled();
     });
 
@@ -412,7 +462,7 @@ describe('ConversationInput', () => {
 
       fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
-      expect(submitMessage).toHaveBeenCalledWith('hello agent');
+      expect(submitMessage).toHaveBeenCalledWith('hello agent', { conversationId: undefined });
       expect(sendUserMessage).not.toHaveBeenCalled();
     });
   });
@@ -467,6 +517,120 @@ describe('ConversationInput', () => {
       expect(screen.getByTestId('agentBuilderConversationInputForm')).toHaveAttribute(
         'aria-disabled',
         'true'
+      );
+    });
+  });
+
+  describe('PDF upload', () => {
+    const pdfFile = new File([new Uint8Array(4)], 'invoice.pdf', { type: 'application/pdf' });
+    const pngFile = new File([new Uint8Array(4)], 'photo.png', { type: 'image/png' });
+    const pdfAttachment = {
+      id: 'pdf-1',
+      type: 'pdf',
+      origin: 'file-1',
+      description: 'invoice.pdf',
+    };
+    const setAttachments = (attachments: unknown[], removeAttachment = jest.fn()) =>
+      mockedUseConversationContext.mockReturnValue({
+        attachments,
+        upsertAttachments: jest.fn(),
+        removeAttachment,
+        resetAttachments: jest.fn(),
+        isEmbeddedContext: false,
+        conversationActions: {} as never,
+      } as never);
+
+    it('gives a pasted PDF to the PDF upload and a pasted image to the image upload', () => {
+      handlePastePdf.mockReturnValue('invoice.pdf');
+      renderInput(<ConversationInput />);
+
+      expect(mockMessageEditorProps.onPasteFile?.(pdfFile)).toBe('invoice.pdf');
+      expect(handlePastePdf).toHaveBeenCalledWith(pdfFile);
+
+      expect(mockHandlePasteImage).not.toHaveBeenCalled();
+
+      mockMessageEditorProps.onPasteFile?.(pngFile);
+      expect(mockHandlePasteImage).toHaveBeenCalledWith(pngFile);
+      expect(handlePastePdf).toHaveBeenCalledTimes(1);
+    });
+
+    it('lets the editor accept a PDF only when PDF upload is available', () => {
+      renderInput(<ConversationInput />);
+      expect(mockMessageEditorProps.acceptPdf).toBe(true);
+
+      mockedUseIsPdfUploadAvailable.mockReturnValue(false);
+      renderInput(<ConversationInput />);
+      expect(mockMessageEditorProps.acceptPdf).toBe(false);
+    });
+
+    it('syncs the PDF upload after the text changes', () => {
+      renderInput(<ConversationInput />);
+
+      mockMessageEditorProps.onAfterInput?.();
+
+      expect(handleAfterPdfInput).toHaveBeenCalledTimes(1);
+    });
+
+    it('passes the PDF loading names to the editor chips', () => {
+      const loadingPdfNames = new Set(['invoice.pdf']);
+      mockedUsePdfUpload.mockReturnValue(pdfUploadState({ loadingPdfNames }));
+
+      renderInput(<ConversationInput />);
+
+      expect(mockMessageEditorProps.uploadingPdfNames).toBe(loadingPdfNames);
+    });
+
+    it('holds the submit while a PDF is loading, and shows its pill', () => {
+      mockedUsePdfUpload.mockReturnValue(
+        pdfUploadState({ loadingPdfNames: new Set(['invoice.pdf']) })
+      );
+
+      renderInput(<ConversationInput />);
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      expect(submitMessage).not.toHaveBeenCalled();
+      expect(screen.getByTestId('mock-remove-attachment-invoice.pdf')).toBeInTheDocument();
+    });
+
+    it('cancels a loading PDF from its pill', () => {
+      mockedUsePdfUpload.mockReturnValue(
+        pdfUploadState({ loadingPdfNames: new Set(['invoice.pdf']) })
+      );
+
+      renderInput(<ConversationInput />);
+      fireEvent.click(screen.getByTestId('mock-remove-attachment-invoice.pdf'));
+
+      expect(handleRemovePdf).toHaveBeenCalledWith('invoice.pdf');
+    });
+
+    it('removes an added PDF through the PDF upload, not as a plain attachment', () => {
+      const removeAttachment = jest.fn();
+      setAttachments([pdfAttachment], removeAttachment);
+
+      renderInput(<ConversationInput />);
+      fireEvent.click(screen.getByTestId('mock-remove-attachment-pdf-1'));
+
+      expect(handleRemovePdf).toHaveBeenCalledWith('invoice.pdf');
+      expect(removeAttachment).not.toHaveBeenCalled();
+    });
+
+    it('sends into the conversation made for the PDF, then tells the PDF upload it was sent', () => {
+      mockedUsePdfUpload.mockReturnValue(pdfUploadState({ pendingConversationId: 'pending-conv' }));
+
+      renderInput(<ConversationInput />);
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      expect(submitMessage).toHaveBeenCalledWith('hello agent', {
+        conversationId: 'pending-conv',
+      });
+      expect(handlePdfSubmitted).toHaveBeenCalledTimes(1);
+    });
+
+    it('gives the PDF upload the create conversation call of the submit hook', () => {
+      renderInput(<ConversationInput />);
+
+      expect(mockedUsePdfUpload).toHaveBeenCalledWith(
+        expect.objectContaining({ createConversation })
       );
     });
   });

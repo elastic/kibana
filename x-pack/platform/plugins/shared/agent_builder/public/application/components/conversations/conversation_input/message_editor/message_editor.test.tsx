@@ -501,6 +501,102 @@ describe('MessageEditor', () => {
     expect(editor.querySelector('[data-image-placeholder]')).not.toBeNull();
   });
 
+  describe('pasting a PDF', () => {
+    const pastePdf = ({
+      acceptPdf,
+      onPasteFile,
+    }: {
+      acceptPdf?: boolean;
+      onPasteFile: jest.Mock;
+    }) => {
+      const { messageEditor } = createMockMessageEditor();
+      render(
+        <MessageEditor
+          messageEditor={messageEditor}
+          onSubmit={mockOnSubmit}
+          onPasteFile={onPasteFile}
+          acceptPdf={acceptPdf}
+          data-test-subj="messageEditor"
+        />
+      );
+      const editor = screen.getByTestId('messageEditor');
+      editor.focus();
+      const range = document.createRange();
+      range.setStart(editor, 0);
+      range.collapse(true);
+      const sel = window.getSelection()!;
+      sel.removeAllRanges();
+      sel.addRange(range);
+
+      const pdfFile = new File([new Uint8Array(4)], 'invoice.pdf', { type: 'application/pdf' });
+      fireEvent.paste(editor, {
+        clipboardData: {
+          getData: jest.fn().mockReturnValue(''),
+          items: [{ kind: 'file', type: 'application/pdf', getAsFile: () => pdfFile }],
+        },
+      });
+      return { editor, pdfFile };
+    };
+
+    it('calls onPasteFile and inserts a pdf chip when acceptPdf is on', () => {
+      const onPasteFile = jest.fn().mockReturnValue('invoice.pdf');
+
+      const { editor, pdfFile } = pastePdf({ acceptPdf: true, onPasteFile });
+
+      expect(onPasteFile).toHaveBeenCalledWith(pdfFile);
+      const chip = editor.querySelector('[data-image-placeholder]');
+      expect(chip).not.toBeNull();
+      expect(chip?.getAttribute('data-placeholder-kind')).toBe('pdf');
+    });
+
+    it('inserts no chip when onPasteFile refuses the file', () => {
+      const onPasteFile = jest.fn().mockReturnValue(undefined);
+
+      const { editor } = pastePdf({ acceptPdf: true, onPasteFile });
+
+      expect(onPasteFile).toHaveBeenCalled();
+      expect(editor.querySelector('[data-image-placeholder]')).toBeNull();
+    });
+
+    it('ignores the pdf when acceptPdf is off', () => {
+      const onPasteFile = jest.fn().mockReturnValue('invoice.pdf');
+
+      const { editor } = pastePdf({ onPasteFile });
+
+      expect(onPasteFile).not.toHaveBeenCalled();
+      expect(editor.querySelector('[data-image-placeholder]')).toBeNull();
+    });
+
+    it('marks a pdf chip as uploading from uploadingPdfNames only', () => {
+      const { messageEditor } = createMockMessageEditor();
+      const { rerender } = render(
+        <MessageEditor
+          messageEditor={messageEditor}
+          onSubmit={mockOnSubmit}
+          uploadingNames={new Set(['same.name'])}
+          data-test-subj="messageEditor"
+        />
+      );
+      const editor = screen.getByTestId('messageEditor');
+      editor.appendChild(createImagePlaceholderElement('same.name', 'pdf'));
+
+      rerender(
+        <MessageEditor
+          messageEditor={messageEditor}
+          onSubmit={mockOnSubmit}
+          uploadingNames={new Set(['same.name'])}
+          uploadingPdfNames={new Set(['same.name'])}
+          data-test-subj="messageEditor"
+        />
+      );
+
+      expect(editor.querySelector('[data-image-placeholder]')).toHaveAttribute(
+        'data-uploading',
+        'true'
+      );
+    });
+  });
+
   it('marks a pasted placeholder chip as uploading immediately', () => {
     const onPasteFile = jest.fn().mockReturnValue('screenshot.png');
     const { messageEditor } = createMockMessageEditor();
