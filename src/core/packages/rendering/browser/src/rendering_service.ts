@@ -13,7 +13,7 @@ export interface RenderingService {
   addContext: (
     element: React.ReactNode,
     options?: {
-      /** Element the React root is mounted in. EUI breakpoint hooks measure its nearest breakpoint container. */
+      /** Element the React root is mounted in. EUI breakpoint hooks measure its nearest breakpoint container. Without it, they follow the window. */
       mountElement?: HTMLElement;
     }
   ) => React.ReactElement;

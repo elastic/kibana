@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import {
   EuiBadge,
@@ -40,10 +40,14 @@ import type { Sees } from './what_eui_sees';
 
 type Rendering = CoreStart['rendering'];
 
-const HOW_IT_WORKS = `<EuiProvider breakpointContainer={{ mountElement }}>
+const HOW_IT_WORKS = `// the app mount opts in
+rendering.addContext(<App />, { mountElement: element })
+
+<EuiProvider breakpointContainer={{ mountElement }}>
 
 container = mountElement.closest('[data-eui-breakpoint-container]') ?? body
-// measured with one shared ResizeObserver, content box`;
+// measured with one shared ResizeObserver, content box
+// roots without a mountElement keep the window`;
 
 const ACTIONS = [
   { label: 'Refresh', iconType: 'refresh' },
@@ -77,23 +81,18 @@ const RootProbe = ({ label }: { label: string }) => {
   );
 };
 
-/** Mounts two separate React roots on `body`, outside the app area, one with a mount element hint and one without. */
-const useOutsideRoots = (rendering: Rendering, isOpen: boolean) => {
+/** Mounts two React roots inside `host`, in the app area, one with a mount element and one without. */
+const useNestedRoots = (
+  rendering: Rendering,
+  host: React.RefObject<HTMLDivElement>,
+  isOpen: boolean
+) => {
   useEffect(() => {
-    if (!isOpen) return;
-    const host = document.createElement('div');
-    Object.assign(host.style, {
-      position: 'fixed',
-      insetBlockEnd: '16px',
-      insetInlineEnd: '16px',
-      zIndex: '9000',
-      display: 'flex',
-      gap: '8px',
-    });
+    const { current } = host;
+    if (!isOpen || !current) return;
     const withoutHint = document.createElement('div');
     const withHint = document.createElement('div');
-    host.append(withoutHint, withHint);
-    document.body.append(host);
+    current.append(withoutHint, withHint);
 
     ReactDOM.render(rendering.addContext(<RootProbe label="No mountElement" />), withoutHint);
     ReactDOM.render(
@@ -104,24 +103,26 @@ const useOutsideRoots = (rendering: Rendering, isOpen: boolean) => {
     return () => {
       ReactDOM.unmountComponentAtNode(withoutHint);
       ReactDOM.unmountComponentAtNode(withHint);
-      host.remove();
+      withoutHint.remove();
+      withHint.remove();
     };
-  }, [rendering, isOpen]);
+  }, [rendering, host, isOpen]);
 };
 
 export const JsTrack = ({ sees, rendering }: { sees: Sees; rendering: Rendering }) => {
   const sidebarApp = useResponsiveSidebarApp();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const [areRootsOpen, setAreRootsOpen] = useState(false);
+  const rootsHost = useRef<HTMLDivElement>(null);
   const isCompact = useIsWithinBreakpoints(['xs', 's', 'm']);
-  useOutsideRoots(rendering, areRootsOpen);
+  useNestedRoots(rendering, rootsHost, areRootsOpen);
 
   const jsBelowM = isBelow(sees.js, 'm');
 
   return (
     <Step
       title="JS track"
-      description="Hooks and components that switch in JS follow the same width: EuiShowFor and EuiHideFor, useIsWithinBreakpoints, and EUI internals like the page template and description list. Only active in CSS + JS mode."
+      description="Hooks and components that switch in JS follow the same width: EuiShowFor and EuiHideFor, useIsWithinBreakpoints, and EUI internals like the page template and description list. Only active in CSS + JS mode, for React roots that opt in."
     >
       <SubSection title="How it works">
         <EuiFlexGroup gutterSize="l">
@@ -134,14 +135,13 @@ export const JsTrack = ({ sees, rendering }: { sees: Sees; rendering: Rendering 
             <EuiText size="s">
               <ul>
                 <li>
-                  A hook can&apos;t see the DOM, so each React root says where it is mounted. EUI
-                  measures the nearest container&apos;s content box, the same box CSS resolves
-                  against.
+                  A hook can&apos;t see the DOM, so a React root opts in by passing the element it
+                  is mounted in. EUI measures the nearest container&apos;s content box, the same box
+                  CSS resolves against.
                 </li>
                 <li>
-                  App mounts pass nothing and default to the app area. Core&apos;s chrome root and{' '}
-                  <EuiCode>toMountPoint</EuiCode> pass their own element, so the header, overlays
-                  and toasts get <EuiCode>body</EuiCode>.
+                  Roots that pass nothing keep the window. This app&apos;s mount opts in. The
+                  header, overlays, toasts and every other root don&apos;t.
                 </li>
                 <li>
                   <EuiCode>EuiPortal</EuiCode> re-resolves from the portal node, so flyouts and
@@ -245,20 +245,24 @@ export const JsTrack = ({ sees, rendering }: { sees: Sees; rendering: Rendering 
       <SubSection title="Issues">
         <EuiFlexGrid columns={3} gutterSize="l">
           <Demo
-            title="Roots need a hint"
+            title="Nested roots must opt in too"
+            kind="JS"
             now={areRootsOpen ? 'shown' : 'hidden'}
             description={
               <>
-                Two React roots mounted on <EuiCode>body</EuiCode>, at the bottom right of the
-                window. Both should see the window. In CSS + JS mode the one without a{' '}
-                <EuiCode>mountElement</EuiCode> falls back to the app area. Any root created outside{' '}
-                <EuiCode>toMountPoint</EuiCode> needs an audit or a lint rule.
+                Two React roots mounted here, inside the app area. In CSS + JS mode only the one
+                with a <EuiCode>mountElement</EuiCode> follows the app; the other keeps the window.
+                Opt-in is per root, so <EuiCode>toMountPoint</EuiCode> and custom roots inside an
+                app need it too.
               </>
             }
           >
-            <EuiButton size="s" onClick={() => setAreRootsOpen((isOpen) => !isOpen)}>
-              {areRootsOpen ? 'Remove roots' : 'Mount roots'}
-            </EuiButton>
+            <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+              <EuiButton size="s" onClick={() => setAreRootsOpen((isOpen) => !isOpen)}>
+                {areRootsOpen ? 'Remove roots' : 'Mount roots'}
+              </EuiButton>
+              <EuiFlexGroup gutterSize="s" responsive={false} ref={rootsHost} />
+            </EuiFlexGroup>
           </Demo>
 
           <Demo
@@ -275,6 +279,38 @@ export const JsTrack = ({ sees, rendering }: { sees: Sees; rendering: Rendering 
             </EuiShowFor>
           </Demo>
         </EuiFlexGrid>
+      </SubSection>
+
+      <SubSection title="Other options (not decided)">
+        <EuiText size="s">
+          <p>
+            This PoC shows roots opting in. How JS should find its container is still open. Each
+            option has its own caveat:
+          </p>
+          <ul>
+            <li>
+              <strong>Roots opt in (shown here).</strong> Without a <EuiCode>mountElement</EuiCode>{' '}
+              JS keeps the window, so nothing gets a wrong answer silently. Opt-in is per root, not
+              per app: nested roots in an opted-in app disagree with it until they opt in too.
+            </li>
+            <li>
+              <strong>Roots default to the app area.</strong> Core&apos;s chrome root and{' '}
+              <EuiCode>toMountPoint</EuiCode> pass their own element, so apps are covered without
+              changes. A root created any other way, outside the app area, silently follows the app
+              area instead of the window.
+            </li>
+            <li>
+              <strong>Element-scoped hooks.</strong> A hook takes a ref and measures from that
+              element, and EUI components measure themselves. No root plumbing, but every call needs
+              a ref, <EuiCode>EuiShowFor</EuiCode> and <EuiCode>EuiHideFor</EuiCode> have no
+              element, and the first render uses a fallback before the measurement lands.
+            </li>
+            <li>
+              <strong>Keep JS on the window.</strong> EUI moves its cheap JS switches to CSS. No new
+              API, but JS-driven layouts still ignore the sidebar.
+            </li>
+          </ul>
+        </EuiText>
       </SubSection>
 
       {isFlyoutOpen && (

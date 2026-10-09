@@ -99,11 +99,7 @@ export class RenderingService implements IRenderingService {
     const Layout = layout.getComponent();
 
     const element = (
-      <KibanaRootContextProvider
-        {...startServices}
-        globalStyles={true}
-        mountElement={targetDomElement}
-      >
+      <KibanaRootContextProvider {...startServices} globalStyles={true}>
         <GlobalRedirectAppLink navigateToUrl={renderCoreDeps.application.navigateToUrl} />
         <Layout />
       </KibanaRootContextProvider>

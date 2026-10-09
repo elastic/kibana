@@ -63,8 +63,8 @@ export const App = ({ rendering }: { rendering: CoreStart['rendering'] }) => {
               </li>
               <li>
                 <strong>Chrome slots.</strong> Content the chrome root renders into the app area
-                (the top and bottom bars) follows the app area in CSS but <code>body</code> in JS,
-                until the slot gets its own provider.
+                (the top and bottom bars) follows the app area in CSS but the window in JS, until
+                that root opts in.
               </li>
               <li>
                 <strong>First render.</strong> JS breakpoints measure synchronously on mount, which
