@@ -6,13 +6,12 @@
  */
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { FeatureWithFilter } from '@kbn/significant-events-schema';
 import { getSampleDocumentsEsql } from '@kbn/ai-tools';
 import { getDiverseSampleDocuments } from '@kbn/nightshift-ai';
-import { conditionToESQLAst } from '@kbn/streamlang';
+import { conditionToESQLFilterAst } from '@kbn/nightshift-shared';
 import { withSpan } from '@kbn/apm-utils';
 import { getEntityFilters } from './get_entity_filters';
 import { parseError } from '../../streams/parse_error';
@@ -159,9 +158,9 @@ export async function fetchSampleDocuments({
 
   const entityFilteredSize = Math.round(size * entityFilteredRatio);
   const diverseSize = Math.round(size * diverseRatio);
-  const whereCondition = entityFilters
-    .map((filter) => conditionToESQLAst({ not: filter }))
-    .reduce((acc, current) => esql.exp`${acc} AND ${current}`);
+  const whereCondition = conditionToESQLFilterAst({
+    and: entityFilters.map((filter) => ({ not: filter })),
+  });
 
   const [{ hits: entityFilteredHits }, { hits: diverseHits }, { hits: randomHits }] =
     await Promise.all([

@@ -178,7 +178,7 @@ describe('fetchSampleDocuments', () => {
       })
     );
     expect(BasicPrettyPrinter.print(entityFilteredCall.whereCondition!)).toBe(
-      'NOT COALESCE(`service.name` == "checkout", FALSE)'
+      '(`service.name` != "checkout" OR `service.name` IS NULL)'
     );
 
     expect(getDiverseSampleDocumentsMock).toHaveBeenCalledWith({
