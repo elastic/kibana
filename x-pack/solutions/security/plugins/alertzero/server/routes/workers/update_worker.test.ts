@@ -89,7 +89,7 @@ describe('registerUpdateWorkerRoute', () => {
   it('maps a blocked Alert Triage enable to 400 with a message for the reason', async () => {
     const update = jest
       .fn()
-      .mockResolvedValue({ outcome: 'blocked', reason: 'alertAnalysisRuntimeDisabled' });
+      .mockResolvedValue({ outcome: 'blocked', reason: 'ruleAttachmentUnavailable' });
     const { handler } = setupRoute(update);
     const response = httpServerMock.createResponseFactory();
 
@@ -110,7 +110,7 @@ describe('registerUpdateWorkerRoute', () => {
 
     expect(response.badRequest).toHaveBeenCalledWith({
       body: {
-        message: expect.stringContaining('alert analysis to be turned on for this space'),
+        message: expect.stringContaining('detection rules cannot be connected to it'),
       },
     });
   });

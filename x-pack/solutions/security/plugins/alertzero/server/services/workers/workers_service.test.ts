@@ -17,7 +17,10 @@ import {
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_IDS,
 } from '@kbn/alertzero-common';
-import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
+import {
+  getManagedWorkflowDefinition,
+  SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import { WorkersService } from './workers_service';
@@ -197,8 +200,7 @@ const createPersistentHarness = () => {
     }
   );
   const management = {
-    // Present-and-enabled by default, representing a healthy deployment; tests that exercise
-    // the Alert Analysis preflight check override this per-call to cover the blocked cases.
+    // Present-and-enabled by default, representing a healthy deployment.
     getWorkflow: jest.fn(async () => ({ enabled: true })),
     getWorkflows: jest.fn(),
     getWorkflowExecutions: jest.fn(async () => ({ results: [], page: 1, size: 10, total: 0 })),
@@ -1086,8 +1088,7 @@ describe('WorkersService', () => {
   describe('alert triage worker opts', () => {
     const makeService = (
       harness: ReturnType<typeof createPersistentHarness>,
-      attachment: ReturnType<typeof makeAttachmentService> | null,
-      isAlertAnalysisRuntimeEnabled?: () => Promise<boolean>
+      attachment: ReturnType<typeof makeAttachmentService> | null
     ) => {
       const getAttachmentServiceMock = attachment
         ? (jest.fn(async () => attachment) as any)
@@ -1099,7 +1100,6 @@ describe('WorkersService', () => {
         {},
         {
           getAttachmentService: getAttachmentServiceMock,
-          isAlertAnalysisRuntimeEnabled,
         },
         async (_request, registration, options) => {
           await harness.install(registration.id, options);
@@ -1110,15 +1110,12 @@ describe('WorkersService', () => {
     };
 
     // A combined settings-and-enable PATCH (one Watch Save) must not persist the settings half
-    // when the enable half is refused: the preflight check has to run, and fail, before the
-    // settings write, or the operator is left with a bumped revision and a Worker that still
-    // is not enabled — a state its own optimistic UI overlay cannot recover from without a
-    // second, separate save.
+    // when the enable half is refused: the refusal has to happen before the settings write, or
+    // the operator is left with a bumped revision and a Worker that still is not enabled — a
+    // state its own optimistic UI overlay cannot recover from without a second, separate save.
     it('combined settings+enable PATCH: does not persist settings when the enable is blocked', async () => {
       const harness = createPersistentHarness();
-      (harness.management.getWorkflow as jest.Mock).mockResolvedValueOnce({ enabled: false });
-      const attachment = makeAttachmentService();
-      const { service } = makeService(harness, attachment);
+      const { service } = makeService(harness, null);
 
       const result = await service.update(
         TRIAGE,
@@ -1131,61 +1128,52 @@ describe('WorkersService', () => {
         request
       );
 
-      expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisWorkflowDisabled' });
+      expect(result).toEqual({ outcome: 'blocked', reason: 'ruleAttachmentUnavailable' });
       expect(harness.documents.has(`${TRIAGE}-${SPACE}`)).toBe(false);
       expect(harness.install).not.toHaveBeenCalled();
       expect(harness.updateWorkflow).not.toHaveBeenCalled();
     });
 
-    it('preflight fail: blocks with a reason and does not enable the Worker', async () => {
-      const harness = createPersistentHarness();
-      (harness.management.getWorkflow as jest.Mock).mockResolvedValueOnce({ enabled: false });
-      const attachment = makeAttachmentService();
-      const { service } = makeService(harness, attachment);
+    // Alert analysis is a per-Worker prerequisite: the Watch page callout warns about it and
+    // each Triage run fails with its own message, so the enable goes through.
+    it.each([
+      ['disabled', { enabled: false }],
+      ['missing', null],
+    ])(
+      'enables and attaches rules when the Alert Analysis workflow is %s',
+      async (_state, alertAnalysisWorkflow) => {
+        const harness = createPersistentHarness();
+        const getWorkflow = harness.management.getWorkflow as jest.Mock;
+        const defaultGetWorkflow = getWorkflow.getMockImplementation();
+        getWorkflow.mockImplementation(async (workflowId: string, ...rest: unknown[]) =>
+          workflowId === SECURITY_ALERT_ANALYSIS_WORKFLOW_ID
+            ? alertAnalysisWorkflow
+            : defaultGetWorkflow?.(workflowId, ...rest)
+        );
+        const attachment = makeAttachmentService();
+        const { service } = makeService(harness, attachment);
 
-      const result = await service.update(
-        TRIAGE,
-        {
-          enabled: true,
-          settings: { serviceAccountId: 'sa-1' },
-          settingsRevision: null,
-        },
-        SPACE,
-        request
-      );
+        const result = await service.update(
+          TRIAGE,
+          {
+            enabled: true,
+            settings: { serviceAccountId: 'sa-1' },
+            settingsRevision: null,
+          },
+          SPACE,
+          request
+        );
 
-      expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisWorkflowDisabled' });
-      expect(harness.management.getWorkflow).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.any(String),
-        request
-      );
-      expect(harness.updateWorkflow).not.toHaveBeenCalled();
-    });
-
-    // getWorkflow returns null for an absent workflow, distinct from a present-but-disabled
-    // one; both must refuse the enable the same way, or a missing sub-workflow lets every rule
-    // fire into a `workflow.execute` that has nothing to execute.
-    it('preflight fail: blocks the enable when the Alert Analysis workflow is missing entirely', async () => {
-      const harness = createPersistentHarness();
-      (harness.management.getWorkflow as jest.Mock).mockResolvedValueOnce(null);
-      const attachment = makeAttachmentService();
-      const { service } = makeService(harness, attachment);
-
-      const result = await service.update(
-        TRIAGE,
-        {
-          enabled: true,
-          settings: { serviceAccountId: 'sa-1' },
-          settingsRevision: null,
-        },
-        SPACE,
-        request
-      );
-
-      expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisWorkflowDisabled' });
-      expect(harness.updateWorkflow).not.toHaveBeenCalled();
-    });
+        expect(result.outcome).toBe('updated');
+        expect(attachment.updateRuleAttachments).toHaveBeenCalled();
+        expect(harness.updateWorkflow).toHaveBeenCalledWith(
+          reportedWorkflowId(TRIAGE, SPACE),
+          { enabled: true },
+          SPACE,
+          request
+        );
+      }
+    );
 
     it('attachment service unavailable: blocks the enable instead of enabling unwired', async () => {
       const harness = createPersistentHarness();
@@ -1296,79 +1284,6 @@ describe('WorkersService', () => {
         SPACE,
         request
       );
-    });
-
-    // The preflight check must not be gated on getAttachmentService being present.
-    // In environments where securitySolution plugin is absent the attachment service
-    // is undefined, but the runtime config guard must still block the enable.
-    it('runtime config off: blocks even when attachment service is absent', async () => {
-      const harness = createPersistentHarness();
-      const { service } = makeService(harness, null, async () => false);
-
-      const result = await service.update(
-        TRIAGE,
-        {
-          enabled: true,
-          settings: { serviceAccountId: 'sa-1' },
-          settingsRevision: null,
-        },
-        SPACE,
-        request
-      );
-
-      expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisRuntimeDisabled' });
-      expect(harness.updateWorkflow).not.toHaveBeenCalled();
-    });
-
-    // The workflow's `enabled` flag is not sufficient on its own. It installs enabled, but
-    // `securitySolution:alertAnalysisWorkflowEnabled` now defaults to false, and with that off
-    // the workflow's own guard short-circuits: it completes having classified nothing, so the
-    // Worker reports success while triaging no alerts. Enabling into that state is worse than
-    // refusing, because nothing anywhere reports a problem.
-    it('runtime config off: blocks even though the workflow itself is enabled', async () => {
-      const harness = createPersistentHarness();
-      const attachment = makeAttachmentService();
-      const { service } = makeService(harness, attachment, async () => false);
-
-      const result = await service.update(
-        TRIAGE,
-        {
-          enabled: true,
-          settings: { serviceAccountId: 'sa-1' },
-          settingsRevision: null,
-        },
-        SPACE,
-        request
-      );
-
-      expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisRuntimeDisabled' });
-      expect(harness.updateWorkflow).not.toHaveBeenCalled();
-      expect(attachment.updateRuleAttachments).not.toHaveBeenCalled();
-    });
-
-    // An unreadable setting must not make the Worker permanently un-enableable: a failed read
-    // is not evidence that analysis is off.
-    it('runtime config unreadable: falls through to the remaining checks', async () => {
-      const harness = createPersistentHarness();
-      const attachment = makeAttachmentService();
-      const { service } = makeService(harness, attachment, async () => {
-        throw new Error('uiSettings unavailable');
-      });
-
-      expect(
-        (
-          await service.update(
-            TRIAGE,
-            {
-              enabled: true,
-              settings: { serviceAccountId: 'sa-1' },
-              settingsRevision: null,
-            },
-            SPACE,
-            request
-          )
-        ).outcome
-      ).toBe('updated');
     });
 
     it('attach-then-enable: passes installed workflow ID (with space suffix) to the attachment service', async () => {
