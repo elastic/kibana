@@ -53,28 +53,27 @@ steps:
 
       - wait: ~
 
-      - command: .buildkite/scripts/steps/build_kibana.sh
-        label: Build Kibana Distribution
+      - command: .buildkite/scripts/steps/cloud/build_cloud_image.sh
+        label: 'Build Cloud Image'
         agents:
           provider: gcp
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
-          machineType: n2-standard-8
+          machineType: n2-standard-16
           preemptible: true
-        if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
-        timeout_in_minutes: 90
-        key: build
+        timeout_in_minutes: 60
+        key: build_cloud_image
         retry:
           automatic:
             - exit_status: '-1'
               limit: 3
 
-      - command: .buildkite/scripts/steps/cloud/build_and_deploy.sh
+      - command: .buildkite/scripts/steps/cloud/deploy.sh
         env:
           ES_ZONE_COUNT: 2
           ES_HOT_TIER_MEMORY_SIZE: 8192
           KIBANA_MEMORY_SIZE: 8192
-        label: 'Build and Deploy to Cloud'
+        label: 'Deploy to Cloud'
         agents:
           provider: gcp
           image: family/kibana-ubuntu-2404
@@ -82,7 +81,7 @@ steps:
           machineType: n2-standard-2
           preemptible: true
         timeout_in_minutes: 30
-        depends_on: build
+        depends_on: build_cloud_image
         retry:
           automatic:
             - exit_status: '-1'

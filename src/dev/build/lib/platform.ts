@@ -11,7 +11,7 @@ import { dashSuffix } from './util';
 
 export type PlatformName = 'win32' | 'darwin' | 'linux';
 export type PlatformArchitecture = 'x64' | 'arm64';
-export type Variant = 'serverless';
+export type Variant = 'serverless' | 'cloud';
 
 export class Platform {
   constructor(
@@ -57,6 +57,10 @@ export class Platform {
     return this.variant === 'serverless';
   }
 
+  isCloud() {
+    return this.variant === 'cloud';
+  }
+
   toString() {
     return `${this.name}-${this.architecture}${dashSuffix(this.getVariant())}`;
   }
@@ -71,9 +75,14 @@ export const DOWNLOAD_PLATFORMS = [
   new Platform('win32', 'arm64', 'windows-arm64'),
 ];
 
+export const CLOUD_PLATFORMS = [
+  new Platform('linux', 'x64', 'linux-x86_64', 'cloud'),
+  new Platform('linux', 'arm64', 'linux-aarch64', 'cloud'),
+];
+
 export const SERVERLESS_PLATFORMS = [
   new Platform('linux', 'x64', 'linux-x86_64', 'serverless'),
   new Platform('linux', 'arm64', 'linux-aarch64', 'serverless'),
 ];
 
-export const ALL_PLATFORMS = [...DOWNLOAD_PLATFORMS, ...SERVERLESS_PLATFORMS];
+export const ALL_PLATFORMS = [...DOWNLOAD_PLATFORMS, ...CLOUD_PLATFORMS, ...SERVERLESS_PLATFORMS];

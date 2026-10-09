@@ -22,13 +22,19 @@ import type { KibanaSolution } from '@kbn/projects-solutions-groups';
 import type { VersionInfo } from './version_info';
 import { getVersionInfo } from './version_info';
 import type { PlatformName, PlatformArchitecture } from './platform';
-import { ALL_PLATFORMS, SERVERLESS_PLATFORMS, DOWNLOAD_PLATFORMS } from './platform';
+import {
+  ALL_PLATFORMS,
+  CLOUD_PLATFORMS,
+  SERVERLESS_PLATFORMS,
+  DOWNLOAD_PLATFORMS,
+} from './platform';
 import type { BuildOptions } from '../build_distributables';
 
 interface Options {
   isRelease: boolean;
   targetAllPlatforms: boolean;
   targetServerlessPlatforms: boolean;
+  targetCloudPlatforms: boolean;
   skipServerless: boolean;
   versionQualifier?: string;
   dockerContextUseLocalArtifact: boolean | null;
@@ -52,6 +58,7 @@ export class Config {
     return new Config(
       opts.targetAllPlatforms,
       opts.targetServerlessPlatforms,
+      opts.targetCloudPlatforms,
       opts.skipServerless,
       kibanaPackageJson,
       nodeVersion,
@@ -82,6 +89,7 @@ export class Config {
   constructor(
     private readonly targetAllPlatforms: boolean,
     private readonly targetServerlessPlatforms: boolean,
+    private readonly targetCloudPlatforms: boolean,
     private readonly skipServerless: boolean,
     private readonly pkg: KibanaPackageJson,
     private readonly nodeVersion: string,
@@ -171,16 +179,18 @@ export class Config {
     return Path.resolve(this.repoRoot, ...subPaths);
   }
 
-  /**
-   * Return the list of Platforms we are targeting, if --this-platform flag is
-   * specified only the platform for this OS will be returned
-   */
   getTargetPlatforms() {
-    if (this.targetServerlessPlatforms) {
-      return SERVERLESS_PLATFORMS;
+    if (this.targetServerlessPlatforms || this.targetCloudPlatforms) {
+      const platforms = this.targetServerlessPlatforms ? SERVERLESS_PLATFORMS : CLOUD_PLATFORMS;
+      if (this.dockerCrossCompile || this.targetAllPlatforms) {
+        return platforms;
+      }
+
+      const architecture = this.getPlatformForThisOs().getArchitecture();
+      return platforms.filter((platform) => platform.getArchitecture() === architecture);
     }
     if (this.targetAllPlatforms) {
-      return this.skipServerless ? DOWNLOAD_PLATFORMS : ALL_PLATFORMS;
+      return this.skipServerless ? [...DOWNLOAD_PLATFORMS, ...CLOUD_PLATFORMS] : ALL_PLATFORMS;
     }
 
     return [this.getPlatformForThisOs()];
@@ -192,11 +202,11 @@ export class Config {
    * reliably get the LICENSE file, which isn't included in the windows version
    */
   getNodePlatforms() {
-    if (this.targetServerlessPlatforms) {
-      return SERVERLESS_PLATFORMS;
+    if (this.targetServerlessPlatforms || this.targetCloudPlatforms) {
+      return this.getTargetPlatforms();
     }
     if (this.targetAllPlatforms) {
-      return this.skipServerless ? DOWNLOAD_PLATFORMS : ALL_PLATFORMS;
+      return this.skipServerless ? [...DOWNLOAD_PLATFORMS, ...CLOUD_PLATFORMS] : ALL_PLATFORMS;
     }
 
     if (process.platform === 'linux' && process.arch === 'x64') {

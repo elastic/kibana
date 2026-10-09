@@ -55,6 +55,7 @@ it('build default and oss dist for current platform, without packages, by defaul
         "skipServerless": false,
         "tarZstd": false,
         "targetAllPlatforms": false,
+        "targetCloudPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -98,6 +99,7 @@ it('builds packages if --all-platforms is passed', () => {
         "skipServerless": false,
         "tarZstd": false,
         "targetAllPlatforms": true,
+        "targetCloudPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -141,6 +143,7 @@ it('limits packages if --rpm passed with --all-platforms', () => {
         "skipServerless": false,
         "tarZstd": false,
         "targetAllPlatforms": true,
+        "targetCloudPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -184,6 +187,7 @@ it('limits packages if --deb passed with --all-platforms', () => {
         "skipServerless": false,
         "tarZstd": false,
         "targetAllPlatforms": true,
+        "targetCloudPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -228,6 +232,7 @@ it('limits packages if --docker passed with --all-platforms', () => {
         "skipServerless": false,
         "tarZstd": false,
         "targetAllPlatforms": true,
+        "targetCloudPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -279,6 +284,7 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
         "skipServerless": false,
         "tarZstd": false,
         "targetAllPlatforms": true,
+        "targetCloudPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -323,6 +329,7 @@ it('limits packages if --all-platforms passed with --skip-docker-fips', () => {
         "skipServerless": false,
         "tarZstd": false,
         "targetAllPlatforms": true,
+        "targetCloudPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -367,6 +374,7 @@ it('limits packages if --all-platforms passed with --skip-docker-cloud-fips', ()
         "skipServerless": false,
         "tarZstd": false,
         "targetAllPlatforms": true,
+        "targetCloudPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -377,4 +385,72 @@ it('limits packages if --all-platforms passed with --skip-docker-cloud-fips', ()
       "unknownFlags": Array [],
     }
   `);
+});
+
+it('only builds cloud packages if --cloud is passed', () => {
+  expect(readCliArgs(['node', 'scripts/build', '--cloud'])).toMatchInlineSnapshot(`
+    Object {
+      "buildOptions": Object {
+        "createArchives": true,
+        "createCdnAssets": true,
+        "createDebPackage": false,
+        "createDockerCloud": true,
+        "createDockerCloudFIPS": false,
+        "createDockerContexts": false,
+        "createDockerFIPS": false,
+        "createDockerServerless": false,
+        "createDockerUBI": false,
+        "createDockerWolfi": false,
+        "createGenericFolders": true,
+        "createPlatformFolders": true,
+        "createRpmPackage": false,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
+        "dockerNamespace": null,
+        "dockerPush": false,
+        "dockerTag": null,
+        "dockerTagQualifier": null,
+        "downloadCloudDependencies": true,
+        "downloadFreshNode": true,
+        "eprRegistry": "snapshot",
+        "initialize": true,
+        "isRelease": false,
+        "skipServerless": false,
+        "tarZstd": false,
+        "targetAllPlatforms": false,
+        "targetCloudPlatforms": true,
+        "targetServerlessPlatforms": false,
+        "versionQualifier": "",
+        "withExamplePlugins": false,
+        "withTestPlugins": false,
+      },
+      "log": <ToolingLog>,
+      "showHelp": false,
+      "unknownFlags": Array [],
+    }
+  `);
+});
+
+it.each([
+  { flags: ['--all-platforms'] },
+  { flags: ['--all-platforms', '--docker-cross-compile'] },
+  { flags: ['--all-platforms', '--docker-images'] },
+])('only builds cloud artifacts with --cloud $flags', ({ flags }) => {
+  const { buildOptions } = readCliArgs(['node', 'scripts/build', '--cloud', ...flags]);
+
+  expect(buildOptions).toMatchObject({
+    createArchives: true,
+    createDebPackage: false,
+    createRpmPackage: false,
+    createDockerCloud: true,
+    createDockerCloudFIPS: false,
+    createDockerContexts: false,
+    createDockerFIPS: false,
+    createDockerServerless: false,
+    createDockerUBI: false,
+    createDockerWolfi: false,
+    targetAllPlatforms: true,
+    targetCloudPlatforms: true,
+    targetServerlessPlatforms: false,
+  });
 });

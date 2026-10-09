@@ -41,6 +41,7 @@ export interface BuildOptions {
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
   targetServerlessPlatforms: boolean;
+  targetCloudPlatforms: boolean;
   skipServerless: boolean;
   tarZstd: boolean;
   withExamplePlugins: boolean;
