@@ -24,6 +24,7 @@ import {
   ACTION_IDS,
   DEFAULT_POLL_INTERVAL_MS,
   HOP_TIMEOUTS_MS,
+  PARKED_HOP_STATUS,
   PROPOSALS_API_VERSION,
   PROPOSALS_URL,
   PUBLIC_API_VERSION,
@@ -81,19 +82,28 @@ const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatus
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * F2: the concurrency manager cancels an overlapping run with
- * `cancellationReason: 'Cancelled due to concurrency limit (max: N)'`
- * (concurrency_manager.ts:199) and status CANCELLED. The public
- * WorkflowExecutionDto does not declare the field, so it is read defensively;
- * any concurrency-limit cancellation is harness interference (INVALID, never
- * scored), not a model failure.
+ * F2/N1: the concurrency manager takes an overlapping run out of the race in
+ * three ways (concurrency_manager.ts): `cancel-in-progress` marks the displaced
+ * run CANCELLED with `Cancelled due to concurrency limit (max: N)` (:199);
+ * `drop` marks the NEW run SKIPPED with `Dropped due to concurrency limit
+ * (max: N)` (:138); a full backlog marks it SKIPPED with `Queue full
+ * (queue-size: N)` (:177). The public WorkflowExecutionDto does not declare
+ * `cancellationReason`, so it is read defensively. Any of the three is harness
+ * interference (INVALID, never scored), not a model failure —
+ * attack_discovery_review is `drop`/max 1, so a re-dispatched review lands here.
  */
 const concurrencyCancellation = (
   execution: WorkflowExecutionDto | undefined
 ): string | undefined => {
-  if (execution?.status !== ExecutionStatus.CANCELLED) return undefined;
+  const status = execution?.status;
+  if (status !== ExecutionStatus.CANCELLED && status !== ExecutionStatus.SKIPPED) return undefined;
   const reason = (execution as { cancellationReason?: string }).cancellationReason;
-  return typeof reason === 'string' && reason.includes('concurrency limit') ? reason : undefined;
+  if (typeof reason !== 'string') return undefined;
+  const byConcurrency =
+    status === ExecutionStatus.CANCELLED
+      ? reason.includes('concurrency limit')
+      : reason.includes('Dropped due to concurrency limit') || reason.includes('Queue full');
+  return byConcurrency ? reason : undefined;
 };
 
 /**
@@ -101,9 +111,13 @@ const concurrencyCancellation = (
  * strategy: cancel-in-progress}` (floor_attack_discovery.yaml) — the product's
  * own limit, which the harness must not touch. When the eval runner executes
  * examples concurrently, overlapping AD hops cancel each other
- * (concurrency_manager.ts:199). This in-process queue serializes whole chains —
- * one example's hops never overlap another's on a max-1 workflow. Dropped
- * rejections keep the queue alive across failures.
+ * (concurrency_manager.ts:199). The spec runs its experiment at concurrency 1
+ * (WORKER_CHAIN_EXPERIMENT_CONCURRENCY), which also keeps seeding and cleanup
+ * from overlapping another example's chain — the AD worker scans the whole
+ * space, so a concurrently seeded example's alerts would leak into this one.
+ * This in-process queue is only a guard for chain execution should a caller
+ * raise that concurrency: it does NOT serialize seeding, so it is not a
+ * substitute. Dropped rejections keep the queue alive across failures.
  */
 let chainQueue: Promise<unknown> = Promise.resolve();
 
@@ -116,6 +130,22 @@ export interface ChainScenario {
   rule: { id: string; name: string };
   goldVerdict: 'true_positive' | 'false_positive' | 'inconclusive';
 }
+
+/** F4: one AD review Investigation's D55 array next to the array the product must have written. */
+export interface ReviewInvestigationExecutionIds {
+  investigationId: string;
+  expectedExecutionIds: string[];
+  workflowExecutionIds: string[];
+}
+
+/**
+ * ChainRunRecord plus harness-only data this package grades. Defined here
+ * (not in @kbn/security-evals-chain-safety) so the shared record shape stays
+ * untouched.
+ */
+export type WorkerChainRunRecord = ChainRunRecord & {
+  reviewInvestigations?: ReviewInvestigationExecutionIds[];
+};
 
 export interface RunChainParams {
   ctx: KbnRequestContext;
@@ -239,17 +269,22 @@ const waitForTerminal = async (
   pollIntervalMs: number,
   /** Extra "done waiting" condition for a hop that legitimately parks (see isReviewSettled). */
   isSettled?: (execution: WorkflowExecutionDto) => boolean
-): Promise<{ status: string; overrun: boolean }> => {
+): Promise<{ status: string; overrun: boolean; parked: boolean }> => {
   const deadline = Date.now() + timeoutMs;
   let last: WorkflowExecutionDto | undefined;
   for (;;) {
     last = (await readExecution(ctx, workflowExecutionId).catch(() => last)) ?? last;
-    if (last && (isTerminal(last.status) || isSettled?.(last))) {
-      return { status: last.status, overrun: false };
+    if (last && isTerminal(last.status)) {
+      return { status: last.status, overrun: false, parked: false };
+    }
+    // B1: settled but not terminal = parked on its gate by design, reported
+    // as `parked` so the hop is not mistaken for a stuck/failed one.
+    if (last && isSettled?.(last)) {
+      return { status: last.status, overrun: false, parked: true };
     }
     if (Date.now() >= deadline) {
       log.warning(`Hop "${hop}" (execution ${workflowExecutionId}) overran ${timeoutMs}ms`);
-      return { status: last?.status ?? 'unreadable', overrun: true };
+      return { status: last?.status ?? 'unreadable', overrun: true, parked: false };
     }
     await sleep(pollIntervalMs);
   }
@@ -372,9 +407,9 @@ const REVIEW_DISPATCH_STEP_ID = 'run_review';
 const collectReviewExecutionIds = async (
   ctx: KbnRequestContext,
   floorExecutionId: string
-): Promise<string[]> => {
+): Promise<Array<{ reviewId: string; runnerExecutionId: string }>> => {
   const children = await listChildExecutions(ctx, floorExecutionId);
-  const ids: string[] = [];
+  const reviews: Array<{ reviewId: string; runnerExecutionId: string }> = [];
   for (const runner of children.filter(
     (child) => child.workflowId === WORKFLOW_IDS.attackDiscoveryRunner
   )) {
@@ -384,11 +419,13 @@ const collectReviewExecutionIds = async (
       const isDispatch =
         step.stepId === REVIEW_DISPATCH_STEP_ID || isExecuteAsyncStepType(step.stepType);
       if (isDispatch && typeof reviewId === 'string') {
-        if (!ids.includes(reviewId)) ids.push(reviewId);
+        if (!reviews.some((r) => r.reviewId === reviewId)) {
+          reviews.push({ reviewId, runnerExecutionId: runner.executionId });
+        }
       }
     }
   }
-  return ids;
+  return reviews;
 };
 
 /**
@@ -472,7 +509,7 @@ export const runChain = ({
   runAsIdentities,
   maxWaitMs = {},
   pollIntervalMs = DEFAULT_POLL_INTERVAL_MS,
-}: RunChainParams): Promise<ChainRunRecord> => {
+}: RunChainParams): Promise<WorkerChainRunRecord> => {
   // F2: whole chains run one at a time — floor_attack_discovery is max-1
   // cancel-in-progress, so overlapping AD hops cancel each other (18/21 in the
   // live smoke). The product's own limit stays untouched. The queue tail
@@ -507,7 +544,7 @@ const runChainUnserialized = async ({
   runAsIdentities,
   maxWaitMs = {},
   pollIntervalMs = DEFAULT_POLL_INTERVAL_MS,
-}: RunChainParams): Promise<ChainRunRecord> => {
+}: RunChainParams): Promise<WorkerChainRunRecord> => {
   const timeouts = { ...HOP_TIMEOUTS_MS, ...maxWaitMs };
   const hops: ChainHopRecord[] = [];
 
@@ -549,7 +586,14 @@ const runChainUnserialized = async ({
 
   let appliedVerdictOrigin: VerdictOrigin | undefined;
   /** Investigations the AD reviews raised proposals on (handoff proposals live there). */
-  const reviewInvestigations: Array<{ id: string; verdict?: VerdictOrigin }> = [];
+  const reviewInvestigations: Array<{
+    id: string;
+    verdict?: VerdictOrigin;
+    /** The runner execution that dispatched this review (its `parent_run_id`). */
+    runnerExecutionId: string;
+  }> = [];
+  /** F4: what each review's Investigation actually carries vs. what the product writes. */
+  const reviewInvestigationIds: ReviewInvestigationExecutionIds[] = [];
 
   if (scenario.workerChain.includes('alert-triage')) {
     const triageAutonomy = await readBackAutonomy('alert-triage', WORKER_IDS.alertTriage);
@@ -561,7 +605,8 @@ const runChainUnserialized = async ({
     );
     // F1: mirror the production trigger path exactly. The alert trigger emits
     // full alert documents (`buildAlertEvent` over `preprocessAlertInputs`,
-    // workflows_management_api.ts:753), and POST /run applies the same
+    // connectors/workflows/index.ts:269 — the alert-trigger emitter), and the
+    // POST /run route (workflows_management_api.ts:753) applies the same
     // preprocessing when `event.triggerType === 'alert'` with `alertIds`
     // (preprocess_alert_inputs.ts:156). Passing expanded docs by hand (the old
     // shape) skipped `classify_alerts`' full-doc validation (`_id`, `_index`,
@@ -697,9 +742,11 @@ const runChainUnserialized = async ({
     // product — never scenario.goldVerdict. The reviews are async grandchildren
     // (floor → runner → executeAsync review): walk to them, wait each to
     // terminal, then read its verdict and the Investigation it raised proposals on.
-    const reviewIds = await collectReviewExecutionIds(ctx, executionId);
-    log.info(`attack_discovery reviews: ${reviewIds.join(', ') || 'none'}`);
-    for (const reviewId of reviewIds) {
+    const dispatchedReviews = await collectReviewExecutionIds(ctx, executionId);
+    log.info(
+      `attack_discovery reviews: ${dispatchedReviews.map((r) => r.reviewId).join(', ') || 'none'}`
+    );
+    for (const { reviewId, runnerExecutionId } of dispatchedReviews) {
       log.info(`attack_discovery_review started: execution ${reviewId}`);
       const reviewWait = await waitForTerminal(
         ctx,
@@ -717,16 +764,24 @@ const runChainUnserialized = async ({
           `attack_discovery_review ${reviewId} cancelled by the product's concurrency limit: ${reviewConcurrencyCancel}`
         );
       }
+      // B1: a review parked on its escalation gate is the correct outcome at
+      // Manual/Assisted autonomy; record it distinctly so ChainTerminal can
+      // tell it from a failed/cancelled review (which stays a real 0).
+      const reviewStatus = reviewWait.overrun
+        ? 'timeout'
+        : reviewWait.parked
+        ? PARKED_HOP_STATUS
+        : reviewWait.status;
       log.info(
-        `attack_discovery_review finished: execution ${reviewId} status ${
-          reviewWait.overrun ? 'timeout' : reviewWait.status
+        `attack_discovery_review finished: execution ${reviewId} status ${reviewStatus}${
+          reviewWait.parked ? ` (engine status ${reviewWait.status})` : ''
         }`
       );
       record(
         'attack_discovery_review',
         WORKFLOW_IDS.attackDiscoveryReview,
         reviewId,
-        reviewWait.overrun ? 'timeout' : reviewWait.status,
+        reviewStatus,
         asTriageTrigger(reviewExecution?.triggeredBy) ?? 'unknown',
         adAutonomy
       );
@@ -736,7 +791,11 @@ const runChainUnserialized = async ({
       const result = readReviewResult(reviewExecution);
       if (result.verdict !== undefined) appliedVerdictOrigin = result.verdict;
       if (result.investigationId !== undefined) {
-        reviewInvestigations.push({ id: result.investigationId, verdict: result.verdict });
+        reviewInvestigations.push({
+          id: result.investigationId,
+          verdict: result.verdict,
+          runnerExecutionId,
+        });
       }
     }
   }
@@ -760,6 +819,15 @@ const runChainUnserialized = async ({
   for (const review of reviewInvestigations) {
     if (!proposalSources.some((source) => source.id === review.id)) {
       const reviewInvestigation = await readInvestigation(ctx, review.id);
+      reviewInvestigationIds.push({
+        investigationId: review.id,
+        // attack_discovery_review.yaml:263,278-285: the review seeds
+        // `workflow_execution_ids` with its `parent_run_id` — the RUNNER's
+        // execution id (attack_discovery_runner.yaml passes `{{ execution.id }}`),
+        // not the floor's and not the review's own.
+        expectedExecutionIds: [review.runnerExecutionId],
+        workflowExecutionIds: reviewInvestigation?.metadata?.workflow_execution_ids ?? [],
+      });
       proposalSources.push({
         id: review.id,
         verdict: review.verdict,
@@ -838,5 +906,6 @@ const runChainUnserialized = async ({
       reopened: investigation?.reopened ?? false,
     },
     harnessInterference,
+    reviewInvestigations: reviewInvestigationIds,
   };
 };

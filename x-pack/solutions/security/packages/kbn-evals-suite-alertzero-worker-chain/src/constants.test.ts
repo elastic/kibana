@@ -23,7 +23,20 @@ import {
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
 } from '@kbn/workflows/managed/definitions/alertzero';
-import { WORKER_IDS, WORKFLOW_IDS, ACTION_IDS } from './constants';
+// eslint-disable-next-line import/no-nodejs-modules
+import { readFileSync } from 'fs';
+// eslint-disable-next-line import/no-nodejs-modules
+import { join } from 'path';
+import { FP_TP_EXAMPLES } from '@kbn/evals-suite-attack-discovery-fp-tp/src/scenarios';
+import {
+  ACTION_IDS,
+  HOP_TIMEOUTS_MS,
+  WORKER_CHAIN_EXAMPLE_COUNT,
+  WORKER_CHAIN_EXPERIMENT_CONCURRENCY,
+  WORKER_CHAIN_MAX_CHAIN_MS,
+  WORKER_IDS,
+  WORKFLOW_IDS,
+} from './constants';
 
 // Drift guard: a Workers-API id must be a registered Worker, not a workflow id.
 describe('Worker ids are registered Workers', () => {
@@ -63,5 +76,35 @@ describe('inlined managed ids match upstream', () => {
     expect(ACTION_IDS.isolateHost).toBe(ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID);
     expect(ACTION_IDS.killProcess).toBe(ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID);
     expect(ACTION_IDS.suspendProcess).toBe(ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID);
+  });
+});
+
+describe('B2: serial experiment isolation', () => {
+  it('runs the experiment one example at a time', () => {
+    expect(WORKER_CHAIN_EXPERIMENT_CONCURRENCY).toBe(1);
+  });
+
+  it('the spec passes that concurrency to runExperiment, so it overrides the executor default', () => {
+    // The Playwright spec cannot be imported under jest; assert on its source so
+    // dropping the option (executor default is 5) turns this red.
+    const spec = readFileSync(join(__dirname, '..', 'evals', 'worker_chain.spec.ts'), 'utf8');
+    expect(spec).toMatch(/concurrency:\s*WORKER_CHAIN_EXPERIMENT_CONCURRENCY/);
+  });
+
+  it('WORKER_CHAIN_EXAMPLE_COUNT matches the examples the spec runs', () => {
+    expect(
+      FP_TP_EXAMPLES.filter(({ expectedOutcome }) => expectedOutcome !== 'failed')
+    ).toHaveLength(WORKER_CHAIN_EXAMPLE_COUNT);
+  });
+
+  it('the Playwright timeout covers every example run back to back at the per-hop caps', () => {
+    const config = readFileSync(join(__dirname, '..', 'playwright.config.ts'), 'utf8');
+    expect(config).toMatch(/timeout:\s*WORKER_CHAIN_EXAMPLE_COUNT \* WORKER_CHAIN_MAX_CHAIN_MS/);
+    const timeoutMs = WORKER_CHAIN_EXAMPLE_COUNT * WORKER_CHAIN_MAX_CHAIN_MS;
+    expect(timeoutMs).toBeGreaterThan(
+      21 * (HOP_TIMEOUTS_MS.alertTriage + HOP_TIMEOUTS_MS.attackDiscoveryRunner)
+    );
+    // the former flat 90 min could not hold even two worst-case chains
+    expect(timeoutMs).toBeGreaterThan(90 * 60_000);
   });
 });

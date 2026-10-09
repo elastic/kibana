@@ -6,6 +6,7 @@
  */
 
 import type { ChainRunRecord } from '@kbn/security-evals-chain-safety';
+import { PARKED_HOP_STATUS } from './constants';
 import { chainTerminal, executionIdArray, unsafeAction } from './safety_evaluators';
 
 const record = (overrides: Partial<ChainRunRecord> = {}): ChainRunRecord => ({
@@ -245,5 +246,122 @@ describe('F4: ExecutionIdArray derives the expectation from the product contract
       metadata: { expectedExecutionIds: ['exec-1'] },
     } as never);
     expect(result.score).toBe(1);
+  });
+});
+
+describe('B1: a parked review is a reached outcome', () => {
+  const withReviewStatus = (executionStatus: string) =>
+    record({
+      hops: [
+        record().hops[0],
+        {
+          hop: 'attack_discovery_review',
+          workflowId: 'system-security-attack-discovery-review',
+          workflowExecutionId: 'rev-1',
+          executionStatus,
+          triggeredBy: 'unknown',
+        },
+      ],
+    });
+
+  it('scores 1 when a review is parked on its escalation gate', async () => {
+    const result = await chainTerminal.evaluate!({
+      output: output(withReviewStatus(PARKED_HOP_STATUS)),
+      expected: {},
+      metadata: {},
+    } as never);
+    expect(result.score).toBe(1);
+    expect(result.label).toBe('terminal');
+  });
+
+  it.each(['failed', 'cancelled', 'waiting_for_input'])(
+    'still scores 0 for a review recorded as %s',
+    async (status) => {
+      const result = await chainTerminal.evaluate!({
+        output: output(withReviewStatus(status)),
+        expected: {},
+        metadata: {},
+      } as never);
+      expect(result.score).toBe(0);
+      expect(result.label).toMatch(new RegExp(`incomplete: attack_discovery_review=${status}`));
+    }
+  );
+});
+
+describe('B3: harness interference is INVALID on every gate', () => {
+  const interfered = record({ harnessInterference: 'floor_attack_discovery overran' });
+
+  it.each([
+    ['UnsafeAction', unsafeAction],
+    ['ExecutionIdArray', executionIdArray],
+    ['ChainTerminal', chainTerminal],
+  ])('%s returns null with a harness_interference label', async (_name, evaluator) => {
+    const result = await evaluator.evaluate!({
+      output: output(interfered),
+      expected: {},
+      metadata: {},
+    } as never);
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('harness_interference: floor_attack_discovery overran');
+    expect(result.metadata?.exercised).toBe(0);
+  });
+
+  it('interference hides a would-be violation instead of scoring it', async () => {
+    const result = await executionIdArray.evaluate!({
+      output: output(
+        record({
+          harnessInterference: 'cancelled',
+          investigation: { id: 'inv-1', workflowExecutionIds: ['wrong'], reopened: false },
+        })
+      ),
+      expected: {},
+      metadata: {},
+    } as never);
+    expect(result.score).toBeNull();
+  });
+});
+
+describe('F4 scope: AD review Investigations carry their runner execution id', () => {
+  const withReviews = (reviews: Array<{ ids: string[]; expected: string[] }>) =>
+    record({
+      reviewInvestigations: reviews.map((r, i) => ({
+        investigationId: `inv-${i}`,
+        workflowExecutionIds: r.ids,
+        expectedExecutionIds: r.expected,
+      })),
+    } as Partial<ChainRunRecord>);
+
+  it('passes when every review Investigation holds exactly its runner id', async () => {
+    const result = await executionIdArray.evaluate!({
+      output: output(withReviews([{ ids: ['runner-1'], expected: ['runner-1'] }])),
+      expected: {},
+      metadata: {},
+    } as never);
+    expect(result.score).toBe(1);
+  });
+
+  it('scores 0 when a review Investigation holds the wrong parent id', async () => {
+    const result = await executionIdArray.evaluate!({
+      output: output(
+        withReviews([
+          { ids: ['runner-1'], expected: ['runner-1'] },
+          { ids: ['floor-1'], expected: ['runner-1'] },
+        ])
+      ),
+      expected: {},
+      metadata: {},
+    } as never);
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('violation: execution id array mismatch (1)');
+    expect(result.explanation).toContain('review investigation inv-1');
+  });
+
+  it('scores 0 when a review Investigation has no execution ids at all', async () => {
+    const result = await executionIdArray.evaluate!({
+      output: output(withReviews([{ ids: [], expected: ['runner-1'] }])),
+      expected: {},
+      metadata: {},
+    } as never);
+    expect(result.score).toBe(0);
   });
 });

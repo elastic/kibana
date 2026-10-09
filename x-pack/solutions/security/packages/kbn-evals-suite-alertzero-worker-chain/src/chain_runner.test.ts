@@ -10,7 +10,8 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { scoreUnsafeAction } from '@kbn/security-evals-chain-safety';
 import { runChain, type ChainScenario } from './chain_runner';
-import { WORKER_IDS, WORKFLOW_IDS } from './constants';
+import { PARKED_HOP_STATUS, WORKER_IDS, WORKFLOW_IDS } from './constants';
+import { chainTerminal } from './safety_evaluators';
 
 const TRIAGE_INSTALLED_ID = 'system-security-floor-alert-triage-default';
 const AD_INSTALLED_ID = 'system-security-floor-attack-discovery-default';
@@ -180,6 +181,9 @@ describe('runChain AD review collection (R5: async grandchildren, real /children
     investigationId: string;
     verdict: string;
     status?: string;
+    cancellationReason?: string;
+    /** The Investigation's metadata.workflow_execution_ids as the product stored it. */
+    workflowExecutionIds?: string[];
     steps?: ReturnType<typeof step>[];
   }
 
@@ -239,6 +243,7 @@ describe('runChain AD review collection (R5: async grandchildren, real /children
       if (review) {
         return {
           status: review.status ?? 'completed',
+          cancellationReason: review.cancellationReason,
           triggeredBy: 'workflow-step',
           stepExecutions: review.steps ?? [
             step('resolve_investigation_id', { investigation_id: review.investigationId }),
@@ -267,7 +272,15 @@ describe('runChain AD review collection (R5: async grandchildren, real /children
         };
       }
       if (path.includes('/api/agent_builder/conversations/')) {
-        return { id: 'c', reopened: false };
+        const conversationId = decodeURIComponent(path.split('/').pop() ?? '');
+        const owner = reviews.find((r) => r.investigationId === conversationId);
+        return {
+          id: conversationId,
+          reopened: false,
+          metadata: owner?.workflowExecutionIds
+            ? { workflow_execution_ids: owner.workflowExecutionIds }
+            : undefined,
+        };
       }
       return {};
     }) as unknown as HttpHandler;
@@ -313,10 +326,69 @@ describe('runChain AD review collection (R5: async grandchildren, real /children
     });
 
     expect(record.harnessInterference).toBeUndefined();
+    // B1: recorded as the harness's own `parked` status (not the engine's raw
+    // non-terminal status) so ChainTerminal can accept it.
     expect(record.hops.find((h) => h.hop === 'attack_discovery_review')?.executionStatus).toBe(
-      'waiting_for_input'
+      PARKED_HOP_STATUS
     );
     expect(record.actions).toHaveLength(1);
+  });
+
+  it('B1: a parked review scores 1 on ChainTerminal end to end, a failed one still scores 0', async () => {
+    const parkedSteps = [
+      step('resolve_investigation_id', { investigation_id: 'inv-1' }),
+      step('resolve_analysis', { verdict: 'true_positive' }),
+      step('escalation_gate', {}, 'workflow.execute'),
+    ];
+    const run = async (status: string, steps?: typeof parkedSteps) => {
+      const { fetch } = makeAdFetch([
+        { id: 'rev-1', investigationId: 'inv-1', verdict: 'true_positive', status, steps },
+      ]);
+      const record = await runChain({
+        ...params(fetch, ['attack-discovery']),
+        maxWaitMs: { perActionProposal: 1, attackDiscoveryReview: 50 },
+      });
+      return chainTerminal.evaluate!({
+        output: { record },
+        expected: {},
+        metadata: {},
+      } as never);
+    };
+
+    expect((await run('waiting_for_input', parkedSteps)).score).toBe(1);
+    expect((await run('failed')).score).toBe(0);
+  });
+
+  it('F4: records each review Investigation next to its runner execution id as the expectation', async () => {
+    const { fetch } = makeAdFetch([
+      {
+        id: 'rev-1',
+        investigationId: 'inv-1',
+        verdict: 'true_positive',
+        workflowExecutionIds: ['exec-runner'],
+      },
+      {
+        id: 'rev-2',
+        investigationId: 'inv-2',
+        verdict: 'inconclusive',
+        // the floor's id, not the runner's: the product wrote the wrong parent
+        workflowExecutionIds: ['exec-floor'],
+      },
+    ]);
+    const record = await runChain(params(fetch, ['attack-discovery']));
+
+    expect(record.reviewInvestigations).toEqual([
+      {
+        investigationId: 'inv-1',
+        expectedExecutionIds: ['exec-runner'],
+        workflowExecutionIds: ['exec-runner'],
+      },
+      {
+        investigationId: 'inv-2',
+        expectedExecutionIds: ['exec-runner'],
+        workflowExecutionIds: ['exec-floor'],
+      },
+    ]);
   });
 
   it('records no review hops and no verdict when the runner dispatched no reviews', async () => {
@@ -1074,6 +1146,34 @@ describe('runChain F2: concurrency-limit cancellation is harness interference', 
     );
   });
 
+  it.each([
+    ['Dropped due to concurrency limit (max: 1)', true],
+    ['Queue full (queue-size: 10)', true],
+    ['Skipped by an operator', false],
+  ])(
+    'N1: a SKIPPED review with reason %p is harness interference: %p',
+    async (cancellationReason, interference) => {
+      const { fetch } = makeAdReviewFetch({ status: 'skipped', cancellationReason });
+      const record = await runChain(params(fetch, ['attack-discovery']));
+      if (interference) {
+        expect(record.harnessInterference).toMatch(
+          /attack_discovery_review rev-1 cancelled by the product's concurrency limit/
+        );
+      } else {
+        expect(record.harnessInterference).toBeUndefined();
+      }
+    }
+  );
+
+  it('N1: a CANCELLED review keeps being detected by the cancel-in-progress reason', async () => {
+    const { fetch } = makeAdReviewFetch({
+      status: 'cancelled',
+      cancellationReason: 'Cancelled due to concurrency limit (max: 1)',
+    });
+    const record = await runChain(params(fetch, ['attack-discovery']));
+    expect(record.harnessInterference).toMatch(/attack_discovery_review rev-1 cancelled/);
+  });
+
   it('serializes chains: two runChain calls never overlap (in-process queue)', async () => {
     const { fetch } = makeFetch(TRIAGE_INSTALLED_ID);
     let inFlight = 0;
@@ -1100,3 +1200,50 @@ describe('runChain F2: concurrency-limit cancellation is harness interference', 
     expect(maxInFlight).toBeLessThanOrEqual(1);
   });
 });
+
+/** Minimal AD chain with one review whose execution carries the given status/reason. */
+const makeAdReviewFetch = (review: { status: string; cancellationReason: string }) => {
+  const exec = (extra: Record<string, unknown>) => ({
+    triggeredBy: 'workflow-step',
+    stepExecutions: [],
+    ...extra,
+  });
+  const fetch = jest.fn(async (path: string, options: Record<string, unknown> = {}) => {
+    if (path.endsWith('/internal/alertzero/workers')) {
+      return {
+        workers: [
+          {
+            id: WORKER_IDS.attackDiscovery,
+            enabled: true,
+            settingsRevision: 1,
+            settings: { autonomy: 'manual', serviceAccountId: 'ns/ad-sa' },
+            workflowId: AD_INSTALLED_ID,
+          },
+        ],
+      };
+    }
+    if (options.method === 'POST' && path.includes('/api/workflows/workflow/')) {
+      return { workflowExecutionId: 'exec-floor' };
+    }
+    if (path.endsWith('/executions/exec-floor/children')) {
+      return [{ workflowId: WORKFLOW_IDS.attackDiscoveryRunner, executionId: 'exec-runner' }];
+    }
+    if (path.endsWith('/executions/exec-runner')) {
+      return exec({
+        status: 'completed',
+        stepExecutions: [
+          {
+            stepId: 'run_review',
+            stepType: 'workflow.executeAsync',
+            output: { executionId: 'rev-1' },
+          },
+        ],
+      });
+    }
+    if (path.endsWith('/executions/rev-1')) return exec(review);
+    if (path.includes('/api/workflows/executions/')) return exec({ status: 'completed' });
+    if (path.startsWith('/internal/proposals')) return { proposals: [] };
+    return {};
+  }) as unknown as HttpHandler;
+  return { fetch };
+};

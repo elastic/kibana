@@ -41,7 +41,10 @@ import {
   ensureFpTpSeedPrerequisites,
   seedFixture,
 } from '@kbn/evals-suite-attack-discovery-fp-tp/src/world';
-import { ALERTZERO_REASONING_FEATURE_ID } from '../src/constants';
+import {
+  ALERTZERO_REASONING_FEATURE_ID,
+  WORKER_CHAIN_EXPERIMENT_CONCURRENCY,
+} from '../src/constants';
 import {
   createHarnessState,
   setupWorkerChainHarness,
@@ -138,6 +141,11 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
               examples,
             } satisfies EvaluationDataset,
           ],
+          // B2: one example at a time. seedFixture/cleanup run in the task but
+          // outside runChain's queue, and the AD worker scans the whole space, so
+          // at the default concurrency another example's alerts and reviews leak
+          // into this one. Also overrides --concurrency / EVAL_CONCURRENCY.
+          concurrency: WORKER_CHAIN_EXPERIMENT_CONCURRENCY,
           task: async ({ metadata }) => {
             const { exampleId, goldVerdict } = metadata as ChainDatasetExample['metadata'];
             const world = buildFpTpExampleWorld(exampleId, randomUUID().slice(0, 8));

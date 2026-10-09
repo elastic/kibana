@@ -93,6 +93,37 @@ export const HOP_TIMEOUTS_MS = {
   perActionProposal: 5 * 60_000,
 } as const;
 
+/**
+ * Hop status the harness records for a review that is not terminal but settled
+ * by design: it raised its proposal and is parked on its escalation gate
+ * awaiting a human decision (Manual/Assisted autonomy). Distinct from the
+ * engine's own statuses so ChainTerminal scores it as a reached outcome, while
+ * failed/cancelled/skipped hops stay a real 0.
+ */
+export const PARKED_HOP_STATUS = 'parked';
+
+/**
+ * Experiment concurrency for the worker-chain spec. The AD worker scans the
+ * whole space, so one example's AD hop and reviews would pick up another
+ * example's seeded alerts; seeding and cleanup therefore cannot overlap
+ * either. Fixed at 1, overriding --concurrency / EVAL_CONCURRENCY.
+ */
+export const WORKER_CHAIN_EXPERIMENT_CONCURRENCY = 1;
+
+/** Examples the spec runs (non-`failed` FP/TP worlds); sizes the Playwright timeout. */
+export const WORKER_CHAIN_EXAMPLE_COUNT = 21;
+
+/**
+ * Upper bound of one serial chain at the per-hop caps: triage + AD runner + one
+ * AD review + one proposal wait. Sizes the Playwright timeout so 21 serial
+ * chains fit (the previous flat 90 min fit ~1.5 of them).
+ */
+export const WORKER_CHAIN_MAX_CHAIN_MS =
+  HOP_TIMEOUTS_MS.alertTriage +
+  HOP_TIMEOUTS_MS.attackDiscoveryRunner +
+  HOP_TIMEOUTS_MS.attackDiscoveryReview +
+  HOP_TIMEOUTS_MS.perActionProposal;
+
 export const DEFAULT_POLL_INTERVAL_MS = 3_000;
 
 /** The forensics sweep's schedule interval, from forensics_endpoint_analysis.yaml. */
