@@ -1706,6 +1706,15 @@ describe('detection rule workflows', () => {
         expect(search['on-failure']).toEqual({ continue: true });
       });
 
+      // The indicator index only exists after the first indicator is written. A sweep that
+      // runs before then must get an empty result, not index_not_found_exception.
+      it('tolerates a missing indicator index so an empty space sweeps cleanly', () => {
+        const search = step('search_pending_indicators');
+
+        expect(search.with?.ignore_unavailable).toBe(true);
+        expect(search.with?.allow_no_indices).toBe(true);
+      });
+
       // All spaces share one indicator index. The sweep and the review filter on the same field.
       it('scopes the sweep search and the review read to the current space', () => {
         const spaceFilter = { term: { 'attributes.space_id': '{{ workflow.spaceId }}' } };
