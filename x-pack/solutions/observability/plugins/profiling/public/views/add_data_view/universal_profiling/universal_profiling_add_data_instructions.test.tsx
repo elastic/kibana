@@ -23,7 +23,9 @@ jest.mock('../../../components/contexts/profiling_dependencies/use_profiling_dep
           DOC_LINK_VERSION: 'current',
           links: { management: { apiKeys: 'https://www.elastic.co/api-keys' } },
         },
-        http: { basePath: { prepend: (path: string) => path } },
+        application: {
+          getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+        },
       },
     },
   }),

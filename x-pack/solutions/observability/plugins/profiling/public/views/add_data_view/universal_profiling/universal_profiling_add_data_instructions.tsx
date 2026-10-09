@@ -24,6 +24,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import major from 'semver/functions/major';
 import { KbnWarningCallout } from '@kbn/ui-callout';
+import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
@@ -55,7 +56,7 @@ export function UniversalProfilingAddDataInstructions() {
     services: { setupDataCollectionInstructions },
     start: { core },
   } = useProfilingDependencies();
-  const { docLinks } = core;
+  const { docLinks, application } = core;
 
   const { data, status } = useAsync(
     ({ http }) => {
@@ -356,9 +357,9 @@ EOF`}
                 data-test-subj="profilingAddDataViewManageUniversalProfilingAgentInFleetButton"
                 iconType="gear"
                 fill
-                href={`${core.http.basePath.prepend(
-                  `/app/integrations/detail/profiler_agent-${data?.profilerAgent.version}/overview`
-                )}`}
+                href={application.getUrlForApp(INTEGRATIONS_PLUGIN_ID, {
+                  path: `/detail/profiler_agent-${data?.profilerAgent.version}/overview`,
+                })}
               >
                 {i18n.translate('xpack.profiling.tabs.elasticAgentIntegration.step2.button', {
                   defaultMessage: 'Manage Universal Profiling agent in Fleet',
@@ -466,7 +467,7 @@ EOF`}
       docLinks.DOC_LINK_VERSION,
       docLinks.ELASTIC_WEBSITE_URL,
       docLinks.links.management.apiKeys,
-      core.http.basePath,
+      application,
       data?.profilerAgent.version,
       majorVersion,
       secretToken,

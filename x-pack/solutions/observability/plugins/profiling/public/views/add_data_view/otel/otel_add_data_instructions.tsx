@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 
 export function OtelAddDataInstructions() {
@@ -36,7 +37,9 @@ export function OtelAddDataInstructions() {
           fill
           iconType="plusCircle"
           // No version in the package key: Fleet resolves the installed version or the latest one
-          href={core.http.basePath.prepend('/app/integrations/detail/profiling_otel/overview')}
+          href={core.application.getUrlForApp(INTEGRATIONS_PLUGIN_ID, {
+            path: '/detail/profiling_otel/overview',
+          })}
         >
           {i18n.translate('xpack.profiling.addData.openTelemetry.integrationButton', {
             defaultMessage: 'Add OpenTelemetry Profiling integration',

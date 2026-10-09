@@ -11,7 +11,11 @@ import { render, screen } from '@testing-library/react';
 jest.mock('../../../components/contexts/profiling_dependencies/use_profiling_dependencies', () => ({
   useProfilingDependencies: () => ({
     start: {
-      core: { http: { basePath: { prepend: (path: string) => `/base${path}` } } },
+      core: {
+        application: {
+          getUrlForApp: (appId: string, { path }: { path: string }) => `/base/app/${appId}${path}`,
+        },
+      },
     },
   }),
 }));
