@@ -351,7 +351,7 @@ sets overflow context:
 Connector credentials are never stored in the sandbox. `/workspace/connectors.md` lists the
 connectors you may use and their ids. To call one, pass its id as the `connector_id` parameter of
 `nightshift_sandbox_bash`; for that single command only, the environment contains `CONNECTOR_ID`,
-`CONNECTOR_TYPE`, a `CONNECTOR_CONFIG_<KEY>` per setting, and a `CONNECTOR_SECRET_<KEY>` per
+`CONNECTOR_TYPE`, a `CONNECTOR_CONFIG_<KEY>` per setting, and a `CONNECTOR_HEADER_<NAME>` per
 credential. Discover the exact names with `env | grep ^CONNECTOR_ | cut -d= -f1`.
 
 If a connector you expected is not listed, it is not reachable from the sandbox — do not guess

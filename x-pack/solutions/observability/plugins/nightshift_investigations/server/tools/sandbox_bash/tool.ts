@@ -43,7 +43,7 @@ const sandboxBashSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Connector whose credentials this command needs (see /workspace/connectors.md). Its config and secrets are exposed to this command only, as CONNECTOR_CONFIG_<KEY> / CONNECTOR_SECRET_<KEY> environment variables, and are gone when the command exits.'
+      'Connector whose credentials this command needs (see /workspace/connectors.md). Its config and auth headers are exposed to this command only, as CONNECTOR_CONFIG_<KEY> / CONNECTOR_HEADER_<NAME> environment variables, and are gone when the command exits.'
     ),
   secret_keys: z
     .array(z.string().max(MAX_SANDBOX_SECRET_KEY_LENGTH))
@@ -70,7 +70,7 @@ export const createSandboxBashTool = ({
   id: SANDBOX_BASH_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Execute a bash command inside a sandboxed container. Use this to run shell commands, scripts, or any computation that requires a shell environment. Python 3 is available as `python` (via /home/appuser/.venv/bin/python). The default working directory is /workspace. To call an external service through a Kibana connector, read /workspace/connectors.md and pass the connector id as `connector_id`: the connector credentials are then available to that single command as CONNECTOR_* environment variables (e.g. `curl -H "Authorization: Bearer $CONNECTOR_SECRET_TOKEN" "$CONNECTOR_CONFIG_APIURL/..."`). To use a sandbox secret listed in /workspace/connectors.md, pass its name in `secret_keys`: it is then available to that single command as an environment variable of the same name (e.g. `secret_keys: ["GITHUB_TOKEN"]` with `curl -H "Authorization: Bearer $GITHUB_TOKEN" ...`).',
+    'Execute a bash command inside a sandboxed container. Use this to run shell commands, scripts, or any computation that requires a shell environment. Python 3 is available as `python` (via /home/appuser/.venv/bin/python). The default working directory is /workspace. To call an external service through a Kibana connector, read /workspace/connectors.md and pass the connector id as `connector_id`: the connector credentials are then available to that single command as CONNECTOR_* environment variables (e.g. `curl -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" "$CONNECTOR_CONFIG_APIURL/..."`). To use a sandbox secret listed in /workspace/connectors.md, pass its name in `secret_keys`: it is then available to that single command as an environment variable of the same name (e.g. `secret_keys: ["GITHUB_TOKEN"]` with `curl -H "Authorization: Bearer $GITHUB_TOKEN" ...`).',
   tags: ['sandbox', 'bash'],
   schema: sandboxBashSchema,
   annotations: {

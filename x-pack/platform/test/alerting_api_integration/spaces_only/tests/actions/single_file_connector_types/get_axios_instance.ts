@@ -127,5 +127,24 @@ export default function createSingleFileConnectorTest({ getService }: FtrProvide
         'Unable to get axios instance for .server-log. This function is exclusive for workflows-only connectors.'
       );
     });
+
+    describe('connector credential handoff', () => {
+      it('returns basic-auth headers and config without secrets', async () => {
+        const response = await supertest
+          .post(
+            `/api/alerts_fixture/${defaultSingleFileConnectorId}/_test_get_connector_credentials`
+          )
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+
+        const encoded = Buffer.from(`${username}:${password}`).toString('base64');
+        expect(response.body.connectorId).to.eql(defaultSingleFileConnectorId);
+        expect(response.body.actionTypeId).to.eql('test.single_file_connector');
+        expect(response.body.config.apiUrl).to.eql(apiUrl);
+        expect(response.body.headers.Authorization).to.eql(`Basic ${encoded}`);
+        expect(response.body).to.not.have.property('secrets');
+        expect(JSON.stringify(response.body)).to.not.contain(password);
+      });
+    });
   });
 }
