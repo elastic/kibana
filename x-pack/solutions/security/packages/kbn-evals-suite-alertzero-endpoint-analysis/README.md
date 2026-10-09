@@ -18,7 +18,10 @@ workers API (`PATCH /internal/alertzero/workers/{workerId}` with
 `{"enabled":true,"settings":{"serviceAccountId":…}}`), which installs the production
 defaults, then runs the sweep test API against the installed production definition.
 The service account is provisioned by the suite (eval-owned
-`alertzero_endpoint_analysis_eval` role (the production role plus one AI-index read delta,
+`alertzero_endpoint_analysis_eval` role (the production role plus one AI-index delta: production's
+`ai-index-idx-security-investigations` grant — `read`, `view_index_metadata`, `index`,
+`auto_configure` — cloned onto `ai-index-idx-alertzero-eval-*` only, so it is a write grant
+mirroring production, not read-only; the parity test derives it from production),
 PUT on every run, even when the account already exists, so a stale definition never wins) +
 account, the account created when missing) because a bare
 enable is rejected with 400 since workers require an account (#295215). A Worker that
