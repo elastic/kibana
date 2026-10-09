@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { evaluateKql } from '@kbn/eval-kql';
 import { parse } from 'yaml';
 import { generateWorkflowYaml } from './generate_workflow_yaml';
 import type { NightshiftAutomationAttributes } from './types';
@@ -138,6 +139,152 @@ describe('generateWorkflowYaml', () => {
       automation.trigger.rows = [{ kind: 'alert', ruleNamePattern: 'say "hello"' }];
       const yaml = parse(generateWorkflowYaml('auto-123', automation));
       expect(yaml.triggers[0].on.condition).toBe('rule.name: "*say \\"hello\\"*"');
+    });
+  });
+
+  describe('slack trigger', () => {
+    interface WorkflowStep {
+      name: string;
+      type: string;
+      if?: string;
+      with: {
+        path: string;
+        'workflow-id': string;
+        body: Record<string, unknown>;
+        inputs: { message: string; investigation_id: string };
+      };
+    }
+    const findStep = (yaml: { steps: WorkflowStep[] }, name: string): WorkflowStep => {
+      const step = yaml.steps.find((candidate) => candidate.name === name);
+      if (!step) throw new Error(`step ${name} not found`);
+      return step;
+    };
+
+    type SlackRow = Extract<
+      NightshiftAutomationAttributes['trigger']['rows'][number],
+      { kind: 'slack' }
+    >;
+    const slackAutomation = (
+      ...rows: Array<Omit<SlackRow, 'kind' | 'event'>>
+    ): NightshiftAutomationAttributes => ({
+      ...baseAutomation(),
+      trigger: {
+        rows: (rows.length > 0 ? rows : [{}]).map((row) => ({
+          kind: 'slack' as const,
+          event: 'message' as const,
+          ...row,
+        })),
+      },
+    });
+    const conditionOf = (automation: NightshiftAutomationAttributes): string =>
+      parse(generateWorkflowYaml('auto-123', automation)).triggers[0].on.condition;
+    const matches = (
+      automation: NightshiftAutomationAttributes,
+      event: Record<string, string>
+    ): boolean =>
+      evaluateKql(conditionOf(automation), {
+        event: { workspace: 'T1', channel: 'C1', messageId: '1.1', ...event },
+      });
+
+    it('emits slack2.message on the Elastic Slack app connector for top-level messages', () => {
+      const yaml = parse(generateWorkflowYaml('auto-123', slackAutomation()));
+      expect(yaml.triggers).toHaveLength(1);
+      expect(yaml.triggers[0].type).toBe('slack2.message');
+      expect(yaml.triggers[0]['connector-id']).toBe('elastic-apps-slack');
+      expect(yaml.triggers[0].on.condition).toBe(
+        'event.workspace:* and not event.threadId:* and (not event.subtype:* or event.subtype:bot_message or event.subtype:file_share)'
+      );
+    });
+
+    it.each([
+      ['a top-level message', {}, true],
+      ['a bot message', { subtype: 'bot_message', botId: 'B1' }, true],
+      ['a thread reply', { threadId: '1.0' }, false],
+      ['an edit', { subtype: 'message_changed' }, false],
+    ])('matches %s: %s', (_name, event, expected) => {
+      expect(matches(slackAutomation(), event)).toBe(expected);
+    });
+
+    it.each([
+      ['channels', { channels: ['C1', 'C2'] }, { channel: 'C2' }, true],
+      ['channels', { channels: ['C1', 'C2'] }, { channel: 'C3' }, false],
+      ['users', { users: ['U1'] }, { sender: 'U1' }, true],
+      ['users', { users: ['U1'] }, { sender: 'U2' }, false],
+    ])('filters by %s', (_name, row, event, expected) => {
+      expect(matches(slackAutomation(row), event)).toBe(expected);
+    });
+
+    it.each([
+      ['outage', 'big outage now', true],
+      ['outage', 'all good', false],
+      ['say "down"', 'they say "down" again', true],
+      ['disk full', 'the disk full alarm', true],
+      ['a or b', 'x a or b y', true],
+      ['a or b', 'only a', false],
+    ])('matches message filter %j against text %j: %s', (messageFilter, text, expected) => {
+      expect(matches(slackAutomation({ messageFilter }), { text })).toBe(expected);
+    });
+
+    it('OR-joins several slack rows', () => {
+      const automation = slackAutomation({ channels: ['C1'] }, { channels: ['C2'] });
+      expect(matches(automation, { channel: 'C1' })).toBe(true);
+      expect(matches(automation, { channel: 'C2' })).toBe(true);
+      expect(matches(automation, { channel: 'C3' })).toBe(false);
+    });
+
+    it('keys concurrency per message and keeps the overlap policy strategy', () => {
+      const automation = slackAutomation();
+      automation.runtime.overlapPolicy = 'queue';
+      const { concurrency } = parse(generateWorkflowYaml('auto-123', automation)).settings;
+      expect(concurrency.key).toBe('auto-123-{{ event.channel }}-{{ event.messageId }}');
+      expect(concurrency.strategy).toBe('queue');
+    });
+
+    it('creates the thread investigation once per event, then runs it', () => {
+      const yaml = parse(generateWorkflowYaml('auto-123', slackAutomation()));
+      const create = findStep(yaml, 'find_or_create_investigation');
+      const investigate = findStep(yaml, 'investigate');
+      expect(create.type).toBe('kibana.request');
+      expect(create.with.path).toBe(
+        '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/_slack_thread'
+      );
+      expect(create.with.body).toEqual({
+        workspace: '${{ event.workspace }}',
+        channel: '{{ event.channel }}',
+        thread_ts: '{{ event.messageId }}',
+        text: '${{ event.text }}',
+        create: true,
+        event_id: '${{ event.correlationKey }}',
+        execution_id: '{{ execution.id }}',
+      });
+      expect(investigate.type).toBe('workflow.execute');
+      expect(investigate.if).toBe(
+        '${{ steps.find_or_create_investigation.output.duplicate != true }}'
+      );
+      expect(investigate.with['workflow-id']).toBe('system-nightshift-investigation');
+      expect(investigate.with.inputs.investigation_id).toBe(
+        '{{ steps.find_or_create_investigation.output.investigation_id }}'
+      );
+    });
+
+    it.each([
+      ['the prompt template when set', 'Look into this.', 'Look into this.'],
+      ['a message carrying the Slack text otherwise', undefined, '{{ event.text }}'],
+    ])('sends %s', (_name, promptTemplate, expected) => {
+      const automation = slackAutomation();
+      automation.execution.promptTemplate = promptTemplate;
+      const { message } = findStep(
+        parse(generateWorkflowYaml('auto-123', automation)),
+        'investigate'
+      ).with.inputs;
+      expect(message).toContain(expected);
+    });
+
+    it('keeps the alert trigger when alert rows are also present', () => {
+      const automation = baseAutomation();
+      automation.trigger.rows = [{ kind: 'alert' }, { kind: 'slack', event: 'message' }];
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      expect(yaml.triggers[0].type).toBe('alerting.alertStatusChanged');
     });
   });
 

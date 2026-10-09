@@ -45,6 +45,7 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core-security-common",
     "@kbn/es-query",
+    "@kbn/eval-kql",
     "@kbn/task-manager-plugin",
     "@kbn/rule-data-utils",
     "@kbn/rule-registry-plugin",
