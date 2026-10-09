@@ -28,11 +28,16 @@ export {
   screenContextAttachmentDataSchema,
   connectorAttachmentDataSchema,
   imageAttachmentDataSchema,
+  pdfAttachmentDataSchema,
   CONNECTOR_TAG_PREFIX,
   SUPPORTED_IMAGE_MIME_TYPES,
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+  CHAT_ATTACHMENT_PDFS_FILE_KIND,
+  SUPPORTED_PDF_MIME_TYPE,
   MAX_IMAGE_BYTES,
   MAX_IMAGES_PER_ROUND,
+  MAX_PDF_BYTES,
+  MAX_PDF_TEXT_LENGTH,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
   type TimeRange,
@@ -41,6 +46,7 @@ export {
   type ConnectorAttachmentData,
   type ImageAttachmentData,
   type SupportedImageMimeType,
+  type PdfAttachmentData,
 } from './attachment_types';
 
 export type {

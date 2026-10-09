@@ -52,6 +52,7 @@ describe('Attachment Routes', () => {
     getStartServices: jest.MockedFunction<() => Promise<any[]>>;
   };
   let routeHandlers: Record<string, { config: any; handler: Function }>;
+  let routeConfigs: Record<string, any>;
 
   const createMockAttachment = (
     overrides: Partial<VersionedAttachment> = {}
@@ -113,6 +114,7 @@ describe('Attachment Routes', () => {
     });
 
     routeHandlers = {};
+    routeConfigs = {};
 
     const createVersionedRoute = (method: string) => ({
       addVersion: jest.fn().mockImplementation((config: any, handler: Function) => {
@@ -133,6 +135,7 @@ describe('Attachment Routes', () => {
           return versionedRoute;
         }),
         post: jest.fn().mockImplementation((config: any) => {
+          routeConfigs[`POST:${config.path}`] = config;
           const versionedRoute = createVersionedRoute('post');
           versionedRoute.addVersion = jest
             .fn()
@@ -351,6 +354,12 @@ describe('Attachment Routes', () => {
   });
 
   describe('POST /conversations/{conversation_id}/attachments', () => {
+    it('keeps the socket open longer than the default 2 minutes and the 3 minute PDF reading budget', () => {
+      const { options } =
+        routeConfigs['POST:/api/agent_builder/conversations/{conversation_id}/attachments'];
+      expect(options.timeout.idleSocket).toBe(4 * 60 * 1000);
+    });
+
     const path = '/attachments';
 
     it('creates attachment with auto-generated ID', async () => {
