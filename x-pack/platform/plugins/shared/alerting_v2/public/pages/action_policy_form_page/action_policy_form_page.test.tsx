@@ -215,10 +215,8 @@ const EXISTING_POLICY: ActionPolicyResponse = {
   description: 'Routes critical alerts',
   enabled: true,
   matcher: { expression: 'data.severity : "critical"' },
-  group_by: ['host.name', 'service.name'],
-  grouping_mode: 'per_field',
+  grouping: { mode: 'per_field', fields: ['host.name', 'service.name'] },
   throttle: { strategy: 'time_interval', interval: '5m' },
-  snoozed_until: null,
   destinations: [{ type: 'workflow', id: 'workflow-2' }],
   created_by: { profile_uid: 'elastic' },
   created_at: '2026-03-01T10:00:00.000Z',
@@ -318,8 +316,8 @@ describe('ActionPolicyFormPage', () => {
         expect(mockCreateMutateAsync).toHaveBeenCalledWith({
           name: 'Policy from test',
           description: 'Description from test',
-          grouping_mode: 'per_alert',
-          throttle: { strategy: 'on_status_change', interval: null },
+          grouping: { mode: 'per_alert' },
+          throttle: { strategy: 'on_status_change' },
           destinations: [{ type: 'workflow', id: 'workflow-1' }],
         })
       );
@@ -503,9 +501,8 @@ describe('ActionPolicyFormPage', () => {
         data: {
           name: 'Critical production alerts',
           description: 'Routes critical alerts',
-          grouping_mode: 'per_field',
-          matcher: { expression: 'data.severity : "critical"' },
-          group_by: ['host.name', 'service.name'],
+          grouping: { mode: 'per_field', fields: ['host.name', 'service.name'] },
+          matcher: { tags: null, expression: 'data.severity : "critical"' },
           throttle: { strategy: 'time_interval', interval: '5m' },
           destinations: [{ type: 'workflow', id: 'workflow-2' }],
         },

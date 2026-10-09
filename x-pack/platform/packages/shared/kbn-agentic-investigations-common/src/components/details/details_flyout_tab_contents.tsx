@@ -5,24 +5,15 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import React, { memo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
-import { FlyoutGroupedAttachments, GroupedAttachmentsSection } from '../grouped_attachments';
 import type { FlyoutGroupedAttachmentsRegistry } from '../grouped_attachments';
 import { DetailsBlock } from './detail_block';
+import { ImpactSection } from './impact_section';
 import { DETAILS_FLYOUT_LABELS } from './translations';
-
-const SUMMARY_LIMIT = 120;
-
-const GROUPED_ATTACHMENTS_ORDER: readonly FlyoutGroupedAttachments[] = [
-  FlyoutGroupedAttachments.ALERTS,
-  FlyoutGroupedAttachments.ATTACKS,
-  FlyoutGroupedAttachments.RULES,
-  FlyoutGroupedAttachments.TIMELINE,
-  FlyoutGroupedAttachments.IOCS,
-];
+import { WhatsHappenedBlock } from './whats_happened_block';
 
 export interface OverviewTabProps {
   investigation: Investigation;
@@ -47,48 +38,17 @@ export const OverviewTab = memo<OverviewTabProps>(
     proposedActionsContent,
     proposedActionsCount,
   }) => {
-    const { summary } = investigation;
-    const [expanded, setExpanded] = useState(false);
-
-    const isCondensed = summary != null && summary.length > SUMMARY_LIMIT;
-    const displayedSummary =
-      isCondensed && !expanded ? `${summary.slice(0, SUMMARY_LIMIT)}...` : summary;
-
-    const attachmentsSection = (
-      <GroupedAttachmentsSection
-        attachments={attachments}
-        registry={groupedAttachments}
-        order={GROUPED_ATTACHMENTS_ORDER}
-      />
-    );
-
     return (
       <EuiFlexGroup direction="column" gutterSize="m">
-        {summary && (
-          <EuiFlexItem>
-            <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.overview}>
-              <EuiText size="s" color="subdued">
-                <p>{displayedSummary}</p>
-              </EuiText>
-              {isCondensed && (
-                <div>
-                  <EuiButtonEmpty
-                    size="s"
-                    flush="left"
-                    onClick={() => setExpanded((prev) => !prev)}
-                  >
-                    {expanded
-                      ? DETAILS_FLYOUT_LABELS.overview.showLess
-                      : DETAILS_FLYOUT_LABELS.overview.showMore}
-                  </EuiButtonEmpty>
-                </div>
-              )}
-              {attachmentsSection}
-            </DetailsBlock>
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <WhatsHappenedBlock
+            summary={investigation.summary}
+            attachments={attachments}
+            groupedAttachments={groupedAttachments}
+          />
+        </EuiFlexItem>
 
-        {!summary && attachmentsSection}
+        <ImpactSection attachments={attachments} />
 
         {proposedActionsContent && (
           <EuiFlexItem>

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AIMessage } from '@langchain/core/messages';
 import { isAIMessage, isHumanMessage, isToolMessage } from '@langchain/core/messages';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
@@ -84,6 +85,15 @@ describe('formatRetryNotice', () => {
     expect(isToolMessage(result)).toBe(true);
     expect(result.content).toContain('ERROR: tool_not_found');
     expect((result as any).tool_call_id).toBe((call as any).tool_calls[0].id);
+  });
+
+  it('sanitizes the tool name of a tool-not-found error', () => {
+    const error = createAgentExecutionError('no such tool', AgentExecutionErrorCode.toolNotFound, {
+      toolName: 'ghost.tool',
+      toolArgs: {},
+    });
+    const [call] = formatRetryNotice(error) as [AIMessage];
+    expect(call.tool_calls?.[0].name).toBe('ghost_tool');
   });
 
   it('renders a validation error as a failed tool call carrying the validation message', () => {

@@ -265,6 +265,8 @@ overrides:
   '@elastic/pretty-printer': 4.29.0
   '@emnapi/core': 1.11.1
   '@emnapi/runtime': 1.11.1
+  '@paulirish/trace_engine>legacy-javascript': 0.0.3
+  '@paulirish/trace_engine>third-party-web': 0.30.0
   '@redux-saga/core': 1.3.0
   '@redux-saga/types': 1.2.1
   '@types/babel__traverse': 7.20.6
@@ -459,8 +461,8 @@ importers:
         specifier: 1.24.2
         version: 1.24.2(@elastic/elasticsearch@8.19.2(supports-color@10.2.2))(supports-color@10.2.2)
       '@elastic/statistics':
-        specifier: 0.0.2
-        version: 0.0.2
+        specifier: 0.0.3
+        version: 0.0.3
       '@emotion/cache':
         specifier: 11.14.0
         version: 11.14.0
@@ -605,6 +607,12 @@ importers:
       '@kbn/agentic-investigations-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/agentic_investigations
+      '@kbn/ai-anonymization-common':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/ai-infra/ai-anonymization-common
+      '@kbn/ai-anonymization-server':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/ai-infra/ai-anonymization-server
       '@kbn/ai-assistant':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-ai-assistant
@@ -3779,6 +3787,9 @@ importers:
       '@kbn/task-manager-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/task_manager
+      '@kbn/task-manager-service-accounts-test-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/test/task_manager/plugins/service_accounts
       '@kbn/telemetry':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-telemetry
@@ -8995,6 +9006,10 @@ importers:
 
   x-pack/platform/packages/shared/ai-assistant/icon: {}
 
+  x-pack/platform/packages/shared/ai-infra/ai-anonymization-common: {}
+
+  x-pack/platform/packages/shared/ai-infra/ai-anonymization-server: {}
+
   x-pack/platform/packages/shared/ai-infra/anonymization-common: {}
 
   x-pack/platform/packages/shared/ai-infra/anonymization-ui: {}
@@ -9566,6 +9581,8 @@ importers:
   x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin: {}
 
   x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin: {}
+
+  x-pack/platform/test/task_manager/plugins/service_accounts: {}
 
   x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin: {}
 
@@ -11240,8 +11257,8 @@ packages:
   '@elastic/search-ui@1.24.2':
     resolution: {integrity: sha512-fQ/BGEbh4EvX+IWw89xiSUXD3p3iDvZPA46WCHwH+jfEtKiC9P+274UiR32POI3znaWfZElxm9kIyNioVGin0Q==}
 
-  '@elastic/statistics@0.0.2':
-    resolution: {integrity: sha512-KYhGGyP6/ddcfPzGjExy3V8S1dB0ZTOZqg8YL2/8R7uYKvgUFfq2tanv4NoEY9l+4gtcbFAkVnyx2/dWoJhn+A==}
+  '@elastic/statistics@0.0.3':
+    resolution: {integrity: sha512-UjND5cw1sykkutO3pAlF6rz1ayXKQr16SyaxiW/H6AAyi21zsfoy2GS+Z3FjLCcKCFuPKR5mkEwtVPcClzNWkQ==}
     engines: {node: '>=22'}
 
   '@elastic/transport@8.11.0':
@@ -20972,8 +20989,8 @@ packages:
     resolution: {integrity: sha512-DpMa59o5uGUWWjruMp71e6knmwKU3jRBBn1kjuLWN9EeIOxNeSAwvHf03WIl8g/ZMR2oSQC9ej3yeLBwdDc/pg==}
     engines: {node: '>=10.13.0'}
 
-  legacy-javascript@0.0.1:
-    resolution: {integrity: sha512-lPyntS4/aS7jpuvOlitZDFifBCb4W8L/3QU0PLbUTUj+zYah8rfVjYic88yG7ZKTxhS5h9iz7duT8oUXKszLhg==}
+  legacy-javascript@0.0.3:
+    resolution: {integrity: sha512-1r6MT4dVaJyXt4G07Cm2cQ0AUaLJdefiEp4SmIAylA++gnEQ82YvmzE58RkM5EP0fk5hROLCslUPGnwIYdZQVA==}
 
   leven@2.1.0:
     resolution: {integrity: sha512-nvVPLpIHUxCUoRLrFqTgSxXJ614d8AgQoWl7zPe/2VadE8+1dpU3LBhowRuBAcuwruWtOdD8oYC9jDNJjXDPyA==}
@@ -25224,8 +25241,8 @@ packages:
     resolution: {integrity: sha512-hdF5ZgjTqgAntKkklYw0R03MG2x/bSzTtkxmIRw/sTNV8YXsCJ1tfLAX23lhxhHJlEf3CRCOCGGWw3vI3GaSPw==}
     engines: {node: '>=18'}
 
-  traverse@0.6.11:
-    resolution: {integrity: sha512-vxXDZg8/+p3gblxB6BhhG5yWVn1kGRlaL8O78UDXc3wRnPizB5g83dcvWV1jpDMIPnjZjOFuxlMmE82XJ4407w==}
+  traverse@0.6.14:
+    resolution: {integrity: sha512-CYRAVGfnSSe+4Wlof62oUH6y9fGwo0NNS84hMq76MTZtwXQU7Oqna9SgWfrCGj5JPUtHQudnIEt1BP7PInPkPQ==}
     engines: {node: '>= 0.4'}
 
   tree-dump@1.1.0:
@@ -25406,8 +25423,8 @@ packages:
   typed-query-selector@2.12.3:
     resolution: {integrity: sha512-/dtuMZyutHLlrxWhhC1uib00ELUr2dZ8C9B8YzZYsJmeE3V56OxRblrSM2UaF142pcMtak7ehZ6+poWGeehNIg==}
 
-  typedarray.prototype.slice@1.0.5:
-    resolution: {integrity: sha512-q7QNVDGTdl702bVFiI5eY4l/HkgCM6at9KhcFbgUAzezHFbOVy4+0O/lCjsABEQwbZPravVfBIiBVGo89yzHFg==}
+  typedarray.prototype.slice@1.0.6:
+    resolution: {integrity: sha512-r+7YvGfM5TkTiDQ5EqWi/Z4L4KP3jUI+YCmTtWg1tmTHUw6xladLJqzR2heMaHBIM0TTFLZmn/EkIaEHYs/bIA==}
     engines: {node: '>= 0.4'}
 
   typedarray@0.0.7:
@@ -28442,7 +28459,7 @@ snapshots:
       history: 4.9.0
       qs: 6.16.0
 
-  '@elastic/statistics@0.0.2':
+  '@elastic/statistics@0.0.3':
     dependencies:
       simple-statistics: 7.12.1
 
@@ -30091,7 +30108,7 @@ snapshots:
       '@mapbox/extent': 0.4.0
       '@mapbox/geojson-coords': 0.0.2
       rw: 0.1.4
-      traverse: 0.6.11
+      traverse: 0.6.14
 
   '@mapbox/geojson-normalize@0.0.1': {}
 
@@ -31411,7 +31428,7 @@ snapshots:
 
   '@paulirish/trace_engine@0.0.65':
     dependencies:
-      legacy-javascript: 0.0.1
+      legacy-javascript: 0.0.3
       third-party-web: 0.30.0
 
   '@pdf-lib/standard-fonts@1.0.0':
@@ -39722,7 +39739,7 @@ snapshots:
 
   lead@4.0.0: {}
 
-  legacy-javascript@0.0.1: {}
+  legacy-javascript@0.0.3: {}
 
   leven@2.1.0: {}
 
@@ -44848,10 +44865,12 @@ snapshots:
     dependencies:
       punycode: 2.3.1
 
-  traverse@0.6.11:
+  traverse@0.6.14:
     dependencies:
+      define-data-property: 1.1.4
+      es-to-primitive: 1.3.4
       gopd: 1.2.0
-      typedarray.prototype.slice: 1.0.5
+      typedarray.prototype.slice: 1.0.6
       which-typed-array: 1.1.24
 
   tree-dump@1.1.0(tslib@2.8.1):
@@ -45022,7 +45041,7 @@ snapshots:
 
   typed-query-selector@2.12.3: {}
 
-  typedarray.prototype.slice@1.0.5:
+  typedarray.prototype.slice@1.0.6:
     dependencies:
       call-bind: 1.0.9
       define-properties: 1.2.1
