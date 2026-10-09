@@ -8,6 +8,7 @@ import type { BriefSnapshot } from '../../../../../common/entity_analytics/execu
 import realJob from '../__fixtures__/real_job.json';
 import {
   buildStorylineGraphLayout,
+  DIAGRAM_LABEL_GAP,
   DIAGRAM_MIN_HEIGHT,
   DIAGRAM_ROW_HEIGHT,
 } from './build_storyline_graph_layout';
@@ -42,5 +43,32 @@ describe('buildStorylineGraphLayout (real S1)', () => {
     expect(pairs.find(({ to }) => to === story.entityEuids[1])?.verbs).toEqual(
       expect.arrayContaining(['logged on to (rarely)', 'regularly logs on to'])
     );
+  });
+});
+
+describe('edge label placement', () => {
+  it('keeps inline labels apart for a fully connected 2x2 pair set', () => {
+    const snapshot = realJob.snapshot as unknown as BriefSnapshot;
+    const base = snapshot.storylines.storylines[0];
+    const [user, hostA, hostB] = base.entityEuids;
+    const user2 = 'user:second';
+    const entities = {
+      ...snapshot.entities,
+      [user2]: { ...snapshot.entities[user], euid: user2, name: 'second' },
+    };
+    const story = {
+      ...base,
+      entityEuids: [user, user2, hostA, hostB],
+      edges: [
+        { ...base.edges[0], from: user, to: hostA, type: 'same_ad' as const },
+        { ...base.edges[0], from: user, to: hostB, type: 'same_ad' as const },
+        { ...base.edges[0], from: user2, to: hostA, type: 'same_ad' as const },
+        { ...base.edges[0], from: user2, to: hostB, type: 'same_ad' as const },
+      ],
+    };
+    const { pairs } = buildStorylineGraphLayout(story, { ...snapshot, entities });
+    const ys = pairs.map(({ labelY }) => labelY).sort((a, b) => a - b);
+    expect(pairs).toHaveLength(4);
+    ys.slice(1).forEach((y, i) => expect(y - ys[i]).toBeGreaterThanOrEqual(DIAGRAM_LABEL_GAP));
   });
 });

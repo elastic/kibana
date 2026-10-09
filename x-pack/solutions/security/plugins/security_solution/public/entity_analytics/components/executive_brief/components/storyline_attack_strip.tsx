@@ -16,7 +16,9 @@ import { useMitreConfiguration } from '../../../../common/hooks/mitre/use_mitre_
 export const StorylineAttackStrip: React.FC<{
   tacticIds: string[];
   snapshot: BriefSnapshot;
-}> = ({ tacticIds, snapshot }) => {
+  /** Hide the heading (used inside the collapsed-card preview). */
+  compact?: boolean;
+}> = ({ tacticIds, snapshot, compact = false }) => {
   const { tactics } = useMitreConfiguration({ types: ['tactic'] });
 
   const ordered = useMemo(() => {
@@ -40,10 +42,14 @@ export const StorylineAttackStrip: React.FC<{
 
   return (
     <div data-test-subj="executiveBriefAttackStrip">
-      <EuiTitle size="xxs">
-        <h5>{'Attack stages'}</h5>
-      </EuiTitle>
-      <EuiSpacer size="xs" />
+      {!compact && (
+        <>
+          <EuiTitle size="xxs">
+            <h5>{'Attack stages'}</h5>
+          </EuiTitle>
+          <EuiSpacer size="xs" />
+        </>
+      )}
       <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
         {ordered.map(({ id, name }, index) => (
           <React.Fragment key={id}>

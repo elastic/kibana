@@ -5,14 +5,14 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiBadge, EuiIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
   BriefEntity,
   BriefSnapshot,
   Storyline,
 } from '../../../../../../common/entity_analytics/executive_brief/types';
-import { RiskScoreLevel } from '../../../severity/common';
+import { EntityExposureFacts } from '../exposure_column';
 import type { DiagramNode, DiagramPair } from '../../utils/build_storyline_graph_layout';
 import {
   buildStorylineGraphLayout,
@@ -27,7 +27,7 @@ export const ICON_BY_ENTITY_TYPE: Record<BriefEntity['type'], string> = {
 };
 
 /** Share of the width taken by each column; the connector gap is what remains. */
-const COLUMN_PERCENT = 40;
+const COLUMN_PERCENT = 36;
 const LEFT_EDGE = `${COLUMN_PERCENT}%`;
 const RIGHT_EDGE = `${100 - COLUMN_PERCENT}%`;
 
@@ -51,8 +51,10 @@ const EntityCard: React.FC<{ node: DiagramNode; top: number; side: 'left' | 'rig
         display: flex;
         flex-direction: column;
         justify-content: center;
-        gap: ${euiTheme.size.xxs};
-        padding: 0 ${euiTheme.size.s};
+        gap: ${euiTheme.size.xs};
+        min-width: 220px;
+        padding: ${euiTheme.size.s} ${euiTheme.size.m};
+        overflow: hidden;
         border-radius: ${euiTheme.border.radius.medium};
         border: ${euiTheme.border.width.thin} ${isHub ? 'dashed' : 'solid'}
           ${euiTheme.colors.mediumShade};
@@ -82,23 +84,12 @@ const EntityCard: React.FC<{ node: DiagramNode; top: number; side: 'left' | 'rig
           {entity?.name ?? node.euid}
         </EuiText>
       </div>
-      <div
-        css={css`
-          display: flex;
-          align-items: center;
-          gap: ${euiTheme.size.xs};
-          min-width: 0;
-        `}
-      >
-        {entity?.riskLevel && entity.riskScoreNorm !== undefined && (
-          <RiskScoreLevel severity={entity.riskLevel} />
-        )}
-        {isHub && (
-          <EuiText size="xs" color="subdued">
-            {'Shared infrastructure'}
-          </EuiText>
-        )}
-      </div>
+      {entity && <EntityExposureFacts entity={entity} />}
+      {isHub && (
+        <EuiText size="xs" color="subdued">
+          {'Shared infrastructure'}
+        </EuiText>
+      )}
     </div>
   );
 };
@@ -169,37 +160,34 @@ export const StorylineDiagram: React.FC<{ storyline: Storyline; snapshot: BriefS
             top={node.cy - DIAGRAM_CARD_HEIGHT / 2}
           />
         ))}
-        {crossPairs.map((pair) => {
-          const from = byId.get(pair.from);
-          const to = byId.get(pair.to);
-          if (!from || !to) return null;
-          const midY = (from.cy + to.cy) / 2;
-          return (
-            <div
-              key={`label-${pair.from}|${pair.to}`}
-              css={css`
-                position: absolute;
-                left: 50%;
-                top: ${midY}px;
-                transform: translate(-50%, -50%);
-                max-width: ${100 - 2 * COLUMN_PERCENT}%;
-              `}
-            >
-              <EuiToolTip content={pair.verbs.join(' · ')} position="top">
-                <EuiBadge
-                  color="hollow"
-                  tabIndex={0}
-                  data-test-subj="executiveBriefDiagramLabel"
-                  css={css`
-                    background-color: ${euiTheme.colors.backgroundBasePlain};
-                  `}
-                >
-                  {pair.label}
-                </EuiBadge>
-              </EuiToolTip>
-            </div>
-          );
-        })}
+        {crossPairs.map((pair) => (
+          <div
+            key={`label-${pair.from}|${pair.to}`}
+            css={css`
+              position: absolute;
+              left: ${COLUMN_PERCENT + pair.labelT * (100 - 2 * COLUMN_PERCENT)}%;
+              top: ${pair.labelY}px;
+              transform: translate(-50%, -50%);
+              max-width: ${100 - 2 * COLUMN_PERCENT - 2}%;
+            `}
+          >
+            <EuiToolTip content={pair.verbs.join(' · ')} position="top">
+              <div
+                tabIndex={0}
+                data-test-subj="executiveBriefDiagramLabel"
+                css={css`
+                  text-align: center;
+                  padding: 0 ${euiTheme.size.xs};
+                  border-radius: ${euiTheme.border.radius.small};
+                  border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
+                  background-color: ${euiTheme.colors.backgroundBasePlain};
+                `}
+              >
+                <EuiText size="xs">{pair.label}</EuiText>
+              </div>
+            </EuiToolTip>
+          </div>
+        ))}
       </div>
       {sidePairs.length > 0 && (
         <EuiText size="xs" color="subdued" data-test-subj="executiveBriefDiagramSidePairs">

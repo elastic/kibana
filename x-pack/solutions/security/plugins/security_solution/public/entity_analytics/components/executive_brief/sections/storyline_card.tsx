@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import {
+  EuiAccordion,
   EuiBadge,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -30,8 +32,8 @@ import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { EntityBadge } from '../../entity_badge';
 import { EXECUTIVE_BRIEF_SCOPE_ID } from '../constants';
 import { TEST_IDS } from '../test_ids';
+import { useIsPrintMode } from '../components/brief_context';
 import { DecisionAccordion } from '../components/decision_accordion';
-import { ExposureColumn } from '../components/exposure_column';
 import { ResponseRow, ResponseStateBadge } from '../components/response_row';
 import { StorylineAttackStrip } from '../components/storyline_attack_strip';
 import { StorylineGraph } from '../components/storyline_graph';
@@ -49,6 +51,13 @@ const CONFIDENCE_LABEL: Record<BriefConfidence, string> = {
   low: 'Low confidence',
 };
 
+const ENTITY_ICON = {
+  user: 'user',
+  host: 'storage',
+  service: 'vectorTriangle',
+  generic: 'globe',
+} as const;
+
 const ENTITY_FLYOUT_TYPES = {
   user: FLYOUT_TYPE.USER,
   host: FLYOUT_TYPE.HOST,
@@ -61,6 +70,8 @@ interface StorylineCardProps {
   storyline: Storyline;
   narrative: ExecutiveBriefStoryline;
   decisions: Array<{ decision: ExecutiveBriefDecision; index: number }>;
+  /** Expand the card regardless of user toggling (PDF/print capture). Also implied by print mode. */
+  forceExpanded?: boolean;
 }
 
 export const StorylineCard: React.FC<StorylineCardProps> = ({
@@ -68,7 +79,11 @@ export const StorylineCard: React.FC<StorylineCardProps> = ({
   storyline,
   narrative,
   decisions,
+  forceExpanded = false,
 }) => {
+  const isPrintMode = useIsPrintMode();
+  const [isOpen, setIsOpen] = useState(storyline.rank === 1);
+  const expanded = forceExpanded || isPrintMode || isOpen;
   const severityColor = useSeverityColor(storyline.severity);
   const isNewFlyoutEnabled = useIsNewFlyoutEnabled();
   const { openEntityGraphView, openEntityFlyout } = useFlyoutApi();
@@ -93,12 +108,8 @@ export const StorylineCard: React.FC<StorylineCardProps> = ({
     });
   };
 
-  return (
-    <EuiPanel
-      hasBorder
-      paddingSize="l"
-      data-test-subj={TEST_IDS.storylineCard(storyline.evidenceId)}
-    >
+  const preview = (
+    <div data-test-subj="executiveBriefStorylinePreview">
       <EuiFlexGroup gutterSize="s" alignItems="center" wrap responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiBadge color={severityColor} data-test-subj="executiveBriefSeverity">
@@ -119,36 +130,95 @@ export const StorylineCard: React.FC<StorylineCardProps> = ({
           <ResponseStateBadge state={storyline.response.state} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="xs" />
       <EuiFlexGroup
         gutterSize="xs"
         wrap
         responsive={false}
-        data-test-subj="executiveBriefEntityChips"
+        data-test-subj="executiveBriefPreviewEntities"
       >
         {storyline.entityEuids.map((euid) => {
           const entity = snapshot.entities[euid];
           return (
             <EuiFlexItem grow={false} key={euid}>
-              <EntityBadge
-                entity={{ type: entity?.type ?? 'generic', name: entity?.name ?? euid, id: euid }}
-                scopeId={EXECUTIVE_BRIEF_SCOPE_ID}
-              />
+              <EuiBadge color="hollow" iconType={entity ? ENTITY_ICON[entity.type] : 'globe'}>
+                {entity?.name ?? euid}
+              </EuiBadge>
             </EuiFlexItem>
           );
         })}
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiText size="s">
-        <p>{narrative.narrative}</p>
-        <p>
-          <strong>{'Why it matters: '}</strong>
-          {narrative.whyItMatters}
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="l" responsive>
-        <EuiFlexItem grow={2}>
+      <EuiSpacer size="xs" />
+      <StorylineAttackStrip compact tacticIds={storyline.tacticIds} snapshot={snapshot} />
+      {!expanded && (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiText
+            size="s"
+            color="subdued"
+            data-test-subj="executiveBriefNarrativePreview"
+            css={css`
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+            `}
+          >
+            {narrative.narrative}
+          </EuiText>
+        </>
+      )}
+    </div>
+  );
+
+  return (
+    <div data-test-subj={`executiveBriefStorylineCard-${storyline.rank}`}>
+      <EuiPanel
+        hasBorder
+        paddingSize="l"
+        data-test-subj={TEST_IDS.storylineCard(storyline.evidenceId)}
+      >
+        <EuiAccordion
+          id={`executiveBriefStorylineAccordion-${storyline.evidenceId}`}
+          buttonContent={preview}
+          buttonProps={{ 'data-test-subj': `executiveBriefStorylineToggle-${storyline.rank}` }}
+          arrowDisplay="left"
+          forceState={expanded ? 'open' : 'closed'}
+          onToggle={setIsOpen}
+          paddingSize="none"
+        >
+          <EuiSpacer size="m" />
+          <EuiFlexGroup
+            gutterSize="xs"
+            wrap
+            responsive={false}
+            data-test-subj="executiveBriefEntityChips"
+          >
+            {storyline.entityEuids.map((euid) => {
+              const entity = snapshot.entities[euid];
+              return (
+                <EuiFlexItem grow={false} key={euid}>
+                  <EntityBadge
+                    entity={{
+                      type: entity?.type ?? 'generic',
+                      name: entity?.name ?? euid,
+                      id: euid,
+                    }}
+                    scopeId={EXECUTIVE_BRIEF_SCOPE_ID}
+                  />
+                </EuiFlexItem>
+              );
+            })}
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiText size="s">
+            <p>{narrative.narrative}</p>
+            <p>
+              <strong>{'Why it matters: '}</strong>
+              {narrative.whyItMatters}
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
           <StorylineGraph storyline={storyline} snapshot={snapshot} />
           {isNewFlyoutEnabled && focal && (
             <EuiButtonEmpty
@@ -160,34 +230,29 @@ export const StorylineCard: React.FC<StorylineCardProps> = ({
               {'Open in graph view'}
             </EuiButtonEmpty>
           )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <ExposureColumn storyline={storyline} snapshot={snapshot} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <StorylineAttackStrip tacticIds={storyline.tacticIds} snapshot={snapshot} />
-      <EuiSpacer size="m" />
-      <EuiTitle size="xxs">
-        <h5>{'Timeline'}</h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <StorylineSteps storyline={storyline} snapshot={snapshot} />
-      <EuiSpacer size="m" />
-      <ResponseRow response={storyline.response} />
-      {decisions.length > 0 && (
-        <>
           <EuiSpacer size="m" />
-          {decisions.map(({ decision, index }) => (
-            <DecisionAccordion
-              key={`${decision.action}-${index}`}
-              decision={decision}
-              index={index}
-              inline
-            />
-          ))}
-        </>
-      )}
-    </EuiPanel>
+          <EuiTitle size="xxs">
+            <h5>{'Timeline'}</h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <StorylineSteps storyline={storyline} snapshot={snapshot} />
+          <EuiSpacer size="m" />
+          <ResponseRow response={storyline.response} />
+          {decisions.length > 0 && (
+            <>
+              <EuiSpacer size="m" />
+              {decisions.map(({ decision, index }) => (
+                <DecisionAccordion
+                  key={`${decision.action}-${index}`}
+                  decision={decision}
+                  index={index}
+                  inline
+                />
+              ))}
+            </>
+          )}
+        </EuiAccordion>
+      </EuiPanel>
+    </div>
   );
 };

@@ -27,13 +27,11 @@ const toCriticality = (value: string | undefined): CriticalityLevelWithUnassigne
     ? (value as CriticalityLevelWithUnassigned)
     : 'unassigned';
 
-const EntityExposure: React.FC<{ entity: BriefEntity }> = ({ entity }) => {
+/** Risk, criticality, privilege, vulnerability and watchlist facts of one entity (no name). */
+export const EntityExposureFacts: React.FC<{ entity: BriefEntity }> = ({ entity }) => {
   const vulns = entity.vulnerabilities;
   return (
     <div data-test-subj={`executiveBriefExposure-${entity.name}`}>
-      <EuiText size="xs">
-        <strong>{entity.name}</strong>
-      </EuiText>
       <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
         {entity.riskLevel && entity.riskScoreNorm !== undefined && (
           <EuiFlexItem grow={false}>
@@ -75,6 +73,16 @@ const EntityExposure: React.FC<{ entity: BriefEntity }> = ({ entity }) => {
   );
 };
 
+const EntityExposure: React.FC<{ entity: BriefEntity }> = ({ entity }) => (
+  <div>
+    <EuiText size="xs">
+      <strong>{entity.name}</strong>
+    </EuiText>
+    <EntityExposureFacts entity={entity} />
+  </div>
+);
+
+/** Fallback list of exposure facts, used only when the relationship diagram cannot render. */
 export const ExposureColumn: React.FC<{ storyline: Storyline; snapshot: BriefSnapshot }> = ({
   storyline,
   snapshot,
