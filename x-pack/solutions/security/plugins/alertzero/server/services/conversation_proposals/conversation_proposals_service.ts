@@ -42,8 +42,9 @@ const CLOSED_DECIDED_WITHIN_HOURS = 72;
  * pages and be shown twice or skipped. Unique per live proposal: `create` roots a
  * chain at its own id, `revise` numbers it. An original and its clone share both,
  * and can now sit together in the closed queue (a failed original stays visible
- * after being replaced); the `createdAt` that precedes this in the closed sort
- * separates them, since the clone is created later.
+ * after being replaced). A clone also inherits `createdAt`, so what separates them
+ * is `decidedAt`, which leads the closed sort: the clone has none until it is
+ * decided, and then its own.
  */
 const TIEBREAKER: SortCombinations[] = [
   { rootProposalId: { order: 'asc' } },
@@ -96,11 +97,12 @@ export class ConversationProposalsService {
         // The index is shared with every other solution's proposals, and only
         // this filter keeps theirs out of an AlertZero queue.
         origin: ALERTZERO_PROPOSAL_ORIGIN,
-        // Superseded records stay: a failed action is replaced by a retry, and the
-        // failed attempt is the one that was decided. Undecided superseded records
-        // (revisions) carry no `decidedAt`, so the window above already drops them.
+        // A failed action is replaced by a retry, and the failed attempt is the one that
+        // was decided, so superseded records stay if they carry a decision. Undecided ones
+        // (earlier revisions) go: settling one as `expired` stamps `decidedAt` without a
+        // decision, so the recency window alone would let it into Closed.
         excludeSuperseded: false,
-        excludeUndecidedSuperseded: false,
+        excludeUndecidedSuperseded: true,
         excludeExpired: false,
         size,
         from,

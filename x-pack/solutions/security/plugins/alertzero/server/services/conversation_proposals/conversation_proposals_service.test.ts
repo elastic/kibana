@@ -450,6 +450,7 @@ describe('ConversationProposalsService', () => {
         expect.objectContaining({
           decidedWithinHours: 72,
           excludeSuperseded: false,
+          excludeUndecidedSuperseded: true,
           size: 25,
           from: 0,
         }),
