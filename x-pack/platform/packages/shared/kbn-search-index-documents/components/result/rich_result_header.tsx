@@ -120,16 +120,20 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
   );
 
   const metaDataIcon = (
-    <EuiButtonIcon
-      iconType="info"
-      color="text"
-      data-test-subj="documentMetadataButton"
-      onClick={(e: React.MouseEvent<HTMLElement>) => {
-        e.stopPropagation();
-        setPopoverIsOpen(!popoverIsOpen);
-      }}
-      aria-label={metaDataLabel}
-    />
+    // The info button stays focused while the popover is open, which would
+    // leave this tooltip stacked on top of the popover.
+    <EuiToolTip content={popoverIsOpen ? undefined : metaDataLabel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="info"
+        color="text"
+        data-test-subj="documentMetadataButton"
+        onClick={(e: React.MouseEvent<HTMLElement>) => {
+          e.stopPropagation();
+          setPopoverIsOpen(!popoverIsOpen);
+        }}
+        aria-label={metaDataLabel}
+      />
+    </EuiToolTip>
   );
 
   return (

@@ -55,7 +55,9 @@ const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
   );
 
   const metaDataIcon = (
-    <EuiToolTip content={metaDataLabel} disableScreenReaderOutput>
+    // The info button stays focused while the popover is open, which would
+    // leave this tooltip stacked on top of the popover.
+    <EuiToolTip content={popoverIsOpen ? undefined : metaDataLabel} disableScreenReaderOutput>
       <EuiButtonIcon
         display="empty"
         size="xs"
