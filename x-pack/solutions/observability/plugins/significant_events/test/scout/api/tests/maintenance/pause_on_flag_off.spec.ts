@@ -77,18 +77,36 @@ const listPausedSpaceIds = async (kbnClient: KbnClient): Promise<Set<string>> =>
   return new Set(states.filter(({ state }) => state === 'paused').map(({ id }) => id));
 };
 
-const createClient = (
-  apiClient: ApiClientFixture,
-  cookieHeader: Record<string, string>,
-  engineAdminCookieHeader: Record<string, string>
-) => {
-  const internalHeaders = { ...COMMON_API_HEADERS, ...cookieHeader };
-  const publicHeaders = { ...PUBLIC_API_HEADERS, ...cookieHeader };
+interface IRoleSessions {
+  asStreamsAdmin: () => Promise<{ cookieHeader: Record<string, string> }>;
+  asNightshiftEngineAdmin: () => Promise<{ cookieHeader: Record<string, string> }>;
+}
+
+const createClient = (apiClient: ApiClientFixture, sessions: IRoleSessions) => {
+  // Scout keeps one custom role per worker, and every interactive session of the worker shares
+  // it. Logging in as a second role rewrites the first role's privileges, so a cookie fetched
+  // earlier silently loses them: the engine admin has no workflow privileges, which made the
+  // workflow reads answer 403. Log in as a role only right before it is used.
+  let activeRole: 'streams' | 'engine' | undefined;
+  let activeCookieHeader: Record<string, string> = {};
+  const cookieFor = async (role: 'streams' | 'engine') => {
+    if (activeRole !== role) {
+      const { cookieHeader } =
+        role === 'streams'
+          ? await sessions.asStreamsAdmin()
+          : await sessions.asNightshiftEngineAdmin();
+      activeRole = role;
+      activeCookieHeader = cookieHeader;
+    }
+    return activeCookieHeader;
+  };
+  const internalHeaders = async () => ({ ...COMMON_API_HEADERS, ...(await cookieFor('streams')) });
+  const publicHeaders = async () => ({ ...PUBLIC_API_HEADERS, ...(await cookieFor('streams')) });
 
   return {
     async getMaintenance() {
       const response = await apiClient.get('internal/significant_events/maintenance/_status', {
-        headers: internalHeaders,
+        headers: await internalHeaders(),
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
@@ -96,14 +114,14 @@ const createClient = (
     },
     async isAvailable() {
       const response = await apiClient.get('internal/significant_events/availability', {
-        headers: internalHeaders,
+        headers: await internalHeaders(),
         responseType: 'json',
       });
       return response.body.available;
     },
     async isWorkflowEnabled(endpoint: string) {
       const response = await apiClient.get(endpoint, {
-        headers: publicHeaders,
+        headers: await publicHeaders(),
         responseType: 'json',
       });
       return response.statusCode === 200 ? response.body.enabled : undefined;
@@ -129,7 +147,7 @@ const createClient = (
           .poll(
             async () => {
               const response = await apiClient.get(endpoint, {
-                headers: publicHeaders,
+                headers: await publicHeaders(),
                 responseType: 'json',
               });
               lastResponse =
@@ -150,14 +168,14 @@ const createClient = (
     async bootstrapSpaceWorkflow() {
       // Bootstrapping needs Manage engines, which the streams admin role does not include.
       const response = await apiClient.post(BOOTSTRAP_CLEANUP_ENDPOINT, {
-        headers: { ...COMMON_API_HEADERS, ...engineAdminCookieHeader },
+        headers: { ...COMMON_API_HEADERS, ...(await cookieFor('engine')) },
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
     },
     async isRuleEnabled(ruleId: string) {
       const response = await apiClient.get(`api/alerting/v2/rules/${ruleId}`, {
-        headers: publicHeaders,
+        headers: await publicHeaders(),
         responseType: 'json',
       });
       return response.statusCode === 200 ? response.body.enabled : undefined;
@@ -165,7 +183,7 @@ const createClient = (
     /** Creates the source the rule-backed query is stored under. */
     async createSource(title: string) {
       const response = await apiClient.post('internal/nightshift/sources', {
-        headers: internalHeaders,
+        headers: await internalHeaders(),
         body: { title, esql: SOURCE_ESQL },
         responseType: 'json',
       });
@@ -174,7 +192,7 @@ const createClient = (
     },
     async deleteSource(sourceId: string) {
       const response = await apiClient.delete(`internal/nightshift/sources/${sourceId}`, {
-        headers: internalHeaders,
+        headers: await internalHeaders(),
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
@@ -194,7 +212,7 @@ const createClient = (
       await expect
         .poll(async () => {
           const response = await apiClient.put(`internal/significant_events/queries/${queryId}`, {
-            headers: internalHeaders,
+            headers: await internalHeaders(),
             body: {
               title: 'Nightshift flag-off rule',
               esql: { query: esql },
@@ -210,7 +228,7 @@ const createClient = (
     /** Deletes the query together with its backing rule. */
     async deleteQuery(queryId: string) {
       const response = await apiClient.post('internal/streams/queries/_bulk_delete', {
-        headers: internalHeaders,
+        headers: await internalHeaders(),
         body: { queryIds: [queryId] },
         responseType: 'json',
       });
@@ -224,15 +242,11 @@ apiTest.describe(
   'Pause when Nightshift is turned off',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    let cookieHeader: Record<string, string>;
-    let engineAdminCookieHeader: Record<string, string>;
     let queryId: string | undefined;
     let sourceId: string | undefined;
     let spaceIdsPausedBeforeTest = new Set<string>();
 
-    apiTest.beforeAll(async ({ samlAuth, apiServices, kbnClient }) => {
-      ({ cookieHeader } = await samlAuth.asStreamsAdmin());
-      ({ cookieHeader: engineAdminCookieHeader } = await samlAuth.asNightshiftEngineAdmin());
+    apiTest.beforeAll(async ({ apiServices, kbnClient }) => {
       await enableAlertingV2(kbnClient);
       // Flag-off pauses every space. Spaces that were already paused keep that state afterwards.
       spaceIdsPausedBeforeTest = await listPausedSpaceIds(kbnClient);
@@ -240,7 +254,7 @@ apiTest.describe(
       await apiServices.significantEventsTest.resumeSignificantEvents();
     });
 
-    apiTest.afterAll(async ({ apiServices, apiClient, kbnClient }) => {
+    apiTest.afterAll(async ({ apiServices, apiClient, kbnClient, samlAuth }) => {
       await apiServices.significantEventsTest.enableSignificantEvents();
       await apiServices.significantEventsTest.resumeSignificantEvents();
       // Flag-off pauses every space, and resume only reaches the space it is called in. Leave the
@@ -252,20 +266,20 @@ apiTest.describe(
           .map((id) => apiServices.significantEventsTest.resumeSignificantEvents({ spaceId: id }))
       );
       if (queryId !== undefined) {
-        await createClient(apiClient, cookieHeader, engineAdminCookieHeader).deleteQuery(queryId);
+        await createClient(apiClient, samlAuth).deleteQuery(queryId);
       }
       if (sourceId !== undefined) {
-        await createClient(apiClient, cookieHeader, engineAdminCookieHeader).deleteSource(sourceId);
+        await createClient(apiClient, samlAuth).deleteSource(sourceId);
       }
       await unsetAlertingV2(kbnClient);
     });
 
     apiTest(
       'pauses when the flag is turned off and stays paused when it is turned back on',
-      async ({ apiClient, apiServices }) => {
+      async ({ apiClient, apiServices, samlAuth }) => {
         // Waits for workflow installation plus the flag settle window, beyond the 60s default.
         apiTest.setTimeout(300_000);
-        const client = createClient(apiClient, cookieHeader, engineAdminCookieHeader);
+        const client = createClient(apiClient, samlAuth);
         const nightshift = apiServices.significantEventsTest;
 
         const ruleId = await apiTest.step(
