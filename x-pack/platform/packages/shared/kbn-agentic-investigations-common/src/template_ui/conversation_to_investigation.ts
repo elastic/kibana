@@ -115,13 +115,19 @@ const toTimelineEvents = (events: Conversation['events']): TimelineEvent[] =>
  */
 export const conversationToEscalationHeader = (
   conversation: Conversation
-): { status: string; assigneeUids: string[]; linkedInvestigationIds: string[] } => {
+): {
+  status: string;
+  assigneeUids: string[];
+  linkedInvestigationIds: string[];
+  summary: string | undefined;
+} => {
   const metadata = conversation.metadata ?? {};
   return {
     // The server treats a missing status as 'open' (escalations_service filters on `not closed`).
     status: readString(metadata.status) ?? 'open',
     assigneeUids: readStringArray(metadata.assignees),
     linkedInvestigationIds: readStringArray(metadata.linked_investigations),
+    summary: readString(metadata.summary) ?? readString(metadata.description),
   };
 };
 

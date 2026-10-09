@@ -260,7 +260,7 @@ Direction covers both numeric scores and the values assigned to categorical labe
 
 #### Evaluator versions
 
-Every saved change writes a new immutable version; saving without changing anything writes nothing. The semver level is **derived from the edit rather than chosen by the author**, because a judge offers no way to verify a claim that a change was safe — a one-word rubric change can move every score.
+Every saved change writes a new immutable version; saving without changing anything writes nothing. An update may send `base_version`, the version the edit started from; if the evaluator has moved on since, the update is refused with `409` instead of being written over the newer version. The editor always sends it, so two people editing the same evaluator cannot silently undo each other's changes. An update without it is layered onto whatever the latest version is. The semver level is **derived from the edit rather than chosen by the author**, because a judge offers no way to verify a claim that a change was safe — a one-word rubric change can move every score.
 
 | Level | What changed | Effect on past scores |
 | --- | --- | --- |

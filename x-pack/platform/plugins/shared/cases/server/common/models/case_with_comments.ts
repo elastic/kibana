@@ -658,22 +658,24 @@ export class CaseCommentModel {
         (attachment) => !isSavedObjectErrorResult(attachment)
       );
 
-      const attachmentsWithoutErrors = attachments.flatMap((attachment) => {
-        const savedObject = savedObjectsWithoutErrors.find((so) => so.id === attachment.id);
+      const withoutErrors = (items: CommentRequestWithId) =>
+        items.flatMap((attachment) => {
+          const savedObject = savedObjectsWithoutErrors.find((so) => so.id === attachment.id);
 
-        return savedObject
-          ? [
-              {
-                ...attachment,
-                savedObjectType: savedObject.type as AttachmentSavedObjectType,
-              },
-            ]
-          : [];
-      });
+          return savedObject
+            ? [
+                {
+                  ...attachment,
+                  savedObjectType: savedObject.type as AttachmentSavedObjectType,
+                },
+              ]
+            : [];
+        });
 
       await Promise.all([
-        commentableCase.handleAlertComments(attachmentsWithoutErrors),
-        this.bulkCreateCommentUserAction(attachmentsWithoutErrors),
+        // Alert sync uses the original request so alerts already on the case still get synced.
+        commentableCase.handleAlertComments(withoutErrors(attachments)),
+        this.bulkCreateCommentUserAction(withoutErrors(attachmentWithoutDuplicateAlerts)),
       ]);
 
       return commentableCase;
