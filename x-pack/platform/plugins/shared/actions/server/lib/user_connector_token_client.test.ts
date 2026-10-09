@@ -307,6 +307,68 @@ describe('UserConnectorTokenClient', () => {
       expect(logger.error).toHaveBeenCalled();
     });
 
+    test('pages through tokens so a connector with many tokens does not hide another', async () => {
+      const tokenSo = (connectorId: string, index: number) => ({
+        id: `token-${connectorId}-${index}`,
+        type: 'user_connector_token',
+        attributes: {
+          profileUid: 'user-profile-123',
+          connectorId,
+          credentialType: 'oauth',
+          credentials: {},
+          expiresAt: FUTURE,
+          createdAt: PAST,
+          updatedAt: PAST,
+        },
+        score: 1,
+        references: [],
+      });
+      unsecuredSavedObjectsClient.find
+        .mockResolvedValueOnce({
+          total: 101,
+          per_page: 100,
+          page: 1,
+          saved_objects: Array.from({ length: 100 }, (_, index) => tokenSo('b', index)),
+        })
+        .mockResolvedValueOnce({
+          total: 101,
+          per_page: 100,
+          page: 2,
+          saved_objects: [tokenSo('a', 0)],
+        });
+
+      expect(await getUsable(['a', 'b'])).toEqual(new Set(['a', 'b']));
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(2);
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ page: 2 })
+      );
+    });
+
+    test('caps concurrent decryption of tokens', async () => {
+      const connectorIds = Array.from({ length: 25 }, (_, index) => `connector-${index}`);
+      mockTokens(connectorIds.map((connectorId) => ({ connectorId, expiresAt: PAST })));
+
+      let inFlight = 0;
+      let maxInFlight = 0;
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockImplementation(async () => {
+        inFlight++;
+        maxInFlight = Math.max(maxInFlight, inFlight);
+        await Promise.resolve();
+        await Promise.resolve();
+        inFlight--;
+        return {
+          id: 'token-id',
+          type: 'user_connector_token',
+          references: [],
+          attributes: { credentials: { refreshToken: 'rt' } },
+        };
+      });
+
+      expect(await getUsable(connectorIds)).toEqual(new Set(connectorIds));
+      expect(maxInFlight).toBe(10);
+    });
+
     test('only considers the most recent token per connector', async () => {
       mockTokens([
         { connectorId: 'a', expiresAt: FUTURE },

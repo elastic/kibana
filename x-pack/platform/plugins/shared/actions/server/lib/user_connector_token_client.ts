@@ -33,6 +33,8 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 export const MAX_TOKENS_RETURNED = 1;
 const MAX_RETRY_ATTEMPTS = 3;
 const REVOKE_CONCURRENCY = 10;
+const DECRYPT_CONCURRENCY = 10;
+const TOKEN_LOOKUP_PAGE_SIZE = 100;
 
 const isFutureOrUnset = (isoDate: string | undefined, now: number): boolean =>
   !isoDate || Date.parse(isoDate) > now;
@@ -413,15 +415,29 @@ export class UserConnectorTokenClient {
       .map((id) => `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${id}"`)
       .join(' OR ');
 
-    let tokens: Array<SavedObject<UserConnectorToken>>;
+    // Only the latest token per connector counts, matching `get`. A connector can have several
+    // tokens, so page until every connector has been seen rather than assuming one token each.
+    const latestTokenByConnectorId = new Map<string, SavedObject<UserConnectorToken>>();
     try {
-      ({ saved_objects: tokens } = await this.unsecuredSavedObjectsClient.find<UserConnectorToken>({
-        type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-        perPage: connectorIds.length,
-        filter: `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.profileUid: "${profileUid}" AND (${connectorIdFilter})`,
-        sortField: 'updated_at',
-        sortOrder: 'desc',
-      }));
+      for (let page = 1; latestTokenByConnectorId.size < connectorIds.length; page++) {
+        const { saved_objects: tokens, total } =
+          await this.unsecuredSavedObjectsClient.find<UserConnectorToken>({
+            type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+            perPage: TOKEN_LOOKUP_PAGE_SIZE,
+            page,
+            filter: `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.profileUid: "${profileUid}" AND (${connectorIdFilter})`,
+            sortField: 'updated_at',
+            sortOrder: 'desc',
+          });
+        for (const token of tokens) {
+          if (!latestTokenByConnectorId.has(token.attributes.connectorId)) {
+            latestTokenByConnectorId.set(token.attributes.connectorId, token);
+          }
+        }
+        if (page * TOKEN_LOOKUP_PAGE_SIZE >= total) {
+          break;
+        }
+      }
     } catch (err) {
       this.logger.error(
         `Failed to fetch user_connector_tokens for profileUid "${profileUid}". Error: ${err.message}`
@@ -429,44 +445,39 @@ export class UserConnectorTokenClient {
       return usableConnectorIds;
     }
 
-    // Only the latest token per connector counts, matching `get`.
-    const latestTokenByConnectorId = new Map<string, SavedObject<UserConnectorToken>>();
-    for (const token of tokens) {
-      if (!latestTokenByConnectorId.has(token.attributes.connectorId)) {
-        latestTokenByConnectorId.set(token.attributes.connectorId, token);
-      }
-    }
-
+    const limit = pLimit(DECRYPT_CONCURRENCY);
     await Promise.all(
-      [...latestTokenByConnectorId].map(async ([connectorId, token]) => {
-        const { expiresAt, refreshTokenExpiresAt } = token.attributes;
-        const now = Date.now();
+      [...latestTokenByConnectorId].map(([connectorId, token]) =>
+        limit(async () => {
+          const { expiresAt, refreshTokenExpiresAt } = token.attributes;
+          const now = Date.now();
 
-        if (isFutureOrUnset(expiresAt, now)) {
-          usableConnectorIds.add(connectorId);
-          return;
-        }
-
-        // The refresh token lives in the encrypted credentials, so it must be decrypted to check.
-        if (!isFutureOrUnset(refreshTokenExpiresAt, now)) {
-          return;
-        }
-        try {
-          const decrypted =
-            await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<UserConnectorToken>(
-              USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-              token.id
-            );
-          const { refreshToken } = decrypted.attributes.credentials ?? {};
-          if (typeof refreshToken === 'string' && refreshToken.length > 0) {
+          if (isFutureOrUnset(expiresAt, now)) {
             usableConnectorIds.add(connectorId);
+            return;
           }
-        } catch (err) {
-          this.logger.error(
-            `Failed to decrypt user_connector_token for connectorId "${connectorId}". Error: ${err.message}`
-          );
-        }
-      })
+
+          // The refresh token lives in the encrypted credentials, so it must be decrypted to check.
+          if (!isFutureOrUnset(refreshTokenExpiresAt, now)) {
+            return;
+          }
+          try {
+            const decrypted =
+              await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<UserConnectorToken>(
+                USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+                token.id
+              );
+            const { refreshToken } = decrypted.attributes.credentials ?? {};
+            if (typeof refreshToken === 'string' && refreshToken.length > 0) {
+              usableConnectorIds.add(connectorId);
+            }
+          } catch (err) {
+            this.logger.error(
+              `Failed to decrypt user_connector_token for connectorId "${connectorId}". Error: ${err.message}`
+            );
+          }
+        })
+      )
     );
 
     return usableConnectorIds;
