@@ -15,5 +15,9 @@ import { addEcsToRequiredFields, dedupeRequiredFields } from '../../../rule_mana
 /**
  * Brings required fields to a canonical form so order, duplicates and stored `ecs` values don't affect comparisons.
  */
-export const normalizeRequiredFields = (requiredFields?: RequiredFieldInput[]): RequiredField[] =>
-  sortBy(dedupeRequiredFields(addEcsToRequiredFields(requiredFields)), ['name', 'type']);
+export function normalizeRequiredFields(requiredFields?: RequiredFieldInput[]): RequiredField[] {
+  const deduped = dedupeRequiredFields(requiredFields ?? []);
+  const dedupedWithEcs = addEcsToRequiredFields(deduped);
+
+  return sortBy(dedupedWithEcs, ['name', 'type']);
+}

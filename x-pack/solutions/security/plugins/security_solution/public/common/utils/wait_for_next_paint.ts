@@ -10,5 +10,6 @@
  * visible before heavy synchronous work runs.
  * `requestAnimationFrame` callbacks run right before a paint, `setTimeout` moves past it.
  */
-export const waitForNextPaint = (): Promise<void> =>
-  new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
+export function waitForNextPaint(): Promise<void> {
+  return new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
+}

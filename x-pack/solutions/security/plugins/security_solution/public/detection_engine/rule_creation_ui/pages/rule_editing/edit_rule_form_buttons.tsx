@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { memo, useCallback, useState } from 'react';
 import { EuiButton, EuiFlexItem } from '@elastic/eui';
-import React, { memo } from 'react';
-import { useAsyncActionWithLoading } from '../../../../common/hooks/use_async_action_with_loading';
+import { waitForNextPaint } from '../../../../common/utils/wait_for_next_paint';
 import * as i18n from './translations';
 
 interface EditRuleFormButtonsProps {
@@ -24,7 +24,19 @@ export const EditRuleFormButtons = memo(function EditRuleFormButtons({
   isLoading,
   isDisabled,
 }: EditRuleFormButtonsProps): JSX.Element {
-  const [isSubmitting, submit] = useAsyncActionWithLoading(onSubmit);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  // onSubmit starts with CPU-heavy synchronous form validation, which blocks the browser from
+  // painting until it finishes. Waiting for the next paint first shows the loading state right away.
+  const submit = useCallback(async () => {
+    setIsSubmitting(true);
+
+    try {
+      await waitForNextPaint();
+      await onSubmit();
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [onSubmit]);
   const isSaving = isSubmitting || isLoading;
 
   return (
