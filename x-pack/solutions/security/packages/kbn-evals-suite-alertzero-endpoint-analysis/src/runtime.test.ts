@@ -88,16 +88,36 @@ describe('AlertZeroRuntime.cancelAll', () => {
   it('does not throw when the execution reached a terminal state before the cancel landed', async () => {
     const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
     try {
+      // Pre-read RUNNING, post-error re-read COMPLETED: the cancel failed only
+      // because the execution finished in between, so the error is tolerated.
       const fetch = createFetch((path) => {
         if (path.endsWith('/cancel')) throw new Error('500 Something went wrong');
-        return running;
+        return fetch.mock.calls.filter(([p]) => !p.endsWith('/cancel')).length <= 1
+          ? running
+          : { id: 'exec-1', status: ExecutionStatus.COMPLETED };
       }) as FetchMock;
       const runtime = new AlertZeroRuntime(fetch);
       runtime.executionIds.add('exec-1');
       await expect(runtime.cancelAll()).resolves.toBeUndefined();
       expect(warn).toHaveBeenCalledWith(
-        expect.stringContaining('could not cancel execution exec-1')
+        expect.stringContaining('reached terminal state completed')
       );
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it('rejects when the cancel fails and the execution is still non-terminal', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      const fetch = createFetch((path) => {
+        if (path.endsWith('/cancel')) throw new Error('403 Forbidden');
+        return running;
+      }) as FetchMock;
+      const runtime = new AlertZeroRuntime(fetch);
+      runtime.executionIds.add('exec-1');
+      await expect(runtime.cancelAll()).rejects.toThrow('403 Forbidden');
+      expect(warn).not.toHaveBeenCalled();
     } finally {
       warn.mockRestore();
     }

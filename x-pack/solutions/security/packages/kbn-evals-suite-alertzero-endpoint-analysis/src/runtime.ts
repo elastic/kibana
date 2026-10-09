@@ -8,7 +8,7 @@
 import { randomUUID } from 'crypto';
 import type { Client } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
-import { ExecutionStatus, type WorkflowExecutionDto } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus, type WorkflowExecutionDto } from '@kbn/workflows';
 import {
   PROPOSALS_INTERNAL_URL,
   PROPOSALS_API_VERSION,
@@ -157,17 +157,22 @@ export class AlertZeroRuntime {
           execution.status
         )
       ) {
-        // Cleanup, not verification: an execution that reached a terminal state between the
-        // read above and this call makes the server answer 4xx/5xx. A failed cancel must
-        // never mask the test's own verdict, so it is swallowed (with the error surfaced
-        // via the thrown message if the whole cancelAll later fails for another reason).
+        // Cleanup, not verification: a failed cancel must never mask the test's own
+        // verdict. But an error is only tolerated when the execution is actually done:
+        // the server's cancel can fail (e.g. 500) because the execution reached a
+        // terminal state between the read above and this call (cancelWorkflow returns
+        // silently for terminal executions, so the error comes from the race inside
+        // the call). Re-read the execution and swallow only if it is now terminal;
+        // otherwise rethrow — a still-running execution means real cleanup leaked.
         await this.fetch(`/api/workflows/executions/${encodeURIComponent(id)}/cancel`, {
           method: 'POST',
           headers: workflowHeaders,
-        }).catch((error: Error) => {
+        }).catch(async (error: Error) => {
+          const after = await this.read(id);
+          if (!isTerminalStatus(after.status)) throw error;
           // eslint-disable-next-line no-console -- best-effort cleanup signal, no logger here
           console.warn(
-            `AlertZero eval cleanup: could not cancel execution ${id}: ${error.message}`
+            `AlertZero eval cleanup: execution ${id} reached terminal state ${after.status} before the cancel landed: ${error.message}`
           );
         });
       }
