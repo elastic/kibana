@@ -6,8 +6,6 @@
  */
 
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
-import { SEVERITY_LEVELS } from '../../../../../common/attachment_enums';
-import type { SeverityLevel } from '../../../../../common/attachment_enums';
 import type { significantSecurityEventAttachmentDataSchema } from '../../../../../common/significant_security_event_schema';
 import { significantSecurityEventAttachmentReadSchema } from '../../../../../common/significant_security_event_schema';
 import type { ResolveHostEnrollment } from '../../../fleet/resolve_host_enrollment';
@@ -219,21 +217,18 @@ export const readCurrentRunState = async ({
     ),
   ];
   const hostNames = entityValues((field) => field === 'host.name' || field === 'host.hostname');
-  // The deterministic mapper only ever emits the `.name` fields, so `users`/`services` cover
-  // every identity subject today. `user.email`/`user.id`/`service.id` stay allowlisted for an
-  // agent-written SSE, though, and have no subject of their own to be named by -- rather than
-  // going silent on that evidence, `hasUnnamedIdentityEntity` below keeps a generic signal for
-  // it, mirroring how `hasIocIndicator` covers evidence with no subject at all.
-  const users = entityValues((field) => field === 'user.name');
+  // `users` above (from `findings`) already covers `user.name`. `services` is the same idea
+  // for `service.name`, which no other feature derives yet. `user.email`/`user.id`/`service.id`
+  // stay allowlisted for an agent-written SSE, though, and have no subject of their own to be
+  // named by -- rather than going silent on that evidence, `hasUnnamedIdentityEntity` below
+  // keeps a generic signal for it, mirroring how `hasIocIndicator` covers evidence with no
+  // subject at all.
   const services = entityValues((field) => field === 'service.name');
   const hasUnnamedIdentityEntity = currentRun.some((sse) =>
     sse.entities.some(
       (e) => e.field === 'user.email' || e.field === 'user.id' || e.field === 'service.id'
     )
   );
-  const severity: SeverityLevel | undefined = currentRun
-    .map((sse) => sse.severity)
-    .sort((a, b) => SEVERITY_LEVELS.indexOf(b) - SEVERITY_LEVELS.indexOf(a))[0];
 
   const hosts: CurrentRunHost[] = [];
   for (const name of hostNames) {
@@ -294,9 +289,7 @@ export const readCurrentRunState = async ({
     manualRemediation,
     hosts,
     processSelectors,
-    users,
     services,
-    ...(severity !== undefined && { severity }),
     evidence,
   };
 };

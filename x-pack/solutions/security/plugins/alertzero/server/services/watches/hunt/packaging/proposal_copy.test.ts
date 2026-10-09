@@ -91,7 +91,6 @@ const baseState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState =>
   corroboratedTechniques: ['T1059.001'],
   hosts: [host],
   processSelectors: [],
-  users: [],
   services: [],
   hasIocIndicator: false,
   hasUnnamedIdentityEntity: false,

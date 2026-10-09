@@ -125,7 +125,6 @@ const baseHitState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState
   hosts: [{ name: 'host-a', enrolled: true, agentId: 'agent-a' }],
   processSelectors: [],
   // Fully-covered defaults: no recommendation trigger fires unless a test overrides one.
-  users: [],
   services: [],
   hasIocIndicator: false,
   hasUnnamedIdentityEntity: false,

@@ -6,7 +6,6 @@
  */
 
 import type { ActionCatalogEntry, ActionSubjectKind } from '@kbn/alertzero-common';
-import type { SeverityLevel } from '../../../../../common/attachment_enums';
 import type {
   PackageReportBehavior,
   PackageReportMintPayload,
@@ -147,7 +146,10 @@ export interface CurrentRunState {
   findings: CurrentRunFinding[];
   /** Technique id to display name, from SSE behaviors and technique SKIs (`T1078.004 (Cloud Accounts)`). */
   techniqueNames: Record<string, string>;
-  /** Distinct `user.name` entities across current-run SSEs. */
+  /**
+   * Distinct `user.name` entities across current-run SSEs, in SSE order. Tier 1's CloudTrail
+   * identity-type vote decides whether an identity lands here or in `services`.
+   */
   users: string[];
   /** Hunt window of the first current-run SSE that names one. */
   window?: { from: string; to: string };
@@ -168,15 +170,8 @@ export interface CurrentRunState {
    * Empty means kill/suspend cannot be filled.
    */
   processSelectors: ProcessSelector[];
-  /**
-   * Deduped `user.name` entity values across current-run SSEs, in SSE order. Tier 1's
-   * CloudTrail identity-type vote decides whether an identity lands here or in `services`.
-   */
-  users: string[];
   /** Deduped `service.name` entity values across current-run SSEs (assumed roles, service accounts). */
   services: string[];
-  /** Max SSE `severity` across current-run SSEs, by `SEVERITY_LEVELS` order. */
-  severity?: SeverityLevel;
   /** True when any current-run SSE security knowledge indicator is IOC-typed. */
   hasIocIndicator: boolean;
   /**
