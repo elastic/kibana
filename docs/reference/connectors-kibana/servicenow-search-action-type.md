@@ -55,9 +55,9 @@ serverless: unavailable
 stack: preview 9.6+
 ```
 
-The connector can start a workflow from an incident, a journal entry, or a change-approval update. {{kib}} does not create the {{sn}} rules. An administrator configures one outbound REST message and three async business rules that POST the JSON envelope below.
+The connector can start a workflow from an incident, a journal entry, or a change-approval update. {{kib}} does not create the {{sn}} rules. An administrator creates one outbound REST message first, then three **after** business rules that POST the JSON envelope below. A record saved before those rules exist is not sent later. Create a new record after the REST message and the matching rule are saved.
 
-A saved connector does not receive events until **Receive events** is turned on and the connector is saved. Rotate the ingest token after that save, and copy the ingest URL from the connector. The connector requires an Enterprise license.
+A saved connector does not receive events until **Receive events** is turned on and the connector is saved. Rotate the ingest token after that save, and copy the ingest URL from the connector. The connector requires an Enterprise license. The {{sn}} instance must be able to reach that URL. A developer instance cannot call `localhost`. Set `server.publicBaseUrl` to the same host you put in the REST message.
 
 ### Prerequisites [servicenow-search-inbound-prerequisites]
 
@@ -65,7 +65,7 @@ A saved connector does not receive events until **Receive events** is turned on 
 :   Enterprise license, `server.publicBaseUrl`, and `xpack.actions.inboundEvents.enabled: true`. On the connector, turn on **Receive events**, save, and rotate the ingest token.
 
 {{sn}} platform
-:   The rules use an async business rule and an outbound REST message (`RESTMessageV2`). Flow Designer and IntegrationHub are not required.
+:   The rules run **after** the database write and send the HTTP call with `executeAsync()`, so the user transaction does not wait on {{kib}}. An **async** rule has no `previous` object, so an update is sent as `incident.created`. Flow Designer and IntegrationHub are not required.
 
 Incident and journal events
 :   Incident Management, which provides the `incident` table. Journal rows are stored in the platform table `sys_journal_field`.
@@ -108,18 +108,25 @@ An `occurrence` that is not in this table, or a body missing a required field, d
 
 ### Outbound REST message [servicenow-search-inbound-rest-message]
 
-In {{sn}}, open **System Web Services > Outbound > REST Message** and create a message named `Elastic Workflows`. Add an HTTP method named `post`:
+In the {{sn}} banner, click **All** and type `REST Message`. Open **System Web Services > Outbound > REST Message**. The Admin workspace menu does not list this record.
 
-- HTTP method: POST
-- Endpoint: the ingest URL copied from the connector
+Create a message whose **Name** is exactly `Elastic Workflows`, then save it before adding a method. Under **HTTP Methods**, click **New** and set:
+
+- **Name**: `post`. The scripts look up this name. It is case sensitive. **POST**, `Default POST`, or any other name throws `com.glide.communications.ProcessingException` and writes nothing to the outbound HTTP log. That error is in **System Logs > Errors**.
+- **HTTP method**: POST. This dropdown is the verb. It is separate from **Name**.
+- **Endpoint**: the ingest URL copied from the connector, on a host the {{sn}} instance can reach.
 - HTTP header `Content-Type`: `application/json`
 - HTTP header `Authorization`: `Bearer <ingest-token>`
 
-The three business rules call this method. Rotating the ingest token means updating this header, or the `token` query parameter, and saving the connector token in {{kib}}.
+The three business rules call `new sn_ws.RESTMessageV2('Elastic Workflows', 'post')`. Rotating the ingest token means updating this header, or the `token` query parameter, and saving the connector token in {{kib}}.
 
 ### Incident rule [servicenow-search-inbound-incident-rule]
 
-Create an **async** business rule on `incident` with **Insert** and **Update** selected. On insert, the script sends `incident.created`. When `state` changes to the resolved or closed value, it sends `incident.resolved` and does not also send `incident.updated`. Out-of-box values are `6` (Resolved) and `7` (Closed). If this instance uses different choices, change those two values in the script. Any other watched-field change sends `incident.updated` with `changed_fields`. A journal-only update changes none of those fields, so the script does not call {{kib}}. Comments and work notes are delivered by the journal rule.
+Click **All**, type `Business Rules`, and open **System Definition > Business Rules**. Create an **after** business rule on `incident` with **Advanced**, **Insert**, and **Update** selected. Put the script on the **Advanced** tab. Leave **When** set to **after**. **async** has no `previous` record, so `previous.nil()` is true for an update and the workflow receives `servicenow_search.incident_created`.
+
+On insert, `current.operation()` is `insert` and the script sends `incident.created`.
+
+When `state` changes to the resolved or closed value, it sends `incident.resolved` and does not also send `incident.updated`. Out-of-box values are `6` (Resolved) and `7` (Closed). If this instance uses different choices, change those two values in the script. Any other watched-field change sends `incident.updated` with `changed_fields`. A journal-only update changes none of those fields, so the script does not call {{kib}}. Comments and work notes are delivered by the journal rule.
 
 ```javascript
 (function executeRule(current, previous) {
@@ -189,7 +196,7 @@ Create an **async** business rule on `incident` with **Insert** and **Update** s
 
 ### Journal rule [servicenow-search-inbound-journal-rule]
 
-Create an **async** business rule on `sys_journal_field` with **Insert** selected. Set the condition to `name=incident` and `element` in `comments`, `work_notes`. `comments` sends `comment.added`. `work_notes` sends `work_note.added`. `table` and `sys_id` identify the parent incident (`name` and `element_id`). `author` is `sys_created_by` on the journal row.
+Create an **after** business rule on `sys_journal_field` with **Insert** selected. Set the condition to `name=incident` and `element` in `comments`, `work_notes`. `comments` sends `comment.added`. `work_notes` sends `work_note.added`. `table` and `sys_id` identify the parent incident (`name` and `element_id`). `author` is `sys_created_by` on the journal row.
 
 ```javascript
 (function executeRule(current, previous) {
@@ -232,7 +239,7 @@ Create an **async** business rule on `sys_journal_field` with **Insert** selecte
 
 ### Change-approval rule [servicenow-search-inbound-approval-rule]
 
-Create an **async** business rule on `sysapproval_approver` with **Update** selected and a condition that **State** changes. The script sends `change.approval_state_changed` only when `sysapproval` is the sys_id of a `change_request`. Approvals for other tables are ignored. `approver` is the approver's sys_id. `state` is the current approval choice, such as `approved` or `rejected`.
+Create an **after** business rule on `sysapproval_approver` with **Update** selected and a condition that **State** changes. **after** is required so `previous` contains the approval state before the change. The script sends `change.approval_state_changed` only when `sysapproval` is the sys_id of a `change_request`. Approvals for other tables are ignored. `approver` is the approver's sys_id. `state` is the current approval choice, such as `approved` or `rejected`.
 
 ```javascript
 (function executeRule(current, previous) {
@@ -261,7 +268,20 @@ Create an **async** business rule on `sysapproval_approver` with **Update** sele
 })(current, previous);
 ```
 
-Outbound HTTP requests are recorded in `sys_outbound_http_log`.
+### Confirm the call [servicenow-search-inbound-confirm]
+
+Create a new incident after the REST message and the incident rule are saved. Then click **All**, type `Outbound HTTP Log`, and open the list at `sys_outbound_http_log_list.do`. The form `sys_outbound_http_log.do` is a new record, not the list of calls.
+
+Look for a row whose hostname is the {{kib}} host:
+
+- **No {{kib}} row, and System Logs > Errors shows `ProcessingException`.** The REST message **Name** is not `Elastic Workflows`, or the HTTP method **Name** is not `post`.
+- **No {{kib}} row and no error.** The incident script returned before the REST call. On an update, a watched field has to change. A journal-only save does not call {{kib}}.
+- **An update starts `servicenow_search.incident_created`.** **When** is **async**. Set it to **after** and detect the insert with `current.operation() == 'insert'` only. An async rule has no `previous` object, so treating an empty `previous` as an insert labels every save as created.
+- **A connection error.** The endpoint is not reachable from the {{sn}} instance. Use a public host, and set `server.publicBaseUrl` to that host.
+- **HTTP 404.** The ingest token does not match the connector, or **Receive events** was not saved before the token was rotated.
+- **HTTP 202.** {{kib}} accepted the event. The workflow must be enabled and subscribed to that event id, such as `servicenow_search.incident_created`.
+
+Rows for `signaldc.service-now.com` are {{sn}} telemetry. A response status of `-1` on those rows is not a {{kib}} response.
 
 ### Example [servicenow-search-inbound-example]
 
