@@ -6,23 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1.0"; you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- *
- * http://www.elastic.co/licensing/elastic-license
- *
- * or in writing, software distributed under the Apache License, Version 2.0
- * which is available at https://www.apache.org/licenses/LICENSE-2.0.
- *
- * This product includes software developed at third-party
- * specifications (https://github.com/elastic/spec).
- */
-
 import Fs from 'fs';
 import Path from 'path';
 import { parse as parseYaml } from 'yaml';
@@ -162,6 +145,36 @@ const weeklyModelGroupsBySuite = new Map(
   ])
 );
 
+// Suites that pre-date the EVAL_SERVER_CONFIG_SET rule and are not fixed yet.
+const CONFIG_SET_ALLOWLIST = new Set(['attack-discovery', 'skill-selection-benchmark']);
+
+const knownSuiteIds = new Set(suites.map(({ id }) => id));
+
+const serverConfigSetBySuite = new Map(
+  suites.flatMap(({ id, serverConfigSet }) => (serverConfigSet ? [[id, serverConfigSet]] : []))
+);
+
+// Shared by the real-config tests below and the hand-written-fixture tests: the fixture path must
+// exercise the exact same guard logic, not a copy of it.
+const unknownSuiteIds = (steps: WeeklyStep[]) =>
+  steps.map(({ env }) => env.EVAL_SUITE_ID!).filter((id) => !knownSuiteIds.has(id));
+
+const configSetProblems = (steps: WeeklyStep[]) =>
+  steps
+    .filter(
+      ({ env = {} }) =>
+        env.EVAL_SUITE_ID !== undefined && !CONFIG_SET_ALLOWLIST.has(env.EVAL_SUITE_ID)
+    )
+    .map(({ env = {} }) => {
+      const expected = serverConfigSetBySuite.get(env.EVAL_SUITE_ID!);
+      if (expected === undefined || env.EVAL_SERVER_CONFIG_SET === expected) return null;
+      return (
+        `${env.EVAL_SUITE_ID}: suite declares serverConfigSet "${expected}" but the step env has ` +
+        `"${env.EVAL_SERVER_CONFIG_SET ?? 'no EVAL_SERVER_CONFIG_SET'}"`
+      );
+    })
+    .filter(Boolean);
+
 describe('evals.suites.json weeklyEisModelGroups', () => {
   it('is covered by the EVAL_MODEL_GROUPS of the suite step in llm_evals.yml', () => {
     // The weekly job requests EVAL_MODEL_GROUPS, not weeklyEisModelGroups, so a model present only
@@ -183,107 +196,64 @@ describe('evals.suites.json weeklyEisModelGroups', () => {
 });
 
 describe('llm_evals.yml suite steps', () => {
-  const knownSuiteIds = new Set(suites.map(({ id }) => id));
-
   it('names a suite that exists in evals.suites.json', () => {
     // The weeklyEisModelGroups coverage check above only cross-checks suites that define
     // weeklyEisModelGroups, so a mistyped EVAL_SUITE_ID on any other step would otherwise stay
     // green. Fail listing the unknown ids.
-    const unknownIds = suiteSteps
-      .map(({ env }) => env.EVAL_SUITE_ID!)
-      .filter((id) => !knownSuiteIds.has(id));
-
-    expect(unknownIds).toEqual([]);
+    expect(unknownSuiteIds(suiteSteps)).toEqual([]);
   });
 
   it('flags an unknown suite id, including one nested in a group', () => {
-    // Exercises the same path as the check above on a hand-written pipeline: both a top-level
+    // Exercises the same helper as the check above on a hand-written pipeline: both a top-level
     // mistyped id and one nested inside a group step must surface in the unknown list.
-    const unknownIdsIn = (text: string) =>
-      stepsFromYamlText(text)
-        .map(({ env }) => env.EVAL_SUITE_ID!)
-        .filter((id) => !knownSuiteIds.has(id));
-
     expect(
-      unknownIdsIn(
-        [
-          'steps:',
-          '  - command: run_suite.sh',
-          '    env:',
-          '      EVAL_SUITE_ID: security-attack-discovery-fp-tpp',
-          '  - group: weekly',
-          '    steps:',
-          '      - command: run_suite.sh',
-          '        env:',
-          '          EVAL_SUITE_ID: attack-discovery',
-          '  - command: run_suite.sh',
-          '    env:',
-          '      EVAL_SUITE_ID: security-attack-discovery-fp-tp',
-          '',
-        ].join('\n')
+      unknownSuiteIds(
+        stepsFromYamlText(
+          [
+            'steps:',
+            '  - command: run_suite.sh',
+            '    env:',
+            '      EVAL_SUITE_ID: security-attack-discovery-fp-tpp',
+            '  - group: weekly',
+            '    steps:',
+            '      - command: run_suite.sh',
+            '        env:',
+            '          EVAL_SUITE_ID: attack-discovery',
+            '  - command: run_suite.sh',
+            '    env:',
+            '      EVAL_SUITE_ID: security-attack-discovery-fp-tp',
+            '',
+          ].join('\n')
+        )
       )
     ).toEqual(['security-attack-discovery-fp-tpp']);
   });
 
   it('sets EVAL_SERVER_CONFIG_SET on every step whose suite defines a serverConfigSet', () => {
     // run_suite.sh only reads the env var, so a step without it silently boots the default
-    // `evals_tracing` stack. These suites pre-date the rule and are not fixed here.
-    const allowlist = new Set(['attack-discovery', 'skill-selection-benchmark']);
-    const serverConfigSetBySuite = new Map(
-      suites.flatMap(({ id, serverConfigSet }) => (serverConfigSet ? [[id, serverConfigSet]] : []))
-    );
-
-    const problems = suiteSteps.map(({ env = {} }) => {
-      const suiteId = env.EVAL_SUITE_ID!;
-      if (allowlist.has(suiteId)) return null;
-      const expected = serverConfigSetBySuite.get(suiteId);
-      if (expected === undefined || env.EVAL_SERVER_CONFIG_SET === expected) return null;
-      return (
-        `${suiteId}: suite declares serverConfigSet "${expected}" but the step env has ` +
-        `"${env.EVAL_SERVER_CONFIG_SET ?? 'no EVAL_SERVER_CONFIG_SET'}"`
-      );
-    });
-
-    expect(problems.filter(Boolean)).toEqual([]);
+    // `evals_tracing` stack.
+    expect(configSetProblems(suiteSteps)).toEqual([]);
   });
 
   it('flags a missing or mismatched EVAL_SERVER_CONFIG_SET, including in a group-nested step', () => {
-    // Exercises the check above on a hand-written pipeline: a non-allowlisted suite whose
-    // serverConfigSet is absent must surface, while the allowlisted one must not.
-    const allowlist = new Set(['attack-discovery', 'skill-selection-benchmark']);
-    const serverConfigSetBySuite = new Map(
-      suites.flatMap(({ id, serverConfigSet }) => (serverConfigSet ? [[id, serverConfigSet]] : []))
-    );
-
-    const configSetProblemsIn = (text: string) =>
-      stepsFromYamlText(text)
-        .filter(
-          ({ env = {} }) => env.EVAL_SUITE_ID !== undefined && !allowlist.has(env.EVAL_SUITE_ID)
-        )
-        .map(({ env = {} }) => {
-          const expected = serverConfigSetBySuite.get(env.EVAL_SUITE_ID!);
-          if (expected === undefined || env.EVAL_SERVER_CONFIG_SET === expected) return null;
-          return (
-            `${env.EVAL_SUITE_ID}: suite declares serverConfigSet "${expected}" but the step env has ` +
-            `"${env.EVAL_SERVER_CONFIG_SET ?? 'no EVAL_SERVER_CONFIG_SET'}"`
-          );
-        })
-        .filter(Boolean);
-
+    // Exercises the same helper as the check above on a hand-written pipeline: a non-allowlisted
+    // suite whose serverConfigSet is absent must surface, while the allowlisted one must not.
     expect(
-      configSetProblemsIn(
-        [
-          'steps:',
-          '  - command: run_suite.sh',
-          '    env:',
-          '      EVAL_SUITE_ID: nightshift-investigations',
-          '  - group: weekly',
-          '    steps:',
-          '      - command: run_suite.sh',
-          '        env:',
-          '          EVAL_SUITE_ID: attack-discovery',
-          '',
-        ].join('\n')
+      configSetProblems(
+        stepsFromYamlText(
+          [
+            'steps:',
+            '  - command: run_suite.sh',
+            '    env:',
+            '      EVAL_SUITE_ID: nightshift-investigations',
+            '  - group: weekly',
+            '    steps:',
+            '      - command: run_suite.sh',
+            '        env:',
+            '          EVAL_SUITE_ID: attack-discovery',
+            '',
+          ].join('\n')
+        )
       )
     ).toEqual([
       'nightshift-investigations: suite declares serverConfigSet "evals_nightshift_investigations" ' +
