@@ -11,12 +11,14 @@ import { hasApmData } from './has_apm_data';
 
 const makeHits = (value: number) => ({ hits: { total: { value } } });
 
+const OPERATION = 'observability_overview_has_apm_data';
+
 describe('hasApmData', () => {
   it('returns true immediately when phase 1 finds data (no phase 2 call)', async () => {
     const search = jest.fn().mockResolvedValue(makeHits(1));
     const apmEventClient = { search } as unknown as APMEventClient;
 
-    expect(await hasApmData(apmEventClient, 'test_operation')).toBe(true);
+    expect(await hasApmData(apmEventClient, OPERATION)).toBe(true);
     expect(search).toHaveBeenCalledTimes(1);
   });
 
@@ -24,7 +26,7 @@ describe('hasApmData', () => {
     const search = jest.fn().mockResolvedValueOnce(makeHits(0)).mockResolvedValueOnce(makeHits(1));
     const apmEventClient = { search } as unknown as APMEventClient;
 
-    expect(await hasApmData(apmEventClient, 'test_operation')).toBe(true);
+    expect(await hasApmData(apmEventClient, OPERATION)).toBe(true);
     expect(search).toHaveBeenCalledTimes(2);
   });
 
@@ -32,7 +34,7 @@ describe('hasApmData', () => {
     const search = jest.fn().mockResolvedValue(makeHits(0));
     const apmEventClient = { search } as unknown as APMEventClient;
 
-    expect(await hasApmData(apmEventClient, 'test_operation')).toBe(false);
+    expect(await hasApmData(apmEventClient, OPERATION)).toBe(false);
     expect(search).toHaveBeenCalledTimes(2);
   });
 
@@ -40,7 +42,7 @@ describe('hasApmData', () => {
     const search = jest.fn().mockResolvedValue(makeHits(0));
     const apmEventClient = { search } as unknown as APMEventClient;
 
-    await hasApmData(apmEventClient, 'test_operation');
+    await hasApmData(apmEventClient, OPERATION);
 
     const [, phase1Params] = search.mock.calls[0];
     expect(phase1Params.query?.bool?.filter).toEqual(
@@ -59,7 +61,7 @@ describe('hasApmData', () => {
     const search = jest.fn().mockResolvedValue(makeHits(0));
     const apmEventClient = { search } as unknown as APMEventClient;
 
-    await hasApmData(apmEventClient, 'test_operation');
+    await hasApmData(apmEventClient, OPERATION);
 
     const [, phase2Params] = search.mock.calls[1];
     expect(phase2Params.query).toBeUndefined();
@@ -69,7 +71,7 @@ describe('hasApmData', () => {
     const search = jest.fn().mockResolvedValue(makeHits(0));
     const apmEventClient = { search } as unknown as APMEventClient;
 
-    await hasApmData(apmEventClient, 'test_operation');
+    await hasApmData(apmEventClient, OPERATION);
 
     const expectedEvents = expect.arrayContaining([
       ProcessorEvent.transaction,
@@ -84,11 +86,11 @@ describe('hasApmData', () => {
     const search = jest.fn().mockResolvedValue(makeHits(0));
     const apmEventClient = { search } as unknown as APMEventClient;
 
-    await hasApmData(apmEventClient, 'test_operation');
+    await hasApmData(apmEventClient, OPERATION);
 
     expect(search.mock.calls.map(([operationName]) => operationName)).toEqual([
-      'test_operation',
-      'test_operation',
+      OPERATION,
+      OPERATION,
     ]);
   });
 });
