@@ -12,11 +12,13 @@ const ENTITY_PREVIEW_LIMIT = 10;
  * under {@link ENTITY_PREVIEW_LIMIT} entries, all ids are shown. Beyond that
  * the first {@link ENTITY_PREVIEW_LIMIT} are shown with an "...and N more" suffix
  */
+const formatEuid = (euid: string): string => `\`${euid}\``;
+
 export const formatEntityIdsForPrompt = (entityIds: readonly string[]): string => {
   if (entityIds.length <= ENTITY_PREVIEW_LIMIT) {
-    return `**Entities:** ${entityIds.join(', ')}`;
+    return `**Entities:** ${entityIds.map(formatEuid).join(', ')}`;
   }
-  const head = entityIds.slice(0, ENTITY_PREVIEW_LIMIT).join(', ');
+  const head = entityIds.slice(0, ENTITY_PREVIEW_LIMIT).map(formatEuid).join(', ');
   const remaining = entityIds.length - ENTITY_PREVIEW_LIMIT;
   return `**Entities (first ${ENTITY_PREVIEW_LIMIT}):** ${head} … and ${remaining} more`;
 };

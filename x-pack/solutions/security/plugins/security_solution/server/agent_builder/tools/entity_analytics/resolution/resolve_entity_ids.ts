@@ -15,6 +15,7 @@ const ENTITY_RESOLUTION_CONCURRENCY = 10;
 export interface ResolvedEntityResult {
   euid: string;
   resolvedTo?: string;
+  namespace?: string;
 }
 export type UnresolvedEntityResult = {
   entityId: string;
@@ -46,8 +47,12 @@ export const resolveEntityIdsForResolution = async ({
     async (entityId) => {
       const resolveResults = await resolveSingleEntity({ esClient, spaceId, entityId });
       if (resolveResults.status === 'resolved' && resolveResults.identity.entityStoreId) {
-        const { entityStoreId, resolvedTo } = resolveResults.identity;
-        resolved.push({ euid: entityStoreId, resolvedTo });
+        const { entityStoreId, resolvedTo, namespace } = resolveResults.identity;
+        resolved.push({
+          euid: entityStoreId,
+          resolvedTo,
+          ...(namespace ? { namespace } : {}),
+        });
       } else {
         unresolved.push({
           entityId,

@@ -44,6 +44,22 @@ describe('resolveEntityIdsForResolution', () => {
     expect(result.unresolved).toEqual([]);
   });
 
+  it('carries the identity namespace through when the entity has one', async () => {
+    mockResolveSingleEntity.mockResolvedValueOnce({
+      status: 'resolved',
+      identity: {
+        identifierType: 'user',
+        identifier: 'jsmith',
+        entityStoreId: 'user:jsmith@okta',
+        namespace: 'okta',
+      },
+    });
+
+    const result = await resolveEntityIdsForResolution({ ...baseParams, entityIds: ['jsmith'] });
+
+    expect(result.resolved).toEqual([{ euid: 'user:jsmith@okta', namespace: 'okta' }]);
+  });
+
   it('reports the group target a resolved alias is linked to', async () => {
     mockResolveSingleEntity.mockResolvedValueOnce({
       status: 'resolved',

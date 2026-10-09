@@ -8,6 +8,12 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { BulkResponse, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
+import type { TelemetryReporter } from '../../telemetry/events';
+import {
+  ENTITY_STORE_RESOLUTION_LINK_EVENT,
+  ENTITY_STORE_RESOLUTION_UNLINK_EVENT,
+} from '../../telemetry/events';
+import { reportResolutionError } from './resolution_telemetry';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
 import { getFieldValue } from '../../../common/domain/euid/commons';
 import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
@@ -36,6 +42,7 @@ interface ResolutionClientOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   namespace: string;
+  analytics?: TelemetryReporter;
 }
 
 export interface LinkResult {
@@ -92,11 +99,13 @@ export class ResolutionClient {
   private readonly logger: Logger;
   private readonly esClient: ElasticsearchClient;
   private readonly namespace: string;
+  private readonly analytics?: TelemetryReporter;
 
-  constructor({ logger, esClient, namespace }: ResolutionClientOpts) {
+  constructor({ logger, esClient, namespace, analytics }: ResolutionClientOpts) {
     this.logger = logger;
     this.esClient = esClient;
     this.namespace = namespace;
+    this.analytics = analytics;
   }
 
   private async latestIndexName(): Promise<string> {
@@ -112,6 +121,28 @@ export class ResolutionClient {
     targetId: string,
     rawEntityIds: string[],
     options: ResolutionWriteOptions = {}
+  ): Promise<LinkResult> {
+    try {
+      const result = await this.performLink(targetId, rawEntityIds, options);
+      this.analytics?.reportEvent(ENTITY_STORE_RESOLUTION_LINK_EVENT, {
+        entityType: result.entity_type,
+        entitiesLinked: result.linked.length,
+        entitiesSkipped: result.skipped.length,
+        namespace: this.namespace,
+      });
+      return result;
+    } catch (error) {
+      if (this.analytics) {
+        reportResolutionError(this.analytics, 'link', this.namespace, error);
+      }
+      throw error;
+    }
+  }
+
+  private async performLink(
+    targetId: string,
+    rawEntityIds: string[],
+    options: ResolutionWriteOptions
   ): Promise<LinkResult> {
     const { awaitVisibility = false } = options;
     const refresh: RefreshOption = awaitVisibility ? 'wait_for' : false;
@@ -270,6 +301,27 @@ export class ResolutionClient {
   public async unlinkEntities(
     rawEntityIds: string[],
     options: ResolutionWriteOptions = {}
+  ): Promise<UnlinkResult> {
+    try {
+      const result = await this.performUnlink(rawEntityIds, options);
+      this.analytics?.reportEvent(ENTITY_STORE_RESOLUTION_UNLINK_EVENT, {
+        entityType: result.entity_type,
+        entitiesUnlinked: result.unlinked.length,
+        entitiesSkipped: result.skipped.length,
+        namespace: this.namespace,
+      });
+      return result;
+    } catch (error) {
+      if (this.analytics) {
+        reportResolutionError(this.analytics, 'unlink', this.namespace, error);
+      }
+      throw error;
+    }
+  }
+
+  private async performUnlink(
+    rawEntityIds: string[],
+    options: ResolutionWriteOptions
   ): Promise<UnlinkResult> {
     const { awaitVisibility = false } = options;
     const refresh: RefreshOption = awaitVisibility ? 'wait_for' : false;
@@ -456,7 +508,7 @@ export class ResolutionClient {
    * For a list of entity IDs, finds which ones have aliases pointing to them.
    * Returns a map from entity ID → list of alias entity IDs.
    */
-  private async findEntitiesWithAliases(entityIds: string[]): Promise<Map<string, string[]>> {
+  public async findEntitiesWithAliases(entityIds: string[]): Promise<Map<string, string[]>> {
     const index = await this.latestIndexName();
     const response = await searchByResolvedToField(this.esClient, {
       index,

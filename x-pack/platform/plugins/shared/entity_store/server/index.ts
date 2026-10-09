@@ -59,6 +59,7 @@ export { isEntityTypeCreatableFromSingleDocument } from '../common/domain/defini
 export type { EntityMetadataClient } from './domain/entity_metadata';
 export type { RelationshipsClient } from './domain/relationships';
 export type { ResolutionClient } from './domain/resolution';
+export { selectTarget, type TargetSelectionEntity } from './domain/resolution/target_selection';
 export type { BulkDropTypeSummary } from './infra/elasticsearch/bulk_drop_aggregator';
 export { formatBulkDropSummary } from './infra/elasticsearch/bulk_drop_aggregator';
 export { getLatestEntitiesIndexName, getEntitiesAlias, ENTITY_LATEST } from '../common';

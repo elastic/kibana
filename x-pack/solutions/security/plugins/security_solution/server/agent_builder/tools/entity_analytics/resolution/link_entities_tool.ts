@@ -10,6 +10,7 @@ import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
+import { selectTarget } from '@kbn/entity-store/server';
 import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { IdentifierType } from '../../../../../common/api/entity_analytics/common/common.gen';
@@ -20,13 +21,18 @@ import { requireResolvedEntity } from '../entity_resolution';
 import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 import { checkResolutionAccess } from './check_resolution_access';
 import { formatEntityIdsForPrompt } from '../shared/entity_ids_preview';
-import { resolveEntityIdsForResolution, type UnresolvedEntityResult } from './resolve_entity_ids';
+import {
+  resolveEntityIdsForResolution,
+  type ResolvedEntityResult,
+  type UnresolvedEntityResult,
+} from './resolve_entity_ids';
 import { getResolutionToolAvailability } from './resolution_availability';
 
 const MAX_ENTITIES_PER_CALL = 100;
 
 interface ResolvedEntitiesState {
   targetEuid: string;
+  targetSelection: 'user' | 'suggested';
   resolved: string[];
   unresolved: UnresolvedEntityResult[];
 }
@@ -36,8 +42,9 @@ const schema = z.object({
     .string()
     .min(1)
     .describe(
-      'The entity to link the others to (becomes the resolution group target). Accepts the id (EUID), canonical entity.name, or user.full_name.'
-    ),
+      'The entity to link the others to (becomes the resolution group target). Accepts the id (EUID), canonical entity.name, or user.full_name. Set this ONLY when the user named the target. Omit it otherwise and the tool proposes one; never guess a value.'
+    )
+    .optional(),
   targetType: IdentifierType.describe(
     'The entity type of `targetId`: host, user, service, or generic. Optional — helps disambiguate when `targetId` is a bare name.'
   ).optional(),
@@ -46,7 +53,7 @@ const schema = z.object({
     .min(1)
     .max(MAX_ENTITIES_PER_CALL)
     .describe(
-      `Entities to link to the target, becoming its aliases. Accepts EUIDs, canonical entity.name, or user.full_name values. Up to ${MAX_ENTITIES_PER_CALL} per call; for larger bulk merges, direct the user to the CSV import in the UI.`
+      `Entities to link to the target, becoming its aliases. When \`targetId\` is omitted, list every entity to merge here (at least two) and the tool picks which one becomes the target. Accepts EUIDs, canonical entity.name, or user.full_name values. Up to ${MAX_ENTITIES_PER_CALL} per call; for larger bulk merges, direct the user to the CSV import in the UI.`
     ),
 });
 
@@ -63,6 +70,8 @@ export const linkEntitiesTool = (
     description: `Link one or more entities to a target entity, creating (or extending) an entity resolution group. Requires user confirmation before the change is applied. All entities involved (the target and every id in \`entityIds\`) must be the same entity type.
 
 Use when the user asks to merge, link, or resolve entities together (e.g. "link these two accounts", "merge host:laptop-a into host:laptop-b", "these are the same user, resolve them"). Entity references are resolved to canonical EUIDs automatically — pass names or ids as the user gave them.
+
+When the user does not say which entity should be the target, omit \`targetId\` and list all the entities in \`entityIds\`. The tool proposes the target itself. The proposal is shown in the confirmation prompt and reported back as \`targetSelection: 'suggested'\`; if the user declines and names a different target, call again with \`targetId\`. If a target cannot be proposed (fewer than two linkable entities), the tool asks for \`targetId\` instead.
 
 Entity references that don't resolve to a canonical id are excluded from the batch and reported back, not treated as an error. Beyond that, the call is all-or-nothing: a validation failure on a resolved entity rejects the whole batch with an error (the message states why). Entities already linked to this exact target are reported as \`skipped\`, not an error. This tool only changes resolution-group membership — it does not itself recalculate risk scores (that happens separately, next time scoring runs).`,
     schema,
@@ -157,6 +166,7 @@ Entity references that don't resolve to a canonical id are excluded from the bat
                 type: ToolResultType.other,
                 data: {
                   targetId: result.target_id,
+                  targetSelection: saved.targetSelection,
                   entityType: result.entity_type,
                   linked: result.linked,
                   skipped: result.skipped,
@@ -167,17 +177,21 @@ Entity references that don't resolve to a canonical id are excluded from the bat
           };
         }
 
-        const resolvedTarget = await requireResolvedEntity({
-          esClient: client,
-          spaceId,
-          entityId: params.targetId,
-          entityType: params.targetType,
-        });
-        if (!resolvedTarget.ok) {
-          if (resolvedTarget.result.type === ToolResultType.error) {
-            telemetryTracker.recordFailure(resolvedTarget.result.data.message);
+        let explicitTargetEuid: string | undefined;
+        if (params.targetId) {
+          const resolvedTarget = await requireResolvedEntity({
+            esClient: client,
+            spaceId,
+            entityId: params.targetId,
+            entityType: params.targetType,
+          });
+          if (!resolvedTarget.ok) {
+            if (resolvedTarget.result.type === ToolResultType.error) {
+              telemetryTracker.recordFailure(resolvedTarget.result.data.message);
+            }
+            return { results: [resolvedTarget.result] };
           }
-          return { results: [resolvedTarget.result] };
+          explicitTargetEuid = resolvedTarget.identity.entityStoreId;
         }
 
         const { resolved, unresolved } = await resolveEntityIdsForResolution({
@@ -220,10 +234,36 @@ Entity references that don't resolve to a canonical id are excluded from the bat
           };
         }
 
-        const targetEuid = resolvedTarget.identity.entityStoreId;
-        const resolvedEuids = resolved.map((entry) => entry.euid);
+        // When the user did not name a target, propose one
+        let targetEuid = explicitTargetEuid;
+        if (!targetEuid) {
+          const suggestedTarget = suggestLinkTarget(resolved);
+          if (!suggestedTarget) {
+            return {
+              results: [
+                {
+                  tool_result_id: getToolResultId(),
+                  type: ToolResultType.other,
+                  data: {
+                    message:
+                      'No target was given and one cannot be proposed: at least two of the entities must resolve and not already be aliases. Ask the user which entity should be the target, then call this tool again with `targetId`.',
+                    ...(unresolved.length > 0 ? { unresolvedReferences: unresolved } : {}),
+                  },
+                },
+              ],
+            };
+          }
+          targetEuid = suggestedTarget.euid;
+        }
+
+        const targetSelection = explicitTargetEuid ? 'user' : 'suggested';
+        // A suggested target comes from `resolved`, so it must not also be linked to itself
+        const resolvedEuids = resolved
+          .map((entry) => entry.euid)
+          .filter((euid) => explicitTargetEuid || euid !== targetEuid);
         stateManager.setState<ResolvedEntitiesState>({
           targetEuid,
+          targetSelection,
           resolved: resolvedEuids,
           unresolved,
         });
@@ -235,7 +275,7 @@ Entity references that don't resolve to a canonical id are excluded from the bat
           id: promptId,
           title: 'Link entities',
           message: [
-            `Link ${resolvedEuids.length} ${noun} to "${targetEuid}" as aliases?`,
+            `Link ${resolvedEuids.length} ${noun} to \`${targetEuid}\` as aliases?`,
             '',
             formatEntityIdsForPrompt(resolvedEuids),
           ].join('\n'),
@@ -260,4 +300,27 @@ Entity references that don't resolve to a canonical id are excluded from the bat
       }
     },
   };
+};
+
+/**
+ * Picks the entity that should become the group target when the user did not name one, using
+ * the entity store's shared target selection. Entities that are already aliases cannot be
+ * targets, and a target needs at least one other entity to link, so this returns `undefined`
+ * when fewer than two candidates remain.
+ */
+const suggestLinkTarget = (
+  entities: readonly ResolvedEntityResult[]
+): ResolvedEntityResult | undefined => {
+  const candidates = entities.filter(({ resolvedTo }) => !resolvedTo);
+  if (candidates.length < 2) {
+    return undefined;
+  }
+
+  return selectTarget(
+    candidates.map((entity) => ({
+      ...entity,
+      entityId: entity.euid,
+      namespace: entity.namespace ?? '',
+    }))
+  );
 };

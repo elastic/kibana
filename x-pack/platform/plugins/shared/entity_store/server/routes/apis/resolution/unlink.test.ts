@@ -14,29 +14,15 @@ import {
 } from '../../../domain/errors';
 import type { EntityStoreRequestHandlerContext } from '../../../types';
 import type { ResolutionClient } from '../../../domain/resolution';
-import type { TelemetryReporter } from '../../../telemetry/events';
-import {
-  ENTITY_STORE_RESOLUTION_ERROR_EVENT,
-  ENTITY_STORE_RESOLUTION_UNLINK_EVENT,
-} from '../../../telemetry/events';
 import { handleResolutionUnlink } from './unlink';
 
-const NAMESPACE = 'default';
-
-function createMockAnalytics(): TelemetryReporter {
-  return { reportEvent: jest.fn() };
-}
-
 function createMockContext(
-  resolutionClient: Partial<ResolutionClient>,
-  analytics: TelemetryReporter = createMockAnalytics()
+  resolutionClient: Partial<ResolutionClient>
 ): EntityStoreRequestHandlerContext {
   return {
     entityStore: Promise.resolve({
       logger: loggerMock.create(),
       resolutionClient: resolutionClient as ResolutionClient,
-      analytics,
-      namespace: NAMESPACE,
     }),
   } as unknown as EntityStoreRequestHandlerContext;
 }
@@ -50,95 +36,61 @@ function createMockResponse() {
 }
 
 describe('handleResolutionUnlink', () => {
-  let analytics: TelemetryReporter;
   let mockUnlinkEntities: jest.Mock;
 
   beforeEach(() => {
-    analytics = createMockAnalytics();
     mockUnlinkEntities = jest.fn();
   });
 
-  it('reports unlink telemetry on success', async () => {
-    mockUnlinkEntities.mockResolvedValue({
-      unlinked: ['alias-1'],
-      skipped: ['entity-1'],
-      entity_type: 'user',
-    });
+  it('returns the unlink result on success', async () => {
+    const result = { unlinked: ['alias-1'], skipped: ['entity-1'], entity_type: 'user' };
+    mockUnlinkEntities.mockResolvedValue(result);
 
-    const ctx = createMockContext({ unlinkEntities: mockUnlinkEntities }, analytics);
+    const ctx = createMockContext({ unlinkEntities: mockUnlinkEntities });
     const req = { body: { entity_ids: ['alias-1', 'entity-1'] } } as never;
     const res = createMockResponse();
 
     await handleResolutionUnlink(ctx, req, res);
 
-    expect(analytics.reportEvent).toHaveBeenCalledWith(ENTITY_STORE_RESOLUTION_UNLINK_EVENT, {
-      entityType: 'user',
-      entitiesUnlinked: 1,
-      entitiesSkipped: 1,
-      namespace: NAMESPACE,
+    expect(mockUnlinkEntities).toHaveBeenCalledWith(['alias-1', 'entity-1'], {
+      awaitVisibility: true,
     });
-    expect(res.ok).toHaveBeenCalled();
+    expect(res.ok).toHaveBeenCalledWith({ body: result });
   });
 
-  it('reports error telemetry for EntitiesNotFoundError', async () => {
-    mockUnlinkEntities.mockRejectedValue(new EntitiesNotFoundError(['missing']));
+  it.each([
+    [new EntitiesNotFoundError(['missing'])],
+    [new MixedEntityTypesError(['user', 'host'])],
+  ])('maps %s to a 400 response', async (error) => {
+    mockUnlinkEntities.mockRejectedValue(error);
 
-    const ctx = createMockContext({ unlinkEntities: mockUnlinkEntities }, analytics);
-    const req = { body: { entity_ids: ['missing'] } } as never;
-    const res = createMockResponse();
+    const ctx = createMockContext({ unlinkEntities: mockUnlinkEntities });
+    const req = { body: { entity_ids: ['alias-1'] } } as never;
 
-    const response = await handleResolutionUnlink(ctx, req, res);
+    const response = await handleResolutionUnlink(ctx, req, createMockResponse());
 
-    expect(analytics.reportEvent).toHaveBeenCalledWith(ENTITY_STORE_RESOLUTION_ERROR_EVENT, {
-      errorType: 'entities_not_found',
-      operation: 'unlink',
-      namespace: NAMESPACE,
-    });
     expect(response.status).toBe(400);
   });
 
-  it('reports error telemetry for MixedEntityTypesError', async () => {
-    mockUnlinkEntities.mockRejectedValue(new MixedEntityTypesError(['user', 'host']));
-
-    const ctx = createMockContext({ unlinkEntities: mockUnlinkEntities }, analytics);
-    const req = { body: { entity_ids: ['alias-user', 'alias-host'] } } as never;
-    const res = createMockResponse();
-
-    const response = await handleResolutionUnlink(ctx, req, res);
-
-    expect(analytics.reportEvent).toHaveBeenCalledWith(ENTITY_STORE_RESOLUTION_ERROR_EVENT, {
-      errorType: 'mixed_entity_types',
-      operation: 'unlink',
-      namespace: NAMESPACE,
-    });
-    expect(response.status).toBe(400);
-  });
-
-  it('reports resolution_update error telemetry before re-throwing', async () => {
+  it('re-throws resolution update errors', async () => {
     mockUnlinkEntities.mockRejectedValue(new ResolutionUpdateError('unlinking', []));
 
-    const ctx = createMockContext({ unlinkEntities: mockUnlinkEntities }, analytics);
+    const ctx = createMockContext({ unlinkEntities: mockUnlinkEntities });
     const req = { body: { entity_ids: ['alias-1'] } } as never;
-    const res = createMockResponse();
 
-    await expect(handleResolutionUnlink(ctx, req, res)).rejects.toThrow(ResolutionUpdateError);
-
-    expect(analytics.reportEvent).toHaveBeenCalledWith(ENTITY_STORE_RESOLUTION_ERROR_EVENT, {
-      errorType: 'resolution_update',
-      operation: 'unlink',
-      namespace: NAMESPACE,
-    });
+    await expect(handleResolutionUnlink(ctx, req, createMockResponse())).rejects.toThrow(
+      ResolutionUpdateError
+    );
   });
 
-  it('does not report error telemetry for unknown errors', async () => {
+  it('re-throws unknown errors', async () => {
     mockUnlinkEntities.mockRejectedValue(new Error('unexpected'));
 
-    const ctx = createMockContext({ unlinkEntities: mockUnlinkEntities }, analytics);
+    const ctx = createMockContext({ unlinkEntities: mockUnlinkEntities });
     const req = { body: { entity_ids: ['alias-1'] } } as never;
-    const res = createMockResponse();
 
-    await expect(handleResolutionUnlink(ctx, req, res)).rejects.toThrow('unexpected');
-
-    expect(analytics.reportEvent).not.toHaveBeenCalled();
+    await expect(handleResolutionUnlink(ctx, req, createMockResponse())).rejects.toThrow(
+      'unexpected'
+    );
   });
 });

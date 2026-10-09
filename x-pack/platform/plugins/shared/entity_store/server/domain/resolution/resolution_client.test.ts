@@ -8,6 +8,12 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ResolutionClient } from '.';
+import type { TelemetryReporter } from '../../telemetry/events';
+import {
+  ENTITY_STORE_RESOLUTION_ERROR_EVENT,
+  ENTITY_STORE_RESOLUTION_LINK_EVENT,
+  ENTITY_STORE_RESOLUTION_UNLINK_EVENT,
+} from '../../telemetry/events';
 import {
   ChainResolutionError,
   EntitiesNotFoundError,
@@ -812,6 +818,126 @@ describe('ResolutionClient', () => {
       await expect(client.getResolutionGroup('target-1')).rejects.toThrow(
         ResolutionSearchTruncatedError
       );
+    });
+  });
+
+  describe('findEntitiesWithAliases', () => {
+    it('maps each target to the aliases pointing at it', async () => {
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([
+          createEntityDoc('alias-1', 'user', 'target-1'),
+          createEntityDoc('alias-2', 'user', 'target-1'),
+          createEntityDoc('alias-3', 'user', 'target-2'),
+        ]) as never
+      );
+
+      const result = await client.findEntitiesWithAliases(['target-1', 'target-2', 'target-3']);
+
+      expect(result).toEqual(
+        new Map([
+          ['target-1', ['alias-1', 'alias-2']],
+          ['target-2', ['alias-3']],
+        ])
+      );
+    });
+
+    it('returns an empty map when nothing points at the given entities', async () => {
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
+
+      expect(await client.findEntitiesWithAliases(['target-1'])).toEqual(new Map());
+    });
+  });
+
+  describe('telemetry', () => {
+    let analytics: TelemetryReporter;
+
+    beforeEach(() => {
+      analytics = { reportEvent: jest.fn() };
+      client = new ResolutionClient({
+        logger: mockLogger,
+        esClient: mockEsClient,
+        namespace: NAMESPACE,
+        analytics,
+      });
+    });
+
+    it('reports a link event on success', async () => {
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([
+          createEntityDoc('target-1'),
+          createEntityDoc('entity-1'),
+          createEntityDoc('entity-2', 'user', 'target-1'),
+        ]) as never
+      );
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
+
+      await client.linkEntities('target-1', ['entity-1', 'entity-2']);
+
+      expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(analytics.reportEvent).toHaveBeenCalledWith(ENTITY_STORE_RESOLUTION_LINK_EVENT, {
+        entityType: 'user',
+        entitiesLinked: 1,
+        entitiesSkipped: 1,
+        namespace: NAMESPACE,
+      });
+    });
+
+    it('reports an error event when linking fails with a known error', async () => {
+      await expect(client.linkEntities('target-1', ['target-1'])).rejects.toThrow(SelfLinkError);
+
+      expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(analytics.reportEvent).toHaveBeenCalledWith(ENTITY_STORE_RESOLUTION_ERROR_EVENT, {
+        errorType: 'self_link',
+        operation: 'link',
+        namespace: NAMESPACE,
+      });
+    });
+
+    it('does not report an event when linking fails with an unknown error', async () => {
+      mockEsClient.search.mockRejectedValueOnce(new Error('unexpected'));
+
+      await expect(client.linkEntities('target-1', ['entity-1'])).rejects.toThrow('unexpected');
+
+      expect(analytics.reportEvent).not.toHaveBeenCalled();
+    });
+
+    it('reports an unlink event on success', async () => {
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([
+          createEntityDoc('alias-1', 'user', 'target-1'),
+          createEntityDoc('entity-1'),
+        ]) as never
+      );
+      mockEsClient.bulk.mockResolvedValueOnce({ errors: false, items: [] } as never);
+
+      await client.unlinkEntities(['alias-1', 'entity-1']);
+
+      expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(analytics.reportEvent).toHaveBeenCalledWith(ENTITY_STORE_RESOLUTION_UNLINK_EVENT, {
+        entityType: 'user',
+        entitiesUnlinked: 1,
+        entitiesSkipped: 1,
+        namespace: NAMESPACE,
+      });
+    });
+
+    it('reports an error event when unlinking fails with a known error', async () => {
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
+
+      await expect(client.unlinkEntities(['missing'])).rejects.toThrow(EntitiesNotFoundError);
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(ENTITY_STORE_RESOLUTION_ERROR_EVENT, {
+        errorType: 'entities_not_found',
+        operation: 'unlink',
+        namespace: NAMESPACE,
+      });
+    });
+
+    it('does not report events for cascadeLinkEntities', async () => {
+      await client.cascadeLinkEntities('target-1', []);
+
+      expect(analytics.reportEvent).not.toHaveBeenCalled();
     });
   });
 });
