@@ -8,8 +8,14 @@
  */
 
 import { readLocalStorage, writeLocalStorage } from '../../storage/local_storage';
-import { getSortKey, isAllowedSort, parseSortKey } from './allowed_sorts';
-import type { SortDirectionsByField } from './allowed_sorts';
+import type { ContentListFeatures } from '../types';
+import {
+  getAllowedSorts,
+  getSortKey,
+  isAllowedSort,
+  parseSortKey,
+  toSortDirectionsByField,
+} from './allowed_sorts';
 import type { SortState } from './types';
 
 const STORAGE_KEY_PREFIX_SORT = 'sort:';
@@ -21,12 +27,12 @@ const STORAGE_KEY_PREFIX_SORT = 'sort:';
  * sorting configuration (for example, a field that was removed).
  *
  * @param key - Unique key for the content list (typically `queryKeyScope`).
- * @param sortDirectionsByField - The directions allowed for each sortable field.
+ * @param sorting - The sorting configuration the stored sort must be allowed by.
  * @returns The persisted sort, or `undefined` if none is stored or it is not allowed.
  */
 export const getPersistedSort = (
   key: string,
-  sortDirectionsByField: SortDirectionsByField
+  sorting: ContentListFeatures['sorting']
 ): SortState | undefined => {
   const raw = readLocalStorage(`${STORAGE_KEY_PREFIX_SORT}${key}`);
   if (raw === null) {
@@ -34,7 +40,9 @@ export const getPersistedSort = (
   }
 
   const sort = parseSortKey(raw);
-  return sort && isAllowedSort(sortDirectionsByField, sort) ? sort : undefined;
+  return sort && isAllowedSort(toSortDirectionsByField(getAllowedSorts(sorting)), sort)
+    ? sort
+    : undefined;
 };
 
 /**

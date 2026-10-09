@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SortDirectionsByField } from './allowed_sorts';
+import type { ContentListFeatures } from '../types';
 import { getPersistedSort, setPersistedSort } from './persist';
-import type { SortDirection } from './types';
 
-const directions = (...values: Array<SortDirection>) => new Set(values);
-const sortDirectionsByField: SortDirectionsByField = new Map([
-  ['title', directions('asc', 'desc')],
-  ['accessedAt', directions('desc')],
-]);
+const sorting: ContentListFeatures['sorting'] = {
+  fields: [
+    { field: 'title', name: 'Name' },
+    { field: 'accessedAt', name: 'Recently viewed', allowedDirections: ['desc'] },
+  ],
+};
 
 describe('sorting persist', () => {
   beforeEach(() => {
@@ -28,12 +28,12 @@ describe('sorting persist', () => {
 
   describe('getPersistedSort', () => {
     it('returns undefined when no value is persisted', () => {
-      expect(getPersistedSort('my-list', sortDirectionsByField)).toBeUndefined();
+      expect(getPersistedSort('my-list', sorting)).toBeUndefined();
     });
 
     it('returns the persisted sort when it is allowed', () => {
       localStorage.setItem('contentList:sort:my-list', 'accessedAt:desc');
-      expect(getPersistedSort('my-list', sortDirectionsByField)).toEqual({
+      expect(getPersistedSort('my-list', sorting)).toEqual({
         field: 'accessedAt',
         direction: 'desc',
       });
@@ -44,12 +44,12 @@ describe('sorting persist', () => {
       ['a direction the field does not allow', 'accessedAt:asc'],
     ])('returns undefined for %s', (_, raw) => {
       localStorage.setItem('contentList:sort:my-list', raw);
-      expect(getPersistedSort('my-list', sortDirectionsByField)).toBeUndefined();
+      expect(getPersistedSort('my-list', sorting)).toBeUndefined();
     });
 
     it('keeps sorts separate per key', () => {
       localStorage.setItem('contentList:sort:list-a', 'title:desc');
-      expect(getPersistedSort('list-b', sortDirectionsByField)).toBeUndefined();
+      expect(getPersistedSort('list-b', sorting)).toBeUndefined();
     });
 
     it('returns undefined when localStorage throws', () => {
@@ -57,7 +57,7 @@ describe('sorting persist', () => {
         throw new Error('localStorage unavailable');
       });
 
-      expect(getPersistedSort('my-list', sortDirectionsByField)).toBeUndefined();
+      expect(getPersistedSort('my-list', sorting)).toBeUndefined();
     });
   });
 
@@ -70,7 +70,7 @@ describe('sorting persist', () => {
     it('overwrites an existing value and round-trips', () => {
       setPersistedSort('my-list', { field: 'title', direction: 'asc' });
       setPersistedSort('my-list', { field: 'accessedAt', direction: 'desc' });
-      expect(getPersistedSort('my-list', sortDirectionsByField)).toEqual({
+      expect(getPersistedSort('my-list', sorting)).toEqual({
         field: 'accessedAt',
         direction: 'desc',
       });

@@ -15,13 +15,7 @@ import { useContentListConfig } from '../context';
 import type { ContentListFeatures } from '../features';
 import { isPaginationConfig, isSearchConfig } from '../features';
 import { DEFAULT_PAGE_SIZE } from '../features/pagination';
-import type { SortState } from '../features/sorting';
-import {
-  getAllowedSorts,
-  getInitialSort,
-  getPersistedSort,
-  toSortDirectionsByField,
-} from '../features/sorting';
+import { getInitialSort, getPersistedSort } from '../features/sorting';
 import { getPersistedPageSize } from '../features/pagination';
 import type { PaginationConfig } from '../features/pagination';
 import { reducer, DEFAULT_SELECTION } from './state_reducer';
@@ -63,16 +57,8 @@ const resolveInitialPageSize = (
  * 1. Persisted sort for the given `queryKeyScope`, if allowed by the sorting config (user preference).
  * 2. Configured `sorting.initialSort` (or the default).
  */
-const resolveInitialSort = (
-  queryKeyScope: string,
-  sorting: ContentListFeatures['sorting']
-): SortState => {
-  const persisted = getPersistedSort(
-    queryKeyScope,
-    toSortDirectionsByField(getAllowedSorts(sorting))
-  );
-  return persisted ?? getInitialSort(sorting);
-};
+const resolveInitialSort = (queryKeyScope: string, sorting: ContentListFeatures['sorting']) =>
+  getPersistedSort(queryKeyScope, sorting) ?? getInitialSort(sorting);
 
 /**
  * Internal provider component that manages the runtime state of the content list.
