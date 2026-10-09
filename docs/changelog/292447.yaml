@@ -1,7 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/292447
-type: feature
-products:
-- product: cloud-serverless
-- product: kibana
-title: 'Show `on-failure` fallback steps in the workflow graph'

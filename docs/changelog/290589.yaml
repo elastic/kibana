@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/290589
-type: enhancement
-products:
-- product: cloud-serverless
-- product: kibana
-title: Allow upgrading prebuilt rules to the TARGET/Elastic version
-description: Adds an "Update to Elastic version" bulk action to the Rule Updates table that updates prebuilt rules to the exact Elastic version, discarding any customizations on the updated rules.
