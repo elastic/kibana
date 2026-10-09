@@ -10,6 +10,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
 import {
+  ESCALATION_ATTACHMENTS_SYNCED_EVENT_TYPE,
   ESCALATION_CREATED_FROM_INVESTIGATION_EVENT_TYPE,
   ESCALATION_INVESTIGATION_LINKED_EVENT_TYPE,
 } from '../../../common/escalations/conversation_events';
@@ -17,7 +18,7 @@ import { createEscalationConversationEventUiDefinitions } from '.';
 
 jest.mock('@kbn/agent-builder-plugin/public', () => ({ AGENTBUILDER_APP_ID: 'agent_builder' }));
 
-const setup = (index: 0 | 1, data: object) => {
+const setup = (index: 0 | 1 | 2, data: object) => {
   const application = applicationServiceMock.createStartContract();
   application.getUrlForApp.mockImplementation((appId, { path } = {}) => `/app/${appId}${path}`);
   const definition = createEscalationConversationEventUiDefinitions({ application })[index];
@@ -77,13 +78,31 @@ describe('escalation conversation event UI definitions', () => {
     expect(application.navigateToApp).not.toHaveBeenCalled();
   });
 
-  it('registers both types with a header', () => {
-    const application = applicationServiceMock.createStartContract();
-    const [a, b] = createEscalationConversationEventUiDefinitions({ application });
+  it('renders how many attachments were synced from the investigation', () => {
+    setup(2, { ...data, attachment_ids: ['inv 1:a', 'inv 1:b'] });
 
-    expect([a.type, b.type]).toEqual([
+    expect(screen.getByTestId('escalationAttachmentsSyncedEvent')).toHaveTextContent(
+      '2 attachments were synced from Phishing'
+    );
+    expect(screen.getByTestId('escalationEventInvestigationLink')).toBeInTheDocument();
+  });
+
+  it('uses the singular for one synced attachment', () => {
+    setup(2, { ...data, attachment_ids: ['inv 1:a'] });
+
+    expect(screen.getByTestId('escalationAttachmentsSyncedEvent')).toHaveTextContent(
+      '1 attachment was synced from Phishing'
+    );
+  });
+
+  it('registers all types with a header', () => {
+    const application = applicationServiceMock.createStartContract();
+    const [a, b, c] = createEscalationConversationEventUiDefinitions({ application });
+
+    expect([a.type, b.type, c.type]).toEqual([
       ESCALATION_CREATED_FROM_INVESTIGATION_EVENT_TYPE,
       ESCALATION_INVESTIGATION_LINKED_EVENT_TYPE,
+      ESCALATION_ATTACHMENTS_SYNCED_EVENT_TYPE,
     ]);
     expect(a.getHeader?.({} as never, { conversationId: 'x' })?.icon).toBeDefined();
   });

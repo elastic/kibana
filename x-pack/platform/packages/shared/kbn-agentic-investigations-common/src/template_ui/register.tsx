@@ -13,7 +13,12 @@ import { getCopyLinkFlyoutAction } from '../components/actions/copy_link_action'
 import { DETAILS_FLYOUT_LABELS } from '../components/details/translations';
 import type { FlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
 import { ConversationTitle } from './conversation_title';
-import type { RenderAssignees, RenderStatus, RenderLinkedInvestigations } from './types';
+import type {
+  RenderAssignees,
+  RenderStatus,
+  RenderLinkedInvestigations,
+  RenderSyncIndicator,
+} from './types';
 
 /**
  * The slot contents are loaded on demand: registration runs during every consuming plugin's
@@ -220,6 +225,11 @@ export interface RegisterEscalationTemplateUIOptions {
    * Supplied by the caller so the list can use Kibana HTTP hooks unavailable in this package.
    */
   renderLinkedInvestigations?: RenderLinkedInvestigations;
+  /**
+   * When provided, the header renders it beside the title, e.g. a spinner while the escalation's
+   * attachments sync. Supplied by the caller so it can use Kibana HTTP hooks and toasts.
+   */
+  renderSyncIndicator?: RenderSyncIndicator;
 }
 
 /** Returns the tab ids registered by the escalation template. */
@@ -245,6 +255,7 @@ export const registerEscalationTemplateUI = ({
   renderAssignees,
   renderStatus,
   renderLinkedInvestigations,
+  renderSyncIndicator,
 }: RegisterEscalationTemplateUIOptions): void => {
   const [overviewTabId] = getEscalationTabIds(templateId);
 
@@ -277,6 +288,7 @@ export const registerEscalationTemplateUI = ({
               conversation={conversation}
               renderAssignees={renderAssignees}
               renderStatus={renderStatus}
+              renderSyncIndicator={renderSyncIndicator}
               refetchConversation={refetchConversation}
             />
           </Suspense>

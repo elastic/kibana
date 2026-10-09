@@ -6,23 +6,25 @@
  */
 
 import React from 'react';
-import { EuiFieldText, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFieldText, EuiPanel, EuiText } from '@elastic/eui';
 import { actionLabels } from '../../actions/automation_actions_section';
 import type { SlackTriggerFormValues, TriggerFormValues } from '../../automation_form_values';
 import { ListPill } from '../pills/list_pill';
 import { PillPopover } from '../pills/pill_popover';
-import { Sentence } from '../pills/sentence';
+import { Sentence, SentenceIcon } from '../pills/sentence';
 import { triggerLabels, slackTriggerLeads } from '../translations';
 
 export const SlackTriggerEditor = ({
   trigger,
   onChange,
+  readOnly = false,
 }: {
   trigger: SlackTriggerFormValues;
   onChange: (trigger: TriggerFormValues) => void;
+  readOnly?: boolean;
 }) => (
   <Sentence>
-    <EuiIcon type="logoSlack" aria-hidden={true} />
+    <SentenceIcon type="logoSlack" />
     <EuiText size="s">
       <strong>{slackTriggerLeads[trigger.kind]}</strong>
     </EuiText>
@@ -34,26 +36,31 @@ export const SlackTriggerEditor = ({
       values={trigger.channels}
       onChange={(channels) => onChange({ ...trigger, channels })}
       testSubject="automationSlackTriggerChannels"
+      readOnly={readOnly}
     />
-    <PillPopover
-      ariaLabel={triggerLabels.anyMessage}
-      label={trigger.messageFilter.trim() || triggerLabels.anyMessage}
-      testSubject="automationSlackTriggerMessage"
-    >
-      {() => (
-        <EuiPanel paddingSize="s" hasShadow={false} color="transparent" css={{ width: 300 }}>
-          <EuiFieldText
-            compressed
-            autoFocus
-            aria-label={triggerLabels.anyMessage}
-            placeholder={triggerLabels.messageContains}
-            value={trigger.messageFilter}
-            onChange={(event) => onChange({ ...trigger, messageFilter: event.target.value })}
-            data-test-subj="automationSlackTriggerMessageInput"
-          />
-        </EuiPanel>
-      )}
-    </PillPopover>
+    {readOnly ? (
+      <EuiBadge>{trigger.messageFilter || triggerLabels.anyMessage}</EuiBadge>
+    ) : (
+      <PillPopover
+        ariaLabel={triggerLabels.anyMessage}
+        label={trigger.messageFilter.trim() || triggerLabels.anyMessage}
+        testSubject="automationSlackTriggerMessage"
+      >
+        {() => (
+          <EuiPanel paddingSize="s" hasShadow={false} color="transparent" css={{ width: 300 }}>
+            <EuiFieldText
+              compressed
+              autoFocus
+              aria-label={triggerLabels.anyMessage}
+              placeholder={triggerLabels.messageContains}
+              value={trigger.messageFilter}
+              onChange={(event) => onChange({ ...trigger, messageFilter: event.target.value })}
+              data-test-subj="automationSlackTriggerMessageInput"
+            />
+          </EuiPanel>
+        )}
+      </PillPopover>
+    )}
     <EuiText size="s">{triggerLabels.from}</EuiText>
     <ListPill
       ariaLabel={triggerLabels.anyone}
@@ -62,6 +69,7 @@ export const SlackTriggerEditor = ({
       values={trigger.users}
       onChange={(users) => onChange({ ...trigger, users })}
       testSubject="automationSlackTriggerUsers"
+      readOnly={readOnly}
     />
   </Sentence>
 );
