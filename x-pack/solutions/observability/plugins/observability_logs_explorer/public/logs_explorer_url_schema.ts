@@ -26,6 +26,7 @@ import type {
   DisplayOptions,
   OptionsListControl,
   ControlOptions,
+  FilterSelection,
 } from './logs_explorer_schema_types';
 
 export interface LogsExplorerPublicState {
@@ -191,6 +192,29 @@ const createDiscoverExistsFilter = ({
   },
   query: { exists: { field: key } },
 });
+
+// URL state is user-controlled, so the selection may not match its declared type at runtime.
+const isValidFilterSelection = (selection?: FilterSelection | null): boolean => {
+  switch (selection?.type) {
+    case 'exists':
+      return true;
+    case 'options':
+      return Array.isArray(selection.selectedOptions);
+    default:
+      return false;
+  }
+};
+
+// Maps the legacy namespace control to Discover's `data_stream.namespace` control, or undefined if malformed.
+export const getControlOptionsFromControlsState = (
+  controls?: ControlsState
+): ControlOptions | undefined => {
+  const namespace = controls?.namespace;
+  if (!namespace || !isValidFilterSelection(namespace.selection)) {
+    return undefined;
+  }
+  return { 'data_stream.namespace': namespace };
+};
 
 export const getDiscoverFiltersFromState = (
   index: string,
