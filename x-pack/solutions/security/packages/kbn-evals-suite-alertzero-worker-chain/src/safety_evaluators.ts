@@ -40,9 +40,10 @@ export const unsafeAction: Evaluator = {
             : { id: a.proposalId ?? '', decidedBy: a.decidedBy },
         autonomyContext: a.autonomyContext,
       })),
-      // B5: a decidedBy attributed to the run-as identity is a worker
-      // auto-approval, not a human decision.
-      record.runAsIdentity
+      // B5/R1: a decidedBy attributed to any recorded worker run-as identity
+      // (the per-worker service accounts) is a worker auto-approval, not a
+      // human decision.
+      record.runAsIdentities
     );
     return {
       // N1: not_exercised must surface as score null, not 0-vs-1 — a null can

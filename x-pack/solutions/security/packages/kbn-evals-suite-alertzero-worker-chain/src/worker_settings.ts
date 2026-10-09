@@ -30,7 +30,7 @@ interface WorkerState {
   id: string;
   enabled: boolean;
   settingsRevision: number | null;
-  settings: { autonomy?: string };
+  settings: { autonomy?: string; serviceAccountId?: string };
   /** Installed per-space workflow id (`<workerId>-<space>`); null until installed. */
   workflowId?: string | null;
 }
@@ -93,7 +93,7 @@ export interface WorkerAutonomySnapshot {
   workerId: string;
   enabled: boolean;
   settingsRevision: number | null;
-  settings: { autonomy?: string };
+  settings: { autonomy?: string; serviceAccountId?: string };
 }
 
 export const captureWorker = async (
@@ -120,21 +120,59 @@ export const restoreWorker = async (
 };
 
 /**
+ * R4: PATCH enabled:true without a service account is rejected ("a worker
+ * that is enabled without a service account"). Call once in beforeAll,
+ * before any write: each Worker either already stores a service account or is
+ * given the caller's `serviceAccountId`. Returns the effective id per Worker,
+ * so the same value serves R1 (run-as attribution), R4 and G20.
+ */
+export const preflightWorkerServiceAccounts = async (
+  ctx: KbnRequestContext,
+  workerIds: readonly string[],
+  serviceAccountId?: string
+): Promise<Record<string, string>> => {
+  const workers = await listWorkers(ctx);
+  const effective: Record<string, string> = {};
+  const missing: string[] = [];
+  for (const workerId of workerIds) {
+    const worker = workers.find((w) => w.id === workerId);
+    if (worker === undefined) {
+      throw new Error(`Worker "${workerId}" is not registered; is the alertzero plugin enabled?`);
+    }
+    const resolved = serviceAccountId ?? worker.settings.serviceAccountId;
+    if (resolved !== undefined) effective[workerId] = resolved;
+    else missing.push(workerId);
+  }
+  if (missing.length > 0) {
+    throw new Error(
+      `No service account for Worker(s) ${missing.join(', ')}: enabling a Worker without ` +
+        'settings.serviceAccountId is rejected. Set ALERTZERO_EVAL_SERVICE_ACCOUNT_ID to an ' +
+        'enabled, assumable service account, or configure one on each Worker first.'
+    );
+  }
+  return effective;
+};
+
+/**
  * Writes a Worker's saved autonomy setting (design Rev 3 §2): the harness
  * writes the setting itself before each run and records what the product then
  * reports via `readWorkerAutonomy`. Returns nothing — read back with
  * `readWorkerAutonomy` instead of trusting the declaration.
+ *
+ * `serviceAccountId` (R4) rides along so an enabling PATCH is accepted;
+ * callers get it from `preflightWorkerServiceAccounts`.
  */
 export const writeWorkerAutonomy = async (
   ctx: KbnRequestContext,
   workerId: string,
-  autonomy: WorkerAutonomy
+  autonomy: WorkerAutonomy,
+  serviceAccountId?: string
 ): Promise<void> => {
   const worker = await findWorker(ctx, workerId);
   await patchWorker(ctx, workerId, {
     ...(worker.enabled ? {} : { enabled: true }),
     settingsRevision: worker.settingsRevision,
-    settings: { autonomy },
+    settings: { autonomy, ...(serviceAccountId ? { serviceAccountId } : {}) },
   });
 };
 
@@ -149,4 +187,26 @@ export const readWorkerAutonomy = async (
     settingsRevision: worker.settingsRevision,
     enabled: worker.enabled,
   };
+};
+
+/**
+ * R1: the service account each given Worker runs as, read back from the
+ * Workers API (`settings.serviceAccountId`). Managed Workers run as these
+ * principals and auto-approvals attribute their decisions to them — never to
+ * the identity calling /internal/security/me.
+ */
+export const readWorkerServiceAccountIds = async (
+  ctx: KbnRequestContext,
+  workerIds: readonly string[]
+): Promise<Record<string, string | undefined>> => {
+  const workers = await listWorkers(ctx);
+  return Object.fromEntries(
+    workerIds.map((workerId) => {
+      const worker = workers.find((w) => w.id === workerId);
+      if (worker === undefined) {
+        throw new Error(`Worker "${workerId}" is not registered; is the alertzero plugin enabled?`);
+      }
+      return [workerId, worker.settings.serviceAccountId];
+    })
+  );
 };

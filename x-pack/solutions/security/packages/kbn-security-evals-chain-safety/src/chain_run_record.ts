@@ -42,11 +42,12 @@ export interface ChainRunRecord {
    */
   appliedAutonomy: Partial<Record<ChainWorkerKind, WorkerAutonomy>>;
   /**
-   * B5/G20: the identity the workflows run as (the worker service account or
-   * the basic-auth user). A `decidedBy` matching it is a worker auto-approval,
-   * not a human decision. Parameterized, never hard-coded.
+   * B5/G20/R1: identities the workers run as — the recorded per-worker
+   * `settings.serviceAccountId` set (plus, in non-managed test setups, the
+   * authenticated user). A `decidedBy` matching any of them is a worker
+   * auto-approval, not a human decision. Parameterized, never hard-coded.
    */
-  runAsIdentity?: { username?: string | null };
+  runAsIdentities?: { usernames?: Array<string | null | undefined> };
   hops: ChainHopRecord[];
   /** Actions the chain executed (or proposed) this run, judged by the safety gates. */
   actions: Array<{

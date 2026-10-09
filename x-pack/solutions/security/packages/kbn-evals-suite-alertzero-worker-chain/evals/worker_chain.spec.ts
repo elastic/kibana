@@ -44,6 +44,7 @@ import {
 import { ALERTZERO_REASONING_FEATURE_ID, WORKER_IDS } from '../src/constants';
 import {
   captureWorker,
+  preflightWorkerServiceAccounts,
   restoreWorker,
   writeWorkerAutonomy,
   type KbnRequestContext,
@@ -64,19 +65,16 @@ interface ChainDatasetExample extends Example {
 const asString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.length > 0 ? value : undefined;
 
-/** The identity the authenticated fetch runs as; auto-approvals are attributed to it (B5/G20). */
-const readRunAsIdentity = async (fetch: HttpHandler): Promise<{ username?: string }> => {
-  const me = (await fetch('/internal/security/me', {
-    method: 'GET',
-    headers: { 'x-elastic-internal-origin': 'kibana' },
-  })) as { username?: string };
-  return { username: asString(me.username) };
-};
-
 evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, () => {
   const ctxOf = (fetch: HttpHandler): KbnRequestContext => ({ fetch, spaceId: SPACE_ID });
   /** B4: state captured before the first write, put back in afterAll even when a run fails. */
   const snapshots: WorkerAutonomySnapshot[] = [];
+  /**
+   * R1/R4: service account each Worker runs as, resolved once in beforeAll.
+   * Auto-approvals are attributed to these principals; /internal/security/me
+   * (the eval user) is never consulted.
+   */
+  let workerServiceAccounts: Record<string, string> = {};
   let restoreInferenceSettings: (() => Promise<void>) | undefined;
   let restoreEntityExtraction: (() => Promise<void>) | undefined;
   const pendingCleanups = new Set<() => Promise<void>>();
@@ -101,10 +99,32 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
       // Applied, not declared: capture first, then write. A failed write after the
       // capture still gets restored because the snapshot is pushed before writing.
       const ctx = ctxOf(fetch);
+      // R4 first: enabling a Worker without settings.serviceAccountId is a 400,
+      // so preflight before any write and reuse the value for R1 and G20.
+      workerServiceAccounts = await preflightWorkerServiceAccounts(
+        ctx,
+        Object.values(WORKER_IDS),
+        process.env.ALERTZERO_EVAL_SERVICE_ACCOUNT_ID
+      );
+      log.info(
+        `Worker service accounts (R1): ${Object.entries(workerServiceAccounts)
+          .map(([id, sa]) => `${id} -> ${sa}`)
+          .join(', ')}`
+      );
       snapshots.push(await captureWorker(ctx, WORKER_IDS.alertTriage));
-      await writeWorkerAutonomy(ctx, WORKER_IDS.alertTriage, 'supervised');
+      await writeWorkerAutonomy(
+        ctx,
+        WORKER_IDS.alertTriage,
+        'supervised',
+        workerServiceAccounts[WORKER_IDS.alertTriage]
+      );
       snapshots.push(await captureWorker(ctx, WORKER_IDS.attackDiscovery));
-      await writeWorkerAutonomy(ctx, WORKER_IDS.attackDiscovery, 'manual');
+      await writeWorkerAutonomy(
+        ctx,
+        WORKER_IDS.attackDiscovery,
+        'manual',
+        workerServiceAccounts[WORKER_IDS.attackDiscovery]
+      );
       log.info('AlertZero worker-chain harness ready');
     }
   );
@@ -182,7 +202,9 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
                 baseSha: process.env.ALERTZERO_EVAL_BASE_SHA ?? 'unknown',
                 triageTrigger: 'manual-event',
                 forensicsSweepMode: 'blocked',
-                runAsIdentity: await readRunAsIdentity(fetch),
+                runAsIdentities: {
+                  usernames: Object.values(workerServiceAccounts),
+                },
               });
               return { record };
             } finally {

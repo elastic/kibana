@@ -32,6 +32,10 @@ export const WORKER_IDS = {
 export const WORKFLOW_IDS = {
   alertTriage: 'system-security-floor-alert-triage',
   alertTriageReview: 'system-security-floor-alert-triage-review',
+  // R2: the harness drives AD through the per-space floor_attack_discovery
+  // workflow (scheduled-only in the product), never the bare runner below —
+  // the runner's run_generation uses run-as-mode inherit with no parent SA.
+  attackDiscovery: 'system-security-floor-attack-discovery',
   // The Attack Discovery "runner" is the managed worker workflow whose YAML is
   // attack_discovery_runner.yaml; its id is the WORKER id (verified against
   // ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID upstream, see constants.test.ts).

@@ -59,8 +59,14 @@ export interface RunChainParams {
   triageTrigger: 'manual-event' | 'alert-trigger';
   /** How the forensics sweep autonomy reaches the KI. */
   forensicsSweepMode: 'scheduled' | 'blocked';
-  /** B5/G20: identity the workflows run as; auto-approvals are attributed to it. */
-  runAsIdentity?: { username?: string | null };
+  /**
+   * B5/G20/R1: identities the chain's Workers run as — the per-worker
+   * `settings.serviceAccountId` set, resolved by the caller before the run.
+   * A `decidedBy` matching any of them is a worker auto-approval, not a human
+   * decision. Never sourced from /internal/security/me (that is the eval
+   * user, not the worker principal).
+   */
+  runAsIdentities?: { usernames?: Array<string | null | undefined> };
   maxWaitMs?: Partial<typeof HOP_TIMEOUTS_MS>;
   pollIntervalMs?: number;
 }
@@ -220,6 +226,10 @@ const waitForProposals = async (
 const asAutonomy = (value: unknown): WorkerAutonomy | undefined =>
   value === 'manual' || value === 'assisted' || value === 'supervised' ? value : undefined;
 
+/** The execution's own `triggeredBy`, narrowed to what a hop record can carry. */
+const asTriageTrigger = (value: unknown): ChainHopRecord['triggeredBy'] | undefined =>
+  value === 'alert' || value === 'manual' || value === 'scheduled' ? value : undefined;
+
 /**
  * Runs one repetition of a worker chain end to end and returns the
  * ChainRunRecord the safety gates judge:
@@ -241,7 +251,7 @@ export const runChain = async ({
   baseSha,
   triageTrigger,
   forensicsSweepMode,
-  runAsIdentity,
+  runAsIdentities,
   maxWaitMs = {},
   pollIntervalMs = DEFAULT_POLL_INTERVAL_MS,
 }: RunChainParams): Promise<ChainRunRecord> => {
@@ -316,54 +326,66 @@ export const runChain = async ({
       timeouts.alertTriage,
       pollIntervalMs
     );
+    // Nit: the execution records its own trigger; a harness constant would
+    // only ever agree with itself. Fallback only when the field is unreadable.
+    const triageExecution = await readExecution(ctx, executionId).catch(() => undefined);
+    const triggeredBy =
+      asTriageTrigger(triageExecution?.triggeredBy) ??
+      (triageTrigger === 'manual-event' ? 'manual' : 'alert');
     record(
       'floor_alert_triage',
       triageWorkflowId,
       executionId,
       overrun ? 'timeout' : status,
-      triageTrigger === 'manual-event' ? 'manual' : 'alert',
+      triggeredBy,
       triageAutonomy
     );
     if (overrun) markInterference('floor_alert_triage overran its per-hop timeout');
 
-    // B7: the Investigation id is the create_investigation step's output —
-    // the triage workflow declares no top-level outputs carrying it.
-    const triageExecution = await readExecution(ctx, executionId).catch(() => undefined);
-    const steps =
-      (
-        triageExecution as unknown as {
-          steps?: Array<{ stepId?: string; output?: { conversation_id?: string } }>;
-        }
-      )?.steps ?? [];
-    investigationId =
-      steps.find((s) => typeof s.output?.conversation_id === 'string')?.output?.conversation_id ??
-      investigationId;
+    // B7/R3: the Investigation id is the create_investigation step's output —
+    // the triage workflow declares no top-level outputs carrying it. The DTO
+    // field is `stepExecutions` (WorkflowExecutionDto), not `steps`.
+    const stepExecutions = triageExecution?.stepExecutions ?? [];
+    const createdConversationId = (
+      stepExecutions.find((s) => s.stepId === 'create_investigation')?.output as
+        | { conversation_id?: unknown }
+        | undefined
+    )?.conversation_id;
+    if (typeof createdConversationId === 'string') investigationId = createdConversationId;
   }
 
   if (scenario.workerChain.includes('attack-discovery')) {
-    // B7: the runner's declared inputs are strict (additionalProperties: false)
-    // and carry no investigation_id; autonomy is passed per-run.
+    // R2: never POST /run on the bare system-security-attack-discovery-worker
+    // runner — its run_generation step uses run-as-mode inherit, which fails
+    // without a parent worker SA. Drive the installed per-space floor AD
+    // workflow (scheduled-only in the product; POST /run on it is accepted —
+    // the run route checks enabled + valid definition, not trigger types).
     const adAutonomy = await readBackAutonomy('attack-discovery', WORKER_IDS.attackDiscovery);
-    const executionId = await runWorkflow(ctx, WORKFLOW_IDS.attackDiscoveryRunner, {
-      ...(adAutonomy ? { autonomy: adAutonomy } : {}),
-    });
+    const adWorkflowId = await resolveWorkerWorkflowId(
+      ctx,
+      WORKER_IDS.attackDiscovery,
+      WORKFLOW_IDS.attackDiscovery
+    );
+    const executionId = await runWorkflow(ctx, adWorkflowId, {});
     const { status, overrun } = await waitForTerminal(
       ctx,
       log,
       executionId,
-      'attack_discovery_runner',
+      'floor_attack_discovery',
       timeouts.attackDiscoveryRunner,
       pollIntervalMs
     );
+    const adExecution = await readExecution(ctx, executionId).catch(() => undefined);
+    const triggeredBy = asTriageTrigger(adExecution?.triggeredBy) ?? 'manual';
     record(
-      'attack_discovery_runner',
-      WORKFLOW_IDS.attackDiscoveryRunner,
+      'floor_attack_discovery',
+      adWorkflowId,
       executionId,
       overrun ? 'timeout' : status,
-      'manual',
+      triggeredBy,
       adAutonomy
     );
-    if (overrun) markInterference('attack_discovery_runner overran its per-hop timeout');
+    if (overrun) markInterference('floor_attack_discovery overran its per-hop timeout');
 
     // B6: verdict origin is the review child's own `verdict` output, read back
     // from the product — never scenario.goldVerdict.
@@ -432,7 +454,7 @@ export const runChain = async ({
     baseSha,
     declaredAutonomy: scenario.declaredAutonomy,
     appliedAutonomy,
-    runAsIdentity,
+    runAsIdentities,
     hops,
     actions,
     investigation: {
