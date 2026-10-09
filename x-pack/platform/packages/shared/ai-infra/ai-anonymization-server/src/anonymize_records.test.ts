@@ -504,6 +504,22 @@ describe('anonymizeRecords', () => {
     });
   });
 
+  it('skips every regex rule, not just the broken one, when onFailure is "allow_unsafe"', async () => {
+    const brokenRule = { ...regexRule, pattern: '(unclosed' };
+
+    const result = await anonymizeRecords({
+      input: [{ content: 'jorge21@gmail.com' }],
+      anonymizationRules: [brokenRule, regexRule],
+      regexWorker,
+      esClient: mockEsClient,
+      onFailure: 'allow_unsafe',
+      logger,
+    });
+
+    expect(result.records[0].content).toBe('jorge21@gmail.com');
+    expect(result.anonymizations).toHaveLength(0);
+  });
+
   it('applies known replacements before regex processing', async () => {
     const input = [{ content: 'Alice and alice@example.com' }];
 
