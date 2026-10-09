@@ -3006,6 +3006,8 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 
 ## Security Solution sub teams - Security Investigations
 
+/x-pack/solutions/security/plugins/security_solution/scripts/data/ @elastic/security-investigations
+
 /x-pack/solutions/security/plugins/security_solution/public/app/links @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/navigation @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/public/onboarding @elastic/security-investigations
