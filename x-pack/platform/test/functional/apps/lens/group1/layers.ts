@@ -171,7 +171,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.switchToVisualizationSubtype('Percentage');
 
       // now check that both the main visualization and the current visualization suggestion are in error state
-      expect(await lens.getWorkspaceErrorCount()).to.eql(1);
+      await lens.assertWorkspaceErrorCount(1);
       await testSubjects.existOrFail(
         'lnsSuggestion-currentVisualization > lnsSuggestionPanel__error'
       );
