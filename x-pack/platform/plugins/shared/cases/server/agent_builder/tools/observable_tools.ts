@@ -61,6 +61,7 @@ export const observablesTool = (
     },
     schema: observablesSchema,
     tags: ['cases'],
+    excludeFromMcp: true,
     handler: async (args, toolContext) => {
       const { mode, case_id, ...rest } = args;
 

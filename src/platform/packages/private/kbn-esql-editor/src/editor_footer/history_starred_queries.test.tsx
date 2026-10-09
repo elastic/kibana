@@ -69,8 +69,13 @@ const createMockStarredQueriesService = (items: StarredQueryItem[] = []) =>
   } as unknown as EsqlStarredQueriesService);
 
 describe('Starred and History queries components', () => {
+  const defaultCore = coreMock.createStart();
+  defaultCore.application.capabilities = {
+    ...defaultCore.application.capabilities,
+    esqlViews: { create: true },
+  };
   const services = {
-    core: coreMock.createStart(),
+    core: defaultCore,
     usageCollection: {},
     storage: {},
   };
@@ -307,6 +312,31 @@ describe('Starred and History queries components', () => {
         expect(starredTable.getByText('No items found')).toBeInTheDocument();
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
       });
+    });
+
+    it('opens create view for the selected history query', () => {
+      render(
+        <KibanaContextProvider services={services}>
+          <HistoryAndStarredQueriesTabs
+            containerCSS={{}}
+            containerWidth={1024}
+            onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
+            height={200}
+            starredQueriesService={createMockStarredQueriesService()}
+            enableCreateView
+          />
+        </KibanaContextProvider>
+      );
+
+      const historyTable = within(screen.getByTestId('ESQLEditor-queryHistory'));
+      const query = 'FROM logs | WHERE status = "error"';
+      const row = historyTable.getByText(query).closest('tr');
+      expect(row).not.toBeNull();
+      fireEvent.click(within(row as HTMLElement).getByRole('button', { name: 'Create view' }));
+
+      const dialog = screen.getByRole('dialog', { name: 'Create view' });
+      expect(within(dialog).getByTestId('saveAsViewQueryPreview')).toHaveTextContent(query);
     });
 
     it('should render two tabs', () => {

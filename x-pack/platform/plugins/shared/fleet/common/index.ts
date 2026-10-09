@@ -56,7 +56,6 @@ export {
   AGENTS_SETUP_API_ROUTES,
   PACKAGE_POLICY_API_ROUTES,
   DATA_STREAM_API_ROUTES,
-  DATA_STREAM_INDEX_PATTERN_REGEX,
   EPM_API_ROUTES,
   SETUP_API_ROUTE,
   // Should probably be removed
@@ -70,6 +69,7 @@ export {
   API_VERSIONS,
   APP_API_ROUTES,
   // Cloud Connector constants
+  AWS_IDENTITY_FEDERATION_ENABLED_FLAG,
   SINGLE_ACCOUNT,
   ORGANIZATION_ACCOUNT,
   AWS_ACCOUNT_TYPE_VAR_NAME,
@@ -80,6 +80,8 @@ export {
   displayedAssetTypes,
   displayedAssetTypesLookup,
   CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT,
+  // Download source constants
+  DEFAULT_DOWNLOAD_SOURCE_REFERENCE,
 } from './constants';
 export {
   // Route services
@@ -94,6 +96,7 @@ export {
   isValidNamespace,
   isValidDataset,
   isValidDataStreamType,
+  isValidDataStreamIndexPattern,
   INVALID_NAMESPACE_CHARACTERS,
   VALID_DATA_STREAM_TYPES,
   getFileMetadataIndexName,

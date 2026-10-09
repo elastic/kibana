@@ -110,6 +110,8 @@
     "@kbn/licensing-types",
     "@kbn/lazy-object",
     "@kbn/scout",
+    "@kbn/es",
+    "@kbn/test-es-server",
     "@kbn/dev-utils",
     "@kbn/security-api-integration-helpers",
     "@kbn/mock-idp-utils",
@@ -126,6 +128,7 @@
     "@kbn/unsaved-changes-prompt",
     "@kbn/ui-callout",
     "@kbn/zod",
+    "@kbn/zod-helpers",
   ],
   "exclude": ["target/**/*"]
 }

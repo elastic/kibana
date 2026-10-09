@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
+import { MAX_PARAM_VALUE_LENGTH, MAX_ROUTE_ID_LENGTH, routeId } from '../../zod_query';
 import { validateRouteSpaceName } from '../../common';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import type { SyntheticsParamRequest, SyntheticsParams } from '../../../../common/runtime_types';
@@ -17,11 +17,11 @@ import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
-const RequestParamsSchema = schema.object({
-  id: schema.string(),
+const RequestParamsSchema = z.strictObject({
+  id: routeId,
 });
 
-type RequestParams = TypeOf<typeof RequestParamsSchema>;
+type RequestParams = z.infer<typeof RequestParamsSchema>;
 
 export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   SyntheticsParams | undefined,
@@ -33,19 +33,11 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   validation: {
     request: {
       params: RequestParamsSchema,
-      body: schema.object({
-        key: schema.maybe(
-          schema.string({
-            minLength: 1,
-          })
-        ),
-        value: schema.maybe(
-          schema.string({
-            minLength: 1,
-          })
-        ),
-        description: schema.maybe(schema.string()),
-        tags: schema.maybe(schema.arrayOf(schema.string())),
+      body: z.strictObject({
+        key: z.string().min(1).max(MAX_ROUTE_ID_LENGTH).optional(),
+        value: z.string().min(1).max(MAX_PARAM_VALUE_LENGTH).optional(),
+        description: z.string().max(4096).optional(),
+        tags: z.array(z.string().max(256)).max(100).optional(),
       }),
     },
   },

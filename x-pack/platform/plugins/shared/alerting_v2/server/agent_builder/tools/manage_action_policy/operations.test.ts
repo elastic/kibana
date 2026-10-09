@@ -112,12 +112,12 @@ describe('executeActionPolicyOperations', () => {
 
     it('applies set_matcher', () => {
       const ops: ActionPolicyOperation[] = [
-        { operation: 'set_matcher', matcher: { expression: 'rule.name: "test"' } },
+        { operation: 'set_matcher', matcher: { expression: 'alert_status: "active"' } },
       ];
 
       const result = executeActionPolicyOperations({}, ops);
 
-      expect(result.matcher).toEqual({ expression: 'rule.name: "test"' });
+      expect(result.matcher).toEqual({ expression: 'alert_status: "active"' });
     });
 
     it('applies set_grouping', () => {
@@ -159,12 +159,12 @@ describe('executeActionPolicyOperations', () => {
   });
 
   describe('throttle / grouping compatibility', () => {
-    it('throws when per_episode grouping uses time_interval strategy', () => {
+    it('throws when per_alert grouping uses time_interval strategy', () => {
       const ops: ActionPolicyOperation[] = [
         { operation: 'set_throttle', strategy: 'time_interval', interval: '5m' },
       ];
 
-      expect(() => executeActionPolicyOperations({ grouping_mode: 'per_episode' }, ops)).toThrow(
+      expect(() => executeActionPolicyOperations({ grouping_mode: 'per_alert' }, ops)).toThrow(
         'not valid for grouping mode'
       );
     });

@@ -14,3 +14,5 @@ export {
   type ConversationEventsService,
 } from './conversation_events_service';
 export type { ConversationEventsServiceSetup, ConversationEventsServiceStart } from './types';
+export { materializeConversationEvents } from './materialize_events';
+export { validateConversationEvents } from './validation';

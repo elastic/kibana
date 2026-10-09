@@ -6,13 +6,20 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { loggingSystemMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  loggingSystemMock,
+  savedObjectsServiceMock,
+} from '@kbn/core/server/mocks';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 
 import { EsServiceAccounts } from './es_service_accounts';
 import { ServiceAccountsService } from './service_accounts_service';
 import { UiamServiceAccounts } from './uiam_service_accounts';
 import { licenseMock } from '../../common/licensing/index.mock';
+import { auditServiceMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import { uiamServiceMock } from '../uiam/uiam_service.mock';
 
@@ -31,19 +38,22 @@ describe('ServiceAccountsService', () => {
 
     return {
       config: createConfig(
-        ConfigSchema.validate(config, { serverless: config.serviceAccounts !== undefined }),
+        ConfigSchema.validate(config, { serverless: true }),
         loggingSystemMock.createLogger(),
         { isTLSEnabled: false }
       ),
+      isServerless: true,
       license: licenseMock.create(),
       uiam: uiamServiceMock.create(),
       checkPrivilegesWithRequest: jest.fn(),
+      audit: auditServiceMock.create(),
       getCurrentUser: jest.fn(),
       cloudProjectContext: {
         organizationId: 'organization-id',
         projectId: 'project-id',
         projectType: 'security' as const,
       },
+      clusterClient: elasticsearchServiceMock.createClusterClient(),
       savedObjects: savedObjectsServiceMock.createStartContract(),
       encryptedSavedObjects,
       canEncrypt: true,
@@ -54,9 +64,11 @@ describe('ServiceAccountsService', () => {
   };
 
   let service: ServiceAccountsService;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
-    service = new ServiceAccountsService(loggingSystemMock.create().get('service-accounts'));
+    logger = loggingSystemMock.createLogger();
+    service = new ServiceAccountsService(logger);
   });
 
   describe('#start', () => {
@@ -64,30 +76,52 @@ describe('ServiceAccountsService', () => {
       expect(service.start(startParams({ serviceAccounts: { enabled: false } }))).toBeNull();
     });
 
-    it('returns null when the feature is not configured at all (non-serverless)', () => {
+    it('returns null when the feature is not configured at all', () => {
       expect(service.start(startParams({}))).toBeNull();
     });
 
-    it('selects the UIAM backend when UIAM and project context are available', () => {
+    it('selects the UIAM backend on serverless', () => {
       expect(
         service.start(startParams({ serviceAccounts: { enabled: true } }))?.backend
       ).toBeInstanceOf(UiamServiceAccounts);
     });
 
-    it('falls back to the Elasticsearch backend when UIAM is unavailable', () => {
+    it('uses explicit namespaces for the workload binding store', () => {
+      const params = startParams({ serviceAccounts: { enabled: true } });
+      service.start(params);
+      expect(params.savedObjects.getUnsafeInternalClient).toHaveBeenCalledWith(
+        expect.objectContaining({ excludedExtensions: ['spaces'] })
+      );
+    });
+
+    it('selects the Elasticsearch backend outside serverless', () => {
       expect(
-        service.start(startParams({ serviceAccounts: { enabled: true } }, { uiam: undefined }))
+        service.start(startParams({ serviceAccounts: { enabled: true } }, { isServerless: false }))
           ?.backend
       ).toBeInstanceOf(EsServiceAccounts);
     });
 
-    it('falls back to Elasticsearch when project context is unavailable', () => {
-      expect(
-        service.start(
-          startParams({ serviceAccounts: { enabled: true } }, { cloudProjectContext: undefined })
-        )?.backend
-      ).toBeInstanceOf(EsServiceAccounts);
+    // The offering decides, not what happens to be wired up: a serverless deployment must never
+    // reach Elasticsearch's service accounts, and a traditional one must never reach UIAM.
+    it('selects the Elasticsearch backend outside serverless even when UIAM is configured', () => {
+      const params = startParams({ serviceAccounts: { enabled: true } }, { isServerless: false });
+
+      expect(service.start(params)?.backend).toBeInstanceOf(EsServiceAccounts);
+      expect(params.uiam.createServiceAccount).not.toHaveBeenCalled();
     });
+
+    it.each([
+      ['the UIAM service was never constructed', { uiam: undefined }],
+      ['the cloud project context is missing', { cloudProjectContext: undefined }],
+    ] as const)(
+      'reports the feature as unavailable on serverless when %s',
+      (expectedCause, overrides) => {
+        expect(
+          service.start(startParams({ serviceAccounts: { enabled: true } }, overrides))
+        ).toBeNull();
+        expect(logger.error).toHaveBeenCalledWith(expect.stringContaining(expectedCause));
+      }
+    );
 
     it('passes the configured refresh lifetime to the UIAM backend', async () => {
       jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
@@ -121,21 +155,62 @@ describe('ServiceAccountsService', () => {
       ).resolves.toBeNull();
     });
 
-    it('refuses workload bindings on the Elasticsearch backend', async () => {
-      const start = service.start(
-        startParams({ serviceAccounts: { enabled: true } }, { uiam: undefined })
-      )!;
+    it.each([
+      ['UIAM', { isServerless: true }],
+      ['Elasticsearch', { isServerless: false }],
+    ])(
+      'hands the audit service to the %s backend, the bindings and management',
+      async (_name, overrides) => {
+        const params = startParams({ serviceAccounts: { enabled: true } }, overrides);
+        params.license.isEnabled.mockReturnValue(true);
+        params.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+        params.checkPrivilegesWithRequest.mockReturnValue({
+          globally: jest.fn().mockResolvedValue({ hasAllRequested: false }),
+        });
+        const start = service.start(params)!;
+        const request = httpServerMock.createKibanaRequest({
+          headers: { authorization: 'Bearer essu_token' },
+        });
+
+        // A refused create, bind and delete all audit through the scoped logger, so a denial on
+        // each path proves the same `audit` reached the backend, the bindings and management.
+        await expect(
+          start.backend.create(request, { name: 'relay', roles: ['viewer'] })
+        ).rejects.toMatchObject({
+          output: { statusCode: 403 },
+        });
+        await expect(
+          start.workloads.bindWorkload('alerting', request, {
+            serviceAccountId: 'sa',
+            workloadType: 'rule',
+            workloadId: 'rule-id',
+          })
+        ).rejects.toMatchObject({ output: { statusCode: 403 } });
+        await expect(
+          start.management.delete(request, 'sa', { force: false })
+        ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+        expect(params.audit.asScoped).toHaveBeenCalledTimes(3);
+        expect(params.audit.asScoped).toHaveBeenCalledWith(request);
+      }
+    );
+
+    it('exposes real workload bindings on the Elasticsearch backend', async () => {
+      const params = startParams({ serviceAccounts: { enabled: true } }, { isServerless: false });
+      params.license.isEnabled.mockReturnValue(true);
+      const start = service.start(params);
+      if (!start) throw new Error('Expected ES backend');
 
       await expect(
         start.workloads.getBinding('alerting', {
           workloadType: 'rule',
           workloadId: 'rule-id',
-          spaceId: 'default',
+          spaceId: 'marketing',
         })
-      ).rejects.toMatchObject({
-        message:
-          'Service account workload bindings are not yet implemented for the Elasticsearch backend',
-        output: { statusCode: 501 },
+      ).resolves.toBeNull();
+      expect(params.savedObjects.getUnsafeInternalClient).toHaveBeenCalledWith({
+        includedHiddenTypes: ['service-account-workload-binding'],
+        excludedExtensions: ['spaces'],
       });
     });
   });

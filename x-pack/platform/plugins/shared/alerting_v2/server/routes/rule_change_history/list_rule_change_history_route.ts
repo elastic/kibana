@@ -14,7 +14,6 @@ import {
   type ListRuleChangeHistoryRequest,
 } from '@kbn/alerting-v2-schemas';
 import { inject, injectable } from 'inversify';
-import type { z } from '@kbn/zod/v4';
 import {
   RuleChangesHistoryClientToken,
   type RuleChangesHistoryClientContract,
@@ -22,15 +21,14 @@ import {
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-import { ALERTING_V2_INTERNAL_RULE_CHANGE_HISTORY_API_PATH } from '../constants';
+import { ALERTING_V2_INTERNAL_CHANGE_HISTORY_RULES_API_PATH } from '../constants';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
-import { ruleIdParamsSchema } from '../rules/route_schemas';
 import { listRuleChangeHistoryOasExamples } from './list_rule_change_history_oas_example';
 
 @injectable()
 export class ListRuleChangeHistoryRoute extends BaseAlertingRoute {
   static method = 'get' as const;
-  static path = ALERTING_V2_INTERNAL_RULE_CHANGE_HISTORY_API_PATH;
+  static path = ALERTING_V2_INTERNAL_CHANGE_HISTORY_RULES_API_PATH;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.read],
@@ -46,7 +44,6 @@ export class ListRuleChangeHistoryRoute extends BaseAlertingRoute {
   } as const;
   static schemas = {
     request: {
-      params: ruleIdParamsSchema,
       query: listRuleChangeHistoryRequestSchema,
     },
     response: {
@@ -66,11 +63,7 @@ export class ListRuleChangeHistoryRoute extends BaseAlertingRoute {
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<
-      z.infer<typeof ruleIdParamsSchema>,
-      ListRuleChangeHistoryRequest,
-      unknown
-    >,
+    private readonly request: KibanaRequest<unknown, ListRuleChangeHistoryRequest, unknown>,
     @inject(RuleChangesHistoryClientToken)
     private readonly ruleChangesHistoryClient: RuleChangesHistoryClientContract
   ) {
@@ -79,7 +72,7 @@ export class ListRuleChangeHistoryRoute extends BaseAlertingRoute {
 
   protected async execute() {
     const result = await this.ruleChangesHistoryClient.listRuleChanges({
-      ruleId: this.request.params.id,
+      ruleId: this.request.query.rule_id,
       page: this.request.query.page,
       perPage: this.request.query.per_page,
     });

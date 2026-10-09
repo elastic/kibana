@@ -27,7 +27,8 @@ const defaultModel = { connector: { connectorId: 'default-connector' } } as Scop
 const getDefaultModel = jest.fn();
 const modelProvider = { getDefaultModel } as unknown as ModelProvider;
 const asCurrentUser = { name: 'current-user-client' };
-const esClient = { asCurrentUser } as unknown as IScopedClusterClient;
+const asInternalUser = { name: 'internal-user-client' };
+const esClient = { asCurrentUser, asInternalUser } as unknown as IScopedClusterClient;
 
 const params = {
   nlQuery: 'count logs by status',
@@ -44,11 +45,11 @@ describe('generateVisualizationEsql', () => {
     getDefaultModel.mockReset().mockResolvedValue(defaultModel);
   });
 
-  it('returns the query and result columns when generation succeeds with rows', async () => {
+  it('returns the query and result columns when generation succeeds', async () => {
     const columns = [{ name: 'status', type: 'keyword' }];
     mockedGenerateEsql.mockResolvedValue({
       query: 'FROM logs-* | STATS c = COUNT() BY status',
-      results: { columns },
+      results: { columns, values: [] },
     } as Awaited<ReturnType<typeof generateEsql>>);
 
     const result = await generateVisualizationEsql(params);
@@ -79,8 +80,10 @@ describe('generateVisualizationEsql', () => {
         nlQuery: 'count logs by status',
         index: 'logs-*',
         esClient: asCurrentUser,
+        internalEsClient: asInternalUser,
         additionalInstructions: 'esql-instructions',
         timeRange: { from: 'now-7d', to: 'now' },
+        execute: 'schema',
       })
     );
   });

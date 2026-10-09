@@ -407,5 +407,6 @@ Called from an Agent Builder conversation, the result also carries \`attachment_
       }
     },
     tags: ['cases'],
+    excludeFromMcp: true,
   };
 };

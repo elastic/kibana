@@ -7,14 +7,17 @@
 
 import {
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   applyWorkerSettingsWrite,
   createDefaultWorkerSettings,
   formatWorkerSettingsIssues,
   getCompleteWorkerSettingsSchema,
+  getWorkerSettingsDeclaration,
+  upgradeStoredWorkerSettings,
   type WorkerSettings,
 } from '@kbn/alertzero-common';
 import type { ManagedWorkflowTemplateValues } from '@kbn/workflows/managed';
@@ -23,23 +26,27 @@ import type { WorkerSettingsRegistration } from './types';
 type RegisteredWorkerId =
   | typeof SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
   | typeof SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID
+  | typeof SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID
   | typeof SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID
   | typeof SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID
-  | typeof SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID;
+  | typeof SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID;
 
 const WORKER_SETTINGS_VERSIONS: Record<RegisteredWorkerId, number> = {
+  // A bump makes `parseWorkerValues` reject every document stored at the previous version, even
+  // after `upgradeStoredWorkerSettings`.
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: 1,
   [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: 1,
+  [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: 1,
   [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: 1,
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: 1,
-  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: 1,
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: 1,
 };
 
 /**
  * Template values mirror the settings API: shared fields flat (with the legacy `autonomyLevel`
  * key the YAML templates read), Worker-specific fields nested under `extras`.
  */
-const toTemplateValues = (
+export const toTemplateValues = (
   workerId: RegisteredWorkerId,
   settings: WorkerSettings
 ): ManagedWorkflowTemplateValues => ({
@@ -48,20 +55,31 @@ const toTemplateValues = (
   ...(settings.scheduleInterval === undefined
     ? {}
     : { scheduleInterval: settings.scheduleInterval }),
+  ...(settings.serviceAccountId === undefined
+    ? {}
+    : { serviceAccountId: settings.serviceAccountId }),
   ...(settings.extras === undefined ? {} : { extras: settings.extras }),
 });
 
 /**
- * Reads persisted template values back into complete settings, exactly as stored: nothing is
- * defaulted or merged in, and a document from an older development shape fails here so the
- * Worker projects as unavailable until that state is reset.
+ * Reads persisted template values after the same upgrade the Worker's renderer applies, so the
+ * settings page and the running workflow see the same values. Anything else present is left as
+ * stored, so an out-of-range value still fails here and the Worker projects as unavailable.
  */
 const parseWorkerValues = (
   workerId: RegisteredWorkerId,
-  raw: Record<string, unknown>
+  stored: Record<string, unknown>
 ): WorkerSettings => {
+  const raw = upgradeStoredWorkerSettings(getWorkerSettingsDeclaration(workerId), stored);
   const currentVersion = WORKER_SETTINGS_VERSIONS[workerId];
-  const { settingsVersion, autonomyLevel, scheduleInterval, extras, ...unsupported } = raw;
+  const {
+    settingsVersion,
+    autonomyLevel,
+    scheduleInterval,
+    serviceAccountId,
+    extras,
+    ...unsupported
+  } = raw;
   if (settingsVersion !== undefined && settingsVersion !== currentVersion) {
     throw new Error(
       `Unsupported settings version for AlertZero worker "${workerId}": ${String(settingsVersion)}`
@@ -80,6 +98,9 @@ const parseWorkerValues = (
     workerId,
     autonomy: autonomyLevel,
     ...(scheduleInterval === undefined ? {} : { scheduleInterval }),
+    ...(typeof serviceAccountId === 'string' && serviceAccountId.length > 0
+      ? { serviceAccountId }
+      : {}),
     ...(extras === undefined ? {} : { extras }),
   };
   const parsed = getCompleteWorkerSettingsSchema(workerId).safeParse(candidate);

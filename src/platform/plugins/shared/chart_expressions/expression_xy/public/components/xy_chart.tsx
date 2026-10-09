@@ -23,6 +23,7 @@ import type {
   PointerValue,
   AxisStyle,
   RectStyle,
+  AnnotationClickListener,
 } from '@elastic/charts';
 import {
   Chart,
@@ -49,7 +50,10 @@ import { ESQL_TABLE_TYPE, MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/com
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import type { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
+import type {
+  PointEventAnnotationRow,
+  ManualRangeEventAnnotationRow,
+} from '@kbn/event-annotation-plugin/common';
 import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
@@ -72,6 +76,7 @@ import type {
   FormatFactory,
   LayerCellValueActions,
   MultiFilterEvent,
+  AnnotationClickEvent,
 } from '../types';
 import { isTimeChart } from '../../common/helpers';
 import type {
@@ -99,6 +104,7 @@ import {
   validateExtent,
   getOriginalAxisPosition,
   getMaximumFractionDigits,
+  mapAnnotationClickEvents,
 } from '../helpers';
 import { getXDomain, getXValues, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
@@ -154,6 +160,7 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   onCreateAlertRule: (data: AlertRuleFromVisUIActionData) => void;
   layerCellValueActions: LayerCellValueActions;
   onSelectRange: (data: BrushEvent['data']) => void;
+  onAnnotationClick: (data: AnnotationClickEvent['data']) => void;
   renderMode: RenderMode;
   syncColors: boolean;
   syncTooltips: boolean;
@@ -218,6 +225,7 @@ export function XYChart({
   onCreateAlertRule,
   layerCellValueActions,
   onSelectRange,
+  onAnnotationClick,
   setChartSize,
   interactive = true,
   syncColors,
@@ -435,7 +443,8 @@ export function XYChart({
     shouldRotate,
     formatFactory,
     fieldFormats,
-    yAxisConfigs
+    yAxisConfigs,
+    args.axisFormatPolicies
   );
 
   const axesConfiguration = getAxesConfiguration(
@@ -443,7 +452,8 @@ export function XYChart({
     shouldRotate,
     formatFactory,
     fieldFormats,
-    [...(yAxisConfigs ?? []), ...(xAxisConfig ? [xAxisConfig] : [])]
+    [...(yAxisConfigs ?? []), ...(xAxisConfig ? [xAxisConfig] : [])],
+    args.axisFormatPolicies
   );
 
   const xTitle = xAxisConfig?.title || (xAxisColumn && xAxisColumn.name) || undefined;
@@ -737,6 +747,19 @@ export function XYChart({
     onSelectRange(context);
   };
 
+  const annotationClickHandler: AnnotationClickListener = ({ lines, rects }) => {
+    const clickedAnnotations = mapAnnotationClickEvents({
+      lines,
+      rects,
+      groupedLineAnnotations,
+      rangeAnnotations: rangeAnnotations as ManualRangeEventAnnotationRow[],
+    });
+    if (clickedAnnotations.length === 0) {
+      return;
+    }
+    onAnnotationClick({ annotations: clickedAnnotations });
+  };
+
   const legendInsideParams: LegendPositionConfig = {
     vAlign: legend.verticalAlignment ?? VerticalAlignment.Top,
     hAlign: legend?.horizontalAlignment ?? HorizontalAlignment.Right,
@@ -885,7 +908,8 @@ export function XYChart({
                 formatFactory,
                 isEsqlMode,
                 canCreateAlerts,
-                interactive && !args.detailedTooltip
+                interactive && !args.detailedTooltip,
+                args.axisFormatPolicies
               )}
               customTooltip={
                 args.detailedTooltip
@@ -902,6 +926,7 @@ export function XYChart({
                           splitRowAccessor: splitRowId,
                         }}
                         layers={dataLayers}
+                        axesConfiguration={yAxesConfiguration}
                         xDomain={isTimeVis ? rawXDomain : undefined}
                       />
                     )
@@ -982,6 +1007,7 @@ export function XYChart({
               // enable brushing only for time charts, for both ES|QL and DSL queries
               onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
               onElementClick={interactive ? clickHandler : undefined}
+              onAnnotationClick={interactive ? annotationClickHandler : undefined}
               legendAction={
                 interactive
                   ? getLegendAction(

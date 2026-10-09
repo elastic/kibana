@@ -11,7 +11,7 @@
  * Shared trendline rewrite case matrix for ES|QL metric charts.
  *
  * Single source of truth consumed by two layers:
- * - unit tests (this package): assert the generated query and time field for
+ * - unit tests (@kbn/lens-common): assert the generated query and time field for
  *   every case — fast first line of defense, no infra required
  * - Scout API tests (Lens plugin): execute the source and generated queries
  *   against a real Elasticsearch to catch regressions in query validity,
@@ -65,6 +65,54 @@ export const buildTrendlineQueryCases = ({ index }: { index: string }): Trendlin
       expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
       expectedMetricFields: ['avg_bytes'],
       expectedMetricFieldMap: {},
+    },
+    {
+      description: 'FROM query with multiple piped STATS',
+      sourceQuery: `FROM ${index} | STATS total = SUM(bytes) BY request | STATS avg_total = AVG(total)`,
+      expectedQuery: `FROM ${index} | STATS total = SUM(bytes) BY request, BUCKET(@timestamp, 75, ?_tstart, ?_tend) | STATS avg_total = AVG(total) BY \`BUCKET(@timestamp, 75, ?_tstart, ?_tend)\``,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['avg_total'],
+      metricFields: ['avg_total'],
+    },
+    {
+      description: 'FROM query carrying an existing BUCKET through a later STATS',
+      sourceQuery: `FROM ${index} | STATS total = SUM(bytes) BY time_bucket = BUCKET(@timestamp, 1 hour) | STATS avg_total = AVG(total)`,
+      expectedQuery: `FROM ${index} | STATS total = SUM(bytes) BY time_bucket = BUCKET(@timestamp, 1 hour) | STATS avg_total = AVG(total) BY time_bucket`,
+      expectedTimeField: 'time_bucket',
+      expectedMetricFields: ['avg_total'],
+      metricFields: ['avg_total'],
+    },
+    {
+      description: 'FROM query carrying a BUCKET through DROP and a later STATS',
+      sourceQuery: `FROM ${index} | STATS total = SUM(bytes) BY bucket = BUCKET(@timestamp, 1 hour) | DROP bucket | STATS avg_total = AVG(total)`,
+      expectedQuery: `FROM ${index} | STATS total = SUM(bytes) BY bucket = BUCKET(@timestamp, 1 hour) | STATS avg_total = AVG(total) BY bucket`,
+      expectedTimeField: 'bucket',
+      expectedMetricFields: ['avg_total'],
+      metricFields: ['avg_total'],
+    },
+    {
+      description: 'FROM query carrying an aliased BUCKET through an aliased later STATS grouping',
+      sourceQuery: `FROM ${index} | STATS total = SUM(bytes) BY bucket = BUCKET(@timestamp, 1 hour) | STATS avg_total = AVG(total) BY time_bucket = bucket`,
+      expectedQuery: `FROM ${index} | STATS total = SUM(bytes) BY bucket = BUCKET(@timestamp, 1 hour) | STATS avg_total = AVG(total) BY time_bucket = bucket`,
+      expectedTimeField: 'time_bucket',
+      expectedMetricFields: ['avg_total'],
+      metricFields: ['avg_total'],
+    },
+    {
+      description: 'TS query carrying TBUCKET through a later STATS',
+      sourceQuery: `TS ${index} | STATS total = SUM(AVG_OVER_TIME(bytes_gauge)) BY TBUCKET(100) | STATS avg_total = AVG(total)`,
+      expectedQuery: `TS ${index} | STATS total = SUM(AVG_OVER_TIME(bytes_gauge)) BY TBUCKET(100) | STATS avg_total = AVG(total) BY \`TBUCKET(100)\``,
+      expectedTimeField: 'TBUCKET(100)',
+      expectedMetricFields: ['avg_total'],
+      metricFields: ['avg_total'],
+    },
+    {
+      description: 'TS query carrying an aliased TBUCKET through a later STATS',
+      sourceQuery: `TS ${index} | STATS total = SUM(AVG_OVER_TIME(bytes_gauge)) BY time_bucket = TBUCKET(100) | STATS avg_total = AVG(total)`,
+      expectedQuery: `TS ${index} | STATS total = SUM(AVG_OVER_TIME(bytes_gauge)) BY time_bucket = TBUCKET(100) | STATS avg_total = AVG(total) BY time_bucket`,
+      expectedTimeField: 'time_bucket',
+      expectedMetricFields: ['avg_total'],
+      metricFields: ['avg_total'],
     },
     {
       description: 'raw query without STATS',

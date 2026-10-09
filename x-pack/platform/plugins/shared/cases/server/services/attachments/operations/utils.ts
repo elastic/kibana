@@ -6,28 +6,38 @@
  */
 
 import Boom from '@hapi/boom';
+import type { SavedObject } from '@kbn/core/server';
 import { passThroughTransformer } from '../../../common/attachments/base';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type { AttachmentPersistedAttributes } from '../../../common/types/attachments_v1';
-import type { UnifiedAttachmentAttributes } from '../../../common/types/attachments_v2';
+import { AttachmentTransformedAttributesRt } from '../../../common/types/attachments_v1';
+import type {
+  AttachmentAttributesV2,
+  AttachmentSavedObjectTransformedV2,
+  UnifiedAttachmentAttributes,
+} from '../../../common/types/attachments_v2';
+import type { AttachmentV2, UnifiedAttachment } from '../../../../common/types/domain';
 import {
   type AttachmentPatchAttributesV2,
   UnifiedAttachmentAttributesRt,
+  UnifiedAttachmentRt,
 } from '../../../../common/types/domain/attachment/v2';
-import { isMigratedAttachmentType } from '../../../../common/utils/attachments';
+import { isConvertibleToUnified } from '../../../../common/utils/attachments';
 import {
   getAttachmentTypeFromAttributes,
   getAttachmentTypeTransformers,
 } from '../../../common/attachments';
 import { isUnifiedOnlyAttachment } from '../../type_guards';
+import { injectAttachmentSOAttributesFromRefs } from '../../so_references';
 
 export type ModeTransformedAttributes =
   | { isUnified: true; attributes: UnifiedAttachmentAttributes }
   | { isUnified: false; attributes: AttachmentPersistedAttributes };
 
 /**
- * Decides unified vs legacy shape on read. Migrated types (incl. legacy `actions`)
- * fold to their unified shape in-memory; the stored SO is never mutated.
+ * Decides unified vs legacy shape on read.
+ * Does not consult the registry, so rows stay readable when their plugin stops registering
+ * (e.g. ML on a basic license).
  */
 export function toUnifiedAttributes({
   attributes,
@@ -41,7 +51,7 @@ export function toUnifiedAttributes({
   const owner = attributes?.owner ?? '';
   const transformer = getAttachmentTypeTransformers(attachmentType, owner);
 
-  if (isMigratedAttachmentType(attachmentType, owner)) {
+  if (isConvertibleToUnified(attributes)) {
     const unifiedAttrs = transformer.toUnifiedSchema(attributes);
     const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(unifiedAttrs);
     return { isUnified: true, attributes: validatedAttributes };
@@ -50,6 +60,33 @@ export function toUnifiedAttributes({
   const legacyAttrs = transformer.toLegacySchema(attributes);
   return { isUnified: false, attributes: legacyAttrs };
 }
+
+/**
+ * Injects references and decodes a stored attachment into its unified or legacy shape.
+ */
+export const decodeAttachmentSavedObject = (
+  so: SavedObject<AttachmentPersistedAttributes>
+): AttachmentSavedObjectTransformedV2 => {
+  const injectedSo = injectAttachmentSOAttributesFromRefs(
+    so
+  ) as SavedObject<AttachmentAttributesV2>;
+  const transformed = toUnifiedAttributes({ attributes: injectedSo.attributes });
+  const attributes = transformed.isUnified
+    ? transformed.attributes
+    : decodeOrThrow(AttachmentTransformedAttributesRt)(transformed.attributes);
+
+  return Object.assign(injectedSo, { attributes }) as AttachmentSavedObjectTransformedV2;
+};
+
+export const toUnifiedAttachment = (attachment: AttachmentV2): UnifiedAttachment => {
+  const { id, version, ...attributes } = attachment;
+  const { attributes: folded } = toUnifiedAttributes({ attributes });
+  return decodeOrThrow(UnifiedAttachmentRt)({
+    id,
+    version,
+    ...folded,
+  });
+};
 
 /**
  * Guards the legacy comment-SO write paths (`create`/`bulkCreate`/`update`/

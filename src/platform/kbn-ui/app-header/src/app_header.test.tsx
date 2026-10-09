@@ -23,6 +23,8 @@ jest.mock('@kbn/ui-chrome-layout', () => ({
   useCurrentChromeApplicationBreakpoint: () => mockApplicationBreakpoint,
 }));
 
+const ENHANCE_TOOLTIP = 'Improve the content and style of your dashboard using AI';
+
 describe('AppHeaderView', () => {
   beforeEach(() => {
     mockApplicationBreakpoint = undefined;
@@ -59,6 +61,17 @@ describe('AppHeaderView', () => {
     expect(onClick).toHaveBeenCalledTimes(1);
     expect(typeof onClick.mock.calls[0][0].returnFocus).toBe('function');
     expect(onClick.mock.calls[0][0].triggerElement).toBeUndefined();
+  });
+
+  it('uses a custom share label without changing title action visibility', () => {
+    render(
+      <AppHeaderView title="Workflow" share={{ label: 'Access control', onClick: jest.fn() }} />
+    );
+
+    expect(screen.getByRole('button', { name: 'Access control' })).toBeInTheDocument();
+    const container = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.titleActions).parentElement;
+    expect(container).toHaveStyleRule('opacity', '0');
+    expect(container).toHaveStyleRule('pointer-events', 'none');
   });
 
   it('does not derive a title share action from a menu share item', async () => {
@@ -179,7 +192,7 @@ describe('AppHeaderView', () => {
 
   it('renders when the only content is an experimental dashboard AI action', () => {
     const onClick = jest.fn();
-    render(<AppHeaderView experimentalDashboardAiAction={{ onClick }} />);
+    render(<AppHeaderView experimentalDashboardAiAction={{ onClick, tooltip: ENHANCE_TOOLTIP }} />);
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.enhance)).toBeInTheDocument();
@@ -195,7 +208,7 @@ describe('AppHeaderView', () => {
         title="Dashboard"
         share={{ onClick: jest.fn() }}
         favorite={{ status: 'unfavorited', onToggle }}
-        experimentalDashboardAiAction={{ onClick }}
+        experimentalDashboardAiAction={{ onClick, tooltip: ENHANCE_TOOLTIP }}
       />
     );
 
@@ -216,7 +229,11 @@ describe('AppHeaderView', () => {
     render(
       <AppHeaderView
         title="Dashboard"
-        experimentalDashboardAiAction={{ onClick: jest.fn(), isDisabled: true }}
+        experimentalDashboardAiAction={{
+          onClick: jest.fn(),
+          isDisabled: true,
+          tooltip: ENHANCE_TOOLTIP,
+        }}
       />
     );
 
@@ -227,7 +244,10 @@ describe('AppHeaderView', () => {
     mockApplicationBreakpoint = 's';
 
     render(
-      <AppHeaderView title="Dashboard" experimentalDashboardAiAction={{ onClick: jest.fn() }} />
+      <AppHeaderView
+        title="Dashboard"
+        experimentalDashboardAiAction={{ onClick: jest.fn(), tooltip: ENHANCE_TOOLTIP }}
+      />
     );
 
     const button = screen.getByRole('button', { name: 'Enhance' });
@@ -239,10 +259,43 @@ describe('AppHeaderView', () => {
     mockApplicationBreakpoint = 'm';
 
     render(
-      <AppHeaderView title="Dashboard" experimentalDashboardAiAction={{ onClick: jest.fn() }} />
+      <AppHeaderView
+        title="Dashboard"
+        experimentalDashboardAiAction={{ onClick: jest.fn(), tooltip: ENHANCE_TOOLTIP }}
+      />
     );
 
     expect(screen.getByRole('button', { name: 'Enhance' })).toHaveTextContent('Enhance');
+  });
+
+  it('shows the enhance tooltip on the labeled button', async () => {
+    mockApplicationBreakpoint = 'm';
+
+    render(
+      <AppHeaderView
+        title="Dashboard"
+        experimentalDashboardAiAction={{ onClick: jest.fn(), tooltip: ENHANCE_TOOLTIP }}
+      />
+    );
+
+    fireEvent.mouseOver(screen.getByRole('button', { name: 'Enhance' }));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(ENHANCE_TOOLTIP);
+  });
+
+  it('shows the enhance tooltip on the icon-only button', async () => {
+    mockApplicationBreakpoint = 's';
+
+    render(
+      <AppHeaderView
+        title="Dashboard"
+        experimentalDashboardAiAction={{ onClick: jest.fn(), tooltip: ENHANCE_TOOLTIP }}
+      />
+    );
+
+    fireEvent.mouseOver(screen.getByRole('button', { name: 'Enhance' }));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(ENHANCE_TOOLTIP);
   });
 
   it('renders a description with a Learn more link', () => {
@@ -394,16 +447,13 @@ describe('AppHeaderView', () => {
     expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-xs/);
   });
 
-  it('uses a larger no-back title offset in compact spacing', () => {
+  it('applies the no-back title offset only in compact spacing', () => {
     const { result } = renderHook(() => useEuiTheme());
     const { rerender } = render(<AppHeaderView title="Dashboard" sticky={false} />);
 
     const titleOffsetBox = () => screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title).closest('div');
 
-    expect(titleOffsetBox()).toHaveStyleRule(
-      'padding-inline-start',
-      result.current.euiTheme.size.xs
-    );
+    expect(titleOffsetBox()).not.toHaveStyleRule('padding-inline-start', expect.any(String));
 
     rerender(<AppHeaderView title="Dashboard" sticky={false} spacing="compact" />);
     expect(titleOffsetBox()).toHaveStyleRule(

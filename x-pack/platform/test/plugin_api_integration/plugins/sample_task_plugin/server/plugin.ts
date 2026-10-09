@@ -207,7 +207,7 @@ export class SampleTaskManagerFixturePlugin
       sampleTaskAuthenticatingWithItsOwnCredential: {
         title: 'Sample Task Authenticating With Its Own Credential',
         description:
-          'Calls Elasticsearch through a client scoped to the task fake request, i.e. with the credential Task Manager persisted for the task, and records whether it authenticated. Used to verify end-to-end that stored task API keys (ES or UIAM, granted or provisioned) are presented in a shape Elasticsearch accepts.',
+          'Calls Elasticsearch through a client scoped to the task fake request, i.e. with the credential Task Manager persisted for the task, and records whether it authenticated. Used to verify end-to-end that stored task API keys (ES or UIAM) are presented in a shape Elasticsearch accepts.',
         timeout: '1m',
         maxAttempts: 1,
         stateSchemaByVersion: {

@@ -10,6 +10,7 @@ import { of } from 'rxjs';
 
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { ByteSizeValue } from '@kbn/config-schema';
+import type { PackageInfo } from '@kbn/core/server';
 import type { PluginInitializerContextMock } from '@kbn/core/server/mocks';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -138,6 +139,7 @@ describe('Security Plugin', () => {
             "checkPrivilegesDynamicallyWithRequest": [Function],
             "checkPrivilegesWithRequest": [Function],
             "checkSavedObjectsPrivilegesWithRequest": [Function],
+            "checkUserProfilesPrivileges": [Function],
             "mode": Object {
               "useRbacForRequest": [Function],
             },
@@ -214,6 +216,7 @@ describe('Security Plugin', () => {
               "validate": [Function],
             },
             "getCurrentUser": [Function],
+            "systemIdentity": undefined,
           },
           "authz": Object {
             "actions": Actions {
@@ -249,6 +252,7 @@ describe('Security Plugin', () => {
             "checkPrivilegesDynamicallyWithRequest": [Function],
             "checkPrivilegesWithRequest": [Function],
             "checkSavedObjectsPrivilegesWithRequest": [Function],
+            "checkUserProfilesPrivileges": [Function],
             "mode": Object {
               "useRbacForRequest": [Function],
             },
@@ -261,6 +265,26 @@ describe('Security Plugin', () => {
           },
         }
       `);
+    });
+  });
+
+  describe('service accounts', () => {
+    it('hands the audit service to the service accounts service', () => {
+      const start = jest.spyOn(ServiceAccountsService.prototype, 'start').mockReturnValue(null);
+      try {
+        plugin.setup(mockCoreSetup, mockSetupDependencies);
+        plugin.start(mockCoreStart, mockStartDependencies);
+        expect(start).toHaveBeenCalledWith(
+          expect.objectContaining({
+            audit: expect.objectContaining({
+              asScoped: expect.any(Function),
+              withoutRequest: expect.anything(),
+            }),
+          })
+        );
+      } finally {
+        start.mockRestore();
+      }
     });
   });
 
@@ -295,6 +319,36 @@ describe('Security Plugin', () => {
         }
       }
     );
+  });
+
+  describe('serverless', () => {
+    const serverlessPlugin = (uiam?: Record<string, unknown>) => {
+      const context = coreMock.createPluginInitializerContext(
+        ConfigSchema.validate(
+          { encryptionKey: 'z'.repeat(32), ...(uiam ? { uiam } : {}) },
+          { serverless: true, dist: true }
+        )
+      );
+      // Force type-cast to convert `ReadOnly<PackageInfo>` to mutable `PackageInfo`.
+      (context.env.packageInfo as PackageInfo).buildFlavor = 'serverless';
+      return new SecurityPlugin(context);
+    };
+
+    it('setup() throws when UIAM is not enabled', () => {
+      expect(() => serverlessPlugin().setup(mockCoreSetup, mockSetupDependencies)).toThrow(
+        '`xpack.security.uiam.enabled` must be `true` on serverless deployments.'
+      );
+    });
+
+    it('setup() succeeds when UIAM is enabled', () => {
+      expect(() =>
+        serverlessPlugin({
+          enabled: true,
+          url: 'https://uiam',
+          sharedSecret: 'shared-secret',
+        }).setup(mockCoreSetup, mockSetupDependencies)
+      ).not.toThrow();
+    });
   });
 
   describe('stop()', () => {

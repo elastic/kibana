@@ -24,10 +24,10 @@ import {
   MAX_DISCOVER_SESSION_TAGS,
   DiscoverTabType,
 } from '@kbn/discover-session-constants';
-import { classicTabSchema, esqlTabSchema } from './tab';
+import { discoverSessionApiClassicTabBaseSchema, discoverSessionApiEsqlTabBaseSchema } from './tab';
 import { visContextSchema } from './vis_context';
-import { discoverSessionControlPanelsSchema } from './control_panel';
-import { discoverSessionMetricsTabTypeStateSchema } from './metrics_tab';
+import { discoverSessionApiControlPanelsSchema } from './control_panel';
+import { discoverSessionApiMetricsTabTypeStateSchema } from './metrics_tab';
 
 const discoverSessionTabPresentationSchema = z
   .object({
@@ -39,15 +39,49 @@ const discoverSessionTabPresentationSchema = z
       .boolean()
       .default(false)
       .meta({ description: 'When `true`, the data table is hidden.' }),
-    hide_aggregated_preview: z
-      .boolean()
-      .optional()
-      .meta({ description: 'When `true`, aggregated preview panels are hidden.' }),
     breakdown_field: z
       .string()
       .max(MAX_BREAKDOWN_FIELD_LENGTH)
       .optional()
       .meta({ description: 'Field name used to split chart data into series.' }),
+    time_range: timeRangeSchema.optional().meta({
+      description:
+        'Time range to restore when the tab is opened. When omitted, Discover uses the global time settings.',
+    }),
+    refresh_interval: refreshIntervalSchema.optional().meta({
+      description:
+        'Refresh interval associated with this tab. It can be stored independently; the presence of `time_range` controls whether the time settings are restored.',
+    }),
+    vis_context: visContextSchema.optional(),
+    control_panels: discoverSessionApiControlPanelsSchema.optional(),
+  })
+  .strict();
+
+const discoverSessionTabIdentitySchema = z
+  .object({
+    id: asCodeIdSchema,
+    label: z.string().max(MAX_TAB_LABEL_LENGTH).meta({ description: 'Tab label.' }),
+  })
+  .strict();
+
+export const discoverSessionApiDefaultTabTypeStateSchema = z
+  .object({
+    type: z
+      .literal(`${DiscoverTabType.Default}`)
+      .default(DiscoverTabType.Default)
+      .meta({
+        description:
+          'Identifies the type of profile settings saved with the tab. ' +
+          'The `default` value indicates that no profile settings are included.',
+      }),
+  })
+  .strict();
+
+export const discoverSessionApiClassicTabSchema = z
+  .object({
+    ...discoverSessionTabIdentitySchema.shape,
+    ...discoverSessionApiClassicTabBaseSchema.shape,
+    ...discoverSessionTabPresentationSchema.shape,
     chart_interval: z
       .union([
         z.literal('auto'),
@@ -64,60 +98,31 @@ const discoverSessionTabPresentationSchema = z
       .meta({
         description: 'Time interval for the chart histogram on this tab.',
       }),
-    time_range: timeRangeSchema.optional().meta({
-      description:
-        'Time range to restore when the tab is opened. When omitted, Discover uses the global time settings.',
-    }),
-    refresh_interval: refreshIntervalSchema.optional().meta({
-      description:
-        'Refresh interval associated with this tab. It can be stored independently; the presence of `time_range` controls whether the time settings are restored.',
-    }),
-    vis_context: visContextSchema.optional(),
-    control_panels: discoverSessionControlPanelsSchema.optional(),
-  })
-  .strict();
-
-const discoverSessionTabIdentitySchema = z
-  .object({
-    id: asCodeIdSchema,
-    label: z.string().max(MAX_TAB_LABEL_LENGTH).meta({ description: 'Tab label.' }),
-  })
-  .strict();
-
-export const discoverSessionDefaultTabTypeStateSchema = z
-  .object({
-    type: z
-      .literal(`${DiscoverTabType.Default}`)
-      .default(DiscoverTabType.Default)
+    hide_aggregated_preview: z
+      .boolean()
+      .optional()
       .meta({
         description:
-          'A tab with no type-specific saved state. ' +
-          'If `type` is omitted, it defaults to `default`. Responses always include `type`.',
+          'Applies to the field statistics view. ' +
+          'When `true`, hides the distribution preview shown for each field. ' +
+          'If omitted, previews are shown.',
       }),
+    ...discoverSessionApiDefaultTabTypeStateSchema.shape,
   })
   .strict();
 
-export const discoverSessionClassicTabSchema = z
+export const discoverSessionApiEsqlTabSchema = z
   .object({
     ...discoverSessionTabIdentitySchema.shape,
-    ...classicTabSchema.shape,
-    ...discoverSessionTabPresentationSchema.shape,
-    ...discoverSessionDefaultTabTypeStateSchema.shape,
-  })
-  .strict();
-
-export const discoverSessionEsqlTabSchema = z
-  .object({
-    ...discoverSessionTabIdentitySchema.shape,
-    ...esqlTabSchema.shape,
+    ...discoverSessionApiEsqlTabBaseSchema.omit({ sample_size: true }).shape,
     ...discoverSessionTabPresentationSchema.shape,
     ...asCodeEsqlApproximationSchema.shape,
-    ...discoverSessionDefaultTabTypeStateSchema.shape,
+    ...discoverSessionApiDefaultTabTypeStateSchema.shape,
   })
   .strict();
 
-export const discoverSessionMetricsTabSchema = discoverSessionEsqlTabSchema
-  .extend(discoverSessionMetricsTabTypeStateSchema.shape)
+export const discoverSessionApiMetricsTabSchema = discoverSessionApiEsqlTabSchema
+  .extend(discoverSessionApiMetricsTabTypeStateSchema.shape)
   .meta({
     title: 'Metrics tab',
     description: 'An ES|QL tab with saved metrics grid settings.',
@@ -125,9 +130,9 @@ export const discoverSessionMetricsTabSchema = discoverSessionEsqlTabSchema
 
 export const discoverSessionApiTabSchema = z
   .union([
-    discoverSessionClassicTabSchema,
-    discoverSessionEsqlTabSchema,
-    discoverSessionMetricsTabSchema,
+    discoverSessionApiClassicTabSchema,
+    discoverSessionApiEsqlTabSchema,
+    discoverSessionApiMetricsTabSchema,
   ])
   .meta({
     description:

@@ -7,7 +7,11 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { AuditLogger, CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import type {
+  AuditLogger,
+  CoreSecurityDelegateContract,
+  ServiceAccount,
+} from '@kbn/core-security-server';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { UserProfileData } from '@kbn/core-user-profile-common';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
@@ -87,6 +91,73 @@ describe('buildSecurityApi', () => {
       expect(authc.getCurrentUser).toHaveBeenCalledTimes(1);
       expect(authc.getCurrentUser).toHaveBeenCalledWith(request);
       expect(user).toBe(delegateReturn);
+    });
+  });
+
+  describe('authc.getPrincipal', () => {
+    it('classifies the current user of a real request', () => {
+      const request = httpServerMock.createKibanaRequest();
+      authc.getCurrentUser.mockReturnValue(
+        securityMock.createMockAuthenticatedUser({
+          username: 'creator',
+          authentication_provider: { type: 'http', name: '__http__' },
+          api_key: { id: 'key-id', name: 'key', managed_by: 'elasticsearch' },
+        })
+      );
+
+      expect(api.authc.getPrincipal(request)).toEqual({
+        type: 'api_key',
+        apiKeyId: 'key-id',
+        variant: 'stack',
+      });
+      expect(authc.getCurrentUser).toHaveBeenCalledWith(request);
+      expect(serviceAccounts!.backend.getFakeRequestPrincipal).not.toHaveBeenCalled();
+    });
+
+    it('returns null when no user is authenticated', () => {
+      authc.getCurrentUser.mockReturnValue(null);
+
+      expect(api.authc.getPrincipal(httpServerMock.createKibanaRequest())).toBeNull();
+    });
+
+    it('answers a service-account-bound fake request from the backend without consulting authc', () => {
+      const request = httpServerMock.createFakeKibanaRequest({});
+      const principal = {
+        type: 'service_account' as const,
+        serviceAccountId: 'sa-id',
+        variant: 'uiam' as const,
+      };
+      serviceAccounts!.backend.getFakeRequestPrincipal.mockReturnValue(principal);
+
+      expect(api.authc.getPrincipal(request)).toBe(principal);
+      expect(serviceAccounts!.backend.getFakeRequestPrincipal).toHaveBeenCalledWith(request);
+      expect(authc.getCurrentUser).not.toHaveBeenCalled();
+    });
+
+    // The enrichment names the user a fake request acts for, not the credential Elasticsearch
+    // authenticates it with, which for Task Manager requests is an API key.
+    it('returns null for an enriched fake request rather than classifying its bound user', () => {
+      const request = httpServerMock.createFakeKibanaRequest({
+        headers: { authorization: 'ApiKey dGFzay1rZXk6c2VjcmV0' },
+      });
+      api.fakeRequestEnricher(request, { profileId: 'u_test_profile_123', username: 'jdoe' });
+
+      expect(api.authc.getPrincipal(request)).toBeNull();
+      expect(api.authc.getCurrentUser(request)).toMatchObject({ username: 'jdoe' });
+    });
+
+    it('returns null for a fake request that is not bound to a service account, without consulting authc', () => {
+      authc.getCurrentUser.mockReturnValue(securityMock.createMockAuthenticatedUser());
+
+      expect(api.authc.getPrincipal(httpServerMock.createFakeKibanaRequest({}))).toBeNull();
+      expect(authc.getCurrentUser).not.toHaveBeenCalled();
+    });
+
+    it('returns null for fake requests when service accounts are not enabled', () => {
+      serviceAccounts = null;
+
+      expect(api.authc.getPrincipal(httpServerMock.createFakeKibanaRequest({}))).toBeNull();
+      expect(authc.getCurrentUser).not.toHaveBeenCalled();
     });
   });
 
@@ -195,7 +266,7 @@ describe('buildSecurityApi', () => {
   });
 
   describe('serviceAccounts.create', () => {
-    const params = { name: 'nightshift-relay' };
+    const params = { name: 'nightshift-relay', roles: ['viewer'] };
 
     it('resolves the service lazily rather than at build time', () => {
       const getServiceAccounts = jest.fn().mockReturnValue(serviceAccounts);
@@ -222,13 +293,12 @@ describe('buildSecurityApi', () => {
     });
 
     it('returns the result from the service', async () => {
-      const created = {
+      // Annotated, so a change to the contract shape fails here rather than sliding through:
+      // passing an un-annotated variable to `mockResolvedValue` skips the excess-property check.
+      const created: ServiceAccount = {
         id: 'service-account-id',
-        type: 'project' as const,
         name: 'nightshift-relay',
-        organization_id: 'organization-id',
-        role_assignments: {},
-        assumable_by: [],
+        roles: ['viewer'],
       };
       serviceAccounts!.backend.create.mockResolvedValue(created);
 
@@ -401,6 +471,27 @@ describe('buildSecurityApi', () => {
         expect(authc.apiKeys.uiam!.getInternalCallerAttestationHeaders).toHaveBeenCalledWith(
           credential
         );
+      });
+
+      it('should properly delegate isOwnClientAuthentication to the service', () => {
+        jest.mocked(authc.apiKeys.uiam!.isOwnClientAuthentication).mockReturnValue(true);
+
+        expect(api.authc.apiKeys.uiam!.isOwnClientAuthentication('kibana-shared-secret')).toBe(
+          true
+        );
+        expect(authc.apiKeys.uiam!.isOwnClientAuthentication).toHaveBeenCalledTimes(1);
+        expect(authc.apiKeys.uiam!.isOwnClientAuthentication).toHaveBeenCalledWith(
+          'kibana-shared-secret'
+        );
+      });
+
+      it('should properly delegate isExternalApiKey to the service', () => {
+        jest.mocked(authc.apiKeys.uiam!.isExternalApiKey).mockReturnValue(true);
+        const request = httpServerMock.createKibanaRequest();
+
+        expect(api.authc.apiKeys.uiam!.isExternalApiKey(request)).toBe(true);
+        expect(authc.apiKeys.uiam!.isExternalApiKey).toHaveBeenCalledTimes(1);
+        expect(authc.apiKeys.uiam!.isExternalApiKey).toHaveBeenCalledWith(request);
       });
     });
 

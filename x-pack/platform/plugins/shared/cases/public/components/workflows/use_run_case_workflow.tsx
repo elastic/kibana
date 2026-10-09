@@ -1,0 +1,211 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useCallback, useMemo, useState } from 'react';
+import type { WorkflowListItemDto } from '@kbn/workflows';
+import type { RunWorkflowExecutor } from '@kbn/workflows-ui';
+import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
+import { CASE_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import type { CaseUI } from '../../containers/types';
+import { useCasesConfig } from '../../common/lib/kibana';
+import { useCasesWorkflowExecutor } from './use_cases_workflow_executor';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+
+const CASE_TRIGGER_TYPE_PREFIX = 'cases.';
+
+/**
+ * Stable empty array used as the default for workflowTags to avoid
+ * re-creating the array on every render (which would defeat downstream memos).
+ */
+export const NO_WORKFLOW_TAGS: readonly string[] = [];
+
+/** Reads tags from both the top-level ES-indexed field and the YAML-source field. */
+const getWorkflowTags = (workflow: WorkflowListItemDto): string[] =>
+  (workflow.tags as string[] | undefined) ?? workflow.definition?.tags ?? [];
+
+/**
+ * Returns a predicate that keeps workflows matching any configured tag.
+ * An empty `workflowTags` array means no filtering — all enabled workflows pass.
+ */
+export const createCaseWorkflowFilter = (
+  workflowTags: readonly string[]
+): ((workflow: WorkflowListItemDto) => boolean) => {
+  const configuredTags = new Set(workflowTags);
+  return (workflow) =>
+    configuredTags.size === 0 || getWorkflowTags(workflow).some((tag) => configuredTags.has(tag));
+};
+
+/**
+ * Returns a comparator that ranks workflows with configured tags first, then
+ * workflows that declare a `cases.*` trigger (context-relevant), then all others.
+ */
+export const createCaseWorkflowComparator = (
+  workflowTags: readonly string[]
+): ((a: WorkflowListItemDto, b: WorkflowListItemDto) => number) => {
+  const configuredTags = new Set(workflowTags);
+
+  return (a, b) => {
+    const aHasTag = getWorkflowTags(a).some((tag) => configuredTags.has(tag));
+    const bHasTag = getWorkflowTags(b).some((tag) => configuredTags.has(tag));
+    const tagRank = Number(bHasTag) - Number(aHasTag);
+    // Tags are the primary sort key: if only one workflow has a configured tag, it wins
+    // outright and triggers are irrelevant. If both or neither have one (tagRank === 0),
+    // the tie must be broken by the `cases.*` trigger check below.
+    if (tagRank !== 0) return tagRank;
+
+    // The @kbn/workflows trigger-type union only knows built-in types; cases.* trigger
+    // IDs are runtime extensions, so we compare their string prefix.
+    const aHasCaseTrigger = (a.definition?.triggers ?? []).some((t) =>
+      (t.type as string).startsWith(CASE_TRIGGER_TYPE_PREFIX)
+    );
+    const bHasCaseTrigger = (b.definition?.triggers ?? []).some((t) =>
+      (t.type as string).startsWith(CASE_TRIGGER_TYPE_PREFIX)
+    );
+    return Number(bHasCaseTrigger) - Number(aHasCaseTrigger);
+  };
+};
+
+/**
+ * Returns true when workflows are enabled and readable from Cases — used to decide
+ * whether to show the "Available workflow tags" settings section.
+ *
+ * Requires:
+ *   1. `runWorkflows.enabled` kibana config flag
+ *   2. Workflows UI feature flag (uiSetting)
+ *   3. `workflowsManagement:read` application capability
+ */
+export const useAreWorkflowsAvailableForCases = (): boolean => {
+  const { runWorkflowsEnabled } = useCasesConfig();
+  const { canReadWorkflow } = useWorkflowsCapabilities();
+  const workflowsUIEnabled = useWorkflowsUIEnabledSetting();
+
+  return useMemo(
+    () => runWorkflowsEnabled && workflowsUIEnabled && canReadWorkflow,
+    [runWorkflowsEnabled, workflowsUIEnabled, canReadWorkflow]
+  );
+};
+
+/**
+ * Returns true when the current user satisfies all four conditions required to
+ * run a workflow from a case:
+ *   1. `cases:<owner>/updateCase` privilege (permissions.update)
+ *   2. `runWorkflows.enabled` kibana config flag
+ *   3. Workflows UI feature flag (uiSetting)
+ *   4. `workflowsManagement:execute` application capability
+ */
+export const useCanRunCaseWorkflow = (): boolean => {
+  const { permissions } = useCasesContext();
+  const { runWorkflowsEnabled } = useCasesConfig();
+  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+  const workflowsUIEnabled = useWorkflowsUIEnabledSetting();
+
+  return useMemo(
+    () => permissions.update && runWorkflowsEnabled && workflowsUIEnabled && canExecuteWorkflow,
+    [permissions.update, runWorkflowsEnabled, workflowsUIEnabled, canExecuteWorkflow]
+  );
+};
+
+const rejectAllWorkflows = (): boolean => false;
+
+export interface CaseWorkflowTagsState {
+  /** `undefined` until the owner's case configuration has been fetched successfully. */
+  workflowTags: readonly string[] | undefined;
+  isLoading: boolean;
+  isError: boolean;
+}
+
+/**
+ * Reads the configured workflow tags from the current owner's case configuration.
+ * The configuration query is seeded with placeholder `initialData` (no tags), so tags
+ * are only reported once a fetch has completed without error.
+ */
+export const useCaseWorkflowTags = (): CaseWorkflowTagsState => {
+  const { data: configuration, isFetched, isError } = useGetCaseConfiguration();
+
+  return {
+    workflowTags: isFetched && !isError ? configuration.workflowTags : undefined,
+    isLoading: !isFetched,
+    isError,
+  };
+};
+
+/**
+ * Returns memoised `filterWorkflow` / `sortWorkflow` functions for the pickers based on the
+ * configured workflow tags. Rejects every workflow until the configuration is available so
+ * the pickers never show a list that ignores the configured tags.
+ */
+export const useCaseWorkflowFilters = (): {
+  filterWorkflow: (workflow: WorkflowListItemDto) => boolean;
+  sortWorkflow: (a: WorkflowListItemDto, b: WorkflowListItemDto) => number;
+} => {
+  const { workflowTags } = useCaseWorkflowTags();
+
+  const filterWorkflow = useMemo(
+    () => (workflowTags ? createCaseWorkflowFilter(workflowTags) : rejectAllWorkflows),
+    [workflowTags]
+  );
+  const sortWorkflow = useMemo(
+    () => createCaseWorkflowComparator(workflowTags ?? NO_WORKFLOW_TAGS),
+    [workflowTags]
+  );
+
+  return { filterWorkflow, sortWorkflow };
+};
+
+interface UseRunCaseWorkflowArgs {
+  caseData: CaseUI;
+}
+
+export interface UseRunCaseWorkflowResult {
+  /** Whether the current user is allowed to run a workflow from this case. */
+  canRunWorkflow: boolean;
+  /** Whether the workflow-selection modal is currently open. */
+  isModalOpen: boolean;
+  openModal: () => void;
+  closeModal: () => void;
+  /** Stable inputs forwarded to every workflow execution. */
+  inputs: Record<string, unknown>;
+  /** Cases-owned executor that routes runs through the Cases API. */
+  runWorkflow: RunWorkflowExecutor;
+  /** Predicate limiting the workflow selector to configured tags. */
+  filterWorkflow: (workflow: WorkflowListItemDto) => boolean;
+  /** Comparator prioritising tagged then context-relevant workflows. */
+  sortWorkflow: (a: WorkflowListItemDto, b: WorkflowListItemDto) => number;
+}
+
+export const useRunCaseWorkflow = ({
+  caseData,
+}: UseRunCaseWorkflowArgs): UseRunCaseWorkflowResult => {
+  const canRunWorkflow = useCanRunCaseWorkflow();
+  const { filterWorkflow, sortWorkflow } = useCaseWorkflowFilters();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const openModal = useCallback(() => setIsModalOpen(true), []);
+  const closeModal = useCallback(() => setIsModalOpen(false), []);
+
+  // The Cases API derives event.caseIds from its authorized caseIds request field.
+  const inputs = useMemo(() => ({}), []);
+
+  const origin = useMemo(
+    () => ({ type: CASE_WORKFLOW_ORIGIN_TYPE, caseId: caseData.id }),
+    [caseData.id]
+  );
+
+  const runWorkflow = useCasesWorkflowExecutor({ caseId: caseData.id, origin });
+
+  return {
+    canRunWorkflow,
+    isModalOpen,
+    openModal,
+    closeModal,
+    inputs,
+    runWorkflow,
+    filterWorkflow,
+    sortWorkflow,
+  };
+};

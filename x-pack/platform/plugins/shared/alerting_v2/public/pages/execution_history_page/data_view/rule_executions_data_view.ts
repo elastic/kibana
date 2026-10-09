@@ -27,7 +27,7 @@ const DIRECT_FIELDS = {
 } as const satisfies Record<string, keyof RuleExecutionView>;
 
 // Field (column) ids for the rule executions ad-hoc data view. Nested (`rule.id`), unit-converted
-// (`timings.duration`) and computed (combined `message`) columns don't map 1:1 to a top-level
+// (`timings.duration_ms`) and computed (combined `message`) columns don't map 1:1 to a top-level
 // payload field, so they get a flat display id instead of mirroring the payload path; their drift
 // is caught in the row-mapping step. Direct fields keep the payload key (see DIRECT_FIELDS).
 export const RULE_EXECUTION_FIELDS = {
@@ -87,7 +87,7 @@ const getMessage = (item: RuleExecutionView): string =>
 
 // Projects a rule execution into a `DataTableRecord` for `UnifiedDataTable`. Reading the payload
 // through the typed `item` is the drift guard: a shape change in `RuleExecutionView` (e.g. moving
-// `timings.duration` or renaming `rule.id`) fails to compile here. The Rule name is still resolved
+// `timings.duration_ms` or renaming `rule.id`) fails to compile here. The Rule name is still resolved
 // at render time (it needs the rules cache). `raw` holds the full item so the grid's "copy as JSON"
 // / JSON source views serialize the real record.
 export const ruleExecutionToDataTableRecord = (item: RuleExecutionView): DataTableRecord => ({
@@ -98,7 +98,7 @@ export const ruleExecutionToDataTableRecord = (item: RuleExecutionView): DataTab
   flattened: {
     [RULE_EXECUTION_FIELDS.startedAt]: item.started_at,
     [RULE_EXECUTION_FIELDS.ruleId]: item.rule.id,
-    [RULE_EXECUTION_FIELDS.duration]: item.timings.duration,
+    [RULE_EXECUTION_FIELDS.duration]: item.timings.duration_ms,
     [RULE_EXECUTION_FIELDS.outcome]: item.outcome,
     [RULE_EXECUTION_FIELDS.message]: getMessage(item),
   },

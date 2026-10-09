@@ -58,6 +58,7 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
   observability: [
     'elastic/actionable-obs-team',
     'elastic/apm-agent-approvers',
+    'elastic/nightshift',
     'elastic/nightshift-context-and-research-team',
     'elastic/nightshift-investigations-team',
     'elastic/nightshift-sre-agent-team',
@@ -78,6 +79,7 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/streams-ui',
   ],
   security: [
+    'elastic/alertzero-common-layer',
     'elastic/contextual-security-apps',
     'elastic/core-analysis',
     'elastic/siem-conduit',
@@ -91,8 +93,8 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/security-detection-rule-management',
     'elastic/security-engineering-productivity',
     'elastic/security-entity-analytics',
-    'elastic/security-genai-research-and-development',
     'elastic/security-generative-ai',
+    'elastic/security-investigations',
     'elastic/security-pds-deployment',
     'elastic/security-service-integrations',
     'elastic/security-solution',
