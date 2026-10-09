@@ -1,0 +1,2393 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`pull_request fragments fips/verify_fips_enabled 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-2",
+        "preemptible": true,
+      },
+      "command": ".buildkite/pipelines/fips/verify_fips_enabled.sh",
+      "depends_on": "build",
+      "key": "verify_fips_enabled",
+      "label": "Verify FIPS Enabled",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "timeout_in_minutes": 10,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/agent_builder_smoke_tests 1`] = `
+{
+  "steps": [
+    {
+      "depends_on": [
+        "build",
+      ],
+      "group": "Agent Builder Smoke Tests",
+      "key": "agent-builder-smoke-tests",
+      "steps": [
+        {
+          "agents": {
+            "machineType": "n2-standard-2",
+            "preemptible": true,
+            "spotZones": "us-central1-f,us-central1-c,us-central1-b,us-central1-a",
+          },
+          "artifact_paths": [
+            "target/eis_models.json",
+          ],
+          "command": ".buildkite/scripts/steps/test/discover_eis_models.sh",
+          "env": {
+            "FTR_EIS_CCM": "1",
+          },
+          "key": "discover-eis-models",
+          "label": "🔍 Discover EIS Models",
+          "retry": {
+            "automatic": [
+              {
+                "exit_status": -1,
+                "limit": 3,
+              },
+              {
+                "exit_status": "*",
+                "limit": 1,
+              },
+            ],
+          },
+          "timeout_in_minutes": 10,
+        },
+        {
+          "agents": {
+            "machineType": "n2-standard-4",
+            "preemptible": true,
+            "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+          },
+          "artifact_paths": [
+            "target/llm_smoke_judgements.jsonl",
+          ],
+          "command": "mkdir -p target
+buildkite-agent artifact download 'target/eis_models.json' . --step discover-eis-models || echo '{"models":[]}' > target/eis_models.json
+.buildkite/scripts/steps/test/scout/configs.sh
+.buildkite/scripts/steps/test/annotate_llm_smoke_judgements.sh
+",
+          "depends_on": "discover-eis-models",
+          "env": {
+            "FTR_EIS_CCM": "1",
+            "FTR_GEN_AI": "1",
+            "SCOUT_CONFIG": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/playwright.config.ts",
+            "SCOUT_CONFIG_GROUP_TYPE": "scout-agent-builder-smoke-tests",
+            "SCOUT_SERVER_RUN_FLAGS": "--arch stateful --domain classic",
+          },
+          "key": "scout-agent-builder-smoke-tests",
+          "label": "Agent Builder Scout Smoke Tests",
+          "parallelism": 1,
+          "retry": {
+            "automatic": [
+              {
+                "exit_status": -1,
+                "limit": 3,
+              },
+              {
+                "exit_status": "*",
+                "limit": 1,
+              },
+            ],
+          },
+          "timeout_in_minutes": 50,
+        },
+      ],
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/ai_infra_gen_ai 1`] = `
+{
+  "steps": [
+    {
+      "depends_on": [
+        "build",
+      ],
+      "group": "AppEx AI-Infra genAI tests",
+      "key": "ai-infra-gen-ai",
+      "steps": [
+        {
+          "agents": {
+            "machineType": "n2-standard-4",
+            "preemptible": true,
+            "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+          },
+          "artifact_paths": [
+            "target/llm_smoke_judgements.jsonl",
+          ],
+          "command": ".buildkite/scripts/steps/test/ftr_configs.sh
+.buildkite/scripts/steps/test/annotate_llm_smoke_judgements.sh
+",
+          "env": {
+            "FTR_CONFIG": "x-pack/platform/test/functional_gen_ai/inference/config.ts",
+            "FTR_CONFIG_GROUP_KEY": "ftr-ai-infra-gen-ai-inference-api",
+            "FTR_EIS_CCM": "1",
+            "FTR_EXTRA_ARGS": "--writeLogsToPath=data/ftr_servers_logs",
+            "FTR_GEN_AI": "1",
+          },
+          "key": "ai-infra-gen-ai-inference-api",
+          "label": "AppEx AI-Infra Inference APIs FTR tests",
+          "parallelism": 1,
+          "retry": {
+            "automatic": [
+              {
+                "exit_status": -1,
+                "limit": 3,
+              },
+              {
+                "exit_status": "*",
+                "limit": 1,
+              },
+            ],
+          },
+          "timeout_in_minutes": 50,
+        },
+      ],
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/api_contracts 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "diskType": "hyperdisk-balanced",
+        "machineType": "c4d-standard-2",
+        "preemptible": true,
+        "spotZones": "us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/checks/api_contracts.sh",
+      "depends_on": "check_oas_snapshot",
+      "key": "check_api_contracts",
+      "label": "Check API Contracts",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "soft_fail": true,
+      "timeout_in_minutes": 30,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/base 1`] = `
+{
+  "env": {
+    "KBN_ES_SNAPSHOT_USE_CACHED": "true",
+  },
+  "steps": [
+    {
+      "agents": {
+        "buildDirectory": "/dev/shm/bk",
+        "diskSizeGb": 50,
+        "diskType": "hyperdisk-balanced",
+        "image": "family/kibana-minimal-ubuntu-2604",
+        "machineType": "c4d-standard-16",
+        "zones": "us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d",
+      },
+      "command": ".buildkite/scripts/steps/build_kibana.sh",
+      "if": "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''",
+      "key": "build",
+      "label": "Build Kibana Distribution",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2d-standard-8",
+        "preemptible": true,
+        "spotZones": "us-central1-b,us-central1-c,us-central1-f",
+      },
+      "command": ".buildkite/scripts/steps/quick_checks.sh",
+      "env": {
+        "CHECK_GATE": "true",
+      },
+      "key": "quick_checks",
+      "label": "Quick Checks",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2d-standard-2",
+        "preemptible": true,
+        "spotZones": "us-central1-b,us-central1-c,us-central1-f",
+      },
+      "command": ".buildkite/scripts/steps/checks.sh",
+      "env": {
+        "CHECK_GATE": "true",
+      },
+      "key": "checks",
+      "label": "Checks",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "diskType": "hyperdisk-balanced",
+        "machineType": "n4-standard-16",
+        "preemptible": true,
+        "spotZones": "us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c",
+      },
+      "command": ".buildkite/scripts/steps/lint.sh",
+      "env": {
+        "CHECK_GATE": "true",
+      },
+      "key": "linting",
+      "label": "Linting",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "diskType": "hyperdisk-balanced",
+        "machineType": "n4-standard-32",
+        "preemptible": true,
+        "spotZones": "us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c",
+      },
+      "command": ".buildkite/scripts/steps/lint_with_types.sh",
+      "env": {
+        "CHECK_GATE": "true",
+      },
+      "key": "linting_with_types",
+      "label": "Linting (with types)",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "diskType": "hyperdisk-balanced",
+        "machineType": "n4-highcpu-32",
+        "preemptible": true,
+        "spotZones": "us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c",
+      },
+      "command": ".buildkite/scripts/steps/typecheck/check_types.sh",
+      "env": {
+        "CHECK_GATE": "true",
+        "RESTORE_ARCHIVE": "true",
+        "UPLOAD_ARCHIVE": "true",
+      },
+      "key": "check_types",
+      "label": "Check Types",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "image": "docker.elastic.co/ci-agent-images/kibana/ci-minimal",
+        "imageUID": 1000,
+        "provider": "k8s",
+      },
+      "command": ".buildkite/scripts/steps/test/pick_test_group_run_order.sh",
+      "env": {
+        "FTR_CONFIGS_DEPS": "build",
+        "FTR_CONFIGS_SCRIPT": ".buildkite/scripts/steps/test/ftr_configs.sh",
+        "FTR_TEST_CHANNELS": "ci-on-commit",
+        "JEST_INTEGRATION_SCRIPT": ".buildkite/scripts/steps/test/jest_integration.sh",
+        "JEST_UNIT_SCRIPT": ".buildkite/scripts/steps/test/jest.sh",
+      },
+      "key": "pick_test_group_run_order",
+      "label": "Pick Test Group Run Order",
+      "plugins": [
+        {
+          "sparse-checkout#v1.6.0": {
+            "cleanup_sparse_state": true,
+            "no_cone": true,
+            "paths": [
+              "/.buildkite/",
+              "/.node-version",
+              "/package.json",
+              "/tsconfig.base.json",
+              "/versions.json",
+              "/kibana.jsonc",
+              "**/kibana.jsonc",
+              "**/tsconfig.json",
+              "**/jest.config.js",
+              "**/jest.integration.config.js",
+              "**/*.test.js",
+              "**/*.test.mjs",
+              "**/*.test.ts",
+              "**/*.test.tsx",
+            ],
+            "post_checkout": {
+              "unshallow": true,
+            },
+          },
+        },
+      ],
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 15,
+    },
+    {
+      "agents": {
+        "machineType": "n2d-standard-8",
+      },
+      "command": ".buildkite/scripts/steps/test/scout/test_run_builder.sh",
+      "env": {
+        "SCOUT_TEST_CHANNELS": "ci-on-commit",
+        "SCOUT_TEST_DISTRIBUTION_STRATEGY": "lanes",
+        "SCOUT_TEST_LANES_GROUP_DEPS": "build_scout_tests,build",
+        "SCOUT_TEST_LANE_ESTIMATED_SETUP_MINUTES": 5,
+        "SCOUT_TEST_LANE_TARGET_RUNTIME_MINUTES": 20,
+        "SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS": 300,
+        "SELECTIVE_TESTING_ENABLED": "true",
+      },
+      "key": "build_scout_tests",
+      "label": "Scout Test Run Builder",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 20,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-2",
+      },
+      "command": ".buildkite/scripts/steps/ci_stats_ready.sh",
+      "depends_on": [
+        "build",
+        "report_package_metrics",
+      ],
+      "key": "ci_stats_ready",
+      "label": "Mark CI Stats as ready",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 10,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-2",
+      },
+      "command": ".buildkite/scripts/steps/report_package_metrics.sh",
+      "key": "report_package_metrics",
+      "label": "Report Package Metrics",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "timeout_in_minutes": 15,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/build_cloud_fips_image 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-2",
+        "preemptible": true,
+      },
+      "command": ".buildkite/scripts/steps/fips/build_cloud_fips_image.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "build_cloud_fips_image",
+      "label": "Build Cloud FIPS Image",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "soft_fail": true,
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/build_cloud_image 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-2",
+        "preemptible": true,
+      },
+      "command": ".buildkite/scripts/steps/cloud/build_cloud_image.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "build_cloud_image",
+      "label": "Build Cloud Image",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "soft_fail": true,
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/build_project 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-16",
+        "preemptible": true,
+      },
+      "command": ".buildkite/scripts/steps/artifacts/docker_image.sh",
+      "key": "build_project_image",
+      "label": "Build Project Image",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "soft_fail": true,
+      "timeout_in_minutes": 90,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/check_next_docs 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+      },
+      "command": ".buildkite/scripts/steps/next_docs/build_and_validate_docs.sh",
+      "key": "check_next_docs",
+      "label": "Build and Validate Next Docs",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "timeout_in_minutes": 30,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/check_oas_snapshot 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2d-standard-2",
+        "preemptible": true,
+        "spotZones": "us-central1-b,us-central1-c,us-central1-f",
+      },
+      "command": ".buildkite/scripts/steps/checks/capture_oas_snapshot.sh",
+      "depends_on": [
+        "build",
+      ],
+      "env": {
+        "CHECK_GATE": "true",
+      },
+      "key": "check_oas_snapshot",
+      "label": "Check OAS Snapshot",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/check_saved_objects 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-2",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/check_saved_objects.sh",
+      "depends_on": [
+        "linting",
+        "linting_with_types",
+        "check",
+        "checks",
+        "quick_checks",
+        "check_types",
+        "build",
+      ],
+      "key": "check_saved_objects",
+      "label": "Check changes in Saved Objects",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "timeout_in_minutes": 20,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/code_quality 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "image": "family/kibana-ubuntu-2404",
+        "imageProject": "elastic-images-prod",
+        "machineType": "n2-standard-4",
+        "preemptible": false,
+        "provider": "gcp",
+      },
+      "command": ".buildkite/scripts/steps/code_quality/fallow_analysis.sh",
+      "key": "code_quality_analysis",
+      "label": "Code Quality Analysis",
+      "timeout_in_minutes": 30,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/cps_testing 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-8",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/test/scout/cps_testing.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "cps-testing",
+      "label": "Cross Project Search (CPS) UI Tests",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 30,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/deploy_cloud 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-2",
+        "preemptible": true,
+      },
+      "command": ".buildkite/scripts/steps/cloud/build_and_deploy.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "deploy_cloud",
+      "label": "Build and Deploy to Cloud",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "soft_fail": true,
+      "timeout_in_minutes": 30,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/deploy_project 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-16",
+        "preemptible": true,
+      },
+      "command": ".buildkite/scripts/steps/artifacts/docker_image.sh",
+      "key": "build_project_image",
+      "label": "Build Project Image",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "timeout_in_minutes": 90,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+      },
+      "command": ".buildkite/scripts/steps/serverless/deploy.sh",
+      "depends_on": [
+        "build_project_image",
+      ],
+      "key": "deploy_project",
+      "label": "Deploy Project",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "timeout_in_minutes": 10,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/fips 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-2",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/fips/build.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "build_fips_image",
+      "label": "Build FIPS Image",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "soft_fail": true,
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/fleet_cypress 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/fleet_cypress.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "fleet-cypress",
+      "label": "Fleet Cypress Tests",
+      "parallelism": 6,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 50,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/ftr_bench 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "diskSizeGb": 200,
+        "diskType": "hyperdisk-balanced",
+        "machineType": "c4d-standard-16",
+        "zones": "us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/ftr_bench.sh",
+      "key": "ftr_bench",
+      "label": "FTR Bench",
+      "soft_fail": true,
+      "timeout_in_minutes": 120,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/jest_bench 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "diskType": "hyperdisk-balanced",
+        "machineType": "c4d-standard-16",
+        "zones": "us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d",
+      },
+      "command": ".buildkite/scripts/steps/jest_bench.sh",
+      "key": "jest_bench",
+      "label": "Jest Bench",
+      "soft_fail": true,
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/kbn_handlebars 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-2",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/test/kbn_handlebars.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "kbn_handlebars",
+      "label": "Check @kbn/handlebars for upstream differences",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 5,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/local_check 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "diskType": "hyperdisk-balanced",
+        "machineType": "n4-standard-16",
+        "preemptible": true,
+        "spotZones": "us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c",
+      },
+      "command": ".buildkite/scripts/steps/checks/local_check.sh",
+      "env": {
+        "CHECK_GATE": "true",
+      },
+      "key": "check",
+      "label": "Local Check",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "timeout_in_minutes": 35,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/page_load_bench 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "diskSizeGb": 200,
+        "diskType": "hyperdisk-balanced",
+        "machineType": "c4d-standard-16",
+        "zones": "us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/page_load_bench.sh",
+      "key": "page_load_bench",
+      "label": "Page Load Bench",
+      "soft_fail": true,
+      "timeout_in_minutes": 120,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/post_build 1`] = `
+{
+  "steps": [
+    {
+      "continue_on_failure": true,
+      "wait": null,
+    },
+    {
+      "agents": {
+        "image": "docker.elastic.co/ci-agent-images/kibana/ci-minimal",
+        "imageUID": 1000,
+        "provider": "k8s",
+      },
+      "command": ".buildkite/scripts/lifecycle/post_build.sh",
+      "label": "Post-Build",
+      "plugins": [
+        {
+          "sparse-checkout#v1.6.0": {
+            "cleanup_sparse_state": true,
+            "paths": [
+              ".buildkite",
+              ".node-version",
+              "package.json",
+              "tsconfig.base.json",
+              "versions.json",
+            ],
+          },
+        },
+      ],
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/prompt_changes 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-2",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/checks/prompt_changes_detector.sh",
+      "key": "prompt_changes",
+      "label": "Check Prompt Changes",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "timeout_in_minutes": 10,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/renovate 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-highcpu-8",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/renovate.sh",
+      "key": "renovate_validation",
+      "label": "Renovate validation",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/response_ops 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/response_ops.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "response-ops",
+      "label": "Rules, Alerts and Exceptions ResponseOps Cypress Tests on Security Solution",
+      "parallelism": 11,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/response_ops_cases 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/response_ops_cases.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "response-ops-cases",
+      "label": "Cases Cypress Tests on Security Solution",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/security_solution/ai_assistant 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_serverless_ai_assistant.sh",
+      "depends_on": [
+        "build",
+      ],
+      "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
+      "key": "security-serverless-ai-assistant",
+      "label": "Serverless AI Assistant - Security Solution Cypress Tests",
+      "parallelism": 1,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_solution_ai_assistant.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "security-ai-assistant",
+      "label": "AI Assistant - Security Solution Cypress Tests",
+      "parallelism": 1,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/security_solution/ai4dsoc 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_serverless_ai4dsoc.sh",
+      "depends_on": [
+        "build",
+      ],
+      "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
+      "key": "security-serverless-ai4dsoc",
+      "label": "Serverless AI4DSOC - Security Solution Cypress Tests",
+      "parallelism": 1,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/security_solution/asset_inventory 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/asset_inventory.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "asset-inventory",
+      "label": "Asset Inventory Cypress Tests",
+      "parallelism": 1,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/asset_inventory.sh",
+      "depends_on": [
+        "build",
+      ],
+      "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
+      "key": "asset-inventory-serverless",
+      "label": "Asset Inventory Cypress Tests on Serverless",
+      "parallelism": 1,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/security_solution/cloud_security_posture 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/cloud_security_posture.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "cloud-security-posture",
+      "label": "Cloud Security Posture Cypress Tests",
+      "parallelism": 1,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/cloud_security_posture_serverless.sh",
+      "depends_on": [
+        "build",
+      ],
+      "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
+      "key": "cloud-security-posture-serverless",
+      "label": "Cloud Security Posture Cypress Tests on Serverless",
+      "parallelism": 1,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/security_solution/cspm_agentless_scout 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-8",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/test/cspm_agentless_scout.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "cspm-agentless-scout",
+      "label": "CSPM Agentless Scout E2E Tests",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/security_solution/cypress_burn 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "enableNestedVirtualization": true,
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/defend_workflows_burn.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "defend-workflows-burn",
+      "label": "[Soft fail] Defend Workflows Cypress Tests, burning changed specs",
+      "parallelism": 1,
+      "retry": {
+        "automatic": false,
+      },
+      "soft_fail": true,
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "enableNestedVirtualization": true,
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/defend_workflows_serverless_burn.sh",
+      "depends_on": [
+        "build",
+      ],
+      "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
+      "key": "defend-workflows-serverless-burn",
+      "label": "[Soft fail] Defend Workflows Cypress Tests on Serverless, burning changed specs",
+      "parallelism": 1,
+      "retry": {
+        "automatic": false,
+      },
+      "soft_fail": true,
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_solution_burn.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "security-solution-burn",
+      "label": "[Soft fail] Security Solution Cypress tests, burning changed specs",
+      "parallelism": 1,
+      "retry": {
+        "automatic": false,
+      },
+      "soft_fail": true,
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/osquery_cypress_burn.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "osquery-cypress-burn",
+      "label": "[Soft fail] Osquery Cypress Tests, burning changed specs",
+      "retry": {
+        "automatic": false,
+      },
+      "soft_fail": true,
+      "timeout_in_minutes": 50,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/security_solution/defend_workflows 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "enableNestedVirtualization": true,
+        "machineType": "n2-highmem-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/defend_workflows.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "defend-workflows",
+      "label": "Defend Workflows Cypress Tests",
+      "parallelism": 24,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "enableNestedVirtualization": true,
+        "machineType": "n2-highmem-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/defend_workflows_serverless.sh",
+      "depends_on": [
+        "build",
+      ],
+      "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
+      "key": "defend-workflows-serverless",
+      "label": "Defend Workflows Cypress Tests on Serverless",
+      "parallelism": 16,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/security_solution/detection_engine 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_serverless_detection_engine.sh",
+      "depends_on": [
+        "build",
+      ],
+      "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
+      "key": "security-serverless-detection-engine",
+      "label": "Serverless Detection Engine - Security Solution Cypress Tests",
+      "parallelism": 8,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_serverless_detection_engine_exceptions.sh",
+      "depends_on": [
+        "build",
+      ],
+      "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
+      "key": "security-serverless-detection-engine-exceptions",
+      "label": "Serverless Detection Engine - Exceptions - Security Solution Cypress Tests",
+      "parallelism": 3,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_solution_detection_engine.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "security-detection-engine",
+      "label": "Detection Engine - Security Solution Cypress Tests",
+      "parallelism": 7,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_solution_detection_engine_exceptions.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "security-detection-engine-exceptions",
+      "label": "Detection Engine - Exceptions - Security Solution Cypress Tests",
+      "parallelism": 2,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/security_solution/entity_analytics 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh",
+      "depends_on": [
+        "build",
+      ],
+      "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
+      "key": "security-serverless-entity-analytics",
+      "label": "Serverless Entity Analytics - Security Cypress Tests",
+      "parallelism": 2,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_solution_entity_analytics.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "security-entity-analytics",
+      "label": "Entity Analytics - Security Solution Cypress Tests",
+      "parallelism": 2,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/security_solution/explore 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_solution_explore.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "security-explore",
+      "label": "Explore - Security Solution Cypress Tests",
+      "parallelism": 2,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_serverless_explore.sh",
+      "depends_on": [
+        "build",
+      ],
+      "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
+      "key": "security-serverless-explore",
+      "label": "Serverless Explore - Security Solution Cypress Tests",
+      "parallelism": 4,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/security_solution/gen_ai_evals 1`] = `
+{
+  "steps": [
+    {
+      "depends_on": [
+        "build",
+      ],
+      "group": "Security Solution Gen AI",
+      "key": "security-solution-gen-ai",
+      "steps": [
+        {
+          "agents": {
+            "machineType": "n2-standard-4",
+            "preemptible": true,
+            "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+          },
+          "command": ".buildkite/scripts/steps/test/ftr_configs.sh",
+          "env": {
+            "FTR_CONFIG": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/evaluations/trial_license_complete_tier/configs/ess.config.ts",
+            "FTR_CONFIG_GROUP_KEY": "ftr-security-solution-gen-ai-evaluations",
+            "FTR_SECURITY_GEN_AI": "1",
+          },
+          "key": "security-solution-gen-ai-evaluations",
+          "label": "Security Solution Gen AI Evaluations",
+          "parallelism": 1,
+          "retry": {
+            "automatic": [
+              {
+                "exit_status": -1,
+                "limit": 3,
+              },
+              {
+                "exit_status": "*",
+                "limit": 1,
+              },
+            ],
+          },
+          "timeout_in_minutes": 50,
+        },
+      ],
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/security_solution/investigations 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_solution_investigations.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "security-investigations",
+      "label": "Investigations - Security Solution Cypress Tests",
+      "parallelism": 9,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_serverless_investigations.sh",
+      "depends_on": [
+        "build",
+      ],
+      "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
+      "key": "security-serverless-investigations",
+      "label": "Serverless Investigations - Security Solution Cypress Tests",
+      "parallelism": 14,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/security_solution/osquery_cypress 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-highmem-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/osquery_cypress.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "osquery-cypress",
+      "label": "Osquery Cypress Tests",
+      "parallelism": 4,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2-highmem-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_serverless_osquery.sh",
+      "depends_on": [
+        "build",
+      ],
+      "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
+      "key": "osquery-serverless",
+      "label": "Osquery Cypress Tests on Serverless",
+      "parallelism": 3,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/security_solution/rule_management 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_serverless_rule_management.sh",
+      "depends_on": [
+        "build",
+      ],
+      "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
+      "key": "security-serverless-rule-management",
+      "label": "Serverless Rule Management - Security Solution Cypress Tests",
+      "parallelism": 8,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_customization.sh",
+      "depends_on": [
+        "build",
+      ],
+      "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
+      "key": "security-serverless-rule-management-prebuilt-customization",
+      "label": "Serverless Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests",
+      "parallelism": 1,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_installation.sh",
+      "depends_on": [
+        "build",
+      ],
+      "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
+      "key": "security-serverless-rule-management-prebuilt-installation",
+      "label": "Serverless Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests",
+      "parallelism": 2,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_management.sh",
+      "depends_on": [
+        "build",
+      ],
+      "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
+      "key": "security-serverless-rule-management-prebuilt-management",
+      "label": "Serverless Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests",
+      "parallelism": 1,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_upgrade.sh",
+      "depends_on": [
+        "build",
+      ],
+      "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
+      "key": "security-serverless-rule-management-prebuilt-upgrade",
+      "label": "Serverless Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests",
+      "parallelism": 2,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_solution_rule_management.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "security-rule-management",
+      "label": "Rule Management - Security Solution Cypress Tests",
+      "parallelism": 6,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_customization.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "security-rule-management-prebuilt-customization",
+      "label": "Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests",
+      "parallelism": 1,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_installation.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "security-rule-management-prebuilt-installation",
+      "label": "Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests",
+      "parallelism": 1,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_management.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "security-rule-management-prebuilt-management",
+      "label": "Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests",
+      "parallelism": 1,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_upgrade.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "security-rule-management-prebuilt-upgrade",
+      "label": "Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests",
+      "parallelism": 2,
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/security_solution/scout_edr_real_fleet 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "enableNestedVirtualization": true,
+        "machineType": "n2-highmem-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/test/scout_edr_real_fleet.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "scout-edr-real-fleet",
+      "label": "Scout EDR Real Fleet",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 60,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/store_moon_cache 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "image": "family/kibana-ubuntu-2404",
+        "imageProject": "elastic-images-prod",
+        "machineType": "n2-highcpu-4",
+        "preemptible": false,
+        "provider": "gcp",
+      },
+      "command": ".buildkite/scripts/steps/store_cache.sh",
+      "id": "store_cache",
+      "label": "Store Cache for build",
+      "soft_fail": true,
+      "timeout_in_minutes": 10,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/storybooks 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "diskType": "hyperdisk-balanced",
+        "machineType": "n4-standard-16",
+        "preemptible": true,
+        "spotZones": "us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c",
+      },
+      "command": ".buildkite/scripts/steps/storybooks/build_and_upload.sh",
+      "key": "storybooks",
+      "label": "Build Storybooks",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
+      "timeout_in_minutes": 80,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/sync_model_labels 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "image": "family/kibana-ubuntu-2404",
+        "imageProject": "elastic-images-prod",
+        "machineType": "n2-standard-4",
+        "provider": "gcp",
+      },
+      "command": ".buildkite/scripts/steps/evals/sync_git_labels.sh",
+      "env": {
+        "FTR_EIS_CCM": "1",
+        "KBN_EVALS": "1",
+      },
+      "key": "sync-git-labels",
+      "label": ":github: Sync models:* labels",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 2,
+          },
+        ],
+      },
+      "soft_fail": true,
+      "timeout_in_minutes": 30,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/trigger_entity_store_performance 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "image": "family/kibana-ubuntu-2404",
+        "imageProject": "elastic-images-prod",
+        "machineType": "n2-standard-2",
+        "provider": "gcp",
+      },
+      "command": ".buildkite/scripts/steps/entity_store_performance/trigger_performance_tests.sh",
+      "key": "entity_store_performance",
+      "label": "Entity Store Performance Tests",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 1,
+          },
+        ],
+      },
+      "soft_fail": true,
+      "timeout_in_minutes": 10,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/warm_start_memory_bench 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "diskType": "hyperdisk-balanced",
+        "machineType": "c4d-standard-16",
+        "zones": "us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d",
+      },
+      "command": ".buildkite/scripts/steps/warm_start_memory_bench.sh",
+      "depends_on": "build",
+      "env": {
+        "WARM_START_MEMORY_COMMENT_ENABLED": "true",
+      },
+      "key": "warm_start_memory_bench",
+      "label": "Warm-start Memory Bench",
+      "soft_fail": true,
+      "timeout_in_minutes": 90,
+    },
+  ],
+}
+`;
+
+exports[`pull_request fragments pull_request/workflows_oom_testing 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-4",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/test/scout/workflows_oom_testing.sh",
+      "depends_on": [
+        "build",
+      ],
+      "key": "workflows-oom-testing",
+      "label": "Workflow Schema OOM Prevention",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "timeout_in_minutes": 30,
+    },
+  ],
+}
+`;

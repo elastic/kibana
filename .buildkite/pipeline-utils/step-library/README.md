@@ -15,7 +15,7 @@ Buildkite's own SDK types (`@buildkite/buildkite-sdk`). Generally, prefer using
 these helper functions and the custom types; they explicitly require what
 Buildkite does not, e.g., a `key`, a `label`, and an `agents` definition.
 
-New steps are written as exported fragments in `steps.ts`:
+New steps are written as exported fragments in `steps/<name>.ts`:
 
 ```ts
 // Individual functions describe the CI intent and produce an array of Steps
@@ -80,5 +80,10 @@ using `options`.
   root) run them differently.
 - `render.fixtures.test.ts` runs the renderer over every YAML fragment that
   still exists.
+- `fragments.test.ts` snapshots every fragment (from its YAML, or from its
+  TypeScript function once ported) after a semantic normalization.
+  `pipeline.scenarios.test.ts` (in `scripts/pipelines/pull_request`) snapshots the
+  ordered step ids of the whole pipeline for example PRs. Update a snapshot
+  deliberately, never to make a change pass.
 - A test that mocks `child_process` cannot call `getKibanaDir()`, which runs
   `git` through it.

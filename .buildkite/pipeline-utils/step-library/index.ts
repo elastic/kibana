@@ -10,5 +10,5 @@
 export * from './helpers.ts';
 export * from './presets.ts';
 export * from './render.ts';
-export * from './steps.ts';
+export { cpsTests } from './steps/cps_testing.ts';
 export type * from './types.ts';
