@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import {
   ADD_CANVAS_ELEMENT_TRIGGER,
@@ -24,7 +23,6 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { VisTypeOnCreate } from '@kbn/visualizations-plugin/public';
 import {
   VEGA_API_ENABLED_FLAG,
   VEGA_EMBEDDABLE_TYPE,
@@ -110,51 +108,36 @@ describe('VegaPlugin', () => {
   });
 
   describe('Vega library', () => {
-    const getOnCreate = async (isLibraryApiEnabled: boolean) => {
-      const { startCore, startDeps, visualizations } = setup();
-      startCore.featureFlags.getBooleanValue$ = jest
+    const startPluginWithLibraryApi = async (isLibraryApiEnabled: boolean) => {
+      const setupResult = setup();
+      setupResult.startCore.featureFlags.getBooleanValue$ = jest
         .fn()
-        .mockReturnValue(new BehaviorSubject(isLibraryApiEnabled));
-      const legacyLoader = jest.mocked(visualizations.createBaseVisualizationAsync).mock
-        .calls[0][1];
-      const { onCreate } = (await legacyLoader()) as { onCreate: VisTypeOnCreate };
-      return { onCreate, startCore, startDeps, visualizations };
+        .mockImplementation(
+          (flag: string) =>
+            new BehaviorSubject(isLibraryApiEnabled && flag === VEGA_API_ENABLED_FLAG)
+        );
+      setupResult.plugin.start(setupResult.startCore, {
+        data: dataPluginMock.createStartContract(),
+        dataViews: dataViewPluginMocks.createStartContract(),
+        embeddable: embeddablePluginMock.createStartContract(),
+        expressions: expressionsPluginMock.createStartContract(),
+        inspector: inspectorPluginMock.createStartContract(),
+        uiActions: uiActionsPluginMock.createStartContract(),
+        unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+        mapsEms: {} as MapsEmsPluginPublicStart,
+        usageCollection: {} as UsageCollectionStart,
+      });
+      // The alias waits for the feature flag.
+      await Promise.resolve();
+      return setupResult;
     };
 
     beforeEach(() => {
       mockOpenVegaLibraryEditor.mockReset().mockResolvedValue(undefined);
     });
 
-    it('opens the library editor from the create wizard when the library API is enabled', async () => {
-      const { onCreate, startCore, startDeps } = await getOnCreate(true);
-      const onEditorClose = jest.fn();
-
-      await expect(onCreate({ onEditorClose })).resolves.toBe(true);
-
-      expect(startCore.featureFlags.getBooleanValue$).toHaveBeenCalledWith(
-        VEGA_API_ENABLED_FLAG,
-        false
-      );
-      await waitFor(() => expect(onEditorClose).toHaveBeenCalledTimes(1));
-      expect(mockOpenVegaLibraryEditor).toHaveBeenCalledWith({
-        core: startCore,
-        deps: startDeps,
-        id: undefined,
-      });
-    });
-
-    it('leaves creating to the legacy editor when the library API is disabled', async () => {
-      const { onCreate } = await getOnCreate(false);
-      const onEditorClose = jest.fn();
-
-      await expect(onCreate({ onEditorClose })).resolves.toBe(false);
-
-      expect(mockOpenVegaLibraryEditor).not.toHaveBeenCalled();
-      expect(onEditorClose).not.toHaveBeenCalled();
-    });
-
-    it('lists library items next to legacy ones, but hides them from create menus', () => {
-      const { visualizations } = setup();
+    it('lists library items next to legacy ones, but hides them from create menus', async () => {
+      const { visualizations } = await startPluginWithLibraryApi(true);
 
       expect(visualizations.registerAlias).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -167,8 +150,14 @@ describe('VegaPlugin', () => {
       );
     });
 
+    it('does not list library items when the library API is disabled', async () => {
+      const { visualizations } = await startPluginWithLibraryApi(false);
+
+      expect(visualizations.registerAlias).not.toHaveBeenCalled();
+    });
+
     it('opens the library editor for a listed item', async () => {
-      const { startCore, startDeps, visualizations } = setup();
+      const { startCore, startDeps, visualizations } = await startPluginWithLibraryApi(true);
       const { visualizations: extension } = jest.mocked(visualizations.registerAlias).mock
         .calls[0][0].appExtensions!;
 

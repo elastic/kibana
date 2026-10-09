@@ -34,7 +34,6 @@ import {
   getNoItemsMessage,
   getVisualizationListingTableStyles,
 } from '@kbn/visualization-listing-components';
-import { visualizationListingRefresh$ } from '../listing_refresh';
 
 interface VisualizationTableListProps {
   core: CoreStart;
@@ -67,12 +66,6 @@ export const VisualizationTableList = ({
   const [refreshListBouncer, setRefreshListBouncer] = useState(false);
   const refreshList = useCallback(() => setRefreshListBouncer((bouncer) => !bouncer), []);
 
-  useEffect(() => {
-    // The create button lives outside this table, so it signals through a shared subject.
-    const subscription = visualizationListingRefresh$.subscribe(refreshList);
-    return () => subscription.unsubscribe();
-  }, [refreshList]);
-
   const createNewVis = useCallback(() => {
     firstValueFrom(core.application.currentAppId$)
       .then((currentApp) => {
@@ -90,7 +83,7 @@ export const VisualizationTableList = ({
           }),
         });
       });
-  }, [visualizations, core.application, core.notifications.toasts, getBreadcrumbs, refreshList]);
+  }, [visualizations, core.application, core.notifications.toasts, getBreadcrumbs]);
 
   useEffect(() => {
     return () => {

@@ -53,19 +53,6 @@
       }
     },
     {
-      "id": "7b072b0731322c3-276f14ac4f3e03d",
-      "title": "Vega library editor creates an item from the create wizard",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
-        "line": 49,
-        "column": 12
-      }
-    },
-    {
       "id": "7b072b0731322c3-0fb51082617176b",
       "title": "Vega library editor saves changes to an existing item in place",
       "expectedStatus": "passed",
@@ -74,7 +61,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
-        "line": 74,
+        "line": 49,
         "column": 12
       }
     },
@@ -87,7 +74,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
-        "line": 107,
+        "line": 82,
         "column": 12
       }
     },
@@ -100,7 +87,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
-        "line": 130,
+        "line": 105,
         "column": 12
       }
     },
@@ -113,7 +100,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
-        "line": 157,
+        "line": 132,
         "column": 12
       }
     },

@@ -62,10 +62,7 @@ const item: { id: string; data: VegaReadResponseBody['data'] } = {
 
 const lastPreviewState = () => mockPreview.mock.lastCall?.[0].serializedState;
 
-const renderEditor = ({
-  canSave = true,
-  withItem = true,
-}: { canSave?: boolean; withItem?: boolean } = {}) => {
+const renderEditor = ({ canSave = true }: { canSave?: boolean } = {}) => {
   const core = coreMock.createStart();
   core.uiSettings.get.mockReturnValue([]);
   const client = {
@@ -84,7 +81,7 @@ const renderEditor = ({
       core={core}
       client={client}
       SearchBar={SearchBar as VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar']}
-      item={withItem ? item : undefined}
+      item={item}
       canSave={canSave}
       closeFlyout={closeFlyout}
       ariaLabelledBy="vegaLibraryEditorTitle"
@@ -102,68 +99,6 @@ describe('VegaLibraryEditor', () => {
       .mocked(data.query.queryString.getDefaultQuery)
       .mockReturnValue({ language: 'lucene', query: '' });
     setData(data);
-  });
-
-  describe('a new item', () => {
-    it('opens with the default spec and renders it in the preview', async () => {
-      renderEditor({ withItem: false });
-
-      expect(
-        await screen.findByRole('heading', { name: 'Create Vega visualization' })
-      ).toHaveAttribute('id', 'vegaLibraryEditorTitle');
-      expect(screen.getByTestId('vegaSpecEditorValue')).toHaveTextContent('{ mark: default }');
-      expect(lastPreviewState()).toEqual({ spec: { format: 'hjson', value: '{ mark: default }' } });
-    });
-
-    it('saves through the save modal, then reports it and closes', async () => {
-      jest.mocked(saveVegaToLibrary).mockResolvedValue({ id: 'new-id', title: 'New chart' });
-      const { core, closeFlyout } = renderEditor({ withItem: false });
-
-      await userEvent.click(await screen.findByText('changeSpec'));
-      await userEvent.click(screen.getByTestId('vegaLibraryEditorSaveButton'));
-
-      await waitFor(() => expect(closeFlyout).toHaveBeenCalledTimes(1));
-      expect(saveVegaToLibrary).toHaveBeenCalledWith(
-        expect.objectContaining({
-          state: { spec: { format: 'hjson', value: '{ mark: bar }' } },
-          initialDetails: undefined,
-        })
-      );
-      expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith('Saved "New chart"');
-    });
-
-    it('stays open when the save modal is dismissed', async () => {
-      jest.mocked(saveVegaToLibrary).mockResolvedValue(undefined);
-      const { core, closeFlyout } = renderEditor({ withItem: false });
-
-      await userEvent.click(await screen.findByTestId('vegaLibraryEditorSaveButton'));
-
-      await waitFor(() => expect(saveVegaToLibrary).toHaveBeenCalledTimes(1));
-      expect(closeFlyout).not.toHaveBeenCalled();
-      expect(core.notifications.toasts.addSuccess).not.toHaveBeenCalled();
-    });
-
-    it('shows the error and stays open when the item cannot be created', async () => {
-      const error = new Error('nope');
-      jest.mocked(saveVegaToLibrary).mockRejectedValue(error);
-      const { core, closeFlyout } = renderEditor({ withItem: false });
-
-      await userEvent.click(await screen.findByTestId('vegaLibraryEditorSaveButton'));
-
-      await waitFor(() =>
-        expect(core.notifications.toasts.addError).toHaveBeenCalledWith(error, {
-          title: 'Unable to save Vega visualization',
-        })
-      );
-      expect(closeFlyout).not.toHaveBeenCalled();
-    });
-
-    it('has no save menu', async () => {
-      renderEditor({ withItem: false });
-
-      await screen.findByTestId('vegaLibraryEditorSaveButton');
-      expect(screen.queryByTestId('vegaLibraryEditorSaveButtonMenu')).not.toBeInTheDocument();
-    });
   });
 
   describe('an existing item', () => {

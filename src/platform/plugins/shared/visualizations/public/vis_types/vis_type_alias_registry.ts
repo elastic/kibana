@@ -16,7 +16,6 @@ import type {
 } from '@kbn/content-management-utils';
 import type { HttpStart } from '@kbn/data-view-editor-plugin/public/shared_imports';
 import type { BaseVisType } from './base_vis_type';
-import type { VisTypeOnCreate } from './types';
 import type { VisualizationSavedObject } from '../../common';
 
 export type VisualizationStage = 'experimental' | 'beta' | 'production';
@@ -112,11 +111,6 @@ export interface VisTypeAlias {
     app: string;
     path: string;
   };
-  /**
-   * Alternative to `alias` for aliases that open their own editor in place, see
-   * `VisTypeDefinition.onCreate`.
-   */
-  onCreate?: VisTypeOnCreate;
   name: string;
   title: string;
   icon: string;

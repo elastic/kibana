@@ -31,7 +31,6 @@ export type {
   BaseVisType,
   VisTypeAlias,
   VisTypeDefinition,
-  VisTypeOnCreate,
   Schema,
   ISchemas,
   VisualizationClient,

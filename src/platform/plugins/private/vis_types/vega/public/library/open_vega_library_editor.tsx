@@ -15,8 +15,7 @@ import { vegaTitleInWizard } from '../vega_icon';
 import { createVegaLibraryClient } from './vega_library_client';
 
 /**
- * Opens the editor for a Vega library item, or for a new item when `id` is omitted. Resolves when
- * the editor closes.
+ * Opens the editor for a Vega library item. Resolves when the editor closes.
  */
 export const openVegaLibraryEditor = async ({
   core,
@@ -25,7 +24,7 @@ export const openVegaLibraryEditor = async ({
 }: {
   core: CoreStart;
   deps: Pick<VegaPluginStartDependencies, 'dataViews' | 'unifiedSearch' | 'savedObjectsTaggingOss'>;
-  id?: string;
+  id: string;
 }): Promise<void> => {
   const client = createVegaLibraryClient(core.http);
 
@@ -44,7 +43,7 @@ export const openVegaLibraryEditor = async ({
     },
     loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
       const [item, defaultDataView, { VegaLibraryEditor }] = await Promise.all([
-        id ? client.get(id).then(({ data }) => ({ id, data })) : undefined,
+        client.get(id).then(({ data }) => ({ id, data })),
         // A missing default data view shouldn't block editing.
         deps.dataViews.getDefault().catch((): null => null),
         import('./vega_library_editor'),

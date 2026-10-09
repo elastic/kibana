@@ -47,31 +47,6 @@ spaceTest.describe('Vega library editor', { tag: '@local-stateful-classic' }, ()
   });
 
   spaceTest(
-    'creates an item from the create wizard',
-    async ({ browserAuth, kbnClient, page, pageObjects, scoutSpace }) => {
-      const title = getTitle('created');
-      await browserAuth.loginAsPrivilegedUser();
-
-      await pageObjects.visualize.goto();
-      await pageObjects.visualize.openNewVisualizationWizard();
-      await pageObjects.visualize.clickVisType('vega');
-
-      await expect(page.testSubj.locator('vegaLibraryEditorFlyout')).toBeVisible();
-      await expect(page.testSubj.locator('embeddableEditorPreviewFlyout')).toBeVisible();
-
-      await page.testSubj.click('vegaLibraryEditorSaveButton');
-      await page.testSubj.fill('savedObjectTitle', title);
-      await page.testSubj.click('confirmSaveSavedObjectButton');
-
-      await expect(page.testSubj.locator('vegaLibraryEditorFlyout')).toBeHidden();
-      await expect(
-        page.testSubj.locator(`visListingTitleLink-${title.split(' ').join('-')}`)
-      ).toBeVisible();
-      expect(await findItems(kbnClient, scoutSpace.id, title)).toHaveLength(1);
-    }
-  );
-
-  spaceTest(
     'saves changes to an existing item in place',
     async ({ browserAuth, kbnClient, page, pageObjects, scoutSpace }) => {
       const title = getTitle('edited');

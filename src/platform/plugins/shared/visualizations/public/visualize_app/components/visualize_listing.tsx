@@ -119,7 +119,7 @@ const useTableListViewProps = (
         ],
       },
     });
-  }, [closeNewVisModal, application, refreshList]);
+  }, [closeNewVisModal, application]);
 
   const editItem = useCallback(
     async ({ attributes: { id }, editor = { editUrl: '' } }: VisualizeUserContent) => {

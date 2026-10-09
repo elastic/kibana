@@ -15,7 +15,7 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plu
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type {
   BasicVisualizationClient,
-  VisTypeOnCreate,
+  VisTypeAlias,
   VisualizationsSetup,
 } from '@kbn/visualizations-plugin/public';
 import type {
@@ -97,6 +97,7 @@ export interface VegaPluginStartDependencies {
 export class VegaPlugin implements Plugin<void, void> {
   initializerContext: PluginInitializerContext<ConfigSchema>;
   private standaloneEmbeddableFlagSubscription?: Subscription;
+  private registerLibraryAlias?: () => void;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
@@ -121,23 +122,12 @@ export class VegaPlugin implements Plugin<void, void> {
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
 
     // Resolves when the editor closes.
-    const openLibraryEditor = async (id?: string) => {
+    const openLibraryEditor = async (id: string) => {
       const [[coreStart, startDeps], { openVegaLibraryEditor }] = await Promise.all([
         core.getStartServices(),
         import('./library/open_vega_library_editor'),
       ]);
       await openVegaLibraryEditor({ core: coreStart, deps: startDeps, id });
-    };
-
-    // Opens the library editor instead of the legacy Visualize editor while the library API is on.
-    const onCreate: VisTypeOnCreate = async ({ onEditorClose }) => {
-      const [coreStart] = await core.getStartServices();
-      const isLibraryApiEnabled = await firstValueFrom(
-        coreStart.featureFlags.getBooleanValue$(VEGA_API_ENABLED_FLAG, false)
-      );
-      if (!isLibraryApiEnabled) return false;
-      openLibraryEditor().finally(onEditorClose);
-      return true;
     };
 
     visualizations.createBaseVisualizationAsync('vega', async () => {
@@ -147,12 +137,11 @@ export class VegaPlugin implements Plugin<void, void> {
         expressions.registerFunction(() => createVegaFn(visualizationDependencies));
         expressions.registerRenderer(getVegaVisRenderer(visualizationDependencies));
       }
-      return { ...vegaVisType, onCreate };
+      return vegaVisType;
     });
 
-    // Lists Vega library items in the Visualize library next to legacy Vega visualizations. Creating
-    // goes through the Vega visualization type above, so the alias is hidden from create UIs.
-    visualizations.registerAlias({
+    // Lists Vega library items in the Visualize library next to legacy Vega visualizations.
+    const libraryAlias: VisTypeAlias = {
       name: 'vegaLibrary',
       title: vegaTitleInWizard,
       icon: 'visualizeApp',
@@ -180,7 +169,10 @@ export class VegaPlugin implements Plugin<void, void> {
           }),
         },
       },
-    });
+    };
+
+    // Registered in `start`, once the feature flag can be read.
+    this.registerLibraryAlias = () => visualizations.registerAlias(libraryAlias);
 
     embeddable.registerEmbeddablePublicDefinition(VEGA_EMBEDDABLE_TYPE, async () => {
       const [startCore, startDeps] = await core.getStartServices();
@@ -202,6 +194,13 @@ export class VegaPlugin implements Plugin<void, void> {
     setMapsEms(deps.mapsEms);
     setThemeService(core.theme);
     setUsageCollectionStart(deps.usageCollection);
+
+    // Without the flag, the Visualize listing shouldn't query the library API.
+    firstValueFrom(core.featureFlags.getBooleanValue$(VEGA_API_ENABLED_FLAG, false)).then(
+      (isLibraryApiEnabled) => {
+        if (isLibraryApiEnabled) this.registerLibraryAlias?.();
+      }
+    );
 
     deps.uiActions.registerActionAsync(ADD_VEGA_PANEL_ACTION_ID, async () => {
       const { getAddVegaPanelAction } = await import('./add_vega_panel_action');

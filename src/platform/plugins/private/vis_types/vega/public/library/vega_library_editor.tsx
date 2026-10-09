@@ -31,7 +31,6 @@ import { BehaviorSubject } from 'rxjs';
 import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
 import type { VegaByValueState, VegaReadResponseBody } from '../../server';
 import { VegaEditorBody, vegaEditorFlyoutBodyCss } from '../components/vega_editor_body';
-import { getDefaultSpec } from '../default_spec';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { fromDraft, isSameDraft, toDraft } from '../lib/library_draft';
 import type { VegaDraft } from '../lib/library_draft';
@@ -66,8 +65,7 @@ export interface VegaLibraryEditorProps {
   client: VegaLibraryClient;
   SearchBar: VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'];
   savedObjectsTagging?: SavedObjectsTaggingApi;
-  /** The item to edit. Without it, the editor creates a new item. */
-  item?: { id: string; data: VegaReadResponseBody['data'] };
+  item: { id: string; data: VegaReadResponseBody['data'] };
   defaultDataView?: DataView;
   /** Whether the user may save library items. Without it, the editor can still be used to explore. */
   canSave: boolean;
@@ -97,10 +95,7 @@ export const VegaLibraryEditor = ({
   closeFlyout,
   ariaLabelledBy,
 }: VegaLibraryEditorProps) => {
-  const initialDraft = useMemo<VegaDraft>(
-    () => toDraft(item?.data ?? { spec: { format: 'hjson', value: getDefaultSpec() } }),
-    [item]
-  );
+  const initialDraft = useMemo<VegaDraft>(() => toDraft(item.data), [item]);
   const [draft, setDraft] = useState(initialDraft);
   // Only the spec waits for Run preview; the preview follows query and filter changes right away.
   const [previewedSpec, setPreviewedSpec] = useState<Pick<VegaDraft, 'spec' | 'format'>>({
@@ -113,7 +108,6 @@ export const VegaLibraryEditor = ({
   const [isSaving, setIsSaving] = useState(false);
   const [isDiscardConfirmOpen, setIsDiscardConfirmOpen] = useState(false);
 
-  const isExisting = item !== undefined;
   const isDirty = !isSameDraft(draft, initialDraft);
   const canPreview = draft.spec !== previewedSpec.spec;
   const dataViews = specDataViews.length ? specDataViews : defaultDataView ? [defaultDataView] : [];
@@ -169,10 +163,6 @@ export const VegaLibraryEditor = ({
   };
 
   const saveChanges = async () => {
-    if (!item) {
-      await saveAsNewItem();
-      return;
-    }
     setIsSaving(true);
     try {
       // The API replaces the whole item, so keep what the editor doesn't change.
@@ -201,14 +191,10 @@ export const VegaLibraryEditor = ({
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
               <h2 id={ariaLabelledBy}>
-                {item
-                  ? i18n.translate('visTypeVega.libraryEditor.editTitle', {
-                      defaultMessage: 'Edit Vega visualization: {title}',
-                      values: { title: item.data.title },
-                    })
-                  : i18n.translate('visTypeVega.libraryEditor.createTitle', {
-                      defaultMessage: 'Create Vega visualization',
-                    })}
+                {i18n.translate('visTypeVega.libraryEditor.editTitle', {
+                  defaultMessage: 'Edit Vega visualization: {title}',
+                  values: { title: item.data.title },
+                })}
               </h2>
             </EuiTitle>
           </EuiFlexItem>
@@ -264,27 +250,23 @@ export const VegaLibraryEditor = ({
         hideSave={!canSave}
         onSave={saveChanges}
         saveButtonLabel={saveLabel}
-        isSaveDisabled={isExisting && !isDirty}
+        isSaveDisabled={!isDirty}
         isSaving={isSaving}
         saveButtonDataTestSubj="vegaLibraryEditorSaveButton"
-        saveMenuItems={
-          item
-            ? [
-                {
-                  name: i18n.translate('visTypeVega.libraryEditor.saveAsNewButtonLabel', {
-                    defaultMessage: 'Save as new…',
-                  }),
-                  onClick: () =>
-                    saveAsNewItem({
-                      title: item.data.title,
-                      description: item.data.description,
-                      tags: item.data.tags,
-                    }),
-                  'data-test-subj': 'vegaLibraryEditorSaveAsNewButton',
-                },
-              ]
-            : undefined
-        }
+        saveMenuItems={[
+          {
+            name: i18n.translate('visTypeVega.libraryEditor.saveAsNewButtonLabel', {
+              defaultMessage: 'Save as new…',
+            }),
+            onClick: () =>
+              saveAsNewItem({
+                title: item.data.title,
+                description: item.data.description,
+                tags: item.data.tags,
+              }),
+            'data-test-subj': 'vegaLibraryEditorSaveAsNewButton',
+          },
+        ]}
       />
       {isPreviewOpen ? (
         <EmbeddableEditorPreview<VegaByValueState, VegaPreviewApi, VegaPreviewParentApi>
