@@ -1490,6 +1490,7 @@ const createMockOutputVerdict = (
     rationale: string;
     contributing_factors: string[];
     host_name: string;
+    host_entity_key: string;
     user_name: string;
   }> = {}
 ) => ({
@@ -1499,6 +1500,7 @@ const createMockOutputVerdict = (
   rationale: 'suspicious',
   contributing_factors: ['c2 url'],
   host_name: 'host-a',
+  host_entity_key: 'host-a',
   user_name: 'user-a',
   ...overrides,
 });
@@ -1651,8 +1653,26 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       rationale: 'signed installer',
       contributing_factors: ['vendor signature'],
       host_name: '__missing__',
+      host_entity_key: '__missing__',
       user_name: '__missing__',
     });
+  });
+
+  it('keys the host entity on host.id when the alert has one, else host.name, like the Entity Store', () => {
+    const buildStep = findStepByName(workflow.steps, 'build_output_verdict') as {
+      with: { output_verdict: Record<string, unknown> };
+    };
+    const keyFor = (host: Record<string, unknown>) =>
+      (
+        renderValueRecursively(engine, buildStep.with.output_verdict, {
+          foreach: { item: { _id: 'a', host, user: {} } },
+          variables: { batch_alert_verdict: { contributing_factors: [] } },
+        }) as Record<string, unknown>
+      ).host_entity_key;
+
+    expect(keyFor({ id: 'HW-UUID-ABC', name: 'prod-web-01' })).toBe('HW-UUID-ABC');
+    expect(keyFor({ name: 'prod-web-01' })).toBe('prod-web-01');
+    expect(keyFor({})).toBe('__missing__');
   });
 
   it('truncates host_name and user_name to the workflow.output 512-char limit', () => {
@@ -2122,8 +2142,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
         generated_summary: 'Hosts look compromised.',
         resolved_connector_id: 'connector-1',
         agent_id: 'elastic-ai-agent',
-        impacted_entities: [{ entity_type: 'host', name: 'host-a' }],
-        impacted_entities_truncated: 'false',
+        impacted_entities: [{ id: 'host:host-a', name: 'host-a', type: 'host' }],
         missing_alert_ids: ['a-missing'],
       },
     }) as Record<string, unknown>;
@@ -2137,8 +2156,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     expect(rendered.generated_summary).toBe('Hosts look compromised.');
     expect(rendered.connector_id).toBe('connector-1');
     expect(rendered.agent_id).toBe('elastic-ai-agent');
-    expect(rendered.impacted_entities).toEqual([{ entity_type: 'host', name: 'host-a' }]);
-    expect(rendered.impacted_entities_truncated).toBe('false');
+    expect(rendered.impacted_entities).toEqual([
+      { id: 'host:host-a', name: 'host-a', type: 'host' },
+    ]);
     expect(rendered.missing_alert_ids).toEqual(['a-missing']);
   });
 
@@ -2212,7 +2232,10 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     expect(summary.endsWith(' ')).toBe(false);
   });
 
-  it('builds host and user impact entity rows with per-verdict counts', () => {
+  it('builds type-prefixed host and user impact entities, skipping alerts without the field', () => {
+    const collectStep = findStepByName(workflow.steps, 'collect_unique_entity_names') as {
+      with: { host_keys_for_entities: string; user_names_for_entities: string };
+    };
     const hostStep = findStepByName(workflow.steps, 'build_host_entity') as {
       with: { current_entity: Record<string, unknown> };
     };
@@ -2222,113 +2245,118 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     const verdicts = [
       createMockOutputVerdict({
         alert_id: 'a1',
-        classification: 'true_positive',
         host_name: 'ws-1',
+        host_entity_key: 'HW-1',
         user_name: 'alice',
       }),
       createMockOutputVerdict({
         alert_id: 'a2',
-        classification: 'false_positive',
         host_name: 'ws-1',
+        host_entity_key: 'HW-1',
+        user_name: '__missing__',
+      }),
+      createMockOutputVerdict({
+        alert_id: 'a3',
+        host_name: '__missing__',
+        host_entity_key: '__missing__',
         user_name: 'alice',
       }),
     ];
 
-    const hostEntity = renderValueRecursively(engine, hostStep.with.current_entity, {
-      foreach: { item: 'ws-1' },
+    const hostKeys = evaluateExpression(engine, collectStep.with.host_keys_for_entities, {
       variables: { output_verdicts: verdicts },
-    });
-    const userEntity = renderValueRecursively(engine, userStep.with.current_entity, {
-      foreach: { item: 'alice' },
-      variables: { output_verdicts: verdicts },
-    });
+    }) as string[];
+    // Two alerts for one host.id are one entity, and the alert without a host is skipped.
+    expect(hostKeys).toEqual(['HW-1']);
+    expect(
+      evaluateExpression(engine, collectStep.with.user_names_for_entities, {
+        variables: { output_verdicts: verdicts },
+      })
+    ).toEqual(['alice']);
 
-    expect(hostEntity).toEqual({
-      entity_type: 'host',
-      name: 'ws-1',
-      alert_count: 2,
-      verdicts: { true_positive: 1, false_positive: 1, inconclusive: 0 },
-    });
-    expect(userEntity).toEqual({
-      entity_type: 'user',
-      name: 'alice',
-      alert_count: 2,
-      verdicts: { true_positive: 1, false_positive: 1, inconclusive: 0 },
-    });
+    // The id uses the Entity Store key (host.id) while the name stays readable.
+    expect(
+      renderValueRecursively(engine, hostStep.with.current_entity, {
+        foreach: { item: hostKeys[0] },
+        variables: { output_verdicts: verdicts },
+      })
+    ).toEqual({ id: 'host:HW-1', name: 'ws-1', type: 'host' });
+    // A host with an id but no name is labelled by its key, since the shared impact needs a name.
+    expect(
+      renderValueRecursively(engine, hostStep.with.current_entity, {
+        foreach: { item: 'HW-2' },
+        variables: {
+          output_verdicts: [
+            createMockOutputVerdict({ host_name: '__missing__', host_entity_key: 'HW-2' }),
+          ],
+        },
+      })
+    ).toEqual({ id: 'host:HW-2', name: 'HW-2', type: 'host' });
+    // The type prefix keeps a host and a user that share a name distinct in the shared impact.
+    expect(
+      renderValueRecursively(engine, userStep.with.current_entity, { foreach: { item: 'dup' } })
+    ).toEqual({ id: 'user:dup', name: 'dup', type: 'user' });
   });
 
-  it('pre-caps unique host/user lists before entity loops and flags truncation from uncapped counts', () => {
-    const hostPlan = findStepByName(workflow.steps, 'plan_host_entity_iteration') as {
-      with: { host_names_for_entities: string; entity_name_count: string };
+  it('keeps hosts that report a different identity field as separate entities, as the Entity Store does', () => {
+    const collectStep = findStepByName(workflow.steps, 'collect_unique_entity_names') as {
+      with: { host_keys_for_entities: string };
     };
-    const userPlan = findStepByName(workflow.steps, 'plan_user_entity_iteration') as {
-      with: {
-        impacted_entities_truncated: string;
-        user_entity_budget: string;
-      };
-    };
-    const userSlice = findStepByName(workflow.steps, 'slice_user_names_for_entities') as {
-      with: { user_names_for_entities: string };
-    };
-    const hostLoop = findStepByName(workflow.steps, 'build_host_entities') as {
-      foreach: string;
-    };
-    const userLoop = findStepByName(workflow.steps, 'build_user_entities') as {
-      foreach: string;
-    };
-    const capStep = findStepByName(workflow.steps, 'cap_impacted_entities') as {
-      with: { impacted_entities: string };
-    };
+    const verdicts = [
+      createMockOutputVerdict({ alert_id: 'a1', host_name: 'ws-1', host_entity_key: 'HW-1' }),
+      createMockOutputVerdict({ alert_id: 'a2', host_name: 'ws-1', host_entity_key: 'ws-1' }),
+    ];
 
-    expect(hostLoop.foreach).toContain('host_names_for_entities');
-    expect(userLoop.foreach).toContain('user_names_for_entities');
-
-    const hostNamesAll = Array.from({ length: 40 }, (_, i) => `host-${i}`);
-    const userNamesAll = Array.from({ length: 30 }, (_, i) => `user-${i}`);
-
-    const entityNameCount = evaluateExpression(engine, hostPlan.with.entity_name_count, {
-      variables: { host_names_all: hostNamesAll, user_names_all: userNamesAll },
+    const hostKeys = evaluateExpression(engine, collectStep.with.host_keys_for_entities, {
+      variables: { output_verdicts: verdicts },
     });
-    expect(entityNameCount).toBe(70);
 
-    const hostNamesForEntities = evaluateExpression(engine, hostPlan.with.host_names_for_entities, {
-      variables: { host_names_all: hostNamesAll },
+    expect(hostKeys).toEqual(['HW-1', 'ws-1']);
+  });
+
+  it('keeps the prefixed entity id within the shared 256-character limit for long names', () => {
+    const hostStep = findStepByName(workflow.steps, 'build_host_entity') as {
+      with: { current_entity: Record<string, unknown> };
+    };
+    const longName = 'h'.repeat(512);
+
+    const entity = renderValueRecursively(engine, hostStep.with.current_entity, {
+      foreach: { item: longName },
+      variables: {
+        output_verdicts: [
+          createMockOutputVerdict({ host_name: longName, host_entity_key: longName }),
+        ],
+      },
+    }) as { id: string; name: string };
+
+    expect(entity.id.length).toBeLessThanOrEqual(256);
+    expect(entity.id.startsWith('host:')).toBe(true);
+    expect(entity.name).toBe(longName);
+  });
+
+  it('caps hosts and users at 50 each so impact stays within the shared 100-entity limit', () => {
+    const collectStep = findStepByName(workflow.steps, 'collect_unique_entity_names') as {
+      with: { host_keys_for_entities: string; user_names_for_entities: string };
+    };
+    const verdicts = Array.from({ length: 70 }, (_, i) =>
+      createMockOutputVerdict({
+        alert_id: `a${i}`,
+        host_name: `host-${i}`,
+        host_entity_key: `host-${i}`,
+        user_name: `user-${i}`,
+      })
+    );
+
+    const hosts = evaluateExpression(engine, collectStep.with.host_keys_for_entities, {
+      variables: { output_verdicts: verdicts },
     }) as string[];
-    expect(hostNamesForEntities).toHaveLength(40);
+    const users = evaluateExpression(engine, collectStep.with.user_names_for_entities, {
+      variables: { output_verdicts: verdicts },
+    }) as string[];
 
-    const truncatedFlag = engine.parseAndRenderSync(userPlan.with.impacted_entities_truncated, {
-      variables: { entity_name_count: 70 },
-    });
-    expect(truncatedFlag.trim()).toBe('true');
-
-    const userBudget = evaluateExpression(engine, userPlan.with.user_entity_budget, {
-      variables: { host_names_for_entities: hostNamesForEntities },
-    });
-    expect(userBudget).toBe(10);
-
-    const userNamesForEntities = evaluateExpression(
-      engine,
-      userSlice.with.user_names_for_entities,
-      {
-        variables: {
-          user_names_all: userNamesAll,
-          user_entity_budget: userBudget,
-        },
-      }
-    ) as string[];
-    expect(userNamesForEntities).toHaveLength(10);
-    expect(userNamesForEntities[0]).toBe('user-0');
-    expect(userNamesForEntities[9]).toBe('user-9');
-
-    // Safety net still slices any materialized list to 50.
-    const entities = Array.from({ length: 55 }, (_, i) => ({
-      entity_type: 'host',
-      name: `host-${i}`,
-    }));
-    const capped = evaluateExpression(engine, capStep.with.impacted_entities, {
-      variables: { impacted_entities: entities },
-    }) as unknown[];
-    expect(capped).toHaveLength(50);
+    expect(hosts).toHaveLength(50);
+    expect(hosts[0]).toBe('host-0');
+    expect(users).toHaveLength(50);
   });
 
   it('applies autoCloseEnabled only when the caller explicitly provides it', () => {

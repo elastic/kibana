@@ -41,13 +41,13 @@ export interface AlertEpisode {
   data?: AlertEpisodeData;
 }
 
-/** Suppression fact read from `.alert-actions`; a null `episode_id` means series-scoped. */
+/** Suppression fact read from `.alert-actions`; a null `alert_id` means series-scoped. */
 export interface SuppressionRow {
   rule_id: RuleId | null;
   source: string | null;
   space_id: string | null;
   group_hash: string;
-  episode_id: string | null;
+  alert_id: string | null;
   should_suppress: boolean;
   last_ack_action?: string | null;
   last_deactivate_action?: string | null;
@@ -55,14 +55,14 @@ export interface SuppressionRow {
 }
 
 /** Row of the episode suppressions query: ack and deactivate state of one episode. */
-export type EpisodeSuppressionRow = Omit<SuppressionRow, 'episode_id' | 'last_snooze_action'> & {
-  episode_id: string;
+export type EpisodeSuppressionRow = Omit<SuppressionRow, 'alert_id' | 'last_snooze_action'> & {
+  alert_id: string;
 };
 
-/** Row of the series suppressions query: snooze state of a series, so it carries no `episode_id`. */
+/** Row of the series suppressions query: snooze state of a series, so it carries no `alert_id`. */
 export type SeriesSuppressionRow = Omit<
   SuppressionRow,
-  'episode_id' | 'last_ack_action' | 'last_deactivate_action'
+  'alert_id' | 'last_ack_action' | 'last_deactivate_action'
 >;
 
 export interface DispatcherExecutionParams {
@@ -96,7 +96,7 @@ export interface Rule {
   id: RuleId;
   spaceId: string;
   name: string;
-  tags: string[];
+  routingTags: string[];
 }
 
 export interface PolicyMatcherAttributes {
@@ -115,7 +115,7 @@ export interface ActionPolicy {
   /** data.* fields used to group episodes into a single action group */
   groupBy: string[];
   /** How episodes are grouped into action group payloads. Defaulted at hydration (DEFAULT_GROUPING_MODE). */
-  groupingMode: 'per_episode' | 'all' | 'per_field';
+  groupingMode: 'per_alert' | 'all' | 'per_field';
   /** Throttle configuration controlling action frequency */
   throttle?: {
     strategy?: 'on_status_change' | 'per_status_interval' | 'time_interval' | 'every_time';
@@ -145,18 +145,26 @@ export interface ActionGroup {
 
 export type ActionPolicyWorkflowPayloadRule = Pick<Rule, 'name'>;
 
+export type ActionPolicyWorkflowPayloadAlert = Omit<
+  AlertEpisode,
+  'episode_id' | 'episode_status'
+> & {
+  alert_id: string;
+  alert_status: AlertEpisodeStatus;
+};
+
 export interface ActionPolicyWorkflowPayload {
   id: ActionGroupId;
   policyId: ActionPolicyId;
   groupKey: Record<string, unknown>;
-  episodes: AlertEpisode[];
+  alerts: ActionPolicyWorkflowPayloadAlert[];
   rules: Record<RuleId, ActionPolicyWorkflowPayloadRule>;
 }
 
 export interface LastNotifiedRecord {
   action_group_id: ActionGroupId;
   last_notified: string;
-  episode_status?: string;
+  alert_status?: string;
 }
 
 export interface LastNotifiedInfo {

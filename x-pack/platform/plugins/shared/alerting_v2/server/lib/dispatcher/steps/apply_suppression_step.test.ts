@@ -28,14 +28,14 @@ describe('ApplySuppressionStep', () => {
         createSuppressionRow({
           rule_id: 'r1',
           group_hash: 'h1',
-          episode_id: 'e1',
+          alert_id: 'e1',
           should_suppress: true,
           last_ack_action: 'ack',
         }),
         createSuppressionRow({
           rule_id: 'r2',
           group_hash: 'h2',
-          episode_id: 'e2',
+          alert_id: 'e2',
           should_suppress: false,
         }),
       ],

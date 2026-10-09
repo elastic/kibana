@@ -10,7 +10,12 @@ import {
   buildProposalSubjectKey,
   canFillRespondAction,
   decidePackageReport,
+  buildProposalSummaryBullets,
 } from './decide_package_report';
+import {
+  MAX_SUMMARY_BULLETS_CHARS,
+  MAX_SUMMARY_PROPOSAL_BULLETS,
+} from '../../../../../common/step_types/package_report';
 import type { CurrentRunState } from './types';
 
 const isolateHost: ActionCatalogEntry = {
@@ -89,10 +94,12 @@ const configureAction: ActionCatalogEntry = {
 const baseHitState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState => ({
   runId: 'run-1',
   reportId: 'rpt-1',
+  sseCount: 1,
   hasConfirmedHit: true,
   titles: ['Shadow admin AssumeRole'],
   evidenceLines: ['Tier 1 hits in cloudtrail'],
   techniques: ['T1078.004'],
+  corroboratedTechniques: ['T1078.004'],
   hosts: [{ name: 'host-a', enrolled: true, agentId: 'agent-a' }],
   processSelectors: [],
   // Fully-covered defaults: no recommendation trigger fires unless a test overrides one.
@@ -330,7 +337,38 @@ describe('decidePackageReport', () => {
     expect(a.proposals[0].subjectKey).toBe(b.proposals[0].subjectKey);
   });
 
-  it('mints kill/suspend per process selector when process fields are present', () => {
+  it('treats a bare pid, without entity_id, as unfillable for a process-scoped action', () => {
+    expect(
+      canFillRespondAction({
+        entry: killProcess,
+        processSelector: {
+          pid: 100,
+          processKey: 'pid:100',
+          hostName: 'host-a',
+          processName: 'a.exe',
+        },
+      })
+    ).toBe(false);
+  });
+
+  it('treats entity_id as fillable for a process-scoped action', () => {
+    expect(
+      canFillRespondAction({
+        entry: killProcess,
+        processSelector: {
+          entityId: 'ent-9',
+          processKey: 'entity:ent-9',
+          hostName: 'host-a',
+          processName: 'b.exe',
+        },
+      })
+    ).toBe(true);
+  });
+
+  it('mints an executable kill action only for the selector carrying entity_id, not the bare-pid one', () => {
+    // A bare pid is reused by the OS, so it can't safely back an executable action by the
+    // time an analyst approves it (the gate's decision window is measured in days);
+    // entity_id is Endpoint's durable per-process identity and doesn't have that problem.
     const result = decidePackageReport({
       conversationId,
       state: baseHitState({
@@ -346,16 +384,33 @@ describe('decidePackageReport', () => {
       }),
       catalog: { ok: true, actions: [killProcess] },
     });
+    const executable = result.proposals.filter(
+      (p) => p.actionWorkflowId === killProcess.workflowId
+    );
+    expect(executable).toHaveLength(1);
+    expect(executable[0].actionInput?.parameters).toEqual({ entity_id: 'ent-9' });
+    expect(executable[0].title).toBe('Kill b.exe on host-a');
+    expect(executable[0].comment).toContain('b.exe');
+  });
+
+  it('does not mint an executable action from a bare pid, even when it is the only process selector found (trigger: process uncovered, PID reuse)', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({
+        hasProcessBearingEvent: true,
+        processSelectors: [
+          { pid: 100, processKey: 'pid:100', hostName: 'host-a', processName: 'a.exe' },
+        ],
+      }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
     expect(result.proposals).toHaveLength(2);
-    expect(result.proposals.every((p) => p.actionWorkflowId === killProcess.workflowId)).toBe(true);
-    expect(result.proposals[0].actionInput?.parameters).toEqual({ pid: 100 });
-    expect(result.proposals[1].actionInput?.parameters).toEqual({ entity_id: 'ent-9' });
-    // Distinct titles: each process gets its own title, so two kill-process proposals on the
-    // same host read as distinct, not duplicates.
-    expect(result.proposals[0].title).toBe('Kill a.exe (PID 100) on host-a');
-    expect(result.proposals[1].title).toBe('Kill b.exe on host-a');
-    expect(result.proposals[0].comment).toContain('a.exe');
-    expect(result.proposals[1].comment).toContain('b.exe');
+    expect(
+      result.proposals.some((p) => p.actionWorkflowId === 'system-security-action-kill-process')
+    ).toBe(false);
+    expect(result.proposals.some((p) => p.actionWorkflowId === isolateHost.workflowId)).toBe(true);
+    const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
+    expect(recommendation?.comment).toContain('could not be resolved to a live process');
   });
 
   it('never applies a process selector observed on one host to a different host', () => {
@@ -367,7 +422,12 @@ describe('decidePackageReport', () => {
           { name: 'host-b', enrolled: true, agentId: 'agent-b' },
         ],
         processSelectors: [
-          { pid: 100, processKey: 'pid:100', hostName: 'host-a', processName: 'a.exe' },
+          {
+            entityId: 'ent-1',
+            processKey: 'entity:ent-1',
+            hostName: 'host-a',
+            processName: 'a.exe',
+          },
         ],
       }),
       catalog: { ok: true, actions: [killProcess] },
@@ -376,7 +436,7 @@ describe('decidePackageReport', () => {
     // mints nothing rather than borrowing host-a's.
     expect(result.proposals).toHaveLength(1);
     expect(result.proposals[0].hostName).toBe('host-a');
-    expect(result.proposals[0].actionInput?.parameters).toEqual({ pid: 100 });
+    expect(result.proposals[0].actionInput?.parameters).toEqual({ entity_id: 'ent-1' });
   });
 
   it('builds stable subject keys for the same host × action × process', () => {
@@ -395,5 +455,77 @@ describe('decidePackageReport', () => {
         processKey: 'p',
       })
     );
+  });
+});
+
+describe('buildProposalSummaryBullets', () => {
+  // journal_note.yaml caps `message` at this; the conclusion embeds the bullets verbatim.
+  const JOURNAL_NOTE_MESSAGE_MAX = 8000;
+
+  it('bounds the bullets for a 50-host, 2-action finding and states how many were omitted', () => {
+    const hosts = Array.from({ length: 50 }, (_, i) => ({
+      name: `a-fairly-long-host-name-number-${i}.corp.example.com`,
+      enrolled: true,
+      agentId: `agent-${i}`,
+    }));
+    const { proposals } = decidePackageReport({
+      conversationId: 'conv-1',
+      state: baseHitState({ hosts }),
+      catalog: {
+        ok: true,
+        actions: [
+          isolateHost,
+          configureAction,
+          { ...isolateHost, workflowId: 'system-security-action-second' },
+        ],
+      },
+    });
+    expect(proposals).toHaveLength(100);
+
+    const { bullets, omittedCount } = buildProposalSummaryBullets(proposals);
+
+    expect(bullets).toHaveLength(MAX_SUMMARY_PROPOSAL_BULLETS);
+    expect(omittedCount).toBe(100 - MAX_SUMMARY_PROPOSAL_BULLETS);
+    expect(bullets.join('\n').length).toBeLessThan(JOURNAL_NOTE_MESSAGE_MAX);
+    expect(bullets[0]).toBe(
+      '- **Isolate host a-fairly-long-host-name-number-0.corp.example.com** on `a-fairly-long-host-name-number-0.corp.example.com`: runs `system-security-action-isolate-host` on approval'
+    );
+  });
+
+  it('stays under the character cap with very long host names and counts what it drops', () => {
+    const hosts = Array.from({ length: 50 }, (_, i) => ({
+      name: `${i}-${'h'.repeat(2000)}`,
+      enrolled: true,
+      agentId: `agent-${i}`,
+    }));
+    const { proposals } = decidePackageReport({
+      conversationId: 'conv-1',
+      state: baseHitState({ hosts }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+
+    const { bullets, omittedCount } = buildProposalSummaryBullets(proposals);
+
+    // Each host segment is cut to 253 characters and marked as cut. Without that cut a 2,000-char
+    // host fits only ~2 bullets in the budget, so the floor below only holds when it is applied.
+    const hostSegments = bullets.map((bullet) => /on `([^`]*)`/.exec(bullet)![1]);
+    expect(hostSegments.every((host) => host.length <= 253 && host.endsWith('…'))).toBe(true);
+    expect(bullets.length).toBeGreaterThanOrEqual(5);
+    expect(bullets.length).toBeLessThan(MAX_SUMMARY_PROPOSAL_BULLETS);
+    expect(bullets.join('\n').length).toBeLessThanOrEqual(MAX_SUMMARY_BULLETS_CHARS);
+    expect(bullets.join('\n').length).toBeLessThan(JOURNAL_NOTE_MESSAGE_MAX);
+    expect(bullets.length + omittedCount).toBe(proposals.length);
+  });
+
+  it('lists everything and omits nothing at or under the cap', () => {
+    const { proposals } = decidePackageReport({
+      conversationId: 'conv-1',
+      state: baseHitState(),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+    expect(buildProposalSummaryBullets(proposals)).toEqual({
+      bullets: [expect.stringContaining('`host-a`')],
+      omittedCount: 0,
+    });
   });
 });

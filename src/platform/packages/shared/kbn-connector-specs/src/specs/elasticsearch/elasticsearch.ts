@@ -36,10 +36,7 @@ export const Elasticsearch: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    // A new connector type must reach Production-NonCanary before it can declare
-    // user-facing features. Ship ['agentBuilder'] first, then add 'workflows'
-    // and others in a follow-up PR.
-    supportedFeatureIds: ['agentBuilder'],
+    supportedFeatureIds: ['agentBuilder', 'workflows'],
   },
 
   auth: {

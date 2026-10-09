@@ -54,6 +54,13 @@ interface EscalationQueueProps {
    * Cmd/middle-click to open in a new tab and showing the URL on hover.
    */
   getHref?: (escalation: EscalationQueueItem) => string | undefined;
+  /** An Impact filter is applied, so an empty list means "no match" rather than "no escalations". */
+  isFiltered?: boolean;
+  /**
+   * Number of escalations loaded from the server before the Impact filter, so "Show more (N)"
+   * stays accurate while `escalations` is narrowed. Defaults to `escalations.length`.
+   */
+  loadedCount?: number;
 }
 
 const StyledAccordion = styled(EuiAccordion)`
@@ -87,11 +94,19 @@ export const EscalationQueue = memo<EscalationQueueProps>(
     onClickCard,
     selectedConversationId,
     getHref,
+    isFiltered = false,
+    loadedCount,
   }) => {
     const { euiTheme } = useEuiTheme();
     const serverTotal = totalItemCount ?? escalations.length;
-    const remaining = serverTotal - escalations.length;
+    const remaining = serverTotal - (loadedCount ?? escalations.length);
     const showLoadMore = onLoadMore !== undefined && remaining > 0;
+
+    // Filtered, the badge counts the matching rows. Rows still to load may match too, so
+    // the figure is a floor then.
+    const badgeCount = isFiltered
+      ? `${escalations.length}${remaining > 0 ? '+' : ''}`
+      : serverTotal;
 
     const buttonContent = (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -106,11 +121,29 @@ export const EscalationQueue = memo<EscalationQueueProps>(
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {/* Show the server total so the badge reflects the full bucket, not just loaded items. */}
-          <EuiBadge color="hollow">{serverTotal}</EuiBadge>
+          {/* Unfiltered, show the server total so the badge reflects the full bucket. */}
+          <EuiBadge color="hollow">{badgeCount}</EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
+
+    const loadMoreButton = showLoadMore ? (
+      <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="chevronSingleDown"
+              iconSide="left"
+              size="s"
+              onClick={onLoadMore}
+              data-test-subj={`escalationQueueLoadMore-${status}`}
+            >
+              {ESCALATION_QUEUE_LABELS.showMore(remaining)}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    ) : null;
 
     const bodyContent = (() => {
       if (error) {
@@ -142,32 +175,21 @@ export const EscalationQueue = memo<EscalationQueueProps>(
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
-            {showLoadMore && (
-              <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
-                <EuiFlexGroup justifyContent="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      iconType="chevronSingleDown"
-                      iconSide="left"
-                      size="s"
-                      onClick={onLoadMore}
-                      data-test-subj={`escalationQueueLoadMore-${status}`}
-                    >
-                      {ESCALATION_QUEUE_LABELS.showMore(remaining)}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
-            )}
+            {loadMoreButton}
           </>
         );
       }
       return (
-        <EuiPanel>
-          <EuiText size="xs" color="subdued">
-            {ESCALATION_QUEUE_LABELS.emptyQueue}
-          </EuiText>
-        </EuiPanel>
+        <>
+          <EuiPanel>
+            <EuiText size="xs" color="subdued">
+              {isFiltered
+                ? ESCALATION_QUEUE_LABELS.emptyQueueWithFilter
+                : ESCALATION_QUEUE_LABELS.emptyQueue}
+            </EuiText>
+          </EuiPanel>
+          {loadMoreButton}
+        </>
       );
     })();
 

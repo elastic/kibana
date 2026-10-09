@@ -16,8 +16,8 @@ import { AssetManagerClient } from './domain/asset_manager';
 import { EntityMaintainersClient } from './domain/entity_maintainers';
 import {
   FeatureFlags,
+  getLegacySecurityAssetsMigrationFlag,
   isDualProcessEnabled,
-  isLegacySecurityAssetsMigrationEnabled,
 } from './infra/feature_flags';
 import { EngineDescriptorClient, EntityStoreGlobalStateClient } from './domain/saved_objects';
 import { LogsExtractionClient } from './domain/logs_extraction';
@@ -127,7 +127,7 @@ export async function createRequestHandlerContext({
       analytics,
       savedObjectsClient: core.savedObjects.client,
       isLegacySecurityAssetsMigrationEnabled: () =>
-        isLegacySecurityAssetsMigrationEnabled(coreStart.featureFlags),
+        getLegacySecurityAssetsMigrationFlag(coreStart.featureFlags),
       isDualProcessEnabled: () => isDualProcessEnabled(coreStart.featureFlags),
     }),
     entityMaintainersClient: new EntityMaintainersClient({

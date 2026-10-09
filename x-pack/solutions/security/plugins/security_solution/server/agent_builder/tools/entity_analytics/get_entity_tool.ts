@@ -550,12 +550,14 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
         const groundingResult = grounding ? [grounding] : [];
 
         if (resolved.status === 'not_found') {
+          const errorMessage = `No entity found for id: ${normalizedEntityId}`;
+          telemetryTracker.recordFailure(errorMessage);
           return {
             results: [
               {
                 tool_result_id: getToolResultId(),
                 type: ToolResultType.error,
-                data: { message: `No entity found for id: ${normalizedEntityId}` },
+                data: { message: errorMessage },
               },
               ...groundingResult,
             ],

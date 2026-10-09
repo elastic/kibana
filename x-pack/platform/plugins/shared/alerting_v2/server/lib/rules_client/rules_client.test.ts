@@ -443,7 +443,7 @@ describe('RulesClient', () => {
       );
 
       const res = await client.bulkCreateRules({
-        rules: [
+        items: [
           { ...baseCreateData, id: 'rule-a', metadata: { name: 'rule-a' } },
           { ...baseCreateData, id: 'rule-b', metadata: { name: 'rule-b' } },
         ],
@@ -502,7 +502,7 @@ describe('RulesClient', () => {
       ]);
 
       const res = await client.bulkCreateRules({
-        rules: [{ ...baseCreateData, id: 'rule-a', metadata: { name: 'from-request' } }],
+        items: [{ ...baseCreateData, id: 'rule-a', metadata: { name: 'from-request' } }],
       });
 
       expect(res.items).toHaveLength(1);
@@ -519,7 +519,7 @@ describe('RulesClient', () => {
       mockBulkCreateEcho();
 
       const res = await client.bulkCreateRules({
-        rules: [{ ...baseCreateData, id: 'rule-off', enabled: false }],
+        items: [{ ...baseCreateData, id: 'rule-off', enabled: false }],
       });
 
       expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
@@ -542,7 +542,7 @@ describe('RulesClient', () => {
       );
 
       const res = await client.bulkCreateRules({
-        rules: [
+        items: [
           { ...baseCreateData, id: 'rule-on', enabled: true, metadata: { name: 'on' } },
           { ...baseCreateData, id: 'rule-off', enabled: false, metadata: { name: 'off' } },
         ],
@@ -565,7 +565,7 @@ describe('RulesClient', () => {
       );
 
       const res = await client.bulkCreateRules({
-        rules: [
+        items: [
           { ...baseCreateData, id: 'rule-on', enabled: true, metadata: { name: 'on' } },
           { ...baseCreateData, id: 'rule-off', enabled: false, metadata: { name: 'off' } },
         ],
@@ -597,7 +597,7 @@ describe('RulesClient', () => {
       ]);
 
       const res = await client.bulkCreateRules({
-        rules: [{ ...baseCreateData, id: 'rule-dup' }],
+        items: [{ ...baseCreateData, id: 'rule-dup' }],
       });
 
       expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
@@ -624,7 +624,7 @@ describe('RulesClient', () => {
       ]);
 
       const res = await client.bulkCreateRules({
-        rules: [{ ...baseCreateData, id: 'rule-dup', enabled: false }],
+        items: [{ ...baseCreateData, id: 'rule-dup', enabled: false }],
       });
 
       expect(taskManager.bulkRemove).not.toHaveBeenCalled();
@@ -650,7 +650,7 @@ describe('RulesClient', () => {
       ]);
 
       const res = await client.bulkCreateRules({
-        rules: [{ ...baseCreateData, id: 'rule-fail' }],
+        items: [{ ...baseCreateData, id: 'rule-fail' }],
       });
 
       expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
@@ -676,7 +676,7 @@ describe('RulesClient', () => {
 
       await expect(
         client.bulkCreateRules({
-          rules: [
+          items: [
             { ...baseCreateData, id: 'rule-a', metadata: { name: 'a' } },
             { ...baseCreateData, id: 'rule-b', metadata: { name: 'b' } },
           ],
@@ -695,7 +695,7 @@ describe('RulesClient', () => {
       taskManager.bulkSchedule.mockResolvedValueOnce([{ params: { ruleId: 'rule-a' } }] as never);
 
       const res = await client.bulkCreateRules({
-        rules: [
+        items: [
           { ...baseCreateData, id: 'rule-a', metadata: { name: 'a' } },
           { ...baseCreateData, id: 'rule-b', metadata: { name: 'b' } },
         ],
@@ -718,7 +718,7 @@ describe('RulesClient', () => {
 
       await expect(
         client.bulkCreateRules({
-          rules: [
+          items: [
             { ...baseCreateData, id: 'a', metadata: { name: 'a' } },
             { ...baseCreateData, id: 'b', metadata: { name: 'b' } },
           ],
@@ -727,7 +727,7 @@ describe('RulesClient', () => {
         output: { statusCode: 400 },
         data: {
           code: 'MAX_SCHEDULES_PER_MINUTE_EXCEEDED',
-          details: { maxScheduledPerMinute: 1 },
+          details: { max_scheduled_per_minute: 1 },
         },
       });
 
@@ -742,7 +742,7 @@ describe('RulesClient', () => {
       mockBulkCreateEcho();
 
       const res = await client.bulkCreateRules({
-        rules: [{ ...baseCreateData, id: 'rule-off', enabled: false }],
+        items: [{ ...baseCreateData, id: 'rule-off', enabled: false }],
       });
 
       expect(res.items).toHaveLength(1);
@@ -757,7 +757,7 @@ describe('RulesClient', () => {
       );
 
       const res = await client.bulkCreateRules({
-        rules: [
+        items: [
           {
             ...baseCreateData,
             id: 'rule-short',
@@ -783,7 +783,7 @@ describe('RulesClient', () => {
 
       await expect(
         client.bulkCreateRules({
-          rules: [
+          items: [
             { ...baseCreateData, id: 'same', metadata: { name: 'a' } },
             { ...baseCreateData, id: 'same', metadata: { name: 'b' } },
           ],
@@ -818,7 +818,7 @@ describe('RulesClient', () => {
       );
 
       await client.bulkCreateRules({
-        rules: [
+        items: [
           { ...baseCreateData, id: 'rule-ok', metadata: { name: 'ok' } },
           { ...baseCreateData, id: 'rule-dup', metadata: { name: 'dup' } },
         ],
@@ -2195,7 +2195,7 @@ describe('RulesClient', () => {
 
   describe('findMatchingRules', () => {
     const kindFilter = `${RULE_SAVED_OBJECT_TYPE}.attributes.kind: alert`;
-    const tagsField = `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`;
+    const tagsField = `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.routing_tags`;
 
     it('finds the alert rules with any of the matcher tags, sorted by name', async () => {
       const client = createClient();
@@ -2285,6 +2285,23 @@ describe('RulesClient', () => {
         total: 21,
         page: 2,
         per_page: 20,
+      });
+    });
+  });
+
+  describe('getRoutingTags', () => {
+    it('aggregates routing tags with the search prefix', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.findTags.mockResolvedValueOnce(['sre']);
+
+      const tags = await client.getRoutingTags({ search: 's' });
+
+      expect(tags).toEqual(['sre']);
+      expect(rulesSavedObjectService.findTags).toHaveBeenCalledWith({
+        search: 's',
+        size: undefined,
+        field: 'routing_tags',
       });
     });
   });
@@ -4280,7 +4297,7 @@ describe('RulesClient', () => {
           output: { statusCode: 400 },
           data: {
             code: 'SCHEDULE_INTERVAL_TOO_SHORT',
-            details: { interval: '30s', minimumScheduleInterval: '1m' },
+            details: { interval: '30s', minimum_schedule_interval: '1m' },
           },
         });
 
@@ -4323,7 +4340,7 @@ describe('RulesClient', () => {
           output: { statusCode: 400 },
           data: {
             code: 'MAX_SCHEDULES_PER_MINUTE_EXCEEDED',
-            details: { interval: '1m', maxScheduledPerMinute: 1 },
+            details: { interval: '1m', max_scheduled_per_minute: 1 },
           },
         });
 

@@ -166,6 +166,39 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
     },
 
+    /**
+     * Selects a combobox option and waits for the choice to be committed to the Lens state,
+     * re-selecting when the option click never landed.
+     *
+     * @param testTargetId - the selector of the combobox, which must also carry `committedAttribute`
+     * @param committedAttribute - the attribute holding the committed option label
+     * @param name - the option label to select
+     */
+    async selectCommittedOptionFromComboBox(
+      testTargetId: string,
+      committedAttribute: string,
+      name: string
+    ) {
+      // EUI drops the option click under load, and the filter text setElement leaves behind makes
+      // the input read back as `name` either way. Match case-insensitively, as comboBox itself does.
+      const expected = name.trim().toLowerCase();
+      await retry.try(
+        async () => {
+          await this.selectOptionFromComboBox(testTargetId, name);
+          await retry.waitForWithTimeout(`[${name}] selection to commit`, 10_000, async () => {
+            const combo = await testSubjects.find(testTargetId);
+            const committed = (await combo.getAttribute(committedAttribute)) ?? '';
+            return committed.trim().toLowerCase() === expected;
+          });
+        },
+        {
+          description: `select [${name}] from [${testTargetId}]`,
+          timeout: 60_000,
+          onFailureBlock: async () => comboBox.clearInputField(testTargetId),
+        }
+      );
+    },
+
     async configureQueryAnnotation(opts: {
       queryString: string;
       timeField: string;
@@ -210,38 +243,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Selects a field in a Lens field combobox and returns only once Lens has committed it.
-     *
-     * @param field - the desired field display name
-     * @param fieldComboBox - the selector of the field combobox
-     */
-    async selectFieldAndWaitForCommit(
-      field: string,
-      fieldComboBox = 'indexPattern-dimension-field'
-    ) {
-      // Closing or reading the editor too early discards the operation→field transition. Do not
-      // wait on the combobox input: setElement types `field` as a filter before the option is
-      // clicked. data-selected-field is the committed option display name and
-      // updates only after insertOrReplaceColumn. Independent of aria-invalid
-      // (incompleteOperation / CCS). Compare exactly — labels are case-sensitive.
-      // Re-select on failure because EUI drops the option click under load, and the filter text
-      // setElement leaves behind makes both its own check and the input read back as `field`.
-      await retry.tryWithRetries(
-        `select field [${field}] in [${fieldComboBox}]`,
-        async () => {
-          await this.selectOptionFromComboBox(fieldComboBox, field);
-          await retry.waitForWithTimeout('field selection to commit', 10_000, async () => {
-            const fieldCombo = await testSubjects.find(fieldComboBox);
-            const committedLabel = (await fieldCombo.getAttribute('data-selected-field')) ?? '';
-            return committedLabel === field;
-          });
-        },
-        { retryCount: 3, timeout: 60_000 },
-        async () => comboBox.clearInputField(fieldComboBox)
-      );
-    },
-
-    /**
      * Changes the specified dimension to the specified operation and optionally the field.
      *
      * @param opts.dimension - the selector of the dimension being changed
@@ -275,7 +276,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
       const field = opts.field;
       if (field) {
-        await this.selectFieldAndWaitForCommit(field);
+        await this.selectCommittedOptionFromComboBox(
+          'indexPattern-dimension-field',
+          'data-selected-field',
+          field
+        );
       }
 
       if (opts.formula) {
@@ -311,16 +316,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       isPreviousIncompatible?: boolean;
     }) {
       if (opts.operation) {
-        await this.selectOptionFromComboBox(
-          'indexPattern-subFunction-selection-row',
+        await this.selectCommittedOptionFromComboBox(
+          'indexPattern-subFunction-selection-row > indexPattern-reference-function',
+          'data-selected-function',
           opts.operation
         );
       }
 
       if (opts.field) {
-        await this.selectFieldAndWaitForCommit(
-          opts.field,
-          'indexPattern-reference-field-selection-row > indexPattern-dimension-field'
+        await this.selectCommittedOptionFromComboBox(
+          'indexPattern-reference-field-selection-row > indexPattern-dimension-field',
+          'data-selected-field',
+          opts.field
         );
       }
     },
@@ -968,9 +975,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
 
       await find.clickByCssSelector('button[data-test-subj="style"]');
-      await retry.try(async () => {
-        await find.byCssSelector('#lnsDimensionContainerTitle');
-      });
+      await testSubjects.existOrFail('lnsStyleSettingsFlyout');
     },
 
     async openLegendSettingsFlyout() {
@@ -986,8 +991,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (await this.hasLegendToolbarButton()) {
         const button = await find.byCssSelector('button[data-test-subj="legend"]');
         await button.click();
+        await testSubjects.existOrFail('lnsLegendSettingsFlyout');
       }
     },
+    /**
+     * Opens the layer settings flyout and waits for it to be present in the DOM.
+     */
+    async openLayerSettings() {
+      await testSubjects.click('lnsLayerSettings');
+      await testSubjects.existOrFail('lnsLayerSettingsFlyout');
+    },
+
     async closeFlyoutWithBackButton() {
       await retry.try(async () => {
         if (await testSubjects.exists('lns-indexPattern-dimensionContainerBack')) {

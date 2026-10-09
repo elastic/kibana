@@ -149,6 +149,7 @@ import {
 } from './elastic_agent_manifest';
 
 import { bulkInstallPackages, getPackageInfo } from './epm/packages';
+import { runWithCache } from './epm/packages/cache';
 import { ensureInstalledPackage } from './epm/packages/install';
 import { unenrollForAgentPolicyId } from './agents';
 import { getAgentCountForAgentPolicies } from './agent_policies/agent_policy_agent_count';
@@ -1326,18 +1327,22 @@ class AgentPolicyService {
     minAgentVersion: string | undefined;
     packageAgentVersionConditions: AgentPolicyAgentVersionCondition[] | undefined;
   }> {
-    const packagePolicies = await findPackagePoliciesForVersionCheck(soClient, policyId);
-    const { conditions, hasTemplateConditions } = await collectAgentVersionConditions(
-      soClient,
-      packagePolicies
-    );
-    const hasConditions = conditions.length > 0;
+    // getPackageInfo only reuses results inside a runWithCache session. Sync updates never
+    // opened one, so every package policy paid a full lookup.
+    return runWithCache(async () => {
+      const packagePolicies = await findPackagePoliciesForVersionCheck(soClient, policyId);
+      const { conditions, hasTemplateConditions } = await collectAgentVersionConditions(
+        soClient,
+        packagePolicies
+      );
+      const hasConditions = conditions.length > 0;
 
-    return {
-      hasAgentVersionConditions: hasConditions || hasTemplateConditions,
-      minAgentVersion: hasConditions ? highestMinAgentVersion(conditions) : undefined,
-      packageAgentVersionConditions: hasConditions ? conditions : undefined,
-    };
+      return {
+        hasAgentVersionConditions: hasConditions || hasTemplateConditions,
+        minAgentVersion: hasConditions ? highestMinAgentVersion(conditions) : undefined,
+        packageAgentVersionConditions: hasConditions ? conditions : undefined,
+      };
+    });
   }
 
   /**

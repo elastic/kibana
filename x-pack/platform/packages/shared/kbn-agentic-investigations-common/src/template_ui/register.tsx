@@ -9,6 +9,7 @@ import React, { Suspense, lazy } from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiSkeletonText } from '@elastic/eui';
 import type { ConversationTemplateServiceStartContract } from '@kbn/agent-builder-browser';
+import { getCopyLinkFlyoutAction } from '../components/actions/copy_link_action';
 import { DETAILS_FLYOUT_LABELS } from '../components/details/translations';
 import { ConversationTitle } from './conversation_title';
 import type { RenderAssignees, RenderStatus, RenderLinkedInvestigations } from './types';
@@ -56,6 +57,11 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    */
   renderEscalationModal?: import('./slots').FooterSlotProps['onOpenEscalation'];
   /**
+   * Wraps the footer's "Open escalation" button, so the caller can hide it once it learns at
+   * render time (for example from a privileges request) that the user may not escalate.
+   */
+  wrapEscalationButton?: import('./slots').FooterSlotProps['wrapEscalationButton'];
+  /**
    * When provided, the overview tab renders a "Proposed actions" section with this as its
    * content. Supplied by the caller because listing and deciding a conversation's proposals
    * needs Kibana HTTP hooks unavailable in this package.
@@ -77,6 +83,12 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    * Supplied by the caller so the modal can use HTTP hooks unavailable in this package.
    */
   renderCloseInvestigationModal?: import('./slots').FooterSlotProps['onCloseInvestigation'];
+  /**
+   * Called by the in-chat flyout's "Copy link" button with the conversation's Agent Builder URL,
+   * which Agent Builder builds. Supplied by the caller, which does the copying. Returns whether it was copied: the button's tooltip confirms success, so the
+   * caller only reports a failure.
+   */
+  onCopyLink: (url: string) => boolean;
 }
 
 /**
@@ -92,10 +104,12 @@ export const registerAgenticInvestigationTemplateUI = ({
   name,
   icon,
   renderEscalationModal,
+  wrapEscalationButton,
   renderProposedActions,
   renderAssignees,
   renderStatus,
   renderCloseInvestigationModal,
+  onCopyLink,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
   const [overviewTabId] = getInvestigationTabIds(templateId);
 
@@ -116,11 +130,22 @@ export const registerAgenticInvestigationTemplateUI = ({
 
   conversationTemplates.registerTemplateUIDefinition(
     templateId,
-    ({ openFullscreenConversation }) => ({
+    ({ openFullscreenConversation, getConversationUrl }) => ({
       name,
       icon,
       tabs: [overviewTabId],
       detailsFlyout: {
+        trailingActions: ({ conversation }) => [
+          getCopyLinkFlyoutAction(() =>
+            onCopyLink(
+              getConversationUrl({
+                conversationId: conversation.id,
+                agentId: conversation.agent_id,
+                openDetails: true,
+              })
+            )
+          ),
+        ],
         header: function InvestigationFlyoutHeader({ conversation, refetchConversation }) {
           return (
             // Agent Builder points the flyout's `aria-labelledby` at the header, so it must not
@@ -151,6 +176,7 @@ export const registerAgenticInvestigationTemplateUI = ({
                   })
                 }
                 onOpenEscalation={renderEscalationModal}
+                wrapEscalationButton={wrapEscalationButton}
                 onCloseInvestigation={renderCloseInvestigationModal}
               />
             </Suspense>

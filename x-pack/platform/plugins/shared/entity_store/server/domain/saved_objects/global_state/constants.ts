@@ -24,6 +24,8 @@ export const LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT = '15m';
 export const LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT = 100_000;
 export const LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT = 'drop' as const;
 
+export const MAX_EXCLUDED_USER_NAMES = 200;
+
 /** Bounds for HTTP/SO string fields to prevent unbounded-input DoS. */
 export const MAX_DURATION_STRING_LENGTH = 32;
 export const MAX_INDEX_PATTERN_LENGTH = 2048;
@@ -163,6 +165,7 @@ export type EntityStoreGlobalState = z.infer<typeof EntityStoreGlobalState>;
 export const EntityStoreGlobalState = z.object({
   historySnapshot: HistorySnapshotState,
   logsExtraction: LogExtractionConfig,
+  excludedUserNames: z.array(z.string()).max(MAX_EXCLUDED_USER_NAMES).default([]),
 });
 
 export type EntityStoreGlobalStateOverrides = z.infer<typeof EntityStoreGlobalStateOverrides>;
@@ -175,5 +178,6 @@ export const EntityStoreGlobalStateOverrides = z
     defaultsVersion: z.enum(['legacy', 'latest']),
     historySnapshot: HistorySnapshotState,
     logsExtraction: LogExtractionObj.partial(),
+    excludedUserNames: z.array(z.string()).max(MAX_EXCLUDED_USER_NAMES),
   })
   .partial();

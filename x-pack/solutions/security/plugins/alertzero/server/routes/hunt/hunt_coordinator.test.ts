@@ -261,11 +261,13 @@ describe('registerHuntCoordinatorRoute', () => {
       },
     };
 
-    const sseOf = (response: ReturnType<typeof httpServerMock.createResponseFactory>) => {
+    const bodyOf = (response: ReturnType<typeof httpServerMock.createResponseFactory>) => {
       const [options] = response.ok.mock.calls[0];
       if (!options) throw new Error('expected an ok response carrying a body');
-      return (options.body as HuntCoordinatorResponse).sse;
+      return options.body as HuntCoordinatorResponse;
     };
+    const sseOf = (response: ReturnType<typeof httpServerMock.createResponseFactory>) =>
+      bodyOf(response).sse;
 
     it('attaches one entry per corroborated technique on a confirmed hit', async () => {
       huntCoordinatorMock.mockResolvedValue(confirmedResult);
@@ -316,6 +318,40 @@ describe('registerHuntCoordinatorRoute', () => {
       await handler(context, requestFor(), response);
 
       expect(sseOf(response)).toBeUndefined();
+      expect(bodyOf(response).impacted_entities).toBeUndefined();
+    });
+
+    it('sends the hosts and users the SSE entries name as impact entities on a confirmed hit', async () => {
+      huntCoordinatorMock.mockResolvedValue({
+        ...confirmedResult,
+        tier1: {
+          ...confirmedResult.tier1,
+          affected_assets: {
+            hosts: [{ name: 'WIN-01', hit_count: 3 }],
+            users: [{ name: 'james', hit_count: 2 }],
+            services: [{ name: 'arn:aws:iam::1:role/deploy', hit_count: 9 }],
+          },
+        },
+      });
+      const { handler, context } = makeDeps();
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor(), response);
+
+      expect(bodyOf(response).impacted_entities).toEqual([
+        { id: 'host:WIN-01', name: 'WIN-01', type: 'host' },
+        { id: 'user:james', name: 'james', type: 'user' },
+      ]);
+    });
+
+    it('sends an empty impact list on a confirmed hit that names no host or user', async () => {
+      huntCoordinatorMock.mockResolvedValue(confirmedResult);
+      const { handler, context } = makeDeps();
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor(), response);
+
+      expect(bodyOf(response).impacted_entities).toEqual([]);
     });
 
     it('sends no entries for a hit on an ad hoc hunt, which has no report to attach to', async () => {
@@ -331,8 +367,12 @@ describe('registerHuntCoordinatorRoute', () => {
 
       expect(response.ok).toHaveBeenCalled();
       expect(sseOf(response)).toBeUndefined();
+      expect(bodyOf(response).impacted_entities).toBeUndefined();
     });
   });
+
+  // The hunt-once evidence write is its own route (`write_hunt_evidence.ts`), called by hunt.yaml
+  // only after this step succeeds -- see that route's doc comment for why it isn't folded in here.
 
   it('logs and returns a generic 500 when the coordinator throws', async () => {
     huntCoordinatorMock.mockRejectedValue(new Error('tier1 search failed'));

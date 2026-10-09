@@ -210,6 +210,35 @@ describe('floor_alert_triage — create_investigation severity', () => {
   });
 });
 
+describe('floor_alert_triage — attach_impact', () => {
+  const classifyOutput = (entities: unknown[]) => ({
+    steps: { classify_alerts: { output: { impacted_entities: entities } } },
+  });
+
+  it('records impact through the shared step, not a security-specific attachment', () => {
+    const step = stepByName('attach_impact');
+    expect(step?.type).toBe('investigations.attachImpact');
+    expect(step?.with).toEqual({
+      conversationId: '{{ steps.create_investigation.output.conversation_id }}',
+      entities: '${{ steps.classify_alerts.output.impacted_entities }}',
+    });
+    expect(JSON.stringify(parsed)).not.toContain('security.impact');
+  });
+
+  it('does not fail the run when impact cannot be recorded', () => {
+    expect(stepByName('attach_impact')?.['on-failure']?.continue).toBe(true);
+  });
+
+  it('skips the step when no alert carried a host or user, since the shared step rejects an empty list', () => {
+    const gate = stepByName('attach_impact_gate');
+    expect(gate?.steps?.map((step) => step.name)).toEqual(['attach_impact']);
+    expect(evalExpr(gate!.condition!, classifyOutput([]))).toBe(false);
+    expect(
+      evalExpr(gate!.condition!, classifyOutput([{ id: 'host:a', name: 'a', type: 'host' }]))
+    ).toBe(true);
+  });
+});
+
 describe('floor_alert_triage — attach_alerts', () => {
   it('retries a failed chunk attach before continuing past it', () => {
     const chunkStep = stepByName('attach_alert_chunk');

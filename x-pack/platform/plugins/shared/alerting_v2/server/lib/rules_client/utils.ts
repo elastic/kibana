@@ -14,7 +14,9 @@ import {
   isLifecycleConfigAllowedForKind,
   isLifecycleConfigPresentForKind,
   isRecoveryConditionUsableWithBreach,
+  isRoutingTagsAllowedForKind,
   REQUIRE_DISTINGUISHABLE_ABSENCE_MESSAGE,
+  ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
   isRecoveryTransitionConsistentWithStrategy,
   recoveryStrategy,
   validateComposedEsqlQuery,
@@ -222,6 +224,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
       name: data.metadata.name,
       description: data.metadata.description,
       tags: data.metadata.tags,
+      routing_tags: data.metadata.routing_tags,
       builder_type: data.metadata.builder_type,
     },
     time_field: data.time_field,
@@ -296,9 +299,15 @@ export function buildUpdateRuleAttributes(
       ...existingAttrs.metadata,
       ...updateData.metadata,
       builder_type: resolveBuilderType(updateData, existingAttrs),
-      // `null` clears all tags. The SO schema is `maybe(...)` without
-      // `nullable()`, so the cleared value must be stored as `undefined`.
+      /*
+       * `null` clears all tags or routing tags. The SO schema is `maybe(...)`
+       * without `nullable()`, so the cleared value must be stored as `undefined`.
+       */
       tags: nullToUndefined(updateData.metadata?.tags, existingAttrs.metadata.tags),
+      routing_tags: nullToUndefined(
+        updateData.metadata?.routing_tags,
+        existingAttrs.metadata.routing_tags
+      ),
     },
     time_field: updateData.time_field ?? existingAttrs.time_field,
     schedule: { ...existingAttrs.schedule, ...updateData.schedule },
@@ -347,6 +356,12 @@ export function validateMergedRuleAttributes(
     {
       valid: isLifecycleConfigAllowedForKind(attrs),
       message: 'Signal rules cannot set recovery or no_data.',
+      code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
+      details: { rule_id: ruleId, rule_kind: attrs.kind },
+    },
+    {
+      valid: isRoutingTagsAllowedForKind(attrs),
+      message: ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
       code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
       details: { rule_id: ruleId, rule_kind: attrs.kind },
     },
@@ -416,6 +431,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
       name: attrs.metadata.name,
       description: attrs.metadata.description,
       tags: attrs.metadata.tags,
+      routing_tags: attrs.metadata.routing_tags,
       builder_type: attrs.metadata.builder_type,
     },
     time_field: attrs.time_field,

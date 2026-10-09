@@ -125,7 +125,10 @@ When the id/name resolves to multiple candidate entities, no attachment is store
           entityType,
         });
         if (!resolved.ok) {
-          return { results: resolved.results };
+          if (resolved.result.type === ToolResultType.error) {
+            telemetryTracker.recordFailure(resolved.result.data.message);
+          }
+          return { results: [resolved.result] };
         }
 
         const { identifierType, identifier, entityStoreId } = resolved.identity;

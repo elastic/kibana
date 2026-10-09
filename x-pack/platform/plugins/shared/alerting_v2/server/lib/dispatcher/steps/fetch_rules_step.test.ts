@@ -30,7 +30,7 @@ describe('FetchRulesStep', () => {
       {
         id: 'r1',
         attributes: createRuleSoAttributes({
-          metadata: { name: 'Rule 1', tags: ['production'] },
+          metadata: { name: 'Rule 1', tags: ['production'], routing_tags: ['sre'] },
         }),
         namespaces: ['default'],
       },
@@ -51,7 +51,31 @@ describe('FetchRulesStep', () => {
     expect(result.data?.rules?.size).toBe(1);
     expect(result.data?.rules?.get('r1')?.name).toBe('Rule 1');
     expect(result.data?.rules?.get('r1')?.spaceId).toBe('default');
+    expect(result.data?.rules?.get('r1')?.routingTags).toEqual(['sre']);
     expect(mockFindByIds).toHaveBeenCalledWith(['r1']);
+  });
+
+  it('defaults routing tags to an empty list when the rule has none', async () => {
+    mockFindByIds.mockResolvedValue([
+      {
+        id: 'r1',
+        attributes: createRuleSoAttributes({
+          metadata: { name: 'Rule 1', tags: ['production'] },
+        }),
+        namespaces: ['default'],
+      },
+    ]);
+
+    const step = new FetchRulesStep(rulesSoService);
+    const state = createDispatcherPipelineState({
+      dispatchable: [createAlertEpisode({ rule_id: 'r1' })],
+    });
+
+    const result = await step.execute(state, logger);
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(result.data?.rules?.get('r1')?.routingTags).toEqual([]);
   });
 
   it('returns empty map when no active episodes', async () => {

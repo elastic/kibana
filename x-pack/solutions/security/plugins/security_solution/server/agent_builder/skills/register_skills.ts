@@ -13,6 +13,7 @@ import { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting
 import { getDetectionRuleEditSkill } from './detection_rule_edit';
 import { getEntityAnalyticsSkill } from './entity_analytics';
 import { manageWatchlistsSkill } from './manage_watchlists';
+import { manageResolutionSkill } from './entity_resolution';
 import { pciComplianceSkill } from './pci_compliance';
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
@@ -74,6 +75,10 @@ export const registerSkills = async ({
 
   if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
     agentBuilder.skills.register(manageWatchlistsSkill);
+  }
+
+  if (isEntityStoreV2Enabled) {
+    agentBuilder.skills.register(manageResolutionSkill);
   }
 
   agentBuilder.skills.register(

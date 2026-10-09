@@ -204,9 +204,49 @@ describe('AttachmentService getter', () => {
         expect(mockLogger.warn).toHaveBeenCalledWith(
           expect.stringContaining(`Attachment ${unrecognizedAttachment.id}`)
         );
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('which has no unified mapping')
+        );
       });
 
-      it('returns migrated legacy events in unified shape', async () => {
+      it('returns a per-item error instead of throwing when a row fails the unified decode', async () => {
+        const userAttachment = createUserAttachment();
+        const junkTypeAttachment = {
+          ...userAttachment,
+          id: '2',
+          attributes: { ...userAttachment.attributes, type: 'junk' },
+        };
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            { ...createErrorSO(CASE_ATTACHMENT_SAVED_OBJECT), id: '1' },
+            userAttachment,
+            { ...createErrorSO(CASE_ATTACHMENT_SAVED_OBJECT), id: '2' },
+            junkTypeAttachment,
+          ] as unknown as SavedObjectsBulkResponse['saved_objects'],
+        });
+
+        const res = await attachmentGetter.bulkGet(['1', '2']);
+
+        expect(res.saved_objects).toEqual([
+          asUnifiedUserAttachment(),
+          {
+            id: '2',
+            type: junkTypeAttachment.type,
+            references: junkTypeAttachment.references,
+            error: {
+              error: 'Bad Request',
+              message: expect.stringMatching(/^Attachment type "junk" failed validation: .+/),
+              statusCode: 400,
+            },
+          },
+        ]);
+        expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringMatching(/^Attachment 2 .*which failed unified decode: .+\. Returning/)
+        );
+      });
+
+      it('returns legacy events in unified shape', async () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
             { ...createErrorSO(CASE_ATTACHMENT_SAVED_OBJECT), id: '1' },
@@ -249,7 +289,7 @@ describe('AttachmentService getter', () => {
         ]);
       });
 
-      it('returns migrated legacy file externalReference in unified shape', async () => {
+      it('returns legacy file externalReference in unified shape', async () => {
         const legacyFile = createFileAttachment({
           externalReferenceMetadata: {
             files: [
@@ -578,6 +618,19 @@ describe('AttachmentService getter', () => {
           type: 'externalReference',
           externalReferenceAttachmentTypeId: 'unknown-third-party-type',
         })
+      );
+    });
+
+    it('throws when a row fails the unified decode, since get has no per-item error channel', async () => {
+      const userAttachment = createUserAttachment();
+      unsecuredSavedObjectsClient.get.mockResolvedValue({
+        ...userAttachment,
+        attributes: { ...userAttachment.attributes, type: 'junk' },
+      });
+
+      await expect(attachmentGetter.get({ savedObjectId: '1' })).rejects.toThrow();
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Error on GET attachment 1')
       );
     });
 

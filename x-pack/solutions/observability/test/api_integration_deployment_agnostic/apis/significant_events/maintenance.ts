@@ -204,22 +204,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             'kibana.space_ids': ['default'],
           },
         });
-        await esClient.create({
-          index: '.significant_events-events',
-          id: 'maintenance-reset-event',
-          refresh: 'wait_for',
-          document: {
-            '@timestamp': timestamp,
-            event_id: 'maintenance-reset-event',
-            status: 'active',
-            stream_names: [RESET_STREAM_NAME],
-            title: 'Maintenance reset test event',
-            summary: 'Representative event removed by the maintenance reset test.',
-            severity: 'medium',
-            confidence: 0.8,
-            'kibana.space_ids': ['default'],
-          },
-        });
 
         await esClient.indices.deleteDataStream(
           { name: DISCOVERIES_DATA_STREAM },
@@ -250,7 +234,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           storedQueries: 1,
           rules: 2,
           investigations: 0,
-          dataStreams: 4,
+          dataStreams: 3,
         });
         expect(
           await getMaintenanceStatus(apiClient).then((status) => status.featureSettings)

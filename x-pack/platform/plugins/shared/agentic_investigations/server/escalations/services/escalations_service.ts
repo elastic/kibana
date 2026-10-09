@@ -32,6 +32,7 @@ import type {
   SetEscalationStatusRequest,
   SetEscalationStatusResponse,
 } from '../../../common/investigations/status';
+import type { ImpactReadClient } from '../../impact/services/impact_client';
 import type { InvestigationStatusService } from '../../investigations/services/investigation_status_service';
 import { assertNoUnexpectedProposals } from '../../investigations/services/investigation_status_service';
 import { CloseTargetsChangedError } from '../../investigations/services/close_targets_changed_error';
@@ -100,10 +101,12 @@ export interface EscalationsServiceDeps {
   getAttachmentsClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
   conversationTemplates: ConversationTemplatesStart;
   getInvestigationStatusService: () => InvestigationStatusService;
+  getImpactClient: (request: KibanaRequest) => ImpactReadClient;
 }
 
 export class EscalationsService {
   private readonly logger: Logger;
+  private readonly getImpactClient: (request: KibanaRequest) => ImpactReadClient;
   private readonly getConversationClient: (
     request: KibanaRequest
   ) => Promise<ConversationPublicClient>;
@@ -119,8 +122,10 @@ export class EscalationsService {
     getAttachmentsClient,
     conversationTemplates,
     getInvestigationStatusService,
+    getImpactClient,
   }: EscalationsServiceDeps) {
     this.logger = logger;
+    this.getImpactClient = getImpactClient;
     this.getConversationClient = getConversationClient;
     this.getAttachmentsClient = getAttachmentsClient;
     this.conversationTemplates = conversationTemplates;
@@ -465,7 +470,45 @@ export class EscalationsService {
       query: query.search,
     });
 
-    return { pagination: { total, page: query.page, per_page: query.per_page }, results };
+    return {
+      pagination: { total, page: query.page, per_page: query.per_page },
+      results: await this.withEntityIds(request, results),
+    };
+  }
+
+  /**
+   * Escalations have no Impact document of their own; their impact is the union of the
+   * entities of the investigations they link. Failure omits the field, like a missing
+   * title, so the queue stays usable without pills.
+   */
+  private async withEntityIds(
+    request: KibanaRequest,
+    escalations: ListEscalationsResponse['results']
+  ): Promise<ListEscalationsResponse['results']> {
+    const linkedIdsByEscalation = escalations.map((escalation) => {
+      const linked = escalation.metadata?.[ESCALATION_LINKED_INVESTIGATIONS_FIELD];
+      return Array.isArray(linked) ? (linked as string[]) : [];
+    });
+    const allLinkedIds = linkedIdsByEscalation.flat();
+    if (allLinkedIds.length === 0) return escalations;
+
+    try {
+      const entityIdsByInvestigation = await this.getImpactClient(
+        request
+      ).getEntityIdsByConversationId(allLinkedIds);
+
+      return escalations.map((escalation, index) => {
+        const entityIds = [
+          ...new Set(
+            linkedIdsByEscalation[index].flatMap((id) => entityIdsByInvestigation.get(id) ?? [])
+          ),
+        ];
+        return entityIds.length > 0 ? { ...escalation, entity_ids: entityIds } : escalation;
+      });
+    } catch (err) {
+      this.logger.debug(`Could not resolve escalation impact: ${err}`);
+      return escalations;
+    }
   }
 
   /**

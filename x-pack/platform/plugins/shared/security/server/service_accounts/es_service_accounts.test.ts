@@ -1169,4 +1169,336 @@ describe('EsServiceAccounts', () => {
       expect(await serviceAccounts.get(request, ACCOUNT_ID)).not.toHaveProperty('description');
     });
   });
+
+  describe('#delete', () => {
+    const ACCOUNT_ID = 'kibana/nightshift-relay';
+    const DELETE_ACCOUNT = { method: 'DELETE', path: ACCOUNT_PATH };
+    const deleteToken = (tokenName: string) => ({
+      method: 'DELETE',
+      path: `${CREDENTIALS_PATH}/token/${tokenName}`,
+    });
+    const undeletedTokensWarning = (tokenNames: string) =>
+      `Service account [${ACCOUNT_ID}] was deleted, but its tokens [${tokenNames}] could not be. ` +
+      'They can no longer authenticate, but an account named [nightshift-relay] cannot be ' +
+      'created again until they are deleted.';
+
+    /**
+     * Answers the account read, the token read and the deletes from one table, so a test can make
+     * any one of them fail without caring about the order they arrive in.
+     */
+    const mockElasticsearch = ({
+      account = accountEntry() as object,
+      tokenNames = ['kibana-managed'],
+      failingPaths = [] as string[],
+    } = {}) => {
+      esClient.asCurrentUser.transport.request.mockImplementation(async (params) => {
+        const { method, path } = params as { method: string; path: string };
+        if (failingPaths.includes(path)) {
+          throw new Error(`${method} ${path} failed`);
+        }
+        if (method === 'GET' && path === ACCOUNT_PATH) return account;
+        if (method === 'GET' && path === CREDENTIALS_PATH) return accountCredentials(tokenNames);
+        return { found: true };
+      });
+    };
+
+    beforeEach(() => {
+      esClient.asCurrentUser.security.invalidateToken.mockResolvedValue({
+        invalidated_tokens: 1,
+        previously_invalidated_tokens: 0,
+        error_count: 0,
+      });
+    });
+
+    it('deletes every token, then the credential, then the account without `force`', async () => {
+      const order: string[] = [];
+      credentialStore.delete.mockImplementation(async () => {
+        order.push('credential');
+        return true;
+      });
+      esClient.asCurrentUser.transport.request.mockImplementation(async (params) => {
+        const { method, path } = params as { method: string; path: string };
+        order.push(`${method} ${path}`);
+        if (method === 'GET' && path === ACCOUNT_PATH) return accountEntry();
+        if (method === 'GET') return accountCredentials(['kibana-managed', 'operator-token']);
+        return { found: true };
+      });
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({ warnings: [] });
+
+      expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
+        elasticsearch: { cluster: ['manage_security'], index: {} },
+      });
+      expect(order).toEqual([
+        `GET ${ACCOUNT_PATH}`,
+        `GET ${CREDENTIALS_PATH}`,
+        `DELETE ${CREDENTIALS_PATH}/token/kibana-managed`,
+        `DELETE ${CREDENTIALS_PATH}/token/operator-token`,
+        'credential',
+        `DELETE ${ACCOUNT_PATH}`,
+      ]);
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith(DELETE_ACCOUNT, {
+        ignore: [404],
+      });
+      expect(credentialStore.delete).toHaveBeenCalledWith(ACCOUNT_ID);
+    });
+
+    it('invalidates the access tokens the account was issued', async () => {
+      mockElasticsearch();
+
+      await serviceAccounts.delete(request, ACCOUNT_ID);
+
+      expect(esClient.asCurrentUser.security.invalidateToken).toHaveBeenCalledWith(
+        { username: ACCOUNT_ID, realm_name: '_service_account' },
+        { ignore: [404] }
+      );
+    });
+
+    it('warns when the access tokens cannot be invalidated', async () => {
+      mockElasticsearch();
+      esClient.asCurrentUser.security.invalidateToken.mockRejectedValue(new Error('unavailable'));
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({
+        warnings: [
+          `Service account [${ACCOUNT_ID}] was deleted, but the access tokens it was issued could ` +
+            'not be invalidated.',
+        ],
+      });
+      expect(credentialStore.delete).toHaveBeenCalledWith(ACCOUNT_ID);
+    });
+
+    it('forces the account delete past a token it could not delete, and warns about it', async () => {
+      mockElasticsearch({
+        tokenNames: ['kibana-managed', 'operator-token'],
+        failingPaths: [`${CREDENTIALS_PATH}/token/operator-token`],
+      });
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({
+        warnings: [undeletedTokensWarning('operator-token')],
+      });
+
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith(
+        { ...DELETE_ACCOUNT, querystring: { force: 'true' } },
+        { ignore: [404] }
+      );
+      expect(credentialStore.delete).toHaveBeenCalledWith(ACCOUNT_ID);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to delete token [operator-token]')
+      );
+    });
+
+    it('deletes the credential after the account when Kibana’s own token was left behind', async () => {
+      mockElasticsearch({ failingPaths: [`${CREDENTIALS_PATH}/token/kibana-managed`] });
+      const order: string[] = [];
+      credentialStore.delete.mockImplementation(async () => {
+        order.push('credential');
+        return true;
+      });
+      const answer = esClient.asCurrentUser.transport.request.getMockImplementation()!;
+      esClient.asCurrentUser.transport.request.mockImplementation(async (params, options) => {
+        const { method, path } = params as { method: string; path: string };
+        if (method === 'DELETE' && path === ACCOUNT_PATH) order.push('account');
+        return answer(params, options);
+      });
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({
+        warnings: [undeletedTokensWarning('kibana-managed')],
+      });
+      expect(order).toEqual(['account', 'credential']);
+    });
+
+    it('still reports the leftover tokens when the late credential delete fails', async () => {
+      mockElasticsearch({ failingPaths: [`${CREDENTIALS_PATH}/token/kibana-managed`] });
+      credentialStore.delete.mockRejectedValue(new Error('saved objects unavailable'));
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({
+        warnings: [undeletedTokensWarning('kibana-managed')],
+      });
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('failed to delete its credential')
+      );
+    });
+
+    it('keeps the account when the credential delete fails, so a retry can finish', async () => {
+      mockElasticsearch();
+      const error = new Error('saved objects unavailable');
+      credentialStore.delete.mockRejectedValue(error);
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).rejects.toBe(error);
+
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalledWith(
+        DELETE_ACCOUNT,
+        expect.anything()
+      );
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining(`Failed to delete service account [${ACCOUNT_ID}]`)
+      );
+    });
+
+    it('surfaces an account delete that Elasticsearch refuses', async () => {
+      esClient.asCurrentUser.transport.request.mockImplementation(async (params) => {
+        const { method, path } = params as { method: string; path: string };
+        if (method === 'GET' && path === ACCOUNT_PATH) return accountEntry();
+        if (method === 'GET') return accountCredentials(['kibana-managed']);
+        if (path === ACCOUNT_PATH) throw new Error('cannot delete service account');
+        return { found: true };
+      });
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).rejects.toThrow(
+        'cannot delete service account'
+      );
+      expect(esClient.asCurrentUser.security.invalidateToken).not.toHaveBeenCalled();
+    });
+
+    it('deletes tokens left over from an account that is already gone', async () => {
+      mockElasticsearch({ account: {}, tokenNames: ['operator-token'] });
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({ warnings: [] });
+
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith(
+        deleteToken('operator-token'),
+        { ignore: [404] }
+      );
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalledWith(
+        DELETE_ACCOUNT,
+        expect.anything()
+      );
+      // A concurrent create may already have written a credential under this id.
+      expect(credentialStore.delete).not.toHaveBeenCalled();
+      expect(esClient.asCurrentUser.security.invalidateToken).toHaveBeenCalledWith(
+        { username: ACCOUNT_ID, realm_name: '_service_account' },
+        { ignore: [404] }
+      );
+    });
+
+    it('reads the account again before deleting tokens left over from it', async () => {
+      const order: string[] = [];
+      esClient.asCurrentUser.transport.request.mockImplementation(async (params) => {
+        const { method, path } = params as { method: string; path: string };
+        order.push(`${method} ${path}`);
+        if (method === 'GET' && path === ACCOUNT_PATH) return {};
+        if (method === 'GET') return accountCredentials(['operator-token']);
+        return { found: true };
+      });
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({ warnings: [] });
+
+      expect(order).toEqual([
+        `GET ${ACCOUNT_PATH}`,
+        `GET ${CREDENTIALS_PATH}`,
+        `GET ${ACCOUNT_PATH}`,
+        `DELETE ${CREDENTIALS_PATH}/token/operator-token`,
+      ]);
+    });
+
+    it('deletes an account created again while its leftover tokens were read, as a whole', async () => {
+      const order: string[] = [];
+      credentialStore.delete.mockImplementation(async () => {
+        order.push('credential');
+        return true;
+      });
+      let accountReads = 0;
+      esClient.asCurrentUser.transport.request.mockImplementation(async (params) => {
+        const { method, path } = params as { method: string; path: string };
+        order.push(`${method} ${path}`);
+        if (method === 'GET' && path === ACCOUNT_PATH) {
+          accountReads++;
+          return accountReads === 1 ? {} : accountEntry();
+        }
+        if (method === 'GET') return accountCredentials(['kibana-managed']);
+        return { found: true };
+      });
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({ warnings: [] });
+
+      expect(order).toEqual([
+        `GET ${ACCOUNT_PATH}`,
+        `GET ${CREDENTIALS_PATH}`,
+        `GET ${ACCOUNT_PATH}`,
+        `GET ${CREDENTIALS_PATH}`,
+        `DELETE ${CREDENTIALS_PATH}/token/kibana-managed`,
+        'credential',
+        `DELETE ${ACCOUNT_PATH}`,
+      ]);
+    });
+
+    it('invalidates access tokens left over from an account that is already gone', async () => {
+      mockElasticsearch({ account: {}, tokenNames: [] });
+      esClient.asCurrentUser.security.invalidateToken.mockResolvedValue({
+        invalidated_tokens: 2,
+        previously_invalidated_tokens: 0,
+        error_count: 0,
+      });
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({ warnings: [] });
+      expect(credentialStore.delete).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['with leftover tokens', ['operator-token']],
+      ['without leftover tokens', []],
+    ])(
+      'warns when an account that is already gone keeps its access tokens, %s',
+      async (_, tokenNames) => {
+        mockElasticsearch({ account: {}, tokenNames });
+        esClient.asCurrentUser.security.invalidateToken.mockRejectedValue(new Error('unavailable'));
+
+        await expect(serviceAccounts.delete(request, ACCOUNT_ID)).resolves.toEqual({
+          warnings: [
+            `Service account [${ACCOUNT_ID}] was deleted, but the access tokens it was issued ` +
+              'could not be invalidated.',
+          ],
+        });
+      }
+    );
+
+    it('rejects with a 404 when the account is gone and left nothing behind', async () => {
+      mockElasticsearch({ account: {}, tokenNames: [] });
+      esClient.asCurrentUser.security.invalidateToken.mockResolvedValue({
+        invalidated_tokens: 0,
+        previously_invalidated_tokens: 0,
+        error_count: 0,
+      });
+      credentialStore.findExisting.mockResolvedValue(new Set([ACCOUNT_ID]));
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+      expect(credentialStore.delete).not.toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 404 for a built-in account without touching its tokens', async () => {
+      await expect(serviceAccounts.delete(request, 'elastic/fleet-server')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 404 for an id that is not `{namespace}/{service}`', async () => {
+      await expect(serviceAccounts.delete(request, 'not-a-principal')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
+      license.isEnabled.mockReturnValue(false);
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 403 when the caller lacks the `manage_security` cluster privilege', async () => {
+      mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+      await expect(serviceAccounts.delete(request, ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+      expect(credentialStore.delete).not.toHaveBeenCalled();
+    });
+  });
 });

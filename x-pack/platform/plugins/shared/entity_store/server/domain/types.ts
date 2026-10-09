@@ -47,6 +47,7 @@ export interface GetStatusSuccessResult {
   logsExtractionConfig: LogExtractionConfig;
   /** Config in effect per entity type, keyed by the types with an installed engine. */
   logsExtractionConfigByType: Partial<Record<EntityType, LogExtractionConfig>>;
+  excludedUserNames: string[];
 }
 
 export interface GetStatusNotInstalledResult {

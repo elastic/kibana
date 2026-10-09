@@ -277,13 +277,28 @@ const handleConversationExecution = async ({
     // Generate title when creating a new conversation
     // OR when the conversation still carries the default placeholder title
     const needsTitle = conversationNeedsTitle(conversation) && !subagentCreation;
+    const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
+    const [titleChatModel, { chatModel }, { name: agentName }, privacySettings] = await Promise.all(
+      [
+        needsTitle
+          ? modelProvider.selectModel({ effortLevel: 'low' }).then((model) => model.chatModel)
+          : undefined,
+        modelProvider.getDefaultModel(),
+        agentService.getRegistry({ request }).then((registry) => registry.get(agentId)),
+        loadTracingPrivacySettings({
+          uiSettingsClient: deps.uiSettings.asScopedToClient(
+            deps.savedObjects.getScopedClient(request)
+          ),
+          logger,
+          spaceId,
+        }),
+      ]
+    );
+    const connectorProvider = getConnectorProvider(chatModel.getConnector());
+
     const title$ = (
-      needsTitle
-        ? generateTitle({
-            chatModel: (await modelProvider.selectModel({ effortLevel: 'low' })).chatModel,
-            conversation,
-            nextInput,
-          })
+      titleChatModel
+        ? generateTitle({ chatModel: titleChatModel, conversation, nextInput })
         : of(conversation.title)
     ).pipe(shareReplay(1));
 
@@ -303,12 +318,6 @@ const handleConversationExecution = async ({
       ? executionStartedEvents$({ conversation, agentEvents$ })
       : EMPTY;
 
-    const chatModel = (await modelProvider.getDefaultModel()).chatModel;
-    const connectorProvider = getConnectorProvider(chatModel.getConnector());
-
-    const agentRegistry = await agentService.getRegistry({ request });
-    const { name: agentName } = await agentRegistry.get(agentId);
-
     const { headers } = request;
     const opikTraceId = headers.opik_trace_id as string | undefined;
     const opikParentSpanId = headers.opik_parent_span_id as string | undefined;
@@ -316,15 +325,6 @@ const handleConversationExecution = async ({
       opikTraceId && opikParentSpanId
         ? { opik_trace_id: opikTraceId, opik_parent_span_id: opikParentSpanId }
         : undefined;
-
-    const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
-    const privacySettings = await loadTracingPrivacySettings({
-      uiSettingsClient: deps.uiSettings.asScopedToClient(
-        deps.savedObjects.getScopedClient(request)
-      ),
-      logger,
-      spaceId,
-    });
 
     return withConverseSpan(
       {
@@ -471,16 +471,22 @@ export const collectAndWriteEvents = ({
       await executionClient.appendEvents(execution.executionId, batch);
     };
 
+    let lastFlushAt = 0;
+
+    // Leading edge: the first event after an idle period is written on the next tick, while
+    // flushes still start at most once per batch interval.
     const scheduleFlush = () => {
       if (flushTimer === undefined) {
+        const delay = Math.max(0, lastFlushAt + EVENT_BATCH_INTERVAL_MS - Date.now());
         flushTimer = setTimeout(() => {
           flushTimer = undefined;
+          lastFlushAt = Date.now();
           flushInProgress = flush().catch((err) => {
             logger.error(
               `Failed to flush events for execution ${execution.executionId}: ${err.message}`
             );
           });
-        }, EVENT_BATCH_INTERVAL_MS);
+        }, delay);
       }
     };
 

@@ -20,7 +20,7 @@ import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlis
 import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 import { securityTool } from '../../constants';
 import { checkWatchlistAccess } from './check_watchlist_access';
-import { formatEntityIdsForPrompt } from './entity_ids_preview';
+import { formatEntityIdsForPrompt } from '../shared/entity_ids_preview';
 import { getWatchlistToolAvailability } from './watchlist_availability';
 
 const MAX_ENTITIES_PER_CALL = 100;
@@ -57,7 +57,7 @@ export const removeEntitiesFromWatchlistTool = (
 
 Use when the user asks to remove entities from a named or known watchlist (e.g. "remove this user from the Privileged Users watchlist", "take host:server01 off watchlist X"). Resolve the watchlist id via \`security.list_watchlists\` first when the user named the watchlist.
 
-This tool only removes entities that were **manually assigned** to the watchlist. Entities that came in via an entity source are reported as \`not_found\` in the result with the message "Entity not manually assigned to this watchlist" — to remove those, the user must reconfigure or remove the entity source in the UI.`,
+This tool only removes entities that were **manually assigned** to the watchlist. Entities that came in via an entity source are reported as \`not_found\` in the result with the message "Entity not manually assigned to this watchlist" — those cannot be removed entity-by-entity; use \`security.remove_watchlist_rule_based_data_source\` to stop the query that's adding them (they are then removed automatically on the next watchlist sync), or \`security.list_watchlist_data_sources\` to see what's adding them first.`,
     schema,
     tags: ['security', 'entity-analytics', 'watchlists'],
     annotations: {
@@ -136,7 +136,7 @@ This tool only removes entities that were **manually assigned** to the watchlist
               '',
               formatEntityIdsForPrompt(params.entityIds),
               '',
-              'Only manually-assigned entities will be removed. Entities added via an entity source will be reported as not found — to remove those, reconfigure or remove the entity source in the UI.',
+              'Only manually-assigned entities will be removed. Entities added via an entity source will be reported as not found — use security.remove_watchlist_rule_based_data_source to stop that source instead.',
             ].join('\n'),
             confirm_text: 'Remove',
             cancel_text: 'Cancel',

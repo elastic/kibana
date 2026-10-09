@@ -43,7 +43,7 @@ export function buildActionGroups(
   for (const { episode, policy } of matched) {
     let groupKey: Record<string, unknown>;
     switch (policy.groupingMode) {
-      case 'per_episode':
+      case 'per_alert':
         groupKey = {
           groupHash: episode.group_hash,
           episodeId: episode.episode_id,

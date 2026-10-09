@@ -15,6 +15,16 @@ jest.mock('./hooks/use_transaction_detail_flyout_links', () => ({
   useTransactionDetailFlyoutLinks: () => mockUseTransactionDetailFlyoutLinks(),
 }));
 
+const mockUseTransactionDetailFlyoutAlertsBadge = jest.fn();
+jest.mock('./hooks/use_transaction_detail_flyout_alerts_badge', () => ({
+  useTransactionDetailFlyoutAlertsBadge: () => mockUseTransactionDetailFlyoutAlertsBadge(),
+}));
+
+const mockUseTransactionDetailFlyoutContext = jest.fn();
+jest.mock('./transaction_detail_flyout_context', () => ({
+  useTransactionDetailFlyoutContext: () => mockUseTransactionDetailFlyoutContext(),
+}));
+
 function renderHeader(isFiltersPending = false) {
   return render(
     <IntlProvider locale="en">
@@ -28,17 +38,26 @@ function renderHeader(isFiltersPending = false) {
 }
 
 describe('TransactionDetailFlyoutHeader', () => {
-  afterEach(() => {
-    cleanup();
-  });
-
-  it('links the transaction name to APM transaction details when href is available', () => {
+  beforeEach(() => {
     mockUseTransactionDetailFlyoutLinks.mockReturnValue({
       loading: false,
       apm: { transactionDetailsHref: '/app/apm/services/checkout/transactions/view?name=GET' },
       discover: { href: undefined, openInDiscoverTab: undefined },
     });
+    mockUseTransactionDetailFlyoutAlertsBadge.mockReturnValue({
+      show: false,
+      count: 0,
+    });
+    mockUseTransactionDetailFlyoutContext.mockReturnValue({
+      filters: { serviceName: 'checkout' },
+    });
+  });
 
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('links the transaction name to APM transaction details when href is available', () => {
     renderHeader();
 
     const link = screen.getByTestId('transactionDetailFlyoutTitleLink');
@@ -49,12 +68,6 @@ describe('TransactionDetailFlyoutHeader', () => {
   });
 
   it('shows a tooltip describing the title link destination', async () => {
-    mockUseTransactionDetailFlyoutLinks.mockReturnValue({
-      loading: false,
-      apm: { transactionDetailsHref: '/app/apm/services/checkout/transactions/view?name=GET' },
-      discover: { href: undefined, openInDiscoverTab: undefined },
-    });
-
     renderHeader();
 
     const link = screen.getByTestId('transactionDetailFlyoutTitleLink');
@@ -81,14 +94,38 @@ describe('TransactionDetailFlyoutHeader', () => {
   });
 
   it('shows a spinner next to the title while filters are pending', () => {
-    mockUseTransactionDetailFlyoutLinks.mockReturnValue({
-      loading: false,
-      apm: { transactionDetailsHref: undefined },
-      discover: { href: undefined, openInDiscoverTab: undefined },
-    });
-
     renderHeader(true);
 
     expect(screen.getByTestId('transactionDetailFlyoutFiltersPendingSpinner')).toBeInTheDocument();
+  });
+
+  it('renders the alerts badge when the alerts hook says to show it', () => {
+    mockUseTransactionDetailFlyoutAlertsBadge.mockReturnValue({
+      show: true,
+      count: 3,
+      href: '/app/apm/services/checkout/alerts?kuery=transaction.name:%20%22GET%22',
+    });
+
+    renderHeader();
+
+    const badge = screen.getByTestId('transactionDetailFlyoutAlertsBadge');
+    expect(badge).toHaveTextContent('3');
+    expect(badge).toHaveAttribute(
+      'href',
+      '/app/apm/services/checkout/alerts?kuery=transaction.name:%20%22GET%22'
+    );
+    expect(badge).toHaveAttribute('data-ebt-action', 'viewAlerts');
+    expect(badge).toHaveAttribute('data-ebt-element', 'transactionDetailFlyoutAlertsBadge');
+  });
+
+  it('hides the alerts badge when the alerts hook says not to show it', () => {
+    mockUseTransactionDetailFlyoutAlertsBadge.mockReturnValue({
+      show: false,
+      count: 0,
+    });
+
+    renderHeader();
+
+    expect(screen.queryByTestId('transactionDetailFlyoutAlertsBadge')).not.toBeInTheDocument();
   });
 });

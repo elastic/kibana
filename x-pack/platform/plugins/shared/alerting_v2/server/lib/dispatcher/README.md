@@ -222,8 +222,8 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 
 | Query                           | Scope   | Actions                                        | Filter                                  | Grouped by                          |
 | ------------------------------- | ------- | ---------------------------------------------- | --------------------------------------- | ----------------------------------- |
-| `getEpisodeSuppressionsQueries` | episode | `ack` / `unack`, `deactivate` / `activate`     | `episode_id IN (<batch episode ids>)`   | `subject`, `group_hash`, `episode_id` |
-| `getSeriesSuppressionsQueries`  | series  | `snooze` / `unsnooze`                          | `(rule_id \| source, group_hash)` pairs of the batch, `episode_id IS NULL` | `subject`, `group_hash`             |
+| `getEpisodeSuppressionsQueries` | episode | `ack` / `unack`, `deactivate` / `activate`     | `alert_id IN (<batch episode ids>)`     | `subject`, `group_hash`, `alert_id` |
+| `getSeriesSuppressionsQueries`  | series  | `snooze` / `unsnooze`                          | `(rule_id \| source, group_hash)` pairs of the batch, `alert_id IS NULL` | `subject`, `group_hash`             |
 
 Neither query has a time bound: an indefinite snooze or an ack stays in effect however old it is. Each query returns at most one row per literal of its `IN` chunk, so result size is bounded by the batch, not by how much history `.alert-actions` has accumulated. Episode ids are chunked up to `ESQL_QUERY_ROW_LIMIT` per request; series pairs are chunked by `SUPPRESSIONS_IN_CLAUSE_LITERAL_BUDGET_BYTES` to stay under the ES|QL statement size cap. Reaching the row limit on any chunk logs `FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED`, which indicates that invariant broke.
 

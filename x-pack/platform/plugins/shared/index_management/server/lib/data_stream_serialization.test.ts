@@ -33,6 +33,8 @@ describe('deserializeDataStream', () => {
         index_uuid: 'uuid-2',
         prefer_ilm: false,
         managed_by: 'Index Lifecycle Management',
+        ilm_policy: 'historical-policy',
+        index_mode: 'standard',
       },
     ],
     generation: 2,
@@ -98,6 +100,8 @@ describe('deserializeDataStream', () => {
             uuid: 'uuid-2',
             preferILM: false,
             managedBy: 'Index Lifecycle Management',
+            ilmPolicyName: 'historical-policy',
+            indexMode: 'standard',
           },
         ],
         generation: 2,
@@ -194,6 +198,52 @@ describe('deserializeDataStream', () => {
         },
         indexMode: 'standard',
       });
+    });
+
+    it('should preserve an explicitly empty backing-index ILM policy setting', () => {
+      const result = deserializeDataStream(
+        {
+          ...mockDataStreamFromEs,
+          indices: [
+            {
+              index_name: '.ds-test-data-stream-000001',
+              index_uuid: 'uuid-1',
+              prefer_ilm: true,
+              managed_by: 'Unmanaged',
+              ilm_policy: '',
+              index_mode: 'standard',
+            },
+          ],
+        },
+        false
+      );
+
+      expect(result.indices[0]).toMatchObject({
+        preferILM: true,
+        managedBy: 'Unmanaged',
+        ilmPolicyName: '',
+        indexMode: 'standard',
+      });
+    });
+
+    it('should preserve a backing-index mode unsupported by the Kibana UI', () => {
+      const result = deserializeDataStream(
+        {
+          ...mockDataStreamFromEs,
+          indices: [
+            {
+              index_name: '.ds-test-data-stream-000001',
+              index_uuid: 'uuid-1',
+              prefer_ilm: false,
+              managed_by: 'Unmanaged',
+              index_mode: 'columnar' as EnhancedDataStreamFromEs['indices'][number]['index_mode'],
+            },
+          ],
+        },
+        false
+      );
+
+      expect(result.indices[0].indexMode).toBe('columnar');
     });
 
     it('populates lifecycleSettings only from explicit options', () => {

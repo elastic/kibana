@@ -30,6 +30,11 @@ import { calculateNextRunAtFromSchedule } from './lib/get_next_run_at';
 import { TaskAlreadyRunningError } from './lib/errors';
 import type { TaskPollingLifecycle } from './polling_lifecycle';
 import { getExecutionId } from './lib/get_execution_id';
+import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
+import {
+  taskManagerClaimNudgeTelemetry,
+  type ClaimNudgeSource,
+} from './otel/claim_nudge_telemetry';
 
 const scheduleOptionsToStoreApiKeyOptions = (
   options?: ScheduleOptions
@@ -62,6 +67,7 @@ export interface TaskSchedulingOpts {
   middleware: Middleware;
   taskManagerId: string;
   taskPollingLifecycle?: TaskPollingLifecycle; // subscribe to task lifecycle events
+  claimNudgeService?: TaskManagerClaimNudgeService;
 }
 
 /**
@@ -78,6 +84,16 @@ export interface BulkUpdateTaskResult {
    */
   errors: ErrorOutput[];
 }
+export interface RunSoonOptions {
+  /** Run even when the task is already running on another node. */
+  force?: boolean;
+  /**
+   * Also requests a best-effort extra claim cycle on background nodes. The cycle may claim other
+   * eligible tasks too, so any required delay must be part of a task's eligibility.
+   */
+  requestImmediateClaim?: boolean;
+}
+
 export interface RunSoonResult {
   id: ConcreteTaskInstance['id'];
   forced: boolean;
@@ -102,6 +118,7 @@ export class TaskScheduling {
   private logger: Logger;
   private middleware: Middleware;
   private readonly taskPolling: TaskPollingLifecycle | undefined;
+  private readonly claimNudgeService: TaskManagerClaimNudgeService | undefined;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -113,6 +130,27 @@ export class TaskScheduling {
     this.middleware = opts.middleware;
     this.store = opts.taskStore;
     this.taskPolling = opts.taskPollingLifecycle;
+    this.claimNudgeService = opts.claimNudgeService;
+  }
+
+  private get claimNudgeEnabled(): boolean {
+    return this.claimNudgeService !== undefined;
+  }
+
+  private async notifyClaimNudge(taskId: string, source: ClaimNudgeSource) {
+    if (!this.claimNudgeService) {
+      return;
+    }
+    try {
+      taskManagerClaimNudgeTelemetry.recordClaimNudge(source);
+      await this.claimNudgeService.notify();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      // Not "failed": a timed-out write may still have been applied.
+      this.logger.warn(
+        `Could not confirm the Task Manager claim nudge for task ${taskId}; it will run on the next poll cycle: ${message}`
+      );
+    }
   }
 
   /**
@@ -311,9 +349,19 @@ export class TaskScheduling {
    * Run task.
    *
    * @param taskId - The task being scheduled.
+   * @param forceOrOptions - Legacy positional `force`, or the options bag. Set
+   * `requestImmediateClaim` to also request a best-effort extra claim cycle.
    * @returns {Promise<RunSoonResult>}
    */
-  public async runSoon(taskId: string, force: boolean = false): Promise<RunSoonResult> {
+  public async runSoon(
+    taskId: string,
+    forceOrOptions?: boolean | RunSoonOptions
+  ): Promise<RunSoonResult> {
+    const options: RunSoonOptions =
+      typeof forceOrOptions === 'boolean' ? { force: forceOrOptions } : forceOrOptions ?? {};
+    const force = options.force === true;
+    // The refresh only serves the nudge, so both are skipped together.
+    const nudge = options.requestImmediateClaim === true && this.claimNudgeEnabled;
     let forced: boolean = false;
     let conflict: boolean = false;
     const task = await this.store.get(taskId);
@@ -350,7 +398,7 @@ export class TaskScheduling {
           scheduledAt: new Date(),
           runAt: new Date(),
         },
-        { validate: false }
+        { validate: false, refresh: nudge }
       );
     } catch (e) {
       if (e.statusCode === 409) {
@@ -363,6 +411,11 @@ export class TaskScheduling {
         throw e;
       }
     }
+
+    if (!conflict && nudge) {
+      void this.notifyClaimNudge(taskId, 'run_soon');
+    }
+
     return conflict ? { id: task.id, forced, conflict: true } : { id: task.id, forced };
   }
 

@@ -258,9 +258,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(value).to.eql('.es()');
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/244933
-      describe.skip('dynamic suggestions for argument values', () => {
+      describe('dynamic suggestions for argument values', () => {
         describe('.es()', () => {
+          const typeExpressionTriggeringSuggestions = async (expression: string) => {
+            const prefix = expression.slice(0, -1);
+            const triggerCharacter = expression.slice(-1);
+            await monacoEditor.typeCodeEditorValue(prefix, 'timelionCodeEditor');
+            await retry.try(async () => {
+              const value = await monacoEditor.getCodeEditorValue(0);
+              expect(value.includes(prefix)).to.eql(true);
+            });
+            await monacoEditor.typeCodeEditorValue(triggerCharacter, 'timelionCodeEditor');
+          };
+
           it('should show index pattern suggestions for index argument', async () => {
             await monacoEditor.setCodeEditorValue('');
             await monacoEditor.typeCodeEditorValue('.es(index=', 'timelionCodeEditor');
@@ -274,11 +284,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
 
           it('should show field suggestions for timefield argument when index pattern set', async () => {
+            const expression = '.es(index=logstash-*, timefield=';
             await monacoEditor.setCodeEditorValue('');
-            await monacoEditor.typeCodeEditorValue(
-              '.es(index=logstash-*, timefield=',
-              'timelionCodeEditor'
-            );
+            await typeExpressionTriggeringSuggestions(expression);
             // other suggestions might be shown for a short amount of time - retry until metric suggestions show up
             await retry.try(async () => {
               const suggestions = await timelion.getSuggestionItemsText();
@@ -288,13 +296,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
 
           it('should show field suggestions for split argument when index pattern set', async () => {
+            const expression = '.es(index=logstash-*, timefield=@timestamp, split=';
             await monacoEditor.setCodeEditorValue('');
-            await monacoEditor.typeCodeEditorValue(
-              '.es(index=logstash-*, timefield=@timestamp, split=',
-              'timelionCodeEditor'
-            );
-            // wait for split fields to load
-            await common.sleep(300);
+            await typeExpressionTriggeringSuggestions(expression);
             // other suggestions might be shown for a short amount of time - retry until metric suggestions show up
             await retry.try(async () => {
               const suggestions = await timelion.getSuggestionItemsText();
@@ -304,10 +308,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
 
           it('should show field suggestions for metric argument when index pattern set', async () => {
-            await monacoEditor.typeCodeEditorValue(
-              '.es(index=logstash-*, timefield=@timestamp, metric=avg:',
-              'timelionCodeEditor'
-            );
+            const expression = '.es(index=logstash-*, timefield=@timestamp, metric=avg:';
+            await monacoEditor.setCodeEditorValue('');
+            await typeExpressionTriggeringSuggestions(expression);
             // other suggestions might be shown for a short amount of time - retry until metric suggestions show up
             await retry.try(async () => {
               const suggestions = await timelion.getSuggestionItemsText();

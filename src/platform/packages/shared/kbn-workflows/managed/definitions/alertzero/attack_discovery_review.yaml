@@ -70,7 +70,9 @@ triggers:
           maxItems: 1000
           items:
             type: string
-            maxLength: 512
+            # The most `security.getAlertEntities` accepts; one longer id would fail its
+            # whole read of the alerts.
+            maxLength: 256
           description: >-
             Document ids of the DETECTION alerts the Attack Discovery correlated.
             Not the Attack Discovery's own id — that is `attack_discovery_id`.
@@ -153,6 +155,11 @@ consts:
   # empty array. A const is the only way to spell an empty-array fallback, which is
   # what keeps `| size` from erroring when `alert_ids` is omitted.
   no_alert_ids: []
+  # How many hosts and users one attack records as Impact: the most-alerted win.
+  # Half of MAX_ENTITY_IDS (100), the most one Investigation's merged impact may
+  # hold, so another writer can still add to it, and few enough pills for the
+  # landing page to stay readable.
+  impact_entity_cap: 50
 steps:
   # kibana-q0t5: the Investigation id is a pure function of the attack, so every
   # execution that reviews this attack addresses the SAME Investigation — a hand
@@ -382,6 +389,78 @@ steps:
           Attached the Attack Discovery. Attempted attachment of
           {{ inputs.alert_ids | default: consts.no_alert_ids | size }} correlated detection
           alert(s); see the attachment list for the batches that landed.
+    on-failure:
+      continue: true
+
+  # Impact: the hosts and users this attack touched, recorded on the Investigation
+  # with `investigations.attachImpact`.
+  #
+  # Impact requires no agent, and no inference; the correlated alerts are the only
+  # source.
+  #
+  # Impact is not required for the review. Nothing below reads it, the FP/TP analysis loads
+  # its own entities, and a review that records no impact is still a complete review. So
+  # every impact related step continues on failure, and is skipped rather than failed when
+  # the step before it left it nothing to work with. The outcome is journaled either way.
+  #
+  # `security.getAlertEntities` derives every id with the Entity Store's own identity
+  # rules, the same way the Attack Discovery flyout resolves a badge to an entity, so
+  # it needs no Entity Store in the space and does NOT depend on detection having stamped
+  # `kibana.alert.entity.id`.
+  - name: collect_impact_entities
+    type: security.getAlertEntities
+    if: "${{ inputs.alert_ids != blank }}"
+    timeout: "60s"
+    with:
+      alert_ids: "${{ inputs.alert_ids }}"
+      max_entities: "${{ consts.impact_entity_cap }}"
+    on-failure:
+      continue: true
+
+  # Merged by id onto whatever impact the Investigation already carries, so a
+  # re-review of the same attack rewrites the same entities rather than adding a
+  # second set.
+  #
+  # Besides the impact record, this puts one `investigation_impact` attachment on the
+  # Investigation.
+  - name: attach_impact
+    type: investigations.attachImpact
+    if: "${{ steps.collect_impact_entities.output.entities != blank }}"
+    with:
+      conversationId: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+      entities: "${{ steps.collect_impact_entities.output.entities }}"
+    on-failure:
+      continue: true
+
+  # Says whether impact was recorded, or why it was not recorded.
+  #
+  # A failed attach is described by its error type, never its message: an internal
+  # failure's message would land in the Investigation, where every later agent round
+  # reads it as user input. The execution history keeps the message.
+  - name: journal_impact_recorded
+    type: workflow.execute
+    with:
+      workflow-id: "{{ consts.journal_note }}"
+      inputs:
+        conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+        message: >-
+          {% if steps.attach_impact.output.entities != blank %}Recorded impact:
+          {{ steps.collect_impact_entities.output.entities | size }} host(s) and user(s){% if
+          steps.collect_impact_entities.output.truncated == true %} (the most alerted of
+          {{ steps.collect_impact_entities.output.total }}){% endif %}.{% elsif
+          steps.attach_impact.error != blank %}Could not record impact{% case
+          steps.attach_impact.error.type %}{% when 'PermissionError' %}: the review's
+          principal lacks the Manage investigations privilege.{% when 'NotFoundError'
+          %}: the review's principal does not own this Investigation.{% when
+          'ValidationError' %}: it was rejected as invalid (an Investigation's impact
+          holds at most 100 hosts and users).{% when 'ConflictError' %}: another writer
+          updated it at the same time. Re-running the review retries it.{% else %}. See
+          review execution {{ execution.id }}.{% endcase %}{% elsif
+          steps.collect_impact_entities.error != blank %}Could not read the correlated
+          alerts' hosts and users, so no impact was recorded. See review execution
+          {{ execution.id }}.{% elsif inputs.alert_ids == blank %}No impact recorded: the
+          review was given no correlated alerts.{% else %}No impact recorded: the
+          {{ inputs.alert_ids | size }} correlated alert(s) name no host or user.{% endif %}
     on-failure:
       continue: true
 

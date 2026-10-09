@@ -26,11 +26,17 @@ const getUrlForApp = jest.fn().mockReturnValue('/app/nightshift');
 const navigateToApp = jest.fn();
 const setBreadcrumbs = jest.fn();
 
-const setCapabilities = (canConfigure: boolean) => {
+const setCapabilities = ({
+  canConfigure,
+  canManage,
+}: {
+  canConfigure: boolean;
+  canManage: boolean;
+}) => {
   mockUseKibana.mockReturnValue({
     core: {
       application: {
-        capabilities: { nightshift: { configure: canConfigure } },
+        capabilities: { nightshift: { configure: canConfigure, manage: canManage } },
         getUrlForApp,
         navigateToApp,
       },
@@ -42,7 +48,7 @@ const setCapabilities = (canConfigure: boolean) => {
 describe('SettingsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    setCapabilities(true);
+    setCapabilities({ canConfigure: true, canManage: true });
     mockUseSignificantEventsAvailability.mockReturnValue({
       availability: { available: true },
       isLoading: false,
@@ -50,8 +56,8 @@ describe('SettingsPage', () => {
     } as ReturnType<typeof useSignificantEventsAvailability>);
   });
 
-  it('redirects users without configure permission to Nightshift', async () => {
-    setCapabilities(false);
+  it('redirects users without manage and configure permission to Nightshift', async () => {
+    setCapabilities({ canConfigure: true, canManage: false });
 
     render(<SettingsPage />);
 

@@ -6,20 +6,25 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
 import { waitFor } from '@testing-library/dom';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
-import { act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import { QuickSearchVisor, type QuickSearchVisorProps } from '.';
+import { NL_TEXTAREA_MAX_HEIGHT, visorStyles } from './visor.styles';
 
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLAdHocDataview: jest.fn().mockResolvedValue({
+jest.mock('@kbn/data-source', () => ({
+  ...jest.requireActual('@kbn/data-source'),
+  EsqlSource: { create: jest.fn().mockResolvedValue({ id: 'mock-esql-source' }) },
+  registerEsqlSourceInDataViewsCache: jest.fn().mockResolvedValue({
     id: 'mock-adhoc-dataview',
     title: 'test_index',
     type: 'esql',
@@ -74,12 +79,104 @@ describe('Quick search visor', () => {
     jest.clearAllMocks();
   });
 
+  // `renderWithI18n` wraps in I18nProvider; rerender with it too, or the visor remounts.
+  const rerenderVisor = (
+    rerender: (ui: React.ReactElement) => void,
+    visorProps: QuickSearchVisorProps
+  ) => rerender(<I18nProvider>{renderESQLVisor(visorProps)}</I18nProvider>);
+
+  const blurKqlInput = () => {
+    const { onChangeQueryInputFocus } = (kqlMock.QueryStringInput as jest.Mock).mock.calls.at(
+      -1
+    )[0];
+    act(() => onChangeQueryInputFocus(false));
+  };
+
+  const lastIndexPatterns = () =>
+    (kqlMock.QueryStringInput as jest.Mock).mock.calls.at(-1)[0].indexPatterns;
+
+  const focusKqlInput = () => {
+    const { onChangeQueryInputFocus } = (kqlMock.QueryStringInput as jest.Mock).mock.calls.at(
+      -1
+    )[0];
+    act(() => onChangeQueryInputFocus(true));
+  };
+
   it('should render the KQL query input', async () => {
     renderWithI18n(renderESQLVisor({ ...props }));
 
     await waitFor(() => {
       expect(kqlMock.QueryStringInput).toHaveBeenCalled();
     });
+  });
+
+  it('looks up the source only once the KQL input is focused, not while the query is typed', async () => {
+    const { rerender } = renderWithI18n(renderESQLVisor({ ...props, query: 'FROM l' }));
+    rerenderVisor(rerender, { ...props, query: 'FROM lo' });
+    rerenderVisor(rerender, { ...props, query: 'FROM logs' });
+    await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
+    expect(EsqlSource.create).not.toHaveBeenCalled();
+
+    focusKqlInput();
+
+    await waitFor(() => expect(EsqlSource.create).toHaveBeenCalledTimes(1));
+    expect(EsqlSource.create).toHaveBeenCalledWith(expect.objectContaining({ query: 'FROM logs' }));
+  });
+
+  it('keeps the fields after blur, so refocusing shows them immediately', async () => {
+    renderWithI18n(renderESQLVisor({ ...props, query: 'FROM logs' }));
+    await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
+    focusKqlInput();
+    await waitFor(() =>
+      expect(lastIndexPatterns()).toEqual([expect.objectContaining({ id: 'mock-adhoc-dataview' })])
+    );
+
+    blurKqlInput();
+    focusKqlInput();
+
+    expect(lastIndexPatterns()).toEqual([expect.objectContaining({ id: 'mock-adhoc-dataview' })]);
+  });
+
+  it('drops the fields of a previous source once focused again', async () => {
+    const { rerender } = renderWithI18n(renderESQLVisor({ ...props, query: 'FROM logs' }));
+    await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
+    focusKqlInput();
+    await waitFor(() => expect(lastIndexPatterns()).toHaveLength(1));
+    blurKqlInput();
+
+    rerenderVisor(rerender, { ...props, query: 'FROM metrics' });
+    // Keep the new lookup pending, to see what is shown meanwhile.
+    (EsqlSource.create as jest.Mock).mockReturnValueOnce(new Promise(() => {}));
+    focusKqlInput();
+
+    expect(lastIndexPatterns()).toEqual([]);
+  });
+
+  it('suggests the fields of the queried dataset, not of the query result', async () => {
+    renderWithI18n(
+      renderESQLVisor({ ...props, query: 'FROM meow1 | STATS count = COUNT(*) BY host' })
+    );
+    await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
+    focusKqlInput();
+
+    await waitFor(() =>
+      expect(kqlMock.QueryStringInput).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          indexPatterns: [expect.objectContaining({ id: 'mock-adhoc-dataview' })],
+        }),
+        expect.anything()
+      )
+    );
+    expect(EsqlSource.create).toHaveBeenCalledWith({
+      query: 'FROM meow1',
+      http: corePluginMock.http,
+      resolveTimeField: false,
+    });
+    expect(registerEsqlSourceInDataViewsCache).toHaveBeenCalledWith(
+      dataMock.dataViews,
+      { id: 'mock-esql-source' },
+      corePluginMock.http
+    );
   });
 
   it('should submit a KQL filter using indexes from the editor query', async () => {
@@ -234,6 +331,59 @@ describe('Quick search visor', () => {
       expect(getByTestId('esqlVisorModeKql')).toBeInTheDocument();
       expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-pressed', 'false');
       expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    it('keeps the visor one row and overlays the focused NL textarea', () => {
+      const { result } = renderHook(() => visorStyles(useEuiTheme(), true, true), {
+        wrapper: EuiThemeProvider,
+      });
+
+      expect(result.current.visorContainer.styles).not.toContain(NL_TEXTAREA_MAX_HEIGHT);
+      expect(result.current.nlInput.styles).toContain('.euiTextArea:focus');
+      expect(result.current.nlInput.styles).toContain('position:absolute');
+      expect(result.current.nlInput.styles).toContain(`max-height:${NL_TEXTAREA_MAX_HEIGHT}`);
+    });
+
+    it('expands the NL textarea on focus, grows with multiline input, and collapses on blur', async () => {
+      let scrollHeight = 40;
+      const scrollHeightSpy = jest
+        .spyOn(HTMLTextAreaElement.prototype, 'scrollHeight', 'get')
+        .mockImplementation(function (this: HTMLTextAreaElement) {
+          return this.getAttribute('data-test-subj') === 'esqlVisorNLQueryInput' ? scrollHeight : 0;
+        });
+
+      try {
+        const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props }));
+        await waitFor(() => expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument());
+        await act(async () => {
+          await userEvent.click(getByTestId('esqlVisorAskAiButton'));
+        });
+
+        const nlInput = getByTestId('esqlVisorNLQueryInput');
+        expect(nlInput.style.height).toBe('');
+
+        await act(async () => {
+          nlInput.focus();
+        });
+        expect(nlInput.style.getPropertyValue('height')).toBe('40px');
+
+        scrollHeight = 96;
+        await act(async () => {
+          await userEvent.type(
+            nlInput,
+            'first line{Shift>}{Enter}{/Shift}second line{Shift>}{Enter}{/Shift}third line'
+          );
+        });
+        expect(nlInput).toHaveValue('first line\nsecond line\nthird line');
+        expect(nlInput.style.getPropertyValue('height')).toBe('96px');
+
+        await act(async () => {
+          nlInput.blur();
+        });
+        expect(nlInput.style.height).toBe('');
+      } finally {
+        scrollHeightSpy.mockRestore();
+      }
     });
 
     it('submits natural language when the editor query is empty and submit action is disabled', async () => {

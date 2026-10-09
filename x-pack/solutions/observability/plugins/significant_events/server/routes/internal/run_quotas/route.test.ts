@@ -9,7 +9,10 @@ import {
   DEFAULT_RUN_QUOTA_SETTINGS,
   type RunQuotaConsumeRequest,
 } from '../../../../common/run_quotas';
-import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import {
+  NIGHTSHIFT_API_PRIVILEGES,
+  NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
+} from '@kbn/nightshift-shared';
 import type { SignificantEventsServer } from '../../../types';
 import type {
   RunQuotaSavedObjectsRepository,
@@ -106,7 +109,7 @@ describe('Significant Events run quota routes', () => {
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     });
     expect(putRoute.security.authz).toEqual({
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     });
     expect(consumeRoute.security.authz).toEqual({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],

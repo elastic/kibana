@@ -753,7 +753,8 @@ export class LensVisService {
 
     const isTextBased = isOfAggregateQueryType(query);
     const requestData = {
-      dataViewId: dataSource.id,
+      // The chart's data view, which is also the Lens layer index the session API derives it from.
+      dataViewId: resolveLensDataView(dataSource)?.id ?? dataSource.id,
       timeField: timeFieldName,
       timeInterval: isTextBased ? undefined : timeInterval,
       breakdownField: breakdownField?.name,

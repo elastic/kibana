@@ -106,9 +106,9 @@ describe('createActionPolicyManagementSkill', () => {
     expect(payloadRef?.content).toContain('### `data`');
     expect(payloadRef?.content).toContain('## Example');
     expect(payloadRef?.content).toContain('`policyId`');
-    expect(payloadRef?.content).toContain('`episodes`');
+    expect(payloadRef?.content).toContain('`alerts`');
     expect(payloadRef?.content).toContain('`rules`');
-    expect(payloadRef?.content).toContain('`episode_status`');
+    expect(payloadRef?.content).toContain('`alert_status`');
   });
 
   it('exposes schema-generated matcher, grouping, and throttle references', () => {
@@ -118,13 +118,13 @@ describe('createActionPolicyManagementSkill', () => {
     );
 
     expect(byName['action-policy-matchers']).toContain('# Action Policy Matchers');
-    expect(byName['action-policy-matchers']).toContain('`episode_status`');
+    expect(byName['action-policy-matchers']).toContain('`alert_status`');
     expect(byName['action-policy-matchers']).toContain('matcher.tags');
     // rule.id/rule.tags appear in an exclusion note, not as usable KQL field:value syntax
     expect(byName['action-policy-matchers']).not.toContain('rule.id:');
     expect(byName['action-policy-matchers']).not.toContain('rule.tags:');
 
-    expect(byName['action-policy-grouping-modes']).toContain('`per_episode`');
+    expect(byName['action-policy-grouping-modes']).toContain('`per_alert`');
     expect(byName['action-policy-throttle-strategies']).toContain('`on_status_change`');
     expect(byName['action-policy-throttle-strategies']).toContain(
       'action-policy-throttle-grouping-compatibility.md'
@@ -132,7 +132,7 @@ describe('createActionPolicyManagementSkill', () => {
     expect(byName['action-policy-throttle-grouping-compatibility']).toContain(
       '# Throttle / Grouping Compatibility'
     );
-    expect(byName['action-policy-throttle-grouping-compatibility']).toContain('`per_episode`');
+    expect(byName['action-policy-throttle-grouping-compatibility']).toContain('`per_alert`');
 
     expect(byName['workflow-destinations']).toContain('# Workflows');
     expect(byName['dispatch-flow']).toContain('# Dispatch Flow');

@@ -54,11 +54,11 @@ export const getDispatchableAlertEventsQuery = ({
       | WHERE type IS NULL OR (@timestamp >= ${gte}::datetime AND @timestamp <= ${lte}::datetime)
       | EVAL
           rule_id = COALESCE(rule.id, rule_id),
-          episode_id = COALESCE(episode.id, episode_id),
-          episode_status = episode.status
+          episode_id = COALESCE(alert.id, alert_id),
+          episode_status = alert.status
       | EVAL ${SUBJECT_EVAL}
       | WHERE subject IS NOT NULL
-      | DROP episode.id, rule.id, episode.status
+      | DROP alert.id, alert_id, rule.id, alert.status
       | INLINE STATS last_fired = max(last_series_event_timestamp) WHERE action_type == "fire" OR action_type == "suppress" OR action_type == "unmatched" BY subject, group_hash
       | WHERE last_fired IS NULL OR last_fired < @timestamp
       | STATS
@@ -182,13 +182,13 @@ const buildSuppressionsPreFilter = (
 };
 
 // Returns one request per chunk (see ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES). Safe to concat:
-// STATS keys on episode_id, the same key used for chunking.
+// STATS keys on alert_id, the same key used for chunking.
 //
-// Ack and deactivate target a single episode, so filtering on the scan's episode ids reads only
-// the current episodes' actions and a series' past episodes never reach the output. Episode ids
-// are UUIDv4, so there is one row per id and rows per chunk stay within the literal cap, below
-// ESQL_QUERY_ROW_LIMIT. subject and group_hash stay in the BY clause so a reused id cannot merge
-// the actions of two series.
+// Ack and deactivate target a single episode, so filtering alert_id on the scan's episode ids
+// reads only the current episodes' actions and a series' past episodes never reach the output.
+// Episode ids are UUIDv4, so there is one row per id and rows per chunk stay within the literal
+// cap, below ESQL_QUERY_ROW_LIMIT. subject and group_hash stay in the BY clause so a reused id
+// cannot merge the actions of two series.
 export const getEpisodeSuppressionsQueries = (
   alertEpisodes: readonly AlertEpisode[]
 ): EsqlRequest[] => {
@@ -198,7 +198,7 @@ export const getEpisodeSuppressionsQueries = (
     const ids = chunk.map((id) => esql.str(id));
 
     return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
-      | WHERE episode_id IN (${ids}) AND action_type IN ("ack", "unack", "deactivate", "activate")
+      | WHERE alert_id IN (${ids}) AND action_type IN ("ack", "unack", "deactivate", "activate")
       | EVAL ${SUBJECT_EVAL}
       | WHERE subject IS NOT NULL
       | STATS
@@ -207,13 +207,13 @@ export const getEpisodeSuppressionsQueries = (
           source = LAST(source, @timestamp),
           space_id = LAST(space_id, @timestamp),
           rule_id = LAST(rule_id, @timestamp)
-        BY subject, group_hash, episode_id
+        BY subject, group_hash, alert_id
       | EVAL should_suppress = CASE(
           last_ack_action == "ack", true,
           last_deactivate_action == "deactivate", true,
           false
         )
-      | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, source, space_id
+      | KEEP rule_id, group_hash, alert_id, should_suppress, last_ack_action, last_deactivate_action, source, space_id
       | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
   });
 };
@@ -234,8 +234,8 @@ const getMinLastEventTimestamp = (alertEpisodes: readonly AlertEpisode[]): strin
 // row per pair. minLastEventTimestamp is computed from the full input so snooze-expiry
 // classification is consistent across chunks.
 //
-// Snooze and unsnooze are series-level actions persisted with a null episode_id; action docs
-// carrying an episode_id are not series actions and are ignored.
+// Snooze and unsnooze are series-level actions persisted with a null alert_id; action docs
+// carrying an alert_id are not series actions and are ignored.
 //
 // Expired snoozes are mapped to "snooze_expired" instead of being filtered out: they must stay
 // in the row set so LAST() still picks them as the latest snooze intent. Dropping them before
@@ -277,7 +277,7 @@ export const getSeriesSuppressionsQueries = (
 
       return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
         | WHERE ${preFilter}
-        | WHERE episode_id IS NULL AND action_type IN ("snooze", "unsnooze")
+        | WHERE alert_id IS NULL AND action_type IN ("snooze", "unsnooze")
         | EVAL ${SUBJECT_EVAL}
         | WHERE subject IS NOT NULL
         | EVAL _pair_key = CONCAT(subject, ${PAIR_SEPARATOR}, group_hash)
@@ -311,8 +311,8 @@ export const getLastNotifiedTimestampsQueries = (
 
     return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
       | WHERE ${whereClause}
-      | STATS last_notified = MAX(@timestamp), episode_status = LAST(episode_status, @timestamp) BY action_group_id
-      | KEEP action_group_id, last_notified, episode_status
+      | STATS last_notified = MAX(@timestamp), alert_status = LAST(alert_status, @timestamp) BY action_group_id
+      | KEEP action_group_id, last_notified, alert_status
       | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
   });
 };

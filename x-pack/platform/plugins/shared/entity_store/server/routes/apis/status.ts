@@ -54,6 +54,7 @@ type StatusEngine = Omit<
 export interface EntityStoreStatusResponseBody {
   status: EntityStoreStatus;
   engines: StatusEngine[];
+  excludedUserNames?: string[];
 }
 
 const querySchema = z.object({
@@ -151,7 +152,7 @@ export function registerStatus(router: EntityStorePluginRouter) {
             });
           }
 
-          const { logsExtractionConfig, logsExtractionConfigByType } =
+          const { logsExtractionConfig, logsExtractionConfigByType, excludedUserNames } =
             rest as GetStatusSuccessResult;
 
           return res.ok({
@@ -163,6 +164,7 @@ export function registerStatus(router: EntityStorePluginRouter) {
                   logsExtractionConfigByType[engine.type] ?? logsExtractionConfig
                 )
               ),
+              excludedUserNames,
             },
           });
         }

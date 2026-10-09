@@ -64,7 +64,7 @@ class SomeSubscriber {
 `emitEvent()` takes:
 
 - `request`: the auth and space context to run under
-- `triggerId`: the workflows trigger id, for example `alertingV2.episodeAssigned`
+- `triggerId`: the workflows trigger id, for example `alerting.actions.alertAssigned`
 - `payload`: a plain object that must conform to the trigger's registered Zod schema
 
 If workflows is unavailable for that request, the service logs a debug message and drops the emit.

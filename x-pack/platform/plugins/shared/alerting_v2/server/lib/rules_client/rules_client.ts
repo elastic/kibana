@@ -294,8 +294,11 @@ export class RulesClient {
         {
           code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
           details: isSingle
-            ? { interval: limitItems[0].updatedEvery, maxScheduledPerMinute }
-            : { maxScheduledPerMinute },
+            ? {
+                interval: limitItems[0].updatedEvery,
+                max_scheduled_per_minute: maxScheduledPerMinute,
+              }
+            : { max_scheduled_per_minute: maxScheduledPerMinute },
         }
       );
     }
@@ -315,7 +318,7 @@ export class RulesClient {
         `Rule schedule interval of "${every}" is shorter than the allowed minimum of "${minimumScheduleInterval}"`,
         {
           code: ALERTING_ERROR_CODES.SCHEDULE_INTERVAL_TOO_SHORT,
-          details: { interval: every, minimumScheduleInterval },
+          details: { interval: every, minimum_schedule_interval: minimumScheduleInterval },
         }
       );
     }
@@ -653,7 +656,7 @@ export class RulesClient {
     const errors: BulkOperationError[] = [];
     const prepared: PreparedRule[] = [];
 
-    for (const item of parsed.rules) {
+    for (const item of parsed.items) {
       const { id, enabled, ...data } = item;
       try {
         prepared.push(
@@ -1021,6 +1024,15 @@ export class RulesClient {
   }
 
   @withApm
+  public async getRoutingTags(params: { search?: string; size?: number } = {}): Promise<string[]> {
+    return this.rulesSavedObjectService.findTags({
+      search: params.search,
+      size: params.size,
+      field: 'routing_tags',
+    });
+  }
+
+  @withApm
   public async findRules(params: FindRulesArgs = {}): Promise<FindRulesResponse> {
     const page = params.page ?? DEFAULT_PAGE;
     const perPage = params.perPage ?? FIND_DEFAULT_PER_PAGE;
@@ -1053,8 +1065,9 @@ export class RulesClient {
   }
 
   /**
-   * Finds the alert rules in scope of a policy matcher: those with at least one of its tags, or every
-   * alert rule when it has no tags. Signal rules never create alerts, so no policy applies to them.
+   * Finds the alert rules in scope of a policy matcher: those with at least one of its tags in
+   * `metadata.routing_tags`, or every alert rule when it has no tags. Signal rules never create
+   * alerts, so no policy applies to them.
    * The matcher expression runs against alerts, so it can't narrow rules down.
    */
   @withApm

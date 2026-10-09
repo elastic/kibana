@@ -25,6 +25,7 @@ type WorkerEnabledMap = Record<string, boolean>;
 export const useEnableWorkers = (
   workerIds: readonly string[],
   workerEnabled: WorkerEnabledMap,
+  serviceAccountId: string | undefined,
   onSuccess?: () => void,
   onSavingChange?: (saving: boolean) => void
 ) => {
@@ -53,14 +54,23 @@ export const useEnableWorkers = (
     // allSettled keeps isSaving true for the full fan-out so a single rejection does
     // not re-enable the button while the remaining PATCHes are still in-flight.
     const results = await Promise.allSettled(
-      idsToUpdate.map((id) =>
-        services.http!.patch(buildWorkerUrl(id), {
+      idsToUpdate.map((id) => {
+        const turningOn = workerEnabled[id] === true;
+        const worker = cached.workers.find((candidate) => candidate.id === id);
+        return services.http!.patch(buildWorkerUrl(id), {
           version: API_VERSIONS.internal.v1,
-          body: JSON.stringify({ enabled: workerEnabled[id] }),
-        })
-      )
+          body: JSON.stringify(
+            turningOn
+              ? {
+                  enabled: true,
+                  settings: { serviceAccountId },
+                  settingsRevision: worker?.settingsRevision ?? null,
+                }
+              : { enabled: false }
+          ),
+        });
+      })
     );
-    setIsSaving(false);
 
     let hadFailure = false;
     let hadSuccess = false;
@@ -72,6 +82,16 @@ export const useEnableWorkers = (
         hadSuccess = true;
       }
     });
+
+    if (hadFailure && hadSuccess) {
+      // A successful enable writes settings and bumps settingsRevision. Refresh before the
+      // button can be pressed again, or the retry resends the revision from before this save
+      // and the workers that landed come back as conflicts. This stays after the fan-out:
+      // per-patch cache writes would let LandingPage leave onboarding early.
+      await queryClient.invalidateQueries({ queryKey: queryKeys.workers.list() });
+    }
+
+    setIsSaving(false);
 
     if (hadFailure) {
       if (hadSuccess) {

@@ -66,14 +66,22 @@ export interface HuntEvidenceSummary {
 export interface CurrentRunState {
   runId: string;
   reportId: string;
+  /** Count of current-run SSE attachments matched (scoped by runId/reportId). */
+  sseCount: number;
   /** True when at least one current-run SSE has `hunt_result.has_confirmed_hit`. */
   hasConfirmedHit: boolean;
   /** SSE titles for the closure summary. */
   titles: string[];
   /** Short evidence lines for the closure summary. */
   evidenceLines: string[];
-  /** Technique ids from current-run SKIs (`type: technique`). */
+  /** Technique ids from current-run SKIs (`type: technique`), proposed or corroborated. */
   techniques: string[];
+  /**
+   * Subset of `techniques` this run actually corroborated (the SSE entry naming it carried
+   * `corroborated_technique_id`), as opposed to one merely named on the report-scoped
+   * fallback entry's indicator list. Only this subset may claim a confirmed hit.
+   */
+  corroboratedTechniques: string[];
   hosts: CurrentRunHost[];
   /**
    * Process selectors already rehydrated from current-run alerts/events.

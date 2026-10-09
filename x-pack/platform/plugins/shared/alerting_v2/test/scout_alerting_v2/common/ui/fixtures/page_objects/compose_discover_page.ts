@@ -51,6 +51,7 @@ export class ComposeDiscoverPage {
   public readonly ruleNameInput: Locator;
   /** Tags combobox on the Details step. */
   public readonly tagsInput: Locator;
+  public readonly routingTagsInput: Locator;
   public readonly addRunbookButton: Locator;
   public readonly relatedDashboardsSelector: Locator;
   public readonly relatedDashboardsInput: Locator;
@@ -99,6 +100,7 @@ export class ComposeDiscoverPage {
     this.sandboxTimeFieldSelector = this.page.testSubj.locator('querySandboxTimeField');
     this.ruleNameInput = this.flyout.locator('[data-test-subj="ruleNameInput"]');
     this.tagsInput = this.flyout.locator('[data-test-subj="ruleTagsInput"]');
+    this.routingTagsInput = this.flyout.locator('[data-test-subj="ruleRoutingTagsInput"]');
     this.addRunbookButton = this.flyout.locator('[data-test-subj="addRunbookButton"]');
     this.relatedDashboardsSelector = this.flyout.locator('[data-test-subj="dashboardsSelector"]');
     this.relatedDashboardsInput = this.flyout.locator(
@@ -221,6 +223,18 @@ export class ComposeDiscoverPage {
   /** Removes every selected tag via the combobox clear button. */
   async clearAllTags() {
     await this.tagsInput.locator('[data-test-subj="comboBoxClearButton"]').click();
+  }
+
+  /** Types a routing tag on the Actions step and presses Enter to add it. */
+  async addRoutingTag(tag: string) {
+    const input = this.routingTagsInput.locator('[data-test-subj="comboBoxSearchInput"]');
+    await input.fill(tag);
+    await input.press('Enter');
+  }
+
+  /** Removes every selected routing tag via the combobox clear button. */
+  async clearAllRoutingTags() {
+    await this.routingTagsInput.locator('[data-test-subj="comboBoxClearButton"]').click();
   }
 
   /**

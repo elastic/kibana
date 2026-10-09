@@ -39,8 +39,8 @@ describe('Elasticsearch connector', () => {
       expect(Elasticsearch.metadata.displayName).toBe('External Elasticsearch');
     });
 
-    it('only declares agentBuilder support (new connector, pre Production-NonCanary)', () => {
-      expect(Elasticsearch.metadata.supportedFeatureIds).toEqual(['agentBuilder']);
+    it('declares agentBuilder and workflows support', () => {
+      expect(Elasticsearch.metadata.supportedFeatureIds).toEqual(['agentBuilder', 'workflows']);
     });
 
     it('requires enterprise license', () => {

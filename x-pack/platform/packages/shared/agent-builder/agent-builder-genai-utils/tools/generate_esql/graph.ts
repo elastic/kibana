@@ -23,6 +23,7 @@ import {
   executeEsql,
   validateEsqlQuery,
   buildTimeRangeParams,
+  buildTimeSeriesTimeRangeFilter,
 } from '../utils/esql';
 import { createRequestDocumentationPrompt, createGenerateEsqlPrompt } from './prompts';
 import type { ResolvedResourceWithSampling } from '../utils/resources';
@@ -312,7 +313,15 @@ export const createNlToEsqlGraph = ({
       const results = await executeEsql({
         query,
         params: buildTimeRangeParams(state.timeRange),
-        ...(schemaOnly ? { limit: 1, dropNullColumns: false } : {}),
+        // The schema probe only collects columns, so bounding it to the time range is safe and
+        // keeps TS and PROMQL queries from aggregating all data.
+        ...(schemaOnly
+          ? {
+              limit: 1,
+              dropNullColumns: false,
+              filter: buildTimeSeriesTimeRangeFilter(query, state.timeRange),
+            }
+          : {}),
         includeFrozen,
         esClient,
       });

@@ -161,8 +161,6 @@ const existingFilePaths = async (
   return new Set(stats.filter((stat) => stat.exists && !stat.is_dir).map((stat) => stat.path));
 };
 
-// Ranking, counters, status, and provenance belong to the memory system; the agent only reads
-// the fact itself, named by its file.
 const renderPage = (page: MemoryPage): string => `${page.content.trim()}\n`;
 
 const toUpdatedDate = (iso: string): string => iso.slice(0, 10);
@@ -215,10 +213,7 @@ export const materializeMemory = async ({
     })
   ).filter((page) => isCanonicalMemoryId(page.id));
 
-  // A short retry prompt like "try again" is a real user message, so the
-  // workflow always forwards it as `query`. Strict title/content match then
-  // returns nothing even when the catalog has pages. Fall back to browse so
-  // hydrate still seeds the workspace.
+  // A short retry prompt still matches nothing, so fall back to browse and seed the workspace.
   if (mode === 'search' && candidates.length === 0) {
     logger.info('Memory search matched 0 page(s) — falling back to browse');
     searchFallback = true;
@@ -276,8 +271,6 @@ export const materializeMemory = async ({
     `Memory materialize keep ${recalledIds.length}/${candidates.length}: ${formatPageRefs(pages)}`
   );
 
-  // Pod eviction clears /workspace. Read the catalog and existing paths before
-  // any write, which clears session.isReset.
   const podReset = session.isReset;
   const priorCatalog = podReset ? [] : await readMemoryCatalog(session);
   const keepPaths = pages.map(pagePath);
@@ -292,7 +285,7 @@ export const materializeMemory = async ({
       continue;
     }
     const existing = await store.get(id);
-    if (!existing || existing.status === 'archived') {
+    if (!existing || existing.archived) {
       continue;
     }
     carriedPaths.add(entry.path);

@@ -6,7 +6,7 @@
  */
 
 import type { EvaluationResult, Evaluator } from '@kbn/evals';
-import type { DashboardAgentTaskOutput, DashboardDatasetExample } from './evaluate_dataset';
+import type { DashboardAgentTaskOutput, DashboardDatasetExample } from './types';
 
 const DASHBOARD_GENERATE_TOOL_ID = 'platform.dashboard.generate_dashboard';
 
@@ -151,8 +151,8 @@ export const dashboardSkillNotActivatedEvaluator: Evaluator<
       score: passed ? 1 : 0,
       label: passed ? 'PASS' : 'FAIL',
       explanation: passed
-        ? `Dashboard management was not used. Paths: ${skillReadPaths.join(', ') || 'n/a'}`
-        : `Expected no dashboard management. dashboardSkillLoaded=${dashboardSkillLoaded}, dashboardToolCalled=${dashboardToolCalled}. Paths: ${
+        ? `Dashboards skill was not used. Paths: ${skillReadPaths.join(', ') || 'n/a'}`
+        : `Expected no dashboards skill. dashboardSkillLoaded=${dashboardSkillLoaded}, dashboardToolCalled=${dashboardToolCalled}. Paths: ${
             skillReadPaths.join(', ') || 'none'
           }. Tool IDs: ${toolIds.join(', ') || 'none'}`,
       metadata: {

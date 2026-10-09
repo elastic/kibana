@@ -102,6 +102,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         CreateActionPolicyFormFlyout={props.services.createActionPolicyFormFlyout}
       />
     ),
+    fields: ['metadata.routingTags'],
   },
 };
 

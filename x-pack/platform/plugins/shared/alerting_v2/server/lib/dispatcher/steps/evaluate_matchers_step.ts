@@ -65,7 +65,7 @@ export class EvaluateMatchersStep implements DispatcherStep {
           continue;
         }
 
-        if (!policyMatcher.matchesTags(rule?.tags)) continue;
+        if (!policyMatcher.matchesRoutingTags(rule?.routingTags)) continue;
 
         const expression = policyMatcher.expressionKql();
         if (expression === null) {

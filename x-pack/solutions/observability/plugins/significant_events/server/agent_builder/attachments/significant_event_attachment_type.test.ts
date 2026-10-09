@@ -39,14 +39,9 @@ const createGetScopedClients = (
   const getEventSearchClient = jest.fn(() => ({
     findLatestByEventId,
   }));
-  // Canonical client — used by isStale to compare against the authoritative write source.
-  const getEventClient = jest.fn(() => ({
-    findLatestByEventId,
-  }));
 
   return jest.fn().mockResolvedValue({
     getEventSearchClient,
-    getEventClient,
   } as unknown as RouteHandlerScopedClients) as jest.MockedFunction<GetScopedClients>;
 };
 

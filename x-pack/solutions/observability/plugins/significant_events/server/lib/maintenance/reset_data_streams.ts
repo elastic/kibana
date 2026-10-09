@@ -151,5 +151,10 @@ export const resetDataStreams = async (params: ResetDataStreamsParams): Promise<
   if (await deleteDiscoveriesDataStream(params)) {
     deleted.add(DISCOVERIES_DATA_STREAM);
   }
+  // NOTE: Significant Events documents in `.rule-events` (Alerting v2's shared data stream) are
+  // NOT cleared here. A direct deleteByQuery on a cross-plugin stream bypasses the owner's
+  // abstraction and requires delete privileges that Nightshift's manage+configure privilege does
+  // not grant — failing silently for non-admins. The correct fix is for alerting_v2 to expose a
+  // `deleteAlertEventsBySource(source)` API. Wire it up once that contract exists.
   return deleted;
 };
