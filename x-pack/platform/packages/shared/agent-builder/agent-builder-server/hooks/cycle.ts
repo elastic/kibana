@@ -81,11 +81,7 @@ export interface CycleHookExecutionContext {
   readonly conversation: {
     /** Absent for one-shot runs. */
     readonly id?: string;
-    /**
-     * The context timeline before this execution, oldest first: user messages, each earlier
-     * execution's lifecycle events, attachment changes and custom events. A round paused on a
-     * prompt and being resumed is the current run, not history. Copied when first read.
-     */
+    /** The context timeline before this execution. */
     readonly events: readonly ProcessedTimelineEvent[];
     /** The executions on `events`, oldest first; derived from it. */
     readonly executions: readonly ExecutionSummary[];

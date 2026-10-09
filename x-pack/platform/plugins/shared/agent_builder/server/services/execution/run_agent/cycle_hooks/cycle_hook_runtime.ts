@@ -94,7 +94,6 @@ export class CycleHookRuntime {
       if (def.boundAgents && !def.boundAgents.includes(this.deps.execution.agent.id)) {
         continue;
       }
-      // Once per round: the paused round being resumed already carries what the hook added.
       if (def.when === 'first' && this.deps.execution.execution.resumed) {
         continue;
       }
