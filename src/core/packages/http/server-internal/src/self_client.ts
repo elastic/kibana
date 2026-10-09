@@ -543,8 +543,7 @@ const selfUnauthorizedToolkit: HttpSelfUnauthorizedErrorHandlerToolkit = {
 /**
  * Core-owned headers a retry overlay must not be able to set. Deliberately narrower than
  * {@link isProtectedHeader}: overriding `authorization` is the whole point of a retry. The UIAM
- * shared secret headers are denied outright — they belong to the Elasticsearch client and must
- * never leave this process on a self call.
+ * shared secret headers are denied outright: only the request's own auth headers may supply them.
  */
 const isRetryOverridableHeader = (name: string): boolean => {
   const lowerName = name.toLowerCase();
