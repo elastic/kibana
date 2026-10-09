@@ -10,6 +10,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import {
   triageHeadroomStepCommonDefinition,
+  triageLoadAlertsStepCommonDefinition,
   triagePlanSweepStepCommonDefinition,
 } from '../../../common/step_types/alert_triage';
 import { readHeadroom } from '../../alert_triage/headroom';
@@ -19,6 +20,7 @@ import {
   countAgedOutAlerts,
   fetchTriageAlerts,
   listLiveExecutionIds,
+  loadAlertsByIds,
   readWorkflowRunLagMs,
   tagAlerts,
 } from './ports';
@@ -128,6 +130,19 @@ export const getTriagePlanSweepStepDefinition = () =>
         };
       } catch (error) {
         throw toApiError(error, 'plan triage sweep');
+      }
+    },
+  });
+
+export const getTriageLoadAlertsStepDefinition = () =>
+  createServerStepDefinition({
+    ...triageLoadAlertsStepCommonDefinition,
+    handler: async ({ input, contextManager }) => {
+      try {
+        const { alerts, missingAlertIds } = await loadAlertsByIds(contextManager, input.alert_ids);
+        return { output: { alerts, missing_alert_ids: missingAlertIds } };
+      } catch (error) {
+        throw toApiError(error, 'load triage batch alerts');
       }
     },
   });

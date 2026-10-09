@@ -8,7 +8,7 @@
  */
 
 import { parse } from 'yaml';
-import FLOOR_ALERT_TRIAGE_YAML from './floor_alert_triage.yaml';
+import FLOOR_ALERT_TRIAGE_BATCH_YAML from './floor_alert_triage_batch.yaml';
 import FLOOR_ALERT_TRIAGE_REVIEW_YAML from './floor_alert_triage_review.yaml';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 import { convertToWorkflowGraph } from '../../../graph/build_execution_graph/build_execution_graph';
@@ -32,7 +32,7 @@ interface YamlStep {
   'on-failure'?: { continue?: boolean; fallback?: YamlStep[]; retry?: { 'max-attempts'?: number } };
 }
 
-const parsed = parse(FLOOR_ALERT_TRIAGE_YAML) as {
+const parsed = parse(FLOOR_ALERT_TRIAGE_BATCH_YAML) as {
   steps: YamlStep[];
 };
 
@@ -74,7 +74,7 @@ const computeFpCandidateIds = (
   autoCloseConfidenceScoreMinThreshold: number
 ): unknown => {
   const fpThresholdExpr = renderString(fpThresholdExprTemplate, {
-    consts: { worker_settings: { autoCloseConfidenceScoreMinThreshold } },
+    inputs: { confidence_floor: autoCloseConfidenceScoreMinThreshold },
   }).trim();
 
   return evalExpr(fpCandidateIdsExpr, {
@@ -83,7 +83,7 @@ const computeFpCandidateIds = (
   });
 };
 
-describe('floor_alert_triage — compute_fp_candidates', () => {
+describe('floor_alert_triage_batch — compute_fp_candidates', () => {
   const mixedVerdictBatch = [
     { alert_id: 'below-floor', classification: 'false_positive', confidence_score: 0.5 },
     { alert_id: 'at-floor', classification: 'false_positive', confidence_score: 0.85 },
@@ -128,12 +128,15 @@ const makeAlerts = (count: number) =>
 
 const renderTriageStarted = (alertCount: number): string =>
   renderString(triageInputTemplate, {
-    event: { rule: { name: 'My Rule' }, alerts: makeAlerts(alertCount) },
-    steps: { create_investigation: { output: { conversation_id: 'conv-1' } } },
+    inputs: { rule_name: 'My Rule' },
+    steps: {
+      create_investigation: { output: { conversation_id: 'conv-1' } },
+      load_alerts: { output: { alerts: makeAlerts(alertCount) } },
+    },
     execution: { url: 'https://kibana.example.com/app/exec/1' },
   });
 
-describe('floor_alert_triage — post_comment_triage_started', () => {
+describe('floor_alert_triage_batch — post_comment_triage_started', () => {
   it('includes the alertzero_reasoning feature name for model routing', () => {
     const comment = renderTriageStarted(3);
     expect(comment).toContain('alertzero_reasoning');
@@ -156,8 +159,11 @@ describe('floor_alert_triage — post_comment_triage_started', () => {
 
   it('claims every alert is attached when no chunk failed', () => {
     const comment = renderString(triageInputTemplate, {
-      event: { rule: { name: 'My Rule' }, alerts: makeAlerts(3) },
-      steps: { create_investigation: { output: { conversation_id: 'conv-1' } } },
+      inputs: { rule_name: 'My Rule' },
+      steps: {
+        create_investigation: { output: { conversation_id: 'conv-1' } },
+        load_alerts: { output: { alerts: makeAlerts(3) } },
+      },
       execution: { url: 'https://kibana.example.com/app/exec/1' },
       variables: { failed_attach_chunk_count: 0, total_attach_chunk_count: 1 },
     });
@@ -167,8 +173,11 @@ describe('floor_alert_triage — post_comment_triage_started', () => {
 
   it('warns with the failure count instead of claiming full attachment when a chunk failed', () => {
     const comment = renderString(triageInputTemplate, {
-      event: { rule: { name: 'My Rule' }, alerts: makeAlerts(45) },
-      steps: { create_investigation: { output: { conversation_id: 'conv-1' } } },
+      inputs: { rule_name: 'My Rule' },
+      steps: {
+        create_investigation: { output: { conversation_id: 'conv-1' } },
+        load_alerts: { output: { alerts: makeAlerts(45) } },
+      },
       execution: { url: 'https://kibana.example.com/app/exec/1' },
       variables: { failed_attach_chunk_count: 1, total_attach_chunk_count: 3 },
     });
@@ -182,35 +191,30 @@ describe('floor_alert_triage — post_comment_triage_started', () => {
 // than silently swallowed (a failed chunk never shows as evidence)
 // ---------------------------------------------------------------------------
 
-describe('floor_alert_triage — create_investigation severity', () => {
-  const renderSeverity = (event: Record<string, unknown>): string => {
+describe('floor_alert_triage_batch — create_investigation severity', () => {
+  const renderSeverity = (alerts: Array<Record<string, unknown>>): string => {
     const create = stepByName('create_investigation');
     const template = (create?.with as { metadata?: { severity?: string } } | undefined)?.metadata
       ?.severity;
-    return renderString(template ?? '', { event }).trim();
+    return renderString(template ?? '', {
+      steps: { load_alerts: { output: { alerts } } },
+    }).trim();
   };
 
-  it('reads the severity off the first alert, since event.rule carries none', () => {
-    expect(
-      renderSeverity({ rule: { name: 'My Rule' }, alerts: [{ 'kibana.alert.severity': 'high' }] })
-    ).toBe('high');
+  it('reads the severity off the first alert, since the rule input carries none', () => {
+    expect(renderSeverity([{ 'kibana.alert.severity': 'high' }])).toBe('high');
   });
 
   it('reads a nested alert document too', () => {
-    expect(
-      renderSeverity({
-        rule: { name: 'My Rule' },
-        alerts: [{ kibana: { alert: { severity: 'critical' } } }],
-      })
-    ).toBe('critical');
+    expect(renderSeverity([{ kibana: { alert: { severity: 'critical' } } }])).toBe('critical');
   });
 
   it('falls back to medium when the alert has no severity', () => {
-    expect(renderSeverity({ rule: { name: 'My Rule' }, alerts: [{}] })).toBe('medium');
+    expect(renderSeverity([{}])).toBe('medium');
   });
 });
 
-describe('floor_alert_triage — attach_impact', () => {
+describe('floor_alert_triage_batch — attach_impact', () => {
   const classifyOutput = (entities: unknown[]) => ({
     steps: { classify_alerts: { output: { impacted_entities: entities } } },
   });
@@ -239,7 +243,7 @@ describe('floor_alert_triage — attach_impact', () => {
   });
 });
 
-describe('floor_alert_triage — attach_alerts', () => {
+describe('floor_alert_triage_batch — attach_alerts', () => {
   it('retries a failed chunk attach before continuing past it', () => {
     const chunkStep = stepByName('attach_alert_chunk');
     expect(chunkStep?.type).toBe('ai.attachment.add');
@@ -283,7 +287,7 @@ describe('floor_alert_triage — attach_alerts', () => {
 // Early abort when Alert Analysis is disabled
 // ---------------------------------------------------------------------------
 
-describe('floor_alert_triage — require_analysis_enabled', () => {
+describe('floor_alert_triage_batch — require_analysis_enabled', () => {
   const topLevelNames = parsed.steps.map((step) => step.name);
 
   it('runs before create_investigation so a disabled-analysis run opens no Investigation', () => {
@@ -331,26 +335,27 @@ describe('floor_alert_triage — require_analysis_enabled', () => {
   });
 });
 
-describe('floor_alert_triage — classify_alerts on-failure', () => {
-  it('fails the run after the warning so close_investigation_no_fp cannot run', () => {
+describe('floor_alert_triage_batch — classify_alerts on-failure', () => {
+  it('marks the alerts failed, then fails the run after the warning so close_investigation_no_fp cannot run', () => {
     const classify = stepByName('classify_alerts');
     const abort = stepByName('abort_classify_failed');
     expect(classify?.['on-failure']?.fallback?.map((step) => step.name)).toEqual([
       'post_comment_classify_failed',
+      'release_claims_classify_failed',
       'abort_classify_failed',
     ]);
     expect(abort?.type).toBe('workflow.fail');
   });
 });
 
-describe('floor_alert_triage — guard_classification_nonempty', () => {
+describe('floor_alert_triage_batch — guard_classification_nonempty', () => {
   it('compares precomputed counts — `| size` after a filter is invalid Liquid in if-conditions', () => {
     const counts = stepByName('compute_classification_guard_counts');
     const outer = stepByName('guard_classification_nonempty');
     const inner = stepByName('guard_classification_nonempty_inner');
 
     expect(counts?.with).toEqual({
-      alert_count: '${{ event.alerts | size }}',
+      alert_count: '${{ steps.load_alerts.output.alerts | size }}',
       verdict_count: '${{ steps.classify_alerts.output.verdicts | size }}',
       missing_alert_count: '${{ steps.classify_alerts.output.missing_alert_ids | size }}',
     });
@@ -368,7 +373,9 @@ describe('floor_alert_triage — guard_classification_nonempty', () => {
       evalExpr('${{ variables.verdict_count == 0 }}', { variables: { verdict_count: 0 } })
     ).toBe(true);
     expect(() =>
-      evalExpr('${{ event.alerts | size > 0 }}', { event: { alerts: [{ _id: 'a' }] } })
+      evalExpr('${{ steps.load_alerts.output.alerts | size > 0 }}', {
+        steps: { load_alerts: { output: { alerts: [{ _id: 'a' }] } } },
+      })
     ).toThrow();
   });
 
@@ -419,7 +426,7 @@ describe('floor_alert_triage — guard_classification_nonempty', () => {
   });
 });
 
-describe('floor_alert_triage — post_comment_classification_results', () => {
+describe('floor_alert_triage_batch — post_comment_classification_results', () => {
   const render = (): string => {
     const comment = stepByName('post_comment_classification_results');
     const template = (comment?.with as { message?: string } | undefined)?.message ?? '';
@@ -449,7 +456,7 @@ describe('floor_alert_triage — post_comment_classification_results', () => {
   });
 });
 
-describe('floor_alert_triage — close_investigation_no_fp', () => {
+describe('floor_alert_triage_batch — close_investigation_no_fp', () => {
   it('nests an analyzed-batch guard so each condition stays a single comparison', () => {
     const outer = stepByName('close_investigation_no_fp');
     const inner = stepByName('close_investigation_no_fp_when_analyzed');
@@ -485,7 +492,7 @@ describe('floor_alert_triage — close_investigation_no_fp', () => {
   });
 });
 
-describe('floor_alert_triage — if-conditions', () => {
+describe('floor_alert_triage_batch — if-conditions', () => {
   it('keeps every if-condition free of Liquid filters', () => {
     const ifSteps = allSteps.filter((step) => step.type === 'if');
     expect(ifSteps.length).toBeGreaterThan(0);
@@ -519,7 +526,7 @@ const AZ_TAG_WRITES = [
 
 const AZ_TAG_STEPS = AZ_TAG_WRITES.map(({ step }) => step);
 
-describe('floor_alert_triage — az: tags', () => {
+describe('floor_alert_triage_batch — az: tags', () => {
   const idsStep = stepByName('compute_az_tag_ids');
 
   const verdicts = [
@@ -647,7 +654,14 @@ describe('floor_alert_triage — az: tags', () => {
         tags: { tags_to_remove: string[]; tags_to_add: string[] };
       };
       expect(tags.tags_to_add).toEqual([tagToAdd]);
-      expect([...tags.tags_to_remove, ...tags.tags_to_add].sort()).toEqual([...all].sort());
+      // The claim tags leave in the same update, so an alert is never left with a verdict and a
+      // claim, or with a claim and no verdict.
+      const claimTags = ['az:triage_pending', 'az:triage_exec:{{ execution.id }}'];
+      const verdictTags = [...tags.tags_to_remove, ...tags.tags_to_add].filter(
+        (tag) => !claimTags.includes(tag)
+      );
+      expect(verdictTags.sort()).toEqual([...all].sort());
+      expect(tags.tags_to_remove).toEqual(expect.arrayContaining(claimTags));
     });
   });
 
@@ -670,7 +684,7 @@ describe('floor_alert_triage — az: tags', () => {
 // ---------------------------------------------------------------------------
 // add_verdict_notes — the only verdict note on the Worker path
 // ---------------------------------------------------------------------------
-describe('floor_alert_triage — add_verdict_notes', () => {
+describe('floor_alert_triage_batch — add_verdict_notes', () => {
   const noteTemplate = (stepByName('add_verdict_note')?.with?.body as { note: { note: string } })
     .note.note;
 
@@ -895,7 +909,7 @@ describe('floor_alert_triage — add_verdict_notes', () => {
 // fails after fallback execution"), so `continue: true` is required alongside it,
 // or the run aborts and any step after the patch (e.g. the outcome comment) never runs.
 // ---------------------------------------------------------------------------
-describe('floor_alert_triage — ai.conversation.metadata.patch failure handling', () => {
+describe('floor_alert_triage_batch — ai.conversation.metadata.patch failure handling', () => {
   const patchSteps = allSteps.filter((step) => step.type === 'ai.conversation.metadata.patch');
 
   it('finds every conversation-close step this workflow defines', () => {
@@ -923,7 +937,7 @@ describe('floor_alert_triage — ai.conversation.metadata.patch failure handling
 // notes exist, and must close the Investigation of a batch whose review the per-rule limit
 // skipped, because no review runs to do that.
 // ---------------------------------------------------------------------------
-describe('floor_alert_triage — closure review hand-off', () => {
+describe('floor_alert_triage_batch — closure review hand-off', () => {
   const review = parse(FLOOR_ALERT_TRIAGE_REVIEW_YAML) as {
     settings: { concurrency: { max: number } };
   };
@@ -967,12 +981,14 @@ describe('floor_alert_triage — closure review hand-off', () => {
     );
 
     const context = {
-      event: { rule: { id: 'rule-1', name: 'Noisy rule' } },
+      inputs: {
+        rule_id: 'rule-1',
+        rule_name: 'Noisy rule',
+        autonomy: 'supervised',
+        confidence_floor: 0.9,
+      },
       steps: { create_investigation: { output: { conversation_id: 'conv-1' } } },
       variables: { fp_candidate_ids: ['a', 'b'] },
-      consts: {
-        worker_settings: { autonomy: 'supervised', autoCloseConfidenceScoreMinThreshold: 0.9 },
-      },
     };
     expect(renderString(inputs.rule_id, context)).toBe('rule-1');
     expect(renderString(inputs.conversation_id, context)).toBe('conv-1');
@@ -1074,7 +1090,7 @@ describe('floor_alert_triage — closure review hand-off', () => {
       return renderString(template, {
         steps: { start_fp_review: { output: { status: 'failed' } } },
         variables: { fp_candidate_count: count },
-        consts: { worker_settings: { autonomy } },
+        inputs: { autonomy },
       });
     };
 
@@ -1122,9 +1138,8 @@ describe('floor_alert_triage — closure review hand-off', () => {
         const template = (stepByName('post_comment_review_limit')?.with as { message: string })
           .message;
         const rendered = renderString(template, {
-          event: { rule: { name: 'Noisy rule' } },
+          inputs: { rule_name: 'Noisy rule', confidence_floor: 0.85 },
           variables: { fp_candidate_count: count },
-          consts: { worker_settings: { autoCloseConfidenceScoreMinThreshold: 0.85 } },
         });
 
         expect(rendered).toContain('No closure proposal was created');
@@ -1168,9 +1183,7 @@ describe('floor_alert_triage — closure review hand-off', () => {
       .message;
     const rendered = renderString(template, {
       variables: { fp_candidate_count: 2 },
-      consts: {
-        worker_settings: { autonomy: 'manual', autoCloseConfidenceScoreMinThreshold: 0.85 },
-      },
+      inputs: { autonomy: 'manual', confidence_floor: 0.85 },
     });
 
     expect(rendered).toContain('handed to the closure review');

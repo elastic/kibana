@@ -224,3 +224,28 @@ export const countAgedOutAlerts = async (
   if (typeof total?.value === 'number') return total.value;
   throw new Error('Aged-out alert count missing from the search response');
 };
+
+export interface LoadedAlerts {
+  alerts: Array<Record<string, unknown>>;
+  missingAlertIds: string[];
+}
+
+/** Loads a batch's alert documents by id, as `{ _id, _index, ...source }` for Alert Analysis. */
+export const loadAlertsByIds = async (
+  { callKibanaApi }: KibanaApi,
+  alertIds: readonly string[]
+): Promise<LoadedAlerts> => {
+  const { body } = await callKibanaApi<{
+    hits?: { hits?: Array<AlertHit & { _index?: string }> };
+  }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: { size: alertIds.length, query: { ids: { values: alertIds } } },
+  });
+  const hits = body.hits?.hits ?? [];
+  const found = new Set(hits.map(({ _id }) => _id));
+  return {
+    alerts: hits.map(({ _id, _index, _source = {} }) => ({ ..._source, _id, _index })),
+    missingAlertIds: alertIds.filter((id) => !found.has(id)),
+  };
+};

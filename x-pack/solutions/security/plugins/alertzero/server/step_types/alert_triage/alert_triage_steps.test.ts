@@ -10,6 +10,7 @@ import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { TM_DELAY_LIMIT_MS } from '../../alert_triage/constants';
 import {
   getTriageHeadroomStepDefinition,
+  getTriageLoadAlertsStepDefinition,
   getTriagePlanSweepStepDefinition,
 } from './alert_triage_steps';
 
@@ -183,5 +184,46 @@ describe('triage plan sweep step', () => {
         },
       })
     );
+  });
+});
+
+describe('triage load alerts step', () => {
+  it('loads the batch documents with _id and _index, as Alert Analysis takes them', async () => {
+    const callKibanaApi = jest.fn().mockResolvedValue({
+      status: 200,
+      headers: {},
+      body: {
+        hits: {
+          hits: [
+            {
+              _id: 'a-1',
+              _index: '.alerts-security.alerts-default',
+              _source: { '@timestamp': 't', 'kibana.alert.rule.uuid': 'rule-a' },
+            },
+          ],
+        },
+      },
+    });
+
+    const { output } = await getTriageLoadAlertsStepDefinition().handler(
+      createContext({ alert_ids: ['a-1', 'a-2'] }, callKibanaApi)
+    );
+
+    expect(output).toEqual({
+      alerts: [
+        {
+          '@timestamp': 't',
+          'kibana.alert.rule.uuid': 'rule-a',
+          _id: 'a-1',
+          _index: '.alerts-security.alerts-default',
+        },
+      ],
+      // An alert deleted between planning and the batch is reported, not silently dropped.
+      missing_alert_ids: ['a-2'],
+    });
+    expect(callKibanaApi.mock.calls[0][0].body).toEqual({
+      size: 2,
+      query: { ids: { values: ['a-1', 'a-2'] } },
+    });
   });
 });
