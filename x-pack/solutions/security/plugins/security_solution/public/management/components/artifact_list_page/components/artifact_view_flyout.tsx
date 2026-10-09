@@ -29,6 +29,7 @@ import {
 import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useArtifactActionsDisabled, useGetArtifact } from '../../../hooks/artifacts';
@@ -101,6 +102,11 @@ type ArtifactViewFlyoutLabels = typeof ARTIFACT_VIEW_FLYOUT_LABELS &
     /** Same strings as the simple table edit and delete actions. */
     cardActionEditLabel?: string;
     cardActionDeleteLabel?: string;
+  };
+
+const isNotFoundError = (error: IHttpFetchError<Error>): boolean => {
+  const httpError = error as IHttpFetchError<{ statusCode?: number }>;
+  return httpError.response?.status === 404 || httpError.body?.statusCode === 404;
   };
 
 export type ArtifactViewFlyoutTakeAction = (action: {
@@ -192,13 +198,16 @@ export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
     }, [onEnabledChangeRefresh, refetchArtifact]);
 
     useEffect(() => {
-      // Refetch keeps the previous item and still sets error. Only a failed initial load should close.
-      if (!error || item) {
+      if (!error) {
         return;
       }
 
       toasts.addWarning(labels.viewFlyoutItemLoadFailure(error.body?.message || error.message));
+
+      // A refetch keeps the previous item. Close when nothing loaded, or when the artifact is gone.
+      if (!item || isNotFoundError(error)) {
       onClose();
+      }
     }, [error, item, labels, onClose, toasts]);
 
     return (

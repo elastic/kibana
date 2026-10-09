@@ -270,7 +270,7 @@ describe('ArtifactViewFlyout', () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  it('keeps the open artifact on screen when a later refresh fails', () => {
+  it('warns and keeps the open artifact on screen when a later refresh fails', () => {
     useGetArtifactMock.mockReturnValue({
       data: item,
       error: { message: 'nope', body: { message: 'missing' } },
@@ -280,8 +280,29 @@ describe('ArtifactViewFlyout', () => {
     render();
 
     expect(onClose).not.toHaveBeenCalled();
-    expect(mockedContext.coreStart.notifications.toasts.addWarning).not.toHaveBeenCalled();
+    expect(mockedContext.coreStart.notifications.toasts.addWarning).toHaveBeenCalledWith(
+      'Failed to retrieve artifact. Reason: missing'
+    );
     expect(renderResult.getByTestId('viewFlyout-title')).toHaveTextContent('Signature one');
+  });
+
+  it('closes when a later refresh cannot find the artifact', () => {
+    useGetArtifactMock.mockReturnValue({
+      data: item,
+      error: {
+        message: 'nope',
+        body: { message: 'not found', statusCode: 404 },
+        response: { status: 404 },
+      },
+      refetch: refetchArtifact,
+    });
+
+    render();
+
+    expect(onClose).toHaveBeenCalled();
+    expect(mockedContext.coreStart.notifications.toasts.addWarning).toHaveBeenCalledWith(
+      'Failed to retrieve artifact. Reason: not found'
+    );
   });
 
   it('shows applied to 0 policies when the artifact is not assigned', () => {
