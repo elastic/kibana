@@ -496,6 +496,8 @@ export const seedRuleAndFpAlerts = async (
   const rule = await fetch<{ id?: string; revision?: number }>(
     '/api/detection_engine/rules?spaceId=default',
     {
+      // kbn-evals fetch defaults to GET; without this the call is a read-rule request with no id.
+      method: 'POST',
       headers: { 'kbn-xsrf': 'true', 'Content-Type': 'application/json' },
       body: JSON.stringify({
         rule_id: ruleId,
