@@ -170,7 +170,11 @@ describe('WorkflowDetailBottomBar', () => {
   });
 
   it('shows the actions slot in both yaml and graph views', () => {
-    const slot = <button type="button" data-test-subj="actions-slot">{'Actions'}</button>;
+    const slot = (
+      <button type="button" data-test-subj="actions-slot">
+        {'Actions'}
+      </button>
+    );
     const { rerender } = render(
       <WorkflowDetailBottomBar {...defaultProps} editorView="yaml" yamlActionsSlot={slot} />
     );

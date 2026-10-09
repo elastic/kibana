@@ -17,15 +17,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { ConnectorContractUnion, WorkflowYaml } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
-import { buildDataReferenceCatalog } from '../../../features/workflow_visual_editor/lib/build_data_reference_catalog';
-import {
-  SettingsEntryListHost,
-  SettingsEntryRow,
-} from './settings_entry_row';
+import type { ConnectorContractUnion, WorkflowYaml } from '@kbn/workflows';
+import { SettingsEntryListHost, SettingsEntryRow } from './settings_entry_row';
 import type { SettingsEditorAddControls } from './workflow_constants_editor';
 import { createEmptyOutput, type OutputField } from './workflow_settings_fields_model';
+import { buildDataReferenceCatalog } from '../../../features/workflow_visual_editor/lib/build_data_reference_catalog';
 
 export interface WorkflowOutputsEditorProps {
   readonly fields: readonly OutputField[];
@@ -94,9 +91,7 @@ export function WorkflowOutputsEditor({
 
   useEffect(() => {
     if (!onAddControlsChange) return undefined;
-    onAddControlsChange(
-      readOnly ? null : { onAdd: handleAdd, disabled: draftField != null }
-    );
+    onAddControlsChange(readOnly ? null : { onAdd: handleAdd, disabled: draftField != null });
     return () => onAddControlsChange(null);
   }, [onAddControlsChange, readOnly, handleAdd, draftField]);
 
@@ -123,12 +118,7 @@ export function WorkflowOutputsEditor({
   const handleUpdate = useCallback(
     (next: OutputField) => {
       const prev = fields.find((f) => f.id === next.id);
-      if (
-        prev &&
-        prev.name.trim() &&
-        next.name.trim() &&
-        prev.name.trim() !== next.name.trim()
-      ) {
+      if (prev && prev.name.trim() && next.name.trim() && prev.name.trim() !== next.name.trim()) {
         const steps = findReferencingSteps?.(prev.name.trim()) ?? [];
         setPendingRename({ field: next, nextName: next.name, steps });
         onChange(fields.map((f) => (f.id === next.id ? { ...next, name: prev.name } : f)));

@@ -10,8 +10,8 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 import { DataReferencePicker } from './data_reference_picker';
+import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 
 const makeItems = (prefix: string, count: number, originLabel: string) =>
   Array.from({ length: count }, (_, i) => ({
@@ -28,7 +28,7 @@ const catalog: DataReferenceCatalog = {
     {
       id: 'triggers',
       title: 'Trigger event',
-      description: 'Data from this workflow\'s trigger.',
+      description: "Data from this workflow's trigger.",
       items: makeItems('event', 7, 'Trigger · Manual'),
     },
     {
@@ -92,9 +92,7 @@ describe('DataReferencePicker scaling', () => {
     });
     // Search lists all matching leaves — no per-group cap.
     expect(screen.getAllByTestId(/workflowDataReferenceRow-event\.f/)).toHaveLength(7);
-    expect(
-      screen.queryByTestId('workflowDataReferenceShowAll-triggers')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflowDataReferenceShowAll-triggers')).not.toBeInTheDocument();
   });
 
   it('does not render jump-link chips', () => {

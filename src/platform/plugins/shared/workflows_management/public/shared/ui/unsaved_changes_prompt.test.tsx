@@ -8,13 +8,13 @@
  */
 
 import { act, render, waitFor } from '@testing-library/react';
-import React from 'react';
 import { createMemoryHistory } from 'history';
+import React from 'react';
 import { Router } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { createStartServicesMock } from '../../mocks';
 import { UnsavedChangesPrompt } from './unsaved_changes_prompt';
+import { createStartServicesMock } from '../../mocks';
 
 describe('UnsavedChangesPrompt', () => {
   let addEventListenerSpy: jest.SpyInstance;
@@ -79,8 +79,13 @@ describe('UnsavedChangesPrompt', () => {
     it('prevents default when dirty', () => {
       renderPrompt({ hasUnsavedChanges: true });
 
-      const handler = addEventListenerSpy.mock.calls.find((call) => call[0] === 'beforeunload')?.[1];
-      const mockEvent = { preventDefault: jest.fn(), returnValue: '' } as unknown as BeforeUnloadEvent;
+      const handler = addEventListenerSpy.mock.calls.find(
+        (call) => call[0] === 'beforeunload'
+      )?.[1];
+      const mockEvent = {
+        preventDefault: jest.fn(),
+        returnValue: '',
+      } as unknown as BeforeUnloadEvent;
 
       handler(mockEvent);
 

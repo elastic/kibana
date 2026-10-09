@@ -18,14 +18,8 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  SettingsEntryListHost,
-  SettingsEntryRow,
-} from './settings_entry_row';
-import {
-  createEmptyConstant,
-  type ConstantField,
-} from './workflow_settings_fields_model';
+import { SettingsEntryListHost, SettingsEntryRow } from './settings_entry_row';
+import { type ConstantField, createEmptyConstant } from './workflow_settings_fields_model';
 
 export interface SettingsEditorAddControls {
   readonly onAdd: () => void;
@@ -84,9 +78,7 @@ export function WorkflowConstantsEditor({
 
   useEffect(() => {
     if (!onAddControlsChange) return undefined;
-    onAddControlsChange(
-      readOnly ? null : { onAdd: handleAdd, disabled: draftField != null }
-    );
+    onAddControlsChange(readOnly ? null : { onAdd: handleAdd, disabled: draftField != null });
     return () => onAddControlsChange(null);
   }, [onAddControlsChange, readOnly, handleAdd, draftField]);
 

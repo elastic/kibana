@@ -13,8 +13,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import {
   countConfiguredSteps,
   findDuplicateCaseIds,
-  SwitchCasesField,
   switchCaseDuplicateKey,
+  SwitchCasesField,
   toSwitchCaseRows,
 } from './switch_cases_field';
 

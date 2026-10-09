@@ -395,7 +395,14 @@ describe('WorkflowGraphCanvas home framing uses the trigger rank', () => {
     // Trigger centred; a wide step far to the right would pull full-graph centerX away.
     mockNodes.length = 0;
     mockNodes.push(
-      { id: 'trigger', type: 'trigger', position: { x: 100, y: 0 }, width: 200, height: 64, data: {} },
+      {
+        id: 'trigger',
+        type: 'trigger',
+        position: { x: 100, y: 0 },
+        width: 200,
+        height: 64,
+        data: {},
+      },
       { id: 'step1', type: 'step', position: { x: 800, y: 150 }, width: 400, height: 64, data: {} }
     );
     const instance = makeInstance();
@@ -412,7 +419,14 @@ describe('WorkflowGraphCanvas home framing uses the trigger rank', () => {
     // Restore default mock nodes for later suites.
     mockNodes.length = 0;
     mockNodes.push(
-      { id: 'trigger', type: 'trigger', position: { x: 0, y: 0 }, width: 200, height: 64, data: {} },
+      {
+        id: 'trigger',
+        type: 'trigger',
+        position: { x: 0, y: 0 },
+        width: 200,
+        height: 64,
+        data: {},
+      },
       { id: 'step1', type: 'step', position: { x: 0, y: 150 }, width: 200, height: 64, data: {} }
     );
   });

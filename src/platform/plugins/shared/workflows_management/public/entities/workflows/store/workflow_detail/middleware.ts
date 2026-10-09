@@ -10,7 +10,13 @@
 import { debounce } from 'lodash';
 import type { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux-toolkit-v1';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { _clearComputedData, _setComputedDataInternal, applyYamlEdit, seedCreateYaml, setYamlString } from './slice';
+import {
+  _clearComputedData,
+  _setComputedDataInternal,
+  applyYamlEdit,
+  seedCreateYaml,
+  setYamlString,
+} from './slice';
 import { performComputation } from './utils/computation';
 import type { RootState } from '../types';
 

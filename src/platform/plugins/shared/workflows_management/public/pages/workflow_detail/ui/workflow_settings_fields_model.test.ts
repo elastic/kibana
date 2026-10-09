@@ -8,11 +8,11 @@
  */
 
 import {
-  constantsToYamlRecord,
   coerceConstantValue,
+  constantsToYamlRecord,
+  outputsToJsonSchema,
   parseConstsToFields,
   parseOutputsToFields,
-  outputsToJsonSchema,
 } from './workflow_settings_fields_model';
 
 describe('workflow_settings_fields_model', () => {

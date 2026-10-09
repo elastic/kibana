@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import type { ConnectorContractUnion, WorkflowYaml } from '@kbn/workflows';
 import {
   extractSchemaPropertyPaths,
@@ -23,7 +24,6 @@ import {
 import { BaseEventSchema } from '@kbn/workflows/spec/schema/common/base_event';
 import { AlertEventSchema } from '@kbn/workflows/spec/schema/triggers/alert_trigger_schema';
 import { isManualTrigger } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
-import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import {
   getAllDocumentOrderSteps,
@@ -107,8 +107,7 @@ const TRIGGER_LABEL: Record<string, string> = {
 const triggerLabelFor = (type: string): string => TRIGGER_LABEL[type] ?? type;
 
 /** Lowercase alphanumerics only — used to decide if a step type adds a second line. */
-const normalizeLabelKey = (value: string): string =>
-  value.toLowerCase().replace(/[^a-z0-9]+/g, '');
+const normalizeLabelKey = (value: string): string => value.toLowerCase().replace(/[^a-z0-9]+/g, '');
 
 /**
  * Show the action type under the step name only when it isn't already implied
@@ -225,11 +224,11 @@ const schemaToItems = (
     ];
   }
 
-  type Mutable = {
+  interface Mutable {
     path: string;
     typeLabel: string;
     children: Map<string, Mutable>;
-  };
+  }
   const rootChildren = new Map<string, Mutable>();
 
   for (const entry of extracted) {
@@ -400,11 +399,7 @@ const buildStepEntities = (
       ];
     } else {
       children = schemaToItems(outputSchema, outputPath, originLabel);
-      if (
-        children.length === 1 &&
-        children[0].path === outputPath &&
-        !children[0].drillable
-      ) {
+      if (children.length === 1 && children[0].path === outputPath && !children[0].drillable) {
         children = [{ ...children[0], note: opaqueNote }];
       }
     }
@@ -553,8 +548,8 @@ export const buildDataReferenceCatalog = ({
     definition == null
       ? []
       : stepsScope === 'allSteps'
-        ? getAllDocumentOrderSteps(definition.steps)
-        : getDocumentOrderPredecessors(definition.steps, currentStepName);
+      ? getAllDocumentOrderSteps(definition.steps)
+      : getDocumentOrderPredecessors(definition.steps, currentStepName);
 
   groups.push({
     id: 'steps',

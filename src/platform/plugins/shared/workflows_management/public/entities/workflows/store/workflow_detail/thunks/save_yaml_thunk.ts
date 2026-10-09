@@ -134,9 +134,7 @@ export const saveYamlThunk = createAsyncThunk<
         // Preserve query (e.g. ?view=graph) so a visual-builder create does not
         // remount onto the YAML editor after first save.
         const search =
-          typeof window !== 'undefined' && window.location.search
-            ? window.location.search
-            : '';
+          typeof window !== 'undefined' && window.location.search ? window.location.search : '';
         application.navigateToApp(PLUGIN_ID, { path: `${workflow.id}${search}` });
       }
       notifications.toasts.addSuccess(

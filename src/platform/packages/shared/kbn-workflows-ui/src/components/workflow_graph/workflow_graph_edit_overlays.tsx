@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { euiCanAnimate, euiFocusRing, EuiIcon, EuiToolTip, useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import {
+  euiCanAnimate,
+  euiFocusRing,
+  EuiIcon,
+  EuiToolTip,
+  useEuiFontSize,
+  useEuiTheme,
+} from '@elastic/eui';
 import { ViewportPortal } from '@xyflow/react';
 import type { Edge, Node } from '@xyflow/react';
 import React, { useCallback, useMemo } from 'react';
@@ -147,12 +154,8 @@ export function WorkflowGraphEditOverlays({
             // Stop the stroke just shy of the dashed + so the arrowhead meets its rim.
             const tipInset = 11;
             const isLr = control.direction === 'LR';
-            const x2 = isLr
-              ? control.segmentEnd.x - tipInset
-              : control.segmentEnd.x;
-            const y2 = isLr
-              ? control.segmentEnd.y
-              : control.segmentEnd.y - tipInset;
+            const x2 = isLr ? control.segmentEnd.x - tipInset : control.segmentEnd.x;
+            const y2 = isLr ? control.segmentEnd.y : control.segmentEnd.y - tipInset;
             return (
               <line
                 key={control.id}

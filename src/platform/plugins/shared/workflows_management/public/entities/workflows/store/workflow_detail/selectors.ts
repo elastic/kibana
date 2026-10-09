@@ -8,8 +8,8 @@
  */
 
 import { createSelector } from 'redux-toolkit-v1';
-import type { RootState } from '../types';
 import { isStructurallyEmptyWorkflowYaml } from './utils/is_structurally_empty_workflow_yaml';
+import type { RootState } from '../types';
 
 // Selectors
 

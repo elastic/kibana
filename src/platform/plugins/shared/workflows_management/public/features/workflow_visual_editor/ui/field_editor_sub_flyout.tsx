@@ -22,9 +22,9 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 import { DataReferenceCatalogTree } from './data_reference_catalog_tree';
 import { ReferenceCapableField } from './reference_capable_field';
+import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 
 export interface FieldEditorSubFlyoutProps {
   readonly fieldLabel: string;
@@ -45,10 +45,10 @@ const VALUE_LABEL = i18n.translate('workflows.fieldEditorSubFlyout.valueLabel', 
 
 const MAX_DRAFT_HISTORY = 200;
 
-type DraftHistory = {
+interface DraftHistory {
   stack: string[];
   index: number;
-};
+}
 
 const createDraftHistory = (initial: string): DraftHistory => ({
   stack: [initial],
@@ -329,7 +329,7 @@ export function FieldEditorSubFlyout({
           overflow: 'hidden',
         }}
       >
-<div
+        <div
           css={{
             flex: '1 1 auto',
             minHeight: 0,

@@ -10,8 +10,8 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 import { FieldEditorSubFlyout } from './field_editor_sub_flyout';
+import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 
 jest.mock('./data_reference_catalog_tree', () => ({
   DataReferenceCatalogTree: () => <div data-test-subj="workflowDataReferenceCatalogTree" />,
@@ -87,9 +87,7 @@ describe('FieldEditorSubFlyout', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByTestId('workflowFieldEditorSubFlyoutValueLabel')).toHaveTextContent(
-      'Value'
-    );
+    expect(screen.getByTestId('workflowFieldEditorSubFlyoutValueLabel')).toHaveTextContent('Value');
     expect(screen.getByTestId('workflowFieldEditorSubFlyoutValueDescription')).toHaveTextContent(
       'Drag a reference in, or type @ / {{'
     );

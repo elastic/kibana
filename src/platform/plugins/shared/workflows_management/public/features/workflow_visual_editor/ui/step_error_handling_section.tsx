@@ -67,7 +67,11 @@ const readOnFailure = (
   const fallbacks: FallbackStepChip[] = [];
   if (Array.isArray(fallbackRaw)) {
     for (const step of fallbackRaw) {
-      if (step && typeof step === 'object' && typeof (step as { name?: unknown }).name === 'string') {
+      if (
+        step &&
+        typeof step === 'object' &&
+        typeof (step as { name?: unknown }).name === 'string'
+      ) {
         fallbacks.push({ name: (step as { name: string }).name });
       }
     }
@@ -215,7 +219,10 @@ export function StepErrorHandlingSection({
             gap: euiTheme.size.s,
           }}
         >
-          <label htmlFor={retrySwitchId} css={{ fontWeight: euiTheme.font.weight.medium, cursor: 'pointer' }}>
+          <label
+            htmlFor={retrySwitchId}
+            css={{ fontWeight: euiTheme.font.weight.medium, cursor: 'pointer' }}
+          >
             {i18n.translate('workflows.stepConfigPanel.errorHandling.retryLabel', {
               defaultMessage: 'Retry on failure',
             })}
@@ -313,8 +320,7 @@ export function StepErrorHandlingSection({
         </div>
         <EuiText size="xs" color="subdued">
           {i18n.translate('workflows.stepConfigPanel.errorHandling.continueHelp', {
-            defaultMessage:
-              'The workflow keeps running even if this step (and its retries) fail',
+            defaultMessage: 'The workflow keeps running even if this step (and its retries) fail',
           })}
         </EuiText>
       </div>

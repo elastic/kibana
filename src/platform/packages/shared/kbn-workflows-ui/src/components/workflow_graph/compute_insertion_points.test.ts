@@ -2,6 +2,15 @@
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
  * Public License v 1".
  */
 
@@ -143,7 +152,11 @@ describe('computeInsertionPoints', () => {
     const gatePorts = points.byNodeId.get('gate');
     expect(gatePorts?.branches).toBeDefined();
     // Last-in-sequence if-nodes get a step port for the "after block" terminal.
-    expect(gatePorts?.step).toMatchObject({ sourceNodeId: 'gate', stepName: 'gate', isTerminal: true });
+    expect(gatePorts?.step).toMatchObject({
+      sourceNodeId: 'gate',
+      stepName: 'gate',
+      isTerminal: true,
+    });
     // 'steps' key = if-node "then" branch; handle is 'then' in use_workflow_layout.
     expect(gatePorts?.branches?.get('steps')).toEqual({
       slot: { kind: 'steps' },
@@ -175,7 +188,11 @@ describe('computeInsertionPoints', () => {
     // 'steps' branch is filtered out — the container's own ⊕ button handles body insertion.
     expect(loopPorts?.branches).toBeUndefined();
     // Flow port for inserting after the container.
-    expect(loopPorts?.step).toMatchObject({ sourceNodeId: 'loop', stepName: 'loop', isTerminal: true });
+    expect(loopPorts?.step).toMatchObject({
+      sourceNodeId: 'loop',
+      stepName: 'loop',
+      isTerminal: true,
+    });
   });
 
   it('gives foreach nodes a flow port but no branches.steps (non-empty body), inner step keeps its port', () => {
@@ -192,7 +209,11 @@ describe('computeInsertionPoints', () => {
     // 'steps' branch is filtered out — no spurious terminal stub below the container.
     expect(loopPorts?.branches).toBeUndefined();
     // Flow port: not terminal (followed by 'after').
-    expect(loopPorts?.step).toMatchObject({ sourceNodeId: 'loop', stepName: 'loop', isTerminal: false });
+    expect(loopPorts?.step).toMatchObject({
+      sourceNodeId: 'loop',
+      stepName: 'loop',
+      isTerminal: false,
+    });
     // Inner step keeps its flow port so its terminal stub (dashed line + ⊕) renders
     // inside the container body — increased WORKFLOW_COMPOUND_PADDING.bottom gives it room.
     expect(points.byNodeId.get('inner')?.step).toMatchObject({

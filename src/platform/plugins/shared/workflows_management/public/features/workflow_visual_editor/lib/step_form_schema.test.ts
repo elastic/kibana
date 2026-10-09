@@ -18,8 +18,8 @@ import {
   isFieldValueRepresentable,
   isStepIncomplete,
   prettifyFieldKey,
-  validateStepField,
   type StepFormField,
+  validateStepField,
 } from './step_form_schema';
 
 const connectors: ConnectorContractUnion[] = [

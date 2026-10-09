@@ -27,8 +27,11 @@ import { componentStyles } from './actions_menu.styles';
 import { getOptionActionId, renderActionOption } from './actions_menu_option';
 import { ActionsMenuPreviewPanel } from './actions_menu_preview_panel';
 import { useKibana } from '../../../hooks/use_kibana';
+import {
+  filterOptionsForInsertionContext,
+  omitDisabledTriggers,
+} from '../lib/filter_options_for_insertion_context';
 import { flattenOptions, getActionOptions } from '../lib/get_action_options';
-import { filterOptionsForInsertionContext, omitDisabledTriggers } from '../lib/filter_options_for_insertion_context';
 import {
   getActionMatchRank,
   isActionSearchMatch,
@@ -46,7 +49,12 @@ import {
   type JumpToStepEntry,
 } from '../types';
 
-export type { ActionsMenuInsertionContext, ActionsMenuPresentation, EditorCommand, JumpToStepEntry };
+export type {
+  ActionsMenuInsertionContext,
+  ActionsMenuPresentation,
+  EditorCommand,
+  JumpToStepEntry,
+};
 
 const SEARCH_INPUT_NAME = 'actions-menu-search';
 const SELECTABLE_ID = 'actions-menu-selectable';

@@ -168,8 +168,7 @@ steps:
 
   describe('applyFallbackToStepFragment', () => {
     it('sets on-failure.fallback on a step fragment and keeps retry', () => {
-      const fragment =
-        'name: second\ntype: http\non-failure:\n  retry:\n    max-attempts: 3\n';
+      const fragment = 'name: second\ntype: http\non-failure:\n  retry:\n    max-attempts: 3\n';
       const r = applyFallbackToStepFragment(fragment, 'name: notify\ntype: console\n');
       expect(r.success).toBe(true);
       if (!r.success) return;

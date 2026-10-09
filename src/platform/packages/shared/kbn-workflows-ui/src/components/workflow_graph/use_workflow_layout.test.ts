@@ -161,7 +161,9 @@ describe('useWorkflowLayout', () => {
       const failureEdge = result.current.edges.find(
         (e) => (e.data as Record<string, unknown>)?.isFailure === true
       );
-      const mainEdge = result.current.edges.find((e) => e.source === 'fetch' && e.target === 'after');
+      const mainEdge = result.current.edges.find(
+        (e) => e.source === 'fetch' && e.target === 'after'
+      );
       // 'fallback' is our normalized handle name (ADR-0010); POC used 'error'.
       expect(failureEdge?.sourceHandle).toBe('fallback');
       expect(mainEdge?.sourceHandle).toBe('step');
@@ -399,8 +401,12 @@ describe('useWorkflowLayout', () => {
 
       expect(traversedOf(findForkEdge(edges, 'gate', 'then'))).toBe(true);
       expect(traversedOf(findForkEdge(edges, 'gate', 'else'))).toBe(false);
-      expect(traversedOf(edges.find((e) => e.source === 'yes' && e.target === 'gate-join'))).toBe(true);
-      expect(traversedOf(edges.find((e) => e.source === 'no' && e.target === 'gate-join'))).toBe(false);
+      expect(traversedOf(edges.find((e) => e.source === 'yes' && e.target === 'gate-join'))).toBe(
+        true
+      );
+      expect(traversedOf(edges.find((e) => e.source === 'no' && e.target === 'gate-join'))).toBe(
+        false
+      );
     });
 
     it('highlights the else branch when the false path is taken (both populated)', () => {
@@ -426,7 +432,9 @@ describe('useWorkflowLayout', () => {
 
       expect(traversedOf(findForkEdge(edges, 'gate', 'else'))).toBe(true);
       expect(traversedOf(findForkEdge(edges, 'gate', 'then'))).toBe(false);
-      expect(traversedOf(edges.find((e) => e.source === 'no' && e.target === 'gate-join'))).toBe(true);
+      expect(traversedOf(edges.find((e) => e.source === 'no' && e.target === 'gate-join'))).toBe(
+        true
+      );
       expect(traversedOf(edges.find((e) => e.source === 'yes' && e.target === 'gate-join'))).toBe(
         false
       );

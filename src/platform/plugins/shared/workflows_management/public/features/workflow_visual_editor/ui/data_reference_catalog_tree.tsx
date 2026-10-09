@@ -19,10 +19,8 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  DataReferenceCatalog,
-  DataReferenceItem,
-} from '../lib/build_data_reference_catalog';
+import { DataReferenceItemRowContent } from './data_reference_item_row';
+import type { DataReferenceCatalog, DataReferenceItem } from '../lib/build_data_reference_catalog';
 import {
   flattenDataReferenceLeaves,
   formatDataReferenceToken,
@@ -31,7 +29,6 @@ import {
   isDataReferenceExpandable,
   isDataReferenceInsertable,
 } from '../lib/build_data_reference_catalog';
-import { DataReferenceItemRowContent } from './data_reference_item_row';
 
 const TREE_WIDTH = 340;
 /** Compact single-line row; grows when a subtitle/value is present. */
@@ -113,8 +110,7 @@ const EMPTY_DRAG_IMAGE =
   typeof Image !== 'undefined'
     ? (() => {
         const img = new Image(1, 1);
-        img.src =
-          'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+        img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
         return img;
       })()
     : null;
@@ -192,12 +188,12 @@ export interface DataReferenceCatalogTreeProps {
   readonly 'data-test-subj'?: string;
 }
 
-type FlatRow = {
+interface FlatRow {
   readonly item: DataReferenceItem;
   readonly depth: number;
   readonly showOrigin: boolean;
   readonly groupId: string;
-};
+}
 
 /**
  * Left-rail variable tree for the field-editor sub-flyout. Expandable rows
@@ -215,9 +211,7 @@ export function DataReferenceCatalogTree({
   const [activeExpandKey, setActiveExpandKey] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   /** UI-shell only — not wired to test-step execution. */
-  const [stepRunStatus, setStepRunStatus] = useState<Readonly<Record<string, StepRunStatus>>>(
-    {}
-  );
+  const [stepRunStatus, setStepRunStatus] = useState<Readonly<Record<string, StepRunStatus>>>({});
   const [stepRunErrors, setStepRunErrors] = useState<Readonly<Record<string, string>>>({});
   const [shellRunExtras, setShellRunExtras] = useState<
     Readonly<Record<string, readonly DataReferenceItem[]>>
@@ -379,31 +373,34 @@ export function DataReferenceCatalogTree({
 
   useEffect(() => () => clearDragGhost(), [clearDragGhost]);
 
-  const handleDragStart = useCallback((event: React.DragEvent, item: DataReferenceItem) => {
-    if (!isDataReferenceDraggable(item)) {
-      event.preventDefault();
-      return;
-    }
-    setIsDraggingPath(item.path);
-    event.dataTransfer.setData('text/plain', formatDataReferenceToken(item.path));
-    event.dataTransfer.effectAllowed = 'copy';
+  const handleDragStart = useCallback(
+    (event: React.DragEvent, item: DataReferenceItem) => {
+      if (!isDataReferenceDraggable(item)) {
+        event.preventDefault();
+        return;
+      }
+      setIsDraggingPath(item.path);
+      event.dataTransfer.setData('text/plain', formatDataReferenceToken(item.path));
+      event.dataTransfer.effectAllowed = 'copy';
 
-    clearDragGhost();
-    const source = event.currentTarget as HTMLElement;
-    const reduceMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    dragPointerRef.current = { x: event.clientX, y: event.clientY };
-    dragGhostRef.current = startCompactDragGhost(source, event.clientX, event.clientY, {
-      background: euiTheme.colors.backgroundBaseElevated,
-      border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
-      color: euiTheme.colors.textParagraph,
-      reduceMotion,
-    });
-    if (EMPTY_DRAG_IMAGE) {
-      event.dataTransfer.setDragImage(EMPTY_DRAG_IMAGE, 0, 0);
-    }
-  }, [clearDragGhost, euiTheme]);
+      clearDragGhost();
+      const source = event.currentTarget as HTMLElement;
+      const reduceMotion =
+        typeof window !== 'undefined' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      dragPointerRef.current = { x: event.clientX, y: event.clientY };
+      dragGhostRef.current = startCompactDragGhost(source, event.clientX, event.clientY, {
+        background: euiTheme.colors.backgroundBaseElevated,
+        border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+        color: euiTheme.colors.textParagraph,
+        reduceMotion,
+      });
+      if (EMPTY_DRAG_IMAGE) {
+        event.dataTransfer.setDragImage(EMPTY_DRAG_IMAGE, 0, 0);
+      }
+    },
+    [clearDragGhost, euiTheme]
+  );
 
   const handleDrag = useCallback((event: React.DragEvent) => {
     if (event.clientX === 0 && event.clientY === 0) return;
@@ -472,8 +469,7 @@ export function DataReferenceCatalogTree({
     const draggable = isDataReferenceDraggable(item);
     const insertable = isDataReferenceInsertable(item);
     const isDragging = isDraggingPath === item.path;
-    const canShellRun =
-      !isSearching && groupId === 'steps' && isDataReferenceEntity(item);
+    const canShellRun = !isSearching && groupId === 'steps' && isDataReferenceEntity(item);
     const runStatus = stepRunStatus[item.path];
     const runError = stepRunErrors[item.path];
 
@@ -528,9 +524,7 @@ export function DataReferenceCatalogTree({
           aria-expanded={expandable ? isOpen : undefined}
           draggable={draggable}
           data-test-subj={`workflowDataReferenceTreeRow-${expandKey}`}
-          tabIndex={
-            activeExpandKey === expandKey || (activeExpandKey === null && isFirst) ? 0 : -1
-          }
+          tabIndex={activeExpandKey === expandKey || (activeExpandKey === null && isFirst) ? 0 : -1}
           onClick={() => handleActivate(item)}
           onDragStart={(e) => handleDragStart(e, item)}
           onDrag={handleDrag}
@@ -555,8 +549,8 @@ export function DataReferenceCatalogTree({
                 ? 'grabbing'
                 : 'grab'
               : insertable || expandable
-                ? 'pointer'
-                : 'default',
+              ? 'pointer'
+              : 'default',
           }}
         >
           {/* Indent before the disclosure so nested chevrons sit next to their icons. */}
@@ -603,7 +597,7 @@ export function DataReferenceCatalogTree({
           </span>
           {draggable ? (
             <span data-drag-grip aria-hidden css={gripCss}>
-              <EuiIcon type="drag" size="s" />
+              <EuiIcon type="drag" size="s" aria-hidden={true} />
             </span>
           ) : null}
         </button>
@@ -725,48 +719,48 @@ export function DataReferenceCatalogTree({
           catalog.groups
             .filter((group) => group.items.length > 0)
             .map((group) => {
-            const groupRows = flatRows.filter((row) => row.groupId === group.id);
-            return (
-              <div key={group.id} data-test-subj={`workflowDataReferenceTreeGroup-${group.id}`}>
-                <div
-                  css={{
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: euiTheme.size.xs,
-                    padding: `10px ${euiTheme.size.m} 4px`,
-                    background: euiTheme.colors.backgroundBasePlain,
-                  }}
-                >
-                  {group.iconType ? (
-                    <EuiIcon type={group.iconType} size="s" color="subdued" aria-hidden />
-                  ) : null}
-                  <EuiText
-                    size="xs"
-                    color="subdued"
+              const groupRows = flatRows.filter((row) => row.groupId === group.id);
+              return (
+                <div key={group.id} data-test-subj={`workflowDataReferenceTreeGroup-${group.id}`}>
+                  <div
                     css={{
-                      fontWeight: euiTheme.font.weight.medium,
+                      position: 'sticky',
+                      top: 0,
+                      zIndex: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: euiTheme.size.xs,
+                      padding: `10px ${euiTheme.size.m} 4px`,
+                      background: euiTheme.colors.backgroundBasePlain,
                     }}
                   >
-                    {group.title}
-                  </EuiText>
-                  <EuiIconTip
-                    type="info"
-                    color="subdued"
-                    position="top"
-                    content={group.description}
-                  />
+                    {group.iconType ? (
+                      <EuiIcon type={group.iconType} size="s" color="subdued" aria-hidden />
+                    ) : null}
+                    <EuiText
+                      size="xs"
+                      color="subdued"
+                      css={{
+                        fontWeight: euiTheme.font.weight.medium,
+                      }}
+                    >
+                      {group.title}
+                    </EuiText>
+                    <EuiIconTip
+                      type="info"
+                      color="subdued"
+                      position="top"
+                      content={group.description}
+                    />
+                  </div>
+                  {groupRows.map((row) => {
+                    const isFirst = !firstAssigned;
+                    firstAssigned = true;
+                    return renderItemRow(row, isFirst);
+                  })}
                 </div>
-                {groupRows.map((row) => {
-                  const isFirst = !firstAssigned;
-                  firstAssigned = true;
-                  return renderItemRow(row, isFirst);
-                })}
-              </div>
-            );
-          })
+              );
+            })
         )}
       </div>
     </div>

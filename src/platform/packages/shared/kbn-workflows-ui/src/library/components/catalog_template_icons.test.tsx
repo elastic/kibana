@@ -17,7 +17,9 @@ jest.mock('@kbn/connector-specs/icons', () => ({
 jest.mock('../../context/workflows_ui_services');
 jest.mock('../../components/step_icons', () => ({
   getBaseConnectorType: (type: string) => type.split('.')[0] ?? type,
-  TypeIcon: ({ type }: { type: string }) => <span data-test-subj={`type-icon-${type}`}>{type}</span>,
+  TypeIcon: ({ type }: { type: string }) => (
+    <span data-test-subj={`type-icon-${type}`}>{type}</span>
+  ),
 }));
 
 describe('CatalogTemplateIcons', () => {

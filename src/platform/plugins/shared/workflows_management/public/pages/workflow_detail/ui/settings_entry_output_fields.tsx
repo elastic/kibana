@@ -18,17 +18,17 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { settingsEntryNameErrorMessage } from './settings_entry_row_shared';
+import type { OutputField } from './workflow_settings_fields_model';
 import type { DataReferenceCatalog } from '../../../features/workflow_visual_editor/lib/build_data_reference_catalog';
 import { ReferenceCapableField } from '../../../features/workflow_visual_editor/ui/reference_capable_field';
 import {
-  SchemaPropertyList,
   SCHEMA_PROPERTY_TYPE_OPTIONS,
-  validateSchemaPropertyName,
   type SchemaPropertyField,
+  SchemaPropertyList,
   type SchemaPropertyType,
+  validateSchemaPropertyName,
 } from '../../../shared/ui/schema_property_builder';
-import { settingsEntryNameErrorMessage } from './settings_entry_row_shared';
-import type { OutputField } from './workflow_settings_fields_model';
 
 export const SETTINGS_ENTRY_OUTPUT_TYPE_OPTIONS = SCHEMA_PROPERTY_TYPE_OPTIONS.filter(
   (option) => option.value !== 'date'
@@ -75,6 +75,7 @@ export const SettingsEntryOutputFields = ({
             compressed
           >
             <EuiFieldText
+              isInvalid={nameError != null && field.name.length > 0}
               compressed
               fullWidth
               value={field.name}

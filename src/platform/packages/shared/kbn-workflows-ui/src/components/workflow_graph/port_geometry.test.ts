@@ -11,24 +11,24 @@ import {
   ERROR_PORT_ALONG,
   ERROR_PORT_FRACTION,
   ERROR_PORT_TRAIL_T,
-  FLOW_BAND_END,
-  FLOW_BAND_START,
-  FLOW_PORT_MIN_GAP,
-  FLOW_TO_ERROR_MIN_GAP,
-  IF_PORT_FALSE,
-  IF_PORT_TRUE,
-  PORT_EDGE_OUTSET,
-  PORT_HIT_SIZE,
-  PORT_STRADDLE_OUTSET,
-  STEP_PORT,
   errorPortCenter,
   errorPortEdgeStyle,
   expandedPortCenters,
   expandedPortsClear,
+  FLOW_BAND_END,
+  FLOW_BAND_START,
+  FLOW_PORT_MIN_GAP,
+  FLOW_TO_ERROR_MIN_GAP,
   flowPortAlong,
   flowPortFraction,
+  IF_PORT_FALSE,
+  IF_PORT_TRUE,
   minCrossSizeForPorts,
+  PORT_EDGE_OUTSET,
+  PORT_HIT_SIZE,
+  PORT_STRADDLE_OUTSET,
   portCenterOnSourceEdge,
+  STEP_PORT,
 } from './port_geometry';
 
 describe('port_geometry', () => {
@@ -147,9 +147,7 @@ describe('port_geometry', () => {
         const width = Math.max(300, minCrossSizeForPorts(flowCount, hasError));
         // Height carries LR flow↔flow; error is on a different edge.
         const height = Math.max(64, minCrossSizeForPorts(flowCount, false));
-        expect(expandedPortsClear(width, height, flowCount, hasError, direction)).toBe(
-          true
-        );
+        expect(expandedPortsClear(width, height, flowCount, hasError, direction)).toBe(true);
       }
     });
 

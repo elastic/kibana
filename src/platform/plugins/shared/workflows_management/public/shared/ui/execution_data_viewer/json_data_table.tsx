@@ -21,12 +21,12 @@ import { usePager } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { JsonValue } from '@kbn/utility-types';
-import { insertIntoActiveDataReferenceTarget } from '../../lib/active_data_reference_insert_target';
-import { appendKeyPath, flattenKeyPaths } from '../../lib/flatten_key_paths';
 import { FieldName } from './field_name';
 import { formatValueAsElement } from './format_value';
 import { inferFieldType } from './infer_field_type';
 import { TableFieldValue } from './table_field_value';
+import { insertIntoActiveDataReferenceTarget } from '../../lib/active_data_reference_insert_target';
+import { appendKeyPath, flattenKeyPaths } from '../../lib/flatten_key_paths';
 import { useGetFormattedDateTime } from '../use_formatted_date';
 
 const MIN_NAME_COLUMN_WIDTH = 220;

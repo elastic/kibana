@@ -18,9 +18,9 @@ import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zo
 import { applyInputDefaults, hasDefaultsRecursive } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { generateSampleFromJsonSchema, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
-import { isBuilderEditableSchema } from '../../../shared/ui/schema_property_builder';
 import { InputValidationCallout } from './input_validation_callout';
 import { WorkflowExecuteManualFieldsForm } from './workflow_execute_manual_fields_form';
+import { isBuilderEditableSchema } from '../../../shared/ui/schema_property_builder';
 
 const SCHEMA_URI = `inmemory://schemas/workflow-manual-json-editor-schema`;
 

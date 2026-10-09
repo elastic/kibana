@@ -49,9 +49,7 @@ export const toSwitchCaseRows = (value: unknown): SwitchCaseRow[] => {
   });
 };
 
-export const switchCaseRowsToValue = (
-  rows: readonly SwitchCaseRow[]
-): SwitchCaseFormValue[] =>
+export const switchCaseRowsToValue = (rows: readonly SwitchCaseRow[]): SwitchCaseFormValue[] =>
   rows.map((row) => ({
     match: row.match,
     steps: [...row.steps],
@@ -239,22 +237,18 @@ export function SwitchCasesField({ value, onChange }: SwitchCasesFieldProps) {
                         fullWidth
                         value={row.match}
                         isInvalid={isDuplicate}
-                        placeholder={i18n.translate(
-                          'workflows.switchCasesField.matchPlaceholder',
-                          { defaultMessage: 'Match value' }
-                        )}
+                        placeholder={i18n.translate('workflows.switchCasesField.matchPlaceholder', {
+                          defaultMessage: 'Match value',
+                        })}
                         inputRef={(el) => {
                           inputRefs.current.set(row.id, el);
                         }}
                         onChange={(e) => handleMatchChange(row.id, e.target.value)}
                         data-test-subj={`workflowSwitchCaseMatch-${index}`}
-                        aria-label={i18n.translate(
-                          'workflows.switchCasesField.matchAriaLabel',
-                          {
-                            defaultMessage: 'Case {index} match value',
-                            values: { index: index + 1 },
-                          }
-                        )}
+                        aria-label={i18n.translate('workflows.switchCasesField.matchAriaLabel', {
+                          defaultMessage: 'Case {index} match value',
+                          values: { index: index + 1 },
+                        })}
                       />
                     </EuiFormRow>
                   </EuiFlexItem>
@@ -262,13 +256,10 @@ export function SwitchCasesField({ value, onChange }: SwitchCasesFieldProps) {
                     <EuiButtonIcon
                       iconType="trash"
                       color="danger"
-                      aria-label={i18n.translate(
-                        'workflows.switchCasesField.deleteAriaLabel',
-                        {
-                          defaultMessage: 'Delete case {index}',
-                          values: { index: index + 1 },
-                        }
-                      )}
+                      aria-label={i18n.translate('workflows.switchCasesField.deleteAriaLabel', {
+                        defaultMessage: 'Delete case {index}',
+                        values: { index: index + 1 },
+                      })}
                       onClick={() => requestDelete(row)}
                       data-test-subj={`workflowSwitchCaseDelete-${index}`}
                       css={{
@@ -285,8 +276,7 @@ export function SwitchCasesField({ value, onChange }: SwitchCasesFieldProps) {
           <EuiText size="xs" color="subdued">
             <p>
               {i18n.translate('workflows.switchCasesField.helpText', {
-                defaultMessage:
-                  'List of match-to-steps mappings. First matching case is executed.',
+                defaultMessage: 'List of match-to-steps mappings. First matching case is executed.',
               })}
             </p>
           </EuiText>
