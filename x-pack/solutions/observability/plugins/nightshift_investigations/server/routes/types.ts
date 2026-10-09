@@ -14,6 +14,7 @@ import type { NightshiftInvestigationsClient } from '../client/investigations_cl
 import type { CortexPageStore } from '../cortex/page_store';
 import type { SandboxSecretsClient } from '../sandbox_secrets';
 import type { CustomContextClient } from '../custom_context';
+import type { OnboardingClient } from '../onboarding/onboarding_client';
 import type { DecisionTreeStore } from '../decision_trees/store';
 import type { MemoryPageStore } from '../memory/page_store';
 import type { GetTriggerEmitter } from '../types';
@@ -50,6 +51,7 @@ export interface NightshiftInvestigationsRouteHandlerResources
   isCortexEnabled: () => boolean;
   sandboxSecretsClient: SandboxSecretsClient;
   customContextClient: CustomContextClient;
+  onboardingClient: OnboardingClient;
   getDecisionTreeStore: GetDecisionTreeStore;
   isDecisionTreesEnabled: () => boolean;
   getMemoryPageStore: GetMemoryPageStore;

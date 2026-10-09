@@ -24,7 +24,7 @@ const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
 
 interface UseStartInvestigationResult {
-  startInvestigation: (message: string) => void;
+  startInvestigation: (message: string, title?: string) => void;
   isStarting: boolean;
 }
 
@@ -32,26 +32,26 @@ interface UseStartInvestigationResult {
 export const useStartInvestigation = ({
   onStarted,
 }: {
-  onStarted?: () => void;
+  onStarted?: (investigationId: string) => void;
 } = {}): UseStartInvestigationResult => {
   const { notifications, nightshiftInvestigations } = useKibana().services;
   const investigationsClient = nightshiftInvestigations?.investigationsClient;
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async (message: string) => {
+    mutationFn: async ({ message, title }: { message: string; title?: string }) => {
       if (!investigationsClient) {
         throw new Error('Nightshift investigations plugin is unavailable');
       }
       return investigationsClient.fetch('POST /internal/nightshift/investigations', {
-        params: { body: { subject: { type: 'manual' }, message } },
+        params: { body: { subject: { type: 'manual' }, message, ...(title ? { title } : {}) } },
         // Closing the panel must not abort a start that is already in flight.
         signal: null,
       });
     },
-    onSuccess: async () => {
+    onSuccess: async ({ investigation_id: investigationId }) => {
       notifications.toasts.addSuccess({ title: START_SUCCESS_TOAST_TITLE });
-      onStarted?.();
+      onStarted?.(investigationId);
       await queryClient.invalidateQueries({ queryKey: NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY });
     },
     onError: (error: unknown) => {
@@ -60,7 +60,7 @@ export const useStartInvestigation = ({
   });
 
   return {
-    startInvestigation: (message) => mutation.mutate(message),
+    startInvestigation: (message, title) => mutation.mutate({ message, title }),
     isStarting: mutation.isLoading,
   };
 };

@@ -21,6 +21,7 @@
     "@kbn/date-range-picker",
     "@kbn/deeplinks-analytics",
     "@kbn/deeplinks-observability",
+    "@kbn/dev-cli-errors",
     "@kbn/dev-cli-runner",
     "@kbn/discover-plugin",
     "@kbn/ebt-click",

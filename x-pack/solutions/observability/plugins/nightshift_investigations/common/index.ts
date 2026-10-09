@@ -231,6 +231,20 @@ export {
 } from './custom_context';
 
 export {
+  ONBOARDING_SUGGESTION_SOURCES,
+  MAX_ONBOARDING_SUGGESTIONS,
+  MAX_ONBOARDING_SUGGESTION_TITLE_LENGTH,
+  MAX_ONBOARDING_SUGGESTION_PROMPT_LENGTH,
+  MAX_ONBOARDING_SUGGESTION_RATIONALE_LENGTH,
+  type OnboardingSuggestion,
+  type OnboardingSuggestionSource,
+  type OnboardingSuggestionsStatus,
+  type OnboardingSuggestionsExecution,
+  type GetOnboardingResponse,
+  type StartOnboardingSuggestionsResponse,
+} from './onboarding';
+
+export {
   DECISION_TREE_AI_INDEX_ID,
   DECISION_TREE_AI_INDEX_DEST,
   DECISION_TREE_DOC_TYPES,
