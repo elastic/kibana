@@ -10,6 +10,7 @@ import { createTrajectoryEvaluator } from '@kbn/evals';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   FP_TP_VERDICTS,
+  HARNESS_TOOL_IDS,
   RATIONALE_MARKDOWN_MAX_LENGTH,
   SUMMARY_MARKDOWN_MAX_LENGTH,
   type FpTpOutcome,
@@ -249,11 +250,14 @@ export const payloadConformance: Evaluator = {
 
 /**
  * Zero-tool guardrail: the workflow gathers the evidence and the agent is tool-less, so
- * any tool call fails. N/A when the traces are unavailable.
+ * any domain tool call fails. Harness tools the runtime attaches to every agent (`write_todos`)
+ * are ignored, so models that plan with them stay comparable to models that do not.
+ * N/A when the traces are unavailable.
  */
 export const createFpTpTrajectoryEvaluator = (): Evaluator => {
   const inner = createTrajectoryEvaluator({
-    extractToolCalls: (output) => asOutput(output).toolCallIds ?? [],
+    extractToolCalls: (output) =>
+      (asOutput(output).toolCallIds ?? []).filter((toolId) => !HARNESS_TOOL_IDS.includes(toolId)),
     goldenPathExtractor: () => [],
     orderWeight: 1,
     coverageWeight: 0,
