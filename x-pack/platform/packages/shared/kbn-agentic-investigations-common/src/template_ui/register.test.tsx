@@ -23,7 +23,10 @@ import {
 } from './register';
 import type { RenderAssignees, RenderLinkedInvestigations } from './types';
 import { ACTIONS_TRANSLATIONS } from '../components/actions/translations';
-import { createFlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
+import {
+  FlyoutGroupedAttachments,
+  createFlyoutGroupedAttachmentsRegistry,
+} from '../components/grouped_attachments';
 
 const conversation: Conversation = {
   id: 'conversation-1',
@@ -163,6 +166,104 @@ describe('registerAgenticInvestigationTemplateUI', () => {
       await screen.findByText('A second sign-in replayed the same session cookie.')
     ).toBeInTheDocument();
     expect(screen.queryByText('Proposed actions')).not.toBeInTheDocument();
+  });
+
+  it('replaces the overview body with renderOverview and passes it the proposed actions and their count', async () => {
+    const { contract } = createFakeService();
+    const renderOverview = jest.fn(
+      ({
+        conversation: { id },
+        proposedActionsContent,
+        proposedActionsCount,
+      }: {
+        conversation: Conversation;
+        proposedActionsContent?: React.ReactNode;
+        proposedActionsCount?: React.ReactNode;
+      }) => (
+        <div>
+          <span>custom overview for {id}</span>
+          {proposedActionsCount}
+          {proposedActionsContent}
+        </div>
+      )
+    );
+    const groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
+    register(contract, {
+      groupedAttachments,
+      renderOverview,
+      renderProposedActions: () => <span>proposals</span>,
+      renderProposedActionsCount: () => <span>3 proposals</span>,
+    });
+
+    const OverviewTabContent = contract.getTab('investigation.overview')?.content;
+    if (!OverviewTabContent) {
+      throw new Error('Expected a registered overview tab');
+    }
+    renderWithKibanaRenderContext(
+      <OverviewTabContent conversation={conversation} isOpenedFromChat={false} />
+    );
+
+    expect(await screen.findByText('custom overview for conversation-1')).toBeInTheDocument();
+    expect(screen.getByText('proposals')).toBeInTheDocument();
+    expect(screen.getByText('3 proposals')).toBeInTheDocument();
+    expect(renderOverview).toHaveBeenCalledWith(
+      expect.objectContaining({ conversation, groupedAttachments })
+    );
+  });
+
+  it("shows the conversation's severity in the header without a live state", async () => {
+    const { contract } = createFakeService();
+    register(contract);
+    const Header = getSlot(contract, 'investigation', 'header');
+
+    renderWithKibanaRenderContext(<Header conversation={conversation} isOpenedFromChat={false} />);
+
+    expect(await screen.findByTestId('investigationFlyoutSeverity')).toHaveTextContent('High');
+  });
+
+  it('leaves the severity to the live state, passing it the conversation severity', async () => {
+    const { contract } = createFakeService();
+    register(contract, {
+      renderLiveState: ({ conversationId, severity }) => (
+        <span>
+          live {conversationId} {severity}
+        </span>
+      ),
+    });
+    const Header = getSlot(contract, 'investigation', 'header');
+
+    renderWithKibanaRenderContext(<Header conversation={conversation} isOpenedFromChat={false} />);
+
+    expect(await screen.findByText('live conversation-1 high')).toBeInTheDocument();
+    expect(screen.queryByTestId('investigationFlyoutSeverity')).not.toBeInTheDocument();
+  });
+
+  it('renders the header title with renderTitle, passing it the conversation id and title', async () => {
+    const { contract } = createFakeService();
+    register(contract, {
+      renderTitle: ({ conversationId, title }) => (
+        <span>
+          title {conversationId} {title}
+        </span>
+      ),
+    });
+    const Header = getSlot(contract, 'investigation', 'header');
+
+    renderWithKibanaRenderContext(<Header conversation={conversation} isOpenedFromChat={false} />);
+
+    expect(
+      await screen.findByRole('heading', {
+        name: 'title conversation-1 Impossible travel — exec account',
+      })
+    ).toBeInTheDocument();
+  });
+
+  it('registers the brief card when supplied', () => {
+    const { contract } = createFakeService();
+    const BriefCard = () => <span>card</span>;
+    register(contract, { briefCard: BriefCard });
+
+    expect(contract.getTemplateUIDefinition('investigation')?.briefCard).toBe(BriefCard);
   });
 
   it('registers the template UI definition with a header and footer', () => {
@@ -342,6 +443,7 @@ describe('registerEscalationTemplateUI', () => {
     registerEscalationTemplateUI({
       conversationTemplates: contract,
       templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
       name: 'Escalation',
     });
 
@@ -358,6 +460,7 @@ describe('registerEscalationTemplateUI', () => {
     registerEscalationTemplateUI({
       conversationTemplates: contract,
       templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
       name: 'Escalation',
       renderAssignees,
     });
@@ -392,6 +495,7 @@ describe('registerEscalationTemplateUI', () => {
     registerEscalationTemplateUI({
       conversationTemplates: contract,
       templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
       name: 'Escalation',
     });
 
@@ -412,6 +516,7 @@ describe('registerEscalationTemplateUI', () => {
     registerEscalationTemplateUI({
       conversationTemplates: contract,
       templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
       name: 'Escalation',
     });
 
@@ -427,6 +532,7 @@ describe('registerEscalationTemplateUI', () => {
     registerEscalationTemplateUI({
       conversationTemplates: contract,
       templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
       name: 'Escalation',
       renderLinkedInvestigations,
     });
@@ -453,6 +559,47 @@ describe('registerEscalationTemplateUI', () => {
     );
   });
 
+  it('renders the summary and grouped attachments in the overview tab', async () => {
+    const { contract } = createFakeService();
+    const groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
+    groupedAttachments.register(FlyoutGroupedAttachments.ALERTS, ['security.alert'], () => (
+      <li>Session cookie replayed</li>
+    ));
+
+    registerEscalationTemplateUI({
+      conversationTemplates: contract,
+      templateId: 'escalation',
+      groupedAttachments,
+      name: 'Escalation',
+    });
+
+    const TabContent = contract.getTab('escalation.overview')?.content;
+    if (!TabContent) throw new Error('Expected escalation.overview tab');
+
+    renderWithKibanaRenderContext(
+      <TabContent
+        conversation={{
+          ...escalationConversation,
+          metadata: { status: 'open', summary: 'Escalated narrative' },
+          attachments: [
+            {
+              id: 'attachment-1',
+              type: 'security.alert',
+              current_version: 1,
+              versions: [
+                { version: 1, data: {}, created_at: '2024-01-01T00:00:00Z', content_hash: 'a' },
+              ],
+            },
+          ],
+        }}
+        isOpenedFromChat={false}
+      />
+    );
+
+    expect(await screen.findByText('Escalated narrative')).toBeInTheDocument();
+    expect(screen.getByText('Session cookie replayed')).toBeInTheDocument();
+  });
+
   it('navigates via openFullscreenConversation with openDetails:true when onOpenInvestigation is called', async () => {
     const { contract, openFullscreenConversation } = createFakeService();
     let capturedOnOpen: ((args: { conversationId: string; agentId: string }) => void) | undefined;
@@ -464,6 +611,7 @@ describe('registerEscalationTemplateUI', () => {
     registerEscalationTemplateUI({
       conversationTemplates: contract,
       templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
       name: 'Escalation',
       renderLinkedInvestigations,
     });

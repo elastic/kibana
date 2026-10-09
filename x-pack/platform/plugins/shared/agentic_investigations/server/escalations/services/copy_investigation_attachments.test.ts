@@ -108,6 +108,18 @@ describe('copyInvestigationAttachments', () => {
     expect(call.attachments[0].id).toBe('inv-1:active');
   });
 
+  it('excludes notification routing from escalation copies', async () => {
+    const attachmentsClient = { bulkCreate: jest.fn() } as never;
+    const routing = makeAttachment({ id: 'routing', type: 'nightshift.notification_routing' });
+    const result = await copyInvestigationAttachments({
+      attachmentsClient,
+      escalation: makeConversation('escalation'),
+      investigation: makeConversation('investigation', [routing]),
+      logger: buildDeps().logger,
+    });
+    expect(result).toEqual({ copied: 0, failed: 0 });
+  });
+
   it('skips screen_context attachments', async () => {
     const { logger, attachmentsClient } = buildDeps();
     const sc = makeAttachment({ id: 'sc', type: 'screen_context' });

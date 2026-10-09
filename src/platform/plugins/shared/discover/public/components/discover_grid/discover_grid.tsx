@@ -15,7 +15,6 @@ import {
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
-import type { DataSource } from '@kbn/data-source';
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
 import type { CascadedDocumentsContext } from '../../application/main/components/layout/cascaded_documents';
@@ -28,7 +27,6 @@ import {
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
   cascadedDocumentsContext?: CascadedDocumentsContext;
-  dataSource?: DataSource;
 }
 
 /**
@@ -91,7 +89,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     });
 
     const isCascadedDocumentsAvailable =
-      props.isPlainRecord && !!cascadedDocumentsContext?.availableCascadeGroups.length;
+      dataSource?.kind === 'esql' && !!cascadedDocumentsContext?.availableCascadeGroups.length;
 
     const externalAdditionalControls = useMemo(() => {
       const additionalControls: ReactNode[] = [];
@@ -146,6 +144,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
         enableInTableSearch
         showSummaryColumnToggle
         visibleCellActions={3} // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
+        dataSource={dataSource}
         getRowIndicator={getRowIndicator}
       />
     );
