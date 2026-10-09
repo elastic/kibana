@@ -93,7 +93,7 @@ This stream is the dispatcher's durable memory and also stores user/system actio
 
 Writers:
 
-- `lib/dispatcher/steps/store_actions_step.ts`
+- `lib/dispatcher/steps/dispatch_step.ts` (with `lib/dispatcher/steps/utils/series_ledger.ts`)
 - alert action routes under `server/routes/alert_actions/`
 
 Readers:
@@ -123,12 +123,12 @@ These actions are created through the alert action routes and clients. They chan
 
 ### Dispatcher outcome actions
 
-These actions are written by `StoreActionsStep` to record what the dispatcher decided during a run.
+These actions are written by `DispatchStep` to record what the dispatcher decided during a run, after each dispatch chunk. `fire`, `suppress` and `unmatched` are written for a series only once every action group holding one of its alerts has concluded, because one of these records hides every event of the series up to its `last_series_event_timestamp`.
 
 | Action type | Written by | Meaning |
 | --- | --- | --- |
 | `fire` | Dispatcher | This episode was eligible for dispatch in the current run. |
-| `notified` | Dispatcher | A notification group was actually scheduled/sent. This is group-level history used for throttling. |
+| `notified` | Dispatcher | A notification group was actually scheduled/sent. Written once per (`action_group_id`, `alert_id`) right after the dispatch chunk, with `last_series_event_timestamp` set to the alert's event time. Used for throttling and to skip content an aborted tick already delivered. Records written before this carry no `alert_id`. |
 | `suppress` | Dispatcher | The episode was intentionally not fired in this run, for example because suppression logic or throttling held it back. |
 | `unmatched` | Dispatcher | The episode stayed dispatchable but matched no enabled notification policy. |
 
@@ -137,7 +137,7 @@ These actions are written by `StoreActionsStep` to record what the dispatcher de
 The dispatcher records both per-episode and per-group outcomes:
 
 - `fire` means an individual episode reached the dispatch stage
-- `notified` means a notification group was actually sent and is the durable record later throttling queries look at
+- `notified` means a notification group was actually sent and is the durable record later throttling queries look at; because it is written per alert of the group as soon as the workflows are scheduled, it also tells a later tick which alerts a group already delivered when the earlier tick aborted before its series were recorded
 
 That distinction is why `.alert-actions` stores both episode-scoped and notification-group-scoped fields.
 
@@ -213,6 +213,6 @@ See the `*_ILM_POLICY` definitions in the datastream files if you need to change
 | --- | --- |
 | `lib/services/resource_service/` | Resource registration and initialization orchestration |
 | `lib/rule_executor/steps/store_alert_events.ts` | Writes `.rule-events` |
-| `lib/dispatcher/steps/store_actions_step.ts` | Writes `.alert-actions` |
+| `lib/dispatcher/steps/dispatch_step.ts` | Writes `.alert-actions` |
 | `lib/dispatcher/queries.ts` | Reads from `.rule-events` and `.alert-actions` |
 | `lib/director/queries.ts` | Reads latest alert state from `.rule-events` |

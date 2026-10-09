@@ -599,3 +599,59 @@ describe('ApplyThrottlingStep', () => {
     expect(result.data?.plan?.throttled).toHaveLength(0);
   });
 });
+
+describe('ApplyThrottlingStep alreadyNotified', () => {
+  const policies = new Map([
+    ['p1', createActionPolicy({ id: 'p1', throttle: { strategy: 'every_time' } })],
+  ]);
+  const notifiedAlert = createAlert({ alert_id: 'alert-notified' });
+  const pendingAlert = createAlert({ alert_id: 'alert-pending', group_hash: 'hash-2' });
+  const alreadyNotified = [
+    createActionGroup({ id: 'g1', policyId: 'p1', alerts: [notifiedAlert] }),
+  ];
+
+  it('carries already-notified groups into the plan when no group is left to throttle', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const step = new ApplyThrottlingStep(queryService);
+
+    const result = await step.execute(
+      createDispatcherPipelineState({
+        groups: [],
+        alreadyNotified,
+        policies,
+        dispatchable: [notifiedAlert],
+      }),
+      logger
+    );
+
+    expect(mockEsClient.esql.query).not.toHaveBeenCalled();
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(result.data?.plan?.alreadyNotified).toEqual(alreadyNotified);
+    expect(result.data?.plan?.unmatched).toEqual([]);
+    expect(result.data?.plan?.isEmpty()).toBe(false);
+  });
+
+  it('carries already-notified groups next to the throttling decision', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    mockEsClient.esql.query.mockResolvedValue(createLastNotifiedTimestampsResponse());
+    const step = new ApplyThrottlingStep(queryService);
+    const pendingGroup = createActionGroup({ id: 'g1', policyId: 'p1', alerts: [pendingAlert] });
+
+    const result = await step.execute(
+      createDispatcherPipelineState({
+        groups: [pendingGroup],
+        alreadyNotified,
+        policies,
+        dispatchable: [notifiedAlert, pendingAlert],
+      }),
+      logger
+    );
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(result.data?.plan?.toDispatch).toEqual([pendingGroup]);
+    expect(result.data?.plan?.alreadyNotified).toEqual(alreadyNotified);
+    expect(result.data?.plan?.unmatched).toEqual([]);
+  });
+});

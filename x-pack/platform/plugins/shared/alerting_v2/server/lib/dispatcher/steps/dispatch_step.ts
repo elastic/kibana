@@ -18,17 +18,23 @@ import type {
   WorkflowsServerPluginSetup,
   WorkflowsManagementClient,
 } from '@kbn/workflows-management-plugin/server';
+import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { inject, injectable } from 'inversify';
-import { isError } from 'lodash';
+import { isError, uniqBy } from 'lodash';
 import { ACTION_POLICIES_REQUIRED_LICENSE } from '../../../../common/action_policies_license';
+import type { AlertActionDocument } from '../../../resources/datastreams/alert_actions';
 import { getActionPolicyLicenseNotSupportedMessage } from '../../errors/action_policy_error_messages';
 import { ALERTING_LOG_CODES, type AlertingV2LogCode } from '../../errors/error_codes';
+import type { EventLogServiceContract } from '../../services/event_log_service/event_log_service';
+import { EventLogServiceToken } from '../../services/event_log_service/tokens';
 import type {
   ActionPoliciesLicenseState,
   LicenseServiceContract,
 } from '../../services/license_service/license_service';
 import { LicenseServiceToken } from '../../services/license_service/tokens';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import type { StorageServiceContract } from '../../services/storage_service/storage_service';
+import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
 import { DISPATCH_CHUNK_SIZE } from '../constants';
 import type {
   ActionGroup,
@@ -40,9 +46,13 @@ import type {
   DispatcherStepOutput,
   DispatchFailure,
 } from '../types';
-import { DispatchOutcome, DispatchPlan, PolicyCatalog } from '../state';
+import { AlertTriage, DispatchOutcome, DispatchPlan, PolicyCatalog, RuleCatalog } from '../state';
+import { withDispatcherSpan } from '../with_dispatcher_span';
 import { DISPATCH_FAILURE_REASONS, type DispatchFailureReason } from './constants';
 import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
+import { toNotifiedActions } from './utils/action_documents';
+import { emitExecutionHistory } from './utils/execution_history';
+import { SeriesLedger } from './utils/series_ledger';
 
 const ACTION_POLICY_TRIGGER = 'action_policy';
 
@@ -82,6 +92,31 @@ const addMapSet = <K, V>(map: Map<K, Set<V>>, key: K, value: V): void => {
   }
 };
 
+/**
+ * Packs schedule items into chunks of at most `maxItems` without splitting a group: once a chunk
+ * returns, every destination of its groups has been attempted. A group with more destinations than
+ * `maxItems` gets a chunk of its own. Relies on a group's items being adjacent in `pending`.
+ */
+const chunkByGroup = (pending: PendingSchedule[], maxItems: number): PendingSchedule[][] => {
+  const chunks: PendingSchedule[][] = [];
+  let current: PendingSchedule[] = [];
+  let start = 0;
+  while (start < pending.length) {
+    const groupId = pending[start].group.id;
+    let end = start + 1;
+    while (end < pending.length && pending[end].group.id === groupId) end++;
+    const groupItems = pending.slice(start, end);
+    if (current.length > 0 && current.length + groupItems.length > maxItems) {
+      chunks.push(current);
+      current = [];
+    }
+    current.push(...groupItems);
+    start = end;
+  }
+  if (current.length > 0) chunks.push(current);
+  return chunks;
+};
+
 @injectable()
 export class DispatchStep implements DispatcherStep {
   public readonly name = 'dispatch';
@@ -89,83 +124,192 @@ export class DispatchStep implements DispatcherStep {
   constructor(
     @inject(WorkflowsManagementApiToken)
     private readonly workflowsManagement: WorkflowsServerPluginSetup['management'],
-    @inject(LicenseServiceToken) private readonly licenseService: LicenseServiceContract
+    @inject(LicenseServiceToken) private readonly licenseService: LicenseServiceContract,
+    @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract,
+    @inject(EventLogServiceToken) private readonly eventLogService: EventLogServiceContract
   ) {}
 
   public async execute(
     state: Readonly<DispatcherPipelineState>,
     logger: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { plan = DispatchPlan.empty(), policies = PolicyCatalog.empty() } = state;
-    const { signal } = state.input;
+    const {
+      plan = DispatchPlan.empty(),
+      triage = AlertTriage.empty(),
+      policies = PolicyCatalog.empty(),
+      rules = RuleCatalog.empty(),
+      input,
+    } = state;
+
+    const ledger = SeriesLedger.of({ triage, plan });
+    if (ledger.isEmpty()) {
+      return { type: 'halt', reason: 'no_actions' };
+    }
 
     const dispatchedExecutions = new Map<ActionGroupId, string[]>();
     const dispatchFailures: DispatchFailure[] = [];
-    const done = (): DispatcherStepOutput => ({
-      type: 'continue',
-      data: {
-        outcome: DispatchOutcome.of({
-          executionsByGroup: dispatchedExecutions,
-          failures: dispatchFailures,
-        }),
-      },
-    });
+    const outcome = () =>
+      DispatchOutcome.of({ executionsByGroup: dispatchedExecutions, failures: dispatchFailures });
 
-    if (plan.toDispatch.length === 0 || signal.aborted) {
-      return done();
+    try {
+      await this.commit(ledger.takeReady(), logger);
+      for await (const concluded of this.dispatchGroups(
+        plan.toDispatch,
+        policies,
+        input.signal,
+        dispatchedExecutions,
+        dispatchFailures,
+        logger
+      )) {
+        await this.commit(
+          [
+            ...concluded.flatMap((group) =>
+              toNotifiedActions(group, policies.groupingModeOf(group.policyId))
+            ),
+            ...ledger.conclude(concluded),
+          ],
+          logger
+        );
+      }
+    } finally {
+      emitExecutionHistory({
+        eventLogService: this.eventLogService,
+        dispatched: ledger.concludedGroups(),
+        throttled: ledger.releasedGroups(plan.throttled),
+        unmatched: ledger.releasedAlerts(plan.unmatched),
+        outcome: outcome(),
+        rules,
+        timestamp: input.startedAt.toISOString(),
+        executionUuid: input.executionUuid,
+      });
+    }
+
+    // Completing with groups never attempted would let the watermark advance past their alerts.
+    if (ledger.hasPending()) {
+      return { type: 'halt', reason: 'aborted' };
+    }
+
+    return { type: 'continue', data: { outcome: outcome() } };
+  }
+
+  /**
+   * Writes the records the latest chunk made safe. Runs even after the tick signal fired: the
+   * workflows they describe are already scheduled.
+   */
+  private async commit(docs: AlertActionDocument[], logger: LoggerServiceContract): Promise<void> {
+    if (docs.length === 0) {
+      return;
+    }
+
+    try {
+      const { errors } = await withDispatcherSpan('commit', () =>
+        this.storageService.bulkIndexDocs<AlertActionDocument>({
+          index: ALERT_ACTIONS_DATA_STREAM,
+          docs,
+        })
+      );
+      if (errors.length > 0) {
+        logger.warn({
+          code: ALERTING_LOG_CODES.DISPATCH_COMMIT_DEGRADED,
+          message: () =>
+            `${errors.length} of ${docs.length} alert action records were rejected; ` +
+            `their series are fetched again next tick. ${errors[0].message}`,
+        });
+      }
+    } catch (err) {
+      const error = toError(err);
+      logger.error({
+        error,
+        code: ALERTING_LOG_CODES.DISPATCH_COMMIT_FAILED,
+        message: () =>
+          `Failed to record ${docs.length} alert action records; scheduling stopped. ` +
+          `Groups dispatched in this chunk are dispatched again next tick. ${error.message}`,
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Schedules the workflows of `groups` and yields each group once, after its last schedule
+   * attempt. Stops when the tick signal fires; groups not yielded by then were never attempted.
+   */
+  private async *dispatchGroups(
+    groups: readonly ActionGroup[],
+    policies: PolicyCatalog,
+    signal: AbortSignal,
+    dispatchedExecutions: Map<ActionGroupId, string[]>,
+    dispatchFailures: DispatchFailure[],
+    logger: LoggerServiceContract
+  ): AsyncGenerator<ActionGroup[]> {
+    if (groups.length === 0 || signal.aborted) {
+      return;
     }
 
     const licenseState = await this.licenseService.getActionPoliciesLicenseState();
     if (!licenseState.isValid) {
-      this.recordLicenseNotSupported(plan.toDispatch, licenseState, dispatchFailures, logger);
-      return done();
+      this.recordLicenseNotSupported(groups, licenseState, dispatchFailures, logger);
+      yield [...groups];
+      return;
     }
 
     const groupsByApiKey = new Map<string, ActionGroup[]>();
-    for (const group of plan.toDispatch) {
+    const groupsWithoutApiKey: ActionGroup[] = [];
+    for (const group of groups) {
       const apiKey = policies.apiKeyOf(group.policyId);
       if (!apiKey) {
         this.recordMissingApiKey(group, dispatchFailures, logger);
+        groupsWithoutApiKey.push(group);
         continue;
       }
       pushMapList(groupsByApiKey, apiKey, group);
     }
 
-    if (groupsByApiKey.size === 0) {
-      return done();
+    if (groupsWithoutApiKey.length > 0) {
+      yield groupsWithoutApiKey;
     }
 
-    const batches: DispatchBatch[] = [...groupsByApiKey].map(([apiKey, groups]) => ({
-      groups,
+    if (groupsByApiKey.size === 0) {
+      return;
+    }
+
+    const batches: DispatchBatch[] = [...groupsByApiKey].map(([apiKey, batchGroups]) => ({
+      groups: batchGroups,
       request: this.craftFakeRequest(apiKey),
       workflowsBySpace: new Map(),
       failedSpaces: new Map(),
     }));
     await this.prefetchWorkflows(batches);
-    for (const { groups, request, workflowsBySpace, failedSpaces } of batches) {
-      if (signal.aborted) break;
+    for (const { groups: batchGroups, request, workflowsBySpace, failedSpaces } of batches) {
+      if (signal.aborted) return;
       const pending = this.buildPendingSchedules(
-        groups,
+        batchGroups,
         workflowsBySpace,
         failedSpaces,
         dispatchFailures,
         logger
       );
-      for (let offset = 0; offset < pending.length; offset += DISPATCH_CHUNK_SIZE) {
-        if (signal.aborted) {
-          break;
-        }
-        await this.dispatchChunk(
-          pending.slice(offset, offset + DISPATCH_CHUNK_SIZE),
-          this.workflowsManagement.getClient(request),
-          dispatchedExecutions,
-          dispatchFailures,
-          logger
+      const scheduledGroupIds = new Set(pending.map(({ group }) => group.id));
+      const unscheduledGroups = batchGroups.filter(({ id }) => !scheduledGroupIds.has(id));
+      if (unscheduledGroups.length > 0) {
+        yield unscheduledGroups;
+      }
+      for (const chunk of chunkByGroup(pending, DISPATCH_CHUNK_SIZE)) {
+        if (signal.aborted) return;
+        await withDispatcherSpan('dispatch_chunk', () =>
+          this.dispatchChunk(
+            chunk,
+            this.workflowsManagement.getClient(request),
+            dispatchedExecutions,
+            dispatchFailures,
+            logger
+          )
+        );
+        yield uniqBy(
+          chunk.map(({ group }) => group),
+          ({ id }) => id
         );
       }
     }
-
-    return done();
   }
 
   private recordLicenseNotSupported(

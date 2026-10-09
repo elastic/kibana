@@ -338,6 +338,24 @@ export const ALERTING_LOG_CODES = {
   /** Scheduling a workflow execution for a dispatch group failed. */
   DISPATCH_WORKFLOW_SCHEDULE_FAILED: 'DISPATCH_WORKFLOW_SCHEDULE_FAILED',
   /**
+   * Writing the `.alert-actions` records of a dispatch commit failed, so
+   * scheduling stopped. The groups of that commit were dispatched but not
+   * recorded, and the next tick dispatches them again.
+   */
+  DISPATCH_COMMIT_FAILED: 'DISPATCH_COMMIT_FAILED',
+  /**
+   * Elasticsearch rejected some records of a dispatch commit. Their series are
+   * fetched again on the next tick, and a group whose `notified` record was
+   * rejected can be dispatched again.
+   */
+  DISPATCH_COMMIT_DEGRADED: 'DISPATCH_COMMIT_DEGRADED',
+  /**
+   * An already-notified query chunk returned the ES|QL row limit, so rows past
+   * it were dropped. The affected alerts are treated as not notified and may be
+   * dispatched again.
+   */
+  DISPATCH_ALREADY_NOTIFIED_ROW_LIMIT_REACHED: 'DISPATCH_ALREADY_NOTIFIED_ROW_LIMIT_REACHED',
+  /**
    * The cluster license does not allow action policies. Alert actions are still
    * recorded, but no workflow is scheduled until the license is upgraded.
    */

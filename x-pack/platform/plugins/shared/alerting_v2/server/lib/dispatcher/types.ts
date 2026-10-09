@@ -161,6 +161,12 @@ export interface LastNotifiedRecord {
   alert_status?: string;
 }
 
+export interface AlreadyNotifiedRecord {
+  action_group_id: ActionGroupId;
+  alert_id: string;
+  notified_through: string;
+}
+
 export interface LastNotifiedInfo {
   lastNotified: Date;
   alertStatus?: string;
@@ -197,8 +203,6 @@ export interface DispatcherPipelineState {
   readonly input: DispatcherPipelineInput;
   /** Result of the windowed candidate scan (alerts + truncation flag). */
   readonly scan?: AlertScan;
-  /** Count of alerts that received an `.alert-actions` record this tick. */
-  readonly recordedAlerts?: number;
   /** Suppression facts from `.alert-actions`, indexed for per-alert lookup. */
   readonly suppressions?: SuppressionIndex;
   /** Dispatchable vs suppressed verdict on the scanned alerts. */
@@ -207,6 +211,8 @@ export interface DispatcherPipelineState {
   readonly policies?: PolicyCatalog;
   readonly matched?: MatchedPair[];
   readonly groups?: ActionGroup[];
+  /** Alerts of each group already delivered by an earlier tick; recorded as `fire`, never dispatched again. */
+  readonly alreadyNotified?: ActionGroup[];
   /** Delivery decision: groups eligible to dispatch now vs groups held back. */
   readonly plan?: DispatchPlan;
   /** Dispatch results: workflow executions per group and failed attempts. */

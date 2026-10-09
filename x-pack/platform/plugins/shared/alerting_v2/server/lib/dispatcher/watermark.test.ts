@@ -7,7 +7,7 @@
 
 import { computeNextWatermark } from './watermark';
 import { createAlert, createDispatcherPipelineInput } from './fixtures/test_utils';
-import { AlertScan } from './state';
+import { AlertScan, DispatchOutcome } from './state';
 import type { DispatcherPipelineResult } from './types';
 
 const BASE_INPUT = createDispatcherPipelineInput({
@@ -23,14 +23,14 @@ const makeResult = (overrides: Partial<DispatcherPipelineResult>): DispatcherPip
 });
 
 describe('computeNextWatermark', () => {
-  describe('aborted before StoreActionsStep (recordedAlerts undefined)', () => {
+  describe('aborted', () => {
     it('does not advance the watermark', () => {
       const result = computeNextWatermark({
         input: BASE_INPUT,
         result: makeResult({
           completed: false,
           haltReason: 'aborted',
-          finalState: { input: BASE_INPUT }, // recordedAlerts undefined
+          finalState: { input: BASE_INPUT },
         }),
       });
 
@@ -48,7 +48,6 @@ describe('computeNextWatermark', () => {
             scan: AlertScan.of({
               alerts: [createAlert({ last_event_timestamp: '2026-01-22T07:34:00.000Z' })],
             }),
-            // recordedAlerts still undefined — StoreActionsStep not reached
           },
         }),
       });
@@ -57,19 +56,24 @@ describe('computeNextWatermark', () => {
     });
   });
 
-  describe('aborted after StoreActionsStep (recordedAlerts defined)', () => {
-    it('advances to windowEnd when some alerts were recorded', () => {
+  describe('aborted after recording some alerts', () => {
+    it('holds even when the tick recorded alerts', () => {
       const result = computeNextWatermark({
         input: BASE_INPUT,
         result: makeResult({
           completed: false,
           haltReason: 'aborted',
-          finalState: { input: BASE_INPUT, recordedAlerts: 5 },
+          finalState: {
+            input: BASE_INPUT,
+            outcome: DispatchOutcome.of({
+              executionsByGroup: new Map([['g1', ['exec-1']]]),
+              failures: [],
+            }),
+          },
         }),
       });
 
-      // Not truncated, not no_alerts/no_actions — falls through to windowEnd
-      expect(result.toISOString()).toBe('2026-01-22T07:35:00.000Z');
+      expect(result.toISOString()).toBe('2026-01-22T07:30:00.000Z');
     });
   });
 
@@ -184,7 +188,6 @@ describe('computeNextWatermark', () => {
           finalState: {
             input: BASE_INPUT,
             scan: AlertScan.of({ alerts: [createAlert()] }),
-            recordedAlerts: 1,
           },
         }),
       });

@@ -58,7 +58,7 @@ windowStart = eventWatermark − OVERLAP_WINDOW_MINUTES
 windowEnd   = min(windowStart + MAX_WINDOW_MINUTES, startedAt − SETTLE_BUFFER_SECONDS)
 ```
 
-The window caps **event** rows only. Action rows are not upper-bounded, so `last_fired` still sees records `StoreActionsStep` just wrote (ES sets their `@timestamp` at ingest, i.e. after the settle buffer).
+The window caps **event** rows only. Action rows are not upper-bounded, so `last_fired` still sees records `DispatchStep` just wrote (ES sets their `@timestamp` at ingest, i.e. after the settle buffer).
 
 `eventWatermark` is a **content-addressed** progress marker — it advances only after alerts in the window have received `.alert-actions` records, never based on wall-clock alone:
 
@@ -66,7 +66,7 @@ The window caps **event** rows only. Action rows are not upper-bounded, so `last
 | ----------------------------------------------- | --------------------------------------------------- |
 | Truncated (`ESQL_QUERY_ROW_LIMIT` rows returned) | `last_event_timestamp` of the last returned alert   |
 | `no_alerts` or `no_actions` halt                | `windowEnd`                                         |
-| Aborted before `StoreActionsStep`               | `eventWatermark` (no advance)                       |
+| `aborted` halt                                  | `eventWatermark` (no advance)                       |
 | `inline_stats_too_large` halt                   | `eventWatermark` (no advance)                       |
 | Normal completion                               | `windowEnd`                                         |
 
@@ -87,9 +87,9 @@ The pipeline then moves through these phases:
 7. Load enabled action policies
 8. Evaluate policy matchers
 9. Build action groups
-10. Apply throttling
-11. Dispatch eligible groups
-12. Store final actions and reasons
+10. Set aside alerts an earlier, aborted tick already delivered
+11. Apply throttling
+12. Dispatch eligible groups and record the outcomes: first the records that need no dispatch, then each chunk's records as soon as the chunk returns, and the execution history once at the end
 
 ### Decision outcomes written to `.alert-actions`
 
@@ -97,10 +97,13 @@ By the end of a dispatcher run, every alert that reached the later pipeline stag
 
 | Outcome      | What happened                                                                                              | Action documents written                             |
 | ------------ | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| `dispatch`   | The alert matched a policy, survived suppression and throttling, and was selected for delivery.            | `fire` per alert, plus `notified` per action group   |
+| `dispatch`   | The alert matched a policy, survived suppression and throttling, and was selected for delivery.            | `fire` per alert, plus `notified` per (action group, alert), written after each dispatch chunk |
+| `already notified` | An earlier tick delivered this alert's content to the group but aborted before recording the alert. | `fire` with an `already notified by policy` reason   |
 | `throttled`  | The alert matched a policy, but the action group was held back by throttling.                              | `suppress` with a throttle-related reason            |
 | `suppressed` | The alert was explicitly filtered out by suppression logic such as ack, snooze, or deactivate semantics.   | `suppress` with the suppression reason               |
 | `unmatched`  | The alert remained dispatchable but matched no enabled action policy.                                      | `unmatched`                                          |
+
+`fire`, `suppress` and `unmatched` carry no `alert_id`, and the scan dedups them per series (`subject`, `group_hash`): one record hides every policy and every episode of its series. `DispatchStep` therefore writes them per series, through `SeriesLedger` (`steps/utils/series_ledger.ts`), only once every (dispatched group, alert) pair of that series has concluded. A group concludes when its chunk returns or when it fails before scheduling. Series with no group to dispatch are written in a first commit, before any scheduling. `notified` is keyed by (`action_group_id`, `alert_id`), so it is written right after each chunk; `ApplyAlreadyNotifiedStep` reads it back on later ticks.
 
 The full action taxonomy, including user-written actions such as `ack` and `snooze`, is documented in [`../../resources/README.md`](../../resources/README.md).
 
@@ -135,10 +138,9 @@ DispatcherPipeline
    +--> FetchPoliciesStep
    +--> EvaluateMatchersStep
    +--> BuildGroupsStep
+   +--> ApplyAlreadyNotifiedStep
    +--> ApplyThrottlingStep
-   +--> DispatchStep
-   +--> StoreActionsStep
-   +--> StoreExecutionHistoryStep
+   +--> DispatchStep                (dispatch, record, execution history)
 ```
 
 Unlike the rule executor, the dispatcher is not streaming. Each step receives one immutable-looking state snapshot and returns either:
@@ -176,7 +178,7 @@ An empty matcher is a catch-all.
 | Settle buffer               | `5` seconds                    | `SETTLE_BUFFER_SECONDS` — excludes the most recent slice to avoid scanning mid-write                                                                                                                                                    |
 | Stuck-tick limit            | `10` ticks (~50 s)             | `STUCK_TICK_LIMIT` — after this many stuck ticks the escape hatch fires                                                                                                                                                                 |
 | Pre-fetch force-advance lag | `15` minutes                   | `PRE_FETCH_STUCK_ADVANCE_LAG_MS` — if the hatch fires with no known alerts and lag exceeds this, skip the unread window                                                                                                                 |
-| Dispatch chunk size         | `250` items                    | `DISPATCH_CHUNK_SIZE` — max items per `bulkScheduleWorkflow` call. Workflows are prefetched with a single `getWorkflowsByIdsForRequests` call (one lookup per space and API key) and scheduled in chunks batched by policy API key. The tick signal is checked between chunks. |
+| Dispatch chunk size         | `250` items                    | `DISPATCH_CHUNK_SIZE` — max items per `bulkScheduleWorkflow` call. Workflows are prefetched with a single `getWorkflowsByIdsForRequests` call (one lookup per space and API key) and scheduled in chunks batched by policy API key. A group's items never span two chunks. Each chunk is followed by one `.alert-actions` commit, and the next chunk is scheduled only after it. The tick signal is checked between chunks. |
 | Matcher language            | KQL                            | `@kbn/eval-kql`                                                                                                                                                                                                                         |
 
 ## Important pipeline state
@@ -192,10 +194,10 @@ The dispatcher carries state forward through `DispatcherPipelineState` in `types
 | `rules`            | `RuleCatalog`      | `FetchRulesStep`                                                                    | Rule metadata keyed by rule id; owns the orphaned-internal-alert guard.                                                                                         |
 | `policies`         | `PolicyCatalog`    | `FetchPoliciesStep`                                                                 | Enabled action policies keyed by id and grouped by space.                                                                                                       |
 | `matched`          | plain array        | `EvaluateMatchersStep`                                                              | Concrete `(alert, policy)` matches.                                                                                                                            |
-| `groups`           | plain array        | `BuildGroupsStep`                                                                   | Action groups to consider for delivery (transient — consumed by `ApplyThrottlingStep`).                                                                        |
-| `plan`             | `DispatchPlan`     | `ApplyThrottlingStep`                                                               | Delivery decision: `toDispatch` vs `throttled`, plus the `unmatched` alerts that landed in no group.                                              |
+| `groups`           | plain array        | `BuildGroupsStep`; narrowed by `ApplyAlreadyNotifiedStep`                           | Action groups to consider for delivery (transient — consumed by `ApplyThrottlingStep`).                                                                        |
+| `alreadyNotified`  | plain array        | `ApplyAlreadyNotifiedStep`                                                          | Groups narrowed to the alerts an earlier, aborted tick already delivered; recorded as `fire`, never dispatched again.                                         |
+| `plan`             | `DispatchPlan`     | `ApplyThrottlingStep`                                                               | Delivery decision: `toDispatch` vs `throttled`, the `alreadyNotified` groups, plus the `unmatched` alerts that landed in no group.                            |
 | `outcome`          | `DispatchOutcome`  | `DispatchStep`                                                                      | What happened: workflow execution ids per group and failed (group, destination) attempts; `deliveredDestinationsFor()` filters totally-failed groups.           |
-| `recordedAlerts`   | plain number       | `StoreActionsStep`                                                                  | Count of alerts that received an `.alert-actions` record this tick.                                                                                            |
 
 ## Execution steps
 
@@ -213,10 +215,9 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 | 8   | `FetchPoliciesStep`          | Load enabled action policies for the space.                                                      |
 | 9   | `EvaluateMatchersStep`       | Evaluate each policy matcher against each alert context.                                         |
 | 10  | `BuildGroupsStep`            | Build `ActionGroup` objects based on policy grouping settings.                                   |
-| 11  | `ApplyThrottlingStep`        | Compare candidate groups with action history and split them into dispatch vs throttled.          |
-| 12  | `DispatchStep`               | Perform delivery side effects for eligible groups.                                               |
-| 13  | `StoreActionsStep`           | Persist the execution outcome to `.alert-actions`.                                               |
-| 14  | `StoreExecutionHistoryStep`  | Emit per-policy `dispatched` / `throttled` / `unmatched` / `dispatch_failed` event-log summaries. |
+| 11  | `ApplyAlreadyNotifiedStep`   | Move the alerts whose `notified` record (per group and alert) covers their current content out of their groups, into `alreadyNotified`. |
+| 12  | `ApplyThrottlingStep`        | Compare candidate groups with action history and split them into dispatch vs throttled.          |
+| 13  | `DispatchStep`               | Perform delivery side effects for eligible groups, commit the `.alert-actions` records each chunk made safe, and emit per-policy `dispatched` / `throttled` / `unmatched` / `dispatch_failed` event-log summaries once. Halts `aborted` while groups are left unattempted. |
 
 ### Suppression queries
 
@@ -237,7 +238,7 @@ When both an alert-level and a series-level record suppress an alert, `Suppressi
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `no_alerts`              | Nothing relevant was found for this run; watermark advances to `windowEnd`.                                                                                      |
 | `no_actions`             | The run produced no stored outcomes after evaluation; watermark advances to `windowEnd`.                                                                         |
-| `aborted`                | The pipeline was stopped early by the TM signal or the soft deadline (`TICK_DEADLINE_MS`). If aborted before `StoreActionsStep`, the watermark does not advance. |
+| `aborted`                | The pipeline was stopped early by the TM signal or the soft deadline (`TICK_DEADLINE_MS`), or `DispatchStep` stopped with groups left unattempted. The watermark does not advance; the records already committed keep the progress. |
 | `inline_stats_too_large` | ES rejected the INLINE STATS pre-fetch query with `illegal_argument_exception: sub-plan execution results too large`. Watermark held; tick counts toward stuck-tick limit (see below). |
 
 ## Watermark contract
@@ -277,7 +278,9 @@ Alerts in the skipped window are **not dispatched** (accepted data loss). Once t
 
 ## Delivery guarantees and limits
 
-- Delivery is effectively at-least-once. If delivery succeeds but action recording fails or the process crashes, a later run may re-deliver.
+- Delivery is effectively at-least-once. `DispatchStep` records each chunk right after it returns, so an abort re-delivers nothing; a crash, or a commit write that fails, re-delivers at most the chunk in flight. A failed commit write stops scheduling for the rest of the tick.
+- An aborted tick keeps its progress: concluded series get their `fire` / `suppress` / `unmatched` records, so the next scan does not return them, and `ApplyAlreadyNotifiedStep` drops the (group, alert) pairs whose `notified` record covers their content.
+- Commits use `refresh: false`. The next tick sees them after the `.alert-actions` refresh interval (about 1 s); if it runs first, the last chunk of an aborted tick can be delivered again.
 - Destination handlers should therefore be idempotent.
 - Workflow destinations are scheduled in `DISPATCH_CHUNK_SIZE` (250) batches via `bulkScheduleWorkflow`, not per-group `pLimit(3)`.
 - The alert query is capped at `ESQL_QUERY_ROW_LIMIT` (10 000) rows per run. A truncated tick advances the watermark only to the last returned row's timestamp; the deferred tail is scanned next tick.
@@ -416,7 +419,7 @@ If you are not adding a new pipeline phase, but instead want to support a new de
 
 Current production delivery is workflow-based. `DispatchStep` uses the policy API key to craft a fake request, prefetches workflows with `getWorkflowsByIdsForRequests`, and schedules them through `bulkScheduleWorkflow` on the request-scoped workflows management client (`getClient(request)`).
 
-Workflow delivery requires an active Enterprise (or trial) license. When the license does not allow action policies, `DispatchStep` schedules no workflow and records one `license_not_supported` failure per (group, workflow destination), which `StoreExecutionHistoryStep` emits as `dispatch_failed` events. Every other step runs unchanged, so `.alert-actions` still receives the same `fire` / `suppress` / `notified` / `unmatched` docs and throttling, deduplication, and watermark behavior match a licensed cluster.
+Workflow delivery requires an active Enterprise (or trial) license. When the license does not allow action policies, `DispatchStep` schedules no workflow and records one `license_not_supported` failure per (group, workflow destination), which it emits as `dispatch_failed` events. Every other step runs unchanged, so `.alert-actions` still receives the same `fire` / `suppress` / `notified` / `unmatched` docs and throttling, deduplication, and watermark behavior match a licensed cluster.
 
 ## Testing
 
@@ -426,11 +429,10 @@ Useful coverage points:
 - `execution_pipeline.test.ts` for ordering and halt semantics
 - `dispatcher.test.ts` for service-level behavior
 - `queries.test.ts` for ES|QL generation
-- `integration_tests/dispatcher.test.ts` for end-to-end dispatcher behavior
 
 ## Safe contribution guidelines
 
 - Keep side effects concentrated in `DispatchStep`. Earlier steps should mostly classify and shape data.
 - Do not mutate existing state objects in place; return new partial state instead.
-- If you add new action semantics, verify both the query side (`queries.ts`) and the write side (`StoreActionsStep`).
+- If you add new action semantics, verify both the query side (`queries.ts`) and the write side (`SeriesLedger` and `DispatchStep`).
 - If you change grouping or throttling identity, treat it as a behavioral change that needs explicit tests because it affects future deduplication.
