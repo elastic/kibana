@@ -7,7 +7,7 @@
 
 import { parse } from 'yaml';
 import { generateWorkflowYaml } from './generate_workflow_yaml';
-import type { NightshiftAutomationAttributes } from './types';
+import type { NightshiftAutomationAttributes, NightshiftTriggerRow } from './types';
 
 const baseAutomation = (): NightshiftAutomationAttributes => ({
   name: 'Test automation',
@@ -142,11 +142,183 @@ describe('generateWorkflowYaml', () => {
   });
 
   describe('manual trigger fallback', () => {
-    it('emits manual trigger when no alert rows are present', () => {
+    it('emits manual trigger when no alert or slack rows are present', () => {
       const automation = baseAutomation();
       automation.trigger.rows = [{ kind: 'schedule' }];
       const yaml = parse(generateWorkflowYaml('auto-123', automation));
-      expect(yaml.triggers[0].type).toBe('manual');
+      expect(yaml.triggers).toEqual([{ type: 'manual' }]);
+    });
+  });
+
+  describe('slack trigger', () => {
+    type SlackRow = Extract<NightshiftTriggerRow, { kind: 'slack' }>;
+    const slackAutomation = (...rows: SlackRow[]): NightshiftAutomationAttributes => {
+      const automation = baseAutomation();
+      automation.trigger.rows = rows;
+      return automation;
+    };
+    const slackRow = (overrides: Partial<SlackRow> = {}): SlackRow => ({
+      kind: 'slack',
+      event: 'message',
+      ...overrides,
+    });
+    const guards =
+      'event.text:* and not event.botId:* and not event.threadId:* and (not event.subtype:* or event.subtype:file_share)';
+
+    it('emits a slack2.message trigger on the Elastic Slack app connector', () => {
+      const yaml = parse(generateWorkflowYaml('auto-123', slackAutomation(slackRow())));
+      expect(yaml.triggers).toEqual([
+        {
+          type: 'slack2.message',
+          'connector-id': 'elastic-apps-slack',
+          on: { condition: guards },
+        },
+      ]);
+    });
+
+    it('filters by a single channel', () => {
+      const yaml = parse(
+        generateWorkflowYaml('auto-123', slackAutomation(slackRow({ channels: ['C1'] })))
+      );
+      expect(yaml.triggers[0].on.condition).toBe(`${guards} and (event.channel:"C1")`);
+    });
+
+    it('ORs multiple channels and ANDs them with users and text', () => {
+      const yaml = parse(
+        generateWorkflowYaml(
+          'auto-123',
+          slackAutomation(
+            slackRow({ channels: ['C1', 'C2'], users: ['U1'], messageFilter: 'deploy failed' })
+          )
+        )
+      );
+      expect(yaml.triggers[0].on.condition).toBe(
+        `${guards} and ((event.channel:"C1" or event.channel:"C2") and event.sender:"U1" and event.text:"deploy failed")`
+      );
+    });
+
+    it('escapes quotes and backslashes in the message filter', () => {
+      const yaml = parse(
+        generateWorkflowYaml(
+          'auto-123',
+          slackAutomation(slackRow({ messageFilter: 'say "hi" \\ now' }))
+        )
+      );
+      expect(yaml.triggers[0].on.condition).toContain('event.text:"say \\"hi\\" \\\\ now"');
+    });
+
+    it('ignores blank values and a whitespace-only message filter', () => {
+      const yaml = parse(
+        generateWorkflowYaml(
+          'auto-123',
+          slackAutomation(slackRow({ channels: [' ', ''], users: [], messageFilter: '   ' }))
+        )
+      );
+      expect(yaml.triggers[0].on.condition).toBe(guards);
+    });
+
+    it('merges several slack rows into one trigger with OR-joined rows', () => {
+      const yaml = parse(
+        generateWorkflowYaml(
+          'auto-123',
+          slackAutomation(slackRow({ channels: ['C1'] }), slackRow({ users: ['U1'] }))
+        )
+      );
+      expect(yaml.triggers).toHaveLength(1);
+      expect(yaml.triggers[0].on.condition).toBe(
+        `${guards} and ((event.channel:"C1") or (event.sender:"U1"))`
+      );
+    });
+
+    it('drops the row filter when any row has no filters', () => {
+      const yaml = parse(
+        generateWorkflowYaml(
+          'auto-123',
+          slackAutomation(slackRow({ channels: ['C1'] }), slackRow())
+        )
+      );
+      expect(yaml.triggers[0].on.condition).toBe(guards);
+    });
+
+    it('emits both triggers, alert first, for mixed alert and slack rows', () => {
+      const automation = baseAutomation();
+      automation.trigger.rows = [slackRow(), { kind: 'alert' }];
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      expect(yaml.triggers.map((t: { type: string }) => t.type)).toEqual([
+        'alerting.alertStatusChanged',
+        'slack2.message',
+      ]);
+    });
+
+    it('emits only the slack trigger for slack and schedule rows', () => {
+      const automation = baseAutomation();
+      automation.trigger.rows = [{ kind: 'schedule' }, slackRow()];
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      expect(yaml.triggers.map((t: { type: string }) => t.type)).toEqual(['slack2.message']);
+    });
+
+    describe('trigger_investigation step', () => {
+      it('investigates a manual subject keyed by the message', () => {
+        const yaml = parse(generateWorkflowYaml('auto-123', slackAutomation(slackRow())));
+        expect(yaml.steps[0].with).toMatchObject({
+          subject_type: 'manual',
+          subject_id: '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}',
+          title: 'Test automation',
+        });
+      });
+
+      it('puts the slack message in the prompt after the prompt template', () => {
+        const automation = slackAutomation(slackRow());
+        automation.execution.promptTemplate = 'Look for deploy problems.';
+        const yaml = parse(generateWorkflowYaml('auto-123', automation));
+        expect(yaml.steps[0].with.message).toBe(
+          'Look for deploy problems.\n\nSlack message from {{ event.sender }} in channel {{ event.channel }}:\n\n{{ event.text | truncate: 4000 }}'
+        );
+      });
+
+      it('still sends the slack message when there is no prompt template', () => {
+        const yaml = parse(generateWorkflowYaml('auto-123', slackAutomation(slackRow())));
+        expect(yaml.steps[0].with.message).toContain('{{ event.text | truncate: 4000 }}');
+      });
+
+      it('emits one step, unguarded, when only slack rows are present', () => {
+        const yaml = parse(generateWorkflowYaml('auto-123', slackAutomation(slackRow())));
+        expect(yaml.steps).toHaveLength(1);
+        expect(yaml.steps[0].type).toBe('nightshift.triggerInvestigation');
+      });
+
+      it('guards one step per trigger kind on execution.triggeredBy for mixed rows', () => {
+        const automation = baseAutomation();
+        automation.trigger.rows = [slackRow(), { kind: 'alert' }];
+        const yaml = parse(generateWorkflowYaml('auto-123', automation));
+
+        expect(yaml.steps).toHaveLength(2);
+        expect(yaml.steps.map((s: { condition: string }) => s.condition)).toEqual([
+          "${{ execution.triggeredBy == 'alerting.alertStatusChanged' }}",
+          "${{ execution.triggeredBy == 'slack2.message' }}",
+        ]);
+        const [alertGuard, slackGuard] = yaml.steps;
+        expect(alertGuard.type).toBe('if');
+        expect(alertGuard.steps[0].with).toMatchObject({
+          subject_type: 'alert',
+          subject_id: '{{ trigger.alert.uuid }}',
+        });
+        expect(slackGuard.steps[0].with).toMatchObject({
+          subject_type: 'manual',
+          subject_id: '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}',
+        });
+      });
+
+      it('gives every step in a mixed automation a distinct name', () => {
+        const automation = baseAutomation();
+        automation.trigger.rows = [slackRow(), { kind: 'alert' }];
+        const yaml = parse(generateWorkflowYaml('auto-123', automation));
+        const names = yaml.steps.flatMap((s: { name: string; steps: Array<{ name: string }> }) => [
+          s.name,
+          ...s.steps.map((inner) => inner.name),
+        ]);
+        expect(new Set(names).size).toBe(names.length);
+      });
     });
   });
 
