@@ -55,7 +55,7 @@ describe('assignHandler', () => {
   it('rejects clearing the assignee of an unassigned alert', () => {
     expect(() => assignHandler.prepare(buildItem(null, null))).toThrow(
       expect.objectContaining({
-        message: 'Cannot unassign alert [episode-1]. It has no assignee',
+        message: '[episode-1] has no assignee.',
       })
     );
   });

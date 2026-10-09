@@ -71,7 +71,7 @@ describe('tagHandler', () => {
   it('rejects clearing the tags of an untagged alert', () => {
     expect(() => tagHandler.prepare(buildItem([], []))).toThrow(
       expect.objectContaining({
-        message: 'Cannot tag alert [episode-1]. It already carries the requested tags',
+        message: '[episode-1] already has these tags.',
       })
     );
   });
