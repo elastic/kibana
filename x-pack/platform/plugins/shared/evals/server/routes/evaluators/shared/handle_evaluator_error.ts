@@ -11,10 +11,21 @@ import { InvalidJudgeConfigError } from '../../../evaluators/user_defined/valida
 import { BuiltInEvaluatorNameError } from '../../../storage/evaluators/built_in_evaluator_name_error';
 import { EvaluatorAlreadyExistsError } from '../../../storage/evaluators/evaluator_already_exists_error';
 import { EvaluatorNotFoundError } from '../../../storage/evaluators/evaluator_not_found_error';
+import { EvaluatorVersionConflictError } from '../../../storage/evaluators/evaluator_version_conflict_error';
 import { InvalidEvaluatorNameError } from '../../../storage/evaluators/invalid_evaluator_name_error';
 
-export const builtInEvaluatorMessage = (name: string): string =>
-  new BuiltInEvaluatorNameError(name).message;
+/**
+ * Refuses a built-in name the same way everywhere: the name is taken by something that
+ * already exists, so every route answers 409 rather than each picking its own status.
+ */
+export const builtInEvaluatorConflict = (
+  response: KibanaResponseFactory,
+  name: string
+): IKibanaResponse =>
+  response.customError({
+    statusCode: 409,
+    body: { message: new BuiltInEvaluatorNameError(name).message },
+  });
 
 /**
  * Turns the definition store's domain errors into responses. Everything else is
@@ -36,7 +47,11 @@ export const handleEvaluatorError = ({
     return response.notFound({ body: { message: error.message } });
   }
 
-  if (error instanceof EvaluatorAlreadyExistsError || error instanceof BuiltInEvaluatorNameError) {
+  if (
+    error instanceof EvaluatorAlreadyExistsError ||
+    error instanceof BuiltInEvaluatorNameError ||
+    error instanceof EvaluatorVersionConflictError
+  ) {
     return response.customError({ statusCode: 409, body: { message: error.message } });
   }
 
@@ -44,6 +59,7 @@ export const handleEvaluatorError = ({
     return response.badRequest({ body: { message: error.message } });
   }
 
-  logger.error(`${fallbackMessage}: ${error instanceof Error ? error.message : String(error)}`);
+  const detail = error instanceof Error ? error.stack ?? error.message : String(error);
+  logger.error(`${fallbackMessage}: ${detail}`);
   return response.customError({ statusCode: 500, body: { message: fallbackMessage } });
 };

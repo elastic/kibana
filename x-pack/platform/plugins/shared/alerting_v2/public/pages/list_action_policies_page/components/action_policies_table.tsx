@@ -68,7 +68,7 @@ const CREATE_POLICY_OPTION_TITLE = i18n.translate(
 );
 const CREATE_POLICY_OPTION_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.actionPolicyCreateOptionsPanel.createPolicyDescription',
-  { defaultMessage: 'Match alert episodes and send them to destinations.' }
+  { defaultMessage: 'Match alerts and send them to destinations.' }
 );
 const CREATE_WITH_AGENT_OPTION_TITLE = i18n.translate(
   'xpack.alertingV2.actionPolicyCreateOptionsPanel.createWithAiAgentTitle',
@@ -155,22 +155,13 @@ export const ActionPoliciesTable = () => {
 
   const clonePolicy = useCallback(
     (policy: ActionPolicyResponse) => {
-      const {
-        name,
-        description,
-        destinations,
-        matcher,
-        group_by: groupBy,
-        throttle,
-        grouping_mode: groupingMode,
-      } = policy;
+      const { name, description, destinations, matcher, grouping, throttle } = policy;
       const data: CreateActionPolicyData = {
         name: `${name} [clone]`,
         description,
         destinations,
-        grouping_mode: groupingMode ?? 'per_episode',
+        grouping: grouping ?? { mode: 'per_alert' },
         ...(matcher != null && { matcher }),
-        ...(groupBy != null && { group_by: groupBy }),
         ...(throttle != null && { throttle }),
       };
       createActionPolicy(data, { onSuccess: () => refetchRef.current() });

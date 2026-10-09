@@ -20,7 +20,14 @@ import type {
 } from '@kbn/workflows-management-plugin/server';
 import { inject, injectable } from 'inversify';
 import { isError } from 'lodash';
+import { ACTION_POLICIES_REQUIRED_LICENSE } from '../../../../common/action_policies_license';
+import { getActionPolicyLicenseNotSupportedMessage } from '../../errors/action_policy_error_messages';
 import { ALERTING_LOG_CODES, type AlertingV2LogCode } from '../../errors/error_codes';
+import type {
+  ActionPoliciesLicenseState,
+  LicenseServiceContract,
+} from '../../services/license_service/license_service';
+import { LicenseServiceToken } from '../../services/license_service/tokens';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { DISPATCH_CHUNK_SIZE } from '../constants';
 import type {
@@ -81,7 +88,8 @@ export class DispatchStep implements DispatcherStep {
 
   constructor(
     @inject(WorkflowsManagementApiToken)
-    private readonly workflowsManagement: WorkflowsServerPluginSetup['management']
+    private readonly workflowsManagement: WorkflowsServerPluginSetup['management'],
+    @inject(LicenseServiceToken) private readonly licenseService: LicenseServiceContract
   ) {}
 
   public async execute(
@@ -104,6 +112,12 @@ export class DispatchStep implements DispatcherStep {
     });
 
     if (plan.toDispatch.length === 0 || signal.aborted) {
+      return done();
+    }
+
+    const licenseState = await this.licenseService.getActionPoliciesLicenseState();
+    if (!licenseState.isValid) {
+      this.recordLicenseNotSupported(plan.toDispatch, licenseState, dispatchFailures, logger);
       return done();
     }
 
@@ -152,6 +166,26 @@ export class DispatchStep implements DispatcherStep {
     }
 
     return done();
+  }
+
+  private recordLicenseNotSupported(
+    groups: readonly ActionGroup[],
+    { type, status }: ActionPoliciesLicenseState,
+    dispatchFailures: DispatchFailure[],
+    logger: LoggerServiceContract
+  ): void {
+    const message =
+      `${getActionPolicyLicenseNotSupportedMessage(ACTION_POLICIES_REQUIRED_LICENSE)} ` +
+      `(current: ${type ?? 'unknown'}, status: ${status ?? 'unknown'}); workflow not scheduled`;
+    logger.warn({
+      message: () => `${message} for ${groups.length} action group(s)`,
+      code: ALERTING_LOG_CODES.DISPATCH_LICENSE_NOT_SUPPORTED,
+    });
+    for (const group of groups) {
+      dispatchFailures.push(
+        ...this.buildGroupFailures(group, DISPATCH_FAILURE_REASONS.LICENSE_NOT_SUPPORTED, message)
+      );
+    }
   }
 
   private recordMissingApiKey(
@@ -317,7 +351,7 @@ export class DispatchStep implements DispatcherStep {
       id: group.id,
       policyId: group.policyId,
       groupKey: group.groupKey,
-      episodes: group.episodes,
+      alerts: group.alerts,
       rules: group.rules,
     };
     const inputs: Record<string, unknown> = { payload };
@@ -420,7 +454,7 @@ export class DispatchStep implements DispatcherStep {
       spaceId: group.spaceId,
       actionGroupId: group.id,
       workflowId,
-      episodes: group.episodes,
+      alerts: group.alerts,
       reason,
       message,
     };

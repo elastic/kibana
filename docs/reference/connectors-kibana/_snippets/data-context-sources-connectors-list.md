@@ -1,5 +1,6 @@
 **Third-party search**
 
+- [Amazon EKS](/reference/connectors-kibana/aws-eks-action-type.md): Discover EKS clusters and node groups, scale node groups, manage cluster access entries, and mint Kubernetes tokens.
 - [Amazon S3](/reference/connectors-kibana/amazon-s3-action-type.md): List and download content from AWS S3 buckets.
 - [Ansible Control Server](/reference/connectors-kibana/ansible-controller-action-type.md): Launch and monitor Ansible Automation Controller / AWX jobs.
 - [Argo CD](/reference/connectors-kibana/argocd-action-type.md): Manage GitOps applications in Argo CD — sync, inspect health and resources.
@@ -7,8 +8,11 @@
 - [AWS X-Ray](/reference/connectors-kibana/aws-x-ray-action-type.md): Retrieve X-Ray insights, service graphs, and trace summaries and details for distributed tracing.
 - [Azure Blob Storage](/reference/connectors-kibana/azure-blob-action-type.md): List containers and blobs, and retrieve blob content from Azure Blob Storage.
 - [Azure Functions](/reference/connectors-kibana/azure-functions-action-type.md): Invoke HTTP-triggered functions, read function keys, and start, stop, or restart function apps.
+- [Azure Kubernetes Service (AKS)](/reference/connectors-kibana/azure-aks-action-type.md): List, inspect, and manage AKS clusters and node pools.
 - [Azure Monitor](/reference/connectors-kibana/azure-monitor-action-type.md): List and triage alerts, query metrics and logs, and control alert rules in Azure Monitor.
+- [Azure SQL](/reference/connectors-kibana/azure-sql-action-type.md): Query tables, search rows, explore schema, and execute SQL in an Azure SQL Database.
 - [BigQuery](/reference/connectors-kibana/bigquery-action-type.md): Run GoogleSQL queries and retrieve results from Google BigQuery.
+- [Bitbucket](/reference/connectors-kibana/bitbucket-action-type.md): Open, review, comment on, and merge pull requests, create branches, report commit build statuses, and trigger pipelines in Bitbucket Cloud.
 - [Box](/reference/connectors-kibana/box-action-type.md): Search files and folders, read content, and query enterprise content using Box AI.
 - [Brave Search](/reference/connectors-kibana/brave-search-action-type.md): Search the web using the Brave Search API.
 - [Buildkite](/reference/connectors-kibana/buildkite-action-type.md): Trigger, observe, retry, and cancel builds, unblock deploy gates, and post annotations.
@@ -27,6 +31,7 @@
 - [Google Cloud Monitoring](/reference/connectors-kibana/google-cloud-monitoring-action-type.md): Find, silence, and snooze GCP alerting policies, and enrich alerts with metric, uptime, and SLO data.
 - [Google Cloud Storage](/reference/connectors-kibana/google-cloud-storage-action-type.md): Search and access objects in Google Cloud Storage buckets.
 - [Google Drive](/reference/connectors-kibana/google-drive-action-type.md): Search and access files and folders in Google Drive.
+- [Google Kubernetes Engine](/reference/connectors-kibana/google-gke-action-type.md): List clusters and node pools, scale and autoscale node pools, upgrade, roll back, and harden GKE clusters, and track the resulting operations.
 - [Grafana](/reference/connectors-kibana/grafana-action-type.md): Read alerts and rules, manage silences, and post annotations.
 - [GraphQL](/reference/connectors-kibana/graphql-action-type.md): Run queries and mutations, and introspect schemas on any GraphQL endpoint.
 - [HubSpot](/reference/connectors-kibana/hubspot-action-type.md): Search and retrieve contacts, companies, deals, and tickets from HubSpot CRM.
@@ -56,6 +61,7 @@
 - [SharePoint Server](/reference/connectors-kibana/sharepoint-server-action-type.md): Search and retrieve documents, list items, folders, and site pages from an on-premises SharePoint Server instance.
 - [Slack (v2)](/reference/connectors-kibana/slack-v2-action-type.md): Search and send messages in Slack.
 - [Snowflake](/reference/connectors-kibana/snowflake-action-type.md): Query Snowflake, discover databases, schemas, tables, and views, and run semantic searches through Cortex Search.
+- [SolarWinds Platform](/reference/connectors-kibana/solarwinds-platform-action-type.md): Run SWQL queries, list, read, and acknowledge active alerts, and look up nodes.
 - [Tavily](/reference/connectors-kibana/tavily-action-type.md): Search the web and extract content from web pages.
 - [Trello](/reference/connectors-kibana/trello-action-type.md): Search boards, lists, and cards, create and update cards, and post comments in Trello.
 - [UniFi](/reference/connectors-kibana/unifi-action-type.md): Inventory UniFi Network sites, devices, clients, and networks, inspect UniFi Protect cameras and sensors, and restart devices or authorize guests.

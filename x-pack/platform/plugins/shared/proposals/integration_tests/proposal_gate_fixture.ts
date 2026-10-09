@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { ExecutionStatus } from '@kbn/workflows';
 import { CREATE_PROPOSAL_WORKFLOW_ID, getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/test_helpers';
-import type { Proposal } from '@kbn/proposals-common';
+import type { Proposal, ProposalOrigin } from '@kbn/proposals-common';
 import type { ProposalDocument, ProposalsStorageClient } from '../server/storage/proposals_storage';
 import { ProposalsService } from '../server/services/proposals_service';
 import type { ProposalPrivilegesChecker } from '../server/services/check_proposal_privileges';
@@ -67,10 +67,26 @@ const createInMemoryStorage = () => {
   return {
     documents,
     client: {
-      index: jest.fn(async ({ id, document }: { id: string; document: ProposalDocument }) => {
-        documents.set(id, { document, seqNo: (seqNo += 1) });
-        return { _id: id };
-      }),
+      index: jest.fn(
+        async ({
+          id,
+          document,
+          op_type,
+        }: {
+          id: string;
+          document: ProposalDocument;
+          op_type?: string;
+        }) => {
+          // Elasticsearch's own contract for `op_type: 'create'`, which a
+          // caller-chosen id rests on: an id that already exists is refused,
+          // never overwritten.
+          if (op_type === 'create' && documents.has(id)) {
+            throw Object.assign(new Error('version conflict'), { statusCode: 409 });
+          }
+          documents.set(id, { document, seqNo: (seqNo += 1) });
+          return { _id: id };
+        }
+      ),
       search: jest.fn(async ({ query }: { query: unknown }) => {
         const bool = (query as { bool?: { filter?: Clause[]; must_not?: Clause[] } })?.bool ?? {};
         const filter = bool.filter ?? [];
@@ -96,8 +112,12 @@ const createInMemoryStorage = () => {
 /** The gate's literal `timeout`, which is also the deadline on the record. */
 const GATE_TIMEOUT_MS = 72 * 60 * 60 * 1000;
 
+/** Required of every caller, but the gate never branches on it, so any member does. */
+const FIXTURE_ORIGIN = 'alertzero' satisfies ProposalOrigin;
+
 export interface ProposalGateFixture {
   engine: WorkflowRunFixture;
+  attachedProposalIds: () => string[];
   /** Every proposal written so far, in insertion order. */
   proposals: () => Array<Proposal & { id: string }>;
   /** The only proposal, asserting there is exactly one. */
@@ -125,6 +145,12 @@ export interface ProposalGateFixture {
    * idle wake-up and the resume check both read.
    */
   gateTimeout: () => string | undefined;
+  /**
+   * Creates a proposal through the real service, outside the workflow under
+   * test: what another execution's gate has already done by the time this run
+   * starts.
+   */
+  seedProposal: (params: { id?: string }) => Promise<{ id: string }>;
   /** Runs the workflow to its first park (or to completion). */
   start: (inputs?: Record<string, unknown>) => Promise<void>;
   /** Answers the parked gate as a human would through a resume surface. */
@@ -172,13 +198,19 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
     resumeWorkflowExecution: jest.fn(),
   };
 
+  const attachedProposalIds: string[] = [];
   const service = new ProposalsService({
     storage: client,
     logger: loggerMock.create(),
     getWorkflowsApi: () => workflowsApi as never,
     // The gate's behaviour does not depend on the conversation card, so the
     // attachment write is stubbed rather than simulated.
-    getAttachmentsClient: async () => ({ create: jest.fn() } as never),
+    getAttachmentsClient: async () =>
+      ({
+        create: jest.fn(async ({ origin }: { origin: string }) => {
+          attachedProposalIds.push(origin);
+        }),
+      } as never),
   });
 
   const privileges: ProposalPrivilegesChecker = {
@@ -212,6 +244,7 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
 
   return {
     engine,
+    attachedProposalIds: () => [...attachedProposalIds],
     proposals,
     onlyProposal: () => {
       const all = proposals();
@@ -236,10 +269,28 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
       const dynamicTimeout = latest?.state?.dynamicTimeout;
       return typeof dynamicTimeout === 'string' ? dynamicTimeout : undefined;
     },
+    seedProposal: async ({ id }) => {
+      const created = await service.create(
+        {
+          conversationId: 'conv-other',
+          comment: 'Seeded',
+          origin: FIXTURE_ORIGIN,
+          confidence: 'medium',
+          id,
+        },
+        { spaceId: 'fake_space_id', request: httpServerMock.createKibanaRequest() }
+      );
+      return { id: created.id };
+    },
     start: async (inputs = {}) => {
       await engine.runWorkflow({
         workflowYaml: gateWorkflowYaml(),
-        inputs: { conversationId: 'conv-1', comment: 'Tune the noisy rule', ...inputs },
+        inputs: {
+          conversationId: 'conv-1',
+          comment: 'Tune the noisy rule',
+          origin: FIXTURE_ORIGIN,
+          ...inputs,
+        },
       });
     },
     resume: async (approved, respondedBy = 'analyst') => {

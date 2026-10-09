@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   ConnectorIngressContext,
@@ -46,97 +46,117 @@ const slackId = (description: string) =>
 
 const optionalSlackId = (description: string) => slackId(description).optional();
 
-const SlackMessageEventSchema = z.object({
-  workspace: optionalSlackId('Slack workspace (team) id.'),
-  channel: slackId('Channel where the message was posted.'),
-  messageId: slackId('Message timestamp, which Slack uses as the message id.'),
-  threadId: optionalSlackId('Thread timestamp when the message is in a thread.'),
-  sender: optionalSlackId('User id of the sender, when Slack includes one.'),
-  text: z
-    .string()
-    .max(SLACK_EVENT_TEXT_MAX)
-    .optional()
-    .describe('Message text, when Slack includes it.'),
-  subtype: optionalSlackId('Slack message subtype, such as bot_message, when present.'),
-  botId: optionalSlackId('Bot id when the message was sent by a bot.'),
-});
+const SlackMessageEventSchema = lazySchema(() =>
+  z.object({
+    workspace: optionalSlackId('Slack workspace (team) id.'),
+    channel: slackId('Channel where the message was posted.'),
+    messageId: slackId('Message timestamp, which Slack uses as the message id.'),
+    threadId: optionalSlackId('Thread timestamp when the message is in a thread.'),
+    sender: optionalSlackId('User id of the sender, when Slack includes one.'),
+    text: z
+      .string()
+      .max(SLACK_EVENT_TEXT_MAX)
+      .optional()
+      .describe('Message text, when Slack includes it.'),
+    subtype: optionalSlackId('Slack message subtype, such as bot_message, when present.'),
+    botId: optionalSlackId('Bot id when the message was sent by a bot.'),
+  })
+);
 
-const SlackAppMentionEventSchema = z.object({
-  workspace: optionalSlackId('Slack workspace (team) id.'),
-  channel: slackId('Channel where the app was mentioned.'),
-  messageId: slackId('Message timestamp of the mention.'),
-  threadId: optionalSlackId('Thread timestamp when the mention is in a thread.'),
-  sender: optionalSlackId('User id of the person who mentioned the app.'),
-  text: z.string().max(SLACK_EVENT_TEXT_MAX).optional().describe('Text of the mention.'),
-});
+const SlackAppMentionEventSchema = lazySchema(() =>
+  z.object({
+    workspace: optionalSlackId('Slack workspace (team) id.'),
+    channel: slackId('Channel where the app was mentioned.'),
+    messageId: slackId('Message timestamp of the mention.'),
+    threadId: optionalSlackId('Thread timestamp when the mention is in a thread.'),
+    sender: optionalSlackId('User id of the person who mentioned the app.'),
+    text: z.string().max(SLACK_EVENT_TEXT_MAX).optional().describe('Text of the mention.'),
+  })
+);
 
-const SlackReactionAddedEventSchema = z.object({
-  channel: optionalSlackId('Channel of the message that received the reaction.'),
-  messageId: optionalSlackId('Timestamp of the message that received the reaction.'),
-  fileId: optionalSlackId('Id of the file that received the reaction.'),
-  fileCommentId: optionalSlackId('Id of the file comment that received the reaction.'),
-  itemType: z
-    .string()
-    .min(1)
-    .max(SLACK_EVENT_NAME_MAX)
-    .optional()
-    .describe('Slack item type, such as message, file, or file_comment.'),
-  user: slackId('User id of the person who added the reaction.'),
-  reaction: z.string().min(1).max(SLACK_EVENT_NAME_MAX).describe('Reaction name, without colons.'),
-});
+const SlackReactionAddedEventSchema = lazySchema(() =>
+  z.object({
+    channel: optionalSlackId('Channel of the message that received the reaction.'),
+    messageId: optionalSlackId('Timestamp of the message that received the reaction.'),
+    fileId: optionalSlackId('Id of the file that received the reaction.'),
+    fileCommentId: optionalSlackId('Id of the file comment that received the reaction.'),
+    itemType: z
+      .string()
+      .min(1)
+      .max(SLACK_EVENT_NAME_MAX)
+      .optional()
+      .describe('Slack item type, such as message, file, or file_comment.'),
+    user: slackId('User id of the person who added the reaction.'),
+    reaction: z
+      .string()
+      .min(1)
+      .max(SLACK_EVENT_NAME_MAX)
+      .describe('Reaction name, without colons.'),
+  })
+);
 
-const SlackFileSharedEventSchema = z.object({
-  fileId: slackId('Id of the shared file.'),
-  user: optionalSlackId('User id of the person who shared the file.'),
-  channel: optionalSlackId('Channel the file was shared in, when Slack includes one.'),
-});
+const SlackFileSharedEventSchema = lazySchema(() =>
+  z.object({
+    fileId: slackId('Id of the shared file.'),
+    user: optionalSlackId('User id of the person who shared the file.'),
+    channel: optionalSlackId('Channel the file was shared in, when Slack includes one.'),
+  })
+);
 
-const SlackFilePublicEventSchema = z.object({
-  fileId: slackId('Id of the file that was made public.'),
-  userId: optionalSlackId(
-    'User id of the person who made the file public, when Slack includes it.'
-  ),
-});
+const SlackFilePublicEventSchema = lazySchema(() =>
+  z.object({
+    fileId: slackId('Id of the file that was made public.'),
+    userId: optionalSlackId(
+      'User id of the person who made the file public, when Slack includes it.'
+    ),
+  })
+);
 
-const SlackChannelCreatedEventSchema = z.object({
-  channelId: slackId('Id of the created public channel.'),
-  name: z
-    .string()
-    .min(1)
-    .max(SLACK_EVENT_NAME_MAX)
-    .optional()
-    .describe('Name of the created channel.'),
-  creator: optionalSlackId('User id of the person who created the channel.'),
-});
+const SlackChannelCreatedEventSchema = lazySchema(() =>
+  z.object({
+    channelId: slackId('Id of the created public channel.'),
+    name: z
+      .string()
+      .min(1)
+      .max(SLACK_EVENT_NAME_MAX)
+      .optional()
+      .describe('Name of the created channel.'),
+    creator: optionalSlackId('User id of the person who created the channel.'),
+  })
+);
 
-const SlackTeamJoinEventSchema = z.object({
-  userId: slackId('User id of the person who joined the workspace.'),
-  name: z.string().min(1).max(SLACK_EVENT_NAME_MAX).optional().describe('Slack username.'),
-  realName: z
-    .string()
-    .min(1)
-    .max(SLACK_EVENT_NAME_MAX)
-    .optional()
-    .describe('Profile real name, when Slack includes it.'),
-  displayName: z
-    .string()
-    .min(1)
-    .max(SLACK_EVENT_NAME_MAX)
-    .optional()
-    .describe('Profile display name, when Slack includes it.'),
-  email: z
-    .string()
-    .min(1)
-    .max(SLACK_EVENT_EMAIL_MAX)
-    .optional()
-    .describe('Profile email, when Slack includes it.'),
-});
+const SlackTeamJoinEventSchema = lazySchema(() =>
+  z.object({
+    userId: slackId('User id of the person who joined the workspace.'),
+    name: z.string().min(1).max(SLACK_EVENT_NAME_MAX).optional().describe('Slack username.'),
+    realName: z
+      .string()
+      .min(1)
+      .max(SLACK_EVENT_NAME_MAX)
+      .optional()
+      .describe('Profile real name, when Slack includes it.'),
+    displayName: z
+      .string()
+      .min(1)
+      .max(SLACK_EVENT_NAME_MAX)
+      .optional()
+      .describe('Profile display name, when Slack includes it.'),
+    email: z
+      .string()
+      .min(1)
+      .max(SLACK_EVENT_EMAIL_MAX)
+      .optional()
+      .describe('Profile email, when Slack includes it.'),
+  })
+);
 
-const SlackMemberJoinedChannelEventSchema = z.object({
-  userId: slackId('User id of the person who joined the channel.'),
-  channelId: slackId('Id of the channel that was joined.'),
-  inviter: optionalSlackId('User id of the person who invited them, when Slack includes one.'),
-});
+const SlackMemberJoinedChannelEventSchema = lazySchema(() =>
+  z.object({
+    userId: slackId('User id of the person who joined the channel.'),
+    channelId: slackId('Id of the channel that was joined.'),
+    inviter: optionalSlackId('User id of the person who invited them, when Slack includes one.'),
+  })
+);
 
 interface ParsedSlackEvent {
   readonly eventId: string;

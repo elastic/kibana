@@ -37,7 +37,6 @@ const baseCellProps = {
   setCellProps: jest.fn(),
   rowIndex: 0,
   colIndex: 0,
-  columnsMeta: undefined,
   isDetails: false,
   isExpanded: false,
   isExpandable: false,
@@ -73,6 +72,32 @@ describe('EpisodeStatusCell', () => {
     expect(screen.getByText('Active')).toBeInTheDocument();
     expect(screen.queryByTestId('alertEpisodeStatusCellSnoozeIndicator')).not.toBeInTheDocument();
     expect(screen.queryByTestId('alertEpisodeStatusCellAckIndicator')).not.toBeInTheDocument();
+  });
+
+  it('renders the flapping indicator for an active flapping alert', () => {
+    const row = makeRow({
+      'episode.status': 'active',
+      'episode.id': 'ep1',
+      'rule.id': 'r1',
+      group_hash: 'gh1',
+      is_flapping: true,
+    });
+    renderWithI18n(<EpisodeStatusCell {...baseCellProps} columnId="episode.status" row={row} />);
+
+    expect(screen.getByTestId('alertEpisodeFlappingBadge')).toBeInTheDocument();
+  });
+
+  it('does not render the flapping indicator for a recovered flapping alert', () => {
+    const row = makeRow({
+      'episode.status': 'inactive',
+      'episode.id': 'ep1',
+      'rule.id': 'r1',
+      group_hash: 'gh1',
+      is_flapping: true,
+    });
+    renderWithI18n(<EpisodeStatusCell {...baseCellProps} columnId="episode.status" row={row} />);
+
+    expect(screen.queryByTestId('alertEpisodeFlappingBadge')).not.toBeInTheDocument();
   });
 });
 

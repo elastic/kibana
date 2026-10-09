@@ -6,7 +6,6 @@
  */
 
 import type { SignificantEvent } from '@kbn/significant-events-schema';
-import type { EventClient } from '../../lib/significant_events/events';
 import {
   EVENT_CREATED_TRIGGER_ID,
   EVENT_STATUS_CHANGED_TRIGGER_ID,
@@ -15,30 +14,23 @@ import { emitSignificantEventWriteTriggers } from './emit_significant_event_trig
 
 const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
-  event_uuid: 'event-uuid-1',
   event_id: 'event-id-1',
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
-  severity: '40-medium',
+  severity: 'medium',
   confidence: 0.8,
   ...overrides,
 });
 
-const createEventClient = () => {
-  const emitTrigger = jest.fn();
-  const eventClient: Pick<EventClient, 'emitTrigger'> = { emitTrigger };
-  return { eventClient, emitTrigger };
-};
-
 describe('emitSignificantEventWriteTriggers', () => {
   it('emits eventCreated when there is no prior version', () => {
-    const { eventClient, emitTrigger } = createEventClient();
+    const emitTrigger = jest.fn();
     const event = createEvent();
 
     emitSignificantEventWriteTriggers({
-      eventClient,
+      emitTrigger,
       significantEvent: event,
       priorSignificantEvent: undefined,
     });
@@ -46,48 +38,46 @@ describe('emitSignificantEventWriteTriggers', () => {
     expect(emitTrigger).toHaveBeenCalledTimes(1);
     expect(emitTrigger).toHaveBeenCalledWith(EVENT_CREATED_TRIGGER_ID, {
       event_id: 'event-id-1',
-      event_uuid: 'event-uuid-1',
       title: 'Test event',
       summary: 'Test summary',
-      status: 'open',
-      severity: '40-medium',
+      status: 'active',
+      severity: 'medium',
       stream_names: ['logs.test'],
       occurred_at: '2026-01-01T00:00:00.000Z',
     });
   });
 
   it('emits eventStatusChanged with previous_status when the status differs', () => {
-    const { eventClient, emitTrigger } = createEventClient();
-    const event = createEvent({ status: 'closed' });
+    const emitTrigger = jest.fn();
+    const event = createEvent({ status: 'inactive' });
 
     emitSignificantEventWriteTriggers({
-      eventClient,
+      emitTrigger,
       significantEvent: event,
-      priorSignificantEvent: { status: 'open' },
+      priorSignificantEvent: { status: 'active' },
     });
 
     expect(emitTrigger).toHaveBeenCalledTimes(1);
     expect(emitTrigger).toHaveBeenCalledWith(EVENT_STATUS_CHANGED_TRIGGER_ID, {
       event_id: 'event-id-1',
-      event_uuid: 'event-uuid-1',
       title: 'Test event',
       summary: 'Test summary',
-      status: 'closed',
-      severity: '40-medium',
+      status: 'inactive',
+      severity: 'medium',
       stream_names: ['logs.test'],
       occurred_at: '2026-01-01T00:00:00.000Z',
-      previous_status: 'open',
+      previous_status: 'active',
     });
   });
 
   it('emits nothing when a prior version exists with the same status', () => {
-    const { eventClient, emitTrigger } = createEventClient();
-    const event = createEvent({ status: 'open' });
+    const emitTrigger = jest.fn();
+    const event = createEvent({ status: 'active' });
 
     emitSignificantEventWriteTriggers({
-      eventClient,
+      emitTrigger,
       significantEvent: event,
-      priorSignificantEvent: { status: 'open' },
+      priorSignificantEvent: { status: 'active' },
     });
 
     expect(emitTrigger).not.toHaveBeenCalled();

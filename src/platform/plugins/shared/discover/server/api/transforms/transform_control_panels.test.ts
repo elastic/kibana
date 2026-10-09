@@ -224,10 +224,11 @@ describe('control panel transforms', () => {
       });
     });
 
-    it('fails when stored content exceeds the API control panel limit', () => {
+    it('returns stored panels beyond the API control panel limit', () => {
+      const panelCount = MAX_DISCOVER_SESSION_CONTROL_PANELS + 1;
       const controlGroupJson = JSON.stringify(
         Object.fromEntries(
-          Array.from({ length: MAX_DISCOVER_SESSION_CONTROL_PANELS + 1 }, (_, order) => [
+          Array.from({ length: panelCount }, (_, order) => [
             `control-${order}`,
             {
               order,
@@ -243,7 +244,10 @@ describe('control panel transforms', () => {
         )
       );
 
-      expect(() => transformControlPanelsOut(controlGroupJson, 'tab-1')).toThrow();
+      const { panels, warnings } = transformControlPanelsOut(controlGroupJson, 'tab-1');
+
+      expect(panels).toHaveLength(panelCount);
+      expect(warnings).toEqual([]);
     });
   });
 

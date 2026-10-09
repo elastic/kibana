@@ -43,6 +43,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
           name: 'created-rule',
           description: 'a freshly created rule',
           tags: ['cpu', 'production'],
+          routing_tags: ['sre'],
         },
       });
       const response = await apiClient.post(testData.RULE_API_PATH, {
@@ -51,9 +52,10 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(201);
       expect(response.body.kind).toBe(body.kind);
-      expect(response.body.metadata).toStrictEqual({ ...body.metadata, version: 1 });
+      expect(response.body.metadata).toStrictEqual(body.metadata);
       expect(response.body.schedule).toStrictEqual(body.schedule);
       expect(response.body.query).toStrictEqual(body.query);
+      expect(response.body.version).toBe(1);
       // Actors are structured objects, not the legacy bare profile-UID string.
       expect(typeof response.body.created_by.profile_uid).toBe('string');
       expect(typeof response.body.updated_by.profile_uid).toBe('string');
@@ -61,7 +63,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       const persisted = await apiServices.alertingV2.rules.get(response.body.id);
       expect(persisted.id).toBe(response.body.id);
       expect(persisted.metadata.name).toBe('created-rule');
-      expect(persisted.metadata.version).toBe(1);
+      expect(persisted.version).toBe(1);
     }
   );
 
@@ -161,6 +163,18 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
     }
   );
 
+  // `description` is optional: omit it to leave it unset rather than sending a sentinel.
+  apiTest('validation: rejects an empty or blank metadata.description', async ({ apiClient }) => {
+    for (const description of ['', '   ']) {
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body: buildCreateRuleData({ metadata: { name: 'blank-description', description } }),
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  });
+
   apiTest('validation: rejects body with an unknown kind value', async ({ apiClient }) => {
     const body = { ...buildCreateRuleData(), kind: 'unknown' };
     const response = await apiClient.post(testData.RULE_API_PATH, {
@@ -241,6 +255,24 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
     });
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
+  apiTest('validation: rejects a signal rule that sets routing tags', async ({ apiClient }) => {
+    const body = buildCreateRuleData({
+      kind: 'signal',
+      state_transition: undefined,
+      recovery: undefined,
+      no_data: undefined,
+      query: { base: 'FROM logs-* | LIMIT 1' },
+      metadata: { name: 'signal-with-routing-tags', routing_tags: ['sre'] },
+    });
+    const response = await apiClient.post(testData.RULE_API_PATH, {
+      headers: writerHeaders,
+      body,
+    });
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+    expect(response.body.message).toContain('metadata.routing_tags');
   });
 
   apiTest(
@@ -359,7 +391,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         body,
       });
       expect(response).toHaveStatusCode(201);
-      expect(response.body.metadata).toStrictEqual({ ...body.metadata, version: 1 });
+      expect(response.body.metadata).toStrictEqual(body.metadata);
       expect(response.body.schedule).toStrictEqual(body.schedule);
       expect(response.body.query).toStrictEqual(body.query);
       expect(response.body.state_transition).toStrictEqual(body.state_transition);

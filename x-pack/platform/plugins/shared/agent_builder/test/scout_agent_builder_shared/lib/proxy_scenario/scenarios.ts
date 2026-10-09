@@ -101,6 +101,29 @@ export const setupAgentCallTool = ({
 };
 
 /**
+ * Tool call scenario with a final answer: the agent calls `toolName`, gets its result back (the
+ * tool's own output, or the auto-declined error of a non-interactive run) and answers `response`.
+ */
+export const setupAgentCallToolThenAnswer = ({
+  proxy,
+  toolName,
+  toolArg,
+  response,
+  title = 'New discussion',
+  continueConversation = false,
+}: {
+  proxy: LlmProxy;
+  toolName: string;
+  toolArg: Record<string, any>;
+  response: string;
+  title?: string;
+  continueConversation?: boolean;
+}) => {
+  setupAgentCallTool({ proxy, toolName, toolArg, title, continueConversation });
+  mockFinalAnswer(proxy, response);
+};
+
+/**
  * Calls
  */
 export const setupAgentCallSearchToolWithEsqlThenAnswer = async ({

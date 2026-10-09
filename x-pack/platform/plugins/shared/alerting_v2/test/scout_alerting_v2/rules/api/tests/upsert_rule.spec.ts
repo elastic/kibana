@@ -48,7 +48,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(201);
       expect(response.body.id).toBe(id);
-      expect(response.body.metadata).toStrictEqual({ ...body.metadata, version: 1 });
+      expect(response.body.metadata).toStrictEqual(body.metadata);
       expect(response.body.kind).toBe(body.kind);
       expect(response.body.schedule).toStrictEqual(body.schedule);
       expect(response.body.query).toStrictEqual(body.query);
@@ -56,7 +56,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       const persisted = await apiServices.alertingV2.rules.get(id);
       expect(persisted.id).toBe(id);
       expect(persisted.metadata.name).toBe('created-via-upsert');
-      expect(persisted.metadata.version).toBe(1);
+      expect(persisted.version).toBe(1);
     }
   );
 
@@ -78,18 +78,16 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(200);
       expect(response.body.id).toBe(created.id);
-      expect(response.body.metadata).toStrictEqual({
-        ...replacementBody.metadata,
-        version: created.metadata.version + 1,
-      });
+      expect(response.body.metadata).toStrictEqual(replacementBody.metadata);
       expect(response.body.schedule).toStrictEqual(replacementBody.schedule);
       expect(response.body.query).toStrictEqual(replacementBody.query);
       // createdAt / createdBy / enabled are preserved across an upsert-replace.
       expect(response.body.created_at).toBe(created.created_at);
       expect(response.body.created_by).toStrictEqual(created.created_by);
       expect(response.body.enabled).toBe(created.enabled);
-      // updatedAt is refreshed on every replace.
+      // updatedAt is refreshed and version advances on every replace.
       expect(response.body.updated_at).not.toBe(created.updated_at);
+      expect(response.body.version).toBe(created.version + 1);
     }
   );
 
@@ -114,6 +112,33 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
 
       const reFetched = await apiServices.alertingV2.rules.get(id);
       expect(reFetched.enabled).toBe(false);
+    }
+  );
+
+  apiTest(
+    'upsert: replace does not merge nested query or metadata leaves',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'replace-me', description: 'original', tags: ['cpu'] },
+          query: {
+            base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+            breach: { segment: 'WHERE count >= 10' },
+          },
+        })
+      );
+
+      const response = await apiClient.put(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: buildCreateRuleData({
+          metadata: { name: 'replaced' },
+          query: { base: 'FROM logs-* | LIMIT 10' },
+        }),
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.metadata).toStrictEqual({ name: 'replaced' });
+      expect(response.body.query).toStrictEqual({ base: 'FROM logs-* | LIMIT 10' });
     }
   );
 

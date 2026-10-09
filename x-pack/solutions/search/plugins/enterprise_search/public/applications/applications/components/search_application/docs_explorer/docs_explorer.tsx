@@ -90,7 +90,9 @@ class InternalSearchApplicationTransporter implements Transporter {
   ) {}
 
   async performRequest(request: SearchRequest) {
-    const url = `/internal/enterprise_search/search_applications/${this.searchApplicationName}/search`;
+    const url = `/internal/enterprise_search/search_applications/${encodeURIComponent(
+      this.searchApplicationName
+    )}/search`;
 
     const response = await this.http.post<SearchResponse>(url, {
       body: JSON.stringify(request),

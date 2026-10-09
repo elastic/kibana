@@ -69,19 +69,23 @@ export const CloudConnectedAppMain: React.FC = () => {
     setAutoEnablingEis: appContext.setAutoEnablingEis,
   };
 
+  if (clusterDetails) {
+    return (
+      <CloudConnectedAppContextProvider value={extendedContext}>
+        <ConnectedServicesPage
+          clusterDetails={clusterDetails}
+          onServiceUpdate={handleServiceUpdate}
+          onDisconnect={handleDisconnect}
+        />
+      </CloudConnectedAppContextProvider>
+    );
+  }
+
   return (
     <CloudConnectedAppContextProvider value={extendedContext}>
       <EuiPage>
         <EuiPageBody panelled={true}>
-          {clusterDetails ? (
-            <ConnectedServicesPage
-              clusterDetails={clusterDetails}
-              onServiceUpdate={handleServiceUpdate}
-              onDisconnect={handleDisconnect}
-            />
-          ) : (
-            <OnboardingPage onConnect={handleConnect} />
-          )}
+          <OnboardingPage onConnect={handleConnect} />
         </EuiPageBody>
       </EuiPage>
     </CloudConnectedAppContextProvider>

@@ -30,4 +30,11 @@ export const escalationQueryKeys = {
    */
   linkedInvestigations: (escalationId: string, linkedIds?: string) =>
     [...escalationQueryKeys.all, 'linkedInvestigations', escalationId, linkedIds ?? ''] as const,
+  /**
+   * Key for the escalations-by-investigation lookup used by the escalation creation modal to
+   * display a warning when the investigation is already part of one or more open escalations.
+   * Nested under `all` so `invalidateEscalations` sweeps it along with the rest.
+   */
+  forInvestigation: (investigationId: string) =>
+    [...escalationQueryKeys.all, 'forInvestigation', investigationId] as const,
 };

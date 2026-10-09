@@ -6,8 +6,6 @@
  */
 
 import type { SchemaOutput } from './schema_output';
-import { syntheticsCCSSettingsSchema } from './zod/settings';
-
-export { syntheticsCCSSettingsSchema };
+import type { syntheticsCCSSettingsSchema } from './schemas/settings';
 
 export type SyntheticsCCSSettings = SchemaOutput<typeof syntheticsCCSSettingsSchema>;

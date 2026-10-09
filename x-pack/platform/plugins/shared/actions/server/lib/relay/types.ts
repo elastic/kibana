@@ -11,6 +11,8 @@ export interface RelayInstallRequest {
   kibana_version: string;
   license_info: string;
   created_by_user_key?: string;
+  /** Agent Builder agent for this deployment's Slack turns; Relay falls back to `elastic-ai-agent` when omitted. */
+  agent_id?: string;
 }
 
 export interface RelayInstallResponse {
@@ -72,6 +74,11 @@ export interface RelayTriggerInput {
   message: string;
   /** Timestamp of the message to reply to, when posting into an existing thread. */
   threadTs?: string;
+  /**
+   * Timestamp of a message this app posted earlier; the Relay edits it instead of posting.
+   * Takes precedence over `threadTs`, which is not sent when this is set.
+   */
+  messageTs?: string;
 }
 
 export interface RelayTriggerResponse {

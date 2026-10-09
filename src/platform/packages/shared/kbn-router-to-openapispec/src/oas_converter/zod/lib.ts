@@ -457,7 +457,9 @@ interface ZodSchemaMeta {
 }
 
 const getZodMeta = (schema: z.ZodType): ZodSchemaMeta =>
-  (z.globalRegistry.get(schema) ?? {}) as ZodSchemaMeta;
+  ((typeof schema.meta === 'function' ? schema.meta() : undefined) ??
+    z.globalRegistry.get(schema) ??
+    {}) as ZodSchemaMeta;
 
 const getStableComponentName = (schema: z.ZodType): string | undefined =>
   zodV4OasComponentRegistry.get(schema as object) ?? getZodMeta(schema).id;
@@ -642,6 +644,11 @@ function hoistMarkedSchemas(
   const name = obj[COMPONENT_ID_MARKER];
 
   if (typeof name === 'string') {
+    // Keep an existing definition (e.g. extracted from `$defs`) rather than
+    // overwriting it with a partial inline copy of the same component.
+    if (Object.hasOwn(shared, name)) {
+      return { $ref: `#/components/schemas/${name}` };
+    }
     const {
       [COMPONENT_ID_MARKER]: _idMarker,
       [OAS_EXTENSIONS_MARKER]: oasExt,
