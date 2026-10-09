@@ -5,7 +5,16 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTimeline } from '@elastic/eui';
+import {
+  EuiAvatar,
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiText,
+  EuiTimeline,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { EuiTimelineItemProps } from '@elastic/eui';
 import { MAX_STORYLINE_EVENTS } from '../../../../../common/entity_analytics/executive_brief/constants';
 import type {
@@ -16,16 +25,18 @@ import type {
 import { getTacticName } from '../utils/resolve_evidence';
 import { EvidenceChip } from './evidence_chip';
 
-const ICON_BY_EVENT: Record<StoryEventType, string> = {
-  alert_first: 'securitySignal',
-  ad_generated: 'bolt',
-  lead_created: 'lightbulb',
-  risk_jump: 'sortUp',
-  relationship_first_seen: 'push',
-  case_opened: 'casesApp',
-  case_status: 'casesApp',
-  alerts_closed: 'checkInCircleFilled',
+export const EVENT_ICON: Record<StoryEventType, { iconType: string; color: EventColor }> = {
+  alert_first: { iconType: 'warning', color: 'warning' },
+  risk_jump: { iconType: 'sortUp', color: 'risk' },
+  relationship_first_seen: { iconType: 'link', color: 'primary' },
+  ad_generated: { iconType: 'sparkles', color: 'accent' },
+  lead_created: { iconType: 'search', color: 'primary' },
+  case_opened: { iconType: 'casesApp', color: 'success' },
+  case_status: { iconType: 'casesApp', color: 'success' },
+  alerts_closed: { iconType: 'checkCircleFill', color: 'success' },
 };
+
+type EventColor = 'warning' | 'risk' | 'primary' | 'accent' | 'success';
 
 const formatTime = (iso: string): string => {
   const date = new Date(iso);
@@ -37,11 +48,33 @@ export const StorylineSteps: React.FC<{ storyline: Storyline; snapshot: BriefSna
   storyline,
   snapshot,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const events = storyline.events.slice(0, MAX_STORYLINE_EVENTS);
+  const isSevere = storyline.severity === 'critical' || storyline.severity === 'high';
+  const colorOf = (type: StoryEventType, color: EventColor): string => {
+    if (type === 'alert_first' && isSevere) return euiTheme.colors.danger;
+    const { colors } = euiTheme;
+    return {
+      warning: colors.warning,
+      risk: colors.severity.risk,
+      primary: colors.primary,
+      accent: colors.accent,
+      success: colors.success,
+    }[color];
+  };
 
   const items: EuiTimelineItemProps[] = events.map((event) => ({
-    icon: ICON_BY_EVENT[event.type],
-    iconAriaLabel: event.type,
+    icon: (
+      <EuiAvatar
+        name={event.type.replace(/_/g, ' ')}
+        iconType={EVENT_ICON[event.type].iconType}
+        iconColor={colorOf(event.type, EVENT_ICON[event.type].color)}
+        color="plain"
+        size="m"
+        data-test-subj={`executiveBriefEventIcon-${event.type}`}
+      />
+    ),
+    iconAriaLabel: event.type.replace(/_/g, ' '),
     verticalAlign: 'top',
     children: (
       <EuiPanel
