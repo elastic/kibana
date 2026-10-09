@@ -23,7 +23,7 @@ import {
 } from '../../utils';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
-/** Runs the same missing-host scenario under both flag-off and flag-on FTR configs. */
+/** Runs missing-entity scenarios under both flag-off and flag-on FTR configs. */
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
@@ -147,6 +147,59 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(entityDoc?.entity?.risk?.calculated_score_norm).to.be.a('number');
 
         expect(score).to.not.be(undefined);
+        expect(score?.id_value).to.eql(expectedEuid);
+      } else {
+        expect(entityDoc).to.be(undefined);
+        expect(score).to.be(undefined);
+      }
+    });
+
+    it(`${
+      isCreateMissingEnabled
+        ? 'creates an alerted service and writes its score without a service extraction engine'
+        : 'does not create an alerted service without the create-missing flag'
+    }`, async () => {
+      const documentId = uuidv4();
+      const serviceName = `service-${uuidv4()}`;
+      const expectedEuid = `service:${serviceName}`;
+
+      await indexListOfDocuments([buildDocument({ service: { name: serviceName } }, documentId)]);
+      await createAndSyncRuleAndAlerts({
+        query: `id: ${documentId}`,
+        alerts: 1,
+        riskScore: 42,
+      });
+
+      await entityStoreUtils.installEntityStoreV2({
+        entityTypes: ['user', 'host', 'generic'],
+        dataViewPattern: testLogsIndex,
+        waitForEntities: false,
+      });
+
+      await maintainerRoutes.runMaintainerSync('risk-score');
+
+      const entityResponse = await es.search({
+        index: getEntitiesAlias(ENTITY_LATEST, 'default'),
+        size: 1,
+        query: { term: { 'entity.id': expectedEuid } },
+      });
+      const entityDoc = entityResponse.hits.hits[0]?._source as
+        | {
+            entity?: {
+              id?: string;
+              created_by?: string;
+              risk?: { calculated_score_norm?: number };
+            };
+          }
+        | undefined;
+      const score = normalizeScores(await readRiskScores(es)).find(
+        (riskScore) => riskScore.id_value === expectedEuid
+      );
+
+      if (isCreateMissingEnabled) {
+        expect(entityDoc?.entity?.id).to.eql(expectedEuid);
+        expect(entityDoc?.entity?.created_by).to.eql('risk_score_maintainer');
+        expect(entityDoc?.entity?.risk?.calculated_score_norm).to.be.a('number');
         expect(score?.id_value).to.eql(expectedEuid);
       } else {
         expect(entityDoc).to.be(undefined);

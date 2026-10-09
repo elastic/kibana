@@ -202,6 +202,32 @@ describe('CRUDClient', () => {
       expect((createdDoc as any).host).toEqual({ id: 'host-1' });
     });
 
+    it('creates a service when the shared index exists without requiring a service engine', async () => {
+      // CRUD creation is intentionally independent of per-type extraction engine installation.
+      esClient.bulk.mockResolvedValue({ errors: false, items: [] } as any);
+
+      const result = await client.createEntitiesFromSource([
+        {
+          type: 'service',
+          source: { service: { name: 'api-gateway' } },
+          expectedEntityId: 'service:api-gateway',
+          createdBy: 'risk_score_maintainer',
+          fields: { 'entity.risk.calculated_score_norm': 42 },
+        },
+      ]);
+
+      expect(result.created).toEqual(['service:api-gateway']);
+      const operations = getBulkOperations(0);
+      expect(operations[0]).toEqual({ create: { _id: hashEuid('service:api-gateway') } });
+      expect(operations[1]).toMatchObject({
+        entity: {
+          id: 'service:api-gateway',
+          created_by: 'risk_score_maintainer',
+          risk: { calculated_score_norm: 42 },
+        },
+      });
+    });
+
     it('falls back entity.name to the untyped id when the source has no host.name (matches extraction)', async () => {
       esClient.bulk.mockResolvedValue({ errors: false, items: [] } as any);
 

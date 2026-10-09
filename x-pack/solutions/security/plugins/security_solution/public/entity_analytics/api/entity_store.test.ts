@@ -7,6 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/public';
+import { EntityType } from '@kbn/entity-store/common';
 
 import { useEntityStoreRoutes } from './entity_store';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
@@ -19,7 +20,7 @@ jest.mock('../../common/lib/kibana/kibana_react', () => ({
 const mockFetch = jest.fn();
 const useKibanaMock = useKibana as jest.Mock;
 
-describe('useEntityStoreRoutes — executionContext propagation to prebuilt watchlist install', () => {
+describe('useEntityStoreRoutes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useKibanaMock.mockReturnValue({
@@ -31,11 +32,12 @@ describe('useEntityStoreRoutes — executionContext propagation to prebuilt watc
     mockFetch.mockResolvedValue({ acknowledged: true });
   });
 
-  it('threads context into the prebuilt watchlist install request when installEntityStore is called', async () => {
+  it('posts the supplied entity types when installEntityStore is called', async () => {
     const { result } = renderHook(() => useEntityStoreRoutes());
 
     const context = { name: 'entity-store-install', id: 'wizard-step-2' };
-    await result.current.installEntityStore(context);
+    const entityTypes = [EntityType.enum.user, EntityType.enum.host, EntityType.enum.generic];
+    await result.current.installEntityStore(entityTypes, context);
 
     expect(mockFetch).toHaveBeenCalledWith(
       WATCHLISTS_PREBUILT_INSTALL_URL,
@@ -43,7 +45,10 @@ describe('useEntityStoreRoutes — executionContext propagation to prebuilt watc
     );
     expect(mockFetch).toHaveBeenCalledWith(
       ENTITY_STORE_ROUTES.public.INSTALL,
-      expect.objectContaining({ context })
+      expect.objectContaining({
+        body: JSON.stringify({ entityTypes }),
+        context,
+      })
     );
   });
 
@@ -66,7 +71,7 @@ describe('useEntityStoreRoutes — executionContext propagation to prebuilt watc
   it('does not fail when installEntityStore is called without context', async () => {
     const { result } = renderHook(() => useEntityStoreRoutes());
 
-    await result.current.installEntityStore();
+    await result.current.installEntityStore([EntityType.enum.user]);
 
     expect(mockFetch).toHaveBeenCalledWith(
       WATCHLISTS_PREBUILT_INSTALL_URL,

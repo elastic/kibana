@@ -8,7 +8,12 @@
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { GetEntityStoreStatusResponse } from '@kbn/entity-store/common';
+import {
+  EntityType,
+  type EntityType as EntityStoreEntityType,
+  type GetEntityStoreStatusResponse,
+} from '@kbn/entity-store/common';
+import { SECURITY_DEFAULT_ENTITY_STORE_INSTALL_TYPES } from '../../../../../common/entity_analytics/constants';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useEntityStoreRoutes } from '../../../api/entity_store';
 import {
@@ -16,6 +21,7 @@ import {
   EA_EXECUTION_CONTEXT_NAMES,
 } from '../../../../common/utils/execution_context';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
+import { useShouldInstallServiceEngine } from './use_should_install_service_engine';
 
 const ENTITY_STORE_STATUS_CONTEXT = buildExecutionContext(
   EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_MANAGEMENT,
@@ -78,17 +84,45 @@ export const useInstallEntityStoreMutation = () => {
   const { telemetry } = useKibana().services;
   const queryClient = useQueryClient();
   const { installEntityStore } = useEntityStoreRoutes();
+  const shouldInstallServiceEngine = useShouldInstallServiceEngine();
 
   return useMutation<unknown, ResponseError, void>(
-    () => {
+    async () => {
       telemetry?.reportEvent(EntityEventTypes.EntityStoreEnablementToggleClicked, {
         timestamp: new Date().toISOString(),
         action: 'start',
       });
-      return installEntityStore(ENTITY_STORE_INSTALL_CONTEXT);
+      const entityTypes: EntityStoreEntityType[] = [...SECURITY_DEFAULT_ENTITY_STORE_INSTALL_TYPES];
+      // Security previously installed service extraction by default, so retain it for spaces
+      // where an existing engine or surviving risk scores show that it was already in use.
+      if (await shouldInstallServiceEngine(ENTITY_STORE_INSTALL_CONTEXT)) {
+        entityTypes.push(EntityType.enum.service);
+      }
+      return installEntityStore(entityTypes, ENTITY_STORE_INSTALL_CONTEXT);
     },
     {
       mutationKey: INSTALL_ENTITY_STORE_KEY,
+      onSuccess: () => queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS }),
+    }
+  );
+};
+
+export const INSTALL_ENTITY_ENGINE_KEY = ['POST', 'INSTALL_ENTITY_ENGINE'];
+export const useInstallEntityEngineMutation = () => {
+  const { telemetry } = useKibana().services;
+  const queryClient = useQueryClient();
+  const { installEntityStore } = useEntityStoreRoutes();
+
+  return useMutation<unknown, ResponseError, EntityStoreEntityType>(
+    (entityType) => {
+      telemetry?.reportEvent(EntityEventTypes.EntityStoreEngineInstallClicked, {
+        timestamp: new Date().toISOString(),
+        entityType,
+      });
+      return installEntityStore([entityType], ENTITY_STORE_INSTALL_CONTEXT);
+    },
+    {
+      mutationKey: INSTALL_ENTITY_ENGINE_KEY,
       onSuccess: () => queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS }),
     }
   );

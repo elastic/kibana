@@ -180,6 +180,29 @@ describe('AssetManagerClient', () => {
     });
   });
 
+  it('keeps history snapshot retention and stopped status on a per-type install', async () => {
+    mockGlobalStateClient.find.mockResolvedValue({
+      historySnapshot: {
+        status: 'stopped',
+        frequency: '12h',
+        retentionDays: 90,
+      },
+      logsExtraction: LATEST_LOG_EXTRACTION_DEFAULTS,
+      excludedUserNames: [],
+    });
+
+    await client.init({} as KibanaRequest, ['service']);
+
+    expect(mockGlobalStateClient.init).toHaveBeenCalledWith({
+      historySnapshot: undefined,
+      logsExtraction: undefined,
+      excludedUserNames: undefined,
+    });
+    expect(mockScheduleHistorySnapshotTasks).toHaveBeenCalledWith(
+      expect.objectContaining({ frequency: '12h' })
+    );
+  });
+
   it('creates shared indices and data streams once during init', async () => {
     await client.init({} as KibanaRequest, ['host', 'user']);
 

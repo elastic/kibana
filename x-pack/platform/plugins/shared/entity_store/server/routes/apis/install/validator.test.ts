@@ -6,6 +6,7 @@
  */
 
 import { BodySchema } from './validator';
+import { ALL_ENTITY_TYPES } from '../../../../common/domain/definitions/entity_schema';
 
 describe('BodySchema historySnapshot', () => {
   it('accepts valid frequency', () => {
@@ -31,7 +32,11 @@ describe('BodySchema historySnapshot', () => {
   });
 
   it('accepts empty body (only entityTypes and logExtraction optional)', () => {
-    expect(BodySchema.safeParse({}).success).toBe(true);
+    const emptyBodyResult = BodySchema.safeParse({});
+    expect(emptyBodyResult.success).toBe(true);
+    if (emptyBodyResult.success) {
+      expect(emptyBodyResult.data.entityTypes).toEqual(ALL_ENTITY_TYPES);
+    }
     expect(BodySchema.safeParse({ entityTypes: ['host'] }).success).toBe(true);
     expect(BodySchema.safeParse({ logExtraction: { lookbackPeriod: '12h' } }).success).toBe(true);
     expect(BodySchema.safeParse({ historySnapshot: { frequency: '1h' } }).success).toBe(true);

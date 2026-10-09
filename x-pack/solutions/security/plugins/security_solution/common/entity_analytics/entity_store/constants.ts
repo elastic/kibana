@@ -5,9 +5,18 @@
  * 2.0.
  */
 
+import { EntityType, type EntityType as EntityStoreEntityType } from '@kbn/entity-store/common';
+
 /**
  * Entity Store routes
  */
+
+/** Entity types installed by Security unless existing service data requires service extraction. */
+export const SECURITY_DEFAULT_ENTITY_STORE_INSTALL_TYPES = [
+  EntityType.enum.user,
+  EntityType.enum.host,
+  EntityType.enum.generic,
+] as const satisfies readonly EntityStoreEntityType[];
 
 export const ENTITY_STORE_URL = '/api/entity_store' as const;
 export const ENTITY_STORE_INTERNAL_PRIVILEGES_URL = `${ENTITY_STORE_URL}/privileges` as const;

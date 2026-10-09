@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EngineStatusHeaderAction } from './engine_status_header_action';
-import { useInstallEntityStoreMutation } from '../../../hooks/use_entity_store';
+import { useInstallEntityEngineMutation } from '../../../hooks/use_entity_store';
 import { isEngineLoading } from '../helpers';
 import type { GetEntityStoreStatusResponse } from '@kbn/entity-store/common';
 import { EntityType } from '../../../../../../../common/entity_analytics/types';
@@ -18,7 +18,7 @@ import type { EngineComponentStatus } from '../../../../../../../common/api/enti
 jest.mock('../../../hooks/use_entity_store');
 jest.mock('../helpers');
 
-const mockUseInstallEntityStoreMutation = useInstallEntityStoreMutation as jest.Mock;
+const mockUseInstallEntityEngineMutation = useInstallEntityEngineMutation as jest.Mock;
 // @ts-expect-error upgrade typescript v5.9.3
 const mockIsEngineLoading = isEngineLoading as jest.Mock;
 
@@ -41,7 +41,7 @@ const defaultEngineResponse: GetEntityStoreStatusResponse['engines'][0] = {
 
 describe('EngineStatusHeaderAction', () => {
   beforeEach(() => {
-    mockUseInstallEntityStoreMutation.mockReturnValue({
+    mockUseInstallEntityEngineMutation.mockReturnValue({
       mutate: jest.fn(),
       isLoading: false,
     });
@@ -49,54 +49,55 @@ describe('EngineStatusHeaderAction', () => {
   });
 
   it('renders loading spinner when loading', () => {
-    mockUseInstallEntityStoreMutation.mockReturnValue({
+    mockUseInstallEntityEngineMutation.mockReturnValue({
       mutate: jest.fn(),
       isLoading: true,
     });
 
-    render(<EngineStatusHeaderAction engine={undefined} />, {
+    render(<EngineStatusHeaderAction engine={undefined} entityType={EntityType.user} />, {
       wrapper: TestProviders,
     });
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
   it('renders install button when engine is undefined', () => {
-    render(<EngineStatusHeaderAction engine={undefined} />, {
+    render(<EngineStatusHeaderAction engine={undefined} entityType={EntityType.user} />, {
       wrapper: TestProviders,
     });
     expect(screen.getByText('Install')).toBeInTheDocument();
   });
 
-  it('calls installEntityStore when install button is clicked', () => {
+  it('installs only the selected missing engine type', () => {
     const mutate = jest.fn();
-    mockUseInstallEntityStoreMutation.mockReturnValue({
+    mockUseInstallEntityEngineMutation.mockReturnValue({
       mutate,
       isLoading: false,
     });
 
-    render(<EngineStatusHeaderAction engine={undefined} />, {
+    render(<EngineStatusHeaderAction engine={undefined} entityType={EntityType.service} />, {
       wrapper: TestProviders,
     });
     fireEvent.click(screen.getByText('Install'));
-    expect(mutate).toHaveBeenCalledWith();
+    expect(mutate).toHaveBeenCalledWith(EntityType.service);
   });
 
-  it('calls installEntityStore when reinstall button is clicked', () => {
+  it('repairs only the selected existing engine type', () => {
     const engine: GetEntityStoreStatusResponse['engines'][0] = {
       ...defaultEngineResponse,
+      type: EntityType.host,
       components: [{ ...defaultComponent, installed: false }],
     };
     const mutate = jest.fn();
-    mockUseInstallEntityStoreMutation.mockReturnValue({
+    mockUseInstallEntityEngineMutation.mockReturnValue({
       mutate,
       isLoading: false,
     });
 
-    render(<EngineStatusHeaderAction engine={engine} />, {
+    render(<EngineStatusHeaderAction engine={engine} entityType={EntityType.host} />, {
       wrapper: TestProviders,
     });
     fireEvent.click(screen.getByText('Reinstall'));
-    expect(mutate).toHaveBeenCalledWith();
+    expect(mutate).toHaveBeenCalledWith(EntityType.host);
   });
 
   it('renders reinstall button and tooltip when a component is not installed', () => {
@@ -105,16 +106,19 @@ describe('EngineStatusHeaderAction', () => {
       components: [{ ...defaultComponent, installed: false }],
     };
 
-    render(<EngineStatusHeaderAction engine={engine} />, {
+    render(<EngineStatusHeaderAction engine={engine} entityType={EntityType.user} />, {
       wrapper: TestProviders,
     });
     expect(screen.getByText('Reinstall')).toBeInTheDocument();
   });
 
   it('renders not action when engine is defined and no error', () => {
-    render(<EngineStatusHeaderAction engine={defaultEngineResponse} />, {
-      wrapper: TestProviders,
-    });
+    render(
+      <EngineStatusHeaderAction engine={defaultEngineResponse} entityType={EntityType.user} />,
+      {
+        wrapper: TestProviders,
+      }
+    );
     expect(screen.queryByText('Install')).not.toBeInTheDocument();
     expect(screen.queryByText('Reinstall')).not.toBeInTheDocument();
   });

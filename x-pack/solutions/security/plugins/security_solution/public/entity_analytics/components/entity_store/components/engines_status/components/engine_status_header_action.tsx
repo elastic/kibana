@@ -8,28 +8,30 @@
 import React from 'react';
 import { EuiLoadingSpinner, EuiButtonEmpty, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { GetEntityStoreStatusResponse } from '@kbn/entity-store/common';
-import { useInstallEntityStoreMutation } from '../../../hooks/use_entity_store';
+import type { EntityType, GetEntityStoreStatusResponse } from '@kbn/entity-store/common';
+import { useInstallEntityEngineMutation } from '../../../hooks/use_entity_store';
 import { isEngineLoading } from '../helpers';
 
 export function EngineStatusHeaderAction({
   engine,
+  entityType,
 }: {
   engine: GetEntityStoreStatusResponse['engines'][0] | undefined;
+  entityType: EntityType;
 }) {
-  const installEntityStoreMutation = useInstallEntityStoreMutation();
-  const installEntityStore = () => {
-    installEntityStoreMutation.mutate();
+  const installEntityEngineMutation = useInstallEntityEngineMutation();
+  const installEntityEngine = () => {
+    installEntityEngineMutation.mutate(entityType);
   };
   const hasUninstalledComponent = engine?.components?.some(({ installed }) => !installed);
 
-  if (installEntityStoreMutation.isLoading || isEngineLoading(engine?.status)) {
+  if (installEntityEngineMutation.isLoading || isEngineLoading(engine?.status)) {
     return <EuiLoadingSpinner size="s" />;
   }
 
   if (!engine) {
     return (
-      <EuiButtonEmpty onClick={installEntityStore}>
+      <EuiButtonEmpty onClick={installEntityEngine}>
         <FormattedMessage
           id="xpack.securitySolution.entityAnalytics.entityStore.enginesStatus.installButton"
           defaultMessage="Install"
@@ -41,7 +43,7 @@ export function EngineStatusHeaderAction({
   if (hasUninstalledComponent) {
     return (
       <div>
-        <EuiButtonEmpty onClick={installEntityStore} iconType="refresh" color="warning">
+        <EuiButtonEmpty onClick={installEntityEngine} iconType="refresh" color="warning">
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.entityStore.enginesStatus.reinstallButton"
             defaultMessage="Reinstall"

@@ -6,9 +6,10 @@
  */
 import { useMemo } from 'react';
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/public';
-import type {
-  GetEntityStoreStatusResponse,
-  InitEntityStoreResponse,
+import {
+  type EntityType as EntityStoreEntityType,
+  type GetEntityStoreStatusResponse,
+  type InitEntityStoreResponse,
 } from '@kbn/entity-store/common';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type {
@@ -54,12 +55,15 @@ export const useEntityStoreRoutes = () => {
         context,
       });
 
-    const installEntityStore = async (context?: KibanaExecutionContext) => {
+    const installEntityStore = async (
+      entityTypes: EntityStoreEntityType[],
+      context?: KibanaExecutionContext
+    ) => {
       await tryInstallPrebuiltWatchlistsWithToast(context);
       return http.fetch<InitEntityStoreResponse>(ENTITY_STORE_ROUTES.public.INSTALL, {
         method: 'POST',
         version: API_VERSIONS.public.v1,
-        body: JSON.stringify({}),
+        body: JSON.stringify({ entityTypes }),
         context,
       });
     };

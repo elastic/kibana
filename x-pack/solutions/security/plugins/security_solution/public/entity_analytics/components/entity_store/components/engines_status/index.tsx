@@ -18,7 +18,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { useEntityStoreTypes } from '../../../../hooks/use_enabled_entity_types';
+import { ALL_ENTITY_TYPES } from '@kbn/entity-store/common';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { downloadBlob } from '../../../../../common/utils/download_blob';
 import { EngineComponentsStatusTable } from './components/engine_components_status';
@@ -46,8 +46,6 @@ export const EngineStatus = () => {
   } = useEntityStoreStatus({
     withComponents: true,
   });
-  const enabledEntityTypes = useEntityStoreTypes();
-
   const downloadJson = () => {
     downloadBlob(new Blob([JSON.stringify(data)]), FILE_NAME);
   };
@@ -69,7 +67,7 @@ export const EngineStatus = () => {
     );
   }
 
-  const enginesStatusData = enabledEntityTypes.map((type) => ({
+  const enginesStatusData = ALL_ENTITY_TYPES.map((type) => ({
     type,
     engine: data.engines.find((e) => e.type === type),
   }));
@@ -96,7 +94,7 @@ export const EngineStatus = () => {
             <Fragment key={type}>
               <EngineStatusHeader
                 entityType={type}
-                actionButton={<EngineStatusHeaderAction engine={engine} />}
+                actionButton={<EngineStatusHeaderAction engine={engine} entityType={type} />}
               />
               <EntityStoreErrorCallout engine={engine} size="s" />
               <EuiSpacer size="s" />
