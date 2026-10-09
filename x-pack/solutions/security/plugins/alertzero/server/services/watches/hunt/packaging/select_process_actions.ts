@@ -55,17 +55,24 @@ export const DEFEND_ACTION_KINDS: Readonly<Record<string, ProcessActionKind | 'i
   [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID]: 'isolate',
 };
 
-/** Matched case-insensitively on the basename of `processName`. */
-export const PROTECTED_PROCESS_NAMES = [
-  'lsass.exe',
-  'csrss.exe',
-  'wininit.exe',
-  'winlogon.exe',
-  'services.exe',
-  'smss.exe',
-  'systemd',
-  'launchd',
-] as const;
+/**
+ * Matched case-insensitively on the basename of `processName`, then, when the selector carries
+ * an executable path, only if that path is where the real system binary lives. A look-alike
+ * `lsass.exe` running from a temp folder is not the system process and must not be shielded
+ * from kill/suspend. With no path, the name alone decides.
+ */
+const WINDOWS_SYSTEM_DIR = '\\windows\\system32\\';
+export const PROTECTED_PROCESS_DIRS: Readonly<Record<string, readonly string[]>> = {
+  'lsass.exe': [WINDOWS_SYSTEM_DIR],
+  'csrss.exe': [WINDOWS_SYSTEM_DIR],
+  'wininit.exe': [WINDOWS_SYSTEM_DIR],
+  'winlogon.exe': [WINDOWS_SYSTEM_DIR],
+  'services.exe': [WINDOWS_SYSTEM_DIR],
+  'smss.exe': [WINDOWS_SYSTEM_DIR],
+  systemd: ['/usr/lib/systemd/', '/lib/systemd/', '/usr/sbin/', '/sbin/'],
+  launchd: ['/sbin/'],
+};
+export const PROTECTED_PROCESS_NAMES = Object.keys(PROTECTED_PROCESS_DIRS);
 export const PROTECTED_PIDS = [1, 4] as const;
 /** Data destruction / impact techniques where suspending is not enough. */
 export const DESTRUCTIVE_TECHNIQUES = ['T1486', 'T1485', 'T1490', 'T1489', 'T1561'] as const;
@@ -117,11 +124,22 @@ const findDestructiveTechniqueFor = (
 ): string | undefined =>
   findConfirmedAmong(attributedTechniqueIds(selector), DESTRUCTIVE_TECHNIQUES, state);
 
-const isProtectedProcess = (selector: ProcessSelector): boolean =>
-  (selector.pid !== undefined && (PROTECTED_PIDS as readonly number[]).includes(selector.pid)) ||
-  (PROTECTED_PROCESS_NAMES as readonly string[]).includes(
-    basename(selector.processName).toLowerCase()
-  );
+const isProtectedProcess = (selector: ProcessSelector): boolean => {
+  if (selector.pid !== undefined && (PROTECTED_PIDS as readonly number[]).includes(selector.pid)) {
+    return true;
+  }
+  const name = basename(selector.processName).toLowerCase();
+  const dirs = PROTECTED_PROCESS_DIRS[name];
+  if (!dirs) {
+    return false;
+  }
+  if (!selector.processExecutable) {
+    return true;
+  }
+  const executable = selector.processExecutable.toLowerCase().replace(/\//g, '\\');
+  const posix = selector.processExecutable.toLowerCase();
+  return dirs.some((dir) => executable.includes(dir) || posix.includes(dir));
+};
 
 /** Last seen before the window opened, or more than `STALE_PROCESS_AGE_MS` before it closed. */
 export const isStale = (selector: ProcessSelector, state: CurrentRunState): boolean => {

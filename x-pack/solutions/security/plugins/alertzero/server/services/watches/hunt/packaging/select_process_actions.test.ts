@@ -120,6 +120,59 @@ describe('selectProcessActions', () => {
       expect(decision.rule).toBe('protected_system_process');
     });
 
+    it('protects a protected name running from its real system directory', () => {
+      const decision = selectProcessActions({
+        selector: selector({
+          processName: 'lsass.exe',
+          processExecutable: 'C:\\Windows\\System32\\lsass.exe',
+        }),
+        host: host(['memdump_process']),
+        state: state(),
+      });
+      expect(decision.rule).toBe('protected_system_process');
+    });
+
+    it('does not protect a look-alike protected name running from elsewhere', () => {
+      const decision = selectProcessActions({
+        selector: selector({
+          processName: 'lsass.exe',
+          processExecutable: 'C:\\Users\\bob\\AppData\\Local\\Temp\\lsass.exe',
+        }),
+        host: host(['memdump_process']),
+        state: state(),
+      });
+      expect(decision.rule).not.toBe('protected_system_process');
+    });
+
+    it('falls back to the name alone when there is no executable path', () => {
+      const decision = selectProcessActions({
+        selector: selector({ processName: 'lsass.exe' }),
+        host: host(),
+        state: state(),
+      });
+      expect(decision.rule).toBe('protected_system_process');
+    });
+
+    it('protects systemd under its system directory but not from /tmp', () => {
+      expect(
+        selectProcessActions({
+          selector: selector({
+            processName: 'systemd',
+            processExecutable: '/usr/lib/systemd/systemd',
+          }),
+          host: host(),
+          state: state(),
+        }).rule
+      ).toBe('protected_system_process');
+      expect(
+        selectProcessActions({
+          selector: selector({ processName: 'systemd', processExecutable: '/tmp/systemd' }),
+          host: host(),
+          state: state(),
+        }).rule
+      ).not.toBe('protected_system_process');
+    });
+
     it('gives way to the stale rule, so a stale protected process proposes nothing', () => {
       const decision = selectProcessActions({
         selector: selector({ processName: 'lsass.exe', observedAt: '2026-09-24T23:59:59.000Z' }),

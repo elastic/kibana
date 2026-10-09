@@ -60,6 +60,7 @@ interface Candidate {
   pid?: number;
   entityId?: string;
   processName: string;
+  processExecutable?: string;
   timestamp: string;
   /**
    * From a technique-attributed SSE ref, not a plain Tier 1 sample; preferred on dedupe, and
@@ -100,6 +101,7 @@ const extractCandidate = (source: RehydrateSource, ref: RehydrateRef): Candidate
     pid,
     entityId,
     processName: source.process?.name ?? source.process?.executable ?? 'unknown process',
+    processExecutable: source.process?.executable,
     timestamp: source['@timestamp'] ?? new Date(0).toISOString(),
     techniqueId: ref.matched?.technique_id,
     techniqueIds: ref.matched?.technique_id ? [ref.matched.technique_id] : [],
@@ -220,6 +222,9 @@ export const makeRehydrateProcessSelectors = (
           hostName: candidate.hostName,
           observedAt: candidate.timestamp,
           processName: candidate.processName,
+          ...(candidate.processExecutable
+            ? { processExecutable: candidate.processExecutable }
+            : {}),
           techniqueId: candidate.techniqueId,
           ...(candidate.techniqueIds.length > 0 ? { techniqueIds: candidate.techniqueIds } : {}),
           iocMatched: candidate.iocMatched,

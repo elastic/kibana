@@ -35,6 +35,8 @@ export interface ProcessSelector {
   hostName: string;
   /** e.g. `powershell.exe`; drives both the Proposal title and comment. */
   processName: string;
+  /** Full executable path (`process.executable`) when the source document carried one. */
+  processExecutable?: string;
   observedAt?: string;
   /**
    * ATT&CK technique this specific process was matched against (from the source event's

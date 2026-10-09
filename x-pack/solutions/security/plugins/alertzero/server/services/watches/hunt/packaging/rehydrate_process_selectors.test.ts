@@ -343,6 +343,22 @@ describe('makeRehydrateProcessSelectors', () => {
     expect(selectors[0].observedAt).toBe('2026-09-27T09:00:00.000Z');
   });
 
+  it('carries the executable path onto the selector', async () => {
+    const esClient = esClientWith([
+      found('logs-endpoint.events-default', 'ev-1', {
+        '@timestamp': '2026-09-26T09:00:00.000Z',
+        host: { name: 'h1' },
+        process: { pid: 100, name: 'lsass.exe', executable: 'C:\\Windows\\System32\\lsass.exe' },
+        event: { type: 'start' },
+      }),
+    ]);
+    const selectors = await makeRehydrateProcessSelectors(esClient)({
+      alerts: [],
+      events: [eventRef('logs-endpoint.events-default', 'ev-1')],
+    });
+    expect(selectors[0].processExecutable).toBe('C:\\Windows\\System32\\lsass.exe');
+  });
+
   it('leaves techniqueId undefined for a plain sample ref with no technique match', async () => {
     const esClient = esClientWith([
       found('logs-endpoint.events-default', 'ev-1', {
