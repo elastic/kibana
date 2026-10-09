@@ -9,6 +9,7 @@ import DOMPurify from 'dompurify';
 import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { CUSTOM_CONTENT_CSP_META } from './constants';
+import { toSafeInternalHref } from './internal_link';
 
 export function injectCsp(html: string, colorMode?: EuiThemeColorModeStandard): string {
   if (html.includes(CUSTOM_CONTENT_CSP_META)) return html;
@@ -124,10 +125,52 @@ export function applyHtmlTheme(
   return injectCsp(injectStyleTag(html, buildThemeCss(euiTheme, colorMode)), colorMode);
 }
 
-export function sanitizeHtml(html: string): string {
-  return DOMPurify.sanitize(html, {
-    FORBID_TAGS: ['a', 'area', 'map'],
-    WHOLE_DOCUMENT: true,
-    FORCE_BODY: false,
+const HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
+const KEPT_ANCHOR_ATTRIBUTES = new Set([
+  'href',
+  'target',
+  'rel',
+  'class',
+  'style',
+  'id',
+  'title',
+  'aria-label',
+]);
+
+const hardenAnchor = (node: Element, basePath: string) => {
+  if (node.localName !== 'a') return;
+
+  if (node.namespaceURI !== HTML_NAMESPACE) {
+    node.removeAttribute('href');
+    node.removeAttribute('xlink:href');
+    return;
+  }
+
+  const href = node.getAttribute('href');
+  Array.from(node.attributes).forEach(({ name }) => {
+    if (!KEPT_ANCHOR_ATTRIBUTES.has(name)) node.removeAttribute(name);
   });
+
+  const safeHref = href === null ? undefined : toSafeInternalHref(href, basePath);
+  if (safeHref === undefined) {
+    ['href', 'target', 'rel'].forEach((name) => node.removeAttribute(name));
+    return;
+  }
+  node.setAttribute('href', safeHref);
+  node.setAttribute('target', '_top');
+  node.setAttribute('rel', 'noopener noreferrer');
+};
+
+export function sanitizeHtml(html: string, basePath = ''): string {
+  const hook = (node: Element) => hardenAnchor(node, basePath);
+  DOMPurify.addHook('afterSanitizeAttributes', hook);
+  try {
+    return DOMPurify.sanitize(html, {
+      FORBID_TAGS: ['area', 'map'],
+      WHOLE_DOCUMENT: true,
+      FORCE_BODY: false,
+    });
+  } finally {
+    DOMPurify.removeHook('afterSanitizeAttributes', hook);
+  }
 }

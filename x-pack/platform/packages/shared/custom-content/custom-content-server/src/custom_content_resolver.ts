@@ -64,7 +64,7 @@ Emit nothing before this comment — no markdown fence, no blank line.`;
 const SANDBOX_GUIDANCE = `ABSOLUTE, NON-NEGOTIABLE RULE: the template renders inside a sandboxed iframe with scripting disabled. ANY JavaScript you write — a <script> tag, an inline event handler (onclick, onmouseover, ...), or building any part of the markup at runtime via document.getElementById/innerHTML/addEventListener/JSON.parse/fetch — will NEVER RUN. It is completely dead code and will render as a BLANK PANEL.
 - Write every element directly as static HTML/SVG — never assemble markup as a string in JavaScript and inject it via innerHTML.
 - If the prompt asks for hover interactivity (e.g. tooltips), this IS possible with CSS :hover alone — do NOT reach for JavaScript. Use a nested element that is invisible by default (\`opacity: 0\`) and reveal it with a \`:hover\` rule.
-- Do NOT use <a> anchor tags or href attributes of any kind.
+- Links are only allowed to other Kibana pages, as <a href="/app/<app-id>/..."> with a path that starts with /app/ (for example /app/dashboards#/view/<id> or /app/discover). Never include a host, a protocol, or a base path. Any other href, including external URLs, is removed at render time, so do not write one. Use no other attribute on <a>.
 - Do NOT load any external resources. No CDN scripts, no Google Fonts, no image URLs.
 - Do NOT use <img> tags with an external \`src\` — the panel's CSP blocks all outbound network requests. For images, icons, or illustrations draw them with inline SVG, pure CSS shapes, or a Unicode emoji/symbol instead.
 - For diagrams and progress indicators, use pure CSS or inline SVG.`;

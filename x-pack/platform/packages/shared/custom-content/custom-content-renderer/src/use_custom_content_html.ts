@@ -70,7 +70,7 @@ export function useCustomContentHtml({
 
   useEffect(() => {
     if (trimmedTemplate && !esqlQuery) {
-      setProcessedHtml(sanitizeHtml(stripMarkdownFences(trimmedTemplate)));
+      setProcessedHtml(sanitizeHtml(stripMarkdownFences(trimmedTemplate), http.basePath.get()));
       setIsLoading(false);
       setError(undefined);
       return;
@@ -97,7 +97,7 @@ export function useCustomContentHtml({
         })
         .then((rawHtml) => {
           if (controller.signal.aborted) return;
-          setProcessedHtml(sanitizeHtml(rawHtml));
+          setProcessedHtml(sanitizeHtml(rawHtml, http.basePath.get()));
           setIsLoading(false);
         })
         .catch((err: Error) => {

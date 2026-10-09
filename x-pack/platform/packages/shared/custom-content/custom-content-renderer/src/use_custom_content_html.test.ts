@@ -11,7 +11,7 @@ import type { EuiThemeComputed } from '@elastic/eui';
 // DOMPurify requires a real DOM — pass-through in Jest
 jest.mock('dompurify', () => ({
   __esModule: true,
-  default: { sanitize: (html: string) => html },
+  default: { sanitize: (html: string) => html, addHook: jest.fn(), removeHook: jest.fn() },
 }));
 
 jest.mock('./fetch_esql_data');
@@ -34,7 +34,7 @@ const mockGetEsQueryConfig = getEsQueryConfig as jest.MockedFunction<typeof getE
 const mockFetchEsqlData = fetchEsqlData as jest.MockedFunction<typeof fetchEsqlData>;
 const mockFillTemplate = fillTemplate as jest.MockedFunction<typeof fillTemplate>;
 
-const mockHttp = {} as unknown as HttpStart;
+const mockHttp = { basePath: { get: () => '' } } as unknown as HttpStart;
 const mockSearch = jest.fn();
 
 const defaultEsQueryConfig: EsQueryConfig = {
