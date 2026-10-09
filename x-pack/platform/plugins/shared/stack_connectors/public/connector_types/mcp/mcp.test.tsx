@@ -24,10 +24,6 @@ describe('mcp connector type', () => {
     expect(connectorType.selectMessage).toBe('Connect to an MCP (Model Context Protocol) server.');
   });
 
-  it('should be hidden from connector-creation pickers', () => {
-    expect(connectorType.getHideInUi?.([])).toBe(true);
-  });
-
   describe('validateParams', () => {
     it('should return no errors for non "call_tool" subAction', async () => {
       const params = {

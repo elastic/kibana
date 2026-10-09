@@ -47,9 +47,9 @@ describe('registerInternalToolsRoutes - _list_connectors', () => {
     jest.clearAllMocks();
 
     mockGetAll = jest.fn().mockResolvedValue(connectorFixtures);
-    // Mirrors production: the MCP connector type carries the AgentBuilderConnectorFeatureId
-    // even though it can't actually be used as an agent tool.
-    mockListTypes = jest.fn().mockResolvedValue([{ id: '.github' }, { id: MCP_CONNECTOR_ID }]);
+    // Mirrors production: the MCP connector type doesn't carry the AgentBuilderConnectorFeatureId,
+    // since it can't actually be used as a generic agent tool.
+    mockListTypes = jest.fn().mockResolvedValue([{ id: '.github' }]);
 
     const mockRouter = {
       get: jest.fn().mockImplementation((config: { path: string }, routeHandler: Handler) => {

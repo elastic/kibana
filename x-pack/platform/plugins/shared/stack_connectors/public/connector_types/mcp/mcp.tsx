@@ -17,9 +17,6 @@ export const getConnectorType = (): MCPConnector => {
     id: CONNECTOR_ID,
     actionTypeTitle: CONNECTOR_NAME,
     isExperimental: true,
-    // Legacy MCP connector: not usable as an agent tool, so it shouldn't be offered
-    // as a creatable type in any connector-creation picker.
-    getHideInUi: () => true,
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.mcp.selectMessageText', {
       defaultMessage: 'Connect to an MCP (Model Context Protocol) server.',
