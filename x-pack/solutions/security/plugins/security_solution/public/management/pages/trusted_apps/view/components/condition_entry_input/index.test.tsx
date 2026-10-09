@@ -16,11 +16,13 @@ import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoin
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { OPERATOR_TITLES } from '../../translations';
+import { ENTRY_PROPERTY_TITLES, OPERATOR_TITLES } from '../../translations';
 
 let onRemoveMock: jest.Mock;
 let onChangeMock: jest.Mock;
 let onVisitedMock: jest.Mock;
+
+const SAMPLE_ERROR = 'Sample entry error';
 
 const baseEntry: Readonly<TrustedAppConditionEntry> = {
   field: ConditionEntryField.HASH,
@@ -110,6 +112,62 @@ describe('Condition entry input', () => {
     await fireEvent.blur(value);
     expect(onVisitedMock).toHaveBeenCalledTimes(1);
     expect(onVisitedMock).toHaveBeenCalledWith(baseEntry);
+  });
+
+  it('trims a repairable value on blur through onChange', () => {
+    props = { ...props, entry: { ...baseEntry, value: ' trustedApp\u00A0' } };
+    render();
+
+    fireEvent.blur(renderResult.getByTestId(`${formPrefix}-value`));
+
+    expect(onChangeMock).toHaveBeenCalledWith({ ...baseEntry, value: 'trustedApp' }, props.entry);
+  });
+
+  it.each([
+    ['a clean value', 'trustedApp'],
+    ['an all-whitespace value', ' \t\n'],
+  ])('does not update %s on blur', (_, value) => {
+    props = { ...props, entry: { ...baseEntry, value } };
+    render();
+
+    fireEvent.blur(renderResult.getByTestId(`${formPrefix}-value`));
+
+    expect(onChangeMock).not.toHaveBeenCalled();
+  });
+
+  it('renders an inline warning without marking the value input invalid', () => {
+    props = { ...props, validation: { errors: [], warnings: ['Path may be formed incorrectly'] } };
+    render();
+
+    const valueInput = renderResult.getByTestId(`${formPrefix}-value`);
+    expect(renderResult.getByText('Path may be formed incorrectly')).toBeInTheDocument();
+    expect(valueInput).not.toHaveAttribute('aria-invalid', 'true');
+  });
+
+  it('renders an inline error and marks the value input invalid', () => {
+    props = { ...props, validation: { errors: [SAMPLE_ERROR], warnings: [] } };
+    render();
+
+    const valueInput = renderResult.getByTestId(`${formPrefix}-value`);
+    const error = renderResult.getByText(SAMPLE_ERROR);
+    expect(error).toBeInTheDocument();
+    expect(valueInput).toHaveAttribute('aria-invalid', 'true');
+    expect(valueInput).toHaveAccessibleDescription(SAMPLE_ERROR);
+  });
+
+  it('renders feedback for a repeated row without adding a visible label', () => {
+    props = {
+      ...props,
+      showLabels: false,
+      validation: { errors: [SAMPLE_ERROR], warnings: [] },
+    };
+    render();
+
+    expect(renderResult.getByText(SAMPLE_ERROR)).toBeInTheDocument();
+    expect(renderResult.queryByText(ENTRY_PROPERTY_TITLES.value)).not.toBeInTheDocument();
+    expect(renderResult.getByTestId(`${formPrefix}-value`)).toHaveAccessibleDescription(
+      SAMPLE_ERROR
+    );
   });
 
   it('should not call on visited for field change if value is empty', async () => {

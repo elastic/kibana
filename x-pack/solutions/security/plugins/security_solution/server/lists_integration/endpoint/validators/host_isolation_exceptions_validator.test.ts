@@ -62,6 +62,12 @@ describe('Endpoint Exceptions API validations', () => {
       await expect(promise).rejects.toThrow(EndpointArtifactExceptionValidationError);
       await expect(promise).rejects.toThrow(/maximum length of \[64\]/);
     });
+
+    it('rejects a null character on create', async () => {
+      await expect(
+        validator.validatePreCreateItem(buildCreateItem('10.0.0.1\u0000'))
+      ).rejects.toThrow(/null characters in fields: destination\.ip/);
+    });
   });
 
   // -----------------------------------------------------------------------------
