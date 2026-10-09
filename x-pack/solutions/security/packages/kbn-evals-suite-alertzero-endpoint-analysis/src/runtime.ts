@@ -23,7 +23,12 @@ import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
 } from '@kbn/alertzero-common';
-import { analysisWorkflowId, workerWorkflowId, proposalWorkflowId } from './contracts';
+import {
+  analysisWorkflowId,
+  workerWorkflowId,
+  proposalWorkflowId,
+  gateWorkflowId,
+} from './contracts';
 
 const workflowHeaders = { 'elastic-api-version': '2023-10-31', 'kbn-xsrf': 'true' };
 
@@ -121,7 +126,7 @@ export class AlertZeroRuntime {
     }
   }
   async assertInstalled() {
-    for (const id of [workerWorkflowId, analysisWorkflowId, proposalWorkflowId]) {
+    for (const id of [workerWorkflowId, analysisWorkflowId, proposalWorkflowId, gateWorkflowId]) {
       const workflow = await this.fetch<{ id: string; valid: boolean }>(
         `/api/workflows/workflow/${encodeURIComponent(id)}`,
         { headers: workflowHeaders }

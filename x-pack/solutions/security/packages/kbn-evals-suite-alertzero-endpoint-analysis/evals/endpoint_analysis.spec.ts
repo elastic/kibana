@@ -24,7 +24,7 @@ import {
 import { assertActionSafety } from '../src/action_safety';
 import { reportActionSafety } from '../src/report_action_safety';
 import { assertAnalysisExecution, assertPersistedProposal } from '../src/assertions';
-import { analysisWorkflowId, proposalWorkflowId, workerWorkflowId } from '../src/contracts';
+import { analysisWorkflowId, gateWorkflowId, workerWorkflowId } from '../src/contracts';
 
 evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.classic }, () => {
   evaluate('L1 endpoint forensic skill routing', async ({ esClient, agentBuilderClient }) => {
@@ -263,7 +263,8 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
       }),
     });
     try {
-      const bridgeId = await runtime.run(proposalWorkflowId, {
+      const gateRunId = await runtime.run(gateWorkflowId, {
+        origin: 'alertzero',
         conversationId: conversation.id,
         title: 'Review endpoint findings',
         comment: 'Review the reconstructed endpoint evidence.',
@@ -283,7 +284,7 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
       assert(persisted, 'Real proposals API never returned the workflow-created proposal');
       assert(persisted.workflowExecutionId, 'Proposal is not linked to its real gate execution');
       const gate = await runtime.read(persisted.workflowExecutionId);
-      assert.equal(gate.workflowId, 'system-create-proposal');
+      assert.equal(gate.workflowId, gateWorkflowId);
       assert(gate.status !== ExecutionStatus.COMPLETED, 'Gate completed before a decision');
       assertPersistedProposal(await runtime.readProposal(persisted.id), {
         conversationId: conversation.id,
@@ -291,7 +292,7 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
         status: 'pending',
       });
       await runtime.dismiss(persisted.id);
-      await runtime.wait(bridgeId, (execution) => execution.status === ExecutionStatus.COMPLETED);
+      await runtime.wait(gateRunId, (execution) => execution.status === ExecutionStatus.COMPLETED);
       assertPersistedProposal(await runtime.readProposal(persisted.id), {
         conversationId: conversation.id,
         workflowExecutionId: gate.id,

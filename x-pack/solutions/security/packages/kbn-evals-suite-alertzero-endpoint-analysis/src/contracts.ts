@@ -13,6 +13,7 @@ import {
   ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID,
+  CREATE_PROPOSAL_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
   getWorkerSettingsDeclaration,
@@ -40,6 +41,9 @@ export const flattenSteps = (steps: AlertZeroStep[]): AlertZeroStep[] =>
 export const analysisWorkflowId = ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID;
 export const workerWorkflowId = ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID;
 export const proposalWorkflowId = ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID;
+// The gate the bridge forwards to. L4 starts it directly: the bridge's `run-as-mode: inherit` only works
+// under a managed parent running as a service account, which a plain API caller cannot be.
+export const gateWorkflowId = CREATE_PROPOSAL_WORKFLOW_ID;
 const analysisWorkflow = getManagedWorkflowDefinition(analysisWorkflowId);
 const workerWorkflow = getManagedWorkflowDefinition(workerWorkflowId);
 if (!analysisWorkflow?.yaml || !workerWorkflow?.yamlTemplate) {
