@@ -15,11 +15,7 @@ import { COMMENT_ATTACHMENT_TYPE, OSQUERY_ATTACHMENT_TYPE } from '@kbn/cases-plu
 import { MAX_COMMENT_LENGTH } from '@kbn/cases-plugin/common/constants';
 import type { BulkCreateAttachmentsRequestV2 } from '@kbn/cases-plugin/common/types/api';
 import type { ExternalReferenceSOAttachmentPayload } from '@kbn/cases-plugin/common/types/domain';
-import {
-  CaseStatuses,
-  AttachmentType,
-  ExternalReferenceStorageType,
-} from '@kbn/cases-plugin/common/types/domain';
+import { CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/ftr_provider_context';
 import {
   defaultUser,
@@ -37,6 +33,7 @@ import {
   postUnifiedAlertMultipleIdsReq,
   postUnifiedAlertReq,
   postUnifiedCommentReq,
+  postUnifiedLensReq,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -52,7 +49,6 @@ import {
   createAndUploadFile,
   deleteAllFiles,
   getAllComments,
-  createComment,
   getCaseSavedObjectsFromES,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
 import {
@@ -90,6 +86,9 @@ const unifiedOtherAttachmentReq = {
   metadata: { agentIds: ['agent-1'], queryId: 'query-1' },
   owner: 'securitySolutionFixture',
 };
+
+const persistableStateAndExternalReferenceLimitMessage =
+  'Case has reached the maximum allowed number (100) of attached persistable state and external reference attachments.';
 
 // `getAllComments` reads through the cases_fixture route, which projects to the legacy shape.
 const legacyAlertCommentOnlyId3 = {
@@ -669,78 +668,46 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        // Skipped pending the attachment-cap redesign: these rely on a custom `.test` ER/PS subtype to
-        // reach MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES (100), which no longer exists once the
-        // ER/PS registries are removed. Re-enable when the cap is revisited (UNIFIED_ATTACHMENT_PLAN "Deferred").
-        it.skip('400s when attempting to bulk create persistable state attachments reaching the 100 limit', async () => {
+        it('400s when attempting to bulk create persistable state attachments reaching the 100 limit', async () => {
           const postedCase = await createCase(supertest, postCaseReq);
 
-          await createComment({
+          await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
-            params: {
-              type: AttachmentType.externalReference,
-              owner: 'securitySolutionFixture',
-              externalReferenceAttachmentTypeId: '.test',
-              externalReferenceId: 'so-id',
-              externalReferenceMetadata: {},
-              externalReferenceStorage: {
-                soType: 'external-ref',
-                type: ExternalReferenceStorageType.savedObject,
-              },
-            },
-            expectedHttpCode: 200,
+            params: [unifiedOtherAttachmentReq],
           });
 
-          const persistableStateAttachments = Array(100).fill({
-            persistableStateAttachmentTypeId: '.test',
-            persistableStateAttachmentState: {},
-            type: AttachmentType.persistableState,
-            owner: 'securitySolutionFixture',
-          });
+          const persistableStateAttachments = Array(100).fill(postUnifiedLensReq);
 
-          await bulkCreateAttachments({
+          const error = (await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
             params: persistableStateAttachments,
             expectedHttpCode: 400,
-          });
+          })) as unknown as Error;
+
+          expect(error.message).to.be(persistableStateAndExternalReferenceLimitMessage);
         });
 
-        // Skipped pending the attachment-cap redesign (see the sibling persistable-state limit test above).
-        it.skip('400s when attempting to bulk create >100 external reference attachments reaching the 100 limit', async () => {
+        it('400s when attempting to bulk create >100 external reference attachments reaching the 100 limit', async () => {
           const postedCase = await createCase(supertest, postCaseReq);
-
-          await createComment({
-            supertest,
-            caseId: postedCase.id,
-            params: {
-              persistableStateAttachmentTypeId: '.test',
-              persistableStateAttachmentState: {},
-              type: AttachmentType.persistableState,
-              owner: 'securitySolutionFixture',
-            },
-            expectedHttpCode: 200,
-          });
-
-          const externalRequestAttachments = Array(100).fill({
-            type: AttachmentType.externalReference,
-            owner: 'securitySolutionFixture',
-            externalReferenceAttachmentTypeId: '.test',
-            externalReferenceId: 'so-id',
-            externalReferenceMetadata: {},
-            externalReferenceStorage: {
-              soType: 'external-ref',
-              type: ExternalReferenceStorageType.savedObject,
-            },
-          });
 
           await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
+            params: [postUnifiedLensReq],
+          });
+
+          const externalRequestAttachments = Array(100).fill(unifiedOtherAttachmentReq);
+
+          const error = (await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
             params: externalRequestAttachments,
             expectedHttpCode: 400,
-          });
+          })) as unknown as Error;
+
+          expect(error.message).to.be(persistableStateAndExternalReferenceLimitMessage);
         });
       });
     });
