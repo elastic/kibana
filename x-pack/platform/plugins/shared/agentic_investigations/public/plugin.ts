@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { createFlyoutGroupedAttachmentsRegistry } from '@kbn/agentic-investigations-common';
 import { registerEscalationConversationEventUiDefinitions } from './escalations/conversation_events';
 import { registerImpactAttachmentTypes } from './impact/attachments';
 import { registerSubjectAttachmentTypes } from './subjects/attachments';
@@ -22,6 +23,7 @@ import type {
   AgenticInvestigationsPublicPluginStart,
   AgenticInvestigationsPublicSetupDependencies,
   AgenticInvestigationsPublicStartDependencies,
+  ImpactEntityOpener,
 } from './types';
 
 /**
@@ -40,6 +42,8 @@ export class AgenticInvestigationsPublicPlugin
     >
 {
   private readonly escalationsEnabled: boolean;
+  private readonly groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
+  private impactEntityOpener: ImpactEntityOpener | undefined;
 
   constructor(context: PluginInitializerContext<AgenticInvestigationsPublicConfig>) {
     this.escalationsEnabled = context.config.get().escalations.enabled;
@@ -52,7 +56,7 @@ export class AgenticInvestigationsPublicPlugin
     registerImpactPublicStepDefinitions(workflowsExtensions);
     registerInvestigationPublicStepDefinitions(workflowsExtensions);
     registerWorkflowExecutionPublicStepDefinitions(workflowsExtensions);
-    return {};
+    return { registerFlyoutGroupedAttachment: this.groupedAttachments.register };
   }
 
   start(
@@ -61,7 +65,7 @@ export class AgenticInvestigationsPublicPlugin
   ): AgenticInvestigationsPublicPluginStart {
     const { agentBuilder } = startDeps;
     if (agentBuilder) {
-      registerImpactAttachmentTypes(agentBuilder);
+      registerImpactAttachmentTypes(agentBuilder, () => this.impactEntityOpener);
       if (this.escalationsEnabled) {
         registerEscalationConversationEventUiDefinitions({
           conversationEvents: agentBuilder.conversationEvents,
@@ -76,13 +80,20 @@ export class AgenticInvestigationsPublicPlugin
         // Escalations are AlertZero-only for now: without them there is no escalation template,
         // and the investigation template has no escalate action.
         escalationsEnabled: this.escalationsEnabled,
+        groupedAttachments: this.groupedAttachments,
         templates: this.escalationsEnabled
           ? [investigationTemplate, escalationTemplate]
           : [investigationTemplate],
       });
     }
-    return {};
+    return {
+      registerImpactEntityOpener: (opener) => {
+        this.impactEntityOpener = opener;
+      },
+    };
   }
 
-  stop() {}
+  stop() {
+    this.impactEntityOpener = undefined;
+  }
 }

@@ -276,6 +276,15 @@
       "minimumReleaseAge": "14 days"
     },
     {
+      "groupName": "Isomer dependencies",
+      "matchDepNames": ["@elastic/distillate", "@elastic/isomer-runtime", "@elastic/isomer-sdk"],
+      "reviewers": ["team:appex-sharedux"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:SharedUX"],
+      "enabled": true,
+      "minimumReleaseAge": "14 days"
+    },
+    {
       "matchDepNames": ["rison-node"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
@@ -2633,6 +2642,15 @@
     {
       "groupName": "mysql2",
       "matchDepNames": ["mysql2"],
+      "reviewers": ["team:response-ops"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:ResponseOps"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "mssql",
+      "matchDepNames": ["mssql", "@types/mssql"],
       "reviewers": ["team:response-ops"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:ResponseOps"],

@@ -23,11 +23,11 @@ export class FlamegraphPage {
   }
 
   async getWebGLWarning() {
-    return this.page.testSubj.locator('profilingFlamegraphWebGLWarning');
+    return this.page.getByTestId('profilingFlamegraphWebGLWarning');
   }
 
   async getFlamegraphChart() {
-    return this.page.testSubj.locator('profilingFlamegraphChart');
+    return this.page.getByTestId('profilingFlamegraphChart');
   }
 
   async disableWebGL() {
