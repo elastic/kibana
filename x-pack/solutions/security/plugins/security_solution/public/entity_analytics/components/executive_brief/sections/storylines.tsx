@@ -62,7 +62,11 @@ export const Storylines: React.FC<StorylinesProps> = ({ snapshot, brief }) => {
       <div
         {...{ [BRIEF_BLOCK_ATTRIBUTE]: 'storylines-title', [BRIEF_KEEP_WITH_NEXT_ATTRIBUTE]: '' }}
       >
-        <SectionTitle index={2} title="Priority threats" subtitle="What's happening?" />
+        <SectionTitle
+          index={2}
+          title="Priority threats"
+          subtitle="Related activity linked across users and hosts, ranked by severity, asset impact and response status"
+        />
       </div>
       {rendered.length === 0 ? (
         <EuiEmptyPrompt

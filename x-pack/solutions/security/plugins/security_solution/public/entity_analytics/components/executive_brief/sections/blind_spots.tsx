@@ -131,7 +131,11 @@ export const BlindSpots: React.FC<BlindSpotsProps> = ({ snapshot, blindSpots }) 
           [BRIEF_KEEP_WITH_NEXT_ATTRIBUTE]: '',
         }}
       >
-        <SectionTitle index={3} title="Blind spots" subtitle="Where can't I see?" />
+        <SectionTitle
+          index={3}
+          title="Blind spots"
+          subtitle="Attack stages with weak detection coverage, and data or analytics gaps that limit this brief"
+        />
         {headline && headlineStage && (
           <>
             <KbnWarningCallout

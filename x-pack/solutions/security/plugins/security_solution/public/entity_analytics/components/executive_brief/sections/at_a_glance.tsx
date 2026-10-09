@@ -29,7 +29,11 @@ export const AtAGlance: React.FC<AtAGlanceProps> = ({ snapshot, glance }) => {
       data-test-subj="executiveBriefAtAGlance"
       {...{ [BRIEF_BLOCK_ATTRIBUTE]: 'glance' }}
     >
-      <SectionTitle index={1} title="At a glance" subtitle="How are we doing?" />
+      <SectionTitle
+        index={1}
+        title="At a glance"
+        subtitle="Overall attention needed, based on active threats, response, detection coverage and visibility"
+      />
       <AttentionVerdict assessment={assessment}>
         <EuiSpacer size="s" />
         <EuiText size="s" data-test-subj="executiveBriefThreatNarrative">

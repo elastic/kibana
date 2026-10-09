@@ -17,7 +17,11 @@ export const Decisions: React.FC<{ decisions: ExecutiveBrief['decisions'] }> = (
     data-test-subj="executiveBriefDecisions"
     {...{ [BRIEF_BLOCK_ATTRIBUTE]: 'decisions' }}
   >
-    <SectionTitle index={4} title="Decisions and next steps" subtitle="What should we do?" />
+    <SectionTitle
+      index={4}
+      title="Decisions and next steps"
+      subtitle="Recommended actions, each tied to a threat or blind spot, with an owner and urgency"
+    />
     <EuiPanel hasBorder paddingSize="m">
       {decisions.map((decision, index) => (
         <DecisionAccordion
