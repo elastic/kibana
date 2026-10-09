@@ -84,30 +84,25 @@ describe('WorkflowStepMinimap', () => {
   });
 
   it('retains the last-known-good step list when the YAML becomes unparseable', async () => {
-    jest.useFakeTimers();
     const { store } = renderMinimap(TWO_STEP_YAML);
 
-    // Verify pills are showing before breaking the YAML.
-    await act(async () => {
-      jest.runAllTimers();
-    });
+    // The first dispatch computes synchronously, so both pills are in the initial commit.
     expect(screen.getByTitle('step-a')).toBeInTheDocument();
+    expect(screen.getByTitle('step-b')).toBeInTheDocument();
 
     // Dispatch broken YAML — middleware debounces computation for 250ms.
     act(() => {
       store.dispatch(setYamlString(BROKEN_YAML));
     });
 
-    // Advance past the debounce — workflowLookup collapses to nothing.
-    await act(async () => {
-      jest.advanceTimersByTime(300);
+    // Wait for the debounced recomputation to land: workflowLookup collapses to no steps.
+    await waitFor(() => {
+      expect(store.getState().detail.computed?.workflowLookup?.steps).toEqual({});
     });
 
     // The minimap should still show the previous step list (lastNonEmptyRef guard).
     expect(screen.getByTitle('step-a')).toBeInTheDocument();
     expect(screen.getByTitle('step-b')).toBeInTheDocument();
-
-    jest.useRealTimers();
   });
 
   it('shows the viewport indicator when not all steps are visible', async () => {
