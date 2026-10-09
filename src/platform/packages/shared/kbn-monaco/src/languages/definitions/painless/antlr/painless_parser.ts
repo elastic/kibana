@@ -1330,6 +1330,8 @@ export default class painless_parser extends Parser {
 		return localctx;
 	}
 
+	public noncondexpression(): NoncondexpressionContext;
+	public noncondexpression(_p: number): NoncondexpressionContext;
 	// @RuleVersion(0)
 	public noncondexpression(_p?: number): NoncondexpressionContext {
 		if (_p === undefined) {

@@ -131,7 +131,7 @@ export const renderHuntWorkerYaml = (yaml: string, values: HuntWorkerTemplateVal
         ].join('\n');
 
   return renderScheduledWorkerYaml(yaml, values)
-    .replaceAll('__WORKER_TRIGGERS__', `\n${triggers}`)
+    .replaceAll('__WORKER_TRIGGERS__', triggers)
     .replaceAll('__WORKER_TIER2_WHEN__', JSON.stringify(HUNT_WORKER_DEFAULTS.tier2When))
     .replaceAll('__WORKER_CANDIDATE_LIMIT__', String(HUNT_WORKER_DEFAULTS.candidateLimit))
     .replaceAll('__WORKER_FAN_OUT_MAX__', String(HUNT_WORKER_DEFAULTS.fanOutMax));

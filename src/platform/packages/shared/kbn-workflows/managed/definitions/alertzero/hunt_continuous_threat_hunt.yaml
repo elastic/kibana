@@ -22,7 +22,8 @@ settings:
     max: 1
 # Triggers are rendered from autonomy: manual = manual only; assisted/supervised
 # add the schedule.
-triggers: __WORKER_TRIGGERS__
+triggers:
+__WORKER_TRIGGERS__
 consts:
   worker_settings:
     settingsVersion: __WORKER_SETTINGS_VERSION__
