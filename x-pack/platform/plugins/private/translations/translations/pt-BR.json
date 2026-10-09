@@ -26244,8 +26244,6 @@
     "xpack.indexLifecycleMgmt.warmPhase.dataTier.noTiersAvailableTitle": "Nenhum nó atribuído à camada quente",
     "xpack.indexLifecycleMgmt.warmPhase.dataTier.willUseFallbackTierDescription": "Se não houver nós quentes disponíveis, os dados são armazenados na camada {tier}.",
     "xpack.indexLifecycleMgmt.warmPhase.dataTier.willUseFallbackTierTitle": "Nenhum nó atribuído à camada quente",
-    "xpack.inference.anonymizationSettingsDescription": "Lista de regras de anonimização <ul> <li><strong>tipo:</strong> &quot;ner&quot; ou &quot;regex&quot;</li> <li><strong>entityClass:</strong> (somente tipo regex) ex: EMAIL, URL, IP</li> <li><strong>padrão:</strong> (somente tipo regex) a string de expressão regular a ser correspondida</li> <li><strong>modelId:</strong> (somente tipo NER) ID do modelo NER (Reconhecimento de Entidades Nomeadas) a ser usado</li> <li><strong>ativado:</strong> sinalizador booleano para ativar ou desativar a regra</li> <li><strong>timeoutSeconds:</strong> (somente para o tipo ner) número máximo de segundos <em>por solicitação de inferência</em> antes de expirar o tempo limite (várias solicitações podem ser emitidas durante uma única interação de chat)</li> </ul>",
-    "xpack.inference.anonymizationSettingsLabel": "Configurações de anonimização",
     "xpack.inference.chatCompletionError.tokenLimitReachedError": "Limite de tokens atingido. O limite é {tokenLimit}, mas a conversa atual tem {tokenCount} tokens.",
     "xpack.inferenceEndpointUICommon.components.adaptiveResourcesAriaLabel": "Abrir popover de informações dos recursos adaptativos",
     "xpack.inferenceEndpointUICommon.components.adaptiveResourcesDescription": "O número de alocações é dimensionado automaticamente com base na carga.",

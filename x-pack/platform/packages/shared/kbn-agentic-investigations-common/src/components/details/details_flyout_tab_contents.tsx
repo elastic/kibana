@@ -12,6 +12,7 @@ import type { Investigation } from '../../types';
 import { FlyoutGroupedAttachments, GroupedAttachmentsSection } from '../grouped_attachments';
 import type { FlyoutGroupedAttachmentsRegistry } from '../grouped_attachments';
 import { DetailsBlock } from './detail_block';
+import { ImpactSection } from './impact_section';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 
 const SUMMARY_LIMIT = 120;
@@ -89,6 +90,8 @@ export const OverviewTab = memo<OverviewTabProps>(
         )}
 
         {!summary && attachmentsSection}
+
+        <ImpactSection attachments={attachments} />
 
         {proposedActionsContent && (
           <EuiFlexItem>

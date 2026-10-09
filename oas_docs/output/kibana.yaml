@@ -46470,6 +46470,8 @@ paths:
                 properties:
                   is_action_secrets_storage_enabled:
                     type: boolean
+                  is_fips_enabled:
+                    type: boolean
                   is_secrets_storage_enabled:
                     type: boolean
                   is_space_awareness_enabled:
