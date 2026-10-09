@@ -34,6 +34,7 @@ import {
   WORKER_CHAIN_EXAMPLE_COUNT,
   WORKER_CHAIN_EXPERIMENT_CONCURRENCY,
   WORKER_CHAIN_MAX_CHAIN_MS,
+  WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN,
   WORKER_IDS,
   WORKFLOW_IDS,
 } from './constants';
@@ -97,14 +98,19 @@ describe('B2: serial experiment isolation', () => {
     ).toHaveLength(WORKER_CHAIN_EXAMPLE_COUNT);
   });
 
-  it('the Playwright timeout covers every example run back to back at the per-hop caps', () => {
+  it('the Playwright config derives its timeout from the selection, not a flat constant', () => {
     const config = readFileSync(join(__dirname, '..', 'playwright.config.ts'), 'utf8');
-    expect(config).toMatch(/timeout:\s*WORKER_CHAIN_EXAMPLE_COUNT \* WORKER_CHAIN_MAX_CHAIN_MS/);
-    const timeoutMs = WORKER_CHAIN_EXAMPLE_COUNT * WORKER_CHAIN_MAX_CHAIN_MS;
-    expect(timeoutMs).toBeGreaterThan(
-      21 * (HOP_TIMEOUTS_MS.alertTriage + HOP_TIMEOUTS_MS.attackDiscoveryRunner)
+    expect(config).toMatch(/timeout:\s*deriveWorkerChainTimeoutMs\(\)/);
+  });
+
+  it('the per-chain bound covers N reviews and one proposal wait per source', () => {
+    const n = WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN;
+    expect(n).toBeGreaterThan(1);
+    expect(WORKER_CHAIN_MAX_CHAIN_MS).toBe(
+      HOP_TIMEOUTS_MS.alertTriage +
+        HOP_TIMEOUTS_MS.attackDiscoveryRunner +
+        n * HOP_TIMEOUTS_MS.attackDiscoveryReview +
+        (n + 1) * HOP_TIMEOUTS_MS.perActionProposal
     );
-    // the former flat 90 min could not hold even two worst-case chains
-    expect(timeoutMs).toBeGreaterThan(90 * 60_000);
   });
 });

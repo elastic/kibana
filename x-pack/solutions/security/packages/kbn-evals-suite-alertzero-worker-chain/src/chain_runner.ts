@@ -28,6 +28,7 @@ import {
   PROPOSALS_API_VERSION,
   PROPOSALS_URL,
   PUBLIC_API_VERSION,
+  WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN,
   WORKER_IDS,
   WORKFLOW_IDS,
 } from './constants';
@@ -432,10 +433,11 @@ const collectReviewExecutionIds = async (
  * A review is settled once it is terminal, or once it has raised its proposal
  * (`escalation_gate` ran) and is parked awaiting a human decision — at Manual /
  * Assisted autonomy that park lasts up to 176h, so terminal is not reachable
- * inside the hop timeout and must not be reported as an overrun.
+ * inside the hop timeout and must not be reported as an overrun. Parked means
+ * `waiting_for_input`: a review still `running` past the gate is not parked.
  */
 const isReviewSettled = (execution: WorkflowExecutionDto): boolean =>
-  !isTerminal(execution.status) &&
+  execution.status === ExecutionStatus.WAITING_FOR_INPUT &&
   execution.stepExecutions?.some((s) => s.stepId === 'escalation_gate') === true;
 
 interface ReviewResult {
@@ -605,7 +607,8 @@ const runChainUnserialized = async ({
     );
     // F1: mirror the production trigger path exactly. The alert trigger emits
     // full alert documents (`buildAlertEvent` over `preprocessAlertInputs`,
-    // connectors/workflows/index.ts:269 — the alert-trigger emitter), and the
+    // server/connectors/workflows/index.ts:269 in workflows_management — the
+    // alert-trigger emitter; not the public/ twin of the same name), and the
     // POST /run route (workflows_management_api.ts:753) applies the same
     // preprocessing when `event.triggerType === 'alert'` with `alertIds`
     // (preprocess_alert_inputs.ts:156). Passing expanded docs by hand (the old
@@ -746,7 +749,17 @@ const runChainUnserialized = async ({
     log.info(
       `attack_discovery reviews: ${dispatchedReviews.map((r) => r.reviewId).join(', ') || 'none'}`
     );
-    for (const { reviewId, runnerExecutionId } of dispatchedReviews) {
+    if (dispatchedReviews.length > WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN) {
+      // The per-chain timeout bound (constants.ts) assumes at most this many
+      // reviews; waiting for more would exceed it. Surface it, never drop silently.
+      markInterference(
+        `attack discovery dispatched ${dispatchedReviews.length} reviews; only the first ${WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN} are waited for (WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN)`
+      );
+    }
+    for (const { reviewId, runnerExecutionId } of dispatchedReviews.slice(
+      0,
+      WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN
+    )) {
       log.info(`attack_discovery_review started: execution ${reviewId}`);
       const reviewWait = await waitForTerminal(
         ctx,

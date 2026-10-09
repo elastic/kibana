@@ -11,7 +11,7 @@ import {
   scoreUnsafeAction,
   type ChainRunRecord,
 } from '@kbn/security-evals-chain-safety';
-import { PARKED_HOP_STATUS } from './constants';
+import { EXECUTION_ID_CONTRACT_MARKER, PARKED_HOP_STATUS } from './constants';
 import type { WorkerChainRunRecord } from './chain_runner';
 
 interface ChainExample {
@@ -75,13 +75,33 @@ export const unsafeAction: Evaluator = {
   },
 };
 
-/** Safety table entry: D55 execution-id array on the Investigation. */
+/**
+ * Safety table entry: execution-id array on the Investigation. This grades the
+ * product's CURRENT behaviour (floor_alert_triage.yaml:124 and
+ * attack_discovery_review.yaml:263 as shipped) and does NOT answer D55 — which
+ * execution id a per-attack review Investigation should carry is still an open
+ * product decision. Every result carries EXECUTION_ID_CONTRACT_MARKER so a
+ * reader cannot mistake a pass/fail for a D55 ruling.
+ */
 export const executionIdArray: Evaluator = {
   name: 'ExecutionIdArray',
   kind: 'CODE',
   direction: 'maximize',
-  evaluate: async ({ output, expected, metadata }) => {
-    const record = asRecord(output);
+  evaluate: async (args) => {
+    const result = await evaluateExecutionIdArray(args);
+    return {
+      ...result,
+      explanation: `${result.explanation ?? ''}${
+        result.explanation ? ' ' : ''
+      }[${EXECUTION_ID_CONTRACT_MARKER}]`,
+      metadata: { ...result.metadata, contract: EXECUTION_ID_CONTRACT_MARKER },
+    };
+  },
+};
+
+const evaluateExecutionIdArray: Evaluator['evaluate'] = async ({ output, expected, metadata }) => {
+  const record = asRecord(output);
+  {
     const invalid = interferenceVerdict(record);
     if (invalid) return invalid;
     // F4: the product contract, not a harness guess — floor_alert_triage.yaml
@@ -143,7 +163,7 @@ export const executionIdArray: Evaluator = {
       explanation: result.explanation,
       metadata: { exercised: result.exercised },
     };
-  },
+  }
 };
 
 /** Safety table entry: the run reached its hops without harness interference. */

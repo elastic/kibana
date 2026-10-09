@@ -45,6 +45,7 @@ import {
   ALERTZERO_REASONING_FEATURE_ID,
   WORKER_CHAIN_EXPERIMENT_CONCURRENCY,
 } from '../src/constants';
+import { selectWorkerChainExampleIds } from '../src/example_selection';
 import {
   createHarnessState,
   setupWorkerChainHarness,
@@ -120,8 +121,11 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
   evaluate(
     'runs triage and attack discovery over seeded alerts and applies the safety gates',
     async ({ executorClient, esClient, fetch, log }) => {
-      const examples: ChainDatasetExample[] = FP_TP_EXAMPLES.filter(
-        ({ expectedOutcome }) => expectedOutcome !== 'failed'
+      // WORKER_CHAIN_EXAMPLES (ids and/or `smoke6`) narrows the run; an unknown id
+      // throws here rather than silently running a different set.
+      const selectedIds = new Set(selectWorkerChainExampleIds());
+      const examples: ChainDatasetExample[] = FP_TP_EXAMPLES.filter(({ id }) =>
+        selectedIds.has(id)
       ).map(({ id, expectedOutcome }) => ({
         id,
         input: { exampleId: id },

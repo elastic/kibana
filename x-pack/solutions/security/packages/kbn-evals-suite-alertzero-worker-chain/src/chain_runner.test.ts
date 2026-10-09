@@ -10,7 +10,12 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { scoreUnsafeAction } from '@kbn/security-evals-chain-safety';
 import { runChain, type ChainScenario } from './chain_runner';
-import { PARKED_HOP_STATUS, WORKER_IDS, WORKFLOW_IDS } from './constants';
+import {
+  PARKED_HOP_STATUS,
+  WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN,
+  WORKER_IDS,
+  WORKFLOW_IDS,
+} from './constants';
 import { chainTerminal } from './safety_evaluators';
 
 const TRIAGE_INSTALLED_ID = 'system-security-floor-alert-triage-default';
@@ -332,6 +337,50 @@ describe('runChain AD review collection (R5: async grandchildren, real /children
       PARKED_HOP_STATUS
     );
     expect(record.actions).toHaveLength(1);
+  });
+
+  it('a review still running past the escalation gate is not parked: it overruns', async () => {
+    const { fetch } = makeAdFetch([
+      {
+        id: 'rev-1',
+        investigationId: 'inv-1',
+        verdict: 'true_positive',
+        status: 'running',
+        steps: [
+          step('resolve_investigation_id', { investigation_id: 'inv-1' }),
+          step('resolve_analysis', { verdict: 'true_positive' }),
+          step('escalation_gate', {}, 'workflow.execute'),
+        ],
+      },
+    ]);
+    const record = await runChain({
+      ...params(fetch, ['attack-discovery']),
+      maxWaitMs: { perActionProposal: 1, attackDiscoveryReview: 50 },
+    });
+
+    expect(record.hops.find((h) => h.hop === 'attack_discovery_review')?.executionStatus).toBe(
+      'timeout'
+    );
+    expect(record.harnessInterference).toMatch(/overran its per-hop timeout/);
+  });
+
+  it('waits for at most WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN reviews and flags the rest', async () => {
+    const reviews = Array.from({ length: WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN + 1 }, (_, i) => ({
+      id: `rev-${i + 1}`,
+      investigationId: `inv-${i + 1}`,
+      verdict: 'true_positive',
+    }));
+    const { fetch } = makeAdFetch(reviews);
+    const record = await runChain(params(fetch, ['attack-discovery']));
+
+    expect(record.hops.filter((h) => h.hop === 'attack_discovery_review')).toHaveLength(
+      WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN
+    );
+    expect(record.harnessInterference).toMatch(
+      new RegExp(
+        `dispatched ${reviews.length} reviews; only the first ${WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN}`
+      )
+    );
   });
 
   it('B1: a parked review scores 1 on ChainTerminal end to end, a failed one still scores 0', async () => {

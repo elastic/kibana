@@ -110,19 +110,59 @@ export const PARKED_HOP_STATUS = 'parked';
  */
 export const WORKER_CHAIN_EXPERIMENT_CONCURRENCY = 1;
 
-/** Examples the spec runs (non-`failed` FP/TP worlds); sizes the Playwright timeout. */
+/** Examples the spec runs when no subset is selected (non-`failed` FP/TP worlds). */
 export const WORKER_CHAIN_EXAMPLE_COUNT = 21;
 
+/** Env var selecting a subset of examples: comma-separated example ids and/or named subsets. */
+export const WORKER_CHAIN_EXAMPLES_ENV = 'WORKER_CHAIN_EXAMPLES';
+
 /**
- * Upper bound of one serial chain at the per-hop caps: triage + AD runner + one
- * AD review + one proposal wait. Sizes the Playwright timeout so 21 serial
- * chains fit (the previous flat 90 min fit ~1.5 of them).
+ * Frozen named subsets for `WORKER_CHAIN_EXAMPLES`. `smoke6` is the pinned
+ * re-smoke set: 3 true-positive + 3 false-positive worlds across both
+ * scenarios. The ids are pinned here so a smoke run is comparable across runs;
+ * example_selection.test.ts asserts they exist and split 3 TP / 3 FP.
+ */
+export const WORKER_CHAIN_SUBSETS: Readonly<Record<string, readonly string[]>> = Object.freeze({
+  smoke6: Object.freeze([
+    'encoded-powershell.tp',
+    'encoded-powershell.tp-entities-missing',
+    'mimicrat-clickfix.tp',
+    'encoded-powershell.fp',
+    'mimicrat-clickfix.fp-benign-mimic',
+    'mimicrat-clickfix.fp-network-only',
+  ]),
+});
+
+/**
+ * Explicit cap on the AD reviews one chain waits for. One floor run can
+ * dispatch several reviews (one per discovered attack); the chain waits for
+ * each, then for every proposal source (the triage Investigation plus one per
+ * review). The runner enforces this cap — reviews past it are not waited for and
+ * the run is marked as harness interference — so the per-chain bound below is a
+ * real ceiling, not a one-review estimate.
+ */
+export const WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN = 3;
+
+/**
+ * Upper bound of one serial chain at the per-hop caps: triage + AD runner +
+ * N reviews + one proposal wait per proposal source (N reviews + the triage
+ * Investigation), N = WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN. The Playwright
+ * timeout is selected examples x EVAL_REPETITIONS x this bound.
  */
 export const WORKER_CHAIN_MAX_CHAIN_MS =
   HOP_TIMEOUTS_MS.alertTriage +
   HOP_TIMEOUTS_MS.attackDiscoveryRunner +
-  HOP_TIMEOUTS_MS.attackDiscoveryReview +
-  HOP_TIMEOUTS_MS.perActionProposal;
+  WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN * HOP_TIMEOUTS_MS.attackDiscoveryReview +
+  (WORKER_CHAIN_MAX_REVIEWS_PER_CHAIN + 1) * HOP_TIMEOUTS_MS.perActionProposal;
+
+/**
+ * Contract marker carried by every ExecutionIdArray result. The per-attack
+ * review Investigation expectation encodes review.yaml:263 as it behaves today;
+ * which execution id it SHOULD carry (D55) is an open product decision this
+ * evaluator does not answer.
+ */
+export const EXECUTION_ID_CONTRACT_MARKER =
+  'contract: review.yaml:263 current behaviour; D55 owner open';
 
 export const DEFAULT_POLL_INTERVAL_MS = 3_000;
 

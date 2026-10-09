@@ -120,6 +120,24 @@ describe('executionIdArray evaluator (D55)', () => {
     } as never);
     expect(result.score).toBe(0);
   });
+
+  it('F4/D55: every result carries the current-behaviour contract marker, pass or fail', async () => {
+    const marker = 'contract: review.yaml:263 current behaviour; D55 owner open';
+    const pass = await executionIdArray.evaluate!({
+      output: output(record()),
+      expected: { expectedExecutionIds: ['exec-1'] },
+      metadata: { expectedExecutionIds: ['exec-1'] },
+    } as never);
+    const fail = await executionIdArray.evaluate!({
+      output: output(record()),
+      expected: { expectedExecutionIds: ['other'] },
+      metadata: { expectedExecutionIds: ['other'] },
+    } as never);
+    for (const result of [pass, fail]) {
+      expect(result.explanation).toContain(marker);
+      expect(result.metadata).toEqual(expect.objectContaining({ contract: marker }));
+    }
+  });
 });
 
 describe('chainTerminal evaluator', () => {
