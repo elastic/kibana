@@ -60,6 +60,7 @@ import {
   getCaseCreateObservableUrl,
   getCaseUpdateObservableUrl,
   getCaseDeleteObservableUrl,
+  getCaseBulkDeleteObservablesUrl,
   getCaseSimilarCasesUrl,
 } from '../../common/api';
 import {
@@ -691,6 +692,22 @@ export const deleteObservable = async (
     method: 'DELETE',
     signal,
   });
+};
+
+export const bulkDeleteObservables = async (
+  caseId: string,
+  observableIds: string[],
+  signal?: AbortSignal
+): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(
+    getCaseBulkDeleteObservablesUrl(caseId),
+    {
+      method: 'POST',
+      body: JSON.stringify({ observableIds }),
+      signal,
+    }
+  );
+  return convertCaseToCamelCase(decodeCaseResponse(response));
 };
 
 export const getSimilarCases = async ({

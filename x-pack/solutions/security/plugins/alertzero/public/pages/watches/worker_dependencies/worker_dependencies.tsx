@@ -168,12 +168,17 @@ const getStrandedDependentReasons = (
     message: dependency.providerHeaderReason(dependencyNames(dependency)),
   }));
 
-/** Every warning for a Worker's header, the no-model reason first because it stops the Worker outright. */
+/**
+ * Every warning for a Worker's header, the no-model reason first because it stops the Worker outright.
+ * Leave `includeBlocking` off for users who can't change Workers: the model check runs as the
+ * requesting user, so without connector access it reports no model in a space that has one.
+ */
 export const getWorkerWarningReasons = (
   worker: Pick<Worker, 'id' | 'blockingReasons'>,
-  enabledById: WorkerEnabledById
+  enabledById: WorkerEnabledById,
+  { includeBlocking }: { includeBlocking: boolean }
 ): WorkerWarningReason[] => [
-  ...getBlockingWarningReasons(worker, { withLink: false }),
+  ...(includeBlocking ? getBlockingWarningReasons(worker, { withLink: false }) : []),
   ...getDisabledProviderReasons(worker.id, enabledById),
   ...getStrandedDependentReasons(worker.id, enabledById),
 ];

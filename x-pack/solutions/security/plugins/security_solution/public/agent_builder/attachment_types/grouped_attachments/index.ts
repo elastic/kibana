@@ -16,4 +16,7 @@ export {
   TIMELINE_TITLE,
   ENDPOINT_ANALYSIS_SUBTITLE,
   alertsTitle,
+  attacksTitle,
+  rulesTitle,
 } from './translations';
+export { buildPageTimerange, encodePageParam } from './page_url';
