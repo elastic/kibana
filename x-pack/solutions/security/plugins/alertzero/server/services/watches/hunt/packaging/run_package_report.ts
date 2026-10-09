@@ -13,7 +13,7 @@ import type {
 } from '../../../../../common/step_types/package_report';
 import type { ResolveHostEnrollment } from '../../../fleet/resolve_host_enrollment';
 import { buildHuntInvestigationConversationId } from '../common/hunt_investigation_id';
-import { decidePackageReport } from './decide_package_report';
+import { buildProposalSummaryBullets, decidePackageReport } from './decide_package_report';
 import { deriveCoverageSubjects } from './derive_coverage_subjects';
 import { readCurrentRunState } from './read_current_run_state';
 import type { RehydrateProcessSelectors } from './rehydrate_process_selectors';
@@ -48,13 +48,46 @@ type MintSuppression = Extract<PackageReportOutput, { status: 'packaged' }>['min
  */
 export type CountExistingProposals = (investigationConversationId: string) => Promise<number>;
 
+/**
+ * Whether the Investigation has a Proposal still open (`pending` or `executing`), i.e. one an
+ * analyst or an in-flight action still depends on. Deliberately narrower than
+ * {@link CountExistingProposals}: a settled Proposal is no reason to hold a clean-run dismissal.
+ */
+export type HasOpenProposal = (investigationConversationId: string) => Promise<boolean>;
+
+type DismissHold = Extract<PackageReportOutput, { status: 'packaged' }>['dismissHold'];
+
 export interface RunPackageReportDeps {
   listRespondActions: ListRespondActions;
   writeCoverageKis: WriteCoverageKis;
   resolveHostEnrollment: ResolveHostEnrollment;
   rehydrateProcessSelectors: RehydrateProcessSelectors;
   countExistingProposals: CountExistingProposals;
+  hasOpenProposal: HasOpenProposal;
 }
+
+/**
+ * Decides whether a clean-run dismissal may proceed. `decidePackageReport` is pure and cannot do
+ * this lookup, so it lives here. Fails closed: if the lookup throws, the Investigation stays open.
+ *
+ * Closes the steady-state case only, not the create window: the packaging workflow dispatches
+ * each gate with `workflow.executeAsync` and releases its concurrency slot before any gate has
+ * actually created its Proposal (see `hunt_package_report.yaml`'s concurrency comment, which
+ * describes the same gap for the mint-side lookup). A clean run that lands in that window sees no
+ * open Proposal and still dismisses, stranding the decision the Proposal is about to carry.
+ * Closing it for good needs atomic dedup on the Proposals side, the same follow-up as the mint
+ * guard (elastic/security-team#19822); do not read this guard as having closed the invariant.
+ */
+const resolveDismissHold = async (
+  hasOpenProposal: HasOpenProposal,
+  investigationConversationId: string
+): Promise<DismissHold> => {
+  try {
+    return (await hasOpenProposal(investigationConversationId)) ? 'open_proposal' : 'none';
+  } catch {
+    return 'check_failed';
+  }
+};
 
 /**
  * The settlement barrier threshold each gate checks before closing the Investigation
@@ -91,7 +124,8 @@ export const computeExpectedProposalCount = ({
  * Orchestrates packaging for one Investigation run. Throws
  * {@link PackageReportIdentityError} when the conversation id does not match the report
  * binding; returns typed `run_incomplete` when the run claimed a hit whose current-run SSE
- * state cannot be read, and when a hunt that did not complete left nothing to package.
+ * state cannot be read, when fewer current-run SSEs were found than the hunt prepared (a
+ * partial `attach_sse` foreach), and when a hunt that did not complete left nothing to package.
  */
 export const runPackageReport = async ({
   spaceId,
@@ -100,6 +134,7 @@ export const runPackageReport = async ({
   runId,
   huntStatus,
   hasConfirmedHit,
+  expectedSseCount,
   attachments,
   deps,
 }: {
@@ -109,6 +144,20 @@ export const runPackageReport = async ({
   runId: string;
   huntStatus: PackageReportInput['huntStatus'];
   hasConfirmedHit: boolean;
+  /**
+   * Number of SSE attachments the hunt child prepared for this run (`hunt.yaml`'s `sse_count`
+   * output). Compared against what `readCurrentRunState` actually found: `attach_sse`'s
+   * `foreach` swallows a per-item attach failure with `continue`, so a shortfall here is
+   * otherwise invisible -- packaging would read the attachments that did land and proceed as
+   * if the run were complete, silently dropping whichever finding failed to attach.
+   *
+   * Undefined skips the check below rather than failing closed: an already-installed Worker
+   * that has not yet picked up the call site supplying this field (its `yamlTemplate` hash does
+   * not cover the imported YAML it renders, so it only updates when its own `version` bumps)
+   * must not have every packaging call start erroring just because this step's own schema
+   * changed out from under it -- that would turn a staleness gap into an outage.
+   */
+  expectedSseCount: number | undefined;
   attachments: VersionedAttachment[] | undefined;
   deps: RunPackageReportDeps;
 }): Promise<PackageReportOutput> => {
@@ -150,12 +199,26 @@ export const runPackageReport = async ({
         investigationConversationId,
       });
       const coverage = await deps.writeCoverageKis(subjects);
+      const dismissHold = await resolveDismissHold(
+        deps.hasOpenProposal,
+        investigationConversationId
+      );
       return {
         status: 'packaged',
         coverage,
         proposals: [],
-        dismiss: true,
-        closureSummary: `Hunt for report ${reportId} found no confirmed hits. Closing: nothing in this environment matched the report at the confirming-index bar.`,
+        proposalBullets: [],
+        omittedProposalCount: 0,
+        dismiss: dismissHold === 'none',
+        dismissHold,
+        closureSummary:
+          dismissHold === 'none'
+            ? `Hunt for report ${reportId} found no confirmed hits. Closing: nothing in this environment matched the report at the confirming-index bar.`
+            : `Hunt for report ${reportId} found no confirmed hits. Leaving the Investigation open: ${
+                dismissHold === 'open_proposal'
+                  ? 'it still has a pending or executing Proposal from an earlier run.'
+                  : 'could not verify whether it has an open Proposal.'
+              }`,
         expectedProposalCount: 0,
         mintSuppression: 'none',
       };
@@ -165,6 +228,17 @@ export const runPackageReport = async ({
       reason: hasConfirmedHit
         ? `No current-run SSE attachment for runId=${runId}`
         : `Hunt did not complete (status=${huntStatus}), so there is no verdict to record for runId=${runId}`,
+    };
+  }
+
+  // A partial `attach_sse` foreach (some items attached, some swallowed a failure via
+  // `continue`) leaves a non-empty but short current-run state -- the gap the `!state`
+  // branch above cannot see, since it only catches a total miss. Reported the same way as a
+  // total miss: `run_incomplete`, not packaged off an incomplete finding set.
+  if (expectedSseCount !== undefined && state.sseCount < expectedSseCount) {
+    return {
+      status: 'run_incomplete',
+      reason: `Hunt prepared ${expectedSseCount} significant security event attachment(s) but only ${state.sseCount} were found for runId=${runId}; the remainder failed to attach`,
     };
   }
 
@@ -181,6 +255,10 @@ export const runPackageReport = async ({
     investigationConversationId,
   });
   const coverage = await deps.writeCoverageKis(subjects);
+
+  const dismissHold: DismissHold = decided.dismiss
+    ? await resolveDismissHold(deps.hasOpenProposal, investigationConversationId)
+    : 'none';
 
   // Only a run that would otherwise mint something needs the lookup: a dismissal (no confirmed
   // hit) has no proposals to suppress, and `decidePackageReport` never returns `dismiss: false`
@@ -212,10 +290,15 @@ export const runPackageReport = async ({
     newProposalCount: proposals.length,
   });
 
+  const { bullets: proposalBullets, omittedCount: omittedProposalCount } =
+    buildProposalSummaryBullets(proposals);
+
   return {
     status: 'packaged',
     coverage,
     proposals,
+    proposalBullets,
+    omittedProposalCount,
     // Not forced to `true`: a confirmed hit the guard suppressed is not benign. Accepted
     // consequence, not an oversight: `decidePackageReport` could not previously return
     // `dismiss: false` with an empty `proposals` (it always filled at least the
@@ -226,7 +309,8 @@ export const runPackageReport = async ({
     // Investigations on rerun"'s own goal of keeping a possibly-new finding visible rather than
     // silently closed; elastic/security-team#19822 (phase 3) resolves it as a side effect of real
     // per-finding dedup, not as a standalone fix.
-    dismiss: decided.dismiss,
+    dismiss: decided.dismiss && dismissHold === 'none',
+    dismissHold,
     closureSummary: decided.closureSummary,
     expectedProposalCount,
     mintSuppression,

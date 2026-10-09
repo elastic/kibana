@@ -58,15 +58,17 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('"Appearance and content" and "Appearance only"');
     expect(skill.content).toContain('Ask even when you found no gaps');
     expect(skill.content).toContain('Content mode is the default');
-    expect(skill.content).toContain(
-      "Skip this step only when the user's message already states a mode or names specific changes"
-    );
+    expect(skill.content).toContain('If the request already says what to change, do not call');
   });
 
   it('separates appearance-only and content enhance modes', () => {
-    expect(skill.content).toContain('**Appearance mode.** Keep every panel ID');
+    expect(skill.content).toContain('**Appearance mode.** Keep every chart panel ID');
+    expect(skill.content).toContain('Markdown panels may be rewritten or removed.');
     expect(skill.content).toContain(
-      'Do not add, remove, or recreate panels, add controls, or change queries'
+      'Do not add, remove, or recreate other panels, add controls, or change queries'
+    );
+    expect(skill.content).toContain(
+      "Skip this step when the user's message already asks for appearance only"
     );
     expect(skill.content).toContain('**Content mode.** Do everything appearance mode does');
     expect(skill.content).toContain('`remove_panels`');

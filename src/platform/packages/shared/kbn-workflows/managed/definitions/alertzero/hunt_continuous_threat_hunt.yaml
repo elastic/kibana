@@ -11,6 +11,7 @@ tags:
   - watch
   - watch-hunt
 settings:
+  __WORKER_RUN_AS_LINE__:
   # Per-space: prevents a second sweep from starting while the first is still
   # running. It is not an ordering, atomicity, or gate-wait bound, and it is
   # distinct from report_fan_out's own concurrency.max below, which throttles
@@ -127,6 +128,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-security-hunt-find-or-create-investigation
+          run-as-mode: inherit
           inputs:
             reportId: "{{ foreach.item }}"
             runId: "{{ execution.id }}"
@@ -135,6 +137,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-security-hunt-execute
+          run-as-mode: inherit
           inputs:
             reportId: "{{ foreach.item }}"
             investigationConversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
@@ -148,6 +151,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-security-hunt-package-report
+          run-as-mode: inherit
           inputs:
             reportId: "{{ foreach.item }}"
             investigationConversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
@@ -159,6 +163,11 @@ steps:
             # having no output at all.
             huntStatus: "{{ steps.hunt.output.status | default: 'failed' }}"
             hasConfirmedHit: "${{ steps.hunt.output.hit == true }}"
+            # What the hunt prepared, for packaging to compare against what it actually finds
+            # attached (`attach_sse`'s foreach can silently drop an item via `continue`). A
+            # missing hunt output (the step errored outright) has nothing to compare, so this
+            # defaults to 0 -- same as a hunt that genuinely confirmed nothing.
+            expectedSseCount: "${{ steps.hunt.output.sse_count | default: 0 }}"
 
       # Outcome derivation: find_or_create failing means no Investigation ever
       # existed, so no conclusion is possible (handled by
@@ -202,6 +211,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-alertzero-journal-note
+          run-as-mode: inherit
           inputs:
             conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
             message: |-

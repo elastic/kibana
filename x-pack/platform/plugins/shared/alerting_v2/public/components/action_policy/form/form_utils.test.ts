@@ -13,7 +13,7 @@ describe('action policy form utils', () => {
     name: 'Policy',
     description: 'Description',
     matcher: null as PolicyMatcher | null,
-    groupingMode: 'per_episode' as const,
+    groupingMode: 'per_alert' as const,
     groupBy: [],
     throttleStrategy: 'on_status_change' as const,
     throttleInterval: '',
@@ -44,7 +44,7 @@ describe('action policy form utils', () => {
       expect(toCreatePayload(state)).toEqual({
         name: 'Policy',
         description: 'Description',
-        grouping_mode: 'per_episode',
+        grouping_mode: 'per_alert',
         throttle: { strategy: 'on_status_change', interval: null },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       });
@@ -121,7 +121,7 @@ describe('action policy form utils', () => {
       expect(toUpdatePayload(state)).toEqual({
         name: 'Policy',
         description: 'Description',
-        grouping_mode: 'per_episode',
+        grouping_mode: 'per_alert',
         matcher: null,
         group_by: null,
         throttle: { strategy: 'on_status_change', interval: null },
@@ -202,7 +202,7 @@ describe('action policy form utils', () => {
         name: 'Test Policy',
         description: 'A test policy',
         matcher: severityMatcher,
-        groupingMode: 'per_episode',
+        groupingMode: 'per_alert',
         groupBy: [],
         throttleStrategy: 'on_status_change',
         throttleInterval: '',

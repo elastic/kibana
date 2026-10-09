@@ -26,6 +26,7 @@ export const evalCommand = {
   name: Commands.EVAL,
   methods: evalCommandMethods,
   metadata: {
+    docPreserving: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.evalDoc', {
       defaultMessage:
         'Calculates an expression and puts the resulting value into a search results field.',

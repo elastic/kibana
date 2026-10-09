@@ -16,6 +16,17 @@ import { unwrapSchema } from './unwrap_schema';
  */
 export const LIQUID_DYNAMIC_KEY_SEGMENT = '__liquid_dynamic_key__';
 
+// Liquid built-in properties: `first`/`last` read an array element, and `size` falls back
+// to the length of an array or string, or the key count of an object, when no own key exists.
+const LIQUID_ARRAY_ELEMENT_PROPERTIES = new Set(['first', 'last']);
+const LIQUID_SIZE_PROPERTY = 'size';
+
+const isStringSchema = (schema: z.ZodType): boolean =>
+  schema instanceof z.ZodString ||
+  schema instanceof z.ZodEnum ||
+  (schema instanceof z.ZodLiteral &&
+    [...schema.values].every((value) => typeof value === 'string'));
+
 const unquoteBracketKey = (inner: string): string | null => {
   if (inner.length < 2) {
     return null;
@@ -27,19 +38,29 @@ const unquoteBracketKey = (inner: string): string | null => {
   return inner.slice(1, -1);
 };
 
+// Stands in for a bracket key while splitting on dots, so a quoted key like `["b.c"]` stays whole
+const BRACKET_KEY_PLACEHOLDER = '\u0000';
+
+const getBracketKey = (inner: string): string => {
+  const quoted = unquoteBracketKey(inner);
+  if (quoted !== null) {
+    return quoted;
+  }
+  return /^-?\d+$/.test(inner) ? inner : LIQUID_DYNAMIC_KEY_SEGMENT;
+};
+
 export function parsePath(path: string): string[] | null {
+  const bracketKeys: string[] = [];
   const normalized = path.replace(/\[([^\]]+)\]/g, (_, raw: string) => {
-    const inner = raw.trim();
-    const quoted = unquoteBracketKey(inner);
-    if (quoted !== null) {
-      return `.${quoted}`;
-    }
-    if (/^-?\d+$/.test(inner)) {
-      return `.${inner}`;
-    }
-    return `.${LIQUID_DYNAMIC_KEY_SEGMENT}`;
+    bracketKeys.push(getBracketKey(raw.trim()));
+    return `.${BRACKET_KEY_PLACEHOLDER}`;
   });
-  const segments = normalized.split('.');
+  let bracketKeyIndex = 0;
+  const segments = normalized
+    .split('.')
+    .map((segment) =>
+      segment === BRACKET_KEY_PLACEHOLDER ? bracketKeys[bracketKeyIndex++] : segment
+    );
   return segments.some((segment) => segment === '') ? null : segments;
 }
 
@@ -61,12 +82,20 @@ export function getSchemaAtPath(
   path: string,
   { partial = false }: { partial?: boolean } = {}
 ): GetSchemaAtPathResult {
-  try {
-    const segments = parsePath(path);
-    if (!segments) {
-      return { schema: null, scopedToPath: null };
-    }
+  const segments = parsePath(path);
+  if (!segments) {
+    return { schema: null, scopedToPath: null };
+  }
+  return getSchemaAtSegments(schema, segments, partial);
+}
 
+// Recurses on parsed segments: joining them back into a path would split quoted keys again
+function getSchemaAtSegments(
+  schema: z.ZodType,
+  segments: string[],
+  partial = false
+): GetSchemaAtPathResult {
+  try {
     let current: z.ZodType = schema;
 
     for (const [index, segment] of segments.entries()) {
@@ -92,6 +121,8 @@ export function getSchemaAtPath(
             !(catchall instanceof z.ZodAny)
           ) {
             current = catchall;
+          } else if (segment === LIQUID_SIZE_PROPERTY) {
+            current = z.number();
           } else {
             return partial
               ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
@@ -110,8 +141,19 @@ export function getSchemaAtPath(
         }
       } else if (current instanceof z.ZodUnion) {
         const branches = current.options;
+        // Prefer a branch that resolves the whole remaining path, so a built-in property
+        // (e.g. `size`) in one branch does not hide a real key in another
+        for (const branch of branches) {
+          const { schema: resolved } = getSchemaAtSegments(
+            branch as z.ZodType,
+            segments.slice(index)
+          );
+          if (resolved) {
+            return { schema: resolved, scopedToPath: segments.join('.') };
+          }
+        }
         const validBranch = branches.find(
-          (branch) => getSchemaAtPath(branch as z.ZodType, segment).schema !== null
+          (branch) => getSchemaAtSegments(branch as z.ZodType, [segment]).schema !== null
         );
         if (!validBranch) {
           return partial
@@ -119,7 +161,7 @@ export function getSchemaAtPath(
             : { schema: null, scopedToPath: null };
         }
         // We found a valid branch, now we need to traverse into it with the current segment
-        const branchResult = getSchemaAtPath(validBranch as z.ZodType, segment);
+        const branchResult = getSchemaAtSegments(validBranch as z.ZodType, [segment]);
         if (!branchResult.schema) {
           return partial
             ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
@@ -129,7 +171,7 @@ export function getSchemaAtPath(
       } else if (current instanceof z.ZodIntersection) {
         const branches = [current.def.left as z.ZodType, current.def.right as z.ZodType];
         const validBranch = branches.find(
-          (branch) => getSchemaAtPath(branch as z.ZodType, segment).schema !== null
+          (branch) => getSchemaAtSegments(branch as z.ZodType, [segment]).schema !== null
         );
         if (!validBranch) {
           return partial
@@ -137,7 +179,7 @@ export function getSchemaAtPath(
             : { schema: null, scopedToPath: null };
         }
         // We found a valid branch, now we need to traverse into it with the current segment
-        const branchResult = getSchemaAtPath(validBranch as z.ZodType, segment);
+        const branchResult = getSchemaAtSegments(validBranch as z.ZodType, [segment]);
         if (!branchResult.schema) {
           return partial
             ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
@@ -145,8 +187,10 @@ export function getSchemaAtPath(
         }
         current = branchResult.schema;
       } else if (current instanceof z.ZodArray) {
-        if (isDynamicKey) {
+        if (isDynamicKey || LIQUID_ARRAY_ELEMENT_PROPERTIES.has(segment)) {
           current = current.element as z.ZodType;
+        } else if (segment === LIQUID_SIZE_PROPERTY) {
+          current = z.number();
         } else if (!/^\d+$/.test(segment)) {
           return partial
             ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
@@ -189,6 +233,8 @@ export function getSchemaAtPath(
           // This is because we're validating schema paths, not runtime data
           current = current.element as z.ZodType;
         }
+      } else if (segment === LIQUID_SIZE_PROPERTY && isStringSchema(current)) {
+        current = z.number();
       } else if (current instanceof z.ZodAny) {
         // pass through any to preserve the description
         return { schema: current, scopedToPath: segments.slice(0, index).join('.') };

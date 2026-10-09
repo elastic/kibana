@@ -25,6 +25,10 @@ import { topologyCorrectnessEvaluator } from './grouping/topology_correctness';
 import { evidenceCollectionEvaluator } from './evidences/evidence_collection';
 import { continuationTrajectoryEvaluator } from './tool_usage/tool_usage';
 import {
+  continuationEventIdProvenanceEvaluator,
+  eventIdProvenanceEvaluator,
+} from './tool_usage/event_id_provenance';
+import {
   continuationRoutingEvaluator,
   continuationStabilityEvaluator,
   continuationTopologyStabilityEvaluator,
@@ -46,6 +50,7 @@ export const createDiscoveryEvaluators = (
     groupingCorrectnessEvaluator,
     topologyCorrectnessEvaluator,
     evidenceCollectionEvaluator,
+    eventIdProvenanceEvaluator,
     createDiscoveryToolUsageEvaluator(),
     createExecuteEsqlGroundingEvaluator(),
     confirmedEvidencesEvaluator,
@@ -84,5 +89,6 @@ export const createContinuationEvaluators = (): ContinuationEvaluator[] =>
     continuationRoutingEvaluator,
     continuationSeverityStabilityEvaluator,
     continuationTopologyStabilityEvaluator,
+    continuationEventIdProvenanceEvaluator,
     continuationTrajectoryEvaluator,
   ]);

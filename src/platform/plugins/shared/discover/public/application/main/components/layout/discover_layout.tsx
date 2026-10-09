@@ -169,6 +169,8 @@ export function DiscoverLayout() {
     columns: currentColumns,
     onAddColumn,
     onRemoveColumn,
+    onRemoveColumns,
+    onMoveColumn,
   } = useColumns({
     capabilities,
     defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
@@ -199,6 +201,29 @@ export function DiscoverLayout() {
       void scopedEBTManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
     },
     [onRemoveColumn, scopedEBTManager, fieldsMetadata]
+  );
+
+  const onRemoveColumnsWithTracking = useCallback(
+    (columnNames: string[]) => {
+      const removedColumnNames = onRemoveColumns(columnNames);
+      void scopedEBTManager.trackDataTableClearSelectedFields({
+        fieldNames: removedColumnNames,
+        fieldsMetadata,
+      });
+    },
+    [onRemoveColumns, scopedEBTManager, fieldsMetadata]
+  );
+
+  const onMoveSidebarColumn = useCallback(
+    (columnName: string, sidebarTargetIndex: number) => {
+      // the sidebar columns exclude `_source`, so map the target position back to the actual columns
+      const targetIndex = currentColumns.indexOf(sidebarColumns[sidebarTargetIndex]);
+      if (targetIndex === -1) {
+        return;
+      }
+      onMoveColumn(columnName, targetIndex);
+    },
+    [currentColumns, sidebarColumns, onMoveColumn]
   );
 
   // The assistant is getting the state from the url correctly
@@ -431,7 +456,9 @@ export function DiscoverLayout() {
                 onChangeDataView={onChangeDataView}
                 onDataViewCreated={onDataViewCreated}
                 onFieldEdited={onFieldEdited}
+                onMoveField={onMoveSidebarColumn}
                 onRemoveField={onRemoveColumnWithTracking}
+                onRemoveFields={onRemoveColumnsWithTracking}
                 selectedDataView={dataView}
                 sidebarToggleState$={sidebarToggleState$}
                 trackUiMetric={trackUiMetric}

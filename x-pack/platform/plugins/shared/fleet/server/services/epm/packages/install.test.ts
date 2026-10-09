@@ -25,6 +25,7 @@ import { appContextService } from '../../app_context';
 import {
   ConcurrentInstallOperationError,
   FleetError,
+  PackageFipsIncompatibleError,
   PackageInvalidArchiveError,
   PackageNotFoundError,
 } from '../../../errors';
@@ -47,6 +48,7 @@ import { getBundledPackageByName, getBundledPackageByPkgKey } from './bundled_pa
 
 import { getInstallationObject, getPackageSavedObjects } from './get';
 import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
+import { setLastUploadInstallCache } from './utils';
 
 jest.mock('../../data_streams');
 jest.mock('./get');
@@ -78,6 +80,7 @@ jest.mock('../../app_context', () => {
       getCloud: jest.fn(),
       getTaskManagerStart: jest.fn(() => ({ runSoon: jest.fn().mockResolvedValue({}) })),
       getKibanaVersion: jest.fn(() => '8.0.0'),
+      getIsFipsEnabled: jest.fn(() => false),
     },
   };
 });
@@ -153,7 +156,7 @@ const emptyPackageSavedObjects: SavedObjectsFindResponse<Installation> = {
 
 function archivePackageFixture(
   overrides: Pick<ArchivePackage, 'name' | 'version'> &
-    Partial<Pick<ArchivePackage, 'data_streams'>>
+    Partial<Pick<ArchivePackage, 'data_streams' | 'policy_templates'>>
 ): ArchivePackage {
   return {
     title: overrides.name,
@@ -165,7 +168,7 @@ function archivePackageFixture(
 
 function parsedArchiveFixture(
   overrides: Pick<ArchivePackage, 'name' | 'version'> &
-    Partial<Pick<ArchivePackage, 'data_streams'>>
+    Partial<Pick<ArchivePackage, 'data_streams' | 'policy_templates'>>
 ): {
   packageInfo: ArchivePackage;
   archiveSignals: { gatedTypesFound: Set<any>; hasMlSecurityRules: boolean };
@@ -568,6 +571,33 @@ describe('install', () => {
       );
     });
 
+    it('does not consume the install-by-upload rate limit window for bundled installs', async () => {
+      (installStateMachine._stateMachineInstallPackage as jest.Mock).mockResolvedValue({});
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      jest.mocked(setLastUploadInstallCache).mockClear();
+      mockGetBundledPackageByPkgKey.mockResolvedValue({
+        name: 'test_package',
+        version: '1.0.0',
+        getBuffer: async () => Buffer.from('test_package'),
+      });
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        pkgkey: 'test_package-1.0.0',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(response.error).toBeUndefined();
+      expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalledWith(
+        expect.objectContaining({ installSource: 'bundled' })
+      );
+      // bundled installs are exempt from the rate limit check, so they must not
+      // restart the window and push back the deadline reported to real uploads
+      expect(setLastUploadInstallCache).not.toHaveBeenCalled();
+    });
+
     describe('name-only install when registry is reachable', () => {
       const actualBundledPackages = jest.requireActual('./bundled_packages');
 
@@ -721,6 +751,78 @@ describe('install', () => {
       });
     });
 
+    describe('fips', () => {
+      const nonFipsPackageInfo = {
+        name: 'test_package',
+        license: 'basic',
+        conditions: { elastic: { subscription: 'basic' } },
+        policy_templates: [{ name: 'a', fips_compatible: false }],
+      };
+
+      beforeEach(() => {
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        jest.mocked(appContextService.getIsFipsEnabled).mockReturnValue(true);
+        jest
+          .mocked(Registry.getPackage)
+          .mockResolvedValue({ packageInfo: nonFipsPackageInfo, paths: [] } as any);
+      });
+
+      afterEach(() => {
+        jest.mocked(appContextService.getIsFipsEnabled).mockReturnValue(false);
+      });
+
+      const install = (force?: boolean) =>
+        installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'test_package',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+          force,
+        });
+
+      it('should not install a non FIPS package when FIPS is enabled', async () => {
+        const response = await install();
+
+        expect(response.error).toBeInstanceOf(PackageFipsIncompatibleError);
+        expect(response.error!.message).toEqual(
+          'test_package is not FIPS compatible and cannot be installed on a FIPS-enabled deployment'
+        );
+        expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
+      });
+
+      it('should install a non FIPS package when FIPS is enabled but using force flag', async () => {
+        const response = await install(true);
+
+        expect(response.error).toBeUndefined();
+      });
+
+      it('should install a non FIPS package when FIPS is not enabled', async () => {
+        jest.mocked(appContextService.getIsFipsEnabled).mockReturnValue(false);
+
+        const response = await install();
+
+        expect(response.error).toBeUndefined();
+      });
+
+      it('should install a package with at least one FIPS compatible policy template', async () => {
+        jest.mocked(Registry.getPackage).mockResolvedValue({
+          packageInfo: {
+            ...nonFipsPackageInfo,
+            policy_templates: [
+              { name: 'a', fips_compatible: false },
+              { name: 'b', fips_compatible: true },
+            ],
+          },
+          paths: [],
+        } as any);
+
+        const response = await install();
+
+        expect(response.error).toBeUndefined();
+      });
+    });
+
     it('should allow to install fleet_server if internal.fleetServerStandalone is configured', async () => {
       jest.mocked(appContextService.getConfig).mockReturnValueOnce({
         internal: {
@@ -843,6 +945,29 @@ describe('install', () => {
       jest.mocked(getBundledPackageByName).mockResolvedValue(undefined);
       jest.mocked(setPackageInfo).mockClear();
       jest.mocked(deleteVerificationResult).mockClear();
+    });
+
+    it('rejects an uploaded non FIPS package when FIPS is enabled', async () => {
+      jest.mocked(appContextService.getIsFipsEnabled).mockReturnValueOnce(true);
+      jest.mocked(parsePackageAndCollectSignals).mockResolvedValueOnce(
+        parsedArchiveFixture({
+          name: 'mysql',
+          version: '1.0.0',
+          policy_templates: [{ name: 'mysql', title: 'MySQL', fips_compatible: false } as any],
+        })
+      );
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'upload',
+        archiveBuffer: {} as Buffer,
+        contentType: '',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(response.error).toBeInstanceOf(PackageFipsIncompatibleError);
+      expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
     });
 
     it('validates real uploads and skips the install when validation fails', async () => {
@@ -1017,6 +1142,24 @@ describe('install', () => {
           throwOnError: true,
         })
       );
+    });
+
+    it('consumes the install-by-upload rate limit window for genuine uploads', async () => {
+      jest.mocked(getInstallationObject).mockResolvedValueOnce(uploadedInstallationSO('1.2.0'));
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      jest.mocked(setLastUploadInstallCache).mockClear();
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'upload',
+        archiveBuffer: {} as Buffer,
+        contentType: '',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(response.error).toBeUndefined();
+      expect(setLastUploadInstallCache).toHaveBeenCalled();
     });
 
     it('rejects a registry package name when skipUploadPackageValidation is unset', async () => {

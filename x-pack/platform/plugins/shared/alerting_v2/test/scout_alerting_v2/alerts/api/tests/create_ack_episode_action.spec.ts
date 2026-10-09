@@ -67,7 +67,7 @@ apiTest.describe('Create ack episode action API', { tag: '@local-stateful-classi
     expect(actions[0]).toMatchObject({
       action_type: 'ack',
       group_hash: groupHash,
-      episode_id: episodeId,
+      alert_id: episodeId,
       rule_id: ruleId,
       space_id: 'default',
     });
@@ -115,7 +115,7 @@ apiTest.describe('Create ack episode action API', { tag: '@local-stateful-classi
       expect(actions[0]).toMatchObject({
         action_type: 'ack',
         group_hash: groupHash,
-        episode_id: olderEpisodeId,
+        alert_id: olderEpisodeId,
       });
     }
   );

@@ -27,7 +27,7 @@ describe('createEpisodeActionRouteForType', () => {
     });
 
     expect(RouteClass.method).toBe('post');
-    expect(RouteClass.path).toBe(`/api/alerting/v2/alerts/{alert_id}/${suffix}`);
+    expect(RouteClass.path).toBe(`/api/alerting/v2/alerts/{id}/${suffix}`);
     expect(RouteClass.options?.summary).toBe(summary);
     expect(RouteClass.validate).toBeDefined();
     expect(RouteClass.validate).toEqual(
@@ -46,7 +46,7 @@ describe('createEpisodeActionRouteForType', () => {
     });
     const { ctx } = createRouteDependencies();
     const request = {
-      params: { alert_id: 'episode-1' },
+      params: { id: 'episode-1' },
       body: { assignee_uid: 'u_abc123' },
     } as unknown as KibanaRequest;
     const alertActionsClient = createAlertActionsClientMock();
@@ -73,7 +73,7 @@ describe('createEpisodeActionRouteForType', () => {
     });
     const { ctx } = createRouteDependencies();
     const request = {
-      params: { alert_id: 'episode-1' },
+      params: { id: 'episode-1' },
       body: { assignee_uid: 'u_abc123' },
     } as unknown as KibanaRequest;
     const alertActionsClient = createAlertActionsClientMock();

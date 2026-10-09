@@ -6,27 +6,28 @@
  */
 
 import { describeCodecCases } from './test_helpers/codec_cases';
-import { DateRangeType, LocationType, StatesIndexStatusType, SummaryType } from './common';
-import { CertFacetsType, CertType, GetCertsParamsType } from './certs';
-import { DynamicSettingsCodec, LocationMonitorsType } from './dynamic_settings';
-import { SyntheticsNetworkEventsApiResponseType } from './network_events';
-import { SnapshotType } from './snapshot';
-import { syntheticsCCSSettingsSchema } from './ccs_settings';
-import { syntheticsMultiSpaceSettingsSchema } from './multi_space_settings';
-import { APIKeyCodec } from './settings/api_key';
+
+import { DateRangeType, LocationType, StatesIndexStatusType, SummaryType } from './schemas/common';
+import { CertFacetsType, CertType, GetCertsParamsType } from './schemas/certs';
+import { DynamicSettingsCodec, LocationMonitorsType } from './schemas/dynamic_settings';
+import { SyntheticsNetworkEventsApiResponseType } from './schemas/network_events';
+import { SnapshotType } from './schemas/snapshot';
 import {
+  syntheticsCCSSettingsSchema,
+  syntheticsMultiSpaceSettingsSchema,
+  APIKeyCodec,
   SyntheticsServiceApiKeySaveType,
   SyntheticsServiceApiKeyType,
-} from './synthetics_service_api_key';
-import { remoteMonitorInfoSchema } from './remote';
-import { TLSParamsType } from './alerts/tls';
+} from './schemas/settings';
+import { remoteMonitorInfoSchema } from './schemas/remote';
 import {
+  TLSParamsType,
   AtomicStatusCheckParamsType,
   GetMonitorAvailabilityParamsType,
   MonitorAvailabilityType,
   RangeUnitType,
   StatusCheckParamsType,
-} from './alerts/status_check';
+} from './schemas/alerts';
 
 const fullCert = {
   monitors: [
