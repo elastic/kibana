@@ -652,6 +652,60 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
     expect(result).toMatchObject({ written: false, reason: 'unchanged_outcome' });
     expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
   });
+
+  it('writes a new unconfirmed rule with the investigated severity', async () => {
+    const stored = makeInvestigatedEvent();
+    const eventClient = makeEventSearchClient({
+      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+    });
+
+    await eventsWriteBulkHandler({
+      eventSearchClient: eventClient,
+      alertEventsClient,
+      source: 'discovery',
+      inputs: [
+        {
+          ...baseInput,
+          event_id: stored.event_id,
+          severity: 'critical',
+          signals: [makeDetectionSignal('rule-2', 'inconclusive')],
+        },
+      ],
+    });
+
+    expect(writtenDocs()[0].severity).toBe('medium');
+  });
+
+  it('accepts severity from a new confirmed rule', async () => {
+    const stored = makeInvestigatedEvent();
+    const eventClient = makeEventSearchClient({
+      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+    });
+
+    const newConfirmedRule: SignalEntry = {
+      ...makeDetectionSignal('rule-2'),
+      impact: 'blocked',
+      metadata: {
+        ...makeDetectionSignal('rule-2').metadata,
+        severity_score: 90,
+      },
+    };
+
+    await eventsWriteBulkHandler({
+      eventSearchClient: eventClient,
+      alertEventsClient,
+      source: 'discovery',
+      inputs: [
+        {
+          ...baseInput,
+          event_id: stored.event_id,
+          signals: [newConfirmedRule],
+        },
+      ],
+    });
+
+    expect(writtenDocs()[0].severity).toBe('critical');
+  });
 });
 
 describe('eventsWriteBulkHandler — signal-less chat create', () => {
