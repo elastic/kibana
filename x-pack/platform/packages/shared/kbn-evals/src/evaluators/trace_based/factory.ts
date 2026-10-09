@@ -24,13 +24,17 @@ const NOT_REPORTED = Symbol('notReported');
 // The queried trace store cannot serve `trace.id` at all — ES|QL rejects the query with
 // `Unknown column [trace.id]`, which is how a missing traces-* read privilege or an
 // unreadable index pattern surfaces (the privilege failure is masked as a schema failure).
-// Returned instead of throwing so deterministic failures don't burn the retry budget.
+// Only reported as unavailable when the suite opted in (`tracesUnavailableForSuiteMode`);
+// without the opt-in losing read privilege is a real failure, not an expected empty store.
+// Returned instead of throwing so the deterministic failure doesn't burn the retry budget.
 const TRACE_STORE_UNREADABLE = Symbol('traceStoreUnreadable');
 
 // The trace store is readable but holds no spans for this trace. Only produced when the
 // suite declared (via `tracesUnavailableForSuiteMode`) that its generation path cannot
-// export traces to the queried store, so absence is expected rather than a retryable
-// indexing lag.
+// export traces to the queried store, and a COUNT(*) probe of spans for the trace.id
+// returned 0. A STATS-without-BY query always returns exactly one row ([[0]] / [[null]]),
+// so the empty-values shape alone cannot distinguish an empty store; the probe is what
+// makes the opt-in reachable on real query shapes.
 const NO_SPANS_FOR_SUITE_MODE = Symbol('noSpansForSuiteMode');
 
 // Matches the ES|QL verification_exception the trace store returns when `trace.id` is not
@@ -150,12 +154,54 @@ export function createTraceBasedEvaluator({
         return NOT_REPORTED;
       }
 
+      // Opt-in probe: STATS-without-BY queries always return exactly one row ([[0]] or
+      // [[null]] on an empty store), so "no spans" cannot be told apart from "spans but
+      // no value" by the evaluator query's own shape. When the suite opted in, a COUNT(*)
+      // over the same FROM/WHERE runs first: 0 spans → the suite's declared mode (a [[0]]
+      // tool_calls result is then N/A, not a real zero); > 0 spans → the evaluator query
+      // runs as normal and a 0 it returns is a real 0.
+      async function countSpansForTrace(): Promise<number> {
+        const probe = await runQuery(
+          `FROM traces-* | WHERE trace.id == "${traceId}" | STATS span_count = COUNT(*)`
+        );
+        const count = Number(probe.values?.[0]?.[0]);
+        if (!Number.isFinite(count)) {
+          throw new Error(
+            `${name}: span count probe returned no usable value for trace ${traceId}`
+          );
+        }
+        return count;
+      }
+
       async function fetchStats(): Promise<
         | number
         | typeof NOT_REPORTED
         | typeof TRACE_STORE_UNREADABLE
         | typeof NO_SPANS_FOR_SUITE_MODE
       > {
+        if (tracesUnavailableForSuiteMode) {
+          let spanCount: number;
+          try {
+            spanCount = await countSpansForTrace();
+          } catch (error) {
+            // The probe hits the same unreadable store the evaluator query would; report
+            // it the same way instead of burning the retry budget on a deterministic error.
+            if (isTraceStoreUnreadableError(error)) {
+              log.warning(
+                `${name}: trace store is unreadable for trace queries (Unknown column [trace.id]) — this almost always means the trace store credentials lack the traces-* read privilege, or the index pattern is unreadable (traceId: ${traceId})`
+              );
+              return TRACE_STORE_UNREADABLE;
+            }
+            throw error;
+          }
+          if (spanCount === 0) {
+            log.debug(
+              `${name}: no spans for trace ${traceId} in the queried store (COUNT(*) = 0), as declared for this suite's generation mode`
+            );
+            return NO_SPANS_FOR_SUITE_MODE;
+          }
+        }
+
         const query = buildQuery(traceId);
 
         let response: EsqlResponse;
@@ -164,8 +210,11 @@ export function createTraceBasedEvaluator({
         } catch (error) {
           if (isTraceStoreUnreadableError(error)) {
             // Deterministic (credential/pattern) failure: the store cannot serve trace.id
-            // for any trace, so retrying cannot help. Surfaced as `unavailable` with the
-            // reason in metadata, never a quiet skip.
+            // for any trace, so retrying cannot help. Only an opted-in suite may report it
+            // as unavailable — without the opt-in losing read privilege is a real failure.
+            if (!tracesUnavailableForSuiteMode) {
+              throw error;
+            }
             log.warning(
               `${name}: trace store is unreadable for trace queries (Unknown column [trace.id]) — this almost always means the trace store credentials lack the traces-* read privilege, or the index pattern is unreadable (traceId: ${traceId})`
             );
@@ -177,12 +226,6 @@ export function createTraceBasedEvaluator({
         const { values } = response;
 
         if (!values || values.length === 0) {
-          if (tracesUnavailableForSuiteMode) {
-            log.debug(
-              `${name}: no spans for trace ${traceId} in the queried store, as declared for this suite's generation mode`
-            );
-            return NO_SPANS_FOR_SUITE_MODE;
-          }
           throw new Error(`No data found for trace`);
         }
 

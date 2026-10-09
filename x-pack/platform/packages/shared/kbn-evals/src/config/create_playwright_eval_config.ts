@@ -26,6 +26,12 @@ export interface EvaluationTestOptions extends ScoutTestOptions {
   repetitions: number;
   concurrency: number;
   timeout?: number;
+  /**
+   * Whether this suite's generation path cannot export traces to TRACING_ES_URL (set
+   * per-project by `createPlaywrightEvalsConfig`, not readable from the environment —
+   * a stray env value must not turn the opt-in on).
+   */
+  tracesUnavailableForSuiteMode?: boolean;
 }
 
 /**
@@ -57,9 +63,6 @@ export function createPlaywrightEvalsConfig({
    */
   tracesUnavailableForSuiteMode?: boolean;
 }): PlaywrightTestConfig<{}, EvaluationTestOptions> {
-  if (tracesUnavailableForSuiteMode) {
-    process.env.KBN_EVALS_TRACES_UNAVAILABLE = 'true';
-  }
   const { reporter, use, outputDir, projects, ...config } = createPlaywrightConfig({
     testDir,
     runGlobalSetup,
@@ -128,6 +131,7 @@ export function createPlaywrightEvalsConfig({
               evaluationConnectorParam: evaluationConnector,
               repetitions: experimentRepetitions,
               concurrency: experimentConcurrency,
+              tracesUnavailableForSuiteMode: tracesUnavailableForSuiteMode ?? false,
             },
           };
         }) ?? []

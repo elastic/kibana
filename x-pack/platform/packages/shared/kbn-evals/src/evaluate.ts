@@ -412,15 +412,19 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
   ],
   evaluators: [
-    async ({ log, inferenceClient, evaluationConnector, traceEsClient }, use) => {
+    async (
+      { log, inferenceClient, evaluationConnector, traceEsClient, tracesUnavailableForSuiteMode },
+      use
+    ) => {
       const evaluatorInferenceClient = inferenceClient.bindTo({
         connectorId: evaluationConnector.id,
       });
 
       // Suites whose generation path cannot export traces to the queried trace store
-      // (TRACING_ES_URL) opt in explicitly; their trace-based evaluators then report
+      // (TRACING_ES_URL) opt in explicitly via a per-project Playwright option set in
+      // `createPlaywrightEvalsConfig`; never readable from the environment, so a stray
+      // env value cannot turn the opt-in on. Their trace-based evaluators then report
       // `unavailable`/`no_spans_for_suite_mode` instead of failing after retries.
-      const tracesUnavailableForSuiteMode = process.env.KBN_EVALS_TRACES_UNAVAILABLE === 'true';
 
       // These judges run in-process against `evaluationConnector`, so unlike the
       // `_evaluate`-backed ones they know their model up front.
@@ -512,4 +516,5 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   evaluationConnectorParam: [undefined, { option: true, scope: 'worker' }],
   repetitions: [1, { option: true, scope: 'worker' }],
   concurrency: [DEFAULT_EXPERIMENT_CONCURRENCY, { option: true, scope: 'worker' }],
+  tracesUnavailableForSuiteMode: [false, { option: true, scope: 'worker' }],
 });
