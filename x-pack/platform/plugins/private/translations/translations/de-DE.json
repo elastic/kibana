@@ -43392,6 +43392,7 @@
     "xpack.securitySolution.detectionEngine.rules.addElasticRulesButtonTitle": "Elastic-Regeln hinzufügen",
     "xpack.securitySolution.detectionEngine.rules.addNewRuleTitle": "Neue Regel erstellen",
     "xpack.securitySolution.detectionEngine.rules.addPageTitle": "Erstellen",
+    "xpack.securitySolution.detectionEngine.rules.addRules.installAllButtonAriaLabel": "Installieren Sie alle Elastic-Regeln",
     "xpack.securitySolution.detectionEngine.rules.addRules.installAllButtonTitle": "Installieren Sie alle",
     "xpack.securitySolution.detectionEngine.rules.addRules.installSelectedRules": "{numberOfSelectedRules} ausgewählte Regel(n) installieren",
     "xpack.securitySolution.detectionEngine.rules.addRules.noRulesBodyTitle": "Für die Installation sind keine vorgefertigten Erkennungsregeln verfügbar",

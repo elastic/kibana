@@ -68,6 +68,7 @@ export const AddPrebuiltRulesAppHeader = React.memo(() => {
       primaryActionItem: {
         id: 'installAllRules',
         label: i18n.INSTALL_ALL,
+        tooltipContent: i18n.INSTALL_ALL_ARIA_LABEL,
         iconType: 'plusCircle',
         run: () => installAllRules(),
         disableButton: !canEditRules || !hasRulesToInstall || isRequestInProgress,

@@ -104,6 +104,8 @@ describe('AddPrebuiltRulesAppHeader', () => {
 
     const installAllButton = screen.getByTestId('installAllRulesButton');
     expect(installAllButton).toHaveTextContent('Install all');
+    await userEvent.hover(installAllButton);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Install all Elastic rules');
     await userEvent.click(installAllButton);
 
     expect(installAllRules).toHaveBeenCalled();
