@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under the
- * Elastic License 2.0. Use of this file is governed by the Elastic License
- * 2.0.
- */
-
+import { isBuiltInConversationEventType } from '@kbn/agent-builder-common';
 import { escalationCases, validateCases } from './dataset';
 import type { EscalationCase } from './types';
 
@@ -47,6 +42,14 @@ describe('escalation grounded-QA dataset', () => {
         }
       }
     }
+  });
+
+  it('seeds no built-in event types (_add_events rejects them with a 400)', () => {
+    const types = escalationCases.flatMap((c) =>
+      c.investigations.flatMap((inv) => inv.events.map((event) => event.type))
+    );
+    expect(types.length).toBeGreaterThan(0);
+    expect(types.filter((type) => isBuiltInConversationEventType(type))).toEqual([]);
   });
 
   it('planted fact keys are unique per case', () => {

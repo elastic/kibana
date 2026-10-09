@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under the
- * Elastic License 2.0. Use of this file is governed by the Elastic License
- * 2.0.
- */
-
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
@@ -124,7 +118,7 @@ const ATTACHMENT_DESCRIPTION_MAX_LENGTH = 2048;
 const eventToTextAttachment = (
   event: SeededEvent
 ): { type: 'text'; data: { content: string }; description: string } => {
-  const content = event.data.message ?? event.data.text ?? Object.values(event.data).join('\n');
+  const content = event.data.text;
   return {
     type: 'text',
     data: { content: event.data.title ? `${event.data.title}\n${content}` : content },
@@ -185,15 +179,15 @@ export interface RunEscalationCaseResult extends EscalationTaskOutput {
 }
 
 /**
- * Polls the escalation conversation until `metadata.summary` appears (or the
- * attempt budget is exhausted). Returns the summary, or undefined if the
- * summarize workflow never produced one.
+ * Polls the escalation conversation until `metadata.summary` appears. Throws
+ * `EscalationWorldSetupError` when the summarize workflow produces none within
+ * the timeout, so a missing summary fails the run instead of scoring 0.
  */
 export const waitForSummary = async (
   fetch: HttpHandler,
   escalationId: string,
   { timeoutMs = 5 * 60_000, intervalMs = 10_000 }: { timeoutMs?: number; intervalMs?: number } = {}
-): Promise<string | undefined> => {
+): Promise<string> => {
   const deadline = Date.now() + timeoutMs;
   for (;;) {
     const conversation = await get<ConversationGetResponse>(
@@ -205,7 +199,9 @@ export const waitForSummary = async (
       return summary;
     }
     if (Date.now() >= deadline) {
-      return undefined;
+      throw new EscalationWorldSetupError(
+        `Escalation ${escalationId} has no metadata.summary after ${timeoutMs}ms; is the investigation-summary workflow enabled?`
+      );
     }
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
   }
@@ -337,7 +333,9 @@ export const runEscalationCase = async ({
     assertSyncCopiedAll(c.id, sync, expectedCopies);
 
     // 4. Wait for the summarize workflow to write metadata.summary.
-    const summary = await waitForSummary(fetch, esclId);
+    const summary = await setupStep(`wait for the summary of ${c.id}`, () =>
+      waitForSummary(fetch, esclId)
+    );
 
     // 5. Ask the escalation-context chat every question. A failed round is a
     // scored failure (kept in the denominator, error recorded), never dropped.

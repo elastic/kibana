@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under the
- * Elastic License 2.0. Use of this file is governed by the Elastic License
- * 2.0.
- */
-
 /** A custom timeline event seeded into a conversation through `_add_events`. */
 export interface SeededEvent {
-  /** `user_message` (journal note) or `text_note` (comment). */
-  type: 'user_message' | 'text_note';
+  /**
+   * Only custom event types are accepted by `_add_events`; built-in types (`user_message`, …)
+   * are rejected with a 400.
+   */
+  type: 'text_note';
   data: Record<string, string>;
 }
 

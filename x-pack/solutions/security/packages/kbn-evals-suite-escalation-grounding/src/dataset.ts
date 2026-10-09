@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under the
- * Elastic License 2.0. Use of this file is governed by the Elastic License
- * 2.0.
- */
-
 import { containsToken } from './grading';
 import type { CaseValidationIssue, EscalationCase, SeededEvent } from './types';
 
-const note = (message: string): SeededEvent => ({
-  type: 'user_message',
-  data: { message },
+// Both helpers seed `text_note`: `_add_events` rejects built-in types such as `user_message`
+// with a 400, so journal-style facts ride on the custom event type too.
+const note = (text: string): SeededEvent => ({
+  type: 'text_note',
+  data: { text },
 });
 const comment = (text: string, title?: string): SeededEvent => ({
   type: 'text_note',

@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under the
- * Elastic License 2.0. Use of this file is governed by the Elastic License
- * 2.0.
- */
-
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { isBuiltInConversationEventType } from '@kbn/agent-builder-common';
 import {
   ESCALATION_LINK_URL,
   ESCALATION_SYNC_URL,
@@ -22,6 +17,7 @@ import {
   EscalationWorldSetupError,
   runEscalationCase,
   spacePath,
+  waitForSummary,
   withSpace,
 } from './escalation_world';
 import { chatKeyMentionRecall } from './evaluators';
@@ -58,10 +54,19 @@ const createFakeKibana = ({
       investigations += 1;
       return { id: body.conversation_id, user: { id: 'profile-uid' } };
     }
-    if (
-      options.method === 'POST' &&
-      /\/conversations\/[^/]+\/(_add_events|attachments)$/.test(path)
-    ) {
+    if (options.method === 'POST' && /\/conversations\/[^/]+\/_add_events$/.test(path)) {
+      // Mirrors the product's validateConversationEvents: built-in types are a 400.
+      const builtIn = (body.events as Array<{ type: string }>).find(({ type }) =>
+        isBuiltInConversationEventType(type)
+      );
+      if (builtIn) {
+        throw new Error(
+          `400 Bad Request: Conversation event type "${builtIn.type}" is internal and cannot be added directly`
+        );
+      }
+      return {};
+    }
+    if (options.method === 'POST' && /\/conversations\/[^/]+\/attachments$/.test(path)) {
       return {};
     }
     if (options.method === 'POST' && path === ESCALATIONS_PATH) {
@@ -101,6 +106,40 @@ describe('runEscalationCase', () => {
     expect(kibana.calls.find((call) => call.path === ESCALATIONS_PATH)?.body).toMatchObject({
       assignees: ['profile-uid'],
     });
+  });
+
+  it('seeds only custom event types, which the real _add_events route accepts', async () => {
+    const kibana = createFakeKibana();
+    await run(kibana.fetch);
+
+    const seeded = kibana.calls
+      .filter((call) => call.path.endsWith('/_add_events'))
+      .flatMap((call) => (call.body as { events: Array<{ type: string }> }).events);
+    expect(seeded.length).toBe(totalEvents);
+    expect(seeded.every(({ type }) => !isBuiltInConversationEventType(type))).toBe(true);
+  });
+
+  it('fails setup when a case would seed a built-in event type (400 from _add_events)', async () => {
+    const kibana = createFakeKibana();
+    const withBuiltIn = {
+      ...c,
+      investigations: c.investigations.map((inv, index) =>
+        index === 0
+          ? { ...inv, events: [{ type: 'user_message', data: { message: 'hi' } }, ...inv.events] }
+          : inv
+      ),
+    } as unknown as typeof c;
+
+    const error = await runEscalationCase({
+      fetch: kibana.fetch,
+      log,
+      c: withBuiltIn,
+      agentId: 'agent',
+      connectorId: 'connector',
+    }).catch((e) => e);
+
+    expect(error).toBeInstanceOf(EscalationWorldSetupError);
+    expect(error.message).toMatch(/seed timeline events.*internal and cannot be added directly/);
   });
 
   it('throws when the sync route does not exist (never scores a broken world)', async () => {
@@ -230,5 +269,38 @@ describe('space parameter (G20 hook)', () => {
     const fetch = jest.fn() as unknown as HttpHandler;
     expect(withSpace(fetch)).toBe(fetch);
     expect(withSpace(fetch, 'default')).toBe(fetch);
+  });
+});
+
+describe('waitForSummary', () => {
+  const conversationFetch = (metadata: Record<string, unknown>) =>
+    (async () => ({ id: 'esc-1', metadata })) as unknown as HttpHandler;
+
+  it('returns the summary once it is written', async () => {
+    await expect(
+      waitForSummary(conversationFetch({ summary: 'done' }), 'esc-1', {
+        timeoutMs: 50,
+        intervalMs: 5,
+      })
+    ).resolves.toBe('done');
+  });
+
+  it('throws EscalationWorldSetupError when no summary appears before the timeout', async () => {
+    const error = await waitForSummary(conversationFetch({}), 'esc-1', {
+      timeoutMs: 30,
+      intervalMs: 5,
+    }).catch((e) => e);
+
+    expect(error).toBeInstanceOf(EscalationWorldSetupError);
+    expect(error.message).toMatch(/no metadata\.summary/);
+  });
+
+  it('treats a blank summary as missing', async () => {
+    await expect(
+      waitForSummary(conversationFetch({ summary: '   ' }), 'esc-1', {
+        timeoutMs: 30,
+        intervalMs: 5,
+      })
+    ).rejects.toBeInstanceOf(EscalationWorldSetupError);
   });
 });

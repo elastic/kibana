@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under the
- * Elastic License 2.0. Use of this file is governed by the Elastic License
- * 2.0.
- */
-
 /**
  * Escalation summary + escalation-context chat grounded-QA eval
  * (security-team#19927, gap G19).
@@ -57,6 +51,7 @@ import { escalationCases, validateCases } from '../src/dataset';
 import { runEscalationCase, withSpace } from '../src/escalation_world';
 import { overrideInferenceFeature, SUMMARY_INFERENCE_FEATURE_ID } from '../src/inference_override';
 import { assertJudgeIsolation } from '../src/judge';
+import { ensureWorkflowEnabled } from '../src/summary_workflow';
 import type { EscalationCase } from '../src/types';
 import {
   chatKeyMentionRecall,
@@ -98,6 +93,7 @@ evaluate.describe(
     // connector, not the model under test. Route that feature to the connector
     // under test for the run so summary metrics are per-model, then restore it.
     let restoreInferenceSettings: (() => Promise<void>) | undefined;
+    let restoreWorkflow: (() => Promise<void>) | undefined;
 
     evaluate.beforeAll(
       async ({
@@ -113,15 +109,8 @@ evaluate.describe(
       }) => {
         assertJudgeIsolation({ connector, evaluationConnector, log });
         const fetch = withSpace(baseFetch, SPACE_ID);
-        const workflow = await fetch<{ enabled: boolean }>(
-          `/api/workflows/workflow/${encodeURIComponent(SUMMARY_WORKFLOW_ID)}`,
-          { method: 'GET', version: '2023-10-31', headers: { 'elastic-api-version': '2023-10-31' } }
-        ).catch(() => undefined);
-        if (workflow && !workflow.enabled) {
-          log.warning(
-            `${SUMMARY_WORKFLOW_ID} is disabled; summaries will be missing and the summary metrics will read 0`
-          );
-        }
+        // The shipped workflow is disabled; without it no summary is ever written.
+        restoreWorkflow = await ensureWorkflowEnabled(fetch, SUMMARY_WORKFLOW_ID);
         restoreInferenceSettings = await overrideInferenceFeature({
           fetch,
           featureId: SUMMARY_INFERENCE_FEATURE_ID,
@@ -134,6 +123,9 @@ evaluate.describe(
     evaluate.afterAll(async ({ log }: { log: ToolingLog }) => {
       await restoreInferenceSettings?.().catch((error: Error) =>
         log.warning(`Could not restore inference settings: ${error.message}`)
+      );
+      await restoreWorkflow?.().catch((error: Error) =>
+        log.warning(`Could not restore ${SUMMARY_WORKFLOW_ID}: ${error.message}`)
       );
     });
 
