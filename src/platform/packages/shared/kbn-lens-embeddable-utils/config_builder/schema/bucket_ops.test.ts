@@ -256,16 +256,9 @@ describe('Bucket Operation Schemas', () => {
           time_field: 'timestamp',
         },
       };
-      const withoutTimeField = {
-        ...withTimeField,
-        rank_by: { type: 'custom', operation: 'last_value', field: 'bytes', direction: 'desc' },
-      };
 
-      expect(bucketTermsOperationSchema.parse(withTimeField).rank_by).toEqual(
+      expect(bucketTermsOperationSchema.validate(withTimeField).rank_by).toEqual(
         withTimeField.rank_by
-      );
-      expect(bucketTermsOperationSchema.parse(withoutTimeField).rank_by).toEqual(
-        withoutTimeField.rank_by
       );
     });
 
@@ -276,7 +269,7 @@ describe('Bucket Operation Schemas', () => {
         rank_by: { type: 'custom', operation: 'last_value', field: 'bytes', direction: 'desc' },
       };
 
-      expect(bucketTermsOperationSchema.parse(withoutTimeField).rank_by).toEqual(
+      expect(bucketTermsOperationSchema.validate(withoutTimeField).rank_by).toEqual(
         withoutTimeField.rank_by
       );
     });
@@ -294,7 +287,7 @@ describe('Bucket Operation Schemas', () => {
         },
       };
 
-      expect(() => bucketTermsOperationSchema.parse(input)).toThrow();
+      expect(() => bucketTermsOperationSchema.validate(input)).toThrow();
     });
   });
 
