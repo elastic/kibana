@@ -21,7 +21,7 @@ export const CREATE_DEACTIVATE_EPISODE_ACTION_REQUEST: CreateDeactivateEpisodeAc
 export const createDeactivateEpisodeActionOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     requestBody: {
-      name: 'createDeactivateEpisodeActionRequest',
+      name: 'createDeactivateAlertActionRequest',
       summary: 'Deactivate as a false positive',
       value: CREATE_DEACTIVATE_EPISODE_ACTION_REQUEST,
     },

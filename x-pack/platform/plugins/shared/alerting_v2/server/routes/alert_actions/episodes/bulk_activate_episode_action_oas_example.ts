@@ -10,7 +10,7 @@ import { buildOasOperation, invalidResponseExample } from '../../oas_utils';
 import type { AlertingOasOperationObject } from '../../oas_types';
 
 export const BULK_ACTIVATE_EPISODE_ACTION_REQUEST: BulkActivateEpisodeActionBody = {
-  items: [{ alert_id: 'episode-1', reason: 'manual reopen' }],
+  items: [{ alert_id: 'alert-1', reason: 'manual reopen' }],
 };
 
 export const BULK_ACTIVATE_EPISODE_ACTION_RESPONSE: BulkResponse = {
@@ -27,13 +27,13 @@ const INVALID_BULK_ACTIVATE_EPISODE_ACTION_RESPONSE = invalidResponseExample({
 export const bulkActivateEpisodeActionOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     requestBody: {
-      name: 'bulkActivateEpisodeActionRequest',
-      summary: 'Reopen an alert episode with a reason',
+      name: 'bulkActivateAlertActionRequest',
+      summary: 'Reopen an alert with a reason',
       value: BULK_ACTIVATE_EPISODE_ACTION_REQUEST,
     },
     responses: {
       200: {
-        name: 'bulkActivateEpisodeActionResponse',
+        name: 'bulkActivateAlertActionResponse',
         summary: 'All actions created',
         value: BULK_ACTIVATE_EPISODE_ACTION_RESPONSE,
       },

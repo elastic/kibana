@@ -75,7 +75,7 @@ export const createBulkEpisodeActionRouteForType = <
     static routeOptions = {
       access,
       summary,
-      description: 'Create the same action for multiple alert episodes in a single request.',
+      description: 'Create the same action for multiple alerts in a single request.',
       oasOperationObject,
     } as const;
     static schemas = {
