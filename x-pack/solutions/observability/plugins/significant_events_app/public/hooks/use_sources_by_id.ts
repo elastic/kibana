@@ -5,12 +5,21 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { useFetchSources } from './use_fetch_sources';
 
+const DELETED_SOURCE_LABEL = i18n.translate('xpack.significantEventsApp.sources.deletedSource', {
+  defaultMessage: 'Deleted source',
+});
+
 interface SourcesLookup {
   sourcesById: Map<string, NightshiftSource>;
-  /** The source title, or the raw value for ids that are not in the catalog. */
+  /**
+   * The source title. An id missing from a loaded catalog is a deleted source and gets a
+   * placeholder. Before the catalog loads, or when it failed to load, the raw value is returned so
+   * live sources are not mislabelled as deleted.
+   */
   getSourceTitle: (sourceId: string) => string;
 }
 
@@ -20,18 +29,21 @@ const toSourcesLookup = (sources: NightshiftSource[]): SourcesLookup => {
   const sourcesById = new Map(sources.map((source) => [source.id, source]));
   return {
     sourcesById,
-    getSourceTitle: (sourceId) => sourcesById.get(sourceId)?.title ?? sourceId,
+    getSourceTitle: (sourceId) => sourcesById.get(sourceId)?.title ?? DELETED_SOURCE_LABEL,
   };
 };
 
-const EMPTY_SOURCES_LOOKUP = toSourcesLookup([]);
+const NOT_LOADED_SOURCES_LOOKUP: SourcesLookup = {
+  sourcesById: new Map(),
+  getSourceTitle: (sourceId) => sourceId,
+};
 
 /**
- * Looks sources up by id. `getSourceTitle` falls back to the raw value when the id is not in the
- * catalog, including a source that has been deleted.
+ * Looks sources up by id. `getSourceTitle` labels an id missing from the loaded catalog as a
+ * deleted source.
  */
 export function useSourcesById(): SourcesLookup & { isError: boolean } {
-  const { data = EMPTY_SOURCES_LOOKUP, isError } = useFetchSources({
+  const { data = NOT_LOADED_SOURCES_LOOKUP, isError } = useFetchSources({
     select: toSourcesLookup,
     showErrorToast: true,
   });

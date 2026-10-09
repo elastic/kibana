@@ -48,12 +48,18 @@ describe('useSourcesById', () => {
     } as never);
   });
 
-  it('shows the title of a known source and the raw value of anything else', async () => {
+  it('shows the title of a known source and a deleted-source label for anything else', async () => {
     const { result } = renderHook(() => useSourcesById(), { wrapper });
 
     await waitFor(() => expect(result.current.sourcesById.size).toBe(1));
     expect(result.current.getSourceTitle('source-1')).toBe('Nginx errors');
-    expect(result.current.getSourceTitle('logs.legacy-stream')).toBe('logs.legacy-stream');
+    expect(result.current.getSourceTitle('logs.legacy-stream')).toBe('Deleted source');
+  });
+
+  it('shows the raw id until the catalog has loaded', () => {
+    const { result } = renderHook(() => useSourcesById(), { wrapper });
+
+    expect(result.current.getSourceTitle('source-1')).toBe('source-1');
   });
 
   it('keeps the same getSourceTitle across renders while the list is unchanged', async () => {
