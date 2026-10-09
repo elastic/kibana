@@ -153,7 +153,7 @@ describe('MatcherSuggestionsService.getRuleEventFieldNames', () => {
   });
 });
 
-describe('MatcherSuggestionsService.getSuggestions', () => {
+describe('MatcherSuggestionsService.getSuggestions for episode fields', () => {
   const service = new MatcherSuggestionsService(createMockEsClient());
 
   it('suggests episode status values using the episode index field name', async () => {
