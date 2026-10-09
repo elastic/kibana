@@ -24,6 +24,34 @@ describe('DispatchPlan', () => {
     expect(DispatchPlan.empty().isEmpty()).toBe(true);
   });
 
+  describe('alreadyNotified', () => {
+    it('defaults to an empty list', () => {
+      expect(DispatchPlan.empty().alreadyNotified).toEqual([]);
+    });
+
+    it('is not empty when only already-notified groups are planned', () => {
+      const plan = DispatchPlan.of({
+        toDispatch: [],
+        throttled: [],
+        alreadyNotified: [createActionGroup({ id: 'g1', alerts: [alert1] })],
+        dispatchable: [alert1],
+      });
+
+      expect(plan.isEmpty()).toBe(false);
+    });
+
+    it('excludes already-notified alerts from unmatched', () => {
+      const plan = DispatchPlan.of({
+        toDispatch: [],
+        throttled: [],
+        alreadyNotified: [createActionGroup({ id: 'g1', alerts: [alert1] })],
+        dispatchable: [alert1, alert2],
+      });
+
+      expect(plan.unmatched).toEqual([alert2]);
+    });
+  });
+
   describe('unmatched', () => {
     it('contains the dispatchable alerts that landed in no group', () => {
       const plan = DispatchPlan.of({
