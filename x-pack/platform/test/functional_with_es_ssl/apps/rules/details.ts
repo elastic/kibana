@@ -47,6 +47,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdConnector;
   }
 
+  async function readRuleEnabledBadge() {
+    if (await testSubjects.exists('ruleEnabledBadge')) {
+      return await testSubjects.getVisibleText('ruleEnabledBadge');
+    }
+    await testSubjects.click('appHeaderBadgesOverflow');
+    const text = await testSubjects.getVisibleText('ruleEnabledBadge');
+    await testSubjects.click('appHeaderBadgesOverflow');
+    return text;
+  }
+
   async function createAlwaysFiringRule(overwrites: Record<string, any> = {}, spaceId?: string) {
     const spaceIdSegment = spaceId ? `s/${spaceId}/` : '';
     const { body: createdRule } = await supertest
@@ -189,9 +199,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should disable the rule', async () => {
-        const statusBadge = await testSubjects.find('ruleEnabledBadge');
-
-        expect(await statusBadge.getVisibleText()).to.eql('Enabled');
+        expect(await readRuleEnabledBadge()).to.eql('Enabled');
 
         await testSubjects.click('ruleEnabledSwitch');
 
@@ -199,14 +207,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async () => {
-          expect(await statusBadge.getVisibleText()).to.eql('Disabled');
+          expect(await readRuleEnabledBadge()).to.eql('Disabled');
         });
       });
 
       it('should allow you to snooze a disabled rule', async () => {
-        const statusBadge = await testSubjects.find('ruleEnabledBadge');
-
-        expect(await statusBadge.getVisibleText()).to.eql('Disabled');
+        expect(await readRuleEnabledBadge()).to.eql('Disabled');
 
         let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
         await snoozeBadge.click();
@@ -227,14 +233,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should reenable a disabled the rule', async () => {
-        const statusBadge = await testSubjects.find('ruleEnabledBadge');
-
-        expect(await statusBadge.getVisibleText()).to.eql('Disabled');
+        expect(await readRuleEnabledBadge()).to.eql('Disabled');
 
         await testSubjects.click('ruleEnabledSwitch');
 
         await retry.try(async () => {
-          expect(await statusBadge.getVisibleText()).to.eql('Enabled');
+          expect(await readRuleEnabledBadge()).to.eql('Enabled');
         });
       });
 
@@ -929,7 +933,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         // Verify we're on the rule details page by checking for rule-specific elements
-        await testSubjects.existOrFail('ruleEnabledBadge');
+        await testSubjects.existOrFail('classicRulesBadge');
         await testSubjects.existOrFail('openEditRuleFlyoutButton');
       });
 
@@ -954,7 +958,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         // Verify we're on the rule details page by checking for rule-specific elements
-        await testSubjects.existOrFail('ruleEnabledBadge');
+        await testSubjects.existOrFail('classicRulesBadge');
         await testSubjects.existOrFail('openEditRuleFlyoutButton');
 
         // Assert that we're still within the correct space by checking the URL
