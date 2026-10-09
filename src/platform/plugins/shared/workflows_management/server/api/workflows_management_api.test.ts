@@ -878,6 +878,7 @@ steps:
             event: { type: 'test-event' },
             spaceId,
             inputs: { param1: 'value1' },
+            isUserInteractive: true,
           },
           mockRequest
         );
@@ -933,6 +934,7 @@ steps:
               param1: 'value1',
               param2: 'value2',
             },
+            isUserInteractive: true,
           },
           mockRequest
         );
@@ -1153,6 +1155,7 @@ steps:
           expect.any(Object),
           expect.objectContaining({
             spaceId: customSpaceId,
+            isUserInteractive: true,
           }),
           mockRequest
         );
@@ -1285,6 +1288,7 @@ steps:
           inputs: { investigation: 'case-1' },
           triggeredBy: undefined,
           metadata,
+          isUserInteractive: true,
         },
         mockRequest
       );
@@ -1424,6 +1428,9 @@ steps:
           metadata: { agent_id: 'agent-1' },
         },
         mockRequest
+      );
+      expect(mockWorkflowsExecutionEngine.executeWorkflow.mock.calls[0][1]).not.toHaveProperty(
+        'isUserInteractive'
       );
       expect(mockWorkflowsService.getWorkflowExecution).toHaveBeenCalledWith(
         'test-exec-id',

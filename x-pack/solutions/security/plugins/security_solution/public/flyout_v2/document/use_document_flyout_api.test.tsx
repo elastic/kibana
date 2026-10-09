@@ -22,6 +22,7 @@ import {
   FLYOUT_TOOL,
   FLYOUT_SESSION_KIND,
 } from '../../common/lib/telemetry';
+import { FLYOUT_WIDTH_LOCAL_STORAGE } from '../shared/constants/local_storage';
 
 jest.mock('react-redux-v7', () => ({
   ...jest.requireActual('react-redux-v7'),
@@ -92,6 +93,39 @@ describe('useDocumentFlyoutApi', () => {
       session: FLYOUT_SESSION_KIND.START,
       origin: undefined,
     });
+  });
+
+  it('opens a single alert at the origin flyout size instead of the persisted Security width', () => {
+    const storageGet = jest.fn((key: string) =>
+      key === FLYOUT_WIDTH_LOCAL_STORAGE ? 720 : undefined
+    );
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        overlays: { openSystemFlyout: mockOpenSystemFlyout },
+        storage: { get: storageGet, set: jest.fn(), remove: jest.fn() },
+        telemetry: { reportEvent: mockReportEvent },
+      },
+    });
+
+    const { result } = renderHook(() => useDocumentFlyoutApi());
+    result.current.openDocumentFlyoutFromIndex({
+      documentId: '1',
+      indexName: 'index',
+      originFlyoutSize: 640,
+    });
+    result.current.openDocumentFlyoutFromPattern({
+      documentId: '2',
+      indexName: '.alerts-*',
+      originFlyoutSize: 's',
+    });
+
+    expect(mockOpenSystemFlyout.mock.calls[0][1]).toEqual(
+      expect.objectContaining({ size: 640, maxWidth: false })
+    );
+    expect(mockOpenSystemFlyout.mock.calls[0][1].defaultSize).toBeUndefined();
+    expect(mockOpenSystemFlyout.mock.calls[1][1]).toEqual(
+      expect.objectContaining({ size: 's', maxWidth: false })
+    );
   });
 
   it('openDocumentFlyoutFromIndexAsChild opens a system flyout that inherits the current session', () => {

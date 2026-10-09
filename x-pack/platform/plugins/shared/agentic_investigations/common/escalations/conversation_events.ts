@@ -20,8 +20,11 @@ export const ESCALATION_CREATED_FROM_INVESTIGATION_EVENT_TYPE =
 export const ESCALATION_INVESTIGATION_LINKED_EVENT_TYPE =
   'escalation_investigation_linked' as const;
 
+/** Written for every linked investigation whose attachments were synced into the escalation. */
+export const ESCALATION_ATTACHMENTS_SYNCED_EVENT_TYPE = 'escalation_attachments_synced' as const;
+
 /**
- * Payload shared by both escalation timeline events. The title and agent id are snapshots taken
+ * Payload shared by the created and linked escalation timeline events. The title and agent id are snapshots taken
  * when the event is written, so rendering needs no extra fetch and survives later changes.
  */
 export const escalationInvestigationEventSchema = z.object({
@@ -32,3 +35,18 @@ export const escalationInvestigationEventSchema = z.object({
 });
 
 export type EscalationInvestigationEventData = z.infer<typeof escalationInvestigationEventSchema>;
+
+/** Upper bound on the attachment ids one sync event lists. */
+export const MAX_SYNCED_ATTACHMENT_IDS = 1000;
+
+/**
+ * Payload of the sync event: the investigation snapshot plus the ids, as stored in the
+ * escalation, of the attachments that sync copied from it.
+ */
+export const escalationAttachmentsSyncedEventSchema = escalationInvestigationEventSchema.extend({
+  attachment_ids: z.array(z.string().min(1)).min(1).max(MAX_SYNCED_ATTACHMENT_IDS),
+});
+
+export type EscalationAttachmentsSyncedEventData = z.infer<
+  typeof escalationAttachmentsSyncedEventSchema
+>;
