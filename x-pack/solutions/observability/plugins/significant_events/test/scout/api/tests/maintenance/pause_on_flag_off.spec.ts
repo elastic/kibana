@@ -31,6 +31,9 @@ const SOURCE_ESQL = 'FROM logs.otel, logs.otel.*';
 // The flag-off pause runs only after the flag value settles, plus, on Cloud, the ~10s config
 // poll that carries the override to every node.
 const POLL_OPTIONS = { timeout: 45_000, intervals: [1_000] };
+// Managed workflows install asynchronously after global setup turns the flag on, and this spec runs
+// right after that, so installation gets a longer budget than the pause itself.
+const INSTALL_POLL_OPTIONS = { timeout: 120_000, intervals: [1_000] };
 
 const PAUSED_BY_FLAG = { state: 'paused', updatedBy: MAINTENANCE_FEATURE_FLAG_ACTOR };
 
@@ -104,6 +107,45 @@ const createClient = (
         responseType: 'json',
       });
       return response.statusCode === 200 ? response.body.enabled : undefined;
+    },
+    /**
+     * Polls until the workflow reports `expected` for `enabled`. A timeout names the last response,
+     * since a workflow that is missing or unreadable only ever reads as `undefined`.
+     */
+    async pollWorkflowEnabled({
+      endpoint,
+      expected,
+      message,
+      options,
+    }: {
+      endpoint: string;
+      expected: boolean;
+      message: string;
+      options: { timeout: number; intervals: number[] };
+    }) {
+      let lastResponse = 'no response yet';
+      try {
+        await expect
+          .poll(
+            async () => {
+              const response = await apiClient.get(endpoint, {
+                headers: publicHeaders,
+                responseType: 'json',
+              });
+              lastResponse =
+                response.statusCode === 200
+                  ? `200, enabled: ${String(response.body.enabled)}`
+                  : `${response.statusCode} ${JSON.stringify(response.body).slice(0, 300)}`;
+              return response.statusCode === 200 ? response.body.enabled : undefined;
+            },
+            { ...options, message }
+          )
+          .toBe(expected);
+      } catch (error) {
+        throw new Error(`${message}. Last response from ${endpoint}: ${lastResponse}`, {
+          cause: error,
+        });
+      }
     },
     async bootstrapSpaceWorkflow() {
       // Bootstrapping needs Manage engines, which the streams admin role does not include.
@@ -222,7 +264,7 @@ apiTest.describe(
       'pauses when the flag is turned off and stays paused when it is turned back on',
       async ({ apiClient, apiServices }) => {
         // Waits for workflow installation plus the flag settle window, beyond the 60s default.
-        apiTest.setTimeout(120_000);
+        apiTest.setTimeout(300_000);
         const client = createClient(apiClient, cookieHeader, engineAdminCookieHeader);
         const nightshift = apiServices.significantEventsTest;
 
@@ -231,20 +273,20 @@ apiTest.describe(
           async () => {
             expect((await client.getMaintenance()).state).toBe('enabled');
             // Installation is asynchronous, so wait until the shared workflow is installed and running.
-            await expect
-              .poll(() => client.isWorkflowEnabled(SHARED_WORKFLOW_ENDPOINT), {
-                ...POLL_OPTIONS,
-                message: 'the shared discovery workflow is installed and enabled',
-              })
-              .toBe(true);
+            await client.pollWorkflowEnabled({
+              endpoint: SHARED_WORKFLOW_ENDPOINT,
+              expected: true,
+              message: 'the shared discovery workflow is installed and enabled',
+              options: INSTALL_POLL_OPTIONS,
+            });
             // The per-space workflow only exists once something asks for it.
             await client.bootstrapSpaceWorkflow();
-            await expect
-              .poll(() => client.isWorkflowEnabled(SPACE_WORKFLOW_ENDPOINT), {
-                ...POLL_OPTIONS,
-                message: 'the bootstrapped space cleanup workflow is installed and enabled',
-              })
-              .toBe(true);
+            await client.pollWorkflowEnabled({
+              endpoint: SPACE_WORKFLOW_ENDPOINT,
+              expected: true,
+              message: 'the bootstrapped space cleanup workflow is installed and enabled',
+              options: INSTALL_POLL_OPTIONS,
+            });
             const source = await client.createSource(`flag-off-${uuidv4()}`);
             sourceId = source.id;
             queryId = `flag-off-${uuidv4()}`;
@@ -269,12 +311,12 @@ apiTest.describe(
               })
               .toStrictEqual(PAUSED_BY_FLAG);
             // The state reads `paused` as soon as the pause is claimed, before the sweep ends.
-            await expect
-              .poll(() => client.isWorkflowEnabled(SPACE_WORKFLOW_ENDPOINT), {
-                ...POLL_OPTIONS,
-                message: 'the pause disables the space cleanup workflow',
-              })
-              .toBe(false);
+            await client.pollWorkflowEnabled({
+              endpoint: SPACE_WORKFLOW_ENDPOINT,
+              expected: false,
+              message: 'the pause disables the space cleanup workflow',
+              options: POLL_OPTIONS,
+            });
             await expect
               .poll(() => client.isRuleEnabled(ruleId), {
                 ...POLL_OPTIONS,
