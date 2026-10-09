@@ -117,6 +117,14 @@ triggers:
           description: >
             Set by the caller when its autonomy policy already permits this
             action. Defaults to false so the gate is fail-closed.
+        proposalId:
+          type: string
+          description: >
+            The id to create the proposal under, instead of a random one, for a
+            caller that derives it from what it is proposing. An id that already
+            exists fails the run with a conflict before anything is gated or
+            settled: whether that is a problem is the caller's to decide. Must be
+            a UUID. Omit for a proposal that is always new.
       required:
         - conversationId
         - comment
@@ -149,6 +157,7 @@ steps:
       # The only deadline in this workflow. Every park below derives from the
       # `expiresAt` it resolves to.
       expiresIn: "{{ inputs.expiresIn | default: '72h' }}"
+      proposalId: '{{ inputs.proposalId }}'
 
   # Everything the loop carries lives in variables: `data.set` is the only step
   # type exempt from output eviction, so its values survive a HITL park, a task
