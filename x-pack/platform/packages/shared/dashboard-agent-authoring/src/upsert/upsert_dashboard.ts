@@ -611,7 +611,7 @@ export const executeDashboardUpsert = async ({
   const attempts = await Promise.all(plans.map((plan) => plan.resolveContent?.()));
 
   const panelAuthoringNotes: PanelAuthoringNote[] = [];
-  const movedPanelIds = new Set<string>();
+  const movedPanelSources = new Map<string, string | null>();
   plans.forEach((plan, planIndex) => {
     const attempt = attempts[planIndex];
     const { id, section, grid } = plan.item;
@@ -619,13 +619,14 @@ export const executeDashboardUpsert = async ({
       failures.push({ ...attempt.failure, identifier: id });
       return;
     }
+    const currentSectionId = getPanelSectionId(nextDashboardData, id) ?? null;
     if (
       plan.existingPanel &&
       grid === undefined &&
       section !== undefined &&
-      section !== getPanelSectionId(nextDashboardData, id)
+      section !== currentSectionId
     ) {
-      movedPanelIds.add(id);
+      movedPanelSources.set(id, currentSectionId);
     }
     nextDashboardData = applyPanel({ dashboardData: nextDashboardData, plan, attempt });
     if (attempt?.authoringNote) {
@@ -655,7 +656,7 @@ export const executeDashboardUpsert = async ({
   const originalSectionIds = getSectionIds(originalDashboardData);
   nextDashboardData = placeNewWidgets({
     dashboardData: nextDashboardData,
-    movedPanelIds,
+    movedPanelSources,
     newSectionIds: new Set(
       [...getSectionIds(nextDashboardData)].filter((id) => !originalSectionIds.has(id))
     ),
