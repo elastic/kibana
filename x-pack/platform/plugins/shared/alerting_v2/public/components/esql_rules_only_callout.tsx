@@ -29,26 +29,26 @@ export const ESQL_RULES_ONLY_CALLOUT_DISMISSED_STORAGE_KEYS = {
 export type EsqlRulesOnlyCalloutPage = keyof typeof ESQL_RULES_ONLY_CALLOUT_DISMISSED_STORAGE_KEYS;
 
 const TITLE = i18n.translate('xpack.alertingV2.esqlRulesOnlyCallout.title', {
-  defaultMessage: 'ES|QL rules only',
+  defaultMessage: 'Universal only',
 });
 
 const DESCRIPTIONS: Record<EsqlRulesOnlyCalloutPage, React.ReactNode> = {
   actionPolicies: (
     <FormattedMessage
       id="xpack.alertingV2.esqlRulesOnlyCallout.actionPoliciesDescription"
-      defaultMessage="Action policies apply to alerts from ES|QL rules and external alerts."
+      defaultMessage="Action policies apply to Universal rules and external alerts. This feature is not available for Kibana Classic alerting."
     />
   ),
   ruleLibrary: (
     <FormattedMessage
       id="xpack.alertingV2.esqlRulesOnlyCallout.ruleLibraryDescription"
-      defaultMessage="Browse templates for ES|QL rules and create new rules from them."
+      defaultMessage="Browse templates for Universal rules and create new rules from them. This feature is not available for Kibana Classic alerting."
     />
   ),
   executionHistory: (
     <FormattedMessage
       id="xpack.alertingV2.esqlRulesOnlyCallout.executionHistoryDescription"
-      defaultMessage="Review past runs for ES|QL rules and action policies."
+      defaultMessage="Review past runs for Universal rules and action policies. This feature is not available for Kibana Classic alerting."
     />
   ),
 };
@@ -58,7 +58,7 @@ export interface EsqlRulesOnlyCalloutProps {
 }
 
 /**
- * Dismissible info callout reinforcing that the page applies to ES|QL rules only.
+ * Dismissible info callout reinforcing that the page applies to Universal rules only.
  */
 export const EsqlRulesOnlyCallout = ({ page }: EsqlRulesOnlyCalloutProps) => {
   const storageKey = ESQL_RULES_ONLY_CALLOUT_DISMISSED_STORAGE_KEYS[page];

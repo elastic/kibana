@@ -45,7 +45,7 @@ export const EmptyPrompt = ({
             <h2 style={{ whiteSpace: 'nowrap' }}>
               <FormattedMessage
                 id="xpack.triggersActionsUI.components.emptyPrompt.emptyTitle"
-                defaultMessage="Get started with Standard rules"
+                defaultMessage="Get started with Classic rules"
               />
             </h2>
           }

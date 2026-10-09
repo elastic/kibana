@@ -19,8 +19,7 @@ import { ObservabilityAlertingPlugin } from './plugin';
 import {
   OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_ALERTS_PATH,
-  OBSERVABILITY_ALERTING_RULES_V1_PATH,
-  OBSERVABILITY_ALERTING_RULES_V2_PATH,
+  OBSERVABILITY_ALERTING_RULES_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID,
@@ -74,10 +73,11 @@ describe('ObservabilityAlertingPlugin', () => {
           RulesPage: () => null,
           RuleLibraryPage: () => null,
           EpisodesPage: () => null,
-          AlertsProvider: ({ children }: { children?: React.ReactNode }) => children ?? null,
           ActionPoliciesPage: () => null,
           ExecutionHistoryPage: () => null,
           CreateRuleOptionsFlyout: () => null,
+          ClassicRuleSummaryFlyout: () => null,
+          RuleSummaryFlyout: () => null,
           createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) =>
             Object.fromEntries(
               Object.entries(paths).map(([k, v]) => [k, { app: appId, pathPrefix: v }])
@@ -86,9 +86,7 @@ describe('ObservabilityAlertingPlugin', () => {
         },
         triggersActionsUi: {
           getClassicRulesPage: () => React.createElement('div'),
-        },
-        observabilityShared: {
-          navigation: { PageTemplate: () => null },
+          ruleTypeRegistry: { list: () => [] },
         },
       },
       {},
@@ -124,19 +122,24 @@ describe('ObservabilityAlertingPlugin', () => {
             visibleIn: ['globalSearch', 'projectSideNav'],
           }),
           expect.objectContaining({
-            id: 'rules-v1',
-            path: OBSERVABILITY_ALERTING_RULES_V1_PATH,
+            id: 'rules',
+            path: '/rules',
             visibleIn: ['globalSearch', 'projectSideNav'],
           }),
           expect.objectContaining({
+            id: 'rules-v1',
+            path: '/rules/v1',
+            visibleIn: ['globalSearch'],
+          }),
+          expect.objectContaining({
             id: 'rules-v2',
-            path: OBSERVABILITY_ALERTING_RULES_V2_PATH,
-            visibleIn: ['globalSearch', 'projectSideNav'],
+            path: '/rules/v2',
+            visibleIn: ['globalSearch'],
           }),
           expect.objectContaining({
             id: 'rule-library',
             path: '/rule-library',
-            visibleIn: ['globalSearch', 'projectSideNav'],
+            visibleIn: [],
           }),
           expect.objectContaining({
             id: 'action-policies',
@@ -174,11 +177,8 @@ describe('ObservabilityAlertingPlugin', () => {
     );
 
     expect(visibilityById).toEqual({
-      [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: [
-        'globalSearch',
-        'projectSideNav',
-        'classicSideNav',
-      ],
+      [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: ['globalSearch', 'projectSideNav'],
+      [OBSERVABILITY_ALERTING_RULES_DEEP_LINK_ID]: [],
       [OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]: [],
       [OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID]: [],
       [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],

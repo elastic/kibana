@@ -9,7 +9,7 @@ import type { AppHeaderBadge } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 
 const ESQL_RULES_ONLY_LABEL = i18n.translate('xpack.alertingV2.esqlRulesOnlyBadge.label', {
-  defaultMessage: 'ES|QL rules only',
+  defaultMessage: 'Universal only',
 });
 
 export const esqlRulesOnlyBadge: AppHeaderBadge = {

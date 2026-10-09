@@ -7,21 +7,18 @@
 
 import type { AppDeepLink, AppDeepLinkLocations, Capabilities } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { hasObservabilityCapabilities } from '@kbn/observability-shared-plugin/public';
-import {
-  getObservabilityRulesTabVisibility,
-  hasObservabilityAlertingCapabilities,
-} from './application/has_observability_alerting_privilege';
+import { hasObservabilityAlertingCapabilities } from './application/has_observability_alerting_privilege';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
   OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID,
-  OBSERVABILITY_ALERTING_ALERTS_ORDER,
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
+  OBSERVABILITY_ALERTING_RULES_DEEP_LINK_ID,
+  OBSERVABILITY_ALERTING_RULES_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID,
@@ -29,49 +26,6 @@ import {
 } from './constants';
 
 const SEARCHABLE_VISIBLE_IN: AppDeepLinkLocations[] = ['globalSearch', 'projectSideNav'];
-const PROJECT_SIDE_NAV_ONLY_VISIBLE_IN: AppDeepLinkLocations[] = ['projectSideNav'];
-const RULES_V1_KEYWORDS = ['classic', 'v1'];
-const RULES_V2_KEYWORDS = ['alerting', 'rules', 'esql'];
-
-type DeepLinkOverride = Partial<Pick<AppDeepLink, 'title' | 'visibleIn' | 'keywords'>>;
-
-const getRulesDeepLinkOverrides = (
-  capabilities: Capabilities
-): Partial<Record<string, DeepLinkOverride>> => {
-  const { showV1, showV2 } = getObservabilityRulesTabVisibility(capabilities);
-
-  if (showV1 && showV2) {
-    // Classic and Universal share one Rules page, so search offers only the Universal entry.
-    return {
-      [OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]: {
-        visibleIn: PROJECT_SIDE_NAV_ONLY_VISIBLE_IN,
-      },
-      [OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID]: {
-        keywords: [...RULES_V2_KEYWORDS, ...RULES_V1_KEYWORDS],
-      },
-    };
-  }
-
-  if (showV1) {
-    return {
-      [OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]: {
-        title: i18n.translate('xpack.observabilityAlerting.deepLinks.rulesV1OnlyTitle', {
-          defaultMessage: 'Rules',
-        }),
-      },
-    };
-  }
-
-  return {};
-};
-
-/**
- * Same gate as the Observability classic nav (`updateGlobalNavigation`), plus Alerting v2 alerts
- * read. Alerts is the only entry listed in the classic hamburger.
- */
-const canListInClassicSideNav = (capabilities: Capabilities): boolean =>
-  hasObservabilityAlertingCapabilities(capabilities, 'alerts').v2 ||
-  hasObservabilityCapabilities(capabilities);
 
 const canAccessDeepLink = (id: string, capabilities: Capabilities): boolean => {
   switch (id) {
@@ -79,12 +33,15 @@ const canAccessDeepLink = (id: string, capabilities: Capabilities): boolean => {
       const { v1, v2 } = hasObservabilityAlertingCapabilities(capabilities, 'alerts');
       return v1 || v2;
     }
+    case OBSERVABILITY_ALERTING_RULES_DEEP_LINK_ID: {
+      const { v1, v2 } = hasObservabilityAlertingCapabilities(capabilities, 'rules');
+      return v1 || v2;
+    }
     case OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID: {
       const { v1 } = hasObservabilityAlertingCapabilities(capabilities, 'rules');
       return v1;
     }
-    case OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID:
-    case OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID: {
+    case OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID: {
       const { v2 } = hasObservabilityAlertingCapabilities(capabilities, 'rules');
       return v2;
     }
@@ -101,24 +58,6 @@ const canAccessDeepLink = (id: string, capabilities: Capabilities): boolean => {
   }
 };
 
-const getAccessibleVisibleIn = (
-  link: AppDeepLink,
-  capabilities: Capabilities
-): AppDeepLinkLocations[] => {
-  if (!canAccessDeepLink(link.id, capabilities)) {
-    return [];
-  }
-
-  if (
-    link.id === OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID &&
-    canListInClassicSideNav(capabilities)
-  ) {
-    return [...SEARCHABLE_VISIBLE_IN, 'classicSideNav'];
-  }
-
-  return SEARCHABLE_VISIBLE_IN;
-};
-
 /**
  * Observability Alerting deep links. When `capabilities` is passed, `visibleIn`
  * is restricted so global search only offers surfaces the user can open.
@@ -131,27 +70,35 @@ export const getObservabilityAlertingDeepLinks = (capabilities?: Capabilities): 
         defaultMessage: 'Alerts',
       }),
       path: OBSERVABILITY_ALERTING_ALERTS_PATH,
-      order: OBSERVABILITY_ALERTING_ALERTS_ORDER,
       visibleIn: SEARCHABLE_VISIBLE_IN,
       keywords: ['alerting', 'episodes', 'alerts', 'inbox'],
     },
     {
+      id: OBSERVABILITY_ALERTING_RULES_DEEP_LINK_ID,
+      title: i18n.translate('xpack.observabilityAlerting.deepLinks.rulesTitle', {
+        defaultMessage: 'Rules',
+      }),
+      path: OBSERVABILITY_ALERTING_RULES_PATH,
+      visibleIn: SEARCHABLE_VISIBLE_IN,
+      keywords: ['alerting', 'rules'],
+    },
+    {
       id: OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,
       title: i18n.translate('xpack.observabilityAlerting.deepLinks.rulesV1Title', {
-        defaultMessage: 'Rules (V1)',
+        defaultMessage: 'Classic',
       }),
       path: OBSERVABILITY_ALERTING_RULES_V1_PATH,
-      visibleIn: SEARCHABLE_VISIBLE_IN,
-      keywords: ['alerting', 'rules', ...RULES_V1_KEYWORDS],
+      visibleIn: ['globalSearch'],
+      keywords: ['alerting', 'rules', 'classic', 'v1'],
     },
     {
       id: OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID,
       title: i18n.translate('xpack.observabilityAlerting.deepLinks.rulesV2Title', {
-        defaultMessage: 'Rules',
+        defaultMessage: 'Universal',
       }),
       path: OBSERVABILITY_ALERTING_RULES_V2_PATH,
-      visibleIn: SEARCHABLE_VISIBLE_IN,
-      keywords: RULES_V2_KEYWORDS,
+      visibleIn: ['globalSearch'],
+      keywords: ['alerting', 'rules', 'esql'],
     },
     {
       id: OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID,
@@ -159,7 +106,7 @@ export const getObservabilityAlertingDeepLinks = (capabilities?: Capabilities): 
         defaultMessage: 'Rule Library',
       }),
       path: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
-      visibleIn: SEARCHABLE_VISIBLE_IN,
+      visibleIn: [],
       keywords: ['alerting', 'templates', 'library'],
     },
     {
@@ -186,11 +133,8 @@ export const getObservabilityAlertingDeepLinks = (capabilities?: Capabilities): 
     return deepLinks;
   }
 
-  const overrides = getRulesDeepLinkOverrides(capabilities);
-
   return deepLinks.map((link) => ({
     ...link,
-    visibleIn: getAccessibleVisibleIn(link, capabilities),
-    ...overrides[link.id],
+    visibleIn: canAccessDeepLink(link.id, capabilities) ? link.visibleIn ?? [] : [],
   }));
 };

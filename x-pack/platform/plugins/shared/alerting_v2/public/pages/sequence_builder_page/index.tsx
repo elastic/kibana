@@ -6,18 +6,9 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
 import { FormProvider } from 'react-hook-form';
-import { useParams, useLocation } from 'react-router-dom';
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  useEuiTheme,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, useEuiMinBreakpoint, useEuiTheme } from '@elastic/eui';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -27,18 +18,18 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import { RuleFormProvider } from '@kbn/alerting-v2-rule-form';
-import type { FormValues, RuleFormServices, SequenceFormValues } from '@kbn/alerting-v2-rule-form';
-import type { UseFormReturn } from 'react-hook-form';
+import type { RuleFormServices } from '@kbn/alerting-v2-rule-form';
 import { getMinimumScheduleInterval } from '../../kibana_services';
 import { useAlertingLocators } from '../../application/locator_context';
-import { CreateActionPolicyFormFlyout } from '../../components/action_policy/form_flyout/create_action_policy_form_flyout';
-import { useCreateActionPolicyDisabledReason } from '../../hooks/use_create_action_policy_disabled_reason';
 import { useSequenceBuilderForm, useSequenceBuilderState } from './use_sequence_builder_form';
-import type { SequenceBuilderLoadError } from './use_sequence_builder_form';
 import { SequenceBuilderHeader } from './sequence_builder_header';
 import { AlertConditionCanvas } from './alert_condition_canvas';
-import { RecoveryConditionCanvas } from './recovery_condition_canvas';
-import { SequenceBuilderDetailsSidebar } from './sequence_builder_details_sidebar';
+import {
+  RecoveryConditionCanvas,
+  DEFAULT_RECOVERY_CONFIG,
+  resolveRecoveryIndices,
+} from './recovery_condition_canvas';
+import type { RecoveryConfig } from './recovery_condition_canvas';
 
 const useRuleFormServicesBag = (): RuleFormServices => {
   const http = useService(CoreStart('http'));
@@ -54,13 +45,6 @@ const useRuleFormServicesBag = (): RuleFormServices => {
     | DashboardStart
     | undefined;
   const cps = useService(PluginStart('cps'), { optional: true }) as CPSPluginStart | undefined;
-  const createActionPolicyDisabledReason = useCreateActionPolicyDisabledReason();
-  const { actionPolicyLocators } = useAlertingLocators();
-  const getActionPolicyEditHref = useCallback(
-    (actionPolicyId: string) =>
-      actionPolicyLocators.getRedirectUrl({ page: 'edit', actionPolicyId }),
-    [actionPolicyLocators]
-  );
 
   return useMemo<RuleFormServices>(
     () => ({
@@ -76,9 +60,6 @@ const useRuleFormServicesBag = (): RuleFormServices => {
       dashboard,
       cps,
       minimumScheduleInterval: getMinimumScheduleInterval(),
-      createActionPolicyFormFlyout: CreateActionPolicyFormFlyout,
-      createActionPolicyDisabledReason,
-      getActionPolicyEditHref,
     }),
     [
       http,
@@ -92,43 +73,37 @@ const useRuleFormServicesBag = (): RuleFormServices => {
       uiActions,
       dashboard,
       cps,
-      createActionPolicyDisabledReason,
-      getActionPolicyEditHref,
     ]
   );
 };
 
-interface SequenceBuilderProps {
-  ruleId: string | undefined;
-  sourceRuleId: string | undefined;
-  methods: UseFormReturn<FormValues>;
-  initialSeqValues: SequenceFormValues | undefined;
-}
-
-const SequenceBuilder: React.FC<SequenceBuilderProps> = ({
-  ruleId,
-  sourceRuleId,
-  methods,
-  initialSeqValues,
-}) => {
-  const { euiTheme } = useEuiTheme();
+export const SequenceBuilderPage: React.FC = () => {
+  const ruleFormServices = useRuleFormServicesBag();
   const { rulesLocators } = useAlertingLocators();
-  const uiState = useSequenceBuilderState(initialSeqValues);
+  const { euiTheme } = useEuiTheme();
+  const largeMediaQuery = useEuiMinBreakpoint('m');
 
-  const hasMissingRules = useMemo(
-    () => uiState.seqValues.steps.some((step) => step.rules.some((r) => r.isMissing)),
-    [uiState.seqValues.steps]
-  );
-
+  const { methods } = useSequenceBuilderForm();
+  const uiState = useSequenceBuilderState();
   const [isRuleListOpen, setIsRuleListOpen] = useState(true);
-  const handleToggleRuleList = useCallback(() => setIsRuleListOpen((v) => !v), []);
+  const handleToggleRuleList = useCallback(() => setIsRuleListOpen((prev) => !prev), []);
+  const [recoveryConfig, setRecoveryConfig] = useState<RecoveryConfig>(DEFAULT_RECOVERY_CONFIG);
 
   const handleStepChange = useCallback(
     (nextStep: 'alert' | 'recovery') => {
+      if (nextStep === 'recovery') {
+        uiState.setSeqValues((prev) => ({
+          ...prev,
+          ...resolveRecoveryIndices(
+            recoveryConfig.mode,
+            prev.steps.length,
+            prev.recoveryStepIndices
+          ),
+        }));
+      }
       uiState.setStep(nextStep);
-      uiState.setSidebarOpen(false);
     },
-    [uiState]
+    [uiState, recoveryConfig.mode]
   );
 
   const handleCancel = useCallback(() => {
@@ -137,7 +112,7 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({
 
   const rulesListHref = rulesLocators.useUrl({});
 
-  const handleSave = methods.handleSubmit((formValues) => uiState.save(formValues, ruleId));
+  const handleSave = methods.handleSubmit((formValues) => uiState.save(formValues));
 
   const canvasContent =
     uiState.step === 'alert' ? (
@@ -146,148 +121,54 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({
         setSeqValues={uiState.setSeqValues}
         isRuleListOpen={isRuleListOpen}
         onToggleRuleList={handleToggleRuleList}
-        excludeRuleId={sourceRuleId}
       />
     ) : (
       <RecoveryConditionCanvas
         seqValues={uiState.seqValues}
         setSeqValues={uiState.setSeqValues}
+        recoveryConfig={recoveryConfig}
+        setRecoveryConfig={setRecoveryConfig}
         isRuleListOpen={isRuleListOpen}
         onToggleRuleList={handleToggleRuleList}
       />
     );
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="none"
-      css={css`
-        /* EuiPageSection padding is size.l on each side; percentage height cannot fill it. */
-        block-size: calc(var(--kbn-application--content-height, 100vh) - ${euiTheme.size.l} * 2);
-        overflow: hidden;
-      `}
-    >
-      <EuiFlexItem grow={false}>
-        <SequenceBuilderHeader
-          step={uiState.step}
-          sidebarOpen={uiState.sidebarOpen}
-          seqValues={uiState.seqValues}
-          isSaving={uiState.isSaving}
-          ruleFetchError={hasMissingRules}
-          rulesListHref={rulesListHref}
-          onStepChange={handleStepChange}
-          onToggleDetails={() => uiState.setSidebarOpen((open) => !open)}
-          onSave={handleSave}
-          onCancel={handleCancel}
-        />
-      </EuiFlexItem>
-
-      <EuiFlexItem
-        css={css`
-          min-block-size: 0;
-          display: flex;
-          flex-direction: column;
-        `}
-      >
-        <SequenceBuilderDetailsSidebar
-          canvas={canvasContent}
-          sidebarOpen={uiState.sidebarOpen}
-          ruleId={ruleId}
-          seqValues={uiState.seqValues}
-          isSaving={uiState.isSaving}
-          ruleFetchError={hasMissingRules}
-          onCloseSidebar={() => uiState.setSidebarOpen(false)}
-          onSave={handleSave}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
-
-const SequenceBuilderLoadFailure: React.FC<{
-  reason: SequenceBuilderLoadError;
-  rulesListHref: string;
-}> = ({ reason, rulesListHref }) => (
-  <EuiEmptyPrompt
-    color="danger"
-    iconType="error"
-    data-test-subj="sequenceBuilderLoadError"
-    title={
-      <h2>
-        <FormattedMessage
-          id="xpack.alertingV2.sequenceBuilderPage.loadError.title"
-          defaultMessage="Unable to open this rule"
-        />
-      </h2>
-    }
-    body={
-      <p>
-        {reason === 'fetch' ? (
-          <FormattedMessage
-            id="xpack.alertingV2.sequenceBuilderPage.loadError.fetchBody"
-            defaultMessage="The rule could not be loaded. It may have been deleted, or you may not have access to it."
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.alertingV2.sequenceBuilderPage.loadError.parseBody"
-            defaultMessage="This rule's query cannot be opened in the sequence builder. Edit it in the ES|QL editor instead."
-          />
-        )}
-      </p>
-    }
-    actions={
-      <EuiButton
-        href={rulesListHref}
-        color="primary"
-        fill
-        data-test-subj="sequenceBuilderLoadErrorBack"
-      >
-        <FormattedMessage
-          id="xpack.alertingV2.sequenceBuilderPage.loadError.backToRules"
-          defaultMessage="Back to rules"
-        />
-      </EuiButton>
-    }
-  />
-);
-
-export const SequenceBuilderPage: React.FC = () => {
-  const { ruleId } = useParams<{ ruleId?: string }>();
-  const location = useLocation();
-  const cloneFromId = useMemo(
-    () => new URLSearchParams(location.search).get('cloneFrom') ?? undefined,
-    [location.search]
-  );
-  const sourceRuleId = ruleId ?? cloneFromId;
-  const ruleFormServices = useRuleFormServicesBag();
-  const { rulesLocators } = useAlertingLocators();
-  const rulesListHref = rulesLocators.useUrl({});
-
-  const { methods, isLoading, loadError, parsedSeqValues } = useSequenceBuilderForm(sourceRuleId, {
-    isClone: Boolean(cloneFromId),
-  });
-
-  if (isLoading) {
-    return (
-      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: '100%' }}>
-        <EuiLoadingSpinner size="xl" />
-      </EuiFlexGroup>
-    );
-  }
-
-  if (loadError) {
-    return <SequenceBuilderLoadFailure reason={loadError} rulesListHref={rulesListHref} />;
-  }
-
-  return (
     <RuleFormProvider services={ruleFormServices} meta={{ layout: 'flyout' }}>
       <FormProvider {...methods}>
-        <SequenceBuilder
-          ruleId={ruleId}
-          sourceRuleId={sourceRuleId}
-          methods={methods}
-          initialSeqValues={parsedSeqValues}
-        />
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          data-test-subj="sequenceBuilderPage"
+          css={css`
+            overflow: hidden;
+            /* Parent hosts (e.g. EuiPageSection) often lack a definite height, so
+               percentage height collapses the React Flow canvas to a thin strip.
+               Subtract page-section padding (size.m top + bottom) when hosted under
+               ObservabilityAlertingApp's padded Rules route. */
+            ${largeMediaQuery} {
+              block-size: calc(
+                var(--kbn-application--content-height, 100vh) - (${euiTheme.size.m} * 2)
+              );
+            }
+          `}
+        >
+          <EuiFlexItem grow={false}>
+            <SequenceBuilderHeader
+              step={uiState.step}
+              seqValues={uiState.seqValues}
+              isSaving={uiState.isSaving}
+              rulesListHref={rulesListHref}
+              onStepChange={handleStepChange}
+              onSave={handleSave}
+              onCancel={handleCancel}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow style={{ minHeight: 0 }}>
+            {canvasContent}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </FormProvider>
     </RuleFormProvider>
   );

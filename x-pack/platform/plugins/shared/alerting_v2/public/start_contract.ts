@@ -12,6 +12,8 @@ import type { AlertingV2PublicStart } from './types';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 import type { AlertingV2PageProps } from './application/composable_pages';
 import type { AlertingV2AlertsProviderProps } from './application/alerts_provider';
+import type { ClassicRuleSummaryFlyoutProps } from './classic_rule_summary_flyout';
+import type { RuleSummaryFlyoutEntryProps } from './rule_summary_flyout_entry';
 
 const LazyCreateRuleOptionsFlyout = React.lazy(() =>
   import('./create_rule_options_flyout').then((m) => ({ default: m.CreateRuleOptionsFlyout }))
@@ -22,6 +24,28 @@ const CreateRuleOptionsFlyout = (props: CreateRuleOptionsFlyoutProps) =>
     React.Suspense,
     { fallback: null },
     React.createElement(LazyCreateRuleOptionsFlyout, props)
+  );
+
+const LazyClassicRuleSummaryFlyout = React.lazy(() =>
+  import('./classic_rule_summary_flyout').then((m) => ({ default: m.ClassicRuleSummaryFlyout }))
+);
+
+const ClassicRuleSummaryFlyout = (props: ClassicRuleSummaryFlyoutProps) =>
+  React.createElement(
+    React.Suspense,
+    { fallback: null },
+    React.createElement(LazyClassicRuleSummaryFlyout, props)
+  );
+
+const LazyRuleSummaryFlyout = React.lazy(() =>
+  import('./rule_summary_flyout_entry').then((m) => ({ default: m.RuleSummaryFlyoutEntry }))
+);
+
+const RuleSummaryFlyout = (props: RuleSummaryFlyoutEntryProps) =>
+  React.createElement(
+    React.Suspense,
+    { fallback: null },
+    React.createElement(LazyRuleSummaryFlyout, props)
   );
 
 /**
@@ -62,6 +86,8 @@ const lazyPageWithContainer = (
 /** Builds the plugin's `Start` contract: the lazy, container-injected composable pages. */
 export const createStartContract = (container: Container): AlertingV2PublicStart => ({
   CreateRuleOptionsFlyout,
+  ClassicRuleSummaryFlyout,
+  RuleSummaryFlyout,
   RulesPage: lazyPageWithContainer(
     () =>
       import('./application/composable_pages').then((m) => ({

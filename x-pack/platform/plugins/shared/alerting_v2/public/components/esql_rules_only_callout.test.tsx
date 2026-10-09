@@ -29,9 +29,11 @@ describe('EsqlRulesOnlyCallout', () => {
     renderCallout();
 
     expect(screen.getByTestId('esqlRulesOnlyCallout')).toBeInTheDocument();
-    expect(screen.getByText('ES|QL rules only')).toBeInTheDocument();
+    expect(screen.getByText('Universal only')).toBeInTheDocument();
     expect(
-      screen.getByText('Action policies apply to alerts from ES|QL rules and external alerts.')
+      screen.getByText(
+        'Action policies apply to Universal rules and external alerts. This feature is not available for Kibana Classic alerting.'
+      )
     ).toBeInTheDocument();
   });
 
@@ -43,7 +45,9 @@ describe('EsqlRulesOnlyCallout', () => {
     );
 
     expect(
-      screen.getByText('Browse templates for ES|QL rules and create new rules from them.')
+      screen.getByText(
+        'Browse templates for Universal rules and create new rules from them. This feature is not available for Kibana Classic alerting.'
+      )
     ).toBeInTheDocument();
   });
 
@@ -55,7 +59,9 @@ describe('EsqlRulesOnlyCallout', () => {
     );
 
     expect(
-      screen.getByText('Review past runs for ES|QL rules and action policies.')
+      screen.getByText(
+        'Review past runs for Universal rules and action policies. This feature is not available for Kibana Classic alerting.'
+      )
     ).toBeInTheDocument();
   });
 

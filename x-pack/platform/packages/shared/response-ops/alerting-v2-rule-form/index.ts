@@ -159,3 +159,19 @@ export { LinkedActionPoliciesStep } from './flyout/compose_discover/compose_disc
 // Form fields
 export { ScheduleField } from './form/fields/schedule_field';
 export { LookbackWindow } from './form/fields/lookback_window';
+
+// Query pipeline explainer (Get started + create Assembled queries)
+export {
+  QueryPipelineExplainer,
+  AssembledQueriesControl,
+  buildPipelineSteps,
+  isComplexEsql,
+  DEMO_QUERY,
+  DEMO_RECOVERY,
+  DEMO_NO_DATA,
+} from './query_pipeline_explainer';
+export type {
+  QueryPipelineExplainerProps,
+  PipelineStep,
+  PipelineStepId,
+} from './query_pipeline_explainer';

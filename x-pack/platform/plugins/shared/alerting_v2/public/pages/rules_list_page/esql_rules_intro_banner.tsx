@@ -6,34 +6,27 @@
  */
 
 import React from 'react';
-import { EuiImage, EuiSpacer } from '@elastic/eui';
+import { EuiIllustration, EuiSpacer } from '@elastic/eui';
+import { aerospace } from '@elastic/eui-illustrations';
 import { AnnouncementBanner } from '@kbn/announcement-banner';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { ALERTING_V2_SECTION_ID, ALERTING_V2_RULES_APP_ID } from '@kbn/alerting-v2-constants';
-import illustration from '../../assets/centralized_action_policies.svg';
 
 export const ESQL_RULES_INTRO_BANNER_DISMISSED_STORAGE_KEY =
-  `${ALERTING_V2_SECTION_ID}.${ALERTING_V2_RULES_APP_ID}.esqlRulesIntroBannerDismissed` as const;
-
-/** Placeholder until comparison / ES|QL rules docs URL is finalized. */
-export const ESQL_RULES_INTRO_DOC_URL = '#' as const;
+  `${ALERTING_V2_SECTION_ID}.${ALERTING_V2_RULES_APP_ID}.esqlRulesIntroBannerDismissed.v2` as const;
 
 const TITLE = i18n.translate('xpack.alertingV2.rulesList.esqlRulesIntroBanner.title', {
-  defaultMessage: 'Introducing ES|QL rules',
+  defaultMessage: 'Introducing Kibana Universal Alerting',
 });
 const DESCRIPTION = i18n.translate('xpack.alertingV2.rulesList.esqlRulesIntroBanner.description', {
   defaultMessage:
-    'Build rules with native ES|QL queries. ES|QL rules are the newer alternative to Standard rules, with a dedicated rules list, a shared alerts inbox, and centralized action policies for notifications.',
+    "Bring your alerting needs together in one open, universal system. Detect the signals that matter, work with alerts as data, combine alerts across different sources and use cases, and control how they're managed, routed, and acted on.",
 });
-const LEARN_MORE_LABEL = i18n.translate(
-  'xpack.alertingV2.rulesList.esqlRulesIntroBanner.learnMore',
-  { defaultMessage: 'Learn more' }
-);
 const ILLUSTRATION_ALT = i18n.translate(
   'xpack.alertingV2.rulesList.esqlRulesIntroBanner.illustrationAlt',
-  { defaultMessage: 'ES|QL rules illustration' }
+  { defaultMessage: 'Kibana Universal Alerting illustration' }
 );
 
 export const EsqlRulesIntroBanner = () => {
@@ -55,19 +48,16 @@ export const EsqlRulesIntroBanner = () => {
         headingElement="h3"
         title={TITLE}
         text={DESCRIPTION}
-        media={<EuiImage src={illustration} alt={ILLUSTRATION_ALT} />}
+        media={
+          <EuiIllustration
+            type={aerospace}
+            alt={ILLUSTRATION_ALT}
+            style={{ maxInlineSize: 80, marginInline: 'auto' }}
+            data-test-subj="esqlRulesIntroBannerIllustration"
+          />
+        }
         onDismiss={() => setIsDismissed(true)}
         dismissButtonProps={{ 'data-test-subj': 'esqlRulesIntroBannerDismiss' }}
-        actionProps={{
-          primary: {
-            children: LEARN_MORE_LABEL,
-            href: ESQL_RULES_INTRO_DOC_URL,
-            target: '_blank',
-            iconType: 'external',
-            iconSide: 'right',
-            'data-test-subj': 'esqlRulesIntroBannerLearnMore',
-          },
-        }}
       />
       <EuiSpacer size="m" />
     </>

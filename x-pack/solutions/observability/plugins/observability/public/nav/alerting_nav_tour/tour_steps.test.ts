@@ -5,118 +5,52 @@
  * 2.0.
  */
 
-import type { Capabilities, CoreStart } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
 import { getAlertingNavTourSteps } from './tour_steps';
 
-const FULL_CAPABILITIES = {
-  alerting_v2_alerts: { read: true },
-  alerting_v2_rules: { all: true, read: true },
-  alerting_v2_action_policies: { read: true },
-  alerting_v2_execution_history: { read: true },
-  observabilityAlerts: { show: true },
-  management: {
-    insightsAndAlerting: {
-      triggersActionsRules: true,
-      maintenanceWindows: true,
-    },
-  },
-};
-
-const createCore = (capabilities: Record<string, unknown>): CoreStart => {
-  const core = coreMock.createStart();
-  core.application.capabilities = {
-    ...core.application.capabilities,
-    ...capabilities,
-  } as Capabilities;
-  return core;
-};
-
-const getStepIds = (capabilities: Record<string, unknown>) =>
-  getAlertingNavTourSteps(createCore(capabilities)).map(({ stepId }) => stepId);
+const TOUR_STEPS = getAlertingNavTourSteps('https://docs.test/action-policies');
 
 describe('getAlertingNavTourSteps', () => {
-  it('defines the Alerts-through-create tour with safe anchors and navigation targets', () => {
-    const steps = getAlertingNavTourSteps(createCore(FULL_CAPABILITIES));
-
-    expect(steps.map((step) => step.stepId)).toEqual([
+  it('covers alerts through create-first-rule, including maintenance windows', () => {
+    expect(TOUR_STEPS.map((step) => step.stepId)).toEqual([
       'alerts',
       'rules',
-      'rulesTabs',
       'actionPolicies',
       'maintenanceWindows',
       'executionHistory',
       'createFirstRule',
     ]);
+  });
 
-    const byId = Object.fromEntries(steps.map((step) => [step.stepId, step]));
+  it('anchors the rules step to the Universal/Classic tabs so they stay visible', () => {
+    const rulesStep = TOUR_STEPS.find((step) => step.stepId === 'rules');
+    expect(rulesStep?.anchor).toContain('v2RulesTab');
+    expect(rulesStep?.anchorPosition).toBe('downLeft');
+  });
 
-    expect(byId.rules.anchor).toBe(
-      '[data-test-subj~="nav-item-deepLinkId-observabilityAlerting:rules-v2"]'
-    );
-    expect(byId.rules.path).toBe('/rules/universal');
-    expect(byId.rulesTabs.anchor).toBe('[data-test-subj="v2RulesTab"]');
+  it('navigates to Management for maintenance windows and anchors to the nav item', () => {
+    const maintenanceStep = TOUR_STEPS.find((step) => step.stepId === 'maintenanceWindows');
+    expect(maintenanceStep?.appId).toBe('management');
+    expect(maintenanceStep?.path).toBe('/insightsAndAlerting/maintenanceWindows');
+    expect(maintenanceStep?.anchor).toContain('nav-item-id-management:maintenanceWindows');
+    expect(maintenanceStep?.anchorPosition).toBe('rightCenter');
+    // Page content remains as a fallback when the Alerting panel is closed.
+    expect(maintenanceStep?.anchor).toContain('mw-empty-prompt');
+    // AppMenu create button must not be an anchor — EuiWrappingPopover relocates it and crashes.
+    expect(maintenanceStep?.anchor).not.toContain('mw-create-button');
 
-    expect(byId.maintenanceWindows.appId).toBe('management');
-    expect(byId.maintenanceWindows.path).toBe('/insightsAndAlerting/maintenanceWindows');
-    expect(byId.maintenanceWindows.anchor).toContain('nav-item-id-management:maintenanceWindows');
-    expect(byId.maintenanceWindows.anchor).not.toContain('mw-create-button');
+    const createFirstRuleStep = TOUR_STEPS.find((step) => step.stepId === 'createFirstRule');
+    expect(createFirstRuleStep?.appId).toBe('observabilityAlerting');
+    expect(createFirstRuleStep?.path).toBe('/rules/v2');
+    expect(createFirstRuleStep?.anchor).toContain('createRuleButton');
+  });
 
-    expect(byId.createFirstRule.appId).toBe('observabilityAlerting');
-    expect(byId.createFirstRule.path).toBe('/rules/universal');
-    expect(byId.createFirstRule.anchor).toContain('createRuleButton');
-    expect(byId.createFirstRule.anchor).toContain('ruleCreateOptionsEmptyStateTitle');
-    expect(byId.createFirstRule.anchor).not.toContain(' h2');
-
-    for (const step of steps) {
+  it('navigates within Alerting for every step except maintenance windows', () => {
+    for (const step of TOUR_STEPS) {
       if (step.stepId === 'maintenanceWindows') {
         expect(step.appId).toBe('management');
       } else {
         expect(step.appId).toBe('observabilityAlerting');
       }
     }
-  });
-
-  it('targets Classic rules and omits Universal-only steps for a Classic-only user', () => {
-    const core = createCore({
-      observabilityAlerts: { show: true },
-      management: { insightsAndAlerting: { triggersActionsRules: true } },
-    });
-    const steps = getAlertingNavTourSteps(core);
-
-    expect(steps.map(({ stepId }) => stepId)).toEqual(['alerts', 'rules']);
-    const rules = steps.find(({ stepId }) => stepId === 'rules');
-    expect(rules?.anchor).toBe(
-      '[data-test-subj~="nav-item-deepLinkId-observabilityAlerting:rules-v1"]'
-    );
-    expect(rules?.path).toBe('/rules/classic');
-  });
-
-  it('omits the rules tabs step when only Universal rules are visible', () => {
-    expect(
-      getStepIds({
-        alerting_v2_alerts: { read: true },
-        alerting_v2_rules: { all: true, read: true },
-      })
-    ).toEqual(['alerts', 'rules', 'createFirstRule']);
-  });
-
-  it('omits the create rule step for read-only Universal rules users', () => {
-    expect(
-      getStepIds({ ...FULL_CAPABILITIES, alerting_v2_rules: { all: false, read: true } })
-    ).not.toContain('createFirstRule');
-  });
-
-  it('omits steps whose nav item is hidden by missing capabilities', () => {
-    const stepIds = getStepIds({
-      ...FULL_CAPABILITIES,
-      alerting_v2_action_policies: { read: false },
-      alerting_v2_execution_history: { read: false },
-      management: { insightsAndAlerting: { triggersActionsRules: true } },
-    });
-
-    expect(stepIds).not.toContain('actionPolicies');
-    expect(stepIds).not.toContain('executionHistory');
-    expect(stepIds).not.toContain('maintenanceWindows');
   });
 });

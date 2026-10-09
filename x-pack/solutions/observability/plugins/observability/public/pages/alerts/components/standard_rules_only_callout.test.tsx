@@ -29,9 +29,11 @@ describe('StandardRulesOnlyCallout', () => {
     renderCallout();
 
     expect(screen.getByTestId('standardRulesOnlyCallout')).toBeInTheDocument();
-    expect(screen.getByText('Standard rules only')).toBeInTheDocument();
+    expect(screen.getByText('Classic only')).toBeInTheDocument();
     expect(
-      screen.getByText('This page only shows alerts from Standard rules.')
+      screen.getByText(
+        'This page only shows alerts from Classic alerting. Use the new Alerts experience to triage Universal, Classic, and external alerts together.'
+      )
     ).toBeInTheDocument();
   });
 

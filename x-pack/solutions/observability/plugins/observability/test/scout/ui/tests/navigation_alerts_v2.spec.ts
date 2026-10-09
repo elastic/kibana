@@ -39,12 +39,11 @@ import { observabilityAlertingNavRole } from '../fixtures/roles';
 const ALERTS_PANEL_ID = 'alerting';
 const ALERTS_DEEP_LINK = 'observability-overview:alerts';
 const CLASSIC_ALERTS_TITLE = 'Alerts';
-const ALERTS_CLASSIC_NAV_TITLE = 'Alerts (Classic)';
+const V1_ALERTS_NAV_TITLE = 'Alerts (Classic)';
 
 const PANEL_LINKS = {
   alerts: 'observabilityAlerting:alerts',
-  rulesV2: 'observabilityAlerting:rules-v2',
-  rulesV1: 'observabilityAlerting:rules-v1',
+  rules: 'observabilityAlerting:rules',
   ruleLibrary: 'observabilityAlerting:rule-library',
   actionPolicies: 'observabilityAlerting:action-policies',
   maintenanceWindows: 'management:maintenanceWindows',
@@ -68,8 +67,7 @@ const expectPlainAlertsLink = async (nav: ObservabilityNavigation) => {
 const ALL_PANEL_LINKS = [
   PANEL_LINKS.alerts,
   ALERTS_DEEP_LINK,
-  PANEL_LINKS.rulesV2,
-  PANEL_LINKS.rulesV1,
+  PANEL_LINKS.rules,
   PANEL_LINKS.ruleLibrary,
   PANEL_LINKS.actionPolicies,
   PANEL_LINKS.maintenanceWindows,
@@ -166,10 +164,9 @@ const expectPanelForRole = async (
   await expectPanelLinks(nav, visible);
 };
 
-// Suite fails on MKI: https://github.com/elastic/kibana/issues/295308
 test.describe(
   'Observability Alerts nav — alerting v2',
-  { tag: [...tags.stateful.classic, '@local-serverless-observability_complete'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ scoutSpace, kbnClient, config }) => {
       // Serverless Observability is already the observability project; solution
@@ -267,11 +264,11 @@ test.describe(
 
       await test.step('panel contains Rule Management, Notifications, and Operations', async () => {
         await expect(
-          nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.rulesV2)
+          nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.rules)
         ).toBeVisible();
         await expect(
           nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.ruleLibrary)
-        ).toBeVisible();
+        ).not.toBeVisible();
         await expect(
           nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.actionPolicies)
         ).toBeVisible();
@@ -281,9 +278,6 @@ test.describe(
         await expect(
           nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.executionHistory)
         ).toBeVisible();
-        await expect(
-          nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.rulesV1)
-        ).not.toBeVisible();
       });
     });
 
@@ -312,24 +306,9 @@ test.describe(
 
       await pageObjects.observabilityNavigation.clickPanelNavItemByDeepLinkId(
         ALERTS_PANEL_ID,
-        PANEL_LINKS.rulesV2
+        PANEL_LINKS.rules
       );
       await expectPageTitle(pageObjects.chrome.pageTitle, 'Rules');
-    });
-
-    test('clicking Rule Library loads Rule library when alerting v2 is enabled', async ({
-      browserAuth,
-      pageObjects,
-      kbnClient,
-      scoutSpace,
-    }) => {
-      await enableV2AndOpenNav({ browserAuth, pageObjects, kbnClient, scoutSpace });
-
-      await pageObjects.observabilityNavigation.clickPanelNavItemByDeepLinkId(
-        ALERTS_PANEL_ID,
-        PANEL_LINKS.ruleLibrary
-      );
-      await expectPageTitle(pageObjects.chrome.pageTitle, 'Rule library');
     });
 
     test('clicking Action Policies loads Action Policies when alerting v2 is enabled', async ({
@@ -379,7 +358,6 @@ test.describe(
 
     test('clicking Alerts V1 loads the classic alerts page when the V1 alerts table setting is on', async ({
       browserAuth,
-      page,
       pageObjects,
       kbnClient,
       scoutSpace,
@@ -405,12 +383,11 @@ test.describe(
         timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
       });
       await expect(nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK)).toHaveText(
-        ALERTS_CLASSIC_NAV_TITLE
+        V1_ALERTS_NAV_TITLE
       );
 
       await nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK).click();
       await expectPageTitle(pageObjects.chrome.pageTitle, CLASSIC_ALERTS_TITLE);
-      await expect(page.getByTestId('classicAlertsBadge')).toBeVisible();
     });
 
     test('reverts to a plain Alerts link that loads the classic alerts page after disabling v2', async ({
@@ -469,7 +446,7 @@ test.describe(
       await expectPanelForRole(
         { browserAuth, pageObjects, kbnClient, scoutSpace },
         observabilityAlertingNavRole({ alerting_v2_rules: ['read'] }),
-        [PANEL_LINKS.rulesV2, PANEL_LINKS.ruleLibrary]
+        [PANEL_LINKS.rules]
       );
     });
 
@@ -482,7 +459,7 @@ test.describe(
       await expectPanelForRole(
         { browserAuth, pageObjects, kbnClient, scoutSpace },
         observabilityAlertingNavRole({ alerting_v2_rules: ['all'] }),
-        [PANEL_LINKS.rulesV2, PANEL_LINKS.ruleLibrary]
+        [PANEL_LINKS.rules]
       );
     });
 
@@ -534,7 +511,7 @@ test.describe(
       await expectPanelForRole(
         { browserAuth, pageObjects, kbnClient, scoutSpace },
         observabilityAlertingNavRole({ logs: ['read'] }),
-        [PANEL_LINKS.alerts, PANEL_LINKS.rulesV1]
+        [PANEL_LINKS.alerts, PANEL_LINKS.rules]
       );
     });
 
@@ -547,7 +524,7 @@ test.describe(
       await expectPanelForRole(
         { browserAuth, pageObjects, kbnClient, scoutSpace },
         observabilityAlertingNavRole({ uptime: ['all'] }),
-        [PANEL_LINKS.alerts, PANEL_LINKS.rulesV1]
+        [PANEL_LINKS.alerts, PANEL_LINKS.rules]
       );
     });
 

@@ -6,58 +6,99 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import { createPortal } from 'react-dom';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { CoreStart } from '@kbn/core/public';
+import { ALERTING_ONBOARDING_START_TOUR_EVENT } from '@kbn/alerting-v2-constants';
+import {
+  ALERTING_NAV_TOUR_STORAGE_KEY,
+  ALERTING_PANEL_FOOTER_SELECTOR,
+  DEFAULT_ALERTING_NAV_TOUR_STATE,
+  type AlertingNavTourPersistedState,
+} from './constants';
 import { AlertingNavGuidedTour } from './guided_tour';
 import { getAlertingNavTourSteps } from './tour_steps';
-import { ALERTING_NAV_START_TOUR_EVENT } from './alerting_nav_tour_state';
-import { canOfferAlertingNavTour } from './can_offer_alerting_nav_tour';
+import { UnifiedAlertingPromoCard } from './unified_alerting_promo_card';
 
-export { ALERTING_NAV_START_TOUR_EVENT } from './alerting_nav_tour_state';
+interface AlertingNavTourProps {
+  coreStart: CoreStart;
+}
+
+const useAlertingPanelFooter = (): Element | null => {
+  const [footer, setFooter] = useState<Element | null>(() =>
+    typeof document !== 'undefined' ? document.querySelector(ALERTING_PANEL_FOOTER_SELECTOR) : null
+  );
+
+  useEffect(() => {
+    const sync = () => setFooter(document.querySelector(ALERTING_PANEL_FOOTER_SELECTOR));
+    sync();
+    const observer = new MutationObserver(sync);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
+
+  return footer;
+};
 
 /**
- * Guided tour for Unified Alerting navigation.
- * Mounted outside any single app so navigation does not unmount the tour.
- * The floating promo lives on the Alerts route (`AlertingNavPromo`).
+ * Renders the Unified Alerting promo card in the Alerting side-nav panel footer
+ * and drives the guided tour across Alerts, Rules, Action policies, Execution
+ * history, and Maintenance windows.
  */
-export const AlertingNavTour: React.FC<{ coreStart: CoreStart }> = ({ coreStart }) => {
-  // Re-evaluate when solution nav id changes (Classic ↔ project).
-  useObservable(
-    coreStart.chrome.getActiveSolutionNavId$(),
-    coreStart.chrome.getActiveSolutionNavId()
-  );
-  const canTakeTour = canOfferAlertingNavTour(coreStart);
+export const AlertingNavTour: React.FC<AlertingNavTourProps> = ({ coreStart }) => {
+  const isTourEnabled = coreStart.notifications.tours.isEnabled();
+  const footerEl = useAlertingPanelFooter();
+  const [persisted = DEFAULT_ALERTING_NAV_TOUR_STATE, setPersisted] =
+    useLocalStorage<AlertingNavTourPersistedState>(
+      ALERTING_NAV_TOUR_STORAGE_KEY,
+      DEFAULT_ALERTING_NAV_TOUR_STATE
+    );
   const [isTourActive, setIsTourActive] = useState(false);
 
-  const startTour = useCallback(() => {
-    if (!canTakeTour) {
-      return;
-    }
-    // Side nav expand happens in AlertingNavGuidedTour when the tour becomes active.
-    setIsTourActive(true);
-  }, [canTakeTour]);
+  const dismiss = useCallback(() => {
+    setPersisted({ ...persisted, isDismissed: true });
+    setIsTourActive(false);
+  }, [persisted, setPersisted]);
 
   const finishTour = useCallback(() => {
     setIsTourActive(false);
-  }, []);
+    setPersisted({ ...persisted, isTourComplete: true });
+  }, [persisted, setPersisted]);
+
+  const startTour = useCallback(() => {
+    if (!isTourEnabled) {
+      return;
+    }
+    setIsTourActive(true);
+  }, [isTourEnabled]);
 
   useEffect(() => {
-    const onStart = () => startTour();
-    window.addEventListener(ALERTING_NAV_START_TOUR_EVENT, onStart);
-    return () => window.removeEventListener(ALERTING_NAV_START_TOUR_EVENT, onStart);
+    const onStartTourEvent = () => startTour();
+    window.addEventListener(ALERTING_ONBOARDING_START_TOUR_EVENT, onStartTourEvent);
+    return () => {
+      window.removeEventListener(ALERTING_ONBOARDING_START_TOUR_EVENT, onStartTourEvent);
+    };
   }, [startTour]);
 
-  if (!canTakeTour) {
-    return null;
-  }
+  const tourSteps = getAlertingNavTourSteps(coreStart.docLinks.links.alerting.actionPolicies);
+  const showPromoCard = !persisted.isDismissed;
 
   return (
-    <AlertingNavGuidedTour
-      steps={getAlertingNavTourSteps(coreStart)}
-      isActive={isTourActive}
-      onFinish={finishTour}
-      application={coreStart.application}
-      sideNav={coreStart.chrome.sideNav}
-    />
+    <>
+      {showPromoCard && footerEl
+        ? createPortal(
+            <UnifiedAlertingPromoCard onTakeTour={startTour} onDismiss={dismiss} />,
+            footerEl
+          )
+        : null}
+      {isTourEnabled ? (
+        <AlertingNavGuidedTour
+          steps={tourSteps}
+          isActive={isTourActive}
+          onFinish={finishTour}
+          application={coreStart.application}
+        />
+      ) : null}
+    </>
   );
 };

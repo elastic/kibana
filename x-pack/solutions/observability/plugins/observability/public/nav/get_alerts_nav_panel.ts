@@ -15,7 +15,6 @@ import {
 } from '@kbn/alerting-v2-utils';
 import {
   OBSERVABILITY_ALERTING_APP_ID,
-  OBSERVABILITY_ALERTING_BASE_PATH,
   type ObservabilityAlertingLinkId,
 } from '@kbn/deeplinks-observability';
 import { hasObservabilityCapabilities } from '@kbn/observability-shared-plugin/public';
@@ -27,7 +26,7 @@ const ALERTS_ICON = 'warning';
 /** Classic Observability alerts label for nav and global search. */
 export const getObservabilityAlertsLinkTitle = (alertingV2Enabled: boolean): string =>
   alertingV2Enabled
-    ? i18n.translate('xpack.observability.nav.alertsClassic', {
+    ? i18n.translate('xpack.observability.nav.alertsV1', {
         defaultMessage: 'Alerts (Classic)',
       })
     : i18n.translate('xpack.observability.alertsLinkTitle', {
@@ -46,13 +45,6 @@ const getAlertsIsActive: NonNullable<RootNodeDefinition['getIsActive']> = ({
   pathNameSerialized.startsWith(prepend('/app/observability/alerting')) ||
   pathNameSerialized.startsWith(prepend('/app/observability/alerts'));
 
-// The visible `Rules` link points to Universal rules, so it also has to cover the Classic pages
-// (list, logs and settings), whose own link is hidden from the side nav.
-const getRulesIsActive: NonNullable<PanelOpenerChildDefinition['getIsActive']> = ({
-  pathNameSerialized,
-  prepend,
-}) => pathNameSerialized.startsWith(prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}/rules`));
-
 const hasManagementCapability = (core: CoreStart, capabilityId: string): boolean =>
   core.application.capabilities.management?.insightsAndAlerting?.[capabilityId] === true;
 
@@ -60,16 +52,11 @@ const hasManagementCapability = (core: CoreStart, capabilityId: string): boolean
  * Same gate as classic nav (`updateGlobalNavigation` / `hasObservabilityCapabilities`):
  * any Observability app capability, not alerting-specific privileges.
  */
-export const canReadV1Alerts = (core: CoreStart): boolean =>
+const canReadV1Alerts = (core: CoreStart): boolean =>
   hasObservabilityCapabilities(core.application.capabilities);
 
-/** Gate for the Classic rules link in the Alerting panel. */
-export const canReadV1Rules = (core: CoreStart): boolean =>
+const canReadV1Rules = (core: CoreStart): boolean =>
   hasManagementCapability(core, V1_RULES_MANAGEMENT_ID);
-
-/** Gate for the Maintenance windows link in the Alerting panel. */
-export const canReadMaintenanceWindows = (core: CoreStart): boolean =>
-  hasManagementCapability(core, MAINTENANCE_WINDOWS_MANAGEMENT_ID);
 
 const maybeSection = (
   children: PanelOpenerChildDefinition[],
@@ -92,6 +79,7 @@ const getAlertsSection = (core: CoreStart): PanelOpenerChildDefinition[] => {
       title: i18n.translate('xpack.observability.nav.alerts', {
         defaultMessage: 'Alerts',
       }),
+      badgeType: 'new',
     });
   }
 
@@ -113,18 +101,15 @@ const getRuleManagementSection = (core: CoreStart): PanelOpenerChildDefinition[]
     return [];
   }
 
-  const rulesChildren: PanelOpenerChildDefinition[] = [];
-
-  if (canReadV2Rules) {
-    rulesChildren.push({ link: obsAlertingLink('rules-v2'), getIsActive: getRulesIsActive });
-    rulesChildren.push({ link: obsAlertingLink('rule-library') });
-    rulesChildren.push({ link: obsAlertingLink('rules-v1'), sideNavStatus: 'hidden' });
-  } else {
-    rulesChildren.push({
-      link: obsAlertingLink('rules-v1'),
-      title: i18n.translate('xpack.observability.nav.rulesV1', { defaultMessage: 'Rules' }),
-    });
-  }
+  // Use the `rules` deep link (visible in projectSideNav). `rules-v2` / `rules-v1`
+  // are search-only and would be filtered out of the Alerting panel.
+  const rulesChildren: PanelOpenerChildDefinition[] = [
+    {
+      link: obsAlertingLink('rules'),
+      title: i18n.translate('xpack.observability.nav.rules', { defaultMessage: 'Rules' }),
+      ...(canReadV2Rules ? { badgeType: 'new' as const } : {}),
+    },
+  ];
 
   return maybeSection(rulesChildren, {
     title: i18n.translate('xpack.observability.nav.ruleManagement', {
@@ -134,7 +119,7 @@ const getRuleManagementSection = (core: CoreStart): PanelOpenerChildDefinition[]
   });
 };
 
-// Side nav renders at most two `new` badges per panel. Those slots are Action policies and Execution history.
+// Side-nav `new` badges (chrome allows up to 4 per level): Alerts, Rules, Action policies, Execution history.
 const getNotificationsSection = (core: CoreStart): PanelOpenerChildDefinition[] => {
   const notificationsChildren: PanelOpenerChildDefinition[] = [];
 
@@ -145,7 +130,7 @@ const getNotificationsSection = (core: CoreStart): PanelOpenerChildDefinition[] 
     });
   }
 
-  if (canReadMaintenanceWindows(core)) {
+  if (hasManagementCapability(core, MAINTENANCE_WINDOWS_MANAGEMENT_ID)) {
     notificationsChildren.push({ link: 'management:maintenanceWindows' });
   }
 

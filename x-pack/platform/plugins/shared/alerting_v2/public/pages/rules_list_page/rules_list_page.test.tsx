@@ -10,7 +10,6 @@ import { render, screen, fireEvent, waitFor, within } from '@testing-library/rea
 import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 import { contentListQueryClient } from '@kbn/content-list-provider';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
-import { CREATE_WITH_AGENT_INITIAL_PROMPT } from '../../constants';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { RulesListPage } from './rules_list_page';
 
@@ -68,7 +67,10 @@ jest.mock('@kbn/core-di-browser', () => {
               : undefined,
         },
         chrome: { docTitle: { change: mockDocTitleChange } },
-        http: { basePath: { prepend: (p: string) => p } },
+        http: {
+          basePath: { prepend: (p: string) => p },
+          get: jest.fn().mockResolvedValue({ total: 0 }),
+        },
         notifications: {
           toasts: { addSuccess: jest.fn(), addError: jest.fn() },
           tours: { isEnabled: () => mockToursEnabled },
@@ -81,13 +83,26 @@ jest.mock('@kbn/core-di-browser', () => {
             },
           },
         },
+        dataViews: {
+          getIdsWithTitle: jest.fn().mockResolvedValue([{ id: 'logs', title: 'logs-*' }]),
+        },
       };
 
       return services[token as string] ?? {};
     },
     CoreStart: (key: string) => key,
+    PluginStart: (key: string) => key,
   };
 });
+
+jest.mock('./use_onboarding_signals', () => ({
+  useOnboardingSignals: () => ({
+    hasData: true,
+    hasClassicRules: false,
+    classicRulesCount: 0,
+    isLoading: false,
+  }),
+}));
 
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   ComposeDiscoverFlyout: ({ onCreateRule }: { onCreateRule: (payload: unknown) => void }) => (
@@ -248,30 +263,6 @@ describe('RulesListPage', () => {
     expect(screen.queryByTestId('alertingV2ExperimentalBadge')).not.toBeInTheDocument();
   });
 
-  it('marks the sequence builder entry point as experimental', async () => {
-    renderPage();
-    await waitForRules();
-
-    const overflowButton = screen.queryByTestId('app-menu-overflow-button');
-    if (overflowButton) {
-      fireEvent.click(overflowButton);
-    }
-
-    await waitFor(() =>
-      expect(screen.getByTestId('createSequenceRuleButton')).toHaveTextContent(
-        'Build a sequence (Experimental)'
-      )
-    );
-  });
-
-  it('hides the sequence builder entry point when Alerting V2 experimental features are disabled', async () => {
-    mockAlertingV2ExperimentalFeaturesEnabled = false;
-    renderPage();
-    await waitForRules();
-
-    expect(screen.queryByTestId('createSequenceRuleButton')).not.toBeInTheDocument();
-  });
-
   describe('ES|QL rules intro banner', () => {
     it('renders the banner above the search bar when rules exist', async () => {
       renderPage();
@@ -377,21 +368,22 @@ describe('RulesListPage', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole('heading', { level: 2, name: /get started with es\|ql rules/i })
+        screen.getByRole('heading', { level: 2, name: /get started with universal rules/i })
       ).toBeInTheDocument();
     });
     expect(screen.queryByTestId('rulesListTable')).not.toBeInTheDocument();
   });
 
-  it('shows the header create controls in the empty state (no rules, no active filters)', async () => {
+  it('hides the header create controls in the empty state (no rules, no active filters)', async () => {
     resolveRules([], 0);
     renderPage();
 
     await waitFor(() => {
       expect(screen.getByTestId('esqlRulesEmptyState')).toBeInTheDocument();
     });
+    // Create lives on the empty prompt only — header Create is hidden to avoid a duplicate.
     expect(screen.getByTestId('createRuleButton')).toBeInTheDocument();
-    expect(screen.getByTestId('createRuleButton-secondary-button')).toBeInTheDocument();
+    expect(screen.queryByTestId('createRuleButton-secondary-button')).not.toBeInTheDocument();
   });
 
   it('keeps the header create controls when filters are active even with zero matching rules', async () => {
@@ -421,27 +413,24 @@ describe('RulesListPage', () => {
     resolveRules([], 0);
     renderPage();
 
-    await waitFor(() =>
-      expect(screen.getByTestId('esqlRulesEmptyStateCreateButton')).toBeInTheDocument()
-    );
-    fireEvent.click(screen.getByTestId('esqlRulesEmptyStateCreateButton'));
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('createRuleButton'));
 
     expect(await screen.findByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
   });
 
-  it('opens agent chat from the empty state create-with-agent button', async () => {
+  it('opens the onboarding modal from the empty state help-me-onboard button', async () => {
     resolveRules([], 0);
     renderPage();
 
     await waitFor(() =>
-      expect(screen.getByTestId('esqlRulesEmptyStateCreateWithAgentButton')).toBeInTheDocument()
+      expect(screen.getByTestId('esqlRulesEmptyStateHelpMeOnboardButton')).toBeInTheDocument()
     );
-    fireEvent.click(screen.getByTestId('esqlRulesEmptyStateCreateWithAgentButton'));
+    fireEvent.click(screen.getByTestId('esqlRulesEmptyStateHelpMeOnboardButton'));
 
-    expect(mockNavigateToApp).toHaveBeenCalledWith('agent_builder', {
-      path: '/agents/elastic-ai-agent/conversations/new',
-      state: { initialMessage: CREATE_WITH_AGENT_INITIAL_PROMPT },
-    });
+    expect(await screen.findByTestId('alertingOnboardingModal')).toBeInTheDocument();
+    expect(screen.getByText('Get started with Universal Alerting')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingOnboardingChecklist')).toBeInTheDocument();
   });
 
   it('passes the search term to findItems', async () => {
@@ -631,9 +620,13 @@ describe('RulesListPage', () => {
     await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('createRuleButton'));
-    fireEvent.click(screen.getByTestId('ruleCreateOptionsFlyoutCloseButton'));
+    expect(await screen.findByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    // History-session flyouts use EUI's built-in close control.
+    fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
 
-    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    });
     expect(screen.getByTestId('rulesListTable')).toBeInTheDocument();
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
   });
@@ -643,10 +636,11 @@ describe('RulesListPage', () => {
     await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('createRuleButton'));
-    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
+    fireEvent.click(await screen.findByTestId('createEsqlRuleCard'));
 
-    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
-    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+    // Selector stays mounted under the authoring flyout for Back navigation.
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(await screen.findByTestId('composeDiscoverFlyout')).toBeInTheDocument();
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
   });
 
@@ -671,86 +665,16 @@ describe('RulesListPage', () => {
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
   });
 
-  it('opens the rule creation flow from the split button dropdown', async () => {
+  it('opens the create options flyout from the header Create rule button', async () => {
     renderPage();
-    await waitFor(() =>
-      expect(screen.getByTestId('createRuleButton-secondary-button')).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
+    fireEvent.click(screen.getByTestId('createRuleButton'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('createEsqlRuleButton')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByTestId('createEsqlRuleButton'));
-
-    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+    expect(await screen.findByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
   });
 
-  it('opens agent chat when "Create with agent" is clicked in the split button dropdown', async () => {
-    renderPage();
-    await waitFor(() =>
-      expect(screen.getByTestId('createRuleButton-secondary-button')).toBeInTheDocument()
-    );
-
-    fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('createWithAgentButton')).toBeInTheDocument();
-    });
-    expect(
-      screen.getByTestId('createWithAgentButton').querySelector('[data-euiicon-type="sparkles"]')
-    ).toBeInTheDocument();
-    expect(screen.getByTestId('createWithAgentButton')).toHaveTextContent(
-      'Create with agent (Experimental)'
-    );
-
-    fireEvent.click(screen.getByTestId('createWithAgentButton'));
-
-    expect(mockNavigateToApp).toHaveBeenCalledWith('agent_builder', {
-      path: '/agents/elastic-ai-agent/conversations/new',
-      state: { initialMessage: CREATE_WITH_AGENT_INITIAL_PROMPT },
-    });
-  });
-
-  it('hides the populated-list Create with AI Agent menu option when Alerting V2 experimental features are disabled', async () => {
-    mockAlertingV2ExperimentalFeaturesEnabled = false;
-    renderPage();
-
-    await waitFor(() =>
-      expect(screen.getByTestId('createRuleButton-secondary-button')).toBeInTheDocument()
-    );
-    fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
-
-    await waitFor(() => expect(screen.getByTestId('createEsqlRuleButton')).toBeInTheDocument());
-    expect(screen.queryByTestId('createWithAgentButton')).not.toBeInTheDocument();
-  });
-
-  it('disables the split button agent option (does not hide it) when agent builder is not available', async () => {
-    mockAgentBuilderShow = false;
-    mockExperimentalFeaturesEnabled = false;
-
-    renderPage();
-    await waitFor(() =>
-      expect(screen.getByTestId('createRuleButton-secondary-button')).toBeInTheDocument()
-    );
-
-    fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('createEsqlRuleButton')).toBeInTheDocument();
-    });
-
-    const agentButton = screen.getByTestId('createWithAgentButton');
-    expect(agentButton).toBeInTheDocument();
-    expect(agentButton).toBeDisabled();
-
-    fireEvent.click(agentButton);
-    expect(mockNavigateToApp).not.toHaveBeenCalled();
-  });
-
-  it('disables the empty state create-with-agent button when agent builder is not available', async () => {
+  it('still shows help-me-onboard in the empty state when agent builder is not available', async () => {
     mockAgentBuilderShow = false;
     mockExperimentalFeaturesEnabled = false;
     resolveRules([], 0);
@@ -758,12 +682,10 @@ describe('RulesListPage', () => {
     renderPage();
 
     await waitFor(() =>
-      expect(screen.getByTestId('esqlRulesEmptyStateCreateWithAgentButton')).toBeInTheDocument()
+      expect(screen.getByTestId('esqlRulesEmptyStateHelpMeOnboardButton')).toBeInTheDocument()
     );
-    const agentButton = screen.getByTestId('esqlRulesEmptyStateCreateWithAgentButton');
-    expect(agentButton).toBeDisabled();
-    fireEvent.click(agentButton);
-    expect(mockNavigateToApp).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('esqlRulesEmptyStateHelpMeOnboardButton'));
+    expect(await screen.findByTestId('alertingOnboardingModal')).toBeInTheDocument();
   });
 
   it('shows delete confirmation modal when delete action is clicked', async () => {
@@ -1017,7 +939,7 @@ describe('RulesListPage', () => {
         expect(screen.getByTestId('rulesListReadOnlyEmpty')).toBeInTheDocument();
       });
       expect(screen.queryByTestId('esqlRulesEmptyState')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('esqlRulesEmptyStateCreateButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('esqlRulesEmptyState')).not.toBeInTheDocument();
     });
 
     it('hides row selection and quick edit', async () => {

@@ -14,16 +14,10 @@ import {
   STANDARD_RULES_ESQL_INTRO_DOC_URL,
 } from './standard_rules_esql_intro_banner';
 
+const mockUseKibana = jest.fn();
+
 jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      http: {
-        basePath: {
-          prepend: (path: string) => `/mock${path}`,
-        },
-      },
-    },
-  }),
+  useKibana: () => mockUseKibana(),
 }));
 
 const renderBanner = () =>
@@ -36,12 +30,23 @@ const renderBanner = () =>
 describe('StandardRulesEsqlIntroBanner', () => {
   beforeEach(() => {
     window.localStorage.clear();
+    mockUseKibana.mockReturnValue({
+      services: {
+        http: {
+          basePath: {
+            prepend: (path: string) => `/mock${path}`,
+          },
+        },
+        tabs: undefined,
+      },
+    });
   });
 
-  it('renders title, ES|QL rules link, and learn more link', () => {
+  it('renders title, Universal rules link, and learn more link', () => {
     renderBanner();
 
-    expect(screen.getByText('Introducing ES|QL rules')).toBeInTheDocument();
+    expect(screen.getByText('Introducing Universal rules')).toBeInTheDocument();
+    expect(screen.getByText('Universal rules')).toBeInTheDocument();
     expect(screen.getByTestId('standardRulesEsqlIntroBannerEsqlLink')).toHaveAttribute(
       'href',
       '/mock/app/management/alertingV2/rules'
@@ -49,6 +54,29 @@ describe('StandardRulesEsqlIntroBanner', () => {
     expect(screen.getByTestId('standardRulesEsqlIntroBannerLearnMoreLink')).toHaveAttribute(
       'href',
       STANDARD_RULES_ESQL_INTRO_DOC_URL
+    );
+  });
+
+  it('links to the host Universal tab when Observability tabs are provided', () => {
+    mockUseKibana.mockReturnValue({
+      services: {
+        http: {
+          basePath: {
+            prepend: (path: string) => `/mock${path}`,
+          },
+        },
+        tabs: [
+          { id: 'v1Rules', href: '/mock/app/observability/alerting/rules/v1' },
+          { id: 'v2Rules', href: '/mock/app/observability/alerting/rules/v2' },
+        ],
+      },
+    });
+
+    renderBanner();
+
+    expect(screen.getByTestId('standardRulesEsqlIntroBannerEsqlLink')).toHaveAttribute(
+      'href',
+      '/mock/app/observability/alerting/rules/v2'
     );
   });
 

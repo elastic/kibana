@@ -10,56 +10,18 @@ import { EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import { CoreStart, useService } from '@kbn/core-di-browser';
+import { useContentListPhase } from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
 import { canAccessTriggersActionsRules, triggersActionsRoute } from '@kbn/rule-data-utils';
 import { useHostTabs } from '../../application/tabs_context';
 import { paths } from '../../constants';
-import {
-  useAreAgentBuilderSkillsAvailable,
-  useAgentBuilderSkillsRequirements,
-} from '../../hooks/use_are_agent_builder_skills_available';
-import { useAlertingV2ExperimentalFeatures } from '../../hooks/use_alerting_v2_experimental_features';
-import { getCreateWithAgentTooltipText } from '../../components/rule_create_options/rule_create_options_panel';
 
 const RULES_LIST_PAGE_TITLE = i18n.translate('xpack.alertingV2.rulesList.pageTitle', {
   defaultMessage: 'Rules',
 });
 
-const getRulesListMenu = ({
-  onCreateRule,
-  onCreateEsqlRule,
-  onCreateWithAgent,
-  onBuildSequence,
-  showBuildSequence,
-  showCreateWithAgent,
-  createWithAgentDisabled,
-  createWithAgentTooltipText,
-}: {
-  onCreateRule: () => void;
-  onCreateEsqlRule: () => void;
-  onCreateWithAgent: () => void;
-  onBuildSequence: () => void;
-  showBuildSequence: boolean;
-  showCreateWithAgent: boolean;
-  createWithAgentDisabled?: boolean;
-  createWithAgentTooltipText?: string;
-}): AppHeaderMenu => ({
-  items: showBuildSequence
-    ? [
-        {
-          id: 'buildSequence',
-          label: i18n.translate('xpack.alertingV2.rulesList.buildSequenceButton', {
-            defaultMessage: 'Build a sequence (Experimental)',
-          }),
-          iconType: 'branch',
-          tooltipContent: i18n.translate('xpack.alertingV2.rulesList.buildSequenceTooltip', {
-            defaultMessage: 'Chain rules to detect multi-step alert patterns',
-          }),
-          testId: 'createSequenceRuleButton',
-          run: onBuildSequence,
-        },
-      ]
-    : [],
+const getRulesListMenu = ({ onCreateRule }: { onCreateRule: () => void }): AppHeaderMenu => ({
+  items: [],
   primaryActionItem: {
     id: 'createRule',
     label: i18n.translate('xpack.alertingV2.rulesList.createRuleButton', {
@@ -68,74 +30,26 @@ const getRulesListMenu = ({
     iconType: 'plusCircle',
     run: onCreateRule,
     testId: 'createRuleButton',
-    popoverTestId: 'createRulePopoverPanel',
-    splitButtonProps: {
-      iconType: 'chevronSingleDown',
-      secondaryButtonAriaLabel: i18n.translate('xpack.alertingV2.rulesList.createRuleMoreOptions', {
-        defaultMessage: 'More create options',
-      }),
-      items: [
-        {
-          id: 'createEsqlRule',
-          label: i18n.translate('xpack.alertingV2.rulesList.createEsqlRuleButton', {
-            defaultMessage: 'Create ES|QL rule',
-          }),
-          iconType: 'productDiscover',
-          order: 0,
-          run: onCreateEsqlRule,
-          testId: 'createEsqlRuleButton',
-        },
-        ...(showCreateWithAgent
-          ? [
-              {
-                id: 'createWithAgent',
-                label: i18n.translate('xpack.alertingV2.rulesList.createWithAgentButton', {
-                  defaultMessage: 'Create with agent (Experimental)',
-                }),
-                iconType: 'sparkles' as const,
-                order: 1,
-                run: onCreateWithAgent,
-                testId: 'createWithAgentButton',
-                disableButton: createWithAgentDisabled,
-                tooltipContent: createWithAgentTooltipText,
-              },
-            ]
-          : []),
-      ],
-    },
   },
 });
 
 export interface RulesListHeaderProps {
   canWrite: boolean;
   onCreateRule: () => void;
-  onCreateEsqlRule: () => void;
-  onCreateWithAgent: () => void;
-  onBuildSequence: () => void;
 }
 
 /**
- * App header for the ES|QL rules list. Create menu is shown whenever the user
- * can write rules, including the empty state (create options also remain in
- * that empty state for discovery).
+ * App header for the Universal rules list. Create opens the host create flow
+ * (mixed chooser in Observability Alerting, or create-options flyout elsewhere).
+ * Hidden during the empty state so create options live only in that prompt.
  * Must render under {@link ContentListProvider}.
  */
-export const RulesListHeader = ({
-  canWrite,
-  onCreateRule,
-  onCreateEsqlRule,
-  onCreateWithAgent,
-  onBuildSequence,
-}: RulesListHeaderProps) => {
+export const RulesListHeader = ({ canWrite, onCreateRule }: RulesListHeaderProps) => {
+  const phase = useContentListPhase();
+  const showHeaderMenu = canWrite && phase !== 'empty' && phase !== 'initialLoad';
   const application = useService(CoreStart('application'));
   const basePath = useService(CoreStart('http')).basePath;
   const hostTabs = useHostTabs();
-  const showBuildSequence = useAlertingV2ExperimentalFeatures();
-  const showCreateWithAgent = useAlertingV2ExperimentalFeatures();
-  const createWithAgentDisabled = !useAreAgentBuilderSkillsAvailable();
-  const createWithAgentTooltipText = getCreateWithAgentTooltipText(
-    useAgentBuilderSkillsRequirements()
-  );
 
   const defaultTabs = useMemo<AppHeaderTab[]>(() => {
     if (!canAccessTriggersActionsRules(application.capabilities)) {
@@ -145,18 +59,9 @@ export const RulesListHeader = ({
 
     return [
       {
-        id: 'v1Rules',
-        label: i18n.translate('xpack.alertingV2.rulesList.v1RulesTabTitle', {
-          defaultMessage: 'Standard rules',
-        }),
-        isSelected: false,
-        href: basePath.prepend(triggersActionsRoute),
-        'data-test-subj': 'v1RulesTab',
-      },
-      {
         id: 'v2Rules',
         label: i18n.translate('xpack.alertingV2.rulesList.v2RulesTabTitle', {
-          defaultMessage: 'ES|QL rules',
+          defaultMessage: 'Universal',
         }),
         isSelected: true,
         href: basePath.prepend(paths.ruleList),
@@ -169,36 +74,23 @@ export const RulesListHeader = ({
         },
         'data-test-subj': 'v2RulesTab',
       },
+      {
+        id: 'v1Rules',
+        label: i18n.translate('xpack.alertingV2.rulesList.v1RulesTabTitle', {
+          defaultMessage: 'Classic',
+        }),
+        isSelected: false,
+        href: basePath.prepend(triggersActionsRoute),
+        'data-test-subj': 'v1RulesTab',
+      },
     ];
   }, [basePath, application.capabilities]);
 
   const tabs = hostTabs ?? defaultTabs;
 
   const headerMenu = useMemo(
-    () =>
-      canWrite
-        ? getRulesListMenu({
-            onCreateRule,
-            onCreateEsqlRule,
-            onCreateWithAgent,
-            onBuildSequence,
-            showBuildSequence,
-            showCreateWithAgent,
-            createWithAgentDisabled,
-            createWithAgentTooltipText,
-          })
-        : undefined,
-    [
-      canWrite,
-      onCreateRule,
-      onCreateEsqlRule,
-      onCreateWithAgent,
-      onBuildSequence,
-      showBuildSequence,
-      showCreateWithAgent,
-      createWithAgentDisabled,
-      createWithAgentTooltipText,
-    ]
+    () => (showHeaderMenu ? getRulesListMenu({ onCreateRule }) : undefined),
+    [showHeaderMenu, onCreateRule]
   );
 
   return (

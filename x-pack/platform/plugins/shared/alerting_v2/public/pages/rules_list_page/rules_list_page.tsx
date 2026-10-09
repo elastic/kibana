@@ -9,20 +9,21 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { ContentList, ContentListProvider, ContentListToolbar } from '@kbn/content-list';
 import { CoreStart, useService } from '@kbn/core-di-browser';
+import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean } from '@kbn/react-hooks';
+import { triggersActionsRoute } from '@kbn/rule-data-utils';
 import { UserCapabilities } from '../../services/user_capabilities';
-import { RULES_CONTENT_LIST_ID } from '../../constants';
+import {
+  AGENT_BUILDER_NEW_CONVERSATION_PATH,
+  CREATE_WITH_AGENT_INITIAL_PROMPT,
+  RULES_CONTENT_LIST_ID,
+} from '../../constants';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useCreateFromTemplateQuery } from '../../hooks/use_create_from_template_query';
-import {
-  useAreAgentBuilderSkillsAvailable,
-  useAgentBuilderSkillsRequirements,
-} from '../../hooks/use_are_agent_builder_skills_available';
 import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
-import { getCreateWithAgentTooltipText } from '../../components/rule_create_options/rule_create_options_panel';
 import { RuleCreateOptionsFlyout } from '../../components/rule_create_options/rule_create_options_flyout';
 import {
   KindFilter,
@@ -31,11 +32,13 @@ import {
   TagsFilter,
 } from './rules_list_filters';
 import { useAlertingLocators } from '../../application/locator_context';
+import { useHostTabs } from '../../application/tabs_context';
 import { RulesListHeader } from './rules_list_header';
 import { RulesListTableContainer } from './rules_list_table_container';
 import { useRulesDataSource } from './rules_data_source';
 import { EsqlRulesIntroBanner } from './esql_rules_intro_banner';
 import { EsqlRulesEmptyState } from './esql_rules_empty_state';
+import { AlertingOnboardingModal } from './alerting_onboarding_modal';
 
 export const RulesListPage = () => {
   useBreadcrumbs('rules_list');
@@ -46,6 +49,10 @@ export const RulesListPage = () => {
   const [
     isCreateOptionsFlyoutOpen,
     { on: openCreateOptionsFlyout, off: closeCreateOptionsFlyout },
+  ] = useBoolean(false);
+  const [
+    isOnboardingModalOpen,
+    { on: openOnboardingModal, off: closeOnboardingModal },
   ] = useBoolean(false);
 
   // One history key for the whole create session so the form can stack on the
@@ -71,16 +78,18 @@ export const RulesListPage = () => {
 
   useCreateFromTemplateQuery(openCreateFromTemplateFlyout);
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
-  const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
-  const abSkillRequirements = useAgentBuilderSkillsRequirements();
   const documentationHref = useService(CoreStart('docLinks')).links.alerting.guide;
+  const { navigateToApp, navigateToUrl } = useService(CoreStart('application'));
+  const http = useService(CoreStart('http'));
+  const hostTabs = useHostTabs();
   const { rulesLocators } = useAlertingLocators();
   const navigateToSequenceBuilder = useCallback(() => {
     rulesLocators.navigateSync({ page: 'sequence_create' });
   }, [rulesLocators]);
-  // We always render the "Create with agent" entry points; when the skill is unavailable they
-  // are shown disabled with a tooltip naming the missing prerequisite rather than hidden.
-  const createWithAgentTooltipText = getCreateWithAgentTooltipText(abSkillRequirements);
+
+  const classicRulesHref =
+    hostTabs?.find((tab) => tab.id === 'v1Rules')?.href ??
+    http.basePath.prepend(triggersActionsRoute);
 
   const handleCloseCreateOptionsFlyout = useCallback(() => {
     // Closing the picker exits the whole create session — also dismiss any form on top.
@@ -100,12 +109,56 @@ export const RulesListPage = () => {
     openCreateBuilderFlyout('threshold');
   };
 
+  const onCreateEsqlFromOnboarding = useCallback(() => {
+    closeOnboardingModal();
+    openCreateFlyout();
+  }, [closeOnboardingModal, openCreateFlyout]);
+
+  const onCreateThresholdFromOnboarding = useCallback(() => {
+    closeOnboardingModal();
+    openCreateBuilderFlyout('threshold');
+  }, [closeOnboardingModal, openCreateBuilderFlyout]);
+
+  const onCreateWithAgentFromOnboarding = useCallback(
+    (userInput?: string) => {
+      closeOnboardingModal();
+      const trimmed = userInput?.trim();
+      navigateToApp(AGENT_BUILDER_APP_ID, {
+        path: AGENT_BUILDER_NEW_CONVERSATION_PATH,
+        state: {
+          initialMessage: trimmed
+            ? `Load the rule-management skill and help me create an alerting rule for: ${trimmed}`
+            : CREATE_WITH_AGENT_INITIAL_PROMPT,
+        },
+      });
+    },
+    [closeOnboardingModal, navigateToApp]
+  );
+
+  const onBuildSequenceFromOnboarding = useCallback(() => {
+    closeOnboardingModal();
+    navigateToSequenceBuilder();
+  }, [closeOnboardingModal, navigateToSequenceBuilder]);
+
+  const onBrowseClassicFromOnboarding = useCallback(
+    (search?: string) => {
+      closeOnboardingModal();
+      const trimmed = search?.trim();
+      const href =
+        trimmed && classicRulesHref
+          ? `${classicRulesHref}${classicRulesHref.includes('?') ? '&' : '?'}search=${encodeURIComponent(
+              trimmed
+            )}`
+          : classicRulesHref;
+      void navigateToUrl(href);
+    },
+    [classicRulesHref, closeOnboardingModal, navigateToUrl]
+  );
+
   const emptyState = canWrite ? (
     <EsqlRulesEmptyState
       onCreateRule={openCreateOptionsFlyout}
-      onCreateWithAgent={navigateToAgentBuilder}
-      createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
-      createWithAgentTooltipText={createWithAgentTooltipText}
+      onHelpMeOnboard={openOnboardingModal}
       documentationHref={documentationHref}
     />
   ) : (
@@ -180,13 +233,7 @@ export const RulesListPage = () => {
           fields: RULES_LIST_FEATURES_FIELDS,
         }}
       >
-        <RulesListHeader
-          canWrite={canWrite}
-          onCreateRule={openCreateOptionsFlyout}
-          onCreateEsqlRule={openCreateFlyout}
-          onCreateWithAgent={navigateToAgentBuilder}
-          onBuildSequence={navigateToSequenceBuilder}
-        />
+        <RulesListHeader canWrite={canWrite} onCreateRule={openCreateOptionsFlyout} />
         <EsqlRulesIntroBanner />
         <ContentList emptyState={emptyState} data-test-subj="rulesList">
           <ContentListToolbar>
@@ -209,6 +256,17 @@ export const RulesListPage = () => {
           onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
           onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
           onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
+        />
+      ) : null}
+      {isOnboardingModalOpen ? (
+        <AlertingOnboardingModal
+          onClose={closeOnboardingModal}
+          onCreateEsqlRule={onCreateEsqlFromOnboarding}
+          onCreateThresholdRule={onCreateThresholdFromOnboarding}
+          onCreateWithAgent={onCreateWithAgentFromOnboarding}
+          onBuildSequence={onBuildSequenceFromOnboarding}
+          onBrowseClassic={onBrowseClassicFromOnboarding}
+          documentationHref={documentationHref}
         />
       ) : null}
       {flyout}

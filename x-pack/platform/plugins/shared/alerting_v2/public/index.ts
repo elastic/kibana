@@ -29,6 +29,8 @@ export type {
 } from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 export type { AlertingV2HostApp, CreateAlertingV2HostApp } from '../common/locators';
+export type { ClassicRuleSummaryFlyoutProps } from './classic_rule_summary_flyout';
+export type { RuleSummaryFlyoutEntryProps } from './rule_summary_flyout_entry';
 export type {
   AlertingV2RulesLocatorParams,
   AlertingV2RuleLibraryLocatorParams,

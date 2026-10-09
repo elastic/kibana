@@ -87,7 +87,6 @@ import {
 } from '../../utils/filter_alert_actions_by_privilege';
 import { UserCapabilities } from '../../services/user_capabilities';
 import { useManageRulesHref } from '../../application/manage_rules_href_context';
-import { InboxAnnouncementBanner } from './inbox_announcement_banner';
 
 const getAlertsListMenu = ({ manageRulesHref }: { manageRulesHref: string }): AppHeaderMenu => ({
   primaryActionItem: {

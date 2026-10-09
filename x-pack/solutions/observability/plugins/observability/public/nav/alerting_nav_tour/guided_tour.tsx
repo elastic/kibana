@@ -5,95 +5,93 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiTourStep, useEuiTheme } from '@elastic/eui';
-import type { ApplicationStart, ChromeStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
+import type { ApplicationStart } from '@kbn/core/public';
+import {
+  ALERTING_NAV_TOUR_TEST_ID_PREFIX,
+  ANCHOR_TIMEOUT_MS,
+  TOUR_POPOVER_WIDTH,
+} from './constants';
 import type { AlertingNavTourStep } from './tour_steps';
-
-export const ALERTING_NAV_TOUR_TEST_ID_PREFIX = 'alertingNavTourStep';
-
-/** Wait for Management pages (e.g. Maintenance Windows) before skipping a missing anchor. */
-const ANCHOR_TIMEOUT_MS = 8000;
-/** Tour popover width as a multiple of `euiTheme.base` (16 → 320px). */
-const TOUR_POPOVER_WIDTH_BASE_MULTIPLIER = 20;
-
-const TOUR_NEXT = i18n.translate('xpack.observability.alertingNavTour.nextButtonLabel', {
-  defaultMessage: 'Next',
-});
-const TOUR_SKIP = i18n.translate('xpack.observability.alertingNavTour.skipButtonLabel', {
-  defaultMessage: 'Skip tour',
-});
-const TOUR_FINISH = i18n.translate('xpack.observability.alertingNavTour.finishButtonLabel', {
-  defaultMessage: 'Finish',
-});
-
-const useIsAnchorMounted = (selector: string): boolean => {
-  const [isMounted, setIsMounted] = useState(
-    () => typeof document !== 'undefined' && !!document.querySelector(selector)
-  );
-
-  useEffect(() => {
-    const check = () => setIsMounted(!!document.querySelector(selector));
-    check();
-    const observer = new MutationObserver(check);
-    observer.observe(document.body, { childList: true, subtree: true });
-    return () => observer.disconnect();
-  }, [selector]);
-
-  return isMounted;
-};
+import { useIsAnchorMounted } from './use_is_anchor_mounted';
+import * as i18n from './translations';
 
 export interface AlertingNavGuidedTourProps {
   steps: AlertingNavTourStep[];
   isActive: boolean;
   onFinish: () => void;
   application: ApplicationStart;
-  /** When set, expands the side nav on activation so nav-item anchors can mount. */
-  sideNav?: ChromeStart['sideNav'];
 }
 
-/** Multi-step tour over Alerting nav items; navigates between pages as steps advance. */
+/**
+ * Multi-step tour over Alerting side-nav items and in-page controls. Navigates
+ * between Alerting pages as steps advance; optional onEnter/onLeave run per step.
+ */
 export const AlertingNavGuidedTour: React.FC<AlertingNavGuidedTourProps> = ({
   steps,
   isActive,
   onFinish,
   application,
-  sideNav,
 }) => {
-  const { euiTheme } = useEuiTheme();
-  const tourPopoverWidth = euiTheme.base * TOUR_POPOVER_WIDTH_BASE_MULTIPLIER;
   const [currentStep, setCurrentStep] = useState(1);
+  const previousStepRef = useRef<AlertingNavTourStep | undefined>(undefined);
 
   useEffect(() => {
     if (isActive) {
-      sideNav?.setIsCollapsed(false);
       setCurrentStep(1);
+      previousStepRef.current = undefined;
     }
-  }, [isActive, sideNav]);
+  }, [isActive]);
 
   const stepsTotal = steps.length;
   const currentStepConfig = steps[currentStep - 1];
-  /*
-   * Effects key on step fields rather than the step object, so a parent re-render that rebuilds
-   * `steps` does not re-navigate or restart the anchor timeout mid-step.
-   */
-  const hasCurrentStep = currentStepConfig !== undefined;
-  const stepId = currentStepConfig?.stepId;
-  const anchor = currentStepConfig?.anchor ?? 'body';
-  const appId = currentStepConfig?.appId;
-  const path = currentStepConfig?.path;
-  const deepLinkId = currentStepConfig?.deepLinkId;
-  const isCurrentAnchorMounted = useIsAnchorMounted(anchor);
+  const isCurrentAnchorMounted = useIsAnchorMounted(currentStepConfig?.anchor ?? 'body');
 
+  // Navigate before showing each step so the target page (and anchors) exist.
   useEffect(() => {
-    if (!isActive || !appId) {
+    if (!isActive || !currentStepConfig?.appId) {
       return;
     }
-    void application.navigateToApp(appId, { path, deepLinkId });
-  }, [isActive, stepId, appId, path, deepLinkId, application]);
+    void application.navigateToApp(currentStepConfig.appId, {
+      path: currentStepConfig.path,
+      deepLinkId: currentStepConfig.deepLinkId,
+    });
+  }, [isActive, currentStepConfig, application]);
+
+  // Run leave/enter hooks when the active step changes. Retry onEnter briefly so
+  // page-mounted anchors are available before step actions run.
+  useEffect(() => {
+    if (!isActive || !currentStepConfig) {
+      return;
+    }
+    const previous = previousStepRef.current;
+    if (previous && previous.stepId !== currentStepConfig.stepId) {
+      previous.onLeave?.();
+    }
+    previousStepRef.current = currentStepConfig;
+
+    if (!currentStepConfig.onEnter) {
+      return;
+    }
+
+    let attempts = 0;
+    const maxAttempts = 10;
+    const tryEnter = () => {
+      currentStepConfig.onEnter?.();
+      attempts += 1;
+      if (document.querySelector(currentStepConfig.anchor) || attempts >= maxAttempts) {
+        clearInterval(intervalId);
+      }
+    };
+    tryEnter();
+    const intervalId = setInterval(tryEnter, 200);
+    return () => clearInterval(intervalId);
+  }, [isActive, currentStepConfig]);
 
   const finishTour = useCallback(() => {
+    previousStepRef.current?.onLeave?.();
+    previousStepRef.current = undefined;
     onFinish();
   }, [onFinish]);
 
@@ -103,7 +101,7 @@ export const AlertingNavGuidedTour: React.FC<AlertingNavGuidedTourProps> = ({
     if (!isActive) {
       return;
     }
-    if (!hasCurrentStep) {
+    if (!currentStepConfig) {
       finishTour();
       return;
     }
@@ -112,17 +110,17 @@ export const AlertingNavGuidedTour: React.FC<AlertingNavGuidedTourProps> = ({
     }
     const timer = setTimeout(() => setCurrentStep((prev) => prev + 1), ANCHOR_TIMEOUT_MS);
     return () => clearTimeout(timer);
-  }, [isActive, hasCurrentStep, stepId, isCurrentAnchorMounted, finishTour]);
+  }, [isActive, currentStepConfig, isCurrentAnchorMounted, finishTour]);
 
   useEffect(() => {
-    if (!isActive || !hasCurrentStep || !isCurrentAnchorMounted) {
+    if (!isActive || !currentStepConfig || !isCurrentAnchorMounted) {
       return;
     }
-    const anchorEl = document.querySelector(anchor);
+    const anchorEl = document.querySelector(currentStepConfig.anchor);
     if (anchorEl && typeof anchorEl.scrollIntoView === 'function') {
       anchorEl.scrollIntoView({ behavior: 'auto', block: 'nearest' });
     }
-  }, [isActive, hasCurrentStep, anchor, isCurrentAnchorMounted]);
+  }, [isActive, currentStepConfig, isCurrentAnchorMounted]);
 
   if (!isActive || !currentStepConfig || !isCurrentAnchorMounted) {
     return null;
@@ -141,8 +139,8 @@ export const AlertingNavGuidedTour: React.FC<AlertingNavGuidedTourProps> = ({
       stepsTotal={stepsTotal}
       isStepOpen
       repositionOnScroll
-      minWidth={tourPopoverWidth}
-      maxWidth={tourPopoverWidth}
+      minWidth={TOUR_POPOVER_WIDTH}
+      maxWidth={TOUR_POPOVER_WIDTH}
       onFinish={finishTour}
       data-test-subj={`${ALERTING_NAV_TOUR_TEST_ID_PREFIX}-${currentStepConfig.stepId}`}
       footerAction={
@@ -153,7 +151,7 @@ export const AlertingNavGuidedTour: React.FC<AlertingNavGuidedTourProps> = ({
             onClick={finishTour}
             data-test-subj={`${ALERTING_NAV_TOUR_TEST_ID_PREFIX}-finish`}
           >
-            {TOUR_FINISH}
+            {i18n.TOUR_FINISH}
           </EuiButton>
         ) : (
           [
@@ -164,7 +162,7 @@ export const AlertingNavGuidedTour: React.FC<AlertingNavGuidedTourProps> = ({
               onClick={finishTour}
               data-test-subj={`${ALERTING_NAV_TOUR_TEST_ID_PREFIX}-skip`}
             >
-              {TOUR_SKIP}
+              {i18n.TOUR_SKIP}
             </EuiButtonEmpty>,
             <EuiButton
               key="next"
@@ -173,7 +171,7 @@ export const AlertingNavGuidedTour: React.FC<AlertingNavGuidedTourProps> = ({
               onClick={nextStep}
               data-test-subj={`${ALERTING_NAV_TOUR_TEST_ID_PREFIX}-next`}
             >
-              {TOUR_NEXT}
+              {i18n.TOUR_NEXT}
             </EuiButton>,
           ]
         )
@@ -181,5 +179,3 @@ export const AlertingNavGuidedTour: React.FC<AlertingNavGuidedTourProps> = ({
     />
   );
 };
-
-export { ANCHOR_TIMEOUT_MS };

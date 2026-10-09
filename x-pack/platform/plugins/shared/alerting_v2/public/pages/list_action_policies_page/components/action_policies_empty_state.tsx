@@ -79,7 +79,7 @@ export const ActionPoliciesEmptyState = ({
             <p>
               <FormattedMessage
                 id="xpack.alertingV2.actionPoliciesList.emptyState.description"
-                defaultMessage="Action policies let you manage notification channels in one place and reuse them across multiple ES|QL rules."
+                defaultMessage="Action policies let you manage notification channels in one place and reuse them across multiple Universal rules."
               />
             </p>
           }

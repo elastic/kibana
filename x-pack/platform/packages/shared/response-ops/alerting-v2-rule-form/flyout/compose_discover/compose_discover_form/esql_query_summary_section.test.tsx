@@ -15,6 +15,14 @@ import {
   type EsqlSummaryState,
 } from './esql_query_summary_section';
 
+jest.mock('../../../query_pipeline_explainer', () => ({
+  AssembledQueriesControl: () => (
+    <button type="button" data-test-subj="assembledQueriesOpen">
+      Assembled queries
+    </button>
+  ),
+}));
+
 const BASE = 'FROM logs-*';
 const ALERT_SEGMENT = '| WHERE count > 100';
 

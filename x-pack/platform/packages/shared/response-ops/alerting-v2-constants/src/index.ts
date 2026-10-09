@@ -11,4 +11,5 @@ export * from './artifacts';
 export * from './esql_params';
 export * from './labels';
 export * from './notification_templates';
+export * from './onboarding';
 export * from './rule_kind';

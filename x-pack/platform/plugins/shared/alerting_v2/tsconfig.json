@@ -163,7 +163,8 @@
     "@kbn/announcement-banner",
     "@kbn/ftr-llm-proxy",
     "@kbn/code-editor",
-    "@kbn/code-editor-mock"
+    "@kbn/code-editor-mock",
+    "@kbn/ui-ai-components"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

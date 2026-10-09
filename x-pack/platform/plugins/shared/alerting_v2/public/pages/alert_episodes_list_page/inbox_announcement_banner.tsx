@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { EuiConfirmModal, EuiIllustration, EuiLink, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
-import { aerospace } from '@elastic/eui-illustrations';
+import { videoAnalytics } from '@elastic/eui-illustrations';
 import { AnnouncementBanner } from '@kbn/announcement-banner';
 import {
   ALERTING_V1_ENABLED_SETTING_ID,
@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 export const INBOX_ANNOUNCEMENT_BANNER_DISMISSED_STORAGE_KEY =
-  `${ALERTING_V2_SECTION_ID}.${ALERTING_V2_EPISODES_APP_ID}.inboxIntroBannerDismissed.v5` as const;
+  `${ALERTING_V2_SECTION_ID}.${ALERTING_V2_EPISODES_APP_ID}.inboxIntroBannerDismissed.v6` as const;
 
 const STANDARD_ALERTS_APP_ID = 'observability-overview';
 const STANDARD_ALERTS_PATH = '/alerts';
@@ -95,14 +95,14 @@ export const InboxAnnouncementBanner = () => {
         text={
           <FormattedMessage
             id="xpack.alertingV2.episodesList.inboxAnnouncementBanner.description"
-            defaultMessage="We've improved the alerts experience to work across alerting frameworks. This new alerts page includes alerts from Kibana ES|QL alerting, Kibana standard alerting, and external sources so you can triage them in one place.{standardLink}"
+            defaultMessage="Bring alerts from Kibana Universal Alerting, Kibana Classic Alerting, and external sources into one unified view. Investigate and triage alerts across your environment in one place.{classicLink}"
             values={{
-              standardLink: isStandardAlertsEnabled ? null : (
+              classicLink: isStandardAlertsEnabled ? null : (
                 <>
                   {' '}
                   <FormattedMessage
                     id="xpack.alertingV2.episodesList.inboxAnnouncementBanner.standardLinkPrompt"
-                    defaultMessage="Prefer the previews alert page? {link}"
+                    defaultMessage="Prefer the previous alerts page? {link}"
                     values={{
                       link: (
                         <EuiLink
@@ -111,7 +111,7 @@ export const InboxAnnouncementBanner = () => {
                         >
                           <FormattedMessage
                             id="xpack.alertingV2.episodesList.inboxAnnouncementBanner.standardLinkLabel"
-                            defaultMessage="Enable standard view"
+                            defaultMessage="Enable classic view"
                           />
                         </EuiLink>
                       ),
@@ -124,7 +124,7 @@ export const InboxAnnouncementBanner = () => {
         }
         media={
           <EuiIllustration
-            type={aerospace}
+            type={videoAnalytics}
             alt={ILLUSTRATION_ALT}
             style={{ maxInlineSize: 80, marginInline: 'auto' }}
             data-test-subj="inboxAnnouncementBannerIllustration"
