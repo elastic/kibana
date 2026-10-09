@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { redirectToDetections } from '../../../common/helpers';
 import { SecurityPageName } from '../../../../app/types';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
@@ -52,6 +53,7 @@ const AddRulesPageComponent: React.FC = () => {
         <NeedAdminForUpdateRulesCallOut />
         <MissingDetectionsPrivilegesCallOut />
         <SecuritySolutionPageWrapper>
+          <EuiSpacer size="s" />
           <AddPrebuiltRulesTable />
         </SecuritySolutionPageWrapper>
       </AddPrebuiltRulesTableContextProvider>
