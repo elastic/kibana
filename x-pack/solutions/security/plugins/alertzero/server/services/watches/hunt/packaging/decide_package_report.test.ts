@@ -349,7 +349,7 @@ describe('decidePackageReport', () => {
           kind: 'host',
           value: 'host-a',
           reachable: true,
-          host: { name: 'host-a', enrolled: true, agentId: 'agent-a' },
+          host: { name: 'host-a', enrolled: true, agentId: 'agent-a', capabilities: [] },
         },
       })
     ).toBe(false);
@@ -502,7 +502,7 @@ describe('decidePackageReport', () => {
     kind: 'process',
     value: processSelector.processName,
     reachable: true,
-    host: { name: 'host-a', enrolled: true, agentId: 'agent-a' },
+    host: { name: 'host-a', enrolled: true, agentId: 'agent-a', capabilities: [] },
     processSelector,
   });
 
@@ -613,6 +613,7 @@ describe('decidePackageReport', () => {
             processKey: 'entity:ent-4242',
             hostName: 'host-a',
             processName: 'proc.exe',
+            iocMatched: false,
           },
         ],
       }),
@@ -653,6 +654,7 @@ describe('decidePackageReport', () => {
             processKey: 'entity:ent-100',
             hostName: 'host-a',
             processName: 'a.exe',
+            iocMatched: false,
           },
         ],
       }),
@@ -681,6 +683,7 @@ describe('decidePackageReport', () => {
               processKey: 'entity:ent-100',
               hostName: 'host-a',
               processName: 'a.exe',
+              iocMatched: false,
             },
           ],
         }),
@@ -845,12 +848,24 @@ describe('decidePackageReport', () => {
       const subjects = collectSubjects(
         baseHitState({
           hosts: [
-            { name: 'host-a', enrolled: true, agentId: 'agent-a' },
-            { name: 'ghost', enrolled: false },
+            { name: 'host-a', enrolled: true, agentId: 'agent-a', capabilities: [] },
+            { name: 'ghost', enrolled: false, capabilities: [] },
           ],
           processSelectors: [
-            { pid: 7, processKey: 'pid:7', hostName: 'ghost', processName: 'g.exe' },
-            { pid: 100, processKey: 'pid:100', hostName: 'host-a', processName: 'a.exe' },
+            {
+              pid: 7,
+              processKey: 'pid:7',
+              hostName: 'ghost',
+              processName: 'g.exe',
+              iocMatched: false,
+            },
+            {
+              pid: 100,
+              processKey: 'pid:100',
+              hostName: 'host-a',
+              processName: 'a.exe',
+              iocMatched: false,
+            },
           ],
           users: ['dev-user'],
           services: ['escalated-role'],
@@ -1135,7 +1150,17 @@ describe('decidePackageReport', () => {
     });
 
     it('never mints the forensics handoff: investigate without endpoint_ids is not fillable', () => {
-      expect(canFillRespondAction({ entry: forensicsHandoff })).toBe(false);
+      expect(
+        canFillRespondAction({
+          entry: forensicsHandoff,
+          subject: {
+            kind: 'host',
+            value: 'host-a',
+            reachable: true,
+            host: enrolledHost('host-a', 'agent-a'),
+          },
+        })
+      ).toBe(false);
       const result = decidePackageReport({
         conversationId,
         state: baseHitState({ processSelectors: [ps1] }),
@@ -1145,14 +1170,22 @@ describe('decidePackageReport', () => {
     });
 
     it('fills memory dump input with the process scope', () => {
+      const processSubjectFor = (processSelector: ProcessSelector): Subject => ({
+        kind: 'process',
+        value: processSelector.processName,
+        reachable: true,
+        host: enrolledHost('host-a', 'agent-a'),
+        processSelector,
+      });
+      const state = baseHitState();
       expect(
-        buildActionInput({ entry: defendMemoryDump, agentId: 'agent-a', processSelector: rundll })
+        buildActionInput({ entry: defendMemoryDump, subject: processSubjectFor(rundll), state })
       ).toEqual({
         endpoint_ids: ['agent-a'],
         parameters: { type: 'process', entity_id: 'ent-2' },
       });
       expect(
-        buildActionInput({ entry: defendSuspend, agentId: 'agent-a', processSelector: rundll })
+        buildActionInput({ entry: defendSuspend, subject: processSubjectFor(rundll), state })
       ).toEqual({ endpoint_ids: ['agent-a'], parameters: { entity_id: 'ent-2' } });
     });
 
@@ -1161,7 +1194,7 @@ describe('decidePackageReport', () => {
       expect(
         buildProposalSubjectKey({
           conversationId,
-          endpointId: 'agent-a',
+          subjectId: 'agent-a',
           actionWorkflowId: ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
           processKey,
         })
@@ -1169,7 +1202,7 @@ describe('decidePackageReport', () => {
       expect(
         buildProposalSubjectKey({
           conversationId,
-          endpointId: 'agent-a',
+          subjectId: 'agent-a',
           actionWorkflowId: ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
           processKey,
         })
@@ -1177,7 +1210,7 @@ describe('decidePackageReport', () => {
       expect(
         buildProposalSubjectKey({
           conversationId,
-          endpointId: 'agent-a',
+          subjectId: 'agent-a',
           actionWorkflowId: ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
         })
       ).toBe('9336b59d-3846-5306-9cb9-1b588da3694b');

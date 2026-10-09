@@ -402,9 +402,9 @@ describe('buildProposalComment', () => {
   it('renders the selection rule as the first Why bullet when given', () => {
     const comment = buildProposalComment({
       entry: suspendProcess,
-      host,
+      subject: processSubject(withPid),
       state: baseState(),
-      processSelector: withPid,
+      actionInput,
       ruleLine: 'Rule: suspend_only (no destructive technique, no memdump_process capability)',
     });
     const lines = comment.split('\n');
@@ -417,9 +417,9 @@ describe('buildProposalComment', () => {
   it('gives a memory dump proposal its own action line and rationale', () => {
     const comment = buildProposalComment({
       entry: memoryDump,
-      host,
+      subject: processSubject(withPid),
       state: baseState(),
-      processSelector: withPid,
+      actionInput,
     });
     expect(comment).toContain(
       '**Action:** Dump memory of `powershell.exe` (PID 4212) on **WIN-ANALYST01** with Elastic Defend.'

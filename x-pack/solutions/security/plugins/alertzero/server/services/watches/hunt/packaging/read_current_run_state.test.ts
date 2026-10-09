@@ -65,7 +65,6 @@ const sseAttachment = ({
    * technique the run actually corroborated, never on the report-scoped fallback entry.
    */
   corroboratedTechniqueId?: string;
-  severity?: 'low' | 'medium' | 'high' | 'critical';
   confidence?: number;
   timeRange?: { from: string; to: string };
 }): VersionedAttachment => ({

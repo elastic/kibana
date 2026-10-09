@@ -109,6 +109,7 @@ const CASES: ResponseActionCase[] = [
     workflow: ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW,
     category: 'investigate',
     dispatchPath: '/s/{{ workflow.spaceId }}/api/endpoint/action/memory_dump',
+    subject: 'process',
   },
 ];
 

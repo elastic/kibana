@@ -22,6 +22,7 @@ consts:
     impact: low
     reversible: false
     approvalPolicy: autonomy-dependent
+    subject: process
   actionLabel: Memory dump
   # Sentinel id used only to probe Actions-log privilege before dumping.
   # A 404 means the privilege is present; anything else must fail closed.
