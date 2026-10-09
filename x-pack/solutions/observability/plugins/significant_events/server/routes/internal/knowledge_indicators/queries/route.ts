@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import pLimit from 'p-limit';
 import { v4 as uuidv4 } from 'uuid';
 import type {
@@ -764,16 +764,18 @@ const upsertQueryRoute = createServerRoute({
     path: z.object({
       queryId: z.string().max(MAX_ID_LENGTH).describe('The identifier of the query.'),
     }),
-    body: upsertStreamQueryRequestSchema.extend({
-      target_name: z
-        .string()
-        .min(1)
-        .max(MAX_STREAM_NAME_LENGTH)
-        .optional()
-        .describe(
-          'Optional analysis target (stream name). Required when creating a query; omitted updates resolve the target from the existing query.'
-        ),
-    }),
+    body: lazySchema(() =>
+      upsertStreamQueryRequestSchema.extend({
+        target_name: z
+          .string()
+          .min(1)
+          .max(MAX_STREAM_NAME_LENGTH)
+          .optional()
+          .describe(
+            'Optional analysis target (stream name). Required when creating a query; omitted updates resolve the target from the existing query.'
+          ),
+      })
+    ),
   }),
   handler: async ({
     params,

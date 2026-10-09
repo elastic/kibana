@@ -6,6 +6,7 @@
  */
 
 export {
+  FLYOUT_GROUPED_ATTACHMENTS_ORDER,
   FlyoutGroupedAttachments,
   type FlyoutGroupedAttachmentDefinition,
   type FlyoutGroupedAttachmentRendererProps,
@@ -22,3 +23,4 @@ export {
   GroupedAttachmentsSection,
   type GroupedAttachmentsSectionProps,
 } from './grouped_attachments_section';
+export { selectGroupedAttachments } from './select_grouped_attachments';

@@ -195,7 +195,7 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
     });
 
     it(`should be able to "Add" a prebuilt rule`, () => {
-      cy.get(ADD_ELASTIC_RULES_BTN).should('be.enabled');
+      cy.get(ADD_ELASTIC_RULES_BTN).should('have.attr', 'href');
     });
   });
 
