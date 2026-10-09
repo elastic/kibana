@@ -427,7 +427,7 @@ export const useCasesColumns = ({
 };
 
 interface Props {
-  theCase: CaseUI;
+  theCase: Pick<CaseUI, 'externalService' | 'updatedAt'>;
   connectors: ActionConnector[];
 }
 
