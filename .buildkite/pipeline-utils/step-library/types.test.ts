@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// SPIKE (#260036, sub-issue 0): shows how the SDK-based step types are used. Everything here is
-// checked by `tsc` (`npm run typecheck`) as well as by Jest.
+// Shows how the SDK-based step types are used. Jest does not report type errors in this
+// workspace, so `tsc` (`npm run typecheck`) is what checks the type-level assertions here.
 
 import { parse } from 'yaml';
 import { commandStep, genericStep, groupStep, waitStep } from './helpers.ts';

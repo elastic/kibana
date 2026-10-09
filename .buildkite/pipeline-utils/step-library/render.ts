@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { stringify } from "yaml";
-import { registerCancelKeys } from "../buildkite/utils.ts";
-import type { Step } from "./types.ts";
+import { stringify } from 'yaml';
+import { registerCancelKeys } from '../buildkite/utils.ts';
+import type { Step } from './types.ts';
 
 export interface RenderOptions {
   cancelOnGateFailure?: boolean; // Register command-step keys so a failing gate step cancels them.
@@ -24,23 +24,25 @@ export const getStepKeys = (steps: readonly Step[]): string[] =>
   steps.flatMap((generic) => {
     // The SDK's step union includes plain strings ('wait'), and its step types are interfaces,
     // so read them as records.
-    if (typeof generic === "string") {
+    if (typeof generic === 'string') {
       return [];
     }
 
     const step = generic as Record<string, unknown>;
 
-    if (typeof step.group === "string" && Array.isArray(step.steps)) {
+    if (typeof step.group === 'string' && Array.isArray(step.steps)) {
       return getStepKeys(step.steps);
     }
 
-    if (typeof step.command !== "string") {
+    if (typeof step.command !== 'string') {
       return [];
     }
 
-    if (typeof step.key !== "string") {
+    if (typeof step.key !== 'string') {
       throw new Error(
-        `step "${String(step.label ?? step.command)}" is missing a "key" (required for cancelOnGateFailure)`,
+        `step "${String(
+          step.label ?? step.command
+        )}" is missing a "key" (required for cancelOnGateFailure)`
       );
     }
 
@@ -49,7 +51,7 @@ export const getStepKeys = (steps: readonly Step[]): string[] =>
 
 export const renderSteps = (
   steps: readonly Step[],
-  { cancelOnGateFailure = false, header = false }: RenderOptions = {},
+  { cancelOnGateFailure = false, header = false }: RenderOptions = {}
 ): string => {
   if (cancelOnGateFailure) {
     registerCancelKeys(getStepKeys(steps));
@@ -58,5 +60,5 @@ export const renderSteps = (
   // lineWidth 0 stops from folding long commands. The default indentSeq keeps list items two
   // spaces in, which is what lets this chunk continue a document that already has `steps:`.
   const text = stringify({ steps }, { lineWidth: 0 });
-  return header ? text : text.replace(/^steps:/, "");
+  return header ? text : text.replace(/^steps:/, '');
 };

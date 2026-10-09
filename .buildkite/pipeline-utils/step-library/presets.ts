@@ -11,19 +11,20 @@ import type { AgentConfig, Retry } from './types.ts';
 
 export const spotZones = {
   centralFCA: 'us-central1-f,us-central1-c,us-central1-a',
-};
+} as const;
 
 // Exit statuses are integers or '*', the forms Buildkite's schema allows.
-export const retry: Record<string, Retry> = {
+//
+// NOTE: This *cannot* be `as const`, which would infer the arrays as `readonly`.
+// The SDK type expects mutable arrays.
+export const retry = {
   agentLossOrAnyOnce: {
     automatic: [
       { exit_status: -1, limit: 3 },
       { exit_status: '*', limit: 1 },
     ],
   },
-
-  agentLoss: { automatic: [{ exit_status: -1, limit: 3 }] },
-};
+} satisfies Record<string, Retry>;
 
 export const spotAgent = (machineType: string, zones: string): AgentConfig => ({
   machineType,
