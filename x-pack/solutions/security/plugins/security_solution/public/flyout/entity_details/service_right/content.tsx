@@ -21,6 +21,7 @@ import { useObservedServiceItems } from './hooks/use_observed_service_items';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { VisualizationsSection } from '../shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
+import { useNewEntityAnalyticsPage } from '../../../entity_analytics/hooks/use_new_entity_analytics_page';
 import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 
 export const OBSERVED_SERVICE_QUERY_ID = 'observedServiceDetailsQuery';
@@ -86,6 +87,22 @@ export const ServicePanelContent = ({
 }: ServicePanelContentProps) => {
   const observedFields = useObservedServiceItems(observedService);
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
+  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
+
+  const resolutionSection =
+    entityStoreEntityId && hasEntityResolutionLicense ? (
+      <>
+        <ResolutionSection
+          entityId={entityStoreEntityId}
+          entityType={EntityType.service}
+          scopeId={scopeId}
+          openDetailsPanel={openDetailsPanel}
+          onShowEntity={onShowEntity}
+          hideHeaderIcons={hideHeaderIcons}
+        />
+        <EuiHorizontalRule />
+      </>
+    ) : null;
 
   return (
     <>
@@ -112,6 +129,7 @@ export const ServicePanelContent = ({
           <EuiHorizontalRule />
         </>
       )}
+      {isNewEntityAnalyticsPage && resolutionSection}
       {entityStoreEntityId && (
         <>
           <VisualizationsSection
@@ -124,19 +142,7 @@ export const ServicePanelContent = ({
           <EuiHorizontalRule margin="m" />
         </>
       )}
-      {entityStoreEntityId && hasEntityResolutionLicense && (
-        <>
-          <ResolutionSection
-            entityId={entityStoreEntityId}
-            entityType={EntityType.service}
-            scopeId={scopeId}
-            openDetailsPanel={openDetailsPanel}
-            onShowEntity={onShowEntity}
-            hideHeaderIcons={hideHeaderIcons}
-          />
-          <EuiHorizontalRule />
-        </>
-      )}
+      {!isNewEntityAnalyticsPage && resolutionSection}
       {!entityStoreV2Enabled && (
         <AssetCriticalityAccordion
           entity={{ name: serviceName, type: EntityType.service }}

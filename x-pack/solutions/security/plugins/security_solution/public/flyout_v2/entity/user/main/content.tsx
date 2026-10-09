@@ -27,6 +27,7 @@ import type { ObservedEntityData } from '../../shared/components/observed_entity
 import type { EntityRiskScore, UserItem } from '../../../../../common/search_strategy';
 import { VisualizationsSection } from '../../../../flyout/entity_details/shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../../entity_analytics/components/entity_resolution/resolution_section';
+import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';
 import {
   AnomaliesSection,
   EMPTY_ANOMALY_OVERVIEW,
@@ -121,6 +122,8 @@ export const Content = ({
   riskScoreQueryId,
 }: ContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
+  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
+
   const isAnomalyDetailsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAnomalyDetails');
   const { data: anomalyPrivilegesData } = useAnomalyPrivileges(isAnomalyDetailsEnabled);
   const hasAnomalyPrivileges = anomalyPrivilegesData?.has_all_required ?? false;
@@ -134,6 +137,21 @@ export const Content = ({
 
   const userName =
     identityFields[EntityIdentifierFields.userName] || Object.values(identityFields)[0] || '';
+
+  const resolutionSection =
+    entityStoreEntityId && !isPreviewMode && hasEntityResolutionLicense ? (
+      <>
+        <ResolutionSection
+          entityId={entityStoreEntityId}
+          entityType={EntityType.user}
+          scopeId={scopeId}
+          openDetailsPanel={enableGraphAndResolutionNavigation ? openDetailsPanel : undefined}
+          onShowEntity={onShowEntity}
+          hideHeaderIcons={hideHeaderIcons}
+        />
+        <EuiHorizontalRule />
+      </>
+    ) : null;
 
   return (
     <>
@@ -164,6 +182,7 @@ export const Content = ({
             <EuiHorizontalRule />
           </>
         )}
+      {isNewEntityAnalyticsPage && resolutionSection}
       {loadAnomalies &&
         (anomalyOverview.isLoading || anomalyOverview.isError || anomalyOverview.data) && (
           <>
@@ -190,19 +209,7 @@ export const Content = ({
           <EuiHorizontalRule margin="m" />
         </>
       )}
-      {entityStoreEntityId && !isPreviewMode && hasEntityResolutionLicense && (
-        <>
-          <ResolutionSection
-            entityId={entityStoreEntityId}
-            entityType={EntityType.user}
-            scopeId={scopeId}
-            openDetailsPanel={enableGraphAndResolutionNavigation ? openDetailsPanel : undefined}
-            onShowEntity={onShowEntity}
-            hideHeaderIcons={hideHeaderIcons}
-          />
-          <EuiHorizontalRule />
-        </>
-      )}
+      {!isNewEntityAnalyticsPage && resolutionSection}
       {!entityStoreV2Enabled && (
         <AssetCriticalityAccordion
           entity={{ name: userName, type: EntityType.user }}

@@ -22,6 +22,8 @@ import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash/fp';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useNewEntityAnalyticsPage } from '../../hooks/use_new_entity_analytics_page';
+import { shouldShowOnlyResolutionRisk } from './show_only_resolution_risk';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
@@ -131,6 +133,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
     'enableRiskScorePrivmonModifier'
   );
   const isWatchlistEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsWatchlistEnabled');
+  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
   const rows = useMemo(
     () => getItems(entityData, isPrivmonModifierEnabled, isWatchlistEnabled),
     [entityData, isPrivmonModifierEnabled, isWatchlistEnabled]
@@ -215,6 +218,16 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
     [resolutionEntityData, isPrivmonModifierEnabled, isWatchlistEnabled]
   );
   const showResolutionRiskSummary = hasResolutionGroup && Boolean(resolutionEntityData?.risk);
+  const showOnlyResolutionRisk = shouldShowOnlyResolutionRisk({
+    enabled: isNewEntityAnalyticsPage,
+    hasResolutionGroup,
+    hasResolutionScore: Boolean(resolutionEntityData?.risk),
+    resolutionLoading: entityResolutionRiskScore?.loading ?? false,
+  });
+  const showResolutionPanel = showResolutionRiskSummary || showOnlyResolutionRisk;
+  const displayedUpdatedAt = showOnlyResolutionRisk
+    ? resolutionRiskData?.['@timestamp']
+    : riskData?.['@timestamp'];
   const resolutionLensAttributes = useMemo(() => {
     if (!resolutionTargetEntityId) {
       return undefined;
@@ -284,14 +297,14 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
             font-size: ${xsFontSize};
           `}
         >
-          {riskData && (
+          {displayedUpdatedAt && (
             <FormattedMessage
               id="xpack.securitySolution.flyout.entityDetails.riskUpdatedTime"
               defaultMessage="Updated {time}"
               values={{
                 time: (
                   <FormattedRelativePreferenceDate
-                    value={riskData['@timestamp']}
+                    value={displayedUpdatedAt}
                     dateFormat="MMM D, YYYY"
                     relativeThresholdInHrs={ONE_WEEK_IN_HOURS}
                   />
@@ -304,113 +317,79 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
     >
       <EuiSpacer size="m" />
 
-      <ExpandablePanel
-        data-test-subj="entityRiskInputs"
-        header={{
-          title: (
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.entityDetails.entityRiskInputs"
-              defaultMessage="Entity risk contributions"
-            />
-          ),
-          link: entityTabLink,
-          iconType: !isPreviewMode && !hideHeaderIcon ? 'chevronLimitLeft' : undefined,
-        }}
-        expand={{
-          expandable: false,
-        }}
-      >
-        <EuiFlexGroup gutterSize="m" direction="row" wrap>
-          <EuiFlexItem grow={1}>
-            <div
-              // Improve Visualization loading state by predefining the size
-              // Set min-width for a fluid layout
-              css={css`
-                height: ${LENS_VISUALIZATION_HEIGHT}px;
-                min-width: ${LENS_VISUALIZATION_MIN_WIDTH}px;
-              `}
-            >
-              {riskData && (
-                <VisualizationEmbeddable
-                  applyGlobalQueriesAndFilters={false}
-                  applyPageAndTabsFilters={false}
-                  lensAttributes={lensAttributes}
-                  id={`RiskSummary-risk_score_metric`}
-                  timerange={timerange}
-                  width={'100%'}
-                  height={LENS_VISUALIZATION_HEIGHT}
-                  disableOnClickFilter
-                  inspectTitle={
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.inspectVisualizationTitle"
-                      defaultMessage="Risk Summary Visualization"
-                    />
-                  }
-                  casesAttachmentMetadata={casesAttachmentMetadata}
-                />
-              )}
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={3}
-            css={css`
-              min-width: ${SUMMARY_TABLE_MIN_WIDTH}px;
-            `}
-          >
-            <InspectButtonContainer>
+      {!showOnlyResolutionRisk && (
+        <ExpandablePanel
+          data-test-subj="entityRiskInputs"
+          header={{
+            title: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.entityDetails.entityRiskInputs"
+                defaultMessage="Entity risk contributions"
+              />
+            ),
+            link: entityTabLink,
+            iconType: !isPreviewMode && !hideHeaderIcon ? 'chevronLimitLeft' : undefined,
+          }}
+          expand={{
+            expandable: false,
+          }}
+        >
+          <EuiFlexGroup gutterSize="m" direction="row" wrap>
+            <EuiFlexItem grow={1}>
               <div
-                // Anchors the position absolute inspect button (nearest positioned ancestor)
+                // Improve Visualization loading state by predefining the size
+                // Set min-width for a fluid layout
                 css={css`
-                  position: relative;
+                  height: ${LENS_VISUALIZATION_HEIGHT}px;
+                  min-width: ${LENS_VISUALIZATION_MIN_WIDTH}px;
                 `}
               >
-                <div
-                  // Position the inspect button above the table
-                  css={css`
-                    position: absolute;
-                    right: 0;
-                    top: -${euiTheme.size.base};
-                  `}
-                >
-                  <InspectButton
-                    queryId={queryId}
-                    title={
+                {riskData && (
+                  <VisualizationEmbeddable
+                    applyGlobalQueriesAndFilters={false}
+                    applyPageAndTabsFilters={false}
+                    lensAttributes={lensAttributes}
+                    id={`RiskSummary-risk_score_metric`}
+                    timerange={timerange}
+                    width={'100%'}
+                    height={LENS_VISUALIZATION_HEIGHT}
+                    disableOnClickFilter
+                    inspectTitle={
                       <FormattedMessage
-                        id="xpack.securitySolution.flyout.entityDetails.inspectTableTitle"
-                        defaultMessage="Risk Summary Table"
+                        id="xpack.securitySolution.flyout.entityDetails.inspectVisualizationTitle"
+                        defaultMessage="Risk Summary Visualization"
                       />
                     }
+                    casesAttachmentMetadata={casesAttachmentMetadata}
                   />
-                </div>
-                <EuiBasicTable
-                  tableCaption={i18n.translate(
-                    'xpack.securitySolution.flyout.entityDetails.riskSummaryTableCaption',
-                    {
-                      defaultMessage: 'Risk summary for {entity}',
-                      values: {
-                        entity: capitalize(entityType),
-                      },
-                    }
-                  )}
-                  data-test-subj="risk-summary-table"
-                  responsiveBreakpoint={false}
-                  columns={columnsArray}
-                  items={rows}
-                  compressed
-                  loading={
-                    riskScoreData.loading ||
-                    (entityBaseRiskScore?.loading ?? false) ||
-                    recalculatingScore
-                  }
-                />
+                )}
               </div>
-            </InspectButtonContainer>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </ExpandablePanel>
-      {showResolutionRiskSummary && (
+            </EuiFlexItem>
+            <RiskContributionsTable
+              testSubj="risk-summary-table"
+              caption={i18n.translate(
+                'xpack.securitySolution.flyout.entityDetails.riskSummaryTableCaption',
+                {
+                  defaultMessage: 'Risk summary for {entity}',
+                  values: {
+                    entity: capitalize(entityType),
+                  },
+                }
+              )}
+              items={rows}
+              loading={
+                riskScoreData.loading ||
+                (entityBaseRiskScore?.loading ?? false) ||
+                recalculatingScore
+              }
+              inspectQueryId={queryId}
+            />
+          </EuiFlexGroup>
+        </ExpandablePanel>
+      )}
+      {showResolutionPanel && (
         <>
-          <EuiSpacer size="m" />
+          {!showOnlyResolutionRisk && <EuiSpacer size="m" />}
           <ExpandablePanel
             data-test-subj="resolutionRiskInputs"
             header={{
@@ -458,36 +437,89 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
                   )}
                 </div>
               </EuiFlexItem>
-              <EuiFlexItem
-                grow={3}
-                css={css`
-                  min-width: ${SUMMARY_TABLE_MIN_WIDTH}px;
-                `}
-              >
-                <EuiBasicTable
-                  tableCaption={i18n.translate(
-                    'xpack.securitySolution.flyout.entityDetails.resolutionRiskSummaryTableCaption',
-                    {
-                      defaultMessage: 'Resolution risk summary for {entity}',
-                      values: {
-                        entity: capitalize(entityType),
-                      },
-                    }
-                  )}
-                  data-test-subj="resolution-risk-summary-table"
-                  responsiveBreakpoint={false}
-                  columns={columnsArray}
-                  items={resolutionRows}
-                  compressed
-                  loading={(entityResolutionRiskScore?.loading ?? false) || recalculatingScore}
-                />
-              </EuiFlexItem>
+              <RiskContributionsTable
+                testSubj="resolution-risk-summary-table"
+                caption={i18n.translate(
+                  'xpack.securitySolution.flyout.entityDetails.resolutionRiskSummaryTableCaption',
+                  {
+                    defaultMessage: 'Resolution risk summary for {entity}',
+                    values: {
+                      entity: capitalize(entityType),
+                    },
+                  }
+                )}
+                items={resolutionRows}
+                loading={(entityResolutionRiskScore?.loading ?? false) || recalculatingScore}
+                inspectQueryId={showOnlyResolutionRisk ? queryId : undefined}
+              />
             </EuiFlexGroup>
           </ExpandablePanel>
         </>
       )}
       <EuiSpacer size="s" />
     </EuiAccordion>
+  );
+};
+
+const RiskContributionsTable = ({
+  testSubj,
+  caption,
+  items,
+  loading,
+  inspectQueryId,
+}: {
+  testSubj: string;
+  caption: string;
+  items: ReturnType<typeof getItems>;
+  loading: boolean;
+  inspectQueryId?: string;
+}) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiFlexItem
+      grow={3}
+      css={css`
+        min-width: ${SUMMARY_TABLE_MIN_WIDTH}px;
+      `}
+    >
+      <InspectButtonContainer>
+        <div
+          css={css`
+            position: relative;
+          `}
+        >
+          {inspectQueryId != null && (
+            <div
+              css={css`
+                position: absolute;
+                right: 0;
+                top: -${euiTheme.size.base};
+              `}
+            >
+              <InspectButton
+                queryId={inspectQueryId}
+                title={
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.entityDetails.inspectTableTitle"
+                    defaultMessage="Risk Summary Table"
+                  />
+                }
+              />
+            </div>
+          )}
+          <EuiBasicTable
+            tableCaption={caption}
+            data-test-subj={testSubj}
+            responsiveBreakpoint={false}
+            columns={columnsArray}
+            items={items}
+            compressed
+            loading={loading}
+          />
+        </div>
+      </InspectButtonContainer>
+    </EuiFlexItem>
   );
 };
 

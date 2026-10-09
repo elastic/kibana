@@ -66,6 +66,8 @@ import { AssetCriticalityBadge } from '../../../asset_criticality';
 import { RiskInputsUtilityBar } from '../../components/utility_bar';
 import { ActionColumn } from '../../components/action_column';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useNewEntityAnalyticsPage } from '../../../../hooks/use_new_entity_analytics_page';
+import { shouldShowOnlyResolutionRisk } from '../../../risk_summary_flyout/show_only_resolution_risk';
 import { useResolutionGroup } from '../../../entity_resolution/hooks/use_resolution_group';
 import { getEntityId, getEntityField, getEntityName } from '../../../entity_resolution/helpers';
 import { useStableExpandableFlyoutState } from '../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state';
@@ -310,6 +312,7 @@ export const RiskInputsTab = <T extends EntityType>({
       entityRiskScore={entityRiskScore}
       resolutionRiskScore={resolutionRiskScore}
       hasResolutionScore={hasResolutionScore}
+      hasRealResolutionGroup={hasRealResolutionGroup}
       loadingRiskScore={loadingRiskScore}
       loadingResolutionRiskScore={loadingResolutionRiskScore}
       inspectRiskScore={inspectRiskScore}
@@ -335,6 +338,7 @@ interface RiskInputsTabContentProps<T extends EntityType> {
   entityRiskScore: EntityRiskScore<T> | undefined;
   resolutionRiskScore: EntityRiskScore<T> | undefined;
   hasResolutionScore: boolean;
+  hasRealResolutionGroup: boolean;
   loadingRiskScore: boolean;
   loadingResolutionRiskScore: boolean;
   inspectRiskScore: RiskScoreState<EntityType>['inspect'];
@@ -357,6 +361,7 @@ const RiskInputsTabContent = <T extends EntityType>({
   entityRiskScore,
   resolutionRiskScore,
   hasResolutionScore,
+  hasRealResolutionGroup,
   loadingRiskScore,
   loadingResolutionRiskScore,
   inspectRiskScore,
@@ -376,15 +381,25 @@ const RiskInputsTabContent = <T extends EntityType>({
   const [historyRange, setHistoryRange] = useState(DEFAULT_HISTORY_RANGE);
   const [selectedTimestamp, setSelectedTimestamp] = useState<string | undefined>(undefined);
   const isRiskScoreHistoryEnabled = useIsExperimentalFeatureEnabled('riskScoreHistoryEnabled');
+  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
+  const showOnlyResolutionRisk = shouldShowOnlyResolutionRisk({
+    enabled: isNewEntityAnalyticsPage,
+    hasResolutionGroup: hasRealResolutionGroup,
+    hasResolutionScore,
+    resolutionLoading: loadingResolutionRiskScore,
+  });
 
   const defaultView =
-    !loadingRiskScore && !entityRiskScore && hasResolutionScore
+    showOnlyResolutionRisk || (!loadingRiskScore && !entityRiskScore && hasResolutionScore)
       ? RiskScoreLeftPanelSubTab.RESOLUTION
       : RiskScoreLeftPanelSubTab.ENTITY;
-  const selectedView = userSelectedView ?? defaultView;
+  const selectedView = showOnlyResolutionRisk
+    ? RiskScoreLeftPanelSubTab.RESOLUTION
+    : userSelectedView ?? defaultView;
 
   const isResolutionView =
-    selectedView === RiskScoreLeftPanelSubTab.RESOLUTION && hasResolutionScore;
+    showOnlyResolutionRisk ||
+    (selectedView === RiskScoreLeftPanelSubTab.RESOLUTION && hasResolutionScore);
 
   // The resolution-group history lives in the same time-series stream as the
   // entity history, keyed by the resolution target's id with `score_type=resolution`.
@@ -635,7 +650,7 @@ const RiskInputsTabContent = <T extends EntityType>({
 
   return (
     <>
-      {hasResolutionScore && (
+      {hasResolutionScore && !showOnlyResolutionRisk && (
         <>
           <EuiButtonGroup
             isFullWidth

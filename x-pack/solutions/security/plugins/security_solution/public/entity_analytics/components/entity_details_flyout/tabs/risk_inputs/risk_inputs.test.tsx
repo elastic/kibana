@@ -8,6 +8,8 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../../common/mock';
+import { USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG } from '../../../../../../common/constants';
+import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana_react.mock';
 import { times } from 'lodash/fp';
 import { EXPAND_ALERT_TEST_ID, RiskInputsTab } from './risk_inputs_tab';
 import { alertInputDataMock } from '../../mocks';
@@ -1694,6 +1696,104 @@ describe('RiskInputsTab', () => {
         expect(getByTestId('riskInputsTabPitIndicator')).toBeInTheDocument();
       });
     });
+  });
+});
+
+describe('RiskInputsTab - single resolution score', () => {
+  const isResolutionScoreFilter = (params?: { filterQuery?: unknown }): boolean => {
+    const filters = (
+      params?.filterQuery as
+        | { bool?: { filter?: Array<{ term?: Record<string, string> }> } }
+        | undefined
+    )?.bool?.filter;
+    return (
+      Array.isArray(filters) &&
+      filters.some((clause) => Object.values(clause.term ?? {}).includes('resolution'))
+    );
+  };
+  const entityScore = {
+    ...riskScore,
+    user: {
+      ...riskScore.user,
+      risk: { ...riskScore.user.risk, calculated_score_norm: 10 },
+    },
+  };
+  const resolutionScore = {
+    ...riskScore,
+    user: {
+      ...riskScore.user,
+      risk: { ...riskScore.user.risk, calculated_score_norm: 80 },
+    },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseMissingRiskEnginePrivileges.mockReturnValue({
+      isLoading: false,
+      hasAllRequiredPrivileges: true,
+    });
+    mockUseGetWatchlists.mockReturnValue({ data: [] });
+    mockUseEntityFromStore.mockReturnValue({ entityRecord: null });
+    mockUseStableExpandableFlyoutState.mockReturnValue({
+      left: {
+        params: {
+          path: {
+            tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
+            subTab: RiskScoreLeftPanelSubTab.ENTITY,
+          },
+        },
+      },
+    });
+    mockUseResolutionGroup.mockReturnValue({
+      data: {
+        target: {
+          entity: { id: 'user:target', name: 'target', attributes: { watchlists: [] } },
+        },
+        aliases: [
+          {
+            entity: { id: 'user:elastic', name: 'elastic', attributes: { watchlists: [] } },
+          },
+        ],
+        group_size: 2,
+      },
+    });
+    mockUseRiskScore.mockImplementation((params?: { filterQuery?: unknown; skip?: boolean }) =>
+      params?.skip
+        ? { loading: false, error: false, data: [] }
+        : isResolutionScoreFilter(params)
+        ? { loading: false, error: false, data: [resolutionScore] }
+        : { loading: false, error: false, data: [entityScore] }
+    );
+    mockUseRiskContributingAlerts.mockReturnValue({
+      loading: false,
+      data: [],
+      hasAlertsRead: true,
+    });
+  });
+
+  it('hides the score toggle and uses the resolution score when the new page flag is on', () => {
+    const startServices = createStartServicesMock();
+    jest
+      .mocked(startServices.featureFlags.useBooleanValue)
+      .mockImplementation((flag, fallback) =>
+        flag === USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG ? true : fallback
+      );
+
+    const { queryByTestId } = render(
+      <TestProviders startServices={startServices}>
+        <RiskInputsTab
+          entityType={EntityType.user}
+          entityName="elastic"
+          onShowAlert={mockOnShowAlert}
+          entityId="user:elastic"
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('risk-input-score-view-toggle')).not.toBeInTheDocument();
+    expect(mockUseRiskContributingAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({ riskScore: resolutionScore })
+    );
   });
 });
 
