@@ -88,9 +88,10 @@ apiTest.describe('Rule metadata.template', { tag: '@local-stateful-classic' }, (
       expect(getResponse).toHaveStatusCode(200);
       expect(getResponse.body.metadata.template).toStrictEqual(TEMPLATE);
 
-      const findResponse = await apiClient.get(`${testData.RULE_API_PATH}?per_page=100`, {
-        headers: writerHeaders,
-      });
+      const findResponse = await apiClient.get(
+        `${testData.RULE_API_PATH}?filter=${encodeURIComponent(`id: "${created.id}"`)}`,
+        { headers: writerHeaders }
+      );
       expect(findResponse).toHaveStatusCode(200);
       const found = findResponse.body.items.find((item: { id: string }) => item.id === created.id);
       expect(found?.metadata.template).toStrictEqual(TEMPLATE);
