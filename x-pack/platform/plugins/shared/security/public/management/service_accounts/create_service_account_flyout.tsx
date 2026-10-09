@@ -335,11 +335,10 @@ export const CreateServiceAccountFlyout = ({
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+        <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              size="s"
-              color="text"
+              flush="right"
               onClick={onClose}
               isDisabled={isSaving}
               data-test-subj="createServiceAccountCancel"
@@ -352,7 +351,7 @@ export const CreateServiceAccountFlyout = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              size="s"
+              fill
               type="submit"
               form={formId}
               isLoading={isSaving}
