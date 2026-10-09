@@ -10,6 +10,7 @@ import {
   assertStructuredEvidence,
   assertAnalysisExecution,
   assertEndpointForensicToolCall,
+  assertPersistedAttachments,
 } from './assertions';
 import {
   analysisInputValidator,
@@ -22,6 +23,7 @@ import {
 import { getCompleteWorkerSettingsSchema } from '@kbn/alertzero-common';
 import { getToolCallSteps } from '@kbn/evals';
 import { ExecutionStatus, type WorkflowStepExecutionDto } from '@kbn/workflows';
+import type { ListAttachmentsResponse } from '@kbn/agent-builder-plugin/common/http_api/attachments';
 
 const expected = {
   host: 'AZ-EVAL-01',
@@ -389,6 +391,29 @@ describe('AlertZero L4 durable proposal evidence', () => {
     expect(() =>
       assertPersistedProposal({ ...proposal(), ...mutation }, proposalExpectation)
     ).toThrow();
+  });
+});
+
+describe('AlertZero persisted forensic attachments', () => {
+  // The list route answers ListAttachmentsResponse: { results, total_token_estimate }.
+  const response = (ids: string[]) =>
+    ({ results: ids.map((id) => ({ id })), total_token_estimate: 0 } as ListAttachmentsResponse);
+
+  it('requires both the timeline and the IoC attachment for the investigation', () => {
+    expect(() =>
+      assertPersistedAttachments(response(['forensic-timeline-ki-1', 'forensic-iocs-ki-1']), 'ki-1')
+    ).not.toThrow();
+  });
+
+  it.each([
+    [['forensic-timeline-ki-1']],
+    [['forensic-iocs-ki-1']],
+    [['forensic-timeline-other', 'forensic-iocs-ki-1']],
+    [[]],
+  ])('rejects a response missing a persisted attachment %p', (ids) => {
+    expect(() => assertPersistedAttachments(response(ids), 'ki-1')).toThrow(
+      /Missing persisted forensic attachments/
+    );
   });
 });
 

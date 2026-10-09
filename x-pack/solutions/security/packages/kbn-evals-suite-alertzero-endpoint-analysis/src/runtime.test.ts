@@ -18,6 +18,7 @@ import {
   runAllCleanups,
   seedAlertZeroEndpoint,
 } from './runtime';
+import { ExecutionStatus } from '@kbn/workflows';
 
 const createEs = () => {
   const es = {
@@ -63,6 +64,53 @@ describe('AlertZeroRuntime.read', () => {
     expect(fetch).toHaveBeenCalledWith(
       '/api/workflows/executions/exec',
       expect.objectContaining({ query: { includeOutput: true } })
+    );
+  });
+});
+
+describe('AlertZeroRuntime.cancelAll', () => {
+  const running = { id: 'exec-1', status: ExecutionStatus.RUNNING };
+
+  it('cancels a still-running execution', async () => {
+    const fetch = createFetch((path, options) => {
+      if (path.endsWith('/cancel')) return {};
+      return running;
+    }) as FetchMock;
+    const runtime = new AlertZeroRuntime(fetch);
+    runtime.executionIds.add('exec-1');
+    await runtime.cancelAll();
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/workflows/executions/exec-1/cancel',
+      expect.objectContaining({ method: 'POST' })
+    );
+  });
+
+  it('does not throw when the execution reached a terminal state before the cancel landed', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      const fetch = createFetch((path) => {
+        if (path.endsWith('/cancel')) throw new Error('500 Something went wrong');
+        return running;
+      }) as FetchMock;
+      const runtime = new AlertZeroRuntime(fetch);
+      runtime.executionIds.add('exec-1');
+      await expect(runtime.cancelAll()).resolves.toBeUndefined();
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('could not cancel execution exec-1')
+      );
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it('never issues a cancel for an already-terminal execution', async () => {
+    const fetch = createFetch(() => ({ id: 'exec-1', status: ExecutionStatus.COMPLETED }));
+    const runtime = new AlertZeroRuntime(fetch);
+    runtime.executionIds.add('exec-1');
+    await runtime.cancelAll();
+    expect(fetch).not.toHaveBeenCalledWith(
+      '/api/workflows/executions/exec-1/cancel',
+      expect.anything()
     );
   });
 });

@@ -157,9 +157,18 @@ export class AlertZeroRuntime {
           execution.status
         )
       ) {
+        // Cleanup, not verification: an execution that reached a terminal state between the
+        // read above and this call makes the server answer 4xx/5xx. A failed cancel must
+        // never mask the test's own verdict, so it is swallowed (with the error surfaced
+        // via the thrown message if the whole cancelAll later fails for another reason).
         await this.fetch(`/api/workflows/executions/${encodeURIComponent(id)}/cancel`, {
           method: 'POST',
           headers: workflowHeaders,
+        }).catch((error: Error) => {
+          // eslint-disable-next-line no-console -- best-effort cleanup signal, no logger here
+          console.warn(
+            `AlertZero eval cleanup: could not cancel execution ${id}: ${error.message}`
+          );
         });
       }
     }

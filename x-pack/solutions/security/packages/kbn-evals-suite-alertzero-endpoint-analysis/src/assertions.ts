@@ -6,6 +6,7 @@
  */
 
 import { proposalSchema, type Proposal } from '@kbn/proposals-common';
+import type { ListAttachmentsResponse } from '@kbn/agent-builder-plugin/common/http_api/attachments';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { assertActionSafety } from './action_safety';
 import { analysisOutputValidator } from './contracts';
@@ -118,6 +119,24 @@ export const assertPersistedProposal = (
     throw new Error('Persisted AlertZero endpoint proposal does not match execution');
   }
   return proposal;
+};
+
+/**
+ * L2/L3: the analysis persists a timeline and an IoC attachment on the investigation
+ * conversation. Pinned to the exported `ListAttachmentsResponse` contract — the list route
+ * (`server/routes/attachments.ts`) returns `{ results, total_token_estimate }`, so a renamed
+ * field breaks type_check here instead of a live run with `undefined.some(...)`.
+ */
+export const assertPersistedAttachments = (
+  response: ListAttachmentsResponse,
+  investigationId: string
+) => {
+  const ids = response.results.map((attachment) => attachment.id);
+  const expected = [`forensic-timeline-${investigationId}`, `forensic-iocs-${investigationId}`];
+  const missing = expected.filter((id) => !ids.includes(id));
+  if (missing.length > 0) {
+    throw new Error(`Missing persisted forensic attachments: ${missing.join(', ')}`);
+  }
 };
 
 export const ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID =

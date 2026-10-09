@@ -8,6 +8,7 @@
 import { strict as assert } from 'assert';
 import { evaluate, tags, getToolCallSteps } from '@kbn/evals';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import type { ListAttachmentsResponse } from '@kbn/agent-builder-plugin/common/http_api/attachments';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   extractAgentConversationIds,
@@ -26,6 +27,7 @@ import { reportActionSafety } from '../src/report_action_safety';
 import {
   assertAnalysisExecution,
   assertEndpointForensicToolCall,
+  assertPersistedAttachments,
   assertPersistedProposal,
 } from '../src/assertions';
 import { analysisWorkflowId, gateWorkflowId, workerWorkflowId } from '../src/contracts';
@@ -169,22 +171,14 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
             'Endpoint forensic tool calls failed'
           );
         }
-        const attachments = await fetch<{ attachments: Array<{ id: string }> }>(
+        // The route returns ListAttachmentsResponse (`results`), not `{ attachments }`.
+        const attachments = await fetch<ListAttachmentsResponse>(
           `/api/agent_builder/conversations/${encodeURIComponent(
             fixture.conversationId
           )}/attachments`,
           { headers: { 'elastic-api-version': '2023-10-31' } }
         );
-        assert(
-          attachments.attachments.some(
-            (attachment) => attachment.id === `forensic-timeline-${fixture.kiId}`
-          )
-        );
-        assert(
-          attachments.attachments.some(
-            (attachment) => attachment.id === `forensic-iocs-${fixture.kiId}`
-          )
-        );
+        assertPersistedAttachments(attachments, fixture.kiId);
       } finally {
         await runAllCleanups([
           () => runtime.cancelAll(),
