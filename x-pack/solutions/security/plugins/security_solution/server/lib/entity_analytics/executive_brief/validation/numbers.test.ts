@@ -58,3 +58,28 @@ describe('findInventedNumbers', () => {
     });
   });
 });
+
+describe('collectAllowedNumbers with an attention assessment', () => {
+  it('allows counts quoted from the assessment summaries and rules', () => {
+    const snapshot = {
+      ...FIXTURE_SNAPSHOT,
+      glance: {
+        ...FIXTURE_SNAPSHOT.glance,
+        assessment: {
+          level: 'action' as const,
+          areas: [
+            {
+              id: 'coverage' as const,
+              level: 'watch' as const,
+              summary: 'Limited coverage on 913 stages with activity',
+              rule: 'limited coverage on 913 stages',
+              evidence: [],
+            },
+          ],
+        },
+      },
+    };
+    expect(collectAllowedNumbers(snapshot).has(913)).toBe(true);
+    expect(collectAllowedNumbers(FIXTURE_SNAPSHOT).has(913)).toBe(false);
+  });
+});

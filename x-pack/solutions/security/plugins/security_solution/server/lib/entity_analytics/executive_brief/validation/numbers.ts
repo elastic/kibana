@@ -62,6 +62,10 @@ export const collectAllowedNumbers = (snapshot: BriefSnapshot): Set<number> => {
   snapshot.blindSpots.gaps.forEach((gap) => {
     parseNumbers(`${gap.title} ${gap.detail ?? ''}`).forEach((n) => addNumber(allowed, n));
   });
+  // The deterministic attention assessment is part of the snapshot, so counts quoted from it are not invented.
+  snapshot.glance.assessment?.areas.forEach((area) => {
+    parseNumbers(`${area.summary} ${area.rule}`).forEach((n) => addNumber(allowed, n));
+  });
   snapshot.storylines.storylines.forEach((storyline) => {
     storyline.events.forEach((event) =>
       parseNumbers(event.summary).forEach((n) => addNumber(allowed, n))
