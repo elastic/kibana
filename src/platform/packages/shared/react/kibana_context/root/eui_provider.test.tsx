@@ -115,7 +115,7 @@ describe('KibanaEuiProvider', () => {
         componentDefaults: {
           EuiFlyout: {
             includeSelectorInFocusTrap: '[data-eui-includes-in-flyout-focus-trap="true"]',
-            container: '#app-main-scroll',
+            container: '[data-eui-breakpoint-container]',
           },
           EuiPopover: {
             repositionOnScroll: true,
