@@ -11,6 +11,7 @@
  * 2.0.
  */
 
+import { containsToken } from './grading';
 import type { CaseValidationIssue, EscalationCase, SeededEvent } from './types';
 
 const note = (message: string): SeededEvent => ({
@@ -184,8 +185,8 @@ export const escalationCases: EscalationCase[] = [
       },
       {
         id: 'f4',
-        key: 'exfil-drop-7731',
-        text: '22 GB was exfiltrated to bucket exfil-drop-7731 before encryption (last investigation only).',
+        key: 'exfil-drop-7731.storage.example',
+        text: '22 GB was exfiltrated to bucket exfil-drop-7731.storage.example before encryption (last investigation only).',
         investigation: 2,
       },
     ],
@@ -715,12 +716,579 @@ export const escalationCases: EscalationCase[] = [
       },
     ],
   },
+  {
+    id: 'case-09-webshell-to-database',
+    description:
+      'Two investigations: an IIS web shell, then the database export it enabled (last investigation only).',
+    investigations: [
+      {
+        id: 'inv-1',
+        title: 'Web shell on IIS app server',
+        events: [
+          note(
+            'Web shell help.aspx dropped in C:\\inetpub\\wwwroot\\uploads on APP07 (host.id hst_app07) by w3wp.exe; first request came from 192.0.2.55 at 02:17 UTC.'
+          ),
+        ],
+      },
+      {
+        id: 'inv-2',
+        title: 'Lateral movement to SQL',
+        events: [
+          note(
+            'From APP07 the attacker authenticated to SQL02 as sa_reporting via xp_cmdshell and exported table dbo.CardHolders (412,090 rows).'
+          ),
+        ],
+      },
+    ],
+    plantedFacts: [
+      {
+        id: 'f1',
+        key: 'help.aspx',
+        text: 'The web shell was help.aspx on APP07.',
+        investigation: 0,
+      },
+      {
+        id: 'f2',
+        key: '192.0.2.55',
+        text: 'The first web shell request came from 192.0.2.55.',
+        investigation: 0,
+      },
+      {
+        id: 'f3',
+        key: 'dbo.CardHolders',
+        text: 'The table dbo.CardHolders was exported from SQL02 (last investigation only).',
+        investigation: 1,
+      },
+    ],
+    questions: [
+      {
+        id: 'q1',
+        question: 'What was the web shell file called and which IP made the first request?',
+        answer: 'help.aspx, first requested from 192.0.2.55.',
+        factIds: ['f1', 'f2'],
+      },
+      {
+        id: 'q2',
+        question: 'Was any database data exported after the web shell landed?',
+        answer: 'Yes, the table dbo.CardHolders was exported from SQL02 via xp_cmdshell.',
+        factIds: ['f3'],
+      },
+    ],
+  },
+  {
+    id: 'case-10-oauth-consent-phish',
+    description:
+      'Three investigations into an OAuth consent phish; the last holds the SharePoint bulk download.',
+    investigations: [
+      {
+        id: 'inv-1',
+        title: 'Malicious OAuth app consent',
+        events: [
+          note(
+            'User l.novak consented to OAuth app Docu-Sync Helper (client id 7c1e-44ab-b9d2) requesting Mail.ReadWrite and Files.Read.All.'
+          ),
+        ],
+      },
+      {
+        id: 'inv-2',
+        title: 'Mailbox rule created',
+        events: [
+          note(
+            'Inbox rule Invoice-Fwd forwards messages containing the word invoice to ext-collector@mail-example.net; created 08:03 UTC from the same session.'
+          ),
+        ],
+      },
+      {
+        id: 'inv-3',
+        title: 'Graph API bulk download',
+        events: [
+          note(
+            'Final investigation: the app pulled 3,204 files from SharePoint site Finance-Q3 via Graph API between 08:10 and 08:42 UTC.'
+          ),
+        ],
+      },
+    ],
+    plantedFacts: [
+      {
+        id: 'f1',
+        key: '7c1e-44ab-b9d2',
+        text: 'The malicious OAuth app had client id 7c1e-44ab-b9d2.',
+        investigation: 0,
+      },
+      {
+        id: 'f2',
+        key: 'ext-collector@mail-example.net',
+        text: 'An inbox rule forwarded invoices to ext-collector@mail-example.net.',
+        investigation: 1,
+      },
+      {
+        id: 'f3',
+        key: 'Finance-Q3',
+        text: 'The app bulk-downloaded the SharePoint site Finance-Q3 (last investigation only).',
+        investigation: 2,
+      },
+    ],
+    questions: [
+      {
+        id: 'q1',
+        question: 'What client id did the malicious OAuth app use?',
+        answer: 'Client id 7c1e-44ab-b9d2.',
+        factIds: ['f1'],
+      },
+      {
+        id: 'q2',
+        question: 'Where did the mailbox rule forward mail?',
+        answer: 'To ext-collector@mail-example.net.',
+        factIds: ['f2'],
+      },
+      {
+        id: 'q3',
+        question: 'Which SharePoint site was bulk downloaded?',
+        answer: 'The site Finance-Q3, 3,204 files via Graph API.',
+        factIds: ['f3'],
+      },
+    ],
+  },
+  {
+    id: 'case-11-k8s-breakout',
+    description: 'Four investigations into a Kubernetes breakout; the last holds the secrets dump.',
+    investigations: [
+      {
+        id: 'inv-1',
+        title: 'Privileged pod created',
+        events: [
+          note(
+            'Pod debug-shell-x2 was created in namespace payments with privileged true and hostPID true by service account ci-deployer.'
+          ),
+        ],
+      },
+      {
+        id: 'inv-2',
+        title: 'Node escape',
+        events: [
+          note(
+            'From the pod, nsenter into PID 1 on node gke-prod-pool2-7f3a gave the attacker root on the node.'
+          ),
+        ],
+      },
+      {
+        id: 'inv-3',
+        title: 'Kubelet credential theft',
+        events: [
+          note(
+            'The kubelet client certificate under /var/lib/kubelet/pki/ was copied to 203.0.113.77 over SCP.'
+          ),
+        ],
+      },
+      {
+        id: 'inv-4',
+        title: 'Secrets dump',
+        events: [
+          note(
+            'Final investigation: 14 Secrets in namespace payments were read, including stripe-live-key and db-master-creds.'
+          ),
+        ],
+      },
+    ],
+    plantedFacts: [
+      {
+        id: 'f1',
+        key: 'debug-shell-x2',
+        text: 'The privileged pod was debug-shell-x2.',
+        investigation: 0,
+      },
+      {
+        id: 'f2',
+        key: 'gke-prod-pool2-7f3a',
+        text: 'The node escape landed on gke-prod-pool2-7f3a.',
+        investigation: 1,
+      },
+      {
+        id: 'f3',
+        key: '203.0.113.77',
+        text: 'The kubelet certificate was copied to 203.0.113.77.',
+        investigation: 2,
+      },
+      {
+        id: 'f4',
+        key: 'stripe-live-key',
+        text: 'The Secret stripe-live-key was read (last investigation only).',
+        investigation: 3,
+      },
+    ],
+    questions: [
+      {
+        id: 'q1',
+        question: 'Which pod was created with privileged settings?',
+        answer: 'The pod debug-shell-x2 in namespace payments.',
+        factIds: ['f1'],
+      },
+      {
+        id: 'q2',
+        question: 'Where was the kubelet client certificate sent?',
+        answer: 'It was copied to 203.0.113.77 over SCP.',
+        factIds: ['f3'],
+      },
+      {
+        id: 'q3',
+        question: 'Which payment-related secret was read?',
+        answer: 'The Secret stripe-live-key, along with db-master-creds.',
+        factIds: ['f4'],
+      },
+    ],
+  },
+  {
+    id: 'case-12-vpn-brute-force',
+    description:
+      'Two investigations: a VPN brute-force, then the successful login and the share it pulled (last only).',
+    investigations: [
+      {
+        id: 'inv-1',
+        title: 'VPN brute-force',
+        events: [
+          note(
+            'VPN gateway vpn-gw-2 logged 9,400 failed logins for user t.berg from 45.155.205.0/24 over 40 minutes.'
+          ),
+        ],
+      },
+      {
+        id: 'inv-2',
+        title: 'Successful login and share access',
+        events: [
+          note(
+            'Final investigation: the login for t.berg finally succeeded at 05:52 UTC from 45.155.205.19 and the session pulled the share \\\\fs02\\hr-payroll.'
+          ),
+        ],
+      },
+    ],
+    plantedFacts: [
+      {
+        id: 'f1',
+        key: 'vpn-gw-2',
+        text: 'The brute-force targeted the gateway vpn-gw-2.',
+        investigation: 0,
+      },
+      {
+        id: 'f2',
+        key: 'hr-payroll',
+        text: 'The compromised session read the hr-payroll share (last investigation only).',
+        investigation: 1,
+      },
+    ],
+    questions: [
+      {
+        id: 'q1',
+        question: 'Which VPN gateway was brute-forced?',
+        answer: 'The gateway vpn-gw-2.',
+        factIds: ['f1'],
+      },
+      {
+        id: 'q2',
+        question: 'After the login succeeded, which file share was accessed?',
+        answer: 'The hr-payroll share on fs02.',
+        factIds: ['f2'],
+      },
+    ],
+  },
+  {
+    id: 'case-13-browser-extension',
+    description:
+      'Three investigations into a hijacked browser extension; the last holds the CRM export.',
+    investigations: [
+      {
+        id: 'inv-1',
+        title: 'Extension force-updated',
+        events: [
+          note(
+            'Extension Tab Saver Plus was force-updated on 340 managed Chrome profiles after its publisher account changed owner.'
+          ),
+        ],
+      },
+      {
+        id: 'inv-2',
+        title: 'Cookie exfiltration',
+        events: [
+          note(
+            'The update injects a content script that posts cookies to https://cdn-metrics-sync.example/c every 60 seconds.'
+          ),
+        ],
+      },
+      {
+        id: 'inv-3',
+        title: 'CRM session replay',
+        events: [
+          note(
+            'Final investigation: stolen session cookies were replayed against the CRM tenant acme-crm-eu to export 1,120 contacts.'
+          ),
+        ],
+      },
+    ],
+    plantedFacts: [
+      {
+        id: 'f1',
+        key: 'Tab Saver Plus',
+        text: 'The hijacked extension was Tab Saver Plus.',
+        investigation: 0,
+      },
+      {
+        id: 'f2',
+        key: 'cdn-metrics-sync.example',
+        text: 'Cookies were posted to cdn-metrics-sync.example.',
+        investigation: 1,
+      },
+      {
+        id: 'f3',
+        key: 'acme-crm-eu',
+        text: 'The replayed cookies hit the CRM tenant acme-crm-eu (last investigation only).',
+        investigation: 2,
+      },
+    ],
+    questions: [
+      {
+        id: 'q1',
+        question: 'Which browser extension was force-updated?',
+        answer: 'Tab Saver Plus, on 340 managed Chrome profiles.',
+        factIds: ['f1'],
+      },
+      {
+        id: 'q2',
+        question: 'Where did the extension send stolen cookies?',
+        answer: 'To https://cdn-metrics-sync.example/c every 60 seconds.',
+        factIds: ['f2'],
+      },
+      {
+        id: 'q3',
+        question: 'Which SaaS tenant was accessed with the stolen cookies?',
+        answer: 'The CRM tenant acme-crm-eu, where 1,120 contacts were exported.',
+        factIds: ['f3'],
+      },
+    ],
+  },
+  {
+    id: 'case-14-rogue-access-point',
+    description:
+      'Two investigations: a rogue wireless AP detected, then its physical location and impact (last only).',
+    investigations: [
+      {
+        id: 'inv-1',
+        title: 'Rogue SSID detected',
+        events: [
+          note(
+            'The floor 3 wireless sensor detected SSID Corp-Guest-Free (BSSID 3C:52:82:AA:10:F4) impersonating the guest network.'
+          ),
+        ],
+      },
+      {
+        id: 'inv-2',
+        title: 'Physical device found',
+        events: [
+          note(
+            'Final investigation: the rogue AP was a Raspberry Pi plugged into wall port WP-3-114, and it captured NTLM hashes for 27 users.'
+          ),
+        ],
+      },
+    ],
+    plantedFacts: [
+      {
+        id: 'f1',
+        key: '3C:52:82:AA:10:F4',
+        text: 'The rogue BSSID was 3C:52:82:AA:10:F4.',
+        investigation: 0,
+      },
+      {
+        id: 'f2',
+        key: 'WP-3-114',
+        text: 'The rogue AP was plugged into wall port WP-3-114 (last investigation only).',
+        investigation: 1,
+      },
+    ],
+    questions: [
+      {
+        id: 'q1',
+        question: 'What BSSID did the rogue access point use?',
+        answer: 'The BSSID 3C:52:82:AA:10:F4.',
+        factIds: ['f1'],
+      },
+      {
+        id: 'q2',
+        question: 'Where was the rogue device physically connected?',
+        answer: 'Wall port WP-3-114, a Raspberry Pi that captured NTLM hashes.',
+        factIds: ['f2'],
+      },
+    ],
+  },
+  {
+    id: 'case-15-bec-wire-fraud',
+    description:
+      'Three investigations into business email compromise; the last traces the stolen funds.',
+    investigations: [
+      {
+        id: 'inv-1',
+        title: 'Lookalike vendor domain',
+        events: [
+          note(
+            'Vendor Lumen Freight emailed new bank details; the reply-to domain lumen-freight.co differs from the real lumen-freight.com.'
+          ),
+        ],
+      },
+      {
+        id: 'inv-2',
+        title: 'Wire approved',
+        events: [
+          note(
+            'Accounts payable approved wire WIRE-55410 for 184,500 EUR to the new IBAN DE89 3704 0044 0532 0130 00.'
+          ),
+        ],
+      },
+      {
+        id: 'inv-3',
+        title: 'Funds traced',
+        events: [
+          note(
+            'Final investigation: the receiving account was drained within 20 minutes to a crypto exchange deposit address bc1qexample7x9k2.'
+          ),
+        ],
+      },
+    ],
+    plantedFacts: [
+      {
+        id: 'f1',
+        key: 'lumen-freight.co',
+        text: 'The lookalike reply-to domain was lumen-freight.co.',
+        investigation: 0,
+      },
+      {
+        id: 'f2',
+        key: 'WIRE-55410',
+        text: 'The fraudulent payment was wire WIRE-55410.',
+        investigation: 1,
+      },
+      {
+        id: 'f3',
+        key: 'bc1qexample7x9k2',
+        text: 'The funds ended at deposit address bc1qexample7x9k2 (last investigation only).',
+        investigation: 2,
+      },
+    ],
+    questions: [
+      {
+        id: 'q1',
+        question: 'Which lookalike domain did the fraudulent email come from?',
+        answer: 'The reply-to domain lumen-freight.co.',
+        factIds: ['f1'],
+      },
+      {
+        id: 'q2',
+        question: 'What was the reference of the approved wire?',
+        answer: 'Wire WIRE-55410 for 184,500 EUR.',
+        factIds: ['f2'],
+      },
+      {
+        id: 'q3',
+        question: 'Where did the funds end up?',
+        answer: 'At the crypto deposit address bc1qexample7x9k2.',
+        factIds: ['f3'],
+      },
+    ],
+  },
+  {
+    id: 'case-16-rogue-rmm',
+    description:
+      'Four investigations into an abused remote-management tool; the last shows it spread to other laptops.',
+    investigations: [
+      {
+        id: 'inv-1',
+        title: 'RMM client installed',
+        events: [
+          note(
+            'ScreenConnect client installed on HR-LT-19 from an email link; relay host relay-sc.example-rmm.net.'
+          ),
+        ],
+      },
+      {
+        id: 'inv-2',
+        title: 'Payload download',
+        events: [
+          note(
+            'The RMM session ran certutil -urlcache to fetch beacon.dll into C:\\ProgramData\\Intel.'
+          ),
+        ],
+      },
+      {
+        id: 'inv-3',
+        title: 'Persistence',
+        events: [
+          note(
+            'Scheduled task IntelSync was created on HR-LT-19 to load the DLL hourly as SYSTEM.'
+          ),
+        ],
+      },
+      {
+        id: 'inv-4',
+        title: 'Spread to other laptops',
+        events: [
+          note(
+            'Final investigation: the same relay was seen on 6 other laptops, the first being FIN-LT-02.'
+          ),
+        ],
+      },
+    ],
+    plantedFacts: [
+      {
+        id: 'f1',
+        key: 'relay-sc.example-rmm.net',
+        text: 'The RMM relay host was relay-sc.example-rmm.net.',
+        investigation: 0,
+      },
+      {
+        id: 'f2',
+        key: 'beacon.dll',
+        text: 'The payload downloaded via certutil was beacon.dll.',
+        investigation: 1,
+      },
+      {
+        id: 'f3',
+        key: 'IntelSync',
+        text: 'Persistence was the scheduled task IntelSync.',
+        investigation: 2,
+      },
+      {
+        id: 'f4',
+        key: 'FIN-LT-02',
+        text: 'The first additional laptop with the relay was FIN-LT-02 (last investigation only).',
+        investigation: 3,
+      },
+    ],
+    questions: [
+      {
+        id: 'q1',
+        question: 'Which relay host did the RMM client connect to?',
+        answer: 'relay-sc.example-rmm.net.',
+        factIds: ['f1'],
+      },
+      {
+        id: 'q2',
+        question: 'What was the name of the scheduled task used for persistence?',
+        answer: 'The scheduled task IntelSync.',
+        factIds: ['f3'],
+      },
+      {
+        id: 'q3',
+        question: 'Did the same relay show up on any other laptops? Which was first?',
+        answer: 'Yes, on 6 other laptops, the first being FIN-LT-02.',
+        factIds: ['f4'],
+      },
+    ],
+  },
 ];
 
 /**
  * Deterministic dataset checks: question facts must live in exactly one
  * investigation, and every case must have a fact unique to its LAST linked
- * investigation (the mutation target). Exported for the unit tests.
+ * investigation (the mutation target). Every investigation must host at least
+ * one planted fact (no decoy investigations) and the last one must be asked
+ * about, so a dropped last investigation removes a graded question. Exported for
+ * the unit tests.
  */
 export const validateCases = (cases: EscalationCase[]): CaseValidationIssue[] => {
   const issues: CaseValidationIssue[] = [];
@@ -732,6 +1300,17 @@ export const validateCases = (cases: EscalationCase[]): CaseValidationIssue[] =>
     if (!c.plantedFacts.some((fact) => fact.investigation === last)) {
       issues.push({ caseId: c.id, problem: 'no fact unique to the last investigation' });
     }
+    for (const [index, inv] of c.investigations.entries()) {
+      if (!c.plantedFacts.some((fact) => fact.investigation === index)) {
+        issues.push({ caseId: c.id, problem: `investigation ${inv.id} hosts no planted fact` });
+      }
+    }
+    const questionHomes = c.questions.flatMap((q) =>
+      q.factIds.map((id) => c.plantedFacts.find((f) => f.id === id)?.investigation)
+    );
+    if (!questionHomes.includes(last)) {
+      issues.push({ caseId: c.id, problem: 'no question on the last investigation' });
+    }
     const keys = new Set(c.plantedFacts.map((f) => f.key));
     if (keys.size !== c.plantedFacts.length) {
       issues.push({ caseId: c.id, problem: 'duplicate planted fact keys' });
@@ -740,7 +1319,7 @@ export const validateCases = (cases: EscalationCase[]): CaseValidationIssue[] =>
     for (const fact of c.plantedFacts) {
       const events = c.investigations[fact.investigation];
       const haystack = events.events.map((e) => Object.values(e.data).join(' ')).join(' ');
-      if (!haystack.includes(fact.key)) {
+      if (!containsToken(haystack, fact.key)) {
         issues.push({
           caseId: c.id,
           problem: `fact ${fact.id} key "${fact.key}" not present in ${events.id} events`,

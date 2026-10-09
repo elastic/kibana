@@ -12,13 +12,13 @@
  */
 
 import { escalationCases, validateCases } from './dataset';
+import type { EscalationCase } from './types';
 
 describe('escalation grounded-QA dataset', () => {
-  it('has 15-25 cases worth of questions', () => {
-    const totalQuestions = escalationCases.reduce((sum, c) => sum + c.questions.length, 0);
-    expect(escalationCases.length).toBeGreaterThanOrEqual(6);
-    expect(totalQuestions).toBeGreaterThanOrEqual(15);
-    expect(totalQuestions).toBeLessThanOrEqual(25);
+  it('has 15-25 cases', () => {
+    expect(escalationCases.length).toBeGreaterThanOrEqual(15);
+    expect(escalationCases.length).toBeLessThanOrEqual(25);
+    expect(new Set(escalationCases.map((c) => c.id)).size).toBe(escalationCases.length);
   });
 
   it('every case links 2-5 investigations', () => {
@@ -54,5 +54,55 @@ describe('escalation grounded-QA dataset', () => {
       const keys = c.plantedFacts.map((f) => f.key);
       expect(new Set(keys).size).toBe(keys.length);
     }
+  });
+
+  it('every investigation hosts at least one planted fact', () => {
+    for (const c of escalationCases) {
+      for (const index of c.investigations.keys()) {
+        expect(c.plantedFacts.some((f) => f.investigation === index)).toBe(true);
+      }
+    }
+  });
+
+  it('every case asks at least one question answered by the last investigation', () => {
+    for (const c of escalationCases) {
+      const last = c.investigations.length - 1;
+      const homes = c.questions.flatMap((q) =>
+        q.factIds.map((id) => c.plantedFacts.find((f) => f.id === id)?.investigation)
+      );
+      expect(homes).toContain(last);
+    }
+  });
+
+  describe('validateCases rejects', () => {
+    const base = escalationCases[0];
+    const problems = (c: EscalationCase) => validateCases([c]).map((i) => i.problem);
+
+    it('a decoy investigation that hosts no fact', () => {
+      const decoy: EscalationCase = {
+        ...base,
+        investigations: [
+          base.investigations[0],
+          { id: 'inv-decoy', title: 'decoy', events: [] },
+          ...base.investigations.slice(1),
+        ],
+        plantedFacts: base.plantedFacts.map((f) =>
+          f.investigation >= 1 ? { ...f, investigation: f.investigation + 1 } : f
+        ),
+      };
+      expect(problems(decoy)).toContain('investigation inv-decoy hosts no planted fact');
+    });
+
+    it('a case with no question on the last investigation', () => {
+      const last = base.investigations.length - 1;
+      const lastFactIds = base.plantedFacts
+        .filter((f) => f.investigation === last)
+        .map((f) => f.id);
+      const noLastQuestion: EscalationCase = {
+        ...base,
+        questions: base.questions.filter((q) => !q.factIds.some((id) => lastFactIds.includes(id))),
+      };
+      expect(problems(noLastQuestion)).toContain('no question on the last investigation');
+    });
   });
 });

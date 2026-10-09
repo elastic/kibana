@@ -36,6 +36,20 @@ const internalHeaders = {
 const escalationUrl = (template: string, escalationId: string): string =>
   template.replace('{id}', encodeURIComponent(escalationId));
 
+/** `/s/<id>` prefix for a non-default space; the default space has no prefix. */
+export const spacePath = (path: string, spaceId?: string): string =>
+  spaceId && spaceId !== 'default' ? `/s/${encodeURIComponent(spaceId)}${path}` : path;
+
+/** Wraps a fetch so every request targets `spaceId` (G20: space/identity parameterization). */
+export const withSpace = (fetch: HttpHandler, spaceId?: string): HttpHandler =>
+  spaceId && spaceId !== 'default'
+    ? (((path: string, options?: unknown) =>
+        (fetch as unknown as (p: string, o?: unknown) => Promise<unknown>)(
+          spacePath(path, spaceId),
+          options
+        )) as unknown as HttpHandler)
+    : fetch;
+
 /** Thrown when the eval world cannot be built; the run must fail instead of scoring the harness. */
 export class EscalationWorldSetupError extends Error {
   constructor(message: string, cause?: unknown) {
@@ -211,12 +225,13 @@ interface ConverseResponse {
  * (used by the mutation spec to prove recall must fall).
  */
 export const runEscalationCase = async ({
-  fetch,
+  fetch: baseFetch,
   log,
   c,
   agentId,
   connectorId,
   mutation,
+  spaceId,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
@@ -224,7 +239,10 @@ export const runEscalationCase = async ({
   agentId: string;
   connectorId: string;
   mutation?: { dropInvestigation?: number };
+  /** Kibana space the whole case runs in (`/s/<id>` prefix); default space when unset. */
+  spaceId?: string;
 }): Promise<RunEscalationCaseResult> => {
+  const fetch = withSpace(baseFetch, spaceId);
   const drop = mutation?.dropInvestigation;
   const investigationIds: string[] = [];
   let assigneeId: string | undefined;
@@ -358,6 +376,7 @@ export const runEscalationCase = async ({
       summary,
       answers,
       answerErrors,
+      ...(drop !== undefined ? { droppedInvestigation: drop } : {}),
     };
   } finally {
     // Conversations are left in place: the evals runner cleans the space.

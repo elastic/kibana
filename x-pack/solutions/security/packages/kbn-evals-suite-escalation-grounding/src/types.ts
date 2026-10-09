@@ -74,4 +74,10 @@ export interface EscalationTaskOutput {
   answers: Record<string, string | undefined>;
   /** Error message per question whose converse round failed; those score 0. */
   answerErrors?: Record<string, string>;
+  /**
+   * Index of the investigation the mutation arm withheld from the escalation.
+   * Precision graders (ClaimGrounding, unsupported specifics) use the corpus
+   * without it; recall stays graded on the full labels.
+   */
+  droppedInvestigation?: number;
 }

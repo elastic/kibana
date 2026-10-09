@@ -15,13 +15,18 @@ import type { Evaluator } from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { EscalationCase, EscalationTaskOutput } from './types';
-import { groundTruthCorpus, hallucinatedSentences, plantedFactRecall } from './grading';
+import {
+  containsToken,
+  groundTruthCorpus,
+  keyMentionRecall,
+  unsupportedNumericSpecifics,
+} from './grading';
 
 export const EVALUATOR_NAMES = {
   claimGrounding: 'ClaimGrounding',
-  summaryRecall: 'SummaryPlantedFactRecall',
-  chatRecall: 'ChatAnswerRecall',
-  hallucination: 'HallucinationCount',
+  summaryRecall: 'SummaryKeyMentionRecall',
+  chatRecall: 'ChatKeyMentionRecall',
+  unsupportedSpecifics: 'UnsupportedNumericSpecifics',
 } as const;
 
 interface CasePayload {
@@ -35,12 +40,17 @@ const asOutput = (output: unknown): EscalationTaskOutput => output as Escalation
  * LLM judge, run through the ClaimGrounding contract: split the escalation
  * summary into factual claims, then check each claim against the linked
  * investigations' ground truth. Score = grounded claims / total claims. This is
- * the only LLM in the suite; recall and hallucination are deterministic.
+ * the only LLM in the suite and the grounding gate: the key-mention and
+ * numeric-specifics graders are deterministic but cannot tell whether a key is
+ * attached to the right claim.
  *
- * Mirrors the ClaimGrounding evaluator added to the FP/TP suite in
- * elastic/kibana#295913: CODE-deterministic where labels are deterministic,
- * LLM only where judgment is genuinely needed, and a claim-free summary is
- * N/A rather than 1.
+ * Follows the ClaimGrounding evaluator added to the FP/TP suite in
+ * elastic/kibana#295913 (`kind: 'LLM'`; deterministic labels stay in CODE
+ * evaluators). A missing summary or a judge that parses no claims scores 0, never
+ * 1: an empty summary must not read as perfectly grounded.
+ *
+ * `output.droppedInvestigation` is the mutation arm's removed investigation; the
+ * judge is given the corpus WITHOUT it, i.e. only what the product saw.
  */
 export const createClaimGroundingEvaluator = ({
   inferenceClient,
@@ -50,11 +60,11 @@ export const createClaimGroundingEvaluator = ({
   log: ToolingLog;
 }): Evaluator => ({
   name: EVALUATOR_NAMES.claimGrounding,
-  kind: 'CODE',
+  kind: 'LLM',
   direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     const { c } = asCase(expected);
-    const { summary } = asOutput(output);
+    const { summary, droppedInvestigation } = asOutput(output);
     if (!summary || summary.trim().length === 0) {
       return {
         score: 0,
@@ -63,7 +73,7 @@ export const createClaimGroundingEvaluator = ({
       };
     }
 
-    const truth = groundTruthCorpus(c);
+    const truth = groundTruthCorpus(c, { skipInvestigation: droppedInvestigation });
 
     const result = await inferenceClient.output({
       id: 'escalation-claim-grounding',
@@ -118,11 +128,15 @@ ${summary}`,
 });
 
 /**
- * Deterministic: fraction of planted facts whose key appears in the summary.
+ * Deterministic key-MENTION recall: fraction of planted facts whose key is
+ * mentioned (token-boundary) in the summary. It does not prove the key is
+ * attached to the right claim; ClaimGrounding is the grounding gate. Graded on
+ * the FULL labels even in the mutation arm, so dropping an investigation must
+ * lower it.
  * The last-investigation fact is the canary for "the summary reflects EVERY
  * linked investigation".
  */
-export const summaryPlantedFactRecall: Evaluator = {
+export const summaryKeyMentionRecall: Evaluator = {
   name: EVALUATOR_NAMES.summaryRecall,
   kind: 'CODE',
   direction: 'maximize',
@@ -132,7 +146,7 @@ export const summaryPlantedFactRecall: Evaluator = {
     if (!summary || summary.trim().length === 0) {
       return { score: 0, label: 'missing-summary', explanation: 'No summary was produced.' };
     }
-    const result = plantedFactRecall(summary, c.plantedFacts);
+    const result = keyMentionRecall(summary, c.plantedFacts);
     return {
       score: result.score,
       label: `${result.hit.length}/${result.hit.length + result.missed.length}`,
@@ -153,7 +167,7 @@ export const summaryPlantedFactRecall: Evaluator = {
  * question set is built so every question qualifies (validated in the dataset
  * unit test).
  */
-export const chatAnswerRecall: Evaluator = {
+export const chatKeyMentionRecall: Evaluator = {
   name: EVALUATOR_NAMES.chatRecall,
   kind: 'CODE',
   direction: 'maximize',
@@ -171,7 +185,7 @@ export const chatAnswerRecall: Evaluator = {
         const keys = q.factIds
           .map((id) => c.plantedFacts.find((f) => f.id === id)?.key)
           .filter((k): k is string => k !== undefined);
-        const answered = keys.every((key) => answer.toLowerCase().includes(key.toLowerCase()));
+        const answered = keys.every((key) => containsToken(answer, key));
         total += 1;
         if (answered) {
           hit += 1;
@@ -195,27 +209,27 @@ export const chatAnswerRecall: Evaluator = {
 };
 
 /**
- * Deterministic hallucination count against the ground-truth corpus: sentences
- * whose specific tokens (numbers, addresses, identifiers) appear nowhere in the
- * linked investigations. Direction is minimize-by-convention (reported raw;
- * lower is better) — kept as an evaluator so it lands in the report table.
+ * Deterministic count of summary sentences asserting an unsupported NUMERIC
+ * specific (digit-bearing token: address, id, count, version) absent from the
+ * ground-truth corpus the product saw. Non-numeric inventions are invisible to
+ * it; ClaimGrounding covers them. Lower is better, reported raw.
  */
-export const hallucinationCount: Evaluator = {
-  name: EVALUATOR_NAMES.hallucination,
+export const unsupportedNumericSpecificsCount: Evaluator = {
+  name: EVALUATOR_NAMES.unsupportedSpecifics,
   kind: 'CODE',
   direction: 'minimize',
   evaluate: async ({ output, expected }) => {
     const { c } = asCase(expected);
-    const { summary } = asOutput(output);
-    const corpus = groundTruthCorpus(c);
-    const result = hallucinatedSentences(summary, corpus);
+    const { summary, droppedInvestigation } = asOutput(output);
+    const corpus = groundTruthCorpus(c, { skipInvestigation: droppedInvestigation });
+    const result = unsupportedNumericSpecifics(summary, corpus);
     return {
       score: result.count,
-      label: `${result.count} suspicious / ${result.graded} sentences`,
+      label: `${result.count} unsupported / ${result.graded} sentences`,
       explanation:
         result.sentences.length > 0
           ? result.sentences.join('\n')
-          : 'No ungrounded specifics found.',
+          : 'No unsupported numeric specifics found.',
       metadata: { sentences: result.sentences, graded: result.graded },
     };
   },

@@ -18,8 +18,13 @@ import {
   ESCALATION_SYNC_URL,
 } from '@kbn/agentic-investigations-plugin/common/escalations/constants';
 import { escalationCases } from './dataset';
-import { EscalationWorldSetupError, runEscalationCase } from './escalation_world';
-import { chatAnswerRecall } from './evaluators';
+import {
+  EscalationWorldSetupError,
+  runEscalationCase,
+  spacePath,
+  withSpace,
+} from './escalation_world';
+import { chatKeyMentionRecall } from './evaluators';
 
 const c = escalationCases[0];
 const SYNC_PATH = ESCALATION_SYNC_URL.replace('{id}', 'esc-1');
@@ -155,7 +160,7 @@ describe('runEscalationCase', () => {
     expect(result.answers[c.questions[0].id]).toBeUndefined();
     expect(result.answerErrors).toEqual({ [c.questions[0].id]: 'converse exploded' });
 
-    const scored = (await chatAnswerRecall.evaluate({
+    const scored = (await chatKeyMentionRecall.evaluate({
       input: {},
       output: result,
       expected: { c },
@@ -164,5 +169,66 @@ describe('runEscalationCase', () => {
     // the failed question stays in the denominator
     expect(scored.metadata.total).toBe(c.questions.length);
     expect(scored.score).toBe(0);
+  });
+});
+
+describe('mutation arm', () => {
+  it('reports the dropped investigation so precision graders use the corpus the product saw', async () => {
+    const last = c.investigations.length - 1;
+    const droppedEvents = c.investigations[last].events.length;
+    const kibana = createFakeKibana({
+      syncResponse: { copied: totalEvents - droppedEvents, failed: 0 },
+    });
+    const result = await runEscalationCase({
+      fetch: kibana.fetch,
+      log,
+      c,
+      agentId: 'agent',
+      connectorId: 'connector',
+      mutation: { dropInvestigation: last },
+    });
+    expect(result.droppedInvestigation).toBe(last);
+    const linked = kibana.calls.filter(
+      (call) => call.method === 'POST' && call.path.includes('_link')
+    ).length;
+    expect(linked).toBe(c.investigations.length - 2);
+  });
+
+  it('leaves droppedInvestigation unset on the full arm', async () => {
+    const result = await run(createFakeKibana().fetch);
+    expect(result.droppedInvestigation).toBeUndefined();
+  });
+});
+
+describe('space parameter (G20 hook)', () => {
+  it('prefixes /s/<id> for a custom space and leaves the default space alone', () => {
+    expect(spacePath('/api/x', 'sec')).toBe('/s/sec/api/x');
+    expect(spacePath('/api/x', 'default')).toBe('/api/x');
+    expect(spacePath('/api/x')).toBe('/api/x');
+  });
+
+  it('routes every request of a case through the space prefix', async () => {
+    const seen: string[] = [];
+    const kibana = createFakeKibana();
+    const spaced = ((path: string, options: unknown) => {
+      seen.push(path);
+      return (kibana.fetch as unknown as Function)(path.replace(/^\/s\/sec/, ''), options);
+    }) as unknown as HttpHandler;
+    await runEscalationCase({
+      fetch: spaced,
+      log,
+      c,
+      agentId: 'agent',
+      connectorId: 'connector',
+      spaceId: 'sec',
+    });
+    expect(seen.length).toBeGreaterThan(0);
+    expect(seen.every((path) => path.startsWith('/s/sec/'))).toBe(true);
+  });
+
+  it('withSpace is the identity for the default space', () => {
+    const fetch = jest.fn() as unknown as HttpHandler;
+    expect(withSpace(fetch)).toBe(fetch);
+    expect(withSpace(fetch, 'default')).toBe(fetch);
   });
 });
