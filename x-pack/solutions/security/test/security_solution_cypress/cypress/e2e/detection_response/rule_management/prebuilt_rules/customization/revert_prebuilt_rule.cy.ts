@@ -18,7 +18,6 @@ import {
 } from '../../../../../tasks/alerts_detection_rules';
 import {
   RULE_DETAILS_REVERT_RULE_BTN,
-  RULE_DETAILS_REVERT_RULE_TOOLTIP,
   RULE_NAME,
   TOASTER_MESSAGE,
 } from '../../../../../screens/alerts_detection_rules';
@@ -114,7 +113,7 @@ describe(
         cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click();
         cy.get(RULE_DETAILS_REVERT_RULE_BTN).should('be.disabled');
         cy.get(RULE_DETAILS_REVERT_RULE_BTN).trigger('mouseover', { force: true }); // Have to force because button element is disabled
-        cy.get(RULE_DETAILS_REVERT_RULE_TOOLTIP).should('exist');
+        cy.contains('Unable to revert rule').should('be.visible');
       });
 
       it(`hides "Revert prebuilt rule" button appear when rule is non-customzied`, function () {

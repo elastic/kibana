@@ -139,9 +139,6 @@ export const RULE_DETAILS_MANUAL_RULE_RUN_BTN = '[data-test-subj="rules-details-
 
 export const RULE_DETAILS_REVERT_RULE_BTN = '[data-test-subj="rules-details-revert-rule"]';
 
-export const RULE_DETAILS_REVERT_RULE_TOOLTIP =
-  '[data-test-subj="rules-details-revert-rule-tooltip"]';
-
 export const SELECT_ALL_RULES_ON_PAGE_CHECKBOX = '[data-test-subj="checkboxSelectAll"]';
 
 export const RULE_IMPORT_MODAL = '[data-test-subj="rules-import-modal-button"]';

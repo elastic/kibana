@@ -14,10 +14,19 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
 import { initialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useNavigation } from '../../../../common/lib/kibana';
+import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
+import { useLocation } from 'react-router-dom';
 
 jest.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/utils/route/use_route_spy');
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: jest.fn(),
+}));
 
 const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.Mock;
 const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
@@ -66,6 +75,11 @@ describe('useRuleDetailsTabs', () => {
     mockUseEndpointExceptionsCapability.mockReturnValue(true);
     mockUseUserPrivileges.mockReturnValue(getUserPrivilegesMockDefaultValue());
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    (useNavigation as jest.Mock).mockReturnValue({
+      getAppUrl: ({ path }: { path: string }) => path,
+    });
+    (useRouteSpy as jest.Mock).mockReturnValue([{ tabName: RuleDetailTabs.overview }]);
+    (useLocation as jest.Mock).mockReturnValue({ search: '' });
   });
 
   beforeEach(() => {
@@ -86,9 +100,24 @@ describe('useRuleDetailsTabs', () => {
       isExistingRule: true,
       canReadAlerts: false,
     });
-    const tabsNames = Object.keys(tabs.result.current);
+    const tabsNames = tabs.result.current.map(({ id }) => id);
 
     expect(tabsNames).not.toContain(RuleDetailTabs.alerts);
+  });
+
+  it('links the selected overview tab to the current rule', () => {
+    const tabs = render({
+      rule: mockRule,
+      ruleId: mockRule.id,
+      isExistingRule: true,
+      canReadAlerts: true,
+    });
+
+    expect(tabs.result.current.find(({ id }) => id === RuleDetailTabs.overview)).toMatchObject({
+      label: 'Overview',
+      isSelected: true,
+      'data-test-subj': 'navigation-overview',
+    });
   });
 
   it('does not render the rule exception tab if the user does not have read permissions', async () => {
@@ -98,7 +127,7 @@ describe('useRuleDetailsTabs', () => {
       isExistingRule: true,
       canReadAlerts: true,
     });
-    const tabsNames = Object.keys(tabs.result.current);
+    const tabsNames = tabs.result.current.map(({ id }) => id);
 
     expect(tabsNames).not.toContain(RuleDetailTabs.exceptions);
   });
@@ -117,7 +146,7 @@ describe('useRuleDetailsTabs', () => {
       isExistingRule: true,
       canReadAlerts: true,
     });
-    const tabsNames = Object.keys(tabs.result.current);
+    const tabsNames = tabs.result.current.map(({ id }) => id);
 
     expect(tabsNames).toContain(RuleDetailTabs.exceptions);
   });
@@ -144,7 +173,7 @@ describe('useRuleDetailsTabs', () => {
       isExistingRule: true,
       canReadAlerts: true,
     });
-    const tabsNames = Object.keys(tabs.result.current);
+    const tabsNames = tabs.result.current.map(({ id }) => id);
 
     expect(tabsNames).toContain(RuleDetailTabs.endpointExceptions);
   });
@@ -171,7 +200,7 @@ describe('useRuleDetailsTabs', () => {
       isExistingRule: true,
       canReadAlerts: true,
     });
-    const tabsNames = Object.keys(tabs.result.current);
+    const tabsNames = tabs.result.current.map(({ id }) => id);
 
     expect(tabsNames).not.toContain(RuleDetailTabs.endpointExceptions);
   });
@@ -197,7 +226,7 @@ describe('useRuleDetailsTabs', () => {
       isExistingRule: true,
       canReadAlerts: true,
     });
-    const tabsNames = Object.keys(tabs.result.current);
+    const tabsNames = tabs.result.current.map(({ id }) => id);
 
     expect(tabsNames).not.toContain(RuleDetailTabs.endpointExceptions);
   });
