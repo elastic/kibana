@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { sortBy, uniqBy } from 'lodash';
+import { sortBy } from 'lodash';
 import type {
   RequiredField,
   RequiredFieldInput,
 } from '../../../../api/detection_engine/model/rule_schema';
-import { addEcsToRequiredFields } from '../../../rule_management/utils';
+import { addEcsToRequiredFields, dedupeRequiredFields } from '../../../rule_management/utils';
 
 /**
  * Brings required fields to a canonical form so order, duplicates and stored `ecs` values don't affect comparisons.
  */
 export const normalizeRequiredFields = (requiredFields?: RequiredFieldInput[]): RequiredField[] =>
-  sortBy(
-    uniqBy(addEcsToRequiredFields(requiredFields), ({ name, type }) => `${name}\u0000${type}`),
-    ['name', 'type']
-  );
+  sortBy(dedupeRequiredFields(addEcsToRequiredFields(requiredFields)), ['name', 'type']);

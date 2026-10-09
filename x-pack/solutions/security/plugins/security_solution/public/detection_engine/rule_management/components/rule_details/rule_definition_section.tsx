@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { isEmpty, uniqBy } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
@@ -34,6 +34,7 @@ import type {
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { assertUnreachable } from '../../../../../common/utility_types';
+import { dedupeRequiredFields } from '../../../../../common/detection_engine/rule_management/utils';
 import * as descriptionStepI18n from '../../../rule_creation_ui/components/description_step/translations';
 import { RelatedIntegrationsDescription } from '../../../common/components/related_integrations/integrations_description';
 import { AlertSuppressionLabel } from '../../../rule_creation_ui/components/description_step/alert_suppression_label';
@@ -329,7 +330,7 @@ export const RequiredFields = ({ requiredFields }: RequiredFieldsProps) => {
 
   /* Stored lists may contain duplicates, see required fields diff algorithms */
   const uniqueRequiredFields = useMemo(
-    () => uniqBy(({ name, type }) => `${name}\u0000${type}`, requiredFields),
+    () => dedupeRequiredFields(requiredFields),
     [requiredFields]
   );
 

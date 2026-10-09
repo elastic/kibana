@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { sortBy, uniqBy } from 'lodash';
+import { sortBy } from 'lodash';
 import { stableStringify } from '@kbn/std';
 import { Version } from './versions_picker/constants';
 import {
@@ -17,6 +17,7 @@ import {
 } from '../../../../../../../common/api/detection_engine';
 import { VersionsPickerOptionEnum } from './versions_picker/versions_picker';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
+import { dedupeRequiredFields } from '../../../../../../../common/detection_engine/rule_management/utils';
 import * as i18n from './translations';
 
 /**
@@ -102,11 +103,7 @@ export const stringifyWithExpandedEmpties = (value: unknown): string => {
  */
 export const normalizeRequiredFieldsForDisplay = <T extends RequiredFieldInput>(
   requiredFields: T[]
-): T[] =>
-  sortBy(
-    uniqBy(requiredFields, ({ name, type }) => `${name}\u0000${type}`),
-    ['name', 'type']
-  );
+): T[] => sortBy(dedupeRequiredFields(requiredFields), ['name', 'type']);
 
 /**
  * Stringifies required fields one field per line, which keeps diffs of long lists compact.
