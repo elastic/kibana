@@ -11,7 +11,7 @@ import { KI_LIFECYCLE_STATUSES } from '../../../common/step_types/ki';
 import { getKi } from '../api/knowledge_indicators';
 import { contextEngineQueryKeys } from './query_keys';
 
-export type ViewKiQueryKey = ReturnType<typeof contextEngineQueryKeys.aiIndex.ki>;
+export type ViewKiQueryKey = ReturnType<typeof contextEngineQueryKeys.aiIndex.viewKi>;
 
 export const VIEW_KI_QUERY_STALE_TIME_MS = 30_000;
 

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ListKiPanel } from './list_ki_panel';
+export { ListKiPanel } from './list/list_ki_panel';
