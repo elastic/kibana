@@ -432,6 +432,21 @@ describe('seedAlertZeroEndpoint', () => {
     expect(fixture.command).not.toBe('EncodedCommand');
   });
 
+  it('creates the investigation conversation as public so the workflow service account can read it', async () => {
+    const fetch = createFetch();
+    await seedAlertZeroEndpoint(createEs(), fetch);
+
+    const create = fetch.mock.calls.find(
+      ([path, options]) => path === '/api/agent_builder/conversations' && options?.method === 'POST'
+    );
+    expect(JSON.parse((create?.[1] as { body: string }).body)).toEqual(
+      expect.objectContaining({
+        template_id: 'investigation',
+        access_control: { access_mode: 'public' },
+      })
+    );
+  });
+
   it('removes already-created resources when seeding fails part way', async () => {
     const fetch = createFetch((path, options) => {
       if (path === '/api/context_engine/ai_index' && options?.method === 'POST') {

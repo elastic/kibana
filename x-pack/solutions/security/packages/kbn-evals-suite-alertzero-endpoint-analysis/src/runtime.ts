@@ -434,6 +434,10 @@ export const seedAlertZeroEndpoint = async (
       body: JSON.stringify({
         title: `AlertZero endpoint eval ${id}`,
         template_id: 'investigation',
+        // Private (the default) hides the conversation from the workflow's effective identity,
+        // a service account distinct from this suite user: verify_investigation then reports
+        // "Conversation not found" and the run retires the indicator without analysing it.
+        access_control: { access_mode: 'public' },
       }),
     });
     conversationId = conversation.id;
