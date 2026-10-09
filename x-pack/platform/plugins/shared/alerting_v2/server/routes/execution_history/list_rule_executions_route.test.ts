@@ -62,8 +62,6 @@ describe('toListRuleExecutionsResponse', () => {
             ended_at: '2026-01-01T00:00:01.500Z',
             timings: { duration_ms: 1500, scheduled_delay_ms: 250 },
             outcome: 'success',
-            reason: null,
-            error: null,
           },
         ],
         total: 1,
@@ -73,7 +71,7 @@ describe('toListRuleExecutionsResponse', () => {
     );
   });
 
-  it('maps the nested error stack trace and keeps a null error null', () => {
+  it('maps the nested error stack trace', () => {
     const [mapped] = toListRuleExecutionsResponse({
       items: [{ ...item, outcome: 'failure', error: { message: 'boom', stackTrace: 'at x' } }],
       total: 1,
@@ -82,6 +80,19 @@ describe('toListRuleExecutionsResponse', () => {
     }).items;
 
     expect(mapped.error).toEqual({ message: 'boom', stack_trace: 'at x' });
+  });
+
+  it('omits the fields the domain model leaves null', () => {
+    const [mapped] = toListRuleExecutionsResponse({
+      items: [{ ...item, rule: { id: 'rule-1', version: null } }],
+      total: 1,
+      page: 1,
+      perPage: 10,
+    }).items;
+
+    expect(mapped.reason).toBeUndefined();
+    expect(mapped.error).toBeUndefined();
+    expect(mapped.rule.version).toBeUndefined();
   });
 
   it('returns an empty items array untouched', () => {

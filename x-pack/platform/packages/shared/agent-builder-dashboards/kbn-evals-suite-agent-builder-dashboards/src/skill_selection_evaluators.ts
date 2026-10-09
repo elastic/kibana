@@ -22,7 +22,7 @@ export const getSkillReadPaths = (output: DashboardAgentTaskOutput): string[] =>
       continue;
     }
 
-    if (step.tool_id === 'filestore.read') {
+    if (step.tool_id === 'read_file' || step.tool_id === 'filestore.read') {
       const params = step.params as { path?: string } | undefined;
       if (params?.path) {
         paths.push(params.path);

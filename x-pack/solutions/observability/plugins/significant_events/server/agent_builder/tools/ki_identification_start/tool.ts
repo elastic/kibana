@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -24,20 +24,25 @@ import { startKiIdentificationToolHandler } from './handler';
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID =
   'platform.sig_events.ki_identification_start';
 
-const onboardingStartSchema = z.object({
-  stream_name: z.string().max(MAX_ID_LENGTH).describe('Target stream name, e.g. "logs.ecs.nginx".'),
-  steps: z
-    .array(z.enum(KIsOnboardingStep))
-    .optional()
-    .default([KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration])
-    .describe('Optional ordered KI identification steps for the background task.'),
-  connectors: z
-    .object({
-      features: z.string().max(MAX_ID_LENGTH).optional(),
-      queries: z.string().max(MAX_ID_LENGTH).optional(),
-    })
-    .optional(),
-});
+const onboardingStartSchema = lazySchema(() =>
+  z.object({
+    stream_name: z
+      .string()
+      .max(MAX_ID_LENGTH)
+      .describe('Target stream name, e.g. "logs.ecs.nginx".'),
+    steps: z
+      .array(z.enum(KIsOnboardingStep))
+      .optional()
+      .default([KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration])
+      .describe('Optional ordered KI identification steps for the background task.'),
+    connectors: z
+      .object({
+        features: z.string().max(MAX_ID_LENGTH).optional(),
+        queries: z.string().max(MAX_ID_LENGTH).optional(),
+      })
+      .optional(),
+  })
+);
 
 export const createKiIdentificationStartTool = ({
   server,
