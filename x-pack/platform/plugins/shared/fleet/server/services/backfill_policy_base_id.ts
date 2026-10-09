@@ -20,7 +20,7 @@ import { appContextService } from '.';
 // Mirrors removeVersionSuffixFromPolicyId: only strips when the segment after the last
 // separator looks like a version (digits.digits) or is the sentinel. Painless regex is off by default so
 // we use a plain digit walk instead. Skips docs that already have policy_base_id (idempotent).
-const BACKFILL_SCRIPT = `
+export const BACKFILL_SCRIPT = `
   if (ctx._source.policy_id == null ||
       (ctx._source.containsKey('policy_base_id') && ctx._source.policy_base_id != null)) {
     ctx.op = 'noop';

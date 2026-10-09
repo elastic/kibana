@@ -1965,6 +1965,8 @@ class AgentPolicyService {
                 ...fleetServerPolicy,
                 policy_id: sentinelPolicyId,
                 data: { ...fleetServerPolicy.data, id: sentinelPolicyId },
+                // fleet-server picks its own policy by `default_fleet_server`, which must stay the base doc
+                default_fleet_server: false,
               });
             }
           }

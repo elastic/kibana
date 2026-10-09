@@ -22,12 +22,12 @@ import type { PackageInfo, PackagePolicyAssetsMap } from '../../../common/types'
 import {
   AGENT_POLICY_INDEX,
   AGENT_POLICY_VERSION_SEPARATOR,
-  AGENT_POLICY_SENTINEL_VERSION,
   AGENTS_INDEX,
 } from '../../../common/constants';
 import {
   splitVersionSuffixFromPolicyId,
   hasAgentVersionSuffix,
+  classifyPolicyId,
 } from '../../../common/services/version_specific_policies_utils';
 
 /** Field on `.fleet-agents` / `.fleet-policies` holding the canonical (suffix-stripped) policy id. */
@@ -456,9 +456,9 @@ export async function getAgentAssignedVersionsForPolicies(
 
   const buckets = agentsResponse.aggregations?.agents_by_policy_id?.buckets ?? [];
   for (const { key } of buckets) {
-    const { baseId, version } = splitVersionSuffixFromPolicyId(key);
-    // The sentinel is not an agent version to compile a variant for.
-    if (version === null || version === AGENT_POLICY_SENTINEL_VERSION) continue;
+    const { kind, baseId, version } = classifyPolicyId(key);
+    // Only agent versions have a variant to compile, not the sentinel.
+    if (kind !== 'agentVersion') continue;
     if (!result.has(baseId)) result.set(baseId, new Set());
     result.get(baseId)!.add(version);
   }

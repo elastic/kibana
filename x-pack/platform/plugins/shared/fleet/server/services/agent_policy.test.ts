@@ -3263,6 +3263,7 @@ describe('Agent policy', () => {
                 name: 'Policy 1',
                 revision: 2,
                 has_agent_version_conditions: false,
+                is_default_fleet_server: true,
                 schema_version: '99.0.0',
               },
               references: [],
@@ -3286,9 +3287,11 @@ describe('Agent policy', () => {
           ...base,
           policy_id: 'policy-1#sentinel',
           policy_base_id: 'policy-1',
+          default_fleet_server: false,
           data: { ...base.data, id: 'policy-1#sentinel' },
         });
         expect(base.data.id).toEqual('policy-1');
+        expect(base.default_fleet_server).toBe(true);
       });
 
       it('deploys only the base policy when the flag is disabled', async () => {

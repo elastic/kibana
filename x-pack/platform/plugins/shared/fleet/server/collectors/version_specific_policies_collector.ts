@@ -20,8 +20,7 @@ import { appContextService, packagePolicyService } from '../services';
 import { getPackageInfo } from '../services/epm/packages';
 import { getAgentTemplateAssetsMap } from '../services/epm/packages/get';
 import { hasAgentVersionConditionInInputTemplate } from '../services/utils/version_specific_policies';
-import { AGENT_POLICY_VERSION_SEPARATOR } from '../constants';
-import { AGENT_POLICY_SENTINEL_VERSION } from '../../common/constants';
+import { AGENT_VERSION_SUFFIX_ES_REGEXP } from '../../common/services/version_specific_policies_utils';
 import { getPackagePolicySavedObjectType } from '../services/package_policy';
 
 const AGENT_POLICY_IDS_BATCH_SIZE = 100;
@@ -137,15 +136,8 @@ export const getVersionSpecificPoliciesUsage = async (
         bool: {
           filter: [
             { term: { active: 'true' } },
-            { wildcard: { policy_id: `*${AGENT_POLICY_VERSION_SEPARATOR}*` } },
-          ],
-          // `<id>#sentinel` is the non-version-specific copy of a policy
-          must_not: [
-            {
-              wildcard: {
-                policy_id: `*${AGENT_POLICY_VERSION_SEPARATOR}${AGENT_POLICY_SENTINEL_VERSION}`,
-              },
-            },
+            // Only agent version suffixes, not the `#sentinel` copy of a policy
+            { regexp: { policy_id: AGENT_VERSION_SUFFIX_ES_REGEXP } },
           ],
         },
       },

@@ -11,24 +11,58 @@ import { AGENT_POLICY_SENTINEL_VERSION, AGENT_POLICY_VERSION_SEPARATOR } from '.
 
 const DEFAULT_POLICY_ID_FIELD = 'policy_id';
 
+// Agent version part of a suffix, e.g. `9.2` in 'policy123#9.2'.
+const AGENT_VERSION_PATTERN = '[0-9]+\\.[0-9]+';
+
 // 'policy123#9.2' or the sentinel 'policy123#sentinel'
-const VERSION_SUFFIX_REGEX = new RegExp(`#(\\d+\\.\\d+|${AGENT_POLICY_SENTINEL_VERSION})$`);
+const VERSION_SUFFIX_REGEX = new RegExp(
+  `${AGENT_POLICY_VERSION_SEPARATOR}(${AGENT_VERSION_PATTERN}|${AGENT_POLICY_SENTINEL_VERSION})$`
+);
+
+/**
+ * Elasticsearch `regexp` query value matching the policy ids with an agent version suffix e.g.
+ * 'policy123#9.2', but not the sentinel or ids that only contain a '#'. Keep in sync with
+ * {@link classifyPolicyId}. `#` is a reserved character in Lucene regexps, so it is escaped.
+ */
+export const AGENT_VERSION_SUFFIX_ES_REGEXP = `.*\\${AGENT_POLICY_VERSION_SEPARATOR}${AGENT_VERSION_PATTERN}`;
+
+export type ClassifiedPolicyId =
+  | { kind: 'base'; baseId: string; version: null }
+  | { kind: 'sentinel'; baseId: string; version: string }
+  | { kind: 'agentVersion'; baseId: string; version: string };
+
+/**
+ * Single source of truth for the kind of a policy id, so callers switch on `kind` instead of
+ * comparing suffixes themselves:
+ * - `base`: no version suffix, e.g. 'policy123' (or 'policy#123', a '#' that is not a suffix)
+ * - `sentinel`: 'policy123#sentinel', the non-version-specific copy of a policy
+ * - `agentVersion`: 'policy123#9.2', a policy variant for agents of that version
+ */
+export function classifyPolicyId(policyId: string): ClassifiedPolicyId {
+  const match = policyId ? VERSION_SUFFIX_REGEX.exec(policyId) : null;
+  if (!match) {
+    return { kind: 'base', baseId: policyId, version: null };
+  }
+  const version = match[1];
+  return {
+    kind: version === AGENT_POLICY_SENTINEL_VERSION ? 'sentinel' : 'agentVersion',
+    baseId: policyId.slice(0, match.index),
+    version,
+  };
+}
 
 export function hasVersionSuffix(policyId: string): boolean {
-  if (!policyId) {
-    return false;
-  }
-  return VERSION_SUFFIX_REGEX.test(policyId);
+  return classifyPolicyId(policyId).kind !== 'base';
 }
 
 /** Whether the policy id ends with the sentinel suffix, e.g. 'policy123#sentinel'. */
 export function hasSentinelVersionSuffix(policyId: string): boolean {
-  return Boolean(policyId) && policyId.endsWith(`#${AGENT_POLICY_SENTINEL_VERSION}`);
+  return classifyPolicyId(policyId).kind === 'sentinel';
 }
 
 /** Whether the policy id ends with an agent version suffix e.g. 'policy123#9.2', not the sentinel. */
 export function hasAgentVersionSuffix(policyId: string): boolean {
-  return hasVersionSuffix(policyId) && !hasSentinelVersionSuffix(policyId);
+  return classifyPolicyId(policyId).kind === 'agentVersion';
 }
 
 export function getSentinelVersionPolicyId(baseId: string): string {
@@ -39,12 +73,7 @@ export function splitVersionSuffixFromPolicyId(policyId: string): {
   baseId: string;
   version: string | null;
 } {
-  if (!hasVersionSuffix(policyId)) {
-    return { baseId: policyId, version: null };
-  }
-  const separatorIndex = policyId.lastIndexOf(AGENT_POLICY_VERSION_SEPARATOR);
-  const baseId = policyId.slice(0, separatorIndex);
-  const version = policyId.slice(separatorIndex + 1);
+  const { baseId, version } = classifyPolicyId(policyId);
   return { baseId, version };
 }
 

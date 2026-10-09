@@ -6,6 +6,8 @@
  */
 
 import {
+  classifyPolicyId,
+  AGENT_VERSION_SUFFIX_ES_REGEXP,
   hasVersionSuffix,
   hasAgentVersionSuffix,
   hasSentinelVersionSuffix,
@@ -23,6 +25,7 @@ import {
   buildPolicyBaseIdWithFallbackKuery,
   buildPolicyBaseIdsWithFallbackKuery,
 } from './version_specific_policies_utils';
+import { POLICY_ID_FIXTURES } from './version_specific_policy_id_fixtures';
 
 describe('removeVersionSuffixFromPolicyId', () => {
   it('should remove version suffix from policy ID', () => {
@@ -84,6 +87,37 @@ describe('splitVersionSuffixFromPolicyId', () => {
     const result = splitVersionSuffixFromPolicyId(policyIdWithHashButNoVersion);
     expect(result).toEqual({ baseId: 'policy#123', version: null });
   });
+});
+
+describe('classifyPolicyId', () => {
+  it.each(POLICY_ID_FIXTURES)('classifies $policyId as $kind', ({ policyId, ...expected }) => {
+    expect(classifyPolicyId(policyId)).toEqual(expected);
+  });
+
+  it('classifies an empty policy id as base', () => {
+    expect(classifyPolicyId('')).toEqual({ kind: 'base', baseId: '', version: null });
+  });
+
+  it.each(POLICY_ID_FIXTURES)(
+    'has consistent helpers for $policyId',
+    ({ policyId, kind, baseId }) => {
+      expect(hasVersionSuffix(policyId)).toBe(kind !== 'base');
+      expect(hasSentinelVersionSuffix(policyId)).toBe(kind === 'sentinel');
+      expect(hasAgentVersionSuffix(policyId)).toBe(kind === 'agentVersion');
+      expect(removeVersionSuffixFromPolicyId(policyId)).toBe(baseId);
+    }
+  );
+
+  // The telemetry query counts agents on policies with an agent version suffix with this regexp.
+  // Lucene regexps match the whole value, like an anchored JS regexp.
+  it.each(POLICY_ID_FIXTURES)(
+    'matches the telemetry regexp as expected for $policyId',
+    ({ policyId, kind }) => {
+      expect(new RegExp(`^(?:${AGENT_VERSION_SUFFIX_ES_REGEXP})$`).test(policyId)).toBe(
+        kind === 'agentVersion'
+      );
+    }
+  );
 });
 
 describe('sentinel version suffix', () => {
