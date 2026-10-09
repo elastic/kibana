@@ -21,7 +21,9 @@ export abstract class DiscoverNavigation extends DiscoverAppBase {
     await this.setQueryMode(options.queryMode);
     await this.page.gotoApp(
       'discover',
-      options.savedSearchId ? { hash: `/view/${options.savedSearchId}` } : undefined
+      options.savedSearchId ? { hash: `/view/${options.savedSearchId}` } : undefined,
+      // `waitForDiscoverPage()` below owns readiness; `load` only adds a wait on every bundle.
+      { waitUntil: 'domcontentloaded' }
     );
     await this.waitForDiscoverPage();
   }
