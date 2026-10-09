@@ -429,8 +429,10 @@ export class MapsPage {
     const queryInput = this.page.locator(
       '[data-test-subj="mapJoinWhereFilterEditor"] [data-test-subj="queryInput"]'
     );
-    await queryInput.click();
-    await queryInput.fill(query);
+    await queryInput.clear();
+    await queryInput.pressSequentially(query);
+    // Dismiss any open autocomplete dropdown before clicking submit.
+    await queryInput.press('Escape');
     await this.page.testSubj.click('mapWhereFilterEditorSubmitButton');
     await this.waitForLayersToLoad();
   }
