@@ -7,10 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse, stringify } from 'query-string';
+import queryString from 'query-string';
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import type { LayoutDirection } from '@kbn/workflows';
+import {
+  type ExecutionStatus,
+  ExecutionStatusValues,
+  type ExecutionType,
+  ExecutionTypeValues,
+  type LayoutDirection,
+} from '@kbn/workflows';
 import {
   getStoredEditorView,
   getStoredGraphDirection,
@@ -30,6 +36,13 @@ export interface WorkflowUrlState {
   stepId?: string;
   resume?: boolean;
   replayExecutionId?: string;
+  replayIsTestRun?: boolean;
+  /** Execution-list filters. Empty lists are omitted from the URL. */
+  executionStatuses?: ExecutionStatus[];
+  executionTypes?: ExecutionType[];
+  executedBy?: string[];
+  /** Row to highlight after the detail flyout closes. */
+  lastViewedExecutionId?: string;
 }
 
 export interface WorkflowUrlUpdateOptions {
@@ -82,12 +95,37 @@ const withRunEntryState = (state: unknown, runEntry: RunEntryState | undefined):
 };
 
 /**
- * Normalise a `query-string` value (which may be `string | string[] | null`)
+ * Normalise a `query-string` value (which may be `string | (string | null)[] | null`)
  * to `string | undefined`, taking the first element of any array.
  */
-function firstString(value: string | string[] | null | undefined): string | undefined {
+function firstString(value: string | Array<string | null> | null | undefined): string | undefined {
   if (Array.isArray(value)) return value[0] ?? undefined;
   return value ?? undefined;
+}
+
+const MAX_URL_LIST_ITEMS = 50;
+const MAX_URL_TOKEN_LENGTH = 512;
+
+function stringList(value: string | Array<string | null> | null | undefined): string[] {
+  const raw = Array.isArray(value) ? value : value == null ? [] : [value];
+  return raw
+    .filter((item): item is string => typeof item === 'string')
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0 && item.length <= MAX_URL_TOKEN_LENGTH)
+    .slice(0, MAX_URL_LIST_ITEMS);
+}
+
+function knownValues<T extends string>(values: string[], allowed: readonly string[]): T[] {
+  const allowedSet = new Set<string>(allowed);
+  return values.filter((value): value is T => allowedSet.has(value));
+}
+
+function boundedToken(value: string | undefined): string | undefined {
+  if (value == null) {
+    return undefined;
+  }
+  const token = value.trim();
+  return token.length > 0 && token.length <= MAX_URL_TOKEN_LENGTH ? token : undefined;
 }
 
 export function useWorkflowUrlState() {
@@ -103,8 +141,15 @@ export function useWorkflowUrlState() {
     stepId: string | undefined;
     shouldAutoResume: boolean;
     replayExecutionId: string | undefined;
+    replayIsTestRun: boolean;
+    executionListFilters: {
+      statuses: ExecutionStatus[];
+      executionTypes: ExecutionType[];
+      executedBy: string[];
+    };
+    lastViewedExecutionId: string | undefined;
   } => {
-    const params = parse(location.search);
+    const params = queryString.parse(location.search);
     return {
       tab: (firstString(params.tab) as WorkflowUrlStateTabType) || 'workflow',
       view:
@@ -122,12 +167,25 @@ export function useWorkflowUrlState() {
       stepId: firstString(params.stepId),
       shouldAutoResume: firstString(params.resume) === 'true',
       replayExecutionId: firstString(params.replayExecutionId),
+      replayIsTestRun: firstString(params.replayIsTestRun) === 'true',
+      executionListFilters: {
+        statuses: knownValues<ExecutionStatus>(
+          stringList(params.executionStatuses),
+          ExecutionStatusValues
+        ),
+        executionTypes: knownValues<ExecutionType>(
+          stringList(params.executionTypes),
+          ExecutionTypeValues
+        ),
+        executedBy: stringList(params.executedBy),
+      },
+      lastViewedExecutionId: boundedToken(firstString(params.lastViewedExecutionId)),
     };
   }, [location.search]);
 
   const updateUrlState = useCallback(
     (updates: Partial<WorkflowUrlState>, { replace = true }: WorkflowUrlUpdateOptions = {}) => {
-      const currentParams = parse(history.location.search);
+      const currentParams = queryString.parse(history.location.search);
 
       // Update the params with new values
       const newParams = {
@@ -135,18 +193,28 @@ export function useWorkflowUrlState() {
         ...updates,
       };
 
-      // Remove undefined/null values to keep URL clean
-      const cleanParams: Record<string, string | boolean> = {};
+      // Remove undefined/null values and empty lists to keep URL clean
+      const cleanParams: Record<string, string | boolean | string[]> = {};
       Object.entries(newParams).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          cleanParams[key] = value as string | boolean;
+        if (value === undefined || value === null) {
+          return;
         }
+        if (Array.isArray(value)) {
+          const items = value.filter(
+            (item): item is string => typeof item === 'string' && item.length > 0
+          );
+          if (items.length > 0) {
+            cleanParams[key] = items;
+          }
+          return;
+        }
+        cleanParams[key] = value as string | boolean;
       });
 
       // Update the URL without causing a full page reload. Values must be encoded: iteration and
       // case-branch ids embed author-controlled step names and case matches, and a raw `&`, `#`
       // or `+` would split or truncate the param when the URL is parsed back.
-      const newSearch = stringify(cleanParams);
+      const newSearch = queryString.stringify(cleanParams);
       const nextSearch = newSearch ? `?${newSearch}` : '';
       if (nextSearch === history.location.search) {
         return;
@@ -279,7 +347,7 @@ export function useWorkflowUrlState() {
   }, [updateUrlState]);
 
   const clearReplayExecutionId = useCallback(() => {
-    updateUrlState({ replayExecutionId: undefined });
+    updateUrlState({ replayExecutionId: undefined, replayIsTestRun: undefined });
   }, [updateUrlState]);
 
   const setEditorView = useCallback(
@@ -312,6 +380,9 @@ export function useWorkflowUrlState() {
     selectedStepId: urlState.stepId,
     shouldAutoResume: urlState.shouldAutoResume,
     replayExecutionId: urlState.replayExecutionId,
+    replayIsTestRun: urlState.replayIsTestRun,
+    executionListFilters: urlState.executionListFilters,
+    lastViewedExecutionId: urlState.lastViewedExecutionId,
 
     // State setters
     setActiveTab,

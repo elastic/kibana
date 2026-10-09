@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  IClusterClient,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import {
   connectorTypeIsDual,
   getConnectorSpec,
@@ -24,8 +29,10 @@ import {
 } from './constants';
 import { logInboundIngressOutcome } from './log_inbound_ingress_outcome';
 import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './types';
+import { resolveKibanaInboundRequest } from './resolve_kibana_inbound_request';
 import { extractIngestToken, verifyIngestToken } from './verify_ingress_auth';
 import { loadIngressCredential, parseIngestToken } from './ingress_credential';
+import type { InboundEventRateLimiter } from './inbound_event_rate_limiter';
 import { loadInboundConnector } from './load_inbound_connector';
 import { validateSpokeHttpHeaders } from './spoke_http';
 
@@ -34,6 +41,7 @@ export type IngestInboundEventResult =
   | { status: 'not_found' }
   | { status: 'error'; statusCode: 500; body: string }
   | { status: 'accepted'; body: { ok: true } }
+  | { status: 'rate_limited'; retryAfterSeconds: number; budget: 'connector' }
   | {
       status: 'spoke_http';
       statusCode: number;
@@ -49,6 +57,7 @@ export interface IngestInboundEventInput {
   headers: Record<string, string | string[] | undefined>;
   query: IngestEventsRequestQuery;
   body: unknown;
+  remoteAddress: string | undefined;
 }
 
 export interface IngestInboundEventParams extends IngestInboundEventInput {
@@ -60,7 +69,10 @@ export interface IngestInboundEventParams extends IngestInboundEventInput {
   logger: Logger;
   getUnsecuredSavedObjectsClient: (spaceId: string) => Promise<SavedObjectsClientContract>;
   getDecryptedConnectorAttributes: (connectorId: string, spaceId: string) => Promise<RawAction>;
+  getElasticsearchClient: () => Promise<IClusterClient>;
+  getKibanaRequestAccess: (request: KibanaRequest) => Promise<boolean>;
   inMemoryConnectors: InMemoryConnector[];
+  rateLimiter: InboundEventRateLimiter;
 }
 
 const stripIngestTokenHash = (config: Record<string, unknown>): Record<string, unknown> => {
@@ -79,6 +91,7 @@ export async function ingestInboundEvent({
   headers,
   query,
   body,
+  remoteAddress,
   inboundEventsEnabled,
   isActionTypeEnabled,
   maxEmitted,
@@ -87,7 +100,10 @@ export async function ingestInboundEvent({
   logger,
   getUnsecuredSavedObjectsClient,
   getDecryptedConnectorAttributes,
+  getElasticsearchClient,
+  getKibanaRequestAccess,
   inMemoryConnectors,
+  rateLimiter,
 }: IngestInboundEventParams): Promise<IngestInboundEventResult> {
   const connectorTypeId = normalizeConnectorTypeId(connectorTypeIdParam);
   const baseLog = {
@@ -102,25 +118,63 @@ export async function ingestInboundEvent({
     return { status: 'forbidden', body: INBOUND_EVENTS_DISABLED_MESSAGE };
   }
 
+  // Socket plus connector. Behind a proxy the socket is shared, so each connector has its own bucket.
+  const remoteAddressKey = `${
+    remoteAddress || 'unknown'
+  }\0${spaceId}\0${connectorTypeId}\0${connectorId}`;
+
+  const rateLimited = (retryAfterSeconds: number): IngestInboundEventResult => {
+    logInboundIngressOutcome(logger, {
+      ...baseLog,
+      outcome: 'rate_limited',
+      detail: `budget=connector retryAfter=${retryAfterSeconds}`,
+      budget: 'connector',
+      retryAfterSeconds,
+    });
+    return { status: 'rate_limited', retryAfterSeconds, budget: 'connector' };
+  };
+
+  const notFound = (
+    outcome: 'no_spec' | 'load_miss' | 'auth_fail',
+    detail?: string
+  ): IngestInboundEventResult => {
+    logInboundIngressOutcome(logger, {
+      ...baseLog,
+      outcome,
+      ...(detail !== undefined ? { detail } : {}),
+    });
+    // A missing type or connector must not take a key. The id is chosen by the caller.
+    if (outcome === 'auth_fail') {
+      rateLimiter.recordRemoteAddressFailure(remoteAddressKey);
+    }
+    return { status: 'not_found' };
+  };
+
+  const addressDecision = rateLimiter.peekRemoteAddress(remoteAddressKey);
+  if (!addressDecision.allowed) {
+    logInboundIngressOutcome(logger, {
+      ...baseLog,
+      outcome: 'rate_limited',
+      detail: `budget=remote_address retryAfter=${addressDecision.retryAfterSeconds}`,
+      budget: 'remoteAddress',
+      retryAfterSeconds: addressDecision.retryAfterSeconds,
+    });
+    // Same 404 as a missing connector. A 429 here would show that the connector exists.
+    return { status: 'not_found' };
+  }
+
   // Path schema maxLength is pre-normalize; reject post-normalize oversize (e.g. undotted 64 + '.').
   if (connectorTypeId.length > MAX_CONNECTOR_TYPE_ID_LENGTH) {
-    logInboundIngressOutcome(logger, { ...baseLog, outcome: 'no_spec' });
-    return { status: 'not_found' };
+    return notFound('no_spec');
   }
 
   const spec = getConnectorSpec(connectorTypeId);
   if (!spec?.events) {
-    logInboundIngressOutcome(logger, { ...baseLog, outcome: 'no_spec' });
-    return { status: 'not_found' };
+    return notFound('no_spec');
   }
 
   if (!isActionTypeEnabled(connectorTypeId)) {
-    logInboundIngressOutcome(logger, {
-      ...baseLog,
-      outcome: 'no_spec',
-      detail: 'type_disabled',
-    });
-    return { status: 'not_found' };
+    return notFound('no_spec', 'type_disabled');
   }
 
   const unsecuredSavedObjectsClient = await getUnsecuredSavedObjectsClient(spaceId);
@@ -134,48 +188,78 @@ export async function ingestInboundEvent({
     logger,
   });
   if (!connector) {
-    logInboundIngressOutcome(logger, { ...baseLog, outcome: 'load_miss' });
-    return { status: 'not_found' };
+    return notFound('load_miss');
   }
+
+  const connectorEventsEnabled = connector.hasPreconfiguredInboundEvents === true;
 
   if (
     connectorTypeIsDual(connector.connectorTypeId) &&
+    !connectorEventsEnabled &&
     connector.hasInboundEventIdentity !== true
   ) {
-    logInboundIngressOutcome(logger, {
-      ...baseLog,
-      outcome: 'load_miss',
-      detail: 'inbound_events_disabled',
+    return notFound('load_miss', 'inbound_events_disabled');
+  }
+
+  let kibanaScheduleRequest: KibanaRequest | undefined;
+  // In-memory events-on connectors have no ingest token. A saved identity stays on the token path.
+  if (connectorEventsEnabled && connector.hasInboundEventIdentity !== true) {
+    try {
+      kibanaScheduleRequest = await resolveKibanaInboundRequest({
+        headers,
+        spaceId,
+        elasticsearchClient: await getElasticsearchClient(),
+        getKibanaRequestAccess,
+      });
+    } catch (error) {
+      logInboundIngressOutcome(logger, {
+        ...baseLog,
+        outcome: 'handle_fail',
+        detail: error instanceof Error ? error.message : String(error),
+      });
+      return {
+        status: 'error',
+        statusCode: 500,
+        body: INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE,
+      };
+    }
+    if (!kibanaScheduleRequest) {
+      return notFound('auth_fail');
+    }
+  } else {
+    const providedToken = extractIngestToken({
+      query,
+      headers,
     });
-    return { status: 'not_found' };
-  }
+    const parsedToken = providedToken ? parseIngestToken(providedToken) : undefined;
+    if (!providedToken || !parsedToken) {
+      return notFound('auth_fail');
+    }
 
-  const providedToken = extractIngestToken({
-    query,
-    headers,
-  });
-  const parsedToken = providedToken ? parseIngestToken(providedToken) : undefined;
-  if (!providedToken || !parsedToken) {
-    logInboundIngressOutcome(logger, { ...baseLog, outcome: 'auth_fail' });
-    return { status: 'not_found' };
-  }
-
-  const credential = await loadIngressCredential({
-    unsecuredSavedObjectsClient,
-    credentialId: parsedToken.credentialId,
-    connectorId,
-  });
-  if (
-    !credential ||
-    !verifyIngestToken({
+    const credential = await loadIngressCredential({
+      unsecuredSavedObjectsClient,
+      credentialId: parsedToken.credentialId,
       connectorId,
-      spaceId,
-      providedToken,
-      ingestTokenHash: credential.ingestTokenHash,
-    })
-  ) {
-    logInboundIngressOutcome(logger, { ...baseLog, outcome: 'auth_fail' });
-    return { status: 'not_found' };
+    });
+    if (
+      !credential ||
+      !verifyIngestToken({
+        connectorId,
+        spaceId,
+        providedToken,
+        ingestTokenHash: credential.ingestTokenHash,
+      })
+    ) {
+      return notFound('auth_fail');
+    }
+  }
+
+  const connectorDecision = rateLimiter.consume(
+    'connector',
+    `${spaceId}\0${connectorTypeId}\0${connectorId}`
+  );
+  if (!connectorDecision.allowed) {
+    return rateLimited(connectorDecision.retryAfterSeconds);
   }
 
   try {
@@ -267,17 +351,19 @@ export async function ingestInboundEvent({
       return { status: 'accepted', body: { ok: true } };
     }
 
-    let scheduleRequest;
-    try {
-      const attributes = await getDecryptedConnectorAttributes(connectorId, spaceId);
-      scheduleRequest = resolveConnectorEventScheduleRequest(attributes, spaceId);
-    } catch (error) {
-      logInboundIngressOutcome(logger, {
-        ...baseLog,
-        outcome: 'identity_missing',
-        detail: `decrypt_failed ${error instanceof Error ? error.message : String(error)}`,
-      });
-      return { status: 'accepted', body: { ok: true } };
+    let scheduleRequest = kibanaScheduleRequest;
+    if (!scheduleRequest) {
+      try {
+        const attributes = await getDecryptedConnectorAttributes(connectorId, spaceId);
+        scheduleRequest = resolveConnectorEventScheduleRequest(attributes, spaceId);
+      } catch (error) {
+        logInboundIngressOutcome(logger, {
+          ...baseLog,
+          outcome: 'identity_missing',
+          detail: `decrypt_failed ${error instanceof Error ? error.message : String(error)}`,
+        });
+        return { status: 'accepted', body: { ok: true } };
+      }
     }
 
     if (!scheduleRequest) {

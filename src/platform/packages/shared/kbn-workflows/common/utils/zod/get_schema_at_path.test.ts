@@ -22,6 +22,11 @@ describe('parsePath', () => {
     expect(parsePath('a["b"].c')).toEqual(['a', 'b', 'c']);
   });
 
+  it('keeps a quoted bracket key that contains a dot as one segment', () => {
+    expect(parsePath('a["b.c"].d')).toEqual(['a', 'b.c', 'd']);
+    expect(parsePath("a['b.c']")).toEqual(['a', 'b.c']);
+  });
+
   it('normalizes numeric bracket keys', () => {
     expect(parsePath('a[0].b')).toEqual(['a', '0', 'b']);
   });
@@ -260,5 +265,62 @@ describe('getSchemaAtPath: prototype-chain keys', () => {
     const result = getSchemaAtPath(z.object(shape), '__proto__');
     expect(result.schema).not.toBeNull();
     expectZodSchemaEqual(result.schema as z.ZodType, z.number());
+  });
+});
+
+describe('getSchemaAtPath: Liquid built-in properties', () => {
+  const schema = z.object({
+    items: z.array(z.object({ name: z.string() })),
+    text: z.string(),
+    label: z.literal('hello'),
+    obj: z.object({ a: z.number() }),
+    withSize: z.object({ size: z.string() }),
+    count: z.number(),
+  });
+
+  it('resolves first and last on an array to its element', () => {
+    expectZodSchemaEqual(
+      getSchemaAtPath(schema, 'items.first.name').schema as z.ZodType,
+      z.string()
+    );
+    expectZodSchemaEqual(
+      getSchemaAtPath(schema, 'items.last.name').schema as z.ZodType,
+      z.string()
+    );
+  });
+
+  it('resolves size on an array, string, string literal or object to a number', () => {
+    for (const path of ['items.size', 'text.size', 'label.size', 'obj.size']) {
+      expectZodSchemaEqual(getSchemaAtPath(schema, path).schema as z.ZodType, z.number());
+    }
+  });
+
+  it('picks the union branch that resolves the whole path over a built-in size', () => {
+    const union = z.union([
+      z.object({ a: z.string() }),
+      z.object({ size: z.object({ unit: z.string() }) }),
+    ]);
+    expectZodSchemaEqual(getSchemaAtPath(union, 'size.unit').schema as z.ZodType, z.string());
+    expectZodSchemaEqual(getSchemaAtPath(union, 'size').schema as z.ZodType, z.number());
+  });
+
+  it('resolves a quoted key that contains a dot, in an object and through a union', () => {
+    const withDottedKey = z.object({ a: z.object({ 'b.c': z.object({ d: z.string() }) }) });
+    const union = z.union([z.object({ x: z.string() }), withDottedKey]);
+    expectZodSchemaEqual(
+      getSchemaAtPath(withDottedKey, 'a["b.c"].d').schema as z.ZodType,
+      z.string()
+    );
+    expectZodSchemaEqual(getSchemaAtPath(union, 'a["b.c"].d').schema as z.ZodType, z.string());
+  });
+
+  it('prefers an own size key over the built-in size', () => {
+    expectZodSchemaEqual(getSchemaAtPath(schema, 'withSize.size').schema as z.ZodType, z.string());
+  });
+
+  it('does not resolve built-in properties on types Liquid does not support them for', () => {
+    expect(getSchemaAtPath(schema, 'obj.first').schema).toBeNull();
+    expect(getSchemaAtPath(schema, 'text.first').schema).toBeNull();
+    expect(getSchemaAtPath(schema, 'count.size').schema).toBeNull();
   });
 });

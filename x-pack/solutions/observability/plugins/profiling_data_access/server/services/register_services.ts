@@ -6,18 +6,26 @@
  */
 
 import type { CloudStart } from '@kbn/cloud-plugin/server';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { BuildFlavor } from '@kbn/config';
+import type { Logger } from '@kbn/core/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
+import { createGetAvailableSchemasService } from './available_schemas';
 import { createFetchFlamechart } from './fetch_flamechart';
-import { createGetStatusService } from './status';
-import type { ProfilingESClient } from '../../common/profiling_es_client';
+import { createGetProfilingStatusService } from './status';
+import { createGetOtelStatusService } from '../otel/services/status';
+import { createGetStatusService } from '../universal_profiling/services/status';
+import type { CreateProfilingEsClient } from '../utils/profiling_es_client';
 import { createFetchFunctions } from './functions';
-import { createCloudSetupState, createSelfManagedSetupState } from './setup_state';
+import {
+  createCloudSetupState,
+  createSelfManagedSetupState,
+} from '../universal_profiling/services/setup_state';
 import { createFetchESFunctions } from './functions/es_functions';
 
 export interface RegisterServicesParams {
-  createProfilingEsClient: (params: { esClient: ElasticsearchClient }) => ProfilingESClient;
+  createProfilingEsClient: CreateProfilingEsClient;
   logger: Logger;
+  buildFlavor: BuildFlavor;
   deps: {
     fleet?: FleetStartContract;
     cloud?: CloudStart;
@@ -27,9 +35,16 @@ export interface RegisterServicesParams {
 export function registerServices(params: RegisterServicesParams) {
   return {
     fetchFlamechartData: createFetchFlamechart(params),
-    getStatus: createGetStatusService(params),
-    getCloudSetupState: createCloudSetupState(params),
-    getSelfManagedSetupState: createSelfManagedSetupState(params),
+    getStatus: createGetProfilingStatusService(params),
+    getAvailableSchemas: createGetAvailableSchemasService(params),
+    otel: {
+      getStatus: createGetOtelStatusService(params),
+    },
+    universalProfiling: {
+      getStatus: createGetStatusService(params),
+      getCloudSetupState: createCloudSetupState(params),
+      getSelfManagedSetupState: createSelfManagedSetupState(params),
+    },
     // Legacy fetch functions api based on stacktraces
     fetchFunctions: createFetchFunctions(params),
     fetchESFunctions: createFetchESFunctions(params),

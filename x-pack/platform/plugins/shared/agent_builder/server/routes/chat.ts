@@ -15,6 +15,7 @@ import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import {
   agentBuilderDefaultAgentId,
+  CHAT_MESSAGE_MAX_LENGTH,
   CONVERSATION_ID_MAX_LENGTH,
   createBadRequestError,
   createInternalError,
@@ -118,6 +119,7 @@ export const conversePayloadSchema = schema.object({
   ),
   input: schema.maybe(
     schema.string({
+      maxLength: CHAT_MESSAGE_MAX_LENGTH,
       meta: { description: 'The user input message to send to the agent.' },
     })
   ),
@@ -212,7 +214,7 @@ export const conversePayloadSchema = schema.object({
       },
       {
         meta: {
-          availability: { stability: 'tech_preview', since: '9.5.0' },
+          availability: { stability: 'stable', since: '9.5.0' },
           description: 'Optional conversation access control. Defaults to private.',
         },
       }

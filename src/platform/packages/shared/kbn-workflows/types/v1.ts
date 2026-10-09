@@ -18,6 +18,7 @@ import type { WorkflowAccessSubject, WorkflowPermissions } from '../common/acces
 import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type {
   SerializedError,
+  WorkflowEffectiveIdentitySchema,
   WorkflowStepTokenUsageSchema,
   WorkflowTokenUsageSchema,
   WorkflowYaml,
@@ -159,7 +160,7 @@ export interface EsWorkflowExecution {
   createdAt: string;
   error: SerializedError | null;
   createdBy?: string; // Keep for backwards compatibility with existing documents
-  effectiveIdentity?: { type: 'service_account'; id: string };
+  effectiveIdentity?: z.infer<typeof WorkflowEffectiveIdentitySchema>;
   executedBy?: string; // User who triggered the workflow
   startedAt: string;
   finishedAt: string;
@@ -314,7 +315,7 @@ export interface WorkflowExecutionDto {
   /** Ordered step IDs returned by modern runs, which support pagination beyond the search window. */
   stepExecutionIds?: string[];
   duration: number | null;
-  effectiveIdentity?: { type: 'service_account'; id: string };
+  effectiveIdentity?: z.infer<typeof WorkflowEffectiveIdentitySchema>;
   executedBy?: string; // User who triggered the workflow
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
@@ -501,7 +502,7 @@ export interface WorkflowDetailDto extends WorkflowAccessSubject {
 
 export type WorkflowAccessControlUpdateResponseDto = Pick<
   WorkflowDetailDto,
-  'owner_id' | 'access_control' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'version'
+  'owner_id' | 'access_control' | 'permissions' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'version'
 >;
 
 export interface WorkflowPartialDetailDto extends Partial<WorkflowDetailDto> {
@@ -600,6 +601,7 @@ export interface ConnectorInstance {
 
 export interface ConnectorInstanceConfig {
   taskType?: string;
+  selectedActions?: string[];
 }
 
 export interface ConnectorTypeInfo {

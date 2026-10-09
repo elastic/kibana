@@ -9,7 +9,7 @@
 
 import { parse } from 'yaml';
 import ALERTZERO_CREATE_PROPOSAL_YAML from './create_proposal.yaml';
-import { parseDuration } from '../../../common/utils';
+import { createWorkflowLiquidEngine, parseDuration } from '../../../common/utils';
 import { CREATE_PROPOSAL_WORKFLOW_ID } from '../proposals';
 import CREATE_PROPOSAL_YAML from '../proposals/create_proposal.yaml';
 
@@ -39,10 +39,57 @@ const gate = parse(CREATE_PROPOSAL_YAML) as ParsedWorkflow;
 const inputsOf = (workflow: ParsedWorkflow) => workflow.triggers[0].inputs ?? {};
 const propertiesOf = (workflow: ParsedWorkflow) => inputsOf(workflow).properties ?? {};
 
+const reopenStep = () => bridge.steps.find((step) => step.name === 'reopen_investigation')!;
+const resolveAutoApproveStep = () =>
+  bridge.steps.find((step) => step.name === 'resolve_auto_approve')!;
 const forward = () => bridge.steps.find((step) => step.name === 'create_proposal')!;
 const forwardedInputs = () => (forward().with?.inputs ?? {}) as Record<string, string>;
 
 describe('AlertZero create proposal bridge', () => {
+  describe('reopen investigation', () => {
+    it('is the first step and targets the reopen step type', () => {
+      expect(bridge.steps[0].name).toBe('reopen_investigation');
+      expect(reopenStep().type).toBe('investigations.reopen');
+    });
+
+    it('passes the conversationId input through as an expression', () => {
+      expect(reopenStep().with?.conversationId).toBe('${{ inputs.conversationId }}');
+    });
+  });
+
+  describe('resolve auto approve', () => {
+    it('is a data.set step that guards autoApprove based on reopen output', () => {
+      expect(resolveAutoApproveStep().type).toBe('data.set');
+    });
+
+    const evaluateAutoApprove = (autoApprove: boolean | undefined, reopened: boolean): unknown =>
+      createWorkflowLiquidEngine().evalValueSync(
+        String(resolveAutoApproveStep().with?.value)
+          .replace(/^\$\{\{/, '')
+          .replace(/\}\}$/, '')
+          .trim(),
+        { inputs: { autoApprove }, steps: { reopen_investigation: { output: { reopened } } } }
+      );
+
+    it.each([true, false, undefined])(
+      'never auto-approves on a reopened investigation (caller autoApprove: %s)',
+      (autoApprove) => {
+        expect(evaluateAutoApprove(autoApprove, true)).toBe(false);
+      }
+    );
+
+    it.each([
+      [true, true],
+      [false, false],
+      [undefined, false],
+    ])(
+      'follows the caller on an investigation that was already open (autoApprove: %s)',
+      (autoApprove, expected) => {
+        expect(evaluateAutoApprove(autoApprove, false)).toBe(expected);
+      }
+    );
+  });
+
   describe('the forward', () => {
     it('targets the shared gate', () => {
       expect(forward().type).toBe('workflow.execute');
@@ -101,12 +148,34 @@ describe('AlertZero create proposal bridge', () => {
     // the gate rejects for `autoApprove` (boolean) and `actionInput` (object) —
     // failing the run over a field the caller simply did not set. `${{ }}`
     // evaluates instead, preserving the type and passing `undefined` through.
+    //
+    // `autoApprove` is excluded: it is sourced from `resolve_auto_approve`
+    // rather than passed through directly, because the reopen guard can force
+    // it false regardless of what the caller set.
     it('forwards with expression syntax so an unset input stays unset', () => {
-      const templated = Object.entries(forwardedInputs()).filter(([name]) => name !== 'origin');
+      const templated = Object.entries(forwardedInputs()).filter(
+        ([name]) => name !== 'origin' && name !== 'autoApprove'
+      );
       expect(templated.length).toBeGreaterThan(0);
       for (const [name, value] of templated) {
         expect([name, value]).toEqual([name, `\${{ inputs.${name} }}`]);
       }
+    });
+
+    it('sources autoApprove from the reopen guard rather than directly from inputs', () => {
+      expect(forwardedInputs().autoApprove).toBe('${{ steps.resolve_auto_approve.output.value }}');
+    });
+  });
+
+  describe('proposalId', () => {
+    it('accepts it as an optional input and forwards it to the gate', () => {
+      expect(propertiesOf(bridge)).toHaveProperty('proposalId');
+      expect(forwardedInputs().proposalId).toBe('${{ inputs.proposalId }}');
+    });
+
+    it('does not require it, so every existing caller is unaffected', () => {
+      const required = bridge.triggers.find(({ type }) => type === 'manual')?.inputs?.required;
+      expect(required).not.toContain('proposalId');
     });
   });
 

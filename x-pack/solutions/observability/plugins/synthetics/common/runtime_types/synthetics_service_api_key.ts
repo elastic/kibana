@@ -6,9 +6,10 @@
  */
 
 import type { SchemaOutput } from './schema_output';
-import { SyntheticsServiceApiKeyType, SyntheticsServiceApiKeySaveType } from './zod/settings';
-
-export { SyntheticsServiceApiKeyType, SyntheticsServiceApiKeySaveType };
+import type {
+  SyntheticsServiceApiKeyType,
+  SyntheticsServiceApiKeySaveType,
+} from './schemas/settings';
 
 export type SyntheticsServiceApiKey = SchemaOutput<typeof SyntheticsServiceApiKeyType>;
 export type SyntheticsServiceApiKeySaveResponse = SchemaOutput<
