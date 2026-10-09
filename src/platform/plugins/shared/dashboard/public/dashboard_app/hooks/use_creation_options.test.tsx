@@ -98,13 +98,13 @@ describe('useCreationOptions', () => {
     expect(history.location.state).toBeUndefined();
   });
 
-  it('passes locator change sources to the creation options and clears them from history.state', async () => {
+  it('passes allowed locator change sources to the creation options and clears them from history.state', async () => {
     const history = createMemoryHistory();
     history.replace({
       pathname: '/',
       search: '',
       hash: '',
-      state: { changeSources: ['agent', 42] },
+      state: { changeSources: ['agent', 'unknown', 42] },
     });
 
     const { result } = renderHook(() =>

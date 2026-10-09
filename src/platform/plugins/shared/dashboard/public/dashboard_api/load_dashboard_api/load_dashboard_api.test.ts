@@ -8,6 +8,7 @@
  */
 
 import { Subject } from 'rxjs';
+import type { DashboardChangeSource } from '../../../common/change_sources';
 import { DEFAULT_DASHBOARD_STATE } from '../../../common/default_dashboard_state';
 import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
 import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
@@ -124,16 +125,15 @@ describe('loadDashboardApi', () => {
   });
 
   describe('change sources', () => {
-    test('should strip restored change sources from initialState and seed the valid ones with creation option sources', async () => {
+    test('should strip restored change sources from initialState and seed the allowed ones', async () => {
       backupState = {
         query: lastSavedQuery,
-        changeSources: ['restored', 7, null] as unknown as string[],
+        changeSources: ['unknown', 'agent', 7, null] as unknown as DashboardChangeSource[],
       };
 
       await loadDashboardApi({
         getCreationOptions: async () => ({
           useSessionStorageIntegration: true,
-          changeSources: ['agent'],
         }),
         savedObjectId: '12345',
       });
@@ -143,7 +143,7 @@ describe('loadDashboardApi', () => {
         ...DEFAULT_DASHBOARD_STATE,
         query: lastSavedQuery,
       });
-      expect(changeSources).toEqual(['agent', 'restored']);
+      expect(changeSources).toEqual(['agent']);
     });
   });
 

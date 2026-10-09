@@ -9,6 +9,7 @@
 
 import type { RootSchema } from '@kbn/core/public';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { DashboardChangeSource } from '../../../common/change_sources';
 import { isDashboardSection } from '../../../common/is_dashboard_section';
 import { coreServices } from '../../services/kibana_services';
 import { DASHBOARD_SAVED_EVENT } from '../../utils/telemetry_constants';
@@ -16,7 +17,7 @@ import { DASHBOARD_SAVED_EVENT } from '../../utils/telemetry_constants';
 export interface DashboardSavedEvent {
   is_new: boolean;
   is_copy: boolean;
-  change_sources?: string[];
+  change_sources?: DashboardChangeSource[];
   panel_count: number;
   panel_types: string[];
 }
@@ -69,7 +70,7 @@ export const reportDashboardSaved = ({
   previousDashboardId?: string;
   dashboardId?: string;
   dashboardState: DashboardState;
-  changeSources: readonly string[];
+  changeSources: readonly DashboardChangeSource[];
 }): void => {
   const isNew = previousDashboardId !== dashboardId;
   const panelTypes = getPanelTypes(dashboardState.panels);

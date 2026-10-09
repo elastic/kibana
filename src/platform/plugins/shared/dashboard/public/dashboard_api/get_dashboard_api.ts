@@ -15,6 +15,7 @@ import type { EuiFlyoutProps } from '@elastic/eui';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { DashboardChangeSource } from '../../common/change_sources';
 import { getLastSavedState } from '../../common/default_dashboard_state';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { DashboardReadResponseBody } from '../../server';
@@ -74,7 +75,7 @@ export function getDashboardApi({
   savedObjectId?: string;
   user?: DashboardUser;
   isAccessControlEnabled?: boolean;
-  changeSources?: readonly string[];
+  changeSources?: readonly DashboardChangeSource[];
 }) {
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = readResult?.meta.managed ?? false;

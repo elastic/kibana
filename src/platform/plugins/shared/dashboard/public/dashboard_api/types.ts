@@ -56,6 +56,7 @@ import type { BehaviorSubject, Observable, Subject } from 'rxjs';
 
 import type { DashboardState, GridData } from '@kbn/as-code-dashboard-schema';
 import type { DashboardLocatorParams } from '../../common';
+import type { DashboardChangeSource } from '../../common/change_sources';
 import type { DashboardRedirect } from '../dashboard_app/types';
 import type { ReadBodyWithResolve } from '../dashboard_client/dashboard_client';
 import type { DashboardLayout } from './layout_manager/types';
@@ -85,7 +86,7 @@ export interface DashboardSetStateOptions {
    * next save that includes this change, so a change that is undone, reset to the last saved
    * state, or discarded before a save is not reported.
    */
-  changeSources?: string[];
+  changeSources?: DashboardChangeSource[];
 }
 
 export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
@@ -108,10 +109,9 @@ export interface DashboardCreationOptions {
 
   /**
    * Labels for the integrations that supplied the initial state, e.g. `agent`. They are reported
-   * with the next save and kept until then, unless the dashboard is reset to its last saved state
-   * or its unsaved draft is discarded.
+   * with the next save that includes this state, like `DashboardSetStateOptions.changeSources`.
    */
-  changeSources?: string[];
+  changeSources?: DashboardChangeSource[];
 
   /** Returns embeddables to add to the dashboard on load. */
   getIncomingEmbeddables?: () => EmbeddablePackageState[] | undefined;

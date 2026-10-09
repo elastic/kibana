@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DashboardChangeSource } from '../../common/change_sources';
 import { DEFAULT_DASHBOARD_STATE } from '../../common/default_dashboard_state';
 import { coreServices } from '../services/kibana_services';
 import { getDashboardApi } from './get_dashboard_api';
@@ -218,7 +219,7 @@ describe('dashboard_saved telemetry', () => {
 
     type Dashboard = ReturnType<typeof getDashboardApi>;
     const settle = () => jest.advanceTimersByTimeAsync(1000);
-    const setup = async (changeSources?: string[]) => {
+    const setup = async (changeSources?: DashboardChangeSource[]) => {
       const dashboard = getDashboardApi({
         incomingEmbeddables: [],
         initialState: DEFAULT_DASHBOARD_STATE,

@@ -14,6 +14,7 @@ import {
   type ChangeSourceVersions,
   type DashboardSaveWithChangeSources,
 } from './unsaved_changes_manager';
+import type { DashboardChangeSource } from '../../common/change_sources';
 import { DEFAULT_DASHBOARD_STATE } from '../../common/default_dashboard_state';
 import type { initializeLayoutManager } from './layout_manager';
 import type { DashboardChildren } from './layout_manager/types';
@@ -289,7 +290,7 @@ describe('unsavedChangesManager', () => {
       setState = setStateMock,
     }: {
       storeUnsavedChanges?: boolean;
-      initialChangeSources?: string[];
+      initialChangeSources?: DashboardChangeSource[];
       setState?: (state: DashboardState) => Promise<void>;
     } = {}) =>
       initializeUnsavedChangesManager({
@@ -350,26 +351,26 @@ describe('unsavedChangesManager', () => {
       rxjsConfig.onUnhandledError = null;
     });
 
-    it('reports added and restored sources on the next save, then clears them', () => {
-      const manager = createManager({ initialChangeSources: ['restored'] });
+    it('reports restored and added sources once on the next save, then clears them', () => {
+      const manager = createManager({ initialChangeSources: ['agent'] });
       manager.internalApi.addChangeSources(['agent']);
       emitLayoutChanges({ panels: [agentPanel] });
 
       save(manager);
       save(manager);
 
-      expect(reportEventMock.mock.calls).toEqual([savedEvent(['agent', 'restored']), savedEvent()]);
+      expect(reportEventMock.mock.calls).toEqual([savedEvent(['agent']), savedEvent()]);
     });
 
     it('reports sources added during a save on the following save', () => {
-      const manager = createManager({ initialChangeSources: ['restored'] });
+      const manager = createManager();
 
       const versionsInSave = manager.internalApi.getChangeSourceVersions();
       manager.internalApi.addChangeSources(['agent']);
       finishSave(versionsInSave);
       save(manager);
 
-      expect(reportEventMock.mock.calls).toEqual([savedEvent(['restored']), savedEvent(['agent'])]);
+      expect(reportEventMock.mock.calls).toEqual([savedEvent(), savedEvent(['agent'])]);
     });
 
     it('keeps sources when edits return to the last saved state', () => {
@@ -384,8 +385,7 @@ describe('unsavedChangesManager', () => {
     });
 
     it('drops unsaved sources on reset to the last saved state', async () => {
-      const manager = createManager({ initialChangeSources: ['restored'] });
-      manager.internalApi.addChangeSources(['agent']);
+      const manager = createManager({ initialChangeSources: ['agent'] });
 
       await manager.api.asyncResetToLastSavedState();
       save(manager);
@@ -396,7 +396,6 @@ describe('unsavedChangesManager', () => {
     it('keeps sources added while a reset is being applied', async () => {
       let finishReset = () => {};
       const manager = createManager({
-        initialChangeSources: ['restored'],
         setState: () => new Promise((resolve) => (finishReset = resolve)),
       });
 
@@ -410,10 +409,7 @@ describe('unsavedChangesManager', () => {
     });
 
     it('backs up the sources of unsaved changes', () => {
-      const manager = createManager({
-        storeUnsavedChanges: true,
-        initialChangeSources: ['restored'],
-      });
+      const manager = createManager({ storeUnsavedChanges: true });
 
       manager.internalApi.addChangeSources(['agent']);
       emitLayoutChanges({ panels: [agentPanel] });
@@ -421,23 +417,25 @@ describe('unsavedChangesManager', () => {
       expect(setBackupStateMock).toHaveBeenLastCalledWith('dashboard1234', {
         viewMode: 'edit',
         panels: [agentPanel],
-        changeSources: ['agent', 'restored'],
+        changeSources: ['agent'],
       });
     });
 
     it('backs up only the sources of changes made since the last save', () => {
-      const manager = createManager({
-        storeUnsavedChanges: true,
-        initialChangeSources: ['restored'],
-      });
+      const manager = createManager({ storeUnsavedChanges: true, initialChangeSources: ['agent'] });
       save(manager);
 
-      manager.internalApi.addChangeSources(['agent']);
       emitLayoutChanges({ panels: [agentPanel, userPanel] });
-
       expect(setBackupStateMock).toHaveBeenLastCalledWith('dashboard1234', {
         viewMode: 'edit',
         panels: [agentPanel, userPanel],
+      });
+
+      manager.internalApi.addChangeSources(['agent']);
+      emitLayoutChanges({ panels: [agentPanel] });
+      expect(setBackupStateMock).toHaveBeenLastCalledWith('dashboard1234', {
+        viewMode: 'edit',
+        panels: [agentPanel],
         changeSources: ['agent'],
       });
     });

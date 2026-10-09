@@ -17,6 +17,7 @@ import type {
 } from '@kbn/presentation-publishing';
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import { DASHBOARD_CHANGE_SOURCES, type DashboardChangeSource } from '../../common/change_sources';
 import { getDashboardBackupService } from '../services/dashboard_api_services';
 import { type DashboardBackupState } from '../services/dashboard_backup_service';
 import type { initializeApproximationManager } from './approximation_manager';
@@ -30,7 +31,7 @@ import type { initializeUnifiedSearchManager } from './unified_search_manager';
 const DEBOUNCE_TIME = 100;
 
 /** For each change source, the version of its latest change in a dashboard state. */
-export type ChangeSourceVersions = Readonly<Record<string, number>>;
+export type ChangeSourceVersions = Readonly<Partial<Record<DashboardChangeSource, number>>>;
 
 export type DashboardSaveWithChangeSources = DashboardSaveEvent & {
   changeSourceVersions: ChangeSourceVersions;
@@ -61,7 +62,7 @@ export function initializeUnsavedChangesManager({
   approximationManager: ReturnType<typeof initializeApproximationManager>;
   setState: (state: DashboardState) => Promise<void>;
   onSave$: Observable<DashboardSaveWithChangeSources>;
-  initialChangeSources?: readonly string[];
+  initialChangeSources?: readonly DashboardChangeSource[];
 }): {
   api: {
     hasUnsavedChanges$: PublishingSubject<boolean>;
@@ -71,7 +72,7 @@ export function initializeUnsavedChangesManager({
   internalApi: {
     getLastSavedState: () => DashboardState;
     unsavedChanges$: Observable<Partial<DashboardState>>;
-    addChangeSources: (sources: readonly string[]) => void;
+    addChangeSources: (sources: readonly DashboardChangeSource[]) => void;
     getChangeSourceVersions: () => ChangeSourceVersions;
     setChangeSourceVersions: (versions: ChangeSourceVersions) => void;
   };
@@ -85,7 +86,7 @@ export function initializeUnsavedChangesManager({
   let versions: ChangeSourceVersions = {};
   let savedVersions: ChangeSourceVersions = {};
 
-  const addChangeSources = (sources: readonly string[]) => {
+  const addChangeSources = (sources: readonly DashboardChangeSource[]) => {
     if (sources.length === 0) return;
     latestVersion++;
     versions = {
@@ -96,9 +97,9 @@ export function initializeUnsavedChangesManager({
   addChangeSources(initialChangeSources);
 
   const getSourcesChangedSinceSave = (draftVersions: ChangeSourceVersions) =>
-    Object.keys(draftVersions)
-      .filter((source) => draftVersions[source] > (savedVersions[source] ?? 0))
-      .sort();
+    DASHBOARD_CHANGE_SOURCES.filter(
+      (source) => (draftVersions[source] ?? 0) > (savedVersions[source] ?? 0)
+    );
 
   const onSaveSubscription = onSave$.subscribe(({ changeSourceVersions, ...saveEvent }) => {
     const changeSourcesInSave = getSourcesChangedSinceSave(changeSourceVersions);

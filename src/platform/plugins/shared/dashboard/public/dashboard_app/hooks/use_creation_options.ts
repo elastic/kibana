@@ -18,7 +18,7 @@ import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { DASHBOARD_APP_ID } from '../../../common/page_bundle_constants';
 import type { DashboardCreationOptions } from '../..';
 import { screenshotModeService } from '../../services/kibana_services';
-import { parseChangeSources } from '../../utils/parse_change_sources';
+import { parseChangeSources, type DashboardChangeSource } from '../../../common/change_sources';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../utils/urls';
 import type { DashboardEmbedSettings } from '../types';
 import {
@@ -31,7 +31,7 @@ import { extractDashboardState, loadAndRemoveDashboardState } from '../url';
 
 type IncomingEmbeddables = EmbeddablePackageState[] | undefined;
 
-const extractChangeSources = (locationState: unknown): string[] =>
+const extractChangeSources = (locationState: unknown): DashboardChangeSource[] =>
   locationState && typeof locationState === 'object' && 'changeSources' in locationState
     ? parseChangeSources(locationState.changeSources)
     : [];
