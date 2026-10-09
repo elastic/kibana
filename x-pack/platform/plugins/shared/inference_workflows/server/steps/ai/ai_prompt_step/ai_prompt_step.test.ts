@@ -317,6 +317,50 @@ describe('aiPromptStepDefinition', () => {
         expect(mockChatModel.invoke).not.toHaveBeenCalled();
       });
 
+      it('should report the token usage and connector under metadata.usage', async () => {
+        const contextWithSchema = {
+          ...mockContext,
+          input: { ...mockContext.input, schema: { type: 'object', properties: {} } },
+        };
+        mockRunnable.invoke.mockResolvedValue({
+          parsed: { response: {} },
+          raw: {
+            response_metadata: { model: 'm' },
+            usage_metadata: {
+              input_tokens: 120,
+              output_tokens: 30,
+              input_token_details: { cache_read: 100 },
+            },
+          },
+        });
+
+        const result = await handler(contextWithSchema);
+
+        expect(result.output.metadata).toEqual({
+          model: 'm',
+          usage: {
+            inputTokens: 120,
+            outputTokens: 30,
+            cachedTokens: 100,
+            connectorId: 'resolved-connector-id',
+          },
+        });
+      });
+
+      it('should report the token usage of a plain response too', async () => {
+        mockChatModel.invoke.mockResolvedValue({
+          content: 'AI generated response',
+          response_metadata: {},
+          usage_metadata: { input_tokens: 10, output_tokens: 5 },
+        });
+
+        const result = await handler(mockContext);
+
+        expect(result.output.metadata).toEqual({
+          usage: { inputTokens: 10, outputTokens: 5, connectorId: 'resolved-connector-id' },
+        });
+      });
+
       it('should handle array output schema by wrapping in response object', async () => {
         const contextWithArraySchema = {
           ...mockContext,
