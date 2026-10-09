@@ -36,7 +36,7 @@ import { Settings } from '../views/settings';
 import { StackTracesView, StackTracesViewWrapper } from '../views/stack_traces_view';
 import { StorageExplorerView } from '../views/storage_explorer';
 import { RouteBreadcrumb } from './route_breadcrumb';
-import { AddDataTabs } from '../views/add_data_view/types';
+import { UniversalProfilingAddDataTabs } from '../views/add_data_view/universal_profiling/types';
 
 const routes = {
   '/': {
@@ -82,23 +82,18 @@ const routes = {
           </RouteBreadcrumb>
         ),
         params: t.type({
-          query: t.type({
+          query: t.partial({
             selectedTab: t.union([
-              t.literal(AddDataTabs.Binary),
-              t.literal(AddDataTabs.Deb),
-              t.literal(AddDataTabs.Docker),
-              t.literal(AddDataTabs.ElasticAgentIntegration),
-              t.literal(AddDataTabs.Kubernetes),
-              t.literal(AddDataTabs.RPM),
-              t.literal(AddDataTabs.Symbols),
+              t.literal(UniversalProfilingAddDataTabs.Binary),
+              t.literal(UniversalProfilingAddDataTabs.Deb),
+              t.literal(UniversalProfilingAddDataTabs.Docker),
+              t.literal(UniversalProfilingAddDataTabs.ElasticAgentIntegration),
+              t.literal(UniversalProfilingAddDataTabs.Kubernetes),
+              t.literal(UniversalProfilingAddDataTabs.RPM),
+              t.literal(UniversalProfilingAddDataTabs.Symbols),
             ]),
           }),
         }),
-        defaults: {
-          query: {
-            selectedTab: AddDataTabs.Kubernetes,
-          },
-        },
       },
       '/profiling-not-enabled': {
         element: <ProfilingNotEnabledView />,
