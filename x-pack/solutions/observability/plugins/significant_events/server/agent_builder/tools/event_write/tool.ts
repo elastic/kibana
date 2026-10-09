@@ -70,7 +70,7 @@ export const eventsWriteItemSchema = significantEventSchema
     status: z
       .never({
         error:
-          'status is not an input: events open active; the engine manages recovering and inactive.',
+          'status is not an input: the server derives it from the per-rule verdicts you write. A breach opens or keeps an event active, healthy verdicts for every member start recovering, and only an operator or a close workflow closes it.',
       })
       .optional(),
     event_id: z
@@ -136,11 +136,20 @@ export const eventsWriteItemSchema = significantEventSchema
           'A confirms item cannot include not_checked signals; leave each not_checked detection out of the write.',
       });
     }
-    if (!hasConfirms && !hasOffTopicObservedError) {
+    // Only a confirmed breach opens an event. A continuation (it names an event_id) may carry any
+    // verdict: a rule turning healthy (`refutes`) is evidence the status is derived from, so it
+    // must be written, never dropped.
+    if (item.event_id === undefined && !hasConfirms && !hasOffTopicObservedError) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
-          'Every item must carry at least one confirms signal, or an off_topic signal with an observed error. Events open on a confirmed breach and the engine moves them to recovering and inactive, so do not write an item for refutes, inconclusive, or not_checked detections alone.',
+          'A new event must carry at least one confirms signal, or an off_topic signal with an observed error. Events open on a confirmed breach: do not create an event for refutes, inconclusive, or not_checked detections alone. To record that a rule of an existing event is healthy, continue that event with its event_id and the refutes signal.',
+      });
+    }
+    if (item.event_id !== undefined && signals.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'A continuation must carry at least one signal.',
       });
     }
   });
@@ -169,7 +178,7 @@ const eventsWriteItemsSchema = z
   .describe(
     i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
       defaultMessage:
-        'Non-empty array of event objects. One call assigns every batch detection. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals. Every item must carry a confirms signal (or an off_topic signal with an observed error); status is not an input — events open active and the engine manages recovering and inactive.',
+        'Non-empty array of event objects. One call assigns every batch detection. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals. A new event must carry a confirms signal (or an off_topic signal with an observed error); a continuation may carry any verdict, including refutes for a rule that turned healthy. Status is not an input: the server derives it from the verdicts.',
     })
   );
 

@@ -183,12 +183,20 @@ describe('events_write tool', () => {
       }
     });
 
-    it('rejects a continuation with no breaching signal', () => {
-      const result = eventsWriteSchema.safeParse({
-        items: [{ ...input, signals: [signalWith('inconclusive')] }],
-      });
+    it.each([
+      ['healthy (refutes)', [signalWith('refutes')]],
+      ['inconclusive', [signalWith('inconclusive')]],
+    ])('accepts a continuation carrying only %s evidence', (_label, signals) => {
+      expect(eventsWriteSchema.safeParse({ items: [{ ...input, signals }] }).success).toBe(true);
+    });
+
+    it('rejects a continuation with no signals at all', () => {
+      const result = eventsWriteSchema.safeParse({ items: [{ ...input, signals: [] }] });
 
       expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues.at(-1)?.message).toContain('at least one signal');
+      }
     });
 
     it('accepts an item backed by a confirms signal, new or continuation', () => {

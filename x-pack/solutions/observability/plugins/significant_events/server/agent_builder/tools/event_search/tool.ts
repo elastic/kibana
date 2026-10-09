@@ -188,7 +188,7 @@ export function createSearchEventsTool({
 
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line2', {
         defaultMessage:
-          'Use "compact" for broad searches and continuation matching. It includes the event summary and symptom hypothesis for correlation, plus signal counts, complete rule UUIDs, unresolved rule UUIDs, and topology. Use "full" only for one known event and request later signal pages when signals_has_more is true. Searches default to "active" events; specify "inactive" only when intentionally reviewing resolved events.',
+          'Use "compact" for broad searches and continuation matching. It includes the event summary and symptom hypothesis for correlation, plus signal counts, every rule UUID, the rule UUIDs whose latest verdict asserts a breach, and topology. Use "full" only for one known event and request later signal pages when signals_has_more is true. Searches default to "active" events; specify "inactive" only when intentionally reviewing resolved events.',
       })}
 
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line3', {
@@ -198,7 +198,7 @@ export function createSearchEventsTool({
 
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line4', {
         defaultMessage:
-          'The "compact" response never returns individual signals, signal descriptions, queries, p-values, or detection IDs. signal_rule_uuids lists the rules whose signal asserts a breach on the event. For evidence details, call "full" with exactly one event_id; its signals are deterministically ordered and bounded to one page.',
+          'The "compact" response never returns individual signals, signal descriptions, queries, p-values, or detection IDs. signal_rule_uuids lists every rule with a detection signal on the event, whatever its verdict. For evidence details, call "full" with exactly one event_id; its signals are deterministically ordered and bounded to one page.',
       })}
     `,
     annotations: {

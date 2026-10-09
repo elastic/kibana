@@ -5,36 +5,87 @@
  * 2.0.
  */
 
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { SignalEntry, SignificantEvent } from '@kbn/significant-events-schema';
 import { agentLifecycle } from './agent_lifecycle';
 
-const latest = (
-  status: SignificantEvent['status'],
-  status_evaluations?: number
-): SignificantEvent => ({ event_id: 'e1', status, status_evaluations } as SignificantEvent);
+const latest = (status: SignificantEvent['status']): SignificantEvent =>
+  ({ event_id: 'e1', status } as SignificantEvent);
 
-describe('agentLifecycle', () => {
-  it('opens a new event as active', () => {
-    expect(agentLifecycle({ latest: undefined })).toEqual({ write: true, status: 'active' });
-  });
+const signal = (rule: string, verdict: SignalEntry['verdict']): SignalEntry =>
+  ({
+    type: 'detection',
+    stream_name: 'logs',
+    description: `${rule} ${verdict}`,
+    verdict,
+    metadata: { rule_uuid: rule, rule_name: rule },
+  } as SignalEntry);
 
-  it.each<SignificantEvent['status']>(['active', 'inactive'])('writes active onto %s', (status) => {
-    expect(agentLifecycle({ latest: latest(status) })).toEqual({ write: true, status: 'active' });
-  });
+const breaching = [signal('a', 'confirms'), signal('b', 'confirms')];
+const oneHealthy = [signal('a', 'refutes'), signal('b', 'confirms')];
+const allHealthy = [signal('a', 'refutes'), signal('b', 'refutes')];
 
-  it('carries evidence onto a recovering event and leaves its status and count alone', () => {
-    expect(agentLifecycle({ latest: latest('recovering', 2) })).toEqual({
+describe('agentLifecycle: the status comes from the members, never from the agent', () => {
+  it('opens a new event as active on a breach', () => {
+    expect(agentLifecycle({ latest: undefined, signals: breaching })).toEqual({
       write: true,
-      status: 'recovering',
-      evaluations: 2,
+      status: 'active',
     });
   });
 
-  it('treats a recovering event with no stored count as having spent none', () => {
-    expect(agentLifecycle({ latest: latest('recovering') })).toEqual({
+  it('does not open an event from healthy members', () => {
+    expect(agentLifecycle({ latest: undefined, signals: allHealthy })).toEqual({
+      write: false,
+      reason: 'not_a_breach',
+    });
+  });
+
+  it('keeps an active event active while any member still breaches', () => {
+    expect(agentLifecycle({ latest: latest('active'), signals: oneHealthy })).toEqual({
+      write: true,
+      status: 'active',
+    });
+  });
+
+  it('starts recovery when every member is healthy', () => {
+    expect(agentLifecycle({ latest: latest('active'), signals: allHealthy })).toEqual({
       write: true,
       status: 'recovering',
-      evaluations: 0,
     });
+  });
+
+  it('returns a recovering event to active when a member breaches again', () => {
+    expect(
+      agentLifecycle({
+        latest: latest('recovering'),
+        signals: [signal('a', 'refutes'), signal('b', 'refutes'), signal('c', 'confirms')],
+      })
+    ).toEqual({ write: true, status: 'active' });
+  });
+
+  it('keeps a recovering event recovering while members stay healthy', () => {
+    expect(agentLifecycle({ latest: latest('recovering'), signals: allHealthy })).toEqual({
+      write: true,
+      status: 'recovering',
+    });
+  });
+
+  it('reopens a closed event on a breach, and ignores healthy members of a closed one', () => {
+    expect(agentLifecycle({ latest: latest('inactive'), signals: breaching })).toEqual({
+      write: true,
+      status: 'active',
+    });
+    expect(agentLifecycle({ latest: latest('inactive'), signals: allHealthy })).toEqual({
+      write: false,
+      reason: 'not_a_breach',
+    });
+  });
+
+  it('holds the status when a member cannot be judged', () => {
+    expect(
+      agentLifecycle({
+        latest: latest('active'),
+        signals: [signal('a', 'refutes'), signal('b', 'inconclusive')],
+      })
+    ).toEqual({ write: true, status: 'active' });
   });
 });

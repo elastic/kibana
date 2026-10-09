@@ -7,13 +7,14 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import {
+  type SignalEntry,
   type SignificantEvent,
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
 } from '@kbn/significant-events-schema';
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
-import type { LifecycleDecision } from '../../../lib/significant_events/events/lifecycle_state_machine';
+import type { LifecycleDecision } from '../../../lib/significant_events/events/lifecycle/lifecycle_state_machine';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import {
@@ -65,6 +66,8 @@ export type EventsWriteInput = Pick<
  */
 export type LifecycleResolver = (args: {
   latest: SignificantEvent | undefined;
+  /** The event's signals once this write is merged: the latest verdict per rule. */
+  signals: SignalEntry[];
 }) => LifecycleDecision;
 
 export interface EventsWriteResult {
@@ -122,10 +125,7 @@ interface SnapshotCandidate {
   eventId: string;
 }
 
-type WriteCandidate = (DedupCandidate | SnapshotCandidate) & {
-  /** Evaluations to carry on the version; set only when the resolver keeps a series recovering. */
-  statusEvaluations?: number;
-};
+type WriteCandidate = DedupCandidate | SnapshotCandidate;
 
 export type EventsWriteBulkResult =
   | EventsWriteResult
@@ -152,7 +152,32 @@ const shouldSkipAsNoOp = (
   return (
     latestEvent.status === candidate.input.status &&
     latestEvent.severity === candidate.input.severity &&
-    !addsRule
+    !addsRule &&
+    !changesMemberVerdict(priorDocs, candidate.input.signals)
+  );
+};
+
+/**
+ * True when a submitted detection signal carries a different verdict than the latest one stored
+ * for its rule (across the event's versions). A member turning healthy, or breaching again, is
+ * evidence the status derives from, so it must be stored even when status and severity do not move.
+ */
+const changesMemberVerdict = (
+  priorDocs: SignificantEvent[],
+  submitted: SignalEntry[] | undefined
+): boolean => {
+  const stored = new Map(
+    mergeSignalsLatestPerRule(priorDocs, [], '').flatMap((signal) =>
+      signal.type === 'detection' && signal.metadata?.rule_uuid
+        ? [[signal.metadata.rule_uuid, signal.verdict] as const]
+        : []
+    )
+  );
+  return (submitted ?? []).some(
+    (signal) =>
+      signal.type === 'detection' &&
+      signal.metadata?.rule_uuid !== undefined &&
+      stored.get(signal.metadata.rule_uuid) !== signal.verdict
   );
 };
 
@@ -439,7 +464,6 @@ const buildPendingWrite = (
       blast_radius: episodeContext.blastRadius,
       severity: candidate.input.severity,
       status,
-      status_evaluations: candidate.statusEvaluations,
     },
   };
 };
@@ -566,13 +590,20 @@ export async function eventsWriteBulkHandler({
       return [candidate];
     }
     const latest = latestByEventId.get(candidate.eventId);
-    const decision = resolveLifecycle({ latest });
+    const signals =
+      candidate.input.event_id === undefined
+        ? candidate.input.signals ?? []
+        : mergeSignalsLatestPerRule(
+            priorDocsByEventId.get(candidate.eventId) ?? [],
+            candidate.input.signals ?? [],
+            timestamp
+          );
+    const decision = resolveLifecycle({ latest, signals });
     if (decision.write) {
       return [
         {
           ...candidate,
           input: { ...candidate.input, status: decision.status },
-          statusEvaluations: decision.evaluations,
         },
       ];
     }
@@ -582,8 +613,7 @@ export async function eventsWriteBulkHandler({
       status: latest?.status ?? candidate.input.status,
       written: false,
       skipped: true,
-      reason: 'existing_active_event',
-      existing_event_id: candidate.eventId,
+      reason: 'unchanged_outcome',
     };
     return [];
   });

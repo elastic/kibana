@@ -72,7 +72,7 @@ describe('searchEventsToolHandler', () => {
         event_id: 'checkout-failure',
         symptom_hypothesis: 'Payment calls are failing',
         summary: 'Checkout payment calls fail.',
-        signal_rule_uuids: ['rule-active'],
+        signal_rule_uuids: ['rule-active', 'rule-clear', 'rule-unknown'],
         signal_counts: {
           total: 3,
           confirms: 1,
@@ -107,7 +107,7 @@ describe('searchEventsToolHandler', () => {
     }
   );
 
-  it('does not report an inconclusive signal as a member', async () => {
+  it('lists a rule whose only signal is inconclusive', async () => {
     const result = await searchEventsToolHandler({
       eventSearchClient: makeClient([{ ...event, signals: [event.signals[2]] }]) as never,
       params: { event_ids: ['checkout-failure'] },
@@ -115,7 +115,7 @@ describe('searchEventsToolHandler', () => {
 
     expect(result.events[0]).toEqual(
       expect.objectContaining({
-        signal_rule_uuids: [],
+        signal_rule_uuids: ['rule-unknown'],
         signal_counts: {
           total: 1,
           confirms: 0,
@@ -128,7 +128,7 @@ describe('searchEventsToolHandler', () => {
     );
   });
 
-  it('reports an off-topic rule with an observed error as a member', async () => {
+  it('lists a rule whose only signal is an off-topic observed error', async () => {
     const result = await searchEventsToolHandler({
       eventSearchClient: makeClient([
         {
@@ -161,7 +161,7 @@ describe('searchEventsToolHandler', () => {
     );
   });
 
-  it('does not report a benign off-topic rule as a member', async () => {
+  it('lists a rule whose only signal is a benign off-topic row', async () => {
     const result = await searchEventsToolHandler({
       eventSearchClient: makeClient([
         {
@@ -180,7 +180,7 @@ describe('searchEventsToolHandler', () => {
 
     expect(result.events[0]).toEqual(
       expect.objectContaining({
-        signal_rule_uuids: [],
+        signal_rule_uuids: ['rule-off-topic'],
         signal_counts: {
           total: 1,
           confirms: 0,

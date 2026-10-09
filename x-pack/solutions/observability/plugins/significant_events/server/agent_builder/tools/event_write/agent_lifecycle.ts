@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { decideLifecycle } from '../../../lib/significant_events/events/lifecycle_state_machine';
+import { assessMembers } from '../../../lib/significant_events/events/event_members';
+import { decideLifecycle } from '../../../lib/significant_events/events/lifecycle/lifecycle_state_machine';
 import type { LifecycleResolver } from './handler';
 
 /**
- * What a discovery write means for the event's status: it asserts a breach. The state machine
- * decides the resulting status, so an agent never picks one: it opens or continues an event as
- * `active`, and onto a `recovering` series it carries evidence while status and count stay put
- * (only a status evaluation moves that series).
+ * What a discovery write means for the event's status. The agent states facts as per-rule
+ * verdicts and never a status: the members' latest verdicts, after this write is merged, are
+ * assessed (breaching, every member healthy, or not judgeable) and the state machine decides. A
+ * breach opens, continues, reopens, or returns a recovering event to `active`; every member
+ * healthy starts recovery; discovery never closes an event.
  */
-export const agentLifecycle: LifecycleResolver = ({ latest }) =>
+export const agentLifecycle: LifecycleResolver = ({ latest, signals }) =>
   decideLifecycle({
-    state: {
-      status: latest?.status,
-      evaluations: latest?.status_evaluations ?? 0,
-    },
-    input: { kind: 'breach_asserted' },
+    state: { status: latest?.status },
+    input: { kind: 'assessment', outcome: assessMembers(signals) },
   });

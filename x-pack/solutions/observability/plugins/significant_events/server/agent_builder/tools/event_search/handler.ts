@@ -90,7 +90,7 @@ export interface CompactEventSearchItem
     | 'title'
   > {
   signal_counts: SignalSummary;
-  /** Rules whose signal asserts a breach on the event: the members the status evaluation probes. */
+  /** Every rule with a detection signal on the event, whatever its verdict: the routing keys. */
   signal_rule_uuids: string[];
 }
 
@@ -159,16 +159,14 @@ const collectSignalMetadata = (signals: Signal[]) =>
     (metadata, signal) => {
       const ruleUuid = getRuleUuid(signal);
       if (ruleUuid !== undefined) {
-        if (isBreachMemberSignal(signal)) {
-          metadata.memberRuleUuids.add(ruleUuid);
-        }
+        metadata.ruleUuids.add(ruleUuid);
       }
       metadata.signalCounts.total++;
       metadata.signalCounts[signal.verdict]++;
       return metadata;
     },
     {
-      memberRuleUuids: new Set<string>(),
+      ruleUuids: new Set<string>(),
       signalCounts: createSignalSummary(),
     }
   );
@@ -198,12 +196,12 @@ const toEventSearchItemBase = (
 
 const toCompactEvent = (event: SignificantEvent): CompactEventSearchItem => {
   const signals = event.signals ?? [];
-  const { memberRuleUuids, signalCounts } = collectSignalMetadata(signals);
+  const { ruleUuids, signalCounts } = collectSignalMetadata(signals);
   return {
     ...toEventSearchItemBase(event),
     summary: event.summary,
     signal_counts: signalCounts,
-    signal_rule_uuids: [...memberRuleUuids].sort(),
+    signal_rule_uuids: [...ruleUuids].sort(),
     causal_features: event.causal_features,
     blast_radius: event.blast_radius,
   };

@@ -1083,12 +1083,11 @@ describe('eventsWriteBulkHandler — continuation status', () => {
 
   describe('a continuation onto a recovering event', () => {
     const eventId = 'checkout-recovering';
-    const recovering = () =>
-      makeStoredEvent(eventId, { status: 'recovering', severity: 'high', status_evaluations: 2 });
+    const recovering = () => makeStoredEvent(eventId, { status: 'recovering', severity: 'high' });
     const clientFor = (stored: SignificantEvent) =>
       makeEventSearchClient({ findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }) });
 
-    it('carries new evidence without flipping the event back to active or moving its count', async () => {
+    it('returns the event to active when a new member breaches', async () => {
       const results = await eventsWriteBulkHandler({
         eventSearchClient: clientFor(recovering()),
         alertEventsClient,
@@ -1118,8 +1117,42 @@ describe('eventsWriteBulkHandler — continuation status', () => {
         resolveLifecycle: agentLifecycle,
       });
 
-      expect(results[0]).toMatchObject({ written: true, status: 'recovering', event_id: eventId });
-      expect(writtenDocs()[0]).toMatchObject({ status: 'recovering', status_evaluations: 2 });
+      expect(results[0]).toMatchObject({ written: true, status: 'active', event_id: eventId });
+      expect(writtenDocs()[0].status).toBe('active');
+    });
+
+    it('keeps the event recovering when it carries healthy evidence', async () => {
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientFor(recovering()),
+        alertEventsClient,
+        inputs: [
+          {
+            ...baseInput,
+            event_id: eventId,
+            status: 'active',
+            severity: 'high',
+            signals: [
+              {
+                type: 'detection',
+                stream_name: 'logs.checkout',
+                description: 'A new rule joined, healthy',
+                verdict: 'refutes',
+                evidence: { esql_query: 'FROM logs.checkout', result: 'found' },
+                metadata: {
+                  detection_id: 'det-healthy',
+                  rule_uuid: 'rule-healthy-member',
+                  change_point_type: 'dip',
+                  p_value: 0.01,
+                },
+              },
+            ],
+          },
+        ],
+        resolveLifecycle: agentLifecycle,
+      });
+
+      expect(results[0]).toMatchObject({ written: true, status: 'recovering' });
+      expect(writtenDocs()[0]).toMatchObject({ status: 'recovering' });
     });
 
     it('skips a write that adds nothing new, as it would on an active event', async () => {
@@ -1167,7 +1200,7 @@ describe('eventsWriteBulkHandler — continuation status', () => {
     expect(results[0]).toMatchObject({
       written: false,
       skipped: true,
-      reason: 'existing_active_event',
+      reason: 'unchanged_outcome',
       status: 'active',
     });
     expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
@@ -1177,7 +1210,27 @@ describe('eventsWriteBulkHandler — continuation status', () => {
     const results = await eventsWriteBulkHandler({
       eventSearchClient: makeEventSearchClient(),
       alertEventsClient,
-      inputs: [{ ...baseInput, status: 'inactive' }],
+      inputs: [
+        {
+          ...baseInput,
+          status: 'inactive',
+          signals: [
+            {
+              type: 'detection',
+              stream_name: 'logs.checkout',
+              description: 'Confirmed',
+              verdict: 'confirms',
+              evidence: { esql_query: 'FROM logs.checkout', result: 'found' },
+              metadata: {
+                detection_id: 'det-1',
+                rule_uuid: 'rule-1',
+                change_point_type: 'spike',
+                p_value: 0.01,
+              },
+            },
+          ],
+        },
+      ],
       resolveLifecycle: agentLifecycle,
     });
 
