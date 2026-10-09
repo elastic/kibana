@@ -50,7 +50,7 @@ export const BriefJumpNav: React.FC<{ items: readonly BriefNavItem[] }> = ({ ite
   const [clicked, setClicked] = useState<string | undefined>();
 
   return (
-    <EuiTabs size="s" bottomBorder={false} data-test-subj="executiveBriefJumpNav">
+    <EuiTabs size="m" bottomBorder={false} data-test-subj="executiveBriefJumpNav">
       {items.map(({ id, label, count }) => (
         <EuiTab
           key={id}
@@ -64,7 +64,7 @@ export const BriefJumpNav: React.FC<{ items: readonly BriefNavItem[] }> = ({ ite
             count === undefined ? undefined : (
               <EuiNotificationBadge
                 color="subdued"
-                size="s"
+                size="m"
                 data-test-subj={`executiveBriefJumpNavCount-${id}`}
               >
                 {count}

@@ -11,7 +11,7 @@ import type {
   ExecutiveBrief,
 } from '../../../../../common/entity_analytics/executive_brief/types';
 import { AttentionAreaRows } from '../components/attention_area_rows';
-import { AttentionVerdict } from '../components/attention_verdict';
+import { AttentionTrend, AttentionVerdict } from '../components/attention_verdict';
 import { ClaimFlag } from '../components/brief_context';
 import { SectionTitle } from '../components/section_title';
 import { BRIEF_BLOCK_ATTRIBUTE, EXECUTIVE_BRIEF_SECTION_IDS } from '../constants';
@@ -50,6 +50,8 @@ export const AtAGlance: React.FC<AtAGlanceProps> = ({ snapshot, glance, brief })
           <AttentionAreaRows areas={assessment.areas} snapshot={snapshot} brief={brief} />
         </>
       ) : null}
+      <EuiSpacer size="m" />
+      <AttentionTrend snapshot={snapshot} />
       <EuiSpacer size="m" />
       <EuiText size="s" data-test-subj="executiveBriefNarrative">
         <p>

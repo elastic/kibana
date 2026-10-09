@@ -92,7 +92,7 @@ const VIEW_LABELS = {
   visibility: 'View blind spots',
 } as const;
 
-/** Compact level label with icon and a coloured accent border, plus a trend hint; children render below (the headline). */
+/** Compact level label with icon and a coloured accent border; children render below (the headline). */
 export const AttentionVerdict: React.FC<AttentionVerdictProps> = ({
   assessment,
   snapshot,
@@ -102,9 +102,6 @@ export const AttentionVerdict: React.FC<AttentionVerdictProps> = ({
   const { euiTheme } = useEuiTheme();
   const isPrintMode = useIsPrintMode();
   const display = assessment ? ATTENTION_LEVEL_DISPLAY[assessment.level] : undefined;
-  const trendSummary = snapshot
-    ? buildTrendSummary(snapshot.glance.needsAttention, snapshot.timeRange.range)
-    : undefined;
   return (
     <EuiPanel
       color={display?.panelColor ?? 'subdued'}
@@ -137,14 +134,6 @@ export const AttentionVerdict: React.FC<AttentionVerdictProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       {children}
-      {trendSummary ? (
-        <>
-          <EuiSpacer size="xs" />
-          <EuiText size="xs" color="subdued" data-test-subj="executiveBriefAttentionTrend">
-            {`${trendSummary.prefix}: ${trendSummary.changes.map(({ text }) => text).join(' · ')}`}
-          </EuiText>
-        </>
-      ) : null}
       {assessment && snapshot && assessment.level !== 'clear' ? (
         <VerdictNextStep
           assessment={assessment}
@@ -177,8 +166,8 @@ const VerdictNextStep: React.FC<VerdictNextStepProps> = ({
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween" wrap>
-        <EuiFlexItem grow>
+      <EuiFlexGroup gutterSize="m" alignItems="center" wrap>
+        <EuiFlexItem grow={false}>
           <EuiText size="s" data-test-subj="executiveBriefNextStep">
             <strong>{'Next step: '}</strong>
             {buildNextStep(topArea, snapshot)}
@@ -216,5 +205,36 @@ const VerdictNextStep: React.FC<VerdictNextStepProps> = ({
         ) : null}
       </EuiFlexGroup>
     </>
+  );
+};
+
+/** Period-over-period changes from the Needs Attention signals, shown as their own undecorated strip. */
+export const AttentionTrend: React.FC<{ snapshot: BriefSnapshot }> = ({ snapshot }) => {
+  const { euiTheme } = useEuiTheme();
+  const summary = buildTrendSummary(snapshot.glance.needsAttention, snapshot.timeRange.range);
+  if (!summary) return null;
+  return (
+    <div data-test-subj="executiveBriefAttentionTrend">
+      <EuiText size="xs" color="subdued">
+        <strong>{`Change ${summary.prefix}`}</strong>
+      </EuiText>
+      <EuiSpacer size="xs" />
+      <EuiFlexGroup gutterSize="l" wrap responsive={false}>
+        {summary.changes.map(({ id, text }) => (
+          <EuiFlexItem grow={false} key={id}>
+            <EuiText size="s">
+              <span
+                css={css`
+                  font-weight: ${euiTheme.font.weight.bold};
+                `}
+              >
+                {text.slice(0, 1)}
+              </span>
+              {text.slice(1)}
+            </EuiText>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </div>
   );
 };

@@ -130,11 +130,34 @@ describe('AtAGlance attention verdict', () => {
     expect(within(rows[3]).getByText('ML off · 173 identities unresolved')).toBeInTheDocument();
   });
 
-  it('does not make the whole row a click target', () => {
+  it('makes the row name a link to its section without turning the row into a button', () => {
+    const target = addScrollTarget('executiveBriefStorylines');
     renderGlance(makeJob(makeAssessment()));
-    const row = screen.getByTestId('executiveBriefAttentionRow-coverage');
+    const row = screen.getByTestId('executiveBriefAttentionRow-threats');
     expect(row).not.toHaveAttribute('role');
     expect(row).not.toHaveAttribute('tabindex');
+    fireEvent.click(within(row).getByTestId('executiveBriefAreaLink-threats'));
+    expect(target.scrollIntoView).toHaveBeenCalled();
+    expect(screen.getByTestId('openRequestProbe')).toHaveTextContent('1');
+    target.remove();
+  });
+
+  it('keeps the row link on clear rows, which have no action buttons', () => {
+    const base = makeAssessment();
+    const areas = base.areas.map((area) =>
+      area.id === 'visibility' ? { ...area, level: 'clear' as const } : area
+    );
+    renderGlance(makeJob({ ...base, areas }));
+    expect(screen.getByTestId('executiveBriefAreaLink-visibility')).toBeInTheDocument();
+  });
+
+  it('does not navigate when the row triage action is clicked', () => {
+    const target = addScrollTarget('executiveBriefBlindSpots');
+    renderGlance(makeJob(makeAssessment()));
+    fireEvent.click(screen.getByTestId('executiveBriefAreaTriage-coverage'));
+    expect(mockOpenChat).toHaveBeenCalledTimes(1);
+    expect(target.scrollIntoView).not.toHaveBeenCalled();
+    target.remove();
   });
 
   it('scrolls to the target section when a row View button is clicked', () => {
@@ -149,7 +172,9 @@ describe('AtAGlance attention verdict', () => {
     renderGlance(makeJob(makeAssessment({ trend: 'more' })));
     const trend = screen.queryByTestId('executiveBriefAttentionTrend');
     if (trend) {
-      expect(trend).toHaveTextContent(/^vs previous (24 hours|7 days|30 days): /);
+      expect(trend).toHaveTextContent(/^Change vs previous (24 hours|7 days|30 days)/);
+      // The trend is its own strip, not part of the verdict callout.
+      expect(screen.getByTestId('executiveBriefAttentionVerdict')).not.toContainElement(trend);
       expect(trend).not.toHaveTextContent('more activity than last period');
     }
   });
@@ -174,6 +199,7 @@ describe('AtAGlance attention verdict', () => {
   it('prints rule text instead of the tooltip in print mode', () => {
     renderGlance(makeJob(makeAssessment()), true);
     expect(screen.queryByTestId('executiveBriefAreaPill-threats')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('executiveBriefAreaLink-threats')).not.toBeInTheDocument();
     expect(screen.getAllByTestId('executiveBriefAreaRulePrint')).toHaveLength(4);
   });
 });

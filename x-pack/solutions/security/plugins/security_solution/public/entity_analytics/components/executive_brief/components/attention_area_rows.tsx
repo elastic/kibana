@@ -10,6 +10,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiText,
   EuiToolTip,
@@ -153,6 +154,11 @@ export const useAttentionActions = (
 
 const TRIAGE_LABEL = 'Triage with AI Agent';
 
+const ABOVE_ROW_LINK = css`
+  position: relative;
+  z-index: 1;
+`;
+
 interface AttentionAreaRowProps {
   area: AttentionArea;
   actions: AttentionActions;
@@ -168,13 +174,22 @@ const AttentionAreaRow: React.FC<AttentionAreaRowProps> = ({ area, actions }) =>
       {STATUS_LABELS[area.level]}
     </EuiBadge>
   );
+  const name = AREA_NAMES[area.id];
   return (
     <div
       key={area.id}
       data-test-subj={TEST_IDS.attentionRow(area.id)}
       css={css`
+        position: relative;
         padding: ${euiTheme.size.s} ${euiTheme.size.m};
         border-top: ${euiTheme.border.thin};
+        ${isPrintMode
+          ? ''
+          : `
+        transition: background ${euiTheme.animation.fast} ease-in;
+        &:hover {
+          background: ${euiTheme.colors.backgroundBaseInteractiveHover};
+        }`}
         &:hover .executiveBriefRowActions {
           opacity: 1;
         }
@@ -188,7 +203,27 @@ const AttentionAreaRow: React.FC<AttentionAreaRowProps> = ({ area, actions }) =>
               font-weight: ${euiTheme.font.weight.semiBold};
             `}
           >
-            {AREA_NAMES[area.id]}
+            {isPrintMode ? (
+              name
+            ) : (
+              // The name is the row's link; its ::after stretches the click target over the whole row.
+              <EuiLink
+                color="text"
+                onClick={() => actions.view(area)}
+                aria-label={`View ${areaFullName(area.id)}`}
+                data-test-subj={`executiveBriefAreaLink-${area.id}`}
+                css={css`
+                  font-weight: inherit;
+                  &::after {
+                    content: '';
+                    position: absolute;
+                    inset: 0;
+                  }
+                `}
+              >
+                {name}
+              </EuiLink>
+            )}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={{ width: '6.5em' }}>
@@ -196,7 +231,11 @@ const AttentionAreaRow: React.FC<AttentionAreaRowProps> = ({ area, actions }) =>
             <span>{badge}</span>
           ) : (
             <EuiToolTip content={area.rule}>
-              <span tabIndex={0} data-test-subj={`executiveBriefAreaPill-${area.id}`}>
+              <span
+                tabIndex={0}
+                data-test-subj={`executiveBriefAreaPill-${area.id}`}
+                css={ABOVE_ROW_LINK}
+              >
                 {badge}
               </span>
             </EuiToolTip>
@@ -218,13 +257,16 @@ const AttentionAreaRow: React.FC<AttentionAreaRowProps> = ({ area, actions }) =>
               gutterSize="xs"
               alignItems="center"
               responsive={false}
-              css={css`
-                opacity: 0.55;
-                transition: opacity ${euiTheme.animation.fast} ease-in;
-                &:focus-within {
-                  opacity: 1;
-                }
-              `}
+              css={[
+                ABOVE_ROW_LINK,
+                css`
+                  opacity: 0.55;
+                  transition: opacity ${euiTheme.animation.fast} ease-in;
+                  &:focus-within {
+                    opacity: 1;
+                  }
+                `,
+              ]}
               className="executiveBriefRowActions"
             >
               {actions.canTriage ? (
