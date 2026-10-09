@@ -141,11 +141,13 @@ Then confirm in Alerts UI that `kibana.alert.rule.name` / severity / MITRE / rea
 
 `--threat-intel` seeds **one enabled RSS source per selected pack** into `.kibana-threat-intel-sources`. Each feed is a `data:application/rss+xml,...` URL with a **single current item** (canonical title, no dated duplicate) so mustard `source_ingestion` demos real ingest once per pack without minting near-duplicate "today" cards.
 
-`--threat-intel-reports` (implies `--threat-intel`) also bulk-writes **seeded historic reports** into `.kibana-threat-reports` from `--start-date` through **`--end-date` minus 24h**. The trailing day is left empty so mustard `source_ingestion` can create the real Last-24h reports. Historic docs rotate distinct per-pack article variants (`historicArticles` in `PACK_TI_SCENARIOS`) so Hub timelines are not the same four titles with date suffixes. The newest ~40% of historic slots also use per-pack emerging `source.name` aliases (older slots stay on the four canonical names) so Hub **Sources** can rise vs prior period; live RSS and the Sources index stay canonical. Newest historic slots use Critical/High so longer presets still show severity variety. Use `--threat-intel-report-count` to override the default **12 historic reports per pack**.
+`--threat-intel-reports` (implies `--threat-intel`) also bulk-writes **seeded historic reports** into `.kibana-threat-reports` from `--start-date` through **`--end-date` minus 24h**. The trailing day is left empty so mustard `source_ingestion` can create the real Last-24h reports. Historic docs rotate distinct per-pack article variants (`historicArticles` in `PACK_TI_SCENARIOS`) so Hub timelines are not the same four titles with date suffixes. The newest ~40% of historic slots also use per-pack emerging `source.name` aliases (older slots stay on the four canonical names) so Hub **Sources** can rise vs prior period; live RSS and the Sources index stay canonical. Newest historic slots use Critical/High so longer presets still show severity variety. Use `--threat-intel-report-count` to override the default **12 historic reports per pack** (max **99**; item keys use a 2-digit `NN` suffix).
 
 Live RSS stays **one canonical article per pack** (severity ladder for enrich). Article text embeds that pack’s observables so mustard `source_ingestion` + `nl_extraction_behavioral` can extract IOCs from the **current RSS items** and hunt into the pack indices.
 
-**Demo caution:** do **not** demo Threat Correlation on seeded historic reports. Hub Correlate (`report_id` mode) needs stored diamond / enrich outputs that historics lack (`extraction_method: seeded`). Correlate from Last-24h workflow-enriched reports only; use historic cards for timeline density and variety.
+**Correlate demo:** the aws-iam primary + assume-role pair seeds A↔B correlation anchors (shared threat actor + hash IOC) and Diamond Model vertices on `historic-01` only (`extraction_method: seeded`, `diamond.model_id: seeded-fixture`). Use those two cards for the correlate dry-run. Other historic slots are timeline density only. Last-24h workflow-enriched reports remain the path for live enrich (`workflow_v2`) demos.
+
+**Seeding prerequisite:** start Kibana against the target Elasticsearch first so threat-intel index templates create `.kibana-threat-reports` and `.kibana-threat-intel-sources`. The generator refuses to auto-create those indices (a template-free create leaves Kibana unable to migrate mappings and every report read returns 503).
 
 Observable contract in `lib/threat_intel_fixtures.ts` (`PACK_TI_SCENARIOS`):
 
@@ -251,7 +253,7 @@ After step 3 (extraction), in Agent Builder use topic prompts that force the hun
 
 - `--threat-intel`: Per-pack RSS sources for mustard TI workflows (defaults `--packs` to all four when omitted)
 - `--threat-intel-reports`: Also seed historic Hub reports into `.kibana-threat-reports` across the generate window (implies `--threat-intel`)
-- `--threat-intel-report-count`: Historic reports per pack (default: 12) when `--threat-intel-reports` is set
+- `--threat-intel-report-count`: Historic reports per pack (default: 12, max: 99) when `--threat-intel-reports` is set
 - `--attacks`: Synthetic Attack Discoveries
 - `--cases`: Cases from ~50% of discoveries (implies `--attacks`)
 - `--no-validate-fixtures`: Disable fixture validation

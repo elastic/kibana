@@ -1083,8 +1083,52 @@ export const THREAT_INTEL_RSS_CURRENT_ITEMS_PER_PACK = 1;
  */
 export const THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_DEFAULT = 12;
 
+/**
+ * Hard cap for `--threat-intel-report-count`. Historic (and current) item keys use a
+ * 2-digit `NN` suffix (`historic-01` … `historic-99`); values above 99 break that id contract.
+ */
+export const THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_MAX = 99;
+
 /** @deprecated Prefer THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_DEFAULT / RSS current count. */
 export const THREAT_INTEL_REPORTS_PER_PACK = THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_DEFAULT;
+
+const THREAT_INTEL_INDEX_MISSING_HINT =
+  'Start Kibana against this Elasticsearch first so the threat intel index templates are installed.';
+
+/**
+ * Refuse to seed when Kibana has not installed the threat-intel companion indices yet.
+ * Creating them here would bypass the strict templates and leave a mapping Kibana cannot migrate
+ * (503 on every report read). See kibana#291895 / Philippe Oberti seeding note.
+ */
+export const assertThreatIntelIndexExists = async ({
+  esClient,
+  index,
+}: {
+  esClient: Client;
+  index: string;
+}): Promise<void> => {
+  const exists = await esClient.indices.exists({ index });
+  if (!exists) {
+    throw new Error(
+      `Cannot seed threat intel fixtures: index ${index} does not exist. ${THREAT_INTEL_INDEX_MISSING_HINT}`
+    );
+  }
+};
+
+export const assertHistoricReportsPerPackInRange = (reportsPerPack: number): number => {
+  if (!Number.isFinite(reportsPerPack) || reportsPerPack < 1) {
+    throw new Error(
+      `Invalid historicReportsPerPack "${reportsPerPack}" (expected integer 1-${THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_MAX})`
+    );
+  }
+  const floored = Math.floor(reportsPerPack);
+  if (floored > THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_MAX) {
+    throw new Error(
+      `Invalid historicReportsPerPack "${reportsPerPack}" (max ${THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_MAX}; item keys use a 2-digit NN suffix)`
+    );
+  }
+  return floored;
+};
 
 /** Place the single current RSS item just before endMs (pubDate is narrative-only; ingest uses now). */
 const RSS_CURRENT_OFFSET_MS = 15 * 60 * 1000;
@@ -1368,7 +1412,9 @@ export const buildPackRssDataUrl = ({
   const articleLink = xmlEscape(scenario.articleUrl);
   const itemsXml = reportItems
     .map((item) => {
-      const guid = `ti-report-${scenario.packId}-${item.itemKey}`;
+      // Same id scheme as historic Hub docs (`reportIdSlug`), so multi-scenario
+      // packs (aws-iam ×5) do not collide on `ti-report-<packId>-current-01`.
+      const guid = `ti-report-${scenario.reportIdSlug}-${item.itemKey}`;
       // Current RSS items always use the canonical title. Historic Hub docs
       // rotate `historicArticles` instead of minting dated title duplicates.
       const title = scenario.title;
@@ -1519,45 +1565,6 @@ export const buildHistoricThreatReportDoc = ({
   return doc;
 };
 
-const ensurePlainIndex = async ({
-  esClient,
-  index,
-  log,
-}: {
-  esClient: Client;
-  index: string;
-  log: ToolingLog;
-}): Promise<void> => {
-  const exists = await esClient.indices.exists({ index });
-  if (exists) return;
-  try {
-    await esClient.indices.create({
-      index,
-      mappings: {
-        dynamic: true,
-        properties: {
-          adapter_type: { type: 'keyword' },
-          name: { type: 'keyword' },
-          enabled: { type: 'boolean' },
-          tags: { type: 'keyword' },
-          space_id: { type: 'keyword' },
-          owner: { type: 'keyword' },
-          created_at: { type: 'date' },
-          updated_at: { type: 'date' },
-        },
-      },
-    });
-    log.info(`Created ${index} for threat-intel fixtures.`);
-  } catch (e) {
-    const status = getStatusCode(e);
-    if (status === 400) {
-      // Race: another process created it.
-      return;
-    }
-    throw e;
-  }
-};
-
 export const cleanThreatIntelFixtures = async ({
   esClient,
   log,
@@ -1667,6 +1674,10 @@ const seedHistoricThreatReports = async ({
 
   if (docs.length === 0) return 0;
 
+  // Preflight: never rely on ES auto-create. A template-free `.kibana-threat-reports`
+  // leaves Kibana unable to migrate mappings (503 on every report read).
+  await assertThreatIntelIndexExists({ esClient, index: THREAT_REPORTS_INDEX });
+
   try {
     // Explicit `index` op with `_id = guid` makes re-seeding idempotent (overwrites
     // the same up-to-99-per-scenario ids instead of duplicating on each run).
@@ -1677,6 +1688,12 @@ const seedHistoricThreatReports = async ({
     const bulkResponse = await esClient.bulk({ refresh: true, body: bulkBody });
     if (bulkResponse.errors) {
       const firstError = bulkResponse.items.find((item) => item.index?.error)?.index?.error;
+      const errorType = firstError?.type ?? '';
+      if (errorType.includes('index_not_found')) {
+        throw new Error(
+          `Cannot seed historic threat reports: index ${THREAT_REPORTS_INDEX} does not exist. ${THREAT_INTEL_INDEX_MISSING_HINT}`
+        );
+      }
       throw new Error(
         `Historic threat-report bulk index had errors: ${
           firstError?.reason ?? firstError?.type ?? 'unknown'
@@ -1687,8 +1704,7 @@ const seedHistoricThreatReports = async ({
     const status = getStatusCode(e);
     if (status === 404) {
       throw new Error(
-        `Cannot seed historic threat reports: index ${THREAT_REPORTS_INDEX} does not exist. ` +
-          `Start Kibana against this Elasticsearch first so the threat intel index templates are installed.`
+        `Cannot seed historic threat reports: index ${THREAT_REPORTS_INDEX} does not exist. ${THREAT_INTEL_INDEX_MISSING_HINT}`
       );
     }
     throw e;
@@ -1735,7 +1751,9 @@ export const seedThreatIntelForPacks = async ({
 
   log.info(`Seeding threat-intel RSS fixtures for packs: ${resolved.join(', ')}`);
 
-  await ensurePlainIndex({ esClient, index: THREAT_INTEL_SOURCES_INDEX, log });
+  // Do not auto-create sources: Kibana's template is `dynamic: strict`. A local
+  // `dynamic: true` create (the old ensurePlainIndex path) breaks setup migration.
+  await assertThreatIntelIndexExists({ esClient, index: THREAT_INTEL_SOURCES_INDEX });
   await cleanThreatIntelFixtures({ esClient, log, packIds: resolved });
 
   const sourceTimestamp = new Date(endMs).toISOString();
@@ -1743,18 +1761,9 @@ export const seedThreatIntelForPacks = async ({
 
   for (const scenario of scenarios) {
     // RSS stays current-only so workflow ingest does not replay the historic archive.
+    // Feed URLs live in CATALOG_SOURCE_URLS (not on the source doc: mapping has no `config`).
     const reportItems = buildPackRssCurrentReportItems({ endMs });
     reportItemCount += reportItems.length;
-    // #291836 moved feed-URL resolution out of the sources index and into the
-    // code-authoritative CATALOG_SOURCE_URLS map, keyed by source id (not by any
-    // per-document field). The `.kibana-threat-intel-sources` mapping is `dynamic:
-    // strict` with no `config` property, so a document carrying `config: { url }`
-    // throws on index() and aborts the whole seeding call before historic reports
-    // are ever written. `buildPackRssDataUrl`'s `data:` URL still exists for the
-    // rss adapter to decode locally, but it cannot be persisted on the source
-    // document anymore — it is threaded through some other test-only path if a
-    // future scenario needs it; for now the fixture just stops writing it.
-    buildPackRssDataUrl({ scenario, reportItems });
     await esClient.index({
       index: THREAT_INTEL_SOURCES_INDEX,
       id: scenario.sourceId,
@@ -1773,11 +1782,6 @@ export const seedThreatIntelForPacks = async ({
 
   let historicReportCount = 0;
   if (historicReportsPerPack !== undefined) {
-    if (!Number.isFinite(historicReportsPerPack) || historicReportsPerPack < 1) {
-      throw new Error(
-        `Invalid historicReportsPerPack "${historicReportsPerPack}" (expected integer >= 1)`
-      );
-    }
     historicReportCount = await seedHistoricThreatReports({
       esClient,
       log,
@@ -1785,7 +1789,7 @@ export const seedThreatIntelForPacks = async ({
       startMs,
       endMs,
       spaceId,
-      reportsPerPack: Math.floor(historicReportsPerPack),
+      reportsPerPack: assertHistoricReportsPerPackInRange(historicReportsPerPack),
     });
   }
 

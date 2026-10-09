@@ -13,6 +13,8 @@ import { scriptsDataDir } from './indexing';
 import { ensureEcsSourceIp } from './packs';
 import {
   allThreatIntelSourceIds,
+  assertHistoricReportsPerPackInRange,
+  assertThreatIntelIndexExists,
   buildHistoricThreatReportDoc,
   buildPackArticleDataUrl,
   buildPackHistoricReportItemsForScenario,
@@ -26,10 +28,16 @@ import {
   resolveHistoricThreatIntelWindow,
   resolveThreatIntelPackIds,
   scenarioRssMustContain,
+  seedThreatIntelForPacks,
   THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_DEFAULT,
+  THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_MAX,
   THREAT_INTEL_LIVE_WINDOW_MS,
   THREAT_INTEL_RSS_CURRENT_ITEMS_PER_PACK,
+  THREAT_INTEL_SOURCES_INDEX,
+  THREAT_REPORTS_INDEX,
 } from './threat_intel_fixtures';
+import type { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 describe('PACK_TI_SCENARIOS', () => {
   it('covers the four Technology Watch packs', () => {
@@ -971,6 +979,27 @@ describe('per-slot correlation anchors', () => {
     }
   });
 
+  it('uses reportIdSlug (not packId) in RSS current guids so aws-iam scenarios do not collide', () => {
+    const endMs = Date.parse('2026-07-21T00:00:00.000Z');
+    const reportItems = buildPackRssCurrentReportItems({ endMs });
+    const guids = PACK_TI_SCENARIOS['aws-iam'].map((scenario) => {
+      const dataUrl = buildPackRssDataUrl({ scenario, reportItems });
+      const encoded = dataUrl.slice(dataUrl.indexOf(',') + 1);
+      const xml = decodeURIComponent(encoded);
+      const match = xml.match(/<guid[^>]*>([^<]+)<\/guid>/);
+      expect(match).not.toBeNull();
+      return match![1];
+    });
+    expect(guids).toEqual([
+      'ti-report-aws-iam-current-01',
+      'ti-report-aws-iam-assume-role-current-01',
+      'ti-report-aws-iam-ioc-only-current-01',
+      'ti-report-aws-iam-behavior-only-current-01',
+      'ti-report-aws-iam-clean-current-01',
+    ]);
+    expect(new Set(guids).size).toBe(guids.length);
+  });
+
   it('seeds extracted.diamond on the anchored historic-01 doc, and nowhere else', () => {
     const docs = buildAllHistoricDocsWithIds();
     const awsIamScenarios = PACK_TI_SCENARIOS['aws-iam'].filter((s) => s.historicAnchors);
@@ -1003,5 +1032,57 @@ describe('per-slot correlation anchors', () => {
         expect(doc.extracted?.diamond).toBeUndefined();
       }
     }
+  });
+});
+
+describe('assertHistoricReportsPerPackInRange', () => {
+  it('returns floored values within 1..99', () => {
+    expect(assertHistoricReportsPerPackInRange(12)).toBe(12);
+    expect(assertHistoricReportsPerPackInRange(99)).toBe(99);
+    expect(assertHistoricReportsPerPackInRange(12.9)).toBe(12);
+  });
+
+  it(`rejects values above ${THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_MAX}`, () => {
+    expect(() => assertHistoricReportsPerPackInRange(100)).toThrow(/max 99/);
+  });
+});
+
+describe('threat intel index preflight (Philippe seeding guard)', () => {
+  const silentLog = { info: () => undefined, warning: () => undefined } as unknown as ToolingLog;
+
+  it('assertThreatIntelIndexExists throws before any write when the index is missing', async () => {
+    const exists = jest.fn().mockResolvedValue(false);
+    const esClient = { indices: { exists } } as unknown as Client;
+    await expect(
+      assertThreatIntelIndexExists({ esClient, index: THREAT_REPORTS_INDEX })
+    ).rejects.toThrow(/does not exist/);
+    expect(exists).toHaveBeenCalledWith({ index: THREAT_REPORTS_INDEX });
+  });
+
+  it('seedThreatIntelForPacks does not call index/bulk when sources index is missing', async () => {
+    const exists = jest.fn().mockResolvedValue(false);
+    const index = jest.fn();
+    const bulk = jest.fn();
+    const esClient = {
+      indices: { exists },
+      index,
+      bulk,
+      deleteByQuery: jest.fn(),
+    } as unknown as Client;
+
+    await expect(
+      seedThreatIntelForPacks({
+        esClient,
+        log: silentLog,
+        packIds: ['aws-iam'],
+        startMs: Date.parse('2026-01-01T00:00:00.000Z'),
+        endMs: Date.parse('2026-07-21T00:00:00.000Z'),
+        spaceId: 'default',
+        historicReportsPerPack: THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_DEFAULT,
+      })
+    ).rejects.toThrow(new RegExp(THREAT_INTEL_SOURCES_INDEX));
+
+    expect(index).not.toHaveBeenCalled();
+    expect(bulk).not.toHaveBeenCalled();
   });
 });
