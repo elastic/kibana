@@ -59,7 +59,7 @@ const blocklistOperatorFieldTestCases = [
   {
     os: OperatingSystem.LINUX,
     field: 'file.name',
-    fieldText: 'File Name',
+    fieldText: 'File name',
     osText: 'Linux',
     isMulti: true,
   },
@@ -87,7 +87,7 @@ const blocklistOperatorFieldTestCases = [
   {
     os: OperatingSystem.WINDOWS,
     field: 'file.name',
-    fieldText: 'File Name',
+    fieldText: 'File name',
     osText: 'Windows',
     isMulti: true,
   },
@@ -108,7 +108,7 @@ const blocklistOperatorFieldTestCases = [
   {
     os: OperatingSystem.MAC,
     field: 'file.name',
-    fieldText: 'File Name',
+    fieldText: 'File name',
     osText: 'Mac',
     isMulti: true,
   },
@@ -546,7 +546,7 @@ describe('blocklist form', () => {
         });
         render(createProps({ item }));
 
-        expect(screen.getByTestId('blocklist-form-field-select').textContent).toEqual('File Name');
+        expect(screen.getByTestId('blocklist-form-field-select').textContent).toEqual('File name');
       });
 
       it('should reset to the cased field when switching back to "is one of"', async () => {

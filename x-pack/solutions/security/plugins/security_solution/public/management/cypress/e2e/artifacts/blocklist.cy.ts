@@ -195,7 +195,7 @@ describe(
       it('Create a blocklist item with the Match operator for the File Name field', () => {
         openBlocklist({ create: true });
         fillOutBlocklistFlyout();
-        selectField('file.name');
+        selectField('file.name.caseless');
         selectOperator('Match');
         setSingleValue('*.exe');
         submitBlocklist();
