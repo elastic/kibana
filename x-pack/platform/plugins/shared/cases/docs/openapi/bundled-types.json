@@ -469,7 +469,8 @@
                       },
                       "customFields": {
                         "type": "array",
-                        "description": "Custom fields configuration details.",
+                        "deprecated": true,
+                        "description": "Custom fields configuration details. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.\n",
                         "items": {
                           "type": "object",
                           "properties": {
@@ -744,7 +745,8 @@
                     },
                     "customFields": {
                       "type": "array",
-                      "description": "Custom fields configuration details.",
+                      "deprecated": true,
+                      "description": "Custom fields configuration details. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.\n",
                       "items": {
                         "type": "object",
                         "properties": {
@@ -1023,7 +1025,8 @@
                     },
                     "customFields": {
                       "type": "array",
-                      "description": "Custom fields configuration details.",
+                      "deprecated": true,
+                      "description": "Custom fields configuration details. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.\n",
                       "items": {
                         "type": "object",
                         "properties": {
@@ -4200,11 +4203,16 @@
         "title": "Case extended fields",
         "type": "object",
         "x-state": "Technical preview; added in 9.5.0",
-        "description": "Case field values keyed by storage key. Keys follow the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to the owner's global (library-wide) fields plus, when a template is applied to the case, that template's fields. On update, the keys provided are merged into the stored map; unlisted keys are left untouched. To discover the writable keys, use the get case fields API (`GET /api/cases/fields`).\n",
+        "description": "Case field values keyed by storage key (for example, `priority_as_keyword`). Keys are validated against the fields exposed by the case's active template and global field library. On update, provided keys are merged into the stored map; unlisted keys are left untouched. Template-linked fields require the `xpack.cases.templates.enabled` setting (enabled by default); global fields are always available. Use the get case fields API to discover valid keys.\n",
         "maxProperties": 500,
         "additionalProperties": {
           "type": "string",
           "maxLength": 30000
+        },
+        "example": {
+          "priority_as_keyword": "high",
+          "ticket_number_as_integer": "4287",
+          "escalated_as_boolean": "true"
         }
       },
       "create_case_request": {
@@ -4271,7 +4279,8 @@
           },
           "customFields": {
             "type": "array",
-            "description": "Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.\n",
+            "deprecated": true,
+            "description": "Custom field values for a case. Omitted optional fields default to null. Deprecated: use `extended_fields` instead.\n",
             "minItems": 0,
             "maxItems": 10,
             "items": {
@@ -4746,6 +4755,16 @@
           }
         }
       },
+      "case_extended_fields_labels": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "A read-only, response-only map from active field definition storage keys to their human-readable labels. Entries reflect currently applicable global and template field definitions — not every stored `extended_fields` key is guaranteed a label, because values retained after switching templates may have no matching current definition. Only populated by the get case and search cases endpoints; absent on create, update, push, and comment responses. Including this field in a write request returns a 400 error.\n",
+        "example": {
+          "priority_as_keyword": "Priority"
+        }
+      },
       "external_service": {
         "type": "object",
         "nullable": true,
@@ -4974,7 +4993,8 @@
           },
           "customFields": {
             "type": "array",
-            "description": "Custom field values for the case.",
+            "deprecated": true,
+            "description": "Deprecated. Use `extended_fields` instead. Custom field values for the case.",
             "items": {
               "type": "object",
               "properties": {
@@ -5006,6 +5026,9 @@
                 }
               }
             }
+          },
+          "extended_fields_labels": {
+            "$ref": "#/components/schemas/case_extended_fields_labels"
           },
           "description": {
             "type": "string",
@@ -5192,7 +5215,8 @@
                 },
                 "customFields": {
                   "type": "array",
-                  "description": "Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.\n",
+                  "deprecated": true,
+                  "description": "Custom field values for a case. Omitted optional fields default to null. Deprecated: use `extended_fields` instead.\n",
                   "minItems": 0,
                   "maxItems": 10,
                   "items": {
@@ -5229,6 +5253,27 @@
                           }
                         ]
                       }
+                    }
+                  }
+                },
+                "template": {
+                  "type": "object",
+                  "nullable": true,
+                  "x-state": "Technical preview",
+                  "description": "The case template to apply, clear, or leave unchanged. Requires the `xpack.cases.templates.enabled` setting. Omit to keep the current template; set to `null` to clear it; set to `{ id, version }` to switch. Switching is an explicit versioned action: both `id` and `version` are required. If `extended_fields` is also provided in the same request, those values are validated against the new template's fields. Use the get case fields API to see what fields the new template exposes.\n",
+                  "required": [
+                    "id",
+                    "version"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The template identifier. Retrieve template ids with `GET /api/cases/templates`."
+                    },
+                    "version": {
+                      "type": "integer",
+                      "description": "The template version to apply. Required on update: switching a template is an explicit versioned action, so the version must be specified.\n",
+                      "minimum": 1
                     }
                   }
                 },
@@ -5403,7 +5448,9 @@
       },
       "templates": {
         "type": "array",
+        "deprecated": true,
         "x-state": "Technical preview",
+        "description": "Configuration-embedded templates. Deprecated: use the templates API (`GET /api/cases/templates`) and case `extended_fields` instead.\n",
         "items": {
           "type": "object",
           "properties": {
@@ -5552,7 +5599,8 @@
           },
           "customFields": {
             "type": "array",
-            "description": "Custom fields case configuration.",
+            "deprecated": true,
+            "description": "Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.\n",
             "minItems": 0,
             "maxItems": 10,
             "items": {
@@ -5667,7 +5715,8 @@
           },
           "customFields": {
             "type": "array",
-            "description": "Custom fields case configuration.",
+            "deprecated": true,
+            "description": "Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.\n",
             "items": {
               "type": "object",
               "required": [
@@ -6303,7 +6352,8 @@
           },
           "customFields": {
             "type": "array",
-            "description": "Custom field values for the case.",
+            "deprecated": true,
+            "description": "Deprecated. Use `extended_fields` instead. Custom field values for the case.",
             "items": {
               "type": "object",
               "properties": {
@@ -6335,6 +6385,17 @@
                 }
               }
             }
+          },
+          "extended_fields": {
+            "type": "object",
+            "x-state": "Technical preview; added in 9.5.0",
+            "description": "The case's stored field values, keyed by storage key (for example `priority_as_keyword`).\n",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "extended_fields_labels": {
+            "$ref": "#/components/schemas/case_extended_fields_labels"
           },
           "description": {
             "type": "string",

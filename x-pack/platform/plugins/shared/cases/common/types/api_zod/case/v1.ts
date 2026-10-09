@@ -25,6 +25,7 @@ import {
   MAX_TAGS_FILTER_LENGTH,
   MAX_TAGS_PER_CASE,
   MAX_TEMPLATE_DEFINITION_LENGTH,
+  MAX_TEMPLATE_KEY_LENGTH,
   MAX_TITLE_LENGTH,
 } from '../../../constants';
 import {
@@ -44,7 +45,6 @@ import {
   CaseSettingsSchema,
   CaseSeveritySchema,
   CaseStatusSchema,
-  CaseTemplateSchema,
   RelatedCaseSchema,
   SimilarCaseSchema,
 } from '../../domain_zod/case/v1';
@@ -84,6 +84,15 @@ export const CaseRequestCustomFieldsSchema = limitedArraySchema({
   max: MAX_CUSTOM_FIELDS_PER_CASE,
 });
 
+/**
+ * Template reference accepted on case UPDATE — zod mirror of `CaseUpdateRequestTemplateRt`.
+ * Unlike creation, `version` is required: the server does not resolve a latest version on update.
+ */
+export const CaseUpdateRequestTemplateSchema = z.object({
+  id: z.string().max(MAX_TEMPLATE_KEY_LENGTH),
+  version: z.number().int().min(1),
+});
+
 export const CaseBaseOptionalFieldsRequestSchema = z.object({
   description: limitedStringSchema({
     fieldName: 'description',
@@ -113,7 +122,7 @@ export const CaseBaseOptionalFieldsRequestSchema = z.object({
     .optional(),
   customFields: CaseRequestCustomFieldsSchema.optional(),
   settings: CaseSettingsSchema.optional(),
-  template: CaseTemplateSchema.nullable().optional(),
+  template: CaseUpdateRequestTemplateSchema.nullable().optional(),
   [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
 });
 
