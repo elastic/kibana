@@ -89,7 +89,10 @@
         "overlapPolicy": "drop"
       },
       "createdAt": "2026-09-01T10:00:00.000Z",
-      "updatedAt": "2026-09-01T10:00:00.000Z"
+      "updatedAt": "2026-09-01T10:00:00.000Z",
+      "completion": {
+        "action": "create_investigation"
+      }
     },
     {
       "name": "Nightly health report",
@@ -112,7 +115,10 @@
       ],
       "runtime": {},
       "createdAt": "2026-09-02T08:00:00.000Z",
-      "updatedAt": "2026-09-03T08:00:00.000Z"
+      "updatedAt": "2026-09-03T08:00:00.000Z",
+      "completion": {
+        "action": "silent"
+      }
     }
   ]
 }

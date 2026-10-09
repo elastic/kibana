@@ -36,11 +36,9 @@ const automationAttributesSchemaV2 = automationAttributesSchemaV1.extends({
   author: schema.maybe(schema.string({ maxLength: 1024 })),
 });
 
-const { completion: _completion, ...automationAttributesSchemaV3Base } =
-  automationAttributesSchemaV2.getPropSchemas();
-
 const automationAttributesSchemaV3 = schema.object({
-  ...automationAttributesSchemaV3Base,
+  ...automationAttributesSchemaV2.getPropSchemas(),
+  completion: schema.maybe(opaqueObject),
   completions: schema.arrayOf(opaqueObject, { maxSize: 10 }),
 });
 
@@ -90,7 +88,6 @@ export const nightshiftAutomationSavedObjectType: SavedObjectsType<NightshiftAut
               },
             }),
           },
-          { type: 'data_removal', removedAttributePaths: ['completion'] },
         ],
         schemas: {
           create: automationAttributesSchemaV3,

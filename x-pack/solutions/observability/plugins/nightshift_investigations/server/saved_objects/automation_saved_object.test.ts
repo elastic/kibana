@@ -78,13 +78,6 @@ describe('nightshift automation saved object', () => {
       expect(backfill({})).toEqual({ attributes: { completions: [] } });
     });
 
-    it('removes the singular completion', () => {
-      expect(getModelVersion(3)?.changes).toContainEqual({
-        type: 'data_removal',
-        removedAttributePaths: ['completion'],
-      });
-    });
-
     it('validates completions as a bounded array', () => {
       const validate = (completions: object[]) =>
         getSchemas('3')?.create?.validate({ ...baseV3, completions });
