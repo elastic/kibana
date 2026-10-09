@@ -10,7 +10,7 @@
 const { RuleTester } = require('eslint');
 const dedent = require('dedent');
 
-const rule = require('./require_kbn_fs');
+const rule = require('../oxlint_plugin').rules.require_kbn_fs;
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),

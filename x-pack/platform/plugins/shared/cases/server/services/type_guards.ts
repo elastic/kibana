@@ -14,7 +14,10 @@ import {
   getAttachmentTypeFromAttributes,
   isUnifiedOnlyAttachmentType,
 } from '../../common/utils/attachments';
-import { UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP } from '../../common/constants/attachments';
+import {
+  LEGACY_ATTACHMENT_TYPES,
+  UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP,
+} from '../../common/constants/attachments';
 
 /**
  * A type narrowing function for external reference saved object attachments.
@@ -67,6 +70,12 @@ export const isUnifiedAttachmentWithSoReference = (
 export const isUnifiedOnlyAttachment = (
   attributes: Partial<AttachmentAttributesV2> | Record<string, unknown>
 ): boolean => {
+  // Legacy-shaped rows have a legacy form by definition, even when their subtype id
+  // has no unified mapping.
+  const rawType = (attributes as { type?: unknown } | null)?.type;
+  if (typeof rawType === 'string' && LEGACY_ATTACHMENT_TYPES.has(rawType)) {
+    return false;
+  }
   let type: string;
   try {
     type = getAttachmentTypeFromAttributes(attributes);
@@ -76,8 +85,7 @@ export const isUnifiedOnlyAttachment = (
     // on the raw request body before decode, so it must not throw.
     return false;
   }
-  const owner = (attributes as { owner?: string }).owner ?? '';
-  if (isUnifiedOnlyAttachmentType(type, owner)) {
+  if (isUnifiedOnlyAttachmentType(type)) {
     return true;
   }
   return (

@@ -19,18 +19,10 @@ import type {
   CreateRuleData,
   FindRulesRequest,
   FindRulesResponse,
-  ListRuleChangeHistoryRequest,
-  ListRuleChangeHistoryResponse,
-  RuleChangeHistoryDetail,
   RuleResponse,
+  UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
-import {
-  COMMON_HEADERS,
-  INTERNAL_RULE_API_PATH,
-  POLL_INTERVAL_MS,
-  POLL_TIMEOUT_MS,
-  RULE_API_PATH,
-} from '../constants';
+import { COMMON_HEADERS, POLL_INTERVAL_MS, POLL_TIMEOUT_MS, RULE_API_PATH } from '../constants';
 
 export interface WaitForEnabledStateParams {
   id: string;
@@ -44,6 +36,7 @@ export interface RuleApiSpaceOptions {
 export interface RulesApiService {
   create: (data: CreateRuleData, options?: RuleApiSpaceOptions) => Promise<RuleResponse>;
   upsert: (id: string, data: CreateRuleData) => Promise<RuleResponse>;
+  update: (id: string, data: UpdateRuleData) => Promise<RuleResponse>;
   get: (id: string) => Promise<RuleResponse>;
   find: (query?: FindRulesRequest) => Promise<FindRulesResponse>;
   delete: (id: string) => Promise<void>;
@@ -58,11 +51,6 @@ export interface RulesApiService {
   enableByQuery: (params: BulkByQueryParams) => Promise<BulkByQueryResult>;
   disableByQuery: (params: BulkByQueryParams) => Promise<BulkByQueryResult>;
   bulkGet: (id: string[]) => Promise<BulkGetRulesResponse>;
-  listChangeHistory: (
-    id: string,
-    query?: Partial<ListRuleChangeHistoryRequest>
-  ) => Promise<ListRuleChangeHistoryResponse>;
-  getChangeHistoryEvent: (id: string, eventId: string) => Promise<RuleChangeHistoryDetail>;
   waitForEnabledState: (params: WaitForEnabledStateParams) => Promise<void>;
   cleanUp: () => Promise<void>;
 }
@@ -129,6 +117,17 @@ export const getRulesApiService = ({
       measurePerformanceAsync(log, 'rules.upsert', async () => {
         const response = await kbnClient.request<RuleResponse>({
           method: 'PUT',
+          path: `${RULE_API_PATH}/${encodeURIComponent(id)}`,
+          headers: COMMON_HEADERS,
+          body: data,
+        });
+        return response.data;
+      }),
+
+    update: (id, data) =>
+      measurePerformanceAsync(log, 'rules.update', async () => {
+        const response = await kbnClient.request<RuleResponse>({
+          method: 'PATCH',
           path: `${RULE_API_PATH}/${encodeURIComponent(id)}`,
           headers: COMMON_HEADERS,
           body: data,
@@ -254,25 +253,6 @@ export const getRulesApiService = ({
           path: `${RULE_API_PATH}/_bulk_get`,
           headers: COMMON_HEADERS,
           body: { ids },
-        });
-        return response.data;
-      }),
-    listChangeHistory: (id, query = {}) =>
-      measurePerformanceAsync(log, 'rules.listChangeHistory', async () => {
-        const response = await kbnClient.request<ListRuleChangeHistoryResponse>({
-          method: 'GET',
-          path: `${INTERNAL_RULE_API_PATH}/${encodeURIComponent(id)}/history`,
-          query: stripUndefined(query),
-        });
-        return response.data;
-      }),
-    getChangeHistoryEvent: (id, eventId) =>
-      measurePerformanceAsync(log, 'rules.getChangeHistoryEvent', async () => {
-        const response = await kbnClient.request<RuleChangeHistoryDetail>({
-          method: 'GET',
-          path: `${INTERNAL_RULE_API_PATH}/${encodeURIComponent(id)}/history/${encodeURIComponent(
-            eventId
-          )}`,
         });
         return response.data;
       }),

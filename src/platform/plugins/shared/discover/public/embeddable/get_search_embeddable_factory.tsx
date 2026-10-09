@@ -108,6 +108,7 @@ export const getSearchEmbeddableFactory = ({
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const fetchContext$ = new BehaviorSubject<FetchContext | undefined>(undefined);
       const fetchWarnings$ = new BehaviorSubject<SearchResponseIncompleteWarning[]>([]);
+      const abortSignal$ = new BehaviorSubject<AbortSignal | undefined>(undefined);
       const refreshTrigger$ = new BehaviorSubject<void>(undefined);
 
       /** Build API */
@@ -342,6 +343,7 @@ export const getSearchEmbeddableFactory = ({
           dataLoading$,
           fetchContext$,
           fetchWarnings$,
+          abortSignal$,
         },
         discoverServices,
         stateManager: searchEmbeddable.stateManager,
@@ -350,6 +352,7 @@ export const getSearchEmbeddableFactory = ({
         setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
         setSearchError: (error: Error | undefined) => searchError$.next(error),
         setApproximationApplied: searchEmbeddable.internalApi.setApproximationApplied,
+        esqlSource$: searchEmbeddable.esqlSource$,
       });
       cancelRequests = _cancelRequests;
 
@@ -491,8 +494,9 @@ export const getSearchEmbeddableFactory = ({
                       }
                     >
                       <SearchEmbeddableGridComponent
-                        api={{ ...api, fetchWarnings$, fetchContext$ }}
+                        api={{ ...api, fetchWarnings$, fetchContext$, abortSignal$ }}
                         dataView={dataView!}
+                        esqlSource$={searchEmbeddable.esqlSource$}
                         onAddFilter={enableFilters ? addFilter : undefined}
                         enableDocumentViewer={enableDocumentViewer}
                         expandedDoc={enableDocumentViewer ? expandedDoc : undefined}

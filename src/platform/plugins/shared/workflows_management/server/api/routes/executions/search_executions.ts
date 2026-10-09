@@ -209,7 +209,7 @@ export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDepe
           };
 
           return response.ok({
-            body: await api.searchExecutionsView(params, spaceId),
+            body: await api.searchExecutionsView({ ...params, request }, spaceId),
           });
         } catch (error) {
           if (error instanceof Error && 'statusCode' in error && error.statusCode === 400) {

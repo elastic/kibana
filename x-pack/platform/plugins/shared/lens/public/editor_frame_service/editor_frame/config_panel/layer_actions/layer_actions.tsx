@@ -41,7 +41,6 @@ export const getSharedActions = ({
   layerType,
   activeVisualization,
   isOnlyLayer,
-  isTextBasedLanguage,
   onCloneLayer,
   onRemoveLayer,
   customRemoveModalText,
@@ -53,7 +52,6 @@ export const getSharedActions = ({
   isOnlyLayer: boolean;
   activeVisualization: Visualization;
   layerType?: LayerType;
-  isTextBasedLanguage?: boolean;
   core: Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
   customRemoveModalText?: { title?: string; description?: string };
 }) => [
@@ -61,7 +59,6 @@ export const getSharedActions = ({
     execute: onCloneLayer,
     layerIndex,
     activeVisualization,
-    isTextBasedLanguage,
   }),
   getRemoveLayerAction({
     execute: onRemoveLayer,
@@ -216,9 +213,11 @@ export const LayerActions = (props: LayerActionsProps) => {
           </EuiToolTip>
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={false}>
-        <InContextMenuActions {...props} actions={listActions} />
-      </EuiFlexItem>
+      {listActions.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <InContextMenuActions {...props} actions={listActions} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

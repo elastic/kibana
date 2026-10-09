@@ -8,7 +8,8 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { EsqlSource } from '@kbn/data-source';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
@@ -44,6 +45,7 @@ interface ESQLDataGridProps {
   rows: DataTableRecord[];
   dataView: DataView;
   columns: DatatableColumn[];
+  dataSource: EsqlSource | undefined;
   flyoutType?: 'overlay' | 'push';
   initialColumns?: DatatableColumn[];
   initialRowHeight?: number;
@@ -114,16 +116,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     setActiveColumns(renderedColumns);
   }
 
-  const columnsMeta = useMemo(() => {
-    return props.columns.reduce((acc, column) => {
-      acc[column.id] = {
-        type: column.meta?.type,
-        esType: column.meta?.esType ?? column.meta?.type,
-      };
-      return acc;
-    }, {} as DataTableColumnsMeta);
-  }, [props.columns]);
-
   const services = useMemo(() => {
     return {
       data,
@@ -138,9 +130,9 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
 
   const onValueChange = useCallback(
     (docId: string, update: Record<string, unknown>) => {
-      indexUpdateService.updateDoc(docId, update, columnsMeta);
+      indexUpdateService.updateDoc(docId, update, props.columns);
     },
-    [indexUpdateService, columnsMeta]
+    [indexUpdateService, props.columns]
   );
 
   const onSort = useCallback(
@@ -196,8 +188,9 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       (acc, columnName, columnIndex) => {
         const isSavedColumn = !!props.dataView.fields.getByName(columnName);
         const editMode = editingColumnIndex === columnIndex;
-        const columnType = columnsMeta[columnName]?.esType;
-        const isUnsupportedESQLType = columnsMeta[columnName]?.type === KBN_FIELD_TYPES.UNKNOWN;
+        const columnMeta = props.columns.find(({ id }) => id === columnName)?.meta;
+        const columnType = columnMeta?.esType ?? columnMeta?.type;
+        const isUnsupportedESQLType = columnMeta?.type === KBN_FIELD_TYPES.UNKNOWN;
         acc[columnName] = memoize(
           getColumnHeaderRenderer(
             columnName,
@@ -220,7 +213,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     renderedColumns,
     props.dataView.fields,
     editingColumnIndex,
-    columnsMeta,
+    props.columns,
     indexUpdateService,
     indexEditorTelemetryService,
   ]);
@@ -273,13 +266,12 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       rowAdditionalLeadingControls={leadingControlColumns}
       columns={renderedColumns}
       rows={rows}
-      columnsMeta={columnsMeta}
+      dataSource={props.dataSource}
       services={services}
       enableInTableSearch={false}
       showKeyboardShortcuts={false}
       externalCustomRenderers={externalCustomRenderers}
       renderCellPopover={indexUpdateService.canEditIndex ? renderCellPopover : undefined}
-      isPlainRecord
       isSortEnabled={true}
       isInMemorySortEnabled={false}
       showMultiFields={false}

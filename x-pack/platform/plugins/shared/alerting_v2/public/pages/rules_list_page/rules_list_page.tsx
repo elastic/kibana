@@ -30,7 +30,6 @@ import { useAlertingLocators } from '../../application/locator_context';
 import { RulesListHeader } from './rules_list_header';
 import { RulesListTableContainer } from './rules_list_table_container';
 import { useRulesDataSource } from './rules_data_source';
-import { CentralizedActionPoliciesBanner } from './centralized_action_policies_banner';
 
 export const RulesListPage = () => {
   useBreadcrumbs('rules_list');
@@ -85,7 +84,7 @@ export const RulesListPage = () => {
         <h2>
           <FormattedMessage
             id="xpack.alertingV2.rulesList.readOnlyEmptyTitle"
-            defaultMessage="No rules"
+            defaultMessage="No Universal rules"
           />
         </h2>
       }
@@ -93,7 +92,7 @@ export const RulesListPage = () => {
         <p>
           <FormattedMessage
             id="xpack.alertingV2.rulesList.readOnlyEmptyBody"
-            defaultMessage="There are no rules to display."
+            defaultMessage="There are no Universal rules to display."
           />
         </p>
       }
@@ -156,7 +155,6 @@ export const RulesListPage = () => {
           onCreateWithAgent={navigateToAgentBuilder}
           onBuildSequence={navigateToSequenceBuilder}
         />
-        <CentralizedActionPoliciesBanner />
         <ContentList emptyState={emptyState} data-test-subj="rulesList">
           <ContentListToolbar>
             <ContentListToolbar.Filters>

@@ -36,11 +36,15 @@ export interface EpisodeFooterActionMenuProps {
   /** Whether the popover is currently open. */
   isOpen: boolean;
   onClose: () => void;
-  /** Already filtered to compatible actions. The menu does not re-filter. */
+  /**
+   * Actions to list. Compatible actions are enabled. An action that fails
+   * `isCompatible` is rendered disabled (with `disabledTooltip`) so a caller
+   * can keep it visible via `showWhenDisabled`.
+   */
   actions: EpisodeAction[];
   episodes: AlertEpisode[];
-  /** Full episode details page href, rendered as the first menu item. */
-  viewDetailsHref: string;
+  /** Full episode details page href, rendered as the first menu item when present. */
+  viewDetailsHref?: string | null;
   onSuccess?: () => void;
 }
 
@@ -54,18 +58,36 @@ export const EpisodeFooterActionMenu = ({
   viewDetailsHref,
   onSuccess,
 }: EpisodeFooterActionMenuProps) => {
-  const [workflowActions, otherActions] = partition(actions, ({ id }) =>
-    WORKFLOW_ACTION_IDS.has(id)
+  const [workflowActions, otherActions] = partition(
+    actions,
+    (action) => WORKFLOW_ACTION_IDS.has(action.id) || action.isWorkflowAction === true
   );
 
   const toMenuItem = (action: EpisodeAction): EuiContextMenuPanelItemDescriptor => {
+    const compatible = action.isCompatible({ episodes });
+    if (!compatible) {
+      return {
+        name: action.displayName,
+        icon: action.iconType,
+        disabled: true,
+        toolTipContent: action.disabledTooltip,
+        'data-test-subj': `alertingV2EpisodeTakeAction-${action.id}`,
+      };
+    }
+
     // An action that renders its own entry owns the click too, so it can anchor a
     // nested popover to it. A plain descriptor item closes the menu on click,
     // which would unmount the anchor before the popover could show.
     if (action.renderMenuItem) {
       return {
         key: action.id,
-        renderItem: () => action.renderMenuItem!({ episodes, onSuccess, closeMenu: onClose }),
+        renderItem: () =>
+          action.renderMenuItem!({
+            episodes,
+            onSuccess,
+            closeMenu: onClose,
+            surface: 'details_flyout',
+          }),
       };
     }
 
@@ -80,14 +102,16 @@ export const EpisodeFooterActionMenu = ({
     };
   };
 
-  const viewDetailsGroup: EuiContextMenuPanelItemDescriptor[] = [
-    {
-      name: i18n.FLYOUT_VIEW_DETAILS,
-      icon: 'eye',
-      href: viewDetailsHref,
-      'data-test-subj': 'alertingV2EpisodeTakeAction-viewDetails',
-    },
-  ];
+  const viewDetailsGroup: EuiContextMenuPanelItemDescriptor[] = viewDetailsHref
+    ? [
+        {
+          name: i18n.FLYOUT_VIEW_DETAILS,
+          icon: 'eye',
+          href: viewDetailsHref,
+          'data-test-subj': 'alertingV2EpisodeTakeAction-viewDetails',
+        },
+      ]
+    : [];
 
   const nonEmptyGroups = [
     viewDetailsGroup,

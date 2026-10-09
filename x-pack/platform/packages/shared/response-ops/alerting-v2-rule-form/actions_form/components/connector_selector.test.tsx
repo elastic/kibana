@@ -43,17 +43,10 @@ jest.mock('@kbn/react-query', () => ({
   }),
 }));
 
-const renderSelector = (
-  connectorCreation?: { mode: 'flyout' } | { mode: 'new-tab'; href: string }
-) =>
+const renderSelector = (props: Partial<React.ComponentProps<typeof ConnectorSelector>> = {}) =>
   render(
     <I18nProvider>
-      <ConnectorSelector
-        connectorTypeId=".email"
-        value={null}
-        onChange={jest.fn()}
-        connectorCreationConfig={connectorCreation}
-      />
+      <ConnectorSelector connectorTypeId=".email" value={null} onChange={jest.fn()} {...props} />
     </I18nProvider>
   );
 
@@ -64,8 +57,10 @@ describe('ConnectorSelector', () => {
 
   it('opens connector management in a new tab when configured', () => {
     renderSelector({
-      mode: 'new-tab',
-      href: '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors',
+      connectorCreationConfig: {
+        mode: 'new-tab',
+        href: '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors',
+      },
     });
 
     expect(screen.getByTestId('singleStepWorkflowCreateConnectorLink')).toHaveAttribute(
@@ -106,5 +101,21 @@ describe('ConnectorSelector', () => {
       expect.objectContaining({ initialConnector: { actionTypeId: '.email' } })
     );
     expect(screen.getByTestId('addConnectorFlyout')).toBeInTheDocument();
+  });
+
+  it('renders the error and marks the selector invalid', () => {
+    renderSelector({ error: 'Select a connector.' });
+
+    expect(screen.getByText('Select a connector.')).toBeInTheDocument();
+    expect(screen.getByRole('combobox')).toHaveAttribute('aria-invalid', 'true');
+  });
+
+  it('forwards blur events', () => {
+    const onBlur = jest.fn();
+    renderSelector({ onBlur });
+
+    fireEvent.blur(screen.getByTestId('singleStepWorkflowConnectorSelect'));
+
+    expect(onBlur).toHaveBeenCalledTimes(1);
   });
 });

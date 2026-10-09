@@ -16,6 +16,7 @@ api/
 └── tests/
     ├── global.setup.ts                         # Enables Streams + the availability feature flag
     ├── global.teardown.ts                      # Reverts the flag, disables Streams
+    ├── authorization/                          # Access for the built-in viewer, editor and admin roles
     ├── significant_events/onboarding_bulk_status.spec.ts
     └── workflows/managed_workflows.spec.ts
 ```
@@ -48,7 +49,7 @@ apiTest.beforeAll(async ({ samlAuth }) => {
 Significant-events API coverage is split across three places; several routes are reachable only
 from the second:
 
-- **this suite** — KI onboarding bulk status, managed workflows
-- `x-pack/platform/test/api_integration_deployment_agnostic/apis/significant_events/` — FTR
+- **this suite** — built-in role access, KI onboarding bulk status, managed workflows
+- `x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/significant_events/` — FTR
   deployment-agnostic tests, run behind the significant-events feature-flag configs
 - `x-pack/solutions/observability/packages/kbn-evals-suite-significant-events/` — LLM evaluation suites

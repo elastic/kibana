@@ -21,7 +21,12 @@ import {
   registerAgenticInvestigationTemplateUI,
   registerEscalationTemplateUI,
 } from './register';
-import type { RenderAssignees } from './types';
+import type { RenderAssignees, RenderLinkedInvestigations } from './types';
+import { ACTIONS_TRANSLATIONS } from '../components/actions/translations';
+import {
+  FlyoutGroupedAttachments,
+  createFlyoutGroupedAttachmentsRegistry,
+} from '../components/grouped_attachments';
 
 const conversation: Conversation = {
   id: 'conversation-1',
@@ -54,10 +59,15 @@ const createFakeService = () => {
   const tabs = new Map<string, ConversationTemplateTabDefinition>();
   const templates = new Map<string, ConversationTemplateUIDefinition>();
   const openFullscreenConversation = jest.fn();
+  const getConversationUrl = jest.fn(
+    ({ conversationId, agentId }: { conversationId: string; agentId: string }) =>
+      `http://localhost/app/agent_builder/agents/${agentId}/conversations/${conversationId}?openConversationDetails=true`
+  );
   const context: ConversationTemplateUIContext = {
     attachmentsService,
     openSidebarConversation: jest.fn(),
     openFullscreenConversation,
+    getConversationUrl,
   };
 
   const contract: ConversationTemplateServiceStartContract = {
@@ -100,8 +110,10 @@ const register = (
   registerAgenticInvestigationTemplateUI({
     conversationTemplates: contract,
     templateId: 'investigation',
+    groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
     name: 'Investigation',
     icon: 'securitySignalDetected',
+    onCopyLink: () => true,
     ...overrides,
   });
 
@@ -117,6 +129,143 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     ]);
   });
 
+  it('threads renderProposedActions into the overview tab with the conversation id', async () => {
+    const { contract } = createFakeService();
+    const renderProposedActions = jest.fn(({ conversationId }: { conversationId: string }) => (
+      <span>proposed actions for {conversationId}</span>
+    ));
+    register(contract, { renderProposedActions });
+
+    const OverviewTabContent = contract.getTab('investigation.overview')?.content;
+    if (!OverviewTabContent) {
+      throw new Error('Expected a registered overview tab');
+    }
+
+    renderWithKibanaRenderContext(
+      <OverviewTabContent conversation={conversation} isOpenedFromChat={false} />
+    );
+
+    expect(await screen.findByText('proposed actions for conversation-1')).toBeInTheDocument();
+  });
+
+  it('omits the proposed actions section when no renderer is supplied', async () => {
+    const { contract } = createFakeService();
+    register(contract);
+
+    const OverviewTabContent = contract.getTab('investigation.overview')?.content;
+    if (!OverviewTabContent) {
+      throw new Error('Expected a registered overview tab');
+    }
+
+    renderWithKibanaRenderContext(
+      <OverviewTabContent conversation={conversation} isOpenedFromChat={false} />
+    );
+
+    // Waits for the lazy overview slot's chunk to resolve before asserting it stayed absent.
+    expect(
+      await screen.findByText('A second sign-in replayed the same session cookie.')
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Proposed actions')).not.toBeInTheDocument();
+  });
+
+  it('replaces the overview body with renderOverview and passes it the proposed actions and their count', async () => {
+    const { contract } = createFakeService();
+    const renderOverview = jest.fn(
+      ({
+        conversation: { id },
+        proposedActionsContent,
+        proposedActionsCount,
+      }: {
+        conversation: Conversation;
+        proposedActionsContent?: React.ReactNode;
+        proposedActionsCount?: React.ReactNode;
+      }) => (
+        <div>
+          <span>custom overview for {id}</span>
+          {proposedActionsCount}
+          {proposedActionsContent}
+        </div>
+      )
+    );
+    const groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
+    register(contract, {
+      groupedAttachments,
+      renderOverview,
+      renderProposedActions: () => <span>proposals</span>,
+      renderProposedActionsCount: () => <span>3 proposals</span>,
+    });
+
+    const OverviewTabContent = contract.getTab('investigation.overview')?.content;
+    if (!OverviewTabContent) {
+      throw new Error('Expected a registered overview tab');
+    }
+    renderWithKibanaRenderContext(
+      <OverviewTabContent conversation={conversation} isOpenedFromChat={false} />
+    );
+
+    expect(await screen.findByText('custom overview for conversation-1')).toBeInTheDocument();
+    expect(screen.getByText('proposals')).toBeInTheDocument();
+    expect(screen.getByText('3 proposals')).toBeInTheDocument();
+    expect(renderOverview).toHaveBeenCalledWith(
+      expect.objectContaining({ conversation, groupedAttachments })
+    );
+  });
+
+  it("shows the conversation's severity in the header without a live state", async () => {
+    const { contract } = createFakeService();
+    register(contract);
+    const Header = getSlot(contract, 'investigation', 'header');
+
+    renderWithKibanaRenderContext(<Header conversation={conversation} isOpenedFromChat={false} />);
+
+    expect(await screen.findByTestId('investigationFlyoutSeverity')).toHaveTextContent('High');
+  });
+
+  it('leaves the severity to the live state, passing it the conversation severity', async () => {
+    const { contract } = createFakeService();
+    register(contract, {
+      renderLiveState: ({ conversationId, severity }) => (
+        <span>
+          live {conversationId} {severity}
+        </span>
+      ),
+    });
+    const Header = getSlot(contract, 'investigation', 'header');
+
+    renderWithKibanaRenderContext(<Header conversation={conversation} isOpenedFromChat={false} />);
+
+    expect(await screen.findByText('live conversation-1 high')).toBeInTheDocument();
+    expect(screen.queryByTestId('investigationFlyoutSeverity')).not.toBeInTheDocument();
+  });
+
+  it('renders the header title with renderTitle, passing it the conversation id and title', async () => {
+    const { contract } = createFakeService();
+    register(contract, {
+      renderTitle: ({ conversationId, title }) => (
+        <span>
+          title {conversationId} {title}
+        </span>
+      ),
+    });
+    const Header = getSlot(contract, 'investigation', 'header');
+
+    renderWithKibanaRenderContext(<Header conversation={conversation} isOpenedFromChat={false} />);
+
+    expect(
+      await screen.findByRole('heading', {
+        name: 'title conversation-1 Impossible travel — exec account',
+      })
+    ).toBeInTheDocument();
+  });
+
+  it('registers the brief card when supplied', () => {
+    const { contract } = createFakeService();
+    const BriefCard = () => <span>card</span>;
+    register(contract, { briefCard: BriefCard });
+
+    expect(contract.getTemplateUIDefinition('investigation')?.briefCard).toBe(BriefCard);
+  });
+
   it('registers the template UI definition with a header and footer', () => {
     const { contract } = createFakeService();
 
@@ -128,6 +277,22 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     expect(definition?.tabs).toEqual(getInvestigationTabIds('investigation'));
     expect(definition?.detailsFlyout?.header).toBeDefined();
     expect(definition?.detailsFlyout?.footer).toBeDefined();
+  });
+
+  it('adds a Copy link flyout action that calls onCopyLink', () => {
+    const onCopyLink = jest.fn().mockReturnValue(true);
+    const { contract } = createFakeService();
+    register(contract, { onCopyLink });
+
+    const getActions =
+      contract.getTemplateUIDefinition('investigation')?.detailsFlyout?.trailingActions;
+    const [action] = getActions?.({ conversation }) ?? [];
+
+    expect(action).toMatchObject({ iconType: 'link', 'aria-label': 'Copy link' });
+    action.onClick?.({} as never);
+    expect(onCopyLink).toHaveBeenCalledWith(
+      'http://localhost/app/agent_builder/agents/agent/conversations/conversation-1?openConversationDetails=true'
+    );
   });
 
   it('gives each solution its own tab ids, so a second one does not collide', () => {
@@ -195,6 +360,20 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     });
   });
 
+  it('hides the footer slot Open in chat when the flyout was opened from within chat', async () => {
+    const { contract } = createFakeService();
+    // The escalation button loads on the same lazy chunk as Open in chat; wiring one in gives a
+    // reliable element to await, so the assertion below cannot pass merely because the chunk
+    // has not resolved yet (the Suspense fallback is `null`).
+    register(contract, { renderEscalationModal: jest.fn(() => <div>Escalation modal</div>) });
+    const Footer = getSlot(contract, 'investigation', 'footer');
+
+    renderWithKibanaRenderContext(<Footer conversation={conversation} isOpenedFromChat />);
+
+    await screen.findByText(ACTIONS_TRANSLATIONS.buttons.openEscalation);
+    expect(screen.queryByTestId('investigationFlyoutOpenChat')).not.toBeInTheDocument();
+  });
+
   it('calls renderAssignees with the conversation id, templateId, uids, and refetchConversation', async () => {
     const { contract } = createFakeService();
     const renderAssignees: RenderAssignees = jest.fn(() => null);
@@ -258,17 +437,18 @@ describe('registerEscalationTemplateUI', () => {
     metadata: { status: 'open', assignees: ['uid-1'] },
   };
 
-  it('registers the template with an empty tabs list and a header only', () => {
+  it('registers the template with an overview tab and a header only (no footer)', () => {
     const { contract } = createFakeService();
 
     registerEscalationTemplateUI({
       conversationTemplates: contract,
       templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
       name: 'Escalation',
     });
 
     const definition = contract.getTemplateUIDefinition('escalation');
-    expect(definition?.tabs).toEqual([]);
+    expect(definition?.tabs).toEqual(['escalation.overview']);
     expect(definition?.detailsFlyout?.header).toBeDefined();
     expect(definition?.detailsFlyout?.footer).toBeUndefined();
   });
@@ -280,6 +460,7 @@ describe('registerEscalationTemplateUI', () => {
     registerEscalationTemplateUI({
       conversationTemplates: contract,
       templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
       name: 'Escalation',
       renderAssignees,
     });
@@ -314,6 +495,7 @@ describe('registerEscalationTemplateUI', () => {
     registerEscalationTemplateUI({
       conversationTemplates: contract,
       templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
       name: 'Escalation',
     });
 
@@ -326,5 +508,128 @@ describe('registerEscalationTemplateUI', () => {
 
     expect(await screen.findByText('open')).toBeInTheDocument();
     expect(screen.getByTestId('escalationHeaderBlocks')).toBeInTheDocument();
+  });
+
+  it('registers the escalation.overview tab', () => {
+    const { contract } = createFakeService();
+
+    registerEscalationTemplateUI({
+      conversationTemplates: contract,
+      templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
+      name: 'Escalation',
+    });
+
+    const tab = contract.getTab('escalation.overview');
+    expect(tab).toBeDefined();
+    expect(tab?.label).toBe('Overview');
+  });
+
+  it('renders the overview tab and forwards linkedInvestigationIds to renderLinkedInvestigations', async () => {
+    const { contract } = createFakeService();
+    const renderLinkedInvestigations: RenderLinkedInvestigations = jest.fn(() => null);
+
+    registerEscalationTemplateUI({
+      conversationTemplates: contract,
+      templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
+      name: 'Escalation',
+      renderLinkedInvestigations,
+    });
+
+    const TabContent = contract.getTab('escalation.overview')?.content;
+    if (!TabContent) throw new Error('Expected escalation.overview tab');
+
+    const conversationWithLinks: Conversation = {
+      ...escalationConversation,
+      metadata: { status: 'open', linked_investigations: ['inv-1', 'inv-2'] },
+    };
+
+    renderWithKibanaRenderContext(
+      <TabContent conversation={conversationWithLinks} isOpenedFromChat={false} />
+    );
+
+    await waitFor(() => expect(renderLinkedInvestigations).toHaveBeenCalled());
+    expect(renderLinkedInvestigations).toHaveBeenCalledWith(
+      expect.objectContaining({
+        escalationId: 'escalation-1',
+        linkedInvestigationIds: ['inv-1', 'inv-2'],
+        onOpenInvestigation: expect.any(Function),
+      })
+    );
+  });
+
+  it('renders the summary and grouped attachments in the overview tab', async () => {
+    const { contract } = createFakeService();
+    const groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
+    groupedAttachments.register(FlyoutGroupedAttachments.ALERTS, ['security.alert'], () => (
+      <li>Session cookie replayed</li>
+    ));
+
+    registerEscalationTemplateUI({
+      conversationTemplates: contract,
+      templateId: 'escalation',
+      groupedAttachments,
+      name: 'Escalation',
+    });
+
+    const TabContent = contract.getTab('escalation.overview')?.content;
+    if (!TabContent) throw new Error('Expected escalation.overview tab');
+
+    renderWithKibanaRenderContext(
+      <TabContent
+        conversation={{
+          ...escalationConversation,
+          metadata: { status: 'open', summary: 'Escalated narrative' },
+          attachments: [
+            {
+              id: 'attachment-1',
+              type: 'security.alert',
+              current_version: 1,
+              versions: [
+                { version: 1, data: {}, created_at: '2024-01-01T00:00:00Z', content_hash: 'a' },
+              ],
+            },
+          ],
+        }}
+        isOpenedFromChat={false}
+      />
+    );
+
+    expect(await screen.findByText('Escalated narrative')).toBeInTheDocument();
+    expect(screen.getByText('Session cookie replayed')).toBeInTheDocument();
+  });
+
+  it('navigates via openFullscreenConversation with openDetails:true when onOpenInvestigation is called', async () => {
+    const { contract, openFullscreenConversation } = createFakeService();
+    let capturedOnOpen: ((args: { conversationId: string; agentId: string }) => void) | undefined;
+    const renderLinkedInvestigations: RenderLinkedInvestigations = jest.fn((props) => {
+      capturedOnOpen = props.onOpenInvestigation;
+      return null;
+    });
+
+    registerEscalationTemplateUI({
+      conversationTemplates: contract,
+      templateId: 'escalation',
+      groupedAttachments: createFlyoutGroupedAttachmentsRegistry(),
+      name: 'Escalation',
+      renderLinkedInvestigations,
+    });
+
+    const TabContent = contract.getTab('escalation.overview')?.content;
+    if (!TabContent) throw new Error('Expected escalation.overview tab');
+
+    renderWithKibanaRenderContext(
+      <TabContent conversation={escalationConversation} isOpenedFromChat={false} />
+    );
+
+    await waitFor(() => expect(capturedOnOpen).toBeDefined());
+    capturedOnOpen!({ conversationId: 'inv-1', agentId: 'agent-42' });
+
+    expect(openFullscreenConversation).toHaveBeenCalledWith({
+      conversationId: 'inv-1',
+      agentId: 'agent-42',
+      openDetails: true,
+    });
   });
 });

@@ -15,7 +15,6 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type {
   CustomCellRenderer,
   CustomGridColumnsConfiguration,
-  DataTableColumnsMeta,
   SortOrder,
   UnifiedDataTable,
   UnifiedDataTableRenderCustomToolbar,
@@ -39,7 +38,6 @@ export interface UseTriggerEventTableConfigResult {
   showTimeColumn: boolean;
   sort: SortOrder[];
   dataTableRows: DataTableRecord[];
-  columnsMeta: DataTableColumnsMeta;
   externalCustomRenderers: CustomCellRenderer;
   customGridColumnsConfiguration: CustomGridColumnsConfiguration;
   unifiedDataTableServices: React.ComponentProps<typeof UnifiedDataTable>['services'];

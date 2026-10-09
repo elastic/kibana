@@ -15,10 +15,8 @@ import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { ConfigKey } from '../../../../common/runtime_types';
 import type { MonitorAssignedAgent, MonitorLocationAssignment } from '../../../../common/types';
 import { getMonitorNotFoundResponse } from '../../synthetics_service/service_errors';
-import {
-  assignedAgentIdForMonitorLocation,
-  isConditionShardedLocation,
-} from '../../../synthetics_service/private_location/assign_by_condition';
+import { assignedAgentIdForMonitorLocation } from '../../../synthetics_service/private_location/assign_by_condition';
+import { isShardingEnabled } from '../../../synthetics_service/private_location/agent_sharding_license';
 import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
 
 const toAssignedAgent = (meta: {
@@ -84,10 +82,10 @@ export const getMonitorAgentAssignment: SyntheticsRestApiRouteFactory<
       const locationById = new Map(locations.map((location) => [location.id, location]));
       const policyNameById = new Map(agentPolicies.map((policy) => [policy.id, policy.name]));
 
-      const shardedMonitorLocations = privateMonitorLocations.filter((location) => {
-        const privateLocation = locationById.get(location.id);
-        return privateLocation != null && isConditionShardedLocation(privateLocation);
-      });
+      const isShardingActive = await isShardingEnabled(server);
+      const shardedMonitorLocations = isShardingActive
+        ? privateMonitorLocations.filter((location) => locationById.has(location.id))
+        : [];
 
       const packagePolicies =
         shardedMonitorLocations.length > 0
@@ -117,10 +115,9 @@ export const getMonitorAgentAssignment: SyntheticsRestApiRouteFactory<
           );
           enrolledByPolicyId.set(privateLocation.agentPolicyId, enrolled);
         }
-        const isAgentSharding = isConditionShardedLocation(privateLocation);
 
         let agents: MonitorAssignedAgent[];
-        if (isAgentSharding) {
+        if (isShardingActive) {
           const assignedAgentId = assignedAgentIdForMonitorLocation(
             packagePolicies.filter(
               (policy): policy is { id: string; condition?: string | null } =>
@@ -145,7 +142,7 @@ export const getMonitorAgentAssignment: SyntheticsRestApiRouteFactory<
         assignments.push({
           locationId: privateLocation.id,
           locationLabel: privateLocation.label,
-          isAgentSharding,
+          isShardingActive,
           agentPolicyId: privateLocation.agentPolicyId,
           agentPolicyName:
             policyNameById.get(privateLocation.agentPolicyId) ?? privateLocation.agentPolicyId,

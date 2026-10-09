@@ -33,6 +33,8 @@ import {
   ExecutionHistoryClient,
   ExecutionHistoryClientToken,
 } from '../lib/execution_history_client';
+import { EventOriginToken } from '../lib/event_origin/token';
+import { InternalRulesClient, InternalRulesClientProvider } from '../lib/internal_rules_client';
 import { RulesClient } from '../lib/rules_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import {
@@ -102,6 +104,8 @@ import {
 import { UserService } from '../lib/services/user_service/user_service';
 import { WorkflowService } from '../lib/services/workflow_service/workflow_service';
 import { WorkflowServiceToken } from '../lib/services/workflow_service/tokens';
+import { LicenseService } from '../lib/services/license_service/license_service';
+import { LicenseServiceToken } from '../lib/services/license_service/tokens';
 import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_service/tokens';
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
@@ -123,6 +127,9 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertEventsClient).toSelf().inRequestScope();
   bind(EpisodesClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
+  bind(InternalRulesClientProvider).toSelf().inSingletonScope();
+  bind(InternalRulesClient).toSelf().inSingletonScope();
+  bind(EventOriginToken).toConstantValue('user');
   bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
   bind(RequestSpaceIdToken)
     .toDynamicValue(({ get }) => {
@@ -187,6 +194,8 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(EventLogServiceToken).toService(EventLogService);
   bind(WorkflowService).toSelf().inSingletonScope();
   bind(WorkflowServiceToken).toService(WorkflowService);
+  bind(LicenseService).toSelf().inSingletonScope();
+  bind(LicenseServiceToken).toService(LicenseService);
   bind(ResourceManager).toSelf().inSingletonScope();
 
   bind(EsServiceInternalToken)
