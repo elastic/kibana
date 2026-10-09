@@ -167,6 +167,34 @@ shown, not the one the Worker first proposed.
 Every stored proposal carries `rootProposalId` and `revision`. The plugin is
 unshipped, so legacy records without these fields are not supported.
 
+### Caller-supplied ids
+
+`create()` takes an optional `id`, and a UUID is required. Without one it mints a
+random id, exactly as before. With one, the proposal is created under that id with
+`op_type: 'create'`, so two callers that derive the same id from the same thing meet
+at the same document and Elasticsearch decides which one creates it, with no
+check-then-create window in application code.
+
+An id that already exists is refused with `ProposalAlreadyExistsError`. The service
+reads nothing and returns nothing on the way there: what a duplicate means is the
+caller's to decide, which is why the caller chose the id. The error extends
+`ProposalConflictError`, so it is already a 409 on the routes and a `ConflictError`
+in a workflow. A caller that wants to converge on the existing proposal looks it up
+itself, with `get` and `getLatestRevision` (after a `revise()` the row at the
+original id is a superseded stub, not the head). A caller that wants a new proposal
+once the old one has settled derives its next id.
+
+The index is shared across spaces and the service does not scope the id, so the
+caller must put the space (and its own producer) into whatever the id is derived
+from. A clash is refused and never returned, so a missing space costs the caller a
+failed create and nothing more.
+
+`proposals.createProposal`, `system-create-proposal` and
+`system-create-alertzero-proposal` take the id as `proposalId` and pass it down. A
+duplicate fails the create step, before the gate workflow holds a proposal id, so
+nothing is parked or settled. A workflow that wants to handle it can branch on the
+step's `ConflictError`.
+
 ### Architecture
 
 ```mermaid
