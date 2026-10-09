@@ -96,10 +96,11 @@ describe('AppsSection', () => {
 
     setup();
 
-    expect(screen.getByTestId('nightshiftAppsUnavailable')).toHaveTextContent(
+    const appsSection = screen.getByTestId('nightshiftAppsSection');
+    expect(within(appsSection).getByTestId('nightshiftAppsUnavailable')).toHaveTextContent(
       'Apps are unavailable'
     );
-    expect(screen.getByTestId('nightshiftAppsUnavailable')).toHaveTextContent(
+    expect(within(appsSection).getByTestId('nightshiftAppsUnavailable')).toHaveTextContent(
       'Apps require Agent Builder and a configured Relay service.'
     );
   });
