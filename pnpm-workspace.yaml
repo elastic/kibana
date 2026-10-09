@@ -47,10 +47,10 @@ allowBuilds:
 # deprecated `$@elastic/esql` override syntax). Must match `@elastic/esql` in
 # package.json; the renovate `esql-js` group bumps them together.
 catalog:
-  '@elastic/esql-grammar': '4.27.0'
-  '@elastic/esql-promql-grammar': '4.27.0'
-  '@elastic/esql-types': '4.27.0'
-  '@elastic/pretty-printer': '4.27.0'
+  '@elastic/esql-grammar': '4.29.0'
+  '@elastic/esql-promql-grammar': '4.29.0'
+  '@elastic/esql-types': '4.29.0'
+  '@elastic/pretty-printer': '4.29.0'
 overrides:
   # Generated from package.json#resolutions by `kbn bootstrap` — edit
   # resolutions, not this block (yarn keys are mapped: `**/a` -> `a`, `a/b` -> `a>b`).
@@ -87,7 +87,6 @@ overrides:
   'baseline-browser-mapping': '2.9.14'
   'cheerio': '1.0.0-rc.12'
   'chokidar': '3.5.3'
-  'd3-scale>d3-color': 'npm:@elastic/kibana-d3-color@2.0.1'
   'dompurify': '3.4.14'
   'esbuild': '0.28.1'
   'fast-xml-parser': '5.5.7'
@@ -119,6 +118,10 @@ overrides:
   '@elastic/pretty-printer': 'catalog:'
   '@emnapi/core': '1.11.1'
   '@emnapi/runtime': '1.11.1'
+  # trace_engine declares these as `latest`; pin them so pnpm dedupe does not
+  # rewrite the lockfile whenever a new release is published.
+  '@paulirish/trace_engine>legacy-javascript': '0.0.3'
+  '@paulirish/trace_engine>third-party-web': '0.30.0'
   # redux-saga@1.3.0's `^` ranges float up under pnpm; pin the transitives to
   # yarn's resolved versions. @redux-saga/types@1.4.1 tightened Saga so `run()`
   # requires a Generator, breaking callers typed against Iterator.
@@ -143,6 +146,7 @@ overrides:
   'colorette': '2.0.20'
   'concaveman': '1.2.0'
   'd3-format@3': '3.1.0'
+  'd3-interpolate@2.0.1>d3-color': 'npm:@elastic/kibana-d3-color@2.0.1'
   'dom-accessibility-api@^0.5.9': '0.5.13'
   # eslint-plugin-import@2.28.0 needs eslint-module-utils@2.8.x; pnpm floats the
   # ^2.8.0 range to 2.14.0, which crashes the import/namespace rule (matches yarn).
@@ -819,6 +823,7 @@ packages:
   - 'src/platform/packages/shared/kbn-ftr-common-functional-services'
   - 'src/platform/packages/shared/kbn-ftr-common-functional-ui-services'
   - 'src/platform/packages/shared/kbn-ftr-llm-proxy'
+  - 'src/platform/packages/shared/kbn-genai-common'
   - 'src/platform/packages/shared/kbn-grok-ui'
   - 'src/platform/packages/shared/kbn-grouping'
   - 'src/platform/packages/shared/kbn-human-readable-id'
@@ -1266,6 +1271,7 @@ packages:
   - 'x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared'
   - 'x-pack/platform/packages/shared/index-management/index_management_shared_types'
   - 'x-pack/platform/packages/shared/ingest-pipelines'
+  - 'x-pack/platform/packages/shared/isomer/isomer'
   - 'x-pack/platform/packages/shared/kbn-agentic-investigations-common'
   - 'x-pack/platform/packages/shared/kbn-ai-assistant'
   - 'x-pack/platform/packages/shared/kbn-ai-tools'

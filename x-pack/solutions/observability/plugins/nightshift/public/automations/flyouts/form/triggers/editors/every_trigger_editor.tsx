@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { EuiButtonGroup, EuiCheckbox, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiButtonGroup, EuiCheckbox, EuiText } from '@elastic/eui';
 import type { ScheduleUnit, TriggerFormValues } from '../../automation_form_values';
 import { SelectPill } from '../pills/select_pill';
-import { Sentence } from '../pills/sentence';
+import { Sentence, SentenceIcon } from '../pills/sentence';
 import { TimeField } from '../pills/time_field';
 import { TimezonePicker } from '../pills/timezone_picker';
 import { triggerLabels } from '../translations';
@@ -27,12 +27,14 @@ const DAYS = [
 export const EveryTriggerEditor = ({
   trigger,
   onChange,
+  readOnly = false,
 }: {
   trigger: Extract<TriggerFormValues, { kind: 'every' }>;
   onChange: (trigger: TriggerFormValues) => void;
+  readOnly?: boolean;
 }) => (
   <Sentence>
-    <EuiIcon type="calendar" aria-hidden={true} />
+    <SentenceIcon type="calendar" />
     <EuiText size="s">{triggerLabels.everyLead}</EuiText>
     <SelectPill<ScheduleUnit>
       ariaLabel={triggerLabels.scheduleUnit}
@@ -44,8 +46,12 @@ export const EveryTriggerEditor = ({
       ]}
       onChange={(unit) => onChange({ ...trigger, unit })}
       testSubject="automationScheduleUnit"
+      readOnly={readOnly}
     />
-    {trigger.unit === 'hour' && (
+    {trigger.unit === 'hour' && readOnly && trigger.betweenHours && (
+      <EuiText size="s">{triggerLabels.betweenHours}</EuiText>
+    )}
+    {trigger.unit === 'hour' && !readOnly && (
       <EuiCheckbox
         id="automationBetweenHours"
         label={triggerLabels.betweenHours}
@@ -57,6 +63,7 @@ export const EveryTriggerEditor = ({
       <TimeField
         label={triggerLabels.startTime}
         value={trigger.startTime}
+        readOnly={readOnly}
         step={3600}
         onChange={(startTime) => onChange({ ...trigger, startTime: `${startTime.slice(0, 2)}:00` })}
       />
@@ -68,12 +75,20 @@ export const EveryTriggerEditor = ({
       <TimeField
         label={triggerLabels.endTime}
         value={trigger.endTime}
+        readOnly={readOnly}
         step={3600}
         onChange={(endTime) => onChange({ ...trigger, endTime: `${endTime.slice(0, 2)}:00` })}
       />
     )}
     {trigger.unit === 'week' && <EuiText size="s">{triggerLabels.on}</EuiText>}
-    {trigger.unit === 'week' && (
+    {trigger.unit === 'week' && readOnly && (
+      <EuiBadge>
+        {DAYS.filter(({ id }) => trigger.daysOfWeek.includes(Number(id)))
+          .map(({ label }) => label)
+          .join(', ')}
+      </EuiBadge>
+    )}
+    {trigger.unit === 'week' && !readOnly && (
       <EuiButtonGroup
         legend={triggerLabels.daysOfWeek}
         type="multi"
@@ -96,12 +111,14 @@ export const EveryTriggerEditor = ({
       <TimeField
         label={triggerLabels.time}
         value={trigger.time}
+        readOnly={readOnly}
         onChange={(time) => onChange({ ...trigger, time })}
       />
     )}
     {(trigger.unit !== 'hour' || trigger.betweenHours) && (
       <TimezonePicker
         timezone={trigger.timezone}
+        readOnly={readOnly}
         onChange={(timezone) => onChange({ ...trigger, timezone })}
       />
     )}

@@ -19,7 +19,13 @@ import {
 import type { TaskEvent, TaskRun } from '../task_events';
 import { asTaskRunEvent, TaskPersistence, asTaskManagerStatEvent } from '../task_events';
 import type { ConcreteTaskInstance, TaskEventLogger } from '../task';
-import { getDeleteTaskRunResult, TaskStatus, TaskCost, InstanceTaskCost } from '../task';
+import {
+  getDeleteTaskRunResult,
+  TaskPriority,
+  TaskStatus,
+  TaskCost,
+  InstanceTaskCost,
+} from '../task';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
 import type { TaskDefinitionRegistry } from '../task_type_dictionary';
@@ -896,15 +902,52 @@ describe('TaskManagerRunner', () => {
       expect(runner.startedAt).toEqual(now);
     });
 
-    test('reschedules tasks that return a runAt', async () => {
+    test.each([undefined, TaskPriority.Standard, TaskPriority.UserInteractive])(
+      'reschedules tasks that return a runAt with priority %s',
+      async (priority) => {
+        const runAt = minutesFromNow(_.random(1, 10));
+        const { instance, runner, store } = await readyToRunStageSetup({
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              allowPriorityOverride: true,
+              createTaskRunner: () => ({
+                async run() {
+                  return { runAt, state: {}, priority };
+                },
+              }),
+            },
+          },
+        });
+
+        await runner.run();
+
+        expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+        expect(store.partialUpdate).toHaveBeenCalledWith(expect.objectContaining({ runAt }), {
+          validate: true,
+          doc: instance,
+        });
+
+        const [update] = store.partialUpdate.mock.calls[0];
+        if (priority === undefined) {
+          expect(update).not.toHaveProperty('priority');
+        } else {
+          expect(update).toHaveProperty('priority', priority);
+        }
+
+        expect(getNextRunAtSpy).not.toHaveBeenCalled();
+      }
+    );
+
+    test('ignores a returned priority when the task type has not opted in', async () => {
       const runAt = minutesFromNow(_.random(1, 10));
-      const { instance, runner, store } = await readyToRunStageSetup({
+      const { runner, store, logger } = await readyToRunStageSetup({
         definitions: {
           bar: {
             title: 'Bar!',
             createTaskRunner: () => ({
               async run() {
-                return { runAt, state: {} };
+                return { runAt, state: {}, priority: TaskPriority.UserInteractive };
               },
             }),
           },
@@ -913,13 +956,13 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
-      expect(store.partialUpdate).toHaveBeenCalledWith(expect.objectContaining({ runAt }), {
-        validate: true,
-        doc: instance,
-      });
-
-      expect(getNextRunAtSpy).not.toHaveBeenCalled();
+      const [update] = store.partialUpdate.mock.calls[0];
+      expect(update).toHaveProperty('runAt', runAt);
+      expect(update).not.toHaveProperty('priority');
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('does not allow priority overrides'),
+        { tags: ['bar'] }
+      );
     });
 
     test('reschedules tasks that return a schedule', async () => {
