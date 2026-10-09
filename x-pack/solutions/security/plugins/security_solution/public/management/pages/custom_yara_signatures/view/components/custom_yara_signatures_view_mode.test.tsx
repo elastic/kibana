@@ -61,4 +61,13 @@ describe('CustomYaraSignaturesViewMode', () => {
     expect(getByLabelText('Copy')).toBeInTheDocument();
     expect(getByLabelText('Expand')).toBeInTheDocument();
   });
+
+  it('renders an empty code block when the artifact has no entries', () => {
+    const item = new ExceptionsListItemGenerator('seed').generate({ entries: [] });
+    const { getByTestId } = createAppRootMockRenderer().render(
+      <CustomYaraSignaturesViewMode item={item} />
+    );
+
+    expect(getByTestId('customYaraSignaturesViewMode').textContent).toBe('');
+  });
 });

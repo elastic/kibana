@@ -13,7 +13,9 @@ import type { ArtifactViewModeComponentProps } from '../../../../components/arti
 
 const getCustomYaraSignatureValue = (item: ExceptionListItemSchema): string => {
   const entry = item.entries[0];
+
   if (
+    entry &&
     'field' in entry &&
     entry.field === CUSTOM_YARA_SIGNATURE_FIELD_TYPE &&
     'value' in entry &&
