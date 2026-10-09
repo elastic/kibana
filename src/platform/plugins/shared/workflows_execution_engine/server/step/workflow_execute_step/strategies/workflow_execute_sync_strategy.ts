@@ -47,14 +47,24 @@ export class WorkflowExecuteSyncStrategy {
     inputs: Record<string, unknown>,
     spaceId: string,
     request: KibanaRequest,
-    parentDepth: number
+    parentDepth: number,
+    inheritParentIdentity: boolean,
+    parentStepName: string
   ): Promise<StrategyResult> {
     const currentState = this.stepExecutionRuntime.getCurrentStepState() as
       | SubWorkflowWaitState
       | undefined;
 
     if (!currentState) {
-      return this.initiateSubWorkflowExecution(workflow, inputs, spaceId, request, parentDepth);
+      return this.initiateSubWorkflowExecution(
+        workflow,
+        inputs,
+        spaceId,
+        request,
+        parentDepth,
+        inheritParentIdentity,
+        parentStepName
+      );
     }
 
     return this.readChildExecutionFromEs(currentState, spaceId);
@@ -97,13 +107,15 @@ export class WorkflowExecuteSyncStrategy {
     inputs: Record<string, unknown>,
     spaceId: string,
     request: KibanaRequest,
-    parentDepth: number
+    parentDepth: number,
+    inheritParentIdentity: boolean,
+    parentStepName: string
   ): Promise<StrategyResult> {
     try {
       const workflowExecution = this.stepExecutionRuntime.workflowExecution;
       const isTestRun = !!this.stepExecutionRuntime.workflowExecution.isTestRun;
       const { workflowExecutionId } = await this.workflowsExecutionEngine.executeWorkflow(
-        toWorkflowExecutionEngineModel(workflow, { isTestRun }),
+        toWorkflowExecutionEngineModel(workflow, { isTestRun, isEphemeral: false }),
         {
           spaceId,
           inputs,
@@ -113,6 +125,7 @@ export class WorkflowExecuteSyncStrategy {
           parentWorkflowExecutionId: workflowExecution.id,
           parentStepId: this.stepExecutionRuntime.node.stepId,
           parentDepth,
+          ...(inheritParentIdentity ? { inheritParentIdentity: true, parentStepName } : {}),
         },
         request
       );

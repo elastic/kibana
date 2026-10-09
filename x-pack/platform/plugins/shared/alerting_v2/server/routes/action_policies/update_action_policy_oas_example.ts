@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UpdateActionPolicyBody } from '@kbn/alerting-v2-schemas';
+import type { UpdateActionPolicyData } from '@kbn/alerting-v2-schemas';
 import type { AlertingOasOperationObject } from '../oas_types';
 import {
   ACTION_POLICY_LICENSE_NOT_SUPPORTED_RESPONSE,
@@ -16,8 +16,7 @@ import {
 } from './action_policy_oas_shared_examples';
 import { buildOasOperation } from '../oas_utils';
 
-export const UPDATE_ACTION_POLICY_REQUEST: UpdateActionPolicyBody = {
-  version: 'WzAsMV0=',
+export const UPDATE_ACTION_POLICY_REQUEST: UpdateActionPolicyData = {
   name: 'Notify on production alerts (updated)',
   description: 'Updated description.',
 };

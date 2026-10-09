@@ -28,10 +28,8 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
 }));
 
 jest.mock('@kbn/alerting-v2-schemas', () => ({
-  getBreachEsqlQuery: (query: unknown) =>
-    typeof query === 'object' && query !== null && 'breach' in (query as Record<string, unknown>)
-      ? (query as Record<string, unknown>).breach
-      : '',
+  getBreachEsqlQuery: (query: { base?: string; breach?: { segment: string } } | null) =>
+    query?.breach ? `${query.base} | ${query.breach.segment}` : query?.base ?? '',
   getRecoverEsqlQuery: () => undefined,
 }));
 
@@ -40,6 +38,20 @@ jest.mock('./use_create_rule', () => ({
 }));
 jest.mock('./use_update_rule', () => ({
   useUpdateRule: () => ({ mutate: mockUpdateMutate, isLoading: false }),
+}));
+let mockCreateActionPolicyDisabledReason: string | undefined;
+jest.mock('./use_create_action_policy_disabled_reason', () => ({
+  useCreateActionPolicyDisabledReason: () => mockCreateActionPolicyDisabledReason,
+}));
+
+const mockActionPolicyGetRedirectUrl = jest.fn(
+  ({ actionPolicyId }: { actionPolicyId: string }) =>
+    `/app/alerting_v2/action-policies/edit/${actionPolicyId}`
+);
+jest.mock('../application/locator_context', () => ({
+  useAlertingLocators: () => ({
+    actionPolicyLocators: { getRedirectUrl: mockActionPolicyGetRedirectUrl },
+  }),
 }));
 
 const mockNavigateToUrl = jest.fn();
@@ -120,6 +132,10 @@ const callOnUpdateRule = () => {
   });
 };
 
+beforeEach(() => {
+  mockCreateActionPolicyDisabledReason = undefined;
+});
+
 describe('useComposeDiscoverFlyout — create submission wiring', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -145,6 +161,41 @@ describe('useComposeDiscoverFlyout — create submission wiring', () => {
     await waitFor(() => {
       expect(mockNavigateToUrl).toHaveBeenCalledWith(REDIRECT_PATH);
       expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+    });
+  });
+});
+
+describe('useComposeDiscoverFlyout — action policy creation', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    capturedFlyoutProps = {};
+    hookApi = undefined;
+  });
+
+  it('passes why action policy creation is disabled to the rule form services', async () => {
+    const disabledReason = 'Action policy creation is disabled';
+    mockCreateActionPolicyDisabledReason = disabledReason;
+
+    await renderAndOpenCreate();
+
+    expect(capturedFlyoutProps.services).toHaveProperty(
+      'createActionPolicyDisabledReason',
+      disabledReason
+    );
+  });
+
+  it('injects a host-aware action policy edit href builder into the rule form services', async () => {
+    await renderAndOpenCreate();
+
+    const services = capturedFlyoutProps.services as {
+      getActionPolicyEditHref: (id: string) => string;
+    };
+    expect(services.getActionPolicyEditHref('ap-1')).toBe(
+      '/app/alerting_v2/action-policies/edit/ap-1'
+    );
+    expect(mockActionPolicyGetRedirectUrl).toHaveBeenCalledWith({
+      page: 'edit',
+      actionPolicyId: 'ap-1',
     });
   });
 });
@@ -180,9 +231,8 @@ describe('useComposeDiscoverFlyout — edit submission wiring', () => {
 describe('useComposeDiscoverFlyout — builder-to-ES|QL confirmation', () => {
   const builderRule = {
     id: 'rule-builder',
-    metadata: { name: 'Builder rule', builder_type: 'threshold' },
-    query: { format: 'standalone', breach: 'FROM logs-* | STATS count() | WHERE count > 5' },
-    recovery_strategy: null,
+    metadata: { name: 'Builder rule', builder: { type: 'threshold' } },
+    query: { base: 'FROM logs-* | STATS count() | WHERE count > 5' },
     time_field: '@timestamp',
   } as unknown as RuleApiResponse;
 

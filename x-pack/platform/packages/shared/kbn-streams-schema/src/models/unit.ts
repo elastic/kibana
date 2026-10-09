@@ -138,9 +138,10 @@ export const streamsPipelineSchema = z
 
 /**
  * Authored Streams unit document from streams-spec `unit.schema.yaml`.
- * Canvas saves sources, destinations, and pipelines incrementally, so Kibana
- * does not require `minItems: 1` here. Completeness and remaining semantic
- * graph rules are enforced by the config-distributor (`transpiler.Compile()`).
+ * Canvas saves sources, destinations, and pipelines incrementally, so this
+ * schema does not require `minItems: 1`. The unit HTTP routes do not parse
+ * requests with this schema. The config-distributor validates authored
+ * documents (`transpiler.Compile()`).
  */
 export const streamsUnitSchema = z.strictObject({
   sources: z.array(sourceSchema).max(2000).default([]),
@@ -177,8 +178,15 @@ export const streamsUnitUpsertRequestSchema = z.object({
 });
 
 export const collectUnitComponentIds = (unit: StreamsUnit.Configuration): string[] => {
-  return [...unit.sources, ...(unit.processors ?? []), ...unit.destinations, ...unit.pipelines].map(
-    ({ id }) => id
+  const components: ReadonlyArray<{ id?: unknown }> = [
+    ...(Array.isArray(unit.sources) ? unit.sources : []),
+    ...(Array.isArray(unit.processors) ? unit.processors : []),
+    ...(Array.isArray(unit.destinations) ? unit.destinations : []),
+    ...(Array.isArray(unit.pipelines) ? unit.pipelines : []),
+  ];
+
+  return components.flatMap((component) =>
+    typeof component?.id === 'string' ? [component.id] : []
   );
 };
 

@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  collectIgnoredKibanaFetcherOccurrences,
+  IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
+  shouldWarnIgnoredKibanaFetcher,
+  validateStepNameUniqueness,
+} from '@kbn/workflows';
 import type { ValidateWorkflowResponseDto, WorkflowYaml } from '@kbn/workflows';
-import { validateStepNameUniqueness } from '@kbn/workflows';
 import { isGraphBuildError, WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowDiagnostic } from '@kbn/workflows/types/v1';
 import type { WorkflowContextRegistry } from '@kbn/workflows-yaml';
@@ -26,6 +31,10 @@ import { validateTriggers } from './validate_triggers';
 
 export interface ValidateWorkflowYamlOptions {
   triggerDefinitions?: TriggerDefinitionForValidateTriggers[];
+  /**
+   * When true, `kibana.*` YAML `fetcher` is warned as ignored because it uses Core self-client.
+   */
+  warnIgnoredKibanaFetcher?: boolean;
   /**
    * Registry of registered step, connector and trigger metadata. Passing one
    * runs the `variable-validation` rule group, which resolves every `{{ … }}`
@@ -140,6 +149,19 @@ export function validateWorkflowYaml(
       const message =
         isGraphBuildError(error) || error instanceof Error ? error.message : String(error);
       diagnostics.push({ severity: 'error', message, source: 'graph', ruleId: 'graphBuildError' });
+    }
+
+    const warnKibanaFetcher = options?.warnIgnoredKibanaFetcher ?? false;
+    for (const occurrence of collectIgnoredKibanaFetcherOccurrences(parsedWorkflow.steps)) {
+      if (shouldWarnIgnoredKibanaFetcher(occurrence.stepType, warnKibanaFetcher)) {
+        diagnostics.push({
+          severity: 'warning',
+          message: IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
+          source: 'deprecation',
+          path: occurrence.path,
+          ruleId: 'ignoredFetcherSetting',
+        });
+      }
     }
 
     // Variable validation resolves references against the step graph, so it only

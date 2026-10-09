@@ -27,6 +27,13 @@ export const WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID = 'workflows:ui:show
 export const WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID = 'workflows:executionStatsBar:enabled';
 
 /**
+ * When true, all `kibana.*` steps use Core `http.selfClient`.
+ * When false, all `kibana.*` steps use the global `fetch` client, including YAML `fetcher`.
+ */
+export const WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG =
+  'workflows.kibanaRequest.coreSelfClientEnabled';
+
+/**
  * Global Advanced Setting gating the Workflow Template Library tech preview.
  *
  * Registered as a global uiSetting (not per-space) so the same toggle is
@@ -88,6 +95,17 @@ export const SystemConnectorsMap = new Map<string, string>([['.http', '.http-sys
  */
 export const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
 export const WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE = 'workflow.yaml.diff';
+
+/**
+ * Why the workflow editor cannot apply changes. The editor sends it on the
+ * `workflow.yaml` attachment so the agent does not offer edits the user cannot save.
+ */
+export const WORKFLOW_EDITOR_READ_ONLY_REASONS = [
+  'executions_tab',
+  'managed',
+  'no_permission',
+] as const;
+export type WorkflowEditorReadOnlyReason = (typeof WORKFLOW_EDITOR_READ_ONLY_REASONS)[number];
 
 /**
  * UI event broadcast on the agent builder events bus when a workflow YAML

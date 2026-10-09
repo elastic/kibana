@@ -32,6 +32,35 @@ function toResponseItem(deployment: CloudOnboardingDeployment) {
   };
 }
 
+const AGENT_BASED_AUTH_METHODS = new Set([
+  'static_keys',
+  'temporary_keys',
+  'shared_credentials',
+  'assume_role',
+]);
+const MANAGED_INTEGRATION_AUTH_METHODS = new Set(['identity_federation', 'static_keys']);
+
+function validateAuthMethod(
+  mechanisms: string[],
+  authMethod: string | undefined
+): string | undefined {
+  if (!authMethod) return undefined;
+  if (mechanisms.includes('agent_based') && !AGENT_BASED_AUTH_METHODS.has(authMethod)) {
+    return `authMethod '${authMethod}' is not valid for agent_based deployments. Allowed: ${[
+      ...AGENT_BASED_AUTH_METHODS,
+    ].join(', ')}`;
+  }
+  if (
+    (mechanisms.includes('managed_integration') || mechanisms.includes('ecf')) &&
+    !MANAGED_INTEGRATION_AUTH_METHODS.has(authMethod)
+  ) {
+    return `authMethod '${authMethod}' is not valid for managed_integration/ecf deployments. Allowed: ${[
+      ...MANAGED_INTEGRATION_AUTH_METHODS,
+    ].join(', ')}`;
+  }
+  return undefined;
+}
+
 export const createCloudOnboardingDeploymentHandler: FleetRequestHandler<
   undefined,
   undefined,
@@ -39,6 +68,14 @@ export const createCloudOnboardingDeploymentHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
+
+  const authMethodError = validateAuthMethod(
+    request.body.mechanisms ?? [],
+    request.body.authMethod
+  );
+  if (authMethodError) {
+    return response.badRequest({ body: { message: authMethodError } });
+  }
 
   try {
     const deployment = await cloudOnboardingDeploymentService.create(
@@ -118,6 +155,28 @@ export const updateCloudOnboardingDeploymentHandler: FleetRequestHandler<
   }
 
   try {
+    // Validate authMethod against the effective mechanisms after this PUT — either the
+    // incoming mechanisms (if the request changes them) or the persisted ones. This prevents
+    // a PUT { mechanisms: ['managed_integration'] } from leaving a stale assume_role method
+    // that POST would have rejected, and vice-versa.
+    if (request.body.authMethod !== undefined || request.body.mechanisms) {
+      const existing = await cloudOnboardingDeploymentService.getById(
+        internalSoClient,
+        request.params.id
+      );
+      const effectiveMechanisms = request.body.mechanisms ?? existing.mechanisms;
+      // Explicit null means the field is being cleared (MI→ECF transition); treat it as
+      // "no method" rather than falling back to the stored value, so the PUT is not rejected.
+      const effectiveAuthMethod =
+        'authMethod' in request.body ? request.body.authMethod : existing.authMethod;
+      if (effectiveAuthMethod) {
+        const authMethodError = validateAuthMethod(effectiveMechanisms, effectiveAuthMethod);
+        if (authMethodError) {
+          return response.badRequest({ body: { message: authMethodError } });
+        }
+      }
+    }
+
     const deployment = await cloudOnboardingDeploymentService.update(
       internalSoClient,
       request.params.id,

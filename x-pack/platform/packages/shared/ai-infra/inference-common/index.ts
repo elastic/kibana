@@ -57,24 +57,19 @@ export {
   type ChatCompletionToolNotFoundError,
   type ChatCompletionToolValidationError,
   type ChatCompletionTokenLimitReachedError,
+  isContextLengthExceededError,
   isToolValidationError,
   isOutputTokenLimitReachedError,
   isToolNotFoundError,
   type ChatCompleteMetadata,
   type ConnectorTelemetryMetadata,
   type ChatCompleteAnonymizationMetadata,
-  type ChatCompleteAnonymizationTarget,
-  type AnonymizationRule,
-  type RegexAnonymizationRule,
-  type NamedEntityRecognitionRule,
   type AnonymizationEntity,
   type Anonymization,
   type Deanonymization,
   type AnonymizationOutput,
   type DeanonymizationOutput,
   type DeanonymizedMessage,
-  type AnonymizationSettings,
-  type AnonymizationEntityClass,
   type AnonymizationResponseMetadata,
   type DeanonymizedMessageData,
   type CustomToolChoice,
@@ -151,6 +146,8 @@ export {
   getModelDefinition,
   getContextWindowSize,
   contextWindowFromModelName,
+  getSupportedReasoningEffortLevels,
+  validateReasoningEffort,
   type InferenceConnector,
   type InferenceConnectorCapabilities,
   type RawConnector,
@@ -162,6 +159,7 @@ export {
   InferenceEndpointProvider,
   elasticModelIds,
   type EisInferenceEndpointMetadata,
+  type EisInferenceEndpointCapabilities,
   type CspRegion,
   type InferenceEndpointRequestBody,
 } from './src/inference_endpoints';
@@ -200,5 +198,3 @@ export {
 } from './src/prompt';
 
 export { type BoundOptions, type UnboundOptions, bindApi } from './src/bind';
-
-export { aiAnonymizationSettings } from './src/ui_settings/settings_keys';

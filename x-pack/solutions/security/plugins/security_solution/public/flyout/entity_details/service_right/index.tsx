@@ -29,6 +29,10 @@ import type { IdentityFields } from '../../document_details/shared/utils';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { useNavigateToServiceDetails } from './hooks/use_navigate_to_service_details';
 import { useEntityFromStore } from '../shared/hooks/use_entity_from_store';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../common/utils/execution_context';
 import { getRiskFromEntityRecord } from '../shared/entity_store_risk_utils';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { useEntityPanelTabs, TABLE_TAB_ID } from '../shared/hooks/use_entity_panel_tabs';
@@ -50,6 +54,16 @@ export interface ServicePanelExpandableFlyoutProps extends FlyoutPanelProps {
 }
 
 export const SERVICE_PANEL_RISK_SCORE_QUERY_ID = 'servicePanelRiskScoreQuery';
+const SERVICE_ENTITY_FROM_STORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'service_entity_from_store'
+);
+
+const SERVICE_RISK_SCORE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'service_risk_score'
+);
+
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
   querySize: 1,
@@ -72,6 +86,7 @@ export const ServicePanel = memo(function ServicePanel({
     identityFields: serviceStoreIdentityFields,
     entityType: 'service',
     skip: false,
+    executionContext: SERVICE_ENTITY_FROM_STORE_CONTEXT,
   });
 
   const euidApi = useEntityStoreEuidApi();
@@ -94,6 +109,7 @@ export const ServicePanel = memo(function ServicePanel({
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
     skip: true,
+    executionContext: SERVICE_RISK_SCORE_CONTEXT,
   });
 
   const { inspect, loading, data: serviceRisk } = riskScoreState;
@@ -224,6 +240,7 @@ export const ServicePanel = memo(function ServicePanel({
             scopeId={scopeId}
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={isPreviewMode}
+            entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
             riskScoreQueryId={SERVICE_PANEL_RISK_SCORE_QUERY_ID}
           />

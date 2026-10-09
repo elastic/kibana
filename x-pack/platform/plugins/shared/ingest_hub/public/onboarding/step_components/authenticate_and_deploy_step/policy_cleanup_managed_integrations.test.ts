@@ -230,6 +230,95 @@ describe('updateManagedIntegrationsPolicy — payload shape', () => {
     expect(payload.vars?.secret_access_key).toBe('SECRET');
   });
 
+  it("sends the policy's stored secret refs back when no keys are in memory", async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: {
+        item: {
+          version: '2.5.0',
+          vars: [{ name: 'access_key_id' }, { name: 'secret_access_key' }],
+          policy_templates: [],
+        },
+      },
+    });
+    mockGetAgentlessPolicy.mockResolvedValue({
+      item: {
+        name: 'existing-agentless-name',
+        package: { version: '2.5.0' },
+        vars: {
+          access_key_id: { isSecretRef: true, id: 'ref-akid' },
+          secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+        },
+      },
+    });
+    await cleanupManagedIntegrationsPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+    });
+    expect(mockUpdateAgentless.mock.calls[0][1].vars).toEqual({
+      default_region: undefined,
+      access_key_id: { isSecretRef: true, id: 'ref-akid' },
+      secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+    });
+  });
+
+  it("prefers refs handed in (a secret an earlier policy just stored) over the policy's own", async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: {
+        item: { version: '2.5.0', vars: [{ name: 'secret_access_key' }], policy_templates: [] },
+      },
+    });
+    mockGetAgentlessPolicy.mockResolvedValue({
+      item: {
+        name: 'existing-agentless-name',
+        package: { version: '2.5.0' },
+        vars: { secret_access_key: { isSecretRef: true, id: 'own-old-secret' } },
+      },
+    });
+    await cleanupManagedIntegrationsPolicies({
+      ...BASE_OPTS,
+      authenticateAndDeployStep: {
+        existingSecretRefs: new Map([
+          ['secret_access_key', { isSecretRef: true as const, id: 'shared-new-secret' }],
+        ]),
+      } as never,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+    });
+    expect(mockUpdateAgentless.mock.calls[0][1].vars).toEqual({
+      default_region: undefined,
+      secret_access_key: { isSecretRef: true, id: 'shared-new-secret' },
+    });
+  });
+
+  it('does not send stored refs for a policy that uses a cloud connector', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: {
+        item: { version: '2.5.0', vars: [{ name: 'secret_access_key' }], policy_templates: [] },
+      },
+    });
+    mockGetAgentlessPolicy.mockResolvedValue({
+      item: {
+        name: 'existing-agentless-name',
+        package: { version: '2.5.0' },
+        cloud_connector: { enabled: true, cloud_connector_id: 'cc-1' },
+        vars: { secret_access_key: { isSecretRef: true, id: 'ref-secret' } },
+      },
+    });
+    await cleanupManagedIntegrationsPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+    });
+    expect(mockUpdateAgentless.mock.calls[0][1].vars).toBeUndefined();
+  });
+
   it('preserves cloud_connector from the fetched policy (not from session connectorId)', async () => {
     mockGetPackageInfo.mockResolvedValue({
       data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },

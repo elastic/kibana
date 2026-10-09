@@ -108,6 +108,8 @@ export const LazyPackagePolicyInputVarField = lazy(() =>
 export type { PackageListGridProps } from './applications/integrations/sections/epm/components/package_list_grid';
 export type { AvailablePackagesHookType } from './applications/integrations/sections/epm/screens/home/hooks/use_available_packages';
 export type { IntegrationCardItem } from './applications/integrations/sections/epm/screens/home';
+export { withSearchMemberMatch } from './applications/integrations/sections/epm/screens/home/search_member_match';
+export { SearchMemberMatchDescription } from './applications/integrations/sections/epm/components/search_member_match_description';
 export type { CategoryFacet } from './applications/integrations/sections/epm/screens/home/category_facets';
 
 export const PackageList = () => {
@@ -285,7 +287,10 @@ export const LazyAwsTemporaryKeysForm = lazy(() =>
 export type { AwsTemporaryKeysFormProps } from './components/cloud_connector/aws_connect_setup/aws_temporary_keys_form';
 
 // Agent policies query — used by the agent-based policy selector in ingest_hub
-export { useGetAgentPoliciesQuery } from './hooks/use_request/agent_policy';
+export {
+  useGetAgentPoliciesQuery,
+  useBulkGetAgentPoliciesQuery,
+} from './hooks/use_request/agent_policy';
 
 // Imperative agent policies fetcher — used to resolve the next available policy name
 export { sendGetAgentPolicies } from './hooks/use_request/agent_policy';

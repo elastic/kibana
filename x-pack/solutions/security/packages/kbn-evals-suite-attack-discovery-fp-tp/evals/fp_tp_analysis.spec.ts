@@ -8,8 +8,8 @@
 /**
  * Outcome eval for the Attack Discovery FP/TP analysis workflow (security-team#19285).
  *
- * `beforeAll` installs the sample workflow (until #19282 ships the managed one) and routes
- * the `alertzero_reasoning` inference feature to the model under test. Each task seeds a
+ * `beforeAll` routes the `alertzero_reasoning` inference feature to the model under test.
+ * The suite runs the managed analysis workflow in place. Each task seeds a
  * fresh copy of one example's world, creates an empty Investigation, runs the workflow,
  * and grades its execution output against the contract in security-team#19280.
  *
@@ -25,10 +25,11 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import {
   FP_TP_INFERENCE_FEATURE_ID,
   FP_TP_MANAGED_WORKFLOW_ID,
-  FP_TP_WORKFLOW_SOURCE,
+  PUBLIC_API_VERSION,
 } from '../src/constants';
 import { evaluate, selectEvaluators, tags } from '../src/evaluate';
 import {
+  claimGrounding,
   createFpTpTrajectoryEvaluator,
   outcomeAccuracy,
   payloadConformance,
@@ -42,7 +43,6 @@ import {
   waitForConversationsReady,
 } from '../src/investigation';
 import { kbnRequestFromFetch } from '../src/kbn_request';
-import { deleteSampleWorkflow, installSampleWorkflow } from '../src/sample_workflow/install';
 import { buildFpTpExampleWorld, FP_TP_EXAMPLES } from '../src/scenarios';
 import { runFpTpAnalysisWorkflow } from '../src/workflow_task';
 import { ensureFpTpSeedPrerequisites, seedFixture, toSeededEvidence } from '../src/world';
@@ -59,13 +59,20 @@ const SUMMARY_CRITERIA = [
 interface FpTpDatasetExample extends Example {
   input: { exampleId: string };
   output: { outcome: string };
-  metadata: { exampleId: string; scenarioKey: string; situation: string; evidenceState: string };
+  metadata: {
+    exampleId: string;
+    scenarioKey: string;
+    situation: string;
+    evidenceState: string;
+    provenance: string;
+    variant: string | null;
+    variantOf: string | null;
+    provisional: boolean;
+  };
 }
 
 evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classic }, () => {
-  let workflowId: string = FP_TP_MANAGED_WORKFLOW_ID;
-  // Set only once the sample is installed, so teardown never deletes the managed workflow.
-  let installedSampleWorkflowId: string | undefined;
+  const workflowId: string = FP_TP_MANAGED_WORKFLOW_ID;
   let restoreInferenceSettings: (() => Promise<void>) | undefined;
   let restoreEntityExtraction: (() => Promise<void>) | undefined;
   // Cleanups that failed inside a task; afterAll retries them.
@@ -81,11 +88,29 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
       connector: EvalConnector;
       log: ToolingLog;
     }) => {
-      if (FP_TP_WORKFLOW_SOURCE === 'sample') {
-        installedSampleWorkflowId = await installSampleWorkflow(fetch);
-        workflowId = installedSampleWorkflowId;
-        log.info(`Installed sample FP/TP analysis workflow ${workflowId}`);
+      let workflow: { enabled: boolean };
+      try {
+        workflow = await fetch<{ enabled: boolean }>(
+          `/api/workflows/workflow/${encodeURIComponent(workflowId)}`,
+          {
+            method: 'GET',
+            version: PUBLIC_API_VERSION,
+            headers: { 'elastic-api-version': PUBLIC_API_VERSION },
+          }
+        );
+      } catch (error) {
+        throw new Error(
+          `Managed workflow "${workflowId}" is unavailable. It is shipped by the alertzero managed definitions, not installed by this suite; the caller may also lack permission to read it. Original error: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
       }
+      if (!workflow.enabled) {
+        throw new Error(
+          `Managed workflow "${workflowId}" is disabled. It is shipped by the alertzero managed definitions, not installed by this suite.`
+        );
+      }
+
       restoreInferenceSettings = await overrideInferenceFeature({
         fetch,
         featureId: FP_TP_INFERENCE_FEATURE_ID,
@@ -107,23 +132,35 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
     await restoreInferenceSettings?.().catch((error: Error) =>
       log.warning(`Could not restore inference settings: ${error.message}`)
     );
-    if (installedSampleWorkflowId !== undefined) {
-      const sampleId = installedSampleWorkflowId;
-      await deleteSampleWorkflow(fetch, sampleId).catch((error: Error) =>
-        log.warning(`Could not delete sample workflow ${sampleId}: ${error.message}`)
-      );
-    }
   });
 
   evaluate(
     'classifies seeded Attack Discoveries with the expected outcome',
     async ({ executorClient, evaluators, esClient, fetch, log, traceEsClient }) => {
       const examples: FpTpDatasetExample[] = FP_TP_EXAMPLES.map(
-        ({ id, scenarioKey, situation, evidenceState, expectedOutcome }) => ({
+        ({
+          id,
+          scenarioKey,
+          situation,
+          evidenceState,
+          expectedOutcome,
+          provenance,
+          variant,
+          provisional = false,
+        }) => ({
           id,
           input: { exampleId: id },
           output: { outcome: expectedOutcome },
-          metadata: { exampleId: id, scenarioKey, situation, evidenceState },
+          metadata: {
+            exampleId: id,
+            scenarioKey,
+            situation,
+            evidenceState,
+            provenance,
+            variant: variant?.kind ?? null,
+            variantOf: variant?.of ?? null,
+            provisional,
+          },
         })
       );
 
@@ -133,9 +170,11 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
             {
               name: 'security: attack-discovery-fp-tp-analysis',
               description:
-                'Runs the FP/TP analysis workflow against seeded U1 worlds (lookalike FP, true ' +
-                'attack, missing or mixed evidence, and both failure paths) and grades the ' +
-                'execution outcome and payload against the #19280 contract.',
+                'Runs the FP/TP analysis workflow against seeded U1-U6 worlds from an authored ' +
+                'encoded-PowerShell scenario and a replayed MIMICRAT ClickFix chain (true ' +
+                'attacks, benign mimics, missing or conflicting evidence, single-fact ' +
+                'mutations, and both failure paths) and grades the execution outcome and ' +
+                'payload against the #19280 contract.',
               examples,
             } satisfies EvaluationDataset,
           ],
@@ -205,6 +244,7 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
           outcomeAccuracy,
           unsafeClose,
           payloadConformance,
+          skipFailedRuns(claimGrounding),
           createFpTpTrajectoryEvaluator(),
           skipFailedRuns(evaluators.criteria(SUMMARY_CRITERIA)),
         ])

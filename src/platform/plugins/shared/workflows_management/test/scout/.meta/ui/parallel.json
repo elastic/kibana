@@ -1,5 +1,5 @@
 {
-  "sha1": "ea8226d179943d40ee9af4ca9acad1ff0c74f2a8",
+  "sha1": "5eab15e7429f91a664fed98ac4b98a82b1532380",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -34,6 +34,62 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/internal_actions/national_parks.spec.ts",
         "line": 56,
         "column": 13
+      }
+    },
+    {
+      "id": "eb10b95e21481ba-5fe0bd1ead1560b",
+      "title": "Workflow administrator sharing grants execution access through Access control and preserves the owner",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_access_control_admin.spec.ts",
+        "line": 43,
+        "column": 54
+      }
+    },
+    {
+      "id": "478a0cfe64d4fb9-8627e04223e9fc9",
+      "title": "Workflow access dialog saves private and public access through the shared form",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_access_control.spec.ts",
+        "line": 46,
+        "column": 13
+      }
+    },
+    {
+      "id": "478a0cfe64d4fb9-cbce59d83ce1e29",
+      "title": "Workflow access dialog lets an executor test a saved workflow with enabled=true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_access_control.spec.ts",
+        "line": 109,
+        "column": 18
+      }
+    },
+    {
+      "id": "478a0cfe64d4fb9-44fe125f3b43fe5",
+      "title": "Workflow access dialog lets an executor test a saved workflow with enabled=false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_access_control.spec.ts",
+        "line": 109,
+        "column": 18
       }
     },
     {
@@ -329,6 +385,48 @@
       }
     },
     {
+      "id": "35e1b13303eb455-503470e3a1c5be6",
+      "title": "Service account UI with the feature flag disabled omits run_as from settings autocomplete and inserted snippets",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/service_accounts_disabled.spec.ts",
+        "line": 69,
+        "column": 7
+      }
+    },
+    {
+      "id": "35e1b13303eb455-6d3fd990e830902",
+      "title": "Service account UI with the feature flag disabled keeps a typed run_as ID without resolving names or showing account suggestions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/service_accounts_disabled.spec.ts",
+        "line": 90,
+        "column": 9
+      }
+    },
+    {
+      "id": "35e1b13303eb455-12e39ee89151417",
+      "title": "Service account UI with the feature flag disabled shows historical raw identity without name badges or directory calls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/service_accounts_disabled.spec.ts",
+        "line": 118,
+        "column": 21
+      }
+    },
+    {
       "id": "a4934baed7bcf96-773061bd6f9afcd",
       "title": "Event autocomplete should be dynamic based on triggers manual trigger: event.* should only suggest spaceId",
       "expectedStatus": "passed",
@@ -362,34 +460,28 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 74,
-        "column": 25
+        "line": 114,
+        "column": 58
       }
     },
     {
-      "id": "84b864bf30250b9-426daf58e791802",
-      "title": "Workflow editor: validation performance [large_perf (87 steps, 431 vars)] editor stays responsive during rapid edits",
+      "id": "84b864bf30250b9-bb6c00e207d6b96",
+      "title": "Workflow editor: validation performance [large_perf (87 steps, 431 vars)] frame rate stays above threshold during rapid edits",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 230,
-        "column": 33
+        "line": 315,
+        "column": 20
       }
     },
     {
@@ -398,34 +490,28 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 74,
-        "column": 25
+        "line": 114,
+        "column": 58
       }
     },
     {
-      "id": "84b864bf30250b9-9672ab6054b564c",
-      "title": "Workflow editor: validation performance [infosec_demo (150 steps, 361 vars)] editor stays responsive during rapid edits",
+      "id": "84b864bf30250b9-c189381fa89f5ce",
+      "title": "Workflow editor: validation performance [infosec_demo (150 steps, 361 vars)] frame rate stays above threshold during rapid edits",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 230,
-        "column": 33
+        "line": 315,
+        "column": 20
       }
     },
     {
@@ -728,8 +814,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/foreach_iterations.spec.ts",
-        "line": 72,
-        "column": 7
+        "line": 94,
+        "column": 9
       }
     },
     {

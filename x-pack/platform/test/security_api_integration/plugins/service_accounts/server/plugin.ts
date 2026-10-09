@@ -20,7 +20,24 @@ interface SetupDependencies {
 export class ServiceAccountsTestPlugin implements Plugin<void, void, SetupDependencies> {
   setup(core: CoreSetup, { security }: SetupDependencies): void {
     core.security.serviceAccounts.registerWorkloadType({ type: 'job', name: 'Test job' });
-    core.http.createRouter().post(
+    const router = core.http.createRouter();
+    // Reports how Core classified the request's principal. Authorization is intentionally off:
+    // the point is to observe classification for credentials without Kibana privileges.
+    router.get(
+      {
+        path: '/internal/service_accounts_test/_principal',
+        options: { access: 'internal' },
+        security: {
+          authz: { enabled: false, reason: 'Test endpoint reporting the authenticated principal' },
+        },
+        validate: false,
+      },
+      async (context, _request, response) => {
+        const { security: coreSecurity } = await context.core;
+        return response.ok({ body: { principal: coreSecurity.authc.getPrincipal() } });
+      }
+    );
+    router.post(
       {
         path: '/internal/service_accounts_test/{workloadId}',
         options: { access: 'internal' },
@@ -40,7 +57,10 @@ export class ServiceAccountsTestPlugin implements Plugin<void, void, SetupDepend
               schema.literal('execute'),
             ]),
             serviceAccountId: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
-            waitMs: schema.number({ min: 0, max: 20000, defaultValue: 0 }),
+            // Long enough to outlive the shortest token each backend issues, so a test can check
+            // renewal. UIAM exchange tokens live at least one minute (PT1M, plus 2s of clock skew),
+            // and the stateful config set expires Elasticsearch tokens after 15s.
+            waitMs: schema.number({ min: 0, max: 70000, defaultValue: 0 }),
             action: schema.oneOf([schema.literal('authenticate'), schema.literal('read_role')], {
               defaultValue: 'authenticate',
             }),
@@ -82,9 +102,12 @@ export class ServiceAccountsTestPlugin implements Plugin<void, void, SetupDepend
             async (fakeRequest) => {
               const client = start.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
               const initialAuthorization = fakeRequest.headers.authorization;
+              const principal = start.security.authc.getPrincipal(fakeRequest);
               const initial = await client.security.authenticate();
-              await client.cluster.health();
-              if (action === 'read_role') await client.security.getRole({ name: 'superuser' });
+              // Both calls are available in serverless mode, unlike cluster health or a lookup of
+              // the `superuser` role. Listing roles needs `read_security`.
+              await client.info();
+              if (action === 'read_role') await client.security.getRole();
               if (revoke === 'unbind') await api.unbindWorkload(request, workload);
               if (revoke === 'disable' || revoke === 'delete_token') {
                 const [namespace, name] = initial.username.split('/');
@@ -118,6 +141,8 @@ export class ServiceAccountsTestPlugin implements Plugin<void, void, SetupDepend
                   renewedUsername: renewed.username,
                   tokenChanged: initialAuthorization !== fakeRequest.headers.authorization,
                   spaceId: fakeRequest.spaceId,
+                  principal,
+                  renewedPrincipal: start.security.authc.getPrincipal(fakeRequest),
                 };
               } catch (error) {
                 if (!(error instanceof errors.ResponseError)) throw error;

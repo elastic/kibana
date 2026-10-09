@@ -113,6 +113,10 @@ export interface InMemoryConnector<
   config: Config;
   exposeConfig?: boolean;
   isDynamic?: boolean;
+  /**
+   * Events are on for this in-memory connector. GET reports it for a dual type.
+   */
+  isInboundEventsEnabled?: boolean;
 }
 
 export type FindActionResult = ConnectorWithExtraFindData;
