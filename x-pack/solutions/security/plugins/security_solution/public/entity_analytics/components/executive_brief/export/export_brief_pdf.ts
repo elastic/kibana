@@ -139,6 +139,8 @@ const captureBlock = async (
 
 /** Embeds the captured blocks and draws them onto pages using the flow layout. */
 const addBlocksToPdf = async (pdfDoc: PdfDocument, blocks: CapturedBlock[]): Promise<void> => {
+  // Already loaded by exportBriefToPdf, so this resolves from the module cache.
+  const { rgb } = await import('pdf-lib');
   const embedded: Array<{
     id: string;
     image: PDFImage;
@@ -191,7 +193,7 @@ const addBlocksToPdf = async (pdfDoc: PdfDocument, blocks: CapturedBlock[]): Pro
     });
     if (sliceOffset > 0 || height < block.scaledHeight) {
       // Mask the neighbouring slices that bleed into the page margins.
-      const white = { type: 'RGB' as const, red: 1, green: 1, blue: 1 };
+      const white = rgb(1, 1, 1);
       pdfPage.drawRectangle({
         x: 0,
         y: pageTop,

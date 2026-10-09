@@ -4,9 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { typeToPathMap } from '@elastic/eui/lib/components/icon/icon_map';
 import type { StoryEventType } from '../../../../../common/entity_analytics/executive_brief/types';
 import { EVENT_ICON } from './storyline_steps';
+
+// EUI's icon map ships without type declarations; type the one export the test needs.
+const { typeToPathMap } = jest.requireActual<{ typeToPathMap: Record<string, unknown> }>(
+  '@elastic/eui/lib/components/icon/icon_map'
+);
 
 describe('storyline step icons', () => {
   const eventTypes: StoryEventType[] = [

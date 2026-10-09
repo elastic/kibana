@@ -19,6 +19,8 @@ declare module 'dom-to-image-more' {
       style?: Partial<CSSStyleDeclaration>;
       /** Return false to exclude a style sheet (e.g. cross-origin sheets). */
       styleFilter?: (style: CSSStyleSheet) => boolean;
+      /** Return false to exclude a node (and its subtree) from the capture. */
+      filter?: (node: Node) => boolean;
     }
 
     function toBlob(node: Node, options?: Options): Promise<Blob>;

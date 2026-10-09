@@ -7,5 +7,5 @@
 
 export { exportBriefToPdf } from './export_brief_pdf';
 export type { ExportProgressCallback } from './export_brief_pdf';
-export type { PageLayout, Section } from './page_layout';
-export { layoutSectionsOnPages, A4_POINTS, PAGE_PADDING } from './page_layout';
+export type { FlowBlock, BlockPlacement } from './page_layout';
+export { flowBlocks, A4_POINTS, PAGE_PADDING } from './page_layout';
