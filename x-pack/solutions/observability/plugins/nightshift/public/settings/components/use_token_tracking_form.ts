@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING } from '@kbn/management-settings-ids';
@@ -31,8 +31,12 @@ export const useTokenTrackingForm = ({ isEnabled }: { isEnabled: boolean }) => {
   const [savedEnabled, setSavedEnabled] = useState(observedEnabled);
   const [draftEnabled, setDraftEnabled] = useState<boolean>();
   const [isSaving, setIsSaving] = useState(false);
+  const saveInProgress = useRef(false);
 
   useEffect(() => {
+    if (saveInProgress.current) {
+      return;
+    }
     setSavedEnabled(observedEnabled);
     setDraftEnabled((current) => (current === observedEnabled ? undefined : current));
   }, [observedEnabled]);
@@ -63,6 +67,7 @@ export const useTokenTrackingForm = ({ isEnabled }: { isEnabled: boolean }) => {
     }
 
     const nextEnabled = draftEnabled;
+    saveInProgress.current = true;
     setIsSaving(true);
     let updateError: Error | undefined;
     const updateErrorSubscription = settingsClient.getUpdateErrors$().subscribe((error) => {
@@ -117,6 +122,7 @@ export const useTokenTrackingForm = ({ isEnabled }: { isEnabled: boolean }) => {
       });
       return 'failed';
     } finally {
+      saveInProgress.current = false;
       updateErrorSubscription.unsubscribe();
       setIsSaving(false);
     }

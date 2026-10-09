@@ -9,7 +9,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING } from '@kbn/management-settings-ids';
 import { useKibana } from '../../hooks/use_kibana';
-import { useTokenTrackingForm } from './use_token_tracking_form';
+import { useTokenTrackingForm, type TokenTrackingSaveResult } from './use_token_tracking_form';
 
 jest.mock('../../hooks/use_kibana');
 
@@ -65,6 +65,7 @@ const setup = ({
     ...renderHook(({ available }) => useTokenTrackingForm({ isEnabled: available }), {
       initialProps: { available: isEnabled },
     }),
+    tracking$,
     updateErrors$,
   };
 };
@@ -100,6 +101,42 @@ describe('useTokenTrackingForm', () => {
     });
   });
 
+  it('does not commit an optimistic settings emission before persistence succeeds', async () => {
+    let resolveSave: (saved: boolean) => void = () => {};
+    const { result, tracking$ } = setup();
+    setUiSetting.mockImplementation((_key: string, enabled: boolean) => {
+      tracking$.next(enabled);
+      return new Promise<boolean>((resolve) => {
+        resolveSave = resolve;
+      });
+    });
+
+    act(() => result.current.updateEnabled(true));
+    let savePromise = Promise.resolve<TokenTrackingSaveResult>('noop');
+    act(() => {
+      savePromise = result.current.save();
+    });
+
+    expect(result.current).toMatchObject({
+      enabled: true,
+      savedEnabled: false,
+      isDirty: true,
+      isSaving: true,
+    });
+
+    await act(async () => {
+      resolveSave(true);
+      await savePromise;
+    });
+
+    expect(result.current).toMatchObject({
+      enabled: true,
+      savedEnabled: true,
+      isDirty: false,
+      isSaving: false,
+    });
+  });
+
   it('does not install the dashboard when disabling tracking', async () => {
     const { result } = setup({ savedEnabled: true });
 
@@ -126,8 +163,10 @@ describe('useTokenTrackingForm', () => {
   });
 
   it('keeps a rejected change dirty and reports the settings error', async () => {
-    const { result, updateErrors$ } = setup();
-    setUiSetting.mockImplementation(async () => {
+    const { result, tracking$, updateErrors$ } = setup();
+    setUiSetting.mockImplementation(async (_key: string, enabled: boolean) => {
+      tracking$.next(enabled);
+      tracking$.next(false);
       updateErrors$.next(new Error('save rejected'));
       return false;
     });
@@ -135,7 +174,11 @@ describe('useTokenTrackingForm', () => {
     act(() => result.current.updateEnabled(true));
     await act(async () => expect(result.current.save()).resolves.toBe('failed'));
 
-    expect(result.current).toMatchObject({ enabled: true, isDirty: true });
+    expect(result.current).toMatchObject({
+      enabled: true,
+      savedEnabled: false,
+      isDirty: true,
+    });
     expect(addDanger).toHaveBeenCalledWith({
       title: 'Unable to enable token tracking',
       text: 'save rejected',
