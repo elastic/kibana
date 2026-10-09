@@ -9,6 +9,7 @@ import {
   ALERT_RULE_CONSUMER,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
   ALERT_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
@@ -240,6 +241,218 @@ describe('bulkUpdate()', () => {
         });
       });
     });
+
+    test('throws and does not write when a document is missing the authorization fields', async () => {
+      const indexName = '.alerts-observability.apm.alerts';
+      const alertsClient = new AlertsClient(alertsClientParams);
+      esClientMock.mget.mockResponseOnce({
+        docs: [
+          {
+            found: true,
+            _id: fakeAlertId,
+            _index: indexName,
+            _source: {
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [SPACE_IDS]: [DEFAULT_SPACE],
+            },
+          },
+        ],
+      });
+
+      await expect(
+        alertsClient.bulkUpdate({
+          ids: [fakeAlertId],
+          query: undefined,
+          index: indexName,
+          status: 'closed',
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid alert found with id of \\"myfakeid1\\" and operation update"`
+      );
+
+      expect(esClientMock.bulk).not.toHaveBeenCalled();
+    });
+
+    test.each([
+      {
+        label: 'rule type id',
+        source: {
+          [ALERT_RULE_CONSUMER]: 'apm',
+          [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+          [SPACE_IDS]: [DEFAULT_SPACE],
+        },
+      },
+      {
+        label: 'consumer',
+        source: {
+          [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+          [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+          [SPACE_IDS]: [DEFAULT_SPACE],
+        },
+      },
+    ])(
+      'throws and does not write when a present document is missing the $label',
+      async ({ source }) => {
+        const indexName = '.alerts-observability.apm.alerts';
+        const alertsClient = new AlertsClient(alertsClientParams);
+        esClientMock.mget.mockResponseOnce({
+          docs: [
+            {
+              found: true,
+              _id: fakeAlertId,
+              _index: indexName,
+              _source: source,
+            },
+          ],
+        });
+
+        await expect(
+          alertsClient.bulkUpdate({
+            ids: [fakeAlertId],
+            query: undefined,
+            index: indexName,
+            status: 'closed',
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"Invalid alert found with id of \\"myfakeid1\\" and operation update"`
+        );
+
+        expect(esClientMock.bulk).not.toHaveBeenCalled();
+      }
+    );
+
+    test('authorizes a present document whose authorization fields are nested in _source', async () => {
+      const indexName = '.alerts-observability.apm.alerts';
+      const alertsClient = new AlertsClient(alertsClientParams);
+      esClientMock.mget.mockResponseOnce({
+        docs: [
+          {
+            found: true,
+            _id: fakeAlertId,
+            _index: indexName,
+            _source: {
+              kibana: {
+                alert: {
+                  rule: {
+                    rule_type_id: 'apm.error_rate',
+                    consumer: 'apm',
+                  },
+                  workflow_status: 'open',
+                },
+                space_ids: [DEFAULT_SPACE],
+              },
+            },
+          },
+        ],
+      });
+      esClientMock.bulk.mockResponseOnce({
+        errors: false,
+        took: 1,
+        items: [
+          {
+            update: {
+              _id: fakeAlertId,
+              _index: indexName,
+              result: 'updated',
+              status: 200,
+            },
+          },
+        ],
+      });
+
+      await alertsClient.bulkUpdate({
+        ids: [fakeAlertId],
+        query: undefined,
+        index: indexName,
+        status: 'closed',
+      });
+
+      expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledWith({
+        consumer: 'apm',
+        entity: 'alert',
+        operation: 'update',
+        ruleTypeId: 'apm.error_rate',
+      });
+      expect(esClientMock.bulk).toHaveBeenCalledWith({
+        refresh: 'wait_for',
+        body: [
+          {
+            update: {
+              _index: indexName,
+              _id: fakeAlertId,
+            },
+          },
+          {
+            doc: {
+              [ALERT_WORKFLOW_STATUS]: 'closed',
+            },
+          },
+        ],
+      });
+    });
+
+    test.each([
+      ['missing', { found: false, _id: 'absent-id', _index: '.alerts-observability.apm.alerts' }],
+      [
+        'error',
+        {
+          _id: 'absent-id',
+          _index: '.alerts-observability.apm.alerts',
+          error: { type: 'index_not_found_exception', reason: 'no such index' },
+        },
+      ],
+    ])(
+      'updates and audits only the valid alert when its sibling lookup is %s',
+      async (_label, absentDoc) => {
+        const indexName = '.alerts-observability.apm.alerts';
+        const alertsClient = new AlertsClient(alertsClientParams);
+        esClientMock.mget.mockResponseOnce({
+          docs: [
+            {
+              found: true,
+              _id: fakeAlertId,
+              _index: indexName,
+              _source: {
+                [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+                [ALERT_RULE_CONSUMER]: 'apm',
+                [ALERT_WORKFLOW_STATUS]: 'open',
+                [SPACE_IDS]: [DEFAULT_SPACE],
+              },
+            },
+            absentDoc,
+          ],
+        });
+        esClientMock.bulk.mockResponseOnce({
+          errors: false,
+          took: 1,
+          items: [],
+        });
+
+        await alertsClient.bulkUpdate({
+          ids: [fakeAlertId, 'absent-id'],
+          query: undefined,
+          index: indexName,
+          status: 'acknowledged',
+        });
+
+        expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledTimes(1);
+        expect(esClientMock.bulk).toHaveBeenCalledWith({
+          refresh: 'wait_for',
+          body: [
+            { update: { _index: indexName, _id: fakeAlertId } },
+            { doc: { [ALERT_WORKFLOW_STATUS]: 'acknowledged' } },
+          ],
+        });
+        expect(auditLogger.log).toHaveBeenCalledTimes(2);
+        expect(auditLogger.log).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({
+            message: `User has acknowledged alert [id=${fakeAlertId}]`,
+            event: expect.objectContaining({ action: 'alert_acknowledge', outcome: 'success' }),
+          })
+        );
+      }
+    );
 
     // test('throws an error if ES client fetch fails', async () => {});
     // test('throws an error if ES client bulk update fails', async () => {});

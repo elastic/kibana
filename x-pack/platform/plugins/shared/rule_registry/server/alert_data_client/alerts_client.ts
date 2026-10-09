@@ -46,7 +46,7 @@ import {
 import type { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
-import { isEmpty, partition } from 'lodash';
+import { get, isEmpty, partition } from 'lodash';
 import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import type { TypeOf } from 'io-ts';
 import {
@@ -101,6 +101,32 @@ const isValidAlert = (source?: estypes.SearchHit<ParsedTechnicalFields>): source
   );
 };
 
+const scalarToAuthField = (value: unknown): string | undefined => {
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  return undefined;
+};
+
+const isAbsentLookup = (item: { found?: boolean; error?: unknown }): boolean =>
+  item.found === false || item.error != null;
+
+const readAlertCaseIds = (source: object | null | undefined): unknown[] => {
+  if (source == null) {
+    return [];
+  }
+
+  const value = get(source, ALERT_CASE_IDS);
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  return value == null ? [] : [value];
+};
+
+const hasAlertWorkflowStatus = (source: object | null | undefined): boolean =>
+  source != null && get(source, ALERT_WORKFLOW_STATUS) != null;
+
 /**
  * Reads an authorization field from an alert hit, preferring the `fields` API (which is
  * populated even when `_source` is disabled) and falling back to `_source` for `mget`
@@ -110,20 +136,26 @@ const getAlertAuthField = (
   hit:
     | {
         fields?: Record<string, unknown[]>;
-        _source?: {
-          [ALERT_RULE_TYPE_ID]?: string | null;
-          [ALERT_RULE_CONSUMER]?: string | null;
-        } | null;
+        _source?: object | null;
       }
     | undefined,
   field: typeof ALERT_RULE_TYPE_ID | typeof ALERT_RULE_CONSUMER
 ): string | undefined => {
   const fromFields = hit?.fields?.[field]?.[0];
   if (fromFields != null) {
-    return String(fromFields);
+    const fieldValue = scalarToAuthField(fromFields);
+    if (fieldValue != null) {
+      return fieldValue;
+    }
   }
-  const fromSource = hit?._source?.[field];
-  return fromSource == null ? undefined : String(fromSource);
+
+  if (hit?._source == null) {
+    return undefined;
+  }
+
+  const fromSource = get(hit._source, field);
+  const sourceValue = Array.isArray(fromSource) ? fromSource[0] : fromSource;
+  return scalarToAuthField(sourceValue);
 };
 
 export interface ConstructorOptions {
@@ -280,19 +312,19 @@ export class AlertsClient {
     source: ParsedTechnicalFields | undefined,
     status: STATUS_VALUES
   ) {
-    return source?.[ALERT_WORKFLOW_STATUS] == null
-      ? { signal: { status } }
-      : { [ALERT_WORKFLOW_STATUS]: status };
+    return hasAlertWorkflowStatus(source)
+      ? { [ALERT_WORKFLOW_STATUS]: status }
+      : { signal: { status } };
   }
 
   private getAlertCaseIdsFieldUpdate(source: ParsedTechnicalFields | undefined, caseIds: string[]) {
-    const uniqueCaseIds = new Set([...(source?.[ALERT_CASE_IDS] ?? []), ...caseIds]);
+    const uniqueCaseIds = new Set([...readAlertCaseIds(source), ...caseIds]);
 
     return { [ALERT_CASE_IDS]: Array.from(uniqueCaseIds.values()) };
   }
 
   private validateTotalCasesPerAlert(source: ParsedTechnicalFields | undefined, caseIds: string[]) {
-    const currentCaseIds = source?.[ALERT_CASE_IDS] ?? [];
+    const currentCaseIds = readAlertCaseIds(source);
 
     if (currentCaseIds.length + caseIds.length > MAX_CASES_PER_ALERT) {
       throw Boom.badRequest(`You cannot attach more than ${MAX_CASES_PER_ALERT} cases to an alert`);
@@ -300,17 +332,18 @@ export class AlertsClient {
   }
 
   /**
-   * Accepts an array of ES documents and executes ensureAuthorized for the given operation
+   * Accepts an array of ES documents and executes ensureAuthorized for the given operation.
+   * Present documents missing ruleTypeId or consumer are rejected. Not-found documents and
+   * per-document lookup errors are skipped so valid siblings can still be processed.
    */
   private async ensureAllAuthorized(
     items: Array<{
       _id: string;
+      found?: boolean;
+      error?: unknown;
       // this is typed kind of crazy to fit the output of es api response to this
       fields?: Record<string, unknown[]>;
-      _source?: {
-        [ALERT_RULE_TYPE_ID]?: string | null;
-        [ALERT_RULE_CONSUMER]?: string | null;
-      } | null;
+      _source?: object | null;
     }>,
     operation: ReadOperations.Find | ReadOperations.Get | WriteOperations.Update
   ) {
@@ -318,8 +351,11 @@ export class AlertsClient {
     // Deduplicate authorization checks: authorization is granted per (ruleTypeId, consumer)
     // pair, so we only need to call `ensureAuthorized` once per unique pair.
     const ownersAndRuleTypeIds = new Map<string, { ruleTypeId: string; consumer: string }>();
-
+    const invalidAlertIds: string[] = [];
     items.forEach((hit) => {
+      if (isAbsentLookup(hit)) {
+        return;
+      }
       hitIds.push(hit._id);
 
       const ruleTypeId = getAlertAuthField(hit, ALERT_RULE_TYPE_ID);
@@ -327,19 +363,31 @@ export class AlertsClient {
 
       if (ruleTypeId != null && consumer != null) {
         ownersAndRuleTypeIds.set(`${ruleTypeId}|${consumer}`, { ruleTypeId, consumer });
+      } else {
+        invalidAlertIds.push(hit._id);
       }
     });
 
-    return Promise.all(
-      Array.from(ownersAndRuleTypeIds.values()).map(({ ruleTypeId, consumer }) =>
-        this.authorization.ensureAuthorized({
-          ruleTypeId,
-          consumer,
-          operation,
-          entity: AlertingAuthorizationEntity.Alert,
-        })
-      )
-    ).catch((error) => {
+    try {
+      if (invalidAlertIds.length > 0) {
+        const errorMessage = `Invalid alert found with id of "${invalidAlertIds.join(
+          ', '
+        )}" and operation ${operation}`;
+        this.logger.error(errorMessage);
+        throw Boom.badData(errorMessage);
+      }
+
+      await Promise.all(
+        Array.from(ownersAndRuleTypeIds.values()).map(({ ruleTypeId, consumer }) =>
+          this.authorization.ensureAuthorized({
+            ruleTypeId,
+            consumer,
+            operation,
+            entity: AlertingAuthorizationEntity.Alert,
+          })
+        )
+      );
+    } catch (error) {
       for (const hitId of hitIds) {
         this.auditLogger?.log(
           alertAuditEvent({
@@ -350,7 +398,7 @@ export class AlertsClient {
         );
       }
       throw error;
-    });
+    }
   }
 
   /**
@@ -463,18 +511,25 @@ export class AlertsClient {
     operation,
     fieldToUpdate,
     validate,
+    onSuccess,
   }: {
     alerts: MgetAndAuditAlert[];
     operation: ReadOperations.Find | ReadOperations.Get | WriteOperations.Update;
     fieldToUpdate: (source: ParsedTechnicalFields | undefined) => Record<string, unknown>;
     validate?: (source: ParsedTechnicalFields | undefined) => void;
+    onSuccess?: (ids: string[]) => void;
   }) {
     try {
       const mgetRes = await this.ensureAllAlertsAuthorized({ alerts, operation });
 
       const updateRequests = [];
+      const updatedIds: string[] = [];
 
       for (const item of mgetRes.docs) {
+        if (isAbsentLookup(item)) {
+          continue;
+        }
+
         if (validate) {
           // @ts-expect-error doesn't handle error branch in MGetResponse
           validate(item?._source);
@@ -494,14 +549,20 @@ export class AlertsClient {
             },
           },
         ]);
+        updatedIds.push(item._id);
       }
 
       const bulkUpdateRequest = updateRequests.flat();
+
+      if (bulkUpdateRequest.length === 0) {
+        return { errors: false, items: [], took: 0 };
+      }
 
       const bulkUpdateResponse = await this.esClient.bulk({
         refresh: 'wait_for',
         body: bulkUpdateRequest,
       });
+      onSuccess?.(updatedIds);
       return bulkUpdateResponse;
     } catch (exc) {
       this.logger.error(`error in mgetAlertsAuditOperate ${exc}`);
@@ -521,10 +582,18 @@ export class AlertsClient {
     status: STATUS_VALUES;
     operation: ReadOperations.Find | ReadOperations.Get | WriteOperations.Update;
   }) {
+    const auditAction = workflowStatusAuditActionMap[status];
     return this.mgetAlertsAuditOperate({
       alerts,
       operation,
       fieldToUpdate: (source) => this.getAlertStatusFieldUpdate(source, status),
+      onSuccess: auditAction
+        ? (ids) => {
+            for (const id of ids) {
+              this.auditLogger?.log(alertAuditEvent({ action: auditAction, id }));
+            }
+          }
+        : undefined,
     });
   }
 
@@ -656,7 +725,7 @@ export class AlertsClient {
       });
 
       await this.ensureAllAuthorized(mgetRes.docs, operation);
-      const ids = mgetRes.docs.map(({ _id }) => _id);
+      const ids = mgetRes.docs.filter((doc) => !isAbsentLookup(doc)).map(({ _id }) => _id);
 
       for (const id of ids) {
         this.auditLogger?.log(
@@ -880,13 +949,6 @@ export class AlertsClient {
         status,
         operation: WriteOperations.Update,
       });
-
-      const auditAction = workflowStatusAuditActionMap[status];
-      if (auditAction) {
-        for (const id of ids) {
-          this.auditLogger?.log(alertAuditEvent({ action: auditAction, id }));
-        }
-      }
 
       return result;
     } else if (query != null) {

@@ -31,6 +31,26 @@ describe('bulkUpdateCases', () => {
     },
   ];
 
+  const validDoc = {
+    found: true as const,
+    _id: 'alert-id',
+    _index: 'alert-index',
+    _source: {
+      [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+      [ALERT_RULE_CONSUMER]: 'apm',
+      [ALERT_CASE_IDS]: caseIds,
+    },
+  };
+
+  const forgedDoc = {
+    found: true as const,
+    _id: 'forged-id',
+    _index: 'alert-index',
+    _source: {
+      [ALERT_CASE_IDS]: caseIds,
+    },
+  };
+
   const alertsClientParams: jest.Mocked<ConstructorOptions> = {
     logger: loggingSystemMock.create().get(),
     authorization: alertingAuthMock,
@@ -47,18 +67,7 @@ describe('bulkUpdateCases', () => {
     jest.clearAllMocks();
 
     esClientMock.mget.mockResponse({
-      docs: [
-        {
-          found: true,
-          _id: 'alert-id',
-          _index: 'alert-index',
-          _source: {
-            [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
-            [ALERT_RULE_CONSUMER]: 'apm',
-            [ALERT_CASE_IDS]: caseIds,
-          },
-        },
-      ],
+      docs: [validDoc],
     });
   });
 
@@ -305,5 +314,241 @@ describe('bulkUpdateCases', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"You cannot attach more than 10 cases to an alert"`
     );
+  });
+
+  it('throws when only some documents in a batch are missing the authorization fields', async () => {
+    esClientMock.mget.mockResponse({
+      docs: [validDoc, forgedDoc],
+    });
+
+    const alertsClient = new AlertsClient(alertsClientParams);
+    const mixedAlerts = [
+      { id: 'alert-id', index: 'alert-index' },
+      { id: 'forged-id', index: 'alert-index' },
+    ];
+
+    await expect(
+      alertsClient.bulkUpdateCases({ caseIds, alerts: mixedAlerts })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Invalid alert found with id of \\"forged-id\\" and operation get"`
+    );
+
+    expect(esClientMock.bulk).not.toHaveBeenCalled();
+    expect(auditLogger.log).toHaveBeenCalledWith({
+      message: 'Failed attempt to access alert [id=forged-id]',
+      event: {
+        action: 'alert_get',
+        category: ['database'],
+        outcome: 'failure',
+        type: ['access'],
+      },
+      error: {
+        code: 'Error',
+        message: 'Invalid alert found with id of "forged-id" and operation get',
+      },
+    });
+    expect(auditLogger.log).toHaveBeenCalledWith({
+      message: 'Failed attempt to access alert [id=alert-id]',
+      event: {
+        action: 'alert_get',
+        category: ['database'],
+        outcome: 'failure',
+        type: ['access'],
+      },
+      error: {
+        code: 'Error',
+        message: 'Invalid alert found with id of "forged-id" and operation get',
+      },
+    });
+    expect(auditLogger.log).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({ outcome: 'success' }),
+      })
+    );
+  });
+
+  it.each([
+    ['missing', { found: false, _id: 'absent-id', _index: 'alert-index' }],
+    [
+      'error',
+      {
+        _id: 'absent-id',
+        _index: 'alert-index',
+        error: { type: 'index_not_found_exception', reason: 'no such index [alert-index]' },
+      },
+    ],
+  ])('skips a %s sibling and updates/audits only the valid alert', async (_label, absentDoc) => {
+    esClientMock.mget.mockResponse({ docs: [validDoc, absentDoc] });
+    const alertsClient = new AlertsClient(alertsClientParams);
+
+    await alertsClient.bulkUpdateCases({
+      caseIds,
+      alerts: [
+        { id: 'alert-id', index: 'alert-index' },
+        { id: 'absent-id', index: 'alert-index' },
+      ],
+    });
+
+    expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledTimes(1);
+    expect(esClientMock.bulk).toHaveBeenCalledWith({
+      refresh: 'wait_for',
+      body: [
+        { update: { _index: 'alert-index', _id: 'alert-id' } },
+        { doc: { [ALERT_CASE_IDS]: ['test-case'] } },
+      ],
+    });
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({ event: expect.objectContaining({ outcome: 'success' }) })
+    );
+  });
+
+  it('does not send an empty bulk request when every lookup is absent', async () => {
+    esClientMock.mget.mockResponse({
+      docs: [
+        { found: false, _id: 'missing-id', _index: 'alert-index' },
+        {
+          _id: 'error-id',
+          _index: 'alert-index',
+          error: { type: 'index_not_found_exception', reason: 'no such index [alert-index]' },
+        },
+      ],
+    });
+
+    const alertsClient = new AlertsClient(alertsClientParams);
+    await alertsClient.bulkUpdateCases({
+      caseIds,
+      alerts: [
+        { id: 'missing-id', index: 'alert-index' },
+        { id: 'error-id', index: 'alert-index' },
+      ],
+    });
+
+    expect(alertingAuthMock.ensureAuthorized).not.toHaveBeenCalled();
+    expect(esClientMock.bulk).not.toHaveBeenCalled();
+    expect(auditLogger.log).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    {
+      label: 'rule type id',
+      source: { [ALERT_RULE_CONSUMER]: 'apm', [ALERT_CASE_IDS]: caseIds },
+    },
+    {
+      label: 'consumer',
+      source: { [ALERT_RULE_TYPE_ID]: 'apm.error_rate', [ALERT_CASE_IDS]: caseIds },
+    },
+  ])(
+    'throws and does not write when a present document is missing the $label',
+    async ({ source }) => {
+      esClientMock.mget.mockResponse({
+        docs: [
+          {
+            found: true,
+            _id: 'forged-id',
+            _index: 'alert-index',
+            _source: source,
+          },
+        ],
+      });
+
+      const alertsClient = new AlertsClient(alertsClientParams);
+
+      await expect(
+        alertsClient.bulkUpdateCases({
+          caseIds,
+          alerts: [{ id: 'forged-id', index: 'alert-index' }],
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid alert found with id of \\"forged-id\\" and operation get"`
+      );
+
+      expect(alertingAuthMock.ensureAuthorized).not.toHaveBeenCalled();
+      expect(esClientMock.bulk).not.toHaveBeenCalled();
+    }
+  );
+
+  it('preserves nested case ids when authorizing and updating a present document', async () => {
+    esClientMock.mget.mockResponse({
+      docs: [
+        {
+          found: true,
+          _id: 'alert-id',
+          _index: 'alert-index',
+          _source: {
+            kibana: {
+              alert: {
+                rule: {
+                  rule_type_id: 'apm.error_rate',
+                  consumer: 'apm',
+                },
+                case_ids: ['existing-case'],
+              },
+            },
+          },
+        },
+      ],
+    });
+
+    const alertsClient = new AlertsClient(alertsClientParams);
+    await alertsClient.bulkUpdateCases({ caseIds, alerts });
+
+    expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledWith({
+      consumer: 'apm',
+      entity: 'alert',
+      operation: 'get',
+      ruleTypeId: 'apm.error_rate',
+    });
+    expect(esClientMock.bulk).toHaveBeenCalledWith({
+      refresh: 'wait_for',
+      body: [
+        {
+          update: {
+            _index: 'alert-index',
+            _id: 'alert-id',
+          },
+        },
+        {
+          doc: {
+            [ALERT_CASE_IDS]: ['existing-case', 'test-case'],
+          },
+        },
+      ],
+    });
+  });
+
+  it('rejects a nested document that would exceed the case limit', async () => {
+    esClientMock.mget.mockResponse({
+      docs: [
+        {
+          found: true,
+          _id: 'alert-id',
+          _index: 'alert-index',
+          _source: {
+            kibana: {
+              alert: {
+                rule: {
+                  rule_type_id: 'apm.error_rate',
+                  consumer: 'apm',
+                },
+                case_ids: Array.from(
+                  { length: MAX_CASES_PER_ALERT },
+                  (_, index) => `existing-${index}`
+                ),
+              },
+            },
+          },
+        },
+      ],
+    });
+
+    const alertsClient = new AlertsClient(alertsClientParams);
+
+    await expect(
+      alertsClient.bulkUpdateCases({ caseIds, alerts })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"You cannot attach more than 10 cases to an alert"`
+    );
+    expect(esClientMock.bulk).not.toHaveBeenCalled();
   });
 });
