@@ -216,10 +216,9 @@ describe('eventsWriteHandler', () => {
 
   describe('unchanged_outcome (no-op guard)', () => {
     it('returns EventsWriteNoOpResult when severity and status are unchanged for a snapshot candidate', async () => {
-      // severity is computed from signals/topology, not copied from input.severity;
-      // an empty-signal candidate computes to 'low', so the stored fixture matches that to
-      // exercise the no-op path.
-      const stored = makeStoredEvent('checkout-stable', { severity: 'low' });
+      // A signal-less candidate keeps its explicit severity ('high' from baseInput); the stored
+      // fixture matches it to exercise the no-op path.
+      const stored = makeStoredEvent('checkout-stable', { severity: 'high' });
       const eventClient = makeEventSearchClient({
         findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
       });
@@ -1028,8 +1027,8 @@ describe('eventsWriteBulkHandler — continuation status', () => {
   });
 
   it('no-op guard skips when both severity and status are identical to latest', async () => {
-    // baseInput has no signals, so the computed severity is 'low' regardless of input.severity.
-    const stored = makeStoredEvent('checkout-stable', { severity: 'low' });
+    // baseInput has no signals, so its explicit severity ('high') is kept and must match stored.
+    const stored = makeStoredEvent('checkout-stable', { severity: 'high' });
     const eventClient = makeEventSearchClient({
       findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
     });
@@ -1129,6 +1128,7 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
     stream_name: 'logs.checkout',
     description: `Signal for ${ruleUuid}`,
     verdict,
+    effect: 'degradation',
     metadata: {
       detection_id: `detection-${ruleUuid}`,
       rule_uuid: ruleUuid,
@@ -1224,9 +1224,14 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
   });
 
   it.each([
-    ['resolution', makeInvestigatedEvent(), 'inactive' as const],
-    ['reactivate', makeInvestigatedEvent({ status: 'inactive' }), 'active' as const],
-  ])('accepts severity on %s', async (_, stored, status) => {
+    ['resolution', makeInvestigatedEvent(), 'inactive' as const, 'low' as const],
+    [
+      'reactivate',
+      makeInvestigatedEvent({ status: 'inactive' }),
+      'active' as const,
+      'medium' as const,
+    ],
+  ])('computes severity on %s', async (_, stored, status, expectedSeverity) => {
     const eventClient = makeEventSearchClient({
       findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
     });
@@ -1240,13 +1245,30 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
           ...baseInput,
           event_id: stored.event_id,
           status,
-          severity: 'low',
           signals: [makeDetectionSignal('rule-1')],
         },
       ],
     });
 
-    expect(writtenDocs()[0]).toEqual(expect.objectContaining({ status, severity: 'low' }));
+    expect(writtenDocs()[0]).toEqual(
+      expect.objectContaining({ status, severity: expectedSeverity })
+    );
+  });
+});
+
+describe('eventsWriteBulkHandler — signal-less chat create', () => {
+  it('stores an explicit severity when the write carries no signals', async () => {
+    const eventClient = makeEventSearchClient();
+
+    await eventsWriteBulkHandler({
+      eventSearchClient: eventClient,
+      alertEventsClient,
+      inputs: [
+        { ...baseInput, severity: 'critical', signals: [], causal_features: [], blast_radius: [] },
+      ],
+    });
+
+    expect(writtenDocs()[0].severity).toBe('critical');
   });
 });
 
@@ -1273,7 +1295,7 @@ describe('eventsWriteItemSchema', () => {
     expect(eventsWriteItemSchema.safeParse(validItem).success).toBe(true);
   });
 
-  it('strips a legacy severity/confidence field instead of rejecting the item', () => {
+  it('strips a legacy severity field instead of rejecting the item', () => {
     const result = eventsWriteItemSchema.safeParse({
       ...validItem,
       severity: 'critical',
@@ -1282,7 +1304,7 @@ describe('eventsWriteItemSchema', () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data).not.toHaveProperty('severity');
-      expect(result.data).not.toHaveProperty('confidence');
+      expect(result.data.confidence).toBe(0.9);
     }
   });
 
@@ -1311,6 +1333,7 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
     stream_name: 'logs.app',
     description: `Signal for ${ruleUuid}`,
     verdict: 'confirms',
+    effect: 'degradation',
     metadata: {
       detection_id: `det-${ruleUuid}`,
       rule_uuid: ruleUuid,

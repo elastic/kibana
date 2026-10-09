@@ -49,6 +49,7 @@ export const eventsWriteItemSchema = lazySchema(() =>
       title: true,
       symptom_hypothesis: true,
       summary: true,
+      confidence: true,
       assessment_note: true,
       signals: true,
       causal_features: true,
@@ -245,7 +246,14 @@ const enrichCausalFeatures = async (
           dropped.push(causalFeature.feature_id);
           return [];
         }
-        return [{ ...causalFeature, type: feature.type, subtype: feature.subtype }];
+        return [
+          {
+            ...causalFeature,
+            feature_id: feature.id,
+            type: feature.type,
+            subtype: feature.subtype,
+          },
+        ];
       });
       // Blast radius rows carry their own row-shape discriminator in `type`; only the
       // indicator's subtype is enriched.
@@ -255,7 +263,7 @@ const enrichCausalFeatures = async (
           dropped.push(entry.feature_id);
           return [];
         }
-        return [{ ...entry, subtype: feature.subtype }];
+        return [{ ...entry, feature_id: feature.id, subtype: feature.subtype }];
       });
       if (dropped.length > 0) {
         logger.warn(

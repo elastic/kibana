@@ -35,6 +35,7 @@ const input = {
   stream_names: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
+  confidence: 0.8,
 };
 
 const getFeatures = jest.fn().mockResolvedValue({ hits: [] });

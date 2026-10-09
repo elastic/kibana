@@ -15,13 +15,14 @@ export type EventsWriteInput = Pick<
   | 'title'
   | 'symptom_hypothesis'
   | 'summary'
+  | 'confidence'
   | 'assessment_note'
   | 'signals'
   | 'causal_features'
   | 'blast_radius'
   | 'workflow_execution_id'
 > &
-  Partial<Pick<SignificantEvent, 'severity' | 'confidence'>> & {
+  Partial<Pick<SignificantEvent, 'severity'>> & {
     event_id?: string;
     conversation_id?: string;
   };

@@ -121,7 +121,7 @@ export const computeEventFacts = (
   const cascadePath = hasCascadePath(episodeContext.blastRadius);
 
   // Floor to 'low' on inactive (the resolved tier, by the same convention the prompt previously wrote directly)
-  const computedSeverity =
+  const severityFromSignals =
     status === 'inactive'
       ? 'low'
       : computeSeverity({
@@ -132,6 +132,9 @@ export const computeEventFacts = (
           hasCascadePath: cascadePath,
           severityScore,
         });
+  // A signal-less write (chat create) keeps its explicit severity; signal-bearing writes always compute.
+  const explicitSeverity = (signals ?? []).length === 0 ? candidate.input.severity : undefined;
+  const computedSeverity = explicitSeverity ?? severityFromSignals;
   const severity = lockSeverityForCompletedInvestigation({
     source,
     latestEvent,

@@ -45,6 +45,7 @@ import {
 } from '../shared';
 import {
   extractDiscoveriesFromToolCall,
+  extractSignificantEventsFromToolCall,
   extractRequestedEventIdsFromToolCall,
   extractWriteItemsFromToolCall,
 } from '../../src/evaluators/discovery/utils/parse_agent_output';
@@ -343,7 +344,7 @@ evaluate.describe(
 
                   return {
                     // Agent outputs via events_write tool calls; extract significant events from steps.
-                    significantEvents: extractDiscoveriesFromToolCall(converseResult.steps),
+                    significantEvents: extractSignificantEventsFromToolCall(converseResult.steps),
                     // Thread the input detections through so snapshot-mode evaluators can access them.
                     inputDetections: stampedDetections,
                     // Raw steps — trajectory/grounding evaluators read tool calls from these.

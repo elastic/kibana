@@ -10,7 +10,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { significantEventSchema } from '@kbn/significant-events-schema';
+import { significantEventSchema, severitySchema } from '@kbn/significant-events-schema';
 import { lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
@@ -23,14 +23,22 @@ import { createEventToolHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID = platformSignificantEventsTools.createEvent;
 
+const CHAT_SEVERITY_RULE =
+  'Severity tier for a chat-created event, stored as given. Omit to leave it computed (low until discovery attaches signals). Options: critical | high | medium | low.';
+
 const createEventSchema = lazySchema(() =>
-  significantEventSchema.pick({
-    status: true,
-    title: true,
-    symptom_hypothesis: true,
-    summary: true,
-    stream_names: true,
-  })
+  significantEventSchema
+    .pick({
+      status: true,
+      title: true,
+      symptom_hypothesis: true,
+      summary: true,
+      confidence: true,
+      stream_names: true,
+    })
+    .extend({
+      severity: severitySchema.optional().describe(CHAT_SEVERITY_RULE),
+    })
 );
 
 export function createEventTool({

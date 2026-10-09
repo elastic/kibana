@@ -71,6 +71,7 @@ describe('event_create tool', () => {
         symptom_hypothesis: 'Requests fail because the upstream dependency is unavailable.',
         summary: 'S',
         stream_names: ['logs.a'],
+        confidence: 0.8,
       },
       createMockToolContext()
     );

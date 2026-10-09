@@ -46,6 +46,29 @@ const EFFECT_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
 ];
 
+const CONFIDENCE_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
+  {
+    id: 'confidence_reflects_support',
+    text: 'Confidence reflects how well-supported the assessment is — KI backing, number of confirmed evidences, and corroboration — not the raw anomaly strength.',
+  },
+  {
+    id: 'no_ki_caps_confidence',
+    text: 'Failure findings with no KI match and no active failure evidence should not claim high confidence (kept at or below ~0.65 without KI backing). Exception: `refutes` discoveries — where queries returned healthy rows (`evidence.result: "found"` with a healthy signature) confirming the signal is a non-event — are confirmed non-events, not unconfirmed findings, so they may sit in the 0.65–0.75 range without KI backing and are exempt from this cap. `off_topic`, `inconclusive`, and `not_checked` findings are not exempt.',
+  },
+  {
+    id: 'strong_corroboration_high_confidence',
+    text: 'Only strongly corroborated findings (multiple confirmed evidences plus aligned KI backing from the input topology or this cycle’s KI search, with no contradiction) may claim high confidence (>=0.85). The judge need not repeat KI search when the discovery already carries aligned causal_features or blast_radius.',
+  },
+];
+
+/** LLM evaluator: scores whether `confidence` reflects evidence/KI backing, with the no-KI ceiling. */
+export const createConfidenceCalibrationEvaluator = ({
+  criteriaFn,
+}: {
+  criteriaFn: CalibrationCriteriaFn;
+}): Evaluator =>
+  createCalibrationEvaluator('confidence_calibration', CONFIDENCE_CALIBRATION_CRITERIA, criteriaFn);
+
 /** LLM evaluator: scores whether each signal's effect/outage_paths match its evidence row. */
 export const createEffectCalibrationEvaluator = ({
   criteriaFn,

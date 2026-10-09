@@ -354,6 +354,14 @@ const detectionSignalSchema = lazySchema(() =>
       // Deterministic guard: only a verdict that means "this row shows something real" may claim
       // impact. An off-topic signal here means a concrete non-benign observed error (guarded above:
       // off_topic requires found evidence) — not merely an unrelated finding.
+      if (signal.verdict === 'confirms' && signal.effect === undefined) {
+        context.addIssue({
+          code: 'custom',
+          path: ['effect'],
+          message:
+            'A confirms signal requires an explicit effect. An omitted effect is computed as "none" and would tier the event as low.',
+        });
+      }
       const canClaimImpact = signal.verdict === 'confirms' || signal.verdict === 'off_topic';
       if (!canClaimImpact && signal.effect !== undefined && signal.effect !== 'none') {
         context.addIssue({
