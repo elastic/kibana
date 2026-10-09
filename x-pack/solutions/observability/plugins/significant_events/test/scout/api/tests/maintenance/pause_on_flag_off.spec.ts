@@ -54,6 +54,26 @@ const isSpaceList = (value: unknown): value is Array<{ id: string }> =>
 const toSpaceIds = (value: unknown): string[] =>
   isSpaceList(value) ? value.map(({ id }) => id) : [];
 
+const hasMaintenanceState = (value: unknown): value is { state: string } =>
+  typeof value === 'object' && value !== null && 'state' in value;
+
+/** Ids of the spaces whose Significant Events activity is paused right now. */
+const listPausedSpaceIds = async (kbnClient: KbnClient): Promise<Set<string>> => {
+  const spaceIds = toSpaceIds(await kbnClient.spaces.list());
+  const states = await Promise.all(
+    spaceIds.map(async (id) => {
+      const { data } = await kbnClient.request<unknown>({
+        method: 'GET',
+        path: `/s/${id}/internal/significant_events/maintenance/_status`,
+        headers: COMMON_API_HEADERS,
+        ignoreErrors: [403, 404],
+      });
+      return { id, state: hasMaintenanceState(data) ? data.state : undefined };
+    })
+  );
+  return new Set(states.filter(({ state }) => state === 'paused').map(({ id }) => id));
+};
+
 const createClient = (
   apiClient: ApiClientFixture,
   cookieHeader: Record<string, string>,
@@ -127,16 +147,22 @@ const createClient = (
     }) {
       // A filter-only MATCH query, so creating it also installs its backing rule.
       const esql = `FROM ${source.viewName} | WHERE severity_text == "ERROR"`;
-      const response = await apiClient.put(`internal/significant_events/queries/${queryId}`, {
-        headers: internalHeaders,
-        body: {
-          title: 'Nightshift flag-off rule',
-          esql: { query: esql },
-          source_id: source.id,
-        },
-        responseType: 'json',
-      });
-      expect(response).toHaveStatusCode(200);
+      // Creating the source only queues its reconciliation. While that run holds the source's
+      // write lease the write answers 409 and asks to retry, so retry until the lease is free.
+      await expect
+        .poll(async () => {
+          const response = await apiClient.put(`internal/significant_events/queries/${queryId}`, {
+            headers: internalHeaders,
+            body: {
+              title: 'Nightshift flag-off rule',
+              esql: { query: esql },
+              source_id: source.id,
+            },
+            responseType: 'json',
+          });
+          return response.statusCode;
+        }, POLL_OPTIONS)
+        .toBe(200);
       return computeRuleId('default', source.id, queryId, esql);
     },
     /** Deletes the query together with its backing rule. */
@@ -160,11 +186,14 @@ apiTest.describe(
     let engineAdminCookieHeader: Record<string, string>;
     let queryId: string | undefined;
     let sourceId: string | undefined;
+    let spaceIdsPausedBeforeTest = new Set<string>();
 
     apiTest.beforeAll(async ({ samlAuth, apiServices, kbnClient }) => {
       ({ cookieHeader } = await samlAuth.asStreamsAdmin());
       ({ cookieHeader: engineAdminCookieHeader } = await samlAuth.asNightshiftEngineAdmin());
       await enableAlertingV2(kbnClient);
+      // Flag-off pauses every space. Spaces that were already paused keep that state afterwards.
+      spaceIdsPausedBeforeTest = await listPausedSpaceIds(kbnClient);
       // An earlier flag flip in this run may have left the deployment paused.
       await apiServices.significantEventsTest.resumeSignificantEvents();
     });
@@ -172,11 +201,12 @@ apiTest.describe(
     apiTest.afterAll(async ({ apiServices, apiClient, kbnClient }) => {
       await apiServices.significantEventsTest.enableSignificantEvents();
       await apiServices.significantEventsTest.resumeSignificantEvents();
-      // Flag-off pauses every space, and resume only reaches the space it is called in.
+      // Flag-off pauses every space, and resume only reaches the space it is called in. Leave the
+      // spaces that were already paused before the test as they were.
       const spaceIds = toSpaceIds(await kbnClient.spaces.list());
       await Promise.all(
         spaceIds
-          .filter((id) => id !== 'default')
+          .filter((id) => id !== 'default' && !spaceIdsPausedBeforeTest.has(id))
           .map((id) => apiServices.significantEventsTest.resumeSignificantEvents({ spaceId: id }))
       );
       if (queryId !== undefined) {
