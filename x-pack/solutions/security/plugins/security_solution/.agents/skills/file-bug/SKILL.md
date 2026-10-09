@@ -52,7 +52,7 @@ python3 "$FILE_BUG" from-findings \
   --out "$FINDING_JSON"
 ```
 
-`from-findings` prints the **bare** finding (`source: exploratory-tester`). Pass that file to later `--finding` flags. Then `check-pack`, `infer-deployment`, `scan-sensitive`, `render-body --out body.md` with `$SESSION_DIR/config.json`. Path B create always includes `sec-eng-prod:exploratory-tester` (`write --finding`). `--index` and `--title` skip `Observation` blocks.
+`from-findings` prints the **bare** finding (`source: exploratory-tester`). Pass that file to later `--finding` flags. Then `check-pack`, `infer-deployment`, `scan-sensitive`, `render-body --out body.md` with `$SESSION_DIR/config.json`. Path B create always includes `sec-eng-prod:exploratory-tester` (`write --finding`). Prefer `--title`. `--index` is **1-based** (`--index 2` is the second fileable finding) and skips `Observation` blocks.
 
 ## Fileable checklist
 
@@ -109,7 +109,7 @@ python3 "$FILE_BUG" check-draft --finding "$FINDING_JSON" --body body.md \
   --label bug --label triage_needed --label "Team:…"
 ```
 
-On comment / reopen, omit `--title`. Always include `bug` and `triage_needed` on a new issue. If `infer-release` is confident, also that `vX.Y.Z` label (`validate-labels`). If version is `Unknown`, omit the `v*` label (do not invent one). If it exits 2 on a concrete unparseable version, ask. Path B also `--label sec-eng-prod:exploratory-tester`.
+On comment / reopen, omit `--title`. Always include `bug` and `triage_needed` on a new issue. If `infer-release` is confident, pass that `vX.Y.Z` as `--label` on `check-draft` and `write` (`validate-labels` first). `write` does not infer or add a release label itself. If version is `Unknown`, omit the `v*` label (do not invent one). If infer-release exits 2 on a concrete unparseable version, ask. Path B also `--label sec-eng-prod:exploratory-tester`.
 
 If `scan-wip` or `check-draft` reports `wip_or_limitation`, ask whether to **file anyway**. Do not ask for a write-yes until they say file anyway; then `check-draft --wip-ok`.
 

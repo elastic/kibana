@@ -456,7 +456,12 @@ def _build_parser() -> argparse.ArgumentParser:
         "from-findings", help="Pick one finding from parse-findings JSONL"
     )
     from_findings.add_argument("--jsonl", required=True)
-    from_findings.add_argument("--index", type=int, default=None)
+    from_findings.add_argument(
+        "--index",
+        type=int,
+        default=None,
+        help="1-based index into fileable findings (skips Observation)",
+    )
     from_findings.add_argument("--title", default=None)
     from_findings.add_argument(
         "--out", default=None, help="Write the bare finding JSON to this path"

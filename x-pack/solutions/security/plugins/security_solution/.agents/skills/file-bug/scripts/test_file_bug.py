@@ -19,6 +19,7 @@ from file_bug import (  # noqa: E402
     TESTER_SOURCE_LABEL,
     TitleTooLong,
     _default_http_post,
+    _install_method,
     check_draft,
     compress_video,
     decide_write_path,
@@ -132,7 +133,7 @@ class InferTeamLabelTest(unittest.TestCase):
             knowledge_md=self.md,
         )
         self.assertEqual(result.status, "confident")
-        self.assertEqual(result.label, "Team:Detection Engine")
+        self.assertEqual(result.label, "Team:Detection Engineering")
 
     def test_security_solution_alias_is_real_label(self):
         result = infer_team_label(
@@ -443,8 +444,13 @@ class FindingFromJsonlTest(unittest.TestCase):
         self.assertEqual(finding["source"], "exploratory-tester")
 
     def test_picks_by_index(self):
-        finding = finding_from_jsonl(self.records, index=0)
+        finding = finding_from_jsonl(self.records, index=1)
         self.assertEqual(finding["title"], "First")
+        self.assertEqual(finding_from_jsonl(self.records, index=2)["title"], "Second")
+
+    def test_index_zero_is_out_of_range(self):
+        with self.assertRaises(ValueError):
+            finding_from_jsonl(self.records, index=0)
 
     def test_missing_title_raises(self):
         with self.assertRaises(ValueError):
@@ -519,6 +525,29 @@ class InferDeploymentTest(unittest.TestCase):
         result = infer_deployment({}, {"environment": {"type": "stateful-ess"}})
         self.assertEqual(result.status, "confident")
         self.assertEqual(result.label, "ECH")
+
+
+class InstallMethodTest(unittest.TestCase):
+    def test_scout_serverless_is_elastic_cloud(self):
+        self.assertEqual(
+            _install_method({"kind": "scout", "type": "serverless"}),
+            "Elastic Cloud",
+        )
+
+    def test_scout_ech_is_elastic_cloud(self):
+        self.assertEqual(
+            _install_method({"kind": "scout", "type": "stateful-ess"}),
+            "Elastic Cloud",
+        )
+
+    def test_scout_arch_serverless_is_elastic_cloud(self):
+        self.assertEqual(
+            _install_method({"kind": "scout", "arch": "serverless"}),
+            "Elastic Cloud",
+        )
+
+    def test_local_scout_is_from_source(self):
+        self.assertEqual(_install_method({"kind": "scout"}), "from source (dev)")
 
 
 class InferReleaseLabelTest(unittest.TestCase):
@@ -855,6 +884,77 @@ class CheckDraftTest(unittest.TestCase):
                 "expected_behavior": "works",
                 "steps_followed": [],
             },
+            config={},
+            labels=["bug", "triage_needed"],
+        )
+        self.assertEqual(gaps, [])
+
+    def test_empty_expected_plus_stamp_is_a_gap(self):
+        body = (
+            "**Describe the bug:**\nRisk table empty\n\n"
+            "**Version:**\n9.6.0\n\n"
+            "**Feature flags:**\nNo feature flag (default/GA)\n\n"
+            "**Deployment:**\nECH\n\n"
+            "**Role required to reproduce:**\nnone\n\n"
+            "**Spaces:**\ndefault\n\n"
+            "**Steps to reproduce:**\n1. Open Entity Analytics\n\n"
+            "**Current behaviour (with screenshots and recordings):**\n"
+            'Toast: "TypeError: cannot read map"\n\n'
+            "**Expected behavior:**\n\n"
+            f"{FILED_VIA}\n"
+        )
+        gaps = check_draft(
+            body=body,
+            title="[Entity Analytics] [Bug] Risk table empty",
+            finding={},
+            config={},
+            labels=["bug", "triage_needed"],
+        )
+        self.assertIn("body_expected", gaps)
+        self.assertIn("expected", gaps)
+
+    def test_vague_expected_plus_stamp_is_still_vague(self):
+        body = (
+            "**Describe the bug:**\nRisk table empty\n\n"
+            "**Version:**\n9.6.0\n\n"
+            "**Feature flags:**\nNo feature flag (default/GA)\n\n"
+            "**Deployment:**\nECH\n\n"
+            "**Role required to reproduce:**\nnone\n\n"
+            "**Spaces:**\ndefault\n\n"
+            "**Steps to reproduce:**\n1. Open Entity Analytics\n\n"
+            "**Current behaviour (with screenshots and recordings):**\n"
+            'Toast: "TypeError: cannot read map"\n\n'
+            "**Expected behavior:**\nworks\n\n"
+            f"{FILED_VIA}\n"
+        )
+        gaps = check_draft(
+            body=body,
+            title="[Entity Analytics] [Bug] Risk table empty",
+            finding={},
+            config={},
+            labels=["bug", "triage_needed"],
+        )
+        self.assertIn("expected_vague", gaps)
+
+    def test_inline_bold_note_stays_in_steps(self):
+        body = (
+            "**Describe the bug:**\nRisk table empty\n\n"
+            "**Version:**\n9.6.0\n\n"
+            "**Feature flags:**\nNo feature flag (default/GA)\n\n"
+            "**Deployment:**\nECH\n\n"
+            "**Role required to reproduce:**\nnone\n\n"
+            "**Spaces:**\ndefault\n\n"
+            "**Steps to reproduce:**\n1. Open Entity Analytics\n"
+            "**Note:** needs Fleet first\n\n"
+            "**Current behaviour (with screenshots and recordings):**\n"
+            'Toast: "TypeError: cannot read map"\n\n'
+            "**Expected behavior:**\nTable lists entities\n\n"
+            f"{FILED_VIA}\n"
+        )
+        gaps = check_draft(
+            body=body,
+            title="[Entity Analytics] [Bug] Risk table empty",
+            finding={},
             config={},
             labels=["bug", "triage_needed"],
         )
@@ -1274,17 +1374,11 @@ class WriteGithubTest(unittest.TestCase):
         self.assertIn("--type", calls[0])
         self.assertIn("Bug", calls[0])
 
-    def test_create_adds_release_label_from_version(self):
+    def test_create_does_not_infer_release_label(self):
         calls = []
 
         def run_gh(argv):
             calls.append(argv)
-            if argv[1:3] == ["label", "list"]:
-                return {
-                    "returncode": 0,
-                    "stdout": json.dumps([{"name": "v9.6.0"}]),
-                    "stderr": "",
-                }
             return {
                 "returncode": 0,
                 "stdout": "https://github.com/elastic/kibana/issues/1",
@@ -1303,22 +1397,17 @@ class WriteGithubTest(unittest.TestCase):
         )
         self.assertEqual(
             result["labels"],
-            ["bug", "triage_needed", "Team:Entity Analytics", "v9.6.0"],
+            ["bug", "triage_needed", "Team:Entity Analytics"],
         )
+        self.assertFalse(any(argv[1:3] == ["label", "list"] for argv in calls))
         create = next(argv for argv in calls if argv[1:3] == ["issue", "create"])
-        self.assertIn("v9.6.0", create)
+        self.assertNotIn("v9.6.0", create)
 
-    def test_create_skips_release_label_missing_from_catalog(self):
+    def test_create_keeps_release_label_passed_by_caller(self):
         calls = []
 
         def run_gh(argv):
             calls.append(argv)
-            if argv[1:3] == ["label", "list"]:
-                return {
-                    "returncode": 0,
-                    "stdout": json.dumps([{"name": "v9.6.0"}]),
-                    "stderr": "",
-                }
             return {
                 "returncode": 0,
                 "stdout": "https://github.com/elastic/kibana/issues/1",
@@ -1330,14 +1419,18 @@ class WriteGithubTest(unittest.TestCase):
             repo="elastic/kibana",
             title="[Entity Analytics] [Bug] Risk table empty",
             body="body",
-            labels=["Team:Entity Analytics"],
+            labels=["Team:Entity Analytics", "v9.6.0"],
             number=None,
-            config={"kibana_version": "9.7.0"},
+            config={"kibana_version": "8.15.0"},
             run_gh=run_gh,
         )
-        self.assertNotIn("v9.7.0", result["labels"])
+        self.assertEqual(
+            result["labels"],
+            ["bug", "triage_needed", "Team:Entity Analytics", "v9.6.0"],
+        )
         create = next(argv for argv in calls if argv[1:3] == ["issue", "create"])
-        self.assertNotIn("v9.7.0", create)
+        self.assertIn("v9.6.0", create)
+        self.assertNotIn("v8.15.0", create)
 
     def test_comment_adds_tester_label_to_existing_issue(self):
         calls = []
@@ -1769,6 +1862,11 @@ class FileBugCliTest(unittest.TestCase):
         self.assertIn("create if no matches", result.stdout)
         self.assertNotIn("reopen_comment / ask", result.stdout)
 
+    def test_from_findings_help_is_one_based(self):
+        result = run_cli("from-findings", "--help")
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("1-based", result.stdout)
+
     def test_format_title_cli_rejects_vague(self):
         result = run_cli(
             "format-title",
@@ -1866,7 +1964,7 @@ class TesterPackIntegrationTest(unittest.TestCase):
                 for line in out.read_text(encoding="utf-8").splitlines()
                 if line.strip()
             ]
-        finding = finding_from_jsonl(records, index=0)
+        finding = finding_from_jsonl(records, index=1)
         self.assertNotEqual(finding.get("block_type"), "Observation")
         config = {
             "area": "Entity Analytics",
@@ -1985,6 +2083,7 @@ class SkillProtocolTest(unittest.TestCase):
         self.assertIn("not already on that issue", self.text)
         self.assertIn("parse-findings.py", self.text)
         self.assertIn("from-findings", self.text)
+        self.assertIn("1-based", self.skill)
         self.assertIn("parse-search", self.text)
         self.assertIn("format-title", self.text)
         self.assertIn("infer-deployment", self.text)

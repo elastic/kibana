@@ -173,9 +173,9 @@ def finding_from_jsonl(
         if len(numbered) == 1:
             return _with_tester_source(numbered[0])
         raise ValueError("pass --index or --title when jsonl has multiple findings")
-    if index < 0 or index >= len(numbered):
-        raise ValueError(f"finding index {index} out of range")
-    return _with_tester_source(numbered[index])
+    if index < 1 or index > len(numbered):
+        raise ValueError(f"finding index {index} out of range (1-based)")
+    return _with_tester_source(numbered[index - 1])
 
 
 def _with_tester_source(finding: dict) -> dict:
@@ -487,10 +487,11 @@ def _install_method(environment: dict) -> str | None:
     if explicit:
         return explicit
     env_type = str(environment.get("type") or "").lower()
+    arch = str(environment.get("arch") or "").lower()
+    if env_type in {"stateful-ess", "serverless"} or arch == "serverless":
+        return "Elastic Cloud"
     if environment.get("kind") in _LOCAL_KINDS or env_type == "stateful-classic":
         return _DEV_INSTALL
-    if env_type in {"stateful-ess", "serverless"}:
-        return "Elastic Cloud"
     return None
 
 
@@ -900,12 +901,18 @@ def _visible_text(text: str) -> str:
     return _HTML_COMMENT_RE.sub("", text)
 
 
+_HEADING_LINE_RE = re.compile(r"^\*\*[^\n]+:\*\*[ \t]*$", re.M)
+_STAMP_LINE_RE = re.compile(rf"^{re.escape(FILED_VIA)}[ \t]*$", re.M)
+
+
 def _section_content(body: str, heading: str) -> str:
     visible = _visible_text(body)
-    if heading not in visible:
+    heading_re = re.compile(r"(?m)^" + re.escape(heading) + r"[ \t]*$")
+    match = heading_re.search(visible)
+    if not match:
         return ""
-    after = visible.split(heading, 1)[1]
-    nxt = re.search(r"\n\*\*[^\n]+:\*\*", after)
+    after = visible[match.end() :]
+    nxt = _HEADING_LINE_RE.search(after) or _STAMP_LINE_RE.search(after)
     chunk = after[: nxt.start()] if nxt else after
     return chunk.strip()
 
@@ -1593,13 +1600,6 @@ def write_github(
     labels = with_source_labels(labels, finding or {}, config)
     if action == "create":
         labels = with_create_labels(labels)
-        release = infer_release_label(finding or {}, config or {})
-        if (
-            release.status == "confident"
-            and release.label
-            and _label_in_repo(repo, release.label, run_gh)
-        ):
-            labels = _unique_labels(labels, [release.label])
     workdir = Path(tempfile.mkdtemp(prefix="file_bug_body_"))
     try:
         body_file = workdir / "body.md"

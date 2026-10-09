@@ -28,7 +28,7 @@ Use the template headings. **Version** (stack). **Original install method** when
 
 **Title** (new issues): `[<team name>] [Bug] <short symptom>`. Run `format-title` after you have a `Team:*` label (human or `infer-team`). If inference is `ask`, ask the human before create. Do not invent a team. If `format-title` exits 2, the symptom is too long — ask the human to shorten it. Do not file a clipped title.
 
-**Release label:** run `infer-release`. A concrete stack version (`9.6.0`, `v9.6.0`, `9.6.0 (notes…)`) becomes `v9.6.0`. `Unknown` is not a release gap — omit the `v*` label. A PR build, `main`, or other unparseable concrete version still asks. Do not invent a `v*` label. Create also always gets `bug` and `triage_needed`. GitHub Type is Bug (`write` sets `--type Bug`).
+**Release label:** run `infer-release`. A concrete stack version (`9.6.0`, `v9.6.0`, `9.6.0 (notes…)`) becomes `v9.6.0` — pass that label on `check-draft` and `write`. `write` does not infer or add a `v*` label after write-yes. `Unknown` is not a release gap — omit the `v*` label. A PR build, `main`, or other unparseable concrete version still asks. Do not invent a `v*` label. Create also always gets `bug` and `triage_needed`. GitHub Type is Bug (`write` sets `--type Bug`).
 
 **Feature flags:** exact flag id, on/off, and **how to enable it**. If confirmed default/GA, write `No feature flag (default/GA)`.
 

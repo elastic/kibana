@@ -3,7 +3,7 @@
 | GitHub Label | Server Path | Public Path | Route Registration | Common API |
 |-------------|------------|-------------|-------------------|------------|
 | `Team:Entity Analytics` | `server/lib/entity_analytics/` | `public/entity_analytics/` | `server/lib/entity_analytics/register_entity_analytics_routes.ts` | `common/api/entity_analytics/` |
-| `Team:Detection Engine` | `server/lib/detection_engine/` | `public/detection_engine/` | `server/lib/detection_engine/rule_management/api/register_routes.ts` | `common/api/detection_engine/` |
+| `Team:Detection Engineering` | `server/lib/detection_engine/` | `public/detection_engine/` | `server/lib/detection_engine/rule_management/api/register_routes.ts` | `common/api/detection_engine/` |
 | `Team:Threat Hunting` | `server/lib/timeline/` | `public/timelines/` | `server/lib/timeline/routes/index.ts` | `common/api/timeline/` |
 | `Team: SecuritySolution` | varies | varies | varies | varies |
 
