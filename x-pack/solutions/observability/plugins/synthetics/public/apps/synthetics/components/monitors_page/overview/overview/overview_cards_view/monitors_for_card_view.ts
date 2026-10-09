@@ -6,6 +6,7 @@
  */
 
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
+import type { GroupByState } from '../../../../../state/overview/models';
 
 /**
  * Paginated overview status is one row per config. The default card view
@@ -14,7 +15,7 @@ import type { OverviewStatusMetaData } from '../../../../../../../../common/runt
  */
 export const monitorsForCardView = (
   monitors: OverviewStatusMetaData[],
-  groupField: string
+  groupField: GroupByState['field']
 ): OverviewStatusMetaData[] => {
   if (groupField === 'monitor') {
     return monitors;

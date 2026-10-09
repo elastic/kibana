@@ -32,6 +32,7 @@ import {
 import { appendOverviewStatusAction } from '../../../../../state/overview_status';
 import { getNextOverviewAppendPage } from '../../../../../state/overview_status/window_refresh';
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
+import type { GroupByState } from '../../../../../state/overview/models';
 import { useInfiniteOverviewTrendsRequests } from '../../../hooks/use_infinite_overview_trends_requests';
 import { useOverviewStatusState } from '../../../hooks/use_overview_status';
 import { monitorsForCardView } from './monitors_for_card_view';
@@ -66,7 +67,7 @@ const UnGroupedCardView = ({
   loaded,
 }: {
   monitorsSortedByStatus: OverviewStatusMetaData[];
-  groupField: string;
+  groupField: GroupByState['field'];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
   loaded: boolean;
 }) => {
