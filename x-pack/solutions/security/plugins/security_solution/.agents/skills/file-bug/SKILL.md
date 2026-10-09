@@ -4,7 +4,7 @@ description: >
   Drafts and files Kibana Security Solution bug reports using the Security
   template, with duplicate search, sensitive-content checks, and explicit
   human confirmation before any GitHub write. Use when the user asks to
-  create, file, or comment a Security bug, or names exploratory-tester
+  create, file, or comment a Security Solution bug, or names exploratory-tester
   findings to file.
 disable-model-invocation: true
 ---

@@ -1,4 +1,4 @@
-# Drafting a Security bug (load while collecting)
+# Drafting a Security Solution bug (load while collecting)
 
 Field rules live here once. `SKILL.md` is the procedure; this file is the field rules. `check-pack`, `check-draft`, `infer-deployment`, `format-title`, and `scan-sensitive` are the source of truth — if prose and a script disagree, trust the script. On create (`--title`), `check-draft` also requires a visible stamp and filled Describe / Version / Steps / Current / Expected sections in the body. Filled template headings (Version, Feature flags, Deployment, Role, Spaces, Steps, Current, Expected) count as pack answers even when the finding JSON does not mirror them. Comment / reopen omit `--title`.
 
