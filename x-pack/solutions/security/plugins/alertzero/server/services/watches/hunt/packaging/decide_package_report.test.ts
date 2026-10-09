@@ -882,6 +882,23 @@ describe('decidePackageReport', () => {
     const kinds = (proposals: Array<{ actionWorkflowId?: string }>) =>
       proposals.map((p) => p.actionWorkflowId).sort();
 
+    it('holds back a selected action by name when the process only has a pid', () => {
+      const pidOnly = selector({ pid: 4242, processKey: 'pid:4242', processName: 'proc.exe' });
+      const result = decidePackageReport({
+        conversationId,
+        // `ps1` has an entity_id, so `processUncovered` stays quiet: only the held-back line
+        // tells the analyst the pid-only process was skipped.
+        state: baseHitState({ hosts: [withMemdump], processSelectors: [ps1, pidOnly] }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      const recommendation = result.proposals.find((p) => !p.actionWorkflowId);
+      expect(recommendation?.comment).toContain('`proc.exe` (PID 4242)');
+      expect(recommendation?.comment).toContain('the process has no entity_id');
+      expect(
+        result.proposals.filter((p) => p.actionWorkflowId).every((p) => !p.title?.includes('4242'))
+      ).toBe(true);
+    });
+
     it('holds back kill by name when the kill action is not installed', () => {
       const result = decidePackageReport({
         conversationId,

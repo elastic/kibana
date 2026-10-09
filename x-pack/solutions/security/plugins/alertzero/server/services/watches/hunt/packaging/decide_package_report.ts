@@ -498,6 +498,20 @@ export const decidePackageReport = ({
     const id = subjectId(subject);
     const actionInput = buildActionInput({ entry, subject, state });
     if (id === undefined || !actionInput) {
+      // A process-scoped action that cannot be built because the selector has no `entity_id`
+      // (a bare pid is never enough to back an executable action) would otherwise vanish
+      // without a trace, and `processUncovered` stays quiet once any other process has one.
+      if (
+        subject.kind === 'process' &&
+        subject.processSelector.entityId === undefined &&
+        needsProcessParameters(actionInputSchema(entry))
+      ) {
+        heldBackLines.push(
+          `${entry.name} was selected for ${describeProcess(subject.processSelector)} on ${
+            subject.host.name
+          } but was not proposed: the process has no entity_id, and a bare PID can be reused by the OS before an analyst approves the action`
+        );
+      }
       return;
     }
     const subjectKey = buildProposalSubjectKey({
