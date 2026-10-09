@@ -51,6 +51,7 @@ export class AgentBuilderPlatformPlugin
     registerAttachmentTypes({
       coreSetup,
       setupDeps,
+      logger: this.logger,
     });
     registerPdfAvailabilityRoute({ router: coreSetup.http.createRouter() });
     registerConversationTemplates({ setupDeps });
