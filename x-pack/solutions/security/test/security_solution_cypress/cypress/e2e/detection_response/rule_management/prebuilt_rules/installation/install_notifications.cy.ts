@@ -87,7 +87,7 @@ describe(
           visitRulesManagementTable();
 
           cy.get(ADD_ELASTIC_RULES_BTN).should('be.visible');
-          cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', `Add Elastic rules1`);
+          cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', 'Add Elastic rules (1)');
         });
       });
 
@@ -112,7 +112,7 @@ describe(
 
         it('notifies user about prebuilt rules available for installation', () => {
           cy.get(ADD_ELASTIC_RULES_BTN).should('be.visible');
-          cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', `Add Elastic rules2`);
+          cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', 'Add Elastic rules (2)');
         });
 
         it('notifies user a rule is again available for installation after it is deleted', () => {
@@ -122,7 +122,7 @@ describe(
             cy.reload();
             deleteFirstRule();
             cy.get(ADD_ELASTIC_RULES_BTN).should('be.visible');
-            cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', `Add Elastic rules${1}`);
+            cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', 'Add Elastic rules (1)');
           });
         });
       });
