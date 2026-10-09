@@ -134,18 +134,52 @@ export function addedInstanceIdsByPolicy(
 }
 
 /**
- * Policy update outcomes in `policyUpdates` order: an update whose policy an earlier phase already
- * wrote this run succeeded with that write, the others take their own attempt's result.
+ * The policy updates split into the ones still to run and the ones a dirty update or cleanup
+ * already wrote this run (those took the new services with them). `pendingIndexes` are the
+ * positions of `pending` inside `all`, so results map back by position instead of by identity.
+ */
+export interface PolicyUpdateSplit {
+  all: PolicyUpdatePlanItem[];
+  pending: PolicyUpdatePlanItem[];
+  pendingIndexes: number[];
+}
+
+export function splitPendingPolicyUpdates(
+  policyUpdates: PolicyUpdatePlanItem[],
+  writtenPolicyIds: ReadonlySet<string>
+): PolicyUpdateSplit {
+  const pending: PolicyUpdatePlanItem[] = [];
+  const pendingIndexes: number[] = [];
+  policyUpdates.forEach((update, index) => {
+    if (!writtenPolicyIds.has(update.policyId)) {
+      pending.push(update);
+      pendingIndexes.push(index);
+    }
+  });
+  return { all: policyUpdates, pending, pendingIndexes };
+}
+
+/**
+ * Policy update outcomes in `all` order: an update whose policy an earlier phase already wrote
+ * succeeded with that write, the pending ones take the result of their own attempt. The attempts
+ * must be the results of running `split.pending`; any other count means they do not line up, and
+ * that fails loudly instead of reporting updates that never ran as succeeded.
  */
 export function mergePolicyUpdateResults(
-  policyUpdates: PolicyUpdatePlanItem[],
-  attemptedPolicyUpdates: PolicyUpdatePlanItem[],
-  attemptedPolicyUpdateResults: Array<PromiseSettledResult<unknown>>
+  split: PolicyUpdateSplit,
+  attemptedResults: Array<PromiseSettledResult<unknown>>
 ): Array<PromiseSettledResult<unknown>> {
-  const resultByUpdate = new Map(
-    attemptedPolicyUpdates.map((update, i) => [update, attemptedPolicyUpdateResults[i]])
-  );
-  return policyUpdates.map(
-    (update) => resultByUpdate.get(update) ?? { status: 'fulfilled' as const, value: undefined }
-  );
+  if (attemptedResults.length !== split.pending.length) {
+    throw new Error(
+      `Expected ${split.pending.length} policy update results, got ${attemptedResults.length}`
+    );
+  }
+  const merged: Array<PromiseSettledResult<unknown>> = split.all.map(() => ({
+    status: 'fulfilled' as const,
+    value: undefined,
+  }));
+  split.pendingIndexes.forEach((index, attempt) => {
+    merged[index] = attemptedResults[attempt];
+  });
+  return merged;
 }

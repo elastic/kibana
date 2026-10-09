@@ -11,6 +11,7 @@ import {
   mergePolicyUpdateResults,
   addedInstanceIdsByPolicy,
   planPolicyUpdates,
+  splitPendingPolicyUpdates,
 } from './plan_policy_updates';
 import type { PolicyUpdatePlanItem } from './plan_policy_updates';
 
@@ -198,37 +199,67 @@ describe('addedInstanceIdsByPolicy', () => {
   });
 });
 
-describe('mergePolicyUpdateResults', () => {
-  const policyUpdateFor = (policyId: string): PolicyUpdatePlanItem => ({
+describe('splitPendingPolicyUpdates and mergePolicyUpdateResults', () => {
+  const policyUpdateFor = (policyId: string, groupId = 'aws'): PolicyUpdatePlanItem => ({
     policyId,
-    group: makeGroup('aws', [policyId]),
+    group: makeGroup(groupId, [policyId]),
     memberInstanceIds: [policyId],
     resolvedInstanceIds: [policyId],
   });
+  const ok = { status: 'fulfilled' as const, value: undefined };
+
+  it('leaves out the policies an earlier phase wrote and remembers where the rest sit', () => {
+    const [written, failed, fine] = ['written', 'failed', 'ok'].map((id) => policyUpdateFor(id));
+
+    const split = splitPendingPolicyUpdates([written, failed, fine], new Set(['written']));
+
+    expect(split.pending).toEqual([failed, fine]);
+    expect(split.pendingIndexes).toEqual([1, 2]);
+    expect(split.all).toEqual([written, failed, fine]);
+  });
 
   it('keeps the attempted results in place and treats policies written earlier as succeeded', () => {
-    const [written, failed, ok] = ['written', 'failed', 'ok'].map(policyUpdateFor);
+    const [written, failed, fine] = ['written', 'failed', 'ok'].map((id) => policyUpdateFor(id));
     const reason = new Error('boom');
+    const split = splitPendingPolicyUpdates([written, failed, fine], new Set(['written']));
 
-    const merged = mergePolicyUpdateResults(
-      [written, failed, ok],
-      [failed, ok],
-      [
-        { status: 'rejected', reason },
-        { status: 'fulfilled', value: undefined },
-      ]
+    const merged = mergePolicyUpdateResults(split, [{ status: 'rejected', reason }, ok]);
+
+    expect(merged).toEqual([ok, { status: 'rejected', reason }, ok]);
+  });
+
+  it('returns only successes when every policy was written earlier', () => {
+    const split = splitPendingPolicyUpdates(
+      [policyUpdateFor('a'), policyUpdateFor('b')],
+      new Set(['a', 'b'])
     );
 
-    expect(merged).toEqual([
-      { status: 'fulfilled', value: undefined },
-      { status: 'rejected', reason },
-      { status: 'fulfilled', value: undefined },
+    expect(mergePolicyUpdateResults(split, []).map((r) => r.status)).toEqual([
+      'fulfilled',
+      'fulfilled',
     ]);
   });
 
-  it('returns only successes when nothing was attempted', () => {
-    const merged = mergePolicyUpdateResults([policyUpdateFor('a'), policyUpdateFor('b')], [], []);
+  it('maps results by position, also for updates that share a policy (split policies)', () => {
+    const first = policyUpdateFor('same', 'aws__a');
+    const second = policyUpdateFor('same', 'aws__b');
+    const reason = new Error('second failed');
+    const split = splitPendingPolicyUpdates([first, second], new Set());
 
-    expect(merged.map((r) => r.status)).toEqual(['fulfilled', 'fulfilled']);
+    const merged = mergePolicyUpdateResults(split, [ok, { status: 'rejected', reason }]);
+
+    expect(merged).toEqual([ok, { status: 'rejected', reason }]);
+  });
+
+  it('does not report updates that never ran as succeeded: results that do not line up throw', () => {
+    const split = splitPendingPolicyUpdates(
+      [policyUpdateFor('a'), policyUpdateFor('b')],
+      new Set()
+    );
+
+    expect(() => mergePolicyUpdateResults(split, [ok])).toThrow(/Expected 2 policy update results/);
+    expect(() => mergePolicyUpdateResults(split, [ok, ok, ok])).toThrow(
+      /Expected 2 policy update results/
+    );
   });
 });

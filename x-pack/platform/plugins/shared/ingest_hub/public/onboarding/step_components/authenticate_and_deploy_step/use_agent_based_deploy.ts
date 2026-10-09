@@ -36,6 +36,7 @@ import { runWithSharedSecrets } from './shared_secrets';
 import {
   collectPolicyUpdateResults,
   mergePolicyUpdateResults,
+  splitPendingPolicyUpdates,
   addedInstanceIdsByPolicy,
   planPolicyUpdates,
 } from './plan_policy_updates';
@@ -544,12 +545,10 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
 
         // Services joining an existing package policy. Policies a cleanup or dirty update already
         // wrote this run took the new services with them.
-        const pendingPolicyUpdates = policyUpdates.filter(
-          ({ policyId }) => !updatedPolicyIdsThisRun.has(policyId)
-        );
+        const policyUpdateSplit = splitPendingPolicyUpdates(policyUpdates, updatedPolicyIdsThisRun);
         const { results: attemptedPolicyUpdateResults, sharedRefs: policyUpdateRefs } =
           await runWithSharedSecrets({
-            items: pendingPolicyUpdates,
+            items: policyUpdateSplit.pending,
             hasTypedSecrets: hasTypedKeys,
             initialRefs: storedSharedRefs,
             // An update can delete the secret it replaced: finish one before starting the next.
@@ -567,8 +566,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           }
         });
         const policyUpdateResults = mergePolicyUpdateResults(
-          policyUpdates,
-          pendingPolicyUpdates,
+          policyUpdateSplit,
           attemptedPolicyUpdateResults
         );
         const updated = collectPolicyUpdateResults(policyUpdates, policyUpdateResults);

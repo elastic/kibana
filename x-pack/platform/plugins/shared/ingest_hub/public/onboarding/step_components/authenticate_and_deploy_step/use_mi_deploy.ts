@@ -22,6 +22,7 @@ import { runWithSharedSecrets } from './shared_secrets';
 import {
   collectPolicyUpdateResults,
   mergePolicyUpdateResults,
+  splitPendingPolicyUpdates,
   addedInstanceIdsByPolicy,
   planPolicyUpdates,
 } from './plan_policy_updates';
@@ -729,12 +730,10 @@ export function useMiDeploy({
       // One package policy bundles all services of a package: a service added to a package that
       // already has a policy joins it instead of creating a second one. Policies a dirty update or
       // cleanup already wrote this run took the new services with them.
-      const pendingPolicyUpdates = policyUpdates.filter(
-        ({ policyId }) => !updatedPolicyIdsThisRun.has(policyId)
-      );
+      const policyUpdateSplit = splitPendingPolicyUpdates(policyUpdates, updatedPolicyIdsThisRun);
       const { results: attemptedPolicyUpdateResults, sharedRefs: policyUpdateRefs } =
         await runWithSharedSecrets({
-          items: pendingPolicyUpdates,
+          items: policyUpdateSplit.pending,
           hasTypedSecrets,
           initialRefs: storedSharedRefs,
           // An update can delete the secret it replaced: finish one before starting the next.
@@ -760,8 +759,7 @@ export function useMiDeploy({
         }
       });
       const policyUpdateResults = mergePolicyUpdateResults(
-        policyUpdates,
-        pendingPolicyUpdates,
+        policyUpdateSplit,
         attemptedPolicyUpdateResults
       );
 
