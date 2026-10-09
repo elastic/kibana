@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiCode,
@@ -13,10 +13,12 @@ import {
   EuiIcon,
   EuiLink,
   EuiSkeletonText,
+  EuiText,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
+import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import type { CustomCellRenderer } from '@kbn/unified-data-table';
 import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
@@ -147,6 +149,29 @@ export const EpisodeSeverityCell = ({ row }: CellRendererProps) => {
   const severity = row.flattened.severity as EpisodeSeverity | undefined | null;
 
   return <AlertEpisodeSeverityBadge severity={severity} />;
+};
+
+/** Origin of an episode: the connector icon when one exists for the source, its raw text otherwise. */
+export const EpisodeSourceCell = ({ row }: CellRendererProps) => {
+  const { source } = row.flattened as unknown as AlertEpisode;
+
+  if (typeof source !== 'string' || !source) return null;
+
+  const IconComponent = ConnectorIconsMap.get(`.${source}`);
+  if (!IconComponent) return <EuiText size="xs">{source}</EuiText>;
+
+  return (
+    <EuiToolTip content={source}>
+      <Suspense fallback={null}>
+        <EuiIcon
+          type={IconComponent}
+          size="l"
+          aria-label={source}
+          data-test-subj="episodeSourceCellIcon"
+        />
+      </Suspense>
+    </EuiToolTip>
+  );
 };
 
 export interface EpisodeRuleCellProps extends CellRendererProps {

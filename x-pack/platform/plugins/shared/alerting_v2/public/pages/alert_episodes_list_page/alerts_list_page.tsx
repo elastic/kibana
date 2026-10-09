@@ -58,6 +58,7 @@ import {
   EpisodeRuleCell,
   EpisodeRuleTagsCell,
   EpisodeSeverityCell,
+  EpisodeSourceCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
 import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
@@ -114,6 +115,11 @@ const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
   assignees: ({ column }) => ({
     ...column,
     displayAsText: i18n.EPISODES_LIST_COLUMN_ASSIGNEES,
+  }),
+  source: ({ column }) => ({
+    ...column,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_SOURCE,
+    isSortable: false,
   }),
 };
 
@@ -556,6 +562,7 @@ const AlertsListPageContent = () => {
       'episode.status': (props) => <EpisodeStatusCell {...props} />,
       duration: (props) => <EpisodeDurationCell {...props} />,
       severity: (props) => <EpisodeSeverityCell {...props} />,
+      source: (props) => <EpisodeSourceCell {...props} />,
       tags: (props) => <EpisodeTagsCell {...props} />,
       rule_tags: (props) => (
         <EpisodeRuleTagsCell {...props} rulesCache={rulesCache} isLoadingRules={isLoadingRules} />
