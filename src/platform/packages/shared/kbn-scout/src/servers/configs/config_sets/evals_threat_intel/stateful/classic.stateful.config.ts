@@ -9,6 +9,7 @@
 
 import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
 import type { ScoutServerConfig } from '../../../../../types';
+import { serviceAccountsServerArgs } from '../../service_accounts/shared';
 
 /**
  * Scout config for Threat Intel enrichment evals.
@@ -19,6 +20,8 @@ import type { ScoutServerConfig } from '../../../../../types';
  * the suite pins AlertZero Fast/Reasoning Model Settings to the model under
  * test instead of relying on the genAi default fallback.
  *
+ * Since #295215 alertzero installs no managed workflows unless service accounts are enabled.
+ *
  * Usage:
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_threat_intel
  */
@@ -28,6 +31,7 @@ export const servers: ScoutServerConfig = {
     ...evalsTracingConfig.kbnTestServer,
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
+      ...serviceAccountsServerArgs,
       '--xpack.alertzero.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',
