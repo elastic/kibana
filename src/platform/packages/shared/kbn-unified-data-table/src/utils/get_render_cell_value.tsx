@@ -14,14 +14,11 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
-import type {
-  DataTableColumnsMeta,
-  DataTableRecord,
-  ShouldShowFieldInTableHandler,
-} from '@kbn/discover-utils/types';
+import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
 import { formatFieldValueReact, tryPrettyPrintJsonBlocks } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
+import type { DataSource } from '@kbn/data-source';
+import { getDataViewFieldFromDataSource } from '@kbn/discover-utils';
 import { UnifiedDataTableContext } from '../table_context';
 import type { CustomCellRenderer, JsonModeSettings, DocumentsDisplayMode } from '../types';
 import { SourceDocument } from '../components/source_document';
@@ -41,9 +38,8 @@ export const getRenderCellValueFn = ({
   fieldFormats,
   maxEntries,
   externalCustomRenderers,
-  isPlainRecord,
   isCompressed = true,
-  columnsMeta,
+  dataSource,
   documentsDisplayMode,
   jsonModeSettings,
   selectedColumns,
@@ -55,9 +51,8 @@ export const getRenderCellValueFn = ({
   fieldFormats: FieldFormatsStart;
   maxEntries: number;
   externalCustomRenderers?: CustomCellRenderer;
-  isPlainRecord?: boolean;
   isCompressed?: boolean;
-  columnsMeta: DataTableColumnsMeta | undefined;
+  dataSource: DataSource | undefined;
   documentsDisplayMode: DocumentsDisplayMode;
   jsonModeSettings?: JsonModeSettings;
   selectedColumns?: string[];
@@ -72,11 +67,7 @@ export const getRenderCellValueFn = ({
     isExpanded,
   }: EuiDataGridCellValueElementProps) => {
     const row = rows ? rows[rowIndex] : undefined;
-    const field = getDataViewFieldOrCreateFromColumnMeta({
-      dataView,
-      fieldName: columnId,
-      columnMeta: columnsMeta?.[columnId],
-    });
+    const field = getDataViewFieldFromDataSource({ dataView, dataSource, fieldName: columnId });
     const ctx = useContext(UnifiedDataTableContext);
     const internalCellProps = useRef<EuiDataGridSetCellProps>({});
     const customCellProps = useRef<EuiDataGridSetCellProps>({});
@@ -136,14 +127,15 @@ export const getRenderCellValueFn = ({
       return <span className={CELL_CLASS}>-</span>;
     }
 
-    const isSourceColumn = field?.type === '_source' || (isPlainRecord && columnId === '_source');
+    const isSourceColumn =
+      field?.type === '_source' || (dataSource?.kind === 'esql' && columnId === '_source');
 
     if (isSourceColumn && documentsDisplayMode === 'json') {
       return (
         <SourceDocumentJsonMode
           row={row}
           dataView={dataView}
-          columnsMeta={columnsMeta}
+          dataSource={dataSource}
           shouldShowFieldHandler={shouldShowFieldHandler}
           fieldFormats={fieldFormats}
           jsonModeSettings={jsonModeSettings}
@@ -168,7 +160,7 @@ export const getRenderCellValueFn = ({
             fieldFormats={fieldFormats}
             closePopover={closePopover}
             isCompressed={isCompressed}
-            columnsMeta={columnsMeta}
+            dataSource={dataSource}
           />
         </span>
       );
@@ -191,7 +183,7 @@ export const getRenderCellValueFn = ({
         useTopLevelObjectColumns,
         fieldFormats,
         closePopover,
-        isPlainRecord,
+        dataSource,
       });
     }
 
@@ -205,9 +197,8 @@ export const getRenderCellValueFn = ({
           fieldFormats={fieldFormats}
           shouldShowFieldHandler={shouldShowFieldHandler}
           maxEntries={maxEntries}
-          isPlainRecord={isPlainRecord}
           isCompressed={isCompressed}
-          columnsMeta={columnsMeta}
+          dataSource={dataSource}
         />
       );
     }
@@ -245,7 +236,7 @@ function renderPopoverContent({
   useTopLevelObjectColumns,
   fieldFormats,
   closePopover,
-  isPlainRecord,
+  dataSource,
 }: {
   row: DataTableRecord;
   field: DataViewField | undefined;
@@ -254,7 +245,7 @@ function renderPopoverContent({
   useTopLevelObjectColumns: boolean;
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;
-  isPlainRecord?: boolean;
+  dataSource: DataSource | undefined;
 }) {
   const closeButton = (
     <EuiToolTip
@@ -278,7 +269,7 @@ function renderPopoverContent({
   if (
     useTopLevelObjectColumns ||
     field?.type === '_source' ||
-    (isPlainRecord && columnId === '_source')
+    (dataSource?.kind === 'esql' && columnId === '_source')
   ) {
     return (
       <SourcePopoverContent
