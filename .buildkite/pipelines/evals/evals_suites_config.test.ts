@@ -212,4 +212,65 @@ describe('llm_evals.yml suite steps', () => {
         ''].join('\n'))
     ).toEqual(['security-attack-discovery-fp-tpp']);
   });
+
+  it('sets EVAL_SERVER_CONFIG_SET on every step whose suite defines a serverConfigSet', () => {
+    // run_suite.sh only reads the env var, so a step without it silently boots the default
+    // `evals_tracing` stack. These suites pre-date the rule and are not fixed here.
+    const allowlist = new Set(['attack-discovery', 'skill-selection-benchmark']);
+    const serverConfigSetBySuite = new Map(
+      suites.flatMap(({ id, serverConfigSet }) => (serverConfigSet ? [[id, serverConfigSet]] : []))
+    );
+
+    const problems = suiteSteps.map(({ env = {} }) => {
+      const suiteId = env.EVAL_SUITE_ID!;
+      if (allowlist.has(suiteId)) return null;
+      const expected = serverConfigSetBySuite.get(suiteId);
+      if (expected === undefined || env.EVAL_SERVER_CONFIG_SET === expected) return null;
+      return (
+        `${suiteId}: suite declares serverConfigSet "${expected}" but the step env has ` +
+        `"${env.EVAL_SERVER_CONFIG_SET ?? 'no EVAL_SERVER_CONFIG_SET'}"`
+      );
+    });
+
+    expect(problems.filter(Boolean)).toEqual([]);
+  });
+
+  it('flags a missing or mismatched EVAL_SERVER_CONFIG_SET, including in a group-nested step', () => {
+    // Exercises the check above on a hand-written pipeline: a non-allowlisted suite whose
+    // serverConfigSet is absent must surface, while the allowlisted one must not.
+    const allowlist = new Set(['attack-discovery', 'skill-selection-benchmark']);
+    const serverConfigSetBySuite = new Map(
+      suites.flatMap(({ id, serverConfigSet }) => (serverConfigSet ? [[id, serverConfigSet]] : []))
+    );
+
+    const configSetProblemsIn = (text: string) =>
+      stepsFromYamlText(text)
+        .filter(({ env = {} }) => env.EVAL_SUITE_ID !== undefined && !allowlist.has(env.EVAL_SUITE_ID))
+        .map(({ env = {} }) => {
+          const expected = serverConfigSetBySuite.get(env.EVAL_SUITE_ID!);
+          if (expected === undefined || env.EVAL_SERVER_CONFIG_SET === expected) return null;
+          return (
+            `${env.EVAL_SUITE_ID}: suite declares serverConfigSet "${expected}" but the step env has ` +
+            `"${env.EVAL_SERVER_CONFIG_SET ?? 'no EVAL_SERVER_CONFIG_SET'}"`
+          );
+        })
+        .filter(Boolean);
+
+    expect(
+      configSetProblemsIn([
+        'steps:',
+        '  - command: run_suite.sh',
+        '    env:',
+        '      EVAL_SUITE_ID: nightshift-investigations',
+        '  - group: weekly',
+        '    steps:',
+        '      - command: run_suite.sh',
+        '        env:',
+        '          EVAL_SUITE_ID: attack-discovery',
+        ''].join('\n'))
+    ).toEqual([
+      'nightshift-investigations: suite declares serverConfigSet "evals_nightshift_investigations" ' +
+        'but the step env has "no EVAL_SERVER_CONFIG_SET"',
+    ]);
+  });
 });
