@@ -12,24 +12,38 @@ import { loadApi } from './load_api';
 import type { LoadApiFailure } from './load_api';
 import { getValidator } from './validate_params';
 import type { ParamsValidationError, ParamsValidator } from './validate_params';
+import { BODY_ROOT_KEY, isRecord } from './types';
 import type { ApiRegistryDefinition, ApiRequest } from './types';
 
-/**
- * Explains why an API cannot be called at all, for the cases we refuse up front rather
- * than letting the request fail against the server.
- *
- * @param definition - The API's registry definition.
- * @returns The reason the API is unsupported, or `undefined` when it can be called.
- */
-export const getUnsupportedReason = (definition: ApiRegistryDefinition): string | undefined =>
-  definition.bodyFormat === 'ndjson'
-    ? 'This API takes a newline-delimited (NDJSON) request body. The generated schemas do not model ' +
-      'that payload as a parameter, so there is no way to supply one.'
-    : undefined;
+const getBodyRootParam = (definition: ApiRegistryDefinition): string | undefined => {
+  const properties = definition.input?.properties;
+  if (!isRecord(properties)) {
+    return undefined;
+  }
+  return Object.keys(properties).find((name) => {
+    const spec = properties[name];
+    return isRecord(spec) && spec[BODY_ROOT_KEY] === true;
+  });
+};
+
+const unwrapBodyRoot = (definition: ApiRegistryDefinition, request: ApiRequest): ApiRequest => {
+  const bodyRootParam = getBodyRootParam(definition);
+  if (bodyRootParam === undefined) {
+    return request;
+  }
+
+  const { body, bulkBody } = request;
+  if (isRecord(bulkBody) && bodyRootParam in bulkBody) {
+    return { ...request, bulkBody: bulkBody[bodyRootParam] };
+  }
+  if (isRecord(body) && bodyRootParam in body) {
+    return { ...request, body: body[bodyRootParam] };
+  }
+  return request;
+};
 
 export type PrepareApiRequestFailure =
   | LoadApiFailure
-  | { status: 'unsupported_api'; reason: string }
   | { status: 'schema_unavailable'; error: unknown }
   | { status: 'invalid_params'; errors: ParamsValidationError[] }
   | { status: 'unresolved_path_params'; params: string[]; pathTemplate: string }
@@ -48,11 +62,7 @@ export interface PrepareApiRequestParams {
 }
 
 /**
- * Turns an API identifier and a flat params map into a concrete HTTP request.
- *
- * Validates the params against the API's schema, routes them into the path, query string, and
- * body, and refuses everything that cannot be called: unsupported payload formats, unresolved
- * path parameters, query values a query string cannot carry, and cross-space Kibana paths.
+ * Validates a flat params map against its API's schema and transforms it into an HTTP request.
  *
  * @param params - The target, API identifier, caller-supplied params, and current space.
  * @returns The request to dispatch along with whether the API is destructive, or the reason no
@@ -71,11 +81,6 @@ export const prepareApiRequest = async ({
 
   const { definition, buildRequest } = loadResult.loaded;
 
-  const unsupportedReason = getUnsupportedReason(definition);
-  if (unsupportedReason) {
-    return { status: 'unsupported_api', reason: unsupportedReason };
-  }
-
   if (definition.input) {
     let validate: ParamsValidator;
     try {
@@ -90,7 +95,7 @@ export const prepareApiRequest = async ({
     }
   }
 
-  const request = buildRequest(params);
+  const request = unwrapBodyRoot(definition, buildRequest(params));
 
   const unresolvedPathParams = Array.from(request.path.matchAll(/\{([^}]+)\}/g)).map(
     ([, paramName]) => paramName

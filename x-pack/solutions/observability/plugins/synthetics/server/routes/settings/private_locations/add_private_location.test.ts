@@ -45,12 +45,10 @@ describe('addPrivateLocationRoute handler - space containment', () => {
     policySpaceIds,
     requestSpaces,
     spaceId = 'naims',
-    hasEnterprise = false,
   }: {
     policySpaceIds?: string[];
     requestSpaces?: string[];
     spaceId?: string;
-    hasEnterprise?: boolean;
   }) => {
     const response = httpServerMock.createResponseFactory();
     const internalSOClient = {};
@@ -69,15 +67,6 @@ describe('addPrivateLocationRoute handler - space containment', () => {
       response,
       spaceId,
       savedObjectsClient: {},
-      context: {
-        licensing: Promise.resolve({
-          license: {
-            isAvailable: true,
-            isActive: true,
-            hasAtLeast: (level: string) => level === 'enterprise' && hasEnterprise,
-          },
-        }),
-      },
     } as any;
     return { routeContext, response };
   };
@@ -147,53 +136,6 @@ describe('addPrivateLocationRoute handler - space containment', () => {
     expect(create).toHaveBeenCalled();
   });
 
-  it('persists isAgentSharding on create when the license is Enterprise', async () => {
-    const { routeContext, response } = makeRouteContext({
-      policySpaceIds: [ALL_SPACES_ID],
-      requestSpaces: ['naims'],
-      hasEnterprise: true,
-    });
-    routeContext.request.body = {
-      ...routeContext.request.body,
-      isAgentSharding: true,
-    };
-    const create = stubDownstream();
-
-    await addPrivateLocationRoute().handler(routeContext);
-
-    expect(response.badRequest).not.toHaveBeenCalled();
-    expect(response.forbidden).not.toHaveBeenCalled();
-    expect(create).toHaveBeenCalledWith(
-      expect.objectContaining({ isAgentSharding: true }),
-      expect.any(String)
-    );
-  });
-
-  it('rejects creating a sharded location without an Enterprise license', async () => {
-    const { routeContext, response } = makeRouteContext({
-      policySpaceIds: [ALL_SPACES_ID],
-      requestSpaces: ['naims'],
-    });
-    routeContext.request.body = {
-      ...routeContext.request.body,
-      isAgentSharding: true,
-    };
-    const create = stubDownstream();
-    response.forbidden.mockReturnValue({ statusCode: 403 } as any);
-
-    const result = await addPrivateLocationRoute().handler(routeContext);
-
-    expect(result).toEqual({ statusCode: 403 });
-    expect(response.forbidden).toHaveBeenCalledWith(
-      expect.objectContaining({
-        body: expect.objectContaining({
-          message: expect.stringContaining('Enterprise license'),
-        }),
-      })
-    );
-    expect(create).not.toHaveBeenCalled();
-  });
-
   it('bypasses the containment check when the agent policy is all-spaces', async () => {
     const { routeContext, response } = makeRouteContext({
       policySpaceIds: [ALL_SPACES_ID],
@@ -230,23 +172,10 @@ describe('PrivateLocationRepository.getLocationSpaces', () => {
   });
 });
 
-describe('PrivateLocationSchema isAgentSharding', () => {
+describe('PrivateLocationSchema', () => {
   const base = { label: 'loc', agentPolicyId: 'ap' };
 
-  it('accepts a boolean flag', () => {
-    expect(PrivateLocationSchema.validate({ ...base, isAgentSharding: true })).toEqual(
-      expect.objectContaining({ isAgentSharding: true })
-    );
-    expect(PrivateLocationSchema.validate({ ...base, isAgentSharding: false })).toEqual(
-      expect.objectContaining({ isAgentSharding: false })
-    );
-  });
-
-  it('allows omitting the flag so existing clients stay classic', () => {
-    expect(PrivateLocationSchema.validate(base).isAgentSharding).toBeUndefined();
-  });
-
-  it('rejects a non-boolean flag', () => {
-    expect(() => PrivateLocationSchema.validate({ ...base, isAgentSharding: 'yes' })).toThrow();
+  it('rejects unknown keys', () => {
+    expect(() => PrivateLocationSchema.parse({ ...base, unexpectedField: true })).toThrow();
   });
 });

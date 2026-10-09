@@ -29,11 +29,11 @@ const runbook = (content: string, id = 'rb-1') => ({
 const dashboard = (dashboardId: string, id = 'db-1') => ({
   id,
   type: DASHBOARD_ARTIFACT_TYPE,
-  data: { dashboardId },
+  data: { dashboard_id: dashboardId },
 });
 
 const dashboardReference = (dashboardId: string, artifactId = 'db-1') => ({
-  name: `artifact:dashboardId:${artifactId}`,
+  name: `artifact:dashboard_id:${artifactId}`,
   type: 'dashboard',
   id: dashboardId,
 });
@@ -323,7 +323,7 @@ apiTest.describe('Rule artifacts API', { tag: '@local-stateful-classic' }, () =>
 
       expect(response).toHaveStatusCode(400);
       expect(response.body.code).toBe('INVALID_ARTIFACT_DATA');
-      expect(response.body.message).toContain('dashboardId');
+      expect(response.body.message).toContain('dashboard_id');
     }
   );
 
@@ -339,6 +339,19 @@ apiTest.describe('Rule artifacts API', { tag: '@local-stateful-classic' }, () =>
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');
     expect(response.body.message).toContain('must be unique within the rule');
+  });
+
+  apiTest('validation: rejects an empty artifacts list', async ({ apiClient }) => {
+    const response = await apiClient.post(testData.RULE_API_PATH, {
+      headers: writerHeaders,
+      body: {
+        ...buildCreateRuleData({ metadata: { name: 'create-empty-artifacts' } }),
+        artifacts: [],
+      },
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(

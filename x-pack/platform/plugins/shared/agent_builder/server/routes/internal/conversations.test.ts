@@ -15,6 +15,7 @@ import { internalApiPath } from '../../../common/constants';
 
 const MARK_READ_PATH = `${internalApiPath}/conversations/{conversation_id}/_mark_read`;
 const SET_PINNED_PATH = `${internalApiPath}/conversations/{conversation_id}/_set_pinned`;
+const SEARCH_PATH = `${internalApiPath}/conversations/_search`;
 
 describe('registerInternalConversationRoutes - _mark_read', () => {
   let routeHandler: (ctx: any, req: any, res: any) => Promise<any>;
@@ -58,6 +59,7 @@ describe('registerInternalConversationRoutes - _mark_read', () => {
           }
         ),
       patch: jest.fn(),
+      get: jest.fn(),
     } as unknown as IRouter;
 
     registerInternalConversationRoutes({
@@ -130,6 +132,7 @@ describe('registerInternalConversationRoutes - _apply_template', () => {
           }
         ),
       patch: jest.fn(),
+      get: jest.fn(),
     } as unknown as IRouter;
 
     registerInternalConversationRoutes({
@@ -148,7 +151,7 @@ describe('registerInternalConversationRoutes - _apply_template', () => {
       kibanaResponseFactory
     );
 
-    expect(applyTemplate).toHaveBeenCalledWith('conv-1', 'phishing');
+    expect(applyTemplate).toHaveBeenCalledWith('conv-1', 'phishing', { source: 'http_api' });
     expect(response.status).toBe(200);
     expect(response.payload).toMatchObject({ id: 'conv-1' });
   });
@@ -165,15 +168,15 @@ describe('registerInternalConversationRoutes - _apply_template', () => {
     expect(response.status).toBe(500);
   });
 
-  it('returns 404 when the experimental features flag is disabled', async () => {
+  it('applies the template when the experimental features flag is disabled', async () => {
     const response = await routeHandler(
       createMockContext({ featureFlagEnabled: false }) as any,
       createRequest(),
       kibanaResponseFactory
     );
 
-    expect(response.status).toBe(404);
-    expect(applyTemplate).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(applyTemplate).toHaveBeenCalledWith('conv-1', 'phishing', { source: 'http_api' });
   });
 });
 
@@ -226,6 +229,7 @@ describe('registerInternalConversationRoutes - PATCH /metadata', () => {
             routeHandlers[config.path] = handler;
           }
         ),
+      get: jest.fn(),
     } as unknown as IRouter;
 
     registerInternalConversationRoutes({
@@ -244,7 +248,11 @@ describe('registerInternalConversationRoutes - PATCH /metadata', () => {
       kibanaResponseFactory
     );
 
-    expect(patchMetadata).toHaveBeenCalledWith('conv-1', { severity: 'high' });
+    expect(patchMetadata).toHaveBeenCalledWith(
+      'conv-1',
+      { severity: 'high' },
+      { source: 'http_api' }
+    );
     expect(response.status).toBe(200);
     expect(response.payload).toMatchObject({ id: 'conv-1', metadata: { severity: 'high' } });
   });
@@ -273,15 +281,15 @@ describe('registerInternalConversationRoutes - PATCH /metadata', () => {
     expect(response.status).toBe(500);
   });
 
-  it('returns 404 when the experimental features flag is disabled', async () => {
+  it('patches the metadata when the experimental features flag is disabled', async () => {
     const response = await routeHandler(
       createMockContext({ featureFlagEnabled: false }) as any,
       createRequest(),
       kibanaResponseFactory
     );
 
-    expect(response.status).toBe(404);
-    expect(patchMetadata).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(patchMetadata).toHaveBeenCalled();
   });
 });
 
@@ -327,6 +335,7 @@ describe('registerInternalConversationRoutes - _set_pinned', () => {
           }
         ),
       patch: jest.fn(),
+      get: jest.fn(),
     } as unknown as IRouter;
 
     registerInternalConversationRoutes({
@@ -348,5 +357,93 @@ describe('registerInternalConversationRoutes - _set_pinned', () => {
     expect(setPinned).toHaveBeenCalledWith('conv-1', true);
     expect(response.status).toBe(200);
     expect(response.payload).toMatchObject({ id: 'conv-1', pinned: true });
+  });
+});
+
+describe('registerInternalConversationRoutes - _search', () => {
+  let routeHandler: (ctx: any, req: any, res: any) => Promise<any>;
+  let search: jest.Mock;
+
+  const createMockContext = () => ({
+    core: Promise.resolve({}),
+    licensing: Promise.resolve({
+      license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+    }),
+  });
+
+  // httpServerMock.createKibanaRequest does not run route validation, so page/per_page
+  // defaults are not applied here - pass them explicitly.
+  const createRequest = (overrides: { query?: object } = {}) =>
+    httpServerMock.createKibanaRequest({
+      method: 'get',
+      path: SEARCH_PATH,
+      query: { query: 'sales', page: 1, per_page: 50 },
+      ...overrides,
+    });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    search = jest.fn().mockResolvedValue({
+      results: [{ id: 'conv-1', title: 'Sales report' }],
+      total: 1,
+    });
+
+    const getInternalServices = jest.fn().mockReturnValue({
+      conversations: {
+        getScopedClient: jest.fn().mockResolvedValue({ search }),
+      },
+    });
+
+    const routeHandlers: Record<string, (ctx: any, req: any, res: any) => Promise<any>> = {};
+
+    const router = {
+      post: jest.fn(),
+      patch: jest.fn(),
+      get: jest
+        .fn()
+        .mockImplementation(
+          (config: { path: string }, handler: (ctx: any, req: any, res: any) => Promise<any>) => {
+            routeHandlers[config.path] = handler;
+          }
+        ),
+    } as unknown as IRouter;
+
+    registerInternalConversationRoutes({
+      router,
+      getInternalServices,
+      logger: loggingSystemMock.createLogger(),
+    } as unknown as RouteDependencies);
+
+    routeHandler = routeHandlers[SEARCH_PATH];
+  });
+
+  it('calls search with the query, agent_id, page, and per_page from the request', async () => {
+    await routeHandler(
+      createMockContext() as any,
+      createRequest({ query: { query: 'sales', agent_id: 'agent-1', page: 2, per_page: 10 } }),
+      kibanaResponseFactory
+    );
+
+    expect(search).toHaveBeenCalledWith({
+      query: 'sales',
+      agentId: 'agent-1',
+      page: 2,
+      perPage: 10,
+    });
+  });
+
+  it('returns the pagination envelope and results', async () => {
+    const response = await routeHandler(
+      createMockContext() as any,
+      createRequest(),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual({
+      pagination: { total: 1, page: 1, per_page: 50 },
+      results: [{ id: 'conv-1', title: 'Sales report' }],
+    });
   });
 });

@@ -949,6 +949,8 @@ export default function (providerContext: FtrProviderContext) {
           has_agent_version_conditions: false,
           min_agent_version: null,
           package_agent_version_conditions: null,
+          download_source_id: null,
+          download_source_ids: [],
         });
       });
 

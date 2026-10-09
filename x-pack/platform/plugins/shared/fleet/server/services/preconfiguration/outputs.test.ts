@@ -44,7 +44,6 @@ jest.mock('../app_context', () => ({
   appContextService: {
     getExperimentalFeatures: jest.fn().mockReturnValue({
       useSpaceAwareness: false,
-      enableOtlpOutput: true,
     }),
     getInternalUserSOClient: jest.fn(),
     getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
@@ -1590,6 +1589,120 @@ describe('Outputs preconfiguration', () => {
         await createOrUpdatePreconfiguredOutputs(soClient, esClient, [data]);
 
         expect(mockedOutputService.create).not.toHaveBeenCalled();
+        expect(mockedOutputService.update).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('allow_edit migration on restart', () => {
+      it('should update es-private-output when its allow_edit is stale (missing new fields)', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        // Simulate an existing saved object that only has the original two fields
+        // (as shipped before this fix).
+        mockedOutputService.bulkGet.mockResolvedValue([
+          {
+            id: SERVERLESS_PRIVATE_OUTPUT_ID,
+            name: 'Private output',
+            type: 'elasticsearch',
+            hosts: ['https://private.es.example.com'],
+            is_default: false,
+            is_default_monitoring: false,
+            is_preconfigured: true,
+            allow_edit: ['is_default', 'is_default_monitoring'],
+          } as any,
+        ]);
+
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          {
+            id: SERVERLESS_PRIVATE_OUTPUT_ID,
+            name: 'Private output',
+            type: 'elasticsearch',
+            hosts: ['https://private.es.example.com'],
+            is_default: false,
+            is_default_monitoring: false,
+            is_preconfigured: true,
+            // project-controller currently ships allow_edit: [] — Kibana unions in the rest
+            allow_edit: [
+              'is_default',
+              'is_default_monitoring',
+              'shipper',
+              'config_yaml',
+              'preset',
+              'write_to_logs_streams',
+            ],
+          },
+        ]);
+
+        // The diff should detect the stale allow_edit and trigger an update
+        expect(mockedOutputService.update).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          SERVERLESS_PRIVATE_OUTPUT_ID,
+          expect.objectContaining({
+            allow_edit: expect.arrayContaining([
+              'is_default',
+              'is_default_monitoring',
+              'shipper',
+              'config_yaml',
+              'preset',
+              'write_to_logs_streams',
+            ]),
+          }),
+          expect.anything()
+        );
+      });
+
+      it('should preserve user-chosen preset across restart (applyAllowEditOverrides)', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        // Simulate: user already changed preset to 'throughput' at runtime
+        mockedOutputService.bulkGet.mockResolvedValue([
+          {
+            id: SERVERLESS_PRIVATE_OUTPUT_ID,
+            name: 'Private output',
+            type: 'elasticsearch',
+            hosts: ['https://private.es.example.com'],
+            is_default: false,
+            is_default_monitoring: false,
+            is_preconfigured: true,
+            preset: 'throughput', // user-set value in the SO
+            allow_edit: [
+              'is_default',
+              'is_default_monitoring',
+              'shipper',
+              'config_yaml',
+              'preset',
+              'write_to_logs_streams',
+            ],
+          } as any,
+        ]);
+
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          {
+            id: SERVERLESS_PRIVATE_OUTPUT_ID,
+            name: 'Private output',
+            type: 'elasticsearch',
+            hosts: ['https://private.es.example.com'],
+            is_default: false,
+            is_default_monitoring: false,
+            is_preconfigured: true,
+            // Config doesn't specify preset (project-controller never will)
+            allow_edit: [
+              'is_default',
+              'is_default_monitoring',
+              'shipper',
+              'config_yaml',
+              'preset',
+              'write_to_logs_streams',
+            ],
+          },
+        ]);
+
+        // No update should fire — the allow_edit list is unchanged, and the
+        // preset from the SO is copied back by applyAllowEditOverrides before
+        // the diff runs, so there is no difference to reconcile.
         expect(mockedOutputService.update).not.toHaveBeenCalled();
       });
     });

@@ -41,6 +41,7 @@ import {
   AgentPolicySchemaV5,
   AgentPolicySchemaV6,
   AgentPolicySchemaV7,
+  AgentPolicySchemaV8,
   EpmPackagesSchemaV6,
   EpmPackagesSchemaV7,
   EpmPackagesSchemaV8,
@@ -57,7 +58,9 @@ import {
   PackagePolicySchemaV24,
   PackagePolicySchemaV25,
   CloudConnectorSchemaV4,
+  CloudConnectorSchemaV5,
   CloudOnboardingDeploymentSchemaV1,
+  CloudOnboardingDeploymentSchemaV2,
 } from '../types';
 
 import { downloadSourceSchemaV2 } from '../../common/types/models/download_source_schema';
@@ -131,6 +134,7 @@ import {
   migratePackagePolicySetRequiresRootToV8150,
 } from './migrations/to_v8_15_0';
 import { backfillAgentPolicyToV4 } from './model_versions/agent_policy_v4';
+import { backfillAgentPolicyDownloadSourceIds } from './model_versions/agent_policy_download_source_ids_backfill';
 import { backfillOutputPolicyToV7 } from './model_versions/outputs';
 import { packagePolicyV17AdvancedFieldsForEndpointV818 } from './model_versions/security_solution/v17_advanced_package_policy_fields';
 import { backfillPackagePolicyLatestRevision } from './model_versions/package_policy_latest_revision_backfill';
@@ -361,6 +365,7 @@ export const getSavedObjectTypes = (
           data_output_id: { type: 'keyword' },
           monitoring_output_id: { type: 'keyword' },
           download_source_id: { type: 'keyword' },
+          download_source_ids: { type: 'keyword', ignore_above: 1024 },
           fleet_server_host_id: { type: 'keyword' },
           agent_features: {
             properties: {
@@ -540,6 +545,24 @@ export const getSavedObjectTypes = (
             create: AgentPolicySchemaV7.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '13': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                download_source_ids: { type: 'keyword', ignore_above: 1024 },
+              },
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: backfillAgentPolicyDownloadSourceIds,
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV8.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV8.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -571,6 +594,7 @@ export const getSavedObjectTypes = (
           data_output_id: { type: 'keyword' },
           monitoring_output_id: { type: 'keyword' },
           download_source_id: { type: 'keyword' },
+          download_source_ids: { type: 'keyword', ignore_above: 1024 },
           fleet_server_host_id: { type: 'keyword' },
           agent_features: {
             properties: {
@@ -679,6 +703,24 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: AgentPolicySchemaV7.extends({}, { unknowns: 'ignore' }),
             create: AgentPolicySchemaV7.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '8': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                download_source_ids: { type: 'keyword', ignore_above: 1024 },
+              },
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: backfillAgentPolicyDownloadSourceIds,
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV8.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV8.extends({}, { unknowns: 'ignore' }),
           },
         },
       },
@@ -1933,6 +1975,10 @@ export const getSavedObjectTypes = (
           verification_status: { type: 'keyword' },
           verification_started_at: { type: 'date' },
           verification_failed_at: { type: 'date' },
+          iac_key: { type: 'keyword', ignore_above: 1024 },
+          iac_deployment_id: { type: 'keyword', ignore_above: 1024 },
+          iac_upgrade_status: { type: 'keyword', ignore_above: 1024 },
+          iac_upgrade_checked_at: { type: 'date' },
         },
       },
       modelVersions: {
@@ -2048,6 +2094,23 @@ export const getSavedObjectTypes = (
             create: CloudConnectorSchemaV4,
           },
         },
+        5: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                iac_key: { type: 'keyword', ignore_above: 1024 },
+                iac_deployment_id: { type: 'keyword', ignore_above: 1024 },
+                iac_upgrade_status: { type: 'keyword', ignore_above: 1024 },
+                iac_upgrade_checked_at: { type: 'date' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: CloudConnectorSchemaV5.extends({}, { unknowns: 'ignore' }),
+            create: CloudConnectorSchemaV5,
+          },
+        },
       },
     },
     [CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE]: {
@@ -2073,6 +2136,19 @@ export const getSavedObjectTypes = (
               { unknowns: 'ignore' }
             ),
             create: CloudOnboardingDeploymentSchemaV1,
+          },
+        },
+        2: {
+          // Widened authMethod (3 new agent_based literals) + agentPolicyIds array replacing
+          // the singular agentPolicyId (which the UI never wrote, so no data_backfill needed).
+          // No mappings_addition — neither field is indexed (dynamic: false).
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV2.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV2,
           },
         },
       },

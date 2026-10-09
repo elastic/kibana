@@ -11,7 +11,7 @@
  * This file contains the presentational layer of the JSON tree: one component per row kind
  * (`NodeRowView`, `ClosingBracketRow`,`PagerRowView`). These hold no state.
  */
-import React, { memo, useEffect, useRef, useState } from 'react';
+import React, { Children, memo, useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -79,7 +79,7 @@ export const NodeRowView = memo(function NodeRowView({
   const { node, hasChildren, isExpanded } = row;
   // The row's action buttons (copy, filter) mount only while the row is active or hovered,
   // so a large tree doesn't flood the document with focusable elements (which makes focus-trap /
-  // tabbable scans dominate page load time).
+  // tabbable scans dominate page load time). A reserved slot keeps that mount from shifting layout.
   const [isHovered, setIsHovered] = useState(false);
   return (
     <div
@@ -250,22 +250,31 @@ const KeyPrefix = memo(function KeyPrefix({
   );
 });
 
+const Comma = memo(function Comma() {
+  const styles = useEuiMemoizedStyles(treeStyles);
+  return <span css={styles.punctuation}>,</span>;
+});
+
 const PrimitiveValue = memo(function PrimitiveValue({
   primitiveType,
   value,
   formatted,
+  trailingComma,
 }: {
   primitiveType: PrimitiveType;
   value: JsonPrimitive;
   formatted?: React.ReactNode;
+  trailingComma: boolean;
 }) {
   const styles = useEuiMemoizedStyles(treeStyles);
+  const comma = trailingComma ? <Comma /> : null;
   if (primitiveType === 'string') {
     return (
       <span className={VALUE_CLASS} css={[styles.value, styles.valueString]}>
         {'"'}
         {formatted ?? String(value)}
         {'"'}
+        {comma}
       </span>
     );
   }
@@ -273,19 +282,16 @@ const PrimitiveValue = memo(function PrimitiveValue({
     return (
       <span className={VALUE_CLASS} css={[styles.value, styles.valueScalar]}>
         {formatted ?? String(value)}
+        {comma}
       </span>
     );
   }
   return (
     <span className={VALUE_CLASS} css={[styles.value, styles.valueNull]}>
       null
+      {comma}
     </span>
   );
-});
-
-const Comma = memo(function Comma() {
-  const styles = useEuiMemoizedStyles(treeStyles);
-  return <span css={styles.punctuation}>,</span>;
 });
 
 const COPIED_FEEDBACK_DURATION = 1200;
@@ -414,6 +420,29 @@ export const CopyAllButton = memo(function CopyAllButton({
   );
 });
 
+const RowActions = memo(function RowActions({
+  nodeId,
+  show,
+  children,
+}: {
+  nodeId: string;
+  show: boolean;
+  children: React.ReactNode;
+}) {
+  const styles = useEuiMemoizedStyles(treeStyles);
+  const { euiTheme } = useEuiTheme();
+  return (
+    <span
+      className="jsonTreeViewerRowActions"
+      css={styles.actions}
+      style={{ minInlineSize: rowActionsMinInlineSize(euiTheme, Children.count(children)) }}
+      data-test-subj={`jsonTreeViewerRowActions-${nodeId}`}
+    >
+      {show ? children : null}
+    </span>
+  );
+});
+
 // A host-defined trailing action on a leaf row.
 const RowActionButton = memo(function RowActionButton({ action }: { action: JsonTreeRowAction }) {
   const styles = useEuiMemoizedStyles(treeStyles);
@@ -456,10 +485,9 @@ const NodeLabel = memo(function NodeLabel({
   const { node, isExpanded, hasChildren, trailingComma } = row;
 
   if (node.kind === 'leaf') {
-    const leafActions =
-      showActions && getLeafActions
-        ? getLeafActions({ value: node.value, path: node.path, isArrayItem: node.isArrayItem })
-        : [];
+    const leafActions = getLeafActions
+      ? getLeafActions({ value: node.value, path: node.path, isArrayItem: node.isArrayItem })
+      : [];
     return (
       <span css={styles.label}>
         <span className={`${LABEL_TEXT_CLASS} ${LEAF_LABEL_CLASS}`} css={styles.labelText}>
@@ -468,17 +496,15 @@ const NodeLabel = memo(function NodeLabel({
             primitiveType={node.primitiveType}
             value={node.value}
             formatted={formatValue?.({ value: node.value, path: node.path })}
+            trailingComma={trailingComma}
           />
-          {trailingComma && <Comma />}
         </span>
-        {showActions && (
-          <span className="jsonTreeViewerRowActions" css={styles.actions}>
-            <ValueCopyButton nodeId={node.id} value={node.value} />
-            {leafActions.map((action) => (
-              <RowActionButton key={action.id} action={action} />
-            ))}
-          </span>
-        )}
+        <RowActions nodeId={node.id} show={showActions}>
+          <ValueCopyButton nodeId={node.id} value={node.value} />
+          {leafActions.map((action) => (
+            <RowActionButton key={action.id} action={action} />
+          ))}
+        </RowActions>
       </span>
     );
   }
@@ -508,7 +534,9 @@ const NodeLabel = memo(function NodeLabel({
           <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
           <span css={styles.bracket}>{open}</span>
         </span>
-        {showActions && <SubtreeCopyButton node={node} />}
+        <RowActions nodeId={node.id} show={showActions}>
+          <SubtreeCopyButton node={node} />
+        </RowActions>
       </span>
     );
   }
@@ -525,7 +553,9 @@ const NodeLabel = memo(function NodeLabel({
         <span css={styles.bracket}>{close}</span>
         {trailingComma && <Comma />}
       </span>
-      {showActions && <SubtreeCopyButton node={node} />}
+      <RowActions nodeId={node.id} show={showActions}>
+        <SubtreeCopyButton node={node} />
+      </RowActions>
     </span>
   );
 });
@@ -741,5 +771,8 @@ const treeStyles = ({ euiTheme }: UseEuiTheme) => ({
 
 const rowPaddingInlineStart = (euiTheme: UseEuiTheme['euiTheme'], depth: number) =>
   `calc(${euiTheme.size.s} + ${depth} * ${euiTheme.size.base})`;
+
+const rowActionsMinInlineSize = (euiTheme: UseEuiTheme['euiTheme'], count: number) =>
+  `calc(${count} * (${euiTheme.size.base} + ${euiTheme.size.xs}))`;
 
 export { treeStyles };

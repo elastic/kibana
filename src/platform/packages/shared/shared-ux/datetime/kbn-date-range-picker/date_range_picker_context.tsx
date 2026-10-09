@@ -123,6 +123,8 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   width: NonNullable<DateRangePickerProps['width']>;
   /** Whether the picker is disabled. */
   disabled: boolean;
+  /** Tooltip shown on the control and time window buttons while disabled. */
+  disabledTooltip?: React.ReactNode;
   /** Whether the picker shows its value but can't be edited. */
   readOnly: boolean;
   /** Whether a loading spinner is shown inside the form control. */
@@ -176,6 +178,7 @@ export function DateRangePickerProvider({
   locale,
   isInvalid = false,
   disabled = false,
+  disabledTooltip,
   readOnly = false,
   isLoading = false,
   compressed = true,
@@ -309,9 +312,11 @@ export function DateRangePickerProvider({
     (range?: TimeRangeBounds, textOverride?: string) => {
       let rangeToApply: TimeRange;
 
-      if (range) {
-        const rangeText =
-          textOverride ?? `${range.start} ${DATE_RANGE_INPUT_DELIMITER} ${range.end}`;
+      if (textOverride !== undefined) {
+        rangeToApply = textToTimeRange(textOverride, transformOptions);
+        setText(textOverride);
+      } else if (range) {
+        const rangeText = `${range.start} ${DATE_RANGE_INPUT_DELIMITER} ${range.end}`;
         rangeToApply = textToTimeRange(rangeText, transformOptions);
         setText(rangeText);
       } else {
@@ -364,6 +369,7 @@ export function DateRangePickerProvider({
       onInputChange,
       width,
       disabled,
+      disabledTooltip,
       readOnly,
       isLoading,
       calendarOptions,
@@ -399,6 +405,7 @@ export function DateRangePickerProvider({
       onInputChange,
       width,
       disabled,
+      disabledTooltip,
       readOnly,
       isLoading,
       calendarOptions,

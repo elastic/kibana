@@ -1,5 +1,5 @@
 {
-  "sha1": "9f129552a643731826247fe0fccfd70246e2862c",
+  "sha1": "44e29f545cf44998ea4add005fc596aa1a078f5a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -452,6 +452,62 @@
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/find_sort.spec.ts",
         "line": 32,
         "column": 61
+      }
+    },
+    {
+      "id": "c7926343b0a1c4a-ecf928eb89f7cf3",
+      "title": "Saved Objects Management - import references imports a visualization when the saved search it references already exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/import_references.spec.ts",
+        "line": 55,
+        "column": 48
+      }
+    },
+    {
+      "id": "c7926343b0a1c4a-ecd850ca4c7e85a",
+      "title": "Saved Objects Management - import references refuses a visualization whose saved search does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/import_references.spec.ts",
+        "line": 69,
+        "column": 43
+      }
+    },
+    {
+      "id": "c7926343b0a1c4a-4bdf1dafa49d8da",
+      "title": "Saved Objects Management - import references reports the bundled visualization as importable when its saved search has a missing data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/import_references.spec.ts",
+        "line": 96,
+        "column": 25
+      }
+    },
+    {
+      "id": "c7926343b0a1c4a-fadde9599dec0bf",
+      "title": "Saved Objects Management - import references imports objects that bundle their own data view, whether or not it already exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/import_references.spec.ts",
+        "line": 140,
+        "column": 66
       }
     },
     {

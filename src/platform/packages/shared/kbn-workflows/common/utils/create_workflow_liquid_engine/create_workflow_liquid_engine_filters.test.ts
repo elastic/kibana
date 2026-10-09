@@ -8,7 +8,7 @@
  */
 
 /**
- * B5 refactor: custom filters (base64_decode_bytes, json_parse, entries, pick) are now registered
+ * B5 refactor: custom filters (base64_decode_bytes, json_parse, entries, pick, chunk) are now registered
  * once inside createWorkflowLiquidEngine, not separately in each consumer.
  *
  * These tests verify:
@@ -124,6 +124,48 @@ describe('createWorkflowLiquidEngine — built-in custom filters (B5)', () => {
   });
 
   // -----------------------------------------------------------------------
+  // chunk — lets a foreach iterate batches of items instead of single items
+  // -----------------------------------------------------------------------
+  describe('chunk filter', () => {
+    const chunkOf = (engine: ReturnType<typeof createWorkflowLiquidEngine>, template: string) =>
+      JSON.parse(engine.parseAndRenderSync(template, { items: [1, 2, 3, 4, 5] }));
+
+    it('splits an array into consecutive groups of the requested size', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      expect(chunkOf(engine, '{{ items | chunk: 2 | json }}')).toEqual([[1, 2], [3, 4], [5]]);
+    });
+
+    it('returns a single group when the size is larger than the array', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      expect(chunkOf(engine, '{{ items | chunk: 50 | json }}')).toEqual([[1, 2, 3, 4, 5]]);
+    });
+
+    it('returns an empty list of groups for an empty array', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      const result = engine.parseAndRenderSync('{{ items | chunk: 3 | json }}', { items: [] });
+      expect(JSON.parse(result)).toEqual([]);
+    });
+
+    it('keeps every item in one group when the size is not a usable number', () => {
+      // A misconfigured size must never silently drop items.
+      const engine = createWorkflowLiquidEngine({ strictFilters: true, strictVariables: false });
+      expect(chunkOf(engine, '{{ items | chunk: 0 | json }}')).toEqual([[1, 2, 3, 4, 5]]);
+      expect(chunkOf(engine, '{{ items | chunk: missing | json }}')).toEqual([[1, 2, 3, 4, 5]]);
+    });
+
+    it('coerces a numeric string size (workflow templates render numbers as strings)', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      expect(chunkOf(engine, '{{ items | chunk: "2" | json }}')).toEqual([[1, 2], [3, 4], [5]]);
+    });
+
+    it('passes non-array values through unchanged', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      const result = engine.parseAndRenderSync('{{ value | chunk: 2 }}', { value: 'abc' });
+      expect(result).toBe('abc');
+    });
+  });
+
+  // -----------------------------------------------------------------------
   // Availability under strictFilters (regression: filters must be registered
   // before the engine is used, regardless of the strictFilters option)
   // -----------------------------------------------------------------------
@@ -139,6 +181,13 @@ describe('createWorkflowLiquidEngine — built-in custom filters (B5)', () => {
       const engine = createWorkflowLiquidEngine({ strictFilters: true });
       expect(() =>
         engine.parseAndRenderSync('{{ v | entries | json }}', { v: { k: 1 } })
+      ).not.toThrow();
+    });
+
+    it('chunk does not throw with strictFilters: true', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      expect(() =>
+        engine.parseAndRenderSync('{{ v | chunk: 2 | json }}', { v: [1, 2, 3] })
       ).not.toThrow();
     });
 

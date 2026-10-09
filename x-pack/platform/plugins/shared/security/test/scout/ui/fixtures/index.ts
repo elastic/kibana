@@ -8,11 +8,23 @@
 import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { test as baseTest, createLazyPageObject } from '@kbn/scout';
 
-import { ApiKeysApp } from './page_objects';
+import {
+  ApiKeysApp,
+  SecurityAccountSettingsPage,
+  SecurityRoleMappingsPage,
+  SecurityRolesPage,
+  SecurityUsersPage,
+  UserProfilePage,
+} from './page_objects';
 
 export interface ExtScoutTestFixtures extends ScoutTestFixtures {
   pageObjects: PageObjects & {
     apiKeys: ApiKeysApp;
+    securityUsers: SecurityUsersPage;
+    securityRoles: SecurityRolesPage;
+    securityRoleMappings: SecurityRoleMappingsPage;
+    securityAccountSettings: SecurityAccountSettingsPage;
+    userProfile: UserProfilePage;
   };
 }
 
@@ -30,6 +42,11 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
     const extendedPageObjects = {
       ...pageObjects,
       apiKeys: createLazyPageObject(ApiKeysApp, page),
+      securityUsers: createLazyPageObject(SecurityUsersPage, page),
+      securityRoles: createLazyPageObject(SecurityRolesPage, page),
+      securityRoleMappings: createLazyPageObject(SecurityRoleMappingsPage, page),
+      securityAccountSettings: createLazyPageObject(SecurityAccountSettingsPage, page),
+      userProfile: createLazyPageObject(UserProfilePage, page),
     };
 
     await use(extendedPageObjects);

@@ -6,56 +6,148 @@
  */
 
 /**
- * Characterization tests pinning the current io-ts behavior of the enum codecs
- * built with the `tEnum` helper, before the zod migration. They document the
- * accepted value set and that decode is identity for a valid value, so the zod
- * `z.nativeEnum`/`z.enum` twins can be proven equivalent.
+ * Accept/reject coverage for the enum codecs. The accepted value set is derived
+ * from each TypeScript enum rather than hand-listed, so adding a member
+ * automatically extends the contract. Decode must be identity for a valid value.
  */
 
-import type * as t from 'io-ts';
-import { decode, type DecodeOutcome } from '../test_helpers/codec_agnostic';
-import { MonitorTypeCodec, ScheduleUnitCodec, VerificationModeCodec } from './monitor_configs';
+import type { z } from '@kbn/zod';
+import { decode } from '../test_helpers/codec_agnostic';
+import { asCases, describeCodecCases } from '../test_helpers/codec_cases';
+import {
+  CodeEditorMode,
+  FormMonitorType,
+  KerberosAuthType,
+  Mode,
+  MonitorTypeEnum,
+  ResponseBodyIndexPolicy,
+  ScheduleUnit,
+  ScreenshotOption,
+  SourceType,
+  TLSVersion,
+  VerificationMode,
+} from './monitor_configs';
+import {
+  CodeEditorModeCodec,
+  FormMonitorTypeCodec,
+  KerberosAuthTypeCodec,
+  ModeCodec,
+  MonitorTypeCodec,
+  RequestBodyCheckCodec,
+  ResponseBodyIndexPolicyCodec,
+  ResponseCheckJSONCodec,
+  ScheduleUnitCodec,
+  ScreenshotOptionCodec,
+  SourceTypeCodec,
+  TLSVersionCodec,
+  VerificationModeCodec,
+} from '../schemas/monitor_configs';
 
-interface CodecUnderTest<A> {
-  flavor: 'io-ts' | 'zod';
-  decode: (input: unknown) => DecodeOutcome<A>;
+/** Values no enum should ever accept, exercised against every codec. */
+const universallyInvalid: unknown[] = ['', 'definitely-not-a-member', 42, null, undefined, {}, []];
+
+interface EnumCase {
+  label: string;
+  codec: z.ZodType;
+  values: string[];
 }
 
-const ioTsCodec = <A, O>(codec: t.Type<A, O, unknown>): CodecUnderTest<A> => ({
-  flavor: 'io-ts',
-  decode: (input) => decode(codec, input),
-});
+const enumCases: EnumCase[] = [
+  {
+    label: 'MonitorTypeCodec',
+    codec: MonitorTypeCodec,
+    values: Object.values(MonitorTypeEnum),
+  },
+  {
+    label: 'ResponseBodyIndexPolicyCodec',
+    codec: ResponseBodyIndexPolicyCodec,
+    values: Object.values(ResponseBodyIndexPolicy),
+  },
+  {
+    label: 'CodeEditorModeCodec',
+    codec: CodeEditorModeCodec,
+    values: Object.values(CodeEditorMode),
+  },
+  {
+    label: 'ScheduleUnitCodec',
+    codec: ScheduleUnitCodec,
+    values: Object.values(ScheduleUnit),
+  },
+  {
+    label: 'VerificationModeCodec',
+    codec: VerificationModeCodec,
+    values: Object.values(VerificationMode),
+  },
+  {
+    label: 'TLSVersionCodec',
+    codec: TLSVersionCodec,
+    values: Object.values(TLSVersion),
+  },
+  {
+    label: 'ScreenshotOptionCodec',
+    codec: ScreenshotOptionCodec,
+    values: Object.values(ScreenshotOption),
+  },
+  {
+    label: 'SourceTypeCodec',
+    codec: SourceTypeCodec,
+    values: Object.values(SourceType),
+  },
+  {
+    label: 'FormMonitorTypeCodec',
+    codec: FormMonitorTypeCodec,
+    values: Object.values(FormMonitorType),
+  },
+  {
+    label: 'ModeCodec',
+    codec: ModeCodec,
+    values: Object.values(Mode),
+  },
+  {
+    label: 'KerberosAuthTypeCodec',
+    codec: KerberosAuthTypeCodec,
+    values: Object.values(KerberosAuthType),
+  },
+];
 
-describe.each([ioTsCodec(MonitorTypeCodec)])('MonitorTypeCodec ($flavor)', (codec) => {
-  it.each(['http', 'tcp', 'icmp', 'browser'])('accepts %p as an identity decode', (input) => {
-    const result = codec.decode(input);
+describe.each(enumCases)('$label', ({ codec, values }) => {
+  it.each(values)('accepts %p as an identity decode', (input) => {
+    const result = decode(codec, input);
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.value).toBe(input);
     }
   });
 
-  it.each(['HTTP', 'unknown', '', 42, null, undefined])('rejects %p', (input) => {
-    expect(codec.decode(input).success).toBe(false);
+  it.each(asCases(universallyInvalid))('rejects %p', (input) => {
+    expect(decode(codec, input).success).toBe(false);
+  });
+
+  // Enum matching is case-sensitive.
+  it.each(values)('rejects the upper-cased form of %p', (input) => {
+    const upper = input.toUpperCase();
+    if (upper !== input) {
+      expect(decode(codec, upper).success).toBe(false);
+    }
   });
 });
 
-describe.each([ioTsCodec(ScheduleUnitCodec)])('ScheduleUnitCodec ($flavor)', (codec) => {
-  it.each(['m', 's'])('accepts %p', (input) => {
-    expect(codec.decode(input).success).toBe(true);
-  });
-
-  it.each(['h', 'minutes', 1, null])('rejects %p', (input) => {
-    expect(codec.decode(input).success).toBe(false);
-  });
+describeCodecCases({
+  label: 'ResponseCheckJSONCodec',
+  codec: ResponseCheckJSONCodec,
+  valid: [
+    { description: 'body is ok', expression: '$.ok == true' },
+    { description: 'extra keys survive', expression: '$.ok', extraKey: 'kept' },
+  ],
+  invalid: [{ description: 'missing expression' }, { expression: '$.ok' }, 'not an object', null],
 });
 
-describe.each([ioTsCodec(VerificationModeCodec)])('VerificationModeCodec ($flavor)', (codec) => {
-  it.each(['certificate', 'full', 'none', 'strict'])('accepts %p', (input) => {
-    expect(codec.decode(input).success).toBe(true);
-  });
-
-  it.each(['partial', '', null])('rejects %p', (input) => {
-    expect(codec.decode(input).success).toBe(false);
-  });
+describeCodecCases({
+  label: 'RequestBodyCheckCodec',
+  codec: RequestBodyCheckCodec,
+  valid: [
+    { value: '{"a":1}', type: CodeEditorMode.JSON },
+    { value: '{"a":1}', type: CodeEditorMode.JSON, extraKey: 'kept' },
+  ],
+  invalid: [{ value: '{}', type: 'yaml' }, { value: 42, type: CodeEditorMode.JSON }, null],
 });

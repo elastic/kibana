@@ -8,6 +8,7 @@
 import {
   isRequestApiKeyType,
   getApiKeyFromRequest,
+  getUiamApiKeyId,
   getUiamApiKeySecret,
   createApiKey,
   getApiKeyAndUserScope,
@@ -57,6 +58,28 @@ describe('api_key_utils', () => {
 
     test('returns the stored value untouched when it is neither raw nor base64 encoded', () => {
       expect(getUiamApiKeySecret('!!!not-base64!!!')).toBe('!!!not-base64!!!');
+    });
+  });
+
+  describe('getUiamApiKeyId', () => {
+    test('extracts the id from the `base64(id:secret)` format', () => {
+      expect(getUiamApiKeyId(Buffer.from('key-id:essu_secret').toString('base64'))).toBe('key-id');
+    });
+
+    test('returns undefined for a raw user-created Cloud key, which has no id', () => {
+      expect(getUiamApiKeyId('essu_user_created_key')).toBeUndefined();
+    });
+
+    test('returns undefined when the decoded secret is not a UIAM credential', () => {
+      expect(
+        getUiamApiKeyId(Buffer.from('key-id:not-a-uiam-secret').toString('base64'))
+      ).toBeUndefined();
+    });
+
+    test('returns undefined for a missing key', () => {
+      expect(getUiamApiKeyId()).toBeUndefined();
+      expect(getUiamApiKeyId(null)).toBeUndefined();
+      expect(getUiamApiKeyId('')).toBeUndefined();
     });
   });
 

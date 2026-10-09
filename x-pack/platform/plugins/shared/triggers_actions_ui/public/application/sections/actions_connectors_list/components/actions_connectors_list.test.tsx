@@ -8,6 +8,7 @@
 import * as React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { EuiThemeProvider } from '@elastic/eui';
 import { ThemeProvider } from 'styled-components';
 import ActionsConnectorsList from './actions_connectors_list';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -668,48 +669,164 @@ describe('actions_connectors_list', () => {
       actionTypeRegistry.has.mockReturnValue(true);
     });
 
-    it('shows the warning icon', async () => {
-      const actions = [
-        {
-          id: '1',
-          actionTypeId: 'test',
-          name: 'ServiceNow Connector',
-          secrets: {},
-          isSystemAction: false,
-          referencedByCount: 1,
-          config: { usesTableApi: true },
-          isDeprecated: true,
-          isMissingSecrets: false,
-        },
-        {
-          id: '2',
-          actionTypeId: 'test2',
-          name: 'ServiceNow SIR Connector',
-          secrets: {},
-          isSystemAction: false,
-          referencedByCount: 1,
-          config: { usesTableApi: true },
-          isDeprecated: true,
-          isMissingSecrets: false,
-        },
-      ] as Array<ActionConnector<{ usesTableApi: boolean }>>;
-
+    const renderDeprecatedList = (actions: ActionConnector[]) =>
       render(
-        <ThemeProvider theme={() => ({ eui: { euiSizeS: '15px' }, darkMode: true })}>
-          <IntlProvider>
-            <ActionsConnectorsList
-              setAddFlyoutVisibility={() => {}}
-              loadActions={async () => {}}
-              editItem={() => {}}
-              isLoadingActions={false}
-              actions={actions}
-              setActions={() => {}}
-            />
-          </IntlProvider>
-        </ThemeProvider>
+        <EuiThemeProvider>
+          <ThemeProvider theme={() => ({ eui: { euiSizeS: '15px' }, darkMode: true })}>
+            <IntlProvider>
+              <ActionsConnectorsList
+                setAddFlyoutVisibility={() => {}}
+                loadActions={async () => {}}
+                editItem={() => {}}
+                isLoadingActions={false}
+                actions={actions}
+                setActions={() => {}}
+              />
+            </IntlProvider>
+          </ThemeProvider>
+        </EuiThemeProvider>
       );
 
+    const showDeprecatedConnectors = async () => {
+      const user = userEvent.setup();
+      if (!screen.queryByTestId('connectorsDeprecatedToggleShow')) {
+        await user.click(await screen.findByTestId('connectorsDisplayOptionsButton'));
+      }
+      await user.click(await screen.findByTestId('connectorsDeprecatedToggleShow'));
+    };
+
+    const hideDeprecatedConnectors = async () => {
+      const user = userEvent.setup();
+      if (!screen.queryByTestId('connectorsDeprecatedToggleHide')) {
+        await user.click(await screen.findByTestId('connectorsDisplayOptionsButton'));
+      }
+      await user.click(await screen.findByTestId('connectorsDeprecatedToggleHide'));
+    };
+
+    const mixedActions = [
+      createMockActionConnector({
+        id: '1',
+        actionTypeId: 'test',
+        name: 'Active Connector',
+        referencedByCount: 1,
+        isDeprecated: false,
+        isConnectorTypeDeprecated: false,
+      }),
+      createMockActionConnector({
+        id: '2',
+        actionTypeId: 'test2',
+        name: 'Deprecated Connector',
+        referencedByCount: 1,
+        isDeprecated: false,
+        isConnectorTypeDeprecated: true,
+      }),
+    ];
+
+    const allDeprecatedActions = [
+      createMockActionConnector({
+        id: '1',
+        actionTypeId: 'test',
+        name: 'ServiceNow Connector',
+        referencedByCount: 1,
+        isDeprecated: true,
+        isConnectorTypeDeprecated: true,
+        config: { usesTableApi: true },
+      }),
+      createMockActionConnector({
+        id: '2',
+        actionTypeId: 'test2',
+        name: 'ServiceNow SIR Connector',
+        referencedByCount: 1,
+        isDeprecated: true,
+        isConnectorTypeDeprecated: true,
+        config: { usesTableApi: true },
+      }),
+    ];
+
+    it('hides type-deprecated connectors by default', async () => {
+      renderDeprecatedList(mixedActions);
+
+      expect(await screen.findByTestId('edit1')).toBeInTheDocument();
+      expect(screen.queryByTestId('edit2')).not.toBeInTheDocument();
+    });
+
+    it('keeps instance-deprecated connectors visible when the type is not deprecated', async () => {
+      renderDeprecatedList([
+        createMockActionConnector({
+          id: '1',
+          actionTypeId: 'test',
+          name: 'Active Connector',
+          referencedByCount: 1,
+          isDeprecated: false,
+          isConnectorTypeDeprecated: false,
+        }),
+        createMockActionConnector({
+          id: '2',
+          actionTypeId: 'test2',
+          name: 'ServiceNow Table API Connector',
+          referencedByCount: 1,
+          isDeprecated: true,
+          isConnectorTypeDeprecated: false,
+          config: { usesTableApi: true },
+        }),
+      ]);
+
+      expect(await screen.findByTestId('edit1')).toBeInTheDocument();
+      expect(screen.getByTestId('edit2')).toBeInTheDocument();
+    });
+
+    it('clears deprecated rows from bulk selection when Hide is selected', async () => {
+      renderDeprecatedList(mixedActions);
+
+      expect(await screen.findByTestId('edit1')).toBeInTheDocument();
+      await showDeprecatedConnectors();
+      expect(await screen.findByTestId('edit2')).toBeInTheDocument();
+
+      const user = userEvent.setup();
+      await user.click(await screen.findByTestId('checkboxSelectRow-2'));
+      expect(await screen.findByTestId('bulkDelete')).toBeInTheDocument();
+
+      await hideDeprecatedConnectors();
+      expect(screen.queryByTestId('edit2')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('bulkDelete')).not.toBeInTheDocument();
+    });
+
+    it('shows deprecated connectors when Show is selected', async () => {
+      renderDeprecatedList(mixedActions);
+
+      expect(await screen.findByTestId('edit1')).toBeInTheDocument();
+      await showDeprecatedConnectors();
+
+      expect(await screen.findByTestId('edit2')).toBeInTheDocument();
+      expect(screen.getByTestId('edit1')).toBeInTheDocument();
+    });
+
+    it('hides deprecated connectors again after Hide is selected', async () => {
+      renderDeprecatedList(mixedActions);
+
+      expect(await screen.findByTestId('edit1')).toBeInTheDocument();
+      await showDeprecatedConnectors();
+      expect(await screen.findByTestId('edit2')).toBeInTheDocument();
+
+      await hideDeprecatedConnectors();
+      expect(screen.queryByTestId('edit2')).not.toBeInTheDocument();
+      expect(screen.getByTestId('edit1')).toBeInTheDocument();
+    });
+
+    it('keeps the table when every connector is deprecated', async () => {
+      renderDeprecatedList(allDeprecatedActions);
+
       expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
+      expect(screen.queryByTestId('createFirstConnectorEmptyPrompt')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('edit1')).not.toBeInTheDocument();
+    });
+
+    it('shows the warning icon', async () => {
+      renderDeprecatedList(allDeprecatedActions);
+
+      expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
+      await showDeprecatedConnectors();
+
       expect(screen.getAllByTestId('connectorsTableCell-actionType')).toHaveLength(2);
       expect(screen.getByTestId('edit1')).toBeInTheDocument();
       expect(screen.getByTestId('edit2')).toBeInTheDocument();

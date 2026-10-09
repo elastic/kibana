@@ -11,8 +11,10 @@ import type { AutoApprovedApi } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import { AgentPromptType, ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { ErrorResultData } from '@kbn/agent-builder-common/tools/tool_result';
+import { NON_INTERACTIVE_DECLINED_REASON } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { isToolHandlerInterruptReturn } from '@kbn/agent-builder-server/tools';
+import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
 import { agentBuilderMocks } from '../../../../../mocks';
 import { createExecuteApiTool } from './execute';
 import type { ApiExecuteResultData } from './execute';
@@ -65,7 +67,7 @@ describe('createExecuteApiTool', () => {
   });
 
   it('has the correct id and no confirmation policy', () => {
-    const tool = createExecuteApiTool({ selfClient });
+    const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
     expect(tool.id).toBe(internalTools.executeApi);
     expect(tool.confirmation).toBeUndefined();
   });
@@ -80,6 +82,7 @@ describe('createExecuteApiTool', () => {
           method: 'PUT',
           path: '/my-index',
           destructive: false,
+          readOnly: false,
         },
         { method: 'PUT', path: '/my-index', body: { settings: { number_of_shards: 1 } } }
       )
@@ -89,7 +92,7 @@ describe('createExecuteApiTool', () => {
     const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
     transportRequest.mockResolvedValue({ acknowledged: true });
 
-    const tool = createExecuteApiTool({ selfClient });
+    const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'indices.create', params: { settings: {} } },
       context
@@ -115,6 +118,7 @@ describe('createExecuteApiTool', () => {
           method: 'GET',
           path: '/api/status',
           destructive: false,
+          readOnly: true,
         },
         { method: 'GET', path: '/api/status', querystring: { v8format: true } }
       )
@@ -122,7 +126,7 @@ describe('createExecuteApiTool', () => {
     mockFetch.mockResolvedValue({ status: 'green' });
 
     const context = agentBuilderMocks.tools.createHandlerContext();
-    const tool = createExecuteApiTool({ selfClient });
+    const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'kibana', api: 'status', params: {} },
       context
@@ -133,6 +137,7 @@ describe('createExecuteApiTool', () => {
       method: 'GET',
       query: { v8format: true },
       body: undefined,
+      headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
       access: 'public',
     });
     const data = result.results[0].data as ApiExecuteResultData;
@@ -149,6 +154,7 @@ describe('createExecuteApiTool', () => {
           method: 'POST',
           path: '/internal/foo',
           destructive: false,
+          readOnly: false,
         },
         { method: 'POST', path: '/internal/foo', body: { a: 1 } }
       )
@@ -156,7 +162,7 @@ describe('createExecuteApiTool', () => {
     mockFetch.mockResolvedValue({});
 
     const context = agentBuilderMocks.tools.createHandlerContext();
-    const tool = createExecuteApiTool({ selfClient });
+    const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
     await tool.handler({ target: 'kibana', api: 'internal_thing', params: {} }, context);
 
     expect(mockFetch).toHaveBeenCalledWith(
@@ -179,13 +185,14 @@ describe('createExecuteApiTool', () => {
           required: ['viewId'],
         },
         destructive: false,
+        readOnly: true,
       },
       { method: 'GET', path: '/api/data_views/data_view/logs' }
     );
     kibanaLoadApi.mockResolvedValue(loaded);
     mockFetch.mockResolvedValue({});
 
-    const tool = createExecuteApiTool({ selfClient });
+    const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
     await tool.handler(
       { target: 'kibana', api: 'data-views.get', params: { viewId: 'logs' } },
       agentBuilderMocks.tools.createHandlerContext()
@@ -208,6 +215,7 @@ describe('createExecuteApiTool', () => {
           method: 'GET',
           path,
           destructive: false,
+          readOnly: true,
         },
         { method: 'GET', path: builtPath }
       );
@@ -218,7 +226,7 @@ describe('createExecuteApiTool', () => {
       );
       mockFetch.mockResolvedValue({ total: 0 });
 
-      const tool = createExecuteApiTool({ selfClient });
+      const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
       const result = (await tool.handler(
         { target: 'kibana', api: 'slo.find-slos-op', params: { spaceId: 'default' } },
         agentBuilderMocks.tools.createHandlerContext()
@@ -237,7 +245,7 @@ describe('createExecuteApiTool', () => {
         sloApi('/s/{spaceId}/api/observability/slos', '/s/marketing/api/observability/slos')
       );
 
-      const tool = createExecuteApiTool({ selfClient });
+      const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
       const result = (await tool.handler(
         { target: 'kibana', api: 'slo.find-slos-op', params: { spaceId: 'marketing' } },
         agentBuilderMocks.tools.createHandlerContext()
@@ -255,7 +263,7 @@ describe('createExecuteApiTool', () => {
         sloApi('/s/{spaceId}/api/observability/slos', '/s/{spaceId}/api/observability/slos')
       );
 
-      const tool = createExecuteApiTool({ selfClient });
+      const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
       const result = (await tool.handler(
         { target: 'kibana', api: 'slo.find-slos-op', params: {} },
         agentBuilderMocks.tools.createHandlerContext()
@@ -276,7 +284,7 @@ describe('createExecuteApiTool', () => {
       );
       mockFetch.mockResolvedValue({});
 
-      const tool = createExecuteApiTool({ selfClient });
+      const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
       await tool.handler(
         { target: 'kibana', api: 'slo.get-definitions-op', params: {} },
         agentBuilderMocks.tools.createHandlerContext()
@@ -292,7 +300,7 @@ describe('createExecuteApiTool', () => {
   it('returns a helpful error for an unknown API identifier', async () => {
     esLoadApi.mockRejectedValue(new UnknownApiError('nope'));
 
-    const tool = createExecuteApiTool({ selfClient });
+    const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'nope', params: {} },
       agentBuilderMocks.tools.createHandlerContext()
@@ -301,6 +309,32 @@ describe('createExecuteApiTool', () => {
     expect(result.results[0].type).toBe(ToolResultType.error);
     const data = result.results[0].data as ErrorResultData;
     expect(data.message).toContain('Unknown API identifier');
+    expect(data.message).toContain(internalTools.discoverApis);
+  });
+
+  describe('when API discovery is disabled', () => {
+    it('never points the model at the discovery tool from its description', () => {
+      const tool = createExecuteApiTool({ selfClient, discoveryEnabled: false });
+
+      expect(tool.description).not.toContain(internalTools.discoverApis);
+      expect(tool.description).toContain(internalTools.describeApi);
+    });
+
+    it('spells out the identifier format instead of the discovery tool on an unknown API', async () => {
+      esLoadApi.mockRejectedValue(new UnknownApiError('nope'));
+
+      const tool = createExecuteApiTool({ selfClient, discoveryEnabled: false });
+      const result = (await tool.handler(
+        { target: 'elasticsearch', api: 'nope', params: {} },
+        agentBuilderMocks.tools.createHandlerContext()
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      const data = result.results[0].data as ErrorResultData;
+      expect(data.message).not.toContain(internalTools.discoverApis);
+      expect(data.message).toContain('no API named "nope"');
+      expect(data.message).toContain('namespace.name');
+    });
   });
 
   it('reports params the validator rejected and points at the describe tool', async () => {
@@ -318,6 +352,7 @@ describe('createExecuteApiTool', () => {
             required: ['index'],
           },
           destructive: false,
+          readOnly: false,
         },
         { method: 'PUT', path: '/42' }
       )
@@ -326,7 +361,7 @@ describe('createExecuteApiTool', () => {
     const context = agentBuilderMocks.tools.createHandlerContext();
     const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
 
-    const tool = createExecuteApiTool({ selfClient });
+    const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'indices.create', params: { index: 42 } },
       context
@@ -356,6 +391,7 @@ describe('createExecuteApiTool', () => {
             },
           },
           destructive: false,
+          readOnly: true,
         },
         { method: 'GET', path: '/_cluster/health' }
       )
@@ -363,7 +399,7 @@ describe('createExecuteApiTool', () => {
 
     const context = agentBuilderMocks.tools.createHandlerContext();
 
-    const tool = createExecuteApiTool({ selfClient });
+    const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'cluster.health', params: { timeout: '30s' } },
       context
@@ -387,6 +423,7 @@ describe('createExecuteApiTool', () => {
             properties: { index: { $ref: '../../../etc/passwd.json#/$defs/x' } },
           },
           destructive: false,
+          readOnly: false,
         },
         { method: 'PUT', path: '/my-index' }
       )
@@ -395,7 +432,7 @@ describe('createExecuteApiTool', () => {
     const context = agentBuilderMocks.tools.createHandlerContext();
     const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
 
-    const tool = createExecuteApiTool({ selfClient });
+    const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'indices.create', params: { index: 'my-index' } },
       context
@@ -427,6 +464,7 @@ describe('createExecuteApiTool', () => {
             },
           },
           destructive: false,
+          readOnly: true,
         },
         { method: 'GET', path: '/_cat/indices/{index}', querystring: { format: 'json' } }
       )
@@ -435,7 +473,7 @@ describe('createExecuteApiTool', () => {
     const context = agentBuilderMocks.tools.createHandlerContext();
     const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
 
-    const tool = createExecuteApiTool({ selfClient });
+    const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'cat.indices', params: { format: 'json' } },
       context
@@ -458,6 +496,7 @@ describe('createExecuteApiTool', () => {
           method: 'DELETE',
           path: '/{index}',
           destructive: true,
+          readOnly: false,
         },
         { method: 'DELETE', path: '/{index}' }
       )
@@ -465,7 +504,7 @@ describe('createExecuteApiTool', () => {
 
     const context = agentBuilderMocks.tools.createHandlerContext();
 
-    const tool = createExecuteApiTool({ selfClient });
+    const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'indices.delete', params: {} },
       context
@@ -475,7 +514,83 @@ describe('createExecuteApiTool', () => {
     expect(result.results[0].type).toBe(ToolResultType.error);
   });
 
-  it('refuses APIs that take an NDJSON request body', async () => {
+  it('sends a body-root payload as the body rather than under its parameter name', async () => {
+    esLoadApi.mockResolvedValue(
+      createLoadedApi(
+        {
+          name: 'index',
+          namespace: null,
+          description: 'Index a document',
+          method: 'PUT',
+          path: '/logs/_doc/1',
+          input: {
+            type: 'object',
+            properties: {
+              document: { 'x-found-in': 'body', 'x-body-root': true },
+            },
+          },
+          destructive: false,
+          readOnly: false,
+        },
+        { method: 'PUT', path: '/logs/_doc/1', body: { document: { field: 1 } } }
+      )
+    );
+
+    const context = agentBuilderMocks.tools.createHandlerContext();
+    const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+    transportRequest.mockResolvedValue({ result: 'created' });
+
+    const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
+    await tool.handler(
+      { target: 'elasticsearch', api: 'index', params: { document: { field: 1 } } },
+      context
+    );
+
+    expect(transportRequest).toHaveBeenCalledWith({
+      method: 'PUT',
+      path: '/logs/_doc/1',
+      body: { field: 1 },
+    });
+  });
+
+  it('sends a Kibana body-root payload as the body itself', async () => {
+    kibanaLoadApi.mockResolvedValue(
+      createLoadedApi(
+        {
+          name: 'create-case',
+          namespace: 'cases',
+          description: 'Create a case',
+          method: 'POST',
+          path: '/api/cases',
+          input: {
+            type: 'object',
+            properties: { body: { 'x-found-in': 'body', 'x-body-root': true } },
+          },
+          destructive: false,
+          readOnly: false,
+        },
+        { method: 'POST', path: '/api/cases', body: { body: { title: 'Investigation' } } }
+      )
+    );
+    mockFetch.mockResolvedValue({ id: 'case-1' });
+
+    const context = agentBuilderMocks.tools.createHandlerContext();
+    const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
+    await tool.handler(
+      { target: 'kibana', api: 'cases.create-case', params: { body: { title: 'Investigation' } } },
+      context
+    );
+
+    expect(mockFetch).toHaveBeenCalledWith('/api/cases', {
+      method: 'POST',
+      query: undefined,
+      body: { title: 'Investigation' },
+      headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
+      access: 'public',
+    });
+  });
+
+  it('executes an NDJSON API by handing its payload to the client as bulk lines', async () => {
     esLoadApi.mockResolvedValue(
       createLoadedApi(
         {
@@ -485,64 +600,92 @@ describe('createExecuteApiTool', () => {
           method: 'POST',
           path: '/_bulk',
           bodyFormat: 'ndjson',
+          input: {
+            type: 'object',
+            properties: {
+              operations: { type: 'array', 'x-found-in': 'body', 'x-body-root': true },
+            },
+          },
           destructive: false,
+          readOnly: false,
         },
-        { method: 'POST', path: '/_bulk' }
+        {
+          method: 'POST',
+          path: '/_bulk',
+          bulkBody: { operations: [{ index: { _index: 'logs' } }, { field: 1 }] },
+        }
       )
     );
 
     const context = agentBuilderMocks.tools.createHandlerContext();
     const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+    transportRequest.mockResolvedValue({ errors: false });
 
-    const tool = createExecuteApiTool({ selfClient });
-    const result = (await tool.handler(
-      { target: 'elasticsearch', api: 'bulk', params: {} },
-      context
-    )) as ToolHandlerStandardReturn;
-
-    expect(result.results[0].type).toBe(ToolResultType.error);
-    const data = result.results[0].data as ErrorResultData;
-    expect(data.message).toContain('NDJSON');
-    expect(transportRequest).not.toHaveBeenCalled();
-  });
-
-  it('reports the NDJSON refusal ahead of any complaint about the params', async () => {
-    esLoadApi.mockResolvedValue(
-      createLoadedApi(
-        {
-          name: 'bulk',
-          namespace: null,
-          description: 'Bulk operations',
-          method: 'POST',
-          path: '/{index}/_bulk',
-          bodyFormat: 'ndjson',
-          input: {
-            type: 'object',
-            properties: { index: { type: 'string', 'x-found-in': 'path' } },
-            required: ['index'],
-          },
-          destructive: false,
-        },
-        { method: 'POST', path: '/logs/_bulk' }
-      )
-    );
-
-    const context = agentBuilderMocks.tools.createHandlerContext();
-
-    const tool = createExecuteApiTool({ selfClient });
+    const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
     const result = (await tool.handler(
       {
         target: 'elasticsearch',
         api: 'bulk',
-        params: { index: 'logs', operations: [{ index: {} }] },
+        params: { operations: [{ index: { _index: 'logs' } }, { field: 1 }] },
       },
       context
     )) as ToolHandlerStandardReturn;
 
-    const data = result.results[0].data as ErrorResultData;
-    expect(data.message).toContain('NDJSON');
-    expect(data.message).toContain('Do not retry it');
-    expect(data.message).not.toContain('Invalid params');
+    expect(transportRequest).toHaveBeenCalledWith({
+      method: 'POST',
+      path: '/_bulk',
+      bulkBody: [{ index: { _index: 'logs' } }, { field: 1 }],
+    });
+    const data = result.results[0].data as ApiExecuteResultData;
+    expect(data.response).toEqual({ errors: false });
+  });
+
+  it('passes the raw text lines of an NDJSON payload through unwrapped', async () => {
+    esLoadApi.mockResolvedValue(
+      createLoadedApi(
+        {
+          name: 'find-structure',
+          namespace: 'text-structure',
+          description: 'Find the structure of some text',
+          method: 'POST',
+          path: '/_text_structure/find_structure',
+          bodyFormat: 'ndjson',
+          input: {
+            type: 'object',
+            properties: {
+              text_files: { type: 'array', 'x-found-in': 'body', 'x-body-root': true },
+            },
+          },
+          destructive: false,
+          readOnly: true,
+        },
+        {
+          method: 'POST',
+          path: '/_text_structure/find_structure',
+          bulkBody: { text_files: ['first,line', 'second,line'] },
+        }
+      )
+    );
+
+    const context = agentBuilderMocks.tools.createHandlerContext();
+    const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+    transportRequest.mockResolvedValue({ num_lines_analyzed: 2 });
+
+    const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
+    await tool.handler(
+      {
+        target: 'elasticsearch',
+        api: 'text-structure.find_structure',
+        params: { text_files: ['first,line', 'second,line'] },
+      },
+      context
+    );
+
+    expect(transportRequest).toHaveBeenCalledWith({
+      method: 'POST',
+      path: '/_text_structure/find_structure',
+      bulkBody: ['first,line', 'second,line'],
+    });
   });
 
   it('returns an error result when the request fails', async () => {
@@ -555,6 +698,7 @@ describe('createExecuteApiTool', () => {
           method: 'GET',
           path: '/_cluster/health',
           destructive: false,
+          readOnly: true,
         },
         { method: 'GET', path: '/_cluster/health' }
       )
@@ -564,7 +708,7 @@ describe('createExecuteApiTool', () => {
     const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
     transportRequest.mockRejectedValue(new Error('cluster unavailable'));
 
-    const tool = createExecuteApiTool({ selfClient });
+    const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'cluster.health', params: {} },
       context
@@ -585,6 +729,7 @@ describe('createExecuteApiTool', () => {
           method: 'PUT',
           path: '/my-index',
           destructive: false,
+          readOnly: false,
         },
         { method: 'PUT', path: '/my-index' }
       )
@@ -598,7 +743,7 @@ describe('createExecuteApiTool', () => {
     const context = agentBuilderMocks.tools.createHandlerContext();
     jest.mocked(context.esClient.asCurrentUser.transport.request).mockRejectedValue(responseError);
 
-    const tool = createExecuteApiTool({ selfClient });
+    const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'indices.create', params: {} },
       context
@@ -623,6 +768,7 @@ describe('createExecuteApiTool', () => {
           method: 'GET',
           path: '/api/status',
           destructive: false,
+          readOnly: true,
         },
         { method: 'GET', path: '/api/status' }
       )
@@ -635,7 +781,7 @@ describe('createExecuteApiTool', () => {
     });
     mockFetch.mockRejectedValue(selfFetchError);
 
-    const tool = createExecuteApiTool({ selfClient });
+    const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'kibana', api: 'status', params: {} },
       agentBuilderMocks.tools.createHandlerContext()
@@ -668,13 +814,14 @@ describe('createExecuteApiTool', () => {
           method: 'GET',
           path: '/_cluster/health',
           destructive: false,
+          readOnly: true,
         },
         { method: 'GET', path: '/_cluster/health', querystring }
       )
     );
 
     const context = agentBuilderMocks.tools.createHandlerContext();
-    const tool = createExecuteApiTool({ selfClient });
+    const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'cluster.health', params: querystring },
       context
@@ -696,6 +843,7 @@ describe('createExecuteApiTool', () => {
           method: 'GET',
           path: '/api/saved_objects/_find',
           destructive: false,
+          readOnly: true,
         },
         {
           method: 'GET',
@@ -706,7 +854,7 @@ describe('createExecuteApiTool', () => {
     );
     mockFetch.mockResolvedValue({ total: 0 });
 
-    const tool = createExecuteApiTool({ selfClient });
+    const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
     await tool.handler(
       { target: 'kibana', api: 'saved_objects.find', params: {} },
       agentBuilderMocks.tools.createHandlerContext()
@@ -730,6 +878,7 @@ describe('createExecuteApiTool', () => {
           method: 'DELETE',
           path: '/{index}',
           destructive: true,
+          readOnly: false,
         },
         { method: 'DELETE', path: '/my-index' }
       );
@@ -752,7 +901,7 @@ describe('createExecuteApiTool', () => {
       }));
       const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
 
-      const tool = createExecuteApiTool({ selfClient });
+      const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
       const result = await tool.handler(deleteIndexParams, context);
 
       expect(transportRequest).not.toHaveBeenCalled();
@@ -775,7 +924,7 @@ describe('createExecuteApiTool', () => {
       const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
       transportRequest.mockResolvedValue({ acknowledged: true });
 
-      const tool = createExecuteApiTool({ selfClient });
+      const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
       const result = (await tool.handler(deleteIndexParams, context)) as ToolHandlerStandardReturn;
 
       expect(transportRequest).toHaveBeenCalledWith({ method: 'DELETE', path: '/my-index' });
@@ -793,7 +942,7 @@ describe('createExecuteApiTool', () => {
       });
       const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
 
-      const tool = createExecuteApiTool({ selfClient });
+      const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
       const result = (await tool.handler(deleteIndexParams, context)) as ToolHandlerStandardReturn;
 
       expect(transportRequest).not.toHaveBeenCalled();
@@ -811,7 +960,7 @@ describe('createExecuteApiTool', () => {
       };
       const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
 
-      const tool = createExecuteApiTool({ selfClient });
+      const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
       const result = (await tool.handler(deleteIndexParams, context)) as ToolHandlerStandardReturn;
 
       expect(transportRequest).not.toHaveBeenCalled();
@@ -820,6 +969,14 @@ describe('createExecuteApiTool', () => {
       expect(result.results[0].type).toBe(ToolResultType.error);
       const data = result.results[0].data as ErrorResultData;
       expect(data.message).toContain('non-interactive');
+      // Tagged as an auto-declined prompt, keeping the API details for the caller.
+      expect(data.metadata).toEqual(
+        expect.objectContaining({
+          declined_reason: NON_INTERACTIVE_DECLINED_REASON,
+          target: 'elasticsearch',
+          api: 'indices.delete',
+        })
+      );
     });
 
     it('records that the user confirmed the call', async () => {
@@ -833,7 +990,7 @@ describe('createExecuteApiTool', () => {
         .mocked(context.esClient.asCurrentUser.transport.request)
         .mockResolvedValue({ acknowledged: true });
 
-      const tool = createExecuteApiTool({ selfClient });
+      const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
       const result = (await tool.handler(deleteIndexParams, context)) as ToolHandlerStandardReturn;
 
       const data = result.results[0].data as ApiExecuteResultData;
@@ -850,6 +1007,7 @@ describe('createExecuteApiTool', () => {
             method: 'GET',
             path: '/_cluster/health',
             destructive: false,
+            readOnly: true,
           },
           { method: 'GET', path: '/_cluster/health' }
         )
@@ -858,7 +1016,7 @@ describe('createExecuteApiTool', () => {
       const context = agentBuilderMocks.tools.createHandlerContext();
       jest.mocked(context.esClient.asCurrentUser.transport.request).mockResolvedValue({});
 
-      const tool = createExecuteApiTool({ selfClient });
+      const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
       const result = (await tool.handler(
         { target: 'elasticsearch', api: 'cluster.health', params: {} },
         context
@@ -914,7 +1072,7 @@ describe('createExecuteApiTool', () => {
           const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
           transportRequest.mockResolvedValue({ acknowledged: true });
 
-          const tool = createExecuteApiTool({ selfClient });
+          const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
           const result = (await tool.handler(
             deleteIndexParams,
             context
@@ -946,7 +1104,7 @@ describe('createExecuteApiTool', () => {
           });
           const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
 
-          const tool = createExecuteApiTool({ selfClient });
+          const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
           const result = (await tool.handler(
             deleteIndexParams,
             context
@@ -959,6 +1117,9 @@ describe('createExecuteApiTool', () => {
           const data = result.results[0].data as ErrorResultData;
           expect(data.message).toContain('pre-approve');
           expect(data.message).toContain('indices.delete');
+          expect(data.metadata).toEqual(
+            expect.objectContaining({ declined_reason: NON_INTERACTIVE_DECLINED_REASON })
+          );
         }
       );
 
@@ -984,7 +1145,7 @@ describe('createExecuteApiTool', () => {
           const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
           transportRequest.mockResolvedValue({ acknowledged: true });
 
-          const tool = createExecuteApiTool({ selfClient });
+          const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
           const result = (await tool.handler(
             deleteIndexParams,
             context
@@ -1007,7 +1168,7 @@ describe('createExecuteApiTool', () => {
         });
         const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
 
-        const tool = createExecuteApiTool({ selfClient });
+        const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
         const result = (await tool.handler(
           deleteIndexParams,
           context
@@ -1032,7 +1193,7 @@ describe('createExecuteApiTool', () => {
           prompt: { type: AgentPromptType.confirmation, ...confirm },
         }));
 
-        const tool = createExecuteApiTool({ selfClient });
+        const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
         const result = await tool.handler(deleteIndexParams, context);
 
         expect(isToolHandlerInterruptReturn(result)).toBe(true);
@@ -1051,7 +1212,7 @@ describe('createExecuteApiTool', () => {
           .mocked(context.esClient.asCurrentUser.transport.request)
           .mockRejectedValue(new Error('index_not_found_exception'));
 
-        const tool = createExecuteApiTool({ selfClient });
+        const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
         const result = (await tool.handler(
           deleteIndexParams,
           context

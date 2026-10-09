@@ -57,7 +57,7 @@ pivot:
     #     security: ">security-breaking"
     #     other:
     # Simple string form: labels as comma-separated string
-    bug-fix: 'release_note:fix'
+    bug-fix: 'release_note:fix, release_note:bug'
     deprecation: 'release_note:deprecation'
     feature: 'release_note:feature'
     enhancement: 'release_note:enhancement'
@@ -208,7 +208,7 @@ pivot:
     'observability':
       - 'Feature:Observability Home'
       - 'Feature:SLO'
-      - 'Team:obs-ux-management'
+      - 'Team:obs-ux-management - DEPRECATED'
       - 'Team:nightshift-context-and-research'
       - 'Team:obs-ux-infra_services - DEPRECATED'
       - 'Team:obs-ux-logs'
@@ -225,7 +225,7 @@ pivot:
       - 'Feature:Logs UI'
       - 'Feature:Infra UI'
       - 'Feature:Service Maps'
-      - 'Team:actionable-obs'
+      - 'Team:actionable-obs - DEPRECATED'
       - 'Team:obs-exploration'
       - 'Team:obs-signals-traces'
       - 'Team:Observability'
@@ -318,21 +318,23 @@ bundle:
   # description: |
   #   This release includes new features and bug fixes.
   use_local_changelogs: false
+  releases:
+    products:
+      kibana: kibana-release
+      cloud-serverless: serverless-release
+      observability: observability-release
+      security: security-release
 
   # Named bundle profiles for different release scenarios
   profiles:
     kibana-release:
-      output_products: 'kibana {version} {lifecycle}'
-      # output: 'kibana/{version}.yaml'
+      product: kibana
     observability-release:
-      output_products: 'observability {version} {lifecycle}'
-      # output: 'observability/{version}.yaml'
+      product: observability
     security-release:
-      output_products: 'security {version} {lifecycle}'
-      # output: 'security/{version}.yaml'
+      product: security
     serverless-release:
-      output_products: 'cloud-serverless {version} {lifecycle}'
-      # output: 'cloud-serverless/kibana-{version}.yaml'
+      product: cloud-serverless
       # Feature IDs to hide when bundling with this profile (accepts string or list)
       hide_features:
         - data-federation

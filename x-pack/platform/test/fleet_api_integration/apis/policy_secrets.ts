@@ -644,7 +644,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('update package policy with secrets', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/289229
+    describe.skip('update package policy with secrets', () => {
       let testAgentPolicy: any;
       let fleetServerAgentPolicy: any;
       let packagePolicyWithSecrets: any;

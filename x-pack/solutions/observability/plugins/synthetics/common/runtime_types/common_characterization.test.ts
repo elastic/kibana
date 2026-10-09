@@ -6,97 +6,161 @@
  */
 
 /**
- * Characterization tests pinning the current io-ts behavior of the synthetics
- * custom scalar codecs before the zod migration. These codecs are hand-written
- * `t.Type`s whose validation lives in the *decode* function (their `.is()`
- * guard only checks `typeof === 'string'`), so the migration must reproduce the
- * decode-side rules — not just the wire type. The suites run through the
- * codec-agnostic `decode` helper so the same expectations can be pointed at the
- * zod twins unchanged once they exist.
+ * Accept/reject coverage for the hand-written scalar codecs (namespace, timeout,
+ * non-empty string, inline script) whose rules live in refine/superRefine rather
+ * than a plain wire type.
  */
 
-import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
-import type * as t from 'io-ts';
-import { decode, type DecodeOutcome } from './test_helpers/codec_agnostic';
+import { z } from '@kbn/zod';
+import { decode } from './test_helpers/codec_agnostic';
+import { asCases } from './test_helpers/codec_cases';
 import {
   getNonEmptyStringCodec,
   InlineScriptString,
   NameSpaceString,
+  NonEmptyString,
+  nonEmptyArray,
   TimeoutString,
-} from './common';
+} from './schemas/common';
+import { inlineScriptIsFullJourneyMessage, nonEmptyFieldMessage } from './validation_messages';
 
-interface CodecUnderTest<A> {
-  flavor: 'io-ts' | 'zod';
-  decode: (input: unknown) => DecodeOutcome<A>;
-}
+const namespaceCorpus = {
+  valid: ['default', 'testnamespace'],
+  invalid: ['With Space And Upper', 'a'.repeat(300), 42, null, undefined, {}],
+};
 
-// Only the io-ts flavor exists today; the migration PR appends `zodCodec(...Zod)`
-// to each `describe.each` array so the identical expectations run against both.
-const ioTsCodec = <A, O>(codec: t.Type<A, O, unknown>): CodecUnderTest<A> => ({
-  flavor: 'io-ts',
-  decode: (input) => decode(codec, input),
-});
-
-describe.each([ioTsCodec(NameSpaceString)])('NameSpaceString ($flavor)', (codec) => {
-  it.each(['default', 'testnamespace'])('accepts valid namespace %p', (input) => {
-    expect(codec.decode(input).success).toBe(true);
+describe('NameSpaceString', () => {
+  it.each(namespaceCorpus.valid)('accepts valid namespace %p', (input) => {
+    expect(decode(NameSpaceString, input).success).toBe(true);
   });
 
-  // Enforces Fleet namespace rules (via `isValidNamespace`), not just `typeof string`.
-  it.each(['With Space And Upper', 'a'.repeat(300), 42, null, undefined, {}])(
-    'rejects invalid namespace %p',
-    (input) => {
-      expect(codec.decode(input).success).toBe(false);
-    }
-  );
-});
-
-describe.each([ioTsCodec(TimeoutString)])('TimeoutString ($flavor)', (codec) => {
-  it.each(['16', '1.5', '0'])('accepts numeric string %p', (input) => {
-    expect(codec.decode(input).success).toBe(true);
-  });
-
-  it.each(['', '   ', 'abc', 16, null, undefined])('rejects %p', (input) => {
-    expect(codec.decode(input).success).toBe(false);
+  it.each(namespaceCorpus.invalid)('rejects invalid namespace %p', (input) => {
+    expect(decode(NameSpaceString, input).success).toBe(false);
   });
 });
 
-describe.each([ioTsCodec(getNonEmptyStringCodec('host'))])(
-  'getNonEmptyStringCodec ($flavor)',
-  (codec) => {
-    it.each(['localhost', 'a'])('accepts non-empty string %p', (input) => {
-      expect(codec.decode(input).success).toBe(true);
-    });
+const timeoutCorpus = {
+  valid: ['16', '1.5', '0'],
+  invalid: ['', '   ', 'abc', 16, null, undefined],
+};
 
-    // Whitespace-only is rejected because the codec trims — `z.string().min(1)`
-    // would not be equivalent here.
-    it.each(['', '   ', 42, null])('rejects %p', (input) => {
-      expect(codec.decode(input).success).toBe(false);
-    });
-  }
-);
-
-describe.each([ioTsCodec(InlineScriptString)])('InlineScriptString ($flavor)', (codec) => {
-  it.each(['step("a step", async () => {})', ''])('accepts %p', (input) => {
-    expect(codec.decode(input).success).toBe(true);
+describe('TimeoutString', () => {
+  it.each(timeoutCorpus.valid)('accepts numeric string %p', (input) => {
+    expect(decode(TimeoutString, input).success).toBe(true);
   });
 
-  it.each([
+  // `'   '` must be rejected by the trim check before the numeric check,
+  // since `Number('   ')` is 0 rather than NaN.
+  it.each(timeoutCorpus.invalid)('rejects %p', (input) => {
+    expect(decode(TimeoutString, input).success).toBe(false);
+  });
+});
+
+const nonEmptyFieldCorpus = { valid: ['localhost', 'a'], invalid: ['', '   ', 42, null] };
+
+describe('getNonEmptyStringCodec', () => {
+  const codec = getNonEmptyStringCodec('host');
+
+  it.each(nonEmptyFieldCorpus.valid)('accepts non-empty string %p', (input) => {
+    expect(decode(codec, input).success).toBe(true);
+  });
+
+  // Whitespace-only is rejected because the codec trims — `z.string().min(1)`
+  // would not be equivalent here.
+  it.each(nonEmptyFieldCorpus.invalid)('rejects %p', (input) => {
+    expect(decode(codec, input).success).toBe(false);
+  });
+});
+
+const inlineScriptCorpus = {
+  // A blank script is accepted: it means "not configured yet".
+  valid: ['step("a step", async () => {})', '', '   '],
+  invalid: [
     'journey("a journey", () => {})', // full journey scripts are rejected
     'console.log("no step here")', // must contain at least one step definition
     42,
     null,
-  ])('rejects %p', (input) => {
-    expect(codec.decode(input).success).toBe(false);
+  ],
+};
+
+describe('InlineScriptString', () => {
+  it.each(inlineScriptCorpus.valid)('accepts %p', (input) => {
+    expect(decode(InlineScriptString, input).success).toBe(true);
+  });
+
+  it.each(inlineScriptCorpus.invalid)('rejects %p', (input) => {
+    expect(decode(InlineScriptString, input).success).toBe(false);
   });
 });
 
-describe.each([ioTsCodec(NonEmptyString)])('NonEmptyString ($flavor)', (codec) => {
-  it.each(['x', 'value'])('accepts %p', (input) => {
-    expect(codec.decode(input).success).toBe(true);
+const nonEmptyStringCorpus = { valid: ['x', 'value'], invalid: ['', '   ', 42, null, undefined] };
+
+describe('NonEmptyString', () => {
+  it.each(nonEmptyStringCorpus.valid)('accepts %p', (input) => {
+    expect(decode(NonEmptyString, input).success).toBe(true);
   });
 
-  it.each(['', '   ', 42, null, undefined])('rejects %p', (input) => {
-    expect(codec.decode(input).success).toBe(false);
+  it.each(nonEmptyStringCorpus.invalid)('rejects %p', (input) => {
+    expect(decode(NonEmptyString, input).success).toBe(false);
+  });
+});
+
+const nonEmptyArrayCorpus = {
+  valid: [['a'], ['a', 'b']],
+  invalid: [[], 'not an array', null, undefined, {}, [1], [null], ['a', 2]],
+};
+
+describe('nonEmptyArray', () => {
+  const codec = nonEmptyArray(z.string());
+
+  it.each(asCases(nonEmptyArrayCorpus.valid))('accepts %p', (input) => {
+    expect(decode(codec, input).success).toBe(true);
+  });
+
+  it.each(asCases(nonEmptyArrayCorpus.invalid))('rejects %p', (input) => {
+    expect(decode(codec, input).success).toBe(false);
+  });
+});
+
+const nonEmptyArrayOfNonEmptyStringCorpus = {
+  valid: [['a'], ['a', 'b']],
+  invalid: [[], ['   '], ['a', ''], [42]],
+};
+
+describe('nonEmptyArray of NonEmptyString', () => {
+  const codec = nonEmptyArray(NonEmptyString);
+
+  it.each(asCases(nonEmptyArrayOfNonEmptyStringCorpus.valid))('accepts %p', (input) => {
+    expect(decode(codec, input).success).toBe(true);
+  });
+
+  it.each(asCases(nonEmptyArrayOfNonEmptyStringCorpus.invalid))('rejects %p', (input) => {
+    expect(decode(codec, input).success).toBe(false);
+  });
+});
+
+describe('custom failure messages', () => {
+  it('NameSpaceString includes the Fleet error text', () => {
+    const result = NameSpaceString.safeParse('Not A Namespace');
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toMatch(/^Invalid namespace:/);
+    }
+  });
+
+  it('getNonEmptyStringCodec includes the field name', () => {
+    const result = getNonEmptyStringCodec('host').safeParse('   ');
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toBe(nonEmptyFieldMessage('host'));
+    }
+  });
+
+  it('InlineScriptString rejects a full journey with the journey message', () => {
+    const result = InlineScriptString.safeParse('journey("a journey", () => {})');
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toBe(inlineScriptIsFullJourneyMessage());
+    }
   });
 });

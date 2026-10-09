@@ -220,6 +220,10 @@ export function setupSavedObjects(
         apiKeyId: {
           type: 'keyword',
         },
+        uiamApiKeyId: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
         createdAt: {
           type: 'date',
         },
@@ -292,7 +296,9 @@ export function setupSavedObjects(
     modelVersions: ruleTemplateModelVersions,
   });
 
-  // Serverless only saved object used to track the status of UIAM API keys provisioning.
+  // Historical saved object used to track UIAM API key provisioning status. The
+  // background provisioning tasks have been removed; this type remains so existing
+  // documents continue to migrate cleanly.
   savedObjects.registerType({
     name: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,

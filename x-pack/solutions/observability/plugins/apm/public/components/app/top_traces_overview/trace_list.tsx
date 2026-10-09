@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiIcon,
-  EuiScreenReaderOnly,
-  EuiToolTip,
-  RIGHT_ALIGNMENT,
-  useEuiFontSize,
-} from '@elastic/eui';
+import { EuiScreenReaderOnly, EuiToolTip, RIGHT_ALIGNMENT, useEuiFontSize } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
@@ -142,27 +136,19 @@ export function getTraceListColumns({
     },
     {
       field: 'impact',
-      name: (
-        <EuiToolTip
-          content={i18n.translate('xpack.apm.tracesTable.impactColumnDescription', {
-            defaultMessage:
-              'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
-          })}
-        >
-          <>
-            {i18n.translate('xpack.apm.tracesTable.impactColumnLabel', {
-              defaultMessage: 'Impact',
-            })}{' '}
-            <EuiIcon
-              size="s"
-              color="subdued"
-              type="question"
-              className="eui-alignTop"
-              aria-hidden={true}
-            />
-          </>
-        </EuiToolTip>
-      ),
+      name: i18n.translate('xpack.apm.tracesTable.impactColumnLabel', {
+        defaultMessage: 'Impact',
+      }),
+      nameTooltip: {
+        content: i18n.translate('xpack.apm.tracesTable.impactColumnDescription', {
+          defaultMessage:
+            'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
+        }),
+        icon: 'question',
+        iconProps: {
+          color: 'subdued',
+        },
+      },
       align: RIGHT_ALIGNMENT,
       sortable: true,
       render: (_, { impact }) => <ImpactBar value={impact} />,

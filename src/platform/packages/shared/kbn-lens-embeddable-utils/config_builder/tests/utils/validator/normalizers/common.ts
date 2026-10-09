@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { orderBy } from 'lodash';
+import { isNil, omitBy, orderBy } from 'lodash';
 
 import { LEGACY_COMPLIMENTARY_PALETTE, COMPLEMENTARY_PALETTE } from '@kbn/coloring';
 import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
@@ -23,6 +23,7 @@ import type {
   ReferenceBasedIndexPatternColumn,
   SumIndexPatternColumn,
   TermsIndexPatternColumn,
+  TextBasedLayerColumn,
   TextBasedPersistedState,
   ValueFormatConfig,
   RangeIndexPatternColumn,
@@ -52,18 +53,6 @@ import { toApiFieldSettings } from '../../../../transforms/columns/field_setting
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 const COMMON_STATE_IGNORE_PATHS = [
-  'savedObjectId', // panel-level SO reference, not part of LensAttributes
-  'state.visualization.title', // removed by-value nested title
-  // TODO: check missing properties striped out in transforms
-  'state.datasourceStates.formBased.layers.*.indexPatternId',
-  'state.datasourceStates.formBased.currentIndexPatternId',
-  // Will be unskipped after the fix for https://github.com/elastic/kibana/issues/283574
-  'state.datasourceStates.formBased.layers.*.columns.*.params.orderAgg.params.sortField',
-  // TODO: check missing ES|QL column properties stripped out in transforms
-  'state.datasourceStates.textBased.layers.*.columns.*.inMetricDimension', // dropped at state -> API and only applied from API -> State if explicitly set
-  'state.datasourceStates.textBased.layers.*.columns.*.meta', // meta is inferred by the transform -> originals may have it, miss it, or have different values
-  'state.datasourceStates.textBased.layers.*.allColumns', // runtime-only property, not persisted or produced by transform
-  'state.datasourceStates.textBased.layers.*.timeField', // inferred at runtime from the data view -> original may have undefined while transform sets @timestamp from query.esql
   // TODO: check missing/different properties on colorMapping
   'state.visualization.columns.*.colorMapping.assignments.*.touched', // dropped at state -> API and only applied from API -> State, hardcoded to false by transform
   'state.visualization.columns.*.colorMapping.specialAssignments.*.touched',
@@ -327,6 +316,21 @@ function normalizeAdHocDataViewSpec(dv: DataViewSpec) {
   if (Object.keys(dv.fieldAttrs ?? {}).length === 0) {
     delete dv.fieldAttrs;
   }
+
+  const normalizedFieldFormats = dv.fieldFormats ?? {};
+  for (const [key, value] of Object.entries(normalizedFieldFormats)) {
+    if (value.id === 'url') {
+      // Clean null params + parsedUrl key
+      normalizedFieldFormats[key].params = omitBy(value.params, isNil);
+      normalizedFieldFormats[key].params.parsedUrl = undefined;
+    }
+
+    if (Object.keys(value.params ?? {}).length === 0) {
+      delete normalizedFieldFormats[key].params;
+    }
+  }
+
+  dv.fieldFormats = normalizedFieldFormats;
   if (Object.keys(dv.fieldFormats ?? {}).length === 0) {
     delete dv.fieldFormats;
   }
@@ -429,6 +433,24 @@ function normalizeDataTypes(col: GenericIndexPatternColumn, inferred?: DataType)
   }
 }
 
+/**
+ * `meta` cannot round-trip the actual data type — API→SO reconstructs `{ type }` from chart role.
+ * `esType` / `field` / `sourceParams` are never produced. Align original `meta` to that guess:
+ * keep `'number'` and `'date'`, coerce everything else (including absent) to `'string'`.
+ * Same `inferColumnDataType` override as form-based `normalizeDataTypes`.
+ */
+function normalizeESQLMeta(column: TextBasedLayerColumn, inferred?: DataType) {
+  if (inferred === 'number' || inferred === 'string' || inferred === 'date') {
+    column.meta = { type: inferred };
+    return;
+  }
+
+  const rawType = column.meta?.type;
+  column.meta = {
+    type: rawType === 'number' || rawType === 'date' ? rawType : 'string',
+  };
+}
+
 const normalizeReferences = <T extends LensAttributes>(
   { references }: T,
   replacements: IdRemapping,
@@ -446,7 +468,12 @@ const normalizeReferences = <T extends LensAttributes>(
           (filterRefNames.has(reference.name) || reference.name.startsWith('filter-index-pattern-'))
         );
       })
-      // ignore current index pattern reference
+      // `indexpattern-datasource-current-indexpattern` is not read by name. The 7.10 migration
+      // and by-value builders emit it. `extractReferences` and the transform do not.
+      // `getUsedDataViews` and the XY first-`index-pattern` fallback use the id. On every
+      // integration panel this reference is first and the next one has the same id, so dropping
+      // it changes neither.`toAPIFormat` does not apply that annotation fallback.
+      // The editor always writes `xy-visualization-layer-*`, so it is not reproducible from the UI.
       .filter((reference) => {
         return !(
           reference.type === 'index-pattern' &&
@@ -772,16 +799,16 @@ const isLastValueColumn = (col: GenericIndexPatternColumn): col is LastValueInde
   col.operationType === 'last_value';
 
 /**
- * Default a missing/`null` `params.showArrayValues` to `true` on `last_value` columns on the ORIGINAL
- * side to match the 8.2.0 saved-object migration `commonSetLastValueShowArrayValues`
- * (`server/migrations/common_migrations.ts`) that coerces any non-boolean `showArrayValues` to `true` at load.
+ * Default a missing/`null` `params.showArrayValues` to `false` on `last_value` columns on the ORIGINAL
+ * side to match the `?? false` fallback in `fromLastValueLensStateToAPI`
+ * (`config_builder/transforms/columns/last_value.ts`).
  */
 const normalizeLastValueShowArrayValues = (col: GenericIndexPatternColumn): void => {
   if (!isLastValueColumn(col)) {
     return;
   }
   if (col.params.showArrayValues == null) {
-    col.params.showArrayValues = true;
+    col.params.showArrayValues = false;
   }
 };
 
@@ -897,11 +924,11 @@ const normalizeFormatParamsForId = (
  * - Pattern-less `custom` format is dropped; with a pattern, `decimals` → `0` — see `normalizeCustomFormat`.
  * - `duration` units and mode-dependent `decimals`/`compact` — see `normalizeDurationFormatParams`.
  */
-const normalizeFormatParams = (col: GenericIndexPatternColumn): void => {
-  if (!('params' in col) || !col.params) {
+const normalizeFormatParams = (col: { params?: { format?: ValueFormatConfig } }): void => {
+  if (!col.params) {
     return;
   }
-  const params = col.params as { format?: ValueFormatConfig };
+  const params = col.params;
   const { format } = params;
   if (!format) {
     return;
@@ -958,9 +985,14 @@ export interface CommonNormalizerArgs {
   columnRemapping: IdRemapping;
   /**
    * Optional per-chart dataType inference. When provided and returns a value,
-   * it overrides the generic blanket coercions in `normalizeDataTypes`.
+   * it overrides the generic blanket coercions in `normalizeDataTypes` (form-based)
+   * and `normalizeESQLMeta` (text-based). `isTextBased` is which column map is
+   * being normalized — remapped IDs are shared, but the correct type is not.
    */
-  inferColumnDataType?: (newColumnId: string) => DataType | undefined;
+  inferColumnDataType?: (
+    newColumnId: string,
+    options: { isTextBased: boolean }
+  ) => DataType | undefined;
 }
 
 // Stored filters carry `field`/ or deprecated `indexRefName` extensions that are absent from the base `FilterMeta`
@@ -1186,6 +1218,23 @@ export const getCommonNormalizer = <T extends LensAttributes>(
       delete attributes.type;
     }
 
+    // 'savedObjectId' is the twin of 'type': a legacy by-reference pointer that old library saves baked
+    // into the stored attributes and unlink copied into by-value panels. It is not part of LensAttributes,
+    // is never read at runtime (the link lives on the panel-level ref_id), and is dropped by toAPIFormat.
+    if ('savedObjectId' in attributes) {
+      delete attributes.savedObjectId;
+    }
+
+    // 'state.visualization.title' is a legacy default the XY/heatmap `initialize()` wrote for freshly
+    // created charts ('Empty XY chart' / 'Empty Heatmap chart'). It is untyped (absent from the
+    // visualization state types) and never read at render: the displayed title comes from the panel-level
+    // title when set, otherwise the document `attributes.title` (`defaultTitle$`) — never from
+    // `state.visualization.title`. It is dropped by toAPIFormat.
+    const { visualization } = attributes.state;
+    if (isRecord(visualization) && 'title' in visualization) {
+      delete visualization.title;
+    }
+
     // Canonicalize filters and collect (in a single pass) the reference names they consumed, so the
     // matching (now-inlined) filter reference entries can be dropped from `references` below.
     const filterRefNames = normalizeFilters(attributes.state.filters, attributes.references);
@@ -1241,18 +1290,32 @@ export const getCommonNormalizer = <T extends LensAttributes>(
       textBased: normalizeDatasourceState(attributes.state.datasourceStates.textBased, (ds) => {
         for (const layer of Object.values(ds.layers)) {
           layer.columns = layer.columns.map((column) => {
-            const remapped = {
+            const columnId = columnIdMap.get(column.columnId) ?? column.columnId;
+            const updatedColumn = {
               ...column,
-              columnId: columnIdMap.get(column.columnId) ?? column.columnId,
+              columnId,
             };
-            normalizeColumnLabel(remapped, { isTextBased: true });
+            normalizeESQLMeta(
+              updatedColumn,
+              inferColumnDataType?.(columnId, { isTextBased: true })
+            );
+            normalizeColumnLabel(updatedColumn, { isTextBased: true });
             // `null`/`''` are leaked persist; a real Identifier Control name is reconstructed
             // from `??` on `fieldName` by `buildESQLLayer`.
-            if (!remapped.variable) {
-              delete remapped.variable;
+            if (!updatedColumn.variable) {
+              delete updatedColumn.variable;
             }
-            return remapped;
+            normalizeFormatParams(updatedColumn);
+            return updatedColumn;
           });
+
+          // For non-datatable charts, 'inMetricDimension' is runtime-only state set by the
+          // suggestion engine and is not used anywhere else. Strip it.
+          if (attributes.visualizationType !== 'lnsDatatable') {
+            for (const column of layer.columns) {
+              delete column.inMetricDimension;
+            }
+          }
 
           // Datatable's ESQL output order is driven by `layer.columns` array order
           // and uses its own canonical (rows → splits → metrics) sort in
@@ -1263,9 +1326,20 @@ export const getCommonNormalizer = <T extends LensAttributes>(
             layer.columns.sort((a, b) => a.columnId.localeCompare(b.columnId));
           }
 
-          if (layer.timeField) {
-            layer.timeField = undefined; // not saved in API re-derived at runtime
+          // 'timeField' is dropped and re-inferred at runtime from the data view unless the ESQL query refers to a specific time field
+          layer.timeField = layer.query?.esql
+            ? parseTimeFieldFromESQLQuery(layer.query.esql) || undefined
+            : undefined;
+
+          // 'allColumns' is a runtime-only property, not persisted or produced by transform
+          if ('allColumns' in layer) {
+            delete layer.allColumns;
           }
+        }
+
+        // leaked runtime-only property, not persisted or produced by transform
+        if ('initialContext' in ds) {
+          delete ds.initialContext;
         }
 
         return ds;
@@ -1311,6 +1385,15 @@ export const getCommonNormalizer = <T extends LensAttributes>(
 
             // apply defaults
             layer.sampling = layer.sampling ?? LENS_SAMPLING_DEFAULT_VALUE;
+
+            // `indexPatternId` is a runtime-only `FormBasedLayer` field, omitted from
+            // `FormBasedPersistedState`, that leaked into by-value panels.
+            // - `extractReferences` moves it onto the `indexpattern-datasource-layer-*` reference.
+            // - `resolveDataViewId` prefers the same reference and falls back to this inline id
+            //   only when the reference is absent.
+            if ('indexPatternId' in layer) {
+              delete layer.indexPatternId;
+            }
 
             // remove empty incompleteColumns
             if (Object.keys(layer.incompleteColumns ?? {}).length === 0) {
@@ -1380,7 +1463,7 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               }
 
               normalizeColumnReferences(col, columnIdMap);
-              normalizeDataTypes(col, inferColumnDataType?.(columnId));
+              normalizeDataTypes(col, inferColumnDataType?.(columnId, { isTextBased: false }));
 
               // Canonicalize terms `params` empty defaults the transform never round-trips
               if (isTermsColumn(col)) {
@@ -1415,9 +1498,18 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               normalizeLastValueShowArrayValues(col);
 
               // Strip empty `format.params` / empty-string `suffix`; canonicalize per format id
-              normalizeFormatParams(col);
+              if ('params' in col) {
+                normalizeFormatParams(col);
+              }
             }
           }
+
+          // `currentIndexPatternId` is a runtime-only `FormBasedPrivateState` field that leaked into
+          // by-value panels. `loadInitialState` recomputes it. The transform never emits it.
+          if ('currentIndexPatternId' in ds) {
+            delete ds.currentIndexPatternId;
+          }
+
           return ds;
         }
       ),
@@ -1488,9 +1580,10 @@ function clearUnusedNamedPaletteParams(palette: PaletteOutput<CustomPaletteParam
  * This need to address:
  * - named palettes: `palette id`, `continuity`, and `rangeType` are compared strictly (see
  *   `normalizeNamedPaletteParams`); the throwaway stops/colorStops/bounds are dropped.
- * - custom palettes: account for the last color stop always becoming `rangeMax`, re-derive
- *   `colorStops` from the normalized `stops`, and default the missing `rangeType`/`continuity`/bounds
- *   the transform always derives.
+ * - custom palettes: mirror the transform's continuity-driven open/closed encoding (open above
+ *   nulls `rangeMax` and the last multi-stop; open below nulls `rangeMin`), set the last
+ *   multi-stop to the effective `rangeMax` when closed, and default missing `rangeType` /
+ *   `params.name` the transform always derives.
  */
 export function getPaletteNormalizer<T extends LensAttributes>(
   palettePath: string,
@@ -1528,40 +1621,36 @@ export function getPaletteNormalizer<T extends LensAttributes>(
           return;
         }
 
-        // For multi-stop palettes: the SO→API transform uses rangeMax as the last step's upper
-        // bound (lte), replacing the original stop value. The API→SO step then reconstructs the
-        // stop from lte, so the last stop becomes rangeMax after the round-trip.
+        // Continuity drives open/closed bounds in `fromColorByValueLensStateToAPI` (falling back
+        // to `getContinuity(rangeMin, rangeMax)` when omitted). Open above drops `lte` on the
+        // last API step, so API→SO reconstructs `rangeMax` and the last multi-stop as `null`.
+        // Open below nulls `rangeMin` the same way. Closed upper bounds keep `lte: rangeMax`, so
+        // the last multi-stop becomes `rangeMax`.
         //
-        // For single stop palettes: the transform's `i === 0` branch emits a closed
-        // `lt: <stop>` and returns before the last-step `lte: rangeMax` branch can run, so
-        // `lte: rangeMax` is never applied to the stop. For an open-above single stop (continuity
-        // 'above'/'all', rangeMax null) the transform instead appends a trailing `gte: <stop>`
-        // continuation step, which `mergeTrailingSameColorStep` collapses back on the reverse pass,
-        // leaving the original `lt` (the stop value) intact.
+        // Single-stop open-above is left untouched: the transform appends a trailing same-color
+        // continuation step and merges it back, so the lone stop value round-trips unchanged.
+        const continuity = palette.params.continuity ?? getContinuity(rangeMin, rangeMax);
+        const isOpenBelow = continuity === 'below' || continuity === 'all';
+        const isOpenAbove = continuity === 'above' || continuity === 'all';
+
+        palette.params.continuity = continuity;
+        palette.params.rangeMin = (isOpenBelow ? null : rangeMin) as unknown as number;
+        palette.params.rangeMax = (isOpenAbove ? null : rangeMax) as unknown as number;
+
         if (palette.params.stops && palette.params.stops.length > 1) {
           const lastStop = palette.params.stops.at(-1);
-          if (lastStop) lastStop.stop = rangeMax as unknown as number; // can be null
+          if (lastStop) {
+            lastStop.stop = (isOpenAbove ? null : rangeMax) as unknown as number;
+          }
         }
 
         if (!palette.params.rangeType) {
           palette.params.rangeType = 'percent';
         }
 
-        if (!palette.params.continuity) {
-          palette.params.continuity = getContinuity(rangeMin, rangeMax);
-        }
-
         // Legacy SOs may omit params.name, but the transform always sets it from the root name
         if (palette.params.name === undefined && palette.name) {
           palette.params.name = palette.name;
-        }
-
-        // Legacy SOs may omit rangeMin/rangeMax, but the transform always derives them (can be null)
-        if (!('rangeMin' in palette.params)) {
-          palette.params.rangeMin = null as unknown as number;
-        }
-        if (!('rangeMax' in palette.params)) {
-          palette.params.rangeMax = null as unknown as number;
         }
       });
 

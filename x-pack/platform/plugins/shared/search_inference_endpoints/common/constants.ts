@@ -34,9 +34,6 @@ export const NO_DEFAULT_MODEL = 'NO_DEFAULT_MODEL';
 
 export const CHAT_COMPLETION_TASK_TYPE = 'chat_completion';
 
-export const REGION_PREFERENCES_REDESIGN_FEATURE_FLAG =
-  'searchSolution.regionPreferencesRedesignEnabled';
-
 export const INFERENCE_UI_CAPABILITIES = {
   show: 'show',
   manage: 'manage',

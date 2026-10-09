@@ -11,8 +11,8 @@ import {
   createWorkflowStepConversationClientMock,
 } from '../../test_utils/workflow_steps';
 
-const experimentalEnabled = jest.fn().mockResolvedValue(true);
-const experimentalDisabled = jest.fn().mockResolvedValue(false);
+const getAgentRegistry = jest.fn().mockResolvedValue({ get: jest.fn() });
+const getExecutionService = jest.fn();
 
 describe('updateConversationMetadataStepDefinition', () => {
   const baseInput = {
@@ -22,10 +22,11 @@ describe('updateConversationMetadataStepDefinition', () => {
 
   it('creates expected step definition structure', () => {
     const { getConversationClient } = createWorkflowStepConversationClientMock();
-    const definition = updateConversationMetadataStepDefinition(
+    const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
-      experimentalEnabled
-    );
+      getAgentRegistry,
+      getExecutionService,
+    });
 
     expect(definition.id).toBe('ai.conversation.metadata.patch');
     expect(typeof definition.handler).toBe('function');
@@ -33,20 +34,21 @@ describe('updateConversationMetadataStepDefinition', () => {
   });
 
   it('calls patchMetadata and returns the changed fields and updated metadata', async () => {
+    const conversation = {
+      id: 'conv-1',
+      metadata: { status: 'resolved', severity: 'low', priority: 'high' },
+    };
     const { patchMetadata, getConversationClient } = createWorkflowStepConversationClientMock({
-      patchMetadata: jest.fn().mockResolvedValue({
-        conversation: {
-          id: 'conv-1',
-          metadata: { status: 'resolved', severity: 'low', priority: 'high' },
-        },
-        changedFields: ['status', 'severity'],
-      }),
+      patchMetadata: jest
+        .fn()
+        .mockResolvedValue({ changedFields: ['status', 'severity'], conversation }),
     });
 
-    const definition = updateConversationMetadataStepDefinition(
+    const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
-      experimentalEnabled
-    );
+      getAgentRegistry,
+      getExecutionService,
+    });
     const result = await definition.handler(
       createStepHandlerContext({
         input: baseInput,
@@ -54,7 +56,11 @@ describe('updateConversationMetadataStepDefinition', () => {
       })
     );
 
-    expect(patchMetadata).toHaveBeenCalledWith('conv-1', { status: 'resolved', severity: 'low' });
+    expect(patchMetadata).toHaveBeenCalledWith(
+      'conv-1',
+      { status: 'resolved', severity: 'low' },
+      { access: 'owner', source: 'workflow' }
+    );
     expect(result).toEqual({
       output: {
         conversation_id: 'conv-1',
@@ -67,15 +73,16 @@ describe('updateConversationMetadataStepDefinition', () => {
   it('returns empty changed_fields when the patch is a no-op', async () => {
     const { getConversationClient } = createWorkflowStepConversationClientMock({
       patchMetadata: jest.fn().mockResolvedValue({
-        conversation: { id: 'conv-1', metadata: { status: 'open' } },
         changedFields: [],
+        conversation: { id: 'conv-1', metadata: { status: 'open' } },
       }),
     });
 
-    const definition = updateConversationMetadataStepDefinition(
+    const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
-      experimentalEnabled
-    );
+      getAgentRegistry,
+      getExecutionService,
+    });
     const result = await definition.handler(
       createStepHandlerContext({
         input: { conversation_id: 'conv-1', updates: { status: 'open' } },
@@ -96,10 +103,11 @@ describe('updateConversationMetadataStepDefinition', () => {
       patchMetadata: jest.fn().mockRejectedValue(new Error('validation failed')),
     });
 
-    const definition = updateConversationMetadataStepDefinition(
+    const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
-      experimentalEnabled
-    );
+      getAgentRegistry,
+      getExecutionService,
+    });
     const result = await definition.handler(createStepHandlerContext({ input: baseInput }));
 
     expect(result).toEqual({
@@ -109,10 +117,11 @@ describe('updateConversationMetadataStepDefinition', () => {
 
   it('rejects an empty updates object', () => {
     const { getConversationClient } = createWorkflowStepConversationClientMock();
-    const definition = updateConversationMetadataStepDefinition(
+    const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
-      experimentalEnabled
-    );
+      getAgentRegistry,
+      getExecutionService,
+    });
 
     expect(
       definition.inputSchema.safeParse({ conversation_id: 'conv-1', updates: {} }).success
@@ -121,25 +130,12 @@ describe('updateConversationMetadataStepDefinition', () => {
 
   it('rejects input without conversation_id', () => {
     const { getConversationClient } = createWorkflowStepConversationClientMock();
-    const definition = updateConversationMetadataStepDefinition(
+    const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
-      experimentalEnabled
-    );
+      getAgentRegistry,
+      getExecutionService,
+    });
 
     expect(definition.inputSchema.safeParse({ updates: { status: 'open' } }).success).toBe(false);
-  });
-
-  it('returns an error when experimental features are disabled', async () => {
-    const { getConversationClient } = createWorkflowStepConversationClientMock();
-    const definition = updateConversationMetadataStepDefinition(
-      getConversationClient,
-      experimentalDisabled
-    );
-
-    const result = await definition.handler(createStepHandlerContext({ input: baseInput }));
-
-    expect(result).toEqual({
-      error: expect.objectContaining({ message: expect.stringContaining('experimental features') }),
-    });
   });
 });

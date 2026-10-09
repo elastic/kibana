@@ -10,7 +10,7 @@ import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { ISearchSource } from '@kbn/data-plugin/common';
-import { ALERT_GROUP } from '@kbn/rule-data-utils';
+import { ALERT_GROUP, ALERT_GROUPING, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import {
   getErrorSource,
   TaskErrorSource,
@@ -1925,6 +1925,11 @@ describe('The custom threshold alert type', () => {
                     value: 'host-0',
                   },
                 ],
+                [ALERT_GROUPING]: {
+                  host: {
+                    name: 'host-0',
+                  },
+                },
               },
             },
           ];
@@ -1953,6 +1958,7 @@ describe('The custom threshold alert type', () => {
           logsLocator: undefined,
           metrics: customThresholdCountCriterion.metrics,
           startedAt: expect.stringMatching(ISO_DATE_REGEX),
+          spaceId: MOCKED_SPACE_ID,
           searchConfiguration: {
             index: 'valid-index-name',
             query: {
@@ -1964,6 +1970,65 @@ describe('The custom threshold alert type', () => {
           timeUnit: 'm',
         });
       });
+      test('builds the recovered alert viewInAppUrl from the alert rule parameter snapshot', async () => {
+        setEvaluationResults([{}]);
+        const snapshotMetrics = [
+          { name: 'A', aggType: Aggregators.COUNT, filter: 'snapshot.filter:*' },
+        ];
+        services.alertsClient.getRecoveredAlerts.mockImplementation((params: any) => {
+          return [
+            {
+              alert: {
+                meta: [],
+                state: [],
+                context: {},
+                id: 'host-0',
+                getId: jest.fn().mockReturnValue('host-0'),
+                getUuid: jest.fn().mockReturnValue('mockedUuid'),
+                getStart: jest.fn().mockReturnValue('2024-07-18T08:09:05.697Z'),
+              },
+              hit: {
+                'host.name': 'host-0',
+                [ALERT_GROUP]: [{ field: 'host.name', value: 'host-0' }],
+                [ALERT_RULE_PARAMETERS]: {
+                  searchConfiguration: {
+                    index: 'snapshot-data-view',
+                    query: { query: 'snapshot: true', language: 'kuery' },
+                  },
+                  criteria: [{ metrics: snapshotMetrics, timeSize: 5, timeUnit: 'h' }],
+                },
+              },
+            },
+          ];
+        });
+        services.alertFactory.done.mockImplementation(() => {
+          return {
+            getRecoveredAlerts: jest.fn().mockReturnValue([
+              {
+                setContext: jest.fn(),
+                getId: jest.fn().mockReturnValue('mockedId'),
+              },
+            ]),
+          };
+        });
+        await execute(COMPARATORS.GREATER_THAN, [0.9]);
+
+        expect(getViewInAppUrl).toHaveBeenCalledTimes(1);
+        expect(getViewInAppUrl).toHaveBeenCalledWith(
+          expect.objectContaining({
+            dataViewId: 'snapshot-data-view',
+            metrics: snapshotMetrics,
+            spaceId: MOCKED_SPACE_ID,
+            searchConfiguration: {
+              index: 'snapshot-data-view',
+              query: { query: 'snapshot: true', language: 'kuery' },
+            },
+            timeSize: 5,
+            timeUnit: 'h',
+          })
+        );
+      });
+
       test('includes reason message in the recovered alert context pulled from the last active alert ', async () => {
         setEvaluationResults([{}]);
         const mockedSetContext = jest.fn();
@@ -3105,6 +3170,65 @@ describe('The custom threshold alert type', () => {
 
           // Reset mock
           services.alertsClient.isTrackedAlert.mockReturnValue(false);
+        });
+      });
+
+      describe('legacy alertOnGroupDisappear: false with noDataBehavior', () => {
+        const runWith = async (params: Record<string, unknown>) => {
+          setEvaluationResults([{}]);
+          await executor({
+            ...mockOptions,
+            services,
+            params: {
+              ...mockOptions.params,
+              groupBy: ['groupByField'],
+              criteria: [
+                {
+                  ...customThresholdNonCountCriterion,
+                  comparator: COMPARATORS.GREATER_THAN,
+                  threshold: [1],
+                },
+              ],
+              ...params,
+            },
+          });
+        };
+
+        const trackedMissingGroups = () =>
+          jest.requireMock('./lib/evaluate_rule').evaluateRule.mock.calls[0][6];
+
+        test('remainActive still tracks missing groups', async () => {
+          await runWith({
+            noDataBehavior: 'remainActive',
+            alertOnGroupDisappear: false,
+            alertOnNoData: false,
+          });
+          expect(trackedMissingGroups()).toBe(true);
+        });
+
+        test('alertOnNoData still tracks missing groups', async () => {
+          await runWith({
+            noDataBehavior: 'alertOnNoData',
+            alertOnGroupDisappear: false,
+            alertOnNoData: false,
+          });
+          expect(trackedMissingGroups()).toBe(true);
+        });
+
+        test('recover does not track missing groups', async () => {
+          await runWith({
+            noDataBehavior: 'recover',
+            alertOnGroupDisappear: true,
+          });
+          expect(trackedMissingGroups()).toBe(false);
+        });
+
+        test('legacy alertOnGroupDisappear: false without noDataBehavior does not track', async () => {
+          await runWith({
+            alertOnGroupDisappear: false,
+            alertOnNoData: false,
+          });
+          expect(trackedMissingGroups()).toBe(false);
         });
       });
 

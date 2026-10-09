@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { mapValues, omit } from 'lodash';
+import { mapValues, memoize, omit } from 'lodash';
 import type { ApiTarget } from '@kbn/agent-builder-common';
+import { dedupeInlineDefinitions, INLINE_DEFINITIONS_FILE } from './inline_definitions';
 import { loadSchemaClosure } from './schema_closure';
-import { isRecord } from './types';
+import { BODY_ROOT_KEY, isRecord } from './types';
 
 // Character limit for inline definitions
 const MAX_INLINED_DEFINITION_CHARS = 1_200;
@@ -21,6 +22,9 @@ const MAX_STUB_CHILD_NAME_CHARS = 2_000;
 
 // Total budget for the child names every stub of a single schema lists
 const MAX_STUB_CHILD_NAME_TOTAL_CHARS = 8_000;
+
+// Character limit for a described schema
+const MAX_DESCRIBED_CHARS = 40_000;
 
 const DEFINITION_POINTER_PREFIX = '/$defs/';
 const LOCAL_POINTER_PREFIX = `#${DEFINITION_POINTER_PREFIX}`;
@@ -193,7 +197,7 @@ const describeAgainstClosure = ({
       return node;
     }
 
-    const siblings = mapValues(omit(node, ['$ref', ROUTING_LOCATION_KEY]), rewrite);
+    const siblings = mapValues(omit(node, ['$ref', ROUTING_LOCATION_KEY, BODY_ROOT_KEY]), rewrite);
 
     const { $ref: ref } = node;
     if (typeof ref !== 'string') {
@@ -252,14 +256,33 @@ const findDefinition = (
   return undefined;
 };
 
+const getInlineDefinitions = memoize(dedupeInlineDefinitions);
+
+const withInlineDefinitions = (
+  closure: Map<string, Record<string, unknown>>,
+  schema: Record<string, unknown>
+): Map<string, Record<string, unknown>> =>
+  new Map(closure).set(INLINE_DEFINITIONS_FILE, {
+    $defs: getInlineDefinitions(schema).definitions,
+  });
+
 const buildDescribedSchema = async (
   target: ApiTarget,
   schema: Record<string, unknown>
 ): Promise<DescribedSchema> => {
   const closure = await loadSchemaClosure(target, schema);
-  return describeAgainstClosure({
+  const described = describeAgainstClosure({
     closure,
     root: schema,
+    inlinedTotalChars: MAX_INLINED_TOTAL_CHARS,
+  });
+  if (JSON.stringify(described.schema).length <= MAX_DESCRIBED_CHARS) {
+    return described;
+  }
+
+  return describeAgainstClosure({
+    closure: withInlineDefinitions(closure, schema),
+    root: getInlineDefinitions(schema).root,
     inlinedTotalChars: MAX_INLINED_TOTAL_CHARS,
   });
 };
@@ -269,7 +292,8 @@ const buildDescribedDefinition = async (
   schema: Record<string, unknown>,
   typeName: string
 ): Promise<DescribedSchema | undefined> => {
-  const closure = await loadSchemaClosure(target, schema);
+  const loaded = await loadSchemaClosure(target, schema);
+  const closure = findDefinition(loaded, typeName) ? loaded : withInlineDefinitions(loaded, schema);
   const definition = findDefinition(closure, typeName);
   if (!definition) {
     return undefined;
@@ -310,6 +334,11 @@ const describedDefinitionCache: Record<
  * reduced to a stub naming the definition and its immediate children. Every stubbed definition
  * can be retrieved in full through {@link toDescribedDefinition}.
  *
+ * A schema that would still describe past {@link MAX_DESCRIBED_CHARS}, typically because it spells
+ * its types out inline rather than referencing them, is described again after its repeated inline
+ * subtrees are hoisted into definitions of their own (see {@link dedupeInlineDefinitions}), which
+ * are then inlined or stubbed like any other.
+ *
  * @param target - Backend the API belongs to.
  * @param schema - The API's `input` JSON Schema.
  * @returns The described schema and the names of the definitions it stubbed.
@@ -338,10 +367,11 @@ export const toDescribedSchema = async (
  * {@link toDescribedSchema} is expanded.
  *
  * @param target - Backend the API belongs to.
- * @param schema - The API's `input` JSON Schema, whose closure the definition is looked up in.
+ * @param schema - The API's `input` JSON Schema, whose closure and inline subtrees the
+ * definition is looked up in.
  * @param typeName - Bare definition name, as carried by a stub's `x-expandable`.
- * @returns The described definition, or undefined when the schema's closure holds no definition
- * under that name.
+ * @returns The described definition, or undefined when neither the schema's closure nor its
+ * inline subtrees hold a definition under that name.
  * @throws {Error} when a referenced file cannot be loaded.
  */
 export const toDescribedDefinition = async (

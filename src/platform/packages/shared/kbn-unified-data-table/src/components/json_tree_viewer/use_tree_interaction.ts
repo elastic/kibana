@@ -267,10 +267,7 @@ export const useRovingTreeNavigation = (
             rowRefs.current.get(rowKey(row))?.querySelector<HTMLElement>('button')?.focus();
           } else if (row.hasChildren && !row.isExpanded) {
             setExpandedFor(row.node.id, true);
-          } else if (row.hasChildren && row.isExpanded) {
-            focusRow(orderedIds[index + 1]);
           } else {
-            // Leaf row: step into its first trailing action (copy, then any host-defined actions).
             rowRefs.current
               .get(rowKey(row))
               ?.querySelector<HTMLElement>('.jsonTreeViewerRowAction')

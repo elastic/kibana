@@ -17,6 +17,7 @@ import type {
 } from './types';
 import { clearSidebarRuntimeContext, setSidebarRuntimeContext } from './sidebar';
 import { AgentBuilderAccessChecker } from './services';
+import { createPublicConversationTemplatesContract } from './services/conversation_templates';
 
 jest.mock('./services/access', () => ({
   ...jest.requireActual('./services/access'),
@@ -33,6 +34,12 @@ jest.mock('./services', () => ({
   AgentService: jest.fn(),
   AttachmentsService: jest.fn(() => ({ addAttachmentType: jest.fn() })),
   RenderersService: jest.fn(() => ({ register: jest.fn() })),
+  ConversationEventsService: jest.fn(() => ({
+    register: jest.fn(),
+    getUiDefinition: jest.fn(),
+    has: jest.fn(),
+    list: jest.fn().mockReturnValue([]),
+  })),
   ChatService: jest.fn(),
   ConversationsService: jest.fn(),
   ConversationTemplatesService: jest.fn(() => ({
@@ -63,6 +70,10 @@ jest.mock('./services/conversation_templates', () => ({
 
 jest.mock('./services/renderers', () => ({
   createPublicRenderersContract: jest.fn(() => ({})),
+}));
+
+jest.mock('./services/conversation_events', () => ({
+  createPublicConversationEventsContract: jest.fn(() => ({})),
 }));
 
 jest.mock('./services/tools', () => ({
@@ -144,6 +155,11 @@ const createMockCoreStart = (sidebarApp: ReturnType<typeof createMockSidebarApp>
     http: {},
     docLinks: { links: {} },
     application: {
+      getUrlForApp: jest.fn(
+        (appId: string, { path = '' }: { path?: string } = {}) =>
+          `http://localhost:5601/app/${appId}${path}`
+      ),
+      navigateToApp: jest.fn(),
       capabilities: {
         navLinks: {},
         management: {},
@@ -153,7 +169,7 @@ const createMockCoreStart = (sidebarApp: ReturnType<typeof createMockSidebarApp>
     },
     chrome: {
       sidebar: { getApp: jest.fn(() => sidebarApp) },
-      next: { aiButton: { register: jest.fn() } },
+      controls: { aiButton: { register: jest.fn() } },
     },
     uiSettings: {
       get$: jest.fn(() => new BehaviorSubject(false)),
@@ -168,12 +184,14 @@ const createMockSetupDeps = (): AgentBuilderSetupDependencies =>
     licenseManagement: undefined,
     share: {},
     workflowsExtensions: {},
+    files: { registerFileKind: jest.fn() },
   } as unknown as AgentBuilderSetupDependencies);
 
 const createMockStartDeps = (): AgentBuilderStartDependencies =>
   ({
     licensing: {},
     inference: {},
+    files: { filesClientFactory: { asScoped: jest.fn().mockReturnValue({}) } },
   } as unknown as AgentBuilderStartDependencies);
 
 const createMockAttachmentGroup = (overrides: Partial<AttachmentGroup> = {}): AttachmentGroup => ({
@@ -289,6 +307,57 @@ describe('AgentBuilderPlugin', () => {
       });
 
       expect(getAgentBuilderAccess).toHaveBeenCalled();
+    });
+  });
+
+  describe('conversation template context', () => {
+    const startAndGetContext = () => {
+      const sidebarApp = createMockSidebarApp();
+      const coreStart = createMockCoreStart(sidebarApp);
+      const plugin = new AgentBuilderPlugin(createMockInitializerContext());
+      plugin.setup(createMockCoreSetup(), createMockSetupDeps());
+      plugin.start(coreStart, createMockStartDeps());
+
+      const [{ context }] = jest.mocked(createPublicConversationTemplatesContract).mock.calls[0];
+      return { context, coreStart, sidebarApp };
+    };
+
+    it('builds the absolute URL of an agent-scoped conversation', () => {
+      const { context, coreStart } = startAndGetContext();
+
+      expect(context.getConversationUrl({ conversationId: 'conv-1', agentId: 'agent-1' })).toBe(
+        'http://localhost:5601/app/agent_builder/agents/agent-1/conversations/conv-1'
+      );
+      expect(coreStart.application.getUrlForApp).toHaveBeenCalledWith('agent_builder', {
+        path: '/agents/agent-1/conversations/conv-1',
+        absolute: true,
+      });
+    });
+
+    it('adds the details flag when asked to open the details flyout', () => {
+      const { context } = startAndGetContext();
+
+      expect(
+        context.getConversationUrl({
+          conversationId: 'conv-1',
+          agentId: 'agent-1',
+          openDetails: true,
+        })
+      ).toBe(
+        'http://localhost:5601/app/agent_builder/agents/agent-1/conversations/conv-1?openConversationDetails=true'
+      );
+    });
+
+    it('navigates to the same path the URL is built from', async () => {
+      const { context, coreStart, sidebarApp } = startAndGetContext();
+      const location = { conversationId: 'conv-1', agentId: 'agent-1', openDetails: true };
+
+      await context.openFullscreenConversation(location);
+
+      expect(sidebarApp.close).toHaveBeenCalledTimes(1);
+      expect(coreStart.application.navigateToApp).toHaveBeenCalledWith('agent_builder', {
+        path: '/agents/agent-1/conversations/conv-1?openConversationDetails=true',
+      });
     });
   });
 

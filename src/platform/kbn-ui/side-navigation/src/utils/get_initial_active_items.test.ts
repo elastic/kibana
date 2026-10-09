@@ -84,4 +84,28 @@ describe('getActiveItems', () => {
     expect(result.primaryItem?.id).toBe('settings');
     expect(result.secondaryItem).toBeNull();
   });
+
+  it('keeps the primary active when only a popover row matches', () => {
+    const withPopover: NavigationStructure = {
+      ...navigation,
+      primaryItems: [
+        {
+          ...navigation.primaryItems[1],
+          popoverSections: [
+            {
+              id: 'recent',
+              items: [createSecondary('recent-dashboard', 'Recent')],
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(getActiveItems(withPopover, 'dashboards').primaryItem?.id).toBe('dashboards');
+    expect(getActiveItems(withPopover, 'dashboards').secondaryItem).toBeNull();
+    expect(getActiveItems(withPopover, 'recent-dashboard')).toEqual({
+      primaryItem: null,
+      secondaryItem: null,
+    });
+  });
 });

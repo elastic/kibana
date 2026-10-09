@@ -9,7 +9,6 @@ import React, { useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiCallOut,
   EuiHealth,
   EuiIcon,
   EuiIconTip,
@@ -25,6 +24,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import moment from 'moment';
 import { useHistory } from 'react-router-dom';
 import { useSyntheticsSettingsContext } from '../../../contexts';
@@ -71,7 +71,7 @@ export const LocationAgentDetails = ({
   }
 
   const agents = stats?.agents ?? [];
-  const isAgentSharding = stats?.isAgentSharding === true;
+  const isShardingActive = stats?.isShardingActive === true;
   const healthyAgents = agents.filter((agent) => agent.healthy).length;
   const unhealthyAgents = agents.filter((agent) => !agent.healthy);
   const pressuredAgents = agents.filter(
@@ -90,7 +90,7 @@ export const LocationAgentDetails = ({
   if (pressuredAgents.length > 0) {
     warnings.push(MEMORY_PRESSURE_WARNING(pressuredAgents.length));
   }
-  const calloutColor = unhealthyAgents.length > 0 ? 'danger' : 'warning';
+  const WarningsCallout = unhealthyAgents.length > 0 ? KbnDangerCallout : KbnWarningCallout;
 
   const columns: Array<EuiBasicTableColumn<AgentStat>> = [
     {
@@ -144,7 +144,7 @@ export const LocationAgentDetails = ({
       name: DISTRIBUTION_COLUMN,
       width: '200px',
       render: (agent: AgentStat) => {
-        const share = agentShare(agent, locationMonitorCount, isAgentSharding);
+        const share = agentShare(agent, locationMonitorCount, isShardingActive);
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem>
@@ -350,11 +350,9 @@ export const LocationAgentDetails = ({
         {warnings.length > 0 && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
+            <WarningsCallout
               announceOnMount
               size="s"
-              color={calloutColor}
-              iconType="warning"
               title={ATTENTION_TITLE}
               data-test-subj="locationAgentWarnings"
             >
@@ -363,7 +361,7 @@ export const LocationAgentDetails = ({
                   <li key={i}>{warning}</li>
                 ))}
               </ul>
-            </EuiCallOut>
+            </WarningsCallout>
           </>
         )}
 
@@ -373,7 +371,7 @@ export const LocationAgentDetails = ({
           <h4>
             {DISTRIBUTION_TITLE}{' '}
             <EuiIconTip
-              content={isAgentSharding ? DISTRIBUTION_HELP_SHARDED : DISTRIBUTION_HELP}
+              content={isShardingActive ? DISTRIBUTION_HELP_SHARDED : DISTRIBUTION_HELP}
               position="right"
               type="question"
             />
@@ -403,12 +401,12 @@ export const LocationAgentDetails = ({
 const agentShare = (
   agent: AgentStat,
   locationMonitorCount: number,
-  isAgentSharding: boolean
+  isShardingActive: boolean
 ): number | null => {
   if (locationMonitorCount <= 0) {
     return null;
   }
-  if (!isAgentSharding || agent.monitorsAssigned == null) {
+  if (!isShardingActive || agent.monitorsAssigned == null) {
     return 1;
   }
   return agent.monitorsAssigned / locationMonitorCount;

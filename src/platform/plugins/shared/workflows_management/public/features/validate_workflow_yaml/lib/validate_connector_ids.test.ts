@@ -8,8 +8,17 @@
  */
 
 import type { ConnectorTypeInfo } from '@kbn/workflows';
+import type { ConnectorIdItem } from '@kbn/workflows-yaml';
 import { validateConnectorIds } from './validate_connector_ids';
-import type { ConnectorIdItem } from '../model/types';
+import { getCachedInferenceConnectorInstances } from '../../../../common/schema';
+import { stepSchemas } from '../../../../common/step_schemas';
+
+jest.mock('../../../../common/schema', () => ({
+  ...jest.requireActual('../../../../common/schema'),
+  getCachedInferenceConnectorInstances: jest.fn(() => new Map()),
+}));
+
+const mockGetCachedInferenceConnectorInstances = jest.mocked(getCachedInferenceConnectorInstances);
 
 describe('validateConnectorIds', () => {
   const mockConnectorInstance = {
@@ -128,6 +137,117 @@ describe('validateConnectorIds', () => {
         beforeMessage: '✓ testyng',
       });
     });
+
+    it('should link inference endpoints to Feature Settings', () => {
+      const getStepDefinitionSpy = jest.spyOn(stepSchemas, 'getStepDefinition').mockReturnValue({
+        editorHandlers: {
+          config: {
+            'connector-id': {
+              connectorIdSelection: {
+                connectorTypes: ['inference.unified_completion'],
+                inferenceFeatureId: 'ai_summarize',
+              },
+            },
+          },
+        },
+      } as never);
+      mockGetCachedInferenceConnectorInstances.mockReturnValue(
+        new Map([
+          [
+            'ai_summarize',
+            [
+              {
+                id: 'inference-endpoint',
+                name: 'Inference endpoint',
+                connectorType: '.inference',
+                isPreconfigured: true,
+                isDeprecated: false,
+                isInferenceEndpoint: true,
+              },
+            ],
+          ],
+        ])
+      );
+
+      const results = validateConnectorIds(
+        [createConnectorIdItem({ key: 'inference-endpoint', connectorType: 'ai.summarize' })],
+        mockConnectorTypes,
+        'http://test/connectors',
+        'http://test/feature-settings'
+      );
+      getStepDefinitionSpy.mockRestore();
+
+      expect(results).toEqual([
+        expect.objectContaining({
+          severity: 'info',
+          message: null,
+          beforeMessage: '✓ Inference endpoint',
+          hoverMessage: expect.stringContaining('[Feature Settings](http://test/feature-settings)'),
+        }),
+      ]);
+      expect(results[0].hoverMessage).not.toContain('Edit connector');
+      expect(results[0].hoverMessage).not.toContain('Manage connectors');
+    });
+
+    it('should accept the wildcard only on a trigger connector-id', () => {
+      const results = validateConnectorIds(
+        [
+          createConnectorIdItem({
+            key: '*',
+            connectorType: '.inboundWebhook',
+            yamlPath: ['triggers', 0, 'connector-id'],
+          }),
+        ],
+        mockConnectorTypes,
+        ''
+      );
+
+      expect(results).toEqual([
+        expect.objectContaining({
+          severity: 'info',
+          message: null,
+          beforeMessage: 'All connectors of this type',
+          hoverMessage:
+            'This trigger starts the workflow for events from every connector instance of this type.',
+        }),
+      ]);
+    });
+
+    it('should reject the wildcard on a connector action step', () => {
+      const results = validateConnectorIds(
+        [createConnectorIdItem({ key: '*', connectorType: '.slack' })],
+        mockConnectorTypes,
+        ''
+      );
+
+      expect(results).toEqual([
+        expect.objectContaining({
+          severity: 'error',
+          ruleId: 'connectorNotFound',
+        }),
+      ]);
+    });
+
+    it('should reject the wildcard on a HITL channel connector-id', () => {
+      const results = validateConnectorIds(
+        [
+          createConnectorIdItem({
+            key: '*',
+            connectorType: '.slack',
+            yamlPath: ['steps', 0, 'with', 'channels', 'slack', 'connector-id'],
+          }),
+        ],
+        mockConnectorTypes,
+        ''
+      );
+
+      expect(results).toEqual([
+        expect.objectContaining({
+          severity: 'error',
+          ruleId: 'connectorNotFound',
+        }),
+      ]);
+    });
   });
 
   describe('when connector name is used instead of UUID', () => {
@@ -203,6 +323,34 @@ describe('validateConnectorIds', () => {
       expect(results[0].hoverMessage).toContain('http://localhost:5601/app/management/connectors');
     });
 
+    it('should link missing inference endpoints to Feature Settings', () => {
+      const getStepDefinitionSpy = jest.spyOn(stepSchemas, 'getStepDefinition').mockReturnValue({
+        editorHandlers: {
+          config: {
+            'connector-id': {
+              connectorIdSelection: {
+                connectorTypes: ['inference.unified_completion'],
+                inferenceFeatureId: 'ai_summarize',
+              },
+            },
+          },
+        },
+      } as never);
+      mockGetCachedInferenceConnectorInstances.mockReturnValue(new Map([['ai_summarize', []]]));
+
+      const results = validateConnectorIds(
+        [createConnectorIdItem({ key: 'missing-endpoint', connectorType: 'ai.summarize' })],
+        mockConnectorTypes,
+        'http://test/connectors',
+        'http://test/feature-settings'
+      );
+      getStepDefinitionSpy.mockRestore();
+
+      expect(results[0].message).toContain('Inference endpoint "missing-endpoint" not found');
+      expect(results[0].hoverMessage).toContain('[Feature Settings](http://test/feature-settings)');
+      expect(results[0].hoverMessage).not.toContain('Manage connectors');
+    });
+
     it('should use connector displayName if available', () => {
       const connectorIdItems: ConnectorIdItem[] = [
         createConnectorIdItem({
@@ -229,6 +377,31 @@ describe('validateConnectorIds', () => {
       expect(results[0].message).toContain(
         'Unknown-type connector UUID "non-existent-connector" not found'
       );
+    });
+
+    it('does not offer Create connector for waitForInput or waitForApproval step types', () => {
+      const results = validateConnectorIds(
+        [
+          createConnectorIdItem({
+            key: 'non-existent-connector',
+            connectorType: 'waitForInput',
+          }),
+          createConnectorIdItem({
+            id: 'test-id-2',
+            key: 'non-existent-connector',
+            connectorType: 'waitForApproval',
+          }),
+        ],
+        mockConnectorTypes,
+        ''
+      );
+
+      expect(results).toHaveLength(2);
+      for (const result of results) {
+        expect(result.hoverMessage).not.toContain('createConnector');
+        expect(result.hoverMessage).not.toContain('.waitForInput');
+        expect(result.hoverMessage).not.toContain('.waitForApproval');
+      }
     });
   });
 

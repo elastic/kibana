@@ -73,6 +73,29 @@ describe('fetchEvents', () => {
     expect(result).toEqual({ columns: [], records: [{ id: 'dummy' }] });
   });
 
+  it('keeps principal-subject enrichment behind all existing actor identity types', async () => {
+    await fetchEvents({
+      esClient,
+      logger,
+      start: 0,
+      end: 1000,
+      originEventIds: [],
+      showUnknownTarget: false,
+      indexPatterns: ['valid_index'],
+      spaceId: 'default',
+      esQuery: undefined,
+    });
+    const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+    const query = args.query ?? '';
+    const resolution =
+      'actorEntityId = COALESCE(_actor_user_euid, _actor_host_euid, _actor_service_euid, `entity.id`)';
+    expect(query).toContain(resolution);
+    expect(query).toContain('gcp.vertexai.audit.authentication_info.principal_subject');
+    expect(query.indexOf('gcp.vertexai.audit.authentication_info.principal_subject')).toBeLessThan(
+      query.indexOf(resolution)
+    );
+  });
+
   it('casts user.id to keyword before the enrichment EVAL to prevent CASE type conflicts', () => {
     // When user.id is mapped as "long" (e.g. aws_bedrock.invocation), the merged enrichment
     // CASE has a preserve branch "user.id IS NOT NULL, user.id" that returns long, while all
@@ -338,6 +361,35 @@ describe('regroupEvents', () => {
     expect(group.actorEntityType).toBe('user');
     expect(group.actorEntitySubType).toBe('admin');
     expect(group.actorsDocData).toEqual([record.actorDocData]);
+  });
+
+  it('aggregates risk score and asset criticality across the actors merged into a group', () => {
+    const record1 = buildEventEsqlRow({
+      actorEntityId: 'user:alice',
+      targetEntityId: 'host:server1',
+    });
+    const record2 = buildEventEsqlRow({
+      actorEntityId: 'user:bob',
+      targetEntityId: 'host:server1',
+    });
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice', { type: 'user', riskScore: 94.1, assetCriticality: 'extreme_impact' }],
+      ['user:bob', { type: 'user', riskScore: 12.4, assetCriticality: 'low_impact' }],
+      ['host:server1', { type: 'host' }],
+    ]);
+
+    const [group] = regroupEvents([record1, record2], enrichmentMap);
+
+    // Both actors merge into one node, so the node reports the spread and the distribution
+    // rather than either entity's own value.
+    expect(group.actorRiskScore).toEqual({ min: 12.4, max: 94.1 });
+    expect(group.actorAssetCriticality).toEqual([
+      { level: 'extreme_impact', count: 1 },
+      { level: 'low_impact', count: 1 },
+    ]);
+    // The target has neither, so no aggregate is emitted for it.
+    expect(group.targetRiskScore).toBeUndefined();
+    expect(group.targetAssetCriticality).toBeUndefined();
   });
 
   it('merges multiple rows of the same type group into one group and sums badges', () => {

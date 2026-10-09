@@ -35,6 +35,7 @@ import type { AlertSnoozePayload } from '@kbn/response-ops-alert-snooze';
 import { useAlertFieldNames } from '@kbn/alerts-ui-shared/src/common/hooks/use_alert_field_names';
 
 import { useKibana } from '../../../utils/kibana_react';
+import { useInvestigateAlert } from '../../../hooks/use_investigate_alert';
 import type { TopAlert } from '../../../typings/alerts';
 import { useAuthorizedToReadRuleType } from '../../../hooks/use_authorized_to_read_rule_type';
 import { observabilityFeatureId } from '../../../../common';
@@ -49,7 +50,6 @@ import { ObsCasesContext } from './obs_cases_context';
 import { AddToCaseButton } from './add_to_case_button';
 import { useDiscoverUrl } from '../hooks/use_discover_url/use_discover_url';
 import { ALERT_DETAILS_EBT_ELEMENTS } from '../ebt_constants';
-import { useInvestigationAvailability } from '../../../hooks/use_investigation_availability';
 
 export interface HeaderActionsProps extends AlertDetailsRuleFormFlyoutBaseProps {
   alert: TopAlert | null;
@@ -103,16 +103,6 @@ export function HeaderActions({
     notifications,
   } = services;
   const alertId = alert?.fields[ALERT_UUID];
-  const hasInvestigationActionPrerequisites = Boolean(
-    services.application?.capabilities?.agentBuilder?.write === true && alertId
-  );
-  const isInvestigationAvailable = useInvestigationAvailability({
-    enabled: hasInvestigationActionPrerequisites,
-    skipAlertsQueryContext: true,
-  });
-  const showInvestigateAction = Boolean(
-    hasInvestigationActionPrerequisites && isInvestigationAvailable
-  );
 
   const { authorizedToReadRuleType } = useAuthorizedToReadRuleType();
 
@@ -128,7 +118,6 @@ export function HeaderActions({
   const canAddToCase = Boolean(casesPermissions?.read && casesPermissions?.createComment);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-  const [isInvestigating, setIsInvestigating] = useState(false);
   const [isRuleSnoozeModalOpen, setRuleSnoozeModalOpen] = useState<boolean>(false);
   const [isAlertSnoozeFormOpen, setIsAlertSnoozeFormOpen] = useState<boolean>(false);
 
@@ -183,29 +172,23 @@ export function HeaderActions({
     }
   }, [alert, alertIndex, untrackAlerts, onUntrackAlert]);
 
-  const handleInvestigate = async () => {
-    if (!alertId) return;
-
-    setIsInvestigating(true);
-    setIsPopoverOpen(false);
-    try {
-      await http.post(`/internal/observability/alerts/${encodeURIComponent(alertId)}/investigate`);
-      notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.observability.alertDetails.investigateSuccessTitle', {
-          defaultMessage: 'Investigation started',
-        }),
-      });
-    } catch (error) {
-      notifications.toasts.addDanger({
-        title: i18n.translate('xpack.observability.alertDetails.investigateErrorTitle', {
-          defaultMessage: 'Failed to start investigation',
-        }),
-        text: error instanceof Error ? error.message : String(error),
-      });
-    } finally {
-      setIsInvestigating(false);
-    }
-  };
+  const {
+    showInvestigateButton,
+    showViewInvestigation,
+    handleInvestigate,
+    isInvestigating,
+    investigateActionLabel,
+    investigateEbtProps,
+    viewInvestigationUrl,
+    viewInvestigationActionLabel,
+    viewInvestigationEbtProps,
+    markInvestigationViewed,
+  } = useInvestigateAlert({
+    alertId,
+    ebtElement: 'alertDetailsPageActions',
+    enabled: isPopoverOpen,
+    onInvestigate: () => setIsPopoverOpen(false),
+  });
 
   const [alertDetailsRuleFormFlyoutOpen, setAlertDetailsRuleFormFlyoutOpen] = useState(false);
 
@@ -274,21 +257,50 @@ export function HeaderActions({
                   <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
                     <div />
 
-                    {showInvestigateAction && (
+                    {isInvestigating && (
                       <EuiButtonEmpty
                         size="s"
                         color="text"
-                        iconType="inspect"
-                        onClick={handleInvestigate}
-                        disabled={isInvestigating}
+                        isLoading
+                        disabled
                         data-test-subj="alertDetailsInvestigate"
                       >
-                        <EuiText size="s">
-                          {i18n.translate('xpack.observability.alertDetails.investigate', {
-                            defaultMessage: 'Investigate',
-                          })}
-                        </EuiText>
+                        <EuiText size="s">{investigateActionLabel}</EuiText>
                       </EuiButtonEmpty>
+                    )}
+
+                    {!isInvestigating && (
+                      <>
+                        {showViewInvestigation && (
+                          <EuiButtonEmpty
+                            size="s"
+                            color="text"
+                            iconType="eye"
+                            href={viewInvestigationUrl}
+                            onClick={() => {
+                              markInvestigationViewed();
+                              handleClosePopover();
+                            }}
+                            data-test-subj="alertDetailsViewInvestigation"
+                            {...viewInvestigationEbtProps}
+                          >
+                            <EuiText size="s">{viewInvestigationActionLabel}</EuiText>
+                          </EuiButtonEmpty>
+                        )}
+
+                        {showInvestigateButton && (
+                          <EuiButtonEmpty
+                            size="s"
+                            color="text"
+                            iconType="inspect"
+                            onClick={handleInvestigate}
+                            data-test-subj="alertDetailsInvestigate"
+                            {...investigateEbtProps}
+                          >
+                            <EuiText size="s">{investigateActionLabel}</EuiText>
+                          </EuiButtonEmpty>
+                        )}
+                      </>
                     )}
 
                     {cases && canAddToCase && (
@@ -305,7 +317,7 @@ export function HeaderActions({
                         size="s"
                         color="text"
                         href={discoverUrl}
-                        iconType="discoverApp"
+                        iconType="productDiscover"
                         target="_blank"
                         onClick={handleClosePopover}
                         data-test-subj={`alertDetailsPage_viewInDiscover${

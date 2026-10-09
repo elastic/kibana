@@ -35,7 +35,10 @@ export const DeleteAllConversationsRequestBody = lazySchema(() =>
     /**
      * Optional list of conversation IDs to delete.
      */
-    excludedIds: z.array(z.string()).optional(),
+    excludedIds: z
+      .array(z.string())
+      .optional()
+      .describe('Optional list of conversation IDs to delete.'),
   })
 );
 export type DeleteAllConversationsRequestBody = z.infer<typeof DeleteAllConversationsRequestBody>;
@@ -57,7 +60,7 @@ export const DeleteConversationRequestParams = lazySchema(() =>
     /**
      * The conversation's `id` value.
      */
-    id: NonEmptyString,
+    id: NonEmptyString.describe("The conversation's `id` value."),
   })
 );
 export type DeleteConversationRequestParams = z.infer<typeof DeleteConversationRequestParams>;
@@ -71,7 +74,9 @@ export const ReadConversationRequestParams = lazySchema(() =>
     /**
      * The conversation's `id` value, a unique identifier for the conversation.
      */
-    id: NonEmptyString,
+    id: NonEmptyString.describe(
+      "The conversation's `id` value, a unique identifier for the conversation."
+    ),
   })
 );
 export type ReadConversationRequestParams = z.infer<typeof ReadConversationRequestParams>;
@@ -85,7 +90,7 @@ export const UpdateConversationRequestParams = lazySchema(() =>
     /**
      * The conversation's `id` value.
      */
-    id: NonEmptyString,
+    id: NonEmptyString.describe("The conversation's `id` value."),
   })
 );
 export type UpdateConversationRequestParams = z.infer<typeof UpdateConversationRequestParams>;

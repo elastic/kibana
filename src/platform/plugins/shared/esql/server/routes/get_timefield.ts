@@ -21,15 +21,13 @@ import { EsqlService } from '@kbn/esql-server-utils';
 import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 
 const ES_TIMESTAMP_FIELD_NAME = '@timestamp';
-// Temporary: remove once dataset filtering is enabled by default in ES
-const DATASET_FILTERING_FEATURE_FLAG_KEY = 'esql.datasetFilteringEnabled';
 
 // ANTLR ALL(*) adaptive-prediction cost grows super-linearly with parenthesis nesting depth.
 // Reject deep queries before touching the parser to prevent event-loop stalls (DoS via a single
 // small request from a low-privileged account).
-const MAX_NESTING_DEPTH = 50;
+export const MAX_NESTING_DEPTH = 50;
 
-const getMaxNestingDepth = (query: string): number => {
+export const getMaxNestingDepth = (query: string): number => {
   let max = 0;
   let depth = 0;
   for (const ch of query) {
@@ -98,7 +96,6 @@ const resolveTimeField = async (
   client: ElasticsearchClient,
   query: string,
   logger: Logger,
-  datasetFilteringEnabled: boolean,
   projectRouting: string | undefined
 ): Promise<{ timeField: string | undefined }> => {
   const effectiveProjectRouting = getProjectRoutingFromEsqlQuery(query) ?? projectRouting;
@@ -118,27 +115,74 @@ const resolveTimeField = async (
   const sources = getIndexPatternFromESQLQuery(query);
   const subqueryArgs = sourceCommand.args.filter(isSubQuery);
   const hasSubqueries = subqueryArgs.length > 0;
-  const service = new EsqlService({ client });
-  const { views } = await service.getViews().catch((viewsError) => {
-    const message = viewsError instanceof Error ? viewsError.message : String(viewsError);
-    logger.error(`Failed to fetch ES|QL views while resolving timefield: ${message}`, {
-      tags: ['esql', 'timefield', 'views'],
-      error: {
-        stack_trace: viewsError instanceof Error ? viewsError.stack : undefined,
-      },
-    });
-    return { views: [] };
-  });
-  const viewNames = new Set(views.map(({ name }) => name));
   const splitSources = sources
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean);
 
-  // Temporary: remove once dataset filtering is enabled by default in ES
-  if (datasetFilteringEnabled) {
-    const { datasets } = await service.getDatasets().catch(() => ({ datasets: [] }));
+  try {
+    // In case of subqueries we need to check all indices separately.
+    // Otherwise, pass the full sources string to fieldCaps so Elasticsearch
+    // evaluates the multi-index pattern holistically.
+    const indices = hasSubqueries ? splitSources : [sources];
+
+    if (!indices.length) {
+      return { timeField: undefined };
+    }
+
+    // The cheapest check comes first: most sources are indices, aliases or data streams.
+    const fieldCapsResults = await Promise.all(
+      indices.map(async (index) => {
+        try {
+          const fieldCapsResp = await client.fieldCaps({
+            index,
+            fields: '@timestamp',
+            include_unmapped: false,
+            ...(effectiveProjectRouting ? { project_routing: effectiveProjectRouting } : {}),
+          });
+          return hasTimestampInFieldCapsResponse(fieldCapsResp);
+        } catch (fieldCapsError) {
+          const message =
+            fieldCapsError instanceof Error ? fieldCapsError.message : String(fieldCapsError);
+          // An unknown index is expected for views and datasets, which are checked below
+          const logLevel = getErrorStatusCode(fieldCapsError) === 404 ? 'debug' : 'error';
+          logger[logLevel](
+            `fieldCaps check failed for index "${index}" while resolving ES|QL timefield: ${message}`,
+            {
+              tags: ['esql', 'timefield', 'fieldCaps'],
+              error: {
+                stack_trace: fieldCapsError instanceof Error ? fieldCapsError.stack : undefined,
+              },
+            }
+          );
+          return false;
+        }
+      })
+    );
+
+    if (fieldCapsResults.every(Boolean)) {
+      return { timeField: ES_TIMESTAMP_FIELD_NAME };
+    }
+
+    // fieldCaps didn't find @timestamp: the sources may be views or datasets, which fieldCaps
+    // doesn't know. ES|QL resolves them itself, so their schema is their output schema.
+    const service = new EsqlService({ client });
+    const [{ views }, { datasets }] = await Promise.all([
+      service.getViews().catch((viewsError) => {
+        const message = viewsError instanceof Error ? viewsError.message : String(viewsError);
+        logger.error(`Failed to fetch ES|QL views while resolving timefield: ${message}`, {
+          tags: ['esql', 'timefield', 'views'],
+          error: {
+            stack_trace: viewsError instanceof Error ? viewsError.stack : undefined,
+          },
+        });
+        return { views: [] };
+      }),
+      service.getDatasets().catch(() => ({ datasets: [] })),
+    ]);
     const datasetNames = new Set(datasets.map(({ name }) => name));
+    const viewNames = new Set(views.map(({ name }) => name));
+
     const datasetSources = splitSources.filter((name) => datasetNames.has(name));
     if (datasetSources.length > 0) {
       const datasetChecks = await Promise.all(
@@ -154,54 +198,8 @@ const resolveTimeField = async (
         return { timeField: ES_TIMESTAMP_FIELD_NAME };
       }
     }
-  }
 
-  try {
-    // In case of subqueries we need to check all indices separately.
-    // Otherwise, pass the full sources string to fieldCaps so Elasticsearch
-    // evaluates the multi-index pattern holistically.
-    const indices = hasSubqueries ? splitSources : [sources];
-
-    if (!indices.length) {
-      return { timeField: undefined };
-    }
-
-    const fieldCapsResults = await Promise.all(
-      indices.map(async (index) => {
-        try {
-          const fieldCapsResp = await client.fieldCaps({
-            index,
-            fields: '@timestamp',
-            include_unmapped: false,
-            ...(effectiveProjectRouting ? { project_routing: effectiveProjectRouting } : {}),
-          });
-          return hasTimestampInFieldCapsResponse(fieldCapsResp);
-        } catch (fieldCapsError) {
-          const message =
-            fieldCapsError instanceof Error ? fieldCapsError.message : String(fieldCapsError);
-          logger.error(
-            `fieldCaps check failed for index "${index}" while resolving ES|QL timefield: ${message}`,
-            {
-              tags: ['esql', 'timefield', 'fieldCaps'],
-              error: {
-                stack_trace: fieldCapsError instanceof Error ? fieldCapsError.stack : undefined,
-              },
-            }
-          );
-          return false;
-        }
-      })
-    );
-
-    const allHaveTimestamp = fieldCapsResults.every(Boolean);
-
-    if (allHaveTimestamp) {
-      return { timeField: ES_TIMESTAMP_FIELD_NAME };
-    }
-
-    // fieldCaps didn't find @timestamp — check if any sources are views
     const viewSources = splitSources.filter((name) => viewNames.has(name));
-
     if (viewSources.length) {
       const viewChecks = await Promise.all(
         viewSources.map((viewName) =>
@@ -259,20 +257,9 @@ export const registerGetTimeFieldRoute = (
 
       const core = await requestHandlerContext.core;
       const client = core.elasticsearch.client.asCurrentUser;
-      // Temporary: remove once dataset filtering is enabled by default in ES
-      const datasetFilteringEnabled = await core.featureFlags.getBooleanValue(
-        DATASET_FILTERING_FEATURE_FLAG_KEY,
-        false
-      );
 
       try {
-        const body = await resolveTimeField(
-          client,
-          query,
-          logger.get(),
-          datasetFilteringEnabled,
-          projectRouting
-        );
+        const body = await resolveTimeField(client, query, logger.get(), projectRouting);
         esqlRouteRequestCounter.add(1, {
           route: 'timefield',
           outcome: 'success',

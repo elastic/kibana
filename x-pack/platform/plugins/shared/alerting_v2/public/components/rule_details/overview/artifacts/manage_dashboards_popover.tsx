@@ -48,7 +48,7 @@ export interface ManageDashboardsPopoverProps {
   dashboard: DashboardStart;
   existingArtifacts: RuleArtifactPayload;
   isSaving: boolean;
-  onSave: (artifacts: RuleArtifactPayload) => void;
+  onSave: (artifacts: RuleArtifactPayload | null) => void;
 }
 
 const attachedGroupLabel = i18n.translate(
@@ -300,10 +300,10 @@ export const ManageDashboardsPopover = ({
       return {
         id: resolveArtifactId(DASHBOARD_ARTIFACT_TYPE, existingArtifact?.id),
         type: DASHBOARD_ARTIFACT_TYPE,
-        data: { dashboardId },
+        data: { dashboard_id: dashboardId },
       };
     });
-    onSave(mapArtifacts([...otherArtifacts, ...draftDashboardArtifacts]) ?? []);
+    onSave(mapArtifacts([...otherArtifacts, ...draftDashboardArtifacts]) ?? null);
   }, [existingDashboardArtifacts, onSave, otherArtifacts, selectedIds]);
 
   return (

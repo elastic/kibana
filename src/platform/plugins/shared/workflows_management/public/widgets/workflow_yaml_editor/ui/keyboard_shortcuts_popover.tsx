@@ -65,6 +65,12 @@ const shortcuts: KeyboardShortcut[] = [
     keys: [COMMAND_KEY, 'F'],
     showInReadOnly: true,
   },
+  {
+    label: i18n.translate('workflows.yamlEditor.shortcuts.findAndReplace', {
+      defaultMessage: 'Find & replace',
+    }),
+    keys: [COMMAND_KEY, 'Shift', 'F'],
+  },
 ];
 const readOnlyShortcuts = shortcuts.filter(({ showInReadOnly }) => showInReadOnly);
 

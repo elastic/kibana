@@ -10,33 +10,19 @@ import {
   EuiAccordion,
   EuiBadge,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
   EuiNotificationBadge,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EsAssetReference } from '@kbn/fleet-plugin/common';
-
-const ES_TYPE_LABELS: Record<string, string> = {
-  index_template: 'Index template',
-  component_template: 'Component template',
-  ingest_pipeline: 'Ingest pipeline',
-  transform: 'Transform',
-  ml_model: 'ML model',
-  data_stream_ilm_policy: 'ILM policy',
-  ilm_policy: 'ILM policy',
-};
-
-function esTypeLabel(type: string): string {
-  return ES_TYPE_LABELS[type] ?? type;
-}
+import { AssetTitleMap } from '@kbn/fleet-plugin/public';
+import type { EnrichedEsAsset } from './use_installed_content';
+import { AssetRow } from './asset_row';
 
 interface RequiredAssetsProps {
-  esAssets: EsAssetReference[];
+  esAssets: EnrichedEsAsset[];
 }
 
 export function RequiredAssets({ esAssets }: RequiredAssetsProps) {
@@ -70,34 +56,23 @@ export function RequiredAssets({ esAssets }: RequiredAssetsProps) {
     >
       <EuiSpacer size="s" />
       {esAssets.map((asset) => {
-        const typeLabel = esTypeLabel(asset.type);
+        const typeLabel = AssetTitleMap[asset.type as keyof typeof AssetTitleMap] ?? asset.type;
         return (
           <React.Fragment key={asset.id}>
-            <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
-              <EuiFlexGroup
-                alignItems="center"
-                justifyContent="spaceBetween"
-                gutterSize="s"
-                responsive={false}
-              >
-                <EuiFlexItem>
-                  <EuiText size="s">
-                    <strong>{asset.id}</strong>
-                  </EuiText>
-                  <EuiText size="xs" color="subdued">
-                    {typeLabel}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge iconType="lock" color="hollow">
-                    <FormattedMessage
-                      id="xpack.ingestHub.detectAndReviewStep.installedContent.requiredAssets.badge"
-                      defaultMessage="Required"
-                    />
-                  </EuiBadge>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
+            <AssetRow
+              id={asset.id}
+              title={asset.id}
+              subLabel={typeLabel}
+              appLink={asset.appLink}
+              badge={
+                <EuiBadge iconType="lock" color="hollow">
+                  <FormattedMessage
+                    id="xpack.ingestHub.detectAndReviewStep.installedContent.requiredAssets.badge"
+                    defaultMessage="Required"
+                  />
+                </EuiBadge>
+              }
+            />
             <EuiSpacer size="xs" />
           </React.Fragment>
         );

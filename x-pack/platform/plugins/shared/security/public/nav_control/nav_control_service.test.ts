@@ -58,8 +58,8 @@ describe('SecurityNavControlService', () => {
     });
 
     navControlService.start({ core: coreStart, authc });
-    expect(coreStart.chrome.next.userMenu.set).toHaveBeenCalledTimes(1);
-    const [content] = coreStart.chrome.next.userMenu.set.mock.calls[0];
+    expect(coreStart.chrome.controls.userMenu.set).toHaveBeenCalledTimes(1);
+    const [content] = coreStart.chrome.controls.userMenu.set.mock.calls[0];
 
     expect(React.isValidElement(content)).toBe(true);
   });
@@ -77,11 +77,11 @@ describe('SecurityNavControlService', () => {
 
     navControlService.start({ core: coreStart, authc });
 
-    expect(coreStart.chrome.next.userMenu.set).not.toHaveBeenCalled();
+    expect(coreStart.chrome.controls.userMenu.set).not.toHaveBeenCalled();
 
     license$.next(validLicense);
 
-    expect(coreStart.chrome.next.userMenu.set).toHaveBeenCalled();
+    expect(coreStart.chrome.controls.userMenu.set).toHaveBeenCalled();
   });
 
   it('should not register the user menu for anonymous paths', () => {
@@ -98,7 +98,7 @@ describe('SecurityNavControlService', () => {
     coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
     navControlService.start({ core: coreStart, authc });
 
-    expect(coreStart.chrome.next.userMenu.set).not.toHaveBeenCalled();
+    expect(coreStart.chrome.controls.userMenu.set).not.toHaveBeenCalled();
   });
 
   it('should only register the user menu once', () => {
@@ -114,13 +114,13 @@ describe('SecurityNavControlService', () => {
 
     navControlService.start({ core: coreStart, authc });
 
-    expect(coreStart.chrome.next.userMenu.set).toHaveBeenCalledTimes(1);
+    expect(coreStart.chrome.controls.userMenu.set).toHaveBeenCalledTimes(1);
 
     // trigger license change
     license$.next({} as ILicense);
     license$.next(validLicense);
 
-    expect(coreStart.chrome.next.userMenu.set).toHaveBeenCalledTimes(1);
+    expect(coreStart.chrome.controls.userMenu.set).toHaveBeenCalledTimes(1);
   });
 
   it('should allow for re-registration if the service is restarted', () => {
@@ -136,12 +136,12 @@ describe('SecurityNavControlService', () => {
 
     navControlService.start({ core: coreStart, authc });
 
-    expect(coreStart.chrome.next.userMenu.set).toHaveBeenCalledTimes(1);
+    expect(coreStart.chrome.controls.userMenu.set).toHaveBeenCalledTimes(1);
 
     navControlService.stop();
 
     navControlService.start({ core: coreStart, authc });
-    expect(coreStart.chrome.next.userMenu.set).toHaveBeenCalledTimes(2);
+    expect(coreStart.chrome.controls.userMenu.set).toHaveBeenCalledTimes(2);
   });
 
   describe(`#start`, () => {

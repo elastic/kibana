@@ -31,6 +31,7 @@ import { EndpointField } from './endpoint_field';
 import { MoreEndpointsPopover } from './more_endpoints_popover';
 import { useApiEndpoints } from './use_api_endpoints';
 import { useApiKeys } from './use_api_keys';
+import { useIngestReceiptToast } from './use_ingest_receipt_toast';
 import { SecurityCallout } from './security_callout';
 import { useSecurityCalloutDismissal } from './use_security_callout_dismissal';
 
@@ -51,9 +52,15 @@ export const ApiEndpoints = ({ titleTag: TitleTag = 'h3' }: ApiEndpointsProps) =
   } = useKibana<ObservabilityOnboardingAppServices>();
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
 
-  const { endpoints, popoverEndpoints, isLoading, isError } = useApiEndpoints();
-  const { encodedApiKeys, keyCreatedBeforeByEndpointId, creatingEndpointId, createApiKey } =
-    useApiKeys();
+  const { endpoints, popoverEndpoints, isLoading, isError, isForbidden } = useApiEndpoints();
+  const {
+    encodedApiKeys,
+    apiKeyIds,
+    keyCreatedBeforeByEndpointId,
+    creatingEndpointId,
+    createApiKey,
+  } = useApiKeys();
+  useIngestReceiptToast(apiKeyIds);
   const { dismissedByEndpointId, dismissCallout } = useSecurityCalloutDismissal();
   const canCreateApiKey = Boolean(application.capabilities.api_keys?.save);
   const [selectedEndpointId, setSelectedEndpointId] = useState<string | undefined>(undefined);
@@ -173,7 +180,7 @@ export const ApiEndpoints = ({ titleTag: TitleTag = 'h3' }: ApiEndpointsProps) =
               </EuiLink>
             )}
           </EuiFlexGroup>
-          {isError && (
+          {(isError || isForbidden) && (
             <>
               <EuiSpacer size="m" />
               <EuiCallOut
@@ -181,14 +188,28 @@ export const ApiEndpoints = ({ titleTag: TitleTag = 'h3' }: ApiEndpointsProps) =
                 color="warning"
                 iconType="warning"
                 size="s"
-                title={i18n.translate(
-                  'xpack.observability_onboarding.apiEndpoints.fetchErrorTitle',
-                  {
-                    defaultMessage:
-                      'Could not load endpoint details. Refresh the page to try again.',
-                  }
-                )}
-                data-test-subj="observabilityOnboardingApiEndpointsFetchError"
+                title={
+                  isForbidden
+                    ? i18n.translate(
+                        'xpack.observability_onboarding.apiEndpoints.noViewPermissionTitle',
+                        {
+                          defaultMessage:
+                            "You don't have permission to view endpoint details. Contact your administrator.",
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.observability_onboarding.apiEndpoints.fetchErrorTitle',
+                        {
+                          defaultMessage:
+                            'Could not load endpoint details. Refresh the page to try again.',
+                        }
+                      )
+                }
+                data-test-subj={
+                  isForbidden
+                    ? 'observabilityOnboardingApiEndpointsNoViewPermission'
+                    : 'observabilityOnboardingApiEndpointsFetchError'
+                }
               />
             </>
           )}

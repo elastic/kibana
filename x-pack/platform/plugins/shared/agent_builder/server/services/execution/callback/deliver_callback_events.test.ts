@@ -11,14 +11,26 @@ import {
   AgentBuilderErrorCode,
   AgentExecutionMode,
   ChatEventType,
+  ConversationOriginType,
   createRequestAbortedError,
+  TimelineEventType,
   type ChatEvent,
+  type RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
+import type { AttachmentServiceStart } from '../../attachments';
+import { SurfacesServiceImpl } from '../../surfaces';
 import type { CallbackDeliveryService } from './callback_delivery_service';
 import { deliverCallbackEvents } from './deliver_callback_events';
 
 const callbackUrl = 'https://callback.example.com/v1/events?token=abc';
+const getTypeDefinition = jest.fn();
+const surfacesDeps = {
+  surfacesService: new SurfacesServiceImpl({
+    attachmentsService: { getTypeDefinition } as unknown as AttachmentServiceStart,
+    logger: loggerMock.create(),
+  }),
+};
 const createConversationExecution = (url: string | null = callbackUrl): AgentExecution =>
   ({
     executionId: 'execution-1',
@@ -28,6 +40,20 @@ const createConversationExecution = (url: string | null = callbackUrl): AgentExe
       ...(url ? { callback: { url } } : {}),
     },
   } as unknown as AgentExecution);
+const createSlackExecution = (): AgentExecution => {
+  const execution = createConversationExecution();
+
+  return {
+    ...execution,
+    agentParams: {
+      ...execution.agentParams,
+      origin: {
+        type: ConversationOriginType.Slack,
+        external_conversation_id: 'team:T1/channel:C1/thread:1',
+      },
+    },
+  } as AgentExecution;
+};
 const createStandaloneExecution = (): AgentExecution =>
   ({
     executionId: 'execution-1',
@@ -49,20 +75,62 @@ const createMessageChunkEvent = (text: string): ChatEvent =>
     data: { text_chunk: text, message_id: 'message-1' },
   } as ChatEvent);
 
-const createRoundCompleteEvent = (): ChatEvent =>
+const createRoundCompleteEvent = (message = 'Hello', attachments: unknown[] = []): ChatEvent =>
   ({
     type: ChatEventType.roundComplete,
-    data: { round: { id: 'round-1' } },
+    data: {
+      round: { id: 'round-1', input: { message: 'hello' }, response: { message } },
+      attachments,
+    },
+  } as unknown as ChatEvent);
+
+const createExecutionStartedEvent = (): ChatEvent =>
+  ({
+    id: 'round-1::execution_started',
+    type: TimelineEventType.executionStarted,
+    created_at: '2024-01-01T00:00:00.000Z',
+    actor: { type: 'agent', id: 'agent-1' },
+    execution_id: 'round-1::execution',
+    trigger_event_id: 'round-1::user_message',
+    data: { trigger_type: 'user_message' },
+  } as unknown as ChatEvent);
+
+const createExecutionTerminatedEvent = (): ChatEvent =>
+  ({
+    id: 'round-1::execution_terminated',
+    type: TimelineEventType.executionTerminated,
+    created_at: '2024-01-01T00:00:00.000Z',
+    actor: { type: 'agent', id: 'agent-1' },
+    execution_id: 'round-1::execution',
+    trigger_event_id: 'round-1::user_message',
+    data: {},
+  } as unknown as ChatEvent);
+
+const createExecutionFailedEvent = (): ChatEvent =>
+  ({
+    id: 'round-1::execution_failed',
+    type: TimelineEventType.executionFailed,
+    created_at: '2024-01-01T00:00:01.000Z',
+    actor: { type: 'agent', id: 'agent-1' },
+    execution_id: 'round-1::execution',
+    trigger_event_id: 'round-1::user_message',
+    data: { time_to_last_token: 1, error: { code: 'internalError', message: 'boom' } },
+  } as unknown as ChatEvent);
+
+const createExecutionAbortedEvent = (): ChatEvent =>
+  ({
+    id: 'round-1::execution_aborted',
+    type: TimelineEventType.executionAborted,
+    created_at: '2024-01-01T00:00:01.000Z',
+    actor: { type: 'agent', id: 'agent-1' },
+    execution_id: 'round-1::execution',
+    trigger_event_id: 'round-1::user_message',
+    data: { time_to_last_token: 1 },
   } as unknown as ChatEvent);
 
 const createCallbackDeliveryServiceMock = () => {
   const transport = jest.fn().mockResolvedValue({ status: 200 });
   const service = {
-    getCallbackUrl: jest.fn((execution: AgentExecution) =>
-      execution.executionMode === AgentExecutionMode.conversation
-        ? execution.agentParams.callback?.url
-        : undefined
-    ),
     validateCallbackUrl: jest.fn(),
     createTransport: jest.fn().mockReturnValue(transport),
     makeCallbackRequest: jest.fn().mockResolvedValue(undefined),
@@ -83,6 +151,7 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(null),
       events$,
       callbackDeliveryService: service,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -97,14 +166,14 @@ describe('deliverCallbackEvents', () => {
       execution: createStandaloneExecution(),
       events$: of(createReasoningEvent('hello')),
       callbackDeliveryService: service,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
     expect(service.makeCallbackRequest).not.toHaveBeenCalled();
   });
 
-  it('logs and resolves without subscribing when the callback URL fails validation', async () => {
-    const logger = loggerMock.create();
+  it('resolves without subscribing when the callback URL fails validation', async () => {
     const { service } = createCallbackDeliveryServiceMock();
     service.validateCallbackUrl.mockImplementation(() => {
       throw new Error('target url is not added to the Kibana config xpack.actions.allowedHosts');
@@ -114,13 +183,11 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(),
       events$: of(createReasoningEvent('hello')),
       callbackDeliveryService: service,
-      logger,
+      ...surfacesDeps,
+      logger: loggerMock.create(),
     });
 
     expect(service.makeCallbackRequest).not.toHaveBeenCalled();
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('not added to the Kibana config xpack.actions.allowedHosts')
-    );
   });
 
   it('delivers one running envelope per event, in order, through a single request function', async () => {
@@ -135,6 +202,7 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(),
       events$: of(...events),
       callbackDeliveryService: service,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -155,9 +223,11 @@ describe('deliverCallbackEvents', () => {
     );
   });
 
-  it('filters out message_chunk events and delivers the rest', async () => {
+  it('filters out message_chunk + execution_started + execution_terminated events and delivers the rest', async () => {
     const { service } = createCallbackDeliveryServiceMock();
     const reasoningEvent = createReasoningEvent('progress');
+    const executionStartedEvent = createExecutionStartedEvent();
+    const executionTerminatedEvent = createExecutionTerminatedEvent();
     const roundCompleteEvent = createRoundCompleteEvent();
 
     await deliverCallbackEvents({
@@ -166,9 +236,12 @@ describe('deliverCallbackEvents', () => {
         createMessageChunkEvent('chunk one'),
         reasoningEvent,
         createMessageChunkEvent('chunk two'),
+        executionStartedEvent,
+        executionTerminatedEvent,
         roundCompleteEvent
       ),
       callbackDeliveryService: service,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -178,6 +251,12 @@ describe('deliverCallbackEvents', () => {
 
     expect(deliveredEvents).toEqual([reasoningEvent, roundCompleteEvent]);
     expect(deliveredEvents.some((event) => event.type === ChatEventType.messageChunk)).toBe(false);
+    expect(deliveredEvents.some((event) => event.type === TimelineEventType.executionStarted)).toBe(
+      false
+    );
+    expect(
+      deliveredEvents.some((event) => event.type === TimelineEventType.executionTerminated)
+    ).toBe(false);
   });
 
   it('retries only round_complete events; other events are delivered at-most-once', async () => {
@@ -189,6 +268,7 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(),
       events$: of(progressEvent, roundCompleteEvent),
       callbackDeliveryService: service,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -221,6 +301,7 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(),
       events$: of(roundCompleteEvent, laterEvent),
       callbackDeliveryService: service,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -229,6 +310,108 @@ describe('deliverCallbackEvents', () => {
     );
 
     expect(deliveredEvents).toEqual([laterEvent, roundCompleteEvent]);
+  });
+
+  it('adds the Slack surface payload to round_complete for Slack rounds', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const reasoningEvent = createReasoningEvent('thinking');
+    const roundCompleteEvent = createRoundCompleteEvent('There are **3** alerts.');
+
+    await deliverCallbackEvents({
+      execution: createSlackExecution(),
+      events$: of(reasoningEvent, roundCompleteEvent),
+      callbackDeliveryService: service,
+      ...surfacesDeps,
+      logger: loggerMock.create(),
+    });
+
+    const deliveredEvents = service.makeCallbackRequest.mock.calls.map(
+      ([{ payload }]) => (payload as { event: ChatEvent }).event
+    );
+
+    expect(deliveredEvents).toEqual([
+      reasoningEvent,
+      {
+        ...roundCompleteEvent,
+        surface_payload: {
+          text: expect.any(String),
+          blocks: [
+            {
+              type: 'rich_text',
+              elements: [
+                {
+                  type: 'rich_text_section',
+                  elements: [
+                    { type: 'text', text: 'There are ' },
+                    { type: 'text', text: '3', style: { bold: true } },
+                    { type: 'text', text: ' alerts.' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      },
+    ]);
+    expect(roundCompleteEvent).not.toHaveProperty('surface_payload');
+  });
+
+  it('renders attachments through their type mapping, and leaves out the others', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const textAttachment = {
+      id: 'a1',
+      type: 'text',
+      current_version: 1,
+      versions: [
+        { version: 1, data: { content: 'Attached note' }, created_at: '', content_hash: '' },
+      ],
+    };
+    getTypeDefinition.mockImplementation((type: string) =>
+      type === 'text'
+        ? {
+            toSurfaceComposition: ({ content }: { content: string }) => ({
+              type: 'view',
+              body: [{ type: 'markdown', text: content }],
+            }),
+          }
+        : undefined
+    );
+
+    await deliverCallbackEvents({
+      execution: createSlackExecution(),
+      events$: of(
+        createRoundCompleteEvent(
+          'Note: <render_attachment id="a1" /> Missing: <render_attachment id="a2" />',
+          [textAttachment]
+        )
+      ),
+      callbackDeliveryService: service,
+      ...surfacesDeps,
+      logger: loggerMock.create(),
+    });
+
+    const [[{ payload }]] = service.makeCallbackRequest.mock.calls;
+    const slack = JSON.stringify((payload as { event: RoundCompleteEvent }).event.surface_payload);
+
+    expect(slack).toContain('Attached note');
+    expect(slack).not.toContain('render_attachment');
+  });
+
+  it('does not add a surface payload to rounds without an origin', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const roundCompleteEvent = createRoundCompleteEvent();
+
+    await deliverCallbackEvents({
+      execution: createConversationExecution(),
+      events$: of(roundCompleteEvent),
+      callbackDeliveryService: service,
+      ...surfacesDeps,
+      logger: loggerMock.create(),
+    });
+
+    expect(service.makeCallbackRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ payload: expect.objectContaining({ event: roundCompleteEvent }) })
+    );
   });
 
   it('does not deliver round_complete when the stream errors after it, sending a failure instead', async () => {
@@ -242,6 +425,7 @@ describe('deliverCallbackEvents', () => {
         throwError(() => new Error('persistence boom'))
       ),
       callbackDeliveryService: service,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -279,14 +463,14 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(),
       events$: of(createReasoningEvent('one'), createReasoningEvent('two')),
       callbackDeliveryService: service,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
     expect(calls).toEqual(['start:one', 'end:one', 'start:two', 'end:two']);
   });
 
-  it('logs and continues with the next event when a delivery fails', async () => {
-    const logger = loggerMock.create();
+  it('continues with the next event when a delivery fails', async () => {
     const { service } = createCallbackDeliveryServiceMock();
     service.makeCallbackRequest
       .mockRejectedValueOnce(new Error('Callback delivery failed with status 400'))
@@ -297,13 +481,11 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(),
       events$: of(...events),
       callbackDeliveryService: service,
-      logger,
+      ...surfacesDeps,
+      logger: loggerMock.create(),
     });
 
     expect(service.makeCallbackRequest).toHaveBeenCalledTimes(2);
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Callback delivery failed with status 400')
-    );
   });
 
   it('delivers a failure payload with a failure error code when the stream errors', async () => {
@@ -316,6 +498,7 @@ describe('deliverCallbackEvents', () => {
         throwError(() => new Error('agent boom'))
       ),
       callbackDeliveryService: service,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -334,6 +517,56 @@ describe('deliverCallbackEvents', () => {
     });
   });
 
+  it('never delivers execution_failed as an event: the failure callback is the single terminal representation', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const reasoning = createReasoningEvent('progress');
+
+    await deliverCallbackEvents({
+      execution: createConversationExecution(),
+      events$: concat(
+        of(reasoning, createExecutionFailedEvent()),
+        throwError(() => new Error('agent boom'))
+      ),
+      callbackDeliveryService: service,
+      ...surfacesDeps,
+      logger: loggerMock.create(),
+    });
+
+    const payloads = service.makeCallbackRequest.mock.calls.map(([{ payload }]) => payload);
+    const delivered = payloads
+      .filter((payload) => 'event' in payload)
+      .map((payload) => (payload as { event: ChatEvent }).event);
+    expect(delivered).toEqual([reasoning]);
+    const failures = payloads.filter((payload) => 'error' in payload);
+    expect(failures).toHaveLength(1);
+    expect(failures[0]).toMatchObject({ error: { message: 'agent boom' } });
+  });
+
+  it('never delivers execution_aborted as an event: exactly one failure callback with requestAborted', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const reasoning = createReasoningEvent('progress');
+
+    await deliverCallbackEvents({
+      execution: createConversationExecution(),
+      events$: concat(
+        of(reasoning, createExecutionAbortedEvent()),
+        throwError(() => createRequestAbortedError('request aborted'))
+      ),
+      callbackDeliveryService: service,
+      ...surfacesDeps,
+      logger: loggerMock.create(),
+    });
+
+    const payloads = service.makeCallbackRequest.mock.calls.map(([{ payload }]) => payload);
+    const delivered = payloads
+      .filter((payload) => 'event' in payload)
+      .map((payload) => (payload as { event: ChatEvent }).event);
+    expect(delivered).toEqual([reasoning]);
+    const failures = payloads.filter((payload) => 'error' in payload);
+    expect(failures).toHaveLength(1);
+    expect(failures[0]).toMatchObject({ error: { code: AgentBuilderErrorCode.requestAborted } });
+  });
+
   it('delivers a failure payload with the requestAborted error code for aborts', async () => {
     const { service, transport } = createCallbackDeliveryServiceMock();
 
@@ -341,6 +574,7 @@ describe('deliverCallbackEvents', () => {
       execution: createConversationExecution(),
       events$: throwError(() => createRequestAbortedError('request aborted')),
       callbackDeliveryService: service,
+      ...surfacesDeps,
       logger: loggerMock.create(),
     });
 
@@ -360,7 +594,6 @@ describe('deliverCallbackEvents', () => {
   });
 
   it('resolves even when the failure delivery fails', async () => {
-    const logger = loggerMock.create();
     const { service } = createCallbackDeliveryServiceMock();
     service.makeCallbackRequest.mockRejectedValue(new Error('callback failed'));
 
@@ -369,9 +602,9 @@ describe('deliverCallbackEvents', () => {
         execution: createConversationExecution(),
         events$: throwError(() => new Error('agent boom')),
         callbackDeliveryService: service,
-        logger,
+        ...surfacesDeps,
+        logger: loggerMock.create(),
       })
     ).resolves.toBeUndefined();
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('callback failed'));
   });
 });

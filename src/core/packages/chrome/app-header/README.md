@@ -33,8 +33,7 @@ small for pages with sticky or shared top-nav constraints while still using the 
 Use `useChromeAppHeaderRegistration` only for lower-level wrappers that need to compose registration
 with other hooks. Most apps should use `ChromeAppHeaderRegistration`.
 
-Use deprecated `chrome.next.appHeader.set` only when a React adapter is not practical. It is the
-imperative primitive behind the React APIs.
+Do not register app-header state through `core.chrome`. Use the React adapters in this package.
 
 ## Migrating route headers
 
@@ -94,7 +93,7 @@ back from breadcrumbs, mount:
 migration over long-lived suppression.
 
 Tri-state `back` lives only on chrome registration (`ChromeAppHeaderConfig` via
-`ChromeAppHeaderRegistration` / `chrome.next.appHeader.set`). The rendered `AppHeader` component
+`ChromeAppHeaderRegistration`). The rendered `AppHeader` component
 does not accept `false`:
 
 - value — explicit chrome back (no breadcrumb fallback)
@@ -104,6 +103,19 @@ does not accept `false`:
 Do not register `{ back: false }` separately from another app-header config on the same route —
 `set` replaces the whole config. Prefer combining fields on one registration, or use
 `SuppressChromeBackButton` when suppression is the only registration.
+
+## Page announcements
+
+Chrome Next announces the `AppHeader` / `ChromeAppHeaderRegistration` title, plus the same
+brand suffix as classic (`customBranding.pageTitle` or `Elastic`). Do not put breadcrumbs
+or that suffix in the header title itself; Chrome appends it.
+
+`AppHeaderLoading` owns the header slot without a title, so a registered chrome-owned title is
+not announced while it is mounted. Unmigrated routes fall back to the document title, then the
+active nav item. Project breadcrumbs are never announced.
+
+Classic Chrome still announces its visible breadcrumb trail. Back navigation is separate; see
+[Back navigation](#back-navigation).
 
 ## Discover tabs
 

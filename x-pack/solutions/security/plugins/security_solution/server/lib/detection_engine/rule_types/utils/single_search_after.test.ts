@@ -123,4 +123,57 @@ describe('singleSearchAfter', () => {
       { consoleLogLevel: 'warn' }
     );
   });
+
+  test('if singleSearchAfter returns failures reported only per cluster as warnings', async () => {
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce({
+      took: 10,
+      timed_out: false,
+      _shards: {
+        total: 0,
+        successful: 0,
+        failed: 0,
+        skipped: 0,
+      },
+      _clusters: {
+        total: 2,
+        successful: 1,
+        skipped: 1,
+        running: 0,
+        partial: 0,
+        failed: 0,
+        details: {
+          kayak: {
+            status: 'skipped',
+            indices: 'logs-a-*',
+            timed_out: false,
+            failures: [
+              {
+                shard: -1,
+                index: 'kayak:logs-a-000001',
+                node: 'node-1',
+                reason: {
+                  type: 'security_exception',
+                  reason: 'action [indices:data/read/search] is unauthorized',
+                },
+              },
+            ],
+          },
+        },
+      },
+      hits: {
+        total: 0,
+        max_score: 0,
+        hits: [],
+      },
+    });
+    const { searchErrors, searchWarnings } = await singleSearchAfter({
+      searchRequest: mockSearchRequest,
+      services: mockService,
+      ruleExecutionLogger,
+    });
+    expect(searchErrors).toEqual([]);
+    expect(searchWarnings).toEqual([
+      'Cluster "kayak" is "skipped" and its data may be missing from this rule run: index: "kayak:logs-a-000001" reason: "action [indices:data/read/search] is unauthorized" type: "security_exception"',
+    ]);
+  });
 });

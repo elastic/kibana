@@ -6,7 +6,7 @@
  */
 
 import type { EvaluationResult, Evaluator } from '@kbn/evals';
-import type { DashboardAgentTaskOutput, DashboardDatasetExample } from './evaluate_dataset';
+import type { DashboardAgentTaskOutput, DashboardDatasetExample } from './types';
 
 const DASHBOARD_GENERATE_TOOL_ID = 'platform.dashboard.generate_dashboard';
 
@@ -22,7 +22,7 @@ export const getSkillReadPaths = (output: DashboardAgentTaskOutput): string[] =>
       continue;
     }
 
-    if (step.tool_id === 'filestore.read') {
+    if (step.tool_id === 'read_file' || step.tool_id === 'filestore.read') {
       const params = step.params as { path?: string } | undefined;
       if (params?.path) {
         paths.push(params.path);
@@ -65,9 +65,7 @@ export const getToolIds = (output: DashboardAgentTaskOutput): string[] => {
 };
 
 const didLoadDashboardSkill = (output: DashboardAgentTaskOutput): boolean =>
-  getLowerCaseSkillPaths(output).some(
-    (path) => path.includes('dashboard') || path.includes('dashboard-management')
-  );
+  getLowerCaseSkillPaths(output).some((path) => path.includes('dashboard'));
 
 const didLoadVisualizationSkill = (output: DashboardAgentTaskOutput): boolean =>
   getLowerCaseSkillPaths(output).some(
@@ -153,8 +151,8 @@ export const dashboardSkillNotActivatedEvaluator: Evaluator<
       score: passed ? 1 : 0,
       label: passed ? 'PASS' : 'FAIL',
       explanation: passed
-        ? `Dashboard management was not used. Paths: ${skillReadPaths.join(', ') || 'n/a'}`
-        : `Expected no dashboard management. dashboardSkillLoaded=${dashboardSkillLoaded}, dashboardToolCalled=${dashboardToolCalled}. Paths: ${
+        ? `Dashboards skill was not used. Paths: ${skillReadPaths.join(', ') || 'n/a'}`
+        : `Expected no dashboards skill. dashboardSkillLoaded=${dashboardSkillLoaded}, dashboardToolCalled=${dashboardToolCalled}. Paths: ${
             skillReadPaths.join(', ') || 'none'
           }. Tool IDs: ${toolIds.join(', ') || 'none'}`,
       metadata: {

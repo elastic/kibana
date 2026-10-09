@@ -15,7 +15,9 @@ const logger = createStepLogger();
 
 describe('FetchPoliciesStep', () => {
   let npSoService: ActionPolicySavedObjectService;
-  let mockFindAllDecrypted: jest.SpyInstance;
+  let mockFindAllDecrypted: ReturnType<
+    typeof createActionPolicySavedObjectService
+  >['mockFindAllDecrypted'];
 
   beforeEach(() => {
     ({ actionPolicySavedObjectService: npSoService, mockFindAllDecrypted } =
@@ -31,9 +33,9 @@ describe('FetchPoliciesStep', () => {
         attributes: {
           name: 'Policy 1',
           description: 'Test',
+          enabled: true,
           destinations: [{ type: 'workflow' as const, id: 'w1' }],
           matcher: null,
-          groupBy: null,
           throttle: null,
           apiKey: 'decrypted-key',
           apiKeyOwner: 'elastic',
@@ -56,8 +58,7 @@ describe('FetchPoliciesStep', () => {
     expect(policy?.name).toBe('Policy 1');
     expect(policy?.apiKey).toBe('decrypted-key');
     expect(policy?.matcher).toBeUndefined();
-    expect(policy?.groupBy).toEqual([]);
-    expect(policy?.tags).toEqual([]);
+    expect(policy?.grouping).toEqual({ mode: 'per_alert' });
     expect(policy?.throttle).toBeUndefined();
     expect(policy?.snoozedUntil).toBeNull();
 
@@ -93,13 +94,15 @@ describe('FetchPoliciesStep', () => {
     );
   });
 
-  it('surfaces the matcher used to scope a policy to a rule', async () => {
+  it('surfaces both clauses of a structured matcher', async () => {
     mockFindAllDecrypted.mockResolvedValue([
       {
         id: 'p-scoped',
         attributes: {
           name: 'Scoped',
-          matcher: 'rule.id: "rule-7"',
+          description: 'Test',
+          enabled: true,
+          matcher: { tags: ['prod'], expression: 'data.severity: "critical"' },
           destinations: [{ type: 'workflow' as const, id: 'w1' }],
           apiKey: 'k',
           apiKeyOwner: 'elastic',
@@ -116,7 +119,7 @@ describe('FetchPoliciesStep', () => {
 
     if (result.type !== 'continue') throw new Error('expected continue');
     const policy = result.data?.policies?.get('p-scoped');
-    expect(policy?.matcher).toBe('rule.id: "rule-7"');
+    expect(policy?.matcher).toEqual({ tags: ['prod'], expression: 'data.severity: "critical"' });
   });
 
   it('fetches multiple policies', async () => {
@@ -125,6 +128,8 @@ describe('FetchPoliciesStep', () => {
         id: 'p1',
         attributes: {
           name: 'Policy 1',
+          description: 'Test',
+          enabled: true,
           destinations: [{ type: 'workflow' as const, id: 'w1' }],
           apiKey: 'key-1',
           apiKeyOwner: 'elastic',
@@ -139,6 +144,8 @@ describe('FetchPoliciesStep', () => {
         id: 'p2',
         attributes: {
           name: 'Policy 2',
+          description: 'Test',
+          enabled: true,
           destinations: [],
           apiKey: 'key-2',
           apiKeyOwner: 'elastic',

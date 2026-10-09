@@ -29,8 +29,6 @@ import { AttachmentType } from '../../../../common/types/domain';
 import type { ConfigType } from '../../../config';
 import { V2_NOOP_ATTACHMENTS_WRITER } from '../../../cases_analytics_v2';
 
-const mode = 'legacy';
-
 describe('AttachmentService getter', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
@@ -47,6 +45,20 @@ describe('AttachmentService getter', () => {
       // this in lockstep with the writer contract instead of a hand-rolled stub.
       analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
     });
+  const asUnifiedUserAttachment = (so = createUserAttachment()) => ({
+    ...so,
+    attributes: {
+      type: 'comment',
+      data: { content: so.attributes.comment },
+      owner: so.attributes.owner,
+      created_at: so.attributes.created_at,
+      created_by: so.attributes.created_by,
+      pushed_at: so.attributes.pushed_at,
+      pushed_by: so.attributes.pushed_by,
+      updated_at: so.attributes.updated_at,
+      updated_by: so.attributes.updated_by,
+    },
+  });
   let attachmentGetter: AttachmentGetter;
 
   beforeEach(async () => {
@@ -66,7 +78,7 @@ describe('AttachmentService getter', () => {
           ] as unknown as SavedObjectsBulkResponse['saved_objects'],
         });
 
-        await expect(attachmentGetter.bulkGet(['1'], mode)).resolves.not.toThrow();
+        await expect(attachmentGetter.bulkGet(['1'])).resolves.not.toThrow();
       });
 
       it('surfaces the legacy not-found error per id when FF is off and no SO type hits', async () => {
@@ -92,12 +104,12 @@ describe('AttachmentService getter', () => {
           ] as unknown as SavedObjectsBulkResponse['saved_objects'],
         });
 
-        const res = await attachmentGetter.bulkGet(['1', 'missing-id'], mode);
+        const res = await attachmentGetter.bulkGet(['1', 'missing-id']);
 
         // The success at id 1 is kept; the duplicate not-founds at `missing-id`
         // collapse to a single error. FF is off, so the surfaced error comes
         // from the legacy (`cases-comments`) bucket to match where new writes go.
-        expect(res.saved_objects).toEqual([createUserAttachment(), legacyNotFoundForMissing]);
+        expect(res.saved_objects).toEqual([asUnifiedUserAttachment(), legacyNotFoundForMissing]);
       });
 
       it('surfaces the unified not-found error per id when FF is on and no SO type hits', async () => {
@@ -117,7 +129,7 @@ describe('AttachmentService getter', () => {
           ] as unknown as SavedObjectsBulkResponse['saved_objects'],
         });
 
-        const res = await attachmentGetterWithFlagOn.bulkGet(['missing-id'], mode);
+        const res = await attachmentGetterWithFlagOn.bulkGet(['missing-id']);
 
         // FF is on → surfaced error comes from the unified (`cases-attachments`)
         // bucket since that's where new writes go.
@@ -147,9 +159,9 @@ describe('AttachmentService getter', () => {
           saved_objects: [unifiedError, legacy, unifiedNotFound, legacyNotFound],
         });
 
-        const res = await attachmentGetterWithFlagOn.bulkGet(['1', '2'], mode);
+        const res = await attachmentGetterWithFlagOn.bulkGet(['1', '2']);
 
-        expect(res.saved_objects).toEqual([legacy, unifiedNotFound]);
+        expect(res.saved_objects).toEqual([asUnifiedUserAttachment(legacy), unifiedNotFound]);
       });
 
       it('strips excess fields', async () => {
@@ -160,11 +172,81 @@ describe('AttachmentService getter', () => {
           ] as unknown as SavedObjectsBulkResponse['saved_objects'],
         });
 
-        const res = await attachmentGetter.bulkGet(['1'], mode);
-        expect(res).toStrictEqual({ saved_objects: [createUserAttachment()] });
+        const res = await attachmentGetter.bulkGet(['1']);
+        expect(res).toStrictEqual({ saved_objects: [asUnifiedUserAttachment()] });
       });
 
-      it('returns migrated legacy events in unified shape when mode=unified', async () => {
+      it('returns a per-item error and logs a warning for an unrecognized attachment type', async () => {
+        const unrecognizedAttachment = createFileAttachment({
+          externalReferenceAttachmentTypeId: 'unknown-third-party-type',
+        });
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            { ...createErrorSO(CASE_ATTACHMENT_SAVED_OBJECT), id: '1' },
+            unrecognizedAttachment,
+          ] as unknown as SavedObjectsBulkResponse['saved_objects'],
+        });
+
+        const res = await attachmentGetter.bulkGet(['1']);
+
+        expect(res.saved_objects).toEqual([
+          {
+            id: unrecognizedAttachment.id,
+            type: unrecognizedAttachment.type,
+            references: unrecognizedAttachment.references,
+            error: {
+              error: 'Bad Request',
+              message: expect.stringContaining('is not recognized'),
+              statusCode: 400,
+            },
+          },
+        ]);
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(`Attachment ${unrecognizedAttachment.id}`)
+        );
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('which has no unified mapping')
+        );
+      });
+
+      it('returns a per-item error instead of throwing when a row fails the unified decode', async () => {
+        const userAttachment = createUserAttachment();
+        const junkTypeAttachment = {
+          ...userAttachment,
+          id: '2',
+          attributes: { ...userAttachment.attributes, type: 'junk' },
+        };
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            { ...createErrorSO(CASE_ATTACHMENT_SAVED_OBJECT), id: '1' },
+            userAttachment,
+            { ...createErrorSO(CASE_ATTACHMENT_SAVED_OBJECT), id: '2' },
+            junkTypeAttachment,
+          ] as unknown as SavedObjectsBulkResponse['saved_objects'],
+        });
+
+        const res = await attachmentGetter.bulkGet(['1', '2']);
+
+        expect(res.saved_objects).toEqual([
+          asUnifiedUserAttachment(),
+          {
+            id: '2',
+            type: junkTypeAttachment.type,
+            references: junkTypeAttachment.references,
+            error: {
+              error: 'Bad Request',
+              message: expect.stringMatching(/^Attachment type "junk" failed validation: .+/),
+              statusCode: 400,
+            },
+          },
+        ]);
+        expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringMatching(/^Attachment 2 .*which failed unified decode: .+\. Returning/)
+        );
+      });
+
+      it('returns legacy events in unified shape', async () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
             { ...createErrorSO(CASE_ATTACHMENT_SAVED_OBJECT), id: '1' },
@@ -192,7 +274,7 @@ describe('AttachmentService getter', () => {
           ] as unknown as SavedObjectsBulkResponse['saved_objects'],
         });
 
-        const res = await attachmentGetter.bulkGet(['1'], 'unified');
+        const res = await attachmentGetter.bulkGet(['1']);
 
         expect(res.saved_objects).toEqual([
           expect.objectContaining({
@@ -207,7 +289,7 @@ describe('AttachmentService getter', () => {
         ]);
       });
 
-      it('returns migrated legacy file externalReference in unified shape when mode=unified', async () => {
+      it('returns legacy file externalReference in unified shape', async () => {
         const legacyFile = createFileAttachment({
           externalReferenceMetadata: {
             files: [
@@ -228,7 +310,7 @@ describe('AttachmentService getter', () => {
           ] as unknown as SavedObjectsBulkResponse['saved_objects'],
         });
 
-        const res = await attachmentGetter.bulkGet(['1'], 'unified');
+        const res = await attachmentGetter.bulkGet(['1']);
 
         expect(res.saved_objects).toEqual([
           expect.objectContaining({
@@ -253,7 +335,7 @@ describe('AttachmentService getter', () => {
         ]);
       });
 
-      it('throws when the response is missing the attributes.comment field', async () => {
+      it('maps a missing comment field to empty unified content', async () => {
         const invalidAttachment = createUserAttachment();
         unset(invalidAttachment, 'attributes.comment');
 
@@ -264,10 +346,14 @@ describe('AttachmentService getter', () => {
           ] as unknown as SavedObjectsBulkResponse['saved_objects'],
         });
 
-        await expect(
-          attachmentGetter.bulkGet(['1'], mode)
-        ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
+        const res = await attachmentGetter.bulkGet(['1']);
+        expect(res.saved_objects[0]).toEqual(
+          expect.objectContaining({
+            attributes: expect.objectContaining({
+              type: 'comment',
+              data: { content: '' },
+            }),
+          })
         );
       });
     });
@@ -344,18 +430,21 @@ describe('AttachmentService getter', () => {
         ]);
       });
 
-      it('throws when the response is missing the attributes.alertId field', async () => {
-        const invalidAlert = { ...createAlertAttachment(), score: 0 };
+      it('skips a row missing the attributes.alertId field and logs a warning', async () => {
+        const invalidAlert = { ...createAlertAttachment(), id: 'invalid-alert', score: 0 };
         unset(invalidAlert, 'attributes.alertId');
-        const soFindRes = createSOFindResponse([invalidAlert]);
+        const validAlert = { ...createAlertAttachment(), score: 0 };
+        const soFindRes = createSOFindResponse([invalidAlert, validAlert]);
 
         mockFinder(soFindRes);
 
-        await expect(
-          attachmentGetter.getAllDocumentsAttachedToCase({ caseId: '1', owner: 'securitySolution' })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"alert\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"attachmentId\\""`
-        );
+        const res = await attachmentGetter.getAllDocumentsAttachedToCase({
+          caseId: '1',
+          owner: 'securitySolution',
+        });
+
+        expect(res).toStrictEqual([validAlert]);
+        expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('invalid-alert'));
       });
     });
 
@@ -488,9 +577,9 @@ describe('AttachmentService getter', () => {
         )
         .mockResolvedValueOnce(createUserAttachment());
 
-      const res = await attachmentGetterWithFlagOn.get({ savedObjectId: '1', mode });
+      const res = await attachmentGetterWithFlagOn.get({ savedObjectId: '1' });
 
-      expect(res).toStrictEqual(createUserAttachment());
+      expect(res).toEqual(asUnifiedUserAttachment());
       expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(2);
       expect(unsecuredSavedObjectsClient.get).toHaveBeenNthCalledWith(
         1,
@@ -509,7 +598,7 @@ describe('AttachmentService getter', () => {
       unsecuredSavedObjectsClient.get.mockRejectedValueOnce(new Error('ES timeout'));
 
       await expect(
-        attachmentGetterWithFlagOn.get({ savedObjectId: '1', mode })
+        attachmentGetterWithFlagOn.get({ savedObjectId: '1' })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"ES timeout"`);
 
       expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
@@ -519,11 +608,43 @@ describe('AttachmentService getter', () => {
       );
     });
 
+    it('falls back to a legacy shape instead of throwing for an unrecognized attachment type', async () => {
+      const unrecognizedAttachment = createFileAttachment({
+        externalReferenceAttachmentTypeId: 'unknown-third-party-type',
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValue(unrecognizedAttachment);
+
+      const res = await attachmentGetter.get({ savedObjectId: '1' });
+
+      expect(res.attributes).toEqual(
+        expect.objectContaining({
+          type: 'externalReference',
+          externalReferenceAttachmentTypeId: 'unknown-third-party-type',
+        })
+      );
+    });
+
+    it('throws a 404 when a row fails to decode', async () => {
+      const userAttachment = createUserAttachment();
+      unsecuredSavedObjectsClient.get.mockResolvedValue({
+        ...userAttachment,
+        attributes: { ...userAttachment.attributes, type: 'junk' },
+      });
+
+      await expect(attachmentGetter.get({ savedObjectId: '1' })).rejects.toMatchObject({
+        message: 'Attachment 1 could not be read.',
+        output: { statusCode: 404 },
+      });
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to decode attachment 1')
+      );
+    });
+
     describe('Decoding', () => {
       it('does not throw when the response has the required fields', async () => {
         unsecuredSavedObjectsClient.get.mockResolvedValue(createUserAttachment());
 
-        await expect(attachmentGetter.get({ savedObjectId: '1', mode })).resolves.not.toThrow();
+        await expect(attachmentGetter.get({ savedObjectId: '1' })).resolves.not.toThrow();
       });
 
       it('strips excess fields', async () => {
@@ -531,20 +652,22 @@ describe('AttachmentService getter', () => {
           ...createUserAttachment({ foo: 'bar' }),
         });
 
-        const res = await attachmentGetter.get({ savedObjectId: '1', mode });
-        expect(res).toStrictEqual(createUserAttachment());
+        const res = await attachmentGetter.get({ savedObjectId: '1' });
+        expect(res).toEqual(asUnifiedUserAttachment());
       });
 
-      it('throws when the response is missing the attributes.comment field', async () => {
+      it('maps a missing comment field to empty unified content', async () => {
         const invalidAttachment = createUserAttachment();
         unset(invalidAttachment, 'attributes.comment');
 
         unsecuredSavedObjectsClient.get.mockResolvedValue(invalidAttachment);
 
-        await expect(
-          attachmentGetter.get({ savedObjectId: '1', mode })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
+        const res = await attachmentGetter.get({ savedObjectId: '1' });
+        expect(res.attributes).toEqual(
+          expect.objectContaining({
+            type: 'comment',
+            data: { content: '' },
+          })
         );
       });
     });
@@ -571,23 +694,29 @@ describe('AttachmentService getter', () => {
 
         const res = await attachmentGetter.getFileAttachments({ caseId: 'caseId', fileIds: ['1'] });
 
-        expect(res).toStrictEqual([
-          { ...createFileAttachment({ externalReferenceId: 'my-id' }), score: 0 },
+        expect(res).toEqual([
+          expect.objectContaining({
+            attributes: expect.objectContaining({
+              type: 'file',
+              attachmentId: 'my-id',
+            }),
+            score: 0,
+          }),
         ]);
       });
 
-      it('throws when the response is missing the attributes.externalReferenceAttachmentTypeId field', async () => {
-        const invalidFile = { ...createFileAttachment(), score: 0 };
+      it('skips a row missing the attributes.externalReferenceAttachmentTypeId field and logs a warning', async () => {
+        const invalidFile = { ...createFileAttachment(), id: 'invalid-file', score: 0 };
         unset(invalidFile, 'attributes.externalReferenceAttachmentTypeId');
-        const soFindRes = createSOFindResponse([invalidFile]);
+        const validFile = { ...createFileAttachment(), score: 0 };
+        const soFindRes = createSOFindResponse([invalidFile, validFile]);
 
         mockFinder(soFindRes);
 
-        await expect(
-          attachmentGetter.getFileAttachments({ caseId: '1', fileIds: ['1'] })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"externalReference\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"savedObject\\" supplied to \\"externalReferenceStorage,type\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
-        );
+        const res = await attachmentGetter.getFileAttachments({ caseId: 'caseId', fileIds: ['1'] });
+
+        expect(res).toEqual([expect.objectContaining({ id: validFile.id })]);
+        expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('invalid-file'));
       });
     });
   });

@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/alerting-comparators'
   - '@kbn/alerting-plugin'
+  - '@kbn/app-header'
   - '@kbn/alerts-as-data-utils'
   - '@kbn/calculate-auto'
   - '@kbn/chart-icons'
@@ -72,6 +73,7 @@ dependsOn:
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/ui-actions-plugin'
   - '@kbn/ui-theme'
+  - '@kbn/data-source'
   - '@kbn/unified-histogram'
   - '@kbn/unified-search-plugin'
   - '@kbn/xstate-utils'
@@ -86,6 +88,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/scout-synthtrace'
   - '@kbn/synthtrace-client'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod

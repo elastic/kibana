@@ -6,25 +6,23 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import {
-  CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ,
-  ContextEngineSubPageHeader,
-} from './context_engine_page_header';
+import { ContextEngineSubPageHeader } from './context_engine_page_header';
 
 const renderHeader = (services: ReturnType<typeof coreMock.createStart>) =>
   render(
-    <ChromeServiceProvider value={{ chrome: services.chrome }}>
+    <MockAppHeaderProvider chrome={services.chrome}>
       <I18nProvider>
         <EuiProvider>
           <KibanaContextProvider services={{ ...services, history: scopedHistoryMock.create() }}>
             <ContextEngineSubPageHeader
-              backLabel="Cancel"
+              backDestinationLabel="Context"
               backHref="/app/context_engine/"
               onBackClick={jest.fn()}
               pageTitle="Create AI index"
@@ -32,7 +30,7 @@ const renderHeader = (services: ReturnType<typeof coreMock.createStart>) =>
           </KibanaContextProvider>
         </EuiProvider>
       </I18nProvider>
-    </ChromeServiceProvider>
+    </MockAppHeaderProvider>
   );
 
 describe('ContextEngineSubPageHeader', () => {
@@ -46,39 +44,16 @@ describe('ContextEngineSubPageHeader', () => {
     jest.restoreAllMocks();
   });
 
-  it('always shows the in-page back button in the project layout', () => {
-    services.chrome.getChromeStyle.mockReturnValue('project');
-
+  it('renders the app header title and back control', () => {
     renderHeader(services);
 
-    expect(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ)).toBeInTheDocument();
-    expect(screen.getByText('Create AI index')).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Create AI index');
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toBeInTheDocument();
   });
 
-  it('suppresses the chrome fallback back button in the project layout', () => {
-    services.chrome.getChromeStyle.mockReturnValue('project');
-    services.chrome.next.appHeader.set.mockReturnValue(jest.fn());
-
+  it('registers the inline app header slot', () => {
     renderHeader(services);
 
-    expect(services.chrome.next.appHeader.set).toHaveBeenCalledWith(
-      expect.objectContaining({ back: false })
-    );
-  });
-
-  it('shows the in-page back button in classic layout', () => {
-    services.chrome.getChromeStyle.mockReturnValue('classic');
-
-    renderHeader(services);
-
-    expect(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ)).toBeInTheDocument();
-  });
-
-  it('does not suppress the chrome back button outside the project layout', () => {
-    services.chrome.getChromeStyle.mockReturnValue('classic');
-
-    renderHeader(services);
-
-    expect(services.chrome.next.appHeader.set).not.toHaveBeenCalled();
+    expect(services.chrome.inlineAppHeader.register).toHaveBeenCalledWith('Create AI index');
   });
 });
