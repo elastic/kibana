@@ -21,6 +21,7 @@
     "@kbn/evals-suite-attack-discovery-fp-tp",
     "@kbn/security-evals-chain-safety",
     "@kbn/tooling-log",
-    "@kbn/workflows"
+    "@kbn/workflows",
+    "@kbn/scout"
   ]
 }
