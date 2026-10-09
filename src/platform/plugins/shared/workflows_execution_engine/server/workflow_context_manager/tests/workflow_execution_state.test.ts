@@ -290,13 +290,11 @@ describe('WorkflowExecutionState', () => {
     });
 
     it('should pick up an external cancellation even when there are no pending changes', async () => {
-      workflowExecutionRepository.getWorkflowExecutionCancelState = jest
-        .fn()
-        .mockResolvedValue({
-          cancelRequested: true,
-          cancelledAt: '2025-08-05T20:02:00.000Z',
-          cancelledBy: 'user',
-        });
+      workflowExecutionRepository.getWorkflowExecutionCancelState = jest.fn().mockResolvedValue({
+        cancelRequested: true,
+        cancelledAt: '2025-08-05T20:02:00.000Z',
+        cancelledBy: 'user',
+      });
 
       await ioService.flush();
 

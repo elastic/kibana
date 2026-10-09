@@ -64,10 +64,7 @@ export class WorkflowExecutionRepository {
   public async getWorkflowExecutionCancelState(
     workflowExecutionId: string,
     spaceId: string
-  ): Promise<Pick<
-    EsWorkflowExecution,
-    'cancelRequested' | 'cancelledAt' | 'cancelledBy'
-  > | null> {
+  ): Promise<Pick<EsWorkflowExecution, 'cancelRequested' | 'cancelledAt' | 'cancelledBy'> | null> {
     const { items } = await this.workflowExecutionsDataClient.getByIds([workflowExecutionId], {
       sourceIncludes: ['spaceId', 'cancelRequested', 'cancelledAt', 'cancelledBy'],
     });
