@@ -225,7 +225,6 @@ export const useSimilarCasesColumns = ({
       externalIncident: {
         width: '8.5em',
         name: casesColumnsConfig.externalIncident.name,
-        sortable: false,
         render: (theCase: SimilarCaseUI) => {
           if (theCase.id != null) {
             // ExternalServiceColumn expects CaseUI; SimilarCaseUI carries the same
