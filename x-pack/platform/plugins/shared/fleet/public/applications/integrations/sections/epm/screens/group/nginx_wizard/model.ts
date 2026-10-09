@@ -7,7 +7,7 @@
 
 // PROTOTYPE: hard-coded model for the Nginx onboarding wizard. The wizard keeps schema-neutral
 // values and maps them onto the selected child package's policy: ECS `nginx` or OTel
-// `nginx_otel_integ`. Generalizing this across integrations is follow-up work.
+// `nginx_otel_integration`. Generalizing this across integrations is follow-up work.
 
 import type { NewPackagePolicyInput, PackagePolicyConfigRecord } from '../../../../../../../types';
 
