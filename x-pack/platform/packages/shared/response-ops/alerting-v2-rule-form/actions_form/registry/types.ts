@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  InlineActionParamError,
-  InlineActionStepType,
-  InlineWorkflowActionDraft,
-} from '../types';
+import type { InlineActionStepType, InlineWorkflowActionDraft } from '../types';
 
 type Slack2SubAction = 'sendMessage';
 type ConnectorTypeSubAction = Slack2SubAction | (string & {});
@@ -22,13 +18,9 @@ export interface InlineActionStepDefinition {
   connectorTypeId: string;
   connectorTypeSubAction?: ConnectorTypeSubAction;
   paramsTemplate: string;
-  /** Validates the parsed params YAML against what the workflow step accepts. */
-  validateParams: (params: Readonly<Record<string, unknown>>) => InlineActionParamError[];
   CustomComponent?: React.ComponentType<{
     value: InlineWorkflowActionDraft;
     onChange: (value: InlineWorkflowActionDraft) => void;
-    /** Params errors currently shown, so the component can flag the params it edits. */
-    paramErrors: readonly InlineActionParamError[];
   }>;
 }
 

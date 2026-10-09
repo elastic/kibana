@@ -60,8 +60,6 @@ export const NotificationControlsSection = () => {
       <Controller
         name="groupingMode"
         control={control}
-        // Re-check the fields this mode shows or hides so their errors don't go stale.
-        rules={{ deps: ['groupBy', 'throttleInterval'] }}
         render={({ field }) => (
           <EuiFormRow
             label={i18n.translate(
@@ -103,8 +101,8 @@ export const NotificationControlsSection = () => {
           name="groupBy"
           control={control}
           rules={{
-            validate: (val, { groupingMode: currentGroupingMode }) => {
-              if (currentGroupingMode === 'per_field' && (!val || val.length === 0)) {
+            validate: (val) => {
+              if (!val || val.length === 0) {
                 return i18n.translate('xpack.alertingV2.actionPolicy.form.groupBy.required', {
                   defaultMessage: 'At least one group-by field is required.',
                 });
@@ -126,7 +124,6 @@ export const NotificationControlsSection = () => {
               })}
             >
               <EuiComboBox
-                inputRef={field.ref}
                 isInvalid={!!error}
                 fullWidth
                 data-test-subj="groupByInput"
@@ -151,7 +148,6 @@ export const NotificationControlsSection = () => {
       <Controller
         name="throttleStrategy"
         control={control}
-        rules={{ deps: 'throttleInterval' }}
         render={({ field: { ref, ...field } }) => (
           <EuiFormRow
             label={
@@ -194,11 +190,8 @@ export const NotificationControlsSection = () => {
           name="throttleInterval"
           control={control}
           rules={{
-            validate: (val, { throttleStrategy: currentStrategy }) => {
-              if (
-                needsInterval(currentStrategy) &&
-                (!val || !THROTTLE_INTERVAL_PATTERN.test(val))
-              ) {
+            validate: (val) => {
+              if (!val || !THROTTLE_INTERVAL_PATTERN.test(val)) {
                 return i18n.translate(
                   'xpack.alertingV2.actionPolicy.form.throttleInterval.required',
                   { defaultMessage: 'Repeat interval is required.' }

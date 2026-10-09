@@ -183,7 +183,6 @@ describe('InlineWorkflowEditor', () => {
       renderStatefulEditor(draft());
 
       expect(screen.queryByText('Select a connector.')).not.toBeInTheDocument();
-      expect(screen.queryByText('to is required.')).not.toBeInTheDocument();
       expect(screen.queryByText('subject is required.')).not.toBeInTheDocument();
     });
 
@@ -191,7 +190,7 @@ describe('InlineWorkflowEditor', () => {
       renderStatefulEditor(draft(), { forceShowErrors: true });
 
       expect(screen.getByText('Select a connector.')).toBeInTheDocument();
-      expect(screen.getByText('Add at least one recipient to to, cc, or bcc.')).toBeInTheDocument();
+      expect(screen.getByText('to is required.')).toBeInTheDocument();
       expect(screen.getByText('subject is required.')).toBeInTheDocument();
       expect(screen.getByText('message is required.')).toBeInTheDocument();
     });
@@ -199,20 +198,11 @@ describe('InlineWorkflowEditor', () => {
     it('shows params errors once the params are edited, without the connector error', () => {
       renderStatefulEditor(draft());
 
-      typeParams('to: user@example.com\nsubject: Hi\nmessage: Body\n');
+      typeParams('to:\n  - user@example.com\nsubject: Hi\nmessage: ""\n');
 
-      expect(screen.getByText('to must be a list of email addresses.')).toBeInTheDocument();
+      expect(screen.getByText('message is required.')).toBeInTheDocument();
+      expect(screen.queryByText('subject is required.')).not.toBeInTheDocument();
       expect(screen.queryByText('Select a connector.')).not.toBeInTheDocument();
-    });
-
-    it('updates params errors as the params change', () => {
-      renderStatefulEditor(draft({ connectorId: 'email-1' }));
-
-      typeParams('to:\n  - me@\nsubject: Hi\nmessage: Body\n');
-      expect(screen.getByText('to has invalid email addresses: me@.')).toBeInTheDocument();
-
-      typeParams('to:\n  - me@example.com\nsubject: Hi\nmessage: Body\n');
-      expect(screen.queryByText(/invalid email addresses/)).not.toBeInTheDocument();
     });
 
     it('reports YAML syntax errors with their location', () => {
@@ -220,7 +210,9 @@ describe('InlineWorkflowEditor', () => {
 
       typeParams('to: "unterminated\n');
 
-      expect(screen.getByText(/^Invalid YAML on line 2, column 1:/)).toBeInTheDocument();
+      expect(
+        screen.getByText('Invalid YAML: Missing closing "quote at line 2, column 1')
+      ).toBeInTheDocument();
     });
 
     it('keeps showing params errors after reverting to the template', () => {
@@ -239,20 +231,6 @@ describe('InlineWorkflowEditor', () => {
 
       expect(screen.getByText('Select a connector.')).toBeInTheDocument();
       expect(screen.queryByText('subject is required.')).not.toBeInTheDocument();
-    });
-
-    it('flags the Slack channel selector when the channel is missing', () => {
-      renderStatefulEditor(
-        draft({
-          stepType: 'slack2.sendMessage',
-          connectorId: 'slack-1',
-          params: 'channel: ""\ntext: hello\n',
-        }),
-        { forceShowErrors: true }
-      );
-
-      expect(screen.getByText('channel is required.')).toBeInTheDocument();
-      expect(screen.getByRole('combobox')).toHaveAttribute('aria-invalid', 'true');
     });
   });
 });

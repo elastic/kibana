@@ -130,15 +130,6 @@ const renderForm = (
   return { ...render(<TestComponent />), onSubmit };
 };
 
-const FLYOUT_CONFIG: ActionPolicyFormConfig = {
-  layout: 'flyout',
-  connectorCreation: { mode: 'new-tab', href: '/connectors' },
-  collapsibleSections: {
-    notificationControls: { initialIsOpen: false },
-    destination: { initialIsOpen: true },
-  },
-};
-
 const NAMED_FORM_STATE: ActionPolicyFormState = { ...DEFAULT_FORM_STATE, name: 'My policy' };
 
 const VALID_FORM_STATE: ActionPolicyFormState = {
@@ -170,7 +161,14 @@ describe('ActionPolicyForm', () => {
 
   it('uses the flyout layout and only collapses configured sections', async () => {
     const user = userEvent.setup();
-    renderForm(DEFAULT_FORM_STATE, FLYOUT_CONFIG);
+    renderForm(DEFAULT_FORM_STATE, {
+      layout: 'flyout',
+      connectorCreation: { mode: 'new-tab', href: '/connectors' },
+      collapsibleSections: {
+        notificationControls: { initialIsOpen: false },
+        destination: { initialIsOpen: true },
+      },
+    });
 
     expect(screen.getByRole('heading', { name: 'Policy details' }).tagName).toBe('H3');
     expect(screen.getByRole('heading', { name: 'Policy scope' }).tagName).toBe('H3');
@@ -273,25 +271,6 @@ describe('ActionPolicyForm', () => {
       await user.click(screen.getByTestId(TEST_SUBJ.submit));
 
       await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
-    });
-
-    it('flags collapsible sections that hold errors', async () => {
-      const user = userEvent.setup();
-      renderForm({ ...NAMED_FORM_STATE, groupingMode: 'per_field', groupBy: [] }, FLYOUT_CONFIG);
-
-      expect(
-        screen.queryByTestId('actionPolicyFormSectionError-notificationControls')
-      ).not.toBeInTheDocument();
-      expect(
-        screen.queryByTestId('actionPolicyFormSectionError-destination')
-      ).not.toBeInTheDocument();
-
-      await user.click(screen.getByTestId(TEST_SUBJ.submit));
-
-      expect(
-        await screen.findByTestId('actionPolicyFormSectionError-notificationControls')
-      ).toBeInTheDocument();
-      expect(screen.getByTestId('actionPolicyFormSectionError-destination')).toBeInTheDocument();
     });
   });
 

@@ -207,7 +207,6 @@ describe('ActionPolicyFormFlyout', () => {
 
     expect(await screen.findByText('Name is required.')).toBeInTheDocument();
     expect(screen.getByText('At least one destination is required')).toBeInTheDocument();
-    expect(screen.getByTestId('actionPolicyFormSectionError-destination')).toBeInTheDocument();
     expect(onSave).not.toHaveBeenCalled();
   });
 

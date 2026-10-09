@@ -26,9 +26,6 @@ interface ActionPolicyFormProps {
   config?: ActionPolicyFormConfig;
 }
 
-const NOTIFICATION_CONTROLS_FIELDS = ['groupBy', 'throttleInterval'] as const;
-const DESTINATION_FIELDS = ['destinations', 'inlineActions'] as const;
-
 export const ActionPolicyForm = ({ config }: ActionPolicyFormProps) => {
   const { control } = useFormContext<ActionPolicyFormState>();
   const matcher = useWatch({ control, name: 'matcher' });
@@ -149,7 +146,6 @@ export const ActionPolicyForm = ({ config }: ActionPolicyFormProps) => {
         id="notificationControls"
         config={collapsibleSections?.notificationControls}
         layout={layout}
-        fieldNames={NOTIFICATION_CONTROLS_FIELDS}
         title={
           <FormattedMessage
             id="xpack.alertingV2.actionPolicy.form.notificationControls.title"
@@ -169,7 +165,6 @@ export const ActionPolicyForm = ({ config }: ActionPolicyFormProps) => {
         id="destination"
         config={collapsibleSections?.destination}
         layout={layout}
-        fieldNames={DESTINATION_FIELDS}
         title={
           <FormattedMessage
             id="xpack.alertingV2.actionPolicy.form.destination.title"

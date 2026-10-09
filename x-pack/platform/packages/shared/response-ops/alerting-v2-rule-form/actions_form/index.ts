@@ -18,14 +18,13 @@ export {
 } from './registry';
 export type { InlineActionStepDefinition, PayloadVariable } from './registry';
 export { InlineWorkflowEditor } from './components/inline_workflow_editor';
-export { isActionValid } from './helpers/validate_inline_action';
+export { isActionValid } from './types';
 export type {
   ActionDraft,
   ActionFormValue,
   ActionSource,
   ConnectorCreationConfig,
   ExistingWorkflowActionDraft,
-  InlineActionParamError,
   InlineActionStepType,
   InlineWorkflowActionDraft,
 } from './types';

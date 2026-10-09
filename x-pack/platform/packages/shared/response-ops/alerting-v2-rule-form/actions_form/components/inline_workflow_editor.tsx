@@ -7,9 +7,9 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React, { useState } from 'react';
-import { validateInlineAction } from '../helpers/validate_inline_action';
 import { getInlineActionStepDefinition } from '../registry';
 import type { ConnectorCreationConfig, InlineWorkflowActionDraft } from '../types';
+import { validateInlineAction } from '../types';
 import { ConnectorSelector } from './connector_selector';
 import { ParamsEditor } from './params_editor';
 
@@ -62,17 +62,13 @@ export const InlineWorkflowEditor = ({
         }}
       />
       {definition.CustomComponent && (
-        <definition.CustomComponent
-          value={value}
-          onChange={onParamsChange}
-          paramErrors={paramErrors}
-        />
+        <definition.CustomComponent value={value} onChange={onParamsChange} />
       )}
       <EuiSpacer size="m" />
       <ParamsEditor
         value={value.params}
         onChange={(params) => onParamsChange({ ...value, params })}
-        errors={paramErrors.map(({ message }) => message)}
+        errors={paramErrors}
       />
     </div>
   );
