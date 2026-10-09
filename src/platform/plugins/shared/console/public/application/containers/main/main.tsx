@@ -17,7 +17,6 @@ import {
   EuiToolTip,
   useEuiTour,
   EuiButtonEmpty,
-  EuiHorizontalRule,
   EuiScreenReaderOnly,
   useEuiTheme,
   useEuiOverflowScroll,
