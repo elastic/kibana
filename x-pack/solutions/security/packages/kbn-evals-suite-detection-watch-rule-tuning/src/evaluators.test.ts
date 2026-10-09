@@ -6,7 +6,7 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import { changeTypeAccuracy, validProposal } from './evaluators';
+import { changeTypeAccuracy, changeTypeAccuracyUncontested, validProposal } from './evaluators';
 import {
   explainMissingProposal,
   isAwaitingApproval,
@@ -56,6 +56,61 @@ describe('rule-tuning evaluators', () => {
       } as never);
       expect(result.score).toBe(0);
       expect(result.label).toBe('none');
+    });
+  });
+
+  describe('changeTypeAccuracyUncontested', () => {
+    const verdict = (change_type: ChangeType): RuleTuningVerdict => ({
+      change_type,
+      executionId: 'exec-uncontested',
+      executionStatus: 'completed' as never,
+    });
+
+    it('scores N/A (null) for a contested fixture id', async () => {
+      const result = await changeTypeAccuracyUncontested.evaluate!({
+        output: verdict('exception'),
+        expected: { change_type: 'manual' },
+        metadata: { fixtureId: 'fp-volume-suppression', ruleType: 'query', expected: 'manual' },
+      } as never);
+      expect(result.score).toBeNull();
+      expect(result.label).toBe('contested');
+      expect(result.explanation).toContain('fp-volume-suppression');
+    });
+
+    it('scores 1 on an uncontested fixture when predicted matches golden', async () => {
+      const result = await changeTypeAccuracyUncontested.evaluate!({
+        output: verdict('exception'),
+        expected: { change_type: 'exception' },
+        metadata: { fixtureId: 'fp-host-exception', ruleType: 'query', expected: 'exception' },
+      } as never);
+      expect(result.score).toBe(1);
+    });
+
+    it('scores 0 on an uncontested fixture when predicted differs', async () => {
+      const result = await changeTypeAccuracyUncontested.evaluate!({
+        output: verdict('query'),
+        expected: { change_type: 'exception' },
+        metadata: { fixtureId: 'fp-host-exception', ruleType: 'query', expected: 'exception' },
+      } as never);
+      expect(result.score).toBe(0);
+      expect(result.metadata).toEqual({ predicted: 'query', expected: 'exception' });
+    });
+
+    it('treats a missing fixtureId as uncontested rather than silently skipping', async () => {
+      const result = await changeTypeAccuracyUncontested.evaluate!({
+        output: verdict('query'),
+        expected: { change_type: 'query' },
+      } as never);
+      expect(result.score).toBe(1);
+    });
+
+    it('never scores on new_terms fixtures — the whole family is contested', async () => {
+      const result = await changeTypeAccuracyUncontested.evaluate!({
+        output: verdict('manual'),
+        expected: { change_type: 'manual' },
+        metadata: { fixtureId: 'fp-manual-newterms-dns', ruleType: 'new_terms', expected: 'manual' },
+      } as never);
+      expect(result.score).toBeNull();
     });
   });
 

@@ -80,6 +80,38 @@ export const EXCEPTION_OPERATOR_PAYLOAD = {
   does_not_exist: null,
 } as const;
 
+/**
+ * Fixtures whose golden label is contested and awaits Seth/Andrew sign-off
+ * (see g6-label-proposal.md on the tracking card). The product contract at
+ * upstream main prefers `exception` whenever the FP cluster concentrates on
+ * identifiable entities — including volume, low-value and new_terms clusters —
+ * so these labels measure the reviewer's proposed contract, not an agreed one.
+ * `ChangeTypeAccuracyUncontested` scores only the remaining fixtures; the
+ * coverage-characterization test asserts this list stays well-formed.
+ * No gold label changes without sign-off: this list documents the dispute.
+ */
+export const CONTESTED_FIXTURE_IDS = [
+  // volume + low-value families: identifiable entities → `exception` outranks
+  // `manual`/`risk_score` by the prompt's preference order (rule_tuning_review.yaml:341)
+  'fp-volume-suppression',
+  'fp-suppression-healthcheck',
+  'fp-suppression-vulnscan',
+  'fp-suppression-inventory',
+  'fp-suppression-patchagent',
+  'fp-low-value-risk',
+  'fp-low-value-scripting',
+  'fp-low-value-admin-tools',
+  'fp-low-value-devtools',
+  'fp-low-value-remote-support',
+  'fp-low-value-archive',
+  // new_terms: exceptions are applied by the runtime at upstream main, so
+  // `manual` is not forced by the rule type
+  'fp-manual-newterms-dns',
+  'fp-manual-newterms-proxy',
+  'fp-manual-newterms-vpn',
+  'fp-manual-newterms-ntp',
+] as const;
+
 /** Tag prefix the workflow writes to harvested alerts. Isolated to the eval namespace. */
 export const EVAL_TAG_PREFIX = 'eval-rule-tuning';
 

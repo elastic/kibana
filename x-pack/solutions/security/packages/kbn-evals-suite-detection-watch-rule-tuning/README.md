@@ -10,10 +10,25 @@ golden tuning path.
 
 | Evaluator | Kind | Gate or smoke |
 |-----------|------|---------------|
-| `ChangeTypeAccuracy` | CODE (binary) | **gate** — predicted tuning path == golden label |
+| `ChangeTypeAccuracy` | CODE (binary) | **gate** — predicted tuning path == golden label, all fixtures |
+| `ChangeTypeAccuracyUncontested` | CODE (binary) | **gate** — same question on the fixtures whose labels are agreed (24/39); contested fixtures score N/A, so the run's N/A count states the coverage gap |
 | `TuningQuality` | LLM judge | **gate** — summary grounded in the seeded FP evidence |
 | `Tool Routing` | CODE (trace) | **gate** — the agent actually retrieved the alerts (`investigate-rule.get_alerts_by_ids`); N/A when no span is reachable |
 | `ValidProposal` | CODE (structural) | **smoke** — schema/apply-gate conformance; expected to saturate |
+
+### Contested labels
+
+15 fixtures carry golden labels that are contested against the product contract at
+upstream main and await sign-off (see `CONTESTED_FIXTURE_IDS` in `src/constants.ts` and
+`g6-label-proposal.md` on the tracking card): the whole volume-suppression and low-value
+families (labeled `manual`/`risk_score`) and the whole new_terms family (labeled `manual`).
+The contract's diagnose prompt ranks `exception` first and the runtime applies exceptions on
+every rule type including new_terms (verified at upstream main
+`e25202cf957`: `rule_tuning_review.yaml:341-395,595-605`, `create_new_terms_alert_type.ts:117,141`).
+No gold label changes without sign-off; until then both accuracy numbers are reported side
+by side. The earlier belief that new_terms exceptions do not work at main was wrong — only
+the backtest preview is type-gated (`can_preview_query_change`, `rule_tuning_review.yaml:614-633`);
+exception creation and application are not.
 
 See [CAPABILITY_PROFILE.md](./CAPABILITY_PROFILE.md) for the gate-vs-smoke contract, the N/A
 semantics and the (unratified) pass/kill thresholds.

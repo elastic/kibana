@@ -7,7 +7,11 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { CHANGE_TYPES, EXCEPTION_OPERATOR_PAYLOAD } from './constants';
+import {
+  CHANGE_TYPES,
+  CONTESTED_FIXTURE_IDS,
+  EXCEPTION_OPERATOR_PAYLOAD,
+} from './constants';
 
 /**
  * Characterization tests for the rule-tuning eval suite.
@@ -231,5 +235,53 @@ describe('rule-tuning coverage characterization', () => {
     for (const changeType of CHANGE_TYPES) {
       expect(counts.get(changeType) ?? 0).toBeGreaterThan(0);
     }
+  });
+
+  it('keeps CONTESTED_FIXTURE_IDS well-formed against the live fixture set', () => {
+    const labels = goldenLabels();
+    const contested = [...CONTESTED_FIXTURE_IDS];
+
+    // Every contested id is a real fixture — a typo would silently shrink the
+    // contested set and inflate ChangeTypeAccuracyUncontested's coverage claim.
+    for (const id of contested) {
+      if (!labels.has(id)) {
+        throw new Error(`CONTESTED_FIXTURE_IDS references unknown fixture ${id}`);
+      }
+    }
+    // Unique: a duplicated id double-counts one dispute.
+    expect(new Set(contested).size).toBe(contested.length);
+
+    // The dispute is exactly the volume + low-value + new_terms families the
+    // label proposal documents (13 fixtures). If a fixture joins or leaves the
+    // dispute, update g6-label-proposal.md in the same commit.
+    expect(contested).toEqual([
+      'fp-volume-suppression',
+      'fp-suppression-healthcheck',
+      'fp-suppression-vulnscan',
+      'fp-suppression-inventory',
+      'fp-suppression-patchagent',
+      'fp-low-value-risk',
+      'fp-low-value-scripting',
+      'fp-low-value-admin-tools',
+      'fp-low-value-devtools',
+      'fp-low-value-remote-support',
+      'fp-low-value-archive',
+      'fp-manual-newterms-dns',
+      'fp-manual-newterms-proxy',
+      'fp-manual-newterms-vpn',
+      'fp-manual-newterms-ntp',
+    ]);
+
+    // The uncontested subset must still exercise every branch the full set
+    // labels `schedule` and `threshold` with — those fixtures are uncontested,
+    // so an accidental contesting would gut the uncontested accuracy number.
+    const uncontestedLabels = [...labels.entries()]
+      .filter(([id]) => !contested.includes(id))
+      .map(([, label]) => label);
+    expect(uncontestedLabels).toContain('threshold');
+    expect(uncontestedLabels).toContain('schedule');
+    // ...and stays the majority of the dataset, or the uncontested number
+    // stops being the headline metric.
+    expect(uncontestedLabels.length).toBe(24);
   });
 });

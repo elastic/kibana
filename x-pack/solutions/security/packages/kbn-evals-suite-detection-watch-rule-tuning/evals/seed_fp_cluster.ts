@@ -356,11 +356,14 @@ const ENTITY_PROFILES: Record<
     { host: 'worker-15', user: 'svc_job', ip: '10.81.4.5', process: 'systemd' },
   ],
   'fp-schedule-offhours-batch': [
-    { host: 'etl-21', user: 'svc_etl', ip: '10.81.5.6', process: 'spark' },
-    { host: 'etl-22', user: 'svc_etl', ip: '10.81.5.7', process: 'spark' },
-    { host: 'etl-23', user: 'svc_etl', ip: '10.81.5.8', process: 'airflow' },
-    { host: 'etl-24', user: 'svc_etl', ip: '10.81.5.9', process: 'airflow' },
-    { host: 'etl-25', user: 'svc_etl', ip: '10.81.5.10', process: 'dbt' },
+    // Distinct users per alert: a shared user.name would make user:svc_etl the
+    // tightest single condition, and the prompt's preference order would rank
+    // an exception above the schedule fix the fixture exists to test.
+    { host: 'etl-21', user: 'svc_spark', ip: '10.81.5.6', process: 'spark' },
+    { host: 'etl-22', user: 'svc_airflow', ip: '10.81.5.7', process: 'spark' },
+    { host: 'etl-23', user: 'svc_dbt', ip: '10.81.5.8', process: 'airflow' },
+    { host: 'etl-24', user: 'svc_transform', ip: '10.81.5.9', process: 'airflow' },
+    { host: 'etl-25', user: 'svc_pipeline', ip: '10.81.5.10', process: 'dbt' },
   ],
 };
 
@@ -524,8 +527,12 @@ export const seedRuleAndFpAlerts = async (
   // Timestamps are oldest-first so the cluster reads as routine recurrence,
   // not a burst.
   const isSchedule = fixture.id.startsWith('fp-schedule-');
+  // Spread strictly INSIDE the now-24h lookback: the oldest alert lands at
+  // now-20h, so the whole cluster is visible to the model as routine activity
+  // the over-wide window sweeps in. ((length - i) * 5h with 5 entities put the
+  // oldest at now-25h — outside the window and invisible to the diagnosis.
   const alertTime = (i: number): Date | undefined =>
-    isSchedule ? new Date(Date.now() - (entities.length - i) * 5 * 60 * 60 * 1000) : undefined;
+    isSchedule ? new Date(Date.now() - (20 - i * 4) * 60 * 60 * 1000) : undefined;
   const docs = entities.map((e, i) => ({
     ...baseAlert(seededUuid, ruleName, ruleId, i, alertTime(i)),
     host: { name: e.host },

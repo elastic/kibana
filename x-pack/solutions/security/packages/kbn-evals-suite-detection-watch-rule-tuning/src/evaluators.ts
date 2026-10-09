@@ -9,6 +9,7 @@ import type { Evaluator } from '@kbn/evals';
 import {
   CHANGE_TYPES,
   CONFIDENCE_LEVELS,
+  CONTESTED_FIXTURE_IDS,
   EXCEPTION_OPERATOR_PAYLOAD,
   PROPOSED_SEVERITIES,
   type ChangeType,
@@ -55,12 +56,49 @@ const isValidExceptionEntry = (entry: unknown): boolean => {
 /**
  * Primary metric: did the review workflow's `diagnose_rule` step pick the golden tuning path?
  * Binary per example; the mean across the dataset is the model's tuning-decision accuracy.
+ * Contested fixtures (CONTESTED_FIXTURE_IDS) stay in the dataset — their labels are the
+ * current gold until sign-off — but `ChangeTypeAccuracyUncontested` below reports the
+ * mean on the agreed subset so the primary number is not dominated by the dispute.
  */
 export const changeTypeAccuracy: Evaluator = {
   name: 'ChangeTypeAccuracy',
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output, expected }) => {
+    const predicted = asProposal(output).change_type;
+    const goldenLabel = asExpected(expected)?.change_type;
+    const correct = predicted != null && predicted === goldenLabel;
+
+    return {
+      score: correct ? 1 : 0,
+      label: predicted ?? 'none',
+      explanation: `predicted="${predicted ?? 'none'}" expected="${goldenLabel ?? 'none'}"`,
+      metadata: { predicted: predicted ?? null, expected: goldenLabel ?? null },
+    };
+  },
+};
+
+/**
+ * Same question as `ChangeTypeAccuracy`, scored only on the uncontested subset:
+ * fixtures whose golden labels are agreed. Contested fixtures score N/A (null)
+ * — not skipped silently — so the run's N/A count states exactly how much of
+ * the dataset the uncontested number does not speak for.
+ */
+export const changeTypeAccuracyUncontested: Evaluator = {
+  name: 'ChangeTypeAccuracyUncontested',
+  kind: 'CODE',
+  direction: 'maximize',
+  evaluate: async ({ output, expected, metadata }) => {
+    const fixtureId = (metadata as { fixtureId?: string } | undefined)?.fixtureId;
+    if (fixtureId != null && (CONTESTED_FIXTURE_IDS as readonly string[]).includes(fixtureId)) {
+      return {
+        score: null,
+        label: 'contested',
+        explanation: `fixture "${fixtureId}" has a contested golden label — scored by ChangeTypeAccuracy only`,
+        metadata: { fixtureId, contested: true },
+      };
+    }
+
     const predicted = asProposal(output).change_type;
     const goldenLabel = asExpected(expected)?.change_type;
     const correct = predicted != null && predicted === goldenLabel;

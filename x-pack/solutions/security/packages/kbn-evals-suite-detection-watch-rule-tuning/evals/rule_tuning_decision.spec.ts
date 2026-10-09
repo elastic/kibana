@@ -45,7 +45,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { selectEvaluators, type EvaluationDataset, type Example } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
 import { runRuleTuningWorkflow, type RuleTuningVerdict } from '../src/workflow_task';
-import { changeTypeAccuracy, validProposal } from '../src/evaluators';
+import { changeTypeAccuracy, changeTypeAccuracyUncontested, validProposal } from '../src/evaluators';
 import {
   assertToolSpansReachable,
   createToolRoutingEvaluator,
@@ -500,6 +500,7 @@ evaluate.describe(
 
         const selectedEvaluators = selectEvaluators([
           changeTypeAccuracy,
+          changeTypeAccuracyUncontested,
           validProposal,
           createToolRoutingEvaluator({ traceEsClient, log, fetch }),
           tuningQualityJudge,
@@ -576,7 +577,7 @@ evaluate.describe(
       };
       const summary = 'FPs are the sanctioned scanner, not a detection';
 
-      // change_type outside the four-branch union — the runtime gate would refuse the PATCH.
+      // change_type outside the six-branch union — the runtime gate would refuse the PATCH.
       const outOfUnion = await validProposal.evaluate?.({
         output: {
           ...completedRun,
