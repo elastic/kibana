@@ -60,7 +60,7 @@ test.describe(
     }) => {
       // Set up listeners before opening the dashboard to avoid race conditions
       const esqlRequestPromise = page.waitForRequest(
-        (req) => req.url().includes('/internal/search/esql') && req.method() === 'POST'
+        (req) => req.url().includes('/internal/search/esql_async') && req.method() === 'POST'
       );
 
       // Open dashboard WITHOUT waiting for render
@@ -71,7 +71,7 @@ test.describe(
 
       const esqlAbortedPromise = page.waitForEvent(
         'requestfailed',
-        (req) => req.url().includes('/internal/search/esql') && req.method() === 'POST'
+        (req) => req.url().includes('/internal/search/esql_async') && req.method() === 'POST'
       );
 
       // Navigate away - this should abort the pending request
@@ -85,7 +85,7 @@ test.describe(
     test('cancels search when clicking the cancel button', async ({ page, pageObjects }) => {
       // Set up listeners before opening the dashboard to avoid race conditions
       const esqlRequestPromise = page.waitForRequest(
-        (req) => req.url().includes('/internal/search/esql') && req.method() === 'POST'
+        (req) => req.url().includes('/internal/search/esql_async') && req.method() === 'POST'
       );
 
       // Open dashboard WITHOUT waiting for render
@@ -96,7 +96,7 @@ test.describe(
 
       const esqlAbortedPromise = page.waitForEvent(
         'requestfailed',
-        (req) => req.url().includes('/internal/search/esql') && req.method() === 'POST'
+        (req) => req.url().includes('/internal/search/esql_async') && req.method() === 'POST'
       );
 
       // Click cancel button - this should abort the pending request
