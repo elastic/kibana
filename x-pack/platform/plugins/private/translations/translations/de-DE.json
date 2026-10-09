@@ -14138,7 +14138,6 @@
     "xpack.apm.serviceMap.popover.edgeAriaLabel": "Details zur Verbindung von {source} zu {target}. Drücken Sie Escape zum Schließen.",
     "xpack.apm.serviceMap.popover.noDataText": "Keine Daten für die ausgewählte Umgebung vorhanden. Versuchen Sie, in eine andere Umgebung zu wechseln.",
     "xpack.apm.serviceMap.popover.nodeAriaLabel": "Details für {nodeName}. Drücken Sie Escape, um zu schließen.",
-    "xpack.apm.serviceMap.popoverClosed": "Popover geschlossen",
     "xpack.apm.serviceMap.regionLabel": "Shard mit {nodeCount} Services und Abhängigkeiten.",
     "xpack.apm.serviceMap.resourceCountLabel": "{count} Ressourcen",
     "xpack.apm.serviceMap.screenReaderInstructions": "Dies ist eine interaktive Dienstkarte zur Darstellung von Anwendungsdiensten und ihren Abhängigkeiten. Verwenden Sie den Tab zur Navigation zwischen den Dienstknoten. Verwenden Sie die Pfeiltasten zum Wechseln zwischen angrenzenden Knoten. Drücken Sie Enter oder die Leertaste zur Auswahl eines Knotens und zur Anzeige der Details, einschließlich der Verbindungen. Drücken Sie die Escape-Taste zum Schließen des Popovers mit den Details. Wenn der Fokus im Kartenbereich oder auf dem Seitenhintergrund liegt (kein Textfeld fokussiert), drücken Sie Command K oder Strg K, um die Suche auf der Seite zu öffnen und den Fokus auf das Suchfeld zu setzen. Über das Optionsfeld und die Zoom-Steuerelemente oben links können Sie filtern, das Layout ändern, hinein- und herauszoomen sowie die Ansicht anpassen.",

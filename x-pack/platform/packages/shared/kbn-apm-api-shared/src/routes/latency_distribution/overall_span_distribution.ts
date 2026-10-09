@@ -34,6 +34,7 @@ export const latencyOverallSpanDistributionRoute =
             durationMax: z.coerce.number().optional(),
             isOtel: z.boolean().optional(),
             percentileThreshold: z.coerce.number(),
+            spanDestinationServiceResources: z.array(z.string()).optional(),
             chartType: latencyDistributionChartTypeSchema,
           })
           .merge(environmentSchema)

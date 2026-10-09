@@ -14180,7 +14180,6 @@
     "xpack.apm.serviceMap.popover.edgeAriaLabel": "{source}から{target}への接続の詳細。Escapeを押して閉じます。",
     "xpack.apm.serviceMap.popover.noDataText": "選択した環境のデータがありません。別の環境に切り替えてください。",
     "xpack.apm.serviceMap.popover.nodeAriaLabel": "{nodeName}の詳細。Escapeを押して閉じます。",
-    "xpack.apm.serviceMap.popoverClosed": "ポップオーバーが閉じられました",
     "xpack.apm.serviceMap.regionLabel": "{nodeCount}件んのサービスと依存関係を含むサービスマップ。",
     "xpack.apm.serviceMap.resourceCountLabel": "{count}個のリソース",
     "xpack.apm.serviceMap.screenReaderInstructions": "これはアプリケーションサービスとその依存関係を示すインタラクティブなサービスマップです。Tabキーを使用してサービスノード間を移動します。矢印キーを使用して隣接するノード間を移動します。ノードを選択して接続情報などの詳細情報を表示するには、Enterキーまたはスペースキーを押してください。詳細ポップオーバーを閉じるにはEscapeキーを押してください。フォーカスがマップ領域またはページの背景にある（テキストフィールドがフォーカスされていない）場合は、Command+KまたはControl+Kを押してページ内検索を開き、検索するフィールドにフォーカスを当てます。左上のオプションパネルとズームコントロールでは、絞り込み、レイアウトの変更、拡大、縮小、ビューを画面に合わせることができます。",

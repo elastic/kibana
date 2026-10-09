@@ -7,13 +7,19 @@
 import { serviceMapRoute } from './service_map';
 import { serviceMapDependencyNodeRoute } from './dependency_node';
 import { serviceMapServiceBadgesRoute } from './service_badges';
+import { serviceMapConnectionTransactionsRoute } from './connection_transactions';
 
 export const serviceMapRouteDefinitions = {
   serviceMap: serviceMapRoute,
   dependencyNode: serviceMapDependencyNodeRoute,
   serviceBadges: serviceMapServiceBadgesRoute,
+  connectionTransactions: serviceMapConnectionTransactionsRoute,
 };
 
 export type { ServiceMapRouteResponse } from './service_map';
 export type { ServiceMapServiceDependencyInfoResponse } from './dependency_node';
 export type { ServiceSloStatsResponse, ServiceMapServiceBadgesResponse } from './service_badges';
+export type {
+  ConnectionTransactionGroup,
+  ConnectionTransactionsResponse,
+} from './connection_transactions';

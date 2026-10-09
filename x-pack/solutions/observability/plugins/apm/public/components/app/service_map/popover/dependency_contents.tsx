@@ -13,7 +13,6 @@ import React from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import type { APIReturnType } from '@kbn/apm-api-shared';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import { isEdge } from './utils';
 import type { ContentsProps } from './popover_content';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
@@ -39,8 +38,7 @@ export function DependencyContents({ selection, environment, start, end }: Conte
   const { offset, comparisonEnabled } = query;
   const apmRouter = useApmRouter();
 
-  const isNode = !isEdge(selection);
-  const dependencyName = isNode ? selection.data.label : undefined;
+  const dependencyName = selection.data.label;
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -63,10 +61,6 @@ export function DependencyContents({ selection, environment, start, end }: Conte
 
   const isLoading = status === FETCH_STATUS.LOADING;
   const trackEvent = useUiTracker();
-
-  if (!isNode) {
-    return null;
-  }
 
   const detailsUrl = dependencyName
     ? apmRouter.link('/dependencies/overview', {

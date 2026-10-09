@@ -14168,7 +14168,6 @@
     "xpack.apm.serviceMap.popover.edgeAriaLabel": "Detalhes para conexão de {source} a {target}. Pressione Esc para fechar.",
     "xpack.apm.serviceMap.popover.noDataText": "Sem dados para o ambiente selecionado. Tente mudar para outro ambiente.",
     "xpack.apm.serviceMap.popover.nodeAriaLabel": "Detalhes para {nodeName}. Pressione Esc para fechar.",
-    "xpack.apm.serviceMap.popoverClosed": "Popover fechado",
     "xpack.apm.serviceMap.regionLabel": "Mapa de serviços com {nodeCount} serviços e dependências.",
     "xpack.apm.serviceMap.resourceCountLabel": "{count} recursos",
     "xpack.apm.serviceMap.screenReaderInstructions": "Este é um mapa interativo de serviços que mostra os serviços da aplicação e suas dependências. Use Tab para navegar entre os nós de serviço. Use as teclas de seta para mover entre nós adjacentes. Pressione Enter ou espaço para selecionar um nó e visualizar seus detalhes, incluindo as conexões. Pressione Esc para fechar o popover de detalhes. Quando o foco estiver na região do mapa ou no plano de fundo da página (sem um campo de texto em foco), pressione Command K ou Control K para abrir a função Localizar na página e colocar o foco no campo de busca. O painel de opções e os controles de zoom no canto superior esquerdo permitem filtrar, alterar o layout, ampliar, reduzir e ajustar a visualização.",

@@ -14118,7 +14118,6 @@
     "xpack.apm.serviceMap.popover.edgeAriaLabel": "Détails de la connexion de {source} à {target}. Appuyez sur Échap pour fermer.",
     "xpack.apm.serviceMap.popover.noDataText": "Aucune donnée pour l'environnement sélectionné. Essayez de passer à un autre environnement.",
     "xpack.apm.serviceMap.popover.nodeAriaLabel": "Détails de {nodeName} Appuyez sur Échap pour fermer.",
-    "xpack.apm.serviceMap.popoverClosed": "Popover fermé",
     "xpack.apm.serviceMap.regionLabel": "Mapping des services avec {nodeCount} services et dépendances.",
     "xpack.apm.serviceMap.resourceCountLabel": "{count} ressources",
     "xpack.apm.serviceMap.screenReaderInstructions": "Ceci est un mapping des services montrant les services applicatifs et leurs dépendances. Utilisez Tab pour naviguer entre les nœuds de service. Utilisez les touches fléchées pour vous déplacer entre les nœuds adjacents. Appuyez sur Entrée ou Espace pour sélectionner un nœud et consulter ses détails, y compris les connexions. Appuyez sur Échap pour fermer la fenêtre de détails. Lorsque le focus est dans la région de la carte ou sur l'arrière-plan de la page (aucun champ de texte n'est sélectionné), appuyez sur Commande K ou Contrôle K pour ouvrir la fonction de recherche dans la page et placer le focus sur le champ de recherche. Le panneau des options et les commandes de zoom en haut à gauche vous permettent de filtrer, de modifier la mise en page, de zoomer, de dézoomer et d'ajuster la vue.",

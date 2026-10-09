@@ -14183,7 +14183,6 @@
     "xpack.apm.serviceMap.popover.edgeAriaLabel": "从 {source} 到 {target} 的连接详情。按 Escape 键即可关闭。",
     "xpack.apm.serviceMap.popover.noDataText": "选定的环境没有数据。请尝试切换到其他环境。",
     "xpack.apm.serviceMap.popover.nodeAriaLabel": "{nodeName} 的详情按 Escape 键即可关闭。",
-    "xpack.apm.serviceMap.popoverClosed": "弹出窗口已关闭",
     "xpack.apm.serviceMap.regionLabel": "具有 {nodeCount} 个服务和依赖关系的服务地图。",
     "xpack.apm.serviceMap.resourceCountLabel": "{count} 项资源",
     "xpack.apm.serviceMap.screenReaderInstructions": "这是显示应用程序服务及其依赖关系的交互式服务地图。使用 Tab 键在服务节点之间导航。使用箭头键在相邻节点之间移动。按 Enter 或 Space 键选择一个节点并查看其详细信息（包括连接）。按 Escape 键关闭详细信息弹出窗口。当焦点位于地图区域或页面背景（没有文本字段获得焦点）时，按 Command K 或 Control K 打开页面查找并聚焦搜索字段。左上角的选项面板和缩放控件允许您进行筛选、更改布局、放大、缩小和调整视图大小。",
