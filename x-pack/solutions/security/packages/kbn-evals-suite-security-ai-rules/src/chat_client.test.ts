@@ -88,6 +88,25 @@ describe('SecurityRuleGenerationClient', () => {
       // The rest of the request contract is unchanged.
       expect(body.connector_id).toBe('connector-1');
     });
+
+    it('sends only top-level keys the converse route schema accepts', async () => {
+      const { fetch, calls } = createFetchStub(ruleCreationResponse());
+      const client = createClient(fetch);
+
+      await client.generateRule('Create a rule that detects credential dumping');
+
+      const body = JSON.parse(String(calls[0].options?.body)) as Record<string, unknown>;
+
+      // The converse route validates its body strictly (unknown keys => 400). `capabilities`
+      // was removed from the schema, so sending it fails every eval example.
+      expect(body).not.toHaveProperty('capabilities');
+      expect(Object.keys(body).sort()).toEqual([
+        'attachments',
+        'browser_api_tools',
+        'connector_id',
+        'input',
+      ]);
+    });
   });
 
   describe('trace and tool-call propagation', () => {

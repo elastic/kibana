@@ -138,7 +138,6 @@ export class SecurityRuleGenerationClient {
       // broke the evals once that agent was removed from the product.
       input: `Create a detection rule based on the following user_query using the dedicated detection rule creation tool. Do not perform any other actions after creating the rule. user_query: ${prompt}`,
       connector_id: this.connectorId,
-      capabilities: { visualizations: true },
       attachments: [
         {
           type: SECURITY_RULE_ATTACHMENT_TYPE,
