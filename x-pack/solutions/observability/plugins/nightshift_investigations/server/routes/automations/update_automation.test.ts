@@ -105,6 +105,16 @@ it('clears managed nested values when the request sends null', async () => {
   );
 });
 
+it('replaces a non-empty completions array', async () => {
+  const result = await call({
+    completions: [{ action: 'post_to_slack', targetMode: 'thread' }, { action: 'silent' }],
+  });
+
+  expect(result).toMatchObject({
+    completions: [{ action: 'post_to_slack', targetMode: 'thread' }, { action: 'silent' }],
+  });
+});
+
 describe('request validation', () => {
   const slackRow = {
     kind: 'slack',
