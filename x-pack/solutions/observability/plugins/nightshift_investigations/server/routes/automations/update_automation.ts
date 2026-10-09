@@ -51,12 +51,15 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
           connectorId: z.string().max(512).optional(),
         })
         .optional(),
-      completion: z
-        .object({
-          action: z.enum(['create_investigation', 'post_to_slack', 'silent']).nullable().optional(),
-          targetMode: z.enum(['thread', 'channel', 'self']).nullable().optional(),
-          destination: z.string().max(500).nullable().optional(),
-        })
+      completions: z
+        .array(
+          z.object({
+            action: z.enum(['create_investigation', 'post_to_slack', 'silent']).optional(),
+            targetMode: z.enum(['thread', 'channel', 'self']).optional(),
+            destination: z.string().max(500).optional(),
+          })
+        )
+        .max(10)
         .optional(),
       runtime: z
         .object({
@@ -90,9 +93,9 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
         tags: body.tags,
         isEnabled: body.isEnabled,
         trigger: body.trigger,
+        completions: body.completions,
       }),
       execution: applyChanges(existing.attributes.execution, body.execution ?? {}),
-      completion: applyChanges(existing.attributes.completion, body.completion ?? {}),
       runtime: applyChanges(existing.attributes.runtime, body.runtime ?? {}),
       updatedAt: new Date().toISOString(),
     };

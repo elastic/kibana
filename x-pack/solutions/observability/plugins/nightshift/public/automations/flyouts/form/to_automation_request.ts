@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import type {
   Automation,
   CreateAutomationBody,
@@ -92,11 +92,11 @@ export const toAutomationRequestBody = (
       ...(instructions ? { promptTemplate: instructions } : {}),
       reasoningMode: values.mode === 'investigate' ? 'investigate' : 'observe',
     },
-    completion: !values.slackAction
-      ? {}
+    completions: !values.slackAction
+      ? []
       : values.slackAction.target === 'thread'
-      ? { action: 'post_to_slack', targetMode: 'thread' }
-      : { action: 'post_to_slack', targetMode: values.slackAction.target, destination },
+      ? [{ action: 'post_to_slack', targetMode: 'thread' }]
+      : [{ action: 'post_to_slack', targetMode: values.slackAction.target, destination }],
     runtime: hasDailyLimit(values.trigger)
       ? { dailyDispatchLimit: Number(values.dailyDispatchLimit) }
       : {},
@@ -125,32 +125,32 @@ const toUpdatedTrigger = (
     : { rows: [row] };
 };
 
-const toUpdatedCompletion = (
+const toUpdatedCompletions = (
   values: AutomationFormValues,
   automation: Automation
-): NonNullable<UpdateAutomationBody['completion']> => {
+): NonNullable<UpdateAutomationBody['completions']> => {
+  const [completion = {}, ...otherCompletions] = automation.completions;
   if (values.slackAction?.target === 'thread') {
-    return {
-      ...automation.completion,
-      action: 'post_to_slack',
-      targetMode: 'thread',
-      destination: null,
-    };
+    return [
+      { ...omit(completion, 'destination'), action: 'post_to_slack', targetMode: 'thread' },
+      ...otherCompletions,
+    ];
   }
   if (values.slackAction) {
-    return {
-      ...automation.completion,
-      action: 'post_to_slack',
-      targetMode:
-        automation.completion.targetMode === 'thread' && values.slackAction.target === 'channel'
-          ? 'thread'
-          : values.slackAction.target,
-      destination: values.slackAction.destination.trim(),
-    };
+    return [
+      {
+        ...completion,
+        action: 'post_to_slack',
+        targetMode:
+          completion.targetMode === 'thread' && values.slackAction.target === 'channel'
+            ? 'thread'
+            : values.slackAction.target,
+        destination: values.slackAction.destination.trim(),
+      },
+      ...otherCompletions,
+    ];
   }
-  return automation.completion.action === 'post_to_slack'
-    ? { ...automation.completion, action: null, targetMode: null, destination: null }
-    : automation.completion;
+  return completion.action === 'post_to_slack' ? otherCompletions : automation.completions;
 };
 
 export const toAutomationUpdateBody = (
@@ -171,7 +171,7 @@ export const toAutomationUpdateBody = (
       ...request.execution,
       promptTemplate: values.instructions.trim() || null,
     },
-    completion: toUpdatedCompletion(values, automation),
+    completions: toUpdatedCompletions(values, automation),
     runtime: {
       ...automation.runtime,
       ...(hasDailyLimit(values.trigger)

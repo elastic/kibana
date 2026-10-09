@@ -25,7 +25,7 @@ const buildAutomation = (overrides: Partial<Automation>): Automation => ({
   isEnabled: true,
   trigger: { rows: [{ kind: 'alert' }] },
   execution: {},
-  completion: {},
+  completions: [],
   runtime: {},
   createdAt: '2026-10-01T00:00:00.000Z',
   updatedAt: '2026-10-01T00:00:00.000Z',
@@ -90,7 +90,7 @@ describe('automation request', () => {
           ],
         },
         execution: { promptTemplate: 'Find the cause', reasoningMode: 'investigate' },
-        completion: {},
+        completions: [],
         runtime: { dailyDispatchLimit: 20 },
       });
     });
@@ -137,7 +137,7 @@ describe('automation request', () => {
             },
           ],
         },
-        completion: { action: 'post_to_slack', targetMode: 'channel', destination: '#oncall' },
+        completions: [{ action: 'post_to_slack', targetMode: 'channel', destination: '#oncall' }],
         runtime: {},
       });
     });
@@ -236,16 +236,16 @@ describe('automation request', () => {
 
     it('keeps a thread reply target', () => {
       const automation = buildAutomation({
-        completion: { action: 'post_to_slack', targetMode: 'thread', destination: '#oncall' },
+        completions: [{ action: 'post_to_slack', targetMode: 'thread', destination: '#oncall' }],
       });
       const values = {
         ...alertValues,
         slackAction: { target: 'channel', destination: '#oncall' },
       } as Parameters<typeof toAutomationUpdateBody>[0];
 
-      expect(toAutomationUpdateBody(values, automation).completion).toMatchObject({
-        targetMode: 'thread',
-      });
+      expect(toAutomationUpdateBody(values, automation).completions).toMatchObject([
+        { targetMode: 'thread' },
+      ]);
     });
 
     it('keeps the trigger untouched when the form did not change it', () => {
@@ -286,14 +286,16 @@ describe('automation request', () => {
     it('keeps the stored completion of a Slack-triggered automation on unrelated edits', () => {
       const automation = buildAutomation({
         trigger: { rows: [{ kind: 'slack', event: 'message', channels: ['#oncall'] }] },
-        completion: { action: 'post_to_slack', targetMode: 'channel', destination: '#alerts' },
+        completions: [{ action: 'post_to_slack', targetMode: 'channel', destination: '#alerts' }],
       });
       const values = {
         ...toAutomationFormValues(automation),
         name: 'Renamed',
       } as Parameters<typeof toAutomationUpdateBody>[0];
 
-      expect(toAutomationUpdateBody(values, automation).completion).toEqual(automation.completion);
+      expect(toAutomationUpdateBody(values, automation).completions).toEqual(
+        automation.completions
+      );
     });
 
     it('saves a reply-in-thread action without a destination', () => {
@@ -303,35 +305,55 @@ describe('automation request', () => {
         slackAction: { target: 'thread', destination: '' },
       } as Parameters<typeof toAutomationUpdateBody>[0];
 
-      expect(toAutomationUpdateBody(values, automation).completion).toEqual({
-        action: 'post_to_slack',
-        targetMode: 'thread',
-        destination: null,
+      expect(toAutomationUpdateBody(values, automation).completions).toEqual([
+        { action: 'post_to_slack', targetMode: 'thread' },
+      ]);
+      expect(toAutomationRequestBody(values).completions).toEqual([
+        { action: 'post_to_slack', targetMode: 'thread' },
+      ]);
+    });
+
+    it('drops the stored destination when switching to a thread reply', () => {
+      const automation = buildAutomation({
+        completions: [{ action: 'post_to_slack', targetMode: 'channel', destination: '#oncall' }],
       });
-      expect(toAutomationRequestBody(values).completion).toEqual({
-        action: 'post_to_slack',
-        targetMode: 'thread',
-      });
+      const values = {
+        ...alertValues,
+        slackAction: { target: 'thread', destination: '' },
+      } as Parameters<typeof toAutomationUpdateBody>[0];
+
+      expect(toAutomationUpdateBody(values, automation).completions).toEqual([
+        { action: 'post_to_slack', targetMode: 'thread' },
+      ]);
     });
 
     it('keeps a completion action that is not a Slack post', () => {
-      const automation = buildAutomation({ completion: { action: 'create_investigation' } });
+      const automation = buildAutomation({ completions: [{ action: 'create_investigation' }] });
 
-      expect(toAutomationUpdateBody(alertValues, automation).completion).toEqual({
-        action: 'create_investigation',
-      });
+      expect(toAutomationUpdateBody(alertValues, automation).completions).toEqual([
+        { action: 'create_investigation' },
+      ]);
     });
 
     it('clears a Slack action that was removed in the form', () => {
       const automation = buildAutomation({
-        completion: { action: 'post_to_slack', targetMode: 'channel', destination: '#oncall' },
+        completions: [{ action: 'post_to_slack', targetMode: 'channel', destination: '#oncall' }],
       });
 
-      expect(toAutomationUpdateBody(alertValues, automation).completion).toEqual({
-        action: null,
-        targetMode: null,
-        destination: null,
+      expect(toAutomationUpdateBody(alertValues, automation).completions).toEqual([]);
+    });
+
+    it('replaces only the first completion and keeps the others', () => {
+      const automation = buildAutomation({
+        completions: [
+          { action: 'post_to_slack', targetMode: 'channel', destination: '#oncall' },
+          { action: 'create_investigation' },
+        ],
       });
+
+      expect(toAutomationUpdateBody(alertValues, automation).completions).toEqual([
+        { action: 'create_investigation' },
+      ]);
     });
   });
 });

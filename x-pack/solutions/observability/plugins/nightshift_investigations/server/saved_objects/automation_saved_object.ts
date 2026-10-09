@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import type { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import type { NightshiftAutomationAttributes } from '../lib/automations/types';
+import { isEmpty } from 'lodash';
+import type {
+  NightshiftAutomationAttributes,
+  NightshiftAutomationCompletion,
+} from '../lib/automations/types';
 
 export const NIGHTSHIFT_AUTOMATION_SO_TYPE = 'nightshift-automation';
 
@@ -30,6 +34,14 @@ const automationAttributesSchemaV1 = schema.object({
 const automationAttributesSchemaV2 = automationAttributesSchemaV1.extends({
   tags: schema.maybe(schema.arrayOf(schema.string({ maxLength: 32 }), { maxSize: 50 })),
   author: schema.maybe(schema.string({ maxLength: 1024 })),
+});
+
+const { completion: _completion, ...automationAttributesSchemaV3Base } =
+  automationAttributesSchemaV2.getPropSchemas();
+
+const automationAttributesSchemaV3 = schema.object({
+  ...automationAttributesSchemaV3Base,
+  completions: schema.arrayOf(opaqueObject, { maxSize: 10 }),
 });
 
 export const nightshiftAutomationSavedObjectType: SavedObjectsType<NightshiftAutomationAttributes> =
@@ -64,6 +76,25 @@ export const nightshiftAutomationSavedObjectType: SavedObjectsType<NightshiftAut
         schemas: {
           create: automationAttributesSchemaV2,
           forwardCompatibility: automationAttributesSchemaV2.extends({}, { unknowns: 'ignore' }),
+        },
+      },
+      3: {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: (
+              doc: SavedObjectUnsanitizedDoc<{ completion: NightshiftAutomationCompletion }>
+            ) => ({
+              attributes: {
+                completions: isEmpty(doc.attributes.completion) ? [] : [doc.attributes.completion],
+              },
+            }),
+          },
+          { type: 'data_removal', removedAttributePaths: ['completion'] },
+        ],
+        schemas: {
+          create: automationAttributesSchemaV3,
+          forwardCompatibility: automationAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
         },
       },
     },

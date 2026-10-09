@@ -19,6 +19,16 @@ const attributes = {
   updatedAt: '2026-10-01T00:00:00.000Z',
 };
 
+const { completion, ...baseV3 } = attributes;
+
+const getModelVersion = (version: number) => {
+  const modelVersions = nightshiftAutomationSavedObjectType.modelVersions;
+  if (!modelVersions || typeof modelVersions === 'function') {
+    throw new Error('Expected static model versions');
+  }
+  return Object.entries(modelVersions).find(([key]) => key === String(version))?.[1];
+};
+
 const getSchemas = (version: string) => {
   const modelVersions = nightshiftAutomationSavedObjectType.modelVersions;
   if (!modelVersions || typeof modelVersions === 'function') {
@@ -45,6 +55,45 @@ describe('nightshift automation saved object', () => {
     expect(getSchemas('2')?.create?.validate({ ...attributes, author: 'alice' })).toEqual({
       ...attributes,
       author: 'alice',
+    });
+  });
+
+  describe('model version 3', () => {
+    const backfill = (completionValue: object) => {
+      const change = getModelVersion(3)?.changes.find(({ type }) => type === 'data_backfill');
+      if (change?.type !== 'data_backfill') throw new Error('Expected data_backfill');
+      return change.backfillFn(
+        { id: '1', type: 'nightshift-automation', attributes: { completion: completionValue } },
+        {} as Parameters<typeof change.backfillFn>[1]
+      );
+    };
+
+    it('moves the completion into a one-item array', () => {
+      expect(backfill({ action: 'post_to_slack' })).toEqual({
+        attributes: { completions: [{ action: 'post_to_slack' }] },
+      });
+    });
+
+    it('maps an empty completion to an empty array', () => {
+      expect(backfill({})).toEqual({ attributes: { completions: [] } });
+    });
+
+    it('removes the singular completion', () => {
+      expect(getModelVersion(3)?.changes).toContainEqual({
+        type: 'data_removal',
+        removedAttributePaths: ['completion'],
+      });
+    });
+
+    it('validates completions as a bounded array', () => {
+      const validate = (completions: object[]) =>
+        getSchemas('3')?.create?.validate({ ...baseV3, completions });
+
+      expect(validate([{ action: 'silent' }])).toEqual({
+        ...baseV3,
+        completions: [{ action: 'silent' }],
+      });
+      expect(() => validate(Array.from({ length: 11 }, () => ({})))).toThrow();
     });
   });
 });

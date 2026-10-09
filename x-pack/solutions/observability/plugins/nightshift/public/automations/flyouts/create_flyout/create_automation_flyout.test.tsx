@@ -86,7 +86,7 @@ describe('CreateAutomationFlyout', () => {
           isEnabled: false,
           trigger: { rows: [{ kind: 'alert' }] },
           execution: { promptTemplate: 'Find the root cause', reasoningMode: 'investigate' },
-          completion: {},
+          completions: [],
           runtime: { dailyDispatchLimit: 20 },
         },
         expect.objectContaining({ onSuccess: expect.any(Function) })

@@ -15,7 +15,7 @@ const buildAutomation = (overrides: Partial<Automation>): Automation => ({
   isEnabled: true,
   trigger: { rows: [{ kind: 'alert' }] },
   execution: {},
-  completion: {},
+  completions: [],
   runtime: {},
   createdAt: '2026-10-01T00:00:00.000Z',
   updatedAt: '2026-10-01T00:00:00.000Z',
@@ -31,7 +31,7 @@ describe('toCloneRequestBody', () => {
       description: 'Triage alerts',
       trigger: { rows: [{ kind: 'schedule', cronExpression: '0 7 * * 1', timezone: 'CET' }] },
       execution: { promptTemplate: 'Find the cause', reasoningMode: 'investigate' },
-      completion: { action: 'post_to_slack', targetMode: 'self', destination: '@me' },
+      completions: [{ action: 'post_to_slack', targetMode: 'self', destination: '@me' }],
       runtime: { dailyDispatchLimit: 5 },
     });
 
@@ -43,7 +43,7 @@ describe('toCloneRequestBody', () => {
       automationType: 'custom',
       trigger: { rows: [{ kind: 'schedule', cronExpression: '0 7 * * 1', timezone: 'CET' }] },
       execution: { promptTemplate: 'Find the cause', reasoningMode: 'investigate' },
-      completion: { action: 'post_to_slack', targetMode: 'self', destination: '@me' },
+      completions: [{ action: 'post_to_slack', targetMode: 'self', destination: '@me' }],
       runtime: { dailyDispatchLimit: 5 },
     });
   });
