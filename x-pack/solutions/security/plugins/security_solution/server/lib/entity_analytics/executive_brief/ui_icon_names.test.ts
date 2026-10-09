@@ -13,6 +13,12 @@ const { typeToPathMap } = jest.requireActual<{ typeToPathMap: Record<string, unk
   '@elastic/eui/lib/components/icon/icon_map'
 );
 
+// Lives in server/ because public code may not import Node builtins; it scans the brief's UI folder.
+const UI_DIR = path.resolve(
+  __dirname,
+  '../../../../public/entity_analytics/components/executive_brief'
+);
+
 const ICON_LITERAL =
   /iconType(?:=|:\s*)["']([A-Za-z0-9]+)["']|iconType:\s*["']([A-Za-z0-9]+)["']|^\s+\w+:\s*["']([A-Za-z0-9]+)["'],?\s*\/\/\s*icon/gm;
 
@@ -25,11 +31,12 @@ const sourceFiles = (dir: string): string[] =>
 
 describe('executive brief icon names', () => {
   it('only uses icon names that exist in the installed EUI (no blank icons)', () => {
-    const unknown = sourceFiles(__dirname).flatMap((file) =>
+    expect(fs.existsSync(UI_DIR)).toBe(true);
+    const unknown = sourceFiles(UI_DIR).flatMap((file) =>
       [...fs.readFileSync(file, 'utf8').matchAll(ICON_LITERAL)]
         .map((match) => match[1] ?? match[2] ?? match[3])
         .filter((name) => !(name in typeToPathMap))
-        .map((name) => `${path.relative(__dirname, file)}: ${name}`)
+        .map((name) => `${path.relative(UI_DIR, file)}: ${name}`)
     );
 
     expect(unknown).toEqual([]);
