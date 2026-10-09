@@ -84,8 +84,7 @@ const useStyles = (isEmbeddable: boolean) => {
       // Make sure the editor actions don't create scrollbars on this container
       // SASSTODO: Uncomment when tooltips are EUI-ified (inside portals)
       overflow: hidden;
-      padding: ${euiTheme.size.m} 0;
-      borderradius: none;
+      padding: ${euiTheme.size.m};
       gap: 0;
       ${isEmbeddable &&
       css`
@@ -110,6 +109,7 @@ const useStyles = (isEmbeddable: boolean) => {
     scrollablePanelWithBackground: css`
       ${useEuiOverflowScroll('y', false)}
       background-color: ${euiTheme.colors.body};
+      border-radius: ${euiTheme.border.radius.inline};
     `,
   };
 };
@@ -257,9 +257,9 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
         grow={true}
         borderRadius={isEmbeddable ? 'none' : 'm'}
         hasShadow={false}
-        hasBorder={false}
+        hasBorder={true}
       >
-        <EuiSplitPanel.Inner grow={false} css={styles.consoleTabs}>
+        <EuiSplitPanel.Inner grow={false} paddingSize="s" css={styles.consoleTabs}>
           <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem>
               <TopNavMenu
@@ -358,7 +358,6 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
             )}
           </EuiFlexGroup>
         </EuiSplitPanel.Inner>
-        <EuiHorizontalRule margin="none" />
         <EuiSplitPanel.Inner
           paddingSize="none"
           css={styles.scrollablePanelWithBackground}
@@ -374,7 +373,6 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
           {currentTab === HISTORY_TAB_ID && <History />}
           {currentTab === CONFIG_TAB_ID && <Config />}
         </EuiSplitPanel.Inner>
-        <EuiHorizontalRule margin="none" />
         <EuiSplitPanel.Inner
           paddingSize="xs"
           grow={false}
