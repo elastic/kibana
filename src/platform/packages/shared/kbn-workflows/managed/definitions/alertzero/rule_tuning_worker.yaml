@@ -88,6 +88,64 @@ consts:
   no_rows: []
   reviewed_tag: detection-watch:tuning-reviewed
 steps:
+  # Expire pending tuning proposals whose rule was edited or deleted after they
+  # were created, so nobody is asked to approve a change that can't be applied.
+  - name: list_pending_tuning_proposals
+    type: kibana.request
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals"
+      headers:
+        elastic-api-version: "1"
+      query:
+        status: pending
+        origin: alertzero
+        category: configure
+        size: 100
+    on-failure:
+      continue: true
+
+  - name: expire_stale_tuning_proposals
+    type: foreach
+    foreach: "${{ steps.list_pending_tuning_proposals.output.proposals | default: consts.no_rows | where: 'actionWorkflowId', 'system-alertzero-action-edit-rule' }}"
+    steps:
+      - name: fetch_proposal_rule
+        type: kibana.request
+        with:
+          method: GET
+          path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ foreach.item.actionInput.id | url_encode }}"
+          headers:
+            elastic-api-version: "2023-10-31"
+        on-failure:
+          continue: true
+
+      - name: expire_deleted_rule_proposal
+        type: proposals.updateProposal
+        if: "${{ steps.fetch_proposal_rule.error != nil and steps.fetch_proposal_rule.error.message contains 'HTTP 404' }}"
+        with:
+          proposalId: "{{ foreach.item.id }}"
+          status: expired
+          rationale: >-
+            The rule was deleted after this proposal was created, so this tuning
+            can't be applied.
+        on-failure:
+          continue: true
+
+      - name: expire_changed_rule_proposal
+        type: proposals.updateProposal
+        if: >-
+          ${{ steps.fetch_proposal_rule.error == nil
+            and foreach.item.actionInput.expected_revision != nil
+            and steps.fetch_proposal_rule.output.revision != foreach.item.actionInput.expected_revision }}
+        with:
+          proposalId: "{{ foreach.item.id }}"
+          status: expired
+          rationale: >-
+            The rule was changed by "{{ steps.fetch_proposal_rule.output.updated_by }}"
+            after this proposal was created, so this tuning can't be applied.
+        on-failure:
+          continue: true
+
   # A review parks at its gate for up to 72h and outlives the sweep that started it.
   # Its rule would be re-harvested until the gate resolves, wasting one of the
   # max_rules_per_sweep slots on a launch the child's per-rule drop concurrency then

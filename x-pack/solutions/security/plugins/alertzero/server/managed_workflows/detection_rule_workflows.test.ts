@@ -442,6 +442,7 @@ describe('detection rule workflows', () => {
       expect(actionInputs.actionWorkflowId).toBe(ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID);
       expect(actionInputs.actionInput).toEqual({
         id: '{{ inputs.rule_uuid }}',
+        expected_revision: '${{ steps.fetch_rule.output.revision }}',
         query: '{{ steps.diagnose_rule.output.structured_output.proposed_query }}',
       });
       // Same edit-rule action as the query path; it patches only the fields it is given.
@@ -449,6 +450,7 @@ describe('detection rule workflows', () => {
       expect(settingsInputs.actionWorkflowId).toBe(actionInputs.actionWorkflowId);
       expect(settingsInputs.actionInput).toEqual({
         id: '{{ inputs.rule_uuid }}',
+        expected_revision: '${{ steps.fetch_rule.output.revision }}',
         // `${{ }}` keeps the score a number.
         risk_score: '${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}',
         severity: '{{ steps.diagnose_rule.output.structured_output.proposed_severity }}',
@@ -738,6 +740,55 @@ describe('detection rule workflows', () => {
         expect(reviewedRows).toEqual([ruleBCurrentVersion]);
       });
 
+      describe('expiring stale tuning proposals', () => {
+        const expireSteps = ['expire_deleted_rule_proposal', 'expire_changed_rule_proposal'].map(
+          (stepName) => tuningSteps.find(({ name }) => name === stepName)!
+        );
+        const proposal = (expectedRevision?: number) => ({
+          id: 'proposal-1',
+          actionInput: { id: 'rule-1', expected_revision: expectedRevision },
+        });
+
+        it.each([
+          [
+            'a deleted rule',
+            { error: { message: 'HTTP 404: Not Found' } },
+            0,
+            ['expire_deleted_rule_proposal'],
+          ],
+          ['a failed rule read', { error: { message: 'HTTP 500: Internal Server Error' } }, 0, []],
+          ['an edited rule', { output: { revision: 1 } }, 0, ['expire_changed_rule_proposal']],
+          ['an unchanged rule', { output: { revision: 0 } }, 0, []],
+          ['a proposal without a revision', { output: { revision: 3 } }, undefined, []],
+        ])('handles %s', (_, fetchRule, expectedRevision, expected) => {
+          const context = {
+            foreach: { item: proposal(expectedRevision) },
+            steps: { fetch_proposal_rule: fetchRule },
+          };
+          const fired = expireSteps.filter((step) => resolveExpression(step.if, context) === true);
+
+          expect(fired.map(({ name }) => name)).toEqual(expected);
+        });
+
+        it('explains why in plain text', async () => {
+          const context = {
+            foreach: { item: proposal(0) },
+            steps: { fetch_proposal_rule: { output: { revision: 1, updated_by: 'jane' } } },
+          };
+          const engine = createWorkflowLiquidEngine();
+          const [deleted, changed] = await Promise.all(
+            expireSteps.map((step) => engine.parseAndRender(String(step.with?.rationale), context))
+          );
+
+          expect(deleted).toBe(
+            "The rule was deleted after this proposal was created, so this tuning can't be applied."
+          );
+          expect(changed).toBe(
+            'The rule was changed by "jane" after this proposal was created, so this tuning can\'t be applied.'
+          );
+        });
+      });
+
       // The pool is cut in ES|QL before the enabled check runs, so it must exceed
       // the launch cap for the enabled filter to have anything to backfill from.
       it('overscans the harvest pool beyond the launch cap', () => {
@@ -918,18 +969,64 @@ describe('detection rule workflows', () => {
         }
       });
 
-      // The whole object is the patch body, so one action covers any field.
-      it('passes the whole edit through as one patch, so one action covers any field', () => {
+      // Every editable field must be in the pick list, or edits to it would be dropped.
+      it('patches every editable field it is given, and nothing else', () => {
         const yaml = parse(getManagedYaml(ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID)) as WorkflowYaml;
         const actionSteps = flattenSteps(yaml.steps as unknown as NestedStep[]);
         const patchStep = actionSteps.find(({ type }) => type === 'security.patchRule')!;
+        const [trigger] = yaml.triggers as unknown as Array<{
+          inputs: { properties: { actionInput: { properties: Record<string, unknown> } } };
+        }>;
+        const editable = Object.keys(trigger.inputs.properties.actionInput.properties).filter(
+          (key) => key !== 'expected_revision'
+        );
+        const patch = String(patchStep.with?.patch);
 
-        expect(patchStep.with?.patch).toBe('${{ inputs.actionInput }}');
+        expect(patch).toMatch(/^\$\{\{ inputs\.actionInput \| pick: /);
+        expect(patch).not.toContain('expected_revision');
+        for (const key of editable) {
+          expect(patch).toContain(`'${key}'`);
+        }
 
         // No impact on the action: the caller's value wins.
         const metadata = (yaml.consts as Record<string, Record<string, unknown>>).actionMetadata;
         expect(metadata).not.toHaveProperty('impact');
         expect(metadata.approvalPolicy).toBe('always-gate');
+      });
+
+      describe.each([
+        ['edit', ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID],
+        ['exception', ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW_ID],
+      ])('refuses a stale %s proposal', (_kind, workflowId) => {
+        it.each([
+          ['a deleted rule', { error: { message: 'HTTP 404: Not Found' } }, 0, 'fail_rule_deleted'],
+          [
+            'any other read failure',
+            { error: { message: 'HTTP 500: Internal Server Error' } },
+            0,
+            'fail_rule_read',
+          ],
+          ['a rule edited since', { output: { revision: 1 } }, 0, 'fail_rule_changed'],
+          ['an unchanged rule', { output: { revision: 0 } }, 0, undefined],
+          ['a proposal without a revision', { output: { revision: 3 } }, undefined, undefined],
+        ])('for %s', (_, fetchRule, expectedRevision, expectedFailStep) => {
+          const yaml = parse(getManagedYaml(workflowId)) as WorkflowYaml;
+          const context = {
+            inputs: { actionInput: { id: 'rule-1', expected_revision: expectedRevision } },
+            steps: { fetch_rule: fetchRule },
+          };
+          const steps = flattenSteps(yaml.steps as unknown as NestedStep[]);
+          const failStep = steps.find(
+            ({ type, if: condition }) =>
+              type === 'workflow.fail' && resolveExpression(condition, context) === true
+          );
+
+          expect(failStep?.name).toBe(expectedFailStep);
+          // The rule is only touched after every check has had its chance to stop the run.
+          expect(steps.findIndex(({ type }) => type.startsWith('security.'))).toBeGreaterThan(
+            steps.findIndex((step) => step === failStep)
+          );
+        });
       });
 
       // The gate validates actionInput against this schema at proposal creation.
@@ -1044,6 +1141,7 @@ describe('detection rule workflows', () => {
         const propose = reviewSteps.find(({ name }) => name === 'propose_exception')!;
         const {
           rule_id: ruleId,
+          expected_revision: expectedRevision,
           description: actionDescription,
           ...exceptionItem
         } = (propose.with?.inputs as { actionInput: Record<string, unknown> }).actionInput;
@@ -1056,6 +1154,7 @@ describe('detection rule workflows', () => {
             'Exception proposed by the rule tuning workflow after reviewing {{ inputs.fp_count }} false-positive alerts.',
         });
         expect(ruleId).toBe('{{ inputs.rule_uuid }}');
+        expect(expectedRevision).toBe('${{ steps.fetch_rule.output.revision }}');
         expect(actionDescription).toBe(
           'Added by the rule tuning workflow after {{ inputs.fp_count }} false positives were reviewed.'
         );
@@ -1110,13 +1209,13 @@ describe('detection rule workflows', () => {
         expect(previewBody.filters).toBe(
           '${{ steps.fetch_rule.output.filters | default: consts.no_items }}'
         );
-        // The query arm previews the proposed query; the exception arm keeps the rule's
-        // own query and differs only in the filters the exception step built.
+        // Only the query arm previews the proposed query; exception, threshold and
+        // schedule keep the rule's own query and change filters, threshold or schedule.
         expect(proposedBody.query).toContain(
-          "{% if steps.diagnose_rule.output.structured_output.change_type == 'exception' %}{{ steps.fetch_rule.output.query }}"
+          "{% if steps.diagnose_rule.output.structured_output.change_type == 'query' %}{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
         );
         expect(proposedBody.query).toContain(
-          '{% else %}{{ steps.diagnose_rule.output.structured_output.proposed_query }}{% endif %}'
+          '{% else %}{{ steps.fetch_rule.output.query }}{% endif %}'
         );
         expect(proposedBody.filters).toContain('steps.build_exception_filter.output.filters');
         expect(proposedBody.filters).toContain('| default: steps.fetch_rule.output.filters');

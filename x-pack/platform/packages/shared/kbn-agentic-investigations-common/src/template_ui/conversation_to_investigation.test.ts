@@ -356,4 +356,16 @@ describe('conversationToEscalationHeader', () => {
     );
     expect(result.assigneeUids).toEqual([]);
   });
+
+  it('reads the summary, falling back to the single-line description', () => {
+    expect(
+      conversationToEscalationHeader(
+        conversation({ metadata: { summary: 'Long form', description: 'Short' } })
+      ).summary
+    ).toBe('Long form');
+    expect(
+      conversationToEscalationHeader(conversation({ metadata: { description: 'Short' } })).summary
+    ).toBe('Short');
+    expect(conversationToEscalationHeader(conversation()).summary).toBeUndefined();
+  });
 });
