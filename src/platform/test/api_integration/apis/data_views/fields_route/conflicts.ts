@@ -20,6 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   // Migration recommendation: MIGRATE TO SCOUT (API)
   // Sibling `fields_for_wildcard_route` is ported, this route is not. Tag
   // `@local-stateful-classic`.
+  // Target: src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/conflicts.spec.ts
   describe('conflicts', () => {
     before(() =>
       esArchiver.load(

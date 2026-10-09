@@ -20,6 +20,7 @@ export default function ({ getService }) {
 
   // Migration recommendation: REPLACE WITH UNIT/JEST
   // Route returns a hardcoded list; a Jest route test (or deletion) is enough. Delete the `it.skip` test.
+  // Target: src/platform/plugins/shared/data/server/scripts/route.test.ts (new)
   describe('Script Languages API', function getLanguages() {
     it('should return 200 with an array of languages', () =>
       supertest

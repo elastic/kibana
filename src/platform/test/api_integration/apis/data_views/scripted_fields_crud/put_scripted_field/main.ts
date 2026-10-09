@@ -16,6 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   // Migration recommendation: MIGRATE TO SCOUT (API)
   // Overwrite and add-new cases for PUT.
+  // Target: src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud.spec.ts
   describe('main', () => {
     before(async () => {
       await esArchiver.load(

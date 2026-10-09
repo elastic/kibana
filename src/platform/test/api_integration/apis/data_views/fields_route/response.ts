@@ -80,6 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
   // Migration recommendation: MIGRATE TO SCOUT (API)
   // No Scout spec hits this route and the unit test only covers `allow_hidden`. Tag
   // `@local-stateful-classic`.
+  // Target: src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/response.spec.ts
   describe('fields route response', () => {
     before(() =>
       esArchiver.load(

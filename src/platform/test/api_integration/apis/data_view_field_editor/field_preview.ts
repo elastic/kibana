@@ -57,6 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     // Migration recommendation: MIGRATE TO SCOUT (API)
     // Runs real painless scripts against an index; needs real ES.
+    // Target: src/platform/plugins/shared/data_view_field_editor/test/scout/api/tests/field_preview.spec.ts (new)
     describe('should return the script value', () => {
       const tests = [
         {
@@ -106,6 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     // Migration recommendation: REPLACE WITH UNIT/JEST
     // The 400s only exercise the route's schema validation.
+    // Target: src/platform/plugins/shared/data_view_field_editor/server/routes/field_preview.test.ts (new)
     describe('payload validation', () => {
       it('should require a script', async () => {
         await supertest
@@ -149,6 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     // Migration recommendation: MIGRATE TO SCOUT (API)
     // Pins ES's cast error wording parsed by `getErrorCodeFromErrorReason`; needs real ES.
+    // Target: src/platform/plugins/shared/data_view_field_editor/test/scout/api/tests/field_preview.spec.ts (new)
     describe('Error messages', () => {
       // As ES does not return error codes we will add a test to make sure its error message string
       // does not change overtime as we rely on it to extract our own error code.

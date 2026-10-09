@@ -21,6 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
   // Migration recommendation: MIGRATE TO SCOUT (API)
   // HTTP caching (cache-control, etag, 304, uiSetting) is only testable end to end. Tag
   // `@local-stateful-classic`.
+  // Target: src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/cache.spec.ts
   describe('cache headers', () => {
     before(() =>
       esArchiver.load(

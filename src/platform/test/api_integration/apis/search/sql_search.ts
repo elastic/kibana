@@ -22,6 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   // Migration recommendation: MIGRATE TO SCOUT (API)
   // Needs a real ES SQL async search; no Scout coverage of the `sql` strategy. Tag `@local-stateful-classic`.
+  // Target: src/platform/plugins/shared/data/test/scout/api/tests/search/sql_search.spec.ts
   describe('SQL search', () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();

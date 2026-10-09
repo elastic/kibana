@@ -50,9 +50,8 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   // Migration recommendation: MIXED. See individual tests.
-  // Serverless copy of src/platform/test/api_integration/apis/data_view_field_editor/field_preview.ts,
-  // audited there. Migrate together with the stateful test, condensed into a single Scout API test
-  // tagged with `tags.deploymentAgnostic`.
+  // Serverless copy of apis/data_view_field_editor/field_preview.ts: merge into the same Scout API
+  // test (`tags.deploymentAgnostic`).
   describe('Field preview', function () {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
@@ -64,8 +63,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     // Migration recommendation: MIGRATE TO SCOUT (API)
-    // Runs a real painless script through the route against an index, so it needs a real ES.
-    // Not coverable with Jest.
+    // Runs real painless scripts against an index; needs real ES.
+    // Target: src/platform/plugins/shared/data_view_field_editor/test/scout/api/tests/field_preview.spec.ts (new)
     describe('should return the script value', () => {
       const tests = [
         {
@@ -116,8 +115,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     // Migration recommendation: REPLACE WITH UNIT/JEST
-    // The three 400s (missing script / context / index) only exercise the route's config-schema
-    // validation, no ES involved. Cover them with a Jest test of the route's request schema.
+    // The 400s only exercise the route's schema validation.
+    // Target: src/platform/plugins/shared/data_view_field_editor/server/routes/field_preview.test.ts (new)
     describe('payload validation', () => {
       it('should require a script', async () => {
         await supertestWithoutAuth
@@ -166,8 +165,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     // Migration recommendation: MIGRATE TO SCOUT (API)
-    // Pins the wording of the ES error message that `getErrorCodeFromErrorReason` parses to derive
-    // CAST_ERROR. It only fails if real ES changes its message, so it must run against real ES.
+    // Pins ES's cast error wording parsed by `getErrorCodeFromErrorReason`; needs real ES.
+    // Target: src/platform/plugins/shared/data_view_field_editor/test/scout/api/tests/field_preview.spec.ts (new)
     describe('Error messages', () => {
       // As ES does not return error codes we will add a test to make sure its error message string
       // does not change overtime as we rely on it to extract our own error code.

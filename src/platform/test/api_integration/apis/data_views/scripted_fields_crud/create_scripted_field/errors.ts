@@ -15,6 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   // Migration recommendation: MIGRATE TO SCOUT (API)
   // Body validation errors (missing field, scripted: false) for create.
+  // Target: src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud.spec.ts
   describe('errors', () => {
     it('returns an error field object is not provided', async () => {
       const title = `foo-${Date.now()}-${Math.random()}*`;

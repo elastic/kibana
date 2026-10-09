@@ -16,6 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   // Migration recommendation: MIGRATE TO SCOUT (API)
   // Removes a scripted field and checks it is gone from the data view.
+  // Target: src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud.spec.ts
   describe('main', () => {
     before(async () => {
       await esArchiver.load(

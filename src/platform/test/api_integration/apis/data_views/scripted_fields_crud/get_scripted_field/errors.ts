@@ -16,6 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   // Migration recommendation: MIGRATE TO SCOUT (API)
   // 404, too-long ID and non-scripted-field errors for GET.
+  // Target: src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud.spec.ts
   describe('errors', () => {
     const basicIndex = '*asic_index';
     let indexPattern: any;

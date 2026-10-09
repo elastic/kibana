@@ -131,6 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // MIGRATE TO SCOUT (API)
       // This and the next two tests depend on real ES error shapes.
+      // Target: src/platform/plugins/shared/data/test/scout/api/tests/search/ (new spec next to ese_post_sync.spec.ts)
       it('should return 400 with illegal ES argument', async () => {
         const resp = await supertestAdminWithCookieCredentials
           .post(`/internal/search/es`)

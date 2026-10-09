@@ -82,6 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
   // Migration recommendation: MIXED. See individual tests.
   // No serverless copy: tag the Scout API test `@local-stateful-classic`. Existing Scout coverage
   // (`saved_query_shared_delete.spec.ts`) does not overlap.
+  // Target (all Scout tests below): src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts
   describe('Saved queries API', function () {
     before(async () => {
       await esArchiver.emptyKibanaIndex();

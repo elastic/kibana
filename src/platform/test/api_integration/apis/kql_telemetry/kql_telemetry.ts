@@ -39,6 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     // MIGRATE TO SCOUT (API)
     // This and the next three tests: counter increments need the saved objects index.
+    // Target: src/platform/plugins/shared/data/test/scout/api/tests/kql_telemetry.spec.ts
     it('should increment the opt *in* counter in the .kibana_analytics/kql-telemetry document', async () => {
       await supertest
         .post('/internal/kql_opt_in_stats')
@@ -109,6 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     // REPLACE WITH UNIT/JEST
     // Only exercises the route schema.
+    // Target: src/platform/plugins/shared/data/server/kql_telemetry/route.test.ts (new)
     it('should only accept literal boolean values for the opt_in POST body param', function () {
       return Promise.all([
         supertest
