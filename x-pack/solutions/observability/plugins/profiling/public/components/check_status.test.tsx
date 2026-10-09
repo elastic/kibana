@@ -8,6 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { EnabledProfilingStatus, ProfilingStatus } from '@kbn/profiling-utils';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 
 jest.mock('react-router-dom', () => ({ useLocation: jest.fn() }));
 jest.mock('../hooks/use_profiling_router');
@@ -24,7 +25,6 @@ jest.mock('./profiling_app_page_template', () => ({
 import { useLocation } from 'react-router-dom';
 import { AsyncStatus } from '../hooks/use_async';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
-import { AddDataTabs } from '../views/add_data_view/types';
 import { useLicenseContext } from './contexts/license/use_license_context';
 import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
 import { useProfilingStatus } from './contexts/profiling_status/use_profiling_status';
@@ -188,14 +188,14 @@ describe('CheckStatus', () => {
   describe('when data from before 8.9.1 exists', () => {
     const legacyData = makeStatus({ universalProfiling: { hasData: true, hasLegacyData: true } });
 
-    it('redirects to the add data page, which shows the deletion instructions', () => {
+    it('redirects to the Universal Profiling add data instructions, which show how to delete it', () => {
       mockStatus({ data: legacyData });
 
       renderCheckStatus();
 
       expect(routerPush).toHaveBeenCalledWith('/add-data-instructions', {
         path: {},
-        query: { selectedTab: AddDataTabs.Kubernetes },
+        query: { schema: ProfilingSchema.ECS },
       });
       expect(screen.queryByTestId('profilingApp')).not.toBeInTheDocument();
     });
@@ -256,7 +256,7 @@ describe('CheckStatus', () => {
 
     expect(routerPush).toHaveBeenCalledWith('/add-data-instructions', {
       path: {},
-      query: { selectedTab: AddDataTabs.Kubernetes },
+      query: {},
     });
     expect(screen.queryByTestId('profilingApp')).not.toBeInTheDocument();
   });
@@ -268,7 +268,7 @@ describe('CheckStatus', () => {
 
     expect(routerPush).toHaveBeenCalledWith('/add-data-instructions', {
       path: {},
-      query: { selectedTab: AddDataTabs.Kubernetes },
+      query: {},
     });
     expect(screen.queryByTestId('profilingApp')).not.toBeInTheDocument();
   });

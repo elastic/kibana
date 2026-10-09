@@ -49,6 +49,22 @@ export const REMOVE_REQUIRED_FIELD_BUTTON_ARIA_LABEL = i18n.translate(
   }
 );
 
+export const SHOW_MORE_REQUIRED_FIELDS = (count: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.showMoreButtonLabel',
+    {
+      values: { count },
+      defaultMessage: 'Show {count} more',
+    }
+  );
+
+export const SHOW_LESS_REQUIRED_FIELDS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.showLessButtonLabel',
+  {
+    defaultMessage: 'Show less',
+  }
+);
+
 export const ADD_REQUIRED_FIELD = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.addRequiredFieldButtonLabel',
   {
