@@ -57,12 +57,12 @@ export const MonitorAssignedAgents = ({
   const privateLocationIds = new Set(privateLocations.map((loc) => loc.id));
   const entries = assignments.filter(
     (entry) =>
-      privateLocationIds.has(entry.locationId) && (entry.isAgentSharding || entry.agents.length > 0)
+      privateLocationIds.has(entry.locationId) && (entry.isShardingActive || entry.agents.length > 0)
   );
 
   const allSharded =
     entries.length > 0
-      ? entries.every((entry) => entry.isAgentSharding)
+      ? entries.every((entry) => entry.isShardingActive)
       : hasAtLeast(AGENT_SHARDING_MIN_LICENSE) === true;
 
   const title = (

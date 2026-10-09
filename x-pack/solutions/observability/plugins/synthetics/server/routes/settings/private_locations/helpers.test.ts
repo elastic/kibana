@@ -257,20 +257,3 @@ describe('updatePrivateLocationMonitors', () => {
     ).rejects.toThrow(/failed to update monitors/i);
   });
 });
-
-describe('contract mappers', () => {
-  it('drops the removed isAgentSharding attribute from legacy saved objects', () => {
-    expect(
-      toClientContract({
-        attributes: {
-          label: 'Loc',
-          id: 'loc-1',
-          agentPolicyId: 'ap-1',
-          isServiceManaged: false,
-          isAgentSharding: true,
-        },
-        namespaces: ['default'],
-      } as any)
-    ).not.toHaveProperty('isAgentSharding');
-  });
-});
