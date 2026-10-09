@@ -8,7 +8,6 @@
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  getDetectionPausedCalloutBody,
   getDetectionPausedCalloutTitle,
   isPausedByFeatureFlag,
 } from '@kbn/significant-events-plugin/common';
@@ -16,11 +15,7 @@ import { KbnWarningCallout } from '@kbn/ui-callout';
 import React from 'react';
 import { useMaintenanceStatus } from '../hooks/use_significant_events_maintenance';
 
-export const DetectionPausedCallout = ({
-  canManageAndConfigure,
-}: {
-  canManageAndConfigure: boolean;
-}) => {
+export const DetectionPausedCallout = () => {
   const { data: status } = useMaintenanceStatus();
 
   if (status?.state !== 'paused') {
@@ -65,16 +60,7 @@ export const DetectionPausedCallout = ({
         size="s"
         title={disabledCounts ? `${title} · ${disabledCounts}` : title}
         data-test-subj="streams-settings-maintenance-paused-status"
-        text={
-          automaticPause ? (
-            <>
-              <p>{getDetectionPausedCalloutBody({ status, canManageAndConfigure })}</p>
-              {partialFailures}
-            </>
-          ) : (
-            partialFailures || undefined
-          )
-        }
+        text={partialFailures || undefined}
       />
       <EuiSpacer />
     </>

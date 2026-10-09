@@ -23,7 +23,7 @@ jest.mock('../hooks/use_significant_events_maintenance', () => ({
 const renderCallout = () =>
   render(
     <I18nProvider>
-      <DetectionPausedCallout canManageAndConfigure />
+      <DetectionPausedCallout />
     </I18nProvider>
   );
 
@@ -32,7 +32,7 @@ describe('DetectionPausedCallout', () => {
     mockMaintenanceStatus = {
       data: {
         state: 'paused',
-        updatedBy: 'kate.sosedova@elastic.co',
+        updatedBy: 'achyut@elastic.co',
         lastSummary: {
           state: 'paused',
           executionsCancelled: 0,
@@ -47,12 +47,12 @@ describe('DetectionPausedCallout', () => {
 
     const callout = screen.getByTestId('streams-settings-maintenance-paused-status');
     expect(callout).toHaveTextContent(
-      'Detection process is paused by kate.sosedova@elastic.co · 168 rules and 14 automations disabled.'
+      'Detection process is paused by achyut@elastic.co · 168 rules and 14 automations disabled.'
     );
     expect(callout).not.toHaveTextContent('Nightshift activity is stopped across the deployment');
   });
 
-  it('uses the feature-flag title and explains that re-enabling does not resume', () => {
+  it('keeps automatic pauses compact', () => {
     mockMaintenanceStatus = {
       data: { state: 'paused', updatedBy: MAINTENANCE_FEATURE_FLAG_ACTOR },
     };
@@ -61,7 +61,7 @@ describe('DetectionPausedCallout', () => {
 
     const callout = screen.getByTestId('streams-settings-maintenance-paused-status');
     expect(callout).toHaveTextContent('Paused automatically because Nightshift was turned off');
-    expect(callout).toHaveTextContent('Turning Nightshift back on does not resume activity');
+    expect(callout).not.toHaveTextContent('Turning Nightshift back on does not resume activity');
   });
 
   it('does not render while detection activity is enabled', () => {

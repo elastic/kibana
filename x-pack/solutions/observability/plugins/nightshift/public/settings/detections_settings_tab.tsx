@@ -92,7 +92,7 @@ export const DetectionsSettingsTab = () => {
 
   return (
     <>
-      <DetectionPausedCallout canManageAndConfigure={form.canManageAndConfigure} />
+      <DetectionPausedCallout />
       {!form.canEditSettings && <SettingsNoPermissionCallout />}
       <SettingsSection
         title={i18n.translate('xpack.nightshift.settings.detectionProcessTitle', {
