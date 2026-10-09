@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   getDetectionPausedCalloutBody,
   getDetectionPausedCalloutTitle,
   type SignificantEventsMaintenanceStatus,
 } from '@kbn/significant-events-plugin/common';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import React from 'react';
 
 export const PausedActivityCallout = ({
@@ -26,34 +26,36 @@ export const PausedActivityCallout = ({
   const failureCount = status.lastSummary?.partialFailures.length ?? 0;
 
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       announceOnMount
-      color="warning"
-      iconType="pause"
       data-test-subj="significantEventsPausedBanner"
       title={getDetectionPausedCalloutTitle(status)}
-    >
-      <p>{getDetectionPausedCalloutBody({ status, canManageAndConfigure })}</p>
-      {failureCount > 0 && (
-        <p>
-          {i18n.translate('xpack.significantEventsApp.pausedBannerPartialFailures', {
-            defaultMessage:
-              'Some maintenance operations could not be completed. Check Settings and the Kibana server logs for details.',
-          })}
-        </p>
-      )}
-      {canManageAndConfigure && settingsHref && (
-        <EuiButton
-          href={settingsHref}
-          color="warning"
-          size="s"
-          data-test-subj="significantEventsPausedBannerSettingsLink"
-        >
-          {i18n.translate('xpack.significantEventsApp.pausedBannerSettingsButton', {
-            defaultMessage: 'Open settings',
-          })}
-        </EuiButton>
-      )}
-    </EuiCallOut>
+      text={
+        <>
+          <p>{getDetectionPausedCalloutBody({ status, canManageAndConfigure })}</p>
+          {failureCount > 0 && (
+            <p>
+              {i18n.translate('xpack.significantEventsApp.pausedBannerPartialFailures', {
+                defaultMessage:
+                  'Some maintenance operations could not be completed. Check Settings and the Kibana server logs for details.',
+              })}
+            </p>
+          )}
+        </>
+      }
+      actionProps={
+        canManageAndConfigure && settingsHref
+          ? {
+              primary: {
+                children: i18n.translate('xpack.significantEventsApp.pausedBannerSettingsButton', {
+                  defaultMessage: 'Open settings',
+                }),
+                href: settingsHref,
+                'data-test-subj': 'significantEventsPausedBannerSettingsLink',
+              },
+            }
+          : undefined
+      }
+    />
   );
 };

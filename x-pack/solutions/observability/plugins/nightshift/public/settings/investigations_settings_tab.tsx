@@ -7,8 +7,10 @@
 
 import React from 'react';
 import { EuiButton, EuiHorizontalRule } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 import { useKibana } from '../hooks/use_kibana';
 import { RunLimitsSection } from './components/run_limits_section';
 import { SettingsSaveBar } from './components/settings_save_bar';
@@ -19,8 +21,10 @@ const INVESTIGATION_RUN_LIMIT_GROUPS = ['investigation'] as const;
 
 export const InvestigationsSettingsTab = ({
   onCustomContextClick,
+  canEditCustomContext = false,
 }: {
   onCustomContextClick?: () => void;
+  canEditCustomContext?: boolean;
 }) => {
   const { appParams, application, http, overlays } = useKibana().services;
   const runLimits = useRunLimitsForm({ groups: INVESTIGATION_RUN_LIMIT_GROUPS });
@@ -85,10 +89,18 @@ export const InvestigationsSettingsTab = ({
                 iconType="pencil"
                 onClick={onCustomContextClick}
                 data-test-subj="nightshiftOpenCustomContext"
-              >
-                {i18n.translate('xpack.nightshift.settings.editCustomContextButtonLabel', {
-                  defaultMessage: 'Edit investigation context',
+                {...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.OPEN_CUSTOM_CONTEXT,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
                 })}
+              >
+                {canEditCustomContext
+                  ? i18n.translate('xpack.nightshift.settings.editCustomContextButtonLabel', {
+                      defaultMessage: 'Edit investigation context',
+                    })
+                  : i18n.translate('xpack.nightshift.settings.viewCustomContextButtonLabel', {
+                      defaultMessage: 'View investigation context',
+                    })}
               </EuiButton>
             </SettingsSectionRow>
           </>

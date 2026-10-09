@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { NIGHTSHIFT_SETTINGS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import type { NightshiftSettingsLocatorParams } from '@kbn/nightshift-shared';
 import type { RunQuotaGroup } from '@kbn/significant-events-plugin/common';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useRunQuotas } from '../../../hooks/use_significant_events_run_quotas';
 import { useKibana } from '../../../hooks/use_kibana';
 
@@ -89,43 +90,49 @@ export const RunQuotaExhaustionCallout = ({
   );
 
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       announceOnMount
-      color="warning"
-      iconType="warning"
       data-test-subj="significantEventsRunLimitsBanner"
       title={i18n.translate('xpack.significantEventsApp.runLimitsBanner.title', {
         defaultMessage: 'Scheduled automation has reached a daily run limit',
       })}
-    >
-      <p>
-        {i18n.translate('xpack.significantEventsApp.runLimitsBanner.description', {
-          defaultMessage:
-            'Reached limits: {reached}. New scheduled admissions in these categories can be denied until the UTC day resets. Manual runs are not limited.',
-          values: { reached },
-        })}
-      </p>
-      {manageHref && canManage && (
-        <EuiButton
-          data-test-subj="significantEventsAppRunQuotaExhaustionCalloutReviewRunLimitsButton"
-          color="warning"
-          size="s"
-          href={manageHref}
-        >
-          {i18n.translate('xpack.significantEventsApp.runLimitsBanner.manageButtonLabel', {
-            defaultMessage: 'Review run limits',
-          })}
-        </EuiButton>
-      )}
-      {manageHref && !canManage && (
-        <p>
-          {i18n.translate('xpack.significantEventsApp.runLimitsBanner.readOnlyDescription', {
-            defaultMessage:
-              'An administrator with the Nightshift Manage engines privilege can change these limits.',
-          })}
-        </p>
-      )}
-    </EuiCallOut>
+      text={
+        <>
+          <p>
+            {i18n.translate('xpack.significantEventsApp.runLimitsBanner.description', {
+              defaultMessage:
+                'Reached limits: {reached}. New scheduled admissions in these categories can be denied until the UTC day resets. Manual runs are not limited.',
+              values: { reached },
+            })}
+          </p>
+          {manageHref && !canManage && (
+            <p>
+              {i18n.translate('xpack.significantEventsApp.runLimitsBanner.readOnlyDescription', {
+                defaultMessage:
+                  'An administrator with the Nightshift Manage engines privilege can change these limits.',
+              })}
+            </p>
+          )}
+        </>
+      }
+      actionProps={
+        manageHref && canManage
+          ? {
+              primary: {
+                children: i18n.translate(
+                  'xpack.significantEventsApp.runLimitsBanner.manageButtonLabel',
+                  {
+                    defaultMessage: 'Review run limits',
+                  }
+                ),
+                href: manageHref,
+                'data-test-subj':
+                  'significantEventsAppRunQuotaExhaustionCalloutReviewRunLimitsButton',
+              },
+            }
+          : undefined
+      }
+    />
   );
 };
 

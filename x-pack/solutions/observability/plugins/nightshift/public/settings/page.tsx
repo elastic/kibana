@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { Redirect, useHistory, useParams } from 'react-router-dom';
 import { NightshiftAppHeader, type NightshiftAppHeaderProps } from '../app/app_header';
 import { useKibana } from '../hooks/use_kibana';
@@ -54,6 +55,7 @@ export function SettingsPage({ headerProps }: { headerProps: SettingsPageHeaderP
   const { tab } = useParams<{ tab?: string }>();
   const history = useHistory();
   const isAppsEnabled = useAppsEnabled();
+  const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
 
   if (isAppsEnabled === undefined) {
     return null;
@@ -91,7 +93,10 @@ export function SettingsPage({ headerProps }: { headerProps: SettingsPageHeaderP
       <EuiPageTemplate.Section component="div" restrictWidth={false}>
         {tab === 'general' && <GeneralSettingsTab />}
         {tab === 'investigations' && (
-          <InvestigationsSettingsTab onCustomContextClick={headerProps.onCustomContextClick} />
+          <InvestigationsSettingsTab
+            onCustomContextClick={headerProps.onCustomContextClick}
+            canEditCustomContext={canManage}
+          />
         )}
         {tab === 'detections' && <DetectionsSettingsTab />}
       </EuiPageTemplate.Section>

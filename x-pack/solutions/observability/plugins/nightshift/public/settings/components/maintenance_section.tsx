@@ -9,7 +9,6 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -22,8 +21,10 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import { getMaintenanceActivityCounts } from '@kbn/significant-events-plugin/common';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import {
   useMaintenanceStatus,
   useSignificantEventsMaintenanceActions,
@@ -82,7 +83,10 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
   const paused = status?.state === 'paused';
   const isMutating = isPausing || isResuming;
   const statusReady = !isLoading && !isError && status !== undefined;
-  const activityCounts = getMaintenanceActivityCounts(status?.lastSummary);
+  const activityCounts = {
+    automationsDisabled: status?.lastSummary?.workflowsDisabled ?? 0,
+    rulesDisabled: status?.lastSummary?.rulesDisabled ?? 0,
+  };
 
   const onConfirm = () => {
     setIsModalOpen(false);
@@ -102,80 +106,65 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
       >
         {isError && (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
               size="s"
-              color="danger"
-              iconType="error"
               data-test-subj="streams-settings-maintenance-status-error"
               title={i18n.translate('xpack.nightshift.settings.maintenance.statusErrorTitle', {
                 defaultMessage: 'Could not load maintenance status',
               })}
-            >
-              <p>
-                {i18n.translate('xpack.nightshift.settings.maintenance.statusErrorBody', {
-                  defaultMessage:
-                    'Pause and Resume are unavailable until status can be loaded. Activity controls stay disabled while status is unknown.',
-                })}
-              </p>
-              <EuiButton
-                size="s"
-                onClick={() => refetch()}
-                data-test-subj="streams-settings-maintenance-status-retry"
-              >
-                {i18n.translate('xpack.nightshift.settings.maintenance.statusRetry', {
-                  defaultMessage: 'Retry',
-                })}
-              </EuiButton>
-            </EuiCallOut>
+              text={i18n.translate('xpack.nightshift.settings.maintenance.statusErrorBody', {
+                defaultMessage:
+                  'Pause and Resume are unavailable until status can be loaded. Activity controls stay disabled while status is unknown.',
+              })}
+              actionProps={{
+                primary: {
+                  children: i18n.translate('xpack.nightshift.settings.maintenance.statusRetry', {
+                    defaultMessage: 'Retry',
+                  }),
+                  onClick: () => void refetch(),
+                  'data-test-subj': 'streams-settings-maintenance-status-retry',
+                },
+              }}
+            />
             <EuiSpacer />
           </>
         )}
         {status?.featureSettingsUnavailable && (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               size="s"
-              color="warning"
-              iconType="warning"
               data-test-subj="streams-settings-maintenance-feature-settings-unavailable"
               title={i18n.translate(
                 'xpack.nightshift.settings.maintenance.featureSettingsUnavailableTitle',
                 { defaultMessage: 'Some activity settings could not be loaded' }
               )}
-            >
-              <p>
-                {i18n.translate(
-                  'xpack.nightshift.settings.maintenance.featureSettingsUnavailableBody',
-                  {
-                    defaultMessage:
-                      'Scheduled discovery and continuous onboarding status may be incomplete. Pause and Resume still work; refresh or retry if those toggles look wrong.',
-                  }
-                )}
-              </p>
-            </EuiCallOut>
+              text={i18n.translate(
+                'xpack.nightshift.settings.maintenance.featureSettingsUnavailableBody',
+                {
+                  defaultMessage:
+                    'Scheduled discovery and continuous onboarding status may be incomplete. Pause and Resume still work; refresh or retry if those toggles look wrong.',
+                }
+              )}
+            />
             <EuiSpacer />
           </>
         )}
         {!canManage && statusReady && (
           <>
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount
               size="s"
-              color="primary"
-              iconType="lock"
               data-test-subj="streams-settings-maintenance-no-manage"
               title={i18n.translate('xpack.nightshift.settings.maintenance.noManageTitle', {
                 defaultMessage: 'Administrator access required',
               })}
-            >
-              <p>
-                {i18n.translate('xpack.nightshift.settings.maintenance.noManageBody', {
-                  defaultMessage:
-                    'You can view pause status, but pausing or resuming requires the Nightshift Manage engines privilege.',
-                })}
-              </p>
-            </EuiCallOut>
+              text={i18n.translate('xpack.nightshift.settings.maintenance.noManageBody', {
+                defaultMessage:
+                  'You can view pause status, but pausing or resuming requires the Nightshift Manage engines privilege.',
+              })}
+            />
             <EuiSpacer />
           </>
         )}
@@ -189,6 +178,10 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
               isLoading={isMutating || isLoading}
               isDisabled={!canManage || !statusReady || isMutating}
               onClick={() => setIsModalOpen(true)}
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.OPEN_DETECTION_ENGINE_CONFIRMATION,
+                element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+              })}
             >
               {isLoading
                 ? i18n.translate('xpack.nightshift.settings.maintenance.loadingButton', {
@@ -251,6 +244,10 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
             <EuiButtonEmpty
               data-test-subj="streams-settings-maintenance-confirm-cancel"
               onClick={() => setIsModalOpen(false)}
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.CANCEL_DETECTION_ENGINE_CHANGE,
+                element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+              })}
             >
               {i18n.translate('xpack.nightshift.settings.maintenance.confirmCancel', {
                 defaultMessage: 'Cancel',
@@ -262,6 +259,12 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
               iconType={paused ? 'play' : 'pause'}
               data-test-subj="streams-settings-maintenance-confirm-button"
               onClick={onConfirm}
+              {...getEbtProps({
+                action: paused
+                  ? NIGHTSHIFT_EBT_ACTIONS.RESUME_DETECTION_ENGINE
+                  : NIGHTSHIFT_EBT_ACTIONS.PAUSE_DETECTION_ENGINE,
+                element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+              })}
             >
               {paused
                 ? i18n.translate('xpack.nightshift.settings.maintenance.resumeConfirmButton', {

@@ -24,7 +24,7 @@ const response = {
 };
 
 describe('run quota drafts', () => {
-  it('uses the suggested limits when the response omits them', () => {
+  it('normalizes legacy globally disabled settings while retaining finite restore limits', () => {
     expect(createRunQuotaDraftState({ enabled: false })).toEqual({
       saved: {
         enabled: false,
@@ -77,16 +77,11 @@ describe('run quota drafts', () => {
     });
   });
 
-  it('converts legacy global disablement to per-category limits when a limit is enabled', () => {
+  it('builds an atomic activation for legacy globally disabled settings', () => {
     const state = setRunLimitEnabled(createRunQuotaDraftState(response), 'detection', true);
 
     expect(buildRunQuotaSettingsUpdate(state)).toEqual({
-      enabled: true,
-      limits: {
-        detection: 15,
-        investigation: 0,
-        ki_extraction: 0,
-      },
+      activateLimits: { detection: 15 },
     });
   });
 

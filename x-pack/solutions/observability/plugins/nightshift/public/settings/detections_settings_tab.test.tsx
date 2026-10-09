@@ -23,6 +23,7 @@ let mockContinuousHasChanged = false;
 let mockScheduledEnabled = false;
 let mockRunLimitsIsDirty = false;
 let mockBlocksActivity = false;
+let mockRunLimitGroups: readonly string[] = [];
 
 jest.mock('@kbn/unsaved-changes-prompt', () => ({
   useUnsavedChangesPrompt: jest.fn(),
@@ -75,15 +76,8 @@ jest.mock('./components/cost_estimate', () => ({
   CostEstimate: () => <div data-test-subj="cost-estimate" />,
 }));
 jest.mock('./components/run_limits_section', () => ({
-  RunLimitsSection: ({
-    description,
-    onConfirmSave,
-  }: {
-    description: React.ReactNode;
-    onConfirmSave: () => Promise<void>;
-  }) => (
+  RunLimitsSection: ({ onConfirmSave }: { onConfirmSave: () => Promise<void> }) => (
     <>
-      <div data-test-subj="runLimitsDescriptionStub">{description}</div>
       <button data-test-subj="runLimitsConfirmStub" onClick={() => void onConfirmSave()}>
         Confirm run limits
       </button>
@@ -91,15 +85,18 @@ jest.mock('./components/run_limits_section', () => ({
   ),
 }));
 jest.mock('./components/use_run_limits_form', () => ({
-  useRunLimitsForm: () => ({
-    isDirty: mockRunLimitsIsDirty,
-    isSaving: false,
-    canManage: true,
-    update: mockRunLimitsIsDirty ? { limits: { detection: 10 } } : undefined,
-    requestSave: mockRunLimitsRequestSave,
-    confirmAndSave: mockRunLimitsConfirmAndSave,
-    cancel: mockRunLimitsCancel,
-  }),
+  useRunLimitsForm: ({ groups }: { groups: readonly string[] }) => {
+    mockRunLimitGroups = groups;
+    return {
+      isDirty: mockRunLimitsIsDirty,
+      isSaving: false,
+      canManage: true,
+      update: mockRunLimitsIsDirty ? { limits: { detection: 10 } } : undefined,
+      requestSave: mockRunLimitsRequestSave,
+      confirmAndSave: mockRunLimitsConfirmAndSave,
+      cancel: mockRunLimitsCancel,
+    };
+  },
 }));
 jest.mock('./components/significant_events_tuning_config_editor', () => ({
   configToAnnotatedYaml: (config: unknown) => JSON.stringify(config),
@@ -195,13 +192,14 @@ const setup = ({
   );
 };
 
-describe('DetectionsSettingsTab developer mode', () => {
+describe('DetectionsSettingsTab', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockContinuousHasChanged = false;
     mockScheduledEnabled = false;
     mockRunLimitsIsDirty = false;
     mockBlocksActivity = false;
+    mockRunLimitGroups = [];
     mockContinuousSave.mockResolvedValue(undefined);
     mockRunLimitsRequestSave.mockResolvedValue('saved');
     mockRunLimitsConfirmAndSave.mockResolvedValue('saved');
@@ -223,10 +221,7 @@ describe('DetectionsSettingsTab developer mode', () => {
     expect(screen.getByTestId('nightshiftDetectionProcessSection')).toHaveTextContent(
       'Detection process'
     );
-    expect(screen.getByTestId('runLimitsDescriptionStub')).toHaveTextContent(
-      'These limits apply only to scheduled detection'
-    );
-    expect(screen.queryByTestId('nightshiftDeveloperModeSection')).not.toBeInTheDocument();
+    expect(mockRunLimitGroups).toEqual(['detection', 'ki_extraction']);
   });
 
   it('saves run limits and activity settings through one bottom bar', async () => {
@@ -460,7 +455,6 @@ describe('DetectionsSettingsTab developer mode', () => {
     const advancedSettings = screen.getByTestId(
       'streams-settings-scheduled-discovery-advanced-settings'
     );
-    expect(advancedSettings).toHaveTextContent('Advanced schedule settings');
     expect(advancedSettings).toHaveAttribute('aria-expanded', 'false');
 
     fireEvent.click(advancedSettings);

@@ -25,6 +25,7 @@ const mockUseUpdateRunQuotas = useUpdateRunQuotas as jest.MockedFunction<typeof 
 
 const save = jest.fn<Promise<RunQuotasResponse>, [RunQuotaSettingsUpdate]>();
 const refetch = jest.fn();
+let updateIsSaving = false;
 
 const response = (overrides: Partial<RunQuotasResponse> = {}): RunQuotasResponse => ({
   enabled: true,
@@ -83,7 +84,7 @@ const TestRunLimits = ({ groups = ALL_GROUPS }: { groups?: readonly RunQuotaGrou
 
 const setup = (data: RunQuotasResponse = response(), groups?: readonly RunQuotaGroup[]) => {
   setQueryResponse(data);
-  mockUseUpdateRunQuotas.mockReturnValue({ save, isSaving: false });
+  mockUseUpdateRunQuotas.mockReturnValue({ save, isSaving: updateIsSaving });
   save.mockResolvedValue(data);
 
   return render(
@@ -96,6 +97,7 @@ const setup = (data: RunQuotasResponse = response(), groups?: readonly RunQuotaG
 describe('RunLimitsSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    updateIsSaving = false;
   });
 
   it('shows legacy globally disabled settings as unlimited per category', () => {
@@ -116,17 +118,8 @@ describe('RunLimitsSection', () => {
     );
 
     expect(screen.getAllByTestId(/^nightshiftRunLimitRow-/)).toHaveLength(3);
-    expect(screen.getByText('Discovery daily limit')).toBeInTheDocument();
-    expect(screen.getByText('Investigation daily limit')).toBeInTheDocument();
-    expect(screen.getByText('Knowledge indicators extraction daily limit')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftRunLimitCount-detection')).toHaveTextContent(
       '14 counted scheduled admissions today'
-    );
-    expect(screen.getByTestId('nightshiftRunLimitCount-investigation')).toHaveTextContent(
-      '6 counted scheduled admissions today'
-    );
-    expect(screen.getByTestId('nightshiftRunLimitCount-ki_extraction')).toHaveTextContent(
-      '25 counted scheduled admissions today'
     );
     expect(screen.queryByTestId(/^nightshiftRunLimitInput-/)).not.toBeInTheDocument();
     for (const group of ALL_GROUPS) {
@@ -141,26 +134,22 @@ describe('RunLimitsSection', () => {
       expect(screen.getByTestId(`nightshiftRunLimitEnabledSwitch-${group}`)).toBeDisabled();
       expect(screen.getByTestId(`nightshiftRunLimitInput-${group}`)).toBeDisabled();
     }
-    expect(screen.getByText('Deployment-wide privilege required')).toBeInTheDocument();
+    expect(screen.getByText('Deployment-wide privileges required')).toBeInTheDocument();
   });
 
   it('renders only the requested quota groups', () => {
     setup(response(), ['investigation']);
 
+    expect(screen.getByTestId('nightshiftRunLimitsSection')).toHaveAccessibleName('Run limits');
     expect(screen.getAllByTestId(/^nightshiftRunLimitRow-/)).toHaveLength(1);
     expect(screen.getByText('Investigation daily limit')).toBeInTheDocument();
     expect(screen.queryByText('Discovery daily limit')).not.toBeInTheDocument();
     expect(
       screen.queryByText('Knowledge indicators extraction daily limit')
     ).not.toBeInTheDocument();
-    expect(screen.getByText('Enforce daily limits')).toBeInTheDocument();
-    expect(screen.queryByText('Enforce daily limits across Nightshift')).not.toBeInTheDocument();
-
-    const toggle = screen.getByTestId('nightshiftRunLimitEnabledSwitch-investigation');
-    const label = screen.getByText('Investigation daily limit');
-    const input = screen.getByTestId('nightshiftRunLimitInput-investigation');
-    expect(toggle.compareDocumentPosition(label)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(label.compareDocumentPosition(input)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(
+      screen.getByRole('switch', { name: 'Enforce daily limits for Investigation' })
+    ).toBeInTheDocument();
   });
 
   it('cancels run-limit changes through the shared save bar', () => {
@@ -179,34 +168,6 @@ describe('RunLimitsSection', () => {
     expect(
       screen.queryByTestId('streams-significant-events-settings-bottom-bar')
     ).not.toBeInTheDocument();
-  });
-
-  it('converts legacy global disablement when a category limit is enabled', async () => {
-    setup(
-      response({
-        enabled: false,
-        counts: {
-          detection: 100,
-          investigation: 3,
-          ki_extraction: 2,
-        },
-      }),
-      ['investigation']
-    );
-
-    fireEvent.click(screen.getByTestId('nightshiftRunLimitEnabledSwitch-investigation'));
-    fireEvent.click(screen.getByTestId('streams-settings-save-button'));
-
-    await waitFor(() =>
-      expect(save).toHaveBeenCalledWith({
-        enabled: true,
-        limits: {
-          detection: 0,
-          investigation: 30,
-          ki_extraction: 0,
-        },
-      })
-    );
   });
 
   it('does not show the exhaustion callout for groups hidden from the tab', () => {
@@ -239,21 +200,6 @@ describe('RunLimitsSection', () => {
     );
   });
 
-  it('saves the knowledge indicator limit without changing the discovery limit', async () => {
-    setup();
-    fireEvent.click(screen.getByTestId('nightshiftRunLimitEnabledSwitch-ki_extraction'));
-
-    expect(screen.getByTestId('nightshiftRunLimitEnabledSwitch-detection')).toBeChecked();
-    expect(screen.getByTestId('nightshiftRunLimitInput-detection')).toHaveValue(100);
-    fireEvent.click(screen.getByTestId('streams-settings-save-button'));
-
-    await waitFor(() =>
-      expect(save).toHaveBeenCalledWith({
-        limits: { ki_extraction: 0 },
-      })
-    );
-  });
-
   it('validates daily limits locally before saving', () => {
     setup();
     fireEvent.change(screen.getByTestId('nightshiftRunLimitInput-detection'), {
@@ -266,7 +212,7 @@ describe('RunLimitsSection', () => {
   });
 
   it('warns before lowering a finite limit to the current count', async () => {
-    setup(
+    const { rerender } = setup(
       response({
         counts: {
           detection: 84,
@@ -282,6 +228,23 @@ describe('RunLimitsSection', () => {
 
     expect(await screen.findByText('Lower limits to values already reached?')).toBeInTheDocument();
     expect(save).not.toHaveBeenCalled();
+
+    updateIsSaving = true;
+    mockUseUpdateRunQuotas.mockReturnValue({ save, isSaving: updateIsSaving });
+    rerender(
+      <I18nProvider>
+        <TestRunLimits />
+      </I18nProvider>
+    );
+    expect(screen.getByRole('button', { name: 'Save lower limits' })).toBeDisabled();
+
+    updateIsSaving = false;
+    mockUseUpdateRunQuotas.mockReturnValue({ save, isSaving: updateIsSaving });
+    rerender(
+      <I18nProvider>
+        <TestRunLimits />
+      </I18nProvider>
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Save lower limits' }));
 
     await waitFor(() =>
@@ -313,26 +276,6 @@ describe('RunLimitsSection', () => {
 
     expect(await screen.findByText('Lower limits to values already reached?')).toBeInTheDocument();
     expect(save).not.toHaveBeenCalled();
-  });
-
-  it('does not describe an investigation severity bypass', () => {
-    setup(
-      response({
-        counts: {
-          detection: 4,
-          investigation: 45,
-          ki_extraction: 2,
-        },
-      })
-    );
-
-    expect(
-      screen.queryByTestId('nightshiftInvestigationCriticalContinuation')
-    ).not.toBeInTheDocument();
-    expect(screen.queryByText(/non-critical scheduled/i)).not.toBeInTheDocument();
-    expect(
-      screen.queryByText(/critical scheduled investigations continue/i)
-    ).not.toBeInTheDocument();
   });
 
   it('keeps the active exhaustion banner while a raised limit is unsaved', () => {

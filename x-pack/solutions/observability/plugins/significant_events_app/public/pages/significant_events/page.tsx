@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { NIGHTSHIFT_APP_ID, NIGHTSHIFT_SETTINGS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
@@ -13,6 +13,7 @@ import {
   getNightshiftCapabilities,
   type NightshiftSettingsLocatorParams,
 } from '@kbn/nightshift-shared';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { SIGNIFICANT_EVENTS_TAB } from '../../../common';
 import { useKibana } from '../../hooks/use_kibana';
@@ -290,54 +291,48 @@ export function SignificantEventsPage() {
         <SignificantEventsAppPageTemplate.Body grow>
           {isMaintenanceStatusLoading && (
             <>
-              <EuiCallOut
+              <KbnInfoCallout
                 announceOnMount
-                color="primary"
-                iconType="clock"
                 data-test-subj="significantEventsStatusLoadingBanner"
                 title={i18n.translate('xpack.significantEventsApp.statusLoadingBannerTitle', {
                   defaultMessage: 'Checking Significant Events activity status',
                 })}
-              >
-                <p>
-                  {i18n.translate('xpack.significantEventsApp.statusLoadingBannerBody', {
-                    defaultMessage: 'Manual triggers stay disabled until activity status is known.',
-                  })}
-                </p>
-              </EuiCallOut>
+                text={i18n.translate('xpack.significantEventsApp.statusLoadingBannerBody', {
+                  defaultMessage: 'Manual triggers stay disabled until activity status is known.',
+                })}
+              />
               <EuiSpacer />
             </>
           )}
           {isMaintenanceStatusError && (
             <>
-              <EuiCallOut
+              <KbnDangerCallout
                 announceOnMount
-                color="danger"
-                iconType="error"
                 data-test-subj="significantEventsStatusErrorBanner"
                 title={i18n.translate('xpack.significantEventsApp.statusErrorBannerTitle', {
                   defaultMessage: 'Could not load Significant Events activity status',
                 })}
-              >
-                <p>
-                  {i18n.translate('xpack.significantEventsApp.statusErrorBannerBody', {
-                    defaultMessage:
-                      'Manual triggers stay disabled until status can be loaded. Open Settings to retry, or refresh the page.',
-                  })}
-                </p>
-                {canManageAndConfigure && detectionSettingsHref && (
-                  <EuiButton
-                    href={detectionSettingsHref}
-                    color="danger"
-                    size="s"
-                    data-test-subj="significantEventsStatusErrorBannerSettingsLink"
-                  >
-                    {i18n.translate('xpack.significantEventsApp.statusErrorBannerSettingsButton', {
-                      defaultMessage: 'Go to Settings',
-                    })}
-                  </EuiButton>
-                )}
-              </EuiCallOut>
+                text={i18n.translate('xpack.significantEventsApp.statusErrorBannerBody', {
+                  defaultMessage:
+                    'Manual triggers stay disabled until status can be loaded. Open Settings to retry, or refresh the page.',
+                })}
+                actionProps={
+                  canManageAndConfigure && detectionSettingsHref
+                    ? {
+                        primary: {
+                          children: i18n.translate(
+                            'xpack.significantEventsApp.statusErrorBannerSettingsButton',
+                            {
+                              defaultMessage: 'Go to Settings',
+                            }
+                          ),
+                          href: detectionSettingsHref,
+                          'data-test-subj': 'significantEventsStatusErrorBannerSettingsLink',
+                        },
+                      }
+                    : undefined
+                }
+              />
               <EuiSpacer />
             </>
           )}

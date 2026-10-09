@@ -44,7 +44,7 @@ export const getDetectionPausedCalloutBody = ({
     'xpack.significantEvents.maintenance.pausedCallout.activityScope',
     {
       defaultMessage:
-        'Detection activity is stopped across the deployment: scheduled discovery, detections and the alerting rules backing knowledge indicator queries.',
+        'Nightshift activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, investigations, and the alerting rules backing knowledge indicator queries.',
     }
   );
 

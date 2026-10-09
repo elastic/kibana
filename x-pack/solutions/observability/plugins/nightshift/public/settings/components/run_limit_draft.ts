@@ -141,21 +141,30 @@ export const buildRunQuotaSettingsUpdate = (
     return undefined;
   }
 
+  if (!state.saved.enabled && state.draft.enabled) {
+    const activateLimits = Object.fromEntries(
+      RUN_QUOTA_GROUPS.flatMap((group) =>
+        isValidLimitedRunLimitDraft(state.draft.limits[group])
+          ? [[group, state.draft.limits[group]]]
+          : []
+      )
+    ) as Partial<Record<RunQuotaGroup, number>>;
+
+    return Object.keys(activateLimits).length > 0 ? { activateLimits } : undefined;
+  }
+
   const update: RunQuotaSettingsUpdate = {};
   if (state.saved.enabled !== state.draft.enabled) {
     update.enabled = state.draft.enabled;
   }
 
-  const changedLimits =
-    !state.saved.enabled && state.draft.enabled
-      ? state.draft.limits
-      : (Object.fromEntries(
-          RUN_QUOTA_GROUPS.flatMap((group) =>
-            state.saved.limits[group] === state.draft.limits[group]
-              ? []
-              : [[group, state.draft.limits[group]]]
-          )
-        ) as Partial<Record<RunQuotaGroup, number>>);
+  const changedLimits = Object.fromEntries(
+    RUN_QUOTA_GROUPS.flatMap((group) =>
+      state.saved.limits[group] === state.draft.limits[group]
+        ? []
+        : [[group, state.draft.limits[group]]]
+    )
+  ) as Partial<Record<RunQuotaGroup, number>>;
 
   if (Object.keys(changedLimits).length > 0) {
     update.limits = changedLimits;

@@ -8,7 +8,14 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 
 const headerPanelStyles = css`
   border-end-start-radius: 0;
@@ -66,32 +73,44 @@ export const SettingsSectionRow = ({
   description?: ReactNode;
   children: ReactNode;
   'data-test-subj'?: string;
-}) => (
-  <EuiFlexGroup alignItems="flexStart" gutterSize="xl" data-test-subj={dataTestSubject}>
-    <EuiFlexItem grow={1}>
-      {titleAdornment ? (
-        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiText size="m">
-              <h4>{title}</h4>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{titleAdornment}</EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        <EuiText size="m">
-          <h4>{title}</h4>
-        </EuiText>
-      )}
-      {description && (
-        <>
-          <EuiSpacer size="xs" />
-          <EuiText size="s" color="subdued">
-            {description}
+}) => {
+  const titleId = useGeneratedHtmlId({ prefix: 'nightshiftSettingsRowTitle' });
+  const descriptionId = useGeneratedHtmlId({ prefix: 'nightshiftSettingsRowDescription' });
+
+  return (
+    <EuiFlexGroup
+      alignItems="flexStart"
+      gutterSize="xl"
+      role="group"
+      aria-labelledby={titleId}
+      aria-describedby={description ? descriptionId : undefined}
+      data-test-subj={dataTestSubject}
+    >
+      <EuiFlexItem grow={1}>
+        {titleAdornment ? (
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="m">
+                <h4 id={titleId}>{title}</h4>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{titleAdornment}</EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <EuiText size="m">
+            <h4 id={titleId}>{title}</h4>
           </EuiText>
-        </>
-      )}
-    </EuiFlexItem>
-    <EuiFlexItem grow={1}>{children}</EuiFlexItem>
-  </EuiFlexGroup>
-);
+        )}
+        {description && (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiText id={descriptionId} size="s" color="subdued">
+              {description}
+            </EuiText>
+          </>
+        )}
+      </EuiFlexItem>
+      <EuiFlexItem grow={1}>{children}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};

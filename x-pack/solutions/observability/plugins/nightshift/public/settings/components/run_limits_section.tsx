@@ -8,8 +8,6 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import {
-  EuiButton,
-  EuiCallOut,
   EuiConfirmModal,
   EuiForm,
   EuiLoadingSpinner,
@@ -19,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RunQuotaGroup } from '@kbn/significant-events-plugin/common';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import { isFiniteRunLimit, RUN_QUOTA_GROUPS } from './run_limit_draft';
 import { RunLimitRow, RUN_QUOTA_GROUP_LABELS } from './run_limit_row';
 import { RunQuotaExhaustionCallout } from './run_quota_exhaustion_callout';
@@ -77,24 +76,21 @@ export const RunLimitsSection = ({
         {quotas.isLoading && <EuiLoadingSpinner size="m" />}
 
         {quotas.isError && (
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
-            color="danger"
-            iconType="error"
             title={i18n.translate('xpack.nightshift.settings.runLimits.loadErrorMessage', {
               defaultMessage: 'Could not load daily run limits',
             })}
-          >
-            <EuiButton
-              data-test-subj="nightshiftRunLimitsSectionRetryButton"
-              size="s"
-              onClick={() => void quotas.refetch()}
-            >
-              {i18n.translate('xpack.nightshift.settings.runLimits.retryButtonLabel', {
-                defaultMessage: 'Retry',
-              })}
-            </EuiButton>
-          </EuiCallOut>
+            actionProps={{
+              primary: {
+                children: i18n.translate('xpack.nightshift.settings.runLimits.retryButtonLabel', {
+                  defaultMessage: 'Retry',
+                }),
+                onClick: () => void quotas.refetch(),
+                'data-test-subj': 'nightshiftRunLimitsSectionRetryButton',
+              },
+            }}
+          />
         )}
 
         {!quotas.isLoading && !quotas.isError && response && draftState && (
@@ -136,53 +132,45 @@ export const RunLimitsSection = ({
             {!canManage && (
               <>
                 <EuiSpacer />
-                <EuiCallOut
+                <KbnInfoCallout
                   announceOnMount
-                  color="primary"
-                  iconType="lock"
                   title={i18n.translate('xpack.nightshift.settings.runLimits.readOnlyTitle', {
-                    defaultMessage: 'Deployment-wide privilege required',
+                    defaultMessage: 'Deployment-wide privileges required',
                   })}
-                >
-                  <p>
-                    {i18n.translate('xpack.nightshift.settings.runLimits.readOnlyDescription', {
-                      defaultMessage:
-                        'Changing daily limits requires the Nightshift Manage engines privilege.',
-                    })}
-                  </p>
-                </EuiCallOut>
+                  text={i18n.translate('xpack.nightshift.settings.runLimits.readOnlyDescription', {
+                    defaultMessage:
+                      'Changing daily limits requires the Nightshift Manage and Configure privileges in all spaces.',
+                  })}
+                />
               </>
             )}
 
             {saveError && (
               <>
                 <EuiSpacer />
-                <EuiCallOut
+                <KbnDangerCallout
                   announceOnMount
-                  color="danger"
-                  iconType="error"
                   title={i18n.translate('xpack.nightshift.settings.runLimits.saveErrorTitle', {
                     defaultMessage: 'Could not save daily run limits',
                   })}
-                >
-                  <p>
-                    {i18n.translate('xpack.nightshift.settings.runLimits.saveErrorDescription', {
-                      defaultMessage:
-                        'Your changes were kept. Review them and try again. Error: {error}',
-                      values: { error: saveError.message },
-                    })}
-                  </p>
-                  <EuiButton
-                    data-test-subj="nightshiftRunLimitsSectionTryAgainButton"
-                    color="danger"
-                    size="s"
-                    onClick={() => void onSave()}
-                  >
-                    {i18n.translate('xpack.nightshift.settings.runLimits.saveRetryButtonLabel', {
-                      defaultMessage: 'Try again',
-                    })}
-                  </EuiButton>
-                </EuiCallOut>
+                  text={i18n.translate('xpack.nightshift.settings.runLimits.saveErrorDescription', {
+                    defaultMessage:
+                      'Your changes were kept. Review them and try again. Error: {error}',
+                    values: { error: saveError.message },
+                  })}
+                  actionProps={{
+                    primary: {
+                      children: i18n.translate(
+                        'xpack.nightshift.settings.runLimits.saveRetryButtonLabel',
+                        {
+                          defaultMessage: 'Try again',
+                        }
+                      ),
+                      onClick: () => void onSave(),
+                      'data-test-subj': 'nightshiftRunLimitsSectionTryAgainButton',
+                    },
+                  }}
+                />
               </>
             )}
           </>
@@ -205,6 +193,7 @@ export const RunLimitsSection = ({
           )}
           confirmButtonText={confirmationButtonText}
           buttonColor="warning"
+          isLoading={isSaving}
         >
           {warnings.loweringGroups.map((group) => {
             const limit = draftState.draft.limits[group];

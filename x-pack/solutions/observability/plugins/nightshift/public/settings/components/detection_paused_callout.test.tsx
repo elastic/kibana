@@ -9,14 +9,16 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MAINTENANCE_FEATURE_FLAG_ACTOR } from '@kbn/significant-events-plugin/common';
-import { useMaintenanceStatus } from '../hooks/use_significant_events_maintenance';
+import type { useMaintenanceStatus } from '../hooks/use_significant_events_maintenance';
 import { DetectionPausedCallout } from './detection_paused_callout';
 
-jest.mock('../hooks/use_significant_events_maintenance');
+let mockMaintenanceStatus: Pick<ReturnType<typeof useMaintenanceStatus>, 'data'> = {
+  data: undefined,
+};
 
-const mockUseMaintenanceStatus = useMaintenanceStatus as jest.MockedFunction<
-  typeof useMaintenanceStatus
->;
+jest.mock('../hooks/use_significant_events_maintenance', () => ({
+  useMaintenanceStatus: () => mockMaintenanceStatus,
+}));
 
 const renderCallout = () =>
   render(
@@ -27,21 +29,23 @@ const renderCallout = () =>
 
 describe('DetectionPausedCallout', () => {
   it('shows the page-level paused status with attribution', () => {
-    mockUseMaintenanceStatus.mockReturnValue({
+    mockMaintenanceStatus = {
       data: { state: 'paused', updatedBy: 'elastic' },
-    } as never);
+    };
 
     renderCallout();
 
     const callout = screen.getByTestId('streams-settings-maintenance-paused-status');
     expect(callout).toHaveTextContent('Detection is paused by elastic.');
-    expect(callout).toHaveTextContent('Detection activity is stopped across the deployment');
+    expect(callout).toHaveTextContent('Nightshift activity is stopped across the deployment');
+    expect(callout).toHaveTextContent('continuous onboarding');
+    expect(callout).toHaveTextContent('investigations');
   });
 
   it('uses the feature-flag title and explains that re-enabling does not resume', () => {
-    mockUseMaintenanceStatus.mockReturnValue({
+    mockMaintenanceStatus = {
       data: { state: 'paused', updatedBy: MAINTENANCE_FEATURE_FLAG_ACTOR },
-    } as never);
+    };
 
     renderCallout();
 
@@ -51,9 +55,9 @@ describe('DetectionPausedCallout', () => {
   });
 
   it('does not render while detection activity is enabled', () => {
-    mockUseMaintenanceStatus.mockReturnValue({
+    mockMaintenanceStatus = {
       data: { state: 'enabled' },
-    } as never);
+    };
 
     renderCallout();
 

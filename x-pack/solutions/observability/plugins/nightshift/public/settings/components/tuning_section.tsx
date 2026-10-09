@@ -18,7 +18,9 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import { SignificantEventsTuningConfigEditor } from './significant_events_tuning_config_editor';
 import { SettingsSectionRow } from './settings_section';
 import type { DetectionSettingsForm } from './use_detection_settings_form';
@@ -85,6 +87,10 @@ export const TuningSection = ({
           aria-haspopup="dialog"
           aria-expanded={isFlyoutOpen}
           data-test-subj="nightshiftSettingsTuningEditButton"
+          {...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.EDIT_TUNING_DOCUMENT,
+            element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+          })}
         >
           {i18n.translate('xpack.nightshift.settings.editTuningDocument', {
             defaultMessage: 'Edit tuning document',
@@ -131,6 +137,10 @@ export const TuningSection = ({
                   iconType="refresh"
                   isDisabled={!canEditSettings || isSavingTuningConfig}
                   onClick={handleResetTuningConfig}
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.RESET_TUNING_DOCUMENT,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                  })}
                 >
                   {i18n.translate('xpack.nightshift.settings.resetToDefaults', {
                     defaultMessage: 'Reset to defaults',
@@ -147,6 +157,10 @@ export const TuningSection = ({
                   }
                   onClick={() => void saveTuningConfig()}
                   data-test-subj="nightshiftSettingsTuningSaveButton"
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.SAVE_TUNING_DOCUMENT,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                  })}
                 >
                   {i18n.translate('xpack.nightshift.settings.saveTuningButton', {
                     defaultMessage: 'Save',

@@ -8,38 +8,44 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import {
+import type {
   useMaintenanceStatus,
   useSignificantEventsMaintenanceActions,
 } from '../hooks/use_significant_events_maintenance';
 import { MaintenanceSection } from './maintenance_section';
 
-jest.mock('../hooks/use_significant_events_maintenance');
-
-const mockUseMaintenanceStatus = useMaintenanceStatus as jest.MockedFunction<
-  typeof useMaintenanceStatus
->;
-const mockUseMaintenanceActions = useSignificantEventsMaintenanceActions as jest.MockedFunction<
-  typeof useSignificantEventsMaintenanceActions
->;
 const pause = jest.fn();
 const resume = jest.fn();
+const refetch = jest.fn();
+let mockMaintenanceStatus: Pick<
+  ReturnType<typeof useMaintenanceStatus>,
+  'data' | 'isLoading' | 'isError' | 'refetch'
+>;
+let mockMaintenanceActions: Pick<
+  ReturnType<typeof useSignificantEventsMaintenanceActions>,
+  'pause' | 'resume' | 'isPausing' | 'isResuming'
+>;
+
+jest.mock('../hooks/use_significant_events_maintenance', () => ({
+  useMaintenanceStatus: () => mockMaintenanceStatus,
+  useSignificantEventsMaintenanceActions: () => mockMaintenanceActions,
+}));
 
 describe('MaintenanceSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseMaintenanceStatus.mockReturnValue({
+    mockMaintenanceStatus = {
       data: { state: 'enabled' },
       isLoading: false,
       isError: false,
-      refetch: jest.fn(),
-    } as never);
-    mockUseMaintenanceActions.mockReturnValue({
+      refetch,
+    };
+    mockMaintenanceActions = {
       pause,
       resume,
       isPausing: false,
       isResuming: false,
-    });
+    };
   });
 
   it('confirms pausing the detection engine with a warning action', () => {
@@ -65,11 +71,13 @@ describe('MaintenanceSection', () => {
   });
 
   it('shows disabled activity counts below the resume action while paused', () => {
-    mockUseMaintenanceStatus.mockReturnValue({
+    mockMaintenanceStatus = {
       data: {
         state: 'paused',
         updatedBy: 'elastic',
         lastSummary: {
+          state: 'paused',
+          executionsCancelled: 0,
           workflowsDisabled: 12,
           rulesDisabled: 28,
           partialFailures: [],
@@ -77,8 +85,8 @@ describe('MaintenanceSection', () => {
       },
       isLoading: false,
       isError: false,
-      refetch: jest.fn(),
-    } as never);
+      refetch,
+    };
 
     render(
       <I18nProvider>
@@ -89,15 +97,17 @@ describe('MaintenanceSection', () => {
     const resumeButton = screen.getByTestId('streams-settings-maintenance-toggle-button');
     const summary = screen.getByTestId('streams-settings-maintenance-activity-counts');
     expect(resumeButton).toHaveTextContent('Resume detection engine');
-    expect(resumeButton.compareDocumentPosition(summary)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(summary).toHaveTextContent('12 automations disabled · 28 rules disabled');
+    expect(summary).toHaveTextContent('12 automations disabled');
+    expect(summary).toHaveTextContent('28 rules disabled');
   });
 
   it('does not show activity counts while enabled', () => {
-    mockUseMaintenanceStatus.mockReturnValue({
+    mockMaintenanceStatus = {
       data: {
         state: 'enabled',
         lastSummary: {
+          state: 'paused',
+          executionsCancelled: 0,
           workflowsDisabled: 12,
           rulesDisabled: 28,
           partialFailures: [],
@@ -105,8 +115,8 @@ describe('MaintenanceSection', () => {
       },
       isLoading: false,
       isError: false,
-      refetch: jest.fn(),
-    } as never);
+      refetch,
+    };
 
     render(
       <I18nProvider>

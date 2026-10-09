@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RunQuotaGroup } from '@kbn/significant-events-plugin/common';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { isFiniteRunLimit, type RunLimitDraft } from './run_limit_draft';
 import { RUN_QUOTA_GROUP_LABELS } from './run_limit_row';
 
@@ -48,24 +49,19 @@ export const RunQuotaExhaustionCallout = ({
   return (
     <>
       <EuiSpacer />
-      <EuiCallOut
+      <KbnWarningCallout
         announceOnMount
         size="s"
-        color="warning"
-        iconType="warning"
         data-test-subj="nightshiftRunLimitsBanner"
         title={i18n.translate('xpack.nightshift.settings.runLimits.exhaustionTitle', {
           defaultMessage: 'Scheduled automation has reached a daily run limit',
         })}
-      >
-        <p>
-          {i18n.translate('xpack.nightshift.settings.runLimits.exhaustionDescription', {
-            defaultMessage:
-              'Reached limits: {reached}. New scheduled admissions in these categories can be denied until the UTC day resets. Manual runs are not limited.',
-            values: { reached },
-          })}
-        </p>
-      </EuiCallOut>
+        text={i18n.translate('xpack.nightshift.settings.runLimits.exhaustionDescription', {
+          defaultMessage:
+            'Reached limits: {reached}. New scheduled admissions in these categories can be denied until the UTC day resets. Manual runs are not limited.',
+          values: { reached },
+        })}
+      />
       <EuiSpacer />
     </>
   );

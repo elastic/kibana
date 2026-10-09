@@ -21,12 +21,14 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
   RELAY_APP_CONNECTION_STATUS,
   type RelayAppConnectionStatus,
 } from '@kbn/significant-events-plugin/common';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { SettingsSection } from '../settings_section';
 import { useRelayAppConnection } from './use_relay_app_connection';
 import { SlackConnectionBindings } from './slack_connection_bindings';
@@ -88,11 +90,11 @@ export function AppsSection({ canEdit }: AppsSectionProps) {
             data-test-subj="nightshiftAppsUnavailable"
             iconType="info"
             title={
-              <h2>
+              <h4>
                 {i18n.translate('xpack.nightshift.settings.apps.unavailableTitle', {
                   defaultMessage: 'Apps are unavailable',
                 })}
-              </h2>
+              </h4>
             }
             body={
               <p>
@@ -182,6 +184,10 @@ function SlackCardFooter({
             onClick={onDisconnect}
             isDisabled={!canEdit || isMutating}
             data-test-subj="streamsSlackAppCancelButton"
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.CANCEL_SLACK_CONNECTION,
+              element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+            })}
           >
             {i18n.translate('xpack.nightshift.settings.apps.slackCancel', {
               defaultMessage: 'Cancel',
@@ -227,6 +233,10 @@ function SlackCardFooter({
                 onClick={() => setShowChannels((value) => !value)}
                 aria-expanded={showChannels}
                 data-test-subj="streamsSlackAppToggleChannelsButton"
+                {...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_SLACK_CHANNELS,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                })}
               >
                 {showChannels
                   ? i18n.translate('xpack.nightshift.settings.apps.slackHideChannels', {
@@ -264,6 +274,10 @@ function SlackCardFooter({
           isLoading={isMutating}
           isDisabled={!canEdit || isMutating}
           data-test-subj="streamsSlackAppConnectButton"
+          {...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.CONNECT_SLACK,
+            element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+          })}
         >
           {i18n.translate('xpack.nightshift.settings.apps.slackConnect', {
             defaultMessage: 'Connect Slack',
@@ -297,6 +311,10 @@ function DisconnectWorkspaceButton({
         isLoading={isMutating}
         isDisabled={!canEdit || isMutating}
         data-test-subj="streamsSlackAppDisconnectButton"
+        {...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.DISCONNECT_SLACK,
+          element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+        })}
       >
         {i18n.translate('xpack.nightshift.settings.apps.slackDisconnect', {
           defaultMessage: 'Disconnect workspace',
