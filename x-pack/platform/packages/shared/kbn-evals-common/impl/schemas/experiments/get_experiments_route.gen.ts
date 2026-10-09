@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { Model, BuildkiteMetadata } from '../common_attributes.gen';
+import { ReasoningEffort, Model, BuildkiteMetadata } from '../common_attributes.gen';
 
 export const EvaluationExperimentSummary = lazySchema(() =>
   z.object({
@@ -58,6 +58,10 @@ export const GetEvaluationExperimentsRequestQuery = lazySchema(() =>
      * Filter by task model ID
      */
     model_id: z.string().max(256).optional().describe('Filter by task model ID'),
+    /**
+     * Filter by the reasoning effort
+     */
+    reasoning_effort: ReasoningEffort.optional().describe('Filter by the reasoning effort'),
     /**
      * Filter by git branch
      */
