@@ -21,13 +21,13 @@ export const EisServiceDisabledCallout = ({
     announceOnMount={false}
     data-test-subj="eisServiceDisabledCallout"
     title={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.serviceDisabled.title', {
-      defaultMessage: 'Cloud Connect is disabled',
+      defaultMessage: 'Elastic Inference Service is disabled by your admin',
     })}
     text={i18n.translate(
       'xpack.searchInferenceEndpoints.eisModelsPage.serviceDisabled.description',
       {
         defaultMessage:
-          'Elastic Inference Service is disabled in the Cloud Connect settings. Models provided through the service are unavailable.',
+          "Update your Cloud Connect settings to use Elastic's managed models and endpoints.",
       }
     )}
     actionProps={{
