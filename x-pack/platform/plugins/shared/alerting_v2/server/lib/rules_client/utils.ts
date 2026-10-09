@@ -356,6 +356,7 @@ export function buildUpdateRuleAttributes(
       tags: next.metadata.tags,
       routing_tags: next.metadata.routing_tags,
       builder_type: next.metadata.builder?.type,
+      template: existingAttrs.metadata.template,
     },
     time_field: next.time_field,
     schedule: { every: next.schedule.every, lookback: next.schedule.lookback },

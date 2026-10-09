@@ -145458,11 +145458,11 @@ components:
           properties:
             builder:
               additionalProperties: false
-              description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
+              description: The rule builder that generated this rule's ES|QL query. Kibana sets this field. Omit it if you write the query yourself.
               type: object
               properties:
                 type:
-                  description: Rule builder type.
+                  description: The rule builder type, for example, `threshold`.
                   maxLength: 64
                   type: string
               required:
@@ -145477,7 +145477,7 @@ components:
               minLength: 1
               type: string
             routing_tags:
-              description: Routing tags that link alerts from this rule to action policies. An action policy applies when its `matcher.tags` contains at least one of these tags. Only allowed when kind is "alert".
+              description: Tags that route this rule's alerts to action policies. A policy matches these alerts when its `matcher.tags` includes at least one of these tags. Only allowed when kind is alert.
               items:
                 maxLength: 128
                 minLength: 1
@@ -145486,7 +145486,7 @@ components:
               minItems: 1
               type: array
             tags:
-              description: Tags for categorization, e.g. ["production", "infra"].
+              description: Tags for organizing and filtering rules, for example, ["production", "infra"]. Action policies don't match on these tags. They only match on `routing_tags`.
               items:
                 maxLength: 128
                 minLength: 1
@@ -145496,11 +145496,11 @@ components:
               type: array
             template:
               additionalProperties: false
-              description: The rule template this rule was created from.
+              description: Rule template that this rule was created from. Not set for rules created without a template.
               type: object
               properties:
                 id:
-                  description: Id of the rule template.
+                  description: ID of the rule template.
                   type: string
               required:
                 - id

@@ -50,7 +50,6 @@ export const CREATE_RULE_REQUEST: CreateRuleDataInput = SAMPLE_RULE_DATA;
 
 export const RULE_RESPONSE: RuleResponse = {
   ...SAMPLE_RULE_DATA,
-  metadata: { ...SAMPLE_RULE_DATA.metadata, template: { id: 'host-cpu-high' } },
   id: 'rule-1',
   version: 1,
   enabled: true,
