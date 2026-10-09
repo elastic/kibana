@@ -740,6 +740,55 @@ describe('detection rule workflows', () => {
         expect(reviewedRows).toEqual([ruleBCurrentVersion]);
       });
 
+      describe('expiring stale tuning proposals', () => {
+        const expireSteps = ['expire_deleted_rule_proposal', 'expire_changed_rule_proposal'].map(
+          (stepName) => tuningSteps.find(({ name }) => name === stepName)!
+        );
+        const proposal = (expectedRevision?: number) => ({
+          id: 'proposal-1',
+          actionInput: { id: 'rule-1', expected_revision: expectedRevision },
+        });
+
+        it.each([
+          [
+            'a deleted rule',
+            { error: { message: 'HTTP 404: Not Found' } },
+            0,
+            ['expire_deleted_rule_proposal'],
+          ],
+          ['a failed rule read', { error: { message: 'HTTP 500: Internal Server Error' } }, 0, []],
+          ['an edited rule', { output: { revision: 1 } }, 0, ['expire_changed_rule_proposal']],
+          ['an unchanged rule', { output: { revision: 0 } }, 0, []],
+          ['a proposal without a revision', { output: { revision: 3 } }, undefined, []],
+        ])('handles %s', (_, fetchRule, expectedRevision, expected) => {
+          const context = {
+            foreach: { item: proposal(expectedRevision) },
+            steps: { fetch_proposal_rule: fetchRule },
+          };
+          const fired = expireSteps.filter((step) => resolveExpression(step.if, context) === true);
+
+          expect(fired.map(({ name }) => name)).toEqual(expected);
+        });
+
+        it('explains why in plain text', async () => {
+          const context = {
+            foreach: { item: proposal(0) },
+            steps: { fetch_proposal_rule: { output: { revision: 1, updated_by: 'jane' } } },
+          };
+          const engine = createWorkflowLiquidEngine();
+          const [deleted, changed] = await Promise.all(
+            expireSteps.map((step) => engine.parseAndRender(String(step.with?.rationale), context))
+          );
+
+          expect(deleted).toBe(
+            "The rule was deleted after this proposal was created, so this tuning can't be applied."
+          );
+          expect(changed).toBe(
+            'The rule was changed by "jane" after this proposal was created, so this tuning can\'t be applied.'
+          );
+        });
+      });
+
       // The pool is cut in ES|QL before the enabled check runs, so it must exceed
       // the launch cap for the enabled filter to have anything to backfill from.
       it('overscans the harvest pool beyond the launch cap', () => {

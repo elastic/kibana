@@ -6,7 +6,7 @@
  */
 
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import {
   esqlQuerySchema,
   queryFeatureSchema,
@@ -49,16 +49,18 @@ interface QueryOccurrencesResponse {
   aggregated_occurrences: SignificantEventOccurrence[];
 }
 
-export const generatedSignificantEventQuerySchema = z.object({
-  type: queryTypeSchema,
-  title: z.string().max(MAX_TITLE_LENGTH),
-  esql: esqlQuerySchema,
-  severity_score: z.number().min(0).max(100),
-  description: z.string().max(MAX_TEXT_LENGTH),
-  evidence: z.array(z.string().max(MAX_TEXT_LENGTH)).optional(),
-  replaces: z.string().max(MAX_ID_LENGTH).optional(),
-  features: z.array(queryFeatureSchema),
-});
+export const generatedSignificantEventQuerySchema = lazySchema(() =>
+  z.object({
+    type: queryTypeSchema,
+    title: z.string().max(MAX_TITLE_LENGTH),
+    esql: esqlQuerySchema,
+    severity_score: z.number().min(0).max(100),
+    description: z.string().max(MAX_TEXT_LENGTH),
+    evidence: z.array(z.string().max(MAX_TEXT_LENGTH)).optional(),
+    replaces: z.string().max(MAX_ID_LENGTH).optional(),
+    features: z.array(queryFeatureSchema),
+  })
+);
 
 type GeneratedSignificantEventQuery = z.infer<typeof generatedSignificantEventQuerySchema>;
 

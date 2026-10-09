@@ -71,7 +71,7 @@ export const toListExecutionHistoryResponse = ({
     page,
     per_page: perPage,
     total,
-    search_matches: searchMatches,
+    search_matches: searchMatches ?? undefined,
   };
 };
 

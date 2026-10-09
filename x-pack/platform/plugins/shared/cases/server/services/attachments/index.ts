@@ -88,8 +88,8 @@ import type {
 import { isSOError } from '../../common/error';
 import {
   assertLegacyWriteableAttachmentType,
+  decodeAttachmentSavedObject,
   getTransformerForPatchAttributes,
-  toUnifiedAttributes,
 } from './operations/utils';
 
 const PERSISTABLE_ATTACHMENT_TYPES_ARRAY = Array.from(PERSISTABLE_ATTACHMENT_TYPES);
@@ -1101,26 +1101,15 @@ export class AttachmentService {
       const validatedAttachments: Array<SavedObjectsFindResult<AttachmentAttributesV2>> = [];
 
       for (const so of res.saved_objects) {
-        const injectedSo = injectAttachmentSOAttributesFromRefs(
-          so as unknown as SavedObject<AttachmentPersistedAttributes>
-        ) as unknown as SavedObjectsFindResult<AttachmentAttributesV2>;
-        const transformed = toUnifiedAttributes({
-          attributes: injectedSo.attributes,
-        });
-        if (transformed.isUnified) {
-          const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
-            transformed.attributes
-          );
-          validatedAttachments.push(Object.assign(injectedSo, { attributes: validatedAttributes }));
-        } else {
-          const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
-            transformed.attributes
-          );
-
+        try {
           validatedAttachments.push(
-            Object.assign(injectedSo, {
-              attributes: validatedAttributes,
-            }) as unknown as SavedObjectsFindResult<AttachmentAttributesV2>
+            decodeAttachmentSavedObject(
+              so as unknown as SavedObject<AttachmentPersistedAttributes>
+            ) as unknown as SavedObjectsFindResult<AttachmentAttributesV2>
+          );
+        } catch (error) {
+          this.context.log.warn(
+            `Failed to decode attachment id ${so.id} of type ${so.type}, skipping it: ${error}`
           );
         }
       }
