@@ -1771,7 +1771,7 @@ describe('RiskInputsTab - single resolution score', () => {
     });
   });
 
-  it('hides the score toggle and uses the resolution score when the new page flag is on', () => {
+  it('shows the score toggle when both scores exist and the new page flag is on', () => {
     const startServices = createStartServicesMock();
     jest
       .mocked(startServices.featureFlags.useBooleanValue)
@@ -1779,7 +1779,7 @@ describe('RiskInputsTab - single resolution score', () => {
         flag === USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG ? true : fallback
       );
 
-    const { queryByTestId } = render(
+    const { getByTestId } = render(
       <TestProviders startServices={startServices}>
         <RiskInputsTab
           entityType={EntityType.user}
@@ -1790,9 +1790,9 @@ describe('RiskInputsTab - single resolution score', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('risk-input-score-view-toggle')).not.toBeInTheDocument();
+    expect(getByTestId('risk-input-score-view-toggle')).toBeInTheDocument();
     expect(mockUseRiskContributingAlerts).toHaveBeenCalledWith(
-      expect.objectContaining({ riskScore: resolutionScore })
+      expect.objectContaining({ riskScore: entityScore })
     );
   });
 });
