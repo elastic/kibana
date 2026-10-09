@@ -552,9 +552,18 @@ const createBulkCreateCaseRequest = async ({
       settings: {
         ...caseWithoutId.settings,
         extractObservables: resolveExtractObservables(caseWithoutId.owner, spaceExtractObservables),
+        extractObservablesSource: 'space_default',
       },
     };
+  } else if (caseWithoutId.settings.extractObservablesSource == null) {
+    // extractObservables was explicitly provided (by the API caller or connector executor) but
+    // the source was not pre-set; mark it as an explicit override.
+    caseWithoutId = {
+      ...caseWithoutId,
+      settings: { ...caseWithoutId.settings, extractObservablesSource: 'explicit' },
+    };
   }
+  // Otherwise the source was already stamped by the connector executor ('rule', 'template' or 'space_default').
 
   const normalizedCase = normalizeCreateCaseRequest(caseWithoutId, customFieldsConfiguration);
 
