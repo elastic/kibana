@@ -148,12 +148,10 @@ export function ProfilingAppPageTemplate({
   return (
     <>
       {/*
-        In some contexts like when using the noDataConfig prop, the page template might choose not to render it's children. 
-        When that happens, because AppHeader is nested inside the template, it won't be rendered.
-        Without an explicit AppHeader component, the Chrome Next framework would attempt to render the compatibility header with the back button derived from breadcrumbs.
-        This component is here to prevent these edge cases from rendering incorrect back buttons. 
-        When AppHeader exists, this component doesn't do anything so the explicit back buttons we do want to render (when using the back prop) won't be hidden. 
-        It's safe to render both at the same time, suppression only happens for auto-generated back targets.
+        The observability page template is lazy loaded, so AppHeader, which is nested inside it, isn't rendered until the template loads.
+        Until then, Chrome Next renders its compatibility header with a back button derived from the breadcrumbs.
+        This component prevents that back button from flashing on the first load.
+        It's safe to render it next to AppHeader: it only suppresses auto-generated back targets, so the back buttons set with the back prop still render.
       */}
       <SuppressChromeBackButton />
       <ObservabilityPageTemplate
