@@ -10,7 +10,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useLocation } from 'react-router-dom';
 
@@ -59,9 +59,18 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
     dataFormat,
     setDataFormat,
     agentBasedOnlySelected,
+    ecfOnlySelected,
+    isUnavailableForMethod,
   } = useServicesStep({ onContinue });
 
   const { detectAndReviewStep } = useOnboardingFlow();
+  const unavailableForMethodReason = i18n.translate(
+    'xpack.ingestHub.servicesStep.ecfOnlyDisabledTooltip',
+    {
+      defaultMessage:
+        "Agent-based deployment doesn't support this service. Switch to Elastic Managed Integrations to select it.",
+    }
+  );
   const location = useLocation();
   // Lock format when in edit mode (SO persisted) OR when deploy has started without a persisted SO
   // (SO create is best-effort — policies may exist even if ?deploymentId= was never added to URL).
@@ -104,26 +113,52 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
 
       {agentBasedOnlySelected.length > 0 && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             title={i18n.translate('xpack.ingestHub.servicesStep.agentBasedOnlyCallout.title', {
               defaultMessage: 'Some services require a self-managed Elastic Agent',
             })}
-            color="warning"
-            iconType="warning"
+            text={
+              <p>
+                <FormattedMessage
+                  id="xpack.ingestHub.servicesStep.agentBasedOnlyCallout.body"
+                  defaultMessage="{services} {count, plural, one {does} other {do}} not support Managed Integrations and can only be collected via a self-managed Elastic Agent. You will configure this in the next steps."
+                  values={{
+                    count: agentBasedOnlySelected.length,
+                    services: (
+                      <strong>{agentBasedOnlySelected.map((s) => s.name).join(', ')}</strong>
+                    ),
+                  }}
+                />
+              </p>
+            }
             data-test-subj="servicesStep-agentBasedOnlyCallout"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.ingestHub.servicesStep.agentBasedOnlyCallout.body"
-                defaultMessage="{services} {count, plural, one {does} other {do}} not support Managed Integrations and can only be collected via a self-managed Elastic Agent. You will configure this in the next steps."
-                values={{
-                  count: agentBasedOnlySelected.length,
-                  services: <strong>{agentBasedOnlySelected.map((s) => s.name).join(', ')}</strong>,
-                }}
-              />
-            </p>
-          </EuiCallOut>
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
+
+      {ecfOnlySelected.length > 0 && (
+        <>
+          <KbnWarningCallout
+            announceOnMount
+            title={i18n.translate('xpack.ingestHub.servicesStep.ecfOnlyCallout.title', {
+              defaultMessage: 'Some services do not support agent-based deployment',
+            })}
+            text={
+              <p>
+                <FormattedMessage
+                  id="xpack.ingestHub.servicesStep.ecfOnlyCallout.body"
+                  defaultMessage="{services} can only be deployed through Elastic Cloud Forwarder. If you choose agent-based deployment in a later step, {count, plural, one {it is} other {they are}} removed from your selection."
+                  values={{
+                    count: ecfOnlySelected.length,
+                    services: <strong>{ecfOnlySelected.map((s) => s.name).join(', ')}</strong>,
+                  }}
+                />
+              </p>
+            }
+            data-test-subj="servicesStep-ecfOnlyCallout"
+          />
           <EuiSpacer size="m" />
         </>
       )}
@@ -244,6 +279,9 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
                           service={service}
                           isSelected={selectedSet.has(service.id)}
                           onToggle={handleToggle}
+                          disabledReason={
+                            isUnavailableForMethod(service) ? unavailableForMethodReason : undefined
+                          }
                           displayName={
                             duplicateNamesInCategory.has(service.name)
                               ? `${service.name} ${service.signalTypes

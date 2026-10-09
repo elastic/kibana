@@ -9,6 +9,7 @@ import { tags } from '@kbn/scout';
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
+import { mockEcfOnlyServicePackages, mockEcfTemplateVersion } from '../helpers/ecf_only_services';
 import { expectOnboardingStepVisible } from '../helpers/onboarding';
 
 // Both services are in the "security_identity_compliance" category,
@@ -22,21 +23,23 @@ async function seedSessionStorage(
   page: ScoutPage,
   {
     selectedServiceIds,
+    dataFormat,
     stepState,
   }: {
     selectedServiceIds: string[];
+    dataFormat?: 'ecs' | 'otel';
     stepState: Record<string, 'complete' | 'incomplete'>;
   }
 ) {
   await page.addInitScript(
-    ({ ids, state }) => {
+    ({ ids, format, state }) => {
       sessionStorage.setItem(
         'onboarding.aws.servicesStep',
-        JSON.stringify({ selectedServiceIds: ids })
+        JSON.stringify({ selectedServiceIds: ids, ...(format ? { dataFormat: format } : {}) })
       );
       sessionStorage.setItem('onboarding.aws.stepState', JSON.stringify(state));
     },
-    { ids: selectedServiceIds, state: stepState }
+    { ids: selectedServiceIds, format: dataFormat, state: stepState }
   );
 }
 
@@ -107,5 +110,37 @@ test.describe('Onboarding — downstream step invalidation', { tag: tags.statefu
       'data-step-status',
       'incomplete'
     );
+  });
+
+  // Path 2: on Step 3 the user switches to agent-based. ECF-only services leave the selection, which
+  // changes it, so service-settings must lose its checkmark as well.
+  test('path 2 — switching to agent-based marks service-settings incomplete', async ({
+    browserAuth,
+    page,
+  }) => {
+    await mockEcfOnlyServicePackages(page);
+    await mockEcfTemplateVersion(page);
+    await browserAuth.loginAsAdmin();
+    await seedSessionStorage(page, {
+      dataFormat: 'otel',
+      selectedServiceIds: ['cloudtrail_otel', 'ec2_otel'],
+      stepState: {
+        services: 'complete',
+        'service-settings': 'complete',
+        'authenticate-and-deploy': 'incomplete',
+        'detect-and-review': 'incomplete',
+      },
+    });
+    await page.gotoApp('onboarding/aws#authenticate-and-deploy');
+    await expectOnboardingStepVisible(page, 'authenticate-and-deploy');
+
+    const settingsIndicator = page.testSubj.locator('onboardingStepIndicator-service-settings');
+    await expect(settingsIndicator).toHaveAttribute('data-step-status', 'complete');
+
+    await page.testSubj.locator('deploymentMethodCard-editButton').click();
+    await page.testSubj.locator('editDeploymentMethodModal-select').selectOption('agent_based');
+    await page.testSubj.locator('editDeploymentMethodModal-saveButton').click();
+
+    await expect(settingsIndicator).toHaveAttribute('data-step-status', 'incomplete');
   });
 });
