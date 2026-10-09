@@ -445,6 +445,8 @@ Rules are evaluated **top-to-bottom**. If two rules overlap on the same entity, 
     ships with the plugin looks like:
     ```jsonc
     {
+      "maskingEnabled": false,   // master switch: no rule runs while this is false
+      "onFailure": "block",      // "block" fails the request when a regex rule cannot run; "allow_unsafe" sends it unmasked
       "rules": [
         {
           "entityClass": "EMAIL",
@@ -461,9 +463,9 @@ Rules are evaluated **top-to-bottom**. If two rules overlap on the same entity, 
       ]
     }
     ```
-3.  Toggle `enabled` to `true` (or add your own rules) and save.  A page refresh is required UI highlighting in chat.
+3.  Set `maskingEnabled` to `true`, toggle each rule's `enabled` to `true` (or add your own rules) and save.  A page refresh is required UI highlighting in chat.
 
-If **no rules are enabled**, anonymization does not run.
+If `maskingEnabled` is `false`, or **no rules are enabled**, anonymization does not run. Settings saved before `maskingEnabled` existed have no such key; for those, anonymization runs exactly when at least one rule is enabled.
 
 > Note: Each request is processed with whatever rules are active at the time of the request, and those rules are applied to all messages included in that request – including any previous conversation history passed along.
 
