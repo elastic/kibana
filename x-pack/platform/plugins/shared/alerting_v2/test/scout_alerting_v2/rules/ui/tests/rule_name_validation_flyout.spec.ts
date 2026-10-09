@@ -31,8 +31,7 @@ test.describe(
 
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAlertingV2Editor();
-      await pageObjects.ruleForm.gotoDiscover();
-      await pageObjects.ruleForm.switchToEsqlMode();
+      await pageObjects.discover.goto({ queryMode: 'esql' });
       await pageObjects.discover.writeAndSubmitEsqlQuery(
         `FROM ${SOURCE_INDEX} | WHERE message != "" | LIMIT 10`
       );

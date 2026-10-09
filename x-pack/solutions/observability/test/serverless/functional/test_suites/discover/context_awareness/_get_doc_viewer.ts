@@ -54,9 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       it('should render logs overview tab for logs data source', async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
+        await PageObjects.discover.navigateToApp({ queryMode: 'classic' });
         await PageObjects.discover.waitUntilTabIsLoaded();
         // Closes tabPreview_contentPanel to prevent intercepting clicks to reduce flakiness
         await browser.pressKeys(browser.keys.ESCAPE);
@@ -96,9 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should not render logs overview tab for non-logs data source', async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
+        await PageObjects.discover.navigateToApp({ queryMode: 'classic' });
         await PageObjects.discover.waitUntilTabIsLoaded();
         // Closes tabPreview_contentPanel to prevent intercepting clicks to reduce flakiness
         await browser.pressKeys(browser.keys.ESCAPE);
