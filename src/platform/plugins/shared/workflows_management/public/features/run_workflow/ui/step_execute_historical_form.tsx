@@ -402,6 +402,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
                 >
                   <CodeEditor
                     languageId="json"
+                    themeOverride={WORKFLOWS_MONACO_EDITOR_THEME}
                     value={value}
                     width="100%"
                     height="100%"
@@ -424,7 +425,6 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
                       renderWhitespace: 'all',
                       wordWrapColumn: 80,
                       wrappingIndent: 'indent',
-                      theme: WORKFLOWS_MONACO_EDITOR_THEME,
                       formatOnType: true,
                       quickSuggestions: false,
                       suggestOnTriggerCharacters: false,
