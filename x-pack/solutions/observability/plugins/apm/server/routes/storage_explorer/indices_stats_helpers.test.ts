@@ -76,9 +76,9 @@ describe('storage explorer with missing APM indices', () => {
     const stats = jest.fn().mockResolvedValue(normalStats);
     const context = contextFor({ indices: { stats } });
 
-    await expect(getTotalIndicesStats({ context, apmEventClient: onePatternClient })).resolves.toEqual(
-      normalStats
-    );
+    await expect(
+      getTotalIndicesStats({ context, apmEventClient: onePatternClient })
+    ).resolves.toEqual(normalStats);
     expect(stats).toHaveBeenCalledWith({
       index: 'traces-apm-*',
       expand_wildcards: 'all',
@@ -115,7 +115,9 @@ describe('storage explorer with missing APM indices', () => {
     });
     const context = contextFor({ ilm: { explainLifecycle } });
 
-    await expect(getIndicesLifecycleStatus({ context, apmEventClient })).rejects.toBe(securityError);
+    await expect(getIndicesLifecycleStatus({ context, apmEventClient })).rejects.toBe(
+      securityError
+    );
   });
 
   it('keeps lifecycle information for an existing APM index pattern', async () => {
