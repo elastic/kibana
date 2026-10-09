@@ -39,6 +39,9 @@ describe('nightshift investigation saved object model version 4', () => {
 
   it('registers a schema-only model version without data or mapping changes', () => {
     expect(modelVersion4?.changes).toEqual([]);
+    expect(Object.keys(modelVersions)).toEqual(['1', '2', '3', '4']);
+    expect(modelVersion4?.schemas?.create).toBeDefined();
+    expect(modelVersion4?.schemas?.forwardCompatibility).toBeDefined();
   });
 
   it('accepts an impact with a top-level summary and evidence and no entities on create', () => {
@@ -76,6 +79,15 @@ describe('nightshift investigation saved object model version 4', () => {
     ).toThrow();
   });
 
+  it('keeps delivery state out of the investigation Saved Object schema', () => {
+    expect(() =>
+      modelVersion4?.schemas?.create?.validate({
+        ...baseAttributes,
+        notificationDestinations: [],
+        notifications: [],
+      })
+    ).toThrow();
+  });
   it("accepts the latest run's execution", () => {
     expect(() =>
       modelVersion4?.schemas?.create?.validate({

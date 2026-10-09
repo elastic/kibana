@@ -30,6 +30,7 @@ import {
   useStartServices,
   useGetPackageInfoByKeyQuery,
   useConfig,
+  useFleetStatus,
 } from '../../../../hooks';
 
 jest.mock('../../../../../../services/use_yaml', () => ({
@@ -378,6 +379,108 @@ describe('When on the package policy create page', () => {
         expect(cancelLink.href).toBe(expectedRouteState.onCancelUrl);
         expect(cancelButton.href).toBe(expectedRouteState.onCancelUrl);
       }, 10000);
+    });
+  });
+
+  describe('When the package has a non FIPS policy template', () => {
+    const NON_FIPS_INPUT_TITLE = 'Collect metrics from Nginx stub status';
+
+    const mockPackageWithNonFipsTemplate = () => {
+      const mockPackageInfo = getMockPackageInfo();
+      const item = mockPackageInfo.data.item as any;
+      item.policy_templates.push({
+        name: 'nginx_metrics',
+        title: 'Nginx metrics',
+        description: 'Collect metrics from Nginx instances',
+        fips_compatible: false,
+        inputs: [{ type: 'nginx/metrics', title: NON_FIPS_INPUT_TITLE, description: 'metrics' }],
+        multiple: true,
+      });
+      item.data_streams.push({
+        type: 'metrics',
+        dataset: 'nginx.stubstatus',
+        title: 'Nginx stub status',
+        ingest_pipeline: 'default',
+        package: 'nginx',
+        path: 'stubstatus',
+        streams: [
+          {
+            input: 'nginx/metrics',
+            title: 'Nginx stub status metrics',
+            template_path: 'stream.yml.hbs',
+            description: 'Collect Nginx stub status metrics',
+            enabled: true,
+          },
+        ],
+      });
+      (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(mockPackageInfo);
+    };
+
+    afterEach(() => {
+      (useFleetStatus as jest.Mock).mockReturnValue({ isReady: true });
+    });
+
+    it('should not show the inputs of the non FIPS policy template when FIPS is enabled', async () => {
+      mockPackageWithNonFipsTemplate();
+      (useFleetStatus as jest.Mock).mockReturnValue({ isReady: true, isFipsEnabled: true });
+
+      act(() => {
+        render();
+      });
+
+      expect(
+        await renderResult.findByText('Collect logs from Nginx instances')
+      ).toBeInTheDocument();
+      expect(renderResult.queryByText(NON_FIPS_INPUT_TITLE)).not.toBeInTheDocument();
+    });
+
+    it('should not initialize the inputs before the FIPS status is loaded', async () => {
+      mockPackageWithNonFipsTemplate();
+      (useFleetStatus as jest.Mock).mockReturnValue({ isReady: false, isLoading: true });
+
+      act(() => {
+        render();
+      });
+
+      expect(renderResult.queryByText('Collect logs from Nginx instances')).not.toBeInTheDocument();
+      expect(renderResult.queryByText(NON_FIPS_INPUT_TITLE)).not.toBeInTheDocument();
+
+      (useFleetStatus as jest.Mock).mockReturnValue({
+        isReady: true,
+        isLoading: false,
+        isFipsEnabled: true,
+      });
+      act(() => {
+        renderResult.rerender(
+          <Route path={INTEGRATIONS_ROUTING_PATHS.add_integration_to_policy}>
+            <CreatePackagePolicySinglePage
+              from="package"
+              prerelease={false}
+              pkgName={'nginx'}
+              pkgVersion={'1.3.0'}
+            />
+          </Route>
+        );
+      });
+
+      expect(
+        await renderResult.findByText('Collect logs from Nginx instances')
+      ).toBeInTheDocument();
+      expect(renderResult.queryByText(NON_FIPS_INPUT_TITLE)).not.toBeInTheDocument();
+    });
+
+    it('should show the inputs of the non FIPS policy template when FIPS is not enabled', async () => {
+      mockPackageWithNonFipsTemplate();
+      (useFleetStatus as jest.Mock).mockReturnValue({ isReady: true, isFipsEnabled: false });
+
+      act(() => {
+        render();
+      });
+
+      expect(
+        await renderResult.findByText('Collect logs from Nginx instances')
+      ).toBeInTheDocument();
+      expect(await renderResult.findByText(NON_FIPS_INPUT_TITLE)).toBeInTheDocument();
     });
   });
 

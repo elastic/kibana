@@ -20,7 +20,7 @@ export interface CreateTextExpansionModelResponse {
 export const createTextExpansionModel = async ({
   modelId,
 }: CreateTextExpansionModelArgs): Promise<CreateTextExpansionModelResponse> => {
-  const route = `/internal/enterprise_search/ml/models/${modelId}`;
+  const route = `/internal/enterprise_search/ml/models/${encodeURIComponent(modelId)}`;
   return await HttpLogic.values.http.post<CreateTextExpansionModelResponse>(route);
 };
 

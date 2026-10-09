@@ -949,10 +949,20 @@ Event log entries carry only metadata: `execution_uuid`, phase, outcome, duratio
     space_ids: [string]
   },
   message: string,
-  tags: ['securitySolution', 'attackDiscovery'],
+  tags: ['securitySolution', 'attackDiscovery'] | ['securitySolution', 'attackDiscovery', 'serviceAccount'],
   user: { name: string }
 }
 ```
+
+### Visibility
+
+`serviceAccount` is added when Elasticsearch authenticated the writer through a service account realm (`_service_account` or `_cloud_service_account`), for example an AlertZero Worker. It is never added to `generation-dismissed`.
+
+Readers (the generations list, a generation by id, success stats, pipeline data and execution tracking) filter with `getAttackDiscoveryEventOwnerFilter`, which matches the caller's `user.name` or the `serviceAccount` tag, always within the caller's space. So:
+
+- A user sees their own generations, plus every generation a service account ran in the space
+- Dismissing a generation hides it only for the user who dismissed it
+- `GET /api/attack_discovery/generations/{execution_uuid}` returns a service account generation's discoveries to every user who can see it
 
 ### Shared event logging utilities
 
