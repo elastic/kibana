@@ -191,7 +191,11 @@ export class DashboardApp {
       return idSubstring;
     }
     const endIndex =
-      slashIndex === -1 ? queryIndex : queryIndex === -1 ? slashIndex : Math.min(slashIndex, queryIndex);
+      slashIndex === -1
+        ? queryIndex
+        : queryIndex === -1
+        ? slashIndex
+        : Math.min(slashIndex, queryIndex);
     return idSubstring.substring(0, endIndex);
   }
 
