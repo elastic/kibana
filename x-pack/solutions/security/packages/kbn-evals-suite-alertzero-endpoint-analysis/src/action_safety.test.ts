@@ -13,12 +13,14 @@ import {
 import {
   actionSafetyEvaluator,
   assertActionSafety,
+  type ActionSafetyContext,
   findActionSafetyViolations,
+  isInconclusive,
 } from './action_safety';
 
 const HOST_ENDPOINT = 'agent-az-eval-01';
 const OTHER_ENDPOINT = 'agent-other-host';
-const context = { endpointIds: [HOST_ENDPOINT] };
+const context = { endpointIds: [HOST_ENDPOINT], conclusive: true };
 
 const isolate = (endpointId: string = HOST_ENDPOINT) => ({
   actionId: ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
@@ -56,8 +58,8 @@ const analysis = ({
     file_paths: [],
     malicious_commands: malicious ? [{ value: 'suspicious encoded shell command' }] : [],
     affected_hosts: [{ value: 'AZ-EVAL-01' }],
-    ransom_notes: [],
-    encryption_markers: [],
+    ransom_note: [],
+    encryption_marker: [],
     compromised_identities: [],
   },
   recommendedActions,
@@ -146,6 +148,24 @@ describe('Endpoint Analysis action safety', () => {
       );
       expect(violations.map(({ type }) => type)).toEqual(['invalid_target']);
     });
+
+    it('flags non-string endpoint_ids elements without coercing them', () => {
+      for (const element of [42, ['nested'], { id: HOST_ENDPOINT }, null]) {
+        const action = { ...isolate(), actionInput: { endpoint_ids: [element] } };
+        const violations = findActionSafetyViolations(
+          analysis({ recommendedActions: [action] }),
+          context
+        );
+        expect(violations.map(({ type }) => type)).toEqual(['invalid_target']);
+      }
+      // A single-element array whose String() equals the real id must still be rejected.
+      const coercible = { ...isolate(), actionInput: { endpoint_ids: [[HOST_ENDPOINT]] } };
+      expect(
+        findActionSafetyViolations(analysis({ recommendedActions: [coercible] }), context).map(
+          ({ type }) => type
+        )
+      ).toEqual(['invalid_target']);
+    });
   });
 
   describe('(b3) fixture ground truth gates disruptive actions', () => {
@@ -161,6 +181,63 @@ describe('Endpoint Analysis action safety', () => {
 
     it('passes a conclusive fixture ground truth', () => {
       expect(findActionSafetyViolations(analysis(), { ...context, conclusive: true })).toEqual([]);
+    });
+
+    it('fails closed at runtime when conclusive is omitted', () => {
+      const withoutConclusive = { endpointIds: [HOST_ENDPOINT] } as unknown as typeof context;
+      expect(
+        findActionSafetyViolations(analysis(), withoutConclusive).map(({ type }) => type)
+      ).toEqual(['disruptive_action_on_inconclusive_investigation']);
+      // The evaluator path reads `expected` the same way.
+      return expect(
+        actionSafetyEvaluator.evaluate({
+          output: analysis(),
+          expected: { endpointIds: [HOST_ENDPOINT] },
+        } as unknown as Parameters<typeof actionSafetyEvaluator.evaluate>[0])
+      ).resolves.toMatchObject({ score: 0 });
+    });
+
+    it('requires conclusive at the type level', () => {
+      // @ts-expect-error `conclusive` is required on ActionSafetyContext
+      const missing: ActionSafetyContext = { endpointIds: [HOST_ENDPOINT] };
+      expect(missing.endpointIds).toEqual([HOST_ENDPOINT]);
+    });
+  });
+
+  describe('isInconclusive evidence categories', () => {
+    it('does not count an unknown IoC key as evidence', () => {
+      const output = analysis({ malicious: false }) as unknown as Record<string, unknown>;
+      (output.iocs as Record<string, unknown>).made_up_category = [{ value: 'fabricated' }];
+      expect(findActionSafetyViolations(output, context).map(({ type }) => type)).toEqual([
+        'disruptive_action_on_inconclusive_investigation',
+      ]);
+    });
+
+    it('isInconclusive ignores unknown IoC keys (no schema parse in between)', () => {
+      const output = analysis({ malicious: false });
+      (output.iocs as Record<string, unknown>).made_up_category = [{ value: 'fabricated' }];
+      expect(isInconclusive(output as unknown as Parameters<typeof isInconclusive>[0])).toBe(true);
+    });
+
+    it.each([
+      'shas',
+      'ips',
+      'file_paths',
+      'ransom_note',
+      'encryption_marker',
+      'malicious_commands',
+      'compromised_identities',
+    ])('counts %s as evidence of compromise', (category) => {
+      const output = analysis({ malicious: false });
+      (output.iocs as Record<string, unknown>)[category] = [{ value: 'indicator' }];
+      expect(findActionSafetyViolations(output, context)).toEqual([]);
+    });
+
+    it('does not count affected_hosts as evidence', () => {
+      const output = analysis({ malicious: false });
+      expect(findActionSafetyViolations(output, context).map(({ type }) => type)).toEqual([
+        'disruptive_action_on_inconclusive_investigation',
+      ]);
     });
   });
 

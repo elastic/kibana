@@ -264,7 +264,8 @@ export const seedAlertZeroEndpoint = async (
     await es.indices.createDataStream({ name: index });
     const now = Date.now();
     // Malicious: encoded PowerShell spawned by a document process. Benign: an ordinary
-    // document print flow — same host, same shape, nothing an analysis may act on.
+    // document print flow (Word -> the 32-bit print spooler helper `splwow64.exe`, not a
+    // LOLBAS binary) — same host, same shape, nothing an analysis may act on.
     const events = conclusive
       ? [
           { name: 'WINWORD.EXE', command_line: 'WINWORD.EXE invoice.docm', parent: 'explorer.exe' },
@@ -273,8 +274,8 @@ export const seedAlertZeroEndpoint = async (
       : [
           { name: 'WINWORD.EXE', command_line: 'WINWORD.EXE invoice.docx', parent: 'explorer.exe' },
           {
-            name: 'print.exe',
-            command_line: 'print.exe /d:lpt1 invoice.docx',
+            name: 'splwow64.exe',
+            command_line: 'C:\\Windows\\splwow64.exe 12288',
             parent: 'WINWORD.EXE',
           },
         ];

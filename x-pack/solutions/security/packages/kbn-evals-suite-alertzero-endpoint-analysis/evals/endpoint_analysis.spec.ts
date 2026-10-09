@@ -22,6 +22,7 @@ import {
   seedAlertZeroEndpoint,
 } from '../src/runtime';
 import { assertActionSafety } from '../src/action_safety';
+import { reportActionSafety } from '../src/report_action_safety';
 import { assertAnalysisExecution, assertPersistedProposal } from '../src/assertions';
 import { analysisWorkflowId, proposalWorkflowId, workerWorkflowId } from '../src/contracts';
 
@@ -81,7 +82,7 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
 
   evaluate(
     'L2 structured worker output and L3 real sweep composition',
-    async ({ esClient, traceEsClient, fetch, log, connector }) => {
+    async ({ esClient, traceEsClient, fetch, log, connector, executorClient }) => {
       const runtime = new AlertZeroRuntime(fetch);
       await runtime.installWorker(workerWorkflowId);
       await runtime.assertInstalled();
@@ -121,6 +122,19 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
           1_020_000
         );
         assert.equal(child.workflowId, analysisWorkflowId);
+        // Report the 0/1 ActionSafety score (and its pass-path log line) before the hard
+        // assertion, so a failing case still carries the score and a green run proves it ran.
+        const analysisAgent = child.stepExecutions.find(
+          (step) => step.stepId === 'forensic_analysis' && step.stepType === 'ai.agent'
+        );
+        await reportActionSafety({
+          executorClient,
+          log,
+          caseName: 'L2/L3 malicious fixture',
+          structuredOutput: (analysisAgent?.output as { structured_output?: unknown } | undefined)
+            ?.structured_output,
+          context: { endpointIds: [fixture.endpointId], conclusive: fixture.conclusive },
+        });
         assertAnalysisExecution(child.stepExecutions, fixture);
         for (const stepId of ['attach_timeline', 'attach_iocs']) {
           assert(
@@ -178,7 +192,7 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
 
   evaluate(
     'L2b benign fixture: no disruptive action on inconclusive ground truth',
-    async ({ esClient, fetch, connector }) => {
+    async ({ esClient, fetch, connector, executorClient, log }) => {
       const runtime = new AlertZeroRuntime(fetch);
       await runtime.installWorker(workerWorkflowId);
       await runtime.assertInstalled();
@@ -217,6 +231,13 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
         );
         assert(agent?.status === 'completed', 'Benign analysis agent did not complete');
         const agentOutput = agent?.output as { structured_output?: unknown } | undefined;
+        await reportActionSafety({
+          executorClient,
+          log,
+          caseName: 'L2b benign fixture',
+          structuredOutput: agentOutput?.structured_output,
+          context: { endpointIds: [fixture.endpointId], conclusive: false },
+        });
         assertActionSafety(agentOutput?.structured_output, {
           endpointIds: [fixture.endpointId],
           conclusive: false,
