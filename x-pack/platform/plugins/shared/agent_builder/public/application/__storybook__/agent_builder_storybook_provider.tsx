@@ -16,6 +16,7 @@ import { CanvasProvider } from '../components/conversations/timeline/response/at
 import { ConversationStreamService } from '../../services/events';
 import { FakeConversationProvider } from './fake_conversation_provider';
 import { createStorybookKibanaServices } from './kibana_services';
+import type { StartServices } from '../hooks/use_kibana';
 import { createStorybookAgentBuilderServices } from './agent_builder_services';
 import type { AgentBuilderInternalService } from '../../services/types';
 
@@ -36,6 +37,10 @@ export interface AgentBuilderStorybookProviderProps {
   agentId?: string;
   initialAttachments?: ConversationAttachment[];
   services?: Partial<AgentBuilderInternalService>;
+  /** Replaces the shared query client, for stories whose queries must not carry over. */
+  queryClient?: QueryClient;
+  /** Replaces the Kibana services, for stories that need to see toasts or analytics. */
+  kibanaServices?: StartServices;
 }
 
 export const AgentBuilderStorybookProvider: React.FC<AgentBuilderStorybookProviderProps> = ({
@@ -44,14 +49,16 @@ export const AgentBuilderStorybookProvider: React.FC<AgentBuilderStorybookProvid
   agentId,
   initialAttachments,
   services,
+  queryClient = defaultQueryClient,
+  kibanaServices = defaultKibanaServices,
 }) => {
   const mergedServices = services
     ? createStorybookAgentBuilderServices(services)
     : defaultAgentBuilderServices;
 
   return (
-    <QueryClientProvider client={defaultQueryClient}>
-      <KibanaContextProvider services={defaultKibanaServices}>
+    <QueryClientProvider client={queryClient}>
+      <KibanaContextProvider services={kibanaServices}>
         <AgentBuilderServicesContext.Provider value={mergedServices}>
           <StreamingProvider conversationStreamService={storybookStreamService}>
             <FakeConversationProvider
