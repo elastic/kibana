@@ -14,9 +14,6 @@ export const OVERVIEW_SECTION_LABELS = Object.freeze({
   subjects: i18n.translate('xpack.alertzero.detailsFlyout.sections.subjects', {
     defaultMessage: 'Subject',
   }),
-  trace: i18n.translate('xpack.alertzero.detailsFlyout.sections.trace', {
-    defaultMessage: 'Investigation trace',
-  }),
 });
 
 /** Labels of the investigation template's `severity` values. Unknown values render as-is. */

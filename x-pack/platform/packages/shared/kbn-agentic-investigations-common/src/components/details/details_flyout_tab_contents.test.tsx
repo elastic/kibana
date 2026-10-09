@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
 import {
@@ -173,7 +173,7 @@ describe('OverviewTab', () => {
           subjects: <span>checkout alert</span>,
           impact: <span>checkout is down</span>,
           conclusion: 'A **bad** deploy.',
-          trace: <span>hypotheses</span>,
+          reasoning: <span>hypothesis tree</span>,
         }}
       />
     );
@@ -185,10 +185,28 @@ describe('OverviewTab', () => {
       'Impact',
       'Conclusion',
       'Proposed actions',
-      'Investigation trace',
     ]);
     expect(screen.getByTestId('groupedAttachmentsSection')).toBeInTheDocument();
     expect(screen.getByText('bad')).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('investigationOverviewConclusion')).getByText('hypothesis tree')
+    ).toBeInTheDocument();
+  });
+
+  it('shows the reasoning without a heading while there is no conclusion', () => {
+    render(
+      <OverviewTab
+        investigation={investigation}
+        attachments={[]}
+        groupedAttachments={groupedAttachments}
+        sections={{ reasoning: <span>hypothesis tree</span> }}
+      />
+    );
+
+    expect(screen.queryByText('Conclusion')).not.toBeInTheDocument();
+    expect(screen.getByTestId('investigationOverviewReasoning')).toHaveTextContent(
+      'hypothesis tree'
+    );
   });
 
   it('leaves out the sections an investigation has no data for', () => {
@@ -197,7 +215,7 @@ describe('OverviewTab', () => {
     expect(screen.queryByText('Subject')).not.toBeInTheDocument();
     expect(screen.queryByText('Impact')).not.toBeInTheDocument();
     expect(screen.queryByText('Conclusion')).not.toBeInTheDocument();
-    expect(screen.queryByText('Investigation trace')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('investigationOverviewReasoning')).not.toBeInTheDocument();
   });
 
   it('renders no "What\'s happened" block without a narrative or attachments', () => {
