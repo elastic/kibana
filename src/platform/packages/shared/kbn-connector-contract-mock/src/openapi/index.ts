@@ -8,9 +8,11 @@
  */
 
 import { loadOperations } from './load_operations';
+import { normalizeOperations } from './normalize_operations';
 import type { ContractOperation, OpenApiDocument } from './types';
 
+/** Loads a spec into operations ready for validation, repairing known vendor schema defects. */
 export const loadContractOperations = (document: OpenApiDocument): ContractOperation[] =>
-  loadOperations(document);
+  normalizeOperations(loadOperations(document));
 
 export type { ContractOperation, ContractSpec, OpenApiDocument, SpecSchema } from './types';
