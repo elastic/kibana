@@ -16,8 +16,9 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   // Migration recommendation: ALREADY COVERED - DELETE
-  // Handler is unit tested: data_view_management/server/routes/resolve_index.test.ts. The rest is
-  // ES behaviour.
+  // The handler maps ES 403 (`no_such_remote_cluster_exception`) and 404 to 404, and
+  // data_view_management/server/routes/resolve_index.test.ts covers both, including the
+  // `cluster1:filebeat-*,cluster2:filebeat-*` query. The rest is ES behaviour.
   describe('Resolve index API', function () {
     it('should return 200 for a search for indices with wildcard', () =>
       supertest

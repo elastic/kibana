@@ -14,6 +14,11 @@ export default function ({ getService }: FtrProviderContext) {
   const supertestNoAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
 
+  // Migration recommendation: MIGRATE TO SCOUT (API)
+  // Third copy of the kql_telemetry tests. The `401` without credentials is not in the other two copies:
+  // add it to the same Scout spec (unauthenticated `apiClient` request, `tags.deploymentAgnostic`); the
+  // `200` case is redundant with the others.
+  // Target: src/platform/plugins/shared/data/test/scout/api/tests/kql_telemetry.spec.ts
   describe('telemetry API', () => {
     describe('no auth', () => {
       it('should return 401', async () => {

@@ -16,7 +16,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   // Migration recommendation: MIGRATE TO SCOUT (API)
   // Legacy-only, deprecated routes with no Scout/unit coverage; condense all scripted_fields_crud
-  // files into one Scout API spec. No serverless copy: tag `@local-stateful-classic`.
+  // files into one Scout API spec. Scripted fields are disabled on serverless, so tag it
+  // `tags.stateful.classic`.
   // Target: src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud.spec.ts
   describe('main', () => {
     before(async () => {

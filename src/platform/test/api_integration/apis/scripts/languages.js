@@ -18,9 +18,8 @@ import { SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION } from '@kbn/data-plugin/common/c
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  // Migration recommendation: REPLACE WITH UNIT/JEST
-  // Route returns a hardcoded list; a Jest route test (or deletion) is enough. Delete the `it.skip` test.
-  // Target: src/platform/plugins/shared/data/server/scripts/route.test.ts (new)
+  // Migration recommendation: DELETE (no replacement needed)
+  // The route returns a hardcoded list, so a test adds no value. Delete the `it.skip` test too.
   describe('Script Languages API', function getLanguages() {
     it('should return 200 with an array of languages', () =>
       supertest

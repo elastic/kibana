@@ -15,9 +15,13 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  // Migration recommendation: ALREADY COVERED - DELETE
-  // Covered by Scout:
+  // Migration recommendation: PARTIALLY COVERED - PORT GAP, THEN DELETE
+  // Mostly covered by Scout:
   // src/platform/plugins/shared/data_views/test/scout/api/tests/{index_patterns,data_views}/runtime_fields_delete_*.spec.ts
+  // Gap: `returns error when ID is too long` asserts the exact message with the id length
+  // (`value has length [1759] but it must have a maximum length of [1000].`); Scout uses a 1100-char id
+  // and only checks `toContain('must have a maximum length of [1000]')`. Tighten the Scout assertion
+  // before deleting.
   describe('errors', () => {
     const basicIndex = 'b*sic_index';
     let indexPattern: any;

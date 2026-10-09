@@ -79,9 +79,12 @@ export default function ({ getService }: FtrProviderContext) {
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send({ title, id });
 
-  // Migration recommendation: MIXED. See individual tests.
-  // No serverless copy: tag the Scout API test `@local-stateful-classic`. Existing Scout coverage
-  // (`saved_query_shared_delete.spec.ts`) does not overlap.
+  // Migration recommendation: MIGRATE TO SCOUT (API)
+  // No serverless copy, but the routes are available there: tag the Scout API test
+  // `tags.deploymentAgnostic`. The routes need `savedQuery:read` / `savedQuery:manage`, which not every
+  // role has, so do not assume `admin`: reuse the role selection of `saved_query_shared_delete.spec.ts`
+  // (`developer` on serverless `es`, `editor` otherwise). That spec only overlaps on the create/get/delete
+  // happy paths.
   // Target (all Scout tests below): src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts
   describe('Saved queries API', function () {
     before(async () => {
@@ -102,8 +105,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     // MIGRATE TO SCOUT (API)
-    // Duplicate-title 400 needs the real saved objects client; the invalid-body 400 and undefined
-    // filters case are covered by data/server/query/route_handler_context.test.ts.
+    // Duplicate-title 400 needs the real saved objects client. The invalid-body 400 is the route's
+    // schema validation (route_handler_context.test.ts only covers the empty-title handler check), so
+    // migrate it too. The undefined filters/timefilter case also needs the real saved objects round-trip
+    // and the route response schema (the Jest tests only use `filters: []`), so migrate it too.
     describe('create', () => {
       it('should return 200 for create saved query', () =>
         createQuery()
@@ -150,7 +155,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     // MIGRATE TO SCOUT (API)
-    // Same as create: 404/duplicate-title need real saved objects; the rest is unit covered.
+    // Same as create: 404/duplicate-title need real saved objects. `should remove filters and timefilter
+    // if not provided` checks the real saved objects client clearing a stored value, which a mocked
+    // Jest client cannot verify, so migrate it too.
     describe('update', () => {
       it('should return 200 for update saved query', () =>
         createQuery()
@@ -255,7 +262,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     // MIGRATE TO SCOUT (API)
-    // Search/pagination run against real saved objects; the bad-request 400 is unit covered.
+    // Search/pagination run against real saved objects. The bad-request 400 is route schema validation
+    // that no Jest test covers, so migrate it too.
     describe('find', () => {
       it('should return 200 for find saved queries', () => findQueries().expect(200));
 

@@ -23,7 +23,8 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   // Migration recommendation: ALREADY COVERED - DELETE
-  // Covered by data_views/server/fetcher/lib/errors.test.ts
+  // Covered by data_views/server/fetcher/lib/errors.test.ts. That Jest test builds the ES errors by
+  // hand instead of getting them from a real ES; that loss is accepted (see the stateful copy).
   describe('index_patterns/* error handler', () => {
     let indexNotFoundError;
     let docNotFoundError;

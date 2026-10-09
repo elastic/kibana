@@ -15,10 +15,16 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  // Migration recommendation: ALREADY COVERED - DELETE
-  // Covered by Scout:
-  // src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts
-  // (11 vs 12 `it`s: check the `customStringAttribute` one).
+  // Migration recommendation: PARTIALLY COVERED - PORT GAPS, THEN DELETE
+  // Mostly covered by Scout:
+  // src/platform/plugins/shared/data_views/test/scout/api/tests/{data_views,index_patterns}/fields_api_update_main.spec.ts
+  // Gaps (5 per config): the `customStringAttribute` loop runs for `customLabel` and
+  // `customDescription`, but Scout only has the `customLabel` cases. Add the four `customDescription`
+  // cases (set on a non-existing field, update in the attribute map, delete from the attribute map,
+  // set on an existing field). Also add `can set field "format" on an existing field`, which Scout
+  // does not have either. Also assert `foo.customLabel` and `bar.customDescription` after the re-GET in
+  // `can update multiple fields` (Scout only re-checks the two `count` values). Port these before
+  // deleting.
   describe('main', () => {
     const basicIndex = 'ba*ic_index';
     let indexPattern: any;

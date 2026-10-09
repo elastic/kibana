@@ -15,6 +15,9 @@ export default function ({ getService }: FtrProviderContext) {
 
   // Migration recommendation: MIGRATE TO SCOUT (API)
   // Body validation errors (missing field, scripted: false) for create.
+  // Validation errors only (no happy paths): the scripted field routes are registered on serverless too,
+  // so tag these `tags.deploymentAgnostic` in the condensed spec; only the `main.ts` happy paths are
+  // `tags.stateful.classic` (see create_scripted_field/main.ts).
   // Target: src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud.spec.ts
   describe('errors', () => {
     it('returns an error field object is not provided', async () => {

@@ -16,6 +16,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   // Migration recommendation: MIGRATE TO SCOUT (API)
   // Removes a scripted field and checks it is gone from the data view.
+  // Part of the condensed spec tagged `tags.stateful.classic` (see create_scripted_field/main.ts): the
+  // happy paths fail on serverless, where scripted fields are disabled.
   // Target: src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud.spec.ts
   describe('main', () => {
     before(async () => {

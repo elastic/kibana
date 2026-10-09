@@ -50,7 +50,9 @@ export default function ({ getService }: FtrProviderContext) {
 
   // Migration recommendation: MIXED. See individual tests.
   // No existing coverage. Merge with the serverless copy into one Scout API test
-  // (`tags.deploymentAgnostic`).
+  // (`tags.deploymentAgnostic`). The plugin has no `test/scout/api` yet, so scaffold it first
+  // (`node scripts/scout generate`). The route has authz disabled and relies on Elasticsearch
+  // privileges, so the Scout role needs read access to the index (the FTR copies use admin).
   describe('Field preview', function () {
     before(async () => await createIndex());
     after(async () => await deleteIndex());
@@ -106,7 +108,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     // Migration recommendation: REPLACE WITH UNIT/JEST
-    // The 400s only exercise the route's schema validation.
+    // The 400s only exercise the route's schema validation. The schema is private to field_preview.ts, so
+    // mock the versioned router (precedent: discover `register_sanitize_route.test.ts`).
     // Target: src/platform/plugins/shared/data_view_field_editor/server/routes/field_preview.test.ts (new)
     describe('payload validation', () => {
       it('should require a script', async () => {
