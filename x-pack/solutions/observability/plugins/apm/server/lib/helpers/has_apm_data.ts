@@ -5,63 +5,44 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { ProcessorEvent } from '@kbn/apm-types-shared';
 import { AT_TIMESTAMP } from '@kbn/apm-types/es_fields';
+import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import type { APMEventClient } from './create_es_client/create_apm_event_client';
 
-/**
- * Recent-data window for the fast phase-1 probe, expressed as ES date-math
- * rounded to the hour. Rounding is what makes the result eligible for the
- * ES shard request cache, so repeated calls within a polling interval are
- * near-free. Written as date math (not epoch millis) so the `range` clause
- * is resolvable from index metadata and lets `can_match` prune shards.
- */
-const HAS_DATA_RECENT_WINDOW = 'now-24h/h';
+/** Rounded date math, so the probe is eligible for the ES shard request cache. */
+const RECENT_WINDOW = 'now-24h/h';
 
-const HAS_DATA_EVENTS = [ProcessorEvent.transaction, ProcessorEvent.error, ProcessorEvent.metric];
+const EXCLUDED_TIERS: DataTier[] = ['data_cold', 'data_frozen'];
+
+const PROCESSOR_EVENTS = [ProcessorEvent.transaction, ProcessorEvent.error, ProcessorEvent.metric];
+
+/**
+ * Bounds the probe to shards that `can_match` can resolve from index metadata.
+ * Tiers are excluded rather than included so clusters without tier roles still
+ * match. See the PR description for why each clause is needed.
+ */
+const RECENT_DATA_QUERY: estypes.QueryDslQueryContainer = {
+  bool: {
+    filter: [
+      { range: { [AT_TIMESTAMP]: { gte: RECENT_WINDOW } } },
+      { bool: { must_not: [{ terms: { _tier: EXCLUDED_TIERS } }] } },
+    ],
+  },
+};
+
+type HasApmDataOperation = 'has_historical_agent_data' | 'observability_overview_has_apm_data';
 
 const hasDataRequest = async (
   apmEventClient: APMEventClient,
-  operationName: string,
-  options?: { recentOnly: boolean }
-) => {
-  const query = options?.recentOnly
-    ? {
-        bool: {
-          filter: [
-            /**
-             * Restrict to recent data so ES `can_match` can prune cold/frozen
-             * shards and CCS remote shards with no recent data. A bare
-             * `processor.event` terms filter (the only clause the client adds)
-             * is not resolvable from index metadata, so without this range
-             * every shard on every tier is contacted.
-             *
-             * Cold/frozen are excluded rather than hot/warm being included so
-             * that self-managed clusters without tier roles (landing in
-             * `data_content` or with no `_tier` at all) are not incorrectly
-             * pushed to the slow phase.
-             */
-            {
-              range: {
-                [AT_TIMESTAMP]: { gte: HAS_DATA_RECENT_WINDOW },
-              },
-            },
-            {
-              bool: {
-                must_not: [{ terms: { _tier: ['data_cold', 'data_frozen'] } }],
-              },
-            },
-          ],
-        },
-      }
-    : undefined;
-
+  operationName: HasApmDataOperation,
+  query?: estypes.QueryDslQueryContainer
+): Promise<boolean> => {
   // the `observability:searchExcludedDataTiers` setting will also be considered
   // in the `search` function to exclude data tiers from the search
   const params = {
-    apm: {
-      events: HAS_DATA_EVENTS,
-    },
+    apm: { events: PROCESSOR_EVENTS },
     terminate_after: 1,
     track_total_hits: 1,
     size: 0,
@@ -73,28 +54,18 @@ const hasDataRequest = async (
 };
 
 /**
- * Answers "does this cluster hold any APM data, ever" in two phases: a cheap
- * recent-window probe first, then an unbounded fallback only when it finds
- * nothing. `operationName` is forwarded to the ES client so each caller stays
- * distinguishable in APM traces and `_inspect` output.
+ * Answers "does this cluster hold any APM data, ever" with a cheap recent-window
+ * probe, falling back to an unbounded one only when that finds nothing.
  */
 export const hasApmData = async (
   apmEventClient: APMEventClient,
-  operationName: string
+  operationName: HasApmDataOperation
 ): Promise<boolean> => {
-  // Phase 1 — fast path. On a live deployment this hits only a handful of
-  // shards and returns in milliseconds, instead of fanning out across the
-  // whole APM shard footprint.
-  const hasRecentData = await hasDataRequest(apmEventClient, operationName, { recentOnly: true });
+  const hasRecentData = await hasDataRequest(apmEventClient, operationName, RECENT_DATA_QUERY);
 
   if (hasRecentData) {
     return true;
   }
 
-  // Phase 2 — exact fallback. Phase 1 found nothing, which means either the
-  // cluster is genuinely empty or all its data is older than
-  // HAS_DATA_RECENT_WINDOW (or lives solely in cold/frozen tiers). Re-run
-  // without bounds to preserve the original "any APM doc, anywhere, ever"
-  // semantics.
   return hasDataRequest(apmEventClient, operationName);
 };
