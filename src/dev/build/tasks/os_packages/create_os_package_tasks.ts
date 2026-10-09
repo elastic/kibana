@@ -56,7 +56,9 @@ export const CreateDebPackageARM64: Task = {
 
 /** Creates an RPM task for the selected Linux distribution. */
 export const CreateRpmPackage = (platform: Platform): Task => ({
-  description: `Creating rpm package ${platform.getArchitecture() === 'x64' ? X64 : ARM64}`,
+  description: `Creating${platform.isFips() ? ' FIPS' : ''} rpm package ${
+    platform.getArchitecture() === 'x64' ? X64 : ARM64
+  }`,
   async run(config, log, build) {
     await runFpm(config, log, build, 'rpm', platform, [
       '--architecture',

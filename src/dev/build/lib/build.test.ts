@@ -73,6 +73,18 @@ describe('#getPlatformArchivePath()', () => {
     );
   });
 
+  it.each(['x64', 'arm64'] as const)('isolates the %s FIPS distribution', (architecture) => {
+    const platform = config.getPlatform('linux', architecture, 'fips');
+    const suffix = architecture === 'x64' ? 'x86_64' : 'aarch64';
+    expect(defaultBuild.getPlatformArchivePath(platform)).toBe(
+      config.resolveFromTarget(`kibana-fips-8.0.0-linux-${suffix}.tar.gz`)
+    );
+    expect(defaultBuild.resolvePathForPlatform(platform)).toBe(
+      config.resolveFromRepo('build/default', `kibana-fips-8.0.0-linux-${suffix}`)
+    );
+    expect(defaultBuild.getRootDirectory(platform)).toBe('kibana-fips-8.0.0');
+  });
+
   describe('#getRootDirectory()', () => {
     it('creates correct root directory name for a platform', () => {
       expect(defaultBuild.getRootDirectory(linuxPlatform)).toMatchInlineSnapshot(`"kibana-8.0.0"`);

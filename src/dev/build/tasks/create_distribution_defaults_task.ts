@@ -16,7 +16,7 @@ export const CreateDistributionDefaults: Task = {
   description: 'Creating distribution configuration defaults',
   async run(config, log, build) {
     for (const platform of config.getTargetPlatforms()) {
-      const { kibana, nodeOptions, nodeEnvironment } = getDistributionDefaults();
+      const { kibana, nodeOptions, nodeEnvironment } = getDistributionDefaults(platform);
       if (
         !Object.keys(kibana).length &&
         !nodeOptions.length &&

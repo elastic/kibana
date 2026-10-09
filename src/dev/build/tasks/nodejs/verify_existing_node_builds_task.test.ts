@@ -61,7 +61,7 @@ async function setup(actualShaSums?: Record<string, string>) {
 
   getNodeShasums.mockReturnValue(
     Object.fromEntries(
-      config.getTargetPlatforms().map((platform) => {
+      config.getNodePlatforms().map((platform) => {
         return [
           `${platform.getName()}:${
             platform.getVariant() || 'default'

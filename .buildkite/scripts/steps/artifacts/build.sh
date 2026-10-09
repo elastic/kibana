@@ -12,6 +12,9 @@ source .buildkite/scripts/steps/artifacts/env.sh
 echo "--- Build Kibana artifacts"
 node scripts/build --all-platforms --debug --docker-cross-compile --skip-docker-fips --skip-serverless --skip-cdn-assets "${BUILD_ARGS[@]}"
 
+echo "--- Verify FIPS distributions"
+.buildkite/scripts/steps/artifacts/verify_fips_packages.sh
+
 echo "--- Extract default i18n messages"
 mkdir -p target/i18n
 node scripts/i18n_extract --output-dir=target/i18n

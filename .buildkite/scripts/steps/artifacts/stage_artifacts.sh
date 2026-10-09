@@ -29,6 +29,8 @@ download "kibana-$FULL_VERSION-arm64.deb"
 download "kibana-$FULL_VERSION-amd64.deb"
 download "kibana-$FULL_VERSION-x86_64.rpm"
 download "kibana-$FULL_VERSION-aarch64.rpm"
+download "kibana-fips-$FULL_VERSION-x86_64.rpm"
+download "kibana-fips-$FULL_VERSION-aarch64.rpm"
 
 download "kibana-$FULL_VERSION-docker-build-context.tar.gz"
 download "kibana-cloud-$FULL_VERSION-docker-build-context.tar.gz"
@@ -41,6 +43,8 @@ download "kibana-cloud-fips-$FULL_VERSION-docker-image-arm64.tar.gz"
 
 download "kibana-$FULL_VERSION-linux-aarch64.tar.gz"
 download "kibana-$FULL_VERSION-linux-x86_64.tar.gz"
+download "kibana-fips-$FULL_VERSION-linux-x86_64.tar.gz"
+download "kibana-fips-$FULL_VERSION-linux-aarch64.tar.gz"
 
 download "kibana-$FULL_VERSION-darwin-x86_64.tar.gz"
 download "kibana-$FULL_VERSION-darwin-aarch64.tar.gz"

@@ -28,9 +28,57 @@ Building Kibana and its distributables can take a lot of memory to finish succes
 NODE_OPTIONS="--max-old-space-size=4096" node scripts/build --release
 ```
 
+## FIPS distributions
+
+An `--all-platforms` build produces additional Linux FIPS archives and RPMs for
+x86_64 and aarch64. To build only those distributions, use:
+
+```sh
+node scripts/build --fips --skip-cdn-assets
+```
+
+Outputs follow the existing Linux naming convention:
+`kibana-fips-<version>-linux-x86_64.tar.gz`,
+`kibana-fips-<version>-linux-aarch64.tar.gz`,
+`kibana-fips-<version>-x86_64.rpm`, and
+`kibana-fips-<version>-aarch64.rpm`. `--tar-zstd` changes the archive compression
+in the same way as for other distributions. `--skip-fips` omits these variants
+and their dependencies from an all-platforms build.
+
+The build requires Docker with Buildx to extract the provider from the same digest-pinned
+Chainguard FIPS base image used for the container distributions. It copies the
+provider binary and its integrity configuration unchanged into `node/fips`,
+along with its license, source-image manifest, and provider/validation SPDX
+metadata. Only the FIPS distributions include these files; the provider adds
+approximately 1.5–2.4 MB uncompressed per architecture.
+No OpenSSL download or system OpenSSL installation is needed at runtime.
+
+FIPS distributions enable Node FIPS mode and `xpack.security.fipsMode.enabled`
+by default. They require glibc 2.34 or newer and the CPU/operating environment
+supported by the provider's security policy (x86-64-v2 or newer for the generic
+x86_64 environment). The bundled glibc-217 Node fallback does not relax the
+provider's requirements. An appropriate Kibana license is still required,
+and PKCS#12 keystore/truststore settings are rejected in FIPS mode.
+
+The `kibana-fips` RPM uses the existing installation directories and
+`kibana.service`. It conflicts with `kibana`; uninstall the existing package
+before switching variants, back up configuration (including `kibana.keystore`),
+installed plugins, and data, and review the
+FIPS requirements before restarting. Upgrades within the same variant retain
+the normal RPM configuration-file handling.
+
+The FIPS defaults select the bundled provider independently of system OpenSSL
+configuration. Changing Kibana's FIPS setting alone does not disable Node FIPS
+mode; the existing startup checks reject mismatched settings.
+
+The artifact pipeline smoke-tests both architectures on ordinary Ubuntu and
+Rocky Linux containers, without a pre-installed FIPS runtime. It verifies FIPS
+cryptographic operations, rejection of MD5, CLI tools with a custom configuration
+directory, and startup failure if the provider is unavailable or corrupted.
+
 ## Distribution defaults
 
-`lib/distribution_defaults.ts` defines package-owned defaults. Existing
+`lib/distribution_defaults.ts` defines package-owned defaults. Regular
 variants have no defaults, so the build emits no `config_defaults` directory
 and retains the existing configuration and Node option behavior.
 

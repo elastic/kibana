@@ -1,7 +1,7 @@
 # Load package-owned defaults before user node.options and NODE_OPTIONS.
 # DIR is set by the calling launcher after resolving its symlinks.
 KBN_DISTRIBUTION_ROOT="$(cd "$DIR" && pwd)" || exit 1
-CONFIG_DIR=${KBN_PATH_CONF:-"$DIR/config"}
+CONFIG_DIR=${KBN_PATH_CONF:-"$KBN_DISTRIBUTION_ROOT/config"}
 
 if [ -f "$KBN_DISTRIBUTION_ROOT/config_defaults/node_env.sh" ]; then
   . "$KBN_DISTRIBUTION_ROOT/config_defaults/node_env.sh"
@@ -12,6 +12,7 @@ if [ -f "$KBN_DISTRIBUTION_ROOT/config_defaults/node.options" ]; then
   export NODE_OPTIONS="$KBN_DEFAULT_NODE_OPTS ${NODE_OPTIONS:-}"
 fi
 
+KBN_NODE_OPTS=${KBN_NODE_OPTS:-}
 if [ -f "${CONFIG_DIR}/node.options" ]; then
-  KBN_NODE_OPTS="$(grep -v ^# < ${CONFIG_DIR}/node.options | xargs)"
+  KBN_NODE_OPTS="$(grep -v '^#' < "${CONFIG_DIR}/node.options" | xargs)"
 fi

@@ -22,7 +22,12 @@ import type { KibanaSolution } from '@kbn/projects-solutions-groups';
 import type { VersionInfo } from './version_info';
 import { getVersionInfo } from './version_info';
 import type { PlatformName, PlatformArchitecture, Variant } from './platform';
-import { ALL_PLATFORMS, SERVERLESS_PLATFORMS, DOWNLOAD_PLATFORMS } from './platform';
+import {
+  ALL_PLATFORMS,
+  SERVERLESS_PLATFORMS,
+  DOWNLOAD_PLATFORMS,
+  FIPS_PLATFORMS,
+} from './platform';
 import type { BuildOptions } from '../build_distributables';
 
 interface Options {
@@ -40,6 +45,8 @@ interface Options {
   withExamplePlugins: boolean;
   withTestPlugins: boolean;
   downloadFreshNode: boolean;
+  skipFips?: boolean;
+  targetFipsPlatforms?: boolean;
 }
 
 export class Config {
@@ -176,11 +183,18 @@ export class Config {
    * specified only the platform for this OS will be returned
    */
   getTargetPlatforms() {
+    if (this.buildOptions.targetFipsPlatforms) {
+      return FIPS_PLATFORMS;
+    }
     if (this.targetServerlessPlatforms) {
       return SERVERLESS_PLATFORMS;
     }
     if (this.targetAllPlatforms) {
-      return this.skipServerless ? DOWNLOAD_PLATFORMS : ALL_PLATFORMS;
+      return [
+        ...DOWNLOAD_PLATFORMS,
+        ...(this.skipServerless ? [] : SERVERLESS_PLATFORMS),
+        ...(this.buildOptions.skipFips ? [] : FIPS_PLATFORMS),
+      ];
     }
 
     return [this.getPlatformForThisOs()];
@@ -192,11 +206,18 @@ export class Config {
    * reliably get the LICENSE file, which isn't included in the windows version
    */
   getNodePlatforms() {
+    if (this.buildOptions.targetFipsPlatforms) {
+      return FIPS_PLATFORMS.map((platform) =>
+        this.getPlatform(platform.getName(), platform.getArchitecture())
+      );
+    }
     if (this.targetServerlessPlatforms) {
       return SERVERLESS_PLATFORMS;
     }
     if (this.targetAllPlatforms) {
-      return this.skipServerless ? DOWNLOAD_PLATFORMS : ALL_PLATFORMS;
+      return this.skipServerless
+        ? DOWNLOAD_PLATFORMS
+        : [...DOWNLOAD_PLATFORMS, ...SERVERLESS_PLATFORMS];
     }
 
     if (process.platform === 'linux' && process.arch === 'x64') {
