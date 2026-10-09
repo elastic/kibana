@@ -129,9 +129,11 @@ describe('tabs actions', () => {
       jest
         .spyOn(services.timefilter, 'getRefreshInterval')
         .mockImplementation(() => currentRefreshInterval);
-      jest.spyOn(services.timefilter, 'setRefreshInterval').mockImplementation((refreshInterval) => {
-        currentRefreshInterval = { ...currentRefreshInterval, ...refreshInterval };
-      });
+      jest
+        .spyOn(services.timefilter, 'setRefreshInterval')
+        .mockImplementation((refreshInterval) => {
+          currentRefreshInterval = { ...currentRefreshInterval, ...refreshInterval };
+        });
       const filterManager = new FilterManager(services.uiSettings);
       services.filterManager = filterManager;
       services.data.query.filterManager = filterManager;
@@ -254,7 +256,9 @@ describe('tabs actions', () => {
           time: expectedTime,
           filters: expectedPinnedFilters,
         });
-        expect(services.storage.get(TABS_LOCAL_STORAGE_KEY).openTabs[0]).toMatchObject(expectedDraft);
+        expect(services.storage.get(TABS_LOCAL_STORAGE_KEY).openTabs[0]).toMatchObject(
+          expectedDraft
+        );
       });
       afterUpdate.internalState.dispatch(
         internalStateActions.disconnectTab({ tabId: updatedTab.id })
@@ -273,7 +277,9 @@ describe('tabs actions', () => {
           time: expectedTime,
           filters: expectedPinnedFilters,
         });
-        expect(services.storage.get(TABS_LOCAL_STORAGE_KEY).openTabs[0]).toMatchObject(expectedDraft);
+        expect(services.storage.get(TABS_LOCAL_STORAGE_KEY).openTabs[0]).toMatchObject(
+          expectedDraft
+        );
       });
       secondReload.internalState.dispatch(
         internalStateActions.disconnectTab({ tabId: updatedTab.id })
