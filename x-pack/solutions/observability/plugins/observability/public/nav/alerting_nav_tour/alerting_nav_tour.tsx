@@ -14,12 +14,14 @@ import type { CoreStart } from '@kbn/core/public';
 import {
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_APP_ID,
+  OBSERVABILITY_OVERVIEW_APP_ID,
 } from '@kbn/deeplinks-observability';
+import { OVERVIEW_PATH } from '../../../common/locators/paths';
 import { AlertingNavGuidedTour } from './guided_tour';
 import { getAlertingNavTourSteps } from './tour_steps';
 import { UnifiedAlertingPromoCard } from './unified_alerting_promo_card';
 
-const ALERTING_NAV_TOUR_STORAGE_KEY = 'observability.alertingNavTour.v3';
+const ALERTING_NAV_TOUR_STORAGE_KEY = 'observability.alertingNavTour.v4';
 
 /** Window event to start this tour from other surfaces (e.g. onboarding). */
 export const ALERTING_NAV_START_TOUR_EVENT = 'kbn:alertingOnboarding:startTour';
@@ -30,14 +32,28 @@ interface AlertingNavTourPersistedState {
 
 const DEFAULT_STATE: AlertingNavTourPersistedState = { isDismissed: false };
 
-const isAlertsLandingPath = (pathname: string): boolean => {
-  // Match `/app/observabilityAlerting/alerts` (with optional trailing slash / query handled by caller).
-  const path = pathname.split('?')[0].replace(/\/$/, '');
-  return path.endsWith(OBSERVABILITY_ALERTING_ALERTS_PATH);
+const normalizePathname = (pathname: string): string => pathname.split('?')[0].replace(/\/$/, '');
+
+/** Alerting Alerts landing (`/app/observabilityAlerting/alerts`). */
+const isAlertsLandingPath = (pathname: string): boolean =>
+  normalizePathname(pathname).endsWith(OBSERVABILITY_ALERTING_ALERTS_PATH);
+
+/** Observability Overview landing (`/app/observability/overview`). */
+const isOverviewLandingPath = (pathname: string): boolean =>
+  normalizePathname(pathname).endsWith(OVERVIEW_PATH);
+
+const isPromoEntryPath = (appId: string | undefined, pathname: string): boolean => {
+  if (appId === OBSERVABILITY_ALERTING_APP_ID && isAlertsLandingPath(pathname)) {
+    return true;
+  }
+  if (appId === OBSERVABILITY_OVERVIEW_APP_ID && isOverviewLandingPath(pathname)) {
+    return true;
+  }
+  return false;
 };
 
 /**
- * Promo card on the Alerting Alerts landing page (bottom-right) + guided tour.
+ * Floating promo (bottom-right) on Alerting Alerts + Observability Overview, plus guided tour.
  * Spike alternative to side-nav footer placement — see elastic/rna-program#1212.
  */
 export const AlertingNavTour: React.FC<{ coreStart: CoreStart }> = ({ coreStart }) => {
@@ -91,10 +107,7 @@ export const AlertingNavTour: React.FC<{ coreStart: CoreStart }> = ({ coreStart 
   }, [startTour]);
 
   const showPromoCard =
-    !persisted.isDismissed &&
-    !isTourActive &&
-    currentAppId === OBSERVABILITY_ALERTING_APP_ID &&
-    isAlertsLandingPath(pathname);
+    !persisted.isDismissed && !isTourActive && isPromoEntryPath(currentAppId, pathname);
 
   return (
     <>
