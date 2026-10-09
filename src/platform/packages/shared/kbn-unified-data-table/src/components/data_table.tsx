@@ -82,6 +82,7 @@ import type {
   DocMap,
   DocumentsDisplayMode,
   JsonModeSettings,
+  UnifiedDataTableOpenInNewTab,
 } from '../types';
 import {
   getDisplayedColumns,
@@ -216,6 +217,11 @@ interface InternalUnifiedDataTableProps {
    * Function to add a filter in the grid cell or document flyout
    */
   onFilter?: DocViewFilterFn;
+  /**
+   * Opens a query in a new Discover tab. When provided (currently Discover only), it is
+   * passed to actions that continue the analysis elsewhere, such as "Find similar values".
+   */
+  onOpenInNewTab?: UnifiedDataTableOpenInNewTab;
   /**
    * Function triggered when a column is resized by the user, passes `undefined` for auto-width
    */
@@ -579,6 +585,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       dataView,
       loadingState,
       onFilter,
+      onOpenInNewTab,
       onResize,
       onSetColumns,
       onSort,
@@ -928,6 +935,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         setExpanded: setExpandedDoc,
         getRowByIndex: (index: number) => displayedRows[index],
         onFilter,
+        onOpenInNewTab,
         hideFilteringOnComputedColumns,
         dataView,
         selectedDocsState,
@@ -947,6 +955,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         displayedRows,
         expandedDoc,
         onFilter,
+        onOpenInNewTab,
         hideFilteringOnComputedColumns,
         setExpandedDoc,
         selectedDocsState,

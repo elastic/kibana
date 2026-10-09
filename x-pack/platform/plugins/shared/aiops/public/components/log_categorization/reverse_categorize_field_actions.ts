@@ -25,7 +25,7 @@ export const createReverseCategorizeFieldAction = (
       return field.esTypes?.includes('text') === true;
     },
     execute: async (context: ReverseCategorizeFieldContext) => {
-      const { field, dataView, fieldValue, originatingApp } = context;
+      const { field, dataView, fieldValue, originatingApp, openInNewTab } = context;
       const [[coreStart, pluginStart], { showReverseCategorizeFieldFlyout }] = await Promise.all([
         getStartServices(),
         import('./show_reverse_flyout'),
@@ -36,7 +36,8 @@ export const createReverseCategorizeFieldAction = (
         fieldValue,
         coreStart,
         pluginStart,
-        originatingApp
+        originatingApp,
+        openInNewTab
       );
     },
   });

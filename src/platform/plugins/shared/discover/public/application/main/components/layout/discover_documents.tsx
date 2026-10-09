@@ -52,6 +52,7 @@ import useLatest from 'react-use/lib/useLatest';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { BehaviorSubject } from 'rxjs';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import {
@@ -339,6 +340,21 @@ function DiscoverDocumentsComponent({
   });
 
   const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
+  const onOpenInNewTab = useCallback<NonNullable<UnifiedDataTableProps['onOpenInNewTab']>>(
+    ({ query: newQuery, filters: newFilters, dataViewId, timeRange, tabLabel }) =>
+      dispatch(
+        internalStateActions.openInNewTab({
+          tabLabel,
+          appState: {
+            query: newQuery,
+            filters: newFilters,
+            ...(dataViewId ? { dataSource: createDataViewDataSource({ dataViewId }) } : {}),
+          },
+          globalState: { timeRange },
+        })
+      ),
+    [dispatch]
+  );
   const onUpdateESQLQuery: UpdateESQLQueryFn = useCallback(
     (queryOrUpdater) => {
       dispatch(updateESQLQuery({ queryOrUpdater }));
@@ -612,6 +628,7 @@ function DiscoverDocumentsComponent({
             showTimeCol={showTimeCol}
             settings={grid}
             onFilter={onAddFilter as DocViewFilterFn}
+            onOpenInNewTab={onOpenInNewTab}
             onSetColumns={onSetColumns}
             onSort={onSort}
             onResize={onResizeDataGrid}

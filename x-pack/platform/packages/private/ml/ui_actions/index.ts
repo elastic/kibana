@@ -16,4 +16,5 @@ export { ACTION_CATEGORIZE_FIELD, type CategorizeFieldContext } from './src/aiop
 export {
   ACTION_REVERSE_CATEGORIZE_FIELD,
   type ReverseCategorizeFieldContext,
+  type ReverseCategorizeOpenInNewTab,
 } from './src/aiops/ui_actions';

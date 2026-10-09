@@ -35,8 +35,10 @@ import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { Filter } from '@kbn/es-query';
 import { buildEmptyFilter, buildEsQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-service';
-import { QUERY_MODE } from '@kbn/aiops-log-pattern-analysis/get_category_query';
+import { QUERY_MODE, type QueryMode } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 
+import type { ReverseCategorizeOpenInNewTab } from '@kbn/ml-ui-actions';
+import { createFilter } from '../use_discover_links';
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,
@@ -54,6 +56,8 @@ import { useDocsForCategory } from './use_docs_for_category';
 import { useCreateFormattedExample } from '../format_category';
 import { PatternCellRenderer } from './pattern_cell_renderer';
 import {
+  addWhereToEsqlQuery,
+  buildMatchFilterExpression,
   findCategoryMatchingFieldValue,
   getEsqlDocumentScopeQuery,
 } from './build_esql_analysis_queries';
@@ -66,6 +70,8 @@ export interface ReverseCategorizationPageProps {
   savedSearch: SavedSearch | null;
   selectedField: DataViewField;
   fieldValue: string;
+  /** Opens a query, with optional filters, in a new tab of the originating app (e.g. Discover). */
+  openInNewTab?: ReverseCategorizeOpenInNewTab;
   onClose: () => void;
 }
 
@@ -76,6 +82,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
   savedSearch,
   selectedField,
   fieldValue,
+  openInNewTab,
   onClose,
 }) => {
   const {
@@ -193,6 +200,82 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     onAddFilter,
     undefined,
     onClose
+  );
+
+  const openCategoryInDiscover = useCallback(
+    (mode: QueryMode) => {
+      if (selectedCategory === null || earliest === undefined || latest === undefined) {
+        return;
+      }
+
+      const tabLabel = i18n.translate(
+        'xpack.aiops.logCategorization.reverseCategorization.tabLabel',
+        {
+          defaultMessage: 'Pattern: {field}',
+          values: { field: selectedField.displayName || selectedField.name },
+        }
+      );
+      const timeRange = {
+        from: new Date(earliest).toISOString(),
+        to: new Date(latest).toISOString(),
+      };
+
+      if (openInNewTab === undefined) {
+        // No new tab support from the originating app.
+        if (isEsqlQuery) {
+          openInDiscover.openFunction(mode, false);
+        } else {
+          openInDiscover.openFunction(mode, true);
+          onClose();
+        }
+        return;
+      }
+
+      // Leave the current tab untouched and continue the analysis in a new one.
+      if (isOfAggregateQueryType(query)) {
+        openInNewTab({
+          query: {
+            esql: addWhereToEsqlQuery(
+              query.esql,
+              buildMatchFilterExpression(selectedField.name, selectedCategory.key, mode)
+            ),
+          },
+          timeRange,
+          tabLabel,
+        });
+      } else {
+        openInNewTab({
+          query: { language: stateFromUrl.searchQueryLanguage, query: stateFromUrl.searchString },
+          filters: [
+            ...stateFromUrl.filters,
+            createFilter(
+              dataView.id ?? '',
+              selectedField.name,
+              [selectedCategory],
+              mode,
+              selectedCategory
+            ),
+          ],
+          dataViewId: dataView.id,
+          timeRange,
+          tabLabel,
+        });
+      }
+      onClose();
+    },
+    [
+      dataView.id,
+      earliest,
+      isEsqlQuery,
+      latest,
+      onClose,
+      openInDiscover,
+      openInNewTab,
+      query,
+      selectedCategory,
+      selectedField,
+      stateFromUrl,
+    ]
   );
 
   const loadCategories = useCallback(async () => {
@@ -566,7 +649,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               disabled={data === null || data.docs.length === 0}
-              onClick={() => openInDiscover.openFunction(QUERY_MODE.INCLUDE, false)}
+              onClick={() => openCategoryInDiscover(QUERY_MODE.INCLUDE)}
               data-test-subj="aiopsReverseCategorizationDocsTableOpenDocumentsInDiscoverButton"
             >
               <FormattedMessage
@@ -578,7 +661,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               disabled={data === null || data.docs.length === 0}
-              onClick={() => openInDiscover.openFunction(QUERY_MODE.EXCLUDE, false)}
+              onClick={() => openCategoryInDiscover(QUERY_MODE.EXCLUDE)}
               data-test-subj="aiopsReverseCategorizationDocsTableFilterOutDocumentsInDiscoverButton"
             >
               <FormattedMessage

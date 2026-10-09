@@ -18,6 +18,7 @@ import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
+import type { ReverseCategorizeOpenInNewTab } from '@kbn/ml-ui-actions';
 import type { AiopsPluginStartDeps } from '../../types';
 import { AiopsAppContext, type AiopsAppContextValue } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
@@ -31,7 +32,8 @@ export async function showReverseCategorizeFieldFlyout(
   fieldValue: string,
   coreStart: CoreStart,
   plugins: AiopsPluginStartDeps,
-  originatingApp: string
+  originatingApp: string,
+  openInNewTab?: ReverseCategorizeOpenInNewTab
 ): Promise<void> {
   const { overlays, application, i18n } = coreStart;
 
@@ -76,6 +78,7 @@ export async function showReverseCategorizeFieldFlyout(
                     selectedField={field}
                     savedSearch={null}
                     fieldValue={fieldValue}
+                    openInNewTab={openInNewTab}
                     onClose={onFlyoutClose}
                   />
                 </StorageContextProvider>
