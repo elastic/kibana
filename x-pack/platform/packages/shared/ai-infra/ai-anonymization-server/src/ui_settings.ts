@@ -25,7 +25,7 @@ export function getAnonymizationUiSettings(): Record<string, UiSettingsParams> {
         defaultMessage: `Configuration for the anonymization pipeline
           <ul>
             <li><strong>maskingEnabled:</strong> master switch for the whole pipeline (off by default)</li>
-            <li><strong>onFailure:</strong> "block" (fail the request) or "allow_unsafe" (proceed unmasked) when a rule cannot run</li>
+            <li><strong>onFailure:</strong> "block" (fail the request) or "allow_unsafe" (proceed unmasked, without applying any regular-expression rule) when a regular-expression rule cannot run</li>
             <li><strong>rules:</strong> list of anonymization rules
               <ul>
                 <li><strong>type:</strong> "NER" or "RegExp"</li>
