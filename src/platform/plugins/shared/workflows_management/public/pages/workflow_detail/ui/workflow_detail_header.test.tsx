@@ -29,6 +29,7 @@ import {
   setYamlString,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { saveYamlThunk } from '../../../entities/workflows/store/workflow_detail/thunks/save_yaml_thunk';
+import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 
 const mockUseKibana = jest.fn();
@@ -156,6 +157,7 @@ describe('WorkflowDetailHeader', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(false);
     localStorage.clear();
     resetWorkflowSettingsSurfaceVariantForTests();
     mockNavigateToApp = jest.fn();
@@ -244,6 +246,8 @@ describe('WorkflowDetailHeader', () => {
   });
 
   it('opens the workflow settings flyout from the header gear', () => {
+    // The settings gear only renders behind the experimental visual-editor flag.
+    (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
     const { getByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
 
     expect(screen.queryByTestId('workflowSettingsFlyout')).not.toBeInTheDocument();

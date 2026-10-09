@@ -91,6 +91,7 @@ import {
   setYamlString,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useWorkflowEditorReadOnly } from '../../../hooks/use_workflow_editor_read_only';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import {
   parseConstsToFields,
@@ -315,8 +316,11 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   const dispatch = useDispatch();
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const flyoutPanelRef = useRef<HTMLDivElement | null>(null);
+  const isEditorReadOnly = useWorkflowEditorReadOnly();
 
-  const canEdit = Boolean(canUpdateWorkflow) && !isExecutionsTab;
+  // Mirrors the YAML editor's read-only gate (managed workflows, per-workflow edit
+  // permission, executions tab) so graph authoring never outpaces what YAML allows.
+  const canEdit = Boolean(canUpdateWorkflow) && !isExecutionsTab && !isEditorReadOnly;
 
   const { isAgentBuilderAvailable, openAgentChat } = useCreationAgentChat({
     yaml: editorYaml,

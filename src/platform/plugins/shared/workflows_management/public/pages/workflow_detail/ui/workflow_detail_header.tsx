@@ -25,11 +25,6 @@ import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { useRunWorkflowWithConfirmation } from './use_run_workflow_with_confirmation';
 import { WorkflowAccessControlModal } from './workflow_access_control_modal';
 import { WorkflowSettingsFlyout } from './workflow_settings_flyout';
-import {
-  getWorkflowSettingsSurfaceVariant,
-  subscribeWorkflowSettingsSurfaceVariant,
-  type WorkflowSettingsSurfaceVariant,
-} from '../../../features/workflow_visual_editor/ui/workflow_settings_surface_variant';
 import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
@@ -43,6 +38,11 @@ import {
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
+import {
+  getWorkflowSettingsSurfaceVariant,
+  subscribeWorkflowSettingsSurfaceVariant,
+  type WorkflowSettingsSurfaceVariant,
+} from '../../../features/workflow_visual_editor/ui/workflow_settings_surface_variant';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowEditorReadOnly } from '../../../hooks/use_workflow_editor_read_only';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
@@ -157,10 +157,15 @@ export const WorkflowDetailHeader = React.memo(
     const canManageAccess = hasUpdatePrivilege && workflow?.permissions?.manage === true;
     const isManagedWorkflow = workflow?.managed === true;
     const isEditorReadOnly = useWorkflowEditorReadOnly();
+    const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
+      WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
+    );
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [settingsSurfaceVariant, setSettingsSurfaceVariant] =
       useState<WorkflowSettingsSurfaceVariant>(() => getWorkflowSettingsSurfaceVariant());
-    const showHeaderSettingsGear = settingsSurfaceVariant === 'a';
+    // Settings-surface variant 'a' is the shipped header flyout; it must still sit
+    // behind the experimental flag like every other graph-authoring surface.
+    const showHeaderSettingsGear = settingsSurfaceVariant === 'a' && isVisualEditorEnabled;
     const canReadVisibleWorkflowExecution =
       canReadWorkflowExecution && (!isManagedWorkflow || canReadManagedWorkflowExecution);
 
@@ -326,10 +331,6 @@ export const WorkflowDetailHeader = React.memo(
         canReadVisibleWorkflowExecution,
         executionsTabDisabledTooltip,
       ]
-    );
-
-    const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
-      WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
     );
 
     const changeHistoryModal = useContext(ChangeHistoryModalContext);
