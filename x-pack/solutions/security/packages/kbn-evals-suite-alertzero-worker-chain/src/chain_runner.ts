@@ -37,9 +37,75 @@ import {
   type KbnRequestContext,
 } from './worker_settings';
 
+/**
+ * F1: minimal structural view of the ES client the spec passes in (Scout's
+ * esClient). Only mget is needed: after seeding, the real alert docs are read
+ * back from the seeded `.alerts-security.alerts-<space>` index so the triage
+ * run receives the same full-document event the product's alert trigger emits.
+ */
+export interface AlertDocumentStore {
+  mget(params: {
+    index: string;
+    docs: Array<{ _id: string }>;
+  }): Promise<{ docs: Array<{ _id: string; found?: boolean; _source?: Record<string, unknown> }> }>;
+}
+
+/** The seeded alerts index (AD2_ALERTS_INDEX in the fp-tp seed, space "default"). */
+export const SEEDED_ALERTS_INDEX = '.alerts-security.alerts-default';
+
+const fetchSeededAlerts = async (
+  ctx: KbnRequestContext,
+  alertStore: AlertDocumentStore,
+  alerts: ChainScenario['alerts']
+): Promise<{
+  index: string;
+  fetched: Array<{ _id: string; _index: string; _source: Record<string, unknown> }>;
+}> => {
+  const index =
+    ctx.spaceId && ctx.spaceId !== 'default'
+      ? `.alerts-security.alerts-${ctx.spaceId}`
+      : SEEDED_ALERTS_INDEX;
+  const { docs } = await alertStore.mget({ index, docs: alerts.map(({ id }) => ({ _id: id })) });
+  return {
+    index,
+    fetched: docs.flatMap((doc) =>
+      doc.found && doc._source !== undefined
+        ? [{ _id: doc._id, _index: index, _source: doc._source }]
+        : []
+    ),
+  };
+};
+
 const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatuses.includes(status);
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * F2: the concurrency manager cancels an overlapping run with
+ * `cancellationReason: 'Cancelled due to concurrency limit (max: N)'`
+ * (concurrency_manager.ts:199) and status CANCELLED. The public
+ * WorkflowExecutionDto does not declare the field, so it is read defensively;
+ * any concurrency-limit cancellation is harness interference (INVALID, never
+ * scored), not a model failure.
+ */
+const concurrencyCancellation = (
+  execution: WorkflowExecutionDto | undefined
+): string | undefined => {
+  if (execution?.status !== ExecutionStatus.CANCELLED) return undefined;
+  const reason = (execution as { cancellationReason?: string }).cancellationReason;
+  return typeof reason === 'string' && reason.includes('concurrency limit') ? reason : undefined;
+};
+
+/**
+ * F2: floor_attack_discovery carries `settings.concurrency: {max: 1,
+ * strategy: cancel-in-progress}` (floor_attack_discovery.yaml) — the product's
+ * own limit, which the harness must not touch. When the eval runner executes
+ * examples concurrently, overlapping AD hops cancel each other
+ * (concurrency_manager.ts:199). This in-process queue serializes whole chains —
+ * one example's hops never overlap another's on a max-1 workflow. Dropped
+ * rejections keep the queue alive across failures.
+ */
+let chainQueue: Promise<unknown> = Promise.resolve();
 
 export interface ChainScenario {
   key: string;
@@ -55,6 +121,12 @@ export interface RunChainParams {
   ctx: KbnRequestContext;
   log: ToolingLog;
   scenario: ChainScenario;
+  /**
+   * F1: ES access for reading the seeded alert documents back (mget). The
+   * spec's Scout esClient satisfies this; kept structural so the package takes
+   * no runtime dependency on @kbn/scout.
+   */
+  alertStore: AlertDocumentStore;
   /** kibana base commit the managed definitions shipped in; recorded on every run. */
   baseSha: string;
   /** Firing strategy for floor_alert_triage (design Rev 3 §3 / N3). */
@@ -389,10 +461,46 @@ const asTriageTrigger = (value: unknown): ChainHopRecord['triggeredBy'] | undefi
  * Worker's saved autonomy (worker_settings.ts); this reads back what each hop
  * actually consumed and stores that on the record.
  */
-export const runChain = async ({
+export const runChain = ({
   ctx,
   log,
   scenario,
+  alertStore,
+  baseSha,
+  triageTrigger,
+  forensicsSweepMode,
+  runAsIdentities,
+  maxWaitMs = {},
+  pollIntervalMs = DEFAULT_POLL_INTERVAL_MS,
+}: RunChainParams): Promise<ChainRunRecord> => {
+  // F2: whole chains run one at a time — floor_attack_discovery is max-1
+  // cancel-in-progress, so overlapping AD hops cancel each other (18/21 in the
+  // live smoke). The product's own limit stays untouched. The queue tail
+  // swallows rejections (a failed chain must not poison the next example) but
+  // the caller still sees the original rejection.
+  const run = chainQueue.then(() =>
+    runChainUnserialized({
+      ctx,
+      log,
+      scenario,
+      alertStore,
+      baseSha,
+      triageTrigger,
+      forensicsSweepMode,
+      runAsIdentities,
+      maxWaitMs,
+      pollIntervalMs,
+    })
+  );
+  chainQueue = run.catch(() => undefined);
+  return run;
+};
+
+const runChainUnserialized = async ({
+  ctx,
+  log,
+  scenario,
+  alertStore,
   baseSha,
   triageTrigger,
   forensicsSweepMode,
@@ -451,20 +559,45 @@ export const runChain = async ({
       WORKER_IDS.alertTriage,
       WORKFLOW_IDS.alertTriage
     );
+    // F1: mirror the production trigger path exactly. The alert trigger emits
+    // full alert documents (`buildAlertEvent` over `preprocessAlertInputs`,
+    // workflows_management_api.ts:753), and POST /run applies the same
+    // preprocessing when `event.triggerType === 'alert'` with `alertIds`
+    // (preprocess_alert_inputs.ts:156). Passing expanded docs by hand (the old
+    // shape) skipped `classify_alerts`' full-doc validation (`_id`, `_index`,
+    // `@timestamp`, `kibana` — alert_trigger_schema.ts AlertSchema) and failed
+    // 21/21. The caller must fetch the seeded docs' `_index` (the harness mgets
+    // them from the seeded alerts index); any id that never indexed fails fast
+    // here, before a workflow run is spent.
+    const seededAlerts = await fetchSeededAlerts(ctx, alertStore, scenario.alerts);
+    if (seededAlerts.fetched.length !== scenario.alerts.length) {
+      const missing = scenario.alerts
+        .filter(({ id }) => !seededAlerts.fetched.some((a) => a._id === id))
+        .map(({ id }) => id);
+      throw new Error(
+        `Scenario "${scenario.key}": seeded alert(s) not found in ` +
+          `"${seededAlerts.index}": ${missing.join(', ')}. ` +
+          'The triage workflow requires full alert documents (F1); the seed must index them first.'
+      );
+    }
     const inputs =
       triageTrigger === 'manual-event'
         ? {
             // The manual trigger declares no inputs, but the engine accepts an
             // event payload shaped like the alert trigger's (verified in
             // workflows_management_api.test.ts:2330). N3 records which path ran.
+            // F1: alertIds ({_id,_index}), not expanded docs — the run route's
+            // preprocessing expands them the way the product's own trigger
+            // would, through the rule type's formatAlert + expandFlattenedAlert.
             event: {
               triggerType: 'alert',
               rule: { id: scenario.rule.id, name: scenario.rule.name },
-              alerts: scenario.alerts,
+              alertIds: seededAlerts.fetched.map(({ _id, _index }) => ({ _id, _index })),
             },
           }
-        : { alertIds: scenario.alerts.map((a) => a.id) };
+        : { alertIds: seededAlerts.fetched.map(({ _id }) => _id) };
     const executionId = await runWorkflow(ctx, triageWorkflowId, inputs);
+    log.info(`floor_alert_triage started: execution ${executionId}`);
     const { status, overrun } = await waitForTerminal(
       ctx,
       log,
@@ -476,6 +609,15 @@ export const runChain = async ({
     // Nit: the execution records its own trigger; a harness constant would
     // only ever agree with itself. Fallback only when the field is unreadable.
     const triageExecution = await readExecution(ctx, executionId).catch(() => undefined);
+    const concurrencyCancel = concurrencyCancellation(triageExecution);
+    if (concurrencyCancel !== undefined) {
+      markInterference(
+        `floor_alert_triage cancelled by the product's concurrency limit: ${concurrencyCancel}`
+      );
+    }
+    log.info(
+      `floor_alert_triage finished: execution ${executionId} status ${overrun ? 'timeout' : status}`
+    );
     const triggeredBy =
       asTriageTrigger(triageExecution?.triggeredBy) ??
       (triageTrigger === 'manual-event' ? 'manual' : 'alert');
@@ -519,6 +661,7 @@ export const runChain = async ({
     // cancelled hop, not a model failure. Run the cell with the Worker's
     // schedule interval long (the default is 24h) or the schedule disabled.
     const executionId = await runWorkflow(ctx, adWorkflowId, {});
+    log.info(`floor_attack_discovery started: execution ${executionId}`);
     const { status, overrun } = await waitForTerminal(
       ctx,
       log,
@@ -528,6 +671,17 @@ export const runChain = async ({
       pollIntervalMs
     );
     const adExecution = await readExecution(ctx, executionId).catch(() => undefined);
+    const adConcurrencyCancel = concurrencyCancellation(adExecution);
+    if (adConcurrencyCancel !== undefined) {
+      markInterference(
+        `floor_attack_discovery cancelled by the product's concurrency limit: ${adConcurrencyCancel}`
+      );
+    }
+    log.info(
+      `floor_attack_discovery finished: execution ${executionId} status ${
+        overrun ? 'timeout' : status
+      }`
+    );
     const triggeredBy = asTriageTrigger(adExecution?.triggeredBy) ?? 'manual';
     record(
       'floor_attack_discovery',
@@ -544,7 +698,9 @@ export const runChain = async ({
     // (floor → runner → executeAsync review): walk to them, wait each to
     // terminal, then read its verdict and the Investigation it raised proposals on.
     const reviewIds = await collectReviewExecutionIds(ctx, executionId);
+    log.info(`attack_discovery reviews: ${reviewIds.join(', ') || 'none'}`);
     for (const reviewId of reviewIds) {
+      log.info(`attack_discovery_review started: execution ${reviewId}`);
       const reviewWait = await waitForTerminal(
         ctx,
         log,
@@ -555,6 +711,17 @@ export const runChain = async ({
         isReviewSettled
       );
       const reviewExecution = await readExecution(ctx, reviewId).catch(() => undefined);
+      const reviewConcurrencyCancel = concurrencyCancellation(reviewExecution);
+      if (reviewConcurrencyCancel !== undefined) {
+        markInterference(
+          `attack_discovery_review ${reviewId} cancelled by the product's concurrency limit: ${reviewConcurrencyCancel}`
+        );
+      }
+      log.info(
+        `attack_discovery_review finished: execution ${reviewId} status ${
+          reviewWait.overrun ? 'timeout' : reviewWait.status
+        }`
+      );
       record(
         'attack_discovery_review',
         WORKFLOW_IDS.attackDiscoveryReview,

@@ -90,10 +90,22 @@ const scenario = (workerChain: ChainScenario['workerChain']): ChainScenario => (
   goldVerdict: 'true_positive',
 });
 
+/** F1: an mget that answers with every requested doc found (the seeded index). */
+const alertStoreAllFound = {
+  mget: async ({ docs }: { docs: Array<{ _id: string }> }) => ({
+    docs: docs.map((doc) => ({
+      _id: doc._id,
+      found: true,
+      _source: { 'kibana.alert.severity': 'high' },
+    })),
+  }),
+};
+
 const params = (fetch: HttpHandler, workerChain: ChainScenario['workerChain']) => ({
   ctx: { fetch, spaceId: 'default' },
   log,
   scenario: scenario(workerChain),
+  alertStore: alertStoreAllFound,
   baseSha: 'abc',
   triageTrigger: 'manual-event' as const,
   forensicsSweepMode: 'blocked' as const,
@@ -995,5 +1007,96 @@ describe('runChain R7/R8: parked means the gate execution is waiting_for_input',
 
     const record = await runChain(params(fetch, ['alert-triage']));
     expect(record.harnessInterference).toMatch(/did not reach a settled status/);
+  });
+});
+
+describe("runChain F1: full alert documents via the run route's preprocessing", () => {
+  it('sends alertIds ({_id,_index}) — the shape the run route preprocesses into full docs', async () => {
+    const { fetch } = makeFetch(TRIAGE_INSTALLED_ID);
+    let runBody:
+      | {
+          inputs?: { event?: { alerts?: unknown; alertIds?: unknown; triggerType?: unknown } };
+        }
+      | undefined;
+    const instrumented = jest.fn(async (path: string, options: Record<string, unknown> = {}) => {
+      if (typeof options.body === 'string' && path.includes('/run')) {
+        runBody = JSON.parse(options.body);
+      }
+      return (fetch as unknown as (p: string, o: Record<string, unknown>) => Promise<unknown>)(
+        path,
+        options
+      );
+    }) as unknown as HttpHandler;
+
+    await runChain(params(instrumented, ['alert-triage']));
+
+    // The old shape (alerts: [{id,hostId}]) failed classify_alerts validation
+    // 21/21 (F1); the run must now carry alertIds read back from the seed.
+    expect(runBody?.inputs?.event?.alerts).toBeUndefined();
+    expect(runBody?.inputs?.event?.alertIds).toEqual([
+      { _id: 'a1', _index: '.alerts-security.alerts-default' },
+    ]);
+    expect(runBody?.inputs?.event?.triggerType).toBe('alert');
+  });
+
+  it('fails fast when a scenario alert is missing from the seeded index', async () => {
+    const { fetch } = makeFetch(TRIAGE_INSTALLED_ID);
+    const missingStore = {
+      mget: async () => ({ docs: [{ _id: 'a1', found: false }] }),
+    };
+    await expect(
+      runChain({ ...params(fetch, ['alert-triage']), alertStore: missingStore })
+    ).rejects.toThrow(/not found in "\.alerts-security\.alerts-default": a1/);
+  });
+});
+
+describe('runChain F2: concurrency-limit cancellation is harness interference', () => {
+  it('records harnessInterference when the AD hop is cancelled by the concurrency limit', async () => {
+    const { fetch: baseFetch } = makeFetch(TRIAGE_INSTALLED_ID, AD_INSTALLED_ID);
+    const fetch = jest.fn(async (path: string, ...rest: unknown[]) => {
+      if (path.endsWith('/executions/exec-1')) {
+        return {
+          status: 'cancelled',
+          cancellationReason: 'Cancelled due to concurrency limit (max: 1)',
+          triggeredBy: 'manual',
+          stepExecutions: [],
+        };
+      }
+      return (baseFetch as unknown as (p: string, ...r: unknown[]) => Promise<unknown>)(
+        path,
+        ...rest
+      );
+    }) as unknown as HttpHandler;
+
+    const record = await runChain(params(fetch, ['attack-discovery']));
+    expect(record.harnessInterference).toMatch(
+      /floor_attack_discovery cancelled by the product's concurrency limit/
+    );
+  });
+
+  it('serializes chains: two runChain calls never overlap (in-process queue)', async () => {
+    const { fetch } = makeFetch(TRIAGE_INSTALLED_ID);
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const slowParams = {
+      ...params(fetch, ['alert-triage']),
+      maxWaitMs: { alertTriage: 30, perActionProposal: 1 },
+      pollIntervalMs: 5,
+    };
+    const tracked = (p: typeof slowParams) => ({
+      ...p,
+      log: {
+        ...log,
+        info: (...args: unknown[]) => {
+          if (String(args[0]).includes('started')) inFlight += 1;
+          if (String(args[0]).includes('finished')) {
+            maxInFlight = Math.max(maxInFlight, inFlight);
+            inFlight -= 1;
+          }
+        },
+      } as unknown as ToolingLog,
+    });
+    await Promise.all([runChain(tracked(slowParams)), runChain(tracked(slowParams))]);
+    expect(maxInFlight).toBeLessThanOrEqual(1);
   });
 });

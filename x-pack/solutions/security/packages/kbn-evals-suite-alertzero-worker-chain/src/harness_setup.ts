@@ -87,12 +87,29 @@ export const setupWorkerChainHarness = async ({
     const workflowId = await assertWorkerInstalled(ctx, workerId);
     log.info(`Worker ${workerId} enabled (workflow ${workflowId})`);
   }
+  // F6: the pre-run Worker snapshot — what teardown's read-back diff compares
+  // against, logged here so the run log carries both sides of the comparison.
+  log.info(
+    `Pre-run Worker snapshot: ${state.snapshots
+      .map(
+        (s) =>
+          `${s.workerId} {enabled: ${s.enabled}, settingsRevision: ${
+            s.settingsRevision
+          }, settings: ${JSON.stringify(s.settings)}}`
+      )
+      .join(' | ')}`
+  );
 };
 
 /**
  * Workers first, the setting last: restoring a Worker goes through the Workers
  * routes, which 404 once the setting is back to false. Every step is attempted
  * and failures are logged, not thrown.
+ *
+ * F6: after each restore the Worker is read back and the read-back is diffed
+ * against the pre-run snapshot, so a failed restore is visible in the log, not
+ * silent. The eval user's identity is logged too (it is who the Workers reads
+ * ran as — the run-as identities are the service accounts, never this user).
  */
 export const teardownWorkerChainHarness = async ({
   ctx,
@@ -103,10 +120,44 @@ export const teardownWorkerChainHarness = async ({
   state: WorkerChainHarnessState;
   log: ToolingLog;
 }): Promise<void> => {
+  // F6: the eval user the harness has been acting as — distinct from the
+  // Workers' run-as service accounts (recorded on the run record, R1).
+  await ctx
+    .fetch('/internal/security/me', { method: 'GET' })
+    .then((me: unknown) => {
+      const username = (me as { username?: string } | undefined)?.username;
+      log.info(`Eval user (GET /internal/security/me): ${username ?? 'unreadable'}`);
+    })
+    .catch((error: Error) => log.warning(`Could not read the eval user: ${error.message}`));
+
   for (const snapshot of state.snapshots) {
     await restoreWorker(ctx, snapshot).catch((error: Error) =>
       log.warning(`Could not restore worker ${snapshot.workerId}: ${error.message}`)
     );
+    // F6: read the restored state back and diff it against the snapshot.
+    await captureWorker(ctx, snapshot.workerId)
+      .then((after) => {
+        const diffs: string[] = [];
+        if (after.enabled !== snapshot.enabled) {
+          diffs.push(`enabled ${after.enabled} != ${snapshot.enabled}`);
+        }
+        const keys = new Set([...Object.keys(after.settings), ...Object.keys(snapshot.settings)]);
+        for (const key of keys) {
+          const a = (after.settings as Record<string, unknown>)[key];
+          const s = (snapshot.settings as Record<string, unknown>)[key];
+          if (a !== s) diffs.push(`settings.${key} ${String(a)} != ${String(s)}`);
+        }
+        if (diffs.length === 0) {
+          log.info(`Worker ${snapshot.workerId} restored (read-back matches snapshot)`);
+        } else {
+          log.warning(
+            `Worker ${snapshot.workerId} restore DIFFERS from snapshot: ${diffs.join('; ')}`
+          );
+        }
+      })
+      .catch((error: Error) =>
+        log.warning(`Could not read back worker ${snapshot.workerId}: ${error.message}`)
+      );
   }
   await state
     .restoreAlertAnalysisSetting?.()

@@ -167,6 +167,17 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
                 ctx: ctxOf(fetch),
                 log,
                 scenario,
+                // F1: the seeded alert documents are read back from the seeded
+                // alerts index via mget, so the triage run receives the same
+                // full-doc event the product's alert trigger emits.
+                alertStore: {
+                  mget: (p) =>
+                    (
+                      esClient as unknown as {
+                        mget(params: unknown): Promise<unknown>;
+                      }
+                    ).mget(p) as never,
+                },
                 baseSha: process.env.ALERTZERO_EVAL_BASE_SHA ?? 'unknown',
                 triageTrigger: 'manual-event',
                 forensicsSweepMode: 'blocked',

@@ -116,11 +116,15 @@ export const restoreWorker = async (
     ...(snapshot.enabled !== current.enabled ? { enabled: snapshot.enabled } : {}),
     settingsRevision: current.settingsRevision,
     // N8: put the service account back too — writeWorkerAutonomy may have set it.
+    // F6: when the snapshot had NONE, the run's write added one and the patch
+    // merge would keep it; `serviceAccountId: null` is the contract's explicit
+    // clear (applyWorkerSettingsWrite branches on undefined, not null).
     settings: {
       autonomy: snapshot.settings.autonomy,
-      ...(snapshot.settings.serviceAccountId !== undefined
-        ? { serviceAccountId: snapshot.settings.serviceAccountId }
-        : {}),
+      serviceAccountId:
+        snapshot.settings.serviceAccountId !== undefined
+          ? snapshot.settings.serviceAccountId
+          : null,
     },
   });
 };

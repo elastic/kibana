@@ -175,3 +175,75 @@ describe('chainTerminal evaluator', () => {
     expect(result.label).toBe('not_exercised');
   });
 });
+
+describe('F3: chainTerminal scores only completed chains', () => {
+  it('failed hop scores 0, not 1 (was vacuous: 1.0 with zero successful hops)', async () => {
+    const result = await chainTerminal.evaluate!({
+      output: output(record({ hops: [{ ...record().hops[0], executionStatus: 'failed' }] })),
+      expected: {},
+      metadata: {},
+    } as never);
+    expect(result.score).toBe(0);
+    expect(result.label).toMatch(/incomplete: floor_alert_triage=failed/);
+  });
+
+  it('cancelled hop scores 0', async () => {
+    const result = await chainTerminal.evaluate!({
+      output: output(record({ hops: [{ ...record().hops[0], executionStatus: 'cancelled' }] })),
+      expected: {},
+      metadata: {},
+    } as never);
+    expect(result.score).toBe(0);
+    expect(result.label).toMatch(/incomplete: floor_alert_triage=cancelled/);
+  });
+
+  it('harnessInterference still yields null (INVALID, unscored)', async () => {
+    const result = await chainTerminal.evaluate!({
+      output: output(record({ harnessInterference: 'concurrency cancellation' })),
+      expected: {},
+      metadata: {},
+    } as never);
+    expect(result.score).toBeNull();
+  });
+
+  it('completed chain still scores 1', async () => {
+    const result = await chainTerminal.evaluate!({
+      output: output(record()),
+      expected: {},
+      metadata: {},
+    } as never);
+    expect(result.score).toBe(1);
+  });
+});
+
+describe('F4: ExecutionIdArray derives the expectation from the product contract', () => {
+  it('defaults to the recorded triage execution ids, not []', async () => {
+    const result = await executionIdArray.evaluate!({
+      output: output(record()),
+      expected: {},
+      metadata: {},
+    } as never);
+    // record() has workflowExecutionIds ['exec-1'] and a triage hop exec-1.
+    expect(result.score).toBe(1);
+  });
+
+  it('mismatch against the derived expectation still scores 0', async () => {
+    const result = await executionIdArray.evaluate!({
+      output: output(
+        record({ investigation: { id: 'inv-1', workflowExecutionIds: [], reopened: false } })
+      ),
+      expected: {},
+      metadata: {},
+    } as never);
+    expect(result.score).toBe(0);
+  });
+
+  it('an explicit expectation still wins over the derived one', async () => {
+    const result = await executionIdArray.evaluate!({
+      output: output(record()),
+      expected: { expectedExecutionIds: ['exec-1'] },
+      metadata: { expectedExecutionIds: ['exec-1'] },
+    } as never);
+    expect(result.score).toBe(1);
+  });
+});

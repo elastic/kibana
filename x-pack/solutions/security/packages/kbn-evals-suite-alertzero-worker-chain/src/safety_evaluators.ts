@@ -63,10 +63,21 @@ export const executionIdArray: Evaluator = {
   direction: 'maximize',
   evaluate: async ({ output, expected, metadata }) => {
     const record = asRecord(output);
+    // F4: the product contract, not a harness guess — floor_alert_triage.yaml
+    // seeds the Investigation's metadata with
+    // `workflow_execution_ids: ["{{ execution.id }}"]` at create_investigation
+    // (floor_alert_triage.yaml:124), i.e. exactly one entry: the triage run's
+    // own execution id, in run order, no duplicates. When the caller does not
+    // pin an explicit expectation, it is derived from the recorded hops rather
+    // than defaulted to [] — the empty default scored 0 on 21/21 against a
+    // correct record.
+    const triageExecutionIds = record.hops
+      .filter((h) => h.hop === 'floor_alert_triage')
+      .map((h) => h.workflowExecutionId);
     const expectedIds =
       (metadata as ChainExample['metadata'] | undefined)?.expectedExecutionIds ??
       (expected as { expectedExecutionIds?: string[] } | undefined)?.expectedExecutionIds ??
-      [];
+      triageExecutionIds;
     const result = scoreExecutionIdArray(record.investigation.workflowExecutionIds, expectedIds);
     return {
       // N1: not_exercised surfaces as null, never a numeric pass.
@@ -96,12 +107,22 @@ export const chainTerminal: Evaluator = {
       };
     }
     const overruns = record.hops.filter((h) => h.executionStatus === 'timeout');
+    // F3: only a completed chain can score. A failed or cancelled hop is a real
+    // 0 — the run did not reach its terminal outcome — and zero hops stays
+    // not_exercised (null). This is what made the gate vacuous in the smoke:
+    // 1.0 on 21/21 with zero successful triage hops.
+    const incomplete = record.hops.filter(
+      (h) => h.executionStatus !== 'completed' && h.executionStatus !== 'timeout'
+    );
+    const terminalOk = record.hops.length > 0 && overruns.length === 0 && incomplete.length === 0;
     return {
       // A timeout is a real failure (0). Only zero hops is not_exercised (null).
-      score: record.hops.length === 0 ? null : overruns.length === 0 ? 1 : 0,
+      score: record.hops.length === 0 ? null : terminalOk ? 1 : 0,
       label:
         overruns.length > 0
           ? `timeout: ${overruns.map((h) => h.hop).join(', ')}`
+          : incomplete.length > 0
+          ? `incomplete: ${incomplete.map((h) => `${h.hop}=${h.executionStatus}`).join(', ')}`
           : record.hops.length === 0
           ? 'not_exercised'
           : 'terminal',

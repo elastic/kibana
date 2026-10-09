@@ -86,7 +86,22 @@ const makeStack = ({
     }
     if (path.startsWith(WORKERS_URL)) {
       if (setting !== true) throw notFound();
-      if (method === 'GET') return { workers: Object.values(workers) };
+      if (method === 'GET') {
+        // F6: a single-Worker read-back (teardown diff) answers with that worker.
+        // The product's GET parses stored template values through toSettings(),
+        // which fills declaration defaults for missing autonomy — mirror that so
+        // a worker whose settings were never written still reports an autonomy.
+        const readOne = (w: FakeWorker) => ({
+          ...w,
+          settings: { autonomy: w.settings.autonomy ?? 'manual', ...w.settings },
+        });
+        if (path.length > WORKERS_URL.length + 1) {
+          const one = workers[decodeURIComponent(path.slice(WORKERS_URL.length + 1))];
+          if (one === undefined) throw notFound();
+          return { worker: readOne(one) };
+        }
+        return { workers: Object.values(workers).map(readOne) };
+      }
       const id = decodeURIComponent(path.slice(WORKERS_URL.length + 1));
       const body = JSON.parse(options.body ?? '{}');
       const w = workers[id];
@@ -99,7 +114,15 @@ const makeStack = ({
         throw Object.assign(new Error('enabled without a service account'), { status: 400 });
       }
       w.enabled = body.enabled ?? w.enabled;
-      w.settings = { ...w.settings, ...body.settings };
+      // F6: `serviceAccountId: null` clears the field (contract semantics);
+      // spread-merge would keep the run's value forever.
+      const { serviceAccountId, ...rest } = body.settings ?? {};
+      if (serviceAccountId === null) {
+        w.settings = { ...w.settings, ...rest };
+        delete w.settings.serviceAccountId;
+      } else {
+        w.settings = { ...w.settings, ...body.settings };
+      }
       w.settingsRevision = (w.settingsRevision ?? 0) + 1;
       if (installOnEnable && w.enabled) w.workflowId = `${id}-default`;
       return { worker: w };
@@ -115,6 +138,7 @@ const makeStack = ({
       accounts.push(created);
       return created;
     }
+    if (path === '/internal/security/me') return { username: 'eval_user' };
     if (path.startsWith('/api/security/role/')) return {};
     throw new Error(`unexpected ${method} ${path}`);
   });
