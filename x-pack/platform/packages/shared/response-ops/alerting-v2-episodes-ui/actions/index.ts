@@ -8,7 +8,6 @@
 export type * from './types';
 export * from './create_episode_actions';
 export { bulkCreateAlertActions } from './bulk_create_alert_actions';
-export type { BulkCreateAlertActionsResponse } from './bulk_create_alert_actions';
 export { createAckAction } from './ack';
 export { createUnackAction } from './unack';
 export { createSnoozeAction } from './snooze';

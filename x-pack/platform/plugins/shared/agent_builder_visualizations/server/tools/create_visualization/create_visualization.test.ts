@@ -59,6 +59,43 @@ const runHandler = async (
   return { result, logger, attachments };
 };
 
+describe('createVisualizationTool schema', () => {
+  const schema = createVisualizationTool().schema;
+
+  it('requires chartType for a new Lens visualization', () => {
+    expect(
+      schema.safeParse({
+        query: 'errors over time',
+        chartType: SupportedChartType.XY,
+      }).success
+    ).toBe(true);
+
+    expect(schema.safeParse({ query: 'errors over time' }).success).toBe(false);
+  });
+
+  it('allows a new Vega visualization without chartType', () => {
+    expect(schema.safeParse({ query: 'small multiples by host', renderer: 'vega' }).success).toBe(
+      true
+    );
+  });
+
+  it('allows an attachment update without chartType', () => {
+    expect(
+      schema.safeParse({ query: 'use a clearer title', attachment_id: 'existing' }).success
+    ).toBe(true);
+  });
+
+  it('rejects renderer when updating an existing attachment', () => {
+    expect(
+      schema.safeParse({
+        query: 'use a clearer title',
+        attachment_id: 'existing',
+        renderer: 'lens',
+      }).success
+    ).toBe(false);
+  });
+});
+
 describe('createVisualizationTool handler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -75,7 +112,10 @@ describe('createVisualizationTool handler', () => {
   });
 
   it('builds a Lens visualization by default and persists it', async () => {
-    const { result, attachments } = await runHandler({ query: 'errors over time' });
+    const { result, attachments } = await runHandler({
+      query: 'errors over time',
+      chartType: SupportedChartType.XY,
+    });
 
     expect(mockBuildLens).toHaveBeenCalledTimes(1);
     expect(mockBuildVega).not.toHaveBeenCalled();
@@ -131,9 +171,8 @@ describe('createVisualizationTool handler', () => {
       ],
     });
 
-    // Caller asks for lens, but an edit must preserve the existing vega renderer.
     const { result } = await runHandler(
-      { query: 'tweak it', renderer: 'lens', attachment_id: 'existing' },
+      { query: 'tweak it', attachment_id: 'existing' },
       { attachments }
     );
 
@@ -156,11 +195,29 @@ describe('createVisualizationTool handler', () => {
     expect(data.version).toBe(2);
   });
 
+  it('returns an error when the attachment to update does not exist', async () => {
+    const { result, attachments } = await runHandler({
+      query: 'tweak it',
+      attachment_id: 'missing',
+    });
+
+    const [{ type, data }] = result.results;
+    expect(type).toBe(ToolResultType.error);
+    expect(data.message).toContain('Visualization attachment "missing" not found');
+    expect(mockBuildLens).not.toHaveBeenCalled();
+    expect(mockBuildVega).not.toHaveBeenCalled();
+    expect(attachments.add).not.toHaveBeenCalled();
+    expect(attachments.update).not.toHaveBeenCalled();
+  });
+
   it('surfaces an error result when persistence fails instead of silently succeeding', async () => {
     const attachments = createAttachments();
     attachments.add.mockRejectedValue(new Error('index_not_found'));
 
-    const { result, logger } = await runHandler({ query: 'errors over time' }, { attachments });
+    const { result, logger } = await runHandler(
+      { query: 'errors over time', chartType: SupportedChartType.XY },
+      { attachments }
+    );
 
     expect(result.results).toHaveLength(1);
     const [{ type, data }] = result.results;
@@ -172,7 +229,10 @@ describe('createVisualizationTool handler', () => {
   it('returns an error result when spec generation throws', async () => {
     mockBuildLens.mockRejectedValue(new Error('esql_generation_failed'));
 
-    const { result } = await runHandler({ query: 'broken' });
+    const { result } = await runHandler({
+      query: 'broken',
+      chartType: SupportedChartType.Metric,
+    });
 
     const [{ type, data }] = result.results;
     expect(type).toBe(ToolResultType.error);
@@ -189,7 +249,10 @@ describe('createVisualizationTool handler', () => {
       )
     );
 
-    const { result } = await runHandler({ query: 'cpu by host' });
+    const { result } = await runHandler({
+      query: 'cpu by host',
+      chartType: SupportedChartType.XY,
+    });
 
     const [{ type, data }] = result.results;
     expect(type).toBe(ToolResultType.error);
@@ -202,7 +265,11 @@ describe('createVisualizationTool handler', () => {
       new Error('Could not discover a suitable index for the query.')
     );
 
-    const { result } = await runHandler({ query: 'cpu by host', index: 'metrics-*' });
+    const { result } = await runHandler({
+      query: 'cpu by host',
+      index: 'metrics-*',
+      chartType: SupportedChartType.XY,
+    });
 
     const [{ data }] = result.results;
     expect(data.message).toContain('Failed to create visualization:');

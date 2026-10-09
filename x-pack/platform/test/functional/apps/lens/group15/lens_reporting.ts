@@ -25,8 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const browser = getService('browser');
 
-  // Failing: See https://github.com/elastic/kibana/issues/278433
-  describe.skip('lens reporting', () => {
+  describe('lens reporting', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/platform/test/functional/fixtures/kbn_archives/lens/reporting'
@@ -77,6 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should not cause PDF reports to fail', async () => {
       await dashboard.navigateToApp();
+      await listingTable.searchForItemWithName('Lens reportz');
       await listingTable.clickItemLink('dashboard', 'Lens reportz');
       await reporting.selectExportItem('PDF');
       await reporting.clickGenerateReportButton();

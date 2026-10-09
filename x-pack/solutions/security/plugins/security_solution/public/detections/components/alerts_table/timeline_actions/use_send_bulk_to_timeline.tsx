@@ -7,7 +7,7 @@
 
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import {
   dataTableActions,

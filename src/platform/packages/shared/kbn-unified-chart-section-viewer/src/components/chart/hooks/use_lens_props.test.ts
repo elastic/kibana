@@ -274,6 +274,47 @@ describe('useLensProps', () => {
     expect(result.current?.lastReloadRequestTime).toBeGreaterThan(0);
   });
 
+  it('updates isApproximate when Fast mode changes', async () => {
+    const chartRef = createMockChartRef();
+    const approximateFetchParams = { ...fetchParams, isApproximate: true };
+    const exactFetchParams = { ...fetchParams, isApproximate: false };
+    const { result, rerender } = renderHook(
+      ({ currentFetchParams }) =>
+        useLensProps({
+          chartId: 'testChartId',
+          title: 'Test Chart',
+          query: 'FROM metrics-*',
+          services: servicesMock as UnifiedHistogramServices,
+          fetchParams: currentFetchParams,
+          discoverFetch$,
+          chartRef,
+          chartLayers: mockChartLayers,
+          profileId: 'testProfileId',
+        }),
+      { initialProps: { currentFetchParams: approximateFetchParams } }
+    );
+
+    act(() => {
+      discoverFetch$.next({
+        fetchParams: approximateFetchParams,
+        lensVisServiceState: undefined,
+      });
+    });
+
+    await waitFor(() => {
+      expect(result.current?.isApproximate).toBe(true);
+    });
+
+    rerender({ currentFetchParams: exactFetchParams });
+    act(() => {
+      discoverFetch$.next({ fetchParams: exactFetchParams, lensVisServiceState: undefined });
+    });
+
+    await waitFor(() => {
+      expect(result.current?.isApproximate).toBe(false);
+    });
+  });
+
   it('handles chartRef as null gracefully', async () => {
     const { result } = renderHook(() =>
       useLensProps({

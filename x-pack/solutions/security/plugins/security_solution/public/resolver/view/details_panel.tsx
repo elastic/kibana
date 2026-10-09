@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';

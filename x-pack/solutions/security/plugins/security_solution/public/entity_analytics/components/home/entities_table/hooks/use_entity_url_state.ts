@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { useKibana } from '../../../../../common/lib/kibana';

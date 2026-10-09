@@ -29,6 +29,7 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -52,6 +53,7 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -77,6 +79,7 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -105,6 +108,7 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -133,6 +137,7 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -162,6 +167,7 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -190,6 +196,7 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -226,6 +233,7 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -263,6 +271,7 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const spy = jest.spyOn(generateSecretsModule, 'generateSecretsSchemaFromSpec');
@@ -300,6 +309,7 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const defaultEars = serializeConnectorSpec(spec);
@@ -428,6 +438,7 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(testSpec, {

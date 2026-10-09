@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/streamlang'
   - '@kbn/inference-common'
   - '@kbn/workflows'
-  - '@kbn/licensing-types'
   - '@kbn/i18n'
 tags:
   - shared-common

@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -21,12 +22,12 @@ import { useRefresh } from '../../use_refresh';
 import { Explorer } from '../../../explorer';
 import { useJobSelection } from '../../../components/job_selector/use_job_selection';
 import { useTableSeverity } from '../../../components/controls/select_severity';
-import { MlPageHeader } from '../../../components/page_header';
-import { PageTitle } from '../../../components/page_title';
+import { MlAppHeader } from '../../../components/ml_app_header';
 import { AnomalyDetectionEmptyState } from '../../../jobs/jobs_list/components/anomaly_detection_empty_state';
 import { useAnomalyExplorerContext } from '../../../explorer/anomaly_explorer_context';
 import { getInfluencers } from '../../../explorer/explorer_utils';
 import { useMlJobService } from '../../../services/job_service';
+import { DatePicker } from '../../../components/ml_page/date_picker';
 
 export interface ExplorerUrlStateManagerProps {
   jobsWithTimeRange: MlJobWithTimeRange[];
@@ -116,13 +117,17 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
 
   return (
     <div className="ml-explorer">
-      <MlPageHeader wrapHeader={true}>
-        <PageTitle
-          title={i18n.translate('xpack.ml.explorer.pageTitle', {
-            defaultMessage: 'Anomaly Explorer',
-          })}
-        />
-      </MlPageHeader>
+      <MlAppHeader
+        title={i18n.translate('xpack.ml.explorer.pageTitle', {
+          defaultMessage: 'Anomaly Explorer',
+        })}
+      />
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <DatePicker />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <CasesContext owner={[]} permissions={casesPermissions!}>
         {jobsWithTimeRange.length === 0 ? (
           <AnomalyDetectionEmptyState showDocsLink iconSize="m" />

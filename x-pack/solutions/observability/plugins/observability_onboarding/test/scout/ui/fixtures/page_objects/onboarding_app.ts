@@ -154,10 +154,6 @@ export class OnboardingApp {
     }
   }
 
-  async waitForIngestionModeSelector(timeout = 30_000) {
-    await this.ingestionModeSelector.waitFor({ state: 'visible', timeout });
-  }
-
   async getGridColumnCount() {
     const gridStyle = await this.useCaseGrid.getAttribute('style');
     if (gridStyle?.includes('grid-template-columns')) {
@@ -193,65 +189,11 @@ export class OnboardingApp {
     await this.cloudUseCaseTile.waitFor({ state: 'visible' });
   }
 
-  public get ingestionModeSelector() {
-    return this.page.getByTestId('observabilityOnboardingIngestionModeSelector');
-  }
-
-  public get classicIngestionOption() {
-    return this.ingestionModeSelector.getByRole('button', { name: /Classic ingestion/i });
-  }
-
-  public get wiredStreamsOption() {
-    return this.ingestionModeSelector.getByRole('button', { name: /Wired Streams/i });
-  }
-
-  public get techPreviewBadge() {
-    return this.ingestionModeSelector.locator('.euiBetaBadge', { hasText: 'Tech Preview' });
-  }
-
-  async selectWiredStreams() {
-    await this.wiredStreamsOption.click();
-  }
-
-  async selectClassicIngestion() {
-    await this.classicIngestionOption.click();
-  }
-
   public get autoDetectCodeSnippet() {
     return this.page.getByTestId('observabilityOnboardingAutoDetectPanelCodeSnippet');
   }
 
   async getAutoDetectCommandContent(): Promise<string> {
     return (await this.autoDetectCodeSnippet.textContent()) ?? '';
-  }
-
-  // Enable Wired Streams Modal
-  public get enableWiredStreamsModal() {
-    return this.page.getByTestId('observabilityOnboardingEnableWiredStreamsModal');
-  }
-
-  public get enableWiredStreamsCancelButton() {
-    return this.page.getByTestId('observabilityOnboardingEnableWiredStreamsCancelButton');
-  }
-
-  public get enableWiredStreamsConfirmButton() {
-    return this.page.getByTestId('observabilityOnboardingEnableWiredStreamsConfirmButton');
-  }
-
-  async cancelEnableWiredStreamsModal() {
-    await this.enableWiredStreamsCancelButton.click();
-  }
-
-  async confirmEnableWiredStreamsModal() {
-    await this.enableWiredStreamsConfirmButton.click();
-  }
-
-  async confirmEnableWiredStreamsModalIfPresent({ timeout = 2_000 } = {}) {
-    try {
-      await this.enableWiredStreamsModal.waitFor({ state: 'visible', timeout });
-      await this.confirmEnableWiredStreamsModal();
-    } catch {
-      // Modal omitted: Wired Streams was already enabled in this session.
-    }
   }
 }

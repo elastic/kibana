@@ -159,6 +159,22 @@ describe('AllTemplatesPage', () => {
     });
   });
 
+  it('hides the info panel when dismissed', async () => {
+    const queryClient = createTestQueryClient();
+
+    renderWithTestingProviders(<AllTemplatesPage />, {
+      wrapperProps: { queryClient },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-info-panel')).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByTestId('templates-info-panel-dismiss'));
+
+    expect(screen.queryByTestId('templates-info-panel')).not.toBeInTheDocument();
+  });
+
   it('renders the table filters', async () => {
     const queryClient = createTestQueryClient();
 

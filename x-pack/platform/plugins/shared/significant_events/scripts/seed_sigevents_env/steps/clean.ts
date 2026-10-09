@@ -7,15 +7,21 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type { Client } from '@elastic/elasticsearch';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { SeedContext } from '../types';
 import type { ConnectionConfig } from '../lib/get_connection_config';
 import { kibanaRequest } from '../lib/kibana';
 
-async function deleteByMatchAll(esClient: Client, index: string, log: ToolingLog): Promise<void> {
+async function deleteByQuery(
+  esClient: Client,
+  index: string,
+  query: QueryDslQueryContainer,
+  log: ToolingLog
+): Promise<void> {
   try {
-    await esClient.deleteByQuery({ index, conflicts: 'proceed', query: { match_all: {} } });
-    log.info(`clean: wiped ${index}`);
+    await esClient.deleteByQuery({ index, conflicts: 'proceed', query });
+    log.info(`clean: deleted matching documents from ${index}`);
   } catch (err) {
     if (err instanceof errors.ResponseError && err.meta.statusCode === 404) {
       log.info(`clean: ${index} not found, skipping`);
@@ -25,6 +31,9 @@ async function deleteByMatchAll(esClient: Client, index: string, log: ToolingLog
   }
 }
 
+const deleteByMatchAll = async (esClient: Client, index: string, log: ToolingLog): Promise<void> =>
+  deleteByQuery(esClient, index, { match_all: {} }, log);
+
 export async function cleanSeedData(
   ctx: SeedContext,
   esClient: Client,
@@ -32,10 +41,10 @@ export async function cleanSeedData(
   log: ToolingLog
 ): Promise<void> {
   await deleteByMatchAll(esClient, '.kibana_streams_features-*', log);
-  await deleteByMatchAll(esClient, '.alerts-streams.alerts-default', log);
 
-  // Queries are Kibana alerting rules — must be deleted via the API to tear down rule state.
-  // List all on the stream so we catch leftovers from previous scenario runs.
+  // Local seed reset only: deleting an Alerting v2 rule leaves its historical `.rule-events`.
+  // Resolve the rule ids before deleting queries so repeated seed runs do not retain stale
+  // synthetic events. List every query on the stream to catch leftovers from earlier runs.
   const listRes = await kibanaRequest(
     config,
     'GET',
@@ -53,6 +62,21 @@ export async function cleanSeedData(
   const queryIds = allQueries
     .map((q) => q.id)
     .filter((id): id is string => typeof id === 'string' && id.length > 0);
+
+  if (queryIds.length > 0) {
+    const assets = await esClient.search({
+      index: '.kibana_streams_assets',
+      size: queryIds.length,
+      _source: ['rule_id'],
+      query: { terms: { 'asset.id': queryIds } },
+    });
+    const ruleIds = assets.hits.hits
+      .map((hit) => (hit._source as { rule_id?: string } | undefined)?.rule_id)
+      .filter((id): id is string => typeof id === 'string' && id.length > 0);
+    if (ruleIds.length > 0) {
+      await deleteByQuery(esClient, '.rule-events', { terms: { 'rule.id': ruleIds } }, log);
+    }
+  }
 
   for (const queryId of queryIds) {
     const path = `/api/streams/${encodeURIComponent(ctx.streamName)}/queries/${encodeURIComponent(

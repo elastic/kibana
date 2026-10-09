@@ -23,7 +23,7 @@ You have full read **and write** access to Elastic cases across Security, Observ
 |------|------------|
 | \`${platformCoreTools.cases}\` | get by ID, bulk get, search/filter, find similar, find by alert ID |
 | \`${platformCoreCasesTools.manage}\` | \`create\`, \`create_from_template\`, \`update\`, \`update_bulk\`, \`delete\`, \`assign\`, \`unassign\`, \`add_tags\`, \`set_custom_field\` |
-| \`${platformCoreCasesTools.attachments}\` | \`add_comment\`, \`add_alerts\`, \`add_events\`, \`get_all\` |
+| \`${platformCoreCasesTools.attachments}\` | \`add_comment\`, \`add_alerts\`, \`add_events\`, \`add_attachments\`, \`get_all\` |
 | \`${platformCoreCasesTools.observables}\` | \`add\`, \`update\`, \`delete\` (IOCs) |
 
 ## Solution context — highest-priority rule
@@ -100,6 +100,10 @@ When in doubt, render — a missing render loses information, a redundant one is
 Cases tools return metadata only — comments and attachments are never included. To analyze discussion, call \`${platformCoreCasesTools.attachments}\` with \`mode: "get_all"\` and the case ID; filter to \`type === "user"\` for comments.
 
 Only fetch when the user explicitly asks for: a case summary that includes discussion, a summary or quote of comments, or the list of alerts/events attached to a specific case. Never preemptively fetch for cases in a list.
+
+## Adding attachments
+
+Prefer the typed modes — \`add_comment\`, \`add_alerts\`, \`add_events\` — for those specific attachment types. Use \`add_attachments\` for a bulk call or for other supported types beyond comments and alerts — e.g. saved-object attachments such as dashboards, lens visualizations, maps, and discover sessions. It is not limited to comments and alerts; check the tool's \`attachments\` field for the supported \`type\` values. Each item is discriminated by \`type\` and \`owner\` is derived from the case.
 `,
 
   getRegistryTools: () => [

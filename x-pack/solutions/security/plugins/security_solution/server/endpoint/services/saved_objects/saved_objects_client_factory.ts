@@ -11,7 +11,7 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { REFERENCE_DATA_SAVED_OBJECT_TYPE } from '../../lib/reference_data';
 import { EndpointError } from '../../../../common/endpoint/errors';
@@ -53,7 +53,7 @@ export class SavedObjectsClientFactory {
       route: { settings: {} },
       url: { href: {}, hash: '' } as URL,
       raw: { req: { url: '/' } } as any,
-      spaceId: asSpaceId(spaceId),
+      spaceId: brandSpaceId(spaceId),
     });
   }
 

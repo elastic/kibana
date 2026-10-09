@@ -108,7 +108,7 @@ export const McpClientDetailsContent = ({
               disableScreenReaderOutput
             >
               <EuiButtonIcon
-                iconType={isSecretVisible ? 'eyeClosed' : 'eye'}
+                iconType={isSecretVisible ? 'eyeSlash' : 'eye'}
                 color="text"
                 aria-label={labels.details.modal.toggleSecretVisibility}
                 onClick={toggleSecretVisibility}

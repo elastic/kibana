@@ -25,7 +25,7 @@ export const cleanupPolicyRevisions = async (
   esClient: ElasticsearchClient,
   context: ContextParam
 ) => {
-  const { logger, abortController } = context;
+  const { logger, signal } = context;
 
   const config = {
     ...defaultConfig,
@@ -55,7 +55,7 @@ export const cleanupPolicyRevisions = async (
     } policies with more than ${config.maxRevisions} revisions.`
   );
 
-  throwIfAborted(abortController);
+  throwIfAborted(signal);
 
   const policiesRevisionSummaries = await populateMinimumRevisionsUsedByAgents(
     esClient,
@@ -66,7 +66,7 @@ export const cleanupPolicyRevisions = async (
     }
   );
 
-  throwIfAborted(abortController);
+  throwIfAborted(signal);
 
   const docCount = Object.values(policiesRevisionSummaries).reduce(
     (sum, summary) => sum + (summary.count - config.maxRevisions),
@@ -96,8 +96,8 @@ export const cleanupPolicyRevisions = async (
   };
 };
 
-export const throwIfAborted = (abortController?: AbortController) => {
-  if (abortController?.signal.aborted) {
+export const throwIfAborted = (signal?: AbortSignal) => {
+  if (signal?.aborted) {
     throw new Error('Task was aborted');
   }
 };

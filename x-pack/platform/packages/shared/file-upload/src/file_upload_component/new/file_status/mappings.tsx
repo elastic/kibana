@@ -9,7 +9,8 @@ import type { FC } from 'react';
 import React, { useState, useEffect, useMemo } from 'react';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import useDebounce from 'react-use/lib/useDebounce';
-import { EuiCallOut, EuiFormRow, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiFormRow, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { JsonEditor, EDITOR_MODE } from './json_editor';
@@ -94,20 +95,19 @@ export const Mappings: FC<Props> = ({
   return (
     <>
       {readonly ? (
-        <EuiCallOut
+        <KbnInfoCallout
           announceOnMount
           size="s"
-          color="primary"
-          iconType="readOnly"
           title={i18n.translate('xpack.fileUpload.mappingsReadonlyWarning', {
             defaultMessage: 'Mappings for individual files are not editable.',
           })}
-        >
-          <FormattedMessage
-            id="xpack.fileUpload.advancedImportSettings.mappingsWarning"
-            defaultMessage="You can only edit combined mappings under advanced options."
-          />
-        </EuiCallOut>
+          text={
+            <FormattedMessage
+              id="xpack.fileUpload.advancedImportSettings.mappingsWarning"
+              defaultMessage="You can only edit combined mappings under advanced options."
+            />
+          }
+        />
       ) : null}
       {showTitle ? (
         <EuiFormRow label={title} fullWidth>

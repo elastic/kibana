@@ -52,19 +52,22 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   useHostAttachmentConfig();
 
   const parentBreadcrumbResolver = useParentBreadcrumbResolver();
-  const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(entity.type);
-  useMetricsBreadcrumbs([
-    {
-      ...breadcrumbOptions.link,
-      text: breadcrumbOptions.text,
-    },
-    {
-      text: entity.name,
-    },
-    {
-      text: capitalize(activeTabId),
-    },
-  ]);
+  const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions();
+  useMetricsBreadcrumbs(
+    [
+      {
+        ...breadcrumbOptions.link,
+        text: breadcrumbOptions.text,
+      },
+      {
+        text: entity.name,
+      },
+      {
+        text: capitalize(activeTabId),
+      },
+    ],
+    { parent: 'app' }
+  );
 
   useEffect(() => {
     if (trackOnlyOnce.current) {

@@ -1,7 +1,7 @@
 ---
 navigation_title: "<%= connector.displayName %>"
 applies_to:
-  stack: preview
+  stack: preview <%= connector.version %>
   serverless: preview
 ---
 
@@ -24,17 +24,13 @@ API Key
 -->
 
 
-## Test connectors [<%= connector.kebabName %>-action-configuration]
+## Connector actions [<%= connector.kebabName %>-connector-actions]
 
-You can test connectors as you're creating or editing the connector in {{kib}}.
+The <%= connector.displayName %> connector exposes the following actions:
 
-The <%= connector.displayName %> connector has the following actions:
-
-<!-- TODO: Add action descriptions here -->
-<!-- Example:
-Action Name
-:   Description of what this action does.
-    - **Parameter Name** (required/optional): Parameter description.
+<!-- TODO: Document each action. Example:
+`actionName`
+:   Description of what this action does, when to use it, and what it returns.
 -->
 
 

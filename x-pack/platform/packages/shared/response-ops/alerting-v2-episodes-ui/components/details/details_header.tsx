@@ -7,13 +7,11 @@
 
 import React from 'react';
 import type { EuiTitleSize } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { AlertEpisodeStatusBadges } from '../status/status_badges';
 import { AlertEpisodeSeverityBadge } from '../severity/episode_severity_badge';
 import { isSupportedEpisodeSeverity } from '../severity/severity_utils';
-import { TagsOverflowBadgeRow, getTagsOverflowLimits } from '../actions/tags_overflow_badge_row';
 import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
 import { isRuleLoaded, isRuleLoading, type RuleState } from '../../types/rule_state';
 import * as i18n from './translations';
@@ -21,37 +19,31 @@ import * as i18n from './translations';
 export interface AlertEpisodeDetailsHeaderProps {
   isLoadingEpisode: boolean;
   ruleState: RuleState;
-  tags: string[];
   status: AlertEpisodeStatus | undefined;
   severity: string | undefined | null;
   episodeAction: EpisodeActionState | undefined;
   groupAction: AlertEpisodeGroupAction | undefined;
+  isFlapping?: boolean;
   titleSize?: EuiTitleSize;
 }
 
 export const AlertEpisodeDetailsHeader = ({
   isLoadingEpisode,
   ruleState,
-  tags,
   status,
   severity,
   episodeAction,
   groupAction,
+  isFlapping = false,
   titleSize = 'l',
 }: AlertEpisodeDetailsHeaderProps) => {
-  const { euiTheme } = useEuiTheme();
   const isLoading = isLoadingEpisode || isRuleLoading(ruleState);
   const titleContent = isLoading
     ? i18n.HEADER_LOADING_TITLE
     : isRuleLoaded(ruleState)
     ? ruleState.rule.metadata.name
     : i18n.HEADER_EPISODE_TITLE_FALLBACK;
-  const description = isRuleLoaded(ruleState) ? ruleState.rule.metadata.description : undefined;
-  const showTags = tags.length > 0;
-  const showBadgeRow = Boolean(status) || isSupportedEpisodeSeverity(severity) || showTags;
-  const nonTagBadgeCount = (status ? 1 : 0) + (isSupportedEpisodeSeverity(severity) ? 1 : 0);
-  const { overflowSize: tagsOverflowSize, maxVisible: tagsMaxVisibleOnOverflow } =
-    getTagsOverflowLimits(nonTagBadgeCount);
+  const showBadgeRow = Boolean(status) || isSupportedEpisodeSeverity(severity);
 
   return (
     <>
@@ -75,6 +67,7 @@ export const AlertEpisodeDetailsHeader = ({
                     status={status}
                     episodeAction={episodeAction}
                     groupAction={groupAction}
+                    isFlapping={isFlapping}
                   />
                 </EuiFlexItem>
               ) : null}
@@ -83,34 +76,10 @@ export const AlertEpisodeDetailsHeader = ({
                   <AlertEpisodeSeverityBadge severity={severity} />
                 </EuiFlexItem>
               ) : null}
-              {showTags ? (
-                <TagsOverflowBadgeRow
-                  tags={tags}
-                  overflowSize={tagsOverflowSize}
-                  maxVisible={tagsMaxVisibleOnOverflow}
-                  data-test-subj="alertingV2EpisodeDetailsHeaderTags"
-                />
-              ) : null}
             </EuiFlexGroup>
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
-      {description ? (
-        <>
-          <EuiSpacer size="s" />
-          {/* EuiText has no font-weight prop, so a lighter-than-bold weight for the
-              description has to be set via css instead of a design-token size/color prop. */}
-          <EuiText
-            size="s"
-            color="subdued"
-            css={css`
-              font-weight: ${euiTheme.font.weight.medium};
-            `}
-          >
-            {description}
-          </EuiText>
-        </>
-      ) : null}
     </>
   );
 };

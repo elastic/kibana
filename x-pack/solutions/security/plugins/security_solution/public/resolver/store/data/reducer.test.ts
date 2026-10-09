@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Store, AnyAction, Reducer } from 'redux';
-import { createStore } from 'redux';
+import type { Store, AnyAction, Reducer } from 'redux-v4';
+import { createStore } from 'redux-v4';
 import { RelatedEventCategory } from '../../../../common/endpoint/generate_data';
 import { dataReducer } from './reducer';
 import * as selectors from './selectors';

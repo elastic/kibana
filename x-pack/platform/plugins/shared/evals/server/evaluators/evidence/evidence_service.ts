@@ -56,6 +56,16 @@ export const hasTraceDocuments = async (
   return logs.documents.length > 0 || traces.documents.length > 0;
 };
 
+export const hasRootSpan = async (traceAccessor: TraceAccessorWithSearch): Promise<boolean> => {
+  const { documents } = await traceAccessor.runSearch('traces', {
+    filter: [{ type: 'not_exists', field: 'parent_span_id' }],
+    fields: ['@timestamp'],
+    size: 1,
+  });
+
+  return documents.length > 0;
+};
+
 const parseJsonIfPossible = (value: unknown): unknown => {
   if (typeof value !== 'string') {
     return value;

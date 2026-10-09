@@ -100,6 +100,17 @@ describe('getOptionDisplayLabel', () => {
     );
   });
 
+  it.each([
+    ['This week until now', 'now/w'],
+    ['This month until now', 'now/M'],
+    ['This year until now', 'now/y'],
+  ])('keeps the "%s" quick-range label (named range, not regenerated bounds)', (label, start) => {
+    // Regression: these "…until now" quick ranges are named ranges, so the curated
+    // label must survive instead of falling back to regenerated absolute bounds
+    // (e.g. "Jul 12, 2026 @ 00:00 → now").
+    expect(getOptionDisplayLabel({ start, end: 'now', label })).toBe(label);
+  });
+
   it('regenerates a display-form label from bounds, honouring timePrecision', () => {
     const start = '2026-05-25T00:00:00.000Z';
     const end = '2026-05-27T23:59:59.999Z';

@@ -19,12 +19,15 @@ describe('uniqueByGroup', () => {
 });
 
 describe('successOrPartialToast', () => {
-  it('returns a success toast when everything processed', () => {
-    const t = successOrPartialToast(3, 3);
+  it('returns a success toast when there are no errors', () => {
+    const t = successOrPartialToast({ affected_count: 3, errors: [] });
     expect(t.color).toBe('success');
   });
-  it('returns a warning toast on partial success', () => {
-    const t = successOrPartialToast(2, 3);
+  it('returns a warning toast when some items failed', () => {
+    const t = successOrPartialToast({
+      affected_count: 2,
+      errors: [{ id: 'g1', error: { code: 'ALERT_GROUP_NOT_FOUND', message: 'not found' } }],
+    });
     expect(t.color).toBe('warning');
   });
 });

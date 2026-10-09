@@ -59,7 +59,7 @@ const SampleThreatsDetectedMetricContent: React.FC = () => (
     title={i18n.THREATS_DETECTED}
     value={SAMPLE_VALUE_METRICS.attackDiscoveryCount} // Lens is pulling the live data, but we have to pull the sample value
     valueFormatter={formatThousands}
-    icon="crosshairs"
+    icon="crosshair"
   />
 );
 

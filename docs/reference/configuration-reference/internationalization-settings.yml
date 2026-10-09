@@ -22,22 +22,22 @@ groups:
         datatype: string
         default: "'en'"
         applies_to:
-          stack: ga 9.5+
-          ech: ga
-          self: ga
+          stack: beta 9.5+
+          ech: beta
+          self: beta
 
       - setting: i18n.locales
         description: |
-          The list of locales that {{kib}} offers in the per-user language picker.
+          The list of locales that {{kib}} offers for per-user language selection.
           Locales not in this list are not available to users, even if translation
-          files for them are installed. Set to `[]` to disable the language picker
+          files for them are installed. Set to `[]` to disable language selection
           entirely.
         datatype: list
         default: '["en", "fr-FR", "ja-JP", "zh-CN", "de-DE"]'
         applies_to:
-          stack: ga 9.5+
-          ech: ga
-          self: ga
+          stack: beta 9.5+
+          ech: beta
+          self: beta
 
       - setting: i18n.allowLocaleCookie
         description: |
@@ -48,9 +48,9 @@ groups:
         datatype: boolean
         default: "true"
         applies_to:
-          stack: ga 9.5+
-          ech: ga
-          self: ga
+          stack: beta 9.5+
+          ech: beta
+          self: beta
 
       - setting: i18n.locale
         description: |

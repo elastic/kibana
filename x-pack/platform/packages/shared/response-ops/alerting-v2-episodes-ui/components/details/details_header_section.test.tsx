@@ -46,7 +46,7 @@ describe('AlertEpisodeDetailsHeaderSection', () => {
     queryClient.clear();
   });
 
-  it('renders the header with rule title, tags and status badges on success', async () => {
+  it('renders the header with rule title and status badges on success', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
       columns: [
         { name: '@timestamp', type: 'date' },
@@ -80,9 +80,6 @@ describe('AlertEpisodeDetailsHeaderSection', () => {
 
     await waitFor(() =>
       expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTitle')).toHaveTextContent('My rule')
-    );
-    await waitFor(() =>
-      expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTags')).toBeInTheDocument()
     );
   });
 

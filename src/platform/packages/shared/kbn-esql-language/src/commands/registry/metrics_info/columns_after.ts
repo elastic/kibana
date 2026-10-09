@@ -21,8 +21,8 @@ export const METRICS_INFO_COLUMNS: ESQLColumnData[] = [
 
 export const columnsAfter = (
   _command: ESQLCommand,
-  previousColumns: ESQLColumnData[],
+  _previousColumns: ESQLColumnData[],
   _query: string
 ): ESQLColumnData[] => {
-  return [...previousColumns, ...METRICS_INFO_COLUMNS];
+  return [...METRICS_INFO_COLUMNS];
 };

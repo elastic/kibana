@@ -586,7 +586,7 @@ export function StreamsTreeTable({
                               }
                             )}
                           >
-                            <EuiBadge color="default">
+                            <EuiBadge color="default" tabIndex={0}>
                               {i18n.translate(
                                 'xpack.streams.streamsTable.pendingDataStream.label',
                                 {

@@ -12,6 +12,7 @@ import { buildRouteValidationWithExcess } from '../../../utils/build_validation/
 import { API_VERSIONS } from '../../../../common/constants';
 import type { SiemReadinessRoutesDeps } from '../types';
 import { fetchIndicesDocCounts } from '../fetchers';
+import { assertSiemReadinessEnabled } from '../assert_siem_readiness_enabled';
 
 export const getMitreDataIndicesDocsCountRoute = (
   router: SiemReadinessRoutesDeps['router'],
@@ -47,6 +48,15 @@ export const getMitreDataIndicesDocsCountRoute = (
           const { indices } = request.body;
 
           const core = await context.core;
+
+          const disabledResponse = await assertSiemReadinessEnabled(
+            core.uiSettings.client,
+            response
+          );
+          if (disabledResponse) {
+            return disabledResponse;
+          }
+
           const esClient = core.elasticsearch.client.asCurrentUser;
 
           const indexDocCounts = await fetchIndicesDocCounts({ esClient, indices: indices || [] });

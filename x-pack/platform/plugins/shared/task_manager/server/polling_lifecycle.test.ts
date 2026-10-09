@@ -34,6 +34,7 @@ import type { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskEventType } from './task_events';
 import { EsApiKeyStrategy } from './api_key_strategy';
 import { resetInFlightTasksOwnedByThisNode } from './lib/task_reconciliation';
+import { taskExecutionControlServiceMock } from './execution_control/task_execution_control_service.mock';
 
 const resetInFlightTasksMock = resetInFlightTasksOwnedByThisNode as jest.MockedFunction<
   typeof resetInFlightTasksOwnedByThisNode
@@ -89,6 +90,9 @@ describe('TaskPollingLifecycle', () => {
         active_nodes_lookback: '30s',
         interval: 10000,
       },
+      execution_control: {
+        poll_interval: 5000,
+      },
       kibanas_per_partition: 2,
       invalidate_api_key_task: {
         interval: '5m',
@@ -126,7 +130,7 @@ describe('TaskPollingLifecycle', () => {
       },
       worker_utilization_running_average_window: 5,
       metrics_reset_interval: 3000,
-      claim_strategy: 'update_by_query',
+      claim_strategy: 'mget',
       request_timeouts: {
         update_by_query: 1000,
       },
@@ -135,6 +139,7 @@ describe('TaskPollingLifecycle', () => {
       grant_uiam_api_keys: false,
     },
     taskStore: mockTaskStore,
+    executionControlService: taskExecutionControlServiceMock.create(),
     logger: taskManagerLogger,
     definitions: new TaskTypeDictionary(taskManagerLogger),
     middleware: createInitialMiddleware(),
@@ -253,22 +258,6 @@ describe('TaskPollingLifecycle', () => {
       expect(resetInFlightTasksMock).toHaveBeenCalledTimes(1);
     });
 
-    test('provides TaskClaiming with the capacity available when strategy = CLAIM_STRATEGY_UPDATE_BY_QUERY', () => {
-      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
-
-      new TaskPollingLifecycle({
-        ...taskManagerOpts,
-        elasticsearchAndSOAvailability$,
-        startingCapacity: 40,
-      });
-      const taskClaimingGetCapacity = (TaskClaiming as jest.Mock<TaskClaimingClass>).mock
-        .calls[0][0].getAvailableCapacity;
-
-      expect(taskClaimingGetCapacity()).toEqual(40);
-      expect(taskClaimingGetCapacity('report')).toEqual(1);
-      expect(taskClaimingGetCapacity('quickReport')).toEqual(5);
-    });
-
     test('provides TaskClaiming with the capacity available when strategy = CLAIM_STRATEGY_MGET', () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
       new TaskPollingLifecycle({
@@ -342,6 +331,56 @@ describe('TaskPollingLifecycle', () => {
       resolveReconciliation();
       await delay(100);
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('execution control', () => {
+    test('cancels all running tasks when execution is paused', () => {
+      const executionControlService = taskExecutionControlServiceMock.create();
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const pollingLifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        executionControlService,
+        elasticsearchAndSOAvailability$,
+      });
+      const cancelSpy = jest.spyOn(pollingLifecycle.pool, 'cancelRunningTasks');
+
+      executionControlService.state.next({ paused: true, pausedTaskTypes: [] });
+
+      expect(cancelSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test('cancels only the newly paused task types', () => {
+      const executionControlService = taskExecutionControlServiceMock.create();
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const pollingLifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        executionControlService,
+        elasticsearchAndSOAvailability$,
+      });
+      const cancelByTypesSpy = jest.spyOn(pollingLifecycle.pool, 'cancelRunningTasksByTypes');
+
+      executionControlService.state.next({ paused: false, pausedTaskTypes: ['foo'] });
+
+      expect(cancelByTypesSpy).toHaveBeenCalledWith(['foo']);
+    });
+
+    test('does not cancel running tasks when execution is resumed', () => {
+      const executionControlService = taskExecutionControlServiceMock.create({
+        paused: true,
+        pausedTaskTypes: [],
+      });
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const pollingLifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        executionControlService,
+        elasticsearchAndSOAvailability$,
+      });
+      const cancelSpy = jest.spyOn(pollingLifecycle.pool, 'cancelRunningTasks');
+
+      executionControlService.state.next({ paused: false, pausedTaskTypes: [] });
+
+      expect(cancelSpy).not.toHaveBeenCalled();
     });
   });
 

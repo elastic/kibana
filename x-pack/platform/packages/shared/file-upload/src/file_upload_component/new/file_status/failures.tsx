@@ -9,7 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState, type FC } from 'react';
 
-import { useEuiTheme, EuiAccordion, EuiPagination, EuiCallOut } from '@elastic/eui';
+import { useEuiTheme, EuiAccordion, EuiPagination } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 import type { ImportFailure } from '@kbn/file-upload-common';
 
@@ -34,18 +35,15 @@ export const Failures: FC<Props> = ({ failedDocs, docCount }) => {
   const endIndex = startIndex + PAGE_SIZE;
 
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       title={
         <FormattedMessage
           id="xpack.fileUpload.importSummary.documentsCouldNotBeImportedTitle"
           defaultMessage="Some documents could not be imported"
         />
       }
-      color="warning"
-      iconType="help"
       size="s"
-    >
-      <p>
+      text={
         <FormattedMessage
           id="xpack.fileUpload.importSummary.documentsCouldNotBeImportedDescription"
           defaultMessage="{importFailuresLength} out of {docCount} documents could not be imported.
@@ -55,8 +53,8 @@ export const Failures: FC<Props> = ({ failedDocs, docCount }) => {
             docCount,
           }}
         />
-      </p>
-
+      }
+    >
       <EuiAccordion
         id="failureList"
         buttonContent={
@@ -94,6 +92,6 @@ export const Failures: FC<Props> = ({ failedDocs, docCount }) => {
           ))}
         </div>
       </EuiAccordion>
-    </EuiCallOut>
+    </KbnWarningCallout>
   );
 };

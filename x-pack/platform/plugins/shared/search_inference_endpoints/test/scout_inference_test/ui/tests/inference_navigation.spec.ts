@@ -6,9 +6,8 @@
  */
 
 import { tags } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
-import { BREADCRUMBS } from '../fixtures/constants';
+import { BREADCRUMBS, INFERENCE_PAGES } from '../fixtures/constants';
 import { eisEndpointsMockData } from '../fixtures/mock_data/eis_endpoints';
 import { externalInferenceEndpointsMockData } from '../fixtures/mock_data/external_inference_endpoints';
 import { mockInferenceEndpoints, unmockInferenceEndpoints } from '../fixtures/mocks';
@@ -29,26 +28,29 @@ test.describe('Inference Navigation', () => {
       await mockInferenceEndpoints(page, eisEndpointsMockData);
       await pageObjects.eisModels.goto();
 
-      await expect(pageObjects.navigation.breadcrumbsContainer).toBeVisible();
-      await pageObjects.navigation.expectBreadcrumbTexts([
-        ...BREADCRUMBS.stateful.classic,
-        'Elastic Inference',
-      ]);
+      await pageObjects.navigation.expectInferencePage({
+        pageHeader: pageObjects.eisModels.pageHeader,
+        urlPath: INFERENCE_PAGES.eisModels.urlPath,
+        classicBreadcrumbs: [...BREADCRUMBS.stateful.classic, 'Elastic Inference'],
+        isNextChrome: await pageObjects.chrome.isNextChrome(),
+      });
     }
   );
 
   test(
-    'EIS Models Page: displays correct breadcrumbs in serverless search navigation',
+    'EIS Models Page: displays correct navigation in serverless search',
     { tag: [...tags.serverless.search] },
     async ({ page, pageObjects }) => {
       await mockInferenceEndpoints(page, eisEndpointsMockData);
       await pageObjects.eisModels.goto();
 
-      await expect(pageObjects.navigation.breadcrumbsContainer).toBeVisible();
-      await pageObjects.navigation.expectBreadcrumbTexts(
-        [...BREADCRUMBS.serverless.search, 'Elastic Inference'],
-        { isServerless: true }
-      );
+      await pageObjects.navigation.expectInferencePage({
+        pageHeader: pageObjects.eisModels.pageHeader,
+        urlPath: INFERENCE_PAGES.eisModels.urlPath,
+        classicBreadcrumbs: [...BREADCRUMBS.serverless.search, 'Elastic Inference'],
+        isNextChrome: await pageObjects.chrome.isNextChrome(),
+        isServerless: true,
+      });
     }
   );
 
@@ -59,26 +61,29 @@ test.describe('Inference Navigation', () => {
       await mockInferenceEndpoints(page, externalInferenceEndpointsMockData);
       await pageObjects.externalInference.goto();
 
-      await expect(pageObjects.navigation.breadcrumbsContainer).toBeVisible();
-      await pageObjects.navigation.expectBreadcrumbTexts([
-        ...BREADCRUMBS.stateful.classic,
-        'External Inference',
-      ]);
+      await pageObjects.navigation.expectInferencePage({
+        pageHeader: pageObjects.externalInference.pageHeader,
+        urlPath: INFERENCE_PAGES.externalInference.urlPath,
+        classicBreadcrumbs: [...BREADCRUMBS.stateful.classic, 'External Inference'],
+        isNextChrome: await pageObjects.chrome.isNextChrome(),
+      });
     }
   );
 
   test(
-    'External Inference Page: displays correct breadcrumbs in serverless search navigation',
+    'External Inference Page: displays correct navigation in serverless search',
     { tag: [...tags.serverless.search] },
     async ({ page, pageObjects }) => {
       await mockInferenceEndpoints(page, externalInferenceEndpointsMockData);
       await pageObjects.externalInference.goto();
 
-      await expect(pageObjects.navigation.breadcrumbsContainer).toBeVisible();
-      await pageObjects.navigation.expectBreadcrumbTexts(
-        [...BREADCRUMBS.serverless.search, 'External Inference'],
-        { isServerless: true }
-      );
+      await pageObjects.navigation.expectInferencePage({
+        pageHeader: pageObjects.externalInference.pageHeader,
+        urlPath: INFERENCE_PAGES.externalInference.urlPath,
+        classicBreadcrumbs: [...BREADCRUMBS.serverless.search, 'External Inference'],
+        isNextChrome: await pageObjects.chrome.isNextChrome(),
+        isServerless: true,
+      });
     }
   );
 
@@ -89,26 +94,29 @@ test.describe('Inference Navigation', () => {
       await mockInferenceEndpoints(page, eisEndpointsMockData);
       await pageObjects.featureSettings.goto();
 
-      await expect(pageObjects.navigation.breadcrumbsContainer).toBeVisible();
-      await pageObjects.navigation.expectBreadcrumbTexts([
-        ...BREADCRUMBS.stateful.classic,
-        'Feature Settings',
-      ]);
+      await pageObjects.navigation.expectInferencePage({
+        pageHeader: pageObjects.featureSettings.pageHeader,
+        urlPath: INFERENCE_PAGES.featureSettings.urlPath,
+        classicBreadcrumbs: [...BREADCRUMBS.stateful.classic, 'Feature Settings'],
+        isNextChrome: await pageObjects.chrome.isNextChrome(),
+      });
     }
   );
 
   test(
-    'Feature Settings Page: displays correct breadcrumbs in serverless search navigation',
+    'Feature Settings Page: displays correct navigation in serverless search',
     { tag: [...tags.serverless.search] },
     async ({ page, pageObjects }) => {
       await mockInferenceEndpoints(page, eisEndpointsMockData);
       await pageObjects.featureSettings.goto();
 
-      await expect(pageObjects.navigation.breadcrumbsContainer).toBeVisible();
-      await pageObjects.navigation.expectBreadcrumbTexts(
-        [...BREADCRUMBS.serverless.search, 'Feature Settings'],
-        { isServerless: true }
-      );
+      await pageObjects.navigation.expectInferencePage({
+        pageHeader: pageObjects.featureSettings.pageHeader,
+        urlPath: INFERENCE_PAGES.featureSettings.urlPath,
+        classicBreadcrumbs: [...BREADCRUMBS.serverless.search, 'Feature Settings'],
+        isNextChrome: await pageObjects.chrome.isNextChrome(),
+        isServerless: true,
+      });
     }
   );
 });

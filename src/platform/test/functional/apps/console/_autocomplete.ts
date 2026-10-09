@@ -34,8 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/257917
-  describe.skip('console autocomplete feature', function describeIndexTests() {
+  describe('console autocomplete feature', function describeIndexTests() {
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
@@ -121,9 +120,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('HTTP methods', async () => {
+        // Suggested in `autocompleteMethods` declaration order, not alphabetically:
+        // `sortText` is the declaration index (see #270787).
         const suggestions = {
           G: ['GET'],
-          P: ['PATCH', 'POST', 'PUT'],
+          P: ['POST', 'PUT', 'PATCH'],
           D: ['DELETE'],
           H: ['HEAD'],
         };
@@ -392,6 +393,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('does not suggest ESQL when inside non-query triple quotes', async () => {
         await PageObjects.console.enterText(`POST _query\n`);
         await PageObjects.console.enterText(`{\n\t"script": """`);
+        // Typing `"""` auto-closes it, leaving the cursor between the opener and an inserted
+        // closer. Forward-delete those 3 characters -- not Backspace, which deletes the opener
+        // instead -- so the string is left *unterminated*, which is the state this test covers.
+        await PageObjects.console.pressDelete(3);
         await PageObjects.console.pressEnter();
         await PageObjects.console.sleepForDebouncePeriod();
         expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(false);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { schema } from './schema';
 
@@ -16,6 +16,8 @@ import { getInitialCaseValue } from '../../../common/utils/get_initial_case_valu
 import { createFormSerializer, createFormDeserializer } from './utils';
 import type { CaseFormFieldsSchemaProps } from '../case_form_fields/schema';
 import { type UseSubmitCaseValue } from './use_submit_case';
+import { KibanaServices } from '../../common/lib/kibana';
+import { useShowLegacyCustomFields } from '../../common/use_show_old_custom_fields';
 
 export interface FormContextProps {
   children?: JSX.Element | JSX.Element[];
@@ -33,6 +35,25 @@ export const FormContext: React.FC<FormContextProps> = ({
   onSubmitCase,
 }) => {
   const { data: connectors = [] } = useGetSupportedActionConnectors();
+  const isTemplatesV2Enabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
+  const { showLegacyCustomFields } = useShowLegacyCustomFields(
+    currentConfiguration.customFields ?? []
+  );
+  const includeLegacyCustomFields = !isTemplatesV2Enabled || showLegacyCustomFields;
+
+  const serializer = useCallback(
+    (data: CaseFormFieldsSchemaProps) =>
+      createFormSerializer(
+        connectors,
+        {
+          ...currentConfiguration,
+          owner: selectedOwner,
+        },
+        data,
+        { includeLegacyCustomFields }
+      ),
+    [connectors, currentConfiguration, selectedOwner, includeLegacyCustomFields]
+  );
 
   const { form } = useForm({
     defaultValue: {
@@ -50,15 +71,7 @@ export const FormContext: React.FC<FormContextProps> = ({
     options: { stripEmptyFields: false },
     schema,
     onSubmit: onSubmitCase,
-    serializer: (data: CaseFormFieldsSchemaProps) =>
-      createFormSerializer(
-        connectors,
-        {
-          ...currentConfiguration,
-          owner: selectedOwner,
-        },
-        data
-      ),
+    serializer,
     deserializer: createFormDeserializer,
   });
 

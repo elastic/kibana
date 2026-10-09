@@ -8,7 +8,7 @@
 import type { Streams } from '@kbn/streams-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
-import { classifyStreams, filterEligibleStreams, parseExcludePatterns } from './classify_streams';
+import { classifyStreams, filterEligibleStreams, isSupportedStream } from './classify_streams';
 
 const STUB_STREAM_FIELDS = {
   description: '',
@@ -57,27 +57,21 @@ const makeStream = (name: string, opts?: { query: boolean }): Streams.all.Defini
 const candidateNames = (result: ReturnType<typeof classifyStreams>) =>
   result.candidates.map((c) => c.streamName);
 
-describe('parseExcludePatterns', () => {
-  it('splits comma-separated patterns and trims whitespace', () => {
-    expect(parseExcludePatterns('debug-*, test-* , logs-*')).toEqual([
-      'debug-*',
-      'test-*',
-      'logs-*',
-    ]);
+const streamNames = (streams: Streams.all.Definition[]) => streams.map((s) => s.name);
+
+describe('isSupportedStream', () => {
+  it('accepts classic and query streams', () => {
+    expect(isSupportedStream(makeStream('logs.app'))).toBe(true);
+    expect(isSupportedStream(makeStream('my-query', { query: true }))).toBe(true);
   });
 
-  it('returns empty array for undefined', () => {
-    expect(parseExcludePatterns(undefined)).toEqual([]);
-  });
-
-  it('returns empty array for empty string', () => {
-    expect(parseExcludePatterns('')).toEqual([]);
+  it('rejects definitions that are none of the supported types', () => {
+    const bogus = { name: 'weird', type: 'group' } as unknown as Streams.all.Definition;
+    expect(isSupportedStream(bogus)).toBe(false);
   });
 });
 
 describe('filterEligibleStreams', () => {
-  const streamNames = (streams: ReturnType<typeof makeStream>[]) => streams.map((s) => s.name);
-
   it('includes non-query streams whose name matches the index patterns', () => {
     const result = filterEligibleStreams({
       allStreams: [makeStream('logs.app'), makeStream('metrics.app')],
@@ -127,13 +121,22 @@ describe('filterEligibleStreams', () => {
 
     expect(streamNames(result)).toEqual(['logs.app', 'metrics.app']);
   });
+
+  it('selects nothing when the index patterns are empty and query streams are disabled', () => {
+    const result = filterEligibleStreams({
+      allStreams: [makeStream('logs.app'), makeStream('metrics.app')],
+      isQueryStreamsEnabled: false,
+      indexPatterns: [],
+    });
+
+    expect(result).toEqual([]);
+  });
 });
 
 describe('classifyStreams', () => {
   const defaultArgs = {
-    allStreams: [] as ReturnType<typeof makeStream>[],
+    allStreams: [] as Streams.all.Definition[],
     executions: [] as WorkflowExecutionListItemDto[],
-    excludedStreamPatterns: '',
     intervalHours: 12,
   };
 
@@ -147,14 +150,14 @@ describe('classifyStreams', () => {
     expect(result.unsupported).toEqual([]);
   });
 
-  it('excludes streams matching exclude patterns', () => {
+  it('buckets definitions of an unsupported type into unsupported', () => {
+    const bogus = { name: 'weird', type: 'group' } as unknown as Streams.all.Definition;
     const result = classifyStreams({
       ...defaultArgs,
-      allStreams: [makeStream('logs'), makeStream('debug-app'), makeStream('test-data')],
-      excludedStreamPatterns: 'debug-*, test-*',
+      allStreams: [makeStream('logs'), bogus],
     });
 
-    expect(result.excluded).toEqual(['debug-app', 'test-data']);
+    expect(result.unsupported).toEqual(['weird']);
     expect(candidateNames(result)).toEqual(['logs']);
   });
 

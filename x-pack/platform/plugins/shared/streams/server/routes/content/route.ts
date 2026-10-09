@@ -141,7 +141,10 @@ function asContentPackEntry({
         ...omit(stream, ['name', 'updated_at']),
         ingest: {
           ...stream.ingest,
-          processing: omit(stream.ingest.processing, 'updated_at'),
+          processing: omit(
+            stream.ingest.processing,
+            'updated_at'
+          ) as Streams.WiredStream.UpsertRequest['stream']['ingest']['processing'],
         },
       },
       ...emptyAssets,

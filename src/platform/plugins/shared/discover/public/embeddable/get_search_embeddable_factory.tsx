@@ -215,6 +215,8 @@ export const getSearchEmbeddableFactory = ({
         getTitle: () => titleManager.api.title$.getValue(),
       });
 
+      let cancelRequests: () => void = () => {};
+
       const api: SearchEmbeddableApi = finalizeApi({
         ...stateApi,
         ...titleManager.api,
@@ -274,6 +276,7 @@ export const getSearchEmbeddableFactory = ({
         supportedTriggers: () => {
           return [ON_OPEN_PANEL_MENU];
         },
+        cancelRequests: () => cancelRequests(),
       });
 
       const addFilter: DocViewFilterFn = async (mapping, values, operation) => {
@@ -330,7 +333,7 @@ export const getSearchEmbeddableFactory = ({
         toolkit,
       });
 
-      const unsubscribeFromFetch = initializeFetch({
+      const { cleanup: cleanupFetch, cancelRequests: _cancelRequests } = initializeFetch({
         api: {
           ...api,
           parentApi,
@@ -352,6 +355,7 @@ export const getSearchEmbeddableFactory = ({
         setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
         setBlockingError: (error: Error | undefined) => blockingError$.next(error),
       });
+      cancelRequests = _cancelRequests;
 
       return {
         api,
@@ -389,7 +393,7 @@ export const getSearchEmbeddableFactory = ({
             return () => {
               drilldownsManager.cleanup();
               searchEmbeddable.cleanup();
-              unsubscribeFromFetch();
+              cleanupFetch();
             };
           }, []);
 

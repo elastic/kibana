@@ -74,11 +74,8 @@ describe('continuous_onboarding.yaml stays in sync with constants', () => {
     );
   });
 
-  it('declares excludedStreamPatterns as an optional input without default', () => {
-    assertYamlContains('name: excludedStreamPatterns\n        type: string\n        description:');
-    expect(WORKFLOW_YAML).not.toMatch(
-      /- name: excludedStreamPatterns\n\s+type: string\n\s+default:/m
-    );
+  it('does not declare the removed excludedStreamPatterns input', () => {
+    expect(WORKFLOW_YAML).not.toContain('excludedStreamPatterns');
   });
 
   it('uses the correct poll delay duration', () => {
@@ -93,9 +90,6 @@ describe('continuous_onboarding.yaml stays in sync with constants', () => {
     assertYamlContains('lookbackHours={{ inputs.lookbackHours | default: consts.lookbackHours }}');
     assertYamlContains(
       '{%- if inputs.extractionIntervalHours %}&extractionIntervalHours={{ inputs.extractionIntervalHours }}{% endif -%}'
-    );
-    assertYamlContains(
-      '{%- if inputs.excludedStreamPatterns %}&excludedStreamPatterns={{ inputs.excludedStreamPatterns }}{% endif -%}'
     );
   });
 

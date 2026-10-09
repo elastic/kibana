@@ -14,6 +14,7 @@ import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_t
 import { PREFIX } from '../../../../flyout/shared/test_ids';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { Resolver } from '../../../../resolver/view';
 import { ANALYZER_TITLE } from '../../../shared/constants/flyout_titles';
@@ -48,7 +49,8 @@ export const AnalyzerGraph = memo(
     const { from, to, shouldUpdate } = useTimelineDataFilters(false);
     const filters = useMemo(() => ({ from, to }), [from, to]);
 
-    const selectedPatterns = useSelectedPatterns(PageScope.analyzer);
+    const { dataView } = useDataView(PageScope.analyzer);
+    const selectedPatterns = useSelectedPatterns(dataView);
 
     if (!eventId) {
       return null;

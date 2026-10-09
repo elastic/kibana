@@ -9,7 +9,6 @@ import type { ScoutPage, Locator } from '@kbn/scout';
 
 export class ExternalInferencePage {
   readonly pageHeader: Locator;
-  readonly apiDocumentationLink: Locator;
   readonly addEndpointHeaderButton: Locator;
 
   readonly emptyPrompt: Locator;
@@ -43,8 +42,7 @@ export class ExternalInferencePage {
   readonly toastList: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.pageHeader = this.page.testSubj.locator('externalInferenceHeader');
-    this.apiDocumentationLink = this.page.testSubj.locator('api-documentation');
+    this.pageHeader = this.page.testSubj.locator('appHeaderTitle');
     this.addEndpointHeaderButton = this.page.testSubj.locator(
       'add-inference-endpoint-header-button'
     );
@@ -86,7 +84,7 @@ export class ExternalInferencePage {
 
   public async goto() {
     await this.page.gotoApp('management/modelManagement/inference_endpoints');
-    await this.page.testSubj.waitForSelector('externalInferenceHeader', { state: 'visible' });
+    await this.page.testSubj.waitForSelector('appHeaderTitle', { state: 'visible' });
   }
 
   public async gotoEmptyState() {

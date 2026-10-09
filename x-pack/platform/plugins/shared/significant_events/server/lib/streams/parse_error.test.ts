@@ -6,7 +6,7 @@
  */
 
 import { errors, type DiagnosticResult } from '@elastic/elasticsearch';
-import { parseError, getErrorMessage } from './parse_error';
+import { parseError } from './parse_error';
 
 /**
  * Helper to create a mock ResponseError for testing.
@@ -198,29 +198,5 @@ describe('parseError', () => {
       expect(result.message).toBe('undefined');
       expect(result.cause).toBeUndefined();
     });
-  });
-});
-
-describe('getErrorMessage', () => {
-  it('returns message from ResponseError', () => {
-    const responseError = createResponseError(404, {
-      error: {
-        type: 'index_not_found_exception',
-      },
-    });
-
-    expect(getErrorMessage(responseError)).toBe(responseError.message);
-  });
-
-  it('returns message from standard Error', () => {
-    const error = new Error('Test error');
-
-    expect(getErrorMessage(error)).toBe('Test error');
-  });
-
-  it('returns string representation of non-Error values', () => {
-    expect(getErrorMessage('String error')).toBe('String error');
-    expect(getErrorMessage(42)).toBe('42');
-    expect(getErrorMessage(null)).toBe('null');
   });
 });

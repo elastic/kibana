@@ -129,7 +129,7 @@ export const getExtendedDiscoverStateContainer = ({
     setAppState: internalStateActions.setAppState,
     updateGlobalState: internalStateActions.updateGlobalState,
     updateAppStateAndReplaceUrl: internalStateActions.updateAppStateAndReplaceUrl,
-    resetAppState: internalStateActions.resetAppState,
+    initializeTabState: internalStateActions.initializeTabState,
     initializeAndSync: internalStateActions.initializeAndSync,
     stopSyncing: internalStateActions.stopSyncing,
     openDiscoverSession: internalStateActions.openDiscoverSession,

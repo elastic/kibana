@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('starred-queries-tab');
 
       const starredItems = await esql.getStarredItems();
-      await esql.isQueryPresentInTable('FROM logstash-*', starredItems);
+      await esql.isQueryPresentInTable('FROM logstash-* | SORT @timestamp DESC', starredItems);
     });
 
     it('should persist the starred query after a browser refresh', async () => {
@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('ESQLEditor-toggle-query-history-icon');
       await testSubjects.click('starred-queries-tab');
       const starredItems = await esql.getStarredItems();
-      await esql.isQueryPresentInTable('FROM logstash-*', starredItems);
+      await esql.isQueryPresentInTable('FROM logstash-* | SORT @timestamp DESC', starredItems);
     });
 
     it('should select a query from the starred and submit it', async () => {
@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       const editorValue = await monacoEditor.getCodeEditorValue();
-      expect(editorValue).to.eql(`FROM logstash-*`);
+      expect(editorValue).to.eql(`FROM logstash-* | SORT @timestamp DESC`);
     });
 
     it('should delete a query from the starred queries tab', async () => {

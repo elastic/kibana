@@ -22,6 +22,7 @@ import { LOADING_LOGO_TEST_ID } from './test_ids';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 const mockOpenFlyout = jest.fn();
 
@@ -144,7 +145,10 @@ describe('attachment_children initComponent', () => {
 
     fireEvent.click(getByTestId(INDICATOR_NAME_TEST_ID));
 
-    expect(flyoutApi.openIocFlyout).toHaveBeenCalledWith({ indicator });
+    expect(flyoutApi.openIocFlyout).toHaveBeenCalledWith({
+      indicator,
+      origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
+    });
     expect(mockOpenFlyout).not.toHaveBeenCalled();
   });
 });

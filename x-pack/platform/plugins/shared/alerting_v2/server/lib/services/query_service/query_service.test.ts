@@ -73,7 +73,7 @@ describe('QueryService', () => {
       expect(mockEsClient.esql.query).toHaveBeenCalledWith(
         {
           query: mockQuery,
-          drop_null_columns: false,
+          drop_null_columns: true,
           filter: mockFilter,
           params: undefined,
         },
@@ -179,7 +179,7 @@ describe('QueryService', () => {
       expect(mockEsClient.esql.query).toHaveBeenCalledWith(
         {
           query: mockQuery,
-          drop_null_columns: false,
+          drop_null_columns: true,
           filter,
           params: undefined,
         },
@@ -315,7 +315,7 @@ describe('QueryService', () => {
       expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
         {
           query: mockQuery,
-          drop_null_columns: false,
+          drop_null_columns: true,
           filter,
           params: undefined,
         },

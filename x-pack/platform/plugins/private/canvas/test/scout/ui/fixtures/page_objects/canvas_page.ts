@@ -237,20 +237,15 @@ export class CanvasPage {
 
   /**
    * Add a new Lens panel by opening the editor menu and clicking the Lens add-panel action,
-   * which launches the Lens editor. The action's display name varies by build — "Lens" in
-   * source, "Visualization" in distributables (see `lensVisTypeAlias.title`) — so match either.
+   * which launches the Lens editor.
    */
   async addNewLensPanel() {
-    await this.page.testSubj.locator('canvasEditorMenuButton').click();
-    const lensAction = this.page.testSubj
-      .locator('create-action-Lens')
-      .or(this.page.testSubj.locator('create-action-Visualization'));
-    await lensAction.click();
+    await this.addNewPanel('Create visualization');
   }
 
   /**
    * Add a new panel of the given type via the canvas editor menu.
-   * @param actionName e.g. 'Visualization', 'Maps', 'Vega'
+   * @param actionName e.g. 'Create visualization', 'Maps', 'Vega'
    */
   async addNewPanel(actionName: string) {
     await this.page.testSubj.locator('canvasEditorMenuButton').click();
@@ -295,6 +290,22 @@ export class CanvasPage {
       .locator(`savedObjectTitle${name.split(' ').join('-')}`)
       .click({ timeout: 20_000 });
     await this.closeAddFromLibrary();
+    // Adding a panel auto-selects it, and Canvas renders its selection/interaction overlay
+    // on top of the panel — covering the hover actions. Canvas has no Escape-to-deselect
+    // shortcut, so clear the selection with a background click before any panel interaction.
+    await this.deselectAllElements();
+  }
+
+  /**
+   * Deselect any selected workpad element by clicking an empty region of the workpad.
+   * The default panel sits at the top-left, so the bottom-right corner is reliably empty.
+   */
+  async deselectAllElements() {
+    const box = await this.workpadPage.boundingBox();
+    if (!box) {
+      return;
+    }
+    await this.page.mouse.click(box.x + box.width * 0.9, box.y + box.height * 0.9);
   }
 
   /** Locator for an embeddable panel heading on the workpad by its space-stripped title id. */

@@ -36,6 +36,15 @@ export const inPredicate = <T extends string>(
   return esql.exp`${esql.col(column)} IN (${literals})`;
 };
 
+export const notInPredicate = <T extends string>(
+  column: string,
+  values: T[]
+): LatestSourceWhereCondition | undefined => {
+  if (values.length === 0) return undefined;
+  const literals = values.map((v) => esql.str(v));
+  return esql.exp`${esql.col(column)} NOT IN (${literals})`;
+};
+
 export const IS_NOT_DELETED: LatestSourceWhereCondition = esql.exp`deleted IS NULL OR deleted == false`;
 
 export const IS_NOT_EXCLUDED: LatestSourceWhereCondition = esql.exp`excluded IS NULL OR excluded == false`;

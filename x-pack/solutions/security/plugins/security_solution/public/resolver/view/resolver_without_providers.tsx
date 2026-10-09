@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useContext } from 'react';
-import { useSelector, useStore } from 'react-redux';
+import { useSelector, useStore } from 'react-redux-v7';
 import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,6 +36,7 @@ import { DocumentDetailsAnalyzerPanelKey } from '../../flyout/document_details/s
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import { useDefaultDocumentFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { buildFlyoutNavTitle } from '../../flyout_v2/shared/utils/build_flyout_nav_title';
 import { ANALYZER_PREVIEW_TITLE } from '../../flyout_v2/shared/constants/flyout_titles';
 
@@ -151,6 +152,7 @@ export const ResolverWithoutProviders = React.memo(
             indexName,
             renderCellActions,
             onAlertUpdated: handleAlertUpdated,
+            origin: FLYOUT_ORIGIN.RESOLVER_NODE,
           }),
       [openDocumentFlyoutFromIndexAsChild, renderCellActions, handleAlertUpdated]
     );

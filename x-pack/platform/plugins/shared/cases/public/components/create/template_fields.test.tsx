@@ -131,7 +131,9 @@ describe('CreateCaseTemplateFields', () => {
 
     renderWithTestingProviders(<CreateCaseTemplateFields />);
 
-    expect(screen.getByText('Extended fields')).toBeInTheDocument();
+    expect(screen.getByTestId('create-case-custom-fields-title')).toHaveTextContent(
+      'Custom fields'
+    );
     expect(screen.getByTestId('control-hostname')).toHaveTextContent('Host Name');
     expect(screen.getByTestId('control-effort')).toHaveTextContent('Effort Level');
   });
@@ -193,7 +195,7 @@ describe('CreateCaseTemplateFields', () => {
 
     renderWithTestingProviders(<CreateCaseTemplateFields />);
 
-    expect(screen.getByText('Extended fields')).toBeInTheDocument();
+    expect(screen.queryByText('Extended fields')).not.toBeInTheDocument();
     expect(screen.getByTestId('control-incident_type')).toBeInTheDocument();
     expect(screen.queryByText('Template not selected')).not.toBeInTheDocument();
   });
@@ -228,7 +230,7 @@ describe('CreateCaseTemplateFields', () => {
 
     renderWithTestingProviders(<CreateCaseTemplateFields />);
 
-    expect(screen.getByText('Extended fields')).toBeInTheDocument();
+    expect(screen.queryByText('Extended fields')).not.toBeInTheDocument();
     expect(screen.getByTestId('control-incident_type')).toBeInTheDocument();
   });
 
@@ -270,10 +272,55 @@ describe('CreateCaseTemplateFields', () => {
     renderWithTestingProviders(<CreateCaseTemplateFields />);
 
     // The template references incident_type via $ref — it should not appear in the global section.
-    // The "Extended fields" heading still appears because the template has its own fields (hostname).
     expect(screen.queryByText('Global fields')).not.toBeInTheDocument();
-    expect(screen.getByText('Extended fields')).toBeInTheDocument();
+    expect(screen.queryByText('Extended fields')).not.toBeInTheDocument();
     expect(screen.queryByTestId('control-incident_type')).not.toBeInTheDocument();
+  });
+
+  it('hides a global field from the global section when the template $ref differs only in case', () => {
+    mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
+    mockUseTemplateFormSync.mockReturnValue({
+      template: {
+        templateId: 'template-1',
+        // Template links the field by its pre-rename casing.
+        definition: { name: 'Test Template', fields: [{ $ref: 'incident_type' }] },
+      },
+      isLoading: false,
+    });
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: {
+        fieldDefinitions: [
+          {
+            fieldDefinitionId: 'fd-1',
+            // Definition was case-only renamed after the template linked it.
+            name: 'Incident_Type',
+            definition: yamlStringify({
+              name: 'Incident_Type',
+              type: 'keyword',
+              control: 'INPUT_TEXT',
+              label: 'Incident Type',
+            }),
+            owner: 'securitySolution',
+            isGlobal: true,
+          },
+        ],
+      },
+      isLoading: false,
+    });
+    // Simulate the real useResolvedFields case-insensitively resolving the $ref against
+    // the (renamed) definition — mirrors what resolveTemplateFields actually does.
+    mockUseResolvedFields.mockReturnValue({
+      resolvedFields: [
+        { name: 'Incident_Type', control: 'INPUT_TEXT', type: 'keyword', label: 'Incident Type' },
+      ],
+      isLoading: false,
+    });
+
+    renderWithTestingProviders(<CreateCaseTemplateFields />);
+
+    // Resolved once via the template section; must not also render via the global
+    // section, whose exclusion check needs to match the same case-insensitive $ref.
+    expect(screen.getAllByTestId('control-Incident_Type')).toHaveLength(1);
   });
 
   it('shows a global field when it is NOT referenced by the template', () => {
@@ -312,7 +359,7 @@ describe('CreateCaseTemplateFields', () => {
 
     renderWithTestingProviders(<CreateCaseTemplateFields />);
 
-    expect(screen.getByText('Extended fields')).toBeInTheDocument();
+    expect(screen.queryByText('Extended fields')).not.toBeInTheDocument();
     expect(screen.getByTestId('control-incident_type')).toBeInTheDocument();
   });
 

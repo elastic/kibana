@@ -7,8 +7,8 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { AnyAction, Dispatch } from 'redux';
-import type { ThunkDispatch } from 'redux-thunk';
+import type { AnyAction, Dispatch } from 'redux-v4';
+import type { ThunkDispatch } from 'redux-thunk-v2';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
 import type { KibanaExecutionContext } from '@kbn/core/public';

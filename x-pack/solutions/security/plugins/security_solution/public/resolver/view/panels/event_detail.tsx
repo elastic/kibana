@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiBasicTableColumn, EuiBreadcrumb, EuiSearchBarProps } from '@elastic/eui';
 import { EuiInMemoryTable, EuiSpacer, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { CellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
 import { BoldCode, StyledTime } from './styles';
 import { GeneratedText } from '../generated_text';

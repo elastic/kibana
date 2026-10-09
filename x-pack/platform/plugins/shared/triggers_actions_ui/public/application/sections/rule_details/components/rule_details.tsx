@@ -16,8 +16,6 @@ import {
   EuiPageSection,
   EuiCallOut,
   EuiSpacer,
-  EuiButton,
-  EuiIcon,
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -142,7 +140,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   // Set breadcrumb and page title
   useEffect(() => {
-    const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref(getUrlForApp);
+    const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref();
     setBreadcrumbs([rulesBreadcrumbWithAppPath, { text: rule.name }]);
     chrome.docTitle.change(getCurrentDocTitle('rules'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -204,34 +202,33 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             }
           ),
           text: toMountPoint(
-            <>
-              <p>
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastMessage"
-                  defaultMessage="This rule has an interval set below the minimum configured interval. This may impact performance."
-                />
-              </p>
-              {hasEditButton && (
-                <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      data-test-subj="ruleIntervalToastEditButton"
-                      onClick={() => {
-                        toasts.remove(configurationToast);
-                        onEditRuleClick();
-                      }}
-                    >
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastMessageButton"
-                        defaultMessage="Edit rule"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              )}
-            </>,
+            <p>
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastMessage"
+                defaultMessage="This rule has an interval set below the minimum configured interval. This may impact performance."
+              />
+            </p>,
             { i18n: i18nStart, theme, userProfile }
           ),
+          ...(hasEditButton
+            ? {
+                actionProps: {
+                  primary: {
+                    'data-test-subj': 'ruleIntervalToastEditButton',
+                    onClick: () => {
+                      toasts.remove(configurationToast);
+                      onEditRuleClick();
+                    },
+                    children: i18n.translate(
+                      'xpack.triggersActionsUI.sections.ruleDetails.scheduleIntervalToastMessageButton',
+                      {
+                        defaultMessage: 'Edit rule',
+                      }
+                    ),
+                  },
+                },
+              }
+            : {}),
         });
       }
     }
@@ -320,7 +317,12 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     }
   };
 
-  const backTarget = getRulesBreadcrumbWithHref(getUrlForApp);
+  const backTarget = {
+    ...getRulesBreadcrumbWithHref(),
+    href: getUrlForApp('management', {
+      path: 'insightsAndAlerting/triggersActions/',
+    }),
+  };
 
   const statusColor = getHealthColor(rule.executionStatus.status);
 
@@ -447,7 +449,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         metadata={metadata}
         menu={appMenu}
         docLink={docLinks.links.alerting.guide}
-        padding={{ bleed: 'm' }}
+        spacing="bleed"
       />
       <EuiPageSection>
         {rule.enabled &&
@@ -489,8 +491,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 iconType="warning"
               >
                 <p>
-                  <EuiIcon color="warning" type="warning" aria-hidden={true} />
-                  &nbsp;
                   {getRuleStatusWarningReasonText()}
                   &nbsp;
                   {rule.executionStatus.warning?.message}
@@ -510,8 +510,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 size="s"
               >
                 <p>
-                  <EuiIcon color="warning" type="warning" aria-hidden={true} />
-                  &nbsp;
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.ruleDetails.actionWithBrokenConnectorWarningBannerTitle"
                     defaultMessage="There is an issue with one of the connectors associated with this rule."

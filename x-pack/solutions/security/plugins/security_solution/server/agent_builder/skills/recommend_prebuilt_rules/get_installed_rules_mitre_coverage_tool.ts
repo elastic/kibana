@@ -125,7 +125,7 @@ export const createGetInstalledRulesMitreCoverageTool = ({
     'Includes total rule count, count with MITRE mappings, and per-tactic and per-technique ' +
     'rule counts. ' +
     'Only returns tactics and techniques with count > 0 — absence means zero coverage. ' +
-    'The canonical 14-tactic list is in the skill prompt; use it to identify missing tactics. ' +
+    'The canonical 15-tactic list is in the skill prompt; use it to identify missing tactics. ' +
     'Session-cached — do not call again in the same conversation.',
   schema: getInstalledRulesMitreCoverageSchema,
   handler: async (_input, { request }) => {

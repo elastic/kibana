@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/278643
+issues:
+- https://github.com/elastic/kibana/issues/278642
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+title: Fix untracking alerts from non-observability rule types on alert details page
+description: Fixes a bug where stack alerts (and other non-observability alerts) could not be untracked from the **observability** alerts page

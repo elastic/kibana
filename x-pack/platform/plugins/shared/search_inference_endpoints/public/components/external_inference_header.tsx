@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiPageTemplate, EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { docLinks } from '../../common/doc_links';
 
 interface ExternalInferenceHeaderProps {
@@ -19,10 +20,29 @@ export const ExternalInferenceHeader: React.FC<ExternalInferenceHeaderProps> = (
   canManage,
   onFlyoutOpen,
 }) => {
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      ...(canManage
+        ? {
+            primaryActionItem: {
+              id: 'addInferenceEndpoint',
+              label: i18n.translate('xpack.searchInferenceEndpoints.addConnectorButtonLabel', {
+                defaultMessage: 'Add endpoint',
+              }),
+              iconType: 'plusCircle' as const,
+              run: onFlyoutOpen,
+              testId: 'add-inference-endpoint-header-button',
+            },
+          }
+        : {}),
+      items: [],
+    }),
+    [canManage, onFlyoutOpen]
+  );
+
   return (
-    <EuiPageTemplate.Header
-      data-test-subj="externalInferenceHeader"
-      pageTitle={i18n.translate('xpack.searchInferenceEndpoints.externalInferenceTitle', {
+    <AppHeader
+      title={i18n.translate('xpack.searchInferenceEndpoints.externalInferenceTitle', {
         defaultMessage: 'External Inference',
       })}
       description={i18n.translate(
@@ -32,37 +52,9 @@ export const ExternalInferenceHeader: React.FC<ExternalInferenceHeaderProps> = (
             'Inference endpoints streamline the deployment and management of machine learning models in Elasticsearch. Set up and manage NLP tasks using unique endpoints, to build AI-powered search.',
         }
       )}
-      bottomBorder={true}
-      rightSideItems={[
-        <EuiFlexGroup gutterSize="m" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiLink
-              target="_blank"
-              data-test-subj="api-documentation"
-              href={docLinks.createInferenceEndpoint}
-              external
-            >
-              {i18n.translate('xpack.searchInferenceEndpoints.apiDocumentationLink', {
-                defaultMessage: 'API Documentation',
-              })}
-            </EuiLink>
-          </EuiFlexItem>
-          {canManage && (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                iconType="plusInCircle"
-                fill
-                data-test-subj="add-inference-endpoint-header-button"
-                onClick={onFlyoutOpen}
-              >
-                {i18n.translate('xpack.searchInferenceEndpoints.addConnectorButtonLabel', {
-                  defaultMessage: 'Add endpoint',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>,
-      ]}
+      menu={menu}
+      docLink={docLinks.createInferenceEndpoint}
+      spacing="bleed"
     />
   );
 };

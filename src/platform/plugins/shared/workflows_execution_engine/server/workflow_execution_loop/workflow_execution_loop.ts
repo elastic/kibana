@@ -35,14 +35,16 @@ const TASK_MANAGER_ABORT_CANCELLATION_REASON = 'Cancelled because Task Manager a
  * - Workflow fails due to an error (ExecutionStatus.FAILED)
  * - Workflow is cancelled (ExecutionStatus.CANCELLED)
  * - Any other non-RUNNING status is reached
+ * - The execution cursor's `stop()` is called while the workflow remains RUNNING
  */
 export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams) {
+  const { workflowExecutionCursor, workflowRuntime } = params;
   // Create an abort controller to signal the persistence loop to exit immediately
   // when execution completes (instead of waiting for the next 500ms flush cycle)
   const persistenceAbortController = new AbortController();
 
   const onTaskAbort = () => {
-    if (isWorkflowTaskManagerAbortSignal(params.taskAbortController.signal)) {
+    if (isWorkflowTaskManagerAbortSignal(params.signal)) {
       params.workflowExecutionState.updateWorkflowExecution({
         cancelRequested: true,
         status: ExecutionStatus.CANCELLED,
@@ -62,14 +64,16 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
     });
     // Also abort persistence loop when task is aborted
     persistenceAbortController.abort();
+    workflowExecutionCursor.stop();
   };
 
-  params.taskAbortController.signal.addEventListener('abort', onTaskAbort, { once: true });
-  if (params.taskAbortController.signal.aborted) {
+  params.signal.addEventListener('abort', onTaskAbort, { once: true });
+  if (params.signal.aborted) {
     onTaskAbort();
   }
 
   try {
+    workflowExecutionCursor.start();
     // Run execution and persistence loops in parallel
     // When execution finishes, signal persistence loop to exit immediately
     await Promise.all([
@@ -80,20 +84,18 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
       persistenceLoop(params, persistenceAbortController.signal),
     ]);
   } catch (error) {
-    params.workflowRuntime.setWorkflowError(
-      error instanceof Error ? error : new Error(String(error))
-    );
+    workflowExecutionCursor.captureError(error);
   } finally {
     const finalFlushSpan = apm.startSpan('final flush state', 'workflow', 'persistence');
     await flushState(params, {
-      workflowLogFlushSignal: params.taskAbortController.signal,
+      workflowLogFlushSignal: params.signal,
     });
     finalFlushSpan?.end();
   }
 
   // Final save to ensure workflow state is persisted after execution loop
   const finalSaveSpan = apm.startSpan('final save state', 'workflow', 'persistence');
-  await params.workflowRuntime.saveState();
+  await workflowRuntime.saveState();
   finalSaveSpan?.end();
 
   // Flush the final state (including terminal status) to Elasticsearch
@@ -109,8 +111,8 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
 
   const finalLogFlushSpan = apm.startSpan('final flush logs', 'workflow', 'logging');
   await params.workflowLogger.flushEvents({
-    signal: params.taskAbortController.signal,
+    signal: params.signal,
   });
   finalLogFlushSpan?.end();
-  params.taskAbortController.signal.removeEventListener('abort', onTaskAbort);
+  params.signal.removeEventListener('abort', onTaskAbort);
 }

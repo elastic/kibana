@@ -69,6 +69,15 @@ export interface RunReconciliationDeps {
    * wrapper.
    */
   onPageComplete?: (info: { processed: number }) => void;
+  /**
+   * Optional cooperative-cancellation signal from Task Manager. Checked at
+   * the top of every page; when aborted the walk throws before fetching or
+   * dispatching the next page. Throwing (rather than returning the
+   * tick-start cursor) is deliberate: it routes through the caller's
+   * per-surface catch so the cursor stays pinned and the un-walked window
+   * is re-walked on the next tick, instead of being silently skipped.
+   */
+  signal?: AbortSignal;
 }
 
 export interface RunReconciliationResult {
@@ -103,6 +112,7 @@ export async function runReconciliation({
   lastRunAt,
   pageDelayMs = 0,
   onPageComplete,
+  signal,
 }: RunReconciliationDeps): Promise<RunReconciliationResult> {
   // Tick start, captured before any I/O. Persisted as the new cursor on a
   // successful drain so the next tick sees only cases updated after this
@@ -163,6 +173,15 @@ export async function runReconciliation({
 
   try {
     while (true) {
+      // Cooperative cancellation: bail before each page's read + bulk
+      // dispatch. Throwing routes through the caller's catch, which pins
+      // the cursor so the un-walked remainder is re-walked next tick.
+      if (signal?.aborted) {
+        throw new Error(
+          `cases-analyticsV2: cases reconciliation aborted after processed=${processed}; cursor left pinned for re-walk`
+        );
+      }
+
       const page = await savedObjectsClient.find<CasePersistedAttributes>({
         type: CASE_SAVED_OBJECT,
         filter,

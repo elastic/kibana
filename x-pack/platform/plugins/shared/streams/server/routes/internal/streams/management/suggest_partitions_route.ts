@@ -94,7 +94,11 @@ export const suggestPartitionsRoute = createServerRoute({
       userPrompt: params.body.user_prompt,
       existingPartitions: params.body.existing_partitions,
       getFeatures: async (filters) => {
-        const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+        const { getKnowledgeIndicatorClient } = scopedClients;
+        if (!getKnowledgeIndicatorClient) {
+          return [];
+        }
+        const kiClient = await getKnowledgeIndicatorClient();
         const { hits } = await kiClient.getFeatures(params.path.name, filters);
         return hits;
       },

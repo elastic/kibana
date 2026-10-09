@@ -20,3 +20,4 @@ const GROUP_LEADER = `${PROCESS}.group_leader`;
 export const GROUP_LEADER_WORKING_DIRECTORY = `${GROUP_LEADER}.working_directory`;
 
 export const ANCESTOR_INDEX = 'kibana.alert.ancestors.index';
+export const LEGACY_ANCESTOR_INDEX = 'signal.ancestors.index';

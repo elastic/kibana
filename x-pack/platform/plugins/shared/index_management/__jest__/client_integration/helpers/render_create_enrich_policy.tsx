@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import type { RouteComponentProps } from 'react-router-dom';
 import type { HttpSetup } from '@kbn/core/public';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { merge } from 'lodash';
 
 import { EnrichPolicyCreate } from '../../../public/application/sections/enrich_policy_create';

@@ -61,7 +61,8 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/licensing-types",
     "@kbn/kql",
-    "@kbn/core-spaces-common"
+    "@kbn/core-spaces-common",
+    "@kbn/app-header"
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json

@@ -1,0 +1,69 @@
+{
+  "sha1": "afe0c48636660a11aa1e4e415cee38f351a6a6b1",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "a0cf3da280571d3-471bfa9f5786e88",
+      "title": "ui_metric savedObject data increments the count field in the document defined by the app/action_type path",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/usage_collection/test/scout/api/tests/ui_metric.spec.ts",
+        "line": 52,
+        "column": 21
+      }
+    },
+    {
+      "id": "a0cf3da280571d3-068bc50905dbfcb",
+      "title": "ui_metric savedObject data supports multiple events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/usage_collection/test/scout/api/tests/ui_metric.spec.ts",
+        "line": 76,
+        "column": 27
+      }
+    },
+    {
+      "id": "a0cf3da280571d3-45d93158616b792",
+      "title": "ui_metric savedObject data aggregates multiple events with same eventID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/usage_collection/test/scout/api/tests/ui_metric.spec.ts",
+        "line": 116,
+        "column": 23
+      }
+    }
+  ]
+}

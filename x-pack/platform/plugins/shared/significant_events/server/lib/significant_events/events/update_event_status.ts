@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 import type { EventClient } from './event_client';
+import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
 
 export const updateSignificantEventStatus = async ({
   eventClient,
@@ -48,7 +49,6 @@ export const updateSignificantEventStatus = async ({
   const updatedEvent = {
     ...latest,
     '@timestamp': now,
-    created_at: now,
     event_uuid: nextEventUuid,
     previous_event_uuid: latest.event_uuid,
     status,
@@ -57,6 +57,13 @@ export const updateSignificantEventStatus = async ({
   // `wait_for` ensures the write is searchable before this resolves, so an immediate
   // re-fetch (e.g. the UI invalidating its query right after this route responds) sees it.
   await eventClient.bulkCreate([updatedEvent], { throwOnFail: true, refresh: 'wait_for' });
+
+  // Notify subscribed workflows of the status change (fire-and-forget).
+  emitSignificantEventWriteTriggers({
+    eventClient,
+    significantEvent: updatedEvent,
+    priorSignificantEvent: latest,
+  });
 
   return { event_uuid: nextEventUuid, updated: 1, ignored: 0, status };
 };

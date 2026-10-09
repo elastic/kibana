@@ -25,7 +25,7 @@ const createOrUpdateFailedInstallStatusMock = createOrUpdateFailedInstallStatus 
 >;
 
 describe('syncIntegrationsOnRemote', () => {
-  const abortController = new AbortController();
+  const { signal } = new AbortController();
   let esClientMock: any;
   let getIndicesMock: jest.Mock;
   let searchMock: jest.Mock;
@@ -74,7 +74,7 @@ describe('syncIntegrationsOnRemote', () => {
     });
 
     await expect(
-      syncIntegrationsOnRemote(esClientMock, soClientMock, {} as any, abortController, loggerMock)
+      syncIntegrationsOnRemote(esClientMock, soClientMock, {} as any, signal, loggerMock)
     ).rejects.toThrowError(
       'Not supported to sync multiple indices with prefix fleet-synced-integrations-ccr-*'
     );
@@ -153,7 +153,7 @@ describe('syncIntegrationsOnRemote', () => {
       esClientMock,
       soClientMock,
       packageClientMock,
-      abortController,
+      signal,
       loggerMock
     );
 
@@ -181,7 +181,7 @@ describe('syncIntegrationsOnRemote', () => {
       esClientMock,
       soClientMock,
       packageClientMock,
-      abortController,
+      signal,
       loggerMock
     );
 
@@ -212,7 +212,7 @@ describe('syncIntegrationsOnRemote', () => {
       esClientMock,
       soClientMock,
       packageClientMock,
-      abortController,
+      signal,
       loggerMock
     );
 
@@ -254,7 +254,7 @@ describe('syncIntegrationsOnRemote', () => {
       esClientMock,
       soClientMock,
       packageClientMock,
-      abortController,
+      signal,
       loggerMock
     );
 
@@ -293,7 +293,7 @@ describe('syncIntegrationsOnRemote', () => {
       esClientMock,
       soClientMock,
       packageClientMock,
-      abortController,
+      signal,
       loggerMock
     );
 
@@ -328,7 +328,7 @@ describe('syncIntegrationsOnRemote', () => {
       esClientMock,
       soClientMock,
       packageClientMock,
-      abortController,
+      signal,
       loggerMock
     );
 
@@ -360,7 +360,7 @@ describe('syncIntegrationsOnRemote', () => {
       esClientMock,
       soClientMock,
       packageClientMock,
-      abortController,
+      signal,
       loggerMock
     );
 
@@ -396,7 +396,7 @@ describe('syncIntegrationsOnRemote', () => {
       esClientMock,
       soClientMock,
       packageClientMock,
-      abortController,
+      signal,
       loggerMock
     );
 
@@ -420,7 +420,7 @@ describe('syncIntegrationsOnRemote', () => {
       esClientMock,
       soClientMock,
       packageClientMock,
-      abortController,
+      signal,
       loggerMock
     );
 
@@ -469,7 +469,7 @@ describe('syncIntegrationsOnRemote', () => {
         esClientMock,
         soClientMock,
         packageClientMock,
-        abortController,
+        signal,
         loggerMock
       );
 
@@ -514,7 +514,7 @@ describe('syncIntegrationsOnRemote', () => {
         esClientMock,
         soClientMock,
         packageClientMock,
-        abortController,
+        signal,
         loggerMock
       );
 
@@ -550,7 +550,7 @@ describe('syncIntegrationsOnRemote', () => {
         esClientMock,
         soClientMock,
         packageClientMock,
-        abortController,
+        signal,
         loggerMock
       );
 
@@ -586,7 +586,7 @@ describe('syncIntegrationsOnRemote', () => {
         esClientMock,
         soClientMock,
         packageClientMock,
-        abortController,
+        signal,
         loggerMock
       );
 

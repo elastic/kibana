@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { memo, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
+import { endpointActionResponseCodes } from '../lib/endpoint_action_response_codes';
+import { KillSuspendProcessActionResult } from '../../kill_process_action_result';
 import type { SuspendProcessRequestBody } from '../../../../../common/api/endpoint';
 import { parsedKillOrSuspendParameter } from '../lib/utils';
 import type {
   SuspendProcessActionOutputContent,
   ResponseActionParametersWithEntityId,
   ResponseActionParametersWithPid,
+  ResponseActionParametersWithProcessData,
 } from '../../../../../common/endpoint/types';
 import { useSendSuspendProcessRequest } from '../../../hooks/response_actions/use_send_suspend_process_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
@@ -38,7 +41,11 @@ export const SuspendProcessActionResult = memo<
       : undefined;
   }, [command.args.args, command.commandDefinition?.meta]);
 
-  return useConsoleActionSubmitter<SuspendProcessRequestBody, SuspendProcessActionOutputContent>({
+  const { result, actionDetails } = useConsoleActionSubmitter<
+    SuspendProcessRequestBody,
+    SuspendProcessActionOutputContent,
+    ResponseActionParametersWithProcessData
+  >({
     ResultComponent,
     // @ts-expect-error upgrade typescript v5.4.5
     setStore,
@@ -49,6 +56,25 @@ export const SuspendProcessActionResult = memo<
     actionCreator,
     actionRequestBody,
     dataTestSubj: 'suspendProcess',
-  }).result;
+  });
+
+  if (actionDetails?.isCompleted && actionDetails.wasSuccessful) {
+    return (
+      <ResultComponent
+        title={
+          endpointActionResponseCodes[
+            actionDetails?.outputs?.[actionDetails.agents[0]]?.content.code ?? ''
+          ]
+        }
+      >
+        <KillSuspendProcessActionResult
+          action={actionDetails}
+          data-test-subj="killProcessResponseOutput"
+        />
+      </ResultComponent>
+    );
+  }
+
+  return result;
 });
 SuspendProcessActionResult.displayName = 'SuspendProcessActionResult';

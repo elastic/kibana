@@ -78,13 +78,51 @@ describe('ExecutionListFilters', () => {
   it('shows "Executed by" section when showExecutor is true', async () => {
     renderComponent({
       showExecutor: true,
-      availableExecutedByOptions: ['user1', 'user2'],
+      availableExecutedByOptions: [
+        { label: 'user1', value: 'user1' },
+        { label: 'user2', value: 'user2' },
+      ],
     });
     const filterButton = screen.getByLabelText('Filter executions');
     fireEvent.click(filterButton);
 
     await waitFor(() => {
       expect(screen.getByText('Executed by')).toBeInTheDocument();
+    });
+  });
+
+  it('filters by the profile UID behind a display label', async () => {
+    const onFiltersChange = jest.fn();
+    renderComponent({
+      showExecutor: true,
+      onFiltersChange,
+      availableExecutedByOptions: [{ label: 'Tal Borenstein', value: 'u_tal' }],
+    });
+    fireEvent.click(screen.getByLabelText('Filter executions'));
+    fireEvent.click(screen.getByPlaceholderText('Filter by user'));
+    fireEvent.click(await screen.findByText('Tal Borenstein'));
+
+    expect(onFiltersChange).toHaveBeenCalledWith({
+      statuses: [],
+      executionTypes: [],
+      executedBy: ['u_tal'],
+    });
+  });
+
+  it('allows filtering by an executor outside the loaded options', async () => {
+    const onFiltersChange = jest.fn();
+    renderComponent({ showExecutor: true, onFiltersChange });
+    fireEvent.click(screen.getByLabelText('Filter executions'));
+    const input = screen.getByPlaceholderText('Filter by user');
+    fireEvent.change(input, { target: { value: 'legacy-user' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    await waitFor(() => {
+      expect(onFiltersChange).toHaveBeenCalledWith({
+        statuses: [],
+        executionTypes: [],
+        executedBy: ['legacy-user'],
+      });
     });
   });
 

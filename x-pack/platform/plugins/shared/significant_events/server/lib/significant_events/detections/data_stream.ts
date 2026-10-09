@@ -21,6 +21,7 @@ export const detectionsMappings = {
     rule_name: mappings.keyword(),
     change_point_type: mappings.keyword(),
     p_value: { type: 'double' as const },
+    severity_score: mappings.integer(),
     processed_by: mappings.keyword(),
   },
 } satisfies MappingsDefinition;
@@ -33,7 +34,7 @@ export const detectionsDataStream: DataStreamDefinition<
   StoredDetection
 > = {
   name: DETECTIONS_DATA_STREAM,
-  version: 7,
+  version: 8,
   hidden: true,
   template: {
     priority: 500,

@@ -13,3 +13,4 @@ export {
   ChromeAppHeaderRegistration,
   useChromeAppHeaderRegistration,
 } from './chrome_app_header_registration';
+export { SuppressChromeBackButton } from './suppress_chrome_back_button';

@@ -46,7 +46,7 @@ export const buildHeader = (status: InvestigationStatus, state?: InvestigationSt
     case 'failed':
       return {
         spinner: false,
-        icon: 'errorFilled',
+        icon: 'errorFill',
         color: 'danger',
         title: i18n.translate('xpack.investigationOutput.failedStatusTitle', {
           defaultMessage: 'Investigation failed',
@@ -64,7 +64,7 @@ export const buildHeader = (status: InvestigationStatus, state?: InvestigationSt
     case 'complete':
       return {
         spinner: false,
-        icon: 'checkInCircleFilled',
+        icon: 'checkCircleFill',
         color: 'success',
         title: i18n.translate('xpack.investigationOutput.successStatusTitle', {
           defaultMessage: 'Investigation complete',

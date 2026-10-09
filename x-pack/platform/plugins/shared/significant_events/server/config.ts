@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type { PluginConfigDescriptor } from '@kbn/core/server';
-import type { SignificantEventsConfig } from '../common/config';
-import { configSchema, exposeToBrowserConfig } from '../common/config';
+import { schema } from '@kbn/config-schema';
 
-export const config: PluginConfigDescriptor<SignificantEventsConfig> = {
-  schema: configSchema,
-  exposeToBrowser: exposeToBrowserConfig,
-};
+export const ConfigSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+});

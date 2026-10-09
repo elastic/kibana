@@ -6,6 +6,7 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -75,8 +76,12 @@ export class RuleWorkflowSubscriber {
     } catch (err) {
       this.logger.error({
         error: err,
-        code: 'RULE_WORKFLOW_SUBSCRIBER_FAILURE',
-        type: `RuleWorkflowSubscriber:${trigger.triggerId}`,
+        code: ALERTING_LOG_CODES.EVENTS_RULE_WORKFLOW_SUBSCRIBER_FAILED,
+        labels: {
+          event_type: trigger.eventType,
+          rule_id: event.payload.ruleId,
+          space_id: event.payload.spaceId,
+        },
       });
     }
   }

@@ -62,7 +62,7 @@ export const useSetupRuleNotifications = () => {
             description: `Notifications for rule "${rule.metadata.name}"`,
             matcher,
             destinations: [{ type: 'workflow', id: workflowId }],
-            groupingMode: 'per_episode',
+            grouping_mode: 'per_episode',
             throttle: { strategy: 'on_status_change', interval: null },
           });
         } catch (err) {

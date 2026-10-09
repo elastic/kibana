@@ -10,7 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { isNil, omit, omitBy } from 'lodash';
 
 import type { DataSetWithName, Dataset } from '../common';
-import { DATA_SETS_LIST_ROUTE_PATH, getDataSetByIdApiPath } from '../common';
+import {
+  DATA_SETS_LIST_ROUTE_PATH,
+  getDataSetByIdApiPath,
+  validateIndexNameRules,
+} from '../common';
 
 interface GetDataSetsResponse {
   data_sets: DataSetWithName[];
@@ -50,6 +54,12 @@ export class DatasetsClient {
         })
       );
     }
+
+    const nameValidation = validateIndexNameRules(nameTrimmed);
+    if (nameValidation) {
+      throw new Error(nameValidation.message);
+    }
+
     const withoutName = omit(dataSet, 'name');
     const body = omitBy(
       {

@@ -9,13 +9,17 @@ import { loggerMock } from '@kbn/logging-mocks';
 import {
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import { createManagedWorkflowsInstaller } from './managed_workflows_installer';
 
 // Significant events is gated solely by the availability flag now, so the installer always writes
-// the full set: 8 base workflows + 4 memory workflows (both via `installWorkflows`) + 1 investigation
+// the full set: 9 base workflows + 4 memory workflows (both via `installWorkflows`) + 1 investigation
 // workflow.
 const BASE_WORKFLOW_COUNT = 8;
 const MEMORY_WORKFLOW_COUNT = 4;
@@ -102,12 +106,23 @@ describe('createManagedWorkflowsInstaller', () => {
     expect(installCountAtReady).toBe(TOTAL_WORKFLOW_COUNT);
   });
 
-  it('installs memory workflows when available', async () => {
+  it('installs memory workflows globally when available', async () => {
     const { client, installer } = createInstaller();
 
     await installer.install();
 
-    expect(installedIds(client)).toContain(SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID);
+    const memoryWorkflowIds = [
+      SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
+      SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+      SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+      SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
+    ];
+
+    for (const workflowId of memoryWorkflowIds) {
+      expect(client.install).toHaveBeenCalledWith(workflowId, {
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      });
+    }
   });
 
   it('installs the investigation workflow when available', async () => {

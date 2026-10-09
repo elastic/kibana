@@ -18,6 +18,7 @@ import {
   rlikePatternItems,
 } from '../../../../../registry/complete_items';
 import { getBinaryExpressionOperand, getExpressionType } from '../../../expressions';
+import { buildExpressionFunctionParameterContext } from '../utils';
 import type { ExpressionContext } from '../types';
 import {
   getLogicalContinuationSuggestions,
@@ -213,4 +214,46 @@ export async function handleStringListOperator(
 /** Returns pattern suggestions for LIKE/RLIKE operators */
 function getStringPatternSuggestions(operator: string): ISuggestionItem[] {
   return operator.includes('rlike') ? rlikePatternItems : likePatternItems;
+}
+
+// ============================================================================
+// eg. : (match operator)
+// ============================================================================
+
+/** Handles the match operator (:) whose right operand accepts only constant values */
+export async function handleMatchOperator(
+  ctx: ExpressionContext
+): Promise<ISuggestionItem[] | null> {
+  const fn = ctx.expressionRoot as ESQLFunction | undefined;
+
+  if (!fn) {
+    return null;
+  }
+
+  const rightOperand = getBinaryExpressionOperand(fn, 'right') as ESQLSingleAstItem | undefined;
+
+  if (!isOperandMissing(rightOperand)) {
+    return null;
+  }
+
+  const parameterContext = buildExpressionFunctionParameterContext(fn, ctx.context, true);
+
+  if (!parameterContext) {
+    return null;
+  }
+
+  const suggestions = new SuggestionBuilder(ctx)
+    .addConstants({
+      paramDefinitions: parameterContext.paramDefinitions,
+      shouldAddComma: false,
+      hasMoreMandatoryArgs: parameterContext.hasMoreMandatoryArgs,
+      preferredPlaceholderType: parameterContext.firstArgumentType,
+      includeValuesControl: true,
+      // The match operator grammar accepts only literal constants as the right operand,
+      // not constant-generating functions (e.g. `field : E()` is a parse error).
+      includeConstantFunctions: false,
+    })
+    .build();
+
+  return suggestions.length > 0 ? suggestions : null;
 }

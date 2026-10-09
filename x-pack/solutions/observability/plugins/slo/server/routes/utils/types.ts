@@ -59,6 +59,7 @@ export interface SLORoutesDependencies {
   getScopedClients: GetScopedClients;
   config: {
     isServerless: boolean;
+    isCpsEnabled: boolean;
     compositeSloSummaryTaskEnabled: boolean;
   };
 }

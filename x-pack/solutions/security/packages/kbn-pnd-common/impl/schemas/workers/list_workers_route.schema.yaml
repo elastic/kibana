@@ -1,0 +1,28 @@
+openapi: 3.0.0
+info:
+  title: List PND Workers API endpoint
+  version: '1'
+paths:
+  /internal/pnd/workers:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: ListWorkers
+      description: List the global worker catalog shared across Security Watches
+      summary: List workers
+      tags:
+        - PND API
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  workers:
+                    type: array
+                    items:
+                      $ref: '../components/watch_settings.schema.yaml#/components/schemas/WatchWorker'
+                required:
+                  - workers

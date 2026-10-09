@@ -89,7 +89,7 @@ export const createAiNavigationTree = (
       children: [
         {
           link: 'inbox' as AppDeepLinkId,
-          icon: 'email',
+          icon: 'mail',
         },
         {
           link: 'discover' as AppDeepLinkId,

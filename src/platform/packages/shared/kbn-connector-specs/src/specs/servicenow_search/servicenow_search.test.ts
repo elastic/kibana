@@ -18,11 +18,6 @@ interface ServiceNowRecordResponse {
   result: unknown;
 }
 
-interface TestResult {
-  ok: boolean;
-  message?: string;
-}
-
 describe('ServicenowSearch', () => {
   const mockClient = {
     get: jest.fn(),
@@ -698,6 +693,8 @@ describe('ServicenowSearch', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = ServicenowSearch.test;
+
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         data: {
@@ -706,10 +703,7 @@ describe('ServicenowSearch', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!ServicenowSearch.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await ServicenowSearch.test.handler(mockContext)) as TestResult;
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://test-instance.service-now.com/api/now/table/sys_user',
@@ -721,49 +715,26 @@ describe('ServicenowSearch', () => {
           },
         }
       );
-      expect(result.ok).toBe(true);
-      expect(result.message).toBe('Successfully connected to ServiceNow');
+      expect(result).toEqual({});
     });
 
-    it('should return success when user table returns no rows', async () => {
-      const mockResponse = {
-        data: {
-          result: [],
-        },
-      };
+    it('should throw when user table returns no rows (permission misconfiguration)', async () => {
+      const mockResponse = { data: { result: [] } };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!ServicenowSearch.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await ServicenowSearch.test.handler(mockContext)) as TestResult;
-
-      expect(result.ok).toBe(true);
-      expect(result.message).toBe('Successfully connected to ServiceNow (no user records visible)');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('no user records are visible');
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw on invalid credentials', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 
-      if (!ServicenowSearch.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await ServicenowSearch.test.handler(mockContext)) as TestResult;
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Invalid credentials');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
 
-    it('should handle network errors', async () => {
+    it('should throw on network timeout', async () => {
       mockClient.get.mockRejectedValue(new Error('Network timeout'));
 
-      if (!ServicenowSearch.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await ServicenowSearch.test.handler(mockContext)) as TestResult;
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Network timeout');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

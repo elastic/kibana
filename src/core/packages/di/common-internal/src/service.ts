@@ -40,8 +40,8 @@ export class CoreInjectionService {
     const contract = {
       getContainer: this.getContainer,
     };
-    this.root.loadSync(this.module);
-    this.root.loadSync(core);
+    this.root.load(this.module);
+    this.root.load(core);
 
     return contract;
   }

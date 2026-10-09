@@ -795,7 +795,6 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
     },
   ],
   discovery: [],
-  discoveryJudge: [],
   kiQueryGeneration: [
     {
       input: {
@@ -818,14 +817,22 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
           },
           {
             id: 'stats-aggregate-monitoring',
-            text: 'Should generate at least one STATS query for aggregate monitoring (e.g., fight simulation throughput at ~12 fights/min baseline, request volume per microservice) with calibrated thresholds documented in descriptions.',
+            text: 'Should generate at least one STATS metric-series query (bucket + metric_value, no post-STATS threshold WHERE) for aggregate monitoring (e.g., fight simulation throughput at ~12 fights/min baseline, request volume per microservice). Descriptions should document that baseline, not a breach threshold.',
             score: 1,
+          },
+          {
+            id: 'latency-signal-preserved',
+            text: 'Must generate at least one STATS query measuring request latency via the verified duration field `attributes.attr.elapsedMillis`, scoped to the MongoDB ingress-connection pattern in fights-db logs (`body.text` containing "Received first command on ingress connection since session start or auth handshake"). Within that verified pattern the field is dense (5 of 5 matching docs carry `elapsedMillis`); stream-wide it covers only 5 of 681 docs (~0.7%). Stream-wide sparsity must NOT disqualify a field that is dense within the verified pattern — dropping the latency signal because the field looks sparse in the stream fails this criterion. Accept any semantically equivalent ES|QL that aggregates `attributes.attr.elapsedMillis` for that pattern (e.g. AVG/MAX/P95 grouped by BUCKET(@timestamp, 1 minute)); do not prescribe one query string.',
+            score: 1,
+            sampling_filters: [
+              { match_phrase: { 'body.text': 'Received first command on ingress connection' } },
+            ],
           },
         ],
         expected_categories: ['operational'],
         expect_stats: true,
         expected_ground_truth:
-          'queries=[operational monitoring for fight throughput/service health across rest-heroes/rest-villains/rest-fights/event-statistics; STATS queries for aggregate fight simulation throughput (~12 fights/min baseline) and request volume per microservice with calibrated thresholds]',
+          'queries=[operational monitoring for fight throughput/service health across rest-heroes/rest-villains/rest-fights/event-statistics; STATS metric-series queries for aggregate fight simulation throughput (~12 fights/min baseline) and request volume per microservice; STATS latency query over attributes.attr.elapsedMillis scoped to the verified MongoDB ingress-connection pattern in fights-db logs]',
       },
       metadata: {
         difficulty: 'easy',

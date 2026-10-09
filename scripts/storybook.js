@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('../src/dev/storybook/run_storybook_cli');
+require('@kbn/dev/storybook/run_storybook_cli');

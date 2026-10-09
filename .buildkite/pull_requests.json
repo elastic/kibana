@@ -22,6 +22,7 @@
       "enable_skippable_commits": true,
       "skip_ci_on_only_changed": [
         "^docs/",
+        "^dev_docs/",
         "^rfcs/",
         "^\\.github/",
         "\\.md$",
@@ -69,7 +70,11 @@
       "enable_trigger_checkbox": true,
       "kibana_versions_check": true,
       "kibana_build_reuse": true,
-      "kibana_build_reuse_pipeline_slugs": ["kibana-pull-request", "kibana-on-merge", "kibana-deploy-project-from-pr"],
+      "kibana_build_reuse_pipeline_slugs": [
+        "kibana-pull-request",
+        "kibana-on-merge",
+        "kibana-deploy-project-from-pr"
+      ],
       "kibana_build_reuse_regexes": [
         "^test/",
         "^x-pack/platform/test/",
@@ -96,7 +101,11 @@
       "enable_trigger_checkbox": true,
       "kibana_versions_check": true,
       "kibana_build_reuse": true,
-      "kibana_build_reuse_pipeline_slugs": ["kibana-pull-request", "kibana-on-merge", "kibana-deploy-cloud-from-pr"],
+      "kibana_build_reuse_pipeline_slugs": [
+        "kibana-pull-request",
+        "kibana-on-merge",
+        "kibana-deploy-cloud-from-pr"
+      ],
       "kibana_build_reuse_regexes": [
         "^test/",
         "^x-pack/platform/test/",
@@ -123,7 +132,12 @@
       "enable_trigger_checkbox": true,
       "kibana_versions_check": true,
       "kibana_build_reuse": true,
-      "kibana_build_reuse_pipeline_slugs": ["kibana-pull-request", "kibana-on-merge", "kibana-deploy-cloud-from-pr", "kibana-entity-store-performance-from-pr"],
+      "kibana_build_reuse_pipeline_slugs": [
+        "kibana-pull-request",
+        "kibana-on-merge",
+        "kibana-deploy-cloud-from-pr",
+        "kibana-entity-store-performance-from-pr"
+      ],
       "kibana_build_reuse_regexes": [
         "^test/",
         "^x-pack/platform/test/",
@@ -138,13 +152,8 @@
       "pipelineSlug": "kibana-storybooks-from-pr",
       "enabled": true,
       "allow_org_users": true,
-      "allowed_repo_permissions": [
-        "admin",
-        "write"
-      ],
-      "allowed_list": [
-        "elastic-vault-github-plugin-prod[bot]"
-      ],
+      "allowed_repo_permissions": ["admin", "write"],
+      "allowed_list": ["elastic-vault-github-plugin-prod[bot]"],
       "set_commit_status": true,
       "commit_status_context": "kibana-storybooks-from-pr",
       "build_on_commit": false,

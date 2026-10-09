@@ -47,6 +47,7 @@ export const esqlFieldTypes: readonly string[] = [
   'boolean',
   'date',
   'double',
+  'double_range',
   'ip',
   'keyword',
   'integer',

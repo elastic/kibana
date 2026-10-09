@@ -166,4 +166,146 @@ describe('templates client', () => {
       );
     });
   });
+
+  describe('mutation authorization (no existence oracle)', () => {
+    it.each(['updateTemplate', 'deleteTemplate'] as const)(
+      '%s rethrows a manage-authorization failure as 404 for a caller with no template read access',
+      async (method) => {
+        const template = createTemplateSavedObject('securitySolution');
+        clientArgs.services.templatesService.getTemplate.mockResolvedValueOnce(template);
+        // Both manageTemplate and the getTemplate fallback fail -> the id must look nonexistent.
+        clientArgs.authorization.ensureAuthorized
+          .mockRejectedValueOnce(Boom.forbidden('no manage'))
+          .mockRejectedValueOnce(Boom.forbidden('no read'));
+
+        const subClient = createTemplatesSubClient(clientArgs);
+
+        await expect(
+          method === 'updateTemplate'
+            ? subClient.updateTemplate('template-1', {
+                name: 'n',
+                owner: 'securitySolution',
+                definition: '',
+              })
+            : subClient.deleteTemplate('template-1')
+        ).rejects.toMatchObject({ output: { statusCode: 404 } });
+      }
+    );
+
+    it.each(['updateTemplate', 'deleteTemplate'] as const)(
+      '%s keeps the honest 403 for a caller who can read but not manage templates',
+      async (method) => {
+        const template = createTemplateSavedObject('securitySolution');
+        clientArgs.services.templatesService.getTemplate.mockResolvedValueOnce(template);
+        clientArgs.authorization.ensureAuthorized
+          .mockRejectedValueOnce(Boom.forbidden('no manage'))
+          .mockResolvedValueOnce(undefined); // read succeeds
+
+        const subClient = createTemplatesSubClient(clientArgs);
+
+        await expect(
+          method === 'updateTemplate'
+            ? subClient.updateTemplate('template-1', {
+                name: 'n',
+                owner: 'securitySolution',
+                definition: '',
+              })
+            : subClient.deleteTemplate('template-1')
+        ).rejects.toMatchObject({ output: { statusCode: 403 } });
+      }
+    );
+
+    it('hides existence using the REQUEST id so the 404 is indistinguishable from a missing id', async () => {
+      // Stored template resolves under a different internal templateId than the request used. The
+      // hide-existence 404 must echo the request id (like the missing-id 404), never the stored one,
+      // or the differing message leaks that the template exists.
+      const template = createTemplateSavedObject('securitySolution');
+      template.attributes.templateId = 'internal-stored-id';
+      clientArgs.services.templatesService.getTemplate.mockResolvedValueOnce(template);
+      clientArgs.authorization.ensureAuthorized
+        .mockRejectedValueOnce(Boom.forbidden('no manage'))
+        .mockRejectedValueOnce(Boom.forbidden('no read'));
+
+      const subClient = createTemplatesSubClient(clientArgs);
+
+      await expect(subClient.deleteTemplate('requested-id')).rejects.toThrow(
+        'Template with id requested-id not found'
+      );
+    });
+
+    it('updateTemplate requires manage rights on the TARGET owner when the owner changes', async () => {
+      const template = createTemplateSavedObject('securitySolution');
+      clientArgs.services.templatesService.getTemplate.mockResolvedValueOnce(template);
+      clientArgs.authorization.ensureAuthorized
+        .mockResolvedValueOnce(undefined) // manage on current owner
+        .mockRejectedValueOnce(Boom.forbidden('no manage on target owner'));
+
+      const subClient = createTemplatesSubClient(clientArgs);
+
+      await expect(
+        subClient.updateTemplate('template-1', {
+          name: 'n',
+          owner: 'observability',
+          definition: '',
+        })
+      ).rejects.toThrow('no manage on target owner');
+      expect(clientArgs.services.templatesService.updateTemplate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('dry-run validators', () => {
+    it('validateCreateTemplate authorizes manageTemplate and runs the write preflight without writing', async () => {
+      const subClient = createTemplatesSubClient(clientArgs);
+      const input = { name: 'New Template', owner: 'securitySolution', definition: '' };
+
+      await subClient.validateCreateTemplate(input);
+
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entities: [expect.objectContaining({ owner: 'securitySolution' })],
+        })
+      );
+      expect(clientArgs.services.templatesService.validateWriteInput).toHaveBeenCalledWith(input);
+      expect(clientArgs.services.templatesService.createTemplate).not.toHaveBeenCalled();
+    });
+
+    it('validateUpdateTemplate 404s on a missing template and excludes the template from the name check', async () => {
+      const subClient = createTemplatesSubClient(clientArgs);
+      const input = { name: 'Renamed', owner: 'securitySolution', definition: '' };
+
+      clientArgs.services.templatesService.getTemplate.mockResolvedValueOnce(undefined);
+      await expect(subClient.validateUpdateTemplate('missing', input)).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+
+      const template = createTemplateSavedObject('securitySolution');
+      clientArgs.services.templatesService.getTemplate.mockResolvedValueOnce(template);
+      await subClient.validateUpdateTemplate('template-1', input);
+
+      expect(clientArgs.services.templatesService.validateWriteInput).toHaveBeenCalledWith(input, {
+        excludeTemplateId: 'template-1',
+        currentOwner: 'securitySolution',
+      });
+      expect(clientArgs.services.templatesService.updateTemplate).not.toHaveBeenCalled();
+    });
+
+    it('validateUpdateTemplate mirrors the real update: owner change requires manage rights on the TARGET owner', async () => {
+      const template = createTemplateSavedObject('securitySolution');
+      clientArgs.services.templatesService.getTemplate.mockResolvedValueOnce(template);
+      clientArgs.authorization.ensureAuthorized
+        .mockResolvedValueOnce(undefined) // manage on current owner
+        .mockRejectedValueOnce(Boom.forbidden('no manage on target owner'));
+
+      const subClient = createTemplatesSubClient(clientArgs);
+
+      await expect(
+        subClient.validateUpdateTemplate('template-1', {
+          name: 'n',
+          owner: 'observability',
+          definition: '',
+        })
+      ).rejects.toThrow('no manage on target owner');
+      expect(clientArgs.services.templatesService.validateWriteInput).not.toHaveBeenCalled();
+    });
+  });
 });

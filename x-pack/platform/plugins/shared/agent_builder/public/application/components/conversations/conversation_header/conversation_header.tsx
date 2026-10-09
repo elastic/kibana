@@ -31,7 +31,7 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
 }) => {
   return (
     <div css={headerGridStyles}>
-      {/* Left column — intentionally empty, reserved for future actions */}
+      {/* Left column — reserved for future controls */}
       <div />
 
       {/* Center column — always exactly centered */}

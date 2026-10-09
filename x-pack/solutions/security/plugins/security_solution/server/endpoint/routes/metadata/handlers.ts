@@ -50,9 +50,13 @@ export function getMetadataListRequestHandler(
 
     const spaceId = (await context.securitySolution).getSpaceId();
     const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService(spaceId);
+    const scoped = endpointAppContext.service.asScoped(request);
 
     try {
-      const { data, total } = await endpointMetadataService.getHostMetadataList(request.query);
+      const { data, total } = await endpointMetadataService.getHostMetadataList(
+        request.query,
+        scoped
+      );
 
       const body: MetadataListResponse = {
         data,
@@ -83,10 +87,11 @@ export const getMetadataRequestHandler = function (
   return async (context, request, response) => {
     const spaceId = (await context.securitySolution).getSpaceId();
     const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService(spaceId);
+    const scoped = endpointAppContext.service.asScoped(request);
 
     try {
       return response.ok({
-        body: await endpointMetadataService.getEnrichedHostMetadata(request.params.id),
+        body: await endpointMetadataService.getEnrichedHostMetadata(request.params.id, scoped),
       });
     } catch (error) {
       return errorHandler(logger, response, error);

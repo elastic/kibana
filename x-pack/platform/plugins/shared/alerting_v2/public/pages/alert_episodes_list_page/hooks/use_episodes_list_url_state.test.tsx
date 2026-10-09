@@ -41,7 +41,7 @@ describe('useEpisodesListUrlState', () => {
     const { result } = renderHook(() => useEpisodesListUrlState(timefilter), { wrapper });
 
     expect(result.current.filterState).toEqual({
-      status: 'active',
+      status: ['active'],
       ruleId: 'rule-123',
     });
   });
@@ -56,12 +56,12 @@ describe('useEpisodesListUrlState', () => {
     const { result } = renderHook(() => useEpisodesListUrlState(timefilter), { wrapper });
 
     await act(async () => {
-      result.current.setFilterState({ status: 'recovering', ruleId: 'r9' });
+      result.current.setFilterState({ status: ['recovering'], ruleId: 'r9' });
     });
 
-    expect(result.current.filterState).toEqual({ status: 'recovering', ruleId: 'r9' });
+    expect(result.current.filterState).toEqual({ status: ['recovering'], ruleId: 'r9' });
     expect(history.location.search).toBe(
-      '?_a=(episodesList:(ruleId:r9,status:recovering,timeFrom:now-15m,timeTo:now))'
+      '?_a=(episodesList:(ruleId:r9,status:!(recovering),timeFrom:now-15m,timeTo:now))'
     );
   });
 });

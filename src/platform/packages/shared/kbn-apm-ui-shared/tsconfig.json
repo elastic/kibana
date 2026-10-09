@@ -24,5 +24,6 @@
     "@kbn/elastic-agent-utils",
     "@kbn/core-chrome-layout-constants",
     "@kbn/apm-common",
+    "@kbn/shared-ux-markdown",
   ]
 }

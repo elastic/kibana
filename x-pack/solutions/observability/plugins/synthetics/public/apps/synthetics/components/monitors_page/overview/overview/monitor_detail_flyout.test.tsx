@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import * as reduxHooks from 'react-redux';
+import * as reduxHooks from 'react-redux-v7';
 import { render } from '../../../../utils/testing/rtl_helpers';
 import { fireEvent } from '@testing-library/react';
 import { MonitorDetailFlyout } from './monitor_detail_flyout';

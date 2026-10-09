@@ -55,7 +55,7 @@ export const getWorkflowToolType = ({
               return {
                 results: [
                   errorResult(
-                    `Unauthorized to execute workflow '${workflowId}'. The 'workflowsManagement' execute and read privileges are required.`
+                    `Unauthorized to execute workflow '${workflowId}'. The 'workflowsManagement' execute privilege is required.`
                   ),
                 ],
               };

@@ -156,6 +156,7 @@ export class ChangeTrackingService implements IChangeTrackingService {
             ...opts,
             correlationId,
             fieldsToHash: RULE_SO_FIELDS_TO_HASH,
+            spanLabels: { solution: module, action: 'write' },
           });
           this.logger.trace(
             `Logged ${groupedChanges.length} change/s to history stream for [${module}, ${this.dataset}] correlationId=${correlationId}`
@@ -186,6 +187,9 @@ export class ChangeTrackingService implements IChangeTrackingService {
       this.logger.warn(error.message);
       throw error;
     }
-    return client.getHistory(spaceId, RULE_SAVED_OBJECT_TYPE, ruleId, opts);
+    return client.getHistory(spaceId, RULE_SAVED_OBJECT_TYPE, ruleId, {
+      ...opts,
+      spanLabels: { solution: module, action: 'read' },
+    });
   }
 }

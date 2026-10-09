@@ -36,7 +36,7 @@ export function registerBumpAgentPoliciesByIdTask(taskManagerSetup: TaskManagerS
         ),
         user: schema.maybe(schema.object({}, { unknowns: 'allow' })),
       }),
-      createTaskRunner: ({ taskInstance, abortController }) => {
+      createTaskRunner: ({ taskInstance, signal }) => {
         return {
           async run() {
             const { agentPolicyIdsWithSpace, user } = taskInstance.params as {
@@ -67,7 +67,7 @@ export function registerBumpAgentPoliciesByIdTask(taskManagerSetup: TaskManagerS
               for (const [spaceId, agentPolicyIds] of Object.entries(
                 agentPolicyIdsIndexedBySpace
               )) {
-                if (abortController.signal.aborted) {
+                if (signal.aborted) {
                   appContextService
                     .getLogger()
                     .warn('Bump agent policies task was cancelled before completing all spaces');

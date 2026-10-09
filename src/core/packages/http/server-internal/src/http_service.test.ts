@@ -117,6 +117,7 @@ test('creates and sets up http server', async () => {
   await service.start();
   expect(httpServer.start).toHaveBeenCalled();
   expect(prebootHttpServer.stop).toHaveBeenCalled();
+  expect(logger.get().get).toHaveBeenCalledWith('self-client');
   await service.stop();
 });
 

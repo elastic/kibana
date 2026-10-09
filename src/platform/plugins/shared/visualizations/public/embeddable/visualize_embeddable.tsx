@@ -323,6 +323,12 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
           titleManager.api.setTitle(visUpdates.title);
         }
       },
+      cancelRequests: () => {
+        const abortController = expressionAbortController$.getValue();
+        if (abortController) {
+          abortController.abort();
+        }
+      },
       openInspector: () => {
         const adapters = inspectorAdapters$.getValue();
         if (!adapters) return;

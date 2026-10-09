@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/core-http-browser'
   - '@kbn/content-management-favorites-server'
+  - '@kbn/favorite-button'
   - '@kbn/i18n-react'
   - '@kbn/usage-collection-plugin'
   - '@kbn/core-user-profile-browser'

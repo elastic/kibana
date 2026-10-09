@@ -231,6 +231,8 @@ describe('URLVoidConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = URLVoidConnector.test;
+
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         data: {
@@ -241,30 +243,18 @@ describe('URLVoidConnector', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!URLVoidConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await URLVoidConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://api.urlvoid.com/api1000/test-api-key/stats/remained'
       );
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to URLVoid API',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid API key'));
 
-      if (!URLVoidConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await URLVoidConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Failed to connect');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

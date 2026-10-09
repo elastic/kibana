@@ -25,6 +25,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./_no_data'));
-    loadTestFile(require.resolve('./_url_state'));
   });
 }

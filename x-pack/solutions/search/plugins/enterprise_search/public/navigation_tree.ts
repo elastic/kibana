@@ -79,6 +79,10 @@ export const getNavigationTreeDefinition = ({
               link: 'agent_builder',
             },
             {
+              icon: 'sparkles',
+              link: 'context_engine',
+            },
+            {
               icon: 'productDiscover',
               link: 'discover',
             },

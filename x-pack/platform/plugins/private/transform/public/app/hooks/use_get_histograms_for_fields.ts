@@ -30,6 +30,7 @@ export const useGetHistogramsForFields = (
   fields: FieldHistogramRequestConfig[],
   query: string | SavedSearchQuery,
   runtimeMappings?: FieldHistogramsRequestSchema['runtimeMappings'],
+  projectRouting?: FieldHistogramsRequestSchema['projectRouting'],
   enabled?: boolean,
   samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE
 ) => {
@@ -43,6 +44,7 @@ export const useGetHistogramsForFields = (
         fields,
         query,
         runtimeMappings,
+        projectRouting,
         samplerShardSize,
       },
     ],
@@ -55,6 +57,7 @@ export const useGetHistogramsForFields = (
             fields,
             samplerShardSize,
             ...(runtimeMappings !== undefined ? { runtimeMappings } : {}),
+            ...(projectRouting !== undefined ? { projectRouting } : {}),
           }),
           version: '1',
           signal,

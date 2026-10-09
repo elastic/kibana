@@ -16,6 +16,8 @@ import { evidenceGroundingEvaluator } from './evidence/evidence_grounding';
 import { filterCoverageEvaluator } from './filter/filter_coverage';
 import { filterGroundingEvaluator } from './filter/filter_grounding';
 import { kiFeatureCountEvaluator } from './bounds/ki_feature_count';
+import { extractedFeatureCountEvaluator } from './diagnostics/extracted_feature_count';
+import { createReportedTokenEvaluators } from '../reported_tokens';
 import type {
   KIFeatureExtractionEvaluationExample,
   KIFeatureExtractionEvaluator,
@@ -45,6 +47,11 @@ export const createKIFeatureExtractionEvaluators = (scenarioCriteria?: {
     typeAssertionsEvaluator,
     filterCoverageEvaluator,
     filterGroundingEvaluator,
+    extractedFeatureCountEvaluator,
+    ...createReportedTokenEvaluators<
+      KIFeatureExtractionEvaluationExample,
+      KIFeatureExtractionOutput
+    >(),
   ];
   const base = selectEvaluators(evaluators);
 

@@ -34,6 +34,8 @@ import type { z } from '@kbn/zod/v4';
 import type {
   BulkCreateWorkflowsParams,
   BulkCreateWorkflowsResponse,
+  CheckWorkflowIdConflictsParams,
+  CheckWorkflowIdConflictsResponse,
   ExportWorkflowsParams,
   ExportWorkflowsResponse,
   GetAggsParams,
@@ -45,11 +47,13 @@ import type {
   GetSchemaParams,
   GetWorkflowExecutionsParams,
   GetWorkflowStepExecutionsParams,
+  InstallTemplateResponse,
   MgetWorkflowsParams,
   RestoreWorkflowVersionParams,
   RestoreWorkflowVersionResponseDto,
   ResumeExecutionParams,
   RunWorkflowOptions,
+  SearchExecutionsParams,
   SearchTriggerEventLogParams,
   SearchTriggerEventLogResult,
   TestWorkflowParams,
@@ -136,6 +140,25 @@ export class WorkflowApi {
     });
   }
 
+  /**
+   * Returns the subset of the given candidate workflow IDs that already exist
+   * in the index, including soft-deleted tombstones and cross-space documents.
+   * Used by the import preflight to detect conflicts before the user commits.
+   *
+   * Implemented as `dryRun=true` on the bulk-create endpoint so no new route
+   * is needed — the same import path is reused for both the preflight check and
+   * the actual import.
+   */
+  async checkWorkflowIdConflicts({
+    workflows,
+  }: CheckWorkflowIdConflictsParams): Promise<CheckWorkflowIdConflictsResponse> {
+    return this.http.post(BASE, {
+      query: { dryRun: true },
+      body: JSON.stringify({ workflows }),
+      version: API_VERSION,
+    });
+  }
+
   // ---------------------------------------------------------------------------
   // Workflow operations
   // ---------------------------------------------------------------------------
@@ -210,6 +233,13 @@ export class WorkflowApi {
   async testStep(params: RunStepCommand): Promise<TestWorkflowResponseDto> {
     return this.http.post(`${BASE}/step/test`, {
       body: JSON.stringify(params),
+      version: API_VERSION,
+    });
+  }
+
+  async searchExecutions(params?: SearchExecutionsParams): Promise<WorkflowExecutionListDto> {
+    return this.http.get(`${BASE}/workflow/executions`, {
+      query: params as HttpFetchQuery,
       version: API_VERSION,
     });
   }
@@ -329,6 +359,33 @@ export class WorkflowApi {
 
   async getLibraryHealth(): Promise<GetLibraryHealthResponse> {
     return this.http.get(`${INTERNAL_BASE}/library/health`, {
+      version: INTERNAL_API_VERSION,
+    });
+  }
+
+  async installTemplate(
+    slug: string,
+    values: Record<string, unknown>
+  ): Promise<InstallTemplateResponse> {
+    return this.http.post(
+      `${INTERNAL_BASE}/library/templates/${encodeURIComponent(slug)}/install`,
+      {
+        body: JSON.stringify({ values }),
+        version: INTERNAL_API_VERSION,
+      }
+    );
+  }
+
+  /**
+   * Installs a template from raw YAML (e.g. an uploaded file) rather than a
+   * catalog slug. The server parses, renders, and creates the workflow.
+   */
+  async installTemplateFromYaml(
+    yaml: string,
+    values: Record<string, unknown>
+  ): Promise<InstallTemplateResponse> {
+    return this.http.post(`${INTERNAL_BASE}/library/templates/install`, {
+      body: JSON.stringify({ yaml, values }),
       version: INTERNAL_API_VERSION,
     });
   }

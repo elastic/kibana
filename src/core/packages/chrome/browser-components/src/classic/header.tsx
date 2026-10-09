@@ -104,7 +104,11 @@ export const ClassicHeader = React.memo(() => {
 
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem>
-                {hasAppMenuConfig ? <HeaderAppMenu /> : <HeaderActionMenu />}
+                {hasAppMenuConfig ? (
+                  <HeaderAppMenu breakpointSource="viewport" />
+                ) : (
+                  <HeaderActionMenu />
+                )}
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
           </EuiHeader>

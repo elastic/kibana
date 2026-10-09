@@ -87,16 +87,61 @@ When in doubt: if the Cypress test primarily calls `cy.request()` for setup and 
 
 All paths relative to this skill's directory.
 
+## Namespace selection — where does the test belong?
+
+Before scaffolding, decide which namespace the migrated test belongs in.
+**Primary rule: namespaces track feature areas**, not teams — one team commonly owns several namespaces (e.g. `@elastic/security-threat-hunting` owns `agent_builder`, `flyout`, `timelines`, and `workflows`).
+
+### Add to an existing namespace when:
+
+The feature under test lives inside a source directory already covered by an existing namespace (see table below). A different owning team is a secondary / reinforcing signal, not a primary criterion.
+
+Existing namespaces and their source scope:
+
+| Namespace | Source scope | `api/`? |
+|-----------|-------------|---------|
+| `agent_builder` | `public/agent_builder/` | no |
+| `entity_analytics` | `public/entity_analytics/` | yes |
+| `exceptions` | `public/exceptions/` | no |
+| `flyout` | `public/flyout/` (and `public/flyout_v2/`, a v2 rewrite of the same feature area in a separate top-level dir; tests should land in this namespace) | no |
+| `reports` | `public/reports/` | no |
+| `timelines` | `public/timelines/` | no |
+| `workflows` | `public/workflows/` | no |
+
+> The source scope column shows the UI (`public/`) anchor. API tests for a feature belong in the **same namespace** as its UI tests — the namespace tracks the feature area, not the code layer (e.g., entity analytics API tests live in `entity_analytics/api/` alongside the UI tests).
+
+### Create a new namespace when:
+
+- The feature source lives in a top-level directory under `public/` **not covered** by any row above (e.g., `public/asset_inventory/` → new namespace `asset_inventory`). Separate v2/v3 rewrites of an existing feature area (e.g. `public/flyout_v2/`) belong in the parent namespace, not a new one. For server-only features with no `public/` counterpart, use the directory name under `server/lib/` as the namespace anchor (e.g., `server/lib/machine_learning/` → namespace `machine_learning`). ⚠️ Exception: `server/lib/timeline` (singular) maps to the existing `timelines` namespace — do not create a new `timeline` namespace.
+- There are **3 or more test specs** — single tests do not justify a new Playwright config with its own fixtures tree.
+
+A different owning team reinforces the decision but is not required on its own.
+
+### How to create a new namespace (3 required steps):
+
+1. **Create the directory structure.** Run `node scripts/scout generate --path x-pack/solutions/security/plugins/security_solution --type ui --namespace <name>` (use `--type api` or `--type both` if API tests are also needed). This scaffolds `test/scout/<name>/{ui,api}/` with the correct config files.
+2. **Generate and commit the config manifest.** Run `node scripts/scout update-test-config-manifests` from the repo root. This writes `.meta/(ui|api)/*.json` under the namespace dir. Without it, CI discovery and selective testing will not see the new config. Commit the generated file.
+3. **Add a CODEOWNERS entry.** Add `/x-pack/solutions/security/plugins/security_solution/test/scout/<namespace>/ @elastic/<team>` to `.github/CODEOWNERS`. If omitted, ownership falls through to the umbrella entry `@elastic/security-engineering-productivity` — easy to forget (the `exceptions` namespace currently has no dedicated entry for this reason).
+
+> **No `.buildkite/scout_ci_config.yml` edit is needed.** The `security_solution` plugin is already registered in the `enabled` plugins list in that file. CI auto-discovers all `playwright.config.ts` files within registered plugins — only entries under `excluded_configs` are skipped. New namespace configs are picked up automatically.
+
+**Then:** add the namespace to the source-scope table in `security-test-directories.md` (in this skill set) and the namespace table in `scout-best-practices-reviewer`.
+
+> **Do not** create a namespace for a sub-component of an existing feature area — add those tests to the parent namespace (e.g., a new risk-score view → `entity_analytics`, not a new `risk_score` namespace).
+
+---
+
 ## Scaffold shortcut
 
-Use the general skill's scaffold with Security Solution defaults:
+Use the general skill's scaffold with Security Solution defaults. Security Solution tests are organised into namespace sub-directories, so pass the correct `<namespace>` for the feature area being migrated (e.g. `timelines`, `entity_analytics`, `exceptions`, `flyout`, `reports`, `workflows`, `agent_builder`):
 
 ```bash
 bash .agents/skills/cypress-to-scout-migration/scripts/scaffold_scout_spec.sh \
   --name <spec_name> --domain <domain_path> \
-  --plugin-test-dir x-pack/solutions/security/plugins/security_solution/test/scout/ui \
+  --plugin-test-dir x-pack/solutions/security/plugins/security_solution/test/scout/<namespace>/ui \
   --type parallel --scout-package @kbn/scout-security
 ```
+
 
 ## Security Solution tags
 
@@ -117,7 +162,6 @@ Available Security serverless tiers:
 | Role | Method | Use |
 |------|--------|-----|
 | Platform engineer | `browserAuth.loginAsPlatformEngineer()` | Default for most tests — standard CRUD privileges |
-| Privileged user | `browserAuth.loginAsPrivilegedUser()` | Editor role in serverless security projects |
 | T1 analyst | `browserAuth.loginAsT1Analyst()` | Read-only analyst (RBAC testing) |
 | Any security role | `browserAuth.loginAsSecurityRole('role_name')` | Generic — works for any role in `roles.yml` |
 | Custom role | `browserAuth.loginWithCustomRole(roleDescriptor)` | Ad-hoc RBAC testing with inline descriptors |
@@ -180,7 +224,7 @@ After migration, run the `scout-best-practices-reviewer` skill against the new t
 
 ## Ownership notes
 
-- **Timeline UI** lives in the `security_solution` plugin (`public/timelines/`), not the `timelines` plugin. The `timelines` plugin only contains server-side saved object definitions and APIs. Scout tests for timeline UI belong in `security_solution/test/scout/`.
+- **Timeline UI** lives in the `security_solution` plugin (`public/timelines/`), not the `timelines` plugin. The `timelines` plugin only contains server-side saved object definitions and APIs. Scout tests for timeline UI belong in `security_solution/test/scout/timelines/ui/`.
 - **Timeline `deleteAll()`** must delete both timelines and templates — they share the same API but require separate fetch calls filtered by `timeline_type`.
 
 ## Skill improvement

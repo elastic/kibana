@@ -52,6 +52,13 @@ export const listLeadsTool = (
       'Leads are sorted by priority (highest first) by default.',
     schema,
     tags: ['security', 'entity-analytics', 'leads'],
+    annotations: {
+      title: 'List Leads',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: ({ request }) =>

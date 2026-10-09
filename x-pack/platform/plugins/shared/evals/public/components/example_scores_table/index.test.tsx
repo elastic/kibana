@@ -100,15 +100,9 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(
-      <ExampleScoresTable
-        examples={examples}
-        onExampleClick={jest.fn()}
-        onTraceClick={onTraceClick}
-      />
-    );
+    render(<ExampleScoresTable examples={examples} onTraceClick={onTraceClick} />);
 
-    expect(screen.getByText('example-id-00000...')).toBeInTheDocument();
+    expect(screen.getByText('example-id-0000000000000001')).toBeInTheDocument();
 
     const pagination = screen.getByRole('navigation', {
       name: 'Select repetition for example example-id-0000000000000001',
@@ -164,16 +158,14 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(
-      <ExampleScoresTable examples={examples} onExampleClick={jest.fn()} onTraceClick={jest.fn()} />
-    );
+    render(<ExampleScoresTable examples={examples} onTraceClick={jest.fn()} />);
 
     expect(
       screen.queryByRole('navigation', {
         name: 'Select repetition for example example-id-single-repetition',
       })
     ).not.toBeInTheDocument();
-    expect(screen.getByText('example-id-singl...')).toBeInTheDocument();
+    expect(screen.getByText('example-id-single-repetition')).toBeInTheDocument();
   });
 
   it('renders evaluator label as a badge when present', () => {
@@ -193,9 +185,7 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(
-      <ExampleScoresTable examples={examples} onExampleClick={jest.fn()} onTraceClick={jest.fn()} />
-    );
+    render(<ExampleScoresTable examples={examples} onTraceClick={jest.fn()} />);
 
     expect(screen.getByText('Factuality:')).toBeInTheDocument();
     expect(screen.getByText('0.80')).toBeInTheDocument();
@@ -220,9 +210,7 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(
-      <ExampleScoresTable examples={examples} onExampleClick={jest.fn()} onTraceClick={jest.fn()} />
-    );
+    render(<ExampleScoresTable examples={examples} onTraceClick={jest.fn()} />);
 
     expect(screen.getByText('Relevance:')).toBeInTheDocument();
     expect(screen.getByText('0.90')).toBeInTheDocument();
@@ -255,13 +243,7 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(
-      <ExampleScoresTable
-        examples={examples}
-        onExampleClick={jest.fn()}
-        onTraceClick={onTraceClick}
-      />
-    );
+    render(<ExampleScoresTable examples={examples} onTraceClick={onTraceClick} />);
 
     const accordion = screen.getByLabelText('Toggle details for evaluator Criteria');
     const accordionButton = accordion.querySelector('.euiAccordion__button') as HTMLButtonElement;
@@ -291,9 +273,7 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(
-      <ExampleScoresTable examples={examples} onExampleClick={jest.fn()} onTraceClick={jest.fn()} />
-    );
+    render(<ExampleScoresTable examples={examples} onTraceClick={jest.fn()} />);
 
     expect(screen.getByText('SimpleScore:')).toBeInTheDocument();
     expect(screen.getByText('1.00')).toBeInTheDocument();

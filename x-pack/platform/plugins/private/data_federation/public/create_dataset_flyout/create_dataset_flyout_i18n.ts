@@ -481,4 +481,14 @@ export const createDatasetFlyoutStrings = {
     i18n.translate('xpack.dataFederation.createDatasetFlyout.saveButton', {
       defaultMessage: 'Save',
     }),
+
+  learnMore: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.learnMore', {
+      defaultMessage: 'Learn more',
+    }),
+
+  settingsLearnMore: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsLearnMore', {
+      defaultMessage: 'Learn more about dataset settings',
+    }),
 };

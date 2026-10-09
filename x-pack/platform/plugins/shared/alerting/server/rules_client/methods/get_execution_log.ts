@@ -126,6 +126,7 @@ export async function getGlobalExecutionLogWithAuth(
           ruleTypeId: 'kibana.alert.rule.rule_type_id',
           consumer: 'kibana.alert.rule.consumer',
         },
+        namespaces,
       },
     });
   } catch (error) {

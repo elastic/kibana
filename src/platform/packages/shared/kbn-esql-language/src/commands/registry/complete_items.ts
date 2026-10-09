@@ -162,11 +162,27 @@ export function buildAddValuePlaceholder(
   });
 }
 
-/** Finds the placeholder type that matches the given ES|QL types */
+/** Finds the placeholder type that matches the given ES|QL types, preferring the one matching `preferredType` when accepted */
 export function findConstantPlaceholderType(
-  types: readonly string[]
+  types: readonly string[],
+  preferredType?: string
 ): ConstantPlaceholderType | undefined {
-  for (const placeholderType of Object.keys(PLACEHOLDER_CONFIG) as ConstantPlaceholderType[]) {
+  const placeholderTypes = Object.keys(PLACEHOLDER_CONFIG) as ConstantPlaceholderType[];
+
+  if (preferredType) {
+    const preferredPlaceholder = placeholderTypes.find((placeholderType) =>
+      PLACEHOLDER_CONFIG[placeholderType].matchTypes.includes(preferredType)
+    );
+
+    if (
+      preferredPlaceholder &&
+      types.some((type) => PLACEHOLDER_CONFIG[preferredPlaceholder].matchTypes.includes(type))
+    ) {
+      return preferredPlaceholder;
+    }
+  }
+
+  for (const placeholderType of placeholderTypes) {
     const { matchTypes } = PLACEHOLDER_CONFIG[placeholderType];
 
     if (types.some((type) => matchTypes.includes(type))) {

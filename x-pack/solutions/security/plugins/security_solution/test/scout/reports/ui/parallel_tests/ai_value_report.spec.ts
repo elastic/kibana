@@ -13,7 +13,6 @@ spaceTest.describe(
   {
     tag: [
       ...tags.stateful.classic,
-      ...tags.stateful.security,
       ...tags.serverless.security.complete,
       ...tags.serverless.security.ease,
     ],

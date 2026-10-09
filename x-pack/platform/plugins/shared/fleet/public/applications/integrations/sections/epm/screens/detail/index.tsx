@@ -137,7 +137,7 @@ function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
 export function Detail() {
   const theme = useEuiTheme();
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
-  const { getFromIntegrations } = useIntegrationsStateContext();
+  const { getFromIntegrations, getFromCollection } = useIntegrationsStateContext();
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref, getPath } = useLink();
   const history = useHistory();
@@ -386,13 +386,15 @@ export function Detail() {
   );
 
   const fromIntegrations = getFromIntegrations();
+  const fromCollection = getFromCollection();
 
-  const fromIntegrationsPath =
-    fromIntegrations === 'updates_available'
-      ? getPath('integrations_installed_updates_available')
-      : fromIntegrations === 'installed'
-      ? getPath('integrations_installed')
-      : getPath('integrations_all');
+  const fromIntegrationsPath = fromCollection
+    ? getPath('integration_collection', { groupId: fromCollection.groupId })
+    : fromIntegrations === 'updates_available'
+    ? getPath('integrations_installed_updates_available')
+    : fromIntegrations === 'installed'
+    ? getPath('integrations_installed')
+    : getPath('integrations_all');
 
   const numOfDeferredInstallations = useMemo(
     () => getDeferredInstallationsCnt(packageInfo),
@@ -430,7 +432,11 @@ export function Detail() {
         <EuiFlexItem>
           {/* Allows button to break out of full width */}
           <div>
-            <BackLink queryParams={queryParams} integrationsPath={fromIntegrationsPath} />
+            <BackLink
+              queryParams={queryParams}
+              integrationsPath={fromIntegrationsPath}
+              collectionTitle={fromCollection?.title}
+            />
           </div>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -492,12 +498,13 @@ export function Detail() {
       </EuiFlexGroup>
     ),
     [
-      integrationInfo,
+      queryParams,
+      fromIntegrationsPath,
+      fromCollection?.title,
+      packageInfoError,
       isLoading,
       packageInfo,
-      fromIntegrationsPath,
-      queryParams,
-      packageInfoError,
+      integrationInfo,
       releaseLabel,
     ]
   );

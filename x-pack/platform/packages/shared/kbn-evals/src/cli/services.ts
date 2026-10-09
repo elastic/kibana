@@ -26,7 +26,10 @@ interface ServiceEntry {
   connectorsHash?: string;
   /** The serverConfigSet used to start Scout */
   serverConfigSet?: string;
-  /** SHA-256 of env vars forwarded to Scout (e.g. TRACING_EXPORTERS, GCS_CREDENTIALS) */
+  /**
+   * SHA-256 of the env the service was started with (Scout: TRACING_EXPORTERS,
+   * GCS_CREDENTIALS; EDOT: ELASTICSEARCH_HOST).
+   */
   envHash?: string;
 }
 
@@ -65,15 +68,19 @@ export const isAlive = (pid: number): boolean => {
   }
 };
 
-export const connectorsHash = (): string => {
-  const raw = process.env.KIBANA_TESTING_AI_CONNECTORS ?? '';
-  return createHash('sha256').update(raw).digest('hex').slice(0, 12);
-};
+const hashParts = (parts: Array<string | undefined>): string =>
+  createHash('sha256')
+    .update(parts.map((part) => part ?? '').join('\0'))
+    .digest('hex')
+    .slice(0, 12);
 
-export const scoutEnvHash = (env: Record<string, string> | undefined): string => {
-  const parts = [env?.TRACING_EXPORTERS ?? '', env?.GCS_CREDENTIALS ?? ''];
-  return createHash('sha256').update(parts.join('\0')).digest('hex').slice(0, 12);
-};
+export const connectorsHash = (): string => hashParts([process.env.KIBANA_TESTING_AI_CONNECTORS]);
+
+export const scoutEnvHash = (env: Record<string, string> | undefined): string =>
+  hashParts([env?.TRACING_EXPORTERS, env?.GCS_CREDENTIALS]);
+
+export const edotEnvHash = (elasticsearchHost: string | undefined): string =>
+  hashParts([elasticsearchHost]);
 
 export const isServiceRunning = (repoRoot: string, name: ServiceName): boolean => {
   const state = readState(repoRoot);
@@ -114,6 +121,27 @@ export const isScoutStale = (
         entry.serverConfigSet ?? DEFAULT_SERVER_CONFIG_SET
       }, requested: ${targetConfigSet})`,
     };
+  }
+
+  return { stale: false };
+};
+
+/**
+ * Returns true if the running EDOT collector exports to a different
+ * Elasticsearch than this run reads traces from. Switching profiles between
+ * runs is what moves the target, and a collector left pointing at the previous
+ * one goes on accepting spans while indexing them somewhere the trace-based
+ * evaluators never look.
+ */
+export const isEdotStale = (
+  repoRoot: string,
+  elasticsearchHost: string | undefined
+): { stale: boolean; reason?: string } => {
+  const entry = readState(repoRoot).edot;
+  if (!entry || !isAlive(entry.pid)) return { stale: false };
+
+  if (entry.envHash && entry.envHash !== edotEnvHash(elasticsearchHost)) {
+    return { stale: true, reason: 'TRACING_ES_URL changed' };
   }
 
   return { stale: false };

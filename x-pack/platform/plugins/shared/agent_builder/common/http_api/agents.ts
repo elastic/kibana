@@ -22,8 +22,10 @@ export type AgentDefinitionWithPermissions = AgentDefinition & {
 
 export type GetAgentResponse = AgentDefinitionWithPermissions;
 
+export type ListAgentResponseItem = AgentDefinitionWithPermissions;
+
 export interface ListAgentResponse {
-  results: AgentDefinitionWithPermissions[];
+  results: ListAgentResponseItem[];
 }
 
 export type UpdateAgentResponse = AgentDefinitionWithPermissions;

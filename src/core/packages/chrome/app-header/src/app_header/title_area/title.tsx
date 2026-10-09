@@ -19,6 +19,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { AppHeaderEditableTitle } from '../../types';
+import { asOptionalPlainText, asPlainText } from '../as_plain_text';
 import { APP_HEADER_TEST_SUBJECTS } from '../test_subjects';
 
 // The bundled lib.dom `FocusOptions` does not yet include `focusVisible`, which lets us
@@ -268,9 +269,9 @@ interface TitleProps {
 
 export const Title = React.memo<TitleProps>(({ title, titleOffset, size = 's' }) => {
   const editable = isEditableTitle(title);
-  const text = editable ? title.text : title;
-  const placeholder = editable ? title.placeholder : undefined;
-  const ariaLabel = editable ? title.ariaLabel : undefined;
+  const text = asPlainText(editable ? title.text : title);
+  const placeholder = asOptionalPlainText(editable ? title.placeholder : undefined);
+  const ariaLabel = asOptionalPlainText(editable ? title.ariaLabel : undefined);
   const onSave = editable ? title.onSave : undefined;
 
   const [isEditing, setIsEditing] = useState(false);

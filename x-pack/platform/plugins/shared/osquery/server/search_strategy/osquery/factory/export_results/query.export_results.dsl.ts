@@ -8,11 +8,9 @@
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { buildQueryFromFilters } from '@kbn/es-query';
 
-import { OSQUERY_INTEGRATION_NAME } from '../../../../../common';
 import type { ExportResultsRequestOptions } from '../../../../../common/search_strategy/osquery';
-import { buildIndexNameWithNamespace } from '../../../../utils/build_index_name_with_namespace';
+import { buildExportResultsIndex } from '../../../../utils/build_export_results_index';
 import { getQueryFilter } from '../../../../utils/build_query';
-import { prefixIndexPatternsWithCcs } from '../../../../utils/ccs_utils';
 import { composeExportKuery } from '../../../../lib/compose_export_kuery';
 
 export const buildExportResultsQuery = ({
@@ -30,8 +28,6 @@ export const buildExportResultsQuery = ({
 }: ExportResultsRequestOptions & {
   ccsEnabled?: boolean;
 }): ISearchRequestParams => {
-  const baseIndex = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
-
   const filter = composeExportKuery({ baseFilter, kuery, agentIds });
   const kqlFilterClause = getQueryFilter({ filter });
 
@@ -40,18 +36,12 @@ export const buildExportResultsQuery = ({
       ? buildQueryFromFilters(esFilters, undefined)
       : { filter: [], must_not: [] };
 
-  // Resolve namespace-aware index pattern (mirrors query.all_results.dsl.ts).
-  let index: string;
-  if (integrationNamespaces && integrationNamespaces.length > 0) {
-    index = integrationNamespaces
-      .map((namespace) => buildIndexNameWithNamespace(baseIndex, namespace))
-      .join(',');
-  } else {
-    index = baseIndex;
-  }
-
-  // mirrors query.all_results.dsl.ts: tolerance flags + CCS prefix.
-  index = prefixIndexPatternsWithCcs(index, ccsEnabled ?? false);
+  // Shared with the export route handler's PIT so both scan the same namespace-
+  // and CCS-resolved targets. Mirrors query.all_results.dsl.ts tolerance flags.
+  const index = buildExportResultsIndex({
+    integrationNamespaces,
+    ccsEnabled: ccsEnabled ?? false,
+  });
 
   // `index` is included so the strategy can route to the correct internal/public
   // ES client (see osquerySearchStrategyProvider). The strategy strips `index`,

@@ -40,6 +40,7 @@ export const appPaths = {
     connectors: '/manage/connectors',
     mcpClients: '/manage/tools/mcp_clients',
     mcpClientCreate: '/manage/tools/mcp_clients/new',
+    mcpClientEdit: ({ clientId }: { clientId: string }) => `/manage/tools/mcp_clients/${clientId}`,
   },
 
   // Legacy paths - redirect to new structure via LegacyConversationRedirect

@@ -52,6 +52,11 @@ const CompareExperimentsPage = React.lazy(async () => {
   return { default: mod.CompareExperimentsPage };
 });
 
+const RunOverviewPage = React.lazy(async () => {
+  const mod = await import('./pages/run_overview');
+  return { default: mod.RunOverviewPage };
+});
+
 const appTitleLabel = i18n.translate('xpack.evals.app.title', {
   defaultMessage: 'Evaluations',
 });
@@ -74,6 +79,7 @@ const tracingTabLabel = i18n.translate('xpack.evals.navigation.tracing', {
 
 const ROOT_PATH = '/' as const;
 const COMPARE_PATH = '/compare' as const;
+const RUNS_PATH = '/runs' as const;
 const DATASETS_PATH = '/datasets' as const;
 const TRACING_PATH = '/tracing' as const;
 const REMOTES_PATH = '/remotes' as const;
@@ -87,6 +93,10 @@ const compareExperimentsBreadcrumbLabel = i18n.translate(
     defaultMessage: 'Compare experiments',
   }
 );
+
+const runOverviewBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.runOverview', {
+  defaultMessage: 'Run overview',
+});
 
 const datasetDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.datasetDetail', {
   defaultMessage: 'Dataset details',
@@ -145,6 +155,13 @@ const getBreadcrumbs = ({
 
   if (pathname === REMOTES_PATH) {
     return [{ text: remotesTabLabel }];
+  }
+
+  if (pathname === RUNS_PATH) {
+    return [
+      { text: experimentsTabLabel, href: experimentsHref },
+      { text: runOverviewBreadcrumbLabel },
+    ];
   }
 
   if (pathname.startsWith('/experiments/')) {
@@ -214,7 +231,7 @@ export const EvalsApp: React.FC<{
 }> = ({ history, setBreadcrumbs, getHref, breadcrumbPrefix }) => {
   return (
     <Router history={history}>
-      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+      <div>
         <EvalsHeader />
         <EvalsNavigation />
         <EvalsBreadcrumbs
@@ -222,20 +239,19 @@ export const EvalsApp: React.FC<{
           getHref={getHref}
           breadcrumbPrefix={breadcrumbPrefix}
         />
-        <div style={{ flex: 1, minHeight: 0 }}>
-          <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
-            <Routes>
-              <Route exact path={ROOT_PATH} component={ExperimentsListPage} />
-              <Route exact path={COMPARE_PATH} component={CompareExperimentsPage} />
-              <Route exact path={DATASETS_PATH} component={DatasetsListPage} />
-              <Route path="/datasets/:datasetId" component={DatasetDetailPage} />
-              <Route exact path={REMOTES_PATH} component={RemotesListPage} />
-              <Route path="/experiments/:experimentId" component={ExperimentDetailPage} />
-              <Route exact path={TRACING_PATH} component={TracingProjectsListPage} />
-              <Route exact path="/tracing/:projectName" component={TracingProjectDetailPage} />
-            </Routes>
-          </Suspense>
-        </div>
+        <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
+          <Routes>
+            <Route exact path={ROOT_PATH} component={ExperimentsListPage} />
+            <Route exact path={COMPARE_PATH} component={CompareExperimentsPage} />
+            <Route exact path={RUNS_PATH} component={RunOverviewPage} />
+            <Route exact path={DATASETS_PATH} component={DatasetsListPage} />
+            <Route path="/datasets/:datasetId" component={DatasetDetailPage} />
+            <Route exact path={REMOTES_PATH} component={RemotesListPage} />
+            <Route path="/experiments/:experimentId" component={ExperimentDetailPage} />
+            <Route exact path={TRACING_PATH} component={TracingProjectsListPage} />
+            <Route exact path="/tracing/:projectName" component={TracingProjectDetailPage} />
+          </Routes>
+        </Suspense>
       </div>
     </Router>
   );

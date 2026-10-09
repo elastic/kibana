@@ -852,6 +852,121 @@ describe('Unified data table cell rendering', () => {
     expect(within(popover).getByText('.gz')).toBeVisible();
   });
 
+  it('renders a pretty-printed JSON value in the cell popover', () => {
+    const json = { foo: { bar: true } };
+    const rows: EsHitRecord[] = [
+      {
+        _id: '1',
+        _index: 'test',
+        _score: 1,
+        _source: undefined,
+        fields: { message: JSON.stringify(json) },
+      },
+    ];
+
+    const DataTableCellValue = getRenderCellValueFn({
+      closePopover: jest.fn(),
+      columnsMeta: undefined,
+      dataView: dataViewMock,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+      rows: rows.map(build),
+      shouldShowFieldHandler: () => true,
+    });
+
+    renderWithI18n(
+      <DataTableCellValue
+        colIndex={0}
+        columnId="message"
+        isDetails={true}
+        isExpandable={true}
+        isExpanded={false}
+        rowIndex={0}
+        setCellProps={jest.fn()}
+      />
+    );
+
+    const popoverValue = screen.getByTestId('dataTableExpandCellActionPopoverValue');
+    expect(popoverValue).toBeVisible();
+    expect(popoverValue.textContent).toBe(JSON.stringify(json, null, 2));
+  });
+
+  it('renders a short, non-JSON value as its plain formatted value in the cell popover', () => {
+    const rows: EsHitRecord[] = [
+      {
+        _id: '1',
+        _index: 'test',
+        _score: 1,
+        _source: undefined,
+        fields: { message: 'a short message' },
+      },
+    ];
+
+    const DataTableCellValue = getRenderCellValueFn({
+      closePopover: jest.fn(),
+      columnsMeta: undefined,
+      dataView: dataViewMock,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+      rows: rows.map(build),
+      shouldShowFieldHandler: () => true,
+    });
+
+    renderWithI18n(
+      <DataTableCellValue
+        colIndex={0}
+        columnId="message"
+        isDetails={true}
+        isExpandable={true}
+        isExpanded={false}
+        rowIndex={0}
+        setCellProps={jest.fn()}
+      />
+    );
+
+    const value = screen.getByTestId('dataTableExpandCellActionPopoverValue');
+    expect(value).toBeVisible();
+    expect(value.textContent).toBe('a short message');
+  });
+
+  it('does not pretty-print JSON for multivalued fields', () => {
+    const rows: EsHitRecord[] = [
+      {
+        _id: '1',
+        _index: 'test',
+        _score: 1,
+        _source: undefined,
+        fields: { message: [JSON.stringify({ a: 1 }), JSON.stringify({ b: 2 })] },
+      },
+    ];
+
+    const DataTableCellValue = getRenderCellValueFn({
+      closePopover: jest.fn(),
+      columnsMeta: undefined,
+      dataView: dataViewMock,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+      rows: rows.map(build),
+      shouldShowFieldHandler: () => true,
+    });
+
+    renderWithI18n(
+      <DataTableCellValue
+        colIndex={0}
+        columnId="message"
+        isDetails={true}
+        isExpandable={true}
+        isExpanded={false}
+        rowIndex={0}
+        setCellProps={jest.fn()}
+      />
+    );
+
+    const value = screen.getByTestId('dataTableExpandCellActionPopoverValue');
+    expect(value).toBeVisible();
+    expect(value.textContent).not.toContain('\n');
+  });
+
   it('renders regular ES|QL fields correctly', () => {
     const DataTableCellValue = getCustomEsqlDataTableCellValue();
 

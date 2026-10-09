@@ -76,7 +76,6 @@ const createMockRound = (
 const createMockConversation = (rounds: ProcessedConversationRound[]): ProcessedConversation => ({
   previousRounds: rounds,
   nextInput: { message: 'current question', attachments: [] },
-  attachments: [],
   attachmentTypes: [],
   attachmentStateManager: createAttachmentStateManager([], {
     getTypeDefinition: () => undefined,

@@ -12,10 +12,12 @@ import type {
   KibanaResponseFactory,
   Logger,
   SavedObject,
+  SavedObjectErrorResult,
   SavedObjectsBulkDeleteStatus,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -275,10 +277,10 @@ export class ScheduledReportsService {
         ids.map((id) => ({ id, type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE }))
       );
 
-      const [validSchedules, bulkGetErrors] = partition(
-        bulkGetResult.saved_objects,
-        (so) => so.error === undefined
+      const validSchedules = bulkGetResult.saved_objects.filter(
+        (so): so is SavedObject<ScheduledReportType> => !isSavedObjectErrorResult(so)
       );
+      const bulkGetErrors = bulkGetResult.saved_objects.filter(isSavedObjectErrorResult);
       const [authorizedSchedules, unauthorizedSchedules] = partition(
         validSchedules,
         (so) => so.attributes.createdBy === username || this.userCanManageReporting
@@ -359,7 +361,7 @@ export class ScheduledReportsService {
     unauthorizedSchedules,
     username,
   }: {
-    bulkGetErrors: SavedObject<ScheduledReportType>[];
+    bulkGetErrors: SavedObjectErrorResult[];
     unauthorizedSchedules: SavedObject<ScheduledReportType>[];
     username: string | boolean;
   }) {
@@ -553,7 +555,7 @@ export class ScheduledReportsService {
         });
 
         for (const so of bulkUpdateResult.saved_objects) {
-          if (so.error) {
+          if (isSavedObjectErrorResult(so)) {
             bulkErrors.push({
               message: so.error.message,
               status: so.error.statusCode,
@@ -564,7 +566,7 @@ export class ScheduledReportsService {
                 ? ScheduledReportAuditAction.ENABLE
                 : ScheduledReportAuditAction.DISABLE,
               id: so.id,
-              name: so?.attributes?.title,
+              name: undefined,
               error: new Error(so.error.message),
             });
           } else {
@@ -621,7 +623,7 @@ export class ScheduledReportsService {
   }: {
     action: ScheduledReportAuditAction;
     user: ReportingUser;
-    scheduledReportSavedObjects: SavedObject<ScheduledReportType>[];
+    scheduledReportSavedObjects: Array<SavedObject<ScheduledReportType> | SavedObjectErrorResult>;
     operation: 'enable' | 'disable';
   }) {
     const errors: BulkOperationError[] = [];
@@ -630,7 +632,7 @@ export class ScheduledReportsService {
     const updatedScheduledReportIds: Set<string> = new Set();
 
     for (const so of scheduledReportSavedObjects) {
-      if (so.error) {
+      if (isSavedObjectErrorResult(so)) {
         errors.push({
           message: so.error.message,
           status: so.error.statusCode,

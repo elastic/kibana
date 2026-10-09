@@ -31,7 +31,8 @@ import {
 
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../..';
-import type { RegistryDataStream } from '../../../../types';
+import type { PackageInfo, RegistryDataStream } from '../../../../types';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
 import {
@@ -2970,26 +2971,81 @@ describe('EPM template', () => {
       });
     });
 
-    // TODO: generateESIndexPatterns does not accept an isOtelInputType flag and therefore
-    // never appends the '.otel' suffix for OTel input packages. The pattern is stored in
-    // the Fleet installation saved object (es_index_patterns) and used by get.ts to match
-    // active data streams for the Fleet UI — it does not affect ES index template routing.
-    // With the missing suffix, the UI will fail to match data streams named
-    // 'logs-generic.otel-<namespace>' against the stored pattern 'logs-generic-*'.
-    // The test below locks in the current (incorrect) behavior so any future fix is explicit.
-    it('does not append .otel suffix for OTel input data streams (current behavior — see TODO above)', () => {
-      const otelDataStream = {
+    describe('with package context', () => {
+      const regularDataStream = {
         type: 'logs',
-        dataset: 'generic',
-        title: 'Generic OTel logs',
+        dataset: 'nginx.access',
+        title: 'Nginx access logs',
         release: 'ga',
-        package: 'otel',
-        path: 'generic',
+        package: 'nginx',
+        path: 'access',
         ingest_pipeline: 'default',
+        streams: [{ input: 'logfile' }],
       } as RegistryDataStream;
 
-      expect(generateESIndexPatterns([otelDataStream])).toEqual({
-        generic: 'logs-generic-*',
+      const otelDataStream = {
+        type: 'metrics',
+        dataset: 'supabase.metrics',
+        title: 'Supabase OTel metrics',
+        release: 'ga',
+        package: 'supabase',
+        path: 'metrics',
+        ingest_pipeline: 'default',
+        streams: [{ input: 'otelcol' }],
+      } as RegistryDataStream;
+
+      const packageInfo = {
+        policy_templates: [{ name: 'supabase', inputs: [{ type: 'otelcol' }] }],
+      } as PackageInfo;
+
+      beforeEach(() => {
+        appContextService.start(
+          createAppContextStartContractMock({}, undefined, undefined, {
+            enableOtelIntegrations: true,
+          } as ExperimentalFeatures)
+        );
+      });
+
+      it('appends the .otel suffix only for data streams on the OTel input', () => {
+        expect(generateESIndexPatterns([regularDataStream, otelDataStream], packageInfo)).toEqual({
+          access: 'logs-nginx.access-*',
+          metrics: 'metrics-supabase.metrics.otel-*',
+        });
+      });
+
+      it('resolves an input referenced by name', () => {
+        const namedInputDataStream = {
+          ...otelDataStream,
+          streams: [{ input: 'otel_metrics' }],
+        } as RegistryDataStream;
+
+        expect(
+          generateESIndexPatterns([namedInputDataStream], {
+            policy_templates: [
+              { name: 'supabase', inputs: [{ type: 'otelcol', name: 'otel_metrics' }] },
+            ],
+          } as PackageInfo)
+        ).toEqual({
+          metrics: 'metrics-supabase.metrics.otel-*',
+        });
+      });
+
+      it('leaves patterns unsuffixed when no package context is given', () => {
+        expect(generateESIndexPatterns([otelDataStream])).toEqual({
+          metrics: 'metrics-supabase.metrics-*',
+        });
+      });
+
+      it('leaves patterns unsuffixed when OTel integrations are disabled', () => {
+        appContextService.start(
+          createAppContextStartContractMock({}, undefined, undefined, {
+            enableOtelIntegrations: false,
+          } as ExperimentalFeatures)
+        );
+
+        expect(generateESIndexPatterns([otelDataStream], packageInfo)).toEqual({
+          metrics: 'metrics-supabase.metrics-*',
+        });
       });
     });
   });

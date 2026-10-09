@@ -9,7 +9,7 @@
 
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { HistogramPercentile, SimpleAggregation } from '../../../types';
+import type { HistogramPercentile, SimpleAggregation } from '@kbn/discover-utils';
 import { SIMPLE_AGGREGATION_OPTIONS, HISTOGRAM_PERCENTILE_OPTIONS } from './constants';
 
 /**

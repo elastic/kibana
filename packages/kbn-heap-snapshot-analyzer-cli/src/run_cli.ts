@@ -20,9 +20,19 @@
 // Loads the snapshot as a Buffer (no V8 ~512MB string limit) and parses the
 // known top-level structure incrementally so multi-GB snapshots work.
 
-import { readFileSync, writeFileSync } from 'fs';
+import { spawnSync } from 'child_process';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getPackages } from '@kbn/repo-packages';
+import type {
+  SourceAttribution,
+  SourceDiffReport,
+  SourceSummary,
+  SourceSummaryRow,
+} from './source_diff';
+import { buildSourceDiff, normalizeSourcePath } from './source_diff';
 
 // Byte constants — keep parser hot loops free of String comparisons.
 const C_LBRACE = 0x7b; // {
@@ -187,6 +197,9 @@ export function runHeapSnapshotAnalyzerCli(): void {
         '  --filter=<regex>         Restrict allocation-site tables to nodes whose deepest\n' +
         '                           allocation frame script_name matches <regex>. Example:\n' +
         '                           --filter=zod for Zod-only allocation attribution.\n' +
+        '  --compare=<snapshot>     Compare against a baseline snapshot, grouped additively\n' +
+        '                           by allocation source and V8 node type.\n' +
+        '  --compare-limit=N        Human-readable comparison rows to print (default 100).\n' +
         '\n' +
         'Computes two attribution views by default:\n' +
         '  - package: explicit-evidence seeds + dominator propagation (per-package; edge-order invariant)\n' +
@@ -247,6 +260,137 @@ export function runHeapSnapshotAnalyzerCli(): void {
   function fmtBytes(b: number, unit: 'KB' | 'MB' = 'MB'): string {
     const div = unit === 'MB' ? 1e6 : 1e3;
     return `${(b / div).toFixed(1)} ${unit}`;
+  }
+
+  const sourceSummaryFile = flagValue('source-summary');
+  const compareSnapshot = flagValue('compare');
+  if (sourceSummaryFile !== undefined && sourceSummaryFile.length === 0) {
+    process.stderr.write('--source-summary requires an output path.\n');
+    process.exit(1);
+  }
+  if (compareSnapshot !== undefined && sourceSummaryFile === undefined) {
+    if (compareSnapshot.length === 0) {
+      process.stderr.write('--compare requires a baseline snapshot path.\n');
+      process.exit(1);
+    }
+    if (filterStr !== undefined) {
+      process.stderr.write('--filter cannot be combined with --compare.\n');
+      process.exit(1);
+    }
+
+    const compareLimitValue = flagValue('compare-limit');
+    const compareLimit =
+      compareLimitValue === undefined ? 100 : Number.parseInt(compareLimitValue, 10);
+    if (!Number.isFinite(compareLimit) || compareLimit <= 0) {
+      process.stderr.write(`Invalid --compare-limit value '${compareLimitValue}'.\n`);
+      process.exit(1);
+    }
+
+    const entrypoint = process.argv[1];
+    if (entrypoint === undefined) {
+      throw new Error('Unable to determine the analyzer entrypoint for comparison workers.');
+    }
+
+    const tempDirectory = mkdtempSync(join(tmpdir(), 'kbn-heap-source-diff-'));
+    const analyzeForSourceSummary = (sourceSnapshot: string, outputPath: string): SourceSummary => {
+      status(`Analyzing source attribution for ${sourceSnapshot}...`);
+      const child = spawnSync(
+        process.execPath,
+        [
+          ...process.execArgv,
+          entrypoint,
+          sourceSnapshot,
+          '--no-counterfactual',
+          `--source-summary=${outputPath}`,
+        ],
+        { stdio: 'inherit' }
+      );
+      if (child.error !== undefined) throw child.error;
+      if (child.status !== 0) {
+        throw new Error(
+          `Source-attribution worker failed for ${sourceSnapshot} (exit ${
+            child.status ?? 'unknown'
+          }).`
+        );
+      }
+      return JSON.parse(readFileSync(outputPath, 'utf8')) as SourceSummary;
+    };
+
+    let diff: SourceDiffReport;
+    try {
+      const baseline = analyzeForSourceSummary(
+        compareSnapshot,
+        join(tempDirectory, 'baseline.json')
+      );
+      const current = analyzeForSourceSummary(snapshotPath, join(tempDirectory, 'current.json'));
+      diff = buildSourceDiff(baseline, current);
+    } finally {
+      rmSync(tempDirectory, { force: true, recursive: true });
+    }
+
+    if (!diff.reconciled) {
+      throw new Error(
+        `Source diff does not reconcile: total delta ${diff.totalDeltaBytes}, attributed delta ${diff.attributedDeltaBytes}.`
+      );
+    }
+
+    if (jsonMode) {
+      const json = JSON.stringify(diff, null, 2);
+      if (jsonFile !== undefined) {
+        writeFileSync(jsonFile, json);
+        status(`Wrote comparison JSON to ${jsonFile}`);
+      } else {
+        process.stdout.write(json + '\n');
+      }
+      process.exit(0);
+    }
+
+    process.stdout.write('=== Heap Snapshot Source Diff ===\n\n');
+    process.stdout.write(`Baseline: ${diff.baseline.snapshot}\n`);
+    process.stdout.write(`Current:  ${diff.current.snapshot}\n`);
+    process.stdout.write(`Total:    ${fmtBytes(diff.totalDeltaBytes)}\n`);
+    process.stdout.write(`Reconciled: yes (${fmtBytes(diff.attributedDeltaBytes)})\n\n`);
+    process.stdout.write('=== Delta by Triggering Package ===\n\n');
+    process.stdout.write(`${pad('Delta', 12, true)} | ${pad('Count', 9, true)} | Package\n`);
+    process.stdout.write(`${'-'.repeat(12)}-+-${'-'.repeat(9)}-+-${'-'.repeat(55)}\n`);
+    for (const row of diff.packages
+      .filter(({ deltaBytes }) => deltaBytes !== 0)
+      .slice(0, compareLimit)) {
+      process.stdout.write(
+        `${pad(fmtBytes(row.deltaBytes), 12, true)} | ${pad(String(row.deltaCount), 9, true)} | ${
+          row.package
+        }\n`
+      );
+    }
+    process.stdout.write('\n=== Delta by Source and Node Type ===\n\n');
+    process.stdout.write(
+      `${pad('Delta', 12, true)} | ${pad('Count', 9, true)} | ${pad('Type', 20)} | ${pad(
+        'Method',
+        16
+      )} | Source <- allocator\n`
+    );
+    process.stdout.write(
+      `${'-'.repeat(12)}-+-${'-'.repeat(9)}-+-${'-'.repeat(20)}-+-${'-'.repeat(16)}-+-${'-'.repeat(
+        70
+      )}\n`
+    );
+    for (const row of diff.rows
+      .filter(({ deltaBytes }) => deltaBytes !== 0)
+      .slice(0, compareLimit)) {
+      const sourceAndAllocator =
+        row.source === row.allocator ? row.source : `${row.source} <- ${row.allocator}`;
+      process.stdout.write(
+        `${pad(fmtBytes(row.deltaBytes), 12, true)} | ${pad(
+          String(row.deltaCount),
+          9,
+          true
+        )} | ${pad(truncate(row.nodeType, 20), 20)} | ${pad(row.attribution, 16)} | ${truncate(
+          sourceAndAllocator,
+          70
+        )}\n`
+      );
+    }
+    process.exit(0);
   }
 
   // --- Streaming parser tailored to the V8 heap-snapshot top-level shape ---
@@ -1203,6 +1347,12 @@ export function runHeapSnapshotAnalyzerCli(): void {
   // "passed filter but no plugin/package frame above" (the latter must flow
   // into the unattributed buckets).
   const nodeFilteredOut = filterRegex ? new Uint8Array(nodeCount) : undefined;
+  // Deepest allocation-frame script for additive source comparison. String ids
+  // refer to the snapshot's strings table; -1 means no tracked allocation.
+  const nodeAllocationSourceStrId = new Int32Array(nodeCount).fill(-1);
+  // First package-bearing frame above the allocator. This attributes runtime
+  // loader allocations to the module whose loading triggered them.
+  const nodeAllocationOwnerSourceStrId = new Int32Array(nodeCount).fill(-1);
   let allocUntrackedNodes = 0;
   let allocFilteredOut = 0;
   let allocAttributable = false;
@@ -1267,6 +1417,34 @@ export function runHeapSnapshotAnalyzerCli(): void {
     const traceFirstPkg = new Int32Array(td.parents.length).fill(-2);
     // And for non-library (Kibana-package) attribution.
     const traceFirstNonLibPkg = new Int32Array(td.parents.length).fill(-2);
+    // First source frame whose path identifies a package.
+    const traceFirstPackageSource = new Int32Array(td.parents.length).fill(-2);
+    // Loader instrumentation wraps require() and otherwise hides the package
+    // that triggered Node's loader allocations. Walk through transparent
+    // wrappers just as allocation --filter attribution walks through a library.
+    const transparentSourcePackages = new Set(['require-in-the-middle']);
+
+    function firstPackageSourceFor(traceIdx: number): number {
+      if (traceIdx < 0) return -1;
+      let cur = traceIdx;
+      const path: number[] = [];
+      while (cur >= 0 && traceFirstPackageSource[cur] === -2) {
+        path.push(cur);
+        const scriptStrId = leafScriptStrId(cur);
+        const packageName =
+          scriptStrId >= 0 && scriptStrId < strings.length
+            ? extractPkg(strings[scriptStrId])
+            : undefined;
+        if (packageName !== undefined && !transparentSourcePackages.has(packageName)) {
+          for (const p of path) traceFirstPackageSource[p] = scriptStrId;
+          return scriptStrId;
+        }
+        cur = td.parents[cur];
+      }
+      const result = cur >= 0 ? traceFirstPackageSource[cur] : -1;
+      for (const p of path) traceFirstPackageSource[p] = result;
+      return result;
+    }
 
     function firstPluginFor(traceIdx: number): number {
       if (traceIdx < 0) return -1;
@@ -1355,6 +1533,8 @@ export function runHeapSnapshotAnalyzerCli(): void {
         allocUntrackedNodes++;
         continue;
       }
+      nodeAllocationSourceStrId[i] = leafScriptStrId(tIdx);
+      nodeAllocationOwnerSourceStrId[i] = firstPackageSourceFor(tIdx);
       // Apply --filter: include only nodes whose leaf trace frame's script
       // matches the regex.
       if (filterRegex) {
@@ -1380,6 +1560,83 @@ export function runHeapSnapshotAnalyzerCli(): void {
     );
   } else {
     status('Skipping alloc-site mode (snapshot has no allocation tracking data).');
+  }
+
+  if (sourceSummaryFile !== undefined) {
+    const tSourceSummary = Date.now();
+    status('Aggregating additive self size by source and node type...');
+    const rowsByKey = new Map<string, SourceSummaryRow>();
+    let summaryTotalSelf = 0;
+
+    for (let i = 0; i < nodeCount; i++) {
+      const bytes = selfSize[i];
+      summaryTotalSelf += bytes;
+
+      const typeId = nodes[i * nf + nTypeIdx];
+      const nodeType = typeId >= 0 && typeId < nodeTypes.length ? nodeTypes[typeId] : 'unknown';
+      const allocationSourceId = nodeAllocationSourceStrId[i];
+      let source = '(unattributed)';
+      let allocator = '(untracked)';
+      let packageName = '(unattributed)';
+      let attribution: SourceAttribution = 'unattributed';
+
+      if (allocationSourceId >= 0 && allocationSourceId < strings.length) {
+        const ownerSourceId = nodeAllocationOwnerSourceStrId[i];
+        const rawAllocator = strings[allocationSourceId];
+        const rawSource =
+          ownerSourceId >= 0 && ownerSourceId < strings.length
+            ? strings[ownerSourceId]
+            : rawAllocator;
+        source = normalizeSourcePath(rawSource);
+        allocator = normalizeSourcePath(rawAllocator);
+        packageName = extractPkg(rawSource) ?? '(runtime)';
+        attribution = 'allocation';
+      } else {
+        const directPackageId = directlyOwnedPkg[i];
+        const inferredPackageId = nodePkgPackage[i];
+        if (directPackageId !== -1) {
+          source = pkgNames[directPackageId];
+          packageName = pkgNames[directPackageId];
+          attribution = 'direct-package';
+        } else if (inferredPackageId !== -1) {
+          source = pkgNames[inferredPackageId];
+          packageName = pkgNames[inferredPackageId];
+          attribution = 'inferred-package';
+        }
+      }
+
+      const key = JSON.stringify([source, allocator, packageName, nodeType, attribution]);
+      const row = rowsByKey.get(key);
+      if (row === undefined) {
+        rowsByKey.set(key, {
+          source,
+          allocator,
+          package: packageName,
+          nodeType,
+          attribution,
+          selfBytes: bytes,
+          count: 1,
+        });
+      } else {
+        row.selfBytes += bytes;
+        row.count++;
+      }
+    }
+
+    const sourceSummary: SourceSummary = {
+      snapshot: snapshotPath,
+      totalSelf: summaryTotalSelf,
+      nodeCount,
+      hasAllocationTracking: allocAttributable,
+      rows: [...rowsByKey.values()],
+    };
+    writeFileSync(sourceSummaryFile, JSON.stringify(sourceSummary));
+    status(
+      `Wrote ${sourceSummary.rows.length} source groups to ${sourceSummaryFile} in ${elapsed(
+        tSourceSummary
+      )}`
+    );
+    process.exit(0);
   }
 
   // --- Aggregate per-package retained bytes (boundary-aware to avoid

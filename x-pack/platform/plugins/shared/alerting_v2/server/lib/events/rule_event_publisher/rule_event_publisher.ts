@@ -7,7 +7,8 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
-import type { RuleLifecycleEvent } from '../../../../common/workflows/triggers';
+import { v4 as uuidv4 } from 'uuid';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import {
   AlertingDomainEventBusToken,
   type AlertingDomainEvent,
@@ -21,17 +22,18 @@ import {
   RULE_ENABLED_EVENT_TYPE,
   RULE_UPDATED_EVENT_TYPE,
   type RuleEvent,
+  type RuleEventPayload,
 } from './events';
 
 /**
- * Minimal rule reference carried in a rule-lifecycle event. Kept intentionally
- * small (a workflow step fetches any further rule data itself); modelled as an
- * object so fields like `version` can be added later without changing the
- * publisher signatures.
+ * Rule carried in a rule-lifecycle event. `rule` is the domain model (the API
+ * response); it is optional only for the bulk-delete fallback where the
+ * pre-delete state could not be read.
  */
 export interface EventRule {
-  id: string;
+  ruleId: string;
   spaceId: string;
+  rule?: RuleResponse;
 }
 
 /**
@@ -88,20 +90,22 @@ export class RuleEventPublisher implements RuleEventPublisherContract {
     eventType: RuleEvent['type'],
     rules: EventRule[]
   ): void {
+    const correlationId = rules.length > 1 ? uuidv4() : undefined;
     for (const rule of rules) {
       this.publish(request, {
         type: eventType,
-        payload: this.toLifecyclePayload(rule),
+        payload: this.toEventPayload(rule, correlationId),
       });
     }
   }
 
-  private toLifecyclePayload(rule: EventRule): RuleLifecycleEvent {
+  private toEventPayload(rule: EventRule, correlationId?: string): RuleEventPayload {
+    const { ruleId, spaceId, rule: domainRule } = rule;
     return {
-      rule: {
-        ruleId: rule.id,
-        spaceId: rule.spaceId,
-      },
+      ruleId,
+      spaceId,
+      ...(correlationId ? { correlationId } : {}),
+      ...(domainRule ? { rule: domainRule } : {}),
     };
   }
 

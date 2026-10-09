@@ -20,7 +20,8 @@ export type AiButtonIconProps = DistributiveOmit<
 >;
 
 /**
- * Renders the icon-only AI button.
+ * Renders the icon-only AI button. Pass `withToolTip` (and optionally `toolTipContent`)
+ * to wrap it in a tooltip. Children are not supported on icon-only buttons.
  * @param props - Props accepted by the icon-only variant.
  */
 export const AiButtonIcon = (props: AiButtonIconProps) => {

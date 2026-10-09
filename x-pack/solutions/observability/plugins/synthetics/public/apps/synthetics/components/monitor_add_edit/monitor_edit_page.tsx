@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
@@ -40,7 +40,6 @@ export const MonitorEditPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor', delay: 15000 });
   const { monitorId } = useParams<{ monitorId: string }>();
   const { spaceId } = useGetUrlParams();
-  useMonitorAddEditBreadcrumbs(true);
   const dispatch = useDispatch();
   const { locationsLoaded, error: locationsError } = useSelector(selectServiceLocationsState);
 
@@ -59,6 +58,8 @@ export const MonitorEditPage: React.FC = () => {
   }, [dispatch, monitorId, spaceId]);
 
   const monitorNotFoundError = useMonitorNotFound(error, data?.id);
+
+  useMonitorAddEditBreadcrumbs(true, { monitorNotFound: Boolean(monitorNotFoundError) });
 
   const canUsePublicLocations = useCanUsePublicLocations(data?.[ConfigKey.LOCATIONS]);
 

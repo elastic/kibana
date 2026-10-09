@@ -40,7 +40,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
   let logFactory: ReturnType<typeof loggerMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
-  let abortController: AbortController;
+  let signal: AbortSignal;
   let taskInstance: ConcreteTaskInstance;
 
   const defaultConfig = {
@@ -59,7 +59,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
     logFactory = loggerMock.create();
     logger = loggerMock.create();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    abortController = new AbortController();
+    signal = new AbortController().signal;
 
     // Setup core services mock
     mockCore.getStartServices.mockResolvedValue([mockCoreStart, {}, {}] as any);
@@ -182,7 +182,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
         enableFleetPolicyRevisionsCleanupTask: false,
       } as any);
 
-      await mockTask.runTask(taskInstance, mockCore, abortController);
+      await mockTask.runTask(taskInstance, mockCore, signal);
 
       expect(logger.debug).toHaveBeenCalledWith(
         '[FleetPolicyRevisionsCleanupTask] Aborting runTask: fleet policy revision cleanup task feature is disabled'
@@ -194,7 +194,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
       const error = new Error('Test error');
       mockEsClient.search.mockRejectedValue(error);
 
-      await mockTask.runTask(taskInstance, mockCore, abortController);
+      await mockTask.runTask(taskInstance, mockCore, signal);
 
       expect(logger.error).toHaveBeenCalledWith(
         '[FleetPolicyRevisionsCleanupTask] error: Error: Test error'
@@ -216,7 +216,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
         },
       } as any);
 
-      await mockTask.runTask(taskInstance, mockCore, abortController);
+      await mockTask.runTask(taskInstance, mockCore, signal);
 
       expect(logger.info).toHaveBeenCalledWith(
         expect.stringContaining('No policies found with more than 10 revisions')
@@ -262,7 +262,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
         deleted: 5,
       } as any);
 
-      await mockTask.runTask(taskInstance, mockCore, abortController);
+      await mockTask.runTask(taskInstance, mockCore, signal);
 
       expect(logger.info).toHaveBeenCalledWith(
         '[FleetPolicyRevisionsCleanupTask] Found 1 policies with more than 10 revisions.'
@@ -287,7 +287,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
           },
         },
         {
-          signal: abortController.signal,
+          signal,
         }
       );
     });
@@ -330,7 +330,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
         deleted: 5,
       } as any);
 
-      await mockTask.runTask(taskInstance, mockCore, abortController);
+      await mockTask.runTask(taskInstance, mockCore, signal);
 
       expect(logger.info).toHaveBeenCalledWith(
         '[FleetPolicyRevisionsCleanupTask] Found 1 policies with more than 10 revisions.'
@@ -355,7 +355,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
           },
         },
         {
-          signal: abortController.signal,
+          signal,
         }
       );
     });
@@ -394,7 +394,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
         deleted: 5,
       } as any);
 
-      await mockTask.runTask(taskInstance, mockCore, abortController);
+      await mockTask.runTask(taskInstance, mockCore, signal);
 
       expect(logger.debug).toHaveBeenCalledWith(
         '[FleetPolicyRevisionsCleanupTask] No policy revisions to delete after evaluating agent usage.'
@@ -444,7 +444,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
         deleted: 5,
       } as any);
 
-      await mockTask.runTask(taskInstance, mockCore, abortController);
+      await mockTask.runTask(taskInstance, mockCore, signal);
 
       expect(logger.info).toHaveBeenCalledWith(
         '[FleetPolicyRevisionsCleanupTask] Found 2 policies with more than 10 revisions.'
@@ -469,7 +469,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
           },
         },
         {
-          signal: abortController.signal,
+          signal,
         }
       );
     });
@@ -502,7 +502,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
         deleted: 5,
       } as any);
 
-      await mockTask.runTask(taskInstance, mockCore, abortController);
+      await mockTask.runTask(taskInstance, mockCore, signal);
 
       expect(logger.info).toHaveBeenCalledWith(
         '[FleetPolicyRevisionsCleanupTask] Found 1 policies with more than 10 revisions.'
@@ -527,7 +527,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
           },
         },
         {
-          signal: abortController.signal,
+          signal,
         }
       );
     });
@@ -547,7 +547,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
         },
       } as any);
 
-      await mockTask.runTask(taskInstance, mockCore, abortController);
+      await mockTask.runTask(taskInstance, mockCore, signal);
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         {
@@ -572,7 +572,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
           },
         },
         {
-          signal: abortController.signal,
+          signal,
         }
       );
     });
@@ -617,7 +617,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
 
       mockEsClient.deleteByQuery.mockResolvedValue({ deleted: 0 } as any);
 
-      await mockTask.runTask(taskInstance, mockCore, abortController);
+      await mockTask.runTask(taskInstance, mockCore, signal);
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -655,7 +655,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
           },
         }),
         {
-          signal: abortController.signal,
+          signal,
         }
       );
     });

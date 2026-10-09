@@ -8,7 +8,6 @@
 import {
   MAX_ID_LENGTH,
   MAX_RULE_NAME_LENGTH,
-  detectionSchema,
   type Detection,
 } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
@@ -93,32 +92,7 @@ const detectionsHistoryRoute = createServerRoute({
   },
 });
 
-const detectionsBulkCreateRoute = createServerRoute({
-  endpoint: 'POST /internal/significant_events/detections',
-  options: {
-    access: 'internal',
-    summary: 'Bulk create detections',
-    description: 'Create detection entities in bulk.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    body: z.array(detectionSchema),
-  }),
-  handler: async ({ params, request, getScopedClients, server }) => {
-    const { getDetectionClient, licensing } = await getScopedClients({ request });
-
-    await assertSignificantEventsAccess({ server, licensing });
-
-    return getDetectionClient().bulkCreate(params.body);
-  },
-});
-
 export const internalDetectionsRoutes = {
   ...detectionsSearchRoute,
   ...detectionsHistoryRoute,
-  ...detectionsBulkCreateRoute,
 };

@@ -36,7 +36,7 @@ describe('bindServices - Elasticsearch client routing', () => {
     container.bind(Request).toConstantValue(request);
     container.bind(Logger).toConstantValue(loggingSystemMock.createLogger());
 
-    container.loadSync(new ContainerModule((options) => bindServices(options)));
+    container.load(new ContainerModule((options) => bindServices(options)));
   });
 
   it('binds the internal client to asInternalUser (origin-only, local)', () => {

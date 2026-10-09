@@ -150,7 +150,7 @@ export class PluginModule extends ContainerModule {
       if (id) {
         fork.onDeactivation(
           id,
-          once(() => fork.unbindAll())
+          once(() => fork.unbindAllAsync())
         );
       }
 
@@ -174,13 +174,13 @@ export class PluginModule extends ContainerModule {
         scope
           .bind(Context)
           .toConstantValue(context)
-          .onDeactivation(once(() => context.unbind(id).catch(noop)));
+          .onDeactivation(once(() => context.unbindAsync(id).catch(noop)));
         scope.get(Context);
 
         context
           .bind(id)
           .toConstantValue(scope)
-          .onDeactivation(once(() => scope.unbindAll()));
+          .onDeactivation(once(() => scope.unbindAllAsync()));
       }
 
       return context.get(id);

@@ -126,7 +126,7 @@ const RemoteCallout = () => {
           isDisabled={!remoteMonitorUrl}
           href={remoteMonitorUrl}
           target="_blank"
-          iconType="popout"
+          iconType="external"
           iconSide="right"
         >
           {VIEW_ON_REMOTE_CLUSTER_LABEL}

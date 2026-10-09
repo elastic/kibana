@@ -14,7 +14,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./grok_debugger'));
     loadTestFile(require.resolve('./search_profiler'));
-    loadTestFile(require.resolve('./painless_lab'));
     loadTestFile(require.resolve('./advanced_settings'));
     loadTestFile(require.resolve('./dashboard_controls'));
     loadTestFile(require.resolve('./dashboard_links'));

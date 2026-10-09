@@ -54,6 +54,7 @@ export function registerTelemetryForceSend({
           request: {
             body: schema.object({
               // If provided, the telemetry will be sent to this local index instead of the default one
+              // codeql[js/kibana/unbounded-string-in-schema] dev-only force-send helper (authz disabled), not user input
               localIndex: schema.maybe(schema.string()),
             }),
           },

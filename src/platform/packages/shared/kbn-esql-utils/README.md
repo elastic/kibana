@@ -15,7 +15,7 @@ not full ES|QL parsing.
 
 ### Parsing and inspection
 - `getLimitFromESQLQuery` - Extract the explicit or default limit for a query.
-- `getTimeFieldFromESQLQuery` - Find the time field used in the query (if any).
+- `parseTimeFieldFromESQLQuery` - Find the time field used in the query (if any).
 - `retrieveMetadataColumns` - Read metadata column names from the `from` command.
 - `hasTransformationalCommand` - Check if the query changes the row/column shape.
 - `getQuerySummary` - Produce a summarized view of query characteristics.

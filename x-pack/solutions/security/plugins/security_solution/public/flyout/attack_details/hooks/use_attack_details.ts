@@ -74,7 +74,7 @@ export const useAttackDetails = ({
   // https://github.com/elastic/kibana/issues/244205
   const pageScope = PageScope.attacks;
   const { dataView } = useDataView(pageScope);
-  const browserFields = useBrowserFields(pageScope);
+  const browserFields = useBrowserFields(dataView);
 
   const runtimeMappings = dataView?.getRuntimeMappings() as RunTimeMappings;
 

@@ -5,13 +5,32 @@
  * 2.0.
  */
 
-import { identifyKIQueries } from '@kbn/streams-ai';
+import {
+  identifyKIQueries,
+  QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
+  type ExistingQuerySummary,
+} from '@kbn/streams-ai';
 import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/prompt';
+import {
+  createMemoryDiscoveryTools,
+  MemoryServiceImpl,
+} from '@kbn/significant-events-plugin/server';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
 
-import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
+import {
+  getCurrentTraceId,
+  createSpanLatencyEvaluator,
+  createChatCallsEvaluator,
+} from '@kbn/evals';
 import type { Streams } from '@kbn/streams-schema';
 import type { Feature } from '@kbn/significant-events-schema';
+import { createReportedTokenEvaluators } from '../../src/evaluators/reported_tokens';
+import {
+  assertRerunRequiresCanonicalKIs,
+  buildQueryGenerationExamples,
+  type CollectedQueryGenExample,
+} from './build_query_gen_examples';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   canonicalKIFeaturesFromExpectedGroundTruth,
@@ -24,6 +43,7 @@ import {
   SIGEVENTS_WIRED_ROOTS,
 } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
+import { createEvalSignificantEventSearchTool } from '../../src/tools/significant_event_search_tool';
 import { createKIQueryGenerationEvaluators } from '../../src/evaluators/ki_query_generation';
 import { createScenarioCriteriaLlmEvaluator } from '../../src/evaluators/scenario_criteria/evaluators';
 import {
@@ -49,18 +69,25 @@ import {
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
-interface CollectedQueryGenExample {
-  scenario: KIQueryGenerationScenario;
-  kis: Feature[];
-  sampleLogs: string[];
-  sampleDocs: Array<Record<string, unknown>>;
-}
-
 evaluate.describe('KI query generation', { tag: tags.serverless.observability.complete }, () => {
   const activeDatasets = getActiveDatasets();
   const availableSnapshotsBySource = new Map<string, Set<string>>();
 
-  evaluate.beforeAll(async ({ esClient, log }) => {
+  evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
+    // The significant_event_search tool is only registered when significant
+    // events availability is on (defaults to false); enable it before any run.
+    await kbnClient.request({
+      path: '/internal/core/_settings',
+      method: 'PUT',
+      headers: { 'elastic-api-version': '1' },
+      body: {
+        'feature_flags.overrides': {
+          [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+        },
+      },
+    });
+    log.info('Enabled significant events availability feature flag');
+
     const snapshots = await buildAvailableSnapshotsBySource(
       activeDatasets,
       (dataset) => dataset.kiQueryGeneration,
@@ -117,6 +144,8 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                     expectedGroundTruth: extractionScenario.output.expected_ground_truth,
                   })
                 : [];
+
+            assertRerunRequiresCanonicalKIs(scenario, canonicalKIs);
 
             const shouldUseCanonicalKIs =
               kiSource === 'canonical' || (kiSource === 'auto' && canonicalKIs.length > 0);
@@ -218,25 +247,35 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
               ])
             );
 
+            // Exercise the same grounding tools that production query generation
+            // wires in, so the eval covers the memory + prior-SigEvents code paths.
+            const memoryTools = createMemoryDiscoveryTools({
+              memoryService: new MemoryServiceImpl({ logger: logger.get('memory'), esClient }),
+            });
+
+            const executeAgentBuilderTool = async (
+              toolId: string,
+              toolParams: Record<string, unknown>
+            ) =>
+              (await fetch('/api/agent_builder/tools/_execute', {
+                method: 'POST',
+                version: '2023-10-31',
+                body: JSON.stringify({ tool_id: toolId, tool_params: toolParams }),
+              })) as { results?: AgentBuilderToolResult[] };
+
+            const eventSearchTool = createEvalSignificantEventSearchTool({
+              executeTool: executeAgentBuilderTool,
+              streamName: MANAGED_STREAM_NAME,
+              logger,
+            });
+
             const groundingModes = resolveGroundingModes();
             const codeIndex = resolveCodeIndexForDataset(dataset.id);
 
-            const examples = collectedExamples.map(({ scenario }) => ({
-              id: scenario.input.scenario_id,
-              input: {
-                ...scenario.input,
-                snapshot_source: scenario.snapshot_source,
-              },
-              output: {
-                ...scenario.output,
-                criteria: scenario.output.criteria,
-                expected: scenario.output.expected_ground_truth,
-              },
-              metadata: {
-                ...scenario.metadata,
-                test_index: MANAGED_STREAM_SEARCH_PATTERN,
-              },
-            }));
+            const examples = buildQueryGenerationExamples(
+              collectedExamples,
+              MANAGED_STREAM_SEARCH_PATTERN
+            );
 
             const evaluatorsList = [
               ...createKIQueryGenerationEvaluators(
@@ -246,10 +285,12 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 },
                 logger
               ),
+              ...createReportedTokenEvaluators(),
               evaluators.traceBasedEvaluators.inputTokens,
               evaluators.traceBasedEvaluators.outputTokens,
               evaluators.traceBasedEvaluators.cachedTokens,
               evaluators.traceBasedEvaluators.toolCalls,
+              createChatCallsEvaluator({ traceEsClient, log }),
               createSpanLatencyEvaluator({ traceEsClient, log, operationName: 'chat' }),
             ];
 
@@ -268,7 +309,13 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                     })
                   : undefined;
 
-              return async ({ input }: { input: KIQueryGenerationScenario['input'] }) => {
+              return async ({
+                input,
+              }: {
+                input: KIQueryGenerationScenario['input'] & {
+                  existing_queries?: ExistingQuerySummary[];
+                };
+              }) => {
                 const heavy = heavyDataByScenario.get(input.scenario_id);
                 if (!heavy) {
                   throw new Error(`No pre-collected data for scenario "${input.scenario_id}"`);
@@ -315,19 +362,47 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                     `ki_types=${JSON.stringify(kiTypeCounts)}, sample_logs=${sampleLogs.length}`
                 );
 
-                const { queries, toolUsage } = await identifyKIQueries({
+                const promptSnippet = [
+                  groundingTools?.promptSnippet,
+                  memoryTools.promptSnippet,
+                  eventSearchTool.promptSnippet,
+                ]
+                  .filter(Boolean)
+                  .join('\n');
+
+                const { queries, toolUsage, tokensUsed, queryAttempts } = await identifyKIQueries({
                   stream,
                   esClient,
                   inferenceClient,
                   logger,
                   signal: new AbortController().signal,
-                  systemPrompt: groundingTools
-                    ? `${significantEventsPrompt}\n${groundingTools.promptSnippet}`
-                    : significantEventsPrompt,
-                  getFeatures: async () => kis,
-                  additionalTools: groundingTools?.additionalTools,
-                  additionalToolCallbacks: groundingTools?.additionalToolCallbacks,
-                  maxSteps: groundingTools ? 10 : undefined,
+                  systemPrompt: `${significantEventsPrompt}\n${promptSnippet}`,
+                  // Mirror production: the plugin excludes these at retrieval,
+                  // but the fixture still builds them — filter here to match.
+                  getFeatures: async () =>
+                    kis.filter(
+                      (feature) =>
+                        !(QUERY_GENERATION_EXCLUDED_FEATURE_TYPES as readonly string[]).includes(
+                          feature.type
+                        )
+                    ),
+                  additionalTools: {
+                    ...memoryTools.tools,
+                    ...eventSearchTool.tools,
+                    ...groundingTools?.additionalTools,
+                  },
+                  additionalToolCallbacks: {
+                    ...memoryTools.callbacks,
+                    ...eventSearchTool.callbacks,
+                    ...groundingTools?.additionalToolCallbacks,
+                  },
+                  maxSteps: groundingTools ? 12 : 8,
+                  requireQueryIntent: true,
+                  collectQueryAttempts: true,
+                  existingQueries: input.existing_queries?.map((q) => ({
+                    ...q,
+                    description: q.description.slice(0, 200),
+                  })),
                 });
 
                 logger.info(
@@ -337,6 +412,9 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 return {
                   queries,
                   toolUsage,
+                  tokens_used: tokensUsed,
+                  query_attempts: queryAttempts,
+                  evaluation_arm: input.existing_queries ? ('rerun' as const) : ('clean' as const),
                   traceId: getCurrentTraceId(),
                   sample_logs: sampleLogs,
                   sample_docs: sampleDocs,

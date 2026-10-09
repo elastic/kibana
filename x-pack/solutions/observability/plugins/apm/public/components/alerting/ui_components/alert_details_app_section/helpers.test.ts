@@ -11,10 +11,44 @@ import { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm
 import {
   formatAnomalyCalloutBody,
   formatAnomalyCalloutTitle,
+  getAlertDetailsRangeStart,
   getAnomalyCalloutColor,
 } from './helpers';
 
 describe('alert details anomaly helpers', () => {
+  describe('getAlertDetailsRangeStart', () => {
+    const alertStart = '2026-07-16T10:00:00.000Z';
+
+    it('returns alertStart for non-anomaly alerts', () => {
+      expect(
+        getAlertDetailsRangeStart({
+          alertStart,
+          isAnomaly: false,
+          anomalyTimestamp: new Date('2026-07-16T09:00:00.000Z').getTime(),
+        })
+      ).toBe(alertStart);
+    });
+
+    it('returns alertStart when anomalyTimestamp is undefined', () => {
+      expect(
+        getAlertDetailsRangeStart({
+          alertStart,
+          isAnomaly: true,
+        })
+      ).toBe(alertStart);
+    });
+
+    it('uses the anomaly timestamp when isAnomaly and anomalyTimestamp are set', () => {
+      expect(
+        getAlertDetailsRangeStart({
+          alertStart,
+          isAnomaly: true,
+          anomalyTimestamp: new Date('2026-07-16T09:30:00.000Z').getTime(),
+        })
+      ).toBe('2026-07-16T09:30:00.000Z');
+    });
+  });
+
   describe('getAnomalyCalloutColor', () => {
     it('maps critical severity to danger', () => {
       expect(getAnomalyCalloutColor(ML_ANOMALY_SEVERITY.CRITICAL)).toBe('danger');

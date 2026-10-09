@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/277645
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+title: "Fix prebuilt watchlists not installing in custom spaces"
+description: "The Privileged Users prebuilt watchlist installs in custom Kibana spaces, not only in the default space, including spaces created after startup."

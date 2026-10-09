@@ -15,6 +15,7 @@ import {
   mockNoRegionPolicy,
   mockRegionPolicy,
   mockRegionPolicyError,
+  mockRegionPolicyDeleteConflict,
   unmockRegionPolicy,
 } from '../fixtures/mocks';
 
@@ -52,55 +53,44 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
     await expect(eisModels.manageRegionsModal).toBeHidden();
   });
 
-  test('Geo tab is active by default and all geos are pre-selected', async ({ pageObjects }) => {
+  test('enabling the custom policy toggle reveals the Geo tab', async ({ pageObjects }) => {
     const { eisModels } = pageObjects;
 
     await eisModels.manageRegionsButton.click();
-    await expect(eisModels.manageRegionsModal).toBeVisible();
+    await expect(eisModels.manageRegionsLoading).toBeHidden();
 
-    await test.step('loading completes and geo tab content is visible', async () => {
-      await expect(eisModels.manageRegionsLoading).toBeHidden();
-      await expect(eisModels.manageRegionsGeoTab).toBeVisible();
-    });
-
-    await test.step('all geos from mock data are shown and checked', async () => {
-      for (const geo of ['apac', 'eu', 'us']) {
-        await expect(eisModels.geoZoneRow(geo)).toBeVisible();
-        const checkbox = eisModels.geoZoneCheckbox(geo);
-        await expect(checkbox).toBeChecked();
-      }
-    });
+    await eisModels.manageRegionsCustomPolicyToggle.click();
+    await expect(eisModels.manageRegionsGeoTab).toBeVisible();
   });
 
-  test('info callout is shown by default and is dismissible', async ({ pageObjects }) => {
+  test('info callout is hidden until the custom policy toggle is on, and is dismissible', async ({
+    pageObjects,
+  }) => {
     const { eisModels } = pageObjects;
 
     await eisModels.manageRegionsButton.click();
+    await expect(eisModels.manageRegionsCallout).toBeHidden();
+
+    await eisModels.manageRegionsCustomPolicyToggle.click();
     await expect(eisModels.manageRegionsCallout).toBeVisible();
 
-    await eisModels.manageRegionsCallout.getByRole('button', { name: /dismiss/i }).click();
+    await eisModels.manageRegionsCalloutDismiss.click();
     await expect(eisModels.manageRegionsCallout).toBeHidden();
   });
 
-  test('Save button is enabled for a new policy (all geos selected = isNewPolicy)', async ({
+  test('selecting all geos enables Save, deselecting them again disables it', async ({
     pageObjects,
   }) => {
     const { eisModels } = pageObjects;
 
     await eisModels.manageRegionsButton.click();
     await expect(eisModels.manageRegionsLoading).toBeHidden();
-
-    await expect(eisModels.manageRegionsSaveButton).toBeEnabled();
-  });
-
-  test('deselecting all geos disables the Save button', async ({ pageObjects }) => {
-    const { eisModels } = pageObjects;
-
-    await eisModels.manageRegionsButton.click();
-    await expect(eisModels.manageRegionsLoading).toBeHidden();
+    await eisModels.manageRegionsCustomPolicyToggle.click();
 
     await eisModels.manageRegionsSelectAllButton.click();
+    await expect(eisModels.manageRegionsSaveButton).toBeEnabled();
 
+    await eisModels.manageRegionsSelectAllButton.click();
     await expect(eisModels.manageRegionsSaveButton).toBeDisabled();
   });
 
@@ -111,8 +101,10 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
 
     await eisModels.manageRegionsButton.click();
     await expect(eisModels.manageRegionsLoading).toBeHidden();
+    await eisModels.manageRegionsCustomPolicyToggle.click();
 
-    await eisModels.geoZoneCheckbox('apac').click();
+    await eisModels.geoZoneCheckbox('eu').click();
+    await eisModels.geoZoneCheckbox('us').click();
     await expect(eisModels.manageRegionsSaveButton).toBeEnabled();
 
     await eisModels.manageRegionsSaveButton.click();
@@ -137,7 +129,9 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
 
     await eisModels.manageRegionsButton.click();
     await expect(eisModels.manageRegionsLoading).toBeHidden();
+    await eisModels.manageRegionsCustomPolicyToggle.click();
 
+    await eisModels.geoZoneCheckbox('eu').click();
     await eisModels.manageRegionsSaveButton.click();
     await expect(eisModels.confirmRegionChangeModal).toBeVisible();
 
@@ -152,7 +146,9 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
 
     await eisModels.manageRegionsButton.click();
     await expect(eisModels.manageRegionsLoading).toBeHidden();
+    await eisModels.manageRegionsCustomPolicyToggle.click();
 
+    await eisModels.geoZoneCheckbox('eu').click();
     await eisModels.manageRegionsSaveButton.click();
     await expect(eisModels.confirmRegionChangeModal).toBeVisible();
 
@@ -162,11 +158,39 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
     await expect(eisModels.manageRegionsModal).toBeHidden();
   });
 
+  test('reopening the modal after a save reflects the saved policy without a page reload', async ({
+    page,
+    pageObjects,
+  }) => {
+    const { eisModels } = pageObjects;
+    await mockNoRegionPolicy(page);
+
+    await eisModels.manageRegionsButton.click();
+    await expect(eisModels.manageRegionsLoading).toBeHidden();
+    await eisModels.manageRegionsCustomPolicyToggle.click();
+
+    await eisModels.geoZoneCheckbox('eu').click();
+    await eisModels.manageRegionsSaveButton.click();
+    await expect(eisModels.confirmRegionChangeModal).toBeVisible();
+    await eisModels.confirmRegionChangeSaveButton.click();
+    await expect(eisModels.manageRegionsModal).toBeHidden();
+
+    await eisModels.manageRegionsButton.click();
+    await expect(eisModels.manageRegionsLoading).toBeHidden();
+
+    await test.step('the just-saved geo is pre-selected', async () => {
+      await expect(eisModels.manageRegionsCustomPolicyToggle).toBeChecked();
+      await expect(eisModels.geoZoneCheckbox('eu')).toBeChecked();
+      await expect(eisModels.geoZoneCheckbox('apac')).not.toBeChecked();
+    });
+  });
+
   test('switching to the Regions tab shows zone accordion panels', async ({ pageObjects }) => {
     const { eisModels } = pageObjects;
 
     await eisModels.manageRegionsButton.click();
     await expect(eisModels.manageRegionsLoading).toBeHidden();
+    await eisModels.manageRegionsCustomPolicyToggle.click();
 
     await eisModels.manageRegionsRegionsTab.click();
 
@@ -188,6 +212,7 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
 
     await eisModels.manageRegionsButton.click();
     await expect(eisModels.manageRegionsLoading).toBeHidden();
+    await eisModels.manageRegionsCustomPolicyToggle.click();
 
     await eisModels.manageRegionsRegionsTab.click();
     await eisModels.manageRegionsExpandAllButton.click();
@@ -198,10 +223,10 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
       await expect(eisModels.regionCheckbox('aws::us-east-1')).toBeVisible();
     });
 
-    await test.step('all region checkboxes are checked by default (new policy)', async () => {
-      await expect(eisModels.regionCheckbox('aws::ap-southeast-1')).toBeChecked();
-      await expect(eisModels.regionCheckbox('aws::eu-west-1')).toBeChecked();
-      await expect(eisModels.regionCheckbox('aws::us-east-1')).toBeChecked();
+    await test.step('no region checkboxes are checked by default (new policy)', async () => {
+      await expect(eisModels.regionCheckbox('aws::ap-southeast-1')).not.toBeChecked();
+      await expect(eisModels.regionCheckbox('aws::eu-west-1')).not.toBeChecked();
+      await expect(eisModels.regionCheckbox('aws::us-east-1')).not.toBeChecked();
     });
   });
 
@@ -210,6 +235,7 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
 
     await eisModels.manageRegionsButton.click();
     await expect(eisModels.manageRegionsLoading).toBeHidden();
+    await eisModels.manageRegionsCustomPolicyToggle.click();
 
     await eisModels.manageRegionsRegionsTab.click();
     await eisModels.manageRegionsExpandAllButton.click();
@@ -235,6 +261,11 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
 
     await eisModels.manageRegionsButton.click();
     await expect(eisModels.manageRegionsLoading).toBeHidden();
+
+    await test.step('toggle is ON by default for an existing policy', async () => {
+      await expect(eisModels.manageRegionsCustomPolicyToggle).toBeChecked();
+      await expect(eisModels.manageRegionsGeoTab).toBeVisible();
+    });
 
     await test.step('only eu is checked', async () => {
       await expect(eisModels.geoZoneCheckbox('eu')).toBeChecked();
@@ -279,6 +310,70 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
 
     await test.step('Save is disabled when policy is unchanged', async () => {
       await expect(eisModels.manageRegionsSaveButton).toBeDisabled();
+    });
+  });
+
+  test('turning the toggle OFF on an existing policy triggers a DELETE after the acknowledge checkbox', async ({
+    page,
+    pageObjects,
+  }) => {
+    const { eisModels } = pageObjects;
+
+    await unmockRegionPolicy(page);
+    const counters = await mockRegionPolicy(page, { allowed_geos: ['eu'] });
+
+    await eisModels.manageRegionsButton.click();
+    await expect(eisModels.manageRegionsLoading).toBeHidden();
+
+    await eisModels.manageRegionsCustomPolicyToggle.click();
+    await eisModels.manageRegionsSaveButton.click();
+
+    await test.step('delete confirmation modal appears', async () => {
+      await expect(eisModels.confirmDeleteRegionPolicyModal).toBeVisible();
+    });
+
+    await test.step('cancelling the delete confirmation keeps the main modal open', async () => {
+      await eisModels.confirmDeleteRegionPolicyCancelButton.click();
+      await expect(eisModels.confirmDeleteRegionPolicyModal).toBeHidden();
+      await expect(eisModels.manageRegionsModal).toBeVisible();
+      expect(counters.deleteRequestCount).toBe(0);
+    });
+
+    await eisModels.manageRegionsSaveButton.click();
+    await eisModels.confirmDeleteRegionPolicyAcknowledge.click();
+    await eisModels.confirmDeleteRegionPolicySaveButton.click();
+
+    await test.step('DELETE is called and both modals close', async () => {
+      await expect.poll(() => counters.deleteRequestCount).toBe(1);
+      expect(counters.putRequestCount).toBe(0);
+      await expect(eisModels.confirmDeleteRegionPolicyModal).toBeHidden();
+      await expect(eisModels.manageRegionsModal).toBeHidden();
+    });
+  });
+
+  test('a failed delete (409 conflict) keeps both modals open for retry', async ({
+    page,
+    pageObjects,
+  }) => {
+    const { eisModels } = pageObjects;
+
+    await unmockRegionPolicy(page);
+    const counters = await mockRegionPolicyDeleteConflict(page, { allowed_geos: ['eu'] });
+
+    await eisModels.manageRegionsButton.click();
+    await expect(eisModels.manageRegionsLoading).toBeHidden();
+
+    await eisModels.manageRegionsCustomPolicyToggle.click();
+    await eisModels.manageRegionsSaveButton.click();
+    await expect(eisModels.confirmDeleteRegionPolicyModal).toBeVisible();
+
+    await eisModels.confirmDeleteRegionPolicyAcknowledge.click();
+    await eisModels.confirmDeleteRegionPolicySaveButton.click();
+
+    await test.step('DELETE is attempted but both modals stay open on conflict', async () => {
+      await expect.poll(() => counters.deleteRequestCount).toBe(1);
+      await expect(eisModels.confirmDeleteRegionPolicyModal).toBeVisible();
+      await expect(eisModels.manageRegionsModal).toBeVisible();
     });
   });
 

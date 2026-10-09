@@ -21,6 +21,7 @@ import {
   DELETE_LIST_ITEM,
   DELETE_LIST_ITEM_DESCRIPTION,
   NOT_FOUND_ITEMS,
+  LIST_ITEMS_TABLE_CAPTION,
 } from '../translations';
 
 export const ListItemTable = ({
@@ -75,6 +76,7 @@ export const ListItemTable = ({
   return (
     <EuiBasicTable
       data-test-subj="value-list-items-modal-table"
+      tableCaption={LIST_ITEMS_TABLE_CAPTION}
       items={items}
       columns={columns}
       pagination={pagination}

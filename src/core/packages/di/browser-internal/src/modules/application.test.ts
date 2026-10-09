@@ -45,7 +45,7 @@ describe('application', () => {
     application = { register: jest.fn() } as unknown as typeof application;
     container = injection.getContainer();
 
-    container.loadSync(new ContainerModule(loadApplication));
+    container.load(new ContainerModule(loadApplication));
     container.bind(CoreSetup('application')).toConstantValue(application);
     container.bind(CoreStart('injection')).toConstantValue(injection);
     container.bind(Application).toConstantValue(TestApplication);
@@ -66,7 +66,7 @@ describe('application', () => {
     });
 
     it('should not register an application if there are no corresponding bindings', () => {
-      container.unbindSync(Application);
+      container.unbind(Application);
 
       expect(setup).not.toThrow();
       expect(application.register).not.toHaveBeenCalled();
@@ -87,7 +87,7 @@ describe('application', () => {
 
       mountSpy = jest.spyOn(TestApplication.prototype, 'mount');
       unmountSpy = jest.spyOn(TestApplication.prototype, 'unmount');
-      unbindAllSpy = jest.spyOn(fork, 'unbindAll');
+      unbindAllSpy = jest.spyOn(fork, 'unbindAllAsync');
 
       setup();
       [{ mount }] = application.register.mock.lastCall!;

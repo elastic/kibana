@@ -19,14 +19,21 @@ export const mockOTLPLogExporter = jest.fn();
 
 export const mockResourceFromAttributes = jest.fn();
 
-interface MockResource {
+export interface MockResource {
   type: string;
+  attributes: Record<string, unknown>;
   merge: jest.Mock<MockResource>;
+  getRawAttributes: jest.Mock<Array<[string, unknown]>>;
 }
 
-const makeMockResource = (label: string): MockResource => ({
+export const makeMockResource = (
+  label: string,
+  attributes: Record<string, unknown> = {}
+): MockResource => ({
   type: label,
+  attributes,
   merge: jest.fn(() => makeMockResource('merged-resource')),
+  getRawAttributes: jest.fn(() => Object.entries(attributes)),
 });
 
 export const mockMergeResource = jest.fn(() => makeMockResource('merged-resource'));

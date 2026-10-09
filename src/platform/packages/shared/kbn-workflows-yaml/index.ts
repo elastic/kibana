@@ -41,6 +41,20 @@ export {
   isLiquidTagValue,
 } from './common/regex';
 
+// JSON Schema template-tolerance weaver
+export {
+  buildTemplateTolerantJsonSchema,
+  wholeValueStringAlternative,
+  anchorWholeValue,
+  toUnicodeSafePattern,
+  TEMPLATE_VALUE_DEF_NAME,
+} from './common/json_schema/build_template_tolerant_json_schema';
+export type {
+  BuildTemplateTolerantJsonSchemaOptions,
+  JsonObject as TemplateTolerantJsonObject,
+  JsonValue as TemplateTolerantJsonValue,
+} from './common/json_schema/build_template_tolerant_json_schema';
+
 // Liquid (template engine + cache + validation)
 export { extractLiquidErrorPosition } from './common/liquid/extract_liquid_error_position';
 export { getLiquidInstance, parseTemplateString } from './common/liquid/liquid_parse_cache';

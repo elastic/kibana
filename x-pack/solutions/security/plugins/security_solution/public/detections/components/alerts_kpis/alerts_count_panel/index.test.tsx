@@ -9,6 +9,8 @@ import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { AlertsCountPanel } from '.';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 
 import type { Status } from '../../../../../common/api/detection_engine';
 import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../common/config';
@@ -148,6 +150,24 @@ describe('toggleQuery', () => {
       </TestProviders>
     );
     expect(queryByTestId('visualization-embeddable')).not.toBeInTheDocument();
+  });
+
+  it('when isExpanded is true, uses the expanded panel height', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <AlertsCountPanel {...defaultProps} isExpanded={true} panelHeight={375} />
+      </TestProviders>
+    );
+    expect(getByTestId('alertsCountPanel')).toHaveStyleRule('height', '375px');
+  });
+
+  it('when isExpanded is false, uses the collapsed panel height', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <AlertsCountPanel {...defaultProps} isExpanded={false} panelHeight={375} />
+      </TestProviders>
+    );
+    expect(getByTestId('alertsCountPanel')).toHaveStyleRule('height', '64px');
   });
 });
 

@@ -15,12 +15,12 @@ type TruncatedType = 'policies' | 'rules';
 interface Props {
   searchParam?: string;
   data?: {
-    searchMatches: SearchMatchCounts | null;
+    search_matches: SearchMatchCounts | null;
   };
 }
 
 export const TruncatedCallout = ({ data, searchParam }: Props) => {
-  const searchMatches = data?.searchMatches ?? null;
+  const searchMatches = data?.search_matches ?? null;
   const truncatedTypes: TruncatedType[] =
     searchMatches !== null
       ? (['policies', 'rules'] as const).filter((t) => searchMatches[t] > searchMatches.cap)

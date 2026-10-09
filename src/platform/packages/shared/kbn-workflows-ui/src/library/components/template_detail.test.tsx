@@ -90,6 +90,28 @@ jest.mock('./template_yaml_preview', () => ({
   ),
 }));
 
+// The install section has its own test (it needs kibana services and a query
+// client); the stub exposes the preview-values callback and echoes the
+// `previewYaml` prop so their wiring through TemplateDetail can be asserted.
+jest.mock('./install_form', () => ({
+  TemplateInstallSection: ({
+    onPreviewValuesChange,
+    previewYaml,
+  }: {
+    onPreviewValuesChange?: (values: Record<string, unknown>) => void;
+    previewYaml: string;
+  }) => (
+    <div data-test-subj="mockInstallSection">
+      <button
+        type="button"
+        data-test-subj="mockInstallSectionCommit"
+        onClick={() => onPreviewValuesChange?.({ 'max-age': 42 })}
+      />
+      <pre data-test-subj="mockInstallSectionPreviewYaml">{previewYaml}</pre>
+    </div>
+  ),
+}));
+
 const RAW = `template-metadata:
   slug: my-template
   version: "1.2.0"
@@ -156,16 +178,16 @@ describe('TemplateDetail', () => {
     expect(screen.getByTestId('workflowLibraryTemplateDetail-version')).toHaveTextContent('1.2.0');
   });
 
-  it('should render the solution logo and humanized tag badges under the title', () => {
+  it('should render the solution logo and localized tag badges under the title', () => {
     renderDetail();
     expect(screen.getByText('Solutions')).toBeInTheDocument();
     // Solutions render as product logos (name shown on hover), not text.
     expect(
       screen.getByTestId('workflowLibraryTemplateDetail-solution-security')
     ).toBeInTheDocument();
-    // Categories render as tags under the title (humanized).
+    // Categories render as tags under the title, using the localized vocabulary name.
     const tags = screen.getByTestId('workflowLibraryTemplateDetail-tags');
-    expect(within(tags).getByText('Threat Intel')).toBeInTheDocument();
+    expect(within(tags).getByText('Threat intelligence')).toBeInTheDocument();
     expect(within(tags).getByText('Enrichment')).toBeInTheDocument();
   });
 
@@ -185,6 +207,28 @@ describe('TemplateDetail', () => {
     expect(preview).not.toHaveTextContent('template-metadata');
     expect(preview.textContent).toContain('maxAge: 7');
     expect(preview.textContent).not.toContain('__install__');
+  });
+
+  it('should re-render the preview with values committed from the install section', () => {
+    renderDetail();
+
+    fireEvent.click(screen.getByTestId('mockInstallSectionCommit'));
+
+    const preview = screen.getByTestId('workflowLibraryTemplateDetail-preview');
+    expect(preview.textContent).toContain('maxAge: 42');
+    expect(preview.textContent).not.toContain('maxAge: 7');
+  });
+
+  it('should pass the preview YAML into the install section (so Remix hands over what the preview shows)', () => {
+    renderDetail();
+
+    fireEvent.click(screen.getByTestId('mockInstallSectionCommit'));
+
+    const sectionYaml = screen.getByTestId('mockInstallSectionPreviewYaml');
+    expect(sectionYaml.textContent).toContain('maxAge: 42');
+    expect(sectionYaml.textContent).toBe(
+      screen.getByTestId('workflowLibraryTemplateDetail-preview').textContent
+    );
   });
 
   it('should show the selected step YAML in a read-only graph flyover', () => {
@@ -214,5 +258,22 @@ describe('TemplateDetail', () => {
     mockUseTemplate.mockReturnValue({ data: undefined, isLoading: false, isError: true });
     renderDetail();
     expect(screen.getByTestId('workflowLibraryTemplateDetail-error')).toBeInTheDocument();
+  });
+
+  it('should render an in-memory template without fetching by slug', () => {
+    // No slug and no fetch result — the query must not be consulted.
+    mockUseTemplate.mockReturnValue({ data: undefined, isLoading: true, isError: true });
+
+    render(
+      <WorkflowsUiServicesProvider services={createMockWorkflowsUiServices()}>
+        <TemplateDetail template={TEMPLATE_BODY} installMode="custom" />
+      </WorkflowsUiServicesProvider>
+    );
+
+    expect(mockUseTemplate).toHaveBeenCalledWith(undefined);
+    expect(screen.getByRole('heading', { name: 'My Template' })).toBeInTheDocument();
+    expect(screen.getByTestId('workflowLibraryTemplateDetail-preview')).toBeInTheDocument();
+    expect(screen.queryByTestId('workflowLibraryTemplateDetail-loading')).toBeNull();
+    expect(screen.queryByTestId('workflowLibraryTemplateDetail-error')).toBeNull();
   });
 });

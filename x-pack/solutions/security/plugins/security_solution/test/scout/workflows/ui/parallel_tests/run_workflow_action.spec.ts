@@ -74,10 +74,12 @@ spaceTest.describe.skip('Run workflow alert action', { tag: [...tags.stateful.cl
 
         await expect(alertsTablePage.workflowPanel).toBeVisible();
 
-        // Select the created workflow from the list
-        await page
-          .getByTestId('workflowIdSelect')
-          .getByRole('option', { name: workflowName })
+        // Select the created workflow from the list. The workflow selector renders a
+        // secondary description alongside the name inside the option's label element,
+        // which breaks selectOption()'s exact-label match, so filter on options instead.
+        await page.components
+          .selectable('workflowIdSelect')
+          .options.filter({ hasText: workflowName })
           .click();
 
         await expect(alertsTablePage.executeWorkflowButton).toBeEnabled();

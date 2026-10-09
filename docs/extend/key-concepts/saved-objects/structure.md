@@ -184,7 +184,7 @@ const change: SavedObjectsModelUnsafeTransformChange = {
 ```
 
 :::{note}
-Such transformations are potentially unsafe because the migration system has no knowledge of the operations executed on the documents. Use them only when no other change type covers your needs. Reach out to the development team if you think you need this.
+Such transformations are potentially unsafe because the migration system has no knowledge of the operations executed on the documents. Use them only when no other change type covers your needs, and call it out explicitly in your pull request description so that reviewers can assess the risk.
 :::
 
 ### schemas [_schemas]

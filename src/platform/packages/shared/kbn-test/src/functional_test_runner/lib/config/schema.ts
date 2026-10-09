@@ -151,6 +151,16 @@ export const schema = Joi.object()
         invert: Joi.boolean().default(false),
         slow: Joi.number().default(30000),
         timeout: Joi.number().default(INSPECTING ? 360000 * 100 : 360000),
+        // Timeout for hooks (before/beforeEach/after/afterEach + FTR lifecycle triggers)
+        // Overridable per-config or inside a hook body via this.timeout().
+        hookTimeout: Joi.number().default(INSPECTING ? 360000 * 100 : 120_000),
+        // Abort the whole config run on the first Mocha timeout (test or hook) instead of
+        // running remaining tests and waiting out the full teardown cascade.
+        abortOnTimeout: Joi.boolean().default(true),
+        // Bound on final cleanup (service/lifecycle teardown) once aborting, so a hung
+        // handler (e.g. a WebDriver call against a dead browser/session) can't stall
+        // reclaiming the CI agent.
+        abortCleanupTimeout: Joi.number().default(20_000),
         ui: Joi.string().default('bdd'),
         // Currently supporting beforeAll and afterAll.
         rootHooks: Joi.object()

@@ -17,11 +17,14 @@ type EsqlPolicy = Omit<SerializedEnrichPolicy, 'type' | 'query'>;
  * @param http The HTTP service to use for the request.
  * @returns A promise that resolves to an array of EsqlPolicy objects.
  */
-export const getEsqlPolicies = async (http: HttpStart): Promise<EsqlPolicy[]> => {
+export const getEsqlPolicies = async (
+  http: HttpStart,
+  signal?: AbortSignal
+): Promise<EsqlPolicy[]> => {
   try {
-    const policies = (await http.get(
-      `/internal/index_management/enrich_policies`
-    )) as SerializedEnrichPolicy[];
+    const policies = (await http.get(`/internal/index_management/enrich_policies`, {
+      signal,
+    })) as SerializedEnrichPolicy[];
 
     return policies.map(({ type, query: policyQuery, ...rest }) => rest);
   } catch (error) {

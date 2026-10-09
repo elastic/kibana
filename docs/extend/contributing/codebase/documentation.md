@@ -49,7 +49,7 @@ Internal plugin details can be kept alongside the code it describes. Information
 ### Structure
 
 The high-level developer documentation located in the [docs/extend](https://github.com/elastic/kibana/tree/main/docs/extend) folder attempts to follow [divio documentation](https://documentation.divio.com/) guidance. [Getting started](../../getting-started/index.md) and [Key concepts](../../key-concepts/index.md) sections are _explanation_ oriented, while
-[Tutorials](../ci-and-build/debugging-in-development.md) falls under both _tutorials_ and _how to_. The [API documentation](../../key-concepts/platform-architecture/api-documentation.md) section is _reference_ material.
+[Tutorials](../../tutorials/index.md) falls under both _tutorials_ and _how to_.
 
 Developers may choose to keep information that is specific to a particular plugin or package alongside the code.
 
@@ -121,13 +121,11 @@ over:
 export getSearchService: (searchSpec: { username: string; password: string }) => string;
 ```
 
-In the former, there will be a link to the `SearchSpec` interface with documentation for the `username` and `password` properties. In the latter the object will render inline, without comments:
-
-![prefer interfaces documentation](../../assets/dev_docs_nested_object.png)
+In the former, consumers can navigate to the `SearchSpec` interface and read the documentation for the `username` and `password` properties. In the latter the object is inlined, without comments.
 
 ### Export every type used in a public API
 
-When a publicly exported API item references a private type, this results in a broken link in our docs system. The private type is, by proxy, part of your public API, and as such, should be exported.
+When a publicly exported API item references a private type, consumers cannot import or extend that type. The private type is, by proxy, part of your public API, and as such, should be exported.
 
 Do:
 
@@ -145,35 +143,8 @@ export type foo: string | AnInterface;
 
 ### Avoid “Pick”
 
-`Pick` not only ends up being unhelpful in our documentation system, but it's also of limited help in your IDE. For that reason, avoid `Pick` and other similarly complex types on your public API items. Using these semantics internally is fine.
-
-![pick api documentation](../../assets/api_doc_pick.png)
-
-### Debugging tips
-
-There are three great ways to debug issues with the API infrastructure.
-
-1. Write a test
-
-[api_doc_suite.test.ts](https://github.com/elastic/kibana/blob/main/packages/kbn-docs-utils/src/integration_tests/api_doc_suite.test.ts) is a pretty comprehensive test suite that builds the test docs inside the [**fixtures** folder](https://github.com/elastic/kibana/tree/main/packages/kbn-docs-utils/src/integration_tests/__fixtures__/src).
-
-Edit the code inside `__fixtures__` to replicate the bug, write a test to track what should happen, then run `yarn jest api_doc_suite`.
-
-Once you've verified the bug is reproducible, use debug messages to narrow down the problem. This is much faster than running the entire suite to debug.
-
-2. Use [ts-ast-viewer.com](https://ts-ast-viewer.com/#code/KYDwDg9gTgLgBASwHY2FAZgQwMbDgMQgjgG8AoOSudJAfgC44AKdIxgZximQHMBKOAF4AfHE7ckPANxkAvkA)
-
-This nifty website will let you add some types and see how the system parses it. For example, the link above shows there is a `QuestionToken` as a sibling to the `FunctionType` which is why [this bug](https://github.com/elastic/kibana/issues/107145) reported children being lost. The API infra system didn't categorize the node as a function type node.
-
-3. Play around with `ts-morph` in a Code Sandbox.
-
-You can fork [this Code Sandbox example](https://codesandbox.io/s/typescript-compiler-issue-0lkwx?file=/src/use_ts_compiler.ts) that was used to explore how to generate the node signature in different ways (e.g. `node.getType.getText()` shows different results than `node.getType.getText(node)`).  Here is [another messy example](https://codesandbox.io/s/admiring-field-5btxs).
-
-The code sandbox approach can be a lot faster to iterate compared to running it in Kibana.
+`Pick` and other similarly complex types are of limited help in your IDE, so avoid them on your public API items. Using these semantics internally is fine.
 
 ## Example plugins
 
 Running Kibana with `yarn start --run-examples` will include all [example plugins](https://github.com/elastic/kibana/tree/main/examples). These are tested examples of platform services in use. We strongly encourage anyone providing a platform level service or [building block](../../key-concepts/ui/building-blocks.md) to include a tutorial that links to a tested example plugin. This is better than relying on copied code snippets, which can quickly get out of date.
-
-You can also visit these [examples plugins hosted online](https://demo.kibana.dev/8.2/app/home). Note that because anonymous access is enabled, some
-of the demos are currently not working.

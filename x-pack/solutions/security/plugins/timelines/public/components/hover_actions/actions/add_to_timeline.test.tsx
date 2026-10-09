@@ -7,6 +7,7 @@
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import React from 'react';
 
@@ -33,8 +34,8 @@ jest.mock('../../../hooks/use_app_toasts', () => ({
 jest.mock('../../../hooks/use_selector');
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const originalModule = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const originalModule = jest.requireActual('react-redux-v7');
 
   return {
     ...originalModule,
@@ -149,7 +150,7 @@ describe('add to timeline', () => {
       </TestProviders>
     );
 
-    fireEvent.mouseOver(screen.getByRole('button'));
+    await userEvent.hover(screen.getByRole('button'));
 
     expect(await screen.findByText(PRESS)).toBeInTheDocument();
   });

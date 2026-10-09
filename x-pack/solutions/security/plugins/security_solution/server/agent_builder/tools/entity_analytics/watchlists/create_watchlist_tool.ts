@@ -65,6 +65,13 @@ Use this tool when the user explicitly asks to create a new watchlist (e.g. "cre
 Do NOT use this tool to add entities to an existing watchlist — that is a separate action.`,
     schema,
     tags: ['security', 'entity-analytics', 'watchlists'],
+    annotations: {
+      title: 'Create Watchlist',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: ({ request }) =>

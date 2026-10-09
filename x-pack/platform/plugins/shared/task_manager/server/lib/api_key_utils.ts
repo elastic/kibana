@@ -7,6 +7,7 @@
 
 import type { AuthenticatedUser, SecurityServiceStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
+import { isUiamCredential } from '@kbn/core-security-server';
 import { truncate } from 'lodash';
 import type { TaskInstance, TaskUserScope } from '../task';
 import type { GrantApiKeysOpts } from '../api_key_strategy/api_key_strategy';
@@ -33,6 +34,29 @@ const getCredentialsFromRequest = (request: KibanaRequest) => {
   }
   const [scheme] = authorizationHeaderValue.split(/\s+/);
   return authorizationHeaderValue.substring(scheme.length + 1);
+};
+
+/**
+ * Normalizes a stored task `uiamApiKey` into the credential UIAM expects on the wire.
+ *
+ * Two writers persist this attribute in different shapes:
+ * - the grant path (`EsAndUiamApiKeyStrategy.grantApiKeys`) stores the raw `essu_…` secret;
+ * - the UIAM provisioning (convert) path stores `base64(<id>:<secret>)`, mirroring how ES API
+ *   keys are encoded.
+ *
+ * Only the raw secret authenticates. Presenting the base64 envelope makes Elasticsearch parse it
+ * as a native `id:api_key` pair and look the id up in its own key store, which fails with a
+ * generic authentication error without the cloud realm — and therefore UIAM — ever being reached.
+ * A value in neither shape is returned untouched, so behavior for it is unchanged.
+ */
+export const getUiamApiKeySecret = (storedUiamApiKey: string): string => {
+  if (isUiamCredential(storedUiamApiKey)) {
+    return storedUiamApiKey;
+  }
+
+  const [, secret] = Buffer.from(storedUiamApiKey, 'base64').toString().split(':');
+
+  return secret && isUiamCredential(secret) ? secret : storedUiamApiKey;
 };
 
 export const isRequestApiKeyType = (user: AuthenticatedUser | null) => {

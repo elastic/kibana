@@ -14,7 +14,7 @@ import {
 
 jest.mock('@kbn/entity-store/public', () => ({ useEntityStoreEuidApi: jest.fn() }));
 jest.mock('@kbn/entity-store/common', () => ({
-  getLatestEntitiesIndexName: jest.fn(() => '.entities.v2.latest.security_default'),
+  getLatestEntitiesIndexName: jest.fn(() => '.entities.v2.latest.default'),
 }));
 jest.mock('../anomaly_heatmap_interval', () => ({ useIntervalForHeatmap: jest.fn(() => 3) }));
 

@@ -10,7 +10,6 @@
     "browser": true,
     "server": true,
     "requiredPlugins": [
-      "presentationUtil",
       "embeddable",
       "dataViews",
       "data",
@@ -18,6 +17,7 @@
       "uiActions",
       "kibanaReact",
       "esql"
-    ]
+    ],
+    "requiredBundles": ["presentationUtil"]
   }
 }

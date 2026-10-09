@@ -24,11 +24,11 @@ describe('buildExtendedFieldsBackfill', () => {
       {}
     );
 
-    // text/toggle → _as_keyword, number → _as_integer (matches getV2FieldType / the field-def migration)
+    // text → _as_keyword, number → _as_integer, toggle → _as_boolean (matches getV2FieldType / the field-def migration)
     expect(result).toEqual({
       summary_as_keyword: 'hello',
       count_as_integer: '7',
-      flag_as_keyword: 'true',
+      flag_as_boolean: 'true',
     });
   });
 
@@ -37,7 +37,7 @@ describe('buildExtendedFieldsBackfill', () => {
       [{ key: 'flag', type: CustomFieldTypes.TOGGLE, value: false }],
       {}
     );
-    expect(result).toEqual({ flag_as_keyword: 'false' });
+    expect(result).toEqual({ flag_as_boolean: 'false' });
   });
 
   it('skips null and undefined values (the case left the field empty)', () => {
@@ -52,7 +52,7 @@ describe('buildExtendedFieldsBackfill', () => {
     expect(result).toEqual({ c_as_keyword: 'kept' });
   });
 
-  it('never overwrites a key already present in extended_fields', () => {
+  it('never overwrites a key already present in extended_fields with a non-empty value', () => {
     const result = buildExtendedFieldsBackfill(
       [
         { key: 'summary', type: CustomFieldTypes.TEXT, value: 'from-legacy' },
@@ -61,6 +61,21 @@ describe('buildExtendedFieldsBackfill', () => {
       { summary_as_keyword: 'already-set-in-v2' }
     );
     // summary is left as-is; only the missing key is added
+    expect(result).toEqual({ count_as_integer: '9' });
+  });
+
+  it('never overwrites an empty-string entry (a possible deliberate v2 clear) but fills null', () => {
+    // '' is ambiguous: the v2 UI writes it both for untouched fields and for explicit clears,
+    // and users can clear values while the space's backfill is still pending — so '' always
+    // wins over the legacy mirror. null cannot come from any user-facing write path, so it is
+    // treated as "no v2 value" and filled.
+    const result = buildExtendedFieldsBackfill(
+      [
+        { key: 'summary', type: CustomFieldTypes.TEXT, value: 'from-legacy' },
+        { key: 'count', type: CustomFieldTypes.NUMBER, value: 9 },
+      ],
+      { summary_as_keyword: '', count_as_integer: null }
+    );
     expect(result).toEqual({ count_as_integer: '9' });
   });
 

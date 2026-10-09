@@ -16,6 +16,7 @@ import type {
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
   PublishesWritableTitle,
+  SupportsJsonExport,
 } from '@kbn/presentation-publishing';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-publishing';
@@ -46,7 +47,8 @@ export type LinksApi = HasType<typeof LINKS_EMBEDDABLE_TYPE> &
   DefaultEmbeddableApi<LinksEmbeddableState> &
   PublishesWritableTitle &
   HasEditCapabilities &
-  HasLibraryTransforms<LinksByReferenceState, LinksByValueState>;
+  HasLibraryTransforms<LinksByReferenceState, LinksByValueState> &
+  SupportsJsonExport;
 
 export type ResolvedLink = Link & {
   id: string;

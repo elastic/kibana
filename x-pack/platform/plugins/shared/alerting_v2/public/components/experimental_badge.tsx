@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiBetaBadge } from '@elastic/eui';
+import type { AppHeaderBadge } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 
 const EXPERIMENTAL_LABEL = i18n.translate('xpack.alertingV2.experimentalBadge.label', {
@@ -18,12 +17,8 @@ const EXPERIMENTAL_TOOLTIP = i18n.translate('xpack.alertingV2.experimentalBadge.
     'This functionality is experimental and may be changed or removed completely in a future release. Elastic will work to fix any issues, but experimental features are not subject to the support SLA of official GA features.',
 });
 
-export const ExperimentalBadge = () => (
-  <EuiBetaBadge
-    alignment="middle"
-    label={EXPERIMENTAL_LABEL}
-    tooltipContent={EXPERIMENTAL_TOOLTIP}
-    tooltipPosition="bottom"
-    data-test-subj="alertingV2ExperimentalBadge"
-  />
-);
+export const experimentalBadge: AppHeaderBadge = {
+  label: EXPERIMENTAL_LABEL,
+  tooltip: EXPERIMENTAL_TOOLTIP,
+  'data-test-subj': 'alertingV2ExperimentalBadge',
+};

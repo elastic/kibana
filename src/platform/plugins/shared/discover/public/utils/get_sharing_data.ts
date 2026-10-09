@@ -14,7 +14,7 @@ import type {
   ISearchSource,
   SerializedSearchSourceFields,
 } from '@kbn/data-plugin/public';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import {
   getSortForSearchSource,
@@ -32,7 +32,8 @@ import { showTimeFieldColumn } from './show_time_field_column';
 export async function getSharingData(
   currentSearchSource: ISearchSource,
   state: DiscoverAppState,
-  services: { uiSettings: IUiSettingsClient; data: DataPublicPluginStart }
+  services: { uiSettings: IUiSettingsClient; data: DataPublicPluginStart },
+  absoluteTimeRange?: TimeRange
 ) {
   const { uiSettings, data } = services;
   const searchSource = currentSearchSource.createCopy();
@@ -63,7 +64,10 @@ export async function getSharingData(
     query,
   });
 
-  const absoluteTimeFilter = data.query.timefilter.timefilter.createFilter(index);
+  const absoluteTimeFilter = data.query.timefilter.timefilter.createFilter(
+    index,
+    absoluteTimeRange
+  );
   const relativeTimeFilter = data.query.timefilter.timefilter.createRelativeFilter(index);
   return {
     getSearchSource: ({
@@ -112,8 +116,10 @@ export async function getSharingData(
             let field = column;
 
             // If this column is a nested field, add a wildcard to the field name in order to fetch
-            // all leaf fields for the report, since the fields API doesn't support nested field roots
-            if (isNestedFieldParent(column, index)) {
+            // all leaf fields for the report, since the fields API doesn't support nested field roots.
+            // In ES|QL mode there is no data view (`index` is undefined) and nested field roots do
+            // not apply, so the check is skipped.
+            if (index && isNestedFieldParent(column, index)) {
               field = `${column}.*`;
             }
 

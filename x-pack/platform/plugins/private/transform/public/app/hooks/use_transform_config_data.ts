@@ -16,6 +16,7 @@ import { getFlattenedObject } from '@kbn/std';
 import { difference } from 'lodash';
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { isCustomProjectRouting } from '@kbn/cps-common';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
 import {
@@ -41,6 +42,24 @@ import {
   isLatestPartialRequest,
   isPivotPartialRequest,
 } from '../sections/create_transform/components/step_define/common/types';
+
+const SOURCE_INDICES_UNAVAILABLE_ERROR = 'Source indices have been deleted or closed.';
+
+export const sourceIndexUnavailableMessage = i18n.translate(
+  'xpack.transform.preview.sourceIndexUnavailableMessage',
+  {
+    defaultMessage:
+      'No source indices match the selected data view in the selected project scope. Select another project scope or choose a data view that exists in this scope.',
+  }
+);
+
+export const isSourceIndexUnavailableError = (error: unknown): boolean =>
+  getErrorMessage(error).includes(SOURCE_INDICES_UNAVAILABLE_ERROR);
+
+export const isProjectScopedSourceIndexUnavailableError = (
+  error: unknown,
+  projectRouting?: StepDefineExposedState['projectRouting']
+): boolean => isCustomProjectRouting(projectRouting) && isSourceIndexUnavailableError(error);
 
 function sortColumns(groupByArr: string[]) {
   return (a: string, b: string) => {
@@ -106,7 +125,8 @@ export const useTransformConfigData = (
   validationStatus: StepDefineExposedState['validationStatus'],
   requestPayload: StepDefineExposedState['previewRequest'],
   combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings'],
-  timeRangeMs?: StepDefineExposedState['timeRangeMs']
+  timeRangeMs?: StepDefineExposedState['timeRangeMs'],
+  projectRouting?: StepDefineExposedState['projectRouting']
 ): UseIndexDataReturnType => {
   const [previewMappingsProperties, setPreviewMappingsProperties] =
     useState<PreviewMappingsProperties>({});
@@ -152,9 +172,10 @@ export const useTransformConfigData = (
         query,
         requestPayload,
         combinedRuntimeMappings,
-        timeRangeMs
+        timeRangeMs,
+        projectRouting
       ),
-    [dataView, query, requestPayload, combinedRuntimeMappings, timeRangeMs]
+    [dataView, query, requestPayload, combinedRuntimeMappings, timeRangeMs, projectRouting]
   );
 
   const {
@@ -170,7 +191,13 @@ export const useTransformConfigData = (
       setNoDataMessage('');
       setStatus(INDEX_STATUS.LOADING);
     } else if (isError) {
-      setErrorMessage(getErrorMessage(previewError));
+      if (isProjectScopedSourceIndexUnavailableError(previewError, projectRouting)) {
+        setErrorMessage('');
+        setNoDataMessage(sourceIndexUnavailableMessage);
+      } else {
+        setErrorMessage(getErrorMessage(previewError));
+        setNoDataMessage('');
+      }
       setTableItems([]);
       setRowCountInfo({
         rowCount: 0,
@@ -244,7 +271,7 @@ export const useTransformConfigData = (
     resetPagination();
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(query)]);
+  }, [JSON.stringify([query, projectRouting])]);
 
   if (sortingColumns.length > 0) {
     const sortingColumnsWithTypes = sortingColumns.map((c) => {

@@ -26,7 +26,9 @@ export function createMockEncryptedSavedObjects(
       id,
       type: ACTION_POLICY_SAVED_OBJECT_TYPE,
       attributes: {
-        auth: { apiKey: attrs.apiKey, createdByUser: attrs.createdByUser, owner: 'test-user' },
+        apiKey: attrs.apiKey,
+        apiKeyCreatedByUser: attrs.createdByUser,
+        apiKeyOwner: 'test-user',
       },
       references: [],
     });

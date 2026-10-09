@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { css } from '@emotion/react';
 import type { StartServicesAccessor } from '@kbn/core/public';
@@ -309,7 +310,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                   ref={wrapperRef}
                 >
                   {error ? (
-                    <EuiCallOut
+                    <KbnDangerCallout
                       announceOnMount
                       title={
                         <FormattedMessage
@@ -317,12 +318,9 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                           defaultMessage="Unable to load the data for the swim lane"
                         />
                       }
-                      color="danger"
-                      iconType="warning"
                       css={{ width: '100%' }}
-                    >
-                      <p>{error.message}</p>
-                    </EuiCallOut>
+                      text={error.message}
+                    />
                   ) : (
                     <SwimlaneContainer
                       id={uuid}

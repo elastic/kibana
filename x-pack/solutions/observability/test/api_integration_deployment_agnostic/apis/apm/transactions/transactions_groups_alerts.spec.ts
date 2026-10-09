@@ -116,7 +116,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         await apmSynthtraceEsClient.index([
           timerange(start, end)
-            .interval('1m')
+            .interval('5m')
             .rate(1)
             .generator((timestamp) => {
               return transactions.map(({ name, duration, type }) => {
@@ -128,7 +128,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               });
             }),
           timerange(start, end)
-            .interval('1m')
+            .interval('5m')
             .rate(1)
             .generator((timestamp) => {
               return transactions.map(({ name, duration, type }) => {

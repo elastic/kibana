@@ -18,6 +18,7 @@ import type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
@@ -65,7 +66,7 @@ import type {
   CasesAttachmentsV2WriterContract,
 } from '../../cases_analytics_v2';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
-import { createCaseError, isSOError } from '../../common/error';
+import { createCaseError } from '../../common/error';
 import type {
   ResolvedExtendedFieldFilter,
   ResolvedFieldLabelFilter,
@@ -91,6 +92,7 @@ import type {
   GetCaseIdsByAlertIdArgs,
   GetCaseIdsByAlertIdAggs,
   CasesMapWithPageInfo,
+  CasesSearchStats,
   DeleteCaseArgs,
   GetCaseArgs,
   GetCasesArgs,
@@ -434,12 +436,20 @@ export class CasesService {
     namespaces,
     extendedFieldFilters,
     fieldLabelFilters,
+    statsOptions,
   }: {
     caseOptions: SavedObjectFindOptionsKueryNode;
     namespaces: string[];
     extendedFieldFilters?: ResolvedExtendedFieldFilter[][];
     fieldLabelFilters?: ResolvedFieldLabelFilter[];
-  }): Promise<CasesMapWithPageInfo> {
+    /**
+     * When provided, status counts and MTTR are computed with the same search query as the
+     * case list (free-text search, extended field filters, attachment matches) but with
+     * `statsOptions.filter` in place of `caseOptions.filter` — the caller passes a filter with
+     * the status clause stripped so all three status counts are always populated.
+     */
+    statsOptions?: { filter?: KueryNode };
+  }): Promise<CasesMapWithPageInfo & { searchStats?: CasesSearchStats }> {
     const caseIdsByAttachmentSearch = await this.getCaseIdsByAttachmentSearch(
       namespaces,
       caseOptions.search,
@@ -479,13 +489,25 @@ export class CasesService {
 
     const hasRuntimeMappings = Object.keys(runtimeMappings).length > 0;
 
-    const cases = await this.searchCases({
-      type: [CASE_SAVED_OBJECT],
-      namespaces,
-      query,
-      ...(hasRuntimeMappings ? { runtime_mappings: runtimeMappings } : {}),
-      ...convertFindQueryParams(caseOptions),
-    });
+    const [cases, searchStats] = await Promise.all([
+      this.searchCases({
+        type: [CASE_SAVED_OBJECT],
+        namespaces,
+        query,
+        ...(hasRuntimeMappings ? { runtime_mappings: runtimeMappings } : {}),
+        ...convertFindQueryParams(caseOptions),
+      }),
+      statsOptions !== undefined
+        ? this.computeSearchStats({
+            namespaces,
+            query: mergeSearchQuery(
+              searchQuery,
+              statsOptions.filter ? toElasticsearchQuery(statsOptions.filter) : undefined
+            ),
+            ...(hasRuntimeMappings ? { runtimeMappings } : {}),
+          })
+        : undefined,
+    ]);
 
     const casesMap = cases?.hits?.hits?.reduce((accMap, caseInfo) => {
       // Extract UUID from _id format: "cases:uuid"
@@ -528,6 +550,65 @@ export class CasesService {
       page: caseOptions.page ?? 1,
       perPage: caseOptions.perPage ?? DEFAULT_PER_PAGE,
       total,
+      ...(searchStats !== undefined ? { searchStats } : {}),
+    };
+  }
+
+  /**
+   * Computes the status counts and MTTR over every case matching the given search query in a
+   * single size-0 aggregation search. This mirrors the case-list query exactly (unlike
+   * getCaseStatusStats, which only sees the KQL filter), so metrics shown next to the list
+   * always agree with it.
+   */
+  private async computeSearchStats({
+    namespaces,
+    query,
+    runtimeMappings,
+  }: {
+    namespaces: string[];
+    query?: estypes.QueryDslQueryContainer;
+    runtimeMappings?: estypes.MappingRuntimeFields;
+  }): Promise<CasesSearchStats> {
+    const response = await this.searchCases({
+      type: [CASE_SAVED_OBJECT],
+      namespaces,
+      query,
+      ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
+      size: 0,
+      // Raw ES search: attributes live directly under the type key (`cases.status`), unlike
+      // the SO client's find aggregations which use `cases.attributes.status`.
+      aggs: {
+        statuses: {
+          terms: {
+            field: `${CASE_SAVED_OBJECT}.status`,
+            size: caseStatuses.length,
+            order: { _key: 'asc' },
+          },
+        },
+        mttr: {
+          avg: {
+            field: `${CASE_SAVED_OBJECT}.duration`,
+          },
+        },
+      },
+    });
+
+    const aggregations = response.aggregations as
+      | {
+          statuses?: { buckets: Array<{ key: string; doc_count: number }> };
+          mttr?: { value: number | null };
+        }
+      | undefined;
+
+    const statusBuckets = CasesService.getStatusBuckets(aggregations?.statuses?.buckets);
+
+    return {
+      statusStats: {
+        open: statusBuckets?.get(CasePersistedStatus.OPEN) ?? 0,
+        'in-progress': statusBuckets?.get(CasePersistedStatus.IN_PROGRESS) ?? 0,
+        closed: statusBuckets?.get(CasePersistedStatus.CLOSED) ?? 0,
+      },
+      mttr: aggregations?.mttr?.value ?? null,
     };
   }
 
@@ -692,6 +773,10 @@ export class CasesService {
           caseId
         );
 
+      if (isSavedObjectErrorResult(resolveCaseResult.saved_object)) {
+        throw new Error(resolveCaseResult.saved_object.error.message);
+      }
+
       const resolvedSO = transformSavedObjectToExternalModel(resolveCaseResult.saved_object);
       const decodeRes = decodeOrThrow(CaseTransformedAttributesRt)(resolvedSO.attributes);
 
@@ -715,7 +800,7 @@ export class CasesService {
       );
 
       const res = cases.saved_objects.map((theCase) => {
-        if (isSOError(theCase)) {
+        if (isSavedObjectErrorResult(theCase)) {
           return theCase;
         }
 
@@ -1065,7 +1150,7 @@ export class CasesService {
       const successfulAnalyticsV2Mirrors: Array<(typeof bulkCreateResponse.saved_objects)[number]> =
         [];
       const res = bulkCreateResponse.saved_objects.map((theCase) => {
-        if (isSOError<CasePersistedAttributes>(theCase)) {
+        if (isSavedObjectErrorResult(theCase)) {
           return theCase;
         }
         successfulAnalyticsV2Mirrors.push(theCase);
@@ -1196,7 +1281,7 @@ export class CasesService {
       const analyticsV2Mirrors: Array<SavedObject<CasePersistedAttributes>> = [];
 
       const res = updatedCases.saved_objects.reduce((acc, theCase) => {
-        if (isSOError(theCase)) {
+        if (isSavedObjectErrorResult(theCase)) {
           acc.push(theCase);
           return acc;
         }

@@ -172,7 +172,7 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
   const triggerButton = (
     <EuiButtonEmpty
       size="s"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       flush="both"
       color="text"

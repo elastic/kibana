@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
+import type { AnyAction, Dispatch, ListenerEffectAPI } from 'redux-toolkit-v1';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';

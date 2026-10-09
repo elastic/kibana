@@ -31,7 +31,7 @@ export const EntityStoreDisabledEmptyPromptBody = React.memo(() => (
     color="plain"
     css={css`
       .euiEmptyPrompt__icon {
-        min-inline-size: 160px;
+        min-inline-size: 224px;
         text-align: center;
       }
       .euiEmptyPrompt__content {
@@ -39,16 +39,22 @@ export const EntityStoreDisabledEmptyPromptBody = React.memo(() => (
       }
     `}
     data-test-subj="entityStoreDisabledEmptyPrompt"
-    icon={<EuiImage size={128} alt="" url={illustrationSearchAnalytics} />}
+    icon={<EuiImage size={192} alt="" url={illustrationSearchAnalytics} />}
     layout="horizontal"
-    style={{ maxWidth: 624 }}
+    style={{ maxWidth: 800 }}
     title={
       <h2>
         <FormattedMessage
           id="xpack.securitySolution.entityAnalytics.homePage.enableEntityAnalytics"
-          defaultMessage="Enable Entity analytics to collect entity data and access analytics capabilities"
+          defaultMessage="Enable Entity analytics"
         />
       </h2>
+    }
+    body={
+      <FormattedMessage
+        id="xpack.securitySolution.entityAnalytics.homePage.enableEntityAnalytics.body"
+        defaultMessage="Start collecting entity data across your environment, so you can spot your riskiest entities and anomalous behavior at a glance, and catch threats before they escalate."
+      />
     }
     actions={
       <SecuritySolutionLinkButton

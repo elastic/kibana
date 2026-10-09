@@ -11,19 +11,36 @@ import { css } from '@emotion/react';
 
 interface JsonCodeBlockProps {
   data: unknown;
+  lineNumbers?: boolean;
+  background?: 'plain' | 'subdued';
 }
 
-export const JsonCodeBlock: React.FC<JsonCodeBlockProps> = ({ data }) => {
+export const JsonCodeBlock: React.FC<JsonCodeBlockProps> = ({
+  data,
+  lineNumbers = true,
+  background = 'plain',
+}) => {
   const { euiTheme } = useEuiTheme();
   const formattedJson = useMemo(() => JSON.stringify(data, null, 2), [data]);
+  const backgroundColor =
+    background === 'subdued'
+      ? euiTheme.colors.backgroundBaseSubdued
+      : euiTheme.colors.backgroundBasePlain;
   const styles = css`
     word-break: break-word;
     border: 1px solid ${euiTheme.colors.borderBaseSubdued};
     border-radius: ${euiTheme.border.radius.small};
-    background-color: ${euiTheme.colors.backgroundBasePlain};
+    background-color: ${backgroundColor};
   `;
   return (
-    <EuiCodeBlock language="json" paddingSize="s" fontSize="s" isCopyable lineNumbers css={styles}>
+    <EuiCodeBlock
+      language="json"
+      paddingSize="s"
+      fontSize="s"
+      isCopyable
+      lineNumbers={lineNumbers}
+      css={styles}
+    >
       {formattedJson}
     </EuiCodeBlock>
   );

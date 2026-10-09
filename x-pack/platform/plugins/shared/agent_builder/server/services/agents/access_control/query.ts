@@ -13,7 +13,8 @@ import { AgentAccessControlMode, type CurrentUser } from '@kbn/agent-builder-com
  *
  * A non-admin user can list an agent when any of the following holds:
  *   - the agent's access mode is not Private (Public + Shared cover the world by default), OR
- *   - the user is the agent's creator (matched on profile id and/or username), OR
+ *   - the user is the agent's creator (matched on stable created_by_id, or username only when
+ *     created_by_id was never stored on a legacy document), OR
  *   - the agent's access-control entries have a `type=user` entry naming the current user.
  *
  * V1: only user-type ACL entries are matched. Role-type grants land in V2 once the
@@ -40,10 +41,18 @@ export const buildReadAccessFilter = ({ user }: { user: CurrentUser }) => {
     },
   ];
 
-  shouldClauses.push({ term: { created_by_name: user.username } });
   if (user.id !== undefined) {
     shouldClauses.push({ term: { created_by_id: user.id } });
   }
+
+  // Legacy ownership: username match only when created_by_id was never stored, so owners of those
+  // docs keep list access without reopening cross-realm collisions for id-backed documents.
+  shouldClauses.push({
+    bool: {
+      must_not: { exists: { field: 'created_by_id' } },
+      filter: { term: { created_by_name: user.username } },
+    },
+  });
 
   // Current explicit user grants.
   shouldClauses.push({

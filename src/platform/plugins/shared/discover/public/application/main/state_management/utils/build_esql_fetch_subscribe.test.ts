@@ -58,9 +58,9 @@ async function getTestProps({
     })
   );
 
-  // Reset the profile state to match the expected initial state for tests
+  // Reset the profile app state defaults to match the expected initial state for tests
   toolkit.internalState.dispatch(
-    toolkit.injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
+    toolkit.injectCurrentTab(internalStateActions.setProfileAppStateDefaultFieldsToReset)({
       fieldsToReset: 'none',
     })
   );
@@ -195,32 +195,6 @@ describe('buildEsqlFetchSubscribe', () => {
       tabId,
       appState: { columns: ['field1'] },
     });
-  });
-
-  test('should keep resetId stable when a transformational fetch requests a columns reset', async () => {
-    const { toolkit, dataState } = await setupTest({});
-    const documents$ = dataState.data$.documents$;
-
-    documents$.next(msgComplete);
-
-    const prevDefaultProfileState = toolkit.getCurrentTab().defaultProfileState;
-
-    documents$.next({
-      fetchStatus: FetchStatus.PARTIAL,
-      result: [
-        {
-          id: '1',
-          raw: { field1: 1 },
-          flattened: { field1: 1 },
-        } as unknown as DataTableRecord,
-      ],
-      query: { esql: 'from the-data-view-title | keep field1' },
-    });
-
-    const nextDefaultProfileState = toolkit.getCurrentTab().defaultProfileState;
-
-    expect(nextDefaultProfileState.fieldsToReset).toEqual(['columns']);
-    expect(nextDefaultProfileState.resetId).toBe(prevDefaultProfileState.resetId);
   });
 
   test('changing an ES|QL query with same result columns but a different index pattern should change state when loading and finished', async () => {
@@ -625,13 +599,13 @@ describe('buildEsqlFetchSubscribe', () => {
     });
   });
 
-  it('should call setProfileStateFieldsToReset correctly when index pattern changes', async () => {
+  it('should call setProfileAppStateDefaultFieldsToReset correctly when index pattern changes', async () => {
     const { toolkit, dataState } = await setupTest({
       appState: { query: { esql: 'from pattern' } },
       defaultFetchStatus: FetchStatus.LOADING,
     });
     const documents$ = dataState.data$.documents$;
-    expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
+    expect(toolkit.getCurrentTab().profileAppStateDefaults.fieldsToReset).toEqual('none');
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern' },
@@ -645,13 +619,13 @@ describe('buildEsqlFetchSubscribe', () => {
       fetchStatus: FetchStatus.LOADING,
       query: { esql: 'from pattern1' },
     });
-    expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('all');
+    expect(toolkit.getCurrentTab().profileAppStateDefaults.fieldsToReset).toEqual('all');
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern1' },
     });
     toolkit.internalState.dispatch(
-      toolkit.injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
+      toolkit.injectCurrentTab(internalStateActions.setProfileAppStateDefaultFieldsToReset)({
         fieldsToReset: 'none',
       })
     );
@@ -664,7 +638,7 @@ describe('buildEsqlFetchSubscribe', () => {
       fetchStatus: FetchStatus.LOADING,
       query: { esql: 'from pattern1' },
     });
-    expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
+    expect(toolkit.getCurrentTab().profileAppStateDefaults.fieldsToReset).toEqual('none');
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern1' },
@@ -678,7 +652,7 @@ describe('buildEsqlFetchSubscribe', () => {
       fetchStatus: FetchStatus.LOADING,
       query: { esql: 'from pattern2' },
     });
-    expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('all');
+    expect(toolkit.getCurrentTab().profileAppStateDefaults.fieldsToReset).toEqual('all');
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern2' },
@@ -738,24 +712,24 @@ describe('buildEsqlFetchSubscribe', () => {
     });
   });
 
-  it('should call setProfileStateFieldsToReset correctly when columns change', async () => {
+  it('should not mark profile columns for reset when the available columns change', async () => {
     const { toolkit, dataState } = await setupTest({});
     const documents$ = dataState.data$.documents$;
     const result1 = [buildDataTableRecord({ message: 'foo' } as EsHitRecord)];
     const result2 = [buildDataTableRecord({ message: 'foo', extension: 'bar' } as EsHitRecord)];
-    expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
+    expect(toolkit.getCurrentTab().profileAppStateDefaults.fieldsToReset).toEqual('none');
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern' },
       result: result1,
     });
-    expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
+    expect(toolkit.getCurrentTab().profileAppStateDefaults.fieldsToReset).toEqual('none');
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern' },
       result: result2,
     });
-    expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual(['columns']);
+    expect(toolkit.getCurrentTab().profileAppStateDefaults.fieldsToReset).toEqual('none');
   });
 
   const makeEsqlCols = (names: string[]) =>

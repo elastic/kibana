@@ -11,13 +11,14 @@ import type { ReactNode } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
-import type { AppHeaderPadding } from '../types';
+import type { AppHeaderSpacing } from '../types';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
-// Single-row bar height, applied to every header (title, tabbed, or back-button-only) so the bar
-// stays a consistent 48px. The symmetric size.s padding leaves a 32px content area, enough for the
-// trailing controls (buttons) to fit without pushing the row past 48px.
-const APPLICATION_TOP_BAR_MIN_HEIGHT_PX = 48;
+// Minimum single-row bar height. Height is otherwise driven by content plus the symmetric vertical
+// padding; this floor keeps short headers (e.g. a title with no trailing control) at the same height
+// as a row with a 32px control (16px + 32px + 16px). The dense `compact` mode uses a shorter floor.
+const STANDARD_MIN_HEIGHT_PX = 64;
+const COMPACT_MIN_HEIGHT_PX = 48;
 
 export interface AppHeaderShellProps {
   title?: ReactNode;
@@ -25,57 +26,74 @@ export interface AppHeaderShellProps {
   titleActions?: ReactNode;
   titleAppend?: ReactNode;
   trailing?: ReactNode;
-  metadata?: ReactNode;
+  secondaryContent?: ReactNode;
+  secondaryContentTestSubj?: string;
   tabs?: ReactNode;
   sticky?: boolean;
-  padding?: AppHeaderPadding;
+  spacing?: AppHeaderSpacing;
   borderless?: boolean;
 }
 
-// Resolves the outer spacing contract: horizontal padding for the scalar values, and the breakout
-// margin for the `bleed` variant. The header's internal vertical padding is standardized separately
-// (see `useHeaderStyles`) so the header keeps a consistent height regardless of this prop.
-const resolvePadding = (
-  sticky: boolean,
-  padding: AppHeaderPadding | undefined,
-  euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']
-) => {
-  const resolved = padding ?? (sticky ? 'm' : 'none');
+type EuiTheme = ReturnType<typeof useEuiTheme>['euiTheme'];
 
-  if (resolved === 'none') {
-    return { paddingInline: undefined, bleedMargin: undefined };
+// Horizontal content inset per mode. `flush` hands the inset to the parent, so the header applies
+// none itself.
+const spacingInset = (spacing: AppHeaderSpacing, euiTheme: EuiTheme): string | undefined => {
+  switch (spacing) {
+    case 'flush':
+      return undefined;
+    case 'compact':
+      return euiTheme.size.s;
+    case 'standard':
+    case 'bleed':
+      return euiTheme.size.base;
+    case 'largeBleed':
+      return euiTheme.size.l;
+    default: {
+      const exhaustive: never = spacing;
+      return exhaustive;
+    }
   }
+};
 
-  if (resolved === 's' || resolved === 'm') {
-    return { paddingInline: euiTheme.size[resolved], bleedMargin: undefined };
-  }
+const resolveSpacing = (spacing: AppHeaderSpacing = 'standard', euiTheme: EuiTheme) => {
+  const inset = spacingInset(spacing, euiTheme);
+  const isBleed = spacing === 'bleed' || spacing === 'largeBleed';
 
-  // `{ bleed }`: pull the header out to its padded container's top/left/right edges (negative margin)
-  // and re-inset the content by the same amount so it stays aligned with the page gutter. The value
-  // mirrors the container's symmetric EUI `paddingSize`: `'m'` → 16px (`size.base`), `'l'` → 24px.
-  const value = { m: euiTheme.size.base, l: euiTheme.size.l }[resolved.bleed];
-  return { paddingInline: value, bleedMargin: value };
+  return {
+    paddingInline: inset,
+    // Vertical padding matches the horizontal inset so content sits the same distance from every
+    // edge. `flush` keeps the standard vertical padding while the parent owns the horizontal inset.
+    paddingBlock: inset ?? euiTheme.size.base,
+    // Bleed pulls the header out to the parent's edges with a matching negative margin, then re-insets
+    // its content by the same token so it stays on the parent's page grid.
+    bleedMargin: isBleed ? inset : undefined,
+    minHeight: spacing === 'compact' ? COMPACT_MIN_HEIGHT_PX : STANDARD_MIN_HEIGHT_PX,
+  };
 };
 
 const useHeaderStyles = (
   sticky: boolean,
-  padding: AppHeaderPadding | undefined,
+  spacing: AppHeaderSpacing | undefined,
   hasTabs: boolean,
   hasTitleAppend: boolean,
-  hasMetadata: boolean,
+  hasSecondaryContent: boolean,
   borderless: boolean
 ) => {
   const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
-    const { paddingInline, bleedMargin } = resolvePadding(sticky, padding, euiTheme);
+    const { paddingInline, paddingBlock, bleedMargin, minHeight } = resolveSpacing(
+      spacing,
+      euiTheme
+    );
 
-    // Vertical padding is internal (independent of the `padding` prop). The primary row floors at a
-    // consistent 48px regardless of title size; content is centered within it.
-    const paddingBlock = euiTheme.size.s;
     // A row followed by another collapses its bottom gap so the next row sits close (and tabs stay
     // flush with the header's bottom border); otherwise it uses the symmetric vertical padding.
     const bottomPad = (followed: boolean) => (followed ? euiTheme.size.xs : paddingBlock);
+
+    const isMultiRow = hasTabs || hasSecondaryContent;
+    const primaryRowBottomPadding = bottomPad(hasTabs || hasSecondaryContent);
 
     const root = css`
       ${sticky &&
@@ -89,7 +107,6 @@ const useHeaderStyles = (
       flex-direction: column;
       min-width: 0;
       box-sizing: border-box;
-      padding: 0;
       ${paddingInline &&
       css`
         padding-inline: ${paddingInline};
@@ -113,16 +130,27 @@ const useHeaderStyles = (
       }
     `;
 
+    // Preserve the single-row content floor in multi-row headers while replacing its symmetric
+    // bottom padding with the smaller gap to the following row.
     const primaryRow = css`
       display: flex;
       align-items: center;
       gap: ${euiTheme.size.m};
       min-width: 0;
-      min-height: ${APPLICATION_TOP_BAR_MIN_HEIGHT_PX}px;
+      box-sizing: border-box;
+      ${!isMultiRow &&
+      css`
+        min-height: ${minHeight}px;
+      `}
+      ${isMultiRow &&
+      !hasTitleAppend &&
+      css`
+        min-height: calc(${minHeight}px - ${paddingBlock} + ${primaryRowBottomPadding});
+      `}
       ${!hasTitleAppend &&
       css`
         padding-block-start: ${paddingBlock};
-        padding-block-end: ${bottomPad(hasTabs || hasMetadata)};
+        padding-block-end: ${primaryRowBottomPadding};
       `}
     `;
 
@@ -167,7 +195,7 @@ const useHeaderStyles = (
       align-items: stretch;
     `;
 
-    const metadataRow = css`
+    const secondaryContentRow = css`
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -182,8 +210,8 @@ const useHeaderStyles = (
       flex-shrink: 0;
       align-items: center;
       gap: ${euiTheme.size.xs};
-      opacity: 0;
-      pointer-events: none;
+      opacity: ${hasTitleAppend ? 1 : 0};
+      pointer-events: ${hasTitleAppend ? 'auto' : 'none'};
       transition: opacity ${euiTheme.animation.fast} ease;
     `;
 
@@ -196,10 +224,10 @@ const useHeaderStyles = (
       titleAppend,
       trailingSlot,
       titleActionsReveal,
-      metadataRow,
+      secondaryContentRow,
       tabsRow,
     };
-  }, [sticky, padding, euiTheme, hasTabs, hasTitleAppend, hasMetadata, borderless]);
+  }, [sticky, spacing, euiTheme, hasTabs, hasTitleAppend, hasSecondaryContent, borderless]);
 };
 
 export const AppHeaderShell = React.memo<AppHeaderShellProps>(
@@ -208,15 +236,23 @@ export const AppHeaderShell = React.memo<AppHeaderShellProps>(
     badges,
     titleActions,
     titleAppend,
-    metadata,
+    secondaryContent,
+    secondaryContentTestSubj,
     trailing,
     tabs,
     sticky = true,
-    padding,
+    spacing,
     borderless = false,
   }) => {
     const hasTitleAppend = titleAppend != null;
-    const styles = useHeaderStyles(sticky, padding, !!tabs, hasTitleAppend, !!metadata, borderless);
+    const styles = useHeaderStyles(
+      sticky,
+      spacing,
+      !!tabs,
+      hasTitleAppend,
+      !!secondaryContent,
+      borderless
+    );
 
     return (
       <div css={styles.root} data-test-subj={APP_HEADER_TEST_SUBJECTS.root}>
@@ -236,9 +272,9 @@ export const AppHeaderShell = React.memo<AppHeaderShellProps>(
           </div>
           {trailing && <div css={styles.trailingSlot}>{trailing}</div>}
         </div>
-        {metadata && (
-          <div css={styles.metadataRow} data-test-subj={APP_HEADER_TEST_SUBJECTS.metadata}>
-            {metadata}
+        {secondaryContent && (
+          <div css={styles.secondaryContentRow} data-test-subj={secondaryContentTestSubj}>
+            {secondaryContent}
           </div>
         )}
         {tabs && (

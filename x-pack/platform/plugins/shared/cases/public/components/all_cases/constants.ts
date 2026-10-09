@@ -6,6 +6,8 @@
  */
 
 export const CUSTOM_FIELD_KEY_PREFIX = 'cf_';
+/** Prefix for Field Library (v2) filter keys in the More Filters map — avoids collisions with system/`cf_` keys. */
+export const EXTENDED_FIELD_KEY_PREFIX = 'ef_';
 export const ALL_CASES_STATE_URL_KEY = 'cases';
 
 export const LEGACY_SUPPORTED_STATE_KEYS = [

@@ -210,6 +210,38 @@ set_git_merge_base() {
   export GITHUB_PR_MERGE_BASE
 }
 
+# For merge-queue builds (gh-readonly-queue/* branches), resolves the merge base
+# against the target branch and the list of first-parent commits this merge group
+# will add to the target branch when it lands. These are reported to ci-stats so
+# a single queue build can act as the metrics baseline for every commit it covers.
+set_merge_queue_git_info() {
+  MERGE_QUEUE_MERGE_BASE="$(buildkite-agent meta-data get merge-queue-merge-base --default '')"
+  MERGE_QUEUE_COVERED_COMMITS="$(buildkite-agent meta-data get merge-queue-covered-commits --default '')"
+
+  if [[ ! "$MERGE_QUEUE_MERGE_BASE" || ! "$MERGE_QUEUE_COVERED_COMMITS" ]]; then
+    if ! git fetch origin "$MERGE_QUEUE_TARGET_BRANCH" 2>/dev/null; then
+      echo "Failed to fetch $MERGE_QUEUE_TARGET_BRANCH to resolve merge queue git info" >&2
+      return 1
+    fi
+
+    MERGE_QUEUE_MERGE_BASE="$(git merge-base HEAD FETCH_HEAD 2>/dev/null || true)"
+    if [[ ! "$MERGE_QUEUE_MERGE_BASE" ]]; then
+      echo "Failed to resolve merge queue merge base" >&2
+      return 1
+    fi
+
+    # first-parent commits between the merge base and the queue-branch head are
+    # the exact commits GitHub fast-forwards onto the target branch on success
+    MERGE_QUEUE_COVERED_COMMITS="$(git rev-list --first-parent "$MERGE_QUEUE_MERGE_BASE..HEAD" | paste -sd, -)"
+
+    buildkite-agent meta-data set merge-queue-merge-base "$MERGE_QUEUE_MERGE_BASE"
+    buildkite-agent meta-data set merge-queue-covered-commits "$MERGE_QUEUE_COVERED_COMMITS"
+  fi
+
+  export MERGE_QUEUE_MERGE_BASE
+  export MERGE_QUEUE_COVERED_COMMITS
+}
+
 # Download an artifact using the buildkite-agent, takes the same arguments as https://buildkite.com/docs/agent/v3/cli-artifact#downloading-artifacts-usage
 # times-out after 60 seconds and retries up to 3 times
 download_artifact() {

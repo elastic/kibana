@@ -34,6 +34,7 @@ describe('convertSecurityApi', () => {
             grant: jest.fn(),
             invalidate: jest.fn(),
             convert: jest.fn(),
+            getInternalCallerAttestationHeaders: jest.fn(),
           },
         },
       },

@@ -10,10 +10,16 @@ import type { ReactNode } from 'react';
 export type WizardStep = 'ingest' | 'search';
 export type VectorPath = 'have-vectors' | 'generate-vectors';
 
-export interface InfoPanelProps {
+export interface DocsPanelProps {
   id: string;
   title: string;
   description: ReactNode;
   docsLabel: string;
   docsHref: string;
+}
+
+export interface OnboardingPill {
+  id: string;
+  label: string;
+  content: ReactNode;
 }

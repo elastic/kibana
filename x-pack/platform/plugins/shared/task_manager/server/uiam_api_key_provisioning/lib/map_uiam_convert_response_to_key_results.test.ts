@@ -23,7 +23,7 @@ const uiamSuccess = (id: string, key: string) => ({
 });
 
 describe('mapUiamConvertResponseToKeyResults', () => {
-  it('maps success to converted rows with base64 uiamApiKey and preserves attributes/version', () => {
+  it('maps success to converted rows with the raw uiamApiKey secret and preserves attributes/version', () => {
     const apiKeysToConvert: ApiKeyToConvert[] = [
       {
         taskId: 'task-a',
@@ -36,7 +36,7 @@ describe('mapUiamConvertResponseToKeyResults', () => {
       },
     ];
     const response: ConvertUiamAPIKeysResponse = {
-      results: [uiamSuccess('uiam-1', 'plain-secret')],
+      results: [uiamSuccess('uiam-1', 'essu_plain-secret')],
     };
 
     const { converted, provisioningStatusForFailedConversions } =
@@ -48,9 +48,9 @@ describe('mapUiamConvertResponseToKeyResults', () => {
     expect(converted[0].uiamApiKeyId).toBe('uiam-1');
     expect(converted[0].version).toBe('v9');
     expect(converted[0].attributes).toEqual(apiKeysToConvert[0].attributes);
-    expect(converted[0].uiamApiKey).toBe(
-      Buffer.from('uiam-1:plain-secret', 'utf8').toString('base64')
-    );
+    // The credential is stored raw (the id lives on `userScope.uiamApiKeyId`), matching the
+    // grant path — encoding `base64(<id>:<secret>)` here made Elasticsearch reject it.
+    expect(converted[0].uiamApiKey).toBe('essu_plain-secret');
   });
 
   it('maps failed result to failed-conversion status (no converted row)', () => {

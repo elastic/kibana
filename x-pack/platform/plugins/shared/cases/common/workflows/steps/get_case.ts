@@ -54,7 +54,7 @@ export const getCaseStepCommonDefinition: CommonStepDefinition<
 - name: find_cases
   type: cases.findCases
   with:
-    search_term: "critical incident"
+    search: "critical incident"
 
 - name: get_first_case
   type: ${GetCaseStepTypeId}

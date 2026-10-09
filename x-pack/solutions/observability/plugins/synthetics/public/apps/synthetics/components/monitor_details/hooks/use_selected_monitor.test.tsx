@@ -16,7 +16,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => ({
+jest.mock('react-redux-v7', () => ({
   useDispatch: () => mockDispatch,
   useSelector: jest.fn(),
 }));
@@ -45,7 +45,7 @@ jest.mock('./use_external_monitor', () => ({
   useExternalMonitor: jest.fn(),
 }));
 
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import {
   getMonitorAction,
   selectEncryptedSyntheticsSavedMonitors,

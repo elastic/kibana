@@ -71,7 +71,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
     () => (
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="arrowLeft" {...historyNavProps} flush="left" size="xs">
+          <EuiButtonEmpty iconType="chevronSingleLeft" {...historyNavProps} flush="left" size="xs">
             <FormattedMessage
               id="xpack.osquery.scheduledExecutionDetails.viewHistoryTitle"
               defaultMessage="View history"
@@ -131,7 +131,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
         />
       }
       actions={
-        <EuiButtonEmpty {...historyNavProps} iconType="arrowLeft">
+        <EuiButtonEmpty {...historyNavProps} iconType="chevronSingleLeft">
           <FormattedMessage
             id="xpack.osquery.scheduledExecutionDetails.backToHistory"
             defaultMessage="Back to History"

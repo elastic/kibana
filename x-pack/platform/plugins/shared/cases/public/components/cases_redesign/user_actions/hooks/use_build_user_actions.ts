@@ -17,8 +17,6 @@ import type {
   CaseConnectors,
 } from '../../../../containers/types';
 import type { CurrentUserProfile } from '../../../types';
-import type { ExternalReferenceAttachmentTypeRegistry } from '../../../../client/attachment_framework/external_reference_registry';
-import type { PersistableStateAttachmentTypeRegistry } from '../../../../client/attachment_framework/persistable_state_registry';
 import type { UnifiedAttachmentTypeRegistry } from '../../../../client/attachment_framework/unified_attachment_registry';
 import { isUserActionTypeSupported } from '../../../user_actions/helpers';
 import { builderMap } from '../../../user_actions/builder';
@@ -32,8 +30,6 @@ interface UseBuildUserActionsArgs {
   userProfiles: Map<string, UserProfileWithAvatar>;
   currentUserProfile: CurrentUserProfile;
   appId: string;
-  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   manageMarkdownEditIds: string[];
   selectedOutlineCommentId: string;
@@ -52,8 +48,6 @@ export const useBuildUserActions = ({
   userProfiles,
   currentUserProfile,
   appId,
-  externalReferenceAttachmentTypeRegistry,
-  persistableStateAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
@@ -83,8 +77,6 @@ export const useBuildUserActions = ({
         caseData,
         casesConfiguration,
         caseConnectors,
-        externalReferenceAttachmentTypeRegistry,
-        persistableStateAttachmentTypeRegistry,
         unifiedAttachmentTypeRegistry,
         userAction,
         userProfiles,
@@ -106,8 +98,6 @@ export const useBuildUserActions = ({
     caseData,
     casesConfiguration,
     caseConnectors,
-    externalReferenceAttachmentTypeRegistry,
-    persistableStateAttachmentTypeRegistry,
     unifiedAttachmentTypeRegistry,
     userProfiles,
     currentUserProfile,

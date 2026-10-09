@@ -41,6 +41,12 @@ describe('getUnmappedFieldsStrategy', () => {
     expect(strategy).toBe(UnmappedFieldsStrategy.LOAD);
   });
 
+  it('should return the LOAD_ALL strategy based on the unmapped_fields setting', () => {
+    const headers = [synth.header`SET unmapped_fields = "LOAD_ALL"`];
+    const strategy = getUnmappedFieldsStrategy(headers);
+    expect(strategy).toBe(UnmappedFieldsStrategy.LOAD_ALL);
+  });
+
   it('should return the NULLIFY strategy based on the unmapped_fields setting', () => {
     const headers = [synth.header`SET unmapped_fields = "NULLIFY"`];
     const strategy = getUnmappedFieldsStrategy(headers);

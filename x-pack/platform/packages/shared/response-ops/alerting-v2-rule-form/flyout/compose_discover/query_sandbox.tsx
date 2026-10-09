@@ -21,6 +21,7 @@ import {
   EuiTabs,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
   type EuiDataGridColumn,
   type EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
@@ -39,7 +40,10 @@ import {
 import type { QueryTab } from './types';
 import { CpsPicker } from './cps_picker';
 import { useResolveTimeField } from './use_resolve_time_field';
-import { MIN_EDITOR_HEIGHT } from './constants';
+import { extractFromSourceQuery } from './extract_from_source_query';
+import { MIN_EDITOR_HEIGHT, MAX_EDITOR_HEIGHT } from './constants';
+import { useQuerySandboxStyles } from './query_sandbox.styles';
+import { useEditorHeightResize } from './use_editor_height_resize';
 
 /**
  * Self-contained ES|QL sandbox that handles data fetching and renders the full
@@ -55,6 +59,13 @@ import { MIN_EDITOR_HEIGHT } from './constants';
  *   the split query blocks.
  *
  * Requires `RuleFormProvider` and `QueryClientProvider` in the ancestor tree.
+ *
+ * ## Layout
+ *
+ * The in-editor toolbar (Search, time field, date range, `headerActions`) sits
+ * inside the bordered editor panel. The Monaco viewport is resizable via a drag
+ * handle (capped at a max height) so the flyout keeps scrolling the results
+ * table as one surface — the table is never trapped in a squeezed pane.
  */
 export interface QuerySandboxProps {
   query: string;
@@ -68,20 +79,22 @@ export interface QuerySandboxProps {
   /**
    * When provided, time-field resolution is owned by the parent (e.g. compose
    * flyout) and the sandbox only displays the options without fetching.
+   * Pass `undefined` (not `[]`) to let the sandbox resolve the time field itself —
+   * an empty array skips resolution and renders an empty time-field select.
    */
   timeFieldOptions?: Array<{ value: string; text: string }>;
   /** Required with `timeFieldOptions` when the parent gates autoRun on resolution. */
   isTimeFieldResolved?: boolean;
   /**
    * Optional help text rendered above the editor. The caller is responsible for
-   * content and styling (e.g. `<EuiText size="s">`). A spacer is added automatically
-   * below it. Absent or `undefined` → nothing is rendered.
+   * content and styling (e.g. `<EuiText size="s">`). Absent or `undefined` →
+   * nothing is rendered.
    */
   helpText?: React.ReactNode;
   /**
-   * Optional actions rendered right-aligned in the ES|QL query header row, just before
-   * the Search button. Use for header-level controls such as Split / Merge buttons.
-   * Absent or `undefined` → nothing is rendered.
+   * Optional actions rendered at the end of the in-editor toolbar (after Search,
+   * time field, and date range). Use for header-level controls such as Split /
+   * Merge buttons. Absent or `undefined` → nothing is rendered.
    */
   headerActions?: React.ReactNode;
   /**
@@ -110,12 +123,9 @@ export interface QuerySandboxProps {
   validationError?: string[];
 }
 
-const VISIBLE_ROWS = 10;
-const INITIAL_EDITOR_HEIGHT = 200;
-const MAX_EDITOR_HEIGHT = 600;
-
 const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
 const RUN_SHORTCUT_LABEL = isMac ? '⌘⏎' : 'Ctrl+Enter';
+const VISIBLE_ROWS = 10;
 
 export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   query,
@@ -132,6 +142,23 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   headerActions,
   validationError,
 }) => {
+  const euiThemeContext = useEuiTheme();
+  const {
+    sandboxRootCss,
+    headerBlockCss,
+    editorBodyCss,
+    editorResizeHandleCss,
+    timeFieldSelectCss,
+    loadingCenterCss,
+    resultsSectionCss,
+  } = useQuerySandboxStyles(euiThemeContext);
+  const {
+    editorHeight,
+    onResizePointerDown,
+    onResizePointerMove,
+    onResizePointerUp,
+    onResizeKeyDown,
+  } = useEditorHeightResize();
   const services = useRuleFormServices();
   const isReadOnly = !onQueryChange;
   const hasTabs = Boolean(tabProps?.tabs?.length);
@@ -140,7 +167,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   const splitTabs = useMemo(() => {
     if (!tabProps?.tabs?.length) return [];
     return TAB_DEFINITIONS.filter((t) => tabProps.tabs.includes(t.id));
-  }, [tabProps?.tabs]);
+  }, [tabProps]);
 
   useEffect(() => {
     if (!tabProps?.tabs.includes('alert')) {
@@ -166,10 +193,23 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     enabled: !skipTimeFieldResolution,
     http: services.http,
     dataViews: services.dataViews,
+    search: services.data.search.search,
   });
 
   const timeFieldOptions = timeFieldOptionsProp ?? resolvedTimeFieldOptions;
   const isTimeFieldResolved = isTimeFieldResolvedProp ?? resolvedIsTimeFieldResolved;
+
+  // Time-field select display state. When the current field isn't on the index
+  // (no date fields, or a stored `@timestamp` on an index that only has
+  // `timestamp`), show a blank selection + invalid state so the user picks one,
+  // rather than fabricating `@timestamp`. Only flag invalid once a source query
+  // is present.
+  const hasSourceQuery = useMemo(() => Boolean(extractFromSourceQuery(query)), [query]);
+  const currentTimeFieldIsOption = useMemo(
+    () => timeFieldOptions.some((option) => option.value === timeField),
+    [timeFieldOptions, timeField]
+  );
+  const timeFieldInvalid = hasSourceQuery && !currentTimeFieldIsOption;
 
   const {
     columns,
@@ -245,82 +285,48 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     [rows]
   );
 
-  const editorPanelStyles: React.CSSProperties = useMemo(
-    () => ({
-      resize: 'vertical',
-      overflow: 'auto',
-      height: INITIAL_EDITOR_HEIGHT,
-      minHeight: MIN_EDITOR_HEIGHT,
-      maxHeight: MAX_EDITOR_HEIGHT,
-    }),
-    []
-  );
+  const editorContent =
+    tabProps && hasTabs ? (
+      <ComposeDiscoverTabs
+        baseQuery={tabProps.baseQuery}
+        alertBlock={tabProps.alertBlock}
+        recoveryBlock={tabProps.recoveryBlock}
+        onBaseQueryChange={tabProps.onBaseQueryChange}
+        onAlertBlockChange={tabProps.onAlertBlockChange}
+        onRecoveryBlockChange={tabProps.onRecoveryBlockChange}
+        activeTab={tabProps.activeTab}
+        onTabChange={tabProps.onTabChange}
+        tabs={tabProps.tabs}
+        onAlertEditorMount={tabProps.onAlertEditorMount}
+        onRecoveryEditorMount={tabProps.onRecoveryEditorMount}
+        readOnly={tabProps.readOnly}
+        hideTabBar
+      />
+    ) : (
+      <CodeEditor
+        languageId={ESQL_LANG_ID}
+        value={query}
+        onChange={(v) => onQueryChange?.(v)}
+        height="100%"
+        options={{
+          minimap: { enabled: false },
+          automaticLayout: true,
+          scrollBeyondLastLine: false,
+          fontSize: 13,
+          readOnly: isReadOnly,
+          domReadOnly: isReadOnly,
+        }}
+      />
+    );
 
   return (
-    <div data-test-subj="querySandbox">
-      {helpText && (
-        <>
-          {helpText}
-          <EuiSpacer size="s" />
-        </>
-      )}
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
-        <CpsPicker />
-        <EuiFlexItem grow={false} style={{ width: 200, minWidth: 0 }}>
-          <EuiSelect
-            options={timeFieldOptions}
-            value={timeField}
-            aria-label={i18n.translate(
-              'xpack.alertingV2.composeDiscover.querySandbox.timeFieldAriaLabel',
-              { defaultMessage: 'Time field for rule execution' }
-            )}
-            onChange={(e) => onTimeFieldChange?.(e.target.value)}
-            disabled={!onTimeFieldChange}
-            compressed
-            prepend={i18n.translate(
-              'xpack.alertingV2.composeDiscover.querySandbox.timeFieldPrependLabel',
-              { defaultMessage: 'Time field' }
-            )}
-            data-test-subj="querySandboxTimeField"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow>
-          <EuiSuperDatePicker
-            start={dateRange.dateStart}
-            end={dateRange.dateEnd}
-            onTimeChange={({ start, end }) => {
-              onDateRangeChange({ dateStart: start, dateEnd: end });
-            }}
-            showUpdateButton={false}
-            compressed
-            width="full"
-          />
-        </EuiFlexItem>
-        {headerActions && <EuiFlexItem grow={false}>{headerActions}</EuiFlexItem>}
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.searchTooltip', {
-              defaultMessage: 'Search ({shortcut})',
-              values: { shortcut: RUN_SHORTCUT_LABEL },
-            })}
-          >
-            <EuiButton
-              size="s"
-              onClick={run}
-              isLoading={isLoading}
-              data-test-subj="querySandboxRunQuery"
-            >
-              {i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.searchButtonLabel', {
-                defaultMessage: 'Search',
-              })}
-            </EuiButton>
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
+    <div data-test-subj="querySandbox" css={sandboxRootCss}>
+      <div css={headerBlockCss}>
+        {helpText}
 
-      {splitTabs.length > 0 && tabProps && (
-        <>
+        <CpsPicker />
+
+        {splitTabs.length > 0 && tabProps && (
           <EuiTabs>
             {splitTabs.map((tab) => (
               <QueryTabButton
@@ -342,185 +348,243 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
               />
             ))}
           </EuiTabs>
-          <EuiSpacer size="s" />
-        </>
-      )}
+        )}
+      </div>
 
-      <EuiPanel hasBorder paddingSize="s">
-        <div style={editorPanelStyles}>
-          {tabProps && hasTabs ? (
-            <ComposeDiscoverTabs
-              baseQuery={tabProps.baseQuery}
-              alertBlock={tabProps.alertBlock}
-              recoveryBlock={tabProps.recoveryBlock}
-              onBaseQueryChange={tabProps.onBaseQueryChange}
-              onAlertBlockChange={tabProps.onAlertBlockChange}
-              onRecoveryBlockChange={tabProps.onRecoveryBlockChange}
-              activeTab={tabProps.activeTab}
-              onTabChange={tabProps.onTabChange}
-              tabs={tabProps.tabs}
-              onAlertEditorMount={tabProps.onAlertEditorMount}
-              onRecoveryEditorMount={tabProps.onRecoveryEditorMount}
-              readOnly={tabProps.readOnly}
-              hideTabBar
+      <EuiPanel hasBorder paddingSize="m" data-test-subj="querySandboxEditorPanel">
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.alertingV2.composeDiscover.querySandbox.searchTooltip',
+                {
+                  defaultMessage: 'Search ({shortcut})',
+                  values: { shortcut: RUN_SHORTCUT_LABEL },
+                }
+              )}
+            >
+              <EuiButton
+                size="s"
+                onClick={run}
+                isLoading={isLoading}
+                data-test-subj="querySandboxRunQuery"
+              >
+                {i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.searchButtonLabel', {
+                  defaultMessage: 'Search',
+                })}
+              </EuiButton>
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} css={timeFieldSelectCss}>
+            <EuiSelect
+              options={timeFieldOptions}
+              value={currentTimeFieldIsOption ? timeField : ''}
+              hasNoInitialSelection={!currentTimeFieldIsOption}
+              isInvalid={timeFieldInvalid}
+              aria-label={i18n.translate(
+                'xpack.alertingV2.composeDiscover.querySandbox.timeFieldAriaLabel',
+                { defaultMessage: 'Time field for rule execution' }
+              )}
+              onChange={(e) => onTimeFieldChange?.(e.target.value)}
+              disabled={!onTimeFieldChange}
+              compressed
+              prepend={i18n.translate(
+                'xpack.alertingV2.composeDiscover.querySandbox.timeFieldPrependLabel',
+                { defaultMessage: 'Time field' }
+              )}
+              data-test-subj="querySandboxTimeField"
             />
-          ) : (
-            <CodeEditor
-              languageId={ESQL_LANG_ID}
-              value={query}
-              onChange={(v) => onQueryChange?.(v)}
-              height="100%"
-              options={{
-                minimap: { enabled: false },
-                automaticLayout: true,
-                scrollBeyondLastLine: false,
-                fontSize: 13,
-                readOnly: isReadOnly,
-                domReadOnly: isReadOnly,
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiSuperDatePicker
+              start={dateRange.dateStart}
+              end={dateRange.dateEnd}
+              onTimeChange={({ start, end }) => {
+                onDateRangeChange({ dateStart: start, dateEnd: end });
               }}
+              showUpdateButton={false}
+              compressed
+              width="auto"
             />
-          )}
+          </EuiFlexItem>
+          {headerActions && <EuiFlexItem grow={false}>{headerActions}</EuiFlexItem>}
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <div css={editorBodyCss} style={{ height: editorHeight }}>
+          {editorContent}
         </div>
+        <button
+          type="button"
+          role="slider"
+          aria-orientation="vertical"
+          aria-valuemin={MIN_EDITOR_HEIGHT}
+          aria-valuemax={MAX_EDITOR_HEIGHT}
+          aria-valuenow={Math.round(editorHeight)}
+          aria-label={i18n.translate(
+            'xpack.alertingV2.composeDiscover.querySandbox.editorResizeHandleAriaLabel',
+            { defaultMessage: 'Resize query editor' }
+          )}
+          css={editorResizeHandleCss}
+          data-test-subj="querySandboxEditorResizeHandle"
+          onPointerDown={onResizePointerDown}
+          onPointerMove={onResizePointerMove}
+          onPointerUp={onResizePointerUp}
+          onPointerCancel={onResizePointerUp}
+          onKeyDown={onResizeKeyDown}
+        />
       </EuiPanel>
-      <EuiSpacer size="s" />
 
-      {validationError && validationError.length > 0 && (
-        <>
+      <EuiPanel
+        paddingSize="s"
+        hasShadow={false}
+        color="transparent"
+        css={resultsSectionCss}
+        data-test-subj="querySandboxResultsPanel"
+      >
+        {validationError && validationError.length > 0 && (
+          <>
+            <EuiCallOut
+              announceOnMount
+              color="danger"
+              iconType="error"
+              data-test-subj="querySandboxValidationError"
+              title={i18n.translate(
+                'xpack.alertingV2.composeDiscover.querySandbox.validationErrorTitle',
+                { defaultMessage: 'Resolve query errors before applying changes' }
+              )}
+            >
+              <ul>
+                {validationError.map((message, index) => (
+                  <li key={index}>{message}</li>
+                ))}
+              </ul>
+            </EuiCallOut>
+            <EuiSpacer size="s" />
+          </>
+        )}
+
+        {hasRun && !isLoading && !isError && (
+          <>
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.resultCountLabel', {
+                defaultMessage: '{count, plural, one {# result} other {# results}}',
+                values: { count: totalRowCount },
+              })}
+            </EuiText>
+            <EuiSpacer size="m" />
+          </>
+        )}
+
+        {!isLoading && !hasRun && (
+          <EuiEmptyPrompt
+            iconType="play"
+            title={
+              <h4>
+                <FormattedMessage
+                  id="xpack.alertingV2.composeDiscover.querySandbox.runPromptTitle"
+                  defaultMessage="Run your query to see results"
+                />
+              </h4>
+            }
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.alertingV2.composeDiscover.querySandbox.runPromptDescription"
+                  defaultMessage="Click <strong>Search</strong> or press <strong>{shortcut}</strong> to execute the query."
+                  values={{
+                    shortcut: RUN_SHORTCUT_LABEL,
+                    strong: (chunks) => <strong>{chunks}</strong>,
+                  }}
+                />
+              </p>
+            }
+          />
+        )}
+
+        {isLoading && (
+          <EuiFlexGroup justifyContent="center" alignItems="center" css={loadingCenterCss}>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="l" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+
+        {isError && !validationError?.length && (
           <EuiCallOut
             announceOnMount
             color="danger"
             iconType="error"
-            data-test-subj="querySandboxValidationError"
-            title={i18n.translate(
-              'xpack.alertingV2.composeDiscover.querySandbox.validationErrorTitle',
-              { defaultMessage: 'Resolve query errors before applying changes' }
-            )}
+            title={i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.queryErrorTitle', {
+              defaultMessage: 'Query error',
+            })}
           >
-            <ul>
-              {validationError.map((message, index) => (
-                <li key={index}>{message}</li>
-              ))}
-            </ul>
+            <p>{error}</p>
           </EuiCallOut>
-          <EuiSpacer size="s" />
-        </>
-      )}
+        )}
 
-      {hasRun && !isLoading && !isError && (
-        <EuiText size="xs" color="subdued">
-          {i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.resultCountLabel', {
-            defaultMessage: '{count, plural, one {# result} other {# results}}',
-            values: { count: totalRowCount },
-          })}
-        </EuiText>
-      )}
-
-      <EuiSpacer size="m" />
-
-      {!isLoading && !hasRun && (
-        <EuiEmptyPrompt
-          iconType="playFilled"
-          title={
-            <h4>
-              <FormattedMessage
-                id="xpack.alertingV2.composeDiscover.querySandbox.runPromptTitle"
-                defaultMessage="Run your query to see results"
-              />
-            </h4>
-          }
-          body={
-            <p>
-              <FormattedMessage
-                id="xpack.alertingV2.composeDiscover.querySandbox.runPromptDescription"
-                defaultMessage="Click <strong>Search</strong> or press <strong>{shortcut}</strong> to execute the query."
-                values={{
-                  shortcut: RUN_SHORTCUT_LABEL,
-                  strong: (chunks) => <strong>{chunks}</strong>,
-                }}
-              />
-            </p>
-          }
-        />
-      )}
-
-      {isLoading && (
-        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="l" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-
-      {isError && !validationError?.length && (
-        <EuiCallOut
-          announceOnMount
-          color="danger"
-          iconType="error"
-          title={i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.queryErrorTitle', {
-            defaultMessage: 'Query error',
-          })}
-        >
-          <p>{error}</p>
-        </EuiCallOut>
-      )}
-
-      {hasRun && !isLoading && !isError && rows.length === 0 && query.trim() && (
-        <EuiEmptyPrompt
-          iconType="search"
-          title={
-            <h4>
-              <FormattedMessage
-                id="xpack.alertingV2.composeDiscover.querySandbox.noResultsTitle"
-                defaultMessage="No results"
-              />
-            </h4>
-          }
-          body={
-            <p>
-              <FormattedMessage
-                id="xpack.alertingV2.composeDiscover.querySandbox.noResultsDescription"
-                defaultMessage="The query returned no results for the current time range."
-              />
-            </p>
-          }
-        />
-      )}
-
-      {hasRun && !isLoading && !isError && rows.length > 0 && (
-        <>
-          <ComposeDiscoverChart
-            query={lastExecutedQuery ?? query}
-            timeField={timeField}
-            timeRange={timeRange}
-            columns={columns}
+        {hasRun && !isLoading && !isError && rows.length === 0 && query.trim() && (
+          <EuiEmptyPrompt
+            iconType="magnify"
+            title={
+              <h4>
+                <FormattedMessage
+                  id="xpack.alertingV2.composeDiscover.querySandbox.noResultsTitle"
+                  defaultMessage="No results"
+                />
+              </h4>
+            }
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.alertingV2.composeDiscover.querySandbox.noResultsDescription"
+                  defaultMessage="The query returned no results for the current time range."
+                />
+              </p>
+            }
           />
+        )}
 
-          <EuiSpacer size="m" />
+        {hasRun && !isLoading && !isError && rows.length > 0 && (
+          <>
+            <ComposeDiscoverChart
+              query={lastExecutedQuery ?? query}
+              timeField={timeField}
+              timeRange={timeRange}
+              columns={columns}
+            />
 
-          <EuiDataGrid
-            aria-label={i18n.translate(
-              'xpack.alertingV2.composeDiscover.querySandbox.queryResultsAriaLabel',
-              { defaultMessage: 'Query results' }
-            )}
-            columns={gridColumns}
-            columnVisibility={{ visibleColumns, setVisibleColumns }}
-            rowCount={rows.length}
-            renderCellValue={renderCellValue}
-            pagination={{
-              ...pagination,
-              pageSizeOptions: [10, 25, 50],
-              onChangePage,
-              onChangeItemsPerPage,
-            }}
-            gridStyle={{ border: 'all', header: 'shade', fontSize: 's', cellPadding: 's' }}
-            toolbarVisibility={{
-              showColumnSelector: true,
-              showSortSelector: true,
-              showFullScreenSelector: false,
-            }}
-          />
-        </>
-      )}
+            <EuiSpacer size="m" />
+
+            <EuiDataGrid
+              aria-label={i18n.translate(
+                'xpack.alertingV2.composeDiscover.querySandbox.queryResultsAriaLabel',
+                { defaultMessage: 'Query results' }
+              )}
+              columns={gridColumns}
+              columnVisibility={{ visibleColumns, setVisibleColumns }}
+              rowCount={rows.length}
+              renderCellValue={renderCellValue}
+              pagination={{
+                ...pagination,
+                pageSizeOptions: [10, 25, 50],
+                onChangePage,
+                onChangeItemsPerPage,
+              }}
+              gridStyle={{
+                border: 'all',
+                header: 'shade',
+                fontSize: 's',
+                cellPadding: 's',
+              }}
+              toolbarVisibility={{
+                showColumnSelector: true,
+                showSortSelector: true,
+                showFullScreenSelector: false,
+              }}
+            />
+          </>
+        )}
+      </EuiPanel>
     </div>
   );
 };

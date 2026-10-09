@@ -8,6 +8,7 @@
 import type {
   AggregationsAggregate,
   AggregationsAggregationContainer,
+  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { isValidTraceId } from '@opentelemetry/api';
 import { LOGS_INDEX_PATTERN, TRACES_INDEX_PATTERN } from '@kbn/evals-common';
@@ -26,12 +27,12 @@ export interface TraceFilterTerm {
   value: string;
 }
 
-export interface TraceFilterExists {
-  type: 'exists';
+export interface TraceFilterExistence {
+  type: 'exists' | 'not_exists';
   field: string;
 }
 
-export type TraceFilter = TraceFilterTerm | TraceFilterExists;
+export type TraceFilter = TraceFilterTerm | TraceFilterExistence;
 
 export interface TraceSearchSort {
   field: string;
@@ -71,6 +72,18 @@ export const createTraceAccessor = (traceAccessor: TraceAccessor): TraceAccessor
     const { index, field } = TRACE_SOURCE[source];
     const { filter = [], fields, sort, size, aggs } = params;
 
+    const filterClauses: QueryDslQueryContainer[] = [{ term: { [field]: traceAccessor.traceId } }];
+    const mustNotClauses: QueryDslQueryContainer[] = [];
+    for (const clause of filter) {
+      if (clause.type === 'term') {
+        filterClauses.push({ term: { [clause.field]: clause.value } });
+      } else if (clause.type === 'exists') {
+        filterClauses.push({ exists: { field: clause.field } });
+      } else {
+        mustNotClauses.push({ exists: { field: clause.field } });
+      }
+    }
+
     const response = await traceAccessor.esClient.search<Record<string, unknown>>({
       index,
       ignore_unavailable: true,
@@ -80,16 +93,8 @@ export const createTraceAccessor = (traceAccessor: TraceAccessor): TraceAccessor
       sort: sort ? [{ [sort.field]: { order: sort.order } }] : undefined,
       query: {
         bool: {
-          filter: [
-            { term: { [field]: traceAccessor.traceId } },
-            ...filter.map((clause) => {
-              if (clause.type === 'term') {
-                return { term: { [clause.field]: clause.value } };
-              }
-
-              return { exists: { field: clause.field } };
-            }),
-          ],
+          filter: filterClauses,
+          ...(mustNotClauses.length > 0 ? { must_not: mustNotClauses } : {}),
         },
       },
     });

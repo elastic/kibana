@@ -32,6 +32,10 @@ export interface GithubIssueMini {
   node_id: GithubIssue['node_id'];
 }
 
+export interface GithubIssueComment {
+  body: string;
+}
+
 interface RequestOptions {
   method: string;
   url: string;
@@ -86,6 +90,40 @@ export class GithubApi {
       },
       undefined
     );
+  }
+
+  /**
+   * Fetch all comments on an issue, following pagination. Returns an empty
+   * list in dry-run mode so update flows behave sensibly without hitting the
+   * (rate limited) GitHub API.
+   */
+  async getIssueComments(issueNumber: number): Promise<GithubIssueComment[]> {
+    const perPage = 100;
+    const comments: GithubIssueComment[] = [];
+
+    let page = 1;
+    while (true) {
+      const resp = await this.request<Array<{ body?: string }>>(
+        {
+          method: 'GET',
+          url: Url.resolve(
+            BASE_URL,
+            `issues/${encodeURIComponent(issueNumber)}/comments?per_page=${perPage}&page=${page}`
+          ),
+        },
+        []
+      );
+
+      for (const comment of resp.data) {
+        comments.push({ body: comment.body ?? '' });
+      }
+
+      if (resp.data.length < perPage) {
+        return comments;
+      }
+
+      page += 1;
+    }
   }
 
   async addIssueComment(issueNumber: number, commentBody: string) {

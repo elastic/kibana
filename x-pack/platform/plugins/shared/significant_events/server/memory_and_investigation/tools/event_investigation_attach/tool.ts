@@ -93,8 +93,15 @@ export const createEventInvestigationAttachTool = ({
         }
       )}
     `,
+    annotations: {
+      title: 'Attach Investigation to Event',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     schema: eventInvestigationAttachSchema,
-    tags: ['streams', 'significant_events'],
+    tags: ['streams', 'significant-events'],
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;

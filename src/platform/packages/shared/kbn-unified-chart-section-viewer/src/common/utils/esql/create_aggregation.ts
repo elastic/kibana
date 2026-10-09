@@ -12,13 +12,10 @@ import { synth, BasicPrettyPrinter } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { FunctionNames } from '@kbn/esql-language';
+import { METRICS_GRID_SETTINGS_DEFAULTS, type MetricsGridSettings } from '@kbn/discover-utils';
 import { isLegacyHistogram } from '../legacy_histogram';
 import { resolveConflictingFieldTypes } from './resolve_conflicting_field_types';
-import type { MetricsGridSettings } from '../../../types';
-import {
-  HISTOGRAM_PERCENTILE_VALUES,
-  METRICS_GRID_SETTINGS_DEFAULTS,
-} from '../../../components/flyout/metrics_grid_settings_flyout/constants';
+import { HISTOGRAM_PERCENTILE_VALUES } from '../../../components/flyout/metrics_grid_settings_flyout/constants';
 
 /**
  * Gets the appropriate casting function name for a field type.

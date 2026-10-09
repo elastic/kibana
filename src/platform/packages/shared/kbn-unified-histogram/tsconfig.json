@@ -42,5 +42,6 @@
     "@kbn/controls-schemas",
     "@kbn/react-hooks",
     "@kbn/ebt-click",
+    "@kbn/i18n-react",
   ]
 }

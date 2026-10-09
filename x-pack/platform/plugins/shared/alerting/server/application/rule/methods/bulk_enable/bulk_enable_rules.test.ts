@@ -5,24 +5,11 @@
  * 2.0.
  */
 
-import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
-import {
-  coreFeatureFlagsMock,
-  savedObjectsClientMock,
-  savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
+import { getRulesClientMockParams } from '../../../../test_utils';
 import type { SavedObject } from '@kbn/core/server';
 import type { RawRule } from '../../../../types';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server/task_scheduling';
@@ -45,8 +32,6 @@ import {
 } from '../../../../rules_client/tests/test_helpers';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { alertsServiceMock } from '../../../../alerts_service/alerts_service.mock';
 import { RecoveredActionGroup } from '../../../../../common';
 
@@ -58,50 +43,26 @@ jest.mock('../get_schedule_frequency', () => ({
   validateScheduleLimit: jest.fn(),
 }));
 
-const taskManager = taskManagerMock.createStart();
-const ruleTypeRegistry = ruleTypeRegistryMock.create();
-const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const authorization = alertingAuthorizationMock.create();
-const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditLoggerMock.create();
 const logger = loggerMock.create();
-const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const alertsService = alertsServiceMock.create();
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
-const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+const {
+  rulesClientParams,
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: authorization as unknown as AlertingAuthorization,
-  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-  spaceId: 'default',
-  namespace: 'default',
-  getUserName: jest.fn(),
-  createAPIKey: createAPIKeyMock,
-  cloneAPIKey: jest.fn(),
-  logger,
-  internalSavedObjectsRepository,
-  encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
-  kibanaVersion,
+  encryptedSavedObjects,
+  authorization,
+  actionsAuthorization,
   auditLogger,
-  maxScheduledPerMinute: 10000,
-  minimumScheduleInterval: { value: '1m', enforce: false },
-  isAuthenticationTypeAPIKey: jest.fn(),
-  getAuthenticationAPIKey: jest.fn(),
-  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  isSystemAction: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
+} = getRulesClientMockParams({
+  kibanaVersion,
+  createAPIKey: createAPIKeyMock,
+  logger,
   alertsService,
-  backfillClient: backfillClientMock.create(),
-  uiSettings: uiSettingsServiceMock.createStartContract(),
-  featureFlags: coreFeatureFlagsMock.createStart(),
-  isServerless: false,
-};
+});
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);

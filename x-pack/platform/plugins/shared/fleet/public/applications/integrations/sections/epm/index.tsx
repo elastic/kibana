@@ -14,12 +14,14 @@ import { INTEGRATIONS_ROUTING_PATHS } from '../../constants';
 import { IntegrationsStateContextProvider, useBreadcrumbs, useStartServices } from '../../hooks';
 
 import { CopyPackagePolicyPage } from '../../../fleet/sections/agent_policy/copy_package_policy_page';
+import { CreatePackagePolicyPage } from '../../../fleet/sections/agent_policy/create_package_policy_page';
 
 import { EPMHomePage } from './screens/home';
 import { Detail } from './screens/detail';
 import { Policy } from './screens/policy';
 import { CreateIntegration } from './screens/create';
 import { CustomLanguagesOverview } from './screens/detail/custom_languages_overview';
+import { CollectionDetailPage } from './screens/collection';
 
 export const EPMApp: React.FunctionComponent = () => {
   const { automaticImport } = useStartServices();
@@ -29,6 +31,9 @@ export const EPMApp: React.FunctionComponent = () => {
 
   return (
     <Routes>
+      <Route path={INTEGRATIONS_ROUTING_PATHS.add_integration_to_policy}>
+        <CreatePackagePolicyPage />
+      </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integration_policy_edit}>
         <Policy />
       </Route>
@@ -57,6 +62,9 @@ export const EPMApp: React.FunctionComponent = () => {
           <CreateIntegration />
         </Route>
       )}
+      <Route path={INTEGRATIONS_ROUTING_PATHS.integration_collection}>
+        <CollectionDetailPage />
+      </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
         <EPMHomePage />
       </Route>

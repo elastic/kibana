@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { McpClientCreate } from '../components/mcp_clients/create/mcp_client_create';
+import { McpClientCreate } from '../components/mcp_clients/form/mcp_client_create';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';

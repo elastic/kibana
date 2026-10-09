@@ -55,11 +55,7 @@ export function QueryStreamDetailManagement({
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
   const { rangeFrom, rangeTo } = useTimeRange();
-  const {
-    ui,
-    features: { significantEvents },
-    isLoading: isPrivilegesLoading,
-  } = useStreamsPrivileges();
+  const { ui } = useStreamsPrivileges();
 
   const canDeleteQueryStream = ui[STREAMS_UI_PRIVILEGES.manage];
 
@@ -173,25 +169,6 @@ export function QueryStreamDetailManagement({
     'data-test-subj': `queryStreamDetails-${tabKey}-tab`,
   }));
 
-  if (tab === 'significantEvents') {
-    if (isPrivilegesLoading) {
-      return null;
-    }
-
-    if (significantEvents?.available) {
-      return (
-        <RedirectTo
-          path="/_discovery/{tab}"
-          params={{ path: { tab: 'knowledge_indicators' }, query: { stream: key } }}
-        />
-      );
-    }
-
-    return (
-      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
-    );
-  }
-
   if (!isValidManagementSubTab(tab) || !tabs[tab]?.content) {
     return (
       <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
@@ -206,7 +183,6 @@ export function QueryStreamDetailManagement({
         badges={badges}
         tabs={appHeaderTabs}
         menu={appHeaderMenu}
-        padding="m"
       />
       <StreamsAppPageTemplate.Body>{tabs[tab].content}</StreamsAppPageTemplate.Body>
       {showDeleteModal && (

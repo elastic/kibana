@@ -162,6 +162,19 @@ describe('InlineFilterPopover', () => {
     expect(screen.getByTestId('test-popover-option-option3')).toBeInTheDocument();
   });
 
+  it('shows a checkmark append instead of a native checkbox for selected options in multi-select mode', () => {
+    render(<InlineFilterPopover {...defaultProps} selectedValues={['option1']} />);
+    expect(screen.getByTestId('test-popover-option-option1-check')).toBeInTheDocument();
+    expect(screen.queryByTestId('test-popover-option-option2-check')).not.toBeInTheDocument();
+  });
+
+  it('does not show a custom checkmark append in single-select mode', () => {
+    render(
+      <InlineFilterPopover {...defaultProps} singleSelect={true} selectedValues={['option1']} />
+    );
+    expect(screen.queryByTestId('test-popover-option-option1-check')).not.toBeInTheDocument();
+  });
+
   it('renders prepend content for options when provided', () => {
     const optionsWithPrepend = [
       {

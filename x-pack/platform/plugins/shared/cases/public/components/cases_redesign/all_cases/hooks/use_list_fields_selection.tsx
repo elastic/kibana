@@ -13,7 +13,10 @@ import type { CasesColumnSelection } from '../types';
 import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
 import type { CasesColumnsConfiguration } from '../../../all_cases/use_cases_columns_configuration';
 import { useCasesColumnsConfiguration } from '../../../all_cases/use_cases_columns_configuration';
-import { mergeSelectedColumnsWithConfiguration } from '../../../all_cases/utils/merge_selected_columns_with_configuration';
+import {
+  getColumnBaseKey,
+  mergeSelectedColumnsWithConfiguration,
+} from '../../../all_cases/utils/merge_selected_columns_with_configuration';
 import { useCasesLocalStorage } from '../../../../common/use_cases_local_storage';
 import { LIST_ALWAYS_VISIBLE_FIELDS } from '../constants';
 
@@ -35,7 +38,9 @@ export function useListFieldsSelection() {
 
   const mergedFields = useMemo(() => {
     const fields = selectedFields || [];
-    const storedFieldKeys = new Set(fields.map(({ field }) => field));
+    // Match on the flag-independent base key so a migrated field stored under the other flag's
+    // key (`<key>` vs `<key>_as_<type>`) is still recognized as "already stored" and keeps its state.
+    const storedBaseKeys = new Set(fields.map(({ field }) => getColumnBaseKey(field)));
 
     const merged = mergeSelectedColumnsWithConfiguration({
       selectedColumns: fields,
@@ -44,7 +49,7 @@ export function useListFieldsSelection() {
 
     // Fields already in localStorage keep their checked state; newly added fields default to unchecked.
     const withDefaults = merged.map((column) =>
-      storedFieldKeys.has(column.field) ? column : { ...column, isChecked: false }
+      storedBaseKeys.has(getColumnBaseKey(column.field)) ? column : { ...column, isChecked: false }
     );
 
     return withDefaults;

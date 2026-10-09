@@ -19,4 +19,4 @@
  * `scripts/extract_tactics_techniques_mitre.js` and refreshed automatically
  * whenever `yarn extract-mitre-attacks` runs.
  */
-export const MITRE_ATTACK_VERSION = 'v18.1';
+export const MITRE_ATTACK_VERSION = 'v19.1';

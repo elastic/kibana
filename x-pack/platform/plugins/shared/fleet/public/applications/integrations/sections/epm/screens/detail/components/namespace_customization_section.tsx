@@ -202,6 +202,7 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
         <>
           <EuiSpacer size="s" />
           <EuiCallOut
+            announceOnMount
             size="s"
             iconType="warning"
             color="warning"

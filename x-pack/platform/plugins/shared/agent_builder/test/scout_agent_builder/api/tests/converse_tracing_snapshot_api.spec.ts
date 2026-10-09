@@ -59,6 +59,11 @@ const PLACEHOLDER_ATTRIBUTES: Record<string, string> = {
   'gen_ai.input.messages': '[INPUT_MESSAGES]',
   'gen_ai.output.messages': '[OUTPUT_MESSAGES]',
   'gen_ai.system_instructions': '[SYSTEM_INSTRUCTIONS]',
+  'elastic.conversation.title': '[CONVERSATION_TITLE]',
+  'user.hash': '[USER_HASH]',
+  'user.id': '[USER_ID]',
+  'user.name': '[USER_NAME]',
+  'elastic.cache_control.session_id': '[CONVERSATION_ID]',
 };
 
 interface SpanEvent {
@@ -83,7 +88,7 @@ const sanitizeAttributes = (attrs: Record<string, unknown>): Record<string, unkn
     }
     result[key] = value;
   }
-  return result;
+  return Object.fromEntries(Object.entries(result).sort(([a], [b]) => a.localeCompare(b)));
 };
 
 const sanitizeEvents = (events: SpanEvent[]): Array<{ name: string; attributes?: unknown }> =>

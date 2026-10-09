@@ -14,3 +14,4 @@ export const ADD_TO_EXISTING_CASE_TEST_ID = 'eaCasesAddToExistingCase';
 export const ENTITY_TAB_TABLE_TEST_ID = 'eaCasesEntityTabTable';
 export const ENTITY_TAB_EMPTY_TEST_ID = 'eaCasesEntityTabEmpty';
 export const ENTITY_TAB_NO_PRIVILEGES_TEST_ID = 'eaCasesEntityTabNoPrivileges';
+export const ENTITY_TAB_STORE_DISABLED_CALLOUT_TEST_ID = 'eaCasesEntityTabStoreDisabledCallout';

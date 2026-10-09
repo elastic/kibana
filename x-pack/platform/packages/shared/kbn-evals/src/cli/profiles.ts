@@ -129,10 +129,10 @@ export const envFromDatasetsProfile = (
 
   if (cfg?.evaluationsKbn) {
     if (isNonEmptyString(cfg.evaluationsKbn.url) && !isPlaceholder(cfg.evaluationsKbn.url)) {
-      next.EVALUATIONS_KBN_URL = cfg.evaluationsKbn.url;
+      next.EVAL_KBN_URL = cfg.evaluationsKbn.url;
     }
     if (isNonEmptyString(cfg.evaluationsKbn.apiKey) && !isPlaceholder(cfg.evaluationsKbn.apiKey)) {
-      next.EVALUATIONS_KBN_API_KEY = cfg.evaluationsKbn.apiKey;
+      next.EVAL_KBN_API_KEY = cfg.evaluationsKbn.apiKey;
     }
   }
 

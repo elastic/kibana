@@ -72,7 +72,7 @@ export function startTrackingDashboardLoadTelemetry(
       map((latestPhaseEvents) => {
         // Map individual render-state of panels to global render-state.
         return latestPhaseEvents.some((phaseEvent) => {
-          return phaseEvent && phaseEvent.status !== 'rendered';
+          return phaseEvent && !['rendered', 'paused'].includes(phaseEvent.status);
         });
       }),
       startWith(false),

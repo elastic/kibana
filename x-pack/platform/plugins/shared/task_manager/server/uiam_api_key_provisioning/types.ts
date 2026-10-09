@@ -89,6 +89,10 @@ export interface ApiKeyToConvert {
  */
 export interface UiamKeyResult {
   taskId: string;
+  /**
+   * Raw `essu_…` secret, the format persisted on the task SO and presented as the credential.
+   * The key id belongs on `uiamApiKeyId`, not encoded into this value.
+   */
   uiamApiKey: string;
   uiamApiKeyId: string;
   /** Decrypted task fields for merge; required for ESO/SO `bulkUpdate` */

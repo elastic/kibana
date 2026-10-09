@@ -1,0 +1,14 @@
+prs:
+- https://github.com/elastic/kibana/pull/280959
+type: breaking-change
+products:
+- product: cloud-serverless
+  target: 2026-07-28
+- product: kibana
+areas:
+- Search and data
+title: Remove support for managing agentless integrations through package and agent policy APIs
+description: Clients that create, update, upgrade, or copy managed integrations through the package policy and agent policy APIs receive a 400 error.
+impact: Affects automation and API clients that manage agentless Fleet integrations through legacy package policy or agent policy endpoints.
+action: Update integrations to use the managed integrations API instead of legacy package policy and agent policy endpoints for agentless integrations.
+subtype: api

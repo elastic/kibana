@@ -122,6 +122,8 @@ export interface RegionPolicyResponse {
   updated_by?: string;
 }
 
+export type ReasoningEffortLevel = 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh';
+
 export enum EisModelStatus {
   Preview = 'preview',
   GA = 'ga',

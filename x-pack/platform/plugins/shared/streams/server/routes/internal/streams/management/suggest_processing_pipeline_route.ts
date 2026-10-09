@@ -27,8 +27,14 @@ import {
   getStreamTypeFromDefinition,
   isOtelStream,
 } from '@kbn/streams-schema';
-import { type StreamlangDSL, type GrokProcessor, type DissectProcessor } from '@kbn/streamlang';
+import {
+  type StreamlangDSL,
+  type GrokProcessor,
+  type DissectProcessor,
+  transpileIngestPipeline,
+} from '@kbn/streamlang';
 import { type InferenceClient, isInferenceError } from '@kbn/inference-common';
+import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import { assembleGrokProcessor, type GrokPatternNode } from '@kbn/grok-heuristics';
@@ -60,6 +66,7 @@ export interface SuggestIngestPipelineParams {
   body: {
     connector_id: string;
     documents: FlattenRecord[];
+    response_format?: 'streamlang' | 'ingest_pipeline';
   };
 }
 
@@ -68,13 +75,14 @@ export const suggestIngestPipelineSchema = z.object({
   body: z.object({
     connector_id: z.string(),
     documents: z.array(flattenRecord),
+    response_format: z.enum(['streamlang', 'ingest_pipeline']).optional(),
   }),
 }) satisfies z.Schema<SuggestIngestPipelineParams>;
 
 type SuggestProcessingPipelineResponse = Observable<
   ServerSentEventBase<
     'suggested_processing_pipeline',
-    { pipeline: SuggestProcessingPipelineResult['pipeline'] }
+    { pipeline: SuggestProcessingPipelineResult['pipeline'] | IngestProcessorContainer[] }
   >
 >;
 
@@ -348,6 +356,14 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           stream_name: stream.name,
           stream_type: getStreamTypeFromDefinition(stream),
         });
+
+        if (params.body.response_format === 'ingest_pipeline' && result.pipeline) {
+          const { processors } = await transpileIngestPipeline(result.pipeline);
+          return {
+            ...result,
+            pipeline: processors,
+          };
+        }
 
         return result;
       })()

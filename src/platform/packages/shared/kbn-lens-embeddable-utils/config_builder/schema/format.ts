@@ -7,111 +7,84 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { LENS_FORMAT_NUMBER_DECIMALS_DEFAULT, LENS_FORMAT_COMPACT_DEFAULT } from './constants';
 import { durationFormatSchema, legacyDurationFormatSchema } from './duration_units';
 
-const numericFormatSchema = schema.object(
-  {
-    type: schema.oneOf([schema.literal('number'), schema.literal('percent')], {
-      meta: {
-        description: 'Value format type: `number` for plain numbers, `percent` for percentages.',
-      },
+const numericFormatSchema = z
+  .object({
+    type: z.enum(['number', 'percent']).meta({
+      description: 'Value format type: `number` for plain numbers, `percent` for percentages.',
     }),
     /**
      * Number of decimals
      */
-    decimals: schema.number({
-      defaultValue: LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
-      meta: {
-        description: 'Number of decimal places to display.',
-      },
+    decimals: z.number().default(LENS_FORMAT_NUMBER_DECIMALS_DEFAULT).meta({
+      description: 'Number of decimal places to display.',
     }),
     /**
      * Suffix
      */
-    suffix: schema.maybe(
-      schema.string({
-        meta: {
-          description: 'Suffix appended to the formatted value.',
-        },
-      })
-    ),
+    suffix: z.string().optional().meta({
+      description: 'Suffix appended to the formatted value.',
+    }),
     /**
      * Whether to use compact notation
      */
-    compact: schema.boolean({
-      defaultValue: LENS_FORMAT_COMPACT_DEFAULT,
-      meta: {
-        description:
-          'When `true`, uses compact notation (for example, 1.2k instead of 1,200). Defaults to `false`.',
-      },
-    }),
-  },
-  {
-    meta: {
-      id: 'numericFormat',
-      title: 'Numeric Format',
+    compact: z.boolean().default(LENS_FORMAT_COMPACT_DEFAULT).meta({
       description:
-        'Number or percentage format with optional decimal places, suffix, and compact notation.',
-    },
-  }
-);
-
-const byteFormatSchema = schema.object(
-  {
-    type: schema.oneOf([schema.literal('bits'), schema.literal('bytes')], {
-      meta: { description: 'Data size unit: `bits` or `bytes`.' },
+        'When `true`, uses compact notation (for example, 1.2k instead of 1,200). Defaults to `false`.',
     }),
+  })
+  .strict()
+  .meta({
+    id: 'numericFormat',
+    title: 'Numeric Format',
+    description:
+      'Number or percentage format with optional decimal places, suffix, and compact notation.',
+  });
+
+const byteFormatSchema = z
+  .object({
+    type: z
+      .union([z.literal('bits'), z.literal('bytes')])
+      .meta({ description: 'Data size unit: `bits` or `bytes`.' }),
     /**
      * Number of decimals
      */
-    decimals: schema.number({
-      defaultValue: LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
-      meta: {
-        description: 'Number of decimal places to display.',
-      },
+    decimals: z.number().default(LENS_FORMAT_NUMBER_DECIMALS_DEFAULT).meta({
+      description: 'Number of decimal places to display.',
     }),
     /**
      * Suffix
      */
-    suffix: schema.maybe(
-      schema.string({
-        meta: {
-          description: 'Suffix appended to the formatted value.',
-        },
-      })
-    ),
-  },
-  {
-    meta: {
-      id: 'byteFormat',
-      title: 'Byte Format',
-      description: 'Data size format in bits or bytes, with optional decimal places and suffix.',
-    },
-  }
-);
+    suffix: z.string().optional().meta({
+      description: 'Suffix appended to the formatted value.',
+    }),
+  })
+  .strict()
+  .meta({
+    id: 'byteFormat',
+    title: 'Byte Format',
+    description: 'Data size format in bits or bytes, with optional decimal places and suffix.',
+  });
 
-const customFormatSchema = schema.object(
-  {
-    type: schema.literal('custom'),
+const customFormatSchema = z
+  .object({
+    type: z.literal('custom'),
     /**
      * Pattern
      */
-    pattern: schema.string({
-      meta: {
-        description: 'Kibana field format pattern string.',
-      },
+    pattern: z.string().meta({
+      description: 'Kibana field format pattern string.',
     }),
-  },
-  {
-    meta: {
-      id: 'customFormat',
-      title: 'Custom Format',
-      description: 'Custom format using a Kibana field format pattern string.',
-    },
-  }
-);
+  })
+  .strict()
+  .meta({
+    id: 'customFormat',
+    title: 'Custom Format',
+    description: 'Custom format using a Kibana field format pattern string.',
+  });
 
 /**
  * Format configuration for dimension values.
@@ -119,26 +92,25 @@ const customFormatSchema = schema.object(
  * the HTTP validation layer. The route handlers enforce exactly one set at runtime based on the
  * `asCode.useGASchemas` feature flag.
  */
-export const formatTypeSchema = schema.oneOf(
-  [
+export const formatTypeSchema = z
+  .union([
     numericFormatSchema,
     byteFormatSchema,
     durationFormatSchema,
     legacyDurationFormatSchema,
     customFormatSchema,
-  ],
-  {
-    meta: {
-      id: 'formatType',
-      title: 'Format Type',
-      description: 'Number display format for the dimension value.',
-    },
-  }
-);
+  ])
+  .meta({
+    id: 'formatType',
+    title: 'Format Type',
+    description: 'Number display format for the dimension value.',
+  });
 
-export const formatSchema = {
-  /**
-   * Format configuration
-   */
-  format: schema.maybe(formatTypeSchema),
-};
+export const formatSchema = z
+  .object({
+    /**
+     * Format configuration
+     */
+    format: formatTypeSchema.optional(),
+  })
+  .strict();

@@ -11,10 +11,12 @@ import { isEqual } from 'lodash';
 import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider } from 'react-hook-form';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import type { AppHeaderTitle } from '@kbn/app-header';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { isMap, parseDocument } from 'yaml';
 import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
+import { useKibana } from '../../../common/lib/kibana';
 import type { YamlEditorFormValues } from './template_form';
 import { useCasesTemplatesNavigation } from '../../../common/navigation';
 import { CasesAppHeader } from '../../app/cases_app_header';
@@ -25,6 +27,7 @@ import { TEMPLATE_PREVIEW_WIDTH_KEY } from '../constants';
 import { TemplateResetModal } from './template_reset_modal';
 import { getTemplateFormBadges, getTemplateFormMenu } from './header_menu';
 import { TemplateEditorLayout } from './template_editor_layout';
+import { TemplateEditorTour } from '../tour/template_editor_tour';
 import {
   type FieldDefaultValue,
   updateYamlFieldDefault,
@@ -35,6 +38,8 @@ import {
   FieldType,
   UserPickerDefaultSchema,
 } from '../../../../common/types/domain/template/fields';
+import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
+import { useCasesContext } from '../../cases_context/use_cases_context';
 import { normalizeYamlString } from '../utils/normalize_yaml_string';
 import {
   getTemplateSettingsAndConnectorFromYaml,
@@ -76,7 +81,6 @@ interface TemplateConfigDraft {
 
 interface TemplateFormLayoutProps {
   form: UseFormReturn<YamlEditorFormValues>;
-  title: string;
   initialMetadata: TemplateMetadata;
   isLoading?: boolean;
   isSaving?: boolean;
@@ -98,11 +102,21 @@ interface TemplateFormLayoutProps {
   initialSettings?: TemplateSettings;
 }
 
-// Full-height offset for the editor wrapper. `CasesPageLayout` always renders the template editor
-// as `fullHeight` (it has no legacy design of its own), so `--kbn-application--content-height`
-// only needs the Security Solution timeline bottom bar (~57px) reserved, which overlays the page
-// bottom. We reserve space for it rather than mutating Security Solution's DOM to hide it.
-const FULL_HEIGHT_BODY_OFFSET = '57px';
+// The template editor is always rendered `fullHeight` (see CasesPageLayout). On Security Solution a
+// fixed "timeline" bottom bar overlays the bottom of every page (~57px), so the editor reserves that
+// space to avoid being hidden behind it. No other solution (Observability, Stack) renders that bar,
+// so reserving the space elsewhere would only leave dead space at the bottom — the offset is applied
+// for the Security Solution owner only. (Cases can't read the bar's height generically: it is
+// Security-owned and exposes no shared signal, so this is keyed on owner rather than the DOM.)
+const SECURITY_TIMELINE_BOTTOM_BAR_OFFSET = '57px';
+const NO_BODY_OFFSET = '0px';
+
+/**
+ * The full-height body offset for the template editor: the Security Solution timeline bottom-bar
+ * reservation for the Security owner, otherwise none. Exported for testing.
+ */
+export const getTemplateEditorBodyOffset = (owner: string[]): string =>
+  owner.includes(SECURITY_SOLUTION_OWNER) ? SECURITY_TIMELINE_BOTTOM_BAR_OFFSET : NO_BODY_OFFSET;
 const LEGACY_SETTINGS_GUIDANCE_COMMENT =
   '# Case settings (sync alerts, extract observables) and the default connector are configured in the\n' +
   '# Settings tab of the preview panel, not here.';
@@ -165,7 +179,6 @@ const updateYamlCaseDefault = (
 
 export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   form,
-  title,
   initialMetadata,
   isLoading,
   isSaving,
@@ -178,6 +191,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   initialSettings,
 }) => {
   const styles = useMemoCss(componentStyles);
+  const { docLinks } = useKibana().services;
   const { getCasesTemplatesUrl, navigateToCasesTemplates } = useCasesTemplatesNavigation();
 
   const defaultPreviewWidth = Math.floor(window.innerWidth * 0.3);
@@ -319,11 +333,9 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   );
   const isYamlDefinitionValid = yamlValidationResult.success;
 
-  // Only the YAML's structural validity gates the Save button. Template-details validity (e.g. the
-  // required name) is checked at submit time against the freshest metadata (see handleSave), so the
-  // button stays responsive while the debounced metadata fields settle rather than flickering
-  // disabled after every keystroke.
-  const hasValidationErrors = useMemo(() => !isYamlDefinitionValid, [isYamlDefinitionValid]);
+  // Both the YAML definition and Configuration metadata must be valid before the primary action is
+  // enabled. The menu tooltip identifies the exact place to fix when either (or both) is invalid.
+  const hasYamlValidationErrors = useMemo(() => !isYamlDefinitionValid, [isYamlDefinitionValid]);
 
   // Freshest YAML, updated synchronously on every edit so Save and each subsequent edit build on the
   // latest value even while the debounced persistence hook (and the render-panel forms) lag behind.
@@ -527,7 +539,8 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     () =>
       getTemplateFormMenu({
         hasChanges,
-        hasValidationErrors,
+        hasYamlValidationErrors,
+        metadataErrors,
         isEdit,
         isLoading,
         isSaving,
@@ -542,13 +555,35 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       handleResetClick,
       handleSave,
       hasChanges,
-      hasValidationErrors,
+      hasYamlValidationErrors,
+      metadataErrors,
       isEdit,
       isEnabled,
       isLoading,
       isSaving,
       submitError,
     ]
+  );
+
+  // The template name is the page title, edited in place. It used to live only on the Configuration
+  // tab, which the editor does not open on — so the one required field for a new template sat behind
+  // a tab the user had no reason to visit and only surfaced as a save failure. AppHeader's editable
+  // title carries this natively: a muted placeholder while unnamed, and an inline error when `onSave`
+  // returns a string, which keeps the message on the field being fixed.
+  const templateFormTitle = useMemo<AppHeaderTitle>(
+    () => ({
+      text: metadata.name,
+      placeholder: i18n.UNTITLED_TEMPLATE,
+      ariaLabel: i18n.EDIT_TEMPLATE_NAME,
+      onSave: (nextName: string) => {
+        const nameErrors = validateTemplateMetadata({ ...metadata, name: nextName });
+        if (nameErrors.name != null) {
+          return nameErrors.name;
+        }
+        handleMetadataChange({ ...metadata, name: nextName });
+      },
+    }),
+    [metadata, handleMetadataChange]
   );
 
   const templateFormBadges = useMemo(() => getTemplateFormBadges(hasChanges), [hasChanges]);
@@ -568,21 +603,30 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     [getCasesTemplatesUrl, navigateToCasesTemplates]
   );
 
+  // Only Security Solution renders the fixed timeline bottom bar, so only it needs the reservation.
+  const { owner } = useCasesContext();
+  const bodyHeightOffset = getTemplateEditorBodyOffset(owner);
+
   return (
     <FormProvider {...form}>
       <EuiFlexGroup
         direction="column"
         gutterSize="none"
-        // Reserve space for the Security Solution timeline bottom bar (see FULL_HEIGHT_BODY_OFFSET)
-        // so the split editor runs to the page bottom without reaching into another plugin's DOM.
-        css={kbnFullBodyHeightCss(FULL_HEIGHT_BODY_OFFSET)}
+        // Reserve space for the Security Solution timeline bottom bar (only present for that owner —
+        // see bodyHeightOffset) so the split editor runs to the page bottom without overlapping the
+        // bar on Security or leaving dead space elsewhere.
+        css={kbnFullBodyHeightCss(bodyHeightOffset)}
       >
+        <TemplateEditorTour enabled={!isLoading} />
         <EuiFlexItem grow={false}>
           <CasesAppHeader
-            title={title}
+            title={templateFormTitle}
             back={templateFormBack}
             badges={templateFormBadges}
             menu={templateFormMenu}
+            // Surfaces a native "Documentation" item in the header overflow menu (matching other
+            // Kibana editors), linking to the case-templates guide via the doclinks service.
+            docLink={docLinks.links.cases.manageCaseTemplates}
           />
         </EuiFlexItem>
 
@@ -606,7 +650,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             metadataErrors={metadataErrors}
             onMetadataChange={handleMetadataChange}
             formResetKey={formResetKey}
-            fieldsHaveErrors={hasValidationErrors}
+            fieldsHaveErrors={hasYamlValidationErrors}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

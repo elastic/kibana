@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/279466
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+areas:
+- Alerting and reporting
+title: Sync Cases custom fields with templates v2 extended fields
+description: When case templates v2 is enabled, custom field values mirror into `extended_fields`
+  on create and update, and newly configured custom fields get matching global field
+  definitions for the templates UI.

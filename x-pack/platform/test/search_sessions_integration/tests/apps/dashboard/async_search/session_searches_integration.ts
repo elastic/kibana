@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. This feature deserves coverage, but we should use playwright's network observation capabilities to make it faster and more reliable.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -71,6 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       let asyncExpirationTimeAfterSessionWasSaved: number;
       let newAsyncSearchId: string;
+      // NOTE: this is an example where when we migrate to playwright, we can use network observation to make this faster and more reliable. We can wait for the request that saves the session to complete, and then check the expiration time of the search.
       await retry.waitFor('async search keepAlive is extended', async () => {
         const newSearchResponse = await dashboardPanelActions.getSearchResponseByTitle(
           'Sum of Bytes by Extension (Delayed 5s)'

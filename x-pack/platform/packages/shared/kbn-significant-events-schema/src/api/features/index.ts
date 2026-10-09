@@ -6,8 +6,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { ChatCompletionTokenCount } from '@kbn/inference-common';
-import type { BaseFeature } from '../../feature';
 import { MAX_ID_LENGTH, MAX_TITLE_LENGTH } from '../../significant_events/constants';
 
 export const tokenCountSchema = z.object({
@@ -34,10 +32,3 @@ export const iterationResultSchema = z.object({
 });
 
 export type IterationResult = z.infer<typeof iterationResultSchema>;
-
-export interface IdentifyFeaturesResult {
-  features: BaseFeature[];
-  durationMs: number;
-  iterations?: IterationResult[];
-  totalTokensUsed?: ChatCompletionTokenCount;
-}

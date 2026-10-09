@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import { ControlTriggerSource, ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import type {
   ICommandCallbacks,
   ICommandContext,
@@ -15,17 +15,24 @@ import type {
 } from '../../../../registry/types';
 import { Location } from '../../../../registry/types';
 import type {
+  FunctionParameter,
   FunctionParameterType,
   FunctionDefinitionTypes,
   SupportedDataType,
 } from '../../../types';
-import { getFieldsSuggestions, withAutoSuggest } from '../helpers';
+import { FULL_TEXT_SEARCH_DEFINITIONS } from '../../../constants';
+import { getControlSuggestionIfSupported, getFieldsSuggestions, withAutoSuggest } from '../helpers';
 import { getOperatorSuggestions } from '../../operators';
 import { getCompatibleLiterals, getDateLiterals } from '../../literals';
 import { filterFunctionDefinitions, getAllFunctions, getFunctionSuggestion } from '../../functions';
+import { isConstantParameter, pairKeywordAndTextTypes } from '../../signatures';
 import type { ExpressionContext } from './types';
 import type { PreferredExpressionType } from './types';
-import { commaCompleteItem } from '../../../../registry/complete_items';
+import {
+  buildAddValuePlaceholder,
+  commaCompleteItem,
+  findConstantPlaceholderType,
+} from '../../../../registry/complete_items';
 import { shouldSuggestComma, type CommaContext } from './comma_decision_engine';
 
 interface FunctionSuggestionOptions {
@@ -105,7 +112,7 @@ export class SuggestionBuilder {
   }): this {
     const types = options?.types ?? ['any'];
     const excludeParentFunctions = options?.excludeParentFunctions ?? false;
-    const ignored = this.resolveIgnoredFunctions(excludeParentFunctions);
+    const ignored = this.resolveIgnoredDefinitions(excludeParentFunctions);
     const addSpaceAfterFunction = options?.addSpaceAfterFunction;
     const constantGeneratingOnly = options?.constantGeneratingOnly ?? false;
 
@@ -155,18 +162,91 @@ export class SuggestionBuilder {
     return this;
   }
 
+  /** Adds suggestions for constant-only parameters (literals, constant functions, placeholder, control) */
+  addConstants(options: {
+    paramDefinitions: FunctionParameter[];
+    shouldAddComma: boolean;
+    hasMoreMandatoryArgs: boolean;
+    preferredPlaceholderType?: SupportedDataType | 'unknown';
+    includeValuesControl?: boolean;
+    includeConstantFunctions?: boolean;
+  }): this {
+    const {
+      paramDefinitions,
+      shouldAddComma,
+      hasMoreMandatoryArgs,
+      preferredPlaceholderType,
+      includeValuesControl,
+      includeConstantFunctions = true,
+    } = options;
+    const constantOnlyParams = getConstantOnlyParams(paramDefinitions);
+
+    if (!constantOnlyParams.length) {
+      return this;
+    }
+
+    const types = pairKeywordAndTextTypes(constantOnlyParams.map(({ type }) => type));
+
+    this.addLiterals({
+      types,
+      addComma: shouldAddComma,
+      advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
+      includeDateLiterals: false, // Date literals are added separately by the function-parameter flow
+      includeCompatibleLiterals: true,
+    });
+
+    // Function parameters also accept zero-arg functions (e.g. NOW(), PI())
+    if (includeConstantFunctions) {
+      this.addFunctions({
+        types,
+        addComma: shouldAddComma,
+        constantGeneratingOnly: true,
+      });
+    }
+
+    // Add placeholder hint ONLY for explicit constant parameters (not duration-derived ones)
+    const hasExplicitConstantOnly = paramDefinitions.some(isConstantParameter);
+
+    if (hasExplicitConstantOnly) {
+      const placeholderType = findConstantPlaceholderType(types, preferredPlaceholderType);
+
+      if (placeholderType) {
+        this.suggestions.push(buildAddValuePlaceholder(placeholderType));
+      }
+
+      if (includeValuesControl) {
+        this.suggestions.push(
+          ...getControlSuggestionIfSupported(
+            Boolean(this.context.context?.supportsControls),
+            ESQLVariableType.VALUES,
+            ControlTriggerSource.SMART_SUGGESTION,
+            this.context.context?.variables
+          )
+        );
+      }
+    }
+
+    return this;
+  }
+
   addOperators(options?: {
     leftParamType?: FunctionParameterType;
     allowed?: string[];
     ignored?: string[];
     returnTypes?: PreferredExpressionType[];
   }): this {
+    const ignored = this.resolveIgnoredDefinitions(false);
+
+    if (options?.ignored) {
+      ignored.push(...options.ignored);
+    }
+
     const operatorSuggestions = getOperatorSuggestions(
       {
         location: this.context.location,
         leftParamType: options?.leftParamType,
         allowed: options?.allowed,
-        ignored: options?.ignored,
+        ignored,
         returnTypes: options?.returnTypes,
       },
       this.context.callbacks?.hasMinimumLicenseRequired,
@@ -198,33 +278,47 @@ export class SuggestionBuilder {
   }
 
   /**
-   * Returns functions to exclude from suggestions by merging two sources:
-   * 1. Command-level ignored functions (e.g., EVAL hides match_phrase)
+   * Returns definitions to exclude from suggestions by merging three sources:
+   * 1. Command-level ignored definitions (e.g., EVAL hides match_phrase)
    *    - Applies exceptions: if current parent function is in allowedInsideFunctions, the function is not ignored
-   * 2. Parent function names for recursion prevention (e.g., ABS inside ABS)
+   * 2. Full-text definitions inside function parameters
+   *    - Full-text definitions cannot be nested in functions unless allowedInsideFunctions says otherwise
+   * 3. Parent function names for recursion prevention (e.g., ABS inside ABS)
    *    - Only included when excludeParentFunctions=true
    */
-  private resolveIgnoredFunctions(excludeParentFunctions: boolean): string[] {
+  private resolveIgnoredDefinitions(excludeParentFunctions: boolean): string[] {
     const {
       getFunctionsToIgnore,
       parentFunctionNames = [],
       functionParameterContext,
     } = this.context.options;
-    const functionsToIgnore = getFunctionsToIgnore?.(functionParameterContext);
+    const ignored = getFunctionsToIgnore?.(functionParameterContext);
+    const ignoredNames = new Set(ignored?.names ?? []);
     const parentFn = functionParameterContext?.functionDefinition?.name?.toLowerCase();
 
-    const isAllowedInsideParent = (fn: string) =>
-      parentFn &&
-      functionsToIgnore?.allowedInsideFunctions?.[fn]?.some((f) => f.toLowerCase() === parentFn);
-
-    const commandIgnored =
-      functionsToIgnore?.names.filter((fn) => !isAllowedInsideParent(fn)) ?? [];
-
-    if (!excludeParentFunctions) {
-      return commandIgnored;
+    if (functionParameterContext) {
+      for (const definitionName of FULL_TEXT_SEARCH_DEFINITIONS) {
+        ignoredNames.add(definitionName);
+      }
     }
 
-    return [...new Set([...commandIgnored, ...parentFunctionNames])];
+    if (parentFn) {
+      for (const [definitionName, allowedParents] of Object.entries(
+        ignored?.allowedInsideFunctions ?? {}
+      )) {
+        if (allowedParents.some((f) => f.toLowerCase() === parentFn)) {
+          ignoredNames.delete(definitionName);
+        }
+      }
+    }
+
+    if (excludeParentFunctions) {
+      for (const parentName of parentFunctionNames) {
+        ignoredNames.add(parentName);
+      }
+    }
+
+    return [...ignoredNames];
   }
 }
 
@@ -284,6 +378,13 @@ function getFunctionsSuggestions({
 
     return withAutoSuggest(suggestion);
   });
+}
+
+/** Filters parameters that only accept constant values (literals or duration types) */
+function getConstantOnlyParams(paramDefinitions: FunctionParameter[]): FunctionParameter[] {
+  return paramDefinitions.filter(
+    (param) => isConstantParameter(param) || /_duration/.test(String(param.type))
+  );
 }
 
 function getLiteralsSuggestions(

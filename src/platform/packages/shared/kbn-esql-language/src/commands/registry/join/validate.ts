@@ -19,6 +19,7 @@ import { isBinaryExpression, isIdentifier, isSource } from '@elastic/esql';
 import type { ICommandCallbacks, ICommandContext } from '../types';
 import { errors } from '../../definitions/utils/errors';
 import { validateCommandArguments } from '../../definitions/utils/validation';
+import { COORDINATOR_LOOKUP_JOIN_PREFIX } from '../../definitions/constants';
 import { getOnOption } from './utils';
 import type { ESQLMessage } from '../../definitions/types';
 
@@ -57,28 +58,33 @@ export const validate = (
     return [errors.unexpected(target.location)];
   }
 
-  let isIndexFound = false;
-  for (const { name, aliases } of joinSources) {
-    if (index.name === name) {
-      isIndexFound = true;
-      break;
-    }
+  const isCoordinatorTarget = index.prefix?.valueUnquoted === COORDINATOR_LOOKUP_JOIN_PREFIX;
 
-    if (aliases) {
-      for (const aliasName of aliases) {
-        if (index.name === aliasName) {
-          isIndexFound = true;
-          break;
+  // Coordinator targets are resolved by ES on the coordinating cluster.
+  if (!isCoordinatorTarget) {
+    let isIndexFound = false;
+    for (const { name, aliases } of joinSources) {
+      if (index.name === name) {
+        isIndexFound = true;
+        break;
+      }
+
+      if (aliases) {
+        for (const aliasName of aliases) {
+          if (index.name === aliasName) {
+            isIndexFound = true;
+            break;
+          }
         }
       }
     }
-  }
 
-  if (!isIndexFound) {
-    const error = errors.invalidJoinIndex(index);
-    messages.push(error);
+    if (!isIndexFound) {
+      const error = errors.invalidJoinIndex(index);
+      messages.push(error);
 
-    return messages;
+      return messages;
+    }
   }
 
   // Validate JOIN ON expressions

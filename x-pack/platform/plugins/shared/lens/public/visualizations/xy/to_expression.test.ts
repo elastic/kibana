@@ -89,6 +89,7 @@ describe('#toExpression', () => {
           legend: { position: Position.Left, isVisible: true },
           valueLabels: 'hide',
           preferredSeriesType: 'bar',
+          areaFill: 'solid',
           fittingFunction: 'Carry',
           endValue: 'Nearest',
           emphasizeFitting: true,
@@ -1068,5 +1069,56 @@ describe('#toExpression', () => {
       datasourceExpressionsByLayers
     ) as Ast;
     expect(expression.chain[0].arguments.addTimeMarker[0] as Ast).toEqual(false);
+  });
+
+  it('should include areaFill in the expression AST', () => {
+    const ast = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'area',
+        areaFill: 'gradient',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'area',
+            splitAccessors: ['d'],
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    expect(ast.chain[0].arguments.areaFill[0]).toEqual('gradient');
+  });
+
+  it('should default areaFill to solid', () => {
+    const ast = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
+        preferredSeriesType: 'area',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'area',
+            splitAccessors: ['d'],
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    expect(ast.chain[0].arguments.areaFill[0]).toEqual('solid');
   });
 });

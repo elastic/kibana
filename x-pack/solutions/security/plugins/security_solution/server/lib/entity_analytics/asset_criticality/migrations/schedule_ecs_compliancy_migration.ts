@@ -70,7 +70,7 @@ export const createMigrationTask =
     logger,
     auditLogger,
   }: Pick<EntityAnalyticsMigrationsParams, 'getStartServices' | 'logger' | 'auditLogger'>) =>
-  ({ abortController }: { abortController: AbortController }) => {
+  ({ signal }: { signal: AbortSignal }) => {
     return {
       run: async () => {
         const [coreStart] = await getStartServices();
@@ -81,7 +81,7 @@ export const createMigrationTask =
           auditLogger,
         });
 
-        const response = await migrationClient.migrateEcsData(abortController.signal);
+        const response = await migrationClient.migrateEcsData(signal);
         const failures = response.failures?.map((failure) => failure.cause);
         const hasFailures = failures && failures?.length > 0;
 
@@ -93,7 +93,6 @@ export const createMigrationTask =
       },
 
       cancel: async () => {
-        abortController.abort();
         logger.debug(`Task cancelled: "${TASK_TYPE}"`);
       },
     };

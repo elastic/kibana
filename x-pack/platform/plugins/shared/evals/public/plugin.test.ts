@@ -5,10 +5,17 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { EvalsSetupDependencies } from './types';
 import { EvalsPublicPlugin } from './plugin';
 
 describe('EvalsPublicPlugin', () => {
+  const createPlugin = (enabled: boolean) =>
+    new EvalsPublicPlugin({
+      config: { get: () => ({ enabled }) },
+    } as unknown as PluginInitializerContext);
+
   const createManagementMock = () => {
     const registerApp = jest.fn();
     return {
@@ -24,6 +31,13 @@ describe('EvalsPublicPlugin', () => {
     };
   };
 
+  const createWorkflowsExtensionsMock = () =>
+    ({
+      registerStepDefinition: jest.fn(),
+    } as unknown as EvalsSetupDependencies['workflowsExtensions'] & {
+      registerStepDefinition: jest.Mock;
+    });
+
   const createCoreSetupMock = () =>
     ({
       application: {
@@ -33,7 +47,7 @@ describe('EvalsPublicPlugin', () => {
     } as any);
 
   it('registers the Stack Management AI entry when management is available', () => {
-    const plugin = new EvalsPublicPlugin();
+    const plugin = createPlugin(true);
     const management = createManagementMock();
 
     const coreSetup = createCoreSetupMock();
@@ -52,7 +66,7 @@ describe('EvalsPublicPlugin', () => {
   });
 
   it('does not register the Stack Management AI entry when management is not available', () => {
-    const plugin = new EvalsPublicPlugin();
+    const plugin = createPlugin(true);
 
     const coreSetup = createCoreSetupMock();
 
@@ -60,5 +74,23 @@ describe('EvalsPublicPlugin', () => {
 
     // nothing to assert besides no throw; management was undefined
     expect(true).toBe(true);
+  });
+
+  it('registers the ai.evals.* Workflows editor steps when the feature flag is enabled', () => {
+    const plugin = createPlugin(true);
+    const workflowsExtensions = createWorkflowsExtensionsMock();
+
+    plugin.setup(createCoreSetupMock(), { workflowsExtensions });
+
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalled();
+  });
+
+  it('does not register the ai.evals.* Workflows editor steps when the feature flag is disabled', () => {
+    const plugin = createPlugin(false);
+    const workflowsExtensions = createWorkflowsExtensionsMock();
+
+    plugin.setup(createCoreSetupMock(), { workflowsExtensions });
+
+    expect(workflowsExtensions.registerStepDefinition).not.toHaveBeenCalled();
   });
 });

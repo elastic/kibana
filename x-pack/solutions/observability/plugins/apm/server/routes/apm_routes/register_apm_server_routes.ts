@@ -100,20 +100,7 @@ export function registerRoutes({
       APMRouteCreateOptions;
     const params = 'params' in route ? route.params : undefined;
 
-    if (params !== undefined && !isZod(params)) {
-      throw new Error(
-        `Route ${endpoint} has non-zod params; io-ts route params are no longer supported.`
-      );
-    }
-
     const { method, pathname, version } = parseEndpoint(endpoint);
-
-    // All route params are zod, so Core validates (and coerces) every request
-    // against the schema below, including the `?_inspect` debug param. Routes
-    // without params still get an inspect-only query schema.
-    const validate = makeZodValidationObject(
-      withInspectQueryParam((params as ZodParamsObject) ?? (z.object({}) as ZodParamsObject))
-    );
 
     const wrappedHandler = async (
       context: ApmPluginRequestHandlerContext,
@@ -244,12 +231,31 @@ export function registerRoutes({
       }
     };
 
+    // Wrapped in a thunk so that schema construction is deferred to the first
+    // request rather than happening at plugin.setup() time. Route params defined
+    // with lazySchema() return a Proxy whose factory is triggered on the first
+    // property access — both the `isZod` check (via the `has` trap) and
+    // `makeZodValidationObject` (via the `get` trap on `.shape.*`) would
+    // materialize all ~300 schemas synchronously at startup if called eagerly.
+    // Core wraps this function with `lodash.once`, so the result is built once
+    // on the first request and cached for all subsequent requests.
+    const makeValidate = () => {
+      if (params !== undefined && !isZod(params)) {
+        throw new Error(
+          `Route ${endpoint} has non-zod params; io-ts route params are no longer supported.`
+        );
+      }
+      return makeZodValidationObject(
+        withInspectQueryParam((params as ZodParamsObject) ?? (z.object({}) as ZodParamsObject))
+      );
+    };
+
     if (!version) {
       (router[method] as RouteRegistrar<typeof method, ApmPluginRequestHandlerContext>)(
         {
           path: pathname,
           options,
-          validate,
+          validate: makeValidate,
           security: security as RouteSecurity,
         },
         wrappedHandler
@@ -265,15 +271,7 @@ export function registerRoutes({
         access: pathname.includes('/internal/apm') ? 'internal' : 'public',
         options,
         security: security as RouteSecurity,
-      }).addVersion(
-        {
-          version,
-          validate: {
-            request: validate,
-          },
-        },
-        wrappedHandler
-      );
+      }).addVersion({ version, validate: () => ({ request: makeValidate() }) }, wrappedHandler);
     }
   });
 }

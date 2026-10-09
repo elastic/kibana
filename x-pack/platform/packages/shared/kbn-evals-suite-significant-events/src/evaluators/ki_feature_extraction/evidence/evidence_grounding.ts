@@ -134,7 +134,7 @@ export const evidenceGroundingEvaluator = {
           ? `${allIssues.slice(0, 5).join('; ')}`
           : `All ${totalEvidence} evidence strings are grounded` +
             (totalDocIds > 0 ? ` and all ${totalDocIds} doc IDs are valid` : ''),
-      details: {
+      metadata: {
         totalEvidence,
         groundedEvidence,
         ungroundedItems,

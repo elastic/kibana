@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { memo, useCallback, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { ShowAllSpaces } from '../../common/show_all_spaces';
 import { ShowLastRunToggle } from '../../common/show_last_run_toggle';

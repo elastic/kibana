@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: DELETE. Already skipped. If we want demo-app coverage of the cache buttons,
+ * unskip and migrate to Scout as a smoke test — but unit coverage of the cache itself is solid in
+ * src/platform/plugins/shared/data/public/search/search_interceptor/search_response_cache.test.ts.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 

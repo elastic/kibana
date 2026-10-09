@@ -41,7 +41,7 @@ interface AddMitreMappingsNodeParams {
 /**
  * Validates and formats the MITRE mapping response according to the Threat schema
  */
-const formatMitreMapping = (response: MitreMappingSelectionResponse): Array<Threat> => {
+export const formatMitreMapping = (response: MitreMappingSelectionResponse): Array<Threat> => {
   const threatMappings: Array<Threat> = [];
 
   // Group techniques by tactic
@@ -124,7 +124,7 @@ const formatMitreMapping = (response: MitreMappingSelectionResponse): Array<Thre
           name: tacticData.name,
           reference: tacticData.reference,
         },
-        technique: formattedTechniques.length > 0 ? formattedTechniques : undefined,
+        technique: formattedTechniques,
       });
     }
   }

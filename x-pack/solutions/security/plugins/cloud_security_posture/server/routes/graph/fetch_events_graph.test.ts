@@ -11,7 +11,6 @@ import { fetchEvents } from './fetch_events_graph';
 import { regroupEvents, enrichEventDocData } from './parse_records';
 import type { Logger } from '@kbn/core/server';
 import type { OriginEventId, EsQuery, EventEsqlRow } from './types';
-import { GRAPH_TARGET_EUID_SOURCE_FIELDS } from './constants';
 import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
 import { hashIds } from './utils';
 
@@ -74,6 +73,52 @@ describe('fetchEvents', () => {
     expect(result).toEqual({ columns: [], records: [{ id: 'dummy' }] });
   });
 
+  it('casts user.id to keyword before the enrichment EVAL to prevent CASE type conflicts', () => {
+    // When user.id is mapped as "long" (e.g. aws_bedrock.invocation), the merged enrichment
+    // CASE has a preserve branch "user.id IS NOT NULL, user.id" that returns long, while all
+    // other branches return keyword strings — causing "argument of [CASE] must be [long]".
+    // The fix: emit "| EVAL user.id = TO_STRING(user.id)" before buildIntegrationRuntimeEvals() runs.
+    void fetchEvents({
+      esClient,
+      logger,
+      start: 0,
+      end: 1000,
+      originEventIds: [] as OriginEventId[],
+      showUnknownTarget: false,
+      indexPatterns: ['valid_index'],
+      spaceId: 'default',
+      esQuery: undefined,
+    });
+
+    const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+    const query: string = args.query;
+
+    expect(query).toContain('EVAL user.id = TO_STRING(user.id)');
+
+    // Must appear before the enrichment block (which starts with entity.sub_type or similar EVAL)
+    const castPos = query.indexOf('EVAL user.id = TO_STRING(user.id)');
+    const enrichmentPos = query.indexOf('| EVAL\n');
+    expect(castPos).toBeLessThan(enrichmentPos);
+  });
+
+  it('omits user.id cast when integrationRuntimeEvalsEnabled is false (escape hatch)', () => {
+    void fetchEvents({
+      esClient,
+      logger,
+      start: 0,
+      end: 1000,
+      originEventIds: [] as OriginEventId[],
+      showUnknownTarget: false,
+      indexPatterns: ['valid_index'],
+      spaceId: 'default',
+      esQuery: undefined,
+      integrationRuntimeEvalsEnabled: false,
+    });
+
+    const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+    expect(args.query).not.toContain('EVAL user.id = TO_STRING(user.id)');
+  });
+
   it('should include origin event parameters when originEventIds are provided', async () => {
     const originEventIds: OriginEventId[] = [
       { id: '1', isAlert: true },
@@ -105,7 +150,7 @@ describe('fetchEvents', () => {
   });
 
   describe('Target entity filtering', () => {
-    it('should require at least one target field to exist when showUnknownTarget is false', async () => {
+    it('should filter unknown targets in ES|QL when showUnknownTarget is false', async () => {
       await fetchEvents({
         esClient,
         logger,
@@ -119,29 +164,22 @@ describe('fetchEvents', () => {
       });
 
       const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
-      const filterArg = args.filter as any;
+      const query: string = args.query;
 
-      const allTargetFields = [
-        ...GRAPH_TARGET_EUID_SOURCE_FIELDS.user,
-        ...GRAPH_TARGET_EUID_SOURCE_FIELDS.host,
-        ...GRAPH_TARGET_EUID_SOURCE_FIELDS.service,
-        ...GRAPH_TARGET_EUID_SOURCE_FIELDS.generic,
-      ];
-      const expectedExistsChecks = allTargetFields.map((field) => ({ exists: { field } }));
-
-      expect(filterArg.bool.filter).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            bool: expect.objectContaining({
-              should: expect.arrayContaining(expectedExistsChecks),
-              minimum_should_match: 1,
-            }),
-          }),
-        ])
-      );
+      // Filtering happens in ES|QL (after enrichment), not in the DSL pre-filter,
+      // so that enrichment-computed entity.target.id values are visible before the check.
+      expect(query).toContain('| WHERE __target_exists');
+      expect(query).toContain('__target_exists = ');
+      // host.target.* must be included so wiz/cloud enrichment targets aren't dropped
+      expect(query).toContain('host.target.id IS NOT NULL');
+      expect(query).toContain('host.target.name IS NOT NULL');
+      // The __target_exists EVAL must appear before the WHERE clause
+      const evalPos = query.indexOf('__target_exists =');
+      const wherePos = query.indexOf('| WHERE __target_exists');
+      expect(evalPos).toBeLessThan(wherePos);
     });
 
-    it('should not filter targets when showUnknownTarget is true', async () => {
+    it('should not filter targets in ES|QL when showUnknownTarget is true', async () => {
       await fetchEvents({
         esClient,
         logger,
@@ -155,12 +193,9 @@ describe('fetchEvents', () => {
       });
 
       const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
-      const filterArg = args.filter as any;
+      const query: string = args.query;
 
-      const hasTargetCheck = filterArg.bool.filter.some((f: any) =>
-        f.bool?.should?.some((s: any) => s.exists?.field?.includes('target'))
-      );
-      expect(hasTargetCheck).toBe(false);
+      expect(query).not.toContain('| WHERE __target_exists');
     });
   });
 

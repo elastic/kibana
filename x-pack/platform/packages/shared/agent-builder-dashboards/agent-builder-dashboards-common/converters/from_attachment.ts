@@ -32,20 +32,26 @@ import { EMPTY_DASHBOARD_STATE } from '../dashboard_state_helpers';
  */
 const buildPanelFromConfig = ({ config, type, id, grid }: AttachmentPanel): DashboardPanel => {
   if (type === VEGA_VIS_TYPE) {
-    const { spec, title, description } = config as {
+    const { spec, title, description, ...restConfig } = config as {
       spec?: unknown;
       title?: unknown;
       description?: unknown;
-    };
+    } & Record<string, unknown>;
+    const panelTitle = typeof title === 'string' ? title : '';
+    const panelDescription = typeof description === 'string' ? description : '';
     return {
       type: VISUALIZE_EMBEDDABLE_TYPE,
       id,
       grid,
       config: {
+        // Preserve panel-level settings (hide_title, hide_border, drilldowns, …).
+        ...restConfig,
+        ...(typeof title === 'string' ? { title: panelTitle } : {}),
+        ...(typeof description === 'string' ? { description: panelDescription } : {}),
         savedVis: buildVegaSavedVis({
           spec: typeof spec === 'string' ? spec : '',
-          title: typeof title === 'string' ? title : '',
-          description: typeof description === 'string' ? description : '',
+          title: panelTitle,
+          description: panelDescription,
         }),
       },
     };

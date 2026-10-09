@@ -6,12 +6,19 @@
  */
 
 import type { ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
-import type { ConversationRound, ToolCallStep, ReasoningStep } from '@kbn/agent-builder-common';
-import { isReasoningStep } from '@kbn/agent-builder-common';
+import {
+  isAskUserQuestionStep,
+  isReasoningStep,
+  isToolCallStep,
+  type ConversationRound,
+  type ReasoningStep,
+  type ToolCallStep,
+} from '@kbn/agent-builder-common';
 import type { ProcessedConversationRound } from './prepare_conversation';
 import type { ResearchAgentAction } from '../actions';
 import { toolCallAction, executeToolAction } from '../actions';
 import { groupToolCallSteps } from './to_langchain_messages';
+import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
 
 export const roundToActions = ({
   round,
@@ -21,50 +28,84 @@ export const roundToActions = ({
   toolIdMapping: ToolIdMapping;
 }): ResearchAgentAction[] => {
   const actions: ResearchAgentAction[] = [];
-  const groups = groupToolCallSteps(round.steps);
+  const groupsByHeadStep = new Map(
+    groupToolCallSteps(round.steps).map((group) => [group[0], group])
+  );
   const reasoningSteps = round.steps.filter(isReasoningStep);
 
-  for (const group of groups) {
-    const { completed, pending } = partitionGroupByCompletion(group);
-    const groupId = group[0].tool_call_group_id;
-    const groupMessage = getGroupReasoning(reasoningSteps, groupId);
-
-    if (completed.length > 0) {
-      actions.push(
-        toolCallAction({
-          toolCalls: completed.map((step) => ({
-            toolName: toolIdMapping.get(step.tool_id) ?? step.tool_id,
-            toolCallId: step.tool_call_id,
-            args: step.params,
-            reasoning: getStepReasoning(reasoningSteps, step.tool_call_id),
-          })),
-          message: groupMessage,
-        })
-      );
-      actions.push(
-        executeToolAction({
-          toolResults: completed.map((step) => ({
-            toolCallId: step.tool_call_id,
-            content: JSON.stringify({ results: step.results }),
-            artifact: { results: step.results },
-          })),
-        })
-      );
+  for (const step of round.steps) {
+    if (isToolCallStep(step)) {
+      const group = groupsByHeadStep.get(step);
+      if (group) {
+        actions.push(...toolCallGroupToActions({ group, reasoningSteps, toolIdMapping }));
+      }
+      continue;
     }
 
-    if (pending.length > 0) {
-      actions.push(
-        toolCallAction({
-          toolCalls: pending.map((step) => ({
-            toolName: toolIdMapping.get(step.tool_id) ?? step.tool_id,
-            toolCallId: step.tool_call_id,
-            args: step.params,
-            reasoning: getStepReasoning(reasoningSteps, step.tool_call_id),
-          })),
-          message: groupMessage,
-        })
-      );
+    if (!isAskUserQuestionStep(step) || step.answers === undefined) {
+      continue;
     }
+
+    const { toolCallId, toolName, args, content, artifact } = materializeAskUserQuestionToolCall({
+      questions: step.questions,
+      answers: step.answers,
+    });
+    actions.push(toolCallAction({ toolCalls: [{ toolName, toolCallId, args }] }));
+    actions.push(executeToolAction({ toolResults: [{ toolCallId, content, artifact }] }));
+  }
+
+  return actions;
+};
+
+const toolCallGroupToActions = ({
+  group,
+  reasoningSteps,
+  toolIdMapping,
+}: {
+  group: ToolCallStep[];
+  reasoningSteps: ReasoningStep[];
+  toolIdMapping: ToolIdMapping;
+}): ResearchAgentAction[] => {
+  const actions: ResearchAgentAction[] = [];
+  const { completed, pending } = partitionGroupByCompletion(group);
+  const groupId = group[0].tool_call_group_id;
+  const groupMessage = getGroupReasoning(reasoningSteps, groupId);
+
+  if (completed.length > 0) {
+    actions.push(
+      toolCallAction({
+        toolCalls: completed.map((step) => ({
+          toolName: toolIdMapping.get(step.tool_id) ?? step.tool_id,
+          toolCallId: step.tool_call_id,
+          args: step.params,
+          reasoning: getStepReasoning(reasoningSteps, step.tool_call_id),
+        })),
+        message: groupMessage,
+      })
+    );
+    actions.push(
+      executeToolAction({
+        toolResults: completed.map((step) => ({
+          toolCallId: step.tool_call_id,
+          content: JSON.stringify({ results: step.results }),
+          artifact: { results: step.results },
+        })),
+      })
+    );
+  }
+
+  if (pending.length > 0) {
+    actions.push(
+      toolCallAction({
+        toolCalls: pending.map((step) => ({
+          toolName: toolIdMapping.get(step.tool_id) ?? step.tool_id,
+          toolCallId: step.tool_call_id,
+          args: step.params,
+          reasoning: getStepReasoning(reasoningSteps, step.tool_call_id),
+        })),
+        message: groupMessage,
+      })
+    );
   }
 
   return actions;

@@ -62,6 +62,11 @@ const CONTEXT_BOOSTS: Partial<Record<Location, Partial<Record<SuggestionCategory
   [Location.LIMIT_BY]: {
     [SuggestionCategory.USER_DEFINED_COLUMN]: -300, // From 300 to 0
   },
+  [Location.HIGHLIGHT]: {
+    // The query text is required while the `prefix = "..."` modifier is optional,
+    // so the optional keyword goes below the query text snippet.
+    [SuggestionCategory.LANGUAGE_KEYWORD]: 201, // From 50 to 251, just after CONSTANT_VALUE
+  },
   [Location.PROMQL]: {
     // Push language keywords (e.g. "by") after pipe but before operators.
     [SuggestionCategory.LANGUAGE_KEYWORD]: 100, // From 50 to 150

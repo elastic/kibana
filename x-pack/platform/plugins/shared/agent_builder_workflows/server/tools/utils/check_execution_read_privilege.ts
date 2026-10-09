@@ -7,12 +7,11 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import { WorkflowsManagementApiActions } from '@kbn/workflows';
+import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 
 /**
- * Verifies the caller holds the `workflowsManagement:readExecution` Kibana
- * privilege before workflow execution data is returned through an Agent Builder
- * tool.
+ * Verifies the caller holds the privileges required to read workflow execution
+ * data before it is returned through an Agent Builder tool.
  *
  * Returns `true` when access is allowed. When the security plugin is disabled
  * there is no privilege model to enforce, so access is allowed.
@@ -31,12 +30,12 @@ export const hasWorkflowExecutionReadPrivilege = async ({
     return true;
   }
 
-  const requiredPrivilege = security.authz.actions.api.get(
-    WorkflowsManagementApiActions.readExecution
+  const requiredPrivileges = WorkflowsManagementOperationPrivileges.readExecution.map((action) =>
+    security.authz.actions.api.get(action)
   );
   const { hasAllRequested } = await security.authz
     .checkPrivilegesWithRequest(request)
-    .atSpace(spaceId, { kibana: [requiredPrivilege] });
+    .atSpace(spaceId, { kibana: requiredPrivileges });
 
   return hasAllRequested;
 };

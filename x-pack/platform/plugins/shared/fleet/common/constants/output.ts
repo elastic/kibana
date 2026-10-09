@@ -9,6 +9,8 @@ import type { NewOutput, OutputType, ValueOf } from '../types';
 
 export const OUTPUT_SAVED_OBJECT_TYPE = 'ingest-outputs';
 
+export const MAX_HOSTS = 100;
+
 export const outputType = {
   Elasticsearch: 'elasticsearch',
   Logstash: 'logstash',
@@ -36,6 +38,11 @@ export const SERVERLESS_DEFAULT_OUTPUT_ID = 'es-default-output';
 //  - Both are uneditable by users due to having `is_preconfigured: true` set
 export const ECH_AGENTLESS_OUTPUT_ID = 'es-agentless-output';
 export const SERVERLESS_AGENTLESS_OUTPUT_ID = 'es-default-output-internal';
+
+// Output IDs for the agentless managed outputs that point to the managed bulk endpoint
+export const ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID = 'es-managed-bulk-agentless-output';
+export const SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID =
+  'es-managed-bulk-agentless-output-internal';
 
 // Output ID for the private endpoint (PrivateLink) in serverless.
 // Injected by project-controller/kibana-controller when PrivateLink is enabled.

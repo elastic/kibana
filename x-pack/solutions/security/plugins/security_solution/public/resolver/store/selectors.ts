@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector, defaultMemoize } from 'reselect';
+import { createSelector, defaultMemoize } from 'reselect-v4';
 import type { State } from '../../common/store/types';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';

@@ -16,3 +16,20 @@ export const AgentBuilderPanelContainer = ({ euiTheme }: UseEuiTheme) => css`
     border-left: ${euiTheme.border.thin};
   }
 `;
+
+// The AI tool logos are bundled as SVG URLs, so `EuiIcon` renders them as `<img>` and its
+// `color` prop is ignored. Must mask the SVG and color it with `textSubdued`, which is aware of
+// color mode.
+export const brandIcon =
+  (icon: string) =>
+  ({ euiTheme }: UseEuiTheme) =>
+    css`
+      display: inline-block;
+      inline-size: ${euiTheme.size.base};
+      block-size: ${euiTheme.size.base};
+      background-color: ${euiTheme.colors.textSubdued};
+      mask-image: url(${icon});
+      mask-size: contain;
+      mask-repeat: no-repeat;
+      mask-position: center;
+    `;

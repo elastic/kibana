@@ -23,6 +23,11 @@ export interface FilterConfig {
   label: string;
   isActive: boolean;
   isAvailable: boolean;
-  getEmptyOptions: () => Partial<FilterOptions>;
+  /**
+   * Returns a partial FilterOptions that clears this filter's value.
+   * Receives the current filterOptions so array-shaped filters (extendedFieldFilters)
+   * can remove only their own entries instead of wiping the whole array.
+   */
+  getEmptyOptions: (filterOptions: FilterOptions) => Partial<FilterOptions>;
   render: (params: FilterConfigRenderParams) => React.ReactNode;
 }

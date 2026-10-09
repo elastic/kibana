@@ -107,7 +107,16 @@ export interface HttpSelfScopedClient {
   ): Promise<TResponseBody>;
 }
 
-/** @public */
+/**
+ * Creates scoped clients for calling Kibana's own HTTP routes.
+ *
+ * Self calls do not support mTLS. Calls fail when Kibana's current
+ * `server.ssl.clientAuthentication` is `optional` or `required`. Core cannot detect
+ * mTLS configured only on an external proxy or public URL, so callers must not use
+ * this client with such a target.
+ *
+ * @public
+ */
 export interface HttpSelfService {
   asScoped(request: KibanaRequest): HttpSelfScopedClient;
 }

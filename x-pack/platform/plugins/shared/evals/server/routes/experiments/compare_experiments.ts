@@ -16,6 +16,7 @@ import {
   computePairedTTestResults,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
@@ -31,7 +32,11 @@ const COMPARE_SOURCE_FIELDS = [
   'task.repetition_index',
 ];
 
-export const registerCompareExperimentsRoute = ({ router, logger }: RouteDependencies) => {
+export const registerCompareExperimentsRoute = ({
+  router,
+  logger,
+  getSpaceId,
+}: RouteDependencies) => {
   router.versioned
     .get({
       path: EVALS_EXPERIMENTS_COMPARE_URL,
@@ -53,20 +58,30 @@ export const registerCompareExperimentsRoute = ({ router, logger }: RouteDepende
       async (context, request, response) => {
         try {
           const { type, baseline_id: idA, target_id: idB } = request.query;
+
+          if (idA === idB) {
+            return response.badRequest({
+              body: {
+                message: `baseline_id and target_id must differ; cannot compare an ${type} with itself.`,
+              },
+            });
+          }
+
           const filterField = type === 'execution' ? 'metadata.execution_id' : 'experiment_id';
 
           const evalsContext = await context.evals;
+          const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
 
           const [responseA, responseB] = await Promise.all([
             evalsContext.evaluationScoreService.search({
-              query: buildExperimentFilterQuery(idA, { filterField }),
+              query: buildExperimentFilterQuery(idA, { filterField, spaceId }),
               sort: SCORES_SORT_ORDER,
               size: MAX_SCORES_PER_EXPERIMENT,
               _source: COMPARE_SOURCE_FIELDS,
               track_total_hits: true,
             }),
             evalsContext.evaluationScoreService.search({
-              query: buildExperimentFilterQuery(idB, { filterField }),
+              query: buildExperimentFilterQuery(idB, { filterField, spaceId }),
               sort: SCORES_SORT_ORDER,
               size: MAX_SCORES_PER_EXPERIMENT,
               _source: COMPARE_SOURCE_FIELDS,

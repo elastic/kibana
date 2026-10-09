@@ -40,7 +40,7 @@ describe('AlertsBadge', () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it('renders a focusable, non-interactive badge when no onClick is provided', () => {
+  it('renders a focusable, non-interactive badge when no onClick or navigationProps is provided', () => {
     renderBadge({ count: 2, serviceName: 'svc' });
 
     const badge = screen.getByTestId('apmAlertsBadge');
@@ -69,7 +69,7 @@ describe('AlertsBadge', () => {
     expect(badge).toHaveAttribute('data-ebt-element', 'serviceFlyoutAlertsBadge');
   });
 
-  it('does not set data-ebt-* attributes when ebt is provided without onClick', () => {
+  it('does not set data-ebt-* attributes when ebt is provided without onClick or navigationProps', () => {
     renderBadge({
       count: 1,
       serviceName: 'svc',
@@ -78,5 +78,72 @@ describe('AlertsBadge', () => {
 
     const badge = screen.getByTestId('apmAlertsBadge');
     expect(badge).not.toHaveAttribute('data-ebt-action');
+  });
+
+  describe('navigationProps', () => {
+    function makeNavigationProps(
+      getRedirectUrl = jest.fn().mockReturnValue('/app/apm/services/svc/alerts')
+    ) {
+      return {
+        navigationProps: {
+          serviceName: 'svc',
+          agentName: 'java' as const,
+          environment: 'production' as const,
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          locators: { get: jest.fn().mockReturnValue({ getRedirectUrl }) } as any,
+        },
+        getRedirectUrl,
+      };
+    }
+
+    it('renders as a link with the href returned by the locator', () => {
+      const { navigationProps } = makeNavigationProps();
+      renderBadge({ count: 3, serviceName: 'svc', navigationProps });
+
+      const badge = screen.getByTestId('apmAlertsBadge');
+      expect(badge.tagName.toLowerCase()).toBe('a');
+      expect(badge).toHaveAttribute('href', '/app/apm/services/svc/alerts');
+    });
+
+    it('calls the locator with serviceOverviewTab alerts and the given params', () => {
+      const { navigationProps, getRedirectUrl } = makeNavigationProps();
+      renderBadge({ count: 3, serviceName: 'svc', navigationProps });
+
+      expect(getRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          serviceName: 'svc',
+          serviceOverviewTab: 'alerts',
+          query: expect.objectContaining({
+            environment: 'production',
+            rangeFrom: 'now-15m',
+            rangeTo: 'now',
+          }),
+        })
+      );
+    });
+
+    it('sets data-ebt-* attributes when ebt is provided alongside navigationProps', () => {
+      const { navigationProps } = makeNavigationProps();
+      renderBadge({
+        count: 1,
+        serviceName: 'svc',
+        navigationProps,
+        ebt: { action: 'viewAlerts', element: 'serviceFlyoutAlertsBadge' },
+      });
+
+      const badge = screen.getByTestId('apmAlertsBadge');
+      expect(badge).toHaveAttribute('data-ebt-action', 'viewAlerts');
+      expect(badge).toHaveAttribute('data-ebt-element', 'serviceFlyoutAlertsBadge');
+    });
+
+    it('renders as a non-interactive badge when the locator returns no href', () => {
+      const { navigationProps } = makeNavigationProps(jest.fn().mockReturnValue(undefined));
+      renderBadge({ count: 2, serviceName: 'svc', navigationProps });
+
+      const badge = screen.getByTestId('apmAlertsBadge');
+      expect(badge.tagName.toLowerCase()).not.toBe('a');
+      expect(badge.tagName.toLowerCase()).not.toBe('button');
+    });
   });
 });

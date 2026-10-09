@@ -26,6 +26,7 @@ describe('<ManagePrivateLocations />', () => {
     jest.spyOn(permissionsHooks, 'useCanManagePrivateLocation').mockReturnValue(true);
     jest.spyOn(permissionsHooks, 'useFleetPermissions').mockReturnValue({
       canReadAgentPolicies: true,
+      canReadAgents: true,
       canSaveIntegrations: false,
       canCreateAgentPolicies: false,
     });

@@ -8,13 +8,14 @@
  */
 
 import { EuiPageTemplate } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderBadge, AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import type { Template } from '@kbn/workflows-library';
-import { CatalogBrowser, useLibraryEnabled } from '@kbn/workflows-ui';
+import type { WorkflowsImportRouteState } from '@kbn/workflows-ui';
+import { CatalogBrowser, UploadTemplateFlyout, useLibraryEnabled } from '@kbn/workflows-ui';
 import { PLUGIN_ID } from '../../../common';
 import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
@@ -30,6 +31,10 @@ const experimentalBadgeLabel = i18n.translate('workflowsManagement.libraryPage.e
 
 const contributeLinkLabel = i18n.translate('workflowsManagement.libraryPage.contributeLink', {
   defaultMessage: 'Contribute a template',
+});
+
+const createFromFileLabel = i18n.translate('workflowsManagement.libraryPage.createFromFile', {
+  defaultMessage: 'Import template',
 });
 
 // The Workflow Template Library ships from `elastic/workflows`; the header
@@ -49,6 +54,10 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
 
   useWorkflowsBreadcrumbs(libraryPageTitle);
 
+  const [isUploadFlyoutOpen, setIsUploadFlyoutOpen] = useState(false);
+  const openUploadFlyout = useCallback(() => setIsUploadFlyoutOpen(true), []);
+  const closeUploadFlyout = useCallback(() => setIsUploadFlyoutOpen(false), []);
+
   const headerBadges = useMemo<AppHeaderBadge[]>(
     () => [
       {
@@ -62,19 +71,27 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
 
   const headerMenu = useMemo<AppHeaderMenu>(
     () => ({
+      primaryActionItem: {
+        id: 'contributeTemplate',
+        order: 1,
+        label: contributeLinkLabel,
+        iconType: 'logoGithub',
+        href: CONTRIBUTE_TEMPLATE_URL,
+        target: '_blank',
+        testId: 'workflowLibraryContributeLink',
+      },
       items: [
         {
-          id: 'contributeTemplate',
-          order: 1,
-          label: contributeLinkLabel,
-          iconType: 'logoGithub',
-          href: CONTRIBUTE_TEMPLATE_URL,
-          target: '_blank',
-          testId: 'workflowLibraryContributeLink',
+          id: 'createFromFile',
+          label: createFromFileLabel,
+          iconType: 'importAction',
+          overflow: true,
+          run: openUploadFlyout,
+          testId: 'workflowLibraryCreateFromFileButton',
         },
       ],
     }),
-    []
+    [openUploadFlyout]
   );
 
   const handleSelect = useCallback(
@@ -82,6 +99,21 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
       application.navigateToApp(PLUGIN_ID, {
         deepLinkId: WorkflowsPageName.library,
         path: template.slug,
+      });
+    },
+    [application]
+  );
+
+  // Navigate to the import page with the uploaded YAML carried on history state
+  // (never in the URL). A reload there loses the state and falls back to the
+  // catalog. The file is processed entirely client-side (see `UploadTemplateFlyout`).
+  const handleFileUploaded = useCallback(
+    (customTemplateYaml: string) => {
+      setIsUploadFlyoutOpen(false);
+      application.navigateToApp(PLUGIN_ID, {
+        deepLinkId: WorkflowsPageName.library,
+        path: 'import',
+        state: { customTemplateYaml } satisfies WorkflowsImportRouteState,
       });
     },
     [application]
@@ -104,6 +136,9 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
       <EuiPageTemplate.Section paddingSize="m" grow>
         <CatalogBrowser onSelect={handleSelect} />
       </EuiPageTemplate.Section>
+      {isUploadFlyoutOpen ? (
+        <UploadTemplateFlyout onClose={closeUploadFlyout} onUploaded={handleFileUploaded} />
+      ) : null}
     </EuiPageTemplate>
   );
 });

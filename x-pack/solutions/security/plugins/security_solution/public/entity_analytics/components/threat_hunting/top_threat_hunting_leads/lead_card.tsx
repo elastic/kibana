@@ -27,7 +27,7 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => {
     <EuiCard
       title={
         <EuiToolTip content={lead.title} anchorClassName="eui-textTruncate" display="block">
-          <span>{lead.title}</span>
+          <span tabIndex={0}>{lead.title}</span>
         </EuiToolTip>
       }
       titleElement="h5"
@@ -50,7 +50,7 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => {
             css={{
               overflowWrap: 'anywhere',
               display: '-webkit-box',
-              WebkitLineClamp: 3,
+              WebkitLineClamp: 4,
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden',
             }}

@@ -22,6 +22,7 @@ import {
   isNativeFunctionCallingSupported,
   handleConnectorStreamResponse,
   handleConnectorDataResponse,
+  ensureToolsWhenHistoryHasToolUse,
 } from '../../utils';
 import type { OpenAIRequest } from './types';
 import { messagesToOpenAI, toolsToOpenAI, toolChoiceToOpenAI } from './to_openai';
@@ -70,7 +71,8 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
       };
     } else {
-      const openAiTools = toolsToOpenAI(tools);
+      const toolsForRequest = ensureToolsWhenHistoryHasToolUse({ tools, messages });
+      const openAiTools = toolsToOpenAI(toolsForRequest);
       const hasTools = Array.isArray(openAiTools) && openAiTools.length > 0;
 
       request = {
@@ -78,11 +80,12 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         ...getTemperatureIfValid(temperature, { connector, modelName }),
         model: modelName,
         messages: messagesToOpenAI({ system, messages }),
-        // Some OpenAI-compatible gateways (notably for Anthropic models) reject tool calling
-        // params when the tools list is empty. Only forward tools/tool_choice when tools exist.
         ...(hasTools
           ? {
-              tool_choice: toolChoiceToOpenAI(toolChoice, { connector, tools }),
+              tool_choice: toolChoiceToOpenAI(toolChoice, {
+                connector,
+                tools: toolsForRequest,
+              }),
               tools: openAiTools,
             }
           : {}),
@@ -114,7 +117,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       return connectorResult$.pipe(
         handleConnectorStreamResponse({ processStream: eventSourceStreamIntoObservable }),
         processOpenAIStream(),
-        emitTokenCountEstimateIfMissing({ request }),
+        emitTokenCountEstimateIfMissing({ request, logger }),
         useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : passThrough
       );
     } else {
@@ -123,7 +126,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
           parseData: (data) => data as OpenAI.ChatCompletion,
         }),
         processOpenAIResponse(),
-        emitTokenCountEstimateIfMissing({ request }),
+        emitTokenCountEstimateIfMissing({ request, logger }),
         useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : passThrough
       );
     }

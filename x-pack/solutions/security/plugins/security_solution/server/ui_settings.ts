@@ -53,8 +53,10 @@ import {
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+  ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
   ENABLE_ASSET_INVENTORY_SETTING,
   ENABLE_CLOUD_CONNECTOR_SETTING,
+  ENABLE_SIEM_READINESS_SETTING,
   ENABLE_DE_HEALTH_UI_SETTING,
   ENABLE_NEW_FLYOUT_SETTING,
   ENABLE_NEWS_FEED_SETTING,
@@ -77,6 +79,53 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
 
 type SettingsConfig = Record<string, UiSettingsParams<unknown>>;
+
+/**
+ * Definition for the per-space `securitySolution:enableAttackDiscoveryWorkflows`
+ * Advanced Setting.
+ *
+ * Registered synchronously as part of the `securityUiSettings` object, positioned
+ * immediately after `enableAlertsAndAttacksAlignment`. The Advanced Settings UI
+ * renders settings in server registration order (the `order` field is not honored
+ * by the current management UI), so registering it here — rather than via a
+ * deferred continuation — is what keeps it in the expected position.
+ *
+ * The toggle is always visible and defaults to `false`. Ideally it would be
+ * hidden when the global `attackDiscoveryWorkflowsEnabled` feature flag is off,
+ * but two platform constraints prevent that: (1) UI settings must be registered
+ * synchronously during plugin setup, and feature-flag evaluation requires
+ * `FeatureFlagsStart` (only available after setup completes); (2) the Advanced
+ * Settings page has no API to show/hide individual settings based on feature
+ * flags. The FF is only ever `false` when an administrator disables it globally;
+ * in that case the toggle is a harmless noop. Behavior is gated by `FF &&
+ * setting` at every server and client read site (see `isWorkflowsEnabledForSpace`).
+ *
+ * @security_note This setting is enforced server-side: `assertWorkflowsEnabled`
+ * (which calls `isWorkflowsEnabledForSpace`) returns 404 on every internal AD
+ * route when the setting is off, regardless of the caller's privilege level.
+ * The real security boundary for *who may run* Attack Discovery is role-based
+ * privileges (`securitySolution-attackDiscoveryAll` + `workflowsManagement:*`),
+ * enforced separately.  The per-space toggle controls *whether the feature is
+ * active for that space*; RBAC controls *who may use it*.
+ */
+export const attackDiscoveryWorkflowsSetting: UiSettingsParams<boolean> = {
+  name: i18n.translate('xpack.securitySolution.uiSettings.enableAttackDiscoveryWorkflows.name', {
+    defaultMessage: 'Attack Discovery Workflows',
+  }),
+  description: i18n.translate(
+    'xpack.securitySolution.uiSettings.enableAttackDiscoveryWorkflows.description',
+    {
+      defaultMessage:
+        'Enable Attack Discovery Workflows for this space. When enabled, Attack Discovery uses orchestrated workflows for alert retrieval and analysis. Has no effect when Attack Discovery Workflows are disabled at the deployment level.',
+    }
+  ),
+  type: 'boolean',
+  value: false,
+  category: [APP_ID],
+  requiresPageReload: true,
+  schema: schema.boolean(),
+  solutionViews: ['classic', 'security'],
+};
 
 /**
  * This helper is used to preserve settings order in the UI
@@ -240,6 +289,12 @@ export const initUiSettings = (
         solutionViews: ['classic', 'security'],
       },
     }),
+    // Registered here (immediately after `enableAlertsAndAttacksAlignment`, before
+    // `enableAssetInventory`) so it renders in that position: the Advanced Settings
+    // UI displays settings in server registration order, not by the `order` field.
+    // When `enableAlertsAndAttacksAlignment` is disabled its entry is absent, so this
+    // setting falls into the same slot, immediately before `enableAssetInventory`.
+    [ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING]: attackDiscoveryWorkflowsSetting,
     [ENABLE_ASSET_INVENTORY_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
         defaultMessage: 'Enable Security Asset Inventory',
@@ -248,6 +303,25 @@ export const initUiSettings = (
         'xpack.securitySolution.uiSettings.enableAssetInventoryDescription',
         {
           defaultMessage: `Enable the Asset Inventory experience within the Security Solution. When enabled, you can access the new Inventory feature through the Security Solution navigation. Note: Disabling this setting will not disable the Entity Store or clear persistent Entity metadata. To manage or disable the Entity Store, please visit the Entity Store Management page.`,
+        }
+      ),
+      type: 'boolean',
+      value: false,
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+      solutionViews: ['classic', 'security'],
+      technicalPreview: true,
+    },
+    [ENABLE_SIEM_READINESS_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableSiemReadinessLabel', {
+        defaultMessage: 'Enable SIEM Readiness',
+      }),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.enableSiemReadinessDescription',
+        {
+          defaultMessage:
+            'Enable the SIEM Readiness experience within the Security Solution. When enabled, you can access SIEM Readiness from the Launchpad menu.',
         }
       ),
       type: 'boolean',
@@ -335,7 +409,7 @@ export const initUiSettings = (
           }
         ),
         type: 'boolean',
-        value: false,
+        value: true,
         category: [APP_ID],
         requiresPageReload: true,
         schema: schema.boolean(),

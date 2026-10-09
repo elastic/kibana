@@ -63,6 +63,7 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/management-settings-ids'
   - '@kbn/core-ui-settings-server'
+  - '@kbn/es-errors'
 tags:
   - plugin
   - prod

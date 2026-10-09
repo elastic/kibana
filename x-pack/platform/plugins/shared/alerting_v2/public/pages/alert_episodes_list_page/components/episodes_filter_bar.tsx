@@ -20,7 +20,7 @@ import {
   EuiSuperDatePicker,
   useEuiTheme,
 } from '@elastic/eui';
-import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import type { TimeRange } from '@kbn/es-query';
 import { AlertEpisodesStatusFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/status_filter';
 import { AlertEpisodesSeverityFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/severity_filter';
@@ -75,8 +75,8 @@ export const EpisodesFilterBar = ({
     [queryStringInput]
   );
 
-  const onStatusChange = useCallback(
-    (status: string | undefined) => {
+  const onStatusesChange = useCallback(
+    (status: string[] | undefined) => {
       onFilterChange((prev) => ({ ...prev, status }));
     },
     [onFilterChange]
@@ -137,8 +137,8 @@ export const EpisodesFilterBar = ({
           <EuiFlexItem grow={false}>
             <EuiFilterGroup compressed>
               <AlertEpisodesStatusFilter
-                selectedStatus={filterState.status}
-                onStatusChange={onStatusChange}
+                selectedStatuses={filterState.status}
+                onStatusesChange={onStatusesChange}
                 data-test-subj="episodesFilterBar-status"
               />
 

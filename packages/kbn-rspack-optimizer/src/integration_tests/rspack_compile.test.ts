@@ -9,7 +9,6 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import Os from 'os';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { rspack } from '@rspack/core';
@@ -52,6 +51,39 @@ function createFixturePlugin(tmpDir: string): { pluginDir: string; pluginId: str
       `export const plugin = () => ({ setup: () => {}, start: () => {} });`,
       `export const MY_CONSTANT = 42;`,
       `export const SomeComponent = () => 'hello';`,
+    ].join('\n') + '\n'
+  );
+
+  return { pluginDir, pluginId };
+}
+
+function createEmotionFixturePlugin(tmpDir: string): { pluginDir: string; pluginId: string } {
+  const pluginId = 'emotionFixturePlugin';
+  const pluginDir = Path.join(tmpDir, 'emotion_fixture_plugin');
+
+  Fs.mkdirSync(Path.join(pluginDir, 'public'), { recursive: true });
+
+  Fs.writeFileSync(
+    Path.join(pluginDir, 'kibana.jsonc'),
+    JSON.stringify({
+      type: 'plugin',
+      id: '@kbn/emotion-fixture-plugin',
+      owner: { name: 'test', githubTeam: 'test' },
+      plugin: {
+        id: pluginId,
+        browser: true,
+      },
+    })
+  );
+
+  Fs.writeFileSync(
+    Path.join(pluginDir, 'public', 'index.ts'),
+    [
+      `import styled from '@emotion/styled';`,
+      ``,
+      'const Parent = styled.div`color: red;`;',
+      'export const Child = styled.div`${Parent}:hover & { color: blue; }`;',
+      `export const plugin = () => ({ setup: () => {}, start: () => {} });`,
     ].join('\n') + '\n'
   );
 
@@ -119,7 +151,9 @@ describe('rspack compile integration', () => {
     let tmpDir: string;
 
     beforeEach(() => {
-      tmpDir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'kbn-rspack-integration-'));
+      const tmpRoot = Path.join(REPO_ROOT, 'target', 'kbn-rspack-integration');
+      Fs.mkdirSync(tmpRoot, { recursive: true });
+      tmpDir = Fs.mkdtempSync(Path.join(tmpRoot, 'test-'));
     });
 
     afterEach(() => {
@@ -178,6 +212,59 @@ describe('rspack compile integration', () => {
       expect(bundleContent).toMatch(/MY_CONSTANT/);
       expect(bundleContent).toMatch(/SomeComponent/);
     }, 120_000);
+
+    it.each([
+      { dist: false, mode: 'development' },
+      { dist: true, mode: 'production' },
+    ])(
+      'compiles Emotion component selectors with injected targets in $mode mode',
+      async ({ dist }) => {
+        const { pluginDir, pluginId } = createEmotionFixturePlugin(tmpDir);
+        const outputDir = Path.join(tmpDir, dist ? 'output-emotion-dist' : 'output-emotion-dev');
+
+        const config = await createExternalPluginConfig({
+          repoRoot: REPO_ROOT,
+          pluginDir,
+          pluginId,
+          outputDir,
+          dist,
+          watch: false,
+          cache: false,
+        });
+
+        const stats = await new Promise<any>((resolve, reject) => {
+          const compiler = rspack(config);
+          compiler.run((err, s) => {
+            compiler.close(() => {
+              if (err) return reject(err);
+              resolve(s);
+            });
+          });
+        });
+
+        expect(stats).toBeDefined();
+        if (stats.hasErrors()) {
+          throw new Error(
+            JSON.stringify(stats.toJson({ all: false, errors: true }).errors, null, 2)
+          );
+        }
+
+        const mainBundle = Fs.readdirSync(outputDir).find(
+          (f) => f.includes(pluginId) && f.endsWith('.js')
+        );
+        expect(mainBundle).toBeDefined();
+
+        const bundleContent = Fs.readFileSync(Path.join(outputDir, mainBundle!), 'utf-8');
+        const emotionTargets = bundleContent.match(/target:\s*"e[a-z0-9]+"/g) ?? [];
+        expect(emotionTargets).toHaveLength(2);
+        if (dist) {
+          expect(config.mode).toBe('production');
+          expect(config.optimization?.minimize).toBe(true);
+          expect(bundleContent).not.toContain('const Parent');
+        }
+      },
+      120_000
+    );
 
     it('compiles a fixture plugin in production mode with minification', async () => {
       const { pluginDir, pluginId } = createFixturePlugin(tmpDir);

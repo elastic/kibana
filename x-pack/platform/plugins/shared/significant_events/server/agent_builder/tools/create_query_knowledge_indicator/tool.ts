@@ -67,8 +67,15 @@ export function createQueryKnowledgeIndicatorTool({
       Use this tool when the conversation discovers a new detection query that should be saved for
       future investigations.
     `,
+    annotations: {
+      title: 'Create Query Knowledge Indicator',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     schema: createQueryKnowledgeIndicatorSchema,
-    tags: ['streams', 'significant_events'],
+    tags: ['streams', 'significant-events'],
     confirmation: {
       askUser: 'always',
       getConfirmation: async ({ toolParams }) => {

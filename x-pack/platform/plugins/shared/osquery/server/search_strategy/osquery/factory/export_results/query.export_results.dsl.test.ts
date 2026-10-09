@@ -25,19 +25,20 @@ describe('buildExportResultsQuery', () => {
     it('falls back to the broad osquery result index when no integrationNamespaces are provided', () => {
       const dsl = buildExportResultsQuery({ ...baseOptions, ccsEnabled: false });
 
-      expect(dsl.index).toBe('logs-osquery_manager.result*');
+      expect(dsl.index).toEqual(['logs-osquery_manager.result*']);
     });
 
     it('builds namespace-specific index patterns from integrationNamespaces', () => {
       const dsl = buildExportResultsQuery({
         ...baseOptions,
-        integrationNamespaces: ['default', 'fleet-ns'],
+        integrationNamespaces: ['default', 'team.a'],
         ccsEnabled: false,
       });
 
-      expect(dsl.index).toBe(
-        'logs-osquery_manager.result-default,logs-osquery_manager.result-fleet-ns'
-      );
+      expect(dsl.index).toEqual([
+        'logs-osquery_manager.result-default',
+        'logs-osquery_manager.result-team.a',
+      ]);
     });
 
     it('uses the fallback index when integrationNamespaces is an empty array', () => {
@@ -47,7 +48,7 @@ describe('buildExportResultsQuery', () => {
         ccsEnabled: false,
       });
 
-      expect(dsl.index).toBe('logs-osquery_manager.result*');
+      expect(dsl.index).toEqual(['logs-osquery_manager.result*']);
     });
   });
 
@@ -92,11 +93,11 @@ describe('buildExportResultsQuery', () => {
       const dsl = buildExportResultsQuery(baseOptions);
       const queryStr = JSON.stringify(dsl.query);
 
-      // The baseFilter value should appear scoped (not as a top-level OR)
+      // The baseFilter value should appear within the composed query
       expect(queryStr).toContain('test-action');
     });
 
-    it('prevents KQL OR gate-bypass: malicious kuery cannot escape baseFilter scope', () => {
+    it('keeps baseFilter and a user kuery containing OR in separate AND-combined groups', () => {
       const dsl = buildExportResultsQuery({
         ...baseOptions,
         baseFilter: 'action_id: "abc"',
@@ -109,7 +110,7 @@ describe('buildExportResultsQuery', () => {
       // The base filter value must be present
       expect(queryStr).toContain('"abc"');
 
-      // The top-level bool must not have a should clause (would allow OR-escape)
+      // The top-level bool must not have a should clause; each part stays in its own group
       const boolQuery = dsl.query as { bool?: { should?: unknown } } | undefined;
       expect(boolQuery?.bool?.should).toBeUndefined();
     });

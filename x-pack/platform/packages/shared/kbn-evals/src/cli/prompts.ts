@@ -7,7 +7,7 @@
 
 import Fs from 'fs';
 import Path from 'path';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import inquirer from 'inquirer';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { resolveEvalSuites, type EvalSuiteDefinition } from './suites';
@@ -56,7 +56,7 @@ export const parseConnectorsFromKibanaDevYml = (repoRoot: string): AvailableConn
 
   try {
     const raw = Fs.readFileSync(configPath, 'utf-8');
-    const parsed = load(raw) as Record<string, unknown> | null;
+    const parsed = parse(raw) as Record<string, unknown> | null;
     if (!parsed) return [];
 
     const preconfigured = parsed['xpack.actions.preconfigured'] as
@@ -198,7 +198,7 @@ export const readLocalEsUrl = (repoRoot: string): string | undefined => {
 
   try {
     const raw = Fs.readFileSync(configPath, 'utf-8');
-    const parsed = load(raw) as Record<string, unknown> | null;
+    const parsed = parse(raw) as Record<string, unknown> | null;
     if (!parsed) return undefined;
 
     const nested = parsed.elasticsearch as Record<string, unknown> | undefined;

@@ -6,6 +6,7 @@
  */
 
 export { EVENTS_DATA_STREAM, eventsDataStream, eventsMappings } from './data_stream';
+export { DEFAULT_EVENTS_SEARCH_FROM, DEFAULT_EVENTS_SEARCH_TO } from './constants';
 export type { SignificantEvent, StoredEvent } from './data_stream';
 export { EventClient } from './event_client';
 export type { EventDataStreamClient } from './event_client';

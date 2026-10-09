@@ -55,7 +55,7 @@ import {
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
 import { DEFAULT_EPISODES_TABLE_SORT } from './utils/episodes_table_config';
 import { useEpisodesTableConfig } from './hooks/use_episodes_table_config';
-import { ExperimentalBadge } from '../../components/experimental_badge';
+import { experimentalBadge } from '../../components/experimental_badge';
 import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -422,8 +422,8 @@ export const AlertEpisodesListPage = () => {
       <AppHeader
         sticky={false}
         title={i18n.EPISODES_LIST_PAGE_TITLE}
-        titleAppend={<ExperimentalBadge />}
-        padding={{ bleed: 'm' }}
+        badges={[experimentalBadge]}
+        spacing="bleed"
         menu={episodesMenu}
       />
       <EuiSpacer size="m" />

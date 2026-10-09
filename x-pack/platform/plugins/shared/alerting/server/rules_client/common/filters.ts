@@ -6,7 +6,7 @@
  */
 
 import type { KueryNode } from '@kbn/es-query';
-import { nodeBuilder } from '@kbn/es-query';
+import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import { RULE_SAVED_OBJECT_TYPE } from '../..';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
@@ -70,6 +70,17 @@ export const buildTagsFilter = (tags?: string[], type = RULE_SAVED_OBJECT_TYPE) 
   }
 
   return buildFilter({ filters: tags, field: 'tags', operator: 'or', type });
+};
+
+/**
+ * Matches Fleet / alerting v1 rule templates: `engine: "v1"` or no `engine` field.
+ * Prefer this allowlist over excluding `"v2"` so future engine values stay out of v1 APIs.
+ */
+export const buildAlertingV1RuleTemplateEngineFilter = (
+  type = RULE_TEMPLATE_SAVED_OBJECT_TYPE
+): KueryNode => {
+  const field = `${type}.attributes.engine`;
+  return fromKueryExpression(`${field}: v1 or not ${field}: *`);
 };
 
 /**

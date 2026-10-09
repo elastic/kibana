@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/278387
+issues:
+- https://github.com/elastic/security-team/issues/18227
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+title: Fix change history writes stopping after a single Elasticsearch error
+description: Transient Elasticsearch errors during change history bulk logging are retried correctly instead of being treated as permanent failures.

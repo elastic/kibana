@@ -16,7 +16,9 @@ import { NoIndexEmptyPage } from '../../components/alerts/empty_pages/no_index_e
 import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
 import { UserUnauthenticatedEmptyPage } from '../../components/alerts/empty_pages/user_unauthenticated_empty_page';
 import * as i18n from './translations';
-import { useSignalHelpers } from '../../../sourcerer/containers/use_signal_helpers';
+import { PageScope } from '../../../data_view_manager/constants';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useSignalHelpers } from '../../hooks/use_signal_helpers';
 import { NeedAdminForUpdateRulesCallOut } from '../../../detection_engine/rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { MissingDetectionsPrivilegesCallOut } from '../../components/callouts/missing_detections_privileges_callout';
 import { NoPrivileges } from '../../../common/components/no_privileges';
@@ -34,7 +36,8 @@ export const AlertsPage = memo(() => {
   const { hasAlertsRead: canReadAlerts } = useAlertsPrivileges();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
-  const { signalIndexNeedsInit } = useSignalHelpers();
+  const { dataView, status } = useDataView(PageScope.alerts);
+  const { signalIndexNeedsInit } = useSignalHelpers(dataView, status);
 
   const loading: boolean = useMemo(
     () => userInfoLoading || listsConfigLoading,
@@ -96,7 +99,7 @@ export const AlertsPage = memo(() => {
           docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges}
         />
       ) : (
-        <Wrapper />
+        <Wrapper dataView={dataView} status={status} />
       )}
     </>
   );

@@ -371,7 +371,7 @@ export const CollectorDetailHealth: React.FC<CollectorDetailHealthProps> = ({
     return (
       <EuiCallOut
         color="warning"
-        iconType="offline"
+        iconType="wifiSlash"
         announceOnMount={false}
         title={i18n.translate('xpack.fleet.otelUi.collectorDetail.health.offlineTitle', {
           defaultMessage: 'Collector is not active',

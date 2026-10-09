@@ -8,14 +8,18 @@
 export const queryKeys = {
   datasets: {
     all: ['evals', 'datasets'] as const,
+    lists: ['evals', 'datasets', 'list'] as const,
     list: (filters?: {
       page?: number;
       perPage?: number;
       search?: string;
+      tags?: string[];
+      maturity?: string[];
       sortField?: string;
       sortOrder?: string;
     }) => ['evals', 'datasets', 'list', filters] as const,
     detail: (datasetId: string) => ['evals', 'datasets', 'detail', datasetId] as const,
+    tagSuggestions: () => ['evals', 'datasets', 'tagSuggestions'] as const,
   },
   remotes: {
     all: ['evals', 'remotes'] as const,

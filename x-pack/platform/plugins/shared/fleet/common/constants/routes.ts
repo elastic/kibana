@@ -65,6 +65,7 @@ export const EPM_API_ROUTES = {
   REAUTHORIZE_TRANSFORMS: `${EPM_PACKAGES_ONE}/transforms/authorize`,
   REVIEW_UPGRADE_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/review_upgrade`,
   ILM_POLICIES_PATTERN: `${INTERNAL_ROOT}/epm/ilm_policies`,
+  NAMESPACE_PREFLIGHT_CHECK_PATTERN: `${INTERNAL_ROOT}/epm/packages/{pkgName}/namespace_customization/_preflight_check`,
 };
 
 // Data stream API routes
@@ -122,6 +123,11 @@ export const CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES = {
   BY_CONNECTOR_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/connector/{connectorId}`,
   UPDATE_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/{id}`,
   DELETE_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/{id}`,
+};
+
+// IaC Provisioner API routes
+export const IAC_PROVISIONER_API_ROUTES = {
+  RENDER_TEMPLATE_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/render_template`,
 };
 
 // Kubernetes Manifest API routes
@@ -253,6 +259,7 @@ export const ENROLLMENT_API_KEY_ROUTES = {
 export const UNINSTALL_TOKEN_ROUTES = {
   LIST_PATTERN: `${API_ROOT}/uninstall_tokens`,
   INFO_PATTERN: `${API_ROOT}/uninstall_tokens/{uninstallTokenId}`,
+  ROTATE_PATTERN: `${API_ROOT}/uninstall_tokens/{agentPolicyId}/rotate`,
 };
 
 // Agents setup API routes

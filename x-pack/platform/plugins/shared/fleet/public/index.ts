@@ -105,6 +105,10 @@ export const AvailablePackagesHook = () => {
     './applications/integrations/sections/epm/screens/home/hooks/use_available_packages'
   );
 };
+export const LocalSearchHook = () => {
+  return import('./applications/integrations/hooks/use_local_search');
+};
+export type { UseLocalSearchType } from './applications/integrations/hooks/use_local_search';
 
 export const LazyPackageCard = lazy(() =>
   import('./applications/integrations/sections/epm/components/package_card').then((module) => ({
@@ -148,3 +152,21 @@ export {
   AWS_AUTH_TYPE_STATIC_KEYS_CARD_TEST_SUBJ,
   AWS_AUTH_TYPE_TEMPORARY_KEYS_CARD_TEST_SUBJ,
 } from './components/cloud_connector/aws_connect_setup/test_subjects';
+
+// AWS Static Keys Form — standalone credential form for cross-plugin use
+export const LazyAwsStaticKeysForm = lazy(() =>
+  import('./components/cloud_connector/aws_connect_setup/aws_static_keys_form').then((module) => ({
+    default: module.AwsStaticKeysForm,
+  }))
+);
+export type { AwsStaticKeysFormProps } from './components/cloud_connector/aws_connect_setup/aws_static_keys_form';
+
+// AWS Identity Federation Setup — connector creation/selection for cross-plugin use
+export const LazyAwsIdentityFederationSetup = lazy(() =>
+  import('./components/cloud_connector/aws_connect_setup/aws_identity_federation_setup').then(
+    (module) => ({ default: module.AwsIdentityFederationSetup })
+  )
+);
+export type { AwsIdentityFederationSetupProps } from './components/cloud_connector/aws_connect_setup/aws_identity_federation_setup';
+
+export { getAnyCloudConnectorIacTemplateUrl } from './components/cloud_connector/utils';

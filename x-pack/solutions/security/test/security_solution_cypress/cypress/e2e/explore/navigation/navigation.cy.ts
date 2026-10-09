@@ -40,6 +40,7 @@ import {
   verifyNavigatesFromDashboardLandingTo,
   navigateFromHeaderTo,
 } from '../../../tasks/security_header';
+import { enableSiemReadiness } from '../../../tasks/api_calls/kibana_advanced_settings';
 
 import {
   ALERTS_URL,
@@ -101,6 +102,11 @@ import {
 } from '../../../screens/kibana_navigation';
 
 describe('top-level navigation common to all pages in the Security app', { tags: '@ess' }, () => {
+  before(() => {
+    // SIEM Readiness is behind an Advanced Setting (default off); enable it for Launchpad nav coverage.
+    enableSiemReadiness();
+  });
+
   beforeEach(() => {
     login();
     visitWithTimeRange(TIMELINES_URL);

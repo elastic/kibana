@@ -1,0 +1,7 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-attack-discovery-agent-builder",
+  "owner": "@elastic/security-genai-research-and-development",
+  "group": "security",
+  "visibility": "private"
+}

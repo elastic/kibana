@@ -18,14 +18,16 @@ import type { Logger } from '@kbn/logging';
 import semverGt from 'semver/functions/gt';
 import semverSatisfies from 'semver/functions/satisfies';
 
-import { escapeKuery } from '@kbn/es-query';
-
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
   AGENT_POLICY_INDEX,
 } from '../../../../common';
 import { AGENT_POLICY_VERSION_SEPARATOR } from '../../../../common/constants/agent_policy';
+import {
+  buildVersionVariantsKueryFragment,
+  buildVersionVariantsEsFilter,
+} from '../../../../common/services/version_specific_policies_utils';
 import type { RollbackResult } from '../../package_policy_service';
 import { getAgentsByKuery, reassignAgents } from '../../agents';
 
@@ -558,7 +560,7 @@ async function cleanupVersionSpecificPoliciesAfterRollback(
     );
     if (stillHasVersionConditions) continue;
 
-    const variantKuery = `policy_id:${escapeKuery(parentId)}${AGENT_POLICY_VERSION_SEPARATOR}*`;
+    const variantKuery = buildVersionVariantsKueryFragment(parentId);
     const { total: variantAgentCount } = await getAgentsByKuery(esClient, soClient, {
       kuery: variantKuery,
       showInactive: false,
@@ -594,7 +596,7 @@ async function cleanupVersionSpecificPoliciesAfterRollback(
       await esClient.deleteByQuery({
         index: AGENT_POLICY_INDEX,
         ignore_unavailable: true,
-        query: { prefix: { policy_id: `${parentId}${AGENT_POLICY_VERSION_SEPARATOR}` } },
+        query: buildVersionVariantsEsFilter(parentId),
         refresh: true,
       });
     }

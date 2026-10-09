@@ -164,7 +164,7 @@ function CanvasZoomControls({
       >
         <EuiToolTip content={zoomInLabel} position="left" disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="plusInCircle"
+            iconType="plusCircle"
             aria-label={zoomInLabel}
             color="text"
             size="s"
@@ -174,7 +174,7 @@ function CanvasZoomControls({
         </EuiToolTip>
         <EuiToolTip content={zoomOutLabel} position="left" disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="minusInCircle"
+            iconType="minusCircle"
             aria-label={zoomOutLabel}
             color="text"
             size="s"

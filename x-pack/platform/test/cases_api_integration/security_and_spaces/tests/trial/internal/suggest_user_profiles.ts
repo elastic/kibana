@@ -196,7 +196,8 @@ export default function ({ getService }: FtrProviderContext) {
       `);
     });
 
-    describe('user with both security and observability privileges', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/262485
+    describe.skip('user with both security and observability privileges', () => {
       const obsAndSecRole: Role = {
         name: 'obsAndSecRole',
         privileges: {

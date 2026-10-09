@@ -45,6 +45,7 @@ export const useTemplateHeaderBreadcrumbs = () => {
   const {
     services: {
       application: { navigateToApp },
+      chrome,
     },
   } = useKibanaContextForPlugin();
 
@@ -59,6 +60,11 @@ export const useTemplateHeaderBreadcrumbs = () => {
     }
     e.preventDefault();
   };
+
+  // The compatibility Back only renders when Chrome Next is active in the project layout.
+  if (chrome.next.isEnabled && chrome.getChromeStyle() === 'project') {
+    return { breadcrumbs: [] satisfies EuiBreadcrumbsProps['breadcrumbs'] };
+  }
 
   const breadcrumbs: EuiBreadcrumbsProps['breadcrumbs'] =
     // If there is a state object in location, it's persisted in case the page is opened in a new tab or after page refresh

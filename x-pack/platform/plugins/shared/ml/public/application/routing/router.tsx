@@ -40,10 +40,6 @@ export interface MlRoute {
   title?: string;
   render(props: MlRouteProps, deps: PageDependencies): JSX.Element;
   breadcrumbs: ChromeBreadcrumb[];
-  /**
-   * Indicated if page contains a global date picker.
-   */
-  enableDatePicker?: boolean;
   'data-test-subj'?: string;
   actionMenu?: React.ReactNode;
   disabled?: boolean;
@@ -56,7 +52,6 @@ export interface PageProps {
 
 export interface PageDependencies {
   history: AppMountParameters['history'];
-  setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
 }
 

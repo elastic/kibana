@@ -103,6 +103,13 @@ export const generateLeadsTool = (
       'Lead generation is asynchronous — this tool starts the job and returns immediately; use list_leads to check for new results after it completes.',
     schema,
     tags: ['security', 'entity-analytics', 'leads'],
+    annotations: {
+      title: 'Generate Leads',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: ({ request }) =>

@@ -7,17 +7,28 @@
 
 export { entityRiskScoreTool, SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from './entity_risk_score_tool';
 export { getEntityTool, SECURITY_GET_ENTITY_TOOL_ID } from './get_entity_tool';
+export { getEntityGraphTool, SECURITY_GET_ENTITY_GRAPH_TOOL_ID } from './get_entity_graph_tool';
+export {
+  getEntityRiskScoreHistoryTool,
+  SECURITY_GET_ENTITY_RISK_SCORE_HISTORY_TOOL_ID,
+} from './risk_score_history/get_entity_risk_score_history_tool';
+export {
+  entityRelationshipHistoryTool,
+  SECURITY_ENTITY_RELATIONSHIP_HISTORY_TOOL_ID,
+} from './entity_relationship_history_tool';
 export { searchEntitiesTool, SECURITY_SEARCH_ENTITIES_TOOL_ID } from './search_entities_tool';
 export {
   addEntitiesToWatchlistTool,
   createWatchlistTool,
   deleteWatchlistTool,
   listWatchlistsTool,
+  getWatchlistIdTool,
   removeEntitiesFromWatchlistTool,
   SECURITY_ADD_ENTITIES_TO_WATCHLIST_TOOL_ID,
   SECURITY_CREATE_WATCHLIST_TOOL_ID,
   SECURITY_DELETE_WATCHLIST_TOOL_ID,
   SECURITY_LIST_WATCHLISTS_TOOL_ID,
+  SECURITY_GET_WATCHLIST_ID_TOOL_ID,
   SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
   SECURITY_UPDATE_WATCHLIST_TOOL_ID,
   updateWatchlistTool,

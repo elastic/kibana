@@ -15,6 +15,10 @@ import {
 import { servers as uiamConfig } from '../../uiam_local/serverless/security_complete.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
 
+const isSecurityTestEndpointsPluginPath = (arg: string) =>
+  arg.startsWith('--plugin-path=') &&
+  arg.includes('x-pack/platform/test/security_functional/plugins/test_endpoints');
+
 export const servers: ScoutServerConfig = {
   ...uiamConfig,
   servers: {
@@ -30,10 +34,23 @@ export const servers: ScoutServerConfig = {
     uiam: true,
     cps: true,
   },
+  esTestCluster: {
+    ...uiamConfig.esTestCluster,
+    serverArgs: [
+      ...uiamConfig.esTestCluster.serverArgs,
+      // Feature flags to enable CPS compatibility for anomaly detection jobs and transforms.
+      'es.transform_cross_project_feature_flag_enabled=true',
+      'es.ml_cross_project_feature_flag_enabled=true',
+    ],
+  },
   kbnTestServer: {
     ...uiamConfig.kbnTestServer,
     serverArgs: [
-      ...uiamConfig.kbnTestServer.serverArgs,
+      // The inherited UIAM config adds securityTestEndpoints for API tests. CPS local
+      // manual/UI testing does not use it, and loading its browser plugin can break boot.
+      ...uiamConfig.kbnTestServer.serverArgs.filter(
+        (arg) => !isSecurityTestEndpointsPluginPath(arg)
+      ),
       '--cps.cpsEnabled=true',
       '--xpack.alerting.rules.apiKeyType=uiam',
       // UIAM API keys for task-manager: required for background tasks to be eligible

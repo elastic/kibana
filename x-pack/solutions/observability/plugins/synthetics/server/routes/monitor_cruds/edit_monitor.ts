@@ -15,6 +15,7 @@ import {
   InvalidLocationError,
   InvalidScheduleError,
 } from '../../synthetics_service/project_monitor/normalizers/common_fields';
+import { InvalidMaintenanceWindowError } from '../../synthetics_service/maintenance_windows/resolve_maintenance_windows';
 import type { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
 import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './project_monitor/add_monitor_project';
@@ -123,10 +124,18 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         });
       }
 
+      const maintenanceWindowRefs = formattedConfig?.[ConfigKey.MAINTENANCE_WINDOWS];
+      const maintenanceWindows = maintenanceWindowRefs?.length
+        ? (await routeContext.syntheticsMonitorClient.syntheticsService.getMaintenanceWindows(
+            spaceId
+          )) ?? []
+        : [];
+
       editedMonitor = await editMonitorAPI.normalizeMonitor(
         formattedConfig as CreateMonitorPayLoad,
         monitor as CreateMonitorPayLoad,
-        previousMonitor.attributes.locations
+        previousMonitor.attributes.locations,
+        maintenanceWindows
       );
 
       const validationResult = validateMonitor(editedMonitor as MonitorFields, spaceId);
@@ -226,7 +235,11 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
         return getMonitorNotFoundResponse(response, monitorId);
       }
-      if (error instanceof InvalidLocationError || error instanceof InvalidScheduleError) {
+      if (
+        error instanceof InvalidLocationError ||
+        error instanceof InvalidScheduleError ||
+        error instanceof InvalidMaintenanceWindowError
+      ) {
         return response.badRequest({ body: { message: error.message } });
       }
       if (error instanceof MonitorValidationError) {

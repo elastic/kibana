@@ -11,7 +11,10 @@ import {
 } from '@kbn/cloud-security-posture-common/schema/graph/latest';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/v1';
-import { GRAPH_ROUTE_PATH } from '../../../common/constants';
+import {
+  GRAPH_ROUTE_PATH,
+  GRAPH_RUNTIME_EVALUATIONS_ENABLED_SETTING,
+} from '../../../common/constants';
 import type { CspRequestHandlerContext, CspRouter } from '../../types';
 import { getGraph as getGraphV1 } from './v1';
 
@@ -44,7 +47,7 @@ export const defineGraphRoute = (router: CspRouter) =>
       },
       async (context: CspRequestHandlerContext, request, response) => {
         const cspContext = await context.csp;
-        const { nodesLimit, showUnknownTarget = false } = request.body;
+        const { nodesLimit, showUnknownTarget = true } = request.body;
         const {
           originEventIds,
           start,
@@ -63,6 +66,11 @@ export const defineGraphRoute = (router: CspRouter) =>
             body: { message: 'Graph visualization requires a Platinum license or higher.' },
           });
         }
+
+        const coreContext = await context.core;
+        const integrationRuntimeEvalsEnabled = await coreContext.uiSettings.client.get<boolean>(
+          GRAPH_RUNTIME_EVALUATIONS_ENABLED_SETTING
+        );
 
         try {
           const resp = await getGraphV1({
@@ -83,6 +91,7 @@ export const defineGraphRoute = (router: CspRouter) =>
             },
             showUnknownTarget,
             nodesLimit,
+            integrationRuntimeEvalsEnabled,
           });
 
           return response.ok({ body: resp });

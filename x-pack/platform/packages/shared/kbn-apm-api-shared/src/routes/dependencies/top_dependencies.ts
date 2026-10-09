@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectionStats, Node } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
@@ -21,10 +21,12 @@ export interface TopDependenciesResponse {
 
 export const topDependenciesRoute = defineRoute<TopDependenciesResponse>()({
   endpoint: 'GET /internal/apm/dependencies/top_dependencies',
-  params: z.object({
-    query: rangeSchema
-      .merge(environmentSchema)
-      .merge(kuerySchema)
-      .merge(z.object({ numBuckets: z.coerce.number() })),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      query: rangeSchema
+        .merge(environmentSchema)
+        .merge(kuerySchema)
+        .merge(z.object({ numBuckets: z.coerce.number() })),
+    })
+  ),
 });

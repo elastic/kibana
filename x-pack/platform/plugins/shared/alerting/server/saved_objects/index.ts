@@ -264,8 +264,19 @@ export function setupSavedObjects(
     management: {
       importableAndExportable: true,
       getTitle(ruleTemplateSavedObject: SavedObject<RawRuleTemplate>) {
-        return `${ruleTemplateSavedObject.attributes.name}`;
+        const { attributes } = ruleTemplateSavedObject;
+        if (attributes.engine === 'v2' && 'rule' in attributes) {
+          const ruleName = (attributes.rule as { metadata?: { name?: string } }).metadata?.name;
+          if (ruleName) {
+            return ruleName;
+          }
+        }
+        if ('name' in attributes && attributes.name) {
+          return attributes.name;
+        }
+        return ruleTemplateSavedObject.id;
       },
+
       getInAppUrl: (savedObject: SavedObject<RawRuleTemplate>) => {
         return {
           path: `${triggersActionsRoute}${createRuleFromTemplateRoute.replace(

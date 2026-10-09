@@ -312,7 +312,8 @@ function validatePackageManifest(parsed, repoRoot, path) {
     type === 'shared-server' ||
     type === 'functional-tests' ||
     type === 'test-helper' ||
-    type === 'core'
+    type === 'core' ||
+    type === 'tooling'
   ) {
     return {
       type,

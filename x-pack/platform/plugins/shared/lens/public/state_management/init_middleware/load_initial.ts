@@ -7,7 +7,7 @@
 
 import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 
-import type { MiddlewareAPI } from '@reduxjs/toolkit';
+import type { MiddlewareAPI } from 'redux-toolkit-v1';
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
 import type { ProjectRouting } from '@kbn/es-query';

@@ -115,6 +115,20 @@ describe('GET /internal/evals/experiments/compare', () => {
     expect(evaluationScoreService.search).toHaveBeenCalledTimes(2);
   });
 
+  it('returns 400 without querying when baseline and target are the same', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+
+    const response = await handler(
+      context,
+      makeRequest('experiment-a', 'experiment-a'),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(400);
+    expect(response.payload.message).toContain('must differ');
+    expect(evaluationScoreService.search).not.toHaveBeenCalled();
+  });
+
   it('returns 404 when no scores exist for the first experiment', async () => {
     const { handler, context, evaluationScoreService } = setup();
     evaluationScoreService.search

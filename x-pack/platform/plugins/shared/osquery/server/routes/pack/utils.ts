@@ -306,6 +306,8 @@ export const stripPriorModePerQueryFields = (
       return rest;
     }
 
+    // Bare intervals (stale prebuilt-pack copies) are converged away separately by
+    // convergePerQueryIntervals; here we only preserve an explicit same-mode override.
     return scheduleType === undefined ? rest : { ...rest, schedule_type: scheduleType };
   }
 
@@ -318,6 +320,36 @@ export const stripPriorModePerQueryFields = (
   } = query;
 
   return rest;
+};
+
+/**
+ * Drop marker-less per-query intervals on write so the stored SO matches what
+ * the agent runs: in an interval-mode pack a bare `interval` without an explicit
+ * `schedule_type: 'interval'` marker is a stale prebuilt-pack copy the wire gate
+ * (`convertSOQueriesToPackConfig`) already ignores. Explicit overrides and rrule
+ * queries are left untouched.
+ */
+export const convergePerQueryIntervals = (
+  queries: Record<string, PackQueryInput>,
+  packScheduleType: ScheduleType | undefined | null
+): Record<string, PackQueryInput> => {
+  if (packScheduleType !== 'interval') return queries;
+
+  return Object.fromEntries(
+    Object.entries(queries).map(([key, query]) => {
+      if (query.schedule_type === 'interval' || query.schedule_type === 'rrule') {
+        return [key, query];
+      }
+
+      if (query.interval !== undefined) {
+        const { interval: _interval, ...rest } = query;
+
+        return [key, rest];
+      }
+
+      return [key, query];
+    })
+  );
 };
 
 export interface ConvertSOQueriesToPackConfigOptions {
@@ -383,11 +415,9 @@ export const convertSOQueriesToPackConfig = (
           scheduleFields = { rrule_schedule: queryRrule };
         }
       } else if (packMode === 'interval') {
-        if (
-          querySchedType !== 'rrule' &&
-          interval !== undefined &&
-          interval !== packSchedule?.interval
-        ) {
+        // Emit a per-query interval only for an explicit flyout override; a bare
+        // stored value must not shadow default_native_schedule.
+        if (querySchedType === 'interval' && interval !== undefined) {
           scheduleFields = { interval };
         }
       } else {

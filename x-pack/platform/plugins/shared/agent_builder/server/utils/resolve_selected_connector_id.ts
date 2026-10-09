@@ -64,13 +64,9 @@ const tryResolveFallbackConnector = async ({
   }
 
   // Fall back to the full connector list, preferring the platform default
-  try {
-    const connectors = await inference.getConnectorList(request);
-    if (connectors.length > 0) {
-      return selectFallbackConnector(connectors);
-    }
-  } catch {
-    // Ignore errors
+  const connectors = await inference.getConnectorList(request).catch(() => undefined);
+  if (connectors && connectors.length > 0) {
+    return selectFallbackConnector(connectors);
   }
 
   return undefined;
@@ -108,13 +104,19 @@ export const resolveSelectedConnectorId = async ({
         `Connector ID [${connectorId}] does not match the configured default connector ID [${defaultConnectorSetting}].`
       );
     }
+
     return defaultConnectorSetting;
   }
   if (connectorId) {
     return connectorId;
   }
   if (hasValidDefaultConnector) {
-    return defaultConnectorSetting;
+    try {
+      await inference.getConnectorById(defaultConnectorSetting, request);
+      return defaultConnectorSetting;
+    } catch {
+      return tryResolveFallbackConnector({ searchInferenceEndpoints, inference, request });
+    }
   }
 
   return tryResolveFallbackConnector({ searchInferenceEndpoints, inference, request });

@@ -9,14 +9,13 @@ import type { EuiCommentProps } from '@elastic/eui';
 
 import type { SnakeToCamelCase } from '../../../../common/types';
 import type { CommentUserAction } from '../../../../common/types/domain';
-import { UserActionActions, AttachmentType } from '../../../../common/types/domain';
+import { UserActionActions } from '../../../../common/types/domain';
 import { type AttachmentTypeRegistry } from '../../../../common/registry';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import type { AttachmentUIV2 } from '../../../../common/ui/types';
 import { createCommonUpdateUserActionBuilder } from '../common';
 import * as i18n from './translations';
 import { createUnifiedAttachmentUserActionBuilder } from './unified_attachment';
-import { createExternalReferenceAttachmentUserActionBuilder } from './external_reference';
 import type { AttachmentType as AttachmentFrameworkAttachmentType } from '../../../client/attachment_framework/types';
 import {
   getReferenceAttachmentId,
@@ -119,7 +118,6 @@ const getCreateCommentUserAction = ({
   userAction,
   userProfiles,
   caseData,
-  externalReferenceAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
   attachment,
   manageMarkdownEditIds,
@@ -132,30 +130,12 @@ const getCreateCommentUserAction = ({
   attachment: AttachmentUIV2;
 } & Omit<
   UserActionBuilderArgs,
-  | 'comments'
-  | 'index'
-  | 'handleOutlineComment'
-  | 'currentUserProfile'
-  | 'persistableStateAttachmentTypeRegistry'
+  'comments' | 'index' | 'handleOutlineComment' | 'currentUserProfile'
 >): EuiCommentProps[] => {
+  // Migrated external-reference / `actions` attachments are projected to their unified
+  // shape by the cases server before reaching the client (UI reads always use
+  // `mode: 'unified'`), so legacy-shaped attachments have no client-side renderer.
   if (isLegacyAttachmentRequest(attachment)) {
-    // Legacy `actions` attachments are projected to the unified `security.endpoint`
-    // type by the cases server before reaching the client (UI reads always use
-    // `mode: 'unified'`), so they fall through to the unified branch below
-    // rather than needing a dedicated cases-side renderer.
-    if (attachment.type === AttachmentType.externalReference) {
-      const externalReferenceBuilder = createExternalReferenceAttachmentUserActionBuilder({
-        userAction,
-        userProfiles,
-        attachment,
-        externalReferenceAttachmentTypeRegistry,
-        caseData,
-        isLoading: loadingCommentIds.includes(attachment.id),
-        handleDeleteComment,
-      });
-
-      return externalReferenceBuilder.build();
-    }
     return [];
   }
 
@@ -193,7 +173,6 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
   caseData,
   casesConfiguration,
   userProfiles,
-  externalReferenceAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
   userAction,
   manageMarkdownEditIds,
@@ -230,7 +209,6 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         casesConfiguration,
         userProfiles,
         userAction: attachmentUserAction,
-        externalReferenceAttachmentTypeRegistry,
         unifiedAttachmentTypeRegistry,
         attachment,
         manageMarkdownEditIds,

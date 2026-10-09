@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
+import type { HttpServiceStart, KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
@@ -74,6 +74,7 @@ import type { PluginsServiceStart } from '../../plugins/plugin_service';
 export interface CreateScopedRunnerDeps {
   // core services
   elasticsearch: ElasticsearchServiceStart;
+  http: HttpServiceStart;
   security: SecurityServiceStart;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
@@ -258,12 +259,14 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     ]);
     const experimentalFeatures: ExperimentalFeatures = {
       skills: true,
+      relevantSkills: experimentalEnabled,
       subagents: experimentalEnabled,
       todos: experimentalEnabled,
       datasets: experimentalEnabled,
       // forcefully disabled until the UI is implemented
       askUserQuestion: false, // isExperimentalEnabled,
       bash: bashEnabled,
+      apiTools: experimentalEnabled,
     };
 
     const allDeps = {

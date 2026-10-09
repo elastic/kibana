@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/content-management-plugin'
   - '@kbn/scout'
   - '@kbn/repo-info'
+  - '@kbn/core-saved-objects-server'
 tags:
   - plugin
   - prod

@@ -167,6 +167,14 @@ const findJestUnitConfig = (filePath: string): string | undefined => {
 
 const stripAnsi = (s: string) => s.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '');
 
+const reportJestFullLog = async (logPath?: string): Promise<void> => {
+  if (!logPath) {
+    return;
+  }
+  writeln(`    full Jest output: ${logPath}`);
+  writeln('');
+};
+
 const runLintTsProjects = async (
   affectedSourceRoots: string[],
   fix: boolean
@@ -506,6 +514,7 @@ run(
             }
             writeln('    $ node scripts/jest --profile quick');
             writeln('');
+            await reportJestFullLog(result.logPath);
             printVerbose();
             errors.push(new Error('jest failed'));
           } else if (result.failed.length > 0) {
@@ -567,6 +576,7 @@ run(
               writeln(`    $ ${jestCmd}`);
               writeln('');
             }
+            await reportJestFullLog(result.logPath);
             printVerbose();
             errors.push(new Error('jest failed'));
           } else {

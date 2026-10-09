@@ -30,14 +30,15 @@ interface ExpandedRowPreviewPaneProps {
 export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transformConfig }) => {
   const toastNotifications = useToastNotifications();
 
-  const { searchQuery, validationStatus, previewRequest, runtimeMappings } = useMemo(
-    () =>
-      applyTransformConfigToDefineState(
-        getDefaultStepDefineState({} as SearchItems),
-        transformConfig
-      ),
-    [transformConfig]
-  );
+  const { searchQuery, validationStatus, previewRequest, runtimeMappings, projectRouting } =
+    useMemo(
+      () =>
+        applyTransformConfigToDefineState(
+          getDefaultStepDefineState({} as SearchItems),
+          transformConfig
+        ),
+      [transformConfig]
+    );
 
   const transformConfigQuery = useMemo(() => getTransformConfigQuery(searchQuery), [searchQuery]);
 
@@ -50,7 +51,9 @@ export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transf
     transformConfigQuery,
     validationStatus,
     previewRequest,
-    runtimeMappings
+    runtimeMappings,
+    undefined,
+    projectRouting
   );
 
   return (

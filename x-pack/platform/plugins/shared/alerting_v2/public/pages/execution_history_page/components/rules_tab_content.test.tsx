@@ -16,6 +16,8 @@ const mockUseFetchRuleExecutions = jest.fn();
 const mockRefetch = jest.fn();
 const mockUseAlertingRulesCache = jest.fn();
 
+let mockCanReadRules = true;
+
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'settings') {
@@ -23,6 +25,13 @@ jest.mock('@kbn/core-di-browser', () => ({
     }
     if (token === 'http') {
       return {};
+    }
+    if (typeof token === 'function') {
+      return {
+        canRead: () => mockCanReadRules,
+        canWrite: () => mockCanReadRules,
+        can: () => mockCanReadRules,
+      };
     }
     return {};
   },
@@ -40,10 +49,10 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache', () => (
 const buildItem = (overrides: Partial<RuleExecutionView> = {}): RuleExecutionView => ({
   id: 'exec-1',
   rule: { id: 'rule-1', version: null },
-  spaceId: 'default',
-  startedAt: '2026-05-05T10:00:00.000Z',
-  endedAt: '2026-05-05T10:00:01.500Z',
-  timings: { duration: 1500, scheduledDelay: 0 },
+  space_id: 'default',
+  started_at: '2026-05-05T10:00:00.000Z',
+  ended_at: '2026-05-05T10:00:01.500Z',
+  timings: { duration: 1500, scheduled_delay: 0 },
   outcome: 'success',
   reason: 'Completed successfully',
   error: null,
@@ -52,13 +61,13 @@ const buildItem = (overrides: Partial<RuleExecutionView> = {}): RuleExecutionVie
 
 const mockResult = (
   overrides: Partial<{
-    data: { items: RuleExecutionView[]; total: number; page: number; perPage: number };
+    data: { items: RuleExecutionView[]; total: number; page: number; per_page: number };
     isFetching: boolean;
     isError: boolean;
   }> = {}
 ) => {
   mockUseFetchRuleExecutions.mockReturnValue({
-    data: { items: [], total: 0, page: 1, perPage: 10 },
+    data: { items: [], total: 0, page: 1, per_page: 10 },
     isFetching: false,
     isError: false,
     refetch: mockRefetch,
@@ -78,6 +87,7 @@ const renderComponent = () =>
 describe('RulesTabContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCanReadRules = true;
     mockUseAlertingRulesCache.mockReturnValue({
       rulesCache: {
         'rule-1': { id: 'rule-1', metadata: { name: 'My Rule' } },
@@ -119,7 +129,7 @@ describe('RulesTabContent', () => {
         items: [buildItem()],
         total: 1,
         page: 1,
-        perPage: 10,
+        per_page: 10,
       },
     });
     renderComponent();
@@ -137,7 +147,7 @@ describe('RulesTabContent', () => {
         items: [buildItem()],
         total: 1,
         page: 1,
-        perPage: 10,
+        per_page: 10,
       },
     });
     renderComponent();
@@ -157,7 +167,7 @@ describe('RulesTabContent', () => {
         items: [buildItem({ rule: { id: 'rule-orphan', version: null } })],
         total: 1,
         page: 1,
-        perPage: 10,
+        per_page: 10,
       },
     });
     renderComponent();
@@ -173,12 +183,12 @@ describe('RulesTabContent', () => {
           buildItem({
             outcome: 'failure',
             reason: null,
-            error: { message: 'Index not found', stackTrace: null },
+            error: { message: 'Index not found', stack_trace: null },
           }),
         ],
         total: 1,
         page: 1,
-        perPage: 10,
+        per_page: 10,
       },
     });
     renderComponent();
@@ -193,7 +203,7 @@ describe('RulesTabContent', () => {
         items: [buildItem({ outcome: 'success', reason: null, error: null })],
         total: 1,
         page: 1,
-        perPage: 10,
+        per_page: 10,
       },
     });
     renderComponent();
@@ -207,7 +217,7 @@ describe('RulesTabContent', () => {
         items: [buildItem({ outcome: 'failure', reason: null, error: null })],
         total: 1,
         page: 1,
-        perPage: 10,
+        per_page: 10,
       },
     });
     renderComponent();
@@ -258,10 +268,10 @@ describe('RulesTabContent', () => {
   it('formats duration in ms for sub-second values', () => {
     mockResult({
       data: {
-        items: [buildItem({ timings: { duration: 250, scheduledDelay: 0 } })],
+        items: [buildItem({ timings: { duration: 250, scheduled_delay: 0 } })],
         total: 1,
         page: 1,
-        perPage: 10,
+        per_page: 10,
       },
     });
     renderComponent();
@@ -273,11 +283,11 @@ describe('RulesTabContent', () => {
     mockResult({
       data: {
         items: Array.from({ length: 10 }, (_, idx) =>
-          buildItem({ id: `exec-${idx}`, startedAt: `2026-05-05T10:0${idx}:00.000Z` })
+          buildItem({ id: `exec-${idx}`, started_at: `2026-05-05T10:0${idx}:00.000Z` })
         ),
         total: 150,
         page: 1,
-        perPage: 10,
+        per_page: 10,
       },
     });
     renderComponent();
@@ -288,10 +298,40 @@ describe('RulesTabContent', () => {
 
   it('caps totalItemCount at the API result window limit', () => {
     mockResult({
-      data: { items: [buildItem()], total: 1_200_000, page: 1, perPage: 100 },
+      data: { items: [buildItem()], total: 1_200_000, page: 1, per_page: 100 },
     });
     renderComponent();
 
     expect(screen.getByText(/of 100/)).toBeInTheDocument();
+  });
+
+  describe('when the user cannot read rules', () => {
+    beforeEach(() => {
+      mockCanReadRules = false;
+    });
+
+    it('does not request rule names (empty ruleIds) and renders rule ids as plain text', () => {
+      // With an empty ruleIds list the real hook resolves no names, so the cache is empty.
+      mockUseAlertingRulesCache.mockReturnValue({
+        rulesCache: {},
+        loading: false,
+        error: undefined,
+      });
+      mockResult({
+        data: {
+          items: [buildItem()],
+          total: 1,
+          page: 1,
+          per_page: 10,
+        },
+      });
+      renderComponent();
+
+      expect(mockUseAlertingRulesCache).toHaveBeenLastCalledWith(
+        expect.objectContaining({ ruleIds: [] })
+      );
+      expect(screen.getByText('rule-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleExecutionHistoryRuleLink-rule-1')).not.toBeInTheDocument();
+    });
   });
 });

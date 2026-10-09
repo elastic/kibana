@@ -6,16 +6,24 @@
  */
 
 import { httpServerMock, loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
-import type { SavedObjectsExportTransformContext } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsExportTransformContext } from '@kbn/core/server';
 import { handleExport } from './export';
 import { mockCases } from '../../mocks';
-import type { CaseSavedObjectTransformed } from '../../common/types/case';
-import { CASE_ATTACHMENT_SAVED_OBJECT } from '../../../common/constants';
-import { getAttachmentsAndUserActionsForCases } from './utils';
+import type { CasePersistedAttributes, CaseSavedObjectTransformed } from '../../common/types/case';
+import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_FIELD_DEFINITION_SAVED_OBJECT,
+  CASE_TEMPLATE_SAVED_OBJECT,
+} from '../../../common/constants';
+import {
+  getAttachmentsAndUserActionsForCases,
+  getTemplatesAndFieldDefinitionsForCases,
+} from './utils';
 
 jest.mock('./utils', () => {
   return {
     getAttachmentsAndUserActionsForCases: jest.fn().mockResolvedValue([]),
+    getTemplatesAndFieldDefinitionsForCases: jest.fn().mockResolvedValue([]),
   };
 });
 
@@ -38,8 +46,7 @@ describe('case export', () => {
     const exported = await handleExport({
       context: testContext,
       coreSetup: coreMock.createSetup(),
-      // @ts-ignore: mock objects are not matching persisted objects
-      objects: testCases,
+      objects: testCases as unknown as Array<SavedObject<CasePersistedAttributes>>,
       logger,
       config,
     });
@@ -85,4 +92,90 @@ describe('case export', () => {
       );
     }
   );
+
+  it.each([
+    ['templates flag on', { templates: { enabled: true } } as never],
+    ['templates flag off', { templates: { enabled: false } } as never],
+  ])(
+    'includes cases-templates and cases-field-definition in the scoped client regardless of the templates feature flag (%s)',
+    async (_label, configForCase) => {
+      const coreSetup = coreMock.createSetup();
+
+      await handleExport({
+        context: testContext,
+        coreSetup,
+        // @ts-ignore: mock objects are not matching persisted objects
+        objects: testCases,
+        logger,
+        config: configForCase,
+      });
+
+      const [coreStart] = await coreSetup.getStartServices();
+
+      expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(
+        testRequest,
+        expect.objectContaining({
+          includedHiddenTypes: expect.arrayContaining([
+            CASE_TEMPLATE_SAVED_OBJECT,
+            CASE_FIELD_DEFINITION_SAVED_OBJECT,
+          ]),
+        })
+      );
+    }
+  );
+
+  it('appends templates and field definitions from getTemplatesAndFieldDefinitionsForCases to the export', async () => {
+    const mockTemplateSO = {
+      id: 'tmpl-so-1',
+      type: CASE_TEMPLATE_SAVED_OBJECT,
+      attributes: { templateId: 'tmpl-abc', name: 'My Template', owner: 'securitySolution' },
+      references: [],
+    };
+    const mockFieldDefSO = {
+      id: 'fd-so-1',
+      type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
+      attributes: { name: 'incident_type', owner: 'securitySolution' },
+      references: [],
+    };
+
+    (getTemplatesAndFieldDefinitionsForCases as jest.Mock).mockResolvedValueOnce([
+      mockTemplateSO,
+      mockFieldDefSO,
+    ]);
+
+    const coreSetup = coreMock.createSetup();
+    const exported = await handleExport({
+      context: testContext,
+      coreSetup,
+      objects: testCases as unknown as Array<SavedObject<CasePersistedAttributes>>,
+      logger,
+      config,
+    });
+
+    expect(exported).toContainEqual(expect.objectContaining({ id: 'tmpl-so-1' }));
+    expect(exported).toContainEqual(expect.objectContaining({ id: 'fd-so-1' }));
+  });
+
+  it('calls getTemplatesAndFieldDefinitionsForCases with the cleaned case objects and logger', async () => {
+    const coreSetup = coreMock.createSetup();
+
+    await handleExport({
+      context: testContext,
+      coreSetup,
+      objects: testCases as unknown as Array<SavedObject<CasePersistedAttributes>>,
+      logger,
+      config,
+    });
+
+    expect(getTemplatesAndFieldDefinitionsForCases).toHaveBeenCalledWith(
+      expect.anything(),
+      // cleaned objects should have incremental_id stripped (undefined)
+      expect.arrayContaining([
+        expect.objectContaining({
+          attributes: expect.objectContaining({ incremental_id: undefined }),
+        }),
+      ]),
+      logger
+    );
+  });
 });

@@ -22,7 +22,7 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
 import { useKibana } from '../../../../common/lib/kibana';
-import { AttacksEventTypes } from '../../../../common/lib/telemetry';
+import { AttacksEventTypes, FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { useUserData } from '../../user_info';
@@ -172,6 +172,7 @@ export const TableSection = React.memo(
             openAttackFlyout({
               attackId: attack.id,
               indexName: dataView.getIndexPattern(),
+              origin: FLYOUT_ORIGIN.ATTACKS_TABLE,
               attackTitle: attack.title,
             });
           } else {

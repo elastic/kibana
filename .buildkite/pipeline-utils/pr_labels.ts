@@ -44,6 +44,9 @@ export const LABEL_MAPPING: Record<string, Record<string, string>> = {
   'ci:ftr-smart-retry': {
     FTR_SMART_RETRY_ENABLED: 'true',
   },
+  'ci:ftr-auto-retry': {
+    FTR_AUTO_RETRY_COUNT: '1',
+  },
   [FIPS_GH_LABELS[FIPS_VERSION.TWO]]: {
     TEST_ENABLE_FIPS_VERSION: FIPS_VERSION.TWO,
   },

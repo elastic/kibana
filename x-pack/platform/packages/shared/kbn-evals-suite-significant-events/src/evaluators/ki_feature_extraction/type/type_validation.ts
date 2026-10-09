@@ -36,7 +36,7 @@ export const typeValidationEvaluator = {
               .map((feature) => `"${feature.id}" has type "${feature.type}"`)
               .join('; ')} (expected one of: ${VALID_KI_FEATURE_TYPES.join(', ')})`
           : 'All KI features have a valid type',
-      details: {
+      metadata: {
         total: features.length,
         invalidFeatures: invalidFeatures.map((feature) => ({
           id: feature.id,

@@ -12,6 +12,29 @@ import memoizeOne from 'memoize-one';
 import { functions as includedFunctions } from './functions';
 import { parse as parseFn } from './grammar.peggy';
 
+const MAX_EXPRESSION_LENGTH = 1000;
+const MAX_NESTING_DEPTH = 20;
+
+// Matches single- and double-quoted strings, including escaped quotes (\' and \").
+// Used to strip quoted spans before counting parenthesis nesting depth, so that
+// parentheses inside KQL/Lucene filter strings (e.g. count(kql='(a or b)')) are
+// not mistakenly counted as structural nesting.
+const QUOTED_STRINGS_RE = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g;
+
+function checkNestingDepth(input) {
+  const unquoted = input.replace(QUOTED_STRINGS_RE, '');
+  let depth = 0;
+  for (let i = 0; i < unquoted.length; i++) {
+    if (unquoted[i] === '(') {
+      if (++depth > MAX_NESTING_DEPTH) {
+        throw new Error(`Expression exceeds maximum nesting depth of ${MAX_NESTING_DEPTH}`);
+      }
+    } else if (unquoted[i] === ')') {
+      depth--;
+    }
+  }
+}
+
 function parse(input, options) {
   if (input == null) {
     throw new Error('Missing expression');
@@ -20,6 +43,12 @@ function parse(input, options) {
   if (typeof input !== 'string') {
     throw new Error('Expression must be a string');
   }
+
+  if (input.length > MAX_EXPRESSION_LENGTH) {
+    throw new Error(`Expression exceeds maximum length of ${MAX_EXPRESSION_LENGTH} characters`);
+  }
+
+  checkNestingDepth(input);
 
   try {
     return parseFn(input, options);

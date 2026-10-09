@@ -221,6 +221,7 @@ export const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: 
   return (
     <>
       <EuiPopover
+        aria-label={i18n.ACTIONS_BUTTON_ARIA_LABEL(theCase.title)}
         id={`case-action-popover-${theCase.id}`}
         key={`case-action-popover-${theCase.id}`}
         data-test-subj={`case-action-popover-${theCase.id}`}

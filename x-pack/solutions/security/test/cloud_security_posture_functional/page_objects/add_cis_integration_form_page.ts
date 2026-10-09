@@ -173,8 +173,8 @@ export function AddCisIntegrationFormPageProvider({
         };
 
     await PageObjects.common.navigateToUrl(
-      'fleet', // Defined in Security Solution plugin
-      'integrations/cloud_security_posture/add-integration/cspm',
+      'integrations',
+      'detail/cloud_security_posture/add-integration/cspm',
       options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -194,8 +194,8 @@ export function AddCisIntegrationFormPageProvider({
         };
 
     await PageObjects.common.navigateToUrl(
-      'fleet',
-      `integrations/cloud_security_posture-${packageVersion}/add-integration`,
+      'integrations',
+      `detail/cloud_security_posture-${packageVersion}/add-integration`,
       options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -215,8 +215,8 @@ export function AddCisIntegrationFormPageProvider({
         };
 
     await PageObjects.common.navigateToUrl(
-      'fleet',
-      `integrations/cloud_security_posture-${packageVersion}/add-integration/cspm`,
+      'integrations',
+      `detail/cloud_security_posture-${packageVersion}/add-integration/cspm`,
       options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -233,8 +233,8 @@ export function AddCisIntegrationFormPageProvider({
         };
 
     await PageObjects.common.navigateToUrl(
-      'fleet', // Defined in Security Solution plugin
-      'integrations/cloud_security_posture/add-integration/vuln_mgmt',
+      'integrations',
+      'detail/cloud_security_posture/add-integration/vuln_mgmt',
       options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -262,8 +262,8 @@ export function AddCisIntegrationFormPageProvider({
         };
 
     await PageObjects.common.navigateToUrl(
-      'fleet', // Defined in Security Solution plugin
-      'integrations/cloud_security_posture/add-integration/kspm',
+      'integrations',
+      'detail/cloud_security_posture/add-integration/kspm',
       options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -510,6 +510,10 @@ export function AddCisIntegrationFormPageProvider({
 
   const getValueInEditPage = async (field: string) => {
     /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await retry.waitFor(`field ${field} to render on edit page`, async () =>
+      testSubjects.exists(field)
+    );
     const fieldValue = await (await testSubjects.find(field)).getAttribute('value');
     return fieldValue;
   };
@@ -559,6 +563,10 @@ export function AddCisIntegrationFormPageProvider({
   const getFieldValueInEditPage = async (field: string) => {
     /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
     await navigateToEditIntegrationPage();
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await retry.waitFor(`field ${field} to render on edit page`, async () =>
+      testSubjects.exists(field)
+    );
     const fieldValue = await getFieldAttributeValue(field, 'value');
     return fieldValue;
   };

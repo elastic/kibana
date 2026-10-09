@@ -92,6 +92,10 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     }),
     addAttachment: jest.fn(),
     updateAttachmentOrigin: jest.fn(),
+    getAgentBuilderAccess: jest.fn().mockResolvedValue({
+      hasRequiredLicense: true,
+      hasLlmConnector: true,
+    }),
     EmbeddableConversation: () => null,
     EmbeddableConversationInput: () => null,
   };

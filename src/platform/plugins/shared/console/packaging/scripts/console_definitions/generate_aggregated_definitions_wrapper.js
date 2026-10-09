@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/babel-register').install();
+require('@kbn/swc-register').install();
 
 // eslint-disable-next-line @kbn/imports/uniform_imports
 const { generateAggregatedDefinitions } = require('./generate_aggregated_definitions.ts');

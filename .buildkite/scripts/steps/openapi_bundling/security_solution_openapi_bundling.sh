@@ -27,6 +27,9 @@ echo -e "\n[Security Solution OpenAPI Bundling] Endpoint Exceptions API\n"
 echo -e "\n[Security Solution OpenAPI Bundling] Endpoint Management API\n"
 (cd x-pack/solutions/security/plugins/security_solution && yarn openapi:bundle:endpoint-management)
 
+echo -e "\n[Security Solution OpenAPI Bundling] Initialization API\n"
+(cd x-pack/solutions/security/plugins/security_solution && yarn openapi:bundle:initialization)
+
 echo -e "\n[Security Solution OpenAPI Bundling] Elastic Assistant API\n"
 (cd x-pack/platform/packages/shared/kbn-elastic-assistant-common && yarn openapi:bundle)
 

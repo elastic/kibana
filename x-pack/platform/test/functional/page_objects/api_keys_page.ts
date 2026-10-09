@@ -145,8 +145,8 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     },
 
     async getFlyoutTitleText() {
-      const header = await find.byClassName('euiFlyoutHeader');
-      return header.getVisibleText();
+      await testSubjects.existOrFail('apiKeyFlyoutTitle');
+      return await testSubjects.getVisibleText('apiKeyFlyoutTitle');
     },
 
     async getFlyoutApiKeyStatus() {

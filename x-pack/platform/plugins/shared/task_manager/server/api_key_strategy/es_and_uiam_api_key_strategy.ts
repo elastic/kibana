@@ -19,6 +19,7 @@ import type { ConcreteTaskInstance, TaskInstance } from '../task';
 import {
   createApiKey,
   getApiKeyFromRequest,
+  getUiamApiKeySecret,
   hasApiKey,
   shouldCloneApiKeyFromRequest,
 } from '../lib/api_key_utils';
@@ -237,7 +238,7 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
   getApiKeyForFakeRequest(taskInstance: ConcreteTaskInstance): string | undefined {
     if (this.typeToUse === ApiKeyType.UIAM) {
       if (taskInstance.uiamApiKey) {
-        return taskInstance.uiamApiKey;
+        return getUiamApiKeySecret(taskInstance.uiamApiKey);
       }
 
       // No UIAM key available even though the strategy is configured to use UIAM.
@@ -275,7 +276,7 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
         'ES API key is not provided to create a fake request, falling back to UIAM API key.',
         { tags: UIAM_LOGS_USAGE_TAGS }
       );
-      return taskInstance.uiamApiKey;
+      return getUiamApiKeySecret(taskInstance.uiamApiKey);
     }
 
     return taskInstance.apiKey;

@@ -458,6 +458,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 value: 'this is a text field value',
               },
             ],
+            // The write-time adapter mirrors customFields into extended_fields when
+            // xpack.cases.templates.enabled is true (set in config_trial.ts).
+            extended_fields: {
+              first_custom_field_key_as_keyword: 'this is a text field value',
+            },
             description: 'case desc',
             duration: null,
             external_service: null,
@@ -1886,6 +1891,9 @@ const createCaseWithId = async ({
       ...getPostCaseRequest(),
       ...req,
       assignees: [],
+      // Creation-request template ref (version optional) vs. persisted shape (version pinned);
+      // this fixture never sets a template, so normalize to the persisted null.
+      template: null,
       connector: {
         name: 'none',
         type: ConnectorTypes.none,

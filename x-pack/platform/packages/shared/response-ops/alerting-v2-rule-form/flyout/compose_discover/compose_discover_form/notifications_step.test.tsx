@@ -6,21 +6,26 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import { useForm, FormProvider } from 'react-hook-form';
+import { act, render, screen, waitFor } from '@testing-library/react';
+import { useForm, FormProvider, type UseFormReturn } from 'react-hook-form';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import type { FormValues } from '../../../form/types';
 import { NotificationsStep } from './notifications_step';
 
-const createWrapper = () => {
+const createWrapper = (formRef?: { current: UseFormReturn<FormValues> | null }) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
     logger: { log: () => {}, warn: () => {}, error: () => {} },
   });
   return ({ children }: { children: React.ReactNode }) => {
-    const form = useForm<FormValues>({ defaultValues: {} as FormValues });
+    const form = useForm<FormValues>({
+      defaultValues: {} as FormValues,
+      mode: 'onBlur',
+    });
+    if (formRef) {
+      formRef.current = form;
+    }
     return (
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
@@ -32,10 +37,7 @@ const createWrapper = () => {
 };
 
 describe('NotificationsStep', () => {
-  it('shows the template-card picker in edit mode', async () => {
-    const http = httpServiceMock.createStartContract();
-    http.fetch.mockResolvedValue({ items: [] } as any);
-
+  it('shows the template-card picker', async () => {
     render(<NotificationsStep />, { wrapper: createWrapper() });
 
     await waitFor(() => {
@@ -43,5 +45,47 @@ describe('NotificationsStep', () => {
     });
 
     expect(screen.queryByTestId('actionRow-policy-1')).not.toBeInTheDocument();
+  });
+
+  describe('notifications field validation', () => {
+    it('passes trigger when notifications are empty', async () => {
+      const formRef: { current: UseFormReturn<FormValues> | null } = { current: null };
+      render(<NotificationsStep />, { wrapper: createWrapper(formRef) });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('composeDiscoverNotificationsField')).toBeInTheDocument();
+      });
+
+      let valid = false;
+      await act(async () => {
+        valid = await formRef.current!.trigger('notifications');
+      });
+      expect(valid).toBe(true);
+    });
+
+    it('fails trigger and shows an error for an incomplete existing action', async () => {
+      const formRef: { current: UseFormReturn<FormValues> | null } = { current: null };
+      render(<NotificationsStep />, { wrapper: createWrapper(formRef) });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('composeDiscoverNotificationsField')).toBeInTheDocument();
+      });
+
+      await act(async () => {
+        formRef.current!.setValue('notifications', {
+          workflows: [{ id: 'item-1', source: 'existing', workflowId: null }],
+        });
+      });
+
+      let valid = true;
+      await act(async () => {
+        valid = await formRef.current!.trigger('notifications');
+      });
+
+      expect(valid).toBe(false);
+      await waitFor(() => {
+        expect(screen.getByText(/incomplete actions/i)).toBeInTheDocument();
+      });
+    });
   });
 });

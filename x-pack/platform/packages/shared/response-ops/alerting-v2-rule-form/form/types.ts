@@ -64,7 +64,7 @@ export interface RuleGrouping {
 export interface RuleArtifact {
   id: string;
   type: string;
-  value: string;
+  data: Record<string, any>;
 }
 
 export interface RuleNotificationsValue {

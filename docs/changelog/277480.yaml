@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/277480
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-10
+areas:
+- APM
+title: 'Add PHP runtime metrics and SDK health dashboard for OpenTelemetry PHP'

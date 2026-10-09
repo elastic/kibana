@@ -10,7 +10,7 @@
 import type { ReactElement, ReactNode, MouseEventHandler } from 'react';
 import type { IconType } from '@elastic/eui';
 import type { Observable } from 'rxjs';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import type { GlobalHeaderAiButton } from './ai_button';
 import type { GlobalSearchConfig } from './global_search';
 
@@ -20,7 +20,10 @@ export type AppHeaderBack = string | AppHeaderBackTarget;
 /** @public */
 export interface AppHeaderBackTarget {
   href: string;
-  /** Click handler, called alongside href navigation when provided. */
+  /**
+   * Optional handler for behavior that differs from `href` navigation.
+   * Do not use it to navigate to `href`; Kibana handles same-origin links as SPA navigation.
+   */
   onClick?: MouseEventHandler;
   /** Destination name for accessibility (e.g. "Back to {label}"). */
   label?: string;
@@ -35,7 +38,10 @@ export interface AppHeaderBadge {
   onClick?: () => void;
   onClickAriaLabel?: string;
   'data-test-subj'?: string;
-  /** @deprecated Used for compatibility with existing breadcrumb badge custom renderers. */
+  /**
+   * @deprecated Escape hatch for badges that cannot be represented with structured props.
+   * Prefer structured badge props for consistent behavior and styling.
+   */
   renderCustomBadge?: (props: { badgeText: string }) => ReactElement;
   /** Popover menu items for badge context menus. When provided, the badge becomes a dropdown trigger. */
   items?: AppHeaderBadgeItem[];
@@ -89,7 +95,7 @@ export interface AppHeaderTabAction {
  * @remarks
  * Actions are intentionally flat (a single level of items). Nested submenus, modals/flyouts and
  * focus return are not supported yet; when a use case arises, mirror the AppMenu approach
- * (`AppMenuRunActionParams` in `@kbn/core-chrome-app-menu-components`) by adding a nested `items`
+ * (`AppMenuRunActionParams` in `@kbn/app-menu`) by adding a nested `items`
  * prop and passing an anchor/`returnFocus` handler down to `onClick`.
  *
  * @public
@@ -204,16 +210,92 @@ export interface AppHeaderEditableTitle {
 /** @public */
 export type AppHeaderTitle = string | AppHeaderEditableTitle;
 
+/**
+ * Outer header spacing. `standard` (also the default when omitted) is a 16px symmetric inset,
+ * `compact` is an 8px inset, and `flush` lets the surrounding layout own the inset. `bleed` and
+ * `largeBleed` must match a direct parent's 16px or 24px symmetric padding respectively (e.g. when
+ * the header is wrapped by `EuiPageTemplate`). Bleed modes are compatibility options for headers
+ * that cannot yet move outside the padded content section.
+ *
+ * @public
+ */
+export type AppHeaderSpacing = 'standard' | 'compact' | 'flush' | 'bleed' | 'largeBleed';
+
 /** @public */
-export interface AppHeaderConfig {
+export type AppHeaderFavoriteStatus = 'unfavorited' | 'favorited' | 'adding' | 'removing';
+
+/**
+ * Favorite action for the app-header title-actions area.
+ *
+ * @public
+ */
+export interface AppHeaderFavoriteAction {
+  status: AppHeaderFavoriteStatus;
+  onToggle: () => void;
+  isDisabled?: boolean;
+}
+
+/**
+ * Share action for the app-header title-actions area.
+ * Apps own behavior and menu placement; App Header owns title presentation.
+ *
+ * @public
+ */
+export interface AppHeaderShareAction {
+  onClick: (context: { returnFocus: () => void }) => void | Promise<void>;
+  isDisabled?: boolean;
+  tooltip?: {
+    content: string;
+    title?: string;
+  };
+}
+
+/**
+ * Plain-text page description. Use the object form to add a URL rendered with a fixed
+ * "Learn more" label.
+ *
+ * @public
+ */
+export type AppHeaderDescription =
+  | string
+  | {
+      text: string;
+      learnMoreUrl: string;
+    };
+
+interface AppHeaderConfigBase {
   title?: AppHeaderTitle;
   back?: AppHeaderBack;
   tabs?: AppHeaderTab[];
   badges?: AppHeaderBadge[];
   menu?: AppMenuConfig;
-  favorite?: ReactNode;
-  metadata?: AppHeaderMetadataItems;
+  favorite?: AppHeaderFavoriteAction;
+  share?: AppHeaderShareAction;
+  spacing?: AppHeaderSpacing;
 }
+
+type AppHeaderSecondaryContent =
+  | {
+      description?: AppHeaderDescription;
+      metadata?: never;
+    }
+  | {
+      description?: never;
+      metadata?: AppHeaderMetadataItems;
+    };
+
+/** @public */
+export type AppHeaderConfig = AppHeaderConfigBase & AppHeaderSecondaryContent;
+
+/**
+ * Chrome-owned registration config. Unlike {@link AppHeaderConfig}, `back` may be `false` to
+ * suppress the breadcrumb-derived fallback.
+ *
+ * @public
+ */
+export type ChromeAppHeaderConfig = Omit<AppHeaderConfig, 'back'> & {
+  back?: AppHeaderBack | false;
+};
 
 /**
  * Chrome Next rollout APIs.
@@ -225,7 +307,12 @@ export interface AppHeaderConfig {
  * @public
  */
 export interface ChromeNext {
-  /** Whether the Chrome Next feature flag is enabled. */
+  /**
+   * Whether the Chrome Next feature flag is enabled.
+   *
+   * This does not indicate that the current layout renders Chrome Next. Before replacing or hiding
+   * fallback UI, also require `chrome.getChromeStyle() === 'project'`.
+   */
   readonly isEnabled: boolean;
   aiButton: {
     /**
@@ -263,6 +350,14 @@ export interface ChromeNext {
      */
     set(content?: ReactNode): void;
   };
+  /** Project picker content. */
+  projectPicker: {
+    /**
+     * Set the project picker content for the Chrome-Next header.
+     * Pass `undefined` to remove. Global — persists across app changes.
+     */
+    set(content?: ReactNode): void;
+  };
   appHeader: {
     /**
      * Set the app header configuration for the Chrome Next project header.
@@ -271,7 +366,7 @@ export interface ChromeNext {
      * Pass the config to show; the returned callback removes it.
      * Per-app, cleared on app change.
      */
-    set(config: AppHeaderConfig): () => void;
+    set(config: ChromeAppHeaderConfig): () => void;
   };
   userMenu: {
     /**

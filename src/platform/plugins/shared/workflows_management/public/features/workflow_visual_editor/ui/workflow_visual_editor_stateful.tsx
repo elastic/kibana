@@ -10,7 +10,7 @@
 import { EuiEmptyPrompt, EuiFocusTrap, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import type { ColorMode, Viewport } from '@xyflow/react';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { stringify as stringifyYaml } from 'yaml';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type LayoutDirection, transformWorkflowToGraph, type WorkflowYaml } from '@kbn/workflows';

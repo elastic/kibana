@@ -15,7 +15,7 @@ import type { AlertingServerStartDependencies } from '../../types';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-import { ALERTING_V2_INTERNAL_SUGGEST_USER_PROFILES_API_PATH } from '../constants';
+import { ALERTING_V2_INTERNAL_SUGGESTIONS_USER_PROFILES_API_PATH } from '../constants';
 
 const ROUTE_AUTH_PRIVILEGES = [ALERTING_V2_API_PRIVILEGES.alerts.read] as const;
 
@@ -54,7 +54,7 @@ type SuggestUserProfilesBody = z.infer<typeof suggestUserProfilesBodySchema>;
 @injectable()
 export class SuggestUserProfilesRoute extends BaseAlertingRoute {
   static method = 'post' as const;
-  static path = ALERTING_V2_INTERNAL_SUGGEST_USER_PROFILES_API_PATH;
+  static path = ALERTING_V2_INTERNAL_SUGGESTIONS_USER_PROFILES_API_PATH;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [...ROUTE_AUTH_PRIVILEGES],

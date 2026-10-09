@@ -35,7 +35,7 @@ const mockUseBulkGetProfiles = jest.mocked(useBulkGetProfiles);
 const mockEpisodeServices = createMockServices();
 
 const defaultProps = {
-  filterState: { status: 'active' as const },
+  filterState: { status: ['active'] },
   onFilterChange: jest.fn(),
   timeRange: { from: 'now-24h', to: 'now' },
   onTimeChange: jest.fn(),

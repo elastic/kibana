@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { MwsCalloutContent } from './mws_callout_content';
 import { MwsPendingSyncCallout } from './mws_pending_sync_callout';
 import { useHasPendingMwChanges } from './use_has_pending_mw_changes';

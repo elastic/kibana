@@ -247,9 +247,11 @@ describe('Trusted apps form', () => {
       expect(getOsField().textContent).toEqual('Windows, ');
     });
 
-    it('should allow user to select between 3 OSs', async () => {
+    it('should allow user to select between 3 OSs', () => {
       const osField = getOsField();
-      await userEvent.click(osField);
+      act(() => {
+        fireEvent.click(osField);
+      });
       const options = Array.from(
         renderResult.baseElement.querySelectorAll(
           '.euiSuperSelect__listbox button.euiSuperSelect__item'

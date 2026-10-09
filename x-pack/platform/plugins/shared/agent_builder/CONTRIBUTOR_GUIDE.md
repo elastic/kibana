@@ -467,7 +467,7 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
     if (openSidebarConversation) {
       buttons.push({
         label: 'Continue in sidebar',
-        icon: 'discuss',
+        icon: 'comment',
         type: ActionButtonType.SECONDARY,
         handler: openSidebarConversation,
       });
@@ -494,6 +494,7 @@ The `getActionButtons` params include flags to customize behavior per viewport:
 - **`isSidebar`** - `true` when rendered in the sidebar (constrained width)
 - **`isCanvas`** - `true` when rendered in the canvas flyout (expanded view)
 - **`openCanvas`** - Callback to open canvas mode; `undefined` when already in canvas
+- **`closeCanvas`** - Callback to dismiss the canvas; `undefined` when not in canvas
 - **`openSidebarConversation`** - Callback to open the agent builder sidebar with the current conversation loaded; `undefined` when already in the sidebar
 
 #### Canvas flyout width
@@ -667,7 +668,7 @@ getActionButtons: ({ attachment, updateOrigin, isCanvas }) => {
   if (attachment.origin) {
     buttons.push({
       label: 'Open in App',
-      icon: 'popout',
+      icon: 'external',
       type: ActionButtonType.SECONDARY,
       handler: () => {
         window.open(`/app/myApp/${attachment.origin}`, '_blank');

@@ -7,7 +7,16 @@
 
 import { randomUUID } from 'crypto';
 import { schema } from '@kbn/config-schema';
-import { bufferCount, defaultIfEmpty, defer, from, mergeMap, take, tap } from 'rxjs';
+import {
+  bufferCount,
+  defaultIfEmpty,
+  defer,
+  from,
+  mergeMap,
+  take,
+  tap,
+  type Observable,
+} from 'rxjs';
 import { cloneDeep } from 'lodash';
 import type {
   TaskManagerSetupContract,
@@ -21,7 +30,9 @@ import type {
   AnalyticsServiceStart,
 } from '@kbn/core/server';
 import {
+  NotAllowedError,
   PermissionError,
+  type ApiExecutableQuery,
   type ExecutableQuery,
   type SkippedQuery,
   type HealthDiagnosticQuery,
@@ -132,6 +143,8 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
 
       if (resolvedQuery.kind === 'skipped') {
         stats = this.buildSkippedStats(resolvedQuery);
+      } else if (resolvedQuery.kind === 'executable_api') {
+        stats = await this.executeApiQuery(resolvedQuery);
       } else {
         stats = await this.executeQuery(resolvedQuery);
       }
@@ -139,6 +152,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       this.logger.debug('Query executed. Sending query stats EBT', {
         queryName: resolvedQuery.query.name,
         traceId: stats.traceId,
+        stats,
       } as LogMeta);
 
       this.reportEBT(TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT, stats);
@@ -169,8 +183,6 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   private async executeQuery(
     executableQuery: ExecutableQuery
   ): Promise<HealthDiagnosticQueryStats> {
-    const { query } = executableQuery;
-    const now = new Date();
     const circuitBreakers = this.buildCircuitBreakers();
     const options = { query: executableQuery, circuitBreakers };
 
@@ -179,6 +191,33 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     }
     const executor = this.queryExecutor;
     const query$ = defer(() => executor.search(options));
+
+    return this.runQueryPipeline(query$, executableQuery, circuitBreakers, 'query');
+  }
+
+  private async executeApiQuery(
+    executableQuery: ApiExecutableQuery
+  ): Promise<HealthDiagnosticQueryStats> {
+    const circuitBreakers = this.buildCircuitBreakers();
+    const options = { query: executableQuery, circuitBreakers };
+
+    if (!this.queryExecutor) {
+      throw new Error('queryExecutor is unavailable');
+    }
+    const executor = this.queryExecutor;
+    const query$ = defer(() => executor.searchApi(options));
+
+    return this.runQueryPipeline(query$, executableQuery, circuitBreakers, 'API query');
+  }
+
+  private runQueryPipeline(
+    query$: Observable<unknown>,
+    executableQuery: ExecutableQuery | ApiExecutableQuery,
+    circuitBreakers: CircuitBreaker[],
+    queryLabel: string
+  ): Promise<HealthDiagnosticQueryStats> {
+    const { query } = executableQuery;
+    const now = new Date();
 
     return new Promise<HealthDiagnosticQueryStats>((resolve) => {
       const queryStats: HealthDiagnosticQueryStats = queryStat(query.name, now, query.version);
@@ -207,9 +246,9 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
             from(
               applyFilterlist(
                 result,
-                executableQuery.query.filterlist,
+                query.filterlist,
                 this.salt,
-                executableQuery.query,
+                query,
                 telemetryConfiguration.encryption_public_keys
               )
             )
@@ -238,9 +277,11 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
               reason: error instanceof ValidationError ? error.result : undefined,
             };
             if (error instanceof PermissionError) {
-              this.logger.debug('Permission error running query.', withErrorMessage(error));
+              this.logger.debug(`Permission error running ${queryLabel}.`, withErrorMessage(error));
+            } else if (error instanceof NotAllowedError) {
+              this.logger.debug('API path not allowed.', withErrorMessage(error));
             } else {
-              this.logger.warn('Error running query', withErrorMessage(error));
+              this.logger.warn(`Error running ${queryLabel}`, withErrorMessage(error));
             }
             resolve({
               ...queryStats,

@@ -93,7 +93,7 @@ export const StatusFilter = ({ matcher, onChange }: QuickFiltersProps) => {
       panelStyle={POPOVER_PANEL_STYLE}
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsOpen((o) => !o)}
           isSelected={isOpen}

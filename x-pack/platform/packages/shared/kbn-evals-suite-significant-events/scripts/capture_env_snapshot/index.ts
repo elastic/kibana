@@ -13,8 +13,8 @@ run(({ log, flags }) => captureEnvSnapshot({ log, flags }), {
   description: `
     Capture the current Streams/Significant Events environment into a GCS snapshot.
 
-    Protected Kibana system indices (Streams .kibana_streams_*) and the KI data stream are
-    reindexed to snapshot-safe names (snapshot-*) with mappings preserved.
+    Significant Events data streams are reindexed to snapshot-safe names (snapshot-*)
+    with mappings preserved.
     --logs-index and --alert-indices are included directly in the snapshot (not reindexed).
 
     Prerequisites:

@@ -63,16 +63,22 @@ export const actionListHandler = (
     } = req;
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const activeSpaceId = (await context.securitySolution).getSpaceId();
+    const scoped = endpointContext.service.asScoped(req);
 
     try {
-      const indexExists = await doesLogsEndpointActionsIndexExist({
-        esClient,
-        logger,
-        indexName: ENDPOINT_ACTIONS_INDEX,
-      });
+      // The probe is origin-only, so under CPS an origin that has never dispatched an action would
+      // 404 the whole list even when linked projects hold history. The search tolerates the missing
+      // index on its own.
+      if (!scoped.isCpsRead()) {
+        const indexExists = await doesLogsEndpointActionsIndexExist({
+          esClient,
+          logger,
+          indexName: ENDPOINT_ACTIONS_INDEX,
+        });
 
-      if (!indexExists) {
-        return res.notFound({ body: 'index_not_found_exception' });
+        if (!indexExists) {
+          return res.notFound({ body: 'index_not_found_exception' });
+        }
       }
 
       // verify feature flag for sentinel_one `agentType`
@@ -91,6 +97,7 @@ export const actionListHandler = (
 
         spaceId: activeSpaceId,
         endpointService: endpointContext.service,
+        scoped,
       };
       // wrapper method to branch logic for
       // normal paged search via page, size

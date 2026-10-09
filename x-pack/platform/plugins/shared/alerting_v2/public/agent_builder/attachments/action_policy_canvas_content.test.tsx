@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, act } from '@testing-library/react';
+import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyCanvasContent } from './action_policy_canvas_content';
 
 const flushPromises = async () => {
@@ -85,7 +86,7 @@ const createAttachment = ({
   data,
 }: { origin?: string; data?: Record<string, unknown> } = {}) => ({
   id: 'att-1',
-  type: 'action_policy' as const,
+  type: ACTION_POLICY_ATTACHMENT_TYPE,
   versions: [],
   current_version: 1,
   origin,

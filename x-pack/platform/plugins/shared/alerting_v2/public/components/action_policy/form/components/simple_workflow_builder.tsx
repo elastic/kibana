@@ -135,7 +135,7 @@ export const SimpleWorkflowBuilder = () => {
               {INLINE_ACTION_STEP_DEFINITIONS.map((definition) => (
                 <EuiFlexItem grow={false} key={definition.id}>
                   <EuiButtonEmpty
-                    iconType={definition.iconType ?? 'plusInCircle'}
+                    iconType={definition.iconType ?? 'plusCircle'}
                     size="s"
                     onClick={() => addDraft(definition.id)}
                     data-test-subj={`simpleWorkflowAdd-${definition.id}`}

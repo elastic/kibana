@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Client as EsClient, estypes } from '@elastic/elasticsearch';
+import { errors, type Client as EsClient, type estypes } from '@elastic/elasticsearch';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
@@ -121,6 +121,31 @@ export interface MlAnnotationsApi {
 }
 
 export interface MlDataFrameAnalyticsApi {
+  /** Create a data frame analytics job via the Kibana API (registers in current space) */
+  createViaKibana: (
+    jobConfig: { id: string; [key: string]: unknown },
+    space?: string
+  ) => Promise<void>;
+  /** Start a data frame analytics job via the Elasticsearch API */
+  start: (analyticsId: string) => Promise<void>;
+  /** Get data frame analytics job runtime stats via the Elasticsearch API */
+  getStats: (
+    analyticsId: string
+  ) => Promise<{ state: string | undefined; hasTrainingDocs: boolean }>;
+  /** Wait for a data frame analytics job to stop by polling the Elasticsearch API */
+  waitForStopped: (analyticsId: string, timeoutMs?: number) => Promise<void>;
+  /** Wait until training has begun so a subsequent waitForStopped does not resolve on the initial stopped state */
+  waitForTrainingDocs: (analyticsId: string, timeoutMs?: number) => Promise<void>;
+  /**
+   * Delete a data frame analytics job if it exists via the Elasticsearch API.
+   * Add space-aware saved object cleanup if this is used in space-scoped tests.
+   */
+  deleteIfExists: (analyticsId: string) => Promise<void>;
+  /** Create and run a data frame analytics job via the Kibana and Elasticsearch APIs */
+  createAndRun: (
+    jobConfig: { id: string; [key: string]: unknown },
+    options?: { timeoutMs?: number; space?: string }
+  ) => Promise<void>;
   /** Get all data frame analytics jobs via the Elasticsearch API */
   getAllJobs: () => Promise<estypes.MlDataframeAnalyticsSummary[]>;
   /** Wait for a data frame analytics job to exist by polling the Elasticsearch API */
@@ -594,6 +619,123 @@ export const getMlApiHelper = (
   };
 
   const dataFrameAnalytics: MlDataFrameAnalyticsApi = {
+    async createViaKibana(
+      jobConfig: { id: string; [key: string]: unknown },
+      space?: string
+    ): Promise<void> {
+      const { id: analyticsId, ...body } = jobConfig;
+      await measurePerformanceAsync(
+        log,
+        `mlApi.dataFrameAnalytics.createViaKibana [${analyticsId}]`,
+        async () => {
+          await kbnClient.request({
+            method: 'PUT',
+            path: `${space ? `/s/${space}` : ''}/internal/ml/data_frame/analytics/${analyticsId}`,
+            headers: ML_INTERNAL_HEADERS,
+            body,
+          });
+          await this.waitForJobToExist(analyticsId);
+        }
+      );
+    },
+
+    async start(analyticsId: string): Promise<void> {
+      await measurePerformanceAsync(
+        log,
+        `mlApi.dataFrameAnalytics.start [${analyticsId}]`,
+        async () => {
+          await esClient.ml.startDataFrameAnalytics({ id: analyticsId });
+        }
+      );
+    },
+
+    async getStats(
+      analyticsId: string
+    ): Promise<{ state: string | undefined; hasTrainingDocs: boolean }> {
+      return measurePerformanceAsync(
+        log,
+        `mlApi.dataFrameAnalytics.getStats [${analyticsId}]`,
+        async () => {
+          const { data_frame_analytics: statsList } = await esClient.ml.getDataFrameAnalyticsStats({
+            id: analyticsId,
+            allow_no_match: true,
+          });
+          const stats = statsList[0];
+
+          return {
+            state: stats?.state,
+            hasTrainingDocs: (stats?.data_counts.training_docs_count ?? 0) > 0,
+          };
+        }
+      );
+    },
+
+    async waitForStopped(analyticsId: string, timeoutMs = 2 * 60 * 1000): Promise<void> {
+      await waitForCondition(
+        `data frame analytics job '${analyticsId}' to stop`,
+        async () => {
+          if ((await this.getStats(analyticsId)).state === 'stopped') {
+            return true;
+          }
+          throw new Error(
+            `DFA job '${analyticsId}' did not reach 'stopped' state within ${timeoutMs}ms`
+          );
+        },
+        timeoutMs,
+        5_000
+      );
+    },
+
+    async waitForTrainingDocs(analyticsId: string, timeoutMs = 60_000): Promise<void> {
+      await waitForCondition(
+        `data frame analytics job '${analyticsId}' to have training docs`,
+        async () => {
+          if ((await this.getStats(analyticsId)).hasTrainingDocs) {
+            return true;
+          }
+          throw new Error(
+            `DFA job '${analyticsId}' did not report training docs within ${timeoutMs}ms`
+          );
+        },
+        timeoutMs,
+        3_000
+      );
+    },
+
+    async deleteIfExists(analyticsId: string): Promise<void> {
+      await measurePerformanceAsync(
+        log,
+        `mlApi.dataFrameAnalytics.deleteIfExists [${analyticsId}]`,
+        async () => {
+          try {
+            await esClient.ml.deleteDataFrameAnalytics({ id: analyticsId, force: true });
+          } catch (error) {
+            if (!(error instanceof errors.ResponseError && error.statusCode === 404)) {
+              throw error;
+            }
+          }
+        }
+      );
+    },
+
+    async createAndRun(
+      jobConfig: { id: string; [key: string]: unknown },
+      { timeoutMs = 2 * 60 * 1000, space }: { timeoutMs?: number; space?: string } = {}
+    ): Promise<void> {
+      await measurePerformanceAsync(
+        log,
+        `mlApi.dataFrameAnalytics.createAndRun [${jobConfig.id}]`,
+        async () => {
+          await this.createViaKibana(jobConfig, space);
+          await this.start(jobConfig.id);
+          // Avoid resolving waitForStopped on the brief post-start stopped state.
+          await this.waitForTrainingDocs(jobConfig.id);
+          await this.waitForStopped(jobConfig.id, timeoutMs);
+          await savedObjects.sync(false, space);
+        }
+      );
+    },
+
     async getAllJobs(): Promise<estypes.MlDataframeAnalyticsSummary[]> {
       return measurePerformanceAsync(log, 'mlApi.dataFrameAnalytics.getAllJobs', async () => {
         const { data_frame_analytics: dfaJobs } = await esClient.ml.getDataFrameAnalytics({

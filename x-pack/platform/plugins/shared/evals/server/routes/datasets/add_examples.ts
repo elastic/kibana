@@ -13,6 +13,7 @@ import {
   INTERNAL_API_ACCESS,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,
@@ -28,6 +29,7 @@ export const registerAddExamplesRoute = ({
   logger,
   canEncrypt,
   getEncryptedSavedObjectsStart,
+  getSpaceId,
 }: RouteDependencies) => {
   router.versioned
     .post({
@@ -85,8 +87,9 @@ export const registerAddExamplesRoute = ({
 
           const { datasetId } = request.params;
           const { examples } = request.body;
+          const activeSpaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
           const evalsContext = await context.evals;
-          const datasetClient = evalsContext.datasetService.getClient();
+          const datasetClient = evalsContext.datasetService.getClient({ spaceId: activeSpaceId });
 
           const exists = await datasetClient.datasetExists(datasetId);
           if (!exists) {
@@ -118,7 +121,8 @@ export const registerAddExamplesRoute = ({
             });
           }
 
-          logger.error(`Failed to add evaluation dataset examples: ${error}`);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error(`Failed to add evaluation dataset examples: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to add evaluation dataset examples' },

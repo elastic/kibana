@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { alertsFilterQuerySchema } from '../../../schemas/alerts_filter_query_schemas';
-import { rRuleRequestSchema } from '../../../../routes/apis/r_rule/request/schemas/v1';
+import { rRuleRequestSchema } from '../../../../routes/schemas/r_rule';
 import { scheduleRequestSchema } from '../../../../routes/schemas/schedule';
 import { maintenanceWindowCategoryIdsSchema } from '../../../schemas/maintenance_window';
 

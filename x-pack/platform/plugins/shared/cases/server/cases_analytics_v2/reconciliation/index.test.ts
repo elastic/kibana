@@ -5,9 +5,37 @@
  * 2.0.
  */
 
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { clampCursorToNotFuture, resetReconciliationTask, RECONCILIATION_TASK_ID } from '.';
+import type {
+  TaskManagerSetupContract,
+  ConcreteTaskInstance,
+} from '@kbn/task-manager-plugin/server';
+import { V2_NOOP_WRITER } from '../writer';
+import { V2_NOOP_ACTIVITY_WRITER } from '../writer/activity';
+import { V2_NOOP_ATTACHMENTS_WRITER } from '../writer/attachments';
+import { runReconciliation } from './runner';
+import { runActivityReconciliation } from './activity_runner';
+import { runAttachmentsReconciliation } from './attachments_runner';
+import {
+  clampCursorToNotFuture,
+  registerReconciliationTask,
+  resetReconciliationTask,
+  RECONCILIATION_TASK_ID,
+  RECONCILIATION_TASK_TYPE,
+} from '.';
+
+jest.mock('./runner');
+jest.mock('./activity_runner');
+jest.mock('./attachments_runner');
+const mockRunReconciliation = runReconciliation as jest.MockedFunction<typeof runReconciliation>;
+const mockRunActivityReconciliation = runActivityReconciliation as jest.MockedFunction<
+  typeof runActivityReconciliation
+>;
+const mockRunAttachmentsReconciliation = runAttachmentsReconciliation as jest.MockedFunction<
+  typeof runAttachmentsReconciliation
+>;
 
 describe('clampCursorToNotFuture', () => {
   const logger = loggerMock.create();
@@ -152,5 +180,196 @@ describe('resetReconciliationTask', () => {
       resetReconciliationTask({ taskManager: tm, logger, intervalMinutes: 30 })
     ).resolves.toBeUndefined();
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('locked'));
+  });
+
+  it('resolves even when ensureScheduled rejects during scheduling', async () => {
+    // End-to-end resilience: an ensureScheduled failure must not break reset. Note that
+    // scheduleReconciliationTask swallows this internally, so the rejection never actually reaches
+    // resetReconciliationTask's own try — this pins the composed "reset never throws on a scheduling
+    // hiccup" behavior, not the try boundary itself (no current input makes scheduling throw).
+    // bulkUpdateState still runs and resolves.
+    const tm = taskManagerMock.createStart();
+    (tm.ensureScheduled as jest.Mock).mockRejectedValueOnce(new Error('tm unavailable'));
+
+    await expect(
+      resetReconciliationTask({ taskManager: tm, logger, intervalMinutes: 30 })
+    ).resolves.toBeUndefined();
+    // bulkUpdateState is reached despite the scheduling hiccup.
+    expect(tm.bulkUpdateState).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('registerReconciliationTask run()', () => {
+  const logger = loggerMock.create();
+
+  /**
+   * Registers the task, pulls out the `run()` closure Task Manager would
+   * invoke, and hands the caller a `signal` it can pre-abort or trip
+   * between surfaces. The three runner modules are mocked (see the
+   * top-level `jest.mock` calls) so the tests exercise only the
+   * orchestration in `createTaskRunner`, not the walks themselves.
+   */
+  const setupRun = ({
+    signal = new AbortController().signal,
+    state = {},
+  }: { signal?: AbortSignal; state?: Record<string, unknown> } = {}) => {
+    const taskManager = taskManagerMock.createSetup() as unknown as TaskManagerSetupContract;
+    const savedObjectsClient = savedObjectsClientMock.create();
+
+    registerReconciliationTask({
+      taskManager,
+      logger,
+      getRunnerDeps: async () => ({
+        savedObjectsClient,
+        writer: V2_NOOP_WRITER,
+        activityWriter: V2_NOOP_ACTIVITY_WRITER,
+        attachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
+      }),
+    });
+
+    const registerFn = (taskManager as unknown as { registerTaskDefinitions: jest.Mock })
+      .registerTaskDefinitions;
+    const definition = registerFn.mock.calls[0][0][RECONCILIATION_TASK_TYPE];
+    const run = definition.createTaskRunner({
+      taskInstance: { state } as unknown as ConcreteTaskInstance,
+      signal,
+    }).run as () => Promise<{ state: Record<string, unknown>; taskRunError?: unknown }>;
+
+    return { run };
+  };
+
+  beforeEach(() => {
+    mockRunReconciliation.mockResolvedValue({ newLastRunAt: 'CASES_NEW', processed: 1 });
+    mockRunActivityReconciliation.mockResolvedValue({ newLastRunAt: 'ACTIVITY_NEW', processed: 1 });
+    mockRunAttachmentsReconciliation.mockResolvedValue({
+      newLastRunAt: 'ATTACHMENTS_NEW',
+      processed: 1,
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('runs all three surfaces in order on the happy path and advances every cursor', async () => {
+    const { run } = setupRun();
+
+    const { state, taskRunError } = await run();
+
+    expect(mockRunReconciliation).toHaveBeenCalledTimes(1);
+    expect(mockRunActivityReconciliation).toHaveBeenCalledTimes(1);
+    expect(mockRunAttachmentsReconciliation).toHaveBeenCalledTimes(1);
+    // Cases must lead so a downstream LOOKUP JOIN sees the dimension row
+    // at least as fresh as the fact rows referencing it.
+    const casesOrder = mockRunReconciliation.mock.invocationCallOrder[0];
+    const activityOrder = mockRunActivityReconciliation.mock.invocationCallOrder[0];
+    const attachmentsOrder = mockRunAttachmentsReconciliation.mock.invocationCallOrder[0];
+    expect(casesOrder).toBeLessThan(activityOrder);
+    expect(activityOrder).toBeLessThan(attachmentsOrder);
+
+    expect(state).toEqual({
+      cases_last_run_at: 'CASES_NEW',
+      activity_last_run_at: 'ACTIVITY_NEW',
+      attachments_last_run_at: 'ATTACHMENTS_NEW',
+    });
+    expect(taskRunError).toBeUndefined();
+  });
+
+  it('skips every surface when the signal is already aborted, carrying the prior cursors forward pinned', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const { run } = setupRun({
+      signal: controller.signal,
+      state: {
+        cases_last_run_at: '2026-05-01T00:00:00.000Z',
+        activity_last_run_at: '2026-05-02T00:00:00.000Z',
+        attachments_last_run_at: '2026-05-03T00:00:00.000Z',
+      },
+    });
+
+    const { state, taskRunError } = await run();
+
+    // No surface ran; all three guards short-circuited.
+    expect(mockRunReconciliation).not.toHaveBeenCalled();
+    expect(mockRunActivityReconciliation).not.toHaveBeenCalled();
+    expect(mockRunAttachmentsReconciliation).not.toHaveBeenCalled();
+    // Prior cursors survive unchanged so the next tick re-walks each window.
+    expect(state).toEqual({
+      cases_last_run_at: '2026-05-01T00:00:00.000Z',
+      activity_last_run_at: '2026-05-02T00:00:00.000Z',
+      attachments_last_run_at: '2026-05-03T00:00:00.000Z',
+    });
+    // No surface threw, so this is a clean (if empty) tick — not an error.
+    expect(taskRunError).toBeUndefined();
+    // The mid-flight cancellation is logged exactly once, not per skipped surface.
+    expect(logger.info).toHaveBeenCalledTimes(1);
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.stringContaining('reconciliation tick cancelled')
+    );
+  });
+
+  it('runs cases, then skips activity + attachments when the signal trips after the cases surface', async () => {
+    const controller = new AbortController();
+    // Trip the signal as a side effect of the cases walk completing, so
+    // the between-surface guards see `aborted` before activity runs.
+    mockRunReconciliation.mockImplementation(async () => {
+      controller.abort();
+      return { newLastRunAt: 'CASES_NEW', processed: 1 };
+    });
+    const { run } = setupRun({
+      signal: controller.signal,
+      state: {
+        cases_last_run_at: '2026-05-01T00:00:00.000Z',
+        activity_last_run_at: '2026-05-02T00:00:00.000Z',
+        attachments_last_run_at: '2026-05-03T00:00:00.000Z',
+      },
+    });
+
+    const { state, taskRunError } = await run();
+
+    // Cases completed and advanced its cursor...
+    expect(mockRunReconciliation).toHaveBeenCalledTimes(1);
+    // ...but the remaining surfaces were skipped by the abort guards.
+    expect(mockRunActivityReconciliation).not.toHaveBeenCalled();
+    expect(mockRunAttachmentsReconciliation).not.toHaveBeenCalled();
+    expect(state).toEqual({
+      cases_last_run_at: 'CASES_NEW',
+      activity_last_run_at: '2026-05-02T00:00:00.000Z',
+      attachments_last_run_at: '2026-05-03T00:00:00.000Z',
+    });
+    expect(taskRunError).toBeUndefined();
+    expect(logger.info).toHaveBeenCalledTimes(1);
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.stringContaining('reconciliation tick cancelled')
+    );
+  });
+
+  it('returns { state, taskRunError } (not a throw) when a surface throws mid-walk, preserving the other surfaces cursors', async () => {
+    // Activity blows up mid-walk; cases + attachments succeed. The tick
+    // must persist the successful cursors and report the failure via
+    // taskRunError rather than throwing away nextState.
+    mockRunActivityReconciliation.mockRejectedValue(new Error('activity boom'));
+    const { run } = setupRun({
+      state: { activity_last_run_at: '2026-05-02T00:00:00.000Z' },
+    });
+
+    const { state, taskRunError } = await run();
+
+    // All three were attempted (no abort here).
+    expect(mockRunReconciliation).toHaveBeenCalledTimes(1);
+    expect(mockRunActivityReconciliation).toHaveBeenCalledTimes(1);
+    expect(mockRunAttachmentsReconciliation).toHaveBeenCalledTimes(1);
+    // Successful surfaces advanced; the failed surface's cursor stays pinned.
+    expect(state).toEqual({
+      cases_last_run_at: 'CASES_NEW',
+      activity_last_run_at: '2026-05-02T00:00:00.000Z',
+      attachments_last_run_at: 'ATTACHMENTS_NEW',
+    });
+    // Failure surfaced as taskRunError, naming the failing surface.
+    expect(taskRunError).toBeDefined();
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('activity reconciliation tick failed'),
+      expect.objectContaining({ error: expect.any(Error) })
+    );
   });
 });

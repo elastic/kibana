@@ -29,6 +29,7 @@ import * as i18n from './translations';
 import { getIsTerminalState } from './get_is_terminal_state';
 import { useDismissAttackDiscoveryGeneration } from '../use_dismiss_attack_discovery_generations';
 import { useHasWorkflowsPrivileges } from '../hooks/use_has_workflows_privileges';
+import { ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { AttackDiscoveryEventTypes } from '../../../common/lib/telemetry';
 
@@ -112,23 +113,25 @@ const LoadingCalloutComponent: React.FC<Props> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const isDarkMode = useKibanaIsDarkMode();
-  const { featureFlags, http, telemetry } = useKibana().services;
+  const { featureFlags, http, telemetry, uiSettings } = useKibana().services;
 
   const [isWorkflowsEnabled, setIsWorkflowsEnabled] = useState<boolean>(false);
 
   const { hasWorkflowsRead } = useHasWorkflowsPrivileges();
 
-  // Load feature flag value
+  // Load feature flag value and combine with per-space uiSetting opt-in
   useEffect(() => {
     const loadFeatureFlag = async () => {
-      const enabled = await featureFlags.getBooleanValue(
+      const ffEnabled = await featureFlags.getBooleanValue(
         'securitySolution.attackDiscoveryWorkflowsEnabled',
-        false
+        true
       );
-      setIsWorkflowsEnabled(enabled);
+      setIsWorkflowsEnabled(
+        ffEnabled && uiSettings.get(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING, false)
+      );
     };
     loadFeatureFlag();
-  }, [featureFlags]);
+  }, [featureFlags, uiSettings]);
 
   const isTerminalState = useMemo(() => getIsTerminalState(status), [status]);
 

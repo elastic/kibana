@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 
@@ -155,6 +156,43 @@ describe('bulkCreateWithInferenceFallback', () => {
     expect(response.errors).toBe(false);
     expect(attempt).toHaveBeenCalledTimes(4);
     expect(attempt).toHaveBeenLastCalledWith({ includeEmbedding: false });
+  });
+
+  it('retries a thrown TimeoutError and returns when a later attempt succeeds', async () => {
+    const attempt = jest
+      .fn()
+      .mockRejectedValueOnce(new errors.TimeoutError('Request timed out', {} as any))
+      .mockResolvedValueOnce(okResponse());
+
+    const response = await bulkCreateWithInferenceFallback(createLogger(), attempt);
+
+    expect(response.errors).toBe(false);
+    expect(attempt).toHaveBeenCalledTimes(2);
+    expect(attempt).toHaveBeenNthCalledWith(2, { includeEmbedding: true });
+  });
+
+  it('falls back to writing without embedding when every attempt throws a TimeoutError', async () => {
+    const attempt = jest
+      .fn()
+      .mockRejectedValueOnce(new errors.TimeoutError('Request timed out', {} as any))
+      .mockRejectedValueOnce(new errors.TimeoutError('Request timed out', {} as any))
+      .mockRejectedValueOnce(new errors.TimeoutError('Request timed out', {} as any))
+      .mockResolvedValueOnce(okResponse());
+
+    const response = await bulkCreateWithInferenceFallback(createLogger(), attempt);
+
+    expect(response.errors).toBe(false);
+    expect(attempt).toHaveBeenCalledTimes(4);
+    expect(attempt).toHaveBeenLastCalledWith({ includeEmbedding: false });
+  });
+
+  it('rethrows a non-inference rejection without retrying or falling back', async () => {
+    const attempt = jest.fn().mockRejectedValue(new Error('mapping conflict'));
+
+    await expect(bulkCreateWithInferenceFallback(createLogger(), attempt)).rejects.toThrow(
+      /mapping conflict/
+    );
+    expect(attempt).toHaveBeenCalledTimes(1);
   });
 
   it('throws when the embedding-stripped fallback also fails', async () => {

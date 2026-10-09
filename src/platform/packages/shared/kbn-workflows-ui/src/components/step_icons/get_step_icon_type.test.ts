@@ -81,4 +81,16 @@ describe('getStepIconType', () => {
     expect(getStepIconType('custom_step')).toBe('plugs');
     expect(getStepIconType('unknown')).toBe('plugs');
   });
+
+  // Regression guard: getStepIconType accepts raw dotted connector types (e.g. ".slack")
+  // without a separate normalization step. Each case below returned "plugs" before the
+  // leading-dot strip was added; if the strip is removed they must fail.
+  it.each([
+    ['logoSlack', '.slack'],
+    ['logoSlack', '.slack_api'],
+    ['mail', '.email'],
+    ['sparkles', '.inference'],
+  ])('should strip the leading dot and return "%s" for "%s"', (expected, nodeType) => {
+    expect(getStepIconType(nodeType)).toBe(expected);
+  });
 });

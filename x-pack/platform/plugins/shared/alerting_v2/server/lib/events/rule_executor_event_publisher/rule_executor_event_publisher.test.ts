@@ -6,28 +6,51 @@
  */
 
 import { createRuleExecutorEventPublisher } from './rule_executor_event_publisher.mock';
-import { RULE_EXECUTION_COMPLETED_EVENT_TYPE } from './events';
+import {
+  RULE_EXECUTION_SUCCEEDED_EVENT_TYPE,
+  RULE_EXECUTION_FAILED_EVENT_TYPE,
+  type RuleExecutionSucceededPayload,
+  type RuleExecutionFailedPayload,
+} from './events';
 
 describe('RuleExecutorEventPublisher', () => {
-  it('publishes rule.execution.completed with the payload and threaded request', () => {
+  it('publishes rule.execution.succeeded with the payload and threaded request', () => {
     const { publisher, eventBus, request } = createRuleExecutorEventPublisher();
 
-    const payload = {
+    const payload: RuleExecutionSucceededPayload = {
       executionId: 'execution-uuid',
-      ruleId: 'rule-1',
-      spaceId: 'space-1',
       scheduledAt: '2025-01-01T00:00:00.000Z',
-      startedAt: '2025-01-01T00:00:00.000Z',
-      endedAt: '2025-01-01T00:00:01.000Z',
-      durationMs: 1000,
-      counters: { signalsGenerated: 5 },
+      ruleEventsGenerated: 5,
+      rule: {
+        ruleId: 'rule-1',
+        spaceId: 'space-1',
+        kind: 'signal',
+        tags: ['security', 'siem'],
+      },
     };
 
-    publisher.publishExecutionCompleted(payload);
+    publisher.publishExecutionSucceeded(payload);
 
     expect(eventBus.publish).toHaveBeenCalledTimes(1);
     expect(eventBus.publish).toHaveBeenCalledWith(
-      { type: RULE_EXECUTION_COMPLETED_EVENT_TYPE, payload },
+      { type: RULE_EXECUTION_SUCCEEDED_EVENT_TYPE, payload },
+      { request }
+    );
+  });
+
+  it('publishes rule.execution.failed with the payload and threaded request', () => {
+    const { publisher, eventBus, request } = createRuleExecutorEventPublisher();
+
+    const payload: RuleExecutionFailedPayload = {
+      rule: { id: 'rule-1', spaceId: 'space-1' },
+      error: 'Something went wrong',
+    };
+
+    publisher.publishExecutionFailed(payload);
+
+    expect(eventBus.publish).toHaveBeenCalledTimes(1);
+    expect(eventBus.publish).toHaveBeenCalledWith(
+      { type: RULE_EXECUTION_FAILED_EVENT_TYPE, payload },
       { request }
     );
   });

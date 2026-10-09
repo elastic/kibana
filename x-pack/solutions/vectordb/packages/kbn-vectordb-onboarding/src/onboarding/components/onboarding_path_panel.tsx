@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type ReactNode } from 'react';
+import React, { type ReactNode, useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,6 +17,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import {
+  outerPanelStyle,
+  iconContainerStyle,
+  getStartedTextStyle,
+} from './onboarding_path_panel.styles';
 
 interface OnboardingPathPanelProps {
   icon: string;
@@ -36,27 +41,34 @@ export const OnboardingPathPanel = ({
   telemetryId,
 }: OnboardingPathPanelProps) => {
   const { euiTheme } = useEuiTheme();
+  const titleId = `${dataTestSubj}-title`;
+  const descriptionId = `${dataTestSubj}-description`;
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onClick();
+      }
+    },
+    [onClick]
+  );
 
   return (
     <EuiSplitPanel.Outer
       direction="row"
       onClick={onClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="button"
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
       data-test-subj={dataTestSubj}
       data-telemetry-id={telemetryId}
       hasBorder
       hasShadow={false}
       color="plain"
-      css={{
-        height: '100%',
-        // On hover, highlight the card's border in the primary color.
-        '&:hover::after': {
-          borderColor: euiTheme.colors.primary,
-        },
-        // On hover, change the icon panel background color to signal the card is clickable.
-        '&:hover .vectordbOnboardingPathIconPanel': {
-          backgroundColor: euiTheme.colors.backgroundBasePrimary,
-        },
-      }}
+      css={outerPanelStyle}
     >
       <EuiSplitPanel.Inner
         color="subdued"
@@ -64,7 +76,7 @@ export const OnboardingPathPanel = ({
         paddingSize="l"
         className="vectordbOnboardingPathIconPanel"
       >
-        <EuiFlexGroup alignItems="center" justifyContent="center" css={{ height: '100%' }}>
+        <EuiFlexGroup alignItems="center" justifyContent="center" css={iconContainerStyle}>
           <EuiFlexItem grow={false}>
             <EuiImage size={euiTheme.base * 4} src={icon} alt="" />
           </EuiFlexItem>
@@ -74,22 +86,16 @@ export const OnboardingPathPanel = ({
         <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="m">
           <EuiFlexGroup gutterSize="s" direction="column" alignItems="flexStart" responsive={false}>
             <EuiTitle size="s">
-              <h2>{title}</h2>
+              <h2 id={titleId}>{title}</h2>
             </EuiTitle>
-            <EuiText color="subdued" size="s">
+            <EuiText color="subdued" size="s" id={descriptionId}>
               {description}
             </EuiText>
           </EuiFlexGroup>
 
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiText
-                size="s"
-                css={{
-                  color: euiTheme.colors.textParagraph,
-                  fontWeight: euiTheme.font.weight.semiBold,
-                }}
-              >
+              <EuiText size="s" css={getStartedTextStyle}>
                 {i18n.translate('vectordbOnboarding.pathSelection.getStarted', {
                   defaultMessage: 'Get started',
                 })}

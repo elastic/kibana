@@ -10,7 +10,8 @@
 import React, { useState, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiResizeObserver, EuiFieldSearch, EuiCallOut } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
+import { EuiSpacer, EuiResizeObserver, EuiFieldSearch } from '@elastic/eui';
 
 import { useFieldPreviewContext } from './field_preview_context';
 import { FieldPreviewHeader } from './field_preview_header';
@@ -91,7 +92,7 @@ export const FieldPreview = () => {
           <EuiSpacer />
 
           {showWarningPreviewNotAvailable ? (
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               title={i18n.translate(
                 'indexPatternFieldEditor.fieldPreview.notAvailableWarningCallout.title',
@@ -99,21 +100,16 @@ export const FieldPreview = () => {
                   defaultMessage: 'Preview not available',
                 }
               )}
-              color="warning"
-              iconType="warning"
+              text={i18n.translate(
+                'indexPatternFieldEditor.fieldPreview.notAvailableWarningCallout.description',
+                {
+                  defaultMessage:
+                    'Runtime field preview is disabled because no documents could be fetched from the cluster.',
+                }
+              )}
               role="alert"
               data-test-subj="previewNotAvailableCallout"
-            >
-              <p>
-                {i18n.translate(
-                  'indexPatternFieldEditor.fieldPreview.notAvailableWarningCallout.description',
-                  {
-                    defaultMessage:
-                      'Runtime field preview is disabled because no documents could be fetched from the cluster.',
-                  }
-                )}
-              </p>
-            </EuiCallOut>
+            />
           ) : (
             <>
               <DocumentsNavPreview />

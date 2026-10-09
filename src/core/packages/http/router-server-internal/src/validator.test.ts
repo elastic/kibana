@@ -127,9 +127,9 @@ describe('Router validator', () => {
       },
     });
 
-    expect(() => validator.getParams({ foo: 1 })).toThrowError('Something went terribly wrong');
+    expect(() => validator.getParams({ foo: 1 })).toThrowError(/^Something went terribly wrong$/);
     expect(() => validator.getParams({}, 'myField')).toThrowError(
-      '[myField]: Something went terribly wrong'
+      /^\[myField\]: Something went terribly wrong$/
     );
   });
 

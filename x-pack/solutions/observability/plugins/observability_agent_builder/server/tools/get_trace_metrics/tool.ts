@@ -60,7 +60,14 @@ export function createGetTraceMetricsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getTraceMetricsSchema> = {
     id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves trace metrics (throughput, failure rate, latency) for APM data with flexible filtering and grouping. 
+    annotations: {
+      title: 'Get Trace Metrics',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+    description: `Retrieves trace metrics (throughput, failure rate, latency) for APM data with flexible filtering and grouping.
         
 Trace metrics are:
 - Throughput: requests per minute

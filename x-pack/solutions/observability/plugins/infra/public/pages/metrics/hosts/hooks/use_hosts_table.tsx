@@ -269,7 +269,7 @@ export const useHostsTable = () => {
           {
             name: TABLE_COLUMN_LABEL.toggleDialogAction,
             description: TABLE_COLUMN_LABEL.toggleDialogAction,
-            icon: ({ id }) => (id === detailsItemId ? 'minimize' : 'expand'),
+            icon: ({ id }) => (id === detailsItemId ? 'minimize' : 'maximize'),
             type: 'icon',
             'data-test-subj': 'hostsView-flyout-button',
             onClick: ({ id }) => {

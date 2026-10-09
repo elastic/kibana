@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/search-playground",
-  "owner": "@elastic/search-kibana",
+  "owner": "@elastic/search-ml-ux",
   // TODO @kbn/enterprise-search-plugin (platform) and @kbn/serverless-search (search) depend on it
   // cc sphilipse
   "group": "search",

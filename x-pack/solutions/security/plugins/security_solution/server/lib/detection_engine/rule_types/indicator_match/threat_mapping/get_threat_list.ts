@@ -7,12 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { getQueryFilter } from '../../utils/get_query_filter';
-import type {
-  GetThreatListOptions,
-  ThreatListCountOptions,
-  ThreatListDoc,
-  GetSortForThreatList,
-} from './types';
+import type { GetThreatListOptions, ThreatListCountOptions, ThreatListDoc } from './types';
 
 /**
  * This should not exceed 10000 (10k)
@@ -32,7 +27,6 @@ export const getThreatList = async ({
 }: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
   const {
     exceptionFilter,
-    listClient,
     runtimeMappings,
     ruleExecutionLogger,
     completeRule: {
@@ -65,10 +59,9 @@ export const getThreatList = async ({
     query: queryFilter,
     search_after: searchAfter,
     runtime_mappings: runtimeMappings,
-    sort: getSortForThreatList({
-      index: threatIndex,
-      listItemIndex: listClient.getListItemName(),
-    }),
+    // _shard_doc is unique within a PIT, so no timestamp tiebreaker is needed;
+    // a date sort value here would break the cursor on date_nanos threat indices
+    sort: ['_shard_doc'],
     track_total_hits: false,
     size: calculatedPerPage,
     pit: { id: pitId },
@@ -79,18 +72,6 @@ export const getThreatList = async ({
   reassignPitId(response.pit_id);
 
   return response;
-};
-
-export const getSortForThreatList = ({
-  index,
-  listItemIndex,
-}: GetSortForThreatList): estypes.Sort => {
-  const defaultSort = ['_shard_doc'];
-  if (index.length === 1 && index[0] === listItemIndex) {
-    return defaultSort;
-  }
-
-  return [...defaultSort, { '@timestamp': 'asc' }];
 };
 
 export const getThreatListCount = async ({

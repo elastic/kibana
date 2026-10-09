@@ -325,7 +325,7 @@ export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = ({ state
       })}
       <EuiButtonEmpty
         size="s"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={addRecoveryCondition}
         data-test-subj="ruleBuilderAddRecoveryCondition"
       >

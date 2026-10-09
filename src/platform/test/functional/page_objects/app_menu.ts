@@ -23,6 +23,16 @@ export class AppMenuPageObject extends FtrService {
     }
   }
 
+  private async openOverflowPopover() {
+    await this.retry.try(async () => {
+      // Reset any lingering open state so the toggle reliably opens the popover.
+      await this.ensureOverflowPopoverClosed();
+      await this.testSubjects.existOrFail(APP_MENU_OVERFLOW_BUTTON);
+      await this.testSubjects.click(APP_MENU_OVERFLOW_BUTTON);
+      await this.testSubjects.existOrFail(APP_MENU_POPOVER, { timeout: 3000 });
+    });
+  }
+
   async clickMenuItem(testId: string, { isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
     await this.retry.try(async () => {
       if (!isInOverflowMenu && (await this.testSubjects.exists(testId, { timeout: 1000 }))) {
@@ -30,14 +40,7 @@ export class AppMenuPageObject extends FtrService {
         return;
       }
 
-      // Close popover if left open from a previous attempt to avoid toggle issues
-      await this.ensureOverflowPopoverClosed();
-
-      await this.testSubjects.existOrFail(APP_MENU_OVERFLOW_BUTTON);
-      await this.testSubjects.click(APP_MENU_OVERFLOW_BUTTON);
-
-      // Verify the popover actually opened
-      await this.testSubjects.existOrFail(APP_MENU_POPOVER, { timeout: 3000 });
+      await this.openOverflowPopover();
       await this.testSubjects.existOrFail(testId, { timeout: 5000 });
       await this.testSubjects.click(testId);
     });
@@ -48,16 +51,14 @@ export class AppMenuPageObject extends FtrService {
       return true;
     }
 
-    if (await this.testSubjects.exists(APP_MENU_OVERFLOW_BUTTON)) {
-      await this.testSubjects.click(APP_MENU_OVERFLOW_BUTTON);
-      await this.testSubjects.existOrFail(APP_MENU_POPOVER, { timeout: 3000 });
-      const exists = await this.testSubjects.exists(testId);
-      await this.testSubjects.click(APP_MENU_OVERFLOW_BUTTON);
-      await this.testSubjects.missingOrFail(APP_MENU_POPOVER, { timeout: 3000 });
-      return exists;
+    if (!(await this.testSubjects.exists(APP_MENU_OVERFLOW_BUTTON))) {
+      return false;
     }
 
-    return false;
+    await this.openOverflowPopover();
+    const exists = await this.testSubjects.exists(testId);
+    await this.ensureOverflowPopoverClosed();
+    return exists;
   }
 
   async existOrFail(testId: string) {
@@ -66,11 +67,9 @@ export class AppMenuPageObject extends FtrService {
     }
 
     if (await this.testSubjects.exists(APP_MENU_OVERFLOW_BUTTON)) {
-      await this.testSubjects.click(APP_MENU_OVERFLOW_BUTTON);
-      await this.testSubjects.existOrFail(APP_MENU_POPOVER, { timeout: 3000 });
+      await this.openOverflowPopover();
       const exists = await this.testSubjects.exists(testId);
-      await this.testSubjects.click(APP_MENU_OVERFLOW_BUTTON);
-      await this.testSubjects.missingOrFail(APP_MENU_POPOVER, { timeout: 3000 });
+      await this.ensureOverflowPopoverClosed();
       if (exists) {
         return;
       }

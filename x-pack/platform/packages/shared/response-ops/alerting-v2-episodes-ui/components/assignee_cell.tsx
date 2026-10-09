@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText, EuiToolTip } fro
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { UserAvatar, UserToolTip } from '@kbn/user-profile-components';
+import { UserAvatar } from '@kbn/user-profile-components';
 import * as i18n from './translations';
 
 export interface AlertEpisodeAssigneeCellProps {
@@ -49,7 +49,7 @@ export const AlertEpisodeAssigneeCell = ({
   if (isError) {
     return (
       <EuiToolTip content={assigneeUid}>
-        <EuiText color="danger" size="s">
+        <EuiText tabIndex={0} color="danger" size="s">
           {i18n.ASSIGNEE_CELL_PROFILE_LOAD_ERROR}
         </EuiText>
       </EuiToolTip>
@@ -61,7 +61,7 @@ export const AlertEpisodeAssigneeCell = ({
   if (!profile) {
     return (
       <EuiToolTip content={assigneeUid}>
-        <EuiText color="subdued" size="s">
+        <EuiText tabIndex={0} color="subdued" size="s">
           {i18n.ASSIGNEE_CELL_UNKNOWN_USER}
         </EuiText>
       </EuiToolTip>
@@ -73,23 +73,21 @@ export const AlertEpisodeAssigneeCell = ({
   const avatar = profile.data?.avatar;
 
   return (
-    <UserToolTip user={user} avatar={avatar} position="top">
-      <EuiFlexGroup
-        gutterSize="xs"
-        alignItems="center"
-        responsive={false}
-        css={{ minWidth: 0 }}
-        data-test-subj="alertingV2EpisodeAssigneeCell"
-      >
-        <EuiFlexItem grow={false}>
-          <UserAvatar user={user} avatar={avatar} size="s" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-          <EuiText size="s" className="eui-textTruncate" title={username}>
-            {username}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </UserToolTip>
+    <EuiFlexGroup
+      gutterSize="xs"
+      alignItems="center"
+      responsive={false}
+      css={{ minWidth: 0 }}
+      data-test-subj="alertingV2EpisodeAssigneeCell"
+    >
+      <EuiFlexItem grow={false}>
+        <UserAvatar user={user} avatar={avatar} size="s" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+        <EuiText size="s" className="eui-textTruncate" title={username}>
+          {username}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

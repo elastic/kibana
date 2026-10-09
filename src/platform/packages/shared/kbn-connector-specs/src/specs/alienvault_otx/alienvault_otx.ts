@@ -169,23 +169,14 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
 
   test: {
     handler: async (ctx) => {
-      try {
-        await ctx.client.get('https://otx.alienvault.com/api/v1/pulses/subscribed', {
-          params: { limit: 1 },
-        });
-        return {
-          ok: true,
-          message: 'Successfully connected to AlienVault OTX API',
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          message: `Failed to connect: ${error}`,
-        };
-      }
+      await ctx.client.get('https://otx.alienvault.com/api/v1/pulses/subscribed', {
+        params: { limit: 1 },
+      });
+      return {};
     },
     description: i18n.translate('connectorSpecs.alienvaultOtx.test.description', {
       defaultMessage: 'Verifies AlienVault OTX API key',
     }),
+    enabled: true,
   },
 };

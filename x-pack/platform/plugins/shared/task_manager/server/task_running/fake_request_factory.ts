@@ -8,7 +8,7 @@
 import type { FakeRawRequest, Headers, KibanaRequest } from '@kbn/core/server';
 import type { FakeRequestEnricher } from '@kbn/core-security-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { asSpaceId } from '@kbn/core-spaces-common';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 
 interface BuildTaskFakeRequestOpts {
   apiKey?: string;
@@ -37,7 +37,7 @@ export const buildTaskFakeRequest = ({
   const headers: Headers = { authorization: `ApiKey ${apiKey}` };
   const fakeRawRequest: FakeRawRequest = {
     headers,
-    spaceId: asSpaceId(spaceId || 'default'),
+    spaceId: brandSpaceId(spaceId || 'default'),
   };
 
   const fakeRequest = kibanaRequestFactory(fakeRawRequest);

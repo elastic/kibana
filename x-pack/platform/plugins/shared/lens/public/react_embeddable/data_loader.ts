@@ -304,7 +304,7 @@ export function loadEmbeddableData(
       internalApi.updateExpressionParams(params);
     }
 
-    internalApi.updateAbortController(abortController);
+    internalApi.updateAbortController(abortController ?? new AbortController());
   }
 
   // Build a custom operator to be resused for various observables

@@ -20,7 +20,7 @@ import {
   FEATURE_FLAGS,
   FEATURE_FLAG_DEFAULTS,
 } from '../../../common/constants';
-import { useFeatureFlag } from './use_feature_flag';
+import { useFeatureFlag } from '../../../hooks';
 
 interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderToggleActions'> {
   allDimensions: Dimension[];

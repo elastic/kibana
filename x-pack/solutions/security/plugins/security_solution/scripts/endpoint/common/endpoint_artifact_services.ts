@@ -37,10 +37,7 @@ import {
 } from '../../../server/endpoint/lib/reference_data';
 
 export const ensureArtifactListExists = memoize(
-  async (
-    kbnClient: KbnClient,
-    artifactType: keyof typeof ENDPOINT_ARTIFACT_LISTS | 'endpointExceptions'
-  ) => {
+  async (kbnClient: KbnClient, artifactType: keyof typeof ENDPOINT_ARTIFACT_LISTS) => {
     let listDefinition: CreateExceptionListSchema;
 
     switch (artifactType) {

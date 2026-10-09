@@ -213,6 +213,42 @@ describe('EditOutputFlyout', () => {
     });
   });
 
+  it('should not show proxy input for kafka output', async () => {
+    const { utils } = renderFlyout({
+      type: 'kafka',
+      name: 'kafka output',
+      id: 'output123',
+      is_default: false,
+      is_default_monitoring: false,
+    });
+
+    expect(utils.queryByTestId('settingsOutputsFlyout.proxyIdInput')).toBeNull();
+  });
+
+  it('should show proxy input for elasticsearch output', async () => {
+    const { utils } = renderFlyout({
+      type: 'elasticsearch',
+      name: 'es output',
+      id: 'output456',
+      is_default: false,
+      is_default_monitoring: false,
+    });
+
+    expect(utils.queryByTestId('settingsOutputsFlyout.proxyIdInput')).not.toBeNull();
+  });
+
+  it('should show proxy input for logstash output', async () => {
+    const { utils } = renderFlyout({
+      type: 'logstash',
+      name: 'logstash output',
+      id: 'output789',
+      is_default: false,
+      is_default_monitoring: false,
+    });
+
+    expect(utils.queryByTestId('settingsOutputsFlyout.proxyIdInput')).not.toBeNull();
+  });
+
   it('should populate secret input with plain text value when editing kafka output', async () => {
     jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
 

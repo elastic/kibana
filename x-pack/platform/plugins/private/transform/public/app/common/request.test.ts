@@ -345,6 +345,7 @@ describe('Transform: Common', () => {
       runtimeMappings,
       runtimeMappingsUpdated: false,
       isRuntimeMappingsEditorEnabled: false,
+      projectRouting: '_alias:*',
     };
     const transformDetailsState: StepDetailsExposedState = {
       continuousModeDateField: 'the-continuous-mode-date-field',
@@ -370,8 +371,7 @@ describe('Transform: Common', () => {
     const request = getCreateTransformRequestBody(
       { getIndexPattern: () => 'the-data-view-title' } as DataView,
       pivotState,
-      transformDetailsState,
-      '_alias:*'
+      transformDetailsState
     );
 
     expect(request).toEqual({

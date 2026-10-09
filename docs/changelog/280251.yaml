@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/280251
+issues:
+- https://github.com/elastic/kibana/issues/278587
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-28
+- product: kibana
+title: Fix failed audit logs when Entity Store install lacks privileges
+description: Read-only Security Solution users no longer trigger failed Entity Store install or init requests that record unauthorized write attempts in audit logs.

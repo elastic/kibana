@@ -32,6 +32,8 @@ import {
   filterPolicyTemplatesTiles,
 } from '../../../../../../../../common/services';
 
+import { ExperimentalFeaturesService } from '../../../../../services';
+
 import {
   isOnlyAgentlessPolicyTemplate,
   isOnlyAgentlessIntegration,
@@ -47,6 +49,7 @@ import { mergeCategoriesAndCount } from '../util';
 
 import { useBuildIntegrationsUrl } from './use_build_integrations_url';
 import { useOnboardingOverride } from './use_onboarding_override';
+import { applyGrouping } from './apply_grouping';
 
 export interface IntegrationsURLParameters {
   searchString?: string;
@@ -212,12 +215,33 @@ export const useAvailablePackages = ({
       preference === 'agent' ? [] : replacementCustomIntegrations || []
     );
 
+  const { enableIntegrationCollectionTiles } = ExperimentalFeaturesService.get();
+
   // All cards before any filter (no agentless filter, no category filter).
   // Used by useBrowseIntegrationHook which applies both filters from the live URL.
   const allCards: IntegrationCardItem[] = useMemo(() => {
     const eprAndCustomPackages = [...mergedEprPackages, ...(appendCustomIntegrations || [])];
-    const mapped = eprAndCustomPackages
-      .map((item) =>
+
+    let itemsToMap: Array<PackageListItem | CustomIntegration>;
+    let extraCards: IntegrationCardItem[] = [];
+
+    if (enableIntegrationCollectionTiles) {
+      const { collectionCards, ungroupedItems } = applyGrouping({
+        items: eprAndCustomPackages,
+        getHref,
+        getAbsolutePath,
+        addBasePath,
+        packageVerificationKeyId,
+      });
+      itemsToMap = ungroupedItems;
+      extraCards = collectionCards;
+    } else {
+      itemsToMap = eprAndCustomPackages;
+    }
+
+    const mapped = [
+      ...extraCards,
+      ...itemsToMap.map((item) =>
         mapToCard({
           getAbsolutePath,
           getHref,
@@ -225,13 +249,15 @@ export const useAvailablePackages = ({
           addBasePath,
           packageVerificationKeyId,
         })
-      )
-      .sort((a, b) => a.title.localeCompare(b.title));
+      ),
+    ].sort((a, b) => a.title.localeCompare(b.title));
+
     return applyOnboardingOverride(mapped);
   }, [
     addBasePath,
     appendCustomIntegrations,
     applyOnboardingOverride,
+    enableIntegrationCollectionTiles,
     getAbsolutePath,
     getHref,
     mergedEprPackages,

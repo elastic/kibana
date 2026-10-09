@@ -20,12 +20,13 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/test-jest-helpers'
   - '@kbn/i18n'
+  - '@kbn/storybook'
 tags:
   - shared-browser
   - package
   - prod
   - group-platform
-  - shared
+  - private
   - jest-unit-tests
 fileGroups:
   src:

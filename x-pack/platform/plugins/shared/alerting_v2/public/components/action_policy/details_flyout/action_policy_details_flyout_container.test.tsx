@@ -194,11 +194,11 @@ const buildPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolic
     name: 'My Policy',
     description: 'desc',
     destinations: [{ type: 'connector', id: 'c-1' }],
-    groupingMode: 'per_episode',
+    grouping_mode: 'per_episode',
     enabled: true,
     tags: ['t1'],
     matcher: undefined,
-    groupBy: undefined,
+    group_by: undefined,
     throttle: undefined,
     ...overrides,
   } as ActionPolicyResponse);
@@ -268,7 +268,7 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
       expect.objectContaining({
         name: 'My Policy [clone]',
         description: 'desc',
-        groupingMode: 'per_episode',
+        grouping_mode: 'per_episode',
       })
     );
     expect(mockOnClose).toHaveBeenCalledTimes(1);

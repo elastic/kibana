@@ -27,11 +27,21 @@ jest.mock('@kbn/esql-utils', () => ({
     .mockResolvedValue({ recommendedQueries: [], recommendedFields: [] }),
 }));
 
+jest.mock('@kbn/language-documentation', () => ({
+  LanguageDocumentationFlyout: ({ isHelpMenuOpen }: { isHelpMenuOpen: boolean }) =>
+    isHelpMenuOpen ? <div data-test-subj="esqlInlineDocumentationFlyout" /> : null,
+}));
+
+const mockToggleLanguageComponent = jest.fn();
+const mockEditorActions = {
+  currentQuery: 'FROM logstash-*',
+  submitEsqlQuery: jest.fn(),
+  editorIsInline: false,
+  toggleLanguageComponent: mockToggleLanguageComponent,
+};
+
 jest.mock('../editor_actions_context', () => ({
-  useEsqlEditorActions: () => ({
-    currentQuery: 'FROM logstash-*',
-    submitEsqlQuery: jest.fn(),
-  }),
+  useEsqlEditorActions: () => mockEditorActions,
 }));
 
 const startMock = coreMock.createStart();
@@ -65,6 +75,8 @@ describe('HelpPopover', () => {
     (getESQLAdHocDataview as jest.Mock).mockClear();
     (getEditorExtensions as jest.Mock).mockClear();
     notificationsMock.feedback.isEnabled.mockReturnValue(true);
+    mockEditorActions.editorIsInline = false;
+    mockToggleLanguageComponent.mockClear();
   });
 
   it('should render a button', async () => {
@@ -133,6 +145,32 @@ describe('HelpPopover', () => {
     });
 
     expect(screen.queryByTestId('esql-recommended-queries')).toBeInTheDocument();
+  });
+
+  it('should open the documentation flyout when Help is clicked in standalone mode', async () => {
+    await renderHelpPopover();
+    await userEvent.click(screen.getByTestId('esql-help-popover-button'));
+    await waitFor(() => userEvent.click(screen.getByTestId('esql-quick-reference')));
+    await waitFor(() => {
+      expect(screen.getByTestId('esqlInlineDocumentationFlyout')).toBeInTheDocument();
+    });
+    expect(mockToggleLanguageComponent).not.toHaveBeenCalled();
+  });
+
+  it('should call toggleLanguageComponent from actions when Help is clicked in inline mode', async () => {
+    mockEditorActions.editorIsInline = true;
+    await renderHelpPopover();
+    await userEvent.click(screen.getByTestId('esql-help-popover-button'));
+    await waitFor(() => userEvent.click(screen.getByTestId('esql-quick-reference')));
+    expect(mockToggleLanguageComponent).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not render the documentation flyout in inline mode', async () => {
+    mockEditorActions.editorIsInline = true;
+    await renderHelpPopover();
+    await userEvent.click(screen.getByTestId('esql-help-popover-button'));
+    await waitFor(() => userEvent.click(screen.getByTestId('esql-quick-reference')));
+    expect(screen.queryByTestId('esqlInlineDocumentationFlyout')).not.toBeInTheDocument();
   });
 
   it('should show identify patterns recommended query', async () => {

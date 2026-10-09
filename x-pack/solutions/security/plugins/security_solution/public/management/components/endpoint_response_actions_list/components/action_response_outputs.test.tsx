@@ -105,4 +105,50 @@ describe('ActionResponseOutputs component', () => {
       expect(renderResult.container.textContent).toContain('submitted successfully');
     });
   });
+
+  describe('kill/suspend process actions', () => {
+    it('should render the process result output for a kill-process action', () => {
+      const action = new EndpointActionGenerator('seed').generateActionDetails({
+        agents: ['agent-a'],
+        command: 'kill-process',
+        wasSuccessful: true,
+        isCompleted: true,
+        outputs: {
+          'agent-a': {
+            type: 'json',
+            content: { code: 'ra_kill-process_success_done', pid: 1234 },
+          },
+        },
+      });
+
+      renderResult = appTestContext.render(
+        <ActionResponseOutputs action={action} data-test-subj="test" />
+      );
+
+      expect(renderResult.getByTestId('test-killProcessOutput')).not.toBeNull();
+      expect(renderResult.container.textContent).toContain('PID 1234');
+    });
+
+    it('should render the process result output for a suspend-process action', () => {
+      const action = new EndpointActionGenerator('seed').generateActionDetails({
+        agents: ['agent-a'],
+        command: 'suspend-process',
+        wasSuccessful: true,
+        isCompleted: true,
+        outputs: {
+          'agent-a': {
+            type: 'json',
+            content: { code: 'ra_suspend-process_success_done', pid: 4321 },
+          },
+        },
+      });
+
+      renderResult = appTestContext.render(
+        <ActionResponseOutputs action={action} data-test-subj="test" />
+      );
+
+      expect(renderResult.getByTestId('test-killProcessOutput')).not.toBeNull();
+      expect(renderResult.container.textContent).toContain('PID 4321');
+    });
+  });
 });

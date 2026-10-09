@@ -105,6 +105,7 @@ const StatusContextMenuComponent: React.FC<Props> = ({
   return (
     <>
       <EuiPopover
+        aria-label={CHANGE_STATUS}
         anchorPosition="downLeft"
         button={popOverButton}
         closePopover={closePopover}

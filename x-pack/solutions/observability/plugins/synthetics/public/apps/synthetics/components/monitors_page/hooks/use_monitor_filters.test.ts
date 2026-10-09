@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import * as spaceHook from '../../../../../hooks/use_kibana_space';
 import * as paramHook from '../../../hooks/use_url_params';
-import * as redux from 'react-redux';
+import * as redux from 'react-redux-v7';
 import { useMonitorFilters } from './use_monitor_filters';
 import { WrappedHelper } from '../../../utils/testing';
 

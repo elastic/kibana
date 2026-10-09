@@ -246,7 +246,36 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         ignoreUnverified: force,
         prerelease: true,
       });
-      const { outputId, fleetServerId } = agentlessAgentService.getDefaultSettings();
+
+      // Built ahead of agent policy creation (using the pre-generated `agentPolicyId`) so its
+      // real inputs are known when choosing the data output below.
+      const newPolicy = {
+        ...omit(data, 'id', 'package', 'cloud_connector'),
+        namespace: data.namespace || 'default',
+        policy_ids: [agentPolicyId],
+        supports_agentless: true,
+        // Extract cloud connector fields from cloud_connector object
+        ...(data.cloud_connector &&
+          data.cloud_connector.enabled && {
+            supports_cloud_connector: true,
+            ...(data.cloud_connector.cloud_connector_id && {
+              cloud_connector_id: data.cloud_connector.cloud_connector_id,
+            }),
+          }),
+      };
+
+      let newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo, {
+        policyTemplate,
+      });
+
+      const { outputId, fleetServerId } = agentlessAgentService.getDefaultSettings({
+        package_policies: [
+          {
+            package: { name: pkg.name },
+            inputs: newPackagePolicy.inputs,
+          },
+        ],
+      });
 
       const agentPolicyName = getAgentlessAgentPolicyNameFromPackagePolicyName(data.name);
 
@@ -285,31 +314,13 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
           global_data_tags: getAgentlessGlobalDataTags(pkgInfo),
           fleet_server_host_id: fleetServerId,
           data_output_id: outputId,
+          monitoring_output_id: outputId,
           is_protected: false,
         },
         { id: agentPolicyId, skipDeploy: true, request, user }
       );
 
       createdAgentPolicyId = agentPolicy.id;
-
-      const newPolicy = {
-        ...omit(data, 'id', 'package', 'cloud_connector'),
-        namespace: data.namespace || 'default',
-        policy_ids: [agentPolicy.id],
-        supports_agentless: true,
-        // Extract cloud connector fields from cloud_connector object
-        ...(data.cloud_connector &&
-          data.cloud_connector.enabled && {
-            supports_cloud_connector: true,
-            ...(data.cloud_connector.cloud_connector_id && {
-              cloud_connector_id: data.cloud_connector.cloud_connector_id,
-            }),
-          }),
-      };
-
-      let newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo, {
-        policyTemplate,
-      });
 
       // Integrate cloud connector if enabled for this agentless policy
       const {

@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/277007
+issues:
+- https://github.com/elastic/kibana/issues/276552
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-16
+areas:
+- Search and data
+- Kibana platform
+title: Fix multi-line code editor corruption on Windows after refresh
+description: On Windows, edits in the Dev Tools Console could corrupt multi-line text after autosave and refresh. Text is now preserved correctly.

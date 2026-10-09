@@ -7,7 +7,8 @@
 
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
-import { API_VERSIONS } from '../../../common/constants';
+import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
+import { ACTIONS_INDEX, API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getHistoryUsersRoute } from './get_history_users_route';
 
@@ -239,6 +240,65 @@ describe('getHistoryUsersRoute', () => {
     expect(mockResponse.customError).toHaveBeenCalledWith({
       statusCode: 404,
       body: { message: 'Failed to fetch history users' },
+    });
+  });
+
+  describe('when CPS is enabled', () => {
+    let mockScopedEsClient: { search: jest.Mock };
+
+    beforeEach(() => {
+      mockScopedEsClient = {
+        search: jest.fn().mockResolvedValue({ aggregations: { unique_users: { buckets: [] } } }),
+      };
+      mockEsClient.search.mockResolvedValue({ aggregations: { unique_users: { buckets: [] } } });
+
+      mockOsqueryContext = {
+        ...mockOsqueryContext,
+        cpsEnabled: true,
+        getStartServices: jest.fn().mockResolvedValue([
+          {
+            elasticsearch: {
+              client: {
+                asInternalUser: mockEsClient,
+                asScoped: jest.fn().mockReturnValue({ asCurrentUser: mockScopedEsClient }),
+              },
+            },
+          },
+        ]),
+      } as unknown as OsqueryAppContext;
+    });
+
+    it('reads the osquery actions index as the current user', async () => {
+      setupRoute();
+
+      await routeHandler(
+        {} as any,
+        httpServerMock.createKibanaRequest({ query: {} }),
+        httpServerMock.createResponseFactory()
+      );
+
+      expect(mockScopedEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ index: `${ACTIONS_INDEX}*` })
+      );
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+      expect(mockEsClient.indices.exists).toHaveBeenCalledWith({ index: `${ACTIONS_INDEX}*` });
+    });
+
+    it('keeps the Fleet fallback index on the internal client', async () => {
+      mockEsClient.indices.exists.mockResolvedValue(false);
+
+      setupRoute();
+
+      await routeHandler(
+        {} as any,
+        httpServerMock.createKibanaRequest({ query: {} }),
+        httpServerMock.createResponseFactory()
+      );
+
+      expect(mockScopedEsClient.search).not.toHaveBeenCalled();
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ index: AGENT_ACTIONS_INDEX })
+      );
     });
   });
 });

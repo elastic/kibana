@@ -10,12 +10,14 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsUtils } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { KueryNode } from '@kbn/es-query';
+import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
 import type { ActionPolicySavedObjectAttributes } from '../../../saved_objects';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
 import { EncryptedSavedObjectsClientToken } from '../../dispatcher/steps/dispatch_step_tokens';
+import { escapeTermsInclude } from '../../escape_terms_include';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
 import { ActionPolicySavedObjectsClientToken } from './tokens';
 import type {
@@ -31,8 +33,6 @@ export type {
   ActionPolicySavedObjectBulkUpdateItem,
   ActionPolicySavedObjectServiceContract,
 };
-
-const escapeRegex = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 @injectable()
 export class ActionPolicySavedObjectService implements ActionPolicySavedObjectServiceContract {
@@ -248,7 +248,7 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
     });
   }
 
-  public async getDistinctTags(params?: { search?: string }): Promise<string[]> {
+  public async findTags(params?: { search?: string }): Promise<string[]> {
     const search = params?.search;
     const result = await this.client.find<
       ActionPolicySavedObjectAttributes,
@@ -260,9 +260,9 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
         tags: {
           terms: {
             field: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.tags`,
-            size: 100,
-            order: { _key: 'asc' },
-            ...(search ? { include: `${escapeRegex(search)}.*` } : {}),
+            size: TAGS_RESPONSE_LIMIT,
+            order: { _count: 'desc' },
+            ...(search ? { include: `${escapeTermsInclude(search)}.*` } : {}),
           },
         },
       },

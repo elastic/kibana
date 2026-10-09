@@ -21,6 +21,13 @@ export const GROUP_BY_ALERT = i18n.translate(
   }
 );
 
+export const GROUP_BY_ALERT_INVALID_FIELD_ERROR = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.groupByAlertInvalidFieldError',
+  {
+    defaultMessage: 'Invalid field. Select a field from the list.',
+  }
+);
+
 export const TIME_WINDOW = i18n.translate(
   'xpack.cases.systemActions.casesConnector.timeWindowLabel',
   {

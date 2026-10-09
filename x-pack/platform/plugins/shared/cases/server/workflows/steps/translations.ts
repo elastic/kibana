@@ -34,6 +34,16 @@ export const SET_CUSTOM_FIELD_FAILED_MESSAGE = (caseId: string, fieldName: strin
     }
   );
 
+export const SET_EXTENDED_FIELDS_FAILED_MESSAGE = (caseId: string, errorMessage: string) =>
+  i18n.translate(
+    'xpack.cases.workflowSteps.setExtendedFields.error.extendedFieldsCouldNotBeUpdated',
+    {
+      defaultMessage:
+        'Extended fields on case "{caseId}" could not be updated. Reason: {errorMessage}',
+      values: { caseId, errorMessage },
+    }
+  );
+
 export const FIND_SIMILAR_CASES_FAILED_MESSAGE = (caseId: string) =>
   i18n.translate('xpack.cases.workflowSteps.findSimilarCases.error.similarCasesCouldNotBeFound', {
     defaultMessage: 'Similar cases could not be found for case "{caseId}".',

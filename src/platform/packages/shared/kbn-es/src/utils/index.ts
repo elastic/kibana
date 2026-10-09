@@ -18,6 +18,7 @@ export {
   SYSTEM_INDICES_SUPERUSER_PASSWORD,
 } from './native_realm';
 export { buildSnapshot } from './build_snapshot';
+export { createDownloadProgressBar, formatBytes } from './download_progress';
 export { archiveForPlatform } from './build_snapshot';
 export * from './parse_timeout_to_ms';
 export * from './docker';

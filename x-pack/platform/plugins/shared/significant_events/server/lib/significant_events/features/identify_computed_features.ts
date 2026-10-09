@@ -17,7 +17,7 @@ import {
 } from '@kbn/streams-ai';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { createCodeAnalysisProvider } from '../../semantic_code_search_grounding/compute_code_analysis';
-import type { EbtTelemetryClient } from '../../telemetry';
+import type { EbtTelemetryClient } from '../../telemetry/ebt';
 import { reconcileComputedFeatures } from './reconcile_features';
 
 export interface IdentifyComputedFeaturesOptions {

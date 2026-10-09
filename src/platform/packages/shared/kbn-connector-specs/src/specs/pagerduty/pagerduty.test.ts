@@ -12,6 +12,9 @@ import { PagerdutyConnector } from './pagerduty';
 
 const mockCallTool = jest.fn();
 const mockListTools = jest.fn();
+const mockClientPost = jest.fn();
+const mockClientPut = jest.fn();
+const mockClientGet = jest.fn();
 
 jest.mock('../../lib/mcp/with_mcp_client', () => ({
   withMcpClient: jest.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
@@ -26,13 +29,18 @@ const parse = <K extends keyof typeof PagerdutyConnector.actions>(
 
 describe('PagerdutyConnector', () => {
   const mockContext = {
-    client: {},
+    client: {
+      post: mockClientPost,
+      put: mockClientPut,
+      get: mockClientGet,
+    },
     log: {},
     config: { serverUrl: 'https://mcp.pagerduty.com/mcp' },
   } as unknown as ActionContext;
 
   const mockJson = { ok: true };
   const mockContent = [{ type: 'text', text: JSON.stringify(mockJson) }];
+  const mockIncident = { id: 'Q1A2B3C4D5E6F7', status: 'triggered', title: 'Prod DB down' };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -40,6 +48,11 @@ describe('PagerdutyConnector', () => {
     mockListTools.mockResolvedValue({
       tools: [{ name: 'get_user_data' }, { name: 'list_incidents' }],
     });
+    mockClientPost.mockResolvedValue({ data: { incident: mockIncident } });
+    mockClientPut.mockResolvedValue({
+      data: { incident: { ...mockIncident, status: 'acknowledged' } },
+    });
+    mockClientGet.mockResolvedValue({ data: { services: [{ id: 'PSVC01', name: 'Prod DB' }] } });
   });
 
   describe('getUserData action', () => {
@@ -48,6 +61,260 @@ describe('PagerdutyConnector', () => {
 
       expect(mockCallTool).toHaveBeenCalledWith({ name: 'get_user_data', arguments: {} });
       expect(result).toEqual(mockJson);
+    });
+  });
+
+  describe('triggerIncident action', () => {
+    it('posts to /incidents with required fields and From header', async () => {
+      const input = parse('triggerIncident', {
+        from: 'user@example.com',
+        title: 'Prod DB down',
+        service_id: 'PIJ90N7',
+      });
+      const result = await PagerdutyConnector.actions.triggerIncident.handler(mockContext, input);
+
+      expect(mockClientPost).toHaveBeenCalledWith(
+        'https://api.pagerduty.com/incidents',
+        {
+          incident: {
+            type: 'incident',
+            title: 'Prod DB down',
+            service: { id: 'PIJ90N7', type: 'service_reference' },
+          },
+        },
+        {
+          headers: {
+            From: 'user@example.com',
+            Accept: 'application/vnd.pagerduty+json;version=2',
+          },
+        }
+      );
+      expect(result).toEqual({ incident: mockIncident });
+    });
+
+    it('includes optional fields when provided', async () => {
+      const input = parse('triggerIncident', {
+        from: 'user@example.com',
+        title: 'High CPU',
+        service_id: 'PIJ90N7',
+        urgency: 'high',
+        body: 'CPU usage at 99%',
+        escalation_policy_id: 'PABCDEF',
+        assignment_user_ids: ['P123ABC'],
+      });
+      await PagerdutyConnector.actions.triggerIncident.handler(mockContext, input);
+
+      expect(mockClientPost).toHaveBeenCalledWith(
+        'https://api.pagerduty.com/incidents',
+        {
+          incident: {
+            type: 'incident',
+            title: 'High CPU',
+            service: { id: 'PIJ90N7', type: 'service_reference' },
+            urgency: 'high',
+            body: { type: 'incident_body', details: 'CPU usage at 99%' },
+            escalation_policy: { id: 'PABCDEF', type: 'escalation_policy_reference' },
+            assignments: [{ assignee: { id: 'P123ABC', type: 'user_reference' } }],
+          },
+        },
+        expect.objectContaining({ headers: expect.objectContaining({ From: 'user@example.com' }) })
+      );
+    });
+  });
+
+  describe('acknowledgeIncident action', () => {
+    it('puts to /incidents/{id} with status acknowledged and From header', async () => {
+      const input = parse('acknowledgeIncident', {
+        from: 'user@example.com',
+        incident_id: 'Q1A2B3C4D5E6F7',
+      });
+      const result = await PagerdutyConnector.actions.acknowledgeIncident.handler(
+        mockContext,
+        input
+      );
+
+      expect(mockClientPut).toHaveBeenCalledWith(
+        'https://api.pagerduty.com/incidents/Q1A2B3C4D5E6F7',
+        { incident: { type: 'incident', status: 'acknowledged' } },
+        {
+          headers: {
+            From: 'user@example.com',
+            Accept: 'application/vnd.pagerduty+json;version=2',
+          },
+        }
+      );
+      expect(result).toEqual({ incident: { ...mockIncident, status: 'acknowledged' } });
+    });
+  });
+
+  describe('resolveIncident action', () => {
+    it('puts to /incidents/{id} with status resolved and From header', async () => {
+      mockClientPut.mockResolvedValueOnce({
+        data: { incident: { ...mockIncident, status: 'resolved' } },
+      });
+      const input = parse('resolveIncident', {
+        from: 'user@example.com',
+        incident_id: 'Q1A2B3C4D5E6F7',
+      });
+      const result = await PagerdutyConnector.actions.resolveIncident.handler(mockContext, input);
+
+      expect(mockClientPut).toHaveBeenCalledWith(
+        'https://api.pagerduty.com/incidents/Q1A2B3C4D5E6F7',
+        { incident: { type: 'incident', status: 'resolved' } },
+        expect.objectContaining({ headers: expect.objectContaining({ From: 'user@example.com' }) })
+      );
+      expect(result).toEqual({ incident: { ...mockIncident, status: 'resolved' } });
+    });
+  });
+
+  describe('updateIncident action', () => {
+    it('puts to /incidents/{id} with provided fields', async () => {
+      const input = parse('updateIncident', {
+        from: 'user@example.com',
+        incident_id: 'Q1A2B3C4D5E6F7',
+        urgency: 'low',
+        title: 'Updated title',
+      });
+      await PagerdutyConnector.actions.updateIncident.handler(mockContext, input);
+
+      expect(mockClientPut).toHaveBeenCalledWith(
+        'https://api.pagerduty.com/incidents/Q1A2B3C4D5E6F7',
+        {
+          incident: {
+            type: 'incident',
+            urgency: 'low',
+            title: 'Updated title',
+          },
+        },
+        expect.objectContaining({ headers: expect.objectContaining({ From: 'user@example.com' }) })
+      );
+    });
+
+    it('rejects when no update fields are provided', () => {
+      expect(() =>
+        parse('updateIncident', {
+          from: 'user@example.com',
+          incident_id: 'Q1A2B3C4D5E6F7',
+        })
+      ).toThrow();
+    });
+  });
+
+  describe('listServices action', () => {
+    it('gets /services and returns data', async () => {
+      const input = parse('listServices', { query: 'production' });
+      const result = await PagerdutyConnector.actions.listServices.handler(mockContext, input);
+
+      expect(mockClientGet).toHaveBeenCalledWith(
+        'https://api.pagerduty.com/services',
+        expect.objectContaining({
+          params: { query: 'production' },
+          headers: { Accept: 'application/vnd.pagerduty+json;version=2' },
+          paramsSerializer: { indexes: null },
+        })
+      );
+      expect(result).toEqual({ services: [{ id: 'PSVC01', name: 'Prod DB' }] });
+    });
+
+    it('passes team_ids[] when provided', async () => {
+      const input = parse('listServices', { team_ids: ['T1', 'T2'] });
+      await PagerdutyConnector.actions.listServices.handler(mockContext, input);
+
+      expect(mockClientGet).toHaveBeenCalledWith(
+        'https://api.pagerduty.com/services',
+        expect.objectContaining({
+          params: { 'team_ids[]': ['T1', 'T2'] },
+          paramsSerializer: { indexes: null },
+        })
+      );
+    });
+  });
+
+  describe('addResponders action', () => {
+    it('posts to /incidents/{id}/responder_requests with user targets', async () => {
+      mockClientPost.mockResolvedValueOnce({ data: { responder_request: { id: 'RR01' } } });
+      const input = parse('addResponders', {
+        from: 'user@example.com',
+        incident_id: 'Q1A2B3C4D5E6F7',
+        requester_id: 'P123ABC',
+        message: 'Need your help',
+        responder_user_ids: ['P456DEF'],
+      });
+      const result = await PagerdutyConnector.actions.addResponders.handler(mockContext, input);
+
+      expect(mockClientPost).toHaveBeenCalledWith(
+        'https://api.pagerduty.com/incidents/Q1A2B3C4D5E6F7/responder_requests',
+        {
+          requester_id: 'P123ABC',
+          message: 'Need your help',
+          responder_request_targets: [
+            { responder_request_target: { id: 'P456DEF', type: 'user_reference' } },
+          ],
+        },
+        expect.objectContaining({ headers: expect.objectContaining({ From: 'user@example.com' }) })
+      );
+      expect(result).toEqual({ responder_request: { id: 'RR01' } });
+    });
+
+    it('includes escalation policy targets', async () => {
+      mockClientPost.mockResolvedValueOnce({ data: { responder_request: {} } });
+      const input = parse('addResponders', {
+        from: 'user@example.com',
+        incident_id: 'PINC001',
+        requester_id: 'P123ABC',
+        message: 'Escalating',
+        responder_escalation_policy_ids: ['PABCDEF'],
+      });
+      await PagerdutyConnector.actions.addResponders.handler(mockContext, input);
+
+      expect(mockClientPost).toHaveBeenCalledWith(
+        'https://api.pagerduty.com/incidents/PINC001/responder_requests',
+        expect.objectContaining({
+          responder_request_targets: [
+            {
+              responder_request_target: {
+                id: 'PABCDEF',
+                type: 'escalation_policy_reference',
+              },
+            },
+          ],
+        }),
+        expect.anything()
+      );
+    });
+
+    it('rejects when no responder targets are provided', () => {
+      expect(() =>
+        parse('addResponders', {
+          from: 'user@example.com',
+          incident_id: 'PINC001',
+          requester_id: 'P123ABC',
+          message: 'Help',
+        })
+      ).toThrow();
+    });
+  });
+
+  describe('runResponsePlay action', () => {
+    it('posts to /response_plays/{id}/run with incident and requester', async () => {
+      mockClientPost.mockResolvedValueOnce({ data: {} });
+      const input = parse('runResponsePlay', {
+        from: 'user@example.com',
+        incident_id: 'Q1A2B3C4D5E6F7',
+        response_play_id: 'PABCDEF',
+        requester_id: 'P123ABC',
+      });
+      const result = await PagerdutyConnector.actions.runResponsePlay.handler(mockContext, input);
+
+      expect(mockClientPost).toHaveBeenCalledWith(
+        'https://api.pagerduty.com/response_plays/PABCDEF/run',
+        {
+          incident: { id: 'Q1A2B3C4D5E6F7', type: 'incident_reference' },
+          requester: { id: 'P123ABC', type: 'user_reference' },
+        },
+        expect.objectContaining({ headers: expect.objectContaining({ From: 'user@example.com' }) })
+      );
+      expect(result).toEqual({});
     });
   });
 
@@ -247,30 +514,20 @@ describe('PagerdutyConnector', () => {
   });
 
   describe('test handler', () => {
-    it('returns ok with tool count on successful connection', async () => {
-      if (!PagerdutyConnector.test) {
-        throw new Error('test handler not defined');
-      }
-      const result = await PagerdutyConnector.test.handler(mockContext);
+    const testSpec = PagerdutyConnector.test;
+
+    it('returns {} on successful connection', async () => {
+      const result = await testSpec.handler(mockContext);
 
       expect(mockListTools).toHaveBeenCalled();
-      expect(result).toEqual({
-        ok: true,
-        message: 'Connected to PagerDuty MCP server. 2 tools available.',
-      });
+      expect(result).toEqual({});
     });
 
     it('propagates errors thrown by withMcpClient', async () => {
       const { withMcpClient } = jest.requireMock('../../lib/mcp/with_mcp_client');
       withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
 
-      if (!PagerdutyConnector.test) {
-        throw new Error('test handler not defined');
-      }
-
-      await expect(PagerdutyConnector.test.handler(mockContext)).rejects.toThrow(
-        'connection refused'
-      );
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('connection refused');
     });
   });
 });

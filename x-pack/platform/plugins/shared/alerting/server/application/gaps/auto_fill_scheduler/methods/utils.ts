@@ -10,10 +10,8 @@ import type { RulesClientContext } from '../../../../rules_client/types';
 import type { GapAutoFillSchedulerSO } from '../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 import type { ReadOperations, WriteOperations } from '../../../../authorization';
 import { AlertingAuthorizationEntity } from '../../../../authorization';
-import {
-  gapAutoFillSchedulerAuditEvent,
-  GapAutoFillSchedulerAuditAction,
-} from '../../../../rules_client/common/audit_events';
+import type { GapAutoFillSchedulerAuditAction } from '../../../../rules_client/common/audit_events';
+import { gapAutoFillSchedulerAuditEvent } from '../../../../rules_client/common/audit_events';
 import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { SchedulerContext } from '../../methods/utils';
 
@@ -35,23 +33,6 @@ export const getGapAutoFillSchedulerSO = async ({
     GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
     id
   );
-
-  // Check for errors in the savedObjectsClient result
-  if (schedulerSO.error) {
-    const err = new Error(schedulerSO.error.message);
-    context.auditLogger?.log(
-      gapAutoFillSchedulerAuditEvent({
-        action: GapAutoFillSchedulerAuditAction.GET,
-        savedObject: {
-          type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-          id,
-          name: id,
-        },
-        error: err,
-      })
-    );
-    throw err;
-  }
 
   const ruleTypeIdConsumersPairs = schedulerSO.attributes.ruleTypes.map((ruleType) => ({
     ruleTypeId: ruleType.type,

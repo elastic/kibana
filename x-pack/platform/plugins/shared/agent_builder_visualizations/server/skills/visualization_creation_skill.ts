@@ -73,8 +73,8 @@ Do **not** use this skill when:
    - Provide:
      - \`query\` (required, specific and field-accurate)
      - \`index\` (strongly recommended — pass the grounded index; omitting it forces auto-discovery, which fails for ungrounded/invented fields)
-     - \`renderer\` (\`lens\` or \`vega\`, optional — see "Choosing the Renderer"; omit to default to Lens)
-     - \`chartType\` (optional, only if confident)
+     - \`renderer\` (new visualizations only; \`lens\` or \`vega\`; omit to default to Lens)
+     - \`chartType\` (required for a new Lens visualization; optional hint for a new Vega visualization; optional on updates)
      - \`esql\` (optional, when you have a validated ES|QL)
      - \`attachment_id\` (optional, only when updating an existing visualization)
    - For multi-panel requests, resolve the index (and validate the fields) ONCE up front, then call ${
@@ -126,8 +126,8 @@ ${
 - Pass \`renderer: "vega"\` when:
   - The user explicitly asks for a Vega or Vega-Lite visualization, OR
   - No Lens chart type fits — e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings.
-- Otherwise pass \`renderer: "lens"\` (the default when omitted) with the best-fitting \`chartType\`.
-- When updating an existing attachment, \`renderer\` is ignored — edits keep the existing renderer.
+- Otherwise pass \`renderer: "lens"\` (or omit it to use the Lens default) with the required best-fitting \`chartType\`.
+- When updating an existing attachment, omit \`renderer\` — edits keep the existing renderer.
 
 **Scope — "Vega" here means Vega-Lite, not full Vega.** The Vega renderer only supports the Vega-Lite grammar. It cannot do full Vega features such as custom signals / imperative interactivity, arbitrary data transforms or expressions, or bespoke rendering. If a request fits neither a Lens chart type nor the Vega-Lite grammar, do **not** force a broken or misleading chart. Be honest with the user: explain that the requested chart is not supported in Vega-Lite and that full Vega is not available yet, then offer alternatives — the closest Vega-Lite approximation, a standard Lens chart, or splitting the request into multiple charts — and ask how they would like to proceed.
 
@@ -137,9 +137,7 @@ Supported values for \`chartType\`: ${Object.values(SupportedChartType).join(', 
 
 ${chartTypeSelectionContent}
 
-When uncertain, omit \`chartType\` and let ${
-    platformCoreTools.createVisualization
-  } infer the best type from the request.
+For every new Lens visualization, choose and pass \`chartType\`; it is required. For a new Vega visualization, \`chartType\` is an optional authoring hint — omit it when no Lens chart type represents the requested visualization. On updates, \`chartType\` is optional because the existing visualization provides the current form. When editing a Lens visualization, omit \`chartType\` to preserve its current chart family; provide a new \`chartType\` when the request changes the chart family, such as from \`xy\` to \`pie\`.
 
 ## Edge Cases
 
@@ -170,6 +168,7 @@ When uncertain, omit \`chartType\` and let ${
 {
   "query": "Top 10 source IPs by request count",
   "index": "logs-nginx.access-default",
+  "chartType": "xy",
   "esql": "FROM logs-nginx.access-default | STATS requests = COUNT(*) BY source.ip | SORT requests DESC | LIMIT 10"
 }
 \`\`\`
@@ -180,8 +179,7 @@ When uncertain, omit \`chartType\` and let ${
 {
   "attachment_id": "viz-attachment-123",
   "query": "Update this chart to show 95th percentile response bytes over time",
-  "index": "logs-nginx.access-default",
-  "chartType": "xy"
+  "index": "logs-nginx.access-default"
 }
 \`\`\`
 `,

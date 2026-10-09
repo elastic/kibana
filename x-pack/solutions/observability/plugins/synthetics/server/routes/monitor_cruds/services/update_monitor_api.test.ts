@@ -106,6 +106,7 @@ const createMockRouteContext = () => {
   const findDecryptedMonitors = jest.fn().mockResolvedValue([]);
   const find = jest.fn().mockResolvedValue({ saved_objects: [] });
   const createInternalRepository = jest.fn().mockReturnValue({});
+  const getMaintenanceWindows = jest.fn().mockResolvedValue([]);
   return {
     routeContext: {
       request: { query: {} } as any,
@@ -118,6 +119,7 @@ const createMockRouteContext = () => {
       savedObjectsClient: {} as any,
       syntheticsMonitorClient: {
         syntheticsService: {
+          getMaintenanceWindows,
           locations: [
             {
               id: 'us_central',
@@ -130,7 +132,7 @@ const createMockRouteContext = () => {
       } as any,
       monitorConfigRepository: { findDecryptedMonitors, find } as any,
     } as any,
-    mocks: { findDecryptedMonitors, find, createInternalRepository },
+    mocks: { findDecryptedMonitors, find, createInternalRepository, getMaintenanceWindows },
   };
 };
 
@@ -229,6 +231,31 @@ describe('UpdateMonitorAPI', () => {
         'mon-1',
         'mon-2',
       ]);
+    });
+
+    it('fetches maintenance windows once for a bulk update', async () => {
+      const { routeContext, mocks } = createMockRouteContext();
+      mocks.findDecryptedMonitors.mockResolvedValue([
+        mockDecryptedMonitor({
+          id: 'mon-1',
+          attributes: { [ConfigKey.MAINTENANCE_WINDOWS]: ['mw-1'] },
+        }),
+        mockDecryptedMonitor({
+          id: 'mon-2',
+          attributes: { [ConfigKey.MAINTENANCE_WINDOWS]: ['mw-1'] },
+        }),
+      ]);
+      mocks.getMaintenanceWindows.mockResolvedValue([{ id: 'mw-1', title: 'Weekend deploy' }]);
+
+      const api = new UpdateMonitorAPI(routeContext);
+      const result = await api.execute({
+        updates: updatesFor(['mon-1', 'mon-2'], { enabled: false }),
+      });
+
+      expect(result.perIdErrors).toEqual({});
+      expect(result.survivors).toHaveLength(2);
+      expect(mocks.getMaintenanceWindows).toHaveBeenCalledTimes(1);
+      expect(mocks.getMaintenanceWindows).toHaveBeenCalledWith('default');
     });
 
     it('uses the normalized API config before validation and persistence', async () => {

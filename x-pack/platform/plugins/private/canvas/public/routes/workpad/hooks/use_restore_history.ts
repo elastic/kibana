@@ -7,7 +7,7 @@
 
 import { useRef, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 // @ts-expect-error
 import { restoreHistory } from '../../../state/actions/history';
 import { initializeWorkpad } from '../../../state/actions/workpad';

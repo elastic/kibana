@@ -21,7 +21,7 @@ describe('PluginModule', () => {
 
   beforeEach(() => {
     root = new Container();
-    root.loadSync(new PluginModule(root));
+    root.load(new PluginModule(root));
   });
 
   describe('Scope', () => {
@@ -49,14 +49,14 @@ describe('PluginModule', () => {
     it('should dispose the child container when the parent is disposed', async () => {
       const child = root.get(Scope)(token1);
       child.bind('test').toConstantValue('test');
-      await root.unbindAll();
+      await root.unbindAllAsync();
 
       expect(child.isCurrentBound('test')).toBe(false);
     });
 
     it('should disassociate the child container from the parent when disposed', async () => {
       const child = root.get(Scope)(token1);
-      await child.unbindAll();
+      await child.unbindAllAsync();
 
       expect(root.get(Scope)(token1)).not.toBe(child);
     });
@@ -101,7 +101,7 @@ describe('PluginModule', () => {
 
       expect(forkedChild2.get('service1')).toBe('value2');
 
-      await forkedChild2.unbindAll();
+      await forkedChild2.unbindAllAsync();
 
       expect(forkedChild1.isBound('something')).toBe(false);
     });

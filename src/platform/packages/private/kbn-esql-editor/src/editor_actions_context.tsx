@@ -12,11 +12,13 @@ export interface EsqlEditorActions {
   toggleVisor: () => void;
   toggleHistory: () => void;
   toggleStarredQuery: () => void;
+  toggleLanguageComponent: () => void;
   submitEsqlQuery: (query: string) => void;
   isHistoryOpen: boolean;
   isCurrentQueryStarred: boolean;
   canToggleStarredQuery: boolean;
   currentQuery: string;
+  editorIsInline: boolean;
 }
 
 const EsqlEditorActionsContext = createContext<EsqlEditorActions | null>(null);

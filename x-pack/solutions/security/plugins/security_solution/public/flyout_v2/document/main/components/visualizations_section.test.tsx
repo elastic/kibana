@@ -11,8 +11,8 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
-import { Provider } from 'react-redux';
-import { createStore } from 'redux';
+import { Provider } from 'react-redux-v7';
+import { createStore } from 'redux-v4';
 import { VISUALIZATION_SECTION_TEST_ID, VisualizationsSection } from './visualizations_section';
 import { VISUALIZATION_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
@@ -116,6 +116,7 @@ describe('VisualizationsSection', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    openSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
     mockUseKibana.mockReturnValue({
       services: {
         overlays: {
@@ -125,6 +126,7 @@ describe('VisualizationsSection', () => {
           get: jest.fn().mockReturnValue(true),
         },
         serverless: undefined,
+        telemetry: { reportEvent: jest.fn() },
       },
     } as unknown as ReturnType<typeof useKibana>);
     mockUseIsInSecurityApp.mockReturnValue(true);

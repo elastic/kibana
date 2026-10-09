@@ -40,12 +40,19 @@ export const FieldDefinitionSchema = z.object({
    * template-specific fields.
    */
   isGlobal: z.boolean().optional(),
+
+  /**
+   * The position of a global field in the case details view. It is assigned by
+   * the server and changed from the Field Library reorder controls.
+   */
+  displayOrder: z.number().int().nonnegative().optional(),
 });
 
 export type FieldDefinition = z.infer<typeof FieldDefinitionSchema>;
 
 export const CreateFieldDefinitionInputSchema = FieldDefinitionSchema.omit({
   fieldDefinitionId: true,
+  displayOrder: true,
 });
 
 export type CreateFieldDefinitionInput = z.infer<typeof CreateFieldDefinitionInputSchema>;

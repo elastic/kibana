@@ -17,7 +17,7 @@ const location = { state: undefined };
 const history = { action: 'POP' };
 
 // Mock the hooks and actions
-jest.mock('react-redux', () => ({
+jest.mock('react-redux-v7', () => ({
   useDispatch: () => mockDispatch,
 }));
 

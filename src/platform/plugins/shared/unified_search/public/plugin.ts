@@ -57,6 +57,7 @@ export class UnifiedSearchPublicPlugin
       cps: crossProjectSearch,
       kql: { autocomplete: autocompleteStart },
       esql,
+      licensing,
     }: UnifiedSearchStartDependencies
   ): UnifiedSearchPublicPluginStart {
     setCoreStart(core);
@@ -83,6 +84,7 @@ export class UnifiedSearchPublicPlugin
         },
         cps: crossProjectSearch,
         esql,
+        licensing,
       });
 
     const SearchBar = getCustomSearchBar();

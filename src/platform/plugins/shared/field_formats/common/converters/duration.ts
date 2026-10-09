@@ -20,6 +20,7 @@ import {
   DURATION_INPUT_FORMATS,
   DURATION_OUTPUT_FORMATS,
 } from '../constants/duration_formats';
+import { asPrettyString } from '../utils';
 
 const ratioToSeconds: Record<string, number> = {
   picoseconds: 0.000000000001,
@@ -67,10 +68,16 @@ export class DurationFormat extends FieldFormat {
     };
   }
 
-  textConvert: TextContextTypeConvert = (val: number) => {
+  textConvert: TextContextTypeConvert = (val) => {
     const missing = this.checkForMissingValueText(val);
     if (missing) {
       return missing;
+    }
+
+    // Some fields like histogram have object values that cannot be represented as a duration,
+    // so render them as-is.
+    if (typeof val === 'object') {
+      return asPrettyString(val);
     }
 
     const inputFormat = this.param('inputFormat');

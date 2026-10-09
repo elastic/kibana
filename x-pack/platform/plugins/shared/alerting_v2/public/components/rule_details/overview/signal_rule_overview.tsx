@@ -120,7 +120,7 @@ export const SignalRuleOverview: React.FC = () => {
       {
         title: kpis.totalFirings.toLocaleString(),
         description: i18n.translate('xpack.alertingV2.signalOverview.statTotalFirings', {
-          defaultMessage: 'Total signals',
+          defaultMessage: 'Total events',
         }),
         dataTestSubj: 'signalStatTotalFirings',
       },
@@ -132,7 +132,7 @@ export const SignalRuleOverview: React.FC = () => {
       {
         title: lastFiringMs == null ? NO_VALUE : moment(lastFiringMs).fromNow(),
         description: i18n.translate('xpack.alertingV2.signalOverview.statLastFiring', {
-          defaultMessage: 'Last signal',
+          defaultMessage: 'Last event',
         }),
         dataTestSubj: 'signalStatLastFiring',
       },
@@ -158,7 +158,7 @@ export const SignalRuleOverview: React.FC = () => {
       return (
         <EuiText size="s" color="danger" data-test-subj="signalOverviewKpiError">
           {i18n.translate('xpack.alertingV2.signalOverview.kpiErrorBody', {
-            defaultMessage: 'Could not load signal counts.',
+            defaultMessage: 'Could not load event counts.',
           })}
         </EuiText>
       );
@@ -210,19 +210,19 @@ export const SignalRuleOverview: React.FC = () => {
     if (buckets.length === 0) {
       return (
         <EuiEmptyPrompt
-          iconType="visBarVerticalStacked"
+          iconType="chartBarVerticalStack"
           data-test-subj="signalOverviewEmpty"
           title={
             <h4>
               {i18n.translate('xpack.alertingV2.signalOverview.emptyTitle', {
-                defaultMessage: 'No signals in this window',
+                defaultMessage: 'No events in this window',
               })}
             </h4>
           }
           body={
             <EuiText size="s">
               {i18n.translate('xpack.alertingV2.signalOverview.emptyBody', {
-                defaultMessage: 'Signals appear here once the rule fires.',
+                defaultMessage: 'Events appear here once the rule fires.',
               })}
             </EuiText>
           }
@@ -286,7 +286,7 @@ export const SignalRuleOverview: React.FC = () => {
             <EuiTitle size="xxs">
               <h4>
                 {i18n.translate('xpack.alertingV2.signalOverview.chartTitle', {
-                  defaultMessage: 'Signal frequency',
+                  defaultMessage: 'Event frequency',
                 })}
               </h4>
             </EuiTitle>

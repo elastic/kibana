@@ -14,6 +14,7 @@ export const createCpsManagerMock = (): jest.Mocked<ICPSManager> => ({
   whenReady: jest.fn().mockResolvedValue(undefined),
   fetchProjects: jest.fn().mockResolvedValue(null),
   getTotalProjectCount: jest.fn().mockReturnValue(1),
+  hasLinkedProjects: jest.fn().mockReturnValue(false),
   getProjectRouting$: jest.fn(() => of(undefined)),
   setProjectRouting: jest.fn(),
   getProjectRouting: jest.fn(() => undefined),

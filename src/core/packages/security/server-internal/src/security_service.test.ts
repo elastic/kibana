@@ -16,6 +16,7 @@ import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import { SecurityService } from './security_service';
 import { configServiceMock } from '@kbn/config-mocks';
 import { getFips } from 'crypto';
@@ -146,7 +147,7 @@ describe('SecurityService', function () {
         expect(service.setup().uiam).toBeNull();
       });
 
-      it('should return shared secret if UIAM is enabled', () => {
+      it('should attach the configured shared secret if UIAM is enabled', () => {
         service = new SecurityService(
           mockCoreContext.create({
             configService: configServiceMock.create({
@@ -161,7 +162,12 @@ describe('SecurityService', function () {
             }),
           })
         );
-        expect(service.setup().uiam?.sharedSecret).toBe('some-secret');
+        expect(
+          service.setup().uiam?.getElasticsearchClientAuthentication({
+            credentialSource: 'internal',
+            credential: new HTTPAuthorizationHeader('ApiKey', 'essu_internal_key'),
+          })
+        ).toBe('some-secret');
       });
     });
   });

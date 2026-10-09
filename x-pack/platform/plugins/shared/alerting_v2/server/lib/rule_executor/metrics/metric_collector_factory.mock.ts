@@ -9,14 +9,9 @@ import type { MetricCollectorFactoryContract } from './types';
 import { MetricCollectorFactory } from './metric_collector_factory';
 
 export function createMetricCollectorFactory({
-  executionId = 'execution-uuid',
   startedAt = new Date('2025-01-01T00:00:00.000Z'),
 }: {
-  executionId?: string;
   startedAt?: Date;
 } = {}): MetricCollectorFactoryContract {
-  return new MetricCollectorFactory({
-    generateExecutionId: () => executionId,
-    now: () => startedAt,
-  });
+  return new MetricCollectorFactory({ now: () => startedAt });
 }

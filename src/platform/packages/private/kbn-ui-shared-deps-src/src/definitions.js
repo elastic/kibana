@@ -79,6 +79,10 @@ const externals = {
   redux: '__kbnSharedDeps__.Redux',
   immer: '__kbnSharedDeps__.Immer',
   reselect: '__kbnSharedDeps__.Reselect',
+  'redux-toolkit-v1': '__kbnSharedDeps__.ReduxjsToolkitV1',
+  'react-redux-v7': '__kbnSharedDeps__.ReactReduxV7',
+  'redux-v4': '__kbnSharedDeps__.ReduxV4',
+  'reselect-v4': '__kbnSharedDeps__.ReselectV4',
   'fastest-levenshtein': '__kbnSharedDeps__.FastestLevenshtein',
   'chroma-js': '__kbnSharedDeps__.ChromaJs',
   // cache some used methods of the react-use library
@@ -131,6 +135,7 @@ const externals = {
    */
   tslib: '__kbnSharedDeps__.TsLib',
   uuid: '__kbnSharedDeps__.Uuid',
+  inversify: '__kbnSharedDeps__.Inversify',
   '@kbn/analytics': '__kbnSharedDeps__.KbnAnalytics',
   '@kbn/crypto-browser': '__kbnSharedDeps__.KbnCryptoBrowser',
   '@kbn/es-query': '__kbnSharedDeps__.KbnEsQuery',

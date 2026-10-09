@@ -5,7 +5,7 @@ set -euo pipefail
 # Generate KIBANA_TESTING_AI_CONNECTORS from LiteLLM (when needed).
 #
 # This script is sourced by run_suite.sh after the pre-command hook has
-# exported KBN_EVALS_CONFIG_B64 and EVALUATION_CONNECTOR_ID.
+# exported KBN_EVALS_CONFIG_B64 and EVAL_CONNECTOR_ID.
 #
 # When EVAL_MODEL_GROUPS contains only EIS models (eis/...) and the judge
 # connector is also EIS-backed (or unset), LiteLLM connector generation is
@@ -49,7 +49,7 @@ if [[ -n "${EVAL_PROJECT:-}" ]] && [[ "${EVAL_PROJECT}" == eis-* ]]; then
 fi
 
 # Override: if the judge connector is LiteLLM-backed, we always need LiteLLM.
-if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]] && [[ "${EVALUATION_CONNECTOR_ID}" == litellm-* ]]; then
+if [[ -n "${EVAL_CONNECTOR_ID:-}" ]] && [[ "${EVAL_CONNECTOR_ID}" == litellm-* ]]; then
   NEED_LITELLM_CONNECTORS="true"
 fi
 
@@ -80,9 +80,9 @@ if [[ "$NEED_LITELLM_CONNECTORS" == "true" ]]; then
     exit 1
   fi
 
-  if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]] && [[ "${EVALUATION_CONNECTOR_ID}" == litellm-* ]]; then
-    if ! node -e "const b=process.env.KIBANA_TESTING_AI_CONNECTORS||'';const s=Buffer.from(b,'base64').toString('utf8');const o=JSON.parse(s);const id=process.env.EVALUATION_CONNECTOR_ID;process.exit(Object.prototype.hasOwnProperty.call(o,id)?0:1);" ; then
-      echo "ERROR: EVALUATION_CONNECTOR_ID ($EVALUATION_CONNECTOR_ID) is not present in generated connectors."
+  if [[ -n "${EVAL_CONNECTOR_ID:-}" ]] && [[ "${EVAL_CONNECTOR_ID}" == litellm-* ]]; then
+    if ! node -e "const b=process.env.KIBANA_TESTING_AI_CONNECTORS||'';const s=Buffer.from(b,'base64').toString('utf8');const o=JSON.parse(s);const id=process.env.EVAL_CONNECTOR_ID;process.exit(Object.prototype.hasOwnProperty.call(o,id)?0:1);" ; then
+      echo "ERROR: EVAL_CONNECTOR_ID ($EVAL_CONNECTOR_ID) is not present in generated connectors."
       echo "Sample generated connector ids:"
       node -e "const b=process.env.KIBANA_TESTING_AI_CONNECTORS||'';const s=Buffer.from(b,'base64').toString('utf8');const o=JSON.parse(s);console.log(Object.keys(o).slice(0,20).join('\\n'));"
       exit 1

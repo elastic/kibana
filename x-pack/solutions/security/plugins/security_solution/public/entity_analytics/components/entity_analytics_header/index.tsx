@@ -7,7 +7,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiLink } from '@elastic/eui';
 import styled from '@emotion/styled';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { capitalize, sumBy } from 'lodash/fp';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SEVERITY_COLOR } from '../../../overview/components/detection_response/utils';

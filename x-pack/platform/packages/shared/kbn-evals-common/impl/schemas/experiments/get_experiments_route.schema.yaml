@@ -34,6 +34,13 @@ paths:
             type: string
             maxLength: 256
           description: Filter by git branch
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 256
+          description: Free-text filter matching experiment name or git branch
         - name: dataset_id
           in: query
           required: false

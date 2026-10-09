@@ -11,7 +11,7 @@ import type { AggregateQuery } from '@kbn/es-query';
 import {
   getESQLAdHocDataview,
   getIndexPatternFromESQLQuery,
-  getTimeFieldFromESQLQuery,
+  parseTimeFieldFromESQLQuery,
 } from '@kbn/esql-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -25,7 +25,7 @@ export async function getEsqlDataView(
   const indexPatternFromQuery = getIndexPatternFromESQLQuery(query.esql);
   // Convert undefined time fields to a string since '' and undefined are equivalent here
   const currentTimeField = currentDataView?.timeFieldName ?? '';
-  const newTimeField = getTimeFieldFromESQLQuery(query.esql) ?? '';
+  const newTimeField = parseTimeFieldFromESQLQuery(query.esql) ?? '';
   const onlyTimeFieldChanged =
     indexPatternFromQuery === currentDataView?.getIndexPattern() &&
     newTimeField !== currentTimeField;

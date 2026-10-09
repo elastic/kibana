@@ -55,7 +55,7 @@ export const ShowMoreActivities = React.memo<ShowMoreActivitiesProps>(
       >
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="arrowRight" size="s" color="subdued" aria-hidden={true} />
+            <EuiIcon type="chevronSingleRight" size="s" color="subdued" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">

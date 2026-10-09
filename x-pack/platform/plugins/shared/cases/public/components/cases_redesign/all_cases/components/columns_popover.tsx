@@ -51,7 +51,7 @@ export const ColumnsPopover: React.FC<Props> = ({
   selectedColumns,
   onSelectedColumnsChange,
   buttonLabel = i18n.COLUMNS,
-  buttonIconType = 'tableDensityNormal',
+  buttonIconType = 'table',
 }: Props) => {
   const { euiTheme } = useEuiTheme();
 

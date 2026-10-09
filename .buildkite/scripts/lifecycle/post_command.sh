@@ -91,6 +91,11 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
 
 fi
 
+if compgen -G 'target/kibana-check*' > /dev/null 2>&1; then
+  echo "--- Upload scripts/check logs"
+  buildkite-agent artifact upload 'target/kibana-check*'
+fi
+
 if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
   # If the slack team environment variable is set, ping the team in slack
   if [ -n "${PING_SLACK_TEAM:-}" ]; then

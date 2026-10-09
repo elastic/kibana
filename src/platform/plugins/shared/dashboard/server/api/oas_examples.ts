@@ -514,6 +514,30 @@ const dashboardSearchCodeSamples = [
     label: 'Search dashboards - Console',
     source: 'GET kbn:/api/dashboards?query=web+logs&per_page=10\n',
   },
+  {
+    lang: 'cURL_tag_names',
+    label: 'Filter by tag name - cURL',
+    source:
+      'curl -X GET "${KIBANA_URL}/api/dashboards?tag_names=Security&tag_names=Observability" \\\n' +
+      '  -H "Authorization: ApiKey ${API_KEY}"\n',
+  },
+  {
+    lang: 'Console_tag_names',
+    label: 'Filter by tag name - Console',
+    source: 'GET kbn:/api/dashboards?tag_names=Security&tag_names=Observability\n',
+  },
+  {
+    lang: 'cURL_excluded_tag_names',
+    label: 'Exclude by tag name - cURL',
+    source:
+      'curl -X GET "${KIBANA_URL}/api/dashboards?excluded_tag_names=Deprecated" \\\n' +
+      '  -H "Authorization: ApiKey ${API_KEY}"\n',
+  },
+  {
+    lang: 'Console_excluded_tag_names',
+    label: 'Exclude by tag name - Console',
+    source: 'GET kbn:/api/dashboards?excluded_tag_names=Deprecated\n',
+  },
 ];
 
 const dashboardReadCodeSamples = [

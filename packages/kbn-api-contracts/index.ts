@@ -13,4 +13,3 @@ export type { OasdiffEntry, BreakingChange, FilterResult } from './src/diff';
 export { formatFailure } from './src/report/format_failure';
 export { ESCALATION_LINK } from './src/report/links';
 export { loadAllowlist } from './src/allowlist/load_allowlist';
-export { checkTerraformImpact } from './src/terraform/check_terraform_impact';

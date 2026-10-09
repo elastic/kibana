@@ -61,6 +61,13 @@ export const createCreatePartitionTool = ({
     Only works on wired streams. When creating multiple children under the same parent, call this tool sequentially (they modify the parent's routing table). Children under different parents can be created in parallel.
   `),
   tags: ['streams'],
+  annotations: {
+    title: 'Create Partition',
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
   schema: createPartitionSchema,
   confirmation: {
     askUser: 'always',

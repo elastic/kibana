@@ -13,6 +13,7 @@ import { ApmRuleType } from '@kbn/rule-data-utils';
 import { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import type {
   ANOMALY_DETECTOR_TYPE,
+  ANOMALY_TIMESTAMP,
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
   TRANSACTION_TYPE,
@@ -62,6 +63,7 @@ export interface AlertDetailsAppSectionProps extends ObsAlertDetailsAppSectionPr
   }>;
   alert: TopAlert<{
     [ANOMALY_DETECTOR_TYPE]?: string;
+    [ANOMALY_TIMESTAMP]?: string;
     [ERROR_GROUP_ID]?: string;
     [SERVICE_NAME]: string;
     [SERVICE_ENVIRONMENT]: string;

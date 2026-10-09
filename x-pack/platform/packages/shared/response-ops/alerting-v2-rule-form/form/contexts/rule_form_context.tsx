@@ -25,6 +25,7 @@ export interface RuleFormServices {
   uiActions?: UiActionsStart;
   dashboard?: DashboardStart;
   cps?: CPSPluginStart;
+  minimumScheduleInterval?: string;
 }
 
 export type RuleFormLayout = 'page' | 'flyout';

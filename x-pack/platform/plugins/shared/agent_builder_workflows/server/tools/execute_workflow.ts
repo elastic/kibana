@@ -139,7 +139,7 @@ If set to false, or if the workflow does not complete within the timeout, the to
           return {
             results: [
               errorResult(
-                `Unauthorized to execute workflow '${resolvedWorkflowId}'. The 'workflowsManagement' execute and read privileges are required.`
+                `Unauthorized to execute workflow '${resolvedWorkflowId}'. The 'workflowsManagement' execute privilege is required.`
               ),
             ],
           };

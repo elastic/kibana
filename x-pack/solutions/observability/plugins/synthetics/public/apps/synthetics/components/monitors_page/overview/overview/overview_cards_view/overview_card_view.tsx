@@ -9,7 +9,7 @@ import { type EuiAutoSize, EuiAutoSizer, EuiFlexGroup, EuiFlexItem, EuiSpacer } 
 import InfiniteLoader from 'react-window-infinite-loader';
 import { FixedSizeList, type ListChildComponentProps } from 'react-window';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { CardsViewFooter } from './cards_view_footer';
 import type { FlyoutParamProps } from '../types';
 import { METRIC_ITEM_HEIGHT, MetricItem } from '../metric_item/metric_item';
@@ -82,7 +82,7 @@ const UnGroupedCardView = ({
 
   return (
     <>
-      <div style={{ height: listHeight }}>
+      <div style={{ height: listHeight, paddingLeft: 5 }}>
         {loaded && monitorsSortedByStatus.length ? (
           <EuiAutoSizer>
             {({ width }: EuiAutoSize) => (
@@ -120,7 +120,7 @@ const UnGroupedCardView = ({
                           <EuiFlexGroup
                             data-test-subj={`overview-grid-row-${listIndex}`}
                             gutterSize="m"
-                            css={{ ...style, marginLeft: 5 }}
+                            css={{ ...style }}
                           >
                             {listData[listIndex].map((_, idx) => (
                               <EuiFlexItem

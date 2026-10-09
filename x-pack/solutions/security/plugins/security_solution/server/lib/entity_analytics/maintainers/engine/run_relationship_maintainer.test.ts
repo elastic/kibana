@@ -142,6 +142,7 @@ describe('runRelationshipMaintainer', () => {
           crudClient,
           entityMetadataClient,
           integrations: [baseConfig],
+          maintainerName: 'communicates_with',
         })
       ).rejects.toThrow(/Invalid namespace/);
       // Engine never reached Step 1 / Step 2 / write — precondition guard ran first.
@@ -162,6 +163,7 @@ describe('runRelationshipMaintainer', () => {
           crudClient,
           entityMetadataClient,
           integrations: [baseConfig],
+          maintainerName: 'communicates_with',
         })
       ).resolves.toBeDefined();
     });
@@ -192,6 +194,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
       expect(result.totalNotFound).toBe(1);
       expect(result.totalWriteErrors).toBe(1);
@@ -208,6 +211,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
       expect(result.totalNotFound).toBe(0);
       expect(result.totalWriteErrors).toBe(0);
@@ -228,7 +232,8 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
-        abortController: ac,
+        maintainerName: 'communicates_with',
+        signal: ac.signal,
       });
       expect(result.totalNotFound).toBe(0);
       expect(result.totalWriteErrors).toBe(0);
@@ -245,6 +250,7 @@ describe('runRelationshipMaintainer', () => {
       crudClient,
       entityMetadataClient,
       integrations: [],
+      maintainerName: 'communicates_with',
     });
     expect(result.totalBuckets).toBe(0);
     expect(result.totalRecords).toBe(0);
@@ -266,6 +272,7 @@ describe('runRelationshipMaintainer', () => {
       crudClient,
       entityMetadataClient,
       integrations: [],
+      maintainerName: 'communicates_with',
     });
     const after = new Date().toISOString();
     expect(lastRunTimestamp >= before).toBe(true);
@@ -284,6 +291,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
       expect(result.totalBuckets).toBe(0);
       expect(esql).not.toHaveBeenCalled();
@@ -316,6 +324,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
       expect(search).toHaveBeenCalledTimes(2);
       expect(esql).toHaveBeenCalledTimes(2);
@@ -346,6 +355,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
       // Two search calls because after_key was still set on the partial page.
       // (Old heuristic would have stopped after one because length < page size.)
@@ -369,6 +379,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
       // search may have been called MAX_ITERATIONS or MAX_ITERATIONS+1 times
       // depending on the loop's stop point; the contract is that we stopped
@@ -396,6 +407,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
       expect(result.totalBuckets).toBe(0);
       expect(esql).not.toHaveBeenCalled();
@@ -419,6 +431,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
       expect(result.totalBuckets).toBe(0);
       expect(result.totalWritten).toBe(0);
@@ -441,6 +454,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
       expect(result.totalBuckets).toBe(0);
       expect(logger.error).toHaveBeenCalled();
@@ -462,7 +476,8 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
-        abortController: ac,
+        maintainerName: 'communicates_with',
+        signal: ac.signal,
       });
       expect(result.totalBuckets).toBe(0);
       expect(esql).not.toHaveBeenCalled();
@@ -486,6 +501,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
       expect(result.totalBuckets).toBe(0);
       expect(result.totalWritten).toBe(0);
@@ -513,7 +529,8 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
-        abortController: ac,
+        maintainerName: 'communicates_with',
+        signal: ac.signal,
       });
       expect(result.totalBuckets).toBe(1);
       expect(result.totalRecords).toBe(0);
@@ -539,12 +556,67 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
-      expect(result.totalBuckets).toBe(0); // error integration excluded from totals
+      // The page's buckets were scanned before ES|QL threw, so they count. Nothing
+      // reached the entity store, so written stays 0 — the counters describe work
+      // actually done, not a blanket zero for the whole integration.
+      expect(result.totalBuckets).toBe(1);
       expect(result.totalRecords).toBe(0);
       expect(result.totalWritten).toBe(0);
       expect(bulkUpdate).not.toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalled();
+    });
+
+    it('reports entities persisted by earlier pages when a later page throws mid-pagination', async () => {
+      // Regression guard for the per-page-write invariant: page 1 writes durably,
+      // then page 2's ES|QL throws (e.g. requestTimeoutMs fires). The already-
+      // persisted entities must still be reported — otherwise the completion log
+      // and telemetry claim `written=0` during exactly the timeout scenario the
+      // configurable requestTimeoutMs exists to surface.
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, entityMetadataClient, bulkUpdate } = makeClients();
+
+      // Page 1: one actor, with an after_key so pagination continues.
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }], {
+          'user.name': 'alice',
+        })
+      );
+      esql.mockResolvedValueOnce({
+        columns: [
+          { name: 'actorUserId', type: 'keyword' },
+          { name: 'accesses_frequently', type: 'keyword' },
+          { name: 'accesses_infrequently', type: 'keyword' },
+        ],
+        values: [['user:alice@corp', ['host:H1'], null]],
+      });
+      // Page 2: another actor, but ES|QL fails for it.
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'bob' }, doc_count: 1 }])
+      );
+      esql.mockRejectedValueOnce(new Error('Request timed out'));
+
+      const logger = loggerMock.create();
+      const result = await runRelationshipMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        integrations: [baseConfig],
+        maintainerName: 'communicates_with',
+      });
+
+      expect(bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(result.totalWritten).toBe(1);
+      expect(result.totalRecords).toBe(1);
+
+      // The completion log must agree with the returned totals.
+      const infos = logger.info.mock.calls.map((c) => c[0] as string);
+      const completion = infos.find((m) => m.includes('Integration complete:'));
+      expect(completion).toContain('outcome=error');
+      expect(completion).toContain('written=1');
     });
 
     // Defense in depth: ES|QL responses are typed loosely on the client. A
@@ -567,6 +639,7 @@ describe('runRelationshipMaintainer', () => {
           crudClient,
           entityMetadataClient,
           integrations: [baseConfig],
+          maintainerName: 'communicates_with',
         });
         expect(result.totalRecords).toBe(0);
         expect(bulkUpdate).not.toHaveBeenCalled();
@@ -591,6 +664,7 @@ describe('runRelationshipMaintainer', () => {
           crudClient,
           entityMetadataClient,
           integrations: [baseConfig],
+          maintainerName: 'communicates_with',
         });
         expect(result.totalRecords).toBe(0);
         expect(bulkUpdate).not.toHaveBeenCalled();
@@ -613,6 +687,7 @@ describe('runRelationshipMaintainer', () => {
             crudClient,
             entityMetadataClient,
             integrations: [baseConfig],
+            maintainerName: 'communicates_with',
           })
         ).resolves.toBeDefined();
       });
@@ -630,7 +705,8 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig, oktaConfig],
-        abortController: aborted(),
+        maintainerName: 'communicates_with',
+        signal: aborted().signal,
       });
       expect(search).not.toHaveBeenCalled();
       expect(esql).not.toHaveBeenCalled();
@@ -660,7 +736,8 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig, oktaConfig],
-        abortController: ac,
+        maintainerName: 'communicates_with',
+        signal: ac.signal,
       });
       expect(search).toHaveBeenCalledTimes(1); // only integration #1 ran
       expect(esql).toHaveBeenCalledTimes(1);
@@ -688,7 +765,8 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
-        abortController: ac,
+        maintainerName: 'communicates_with',
+        signal: ac.signal,
       });
       // With streamed per-integration write (C.3): the integration produced
       // zero records so `writeEntityIds` early-returns without ever calling
@@ -736,6 +814,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig, oktaConfig],
+        maintainerName: 'communicates_with',
       });
       expect(result.totalBuckets).toBe(3);
       expect(result.totalRecords).toBe(2);
@@ -769,6 +848,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig, oktaConfig],
+        maintainerName: 'communicates_with',
       });
       expect(result.totalRecords).toBe(1);
       expect(bulkUpdate).toHaveBeenCalledTimes(1);
@@ -802,7 +882,8 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig, oktaConfig],
-        abortController: ac,
+        maintainerName: 'communicates_with',
+        signal: ac.signal,
       });
       // baseConfig wrote 1 entity before the abort fired.
       expect(result.totalWritten).toBe(1);
@@ -825,6 +906,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig, oktaConfig],
+        maintainerName: 'communicates_with',
       });
       const indexes = search.mock.calls.map((c) => (c[0] as { index: string }).index);
       expect(indexes).toEqual(['logs-endpoint.events.security-prod', 'logs-okta.system-prod']);
@@ -832,7 +914,7 @@ describe('runRelationshipMaintainer', () => {
   });
 
   describe('transport options', () => {
-    it('does not pass an AbortSignal to the ES client when no abortController is provided', async () => {
+    it('passes the default requestTimeout (DEFAULT_ESQL_TIMEOUT_MS) to both search and esql.query when no signal is provided', async () => {
       const { esClient, search, esql } = makeEsClient();
       const { crudClient, entityMetadataClient } = makeClients();
       search.mockResolvedValueOnce(
@@ -846,12 +928,15 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
-      expect(search.mock.calls[0][1]).toBeUndefined();
-      expect(esql.mock.calls[0][1]).toBeUndefined();
+      expect((search.mock.calls[0][1] as { requestTimeout: number }).requestTimeout).toBe(60_000);
+      expect((esql.mock.calls[0][1] as { requestTimeout: number }).requestTimeout).toBe(60_000);
+      expect((search.mock.calls[0][1] as { signal?: AbortSignal }).signal).toBeUndefined();
+      expect((esql.mock.calls[0][1] as { signal?: AbortSignal }).signal).toBeUndefined();
     });
 
-    it('passes the AbortSignal to both search and esql.query when abortController is provided', async () => {
+    it('passes the AbortSignal to both search and esql.query when signal is provided', async () => {
       const { esClient, search, esql } = makeEsClient();
       const { crudClient, entityMetadataClient } = makeClients();
       search.mockResolvedValueOnce(
@@ -866,10 +951,64 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
-        abortController: ac,
+        maintainerName: 'communicates_with',
+        signal: ac.signal,
       });
       expect((search.mock.calls[0][1] as { signal: AbortSignal }).signal).toBe(ac.signal);
       expect((esql.mock.calls[0][1] as { signal: AbortSignal }).signal).toBe(ac.signal);
+    });
+  });
+
+  describe('requestTimeoutMs', () => {
+    it('passes requestTimeout to esClient.search when requestTimeoutMs is set', async () => {
+      const { esClient, search } = makeEsClient();
+      const { crudClient, entityMetadataClient } = makeClients();
+      search.mockResolvedValueOnce({ aggregations: { users: { buckets: [] } } });
+
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        integrations: [baseConfig],
+        maintainerName: 'communicates_with',
+        requestTimeoutMs: 90_000,
+      });
+
+      expect(search).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ requestTimeout: 90_000 })
+      );
+    });
+
+    it('passes requestTimeout to esClient.esql.query when requestTimeoutMs is set', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, entityMetadataClient } = makeClients();
+      search.mockResolvedValueOnce({
+        aggregations: {
+          users: {
+            buckets: [{ key: { 'user.name': 'alice' }, doc_count: 1 }],
+          },
+        },
+      });
+      esql.mockResolvedValueOnce({ columns: [], values: [] });
+
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        integrations: [baseConfig],
+        maintainerName: 'communicates_with',
+        requestTimeoutMs: 90_000,
+      });
+
+      expect(esql).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ requestTimeout: 90_000 })
+      );
     });
   });
 
@@ -888,6 +1027,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
       const [esqlArg] = esql.mock.calls[0] as [
         { query: string; filter: { bool: { filter: unknown[] } } }
@@ -912,6 +1052,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [{ ...baseConfig, disableLookbackWindow: true }],
+        maintainerName: 'communicates_with',
       });
       const [esqlArg] = esql.mock.calls[0] as [
         { query: string; filter: { bool: { filter: unknown[] } } }
@@ -949,6 +1090,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
       expect(bulkUpdate).toHaveBeenCalledTimes(1);
       expect(bulkAppend).toHaveBeenCalledTimes(1);
@@ -970,6 +1112,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
       expect(bulkAppend).not.toHaveBeenCalled();
     });
@@ -1009,6 +1152,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
       const [docs] = bulkAppend.mock.calls[0] as [Array<Record<string, unknown>>];
       const actorIds = docs.map((d) => d['entity.id']);
@@ -1042,6 +1186,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig, oktaConfig],
+        maintainerName: 'communicates_with',
       });
       expect(bulkAppend).toHaveBeenCalledTimes(2);
       const scanIds = bulkAppend.mock.calls.flatMap(([docs]) =>
@@ -1075,6 +1220,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig, oktaConfig],
+        maintainerName: 'communicates_with',
       });
       const timestamps = bulkAppend.mock.calls.flatMap(([docs]) =>
         (docs as Array<{ '@timestamp': string }>).map((d) => d['@timestamp'])
@@ -1106,6 +1252,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig, oktaConfig],
+        maintainerName: 'communicates_with',
       });
       const sourcesPerCall = bulkAppend.mock.calls.map(([docs]) => {
         const set = new Set(
@@ -1137,6 +1284,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
       const [docs] = bulkAppend.mock.calls[0] as [Array<Record<string, unknown>>];
       expect(docs).toHaveLength(3);
@@ -1160,8 +1308,13 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
-      expect(result.totalWritten).toBe(0); // error integration excluded from totals
+      // The entity write completed before the metadata write threw, so that entity
+      // IS durably in the store. Reporting 0 here would tell operators nothing was
+      // written when something was — counters must reflect persisted work even
+      // when the integration ends in `outcome: 'error'`.
+      expect(result.totalWritten).toBe(1);
       expect(logger.error).toHaveBeenCalled();
     });
 
@@ -1179,6 +1332,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
       const [docs] = bulkAppend.mock.calls[0] as [
         Array<{ Maintainer: { kind: string; lookback_window: string } }>
@@ -1210,6 +1364,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
       // Second run.
       search.mockResolvedValueOnce(
@@ -1230,6 +1385,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
       expect(bulkAppend).toHaveBeenCalledTimes(2);
       const [run1Docs] = bulkAppend.mock.calls[0] as [Array<{ Maintainer: { scan_id: string } }>];
@@ -1263,6 +1419,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig, oktaConfig],
+        maintainerName: 'communicates_with',
         telemetryCollector: collector,
       });
 
@@ -1303,6 +1460,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
         telemetryCollector: collector,
       });
 
@@ -1332,6 +1490,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
         telemetryCollector: collector,
       });
 
@@ -1359,6 +1518,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig, oktaConfig],
+        maintainerName: 'communicates_with',
       });
 
       // The first integration's failure should NOT throw; the loop should continue.
@@ -1381,9 +1541,66 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
 
       expect(result.totalBuckets).toBe(0);
+    });
+  });
+
+  describe('per-page write', () => {
+    it('calls bulkUpdateEntity once per page when there are multiple pages', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, entityMetadataClient, bulkUpdate } = makeClients();
+
+      // Page 1: returns after_key so pagination continues
+      search.mockResolvedValueOnce({
+        aggregations: {
+          users: {
+            buckets: [{ key: { 'user.name': 'alice' }, doc_count: 1 }],
+            after_key: { 'user.name': 'alice' },
+          },
+        },
+      });
+      // Page 2: no after_key — last page
+      search.mockResolvedValueOnce({
+        aggregations: {
+          users: {
+            buckets: [{ key: { 'user.name': 'bob' }, doc_count: 1 }],
+          },
+        },
+      });
+
+      esql.mockResolvedValue({
+        columns: [
+          { name: 'actorUserId', type: 'keyword' },
+          { name: 'communicates_with', type: 'keyword' },
+        ],
+        values: [['user:alice@host1@local', 'host:h1']],
+      });
+
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        integrations: [
+          {
+            kind: 'standard',
+            id: 'system_auth',
+            name: 'System Auth',
+            indexPattern: (ns) => `logs-system.auth-${ns}`,
+            relationshipKey: 'communicates_with',
+            targetEntityType: 'host',
+            esqlWhereClause: 'event.action == "ssh_login"',
+          },
+        ],
+        maintainerName: 'communicates_with',
+      });
+
+      // bulkUpdateEntity called once per non-empty page (2 pages, both have esql results)
+      expect(bulkUpdate).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -1417,6 +1634,7 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
         telemetryCollector: collector,
       });
 
@@ -1443,10 +1661,42 @@ describe('runRelationshipMaintainer', () => {
         crudClient,
         entityMetadataClient,
         integrations: [baseConfig],
+        maintainerName: 'communicates_with',
       });
 
       expect(search).toHaveBeenCalledTimes(1);
       expect(esql).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('per-integration completion log', () => {
+    it('logs info on successful integration completion with key metrics', async () => {
+      const { esClient, search } = makeEsClient();
+      const { crudClient, entityMetadataClient } = makeClients();
+      const logger = loggerMock.create();
+
+      search.mockResolvedValueOnce({ aggregations: { users: { buckets: [] } } });
+
+      await runRelationshipMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        integrations: [baseConfig],
+        maintainerName: 'communicates_with',
+      });
+
+      const infoCalls = logger.info.mock.calls.map((c) => c[0] as string);
+      const completionLog = infoCalls.find((msg) =>
+        msg.includes('[communicates_with][elastic_defend] Integration complete:')
+      );
+      expect(completionLog).toBeDefined();
+      expect(completionLog).toContain('outcome=');
+      expect(completionLog).toContain('slices=');
+      expect(completionLog).toContain('records=');
+      expect(completionLog).toContain('written=');
+      expect(completionLog).toContain('truncated=');
     });
   });
 });

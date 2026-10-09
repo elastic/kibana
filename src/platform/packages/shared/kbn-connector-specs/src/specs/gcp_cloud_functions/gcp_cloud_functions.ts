@@ -330,28 +330,16 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
 
   test: {
     handler: async (ctx) => {
-      try {
-        const { projectId, region } = ctx.config as { projectId: string; region: string };
-        const parent = buildParentPath(projectId, region);
-
-        await callGcpApi(ctx, 'GET', `${CLOUD_RUN_API_BASE}/${parent}/services`, {
-          pageSize: '1',
-        });
-
-        return {
-          ok: true,
-          message: 'Successfully connected to GCP Cloud Run API',
-        };
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        return {
-          ok: false,
-          message: `Failed to connect: ${errorMessage}`,
-        };
-      }
+      const { projectId, region } = ctx.config as { projectId: string; region: string };
+      const parent = buildParentPath(projectId, region);
+      await callGcpApi(ctx, 'GET', `${CLOUD_RUN_API_BASE}/${parent}/services`, {
+        pageSize: '1',
+      });
+      return {};
     },
     description: i18n.translate('connectorSpecs.gcpCloudFunctions.test.description', {
       defaultMessage: 'Verifies GCP Cloud Functions API credentials and project access',
     }),
+    enabled: true,
   },
 };

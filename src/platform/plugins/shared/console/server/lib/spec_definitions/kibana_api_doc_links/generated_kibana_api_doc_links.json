@@ -291,6 +291,9 @@
   "/api/cases/{caseId}/connector/{connectorId}/_push": {
     "post": "pushCaseDefaultSpace"
   },
+  "/api/cases/{caseId}/fields": {
+    "get": "getCaseApplicableFieldsDefaultSpace"
+  },
   "/api/cases/{caseId}/files": {
     "post": "addCaseFileDefaultSpace"
   },
@@ -309,6 +312,9 @@
   },
   "/api/cases/configure/connectors/_find": {
     "get": "findCaseConnectorsDefaultSpace"
+  },
+  "/api/cases/fields": {
+    "get": "getApplicableFieldsDefaultSpace"
   },
   "/api/cases/reporters": {
     "get": "getCaseReportersDefaultSpace"
@@ -363,6 +369,18 @@
   },
   "/api/data_views/swap_references/_preview": {
     "post": "previewSwapDataViewsDefault"
+  },
+  "/api/detection_engine/attacks/assignees": {
+    "post": "SetAttacksAssignees"
+  },
+  "/api/detection_engine/attacks/search": {
+    "post": "SearchAttacks"
+  },
+  "/api/detection_engine/attacks/status": {
+    "post": "SetAttacksStatus"
+  },
+  "/api/detection_engine/attacks/tags": {
+    "post": "SetAttacksTags"
   },
   "/api/detection_engine/index": {
     "get": "ReadAlertsIndex",
@@ -995,6 +1013,9 @@
   "/api/fleet/uninstall_tokens": {
     "get": "get-fleet-uninstall-tokens"
   },
+  "/api/fleet/uninstall_tokens/{agentPolicyId}/rotate": {
+    "post": "post-fleet-uninstall-tokens-agentpolicyid-rotate"
+  },
   "/api/fleet/uninstall_tokens/{uninstallTokenId}": {
     "get": "get-fleet-uninstall-tokens-uninstalltokenid"
   },
@@ -1243,6 +1264,9 @@
   },
   "/api/security_ai_assistant/prompts/_find": {
     "get": "FindPrompts"
+  },
+  "/api/security_solution/initialize": {
+    "post": "InitializeSecuritySolution"
   },
   "/api/security/entity_store": {
     "put": "put-security-entity-store"
@@ -1592,6 +1616,9 @@
   "/s/{spaceId}/api/observability/slos/_bulk_purge_rollup": {
     "post": "deleteRollupDataOp"
   },
+  "/s/{spaceId}/api/observability/slos/_bulk_snapshot": {
+    "post": "bulkSnapshotOp"
+  },
   "/s/{spaceId}/api/observability/slos/_delete_instances": {
     "post": "deleteSloInstancesOp"
   },
@@ -1602,6 +1629,9 @@
   },
   "/s/{spaceId}/api/observability/slos/{sloId}/_reset": {
     "post": "resetSloOp"
+  },
+  "/s/{spaceId}/api/observability/slos/{sloId}/_snapshot": {
+    "get": "getSnapshotOp"
   },
   "/s/{spaceId}/api/observability/slos/{sloId}/disable": {
     "post": "disableSloOp"

@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/277042
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+title: Fix workflow import failures with cross-space soft-deleted workflows
+description: Workflow import could fail or behave incorrectly when a workflow ID was
+  soft deleted in another space. Import now checks cross-space soft-deleted IDs before
+  creating workflows.

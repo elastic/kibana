@@ -21,11 +21,13 @@ export const ResetMonitorModal = ({
   configIds,
   skippedMonitors = [],
   onClose,
+  onCompleted,
   resetMonitors,
 }: {
   configIds: string[];
   skippedMonitors?: Array<{ id: string; name: string }>;
   onClose: () => void;
+  onCompleted?: () => void;
   resetMonitors: (ids: string[]) => Promise<{ error?: Error }>;
 }) => {
   const [isResetting, setIsResetting] = useState(false);
@@ -52,8 +54,10 @@ export const ResetMonitorModal = ({
         toastLifeTimeMs: 5000,
       });
     }
+    // The action ran (success or failure), so the selection is now stale.
+    onCompleted?.();
     onClose();
-  }, [configIds, onClose, resetMonitors]);
+  }, [configIds, onClose, onCompleted, resetMonitors]);
 
   return (
     <EuiConfirmModal

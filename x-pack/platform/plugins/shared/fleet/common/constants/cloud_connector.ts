@@ -6,6 +6,7 @@
  */
 
 import type { CloudProvider } from '../types/models/cloud_connector';
+import { AWS_CLOUD_PROVIDER } from '../types/models/cloud_connector';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from './package_policy';
 
@@ -123,12 +124,16 @@ export const CLOUD_CONNECTOR_PERMISSION_ALLOWLIST: Record<
   ReadonlyArray<CloudConnectorAllowlistEntry>
 > = {
   security_audit_policy_group: [
-    { provider: 'aws', package: 'cloud_security_posture', policyTemplate: 'cspm' },
-    { provider: 'aws', package: 'cloud_asset_inventory', policyTemplate: 'asset_inventory' },
+    { provider: AWS_CLOUD_PROVIDER, package: 'cloud_security_posture', policyTemplate: 'cspm' },
+    {
+      provider: AWS_CLOUD_PROVIDER,
+      package: 'cloud_asset_inventory',
+      policyTemplate: 'asset_inventory',
+    },
   ],
   aws_global_policy_group: [
-    { provider: 'aws', package: 'aws', policyTemplate: 'guardduty' },
-    { provider: 'aws', package: 'aws', policyTemplate: 's3' },
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'guardduty' },
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 's3' },
   ],
 };
 

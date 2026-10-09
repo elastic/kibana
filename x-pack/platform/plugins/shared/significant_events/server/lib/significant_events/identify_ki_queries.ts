@@ -9,17 +9,19 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, InferenceClient } from '@kbn/inference-common';
 import type { Streams } from '@kbn/streams-schema';
 import type { GeneratedSignificantEventQuery } from '@kbn/significant-events-schema';
-import { ensureMetadata } from '@kbn/streams-schema';
-import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import {
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
 } from '@kbn/significant-events-schema';
-import { identifyKIQueries as identifyKIQueriesThroughAgent } from '@kbn/streams-ai';
+import {
+  identifyKIQueries as identifyKIQueriesThroughAgent,
+  QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
+} from '@kbn/streams-ai';
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
 import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 import type { MemoryDiscoveryTools } from './memory_discovery_tools';
+import type { KiExtractionContextTools } from './ki_extraction_context_tools';
 import type { SemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
 
 /**
@@ -29,6 +31,8 @@ import type { SemanticCodeSearchTools } from '../semantic_code_search_grounding/
  * repository is linked, its git history — adds tool round-trips.
  */
 const MAX_STEPS_WITH_SEMANTIC_CODE_SEARCH_TOOLS = 10;
+
+type KiDiscoveryToolset = MemoryDiscoveryTools | KiExtractionContextTools | SemanticCodeSearchTools;
 
 interface Params {
   definition: Streams.all.Definition;
@@ -45,6 +49,7 @@ interface Dependencies {
   signal: AbortSignal;
   esClient: ElasticsearchClient;
   memoryTools?: MemoryDiscoveryTools;
+  kiExtractionContextTools?: KiExtractionContextTools;
   semanticCodeSearchTools?: SemanticCodeSearchTools;
 }
 
@@ -70,11 +75,12 @@ export async function identifyKIQueries(
     signal,
     esClient,
     memoryTools,
+    kiExtractionContextTools,
     semanticCodeSearchTools,
   } = dependencies;
 
-  const discoveryTools = [memoryTools, semanticCodeSearchTools].filter(
-    (toolset): toolset is MemoryDiscoveryTools | SemanticCodeSearchTools => toolset !== undefined
+  const discoveryTools = [memoryTools, kiExtractionContextTools, semanticCodeSearchTools].filter(
+    (toolset): toolset is KiDiscoveryToolset => toolset !== undefined
   );
 
   const additionalTools: Record<string, ToolDefinition> = Object.assign(
@@ -123,7 +129,10 @@ export async function identifyKIQueries(
     signal,
     systemPrompt: combinedSystemPrompt,
     getFeatures: async (filters) => {
-      const response = await kiClient.getFeatures(definition.name, filters);
+      const response = await kiClient.getFeatures(definition.name, {
+        ...filters,
+        excludedType: [...QUERY_GENERATION_EXCLUDED_FEATURE_TYPES],
+      });
       return response.hits;
     },
     additionalTools: hasAdditionalTools ? additionalTools : undefined,
@@ -139,9 +148,7 @@ export async function identifyKIQueries(
       type: query.type,
       title: query.title,
       description: query.description,
-      esql: {
-        query: query.type === QUERY_TYPE_STATS ? query.esql : ensureMetadata(query.esql),
-      },
+      esql: { query: query.esql },
       severity_score: query.severity_score,
       evidence: query.evidence,
       replaces: query.replaces,

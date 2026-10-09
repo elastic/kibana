@@ -64,6 +64,15 @@ describe('USER_AGENT Validation', () => {
       );
     });
 
+    it('raises error when a property is outside the allowed set', () => {
+      userAgentExpectErrors(
+        'FROM a | USER_AGENT ua = keywordField WITH { "properties": ["name", "bogus"] }',
+        [
+          'Invalid value "bogus" for parameter "properties". Expected one of: name, version, os, device.',
+        ]
+      );
+    });
+
     it('raises error on unknown map key', () => {
       userAgentExpectErrors('FROM a | USER_AGENT ua = keywordField WITH { "unknown_key": "val" }', [
         'Unknown parameter "unknown_key".',

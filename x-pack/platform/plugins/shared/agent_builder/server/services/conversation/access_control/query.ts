@@ -16,15 +16,22 @@ const buildPublicConversationFilter = () => {
 };
 
 /**
- * Matches conversations owned by the current user. Profile id is preferred for
- * new conversations, while username keeps legacy conversations visible.
+ * Matches conversations owned by the current user, on `user_id` when the document stored one and on
+ * username only when it did not. Mirrors `isConversationOwner`.
  */
 const buildOwnedConversationFilter = ({ user }: { user: UserIdAndName }) => {
-  const shouldClauses: Array<Record<string, unknown>> = [{ term: { user_name: user.username } }];
+  const shouldClauses: Array<Record<string, unknown>> = [];
 
   if (user.id !== undefined) {
     shouldClauses.push({ term: { user_id: user.id } });
   }
+
+  shouldClauses.push({
+    bool: {
+      must_not: { exists: { field: 'user_id' } },
+      filter: { term: { user_name: user.username } },
+    },
+  });
 
   return {
     bool: {
@@ -35,9 +42,29 @@ const buildOwnedConversationFilter = ({ user }: { user: UserIdAndName }) => {
 };
 
 /**
+ * Matches conversations shared with the current user. Mirrors `isConversationMember`.
+ */
+const buildSharedConversationFilter = ({ userId }: { userId: string }) => {
+  return {
+    nested: {
+      path: 'access_control.entries',
+      ignore_unmapped: true,
+      query: {
+        bool: {
+          filter: [
+            { term: { 'access_control.entries.type': 'user' } },
+            { term: { 'access_control.entries.id': userId } },
+          ],
+        },
+      },
+    },
+  };
+};
+
+/**
  * Builds the Elasticsearch filter for listing readable conversations.
  *
- * A conversation is listable when it is public or owned by the current user, and
+ * A conversation is listable when it is public, owned by the current user, or shared with them, and
  * its underlying agent is one the user can currently access.
  */
 export const buildReadAccessFilter = ({
@@ -47,12 +74,21 @@ export const buildReadAccessFilter = ({
   user: UserIdAndName;
   agentIds: string[];
 }) => {
+  const shouldClauses: Array<Record<string, unknown>> = [
+    buildPublicConversationFilter(),
+    buildOwnedConversationFilter({ user }),
+  ];
+
+  if (user.id !== undefined) {
+    shouldClauses.push(buildSharedConversationFilter({ userId: user.id }));
+  }
+
   return {
     bool: {
       filter: [
         {
           bool: {
-            should: [buildPublicConversationFilter(), buildOwnedConversationFilter({ user })],
+            should: shouldClauses,
             minimum_should_match: 1,
           },
         },

@@ -10,6 +10,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
@@ -183,7 +184,7 @@ export const AlertTimelineSection: React.FC = () => {
 
         <EuiSpacer size="s" />
         <AlertTimelineLegend />
-        <EuiSpacer size="m" />
+        <EuiHorizontalRule margin="m" />
 
         {isLoading && (
           <EuiFlexGroup

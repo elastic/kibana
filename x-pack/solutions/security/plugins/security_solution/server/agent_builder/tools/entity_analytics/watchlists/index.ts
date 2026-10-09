@@ -12,6 +12,7 @@ export {
 export { createWatchlistTool, SECURITY_CREATE_WATCHLIST_TOOL_ID } from './create_watchlist_tool';
 export { deleteWatchlistTool, SECURITY_DELETE_WATCHLIST_TOOL_ID } from './delete_watchlist_tool';
 export { listWatchlistsTool, SECURITY_LIST_WATCHLISTS_TOOL_ID } from './list_watchlists_tool';
+export { getWatchlistIdTool, SECURITY_GET_WATCHLIST_ID_TOOL_ID } from './get_watchlist_id_tool';
 export {
   removeEntitiesFromWatchlistTool,
   SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,

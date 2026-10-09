@@ -15,6 +15,8 @@ import type { RuleApiResponse } from '../../../../services/rules_api';
 
 const mockResolveDashboardsByIds = jest.fn();
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
+  getDashboardId: (artifact: { data: Record<string, unknown> }) =>
+    typeof artifact.data.dashboardId === 'string' ? artifact.data.dashboardId : undefined,
   resolveDashboardsByIds: (...args: unknown[]) => mockResolveDashboardsByIds(...args),
 }));
 
@@ -53,6 +55,7 @@ const mockHttpService = {
 };
 
 let mockDashboardServiceOverride: typeof mockDashboardService | undefined = mockDashboardService;
+let mockCanWriteRules = true;
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown, options?: { optional?: boolean }) => {
@@ -68,6 +71,14 @@ jest.mock('@kbn/core-di-browser', () => ({
       }
       return mockDashboardServiceOverride;
     }
+    if (typeof token === 'function') {
+      // UserCapabilities service token
+      return {
+        canWrite: (feature: string) => (feature === 'rules' ? mockCanWriteRules : true),
+        canRead: () => true,
+        can: () => mockCanWriteRules,
+      };
+    }
     return {};
   },
   CoreStart: (key: string) => key,
@@ -81,14 +92,14 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'alert',
   enabled: true,
-  metadata: { name: 'Test Rule' },
+  metadata: { name: 'Test Rule', version: 1 },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: { format: 'composed' as const, base: 'FROM logs-*', breach: { segment: '' } },
-  createdBy: 'alice@example.com',
-  createdAt: '2026-03-01T12:00:00.000Z',
-  updatedBy: 'bob@example.com',
-  updatedAt: '2026-03-04T12:00:00.000Z',
+  created_by: 'alice@example.com',
+  created_at: '2026-03-01T12:00:00.000Z',
+  updated_by: 'bob@example.com',
+  updated_at: '2026-03-04T12:00:00.000Z',
 };
 
 const renderSubsection = (rule: RuleApiResponse) =>
@@ -104,6 +115,7 @@ describe('DashboardArtifactsSubsection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockDashboardServiceOverride = mockDashboardService;
+    mockCanWriteRules = true;
     mockUseUpdateRule.mockReturnValue({
       mutate: mockUpdateRule,
       isLoading: false,
@@ -125,7 +137,9 @@ describe('DashboardArtifactsSubsection', () => {
 
     renderSubsection({
       ...baseRule,
-      artifacts: [{ id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, value: 'dash-1' }],
+      artifacts: [
+        { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
+      ],
     });
 
     expect(screen.getByTestId('ruleDashboardArtifactsLoading')).toBeInTheDocument();
@@ -136,7 +150,9 @@ describe('DashboardArtifactsSubsection', () => {
 
     renderSubsection({
       ...baseRule,
-      artifacts: [{ id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, value: 'dash-1' }],
+      artifacts: [
+        { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
+      ],
     });
 
     await waitFor(() => {
@@ -152,7 +168,9 @@ describe('DashboardArtifactsSubsection', () => {
 
     renderSubsection({
       ...baseRule,
-      artifacts: [{ id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, value: 'dash-1' }],
+      artifacts: [
+        { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
+      ],
     });
 
     await waitFor(() => {
@@ -184,8 +202,8 @@ describe('DashboardArtifactsSubsection', () => {
     const rule = {
       ...baseRule,
       artifacts: [
-        { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, value: 'dash-1' },
-        { id: 'artifact-2', type: 'runbook', value: 'runbook-content' },
+        { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
+        { id: 'artifact-2', type: 'runbook', data: { content: 'runbook-content' } },
       ],
     };
 
@@ -202,7 +220,7 @@ describe('DashboardArtifactsSubsection', () => {
       {
         id: 'rule-1',
         payload: {
-          artifacts: [{ id: 'artifact-2', type: 'runbook', value: 'runbook-content' }],
+          artifacts: [{ id: 'artifact-2', type: 'runbook', data: { content: 'runbook-content' } }],
         },
       },
       expect.objectContaining({ onSettled: expect.any(Function) })
@@ -217,7 +235,13 @@ describe('DashboardArtifactsSubsection', () => {
 
     const rule = {
       ...baseRule,
-      artifacts: [{ id: 'artifact-missing', type: DASHBOARD_ARTIFACT_TYPE, value: 'dash-missing' }],
+      artifacts: [
+        {
+          id: 'artifact-missing',
+          type: DASHBOARD_ARTIFACT_TYPE,
+          data: { dashboardId: 'dash-missing' },
+        },
+      ],
     };
 
     renderSubsection(rule);
@@ -246,6 +270,42 @@ describe('DashboardArtifactsSubsection', () => {
       },
       expect.objectContaining({ onSettled: expect.any(Function) })
     );
+  });
+
+  describe('when the user only has read privilege', () => {
+    beforeEach(() => {
+      mockCanWriteRules = false;
+    });
+
+    it('hides the add dashboards affordance', () => {
+      renderSubsection(baseRule);
+
+      expect(screen.queryByTestId('ruleDashboardArtifactsAddButton')).not.toBeInTheDocument();
+    });
+
+    it('hides the remove (trash) affordance on resolved dashboard rows', async () => {
+      mockResolveDashboardsByIds.mockResolvedValue({
+        resolved: [{ id: 'dash-1', title: 'Ops Dashboard' }],
+        missing: [],
+      });
+
+      renderSubsection({
+        ...baseRule,
+        artifacts: [
+          { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
+        ],
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('ruleDashboardArtifactTitle-dash-1')).toBeInTheDocument();
+      });
+
+      expect(
+        screen.queryByTestId('ruleDashboardArtifactDeleteButton-dash-1')
+      ).not.toBeInTheDocument();
+      // The read-only open link remains available.
+      expect(screen.getByTestId('ruleDashboardArtifactOpenLink-dash-1')).toBeInTheDocument();
+    });
   });
 
   it('renders a subdued note when the dashboard plugin is unavailable', () => {

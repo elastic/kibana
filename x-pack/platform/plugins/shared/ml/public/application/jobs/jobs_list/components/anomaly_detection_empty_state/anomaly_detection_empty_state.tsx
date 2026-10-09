@@ -13,7 +13,8 @@ import { i18n } from '@kbn/i18n';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { SerializedStyles } from '@emotion/serialize';
 import adImage from './machine_learning_cog.svg';
-import { useMlKibana, useMlManagementLocator } from '../../../../contexts/kibana';
+import { useMlKibana } from '../../../../contexts/kibana';
+import { useCreateAndNavigateToManagementMlLink } from '../../../../contexts/kibana/use_create_url';
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check';
 import { MLEmptyPromptCard } from '../../../../components/overview/ml_empty_prompt_card';
@@ -30,16 +31,10 @@ export const AnomalyDetectionEmptyState: FC<{
     services: { docLinks },
   } = useMlKibana();
 
-  const mlLocator = useMlManagementLocator();
-
-  const redirectToCreateJobSelectIndexPage = async () => {
-    if (!mlLocator) return;
-
-    await mlLocator.navigate({
-      sectionId: 'ml',
-      appId: `anomaly_detection/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX}`,
-    });
-  };
+  const redirectToCreateJobSelectIndexPage = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
+    'anomaly_detection'
+  );
 
   return (
     <MLEmptyPromptCard

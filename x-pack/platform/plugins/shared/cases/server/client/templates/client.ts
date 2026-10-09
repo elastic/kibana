@@ -33,6 +33,13 @@ export interface TemplatesSubClient {
   createTemplate(input: CreateTemplateInput): Promise<SavedObject<Template>>;
   updateTemplate(templateId: string, input: UpdateTemplateInput): Promise<SavedObject<Template>>;
   deleteTemplate(templateId: string): Promise<void>;
+  /**
+   * Write preflight (`dry_run`): runs the same authorization and name-uniqueness checks a
+   * `createTemplate` would, without writing. Throws exactly what the real write would throw.
+   */
+  validateCreateTemplate(input: CreateTemplateInput): Promise<void>;
+  /** Write preflight (`dry_run`) for `updateTemplate` — see {@link validateCreateTemplate}. */
+  validateUpdateTemplate(templateId: string, input: UpdateTemplateInput): Promise<void>;
   getTags(): Promise<string[]>;
   getAuthors(): Promise<string[]>;
 }
@@ -45,6 +52,54 @@ export interface TemplatesSubClient {
 export const createTemplatesSubClient = (clientArgs: CasesClientArgs): TemplatesSubClient => {
   const { services, authorization, user } = clientArgs;
   const { templatesService } = services;
+
+  /**
+   * Moving a template to a different owner also requires manage rights on the TARGET owner —
+   * otherwise a solution-scoped user could plant templates into another solution's scope.
+   * Shared by `updateTemplate` and its `dry_run` preflight so both throw identically.
+   */
+  const ensureCanManageTargetOwner = async (
+    template: SavedObject<Template>,
+    input: UpdateTemplateInput
+  ) => {
+    if (input.owner !== template.attributes.owner) {
+      await authorization.ensureAuthorized({
+        operation: Operations.manageTemplate,
+        entities: [{ owner: input.owner, id: template.id }],
+      });
+    }
+  };
+
+  /**
+   * Authorizes a mutation on an existing template without becoming an existence oracle: a user
+   * with no template-read access for the owner gets the same 404 as a missing id, while a user
+   * who can read (but not manage) templates gets an honest 403.
+   *
+   * Takes the request `templateId` (not `template.attributes.templateId`) so the hide-existence 404
+   * is byte-identical to the missing-id 404 the callers throw — the two must be indistinguishable.
+   */
+  const ensureCanManageOrHideExistence = async (
+    template: SavedObject<Template>,
+    templateId: string
+  ) => {
+    const entities = [{ owner: template.attributes.owner, id: template.id }];
+    try {
+      await authorization.ensureAuthorized({
+        operation: Operations.manageTemplate,
+        entities,
+      });
+    } catch (manageError) {
+      try {
+        await authorization.ensureAuthorized({
+          operation: Operations.getTemplate,
+          entities,
+        });
+      } catch {
+        throw Boom.notFound(`Template with id ${templateId} not found`);
+      }
+      throw manageError;
+    }
+  };
 
   const templatesSubClient: TemplatesSubClient = {
     getAllTemplates: async (params: TemplatesFindRequest) => {
@@ -101,10 +156,8 @@ export const createTemplatesSubClient = (clientArgs: CasesClientArgs): Templates
       if (!template) {
         throw Boom.notFound(`Template with id ${templateId} not found`);
       }
-      await authorization.ensureAuthorized({
-        operation: Operations.manageTemplate,
-        entities: [{ owner: template.attributes.owner, id: template.id }],
-      });
+      await ensureCanManageOrHideExistence(template, templateId);
+      await ensureCanManageTargetOwner(template, input);
       return templatesService.updateTemplate(templateId, input);
     },
 
@@ -113,11 +166,29 @@ export const createTemplatesSubClient = (clientArgs: CasesClientArgs): Templates
       if (!template) {
         throw Boom.notFound(`Template with id ${templateId} not found`);
       }
+      await ensureCanManageOrHideExistence(template, templateId);
+      return templatesService.deleteTemplate(templateId);
+    },
+
+    validateCreateTemplate: async (input: CreateTemplateInput) => {
       await authorization.ensureAuthorized({
         operation: Operations.manageTemplate,
-        entities: [{ owner: template.attributes.owner, id: template.id }],
+        entities: [{ owner: input.owner, id: uuidv4() }],
       });
-      return templatesService.deleteTemplate(templateId);
+      await templatesService.validateWriteInput(input);
+    },
+
+    validateUpdateTemplate: async (templateId: string, input: UpdateTemplateInput) => {
+      const template = await templatesService.getTemplate(templateId);
+      if (!template) {
+        throw Boom.notFound(`Template with id ${templateId} not found`);
+      }
+      await ensureCanManageOrHideExistence(template, templateId);
+      await ensureCanManageTargetOwner(template, input);
+      await templatesService.validateWriteInput(input, {
+        excludeTemplateId: template.attributes.templateId,
+        currentOwner: template.attributes.owner,
+      });
     },
 
     getTags: () => templatesService.getTags(),

@@ -11,6 +11,7 @@ export {
   type RuleUnbackedFilter,
 } from './knowledge_indicator_client';
 export { KnowledgeIndicatorService } from './knowledge_indicator_service';
+export type { PromoteQueriesResult } from './knowledge_indicator_client/query_rule_orchestrator';
 export {
   knowledgeIndicatorsDataStream,
   KNOWLEDGE_INDICATORS_DATA_STREAM,

@@ -76,7 +76,7 @@ export function ESQLMenu({
       <EuiFlexItem grow={false}>
         <EuiToolTip position="top" content={visorTooltip} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'search'}
+            iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'magnify'}
             size="xs"
             aria-label={searchPlaceholder}
             onClick={onToggleVisor}

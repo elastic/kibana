@@ -9,7 +9,7 @@ import React from 'react';
 import { Pager } from '@elastic/eui';
 import { fireEvent, screen, within } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { getJobs, jobCount } from '../../../../../fixtures';
 import { createRollupJobsStore } from '../../../store';
 import { JobTable } from './job_table';

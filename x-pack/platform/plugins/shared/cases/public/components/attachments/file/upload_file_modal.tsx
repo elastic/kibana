@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiCallOut,
   EuiIconTip,
   EuiModal,
   EuiModalBody,
@@ -18,7 +19,7 @@ import {
 import { css } from '@emotion/react';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import type { UploadedFile } from '@kbn/shared-ux-file-upload/src/file_upload';
 
@@ -35,6 +36,7 @@ import { useCasesToast } from '../../../common/use_cases_toast';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import * as i18n from './translations';
+import type { AttachedFile } from './utils';
 import { useRefreshCaseViewPage } from '../../case_view/use_on_refresh_case_view_page';
 import { deleteFileAttachments } from '../../../containers/api';
 import type { ServerError } from '../../../types';
@@ -106,14 +108,36 @@ UploadFileHint.displayName = 'UploadFileHint';
 export interface UploadFileModalProps {
   caseId: string;
   onClose: () => void;
+  /**
+   * Files already attached to the case (name + extension). Used to warn before
+   * re-uploading a duplicate. Sourced in-memory from the case comments, so no
+   * extra fetch is needed.
+   */
+  existingFiles?: AttachedFile[];
 }
 
-const UploadFileModalComponent: React.FC<UploadFileModalProps> = ({ caseId, onClose }) => {
+// Split a picker filename ("screenshot.png") into `{ name, extension }` to
+// match how the case stores them. Callers lowercase for comparisons.
+const splitExtension = (fullName: string): { name: string; extension: string } => {
+  const dot = fullName.lastIndexOf('.');
+  if (dot <= 0) return { name: fullName, extension: '' };
+  return { name: fullName.slice(0, dot), extension: fullName.slice(dot + 1) };
+};
+
+const UploadFileModalComponent: React.FC<UploadFileModalProps> = ({
+  caseId,
+  onClose,
+  existingFiles = [],
+}) => {
   const { euiTheme } = useEuiTheme();
   const { owner } = useCasesContext();
   const { showDangerToast, showErrorToast, showSuccessToast } = useCasesToast();
   const { mutateAsync: createAttachments } = useCreateAttachments();
   const refreshAttachmentsTable = useRefreshCaseViewPage();
+
+  // Set when the current pick matches a file already on the case; drives the callout.
+  const [duplicateFileName, setDuplicateFileName] = useState<string | null>(null);
+
   const kind = constructFileKindIdByOwner(owner[0] as Owner);
 
   const onError = useCallback(
@@ -127,6 +151,25 @@ const UploadFileModalComponent: React.FC<UploadFileModalProps> = ({ caseId, onCl
       showErrorToast(error, { title: i18n.FAILED_UPLOAD });
     },
     [showDangerToast, showErrorToast]
+  );
+
+  const onFilesSelected = useCallback(
+    (files: File[]) => {
+      if (files.length === 0) {
+        setDuplicateFileName(null);
+        return;
+      }
+      const { name, extension } = splitExtension(files[0].name);
+      const normalizedName = name.toLowerCase();
+      const normalizedExtension = extension.toLowerCase();
+      const match = existingFiles.find(
+        (existing) =>
+          existing.name.toLowerCase() === normalizedName &&
+          existing.extension.toLowerCase() === normalizedExtension
+      );
+      setDuplicateFileName(match ? files[0].name : null);
+    },
+    [existingFiles]
   );
 
   const onUploadDone = useCallback(
@@ -199,9 +242,23 @@ const UploadFileModalComponent: React.FC<UploadFileModalProps> = ({ caseId, onCl
           kind={kind}
           onDone={onUploadDone}
           onError={onError}
+          onFilesSelected={onFilesSelected}
           meta={{ caseIds: [caseId], owner: [owner[0]] }}
         />
         <EuiSpacer size="s" />
+        {duplicateFileName && (
+          <>
+            <EuiCallOut
+              data-test-subj="cases-files-duplicate-warning"
+              size="s"
+              color="warning"
+              iconType="warning"
+              text={i18n.DUPLICATE_FILE_WARNING(duplicateFileName)}
+              announceOnMount
+            />
+            <EuiSpacer size="s" />
+          </>
+        )}
         <UploadFileHint kind={kind} />
       </EuiModalBody>
     </EuiModal>

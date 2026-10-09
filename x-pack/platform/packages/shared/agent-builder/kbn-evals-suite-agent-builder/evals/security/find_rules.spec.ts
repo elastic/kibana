@@ -373,7 +373,7 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'Found 2 detection rules covering tactic TA0005 (Defense Evasion). ' +
+                    'Found 2 detection rules covering tactic TA0005 (Stealth). ' +
                     '"Process Injection T1055" is a critical severity eql rule with risk score 95 and is enabled. ' +
                     '"Process Hollowing Detection" is a high severity query rule with risk score 70 and is enabled. ' +
                     'The find_rules tool was called with mitreTactic set to "TA0005".',

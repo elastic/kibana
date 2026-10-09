@@ -8,6 +8,7 @@
  */
 
 export {
+  asCodeEsqlApproximationSchema,
   asCodeIdSchema,
   asCodeMetaSchema,
   asCodePaginationParamsSchema,
@@ -16,7 +17,6 @@ export {
   asCodeSearchRequestSchema,
   getAsCodeTagsSchema,
   getMeta,
-  getTagsSearchRequest,
   type AsCodeMeta,
   type AsCodeQuery,
 } from './src/schemas';

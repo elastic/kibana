@@ -36,11 +36,14 @@ export const SourceConfigurationSettings = ({
   shouldAllowEdit,
   http,
 }: SourceConfigurationSettingsProps) => {
-  useMetricsBreadcrumbs([
-    {
-      text: settingsTitle,
-    },
-  ]);
+  useMetricsBreadcrumbs(
+    [
+      {
+        text: settingsTitle,
+      },
+    ],
+    { parent: 'app' }
+  );
 
   const [numberOfInfraRules, setNumberOfInfraRules] = useState(0);
 

@@ -1,0 +1,154 @@
+## When to Use This Skill
+
+Load this skill when the user wants to **query a Context Engine AI Index** — i.e. to
+retrieve Knowledge Indicators (KIs) that have already been generated.
+
+This is the query-time complement to `ki-automation-generation`, which populates the index.
+This skill is not about generating these KIs, that is a separate skill.
+
+## What a KI index looks like
+
+KIs are stored in indices matching `ai-index-*` (covers both regular indices and datastreams).
+Use `platform.core.list_indices` to discover which ones exist.
+
+### Field reference
+
+| Field | ES|QL type | Purpose |
+|---|---|---|
+| `type` | keyword | Categorization — e.g. `"index_metadata"`, `"document"`, `"entity_profile"` |
+| `title` | text | Short name of the KI or its backing entity; semantic via `title.semantic` |
+| `content` | text | Full text: purpose, questions answered, access patterns; semantic via `content.semantic` |
+| `description` | text | Short description of this KI; semantic via `description.semantic` |
+| `tags` | keyword | Filter facets |
+| `attributes` | flattened | Structured keyword-queryable metadata (status, themes, entity names, etc.) |
+
+Semantic sub-fields use **dot notation**: `content.semantic`, `title.semantic`, `description.semantic`.
+
+---
+
+## Aggregation
+
+`type` and `tags` values are both set by whichever workflows generated the KIs, so neither is
+a fixed vocabulary. Aggregate to discover what this index actually holds before filtering on
+either one:
+
+```esql
+FROM ai-index-*
+| STATS ki_count = COUNT(*) BY type
+| SORT ki_count DESC
+```
+
+```esql
+FROM ai-index-*
+| STATS ki_count = COUNT(*) BY tags
+| SORT ki_count DESC
+```
+
+`tags` is usually higher cardinality than `type`, and a single KI can carry several, so tags
+lend themselves to narrowing in successive passes: filter, see what is left, filter again.
+
+Aggregations also run over a result set, not just the whole index. Use this to see how
+matches for a query distribute before narrowing:
+
+```esql
+FROM ai-index-*
+| WHERE content:"<query>" OR title:"<query>" OR description:"<query>"
+| STATS ki_count = COUNT(*) BY tags
+| SORT ki_count DESC
+```
+
+Then re-run the retrieval query with the most relevant tag added as a filter.
+
+---
+
+## ES|QL query
+
+Use FORK+FUSE hybrid search. It runs keyword and semantic branches in parallel and combines
+them with reciprocal rank fusion, so documents matching both branches score higher than
+documents matching only one.
+
+Always include `METADATA _id, _index, _score` — required for `SORT _score DESC` and for FUSE
+to deduplicate across branches.
+
+```esql
+FROM ai-index-* METADATA _id, _index, _score
+| FORK
+    ( WHERE content:"<query>" OR title:"<query>" OR description:"<query>"          | SORT _score DESC | LIMIT 20 )
+    ( WHERE content.semantic:"<query>" OR title.semantic:"<query>" OR description.semantic:"<query>" | SORT _score DESC | LIMIT 20 )
+| FUSE
+| SORT _score DESC, _id ASC
+| KEEP title, description, content, type, tags
+| LIMIT <n>
+```
+
+`KEEP` is not optional. Without it the query also returns `_score`, `_id`, `_index`, `_fork`,
+`@timestamp`, `attributes` and `references.uri` for every hit, which wastes the context the KIs
+are meant to save. `METADATA` still belongs at the top, since `FUSE` and the sort need those
+columns mid-pipeline; `KEEP` drops them once they have done their job. Add other fields to the
+`KEEP` list when you need them, for example a key from `attributes` you intend to filter on
+next.
+
+Set a generous per-branch `LIMIT` (20) so FUSE has enough candidates to merge results from.
+The post-FUSE `LIMIT <n>` controls the final result count — start with 5 and adjust based on
+how much context the KIs carry. Some use cases may need only 1–2; others may warrant more if
+individual KIs are sparse.
+
+Only deviate from this template if you have a hard constraint that FORK+FUSE cannot satisfy
+(e.g. you need purely exact-match results with no semantic fallback). In that case,
+keyword-only is a valid alternative:
+
+```esql
+FROM ai-index-* METADATA _id, _index, _score
+| WHERE content:"<query>" OR title:"<query>" OR description:"<query>"
+| SORT _score DESC, _id ASC
+| KEEP title, description, content, type, tags
+| LIMIT <n>
+```
+
+In all other cases, prefer the FORK+FUSE template above.
+
+To scope results to a specific type or tag, add a `WHERE` before `FORK`:
+
+```esql
+FROM ai-index-* METADATA _id, _index, _score
+| WHERE type == "index_metadata"
+| FORK
+    ( WHERE content:"<query>" OR title:"<query>" OR description:"<query>"          | SORT _score DESC | LIMIT 20 )
+    ( WHERE content.semantic:"<query>" OR title.semantic:"<query>" OR description.semantic:"<query>" | SORT _score DESC | LIMIT 20 )
+| FUSE
+| SORT _score DESC, _id ASC
+| KEEP title, description, content, type, tags
+| LIMIT <n>
+```
+
+Replace `type == "index_metadata"` with any combination of `type` or `tags` filters.
+
+---
+
+## ES|QL syntax notes
+
+- **`METADATA _id, _index, _score`** — exposes the BM25/FUSE relevance score. Required for `SORT _score DESC`
+  whenever you use `:` match operators or `FUSE`. Omitting it causes a missing-field error.
+- **FORK branches** — each branch is an independent sub-query executed in parallel. A generous
+  per-branch `LIMIT` (e.g. 20) ensures FUSE has enough candidates.
+- **FUSE** — merges branches into a single ranked result set (using reciprocal rank fusion - RRF - by default).
+- **Dot notation for semantic sub-fields** — use `content.semantic`, not `content_semantic`.
+
+---
+
+## Suggested retrieval flow
+
+1. **Discover** — call `platform.core.list_indices` and filter by `ai-index-*` to find which
+   KI indices exist in the environment.
+2. **Orient** — run a `STATS ki_count = COUNT(*) BY type` aggregation to see what categories
+   of KIs are available. You may want to sample a few KIs — potentially per type if type names
+   are ambiguous (`WHERE type == "..." | LIMIT 2`) — before running your full query. Remember
+   that this doesn't come for free, so only proceed with this if needed.
+3. **Query** — use FORK+FUSE hybrid search.
+4. **Return** — the `KEEP` clause already limits results to `title`, `description`, `content`,
+   `type` and `tags`. Seeing `tags` on the results is often enough to narrow a follow-up query
+   without a separate aggregation.
+
+---
+
+

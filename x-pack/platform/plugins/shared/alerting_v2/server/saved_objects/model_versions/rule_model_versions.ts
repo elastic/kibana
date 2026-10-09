@@ -6,7 +6,12 @@
  */
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { ruleSavedObjectAttributesSchemaV1 } from '../schemas/rule_saved_object_attributes';
+import {
+  ruleSavedObjectAttributesSchemaV1,
+  ruleSavedObjectAttributesSchemaV2,
+  ruleSavedObjectAttributesSchemaV3,
+} from '../schemas/rule_saved_object_attributes';
+import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -34,6 +39,41 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: ruleSavedObjectAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
       create: ruleSavedObjectAttributesSchemaV1,
+    },
+  },
+  '3': {
+    // Adds the server-managed `metadata.version` attribute. It is not indexed (we never
+    // search/sort/aggregate on it), so there is no mappings change. Pre-v3 rules
+    // are backfilled to `1` so every rule has a valid baseline counter; the next
+    // mutation increments from there.
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: (doc) => ({
+          attributes: { metadata: { ...doc.attributes.metadata, version: 1 } },
+        }),
+      },
+    ],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV2.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV2,
+    },
+  },
+  '4': {
+    // Introduce the structured `artifacts[].data` record, backfilled from the
+    // legacy `artifacts[].value`. `value` is gone from the schema and is never
+    // written again, but the backfill leaves the existing one on disk so a
+    // rollback to model version 3 — whose schema still requires it — can read
+    // migrated rules.
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: migrateRuleArtifactsToData,
+      },
+    ],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV3,
     },
   },
 };

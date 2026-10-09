@@ -32,6 +32,7 @@ import { ObservableTypes } from '../../observable_types';
 import { AutomaticClosureSwitch } from './automatic_closure_switch';
 import { SettingsSection } from './settings_section';
 import { ConfigureCasesAppHeader } from './configure_cases_app_header';
+import { OldCustomFieldsAndTemplatesSection } from './old_custom_fields_and_templates_section';
 import * as observableTypesI18n from '../../observable_types/translations';
 
 const contentWrapperCss = css`
@@ -48,6 +49,8 @@ const getFormWrapperCss = (euiTheme: EuiThemeComputed) => css`
   }
 `;
 
+type LegacyFlyoutType = 'customField' | 'template';
+
 // This component intentionally mirrors the connector/closure/observable-types logic in
 // `../../configure_cases` (the legacy settings page) via the shared `useConfigureCasesController`
 // hook. Both pages are kept as separate presentational implementations while behind the
@@ -63,10 +66,15 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     hasMinimumLicensePermissions,
     hasMinimumLicensePermissionsForObservables,
     isObservablesFeatureEnabled,
+    configurationId,
+    configurationVersion,
     closureType,
     connector,
     mappings,
+    customFields,
+    templates,
     observableTypes,
+    isPersistingConfiguration,
     isLoadingCaseConfiguration,
     isLoadingConnectors,
     connectors,
@@ -74,8 +82,9 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     isLoadingAny,
     connectorIsValid,
     updateConnectorDisabled,
+    flyOutVisibility,
     setFlyOutVisibility,
-    isPersistingConfiguration,
+    persistCaseConfigure,
     onClickUpdateConnector,
     onAddNewConnector,
     onChangeConnector,
@@ -85,7 +94,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     onEditObservableType,
     onDeleteObservableType,
     AddOrEditObservableTypeFlyout,
-  } = useConfigureCasesController();
+  } = useConfigureCasesController<LegacyFlyoutType>();
 
   const showObservableTypesSection =
     hasMinimumLicensePermissionsForObservables && isObservablesFeatureEnabled;
@@ -190,6 +199,26 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                     />
                   </SettingsSection>
                 )}
+
+                {/* Rendered for both templates-flag states: with templates v2 ON it is the
+                    read-mostly "legacy" section behind a local-storage switch; with templates
+                    v2 OFF it is the only custom-fields / templates management UI (the v2
+                    templates and field-library routes are unregistered), so hiding it would
+                    leave existing custom fields undeletable while they still block case
+                    creation. The section adapts its copy and gating internally. */}
+                <OldCustomFieldsAndTemplatesSection
+                  configurationId={configurationId}
+                  configurationVersion={configurationVersion}
+                  closureType={closureType}
+                  connector={connector}
+                  customFields={customFields}
+                  templates={templates}
+                  connectors={connectors ?? []}
+                  isLoadingCaseConfiguration={isLoadingCaseConfiguration}
+                  persistCaseConfigure={persistCaseConfigure}
+                  flyOutVisibility={flyOutVisibility}
+                  setFlyOutVisibility={setFlyOutVisibility}
+                />
               </EuiPanel>
             </div>
 

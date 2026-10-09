@@ -1,0 +1,14 @@
+prs:
+- https://github.com/elastic/kibana/pull/277402
+issues:
+- https://github.com/elastic/kibana/issues/275666
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.6.0
+areas:
+- Alerting and reporting
+title: "Fix Kibana lowering raised field limits on alert indices"
+description: "When updating alert index mappings, Kibana no longer reduces an already higher `index.mapping.total_fields.limit` on existing `.alerts-*` indices and templates."

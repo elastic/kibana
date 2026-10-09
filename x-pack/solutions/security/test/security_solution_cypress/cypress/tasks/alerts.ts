@@ -465,7 +465,11 @@ export const showTopNAlertProperty = (propertySelector: string, rowIndex: number
 export const waitForAlerts = () => {
   waitForPageFilters();
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
-  cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.be.true');
+  // `.should('not.be.true')` on a jQuery collection is always true (a jQuery object is
+  // never strictly `=== true`), so this used to be a silent no-op regardless of whether
+  // the data grid was mid-refresh. Assert on absence of the element instead so Cypress
+  // actually retries until the in-progress indicator is gone.
+  cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.exist');
   cy.get(EVENT_CONTAINER_TABLE_LOADING).should('not.exist');
   cy.waitForNetworkIdle('/internal/search/privateRuleRegistryAlertsSearchStrategy', 500);
 };

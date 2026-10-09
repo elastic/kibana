@@ -9,4 +9,4 @@
 
 require('@kbn/setup-node-env');
 
-require('../src/dev/build_package/build_package');
+require('@kbn/dev/build_package/build_package');

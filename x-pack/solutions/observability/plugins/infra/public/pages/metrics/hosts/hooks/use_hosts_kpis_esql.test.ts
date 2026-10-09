@@ -6,7 +6,12 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { buildSemconvQuery, buildEcsQuery, parseKpiRow } from './use_hosts_kpis_esql';
+import {
+  buildSemconvQuery,
+  buildEcsQuery,
+  buildHostsKpisQuery,
+  parseKpiRow,
+} from './use_hosts_kpis_esql';
 
 const SEMCONV_FIELDS = new Set([
   'state',
@@ -125,6 +130,58 @@ describe('use_hosts_kpis_esql query builders', () => {
   it('returns undefined when no KPI field is mapped', () => {
     expect(buildSemconvQuery('metrics-*', 100, () => false)).toBeUndefined();
     expect(buildEcsQuery('metrics-*', 100, () => false)).toBeUndefined();
+  });
+});
+
+describe('buildHostsKpisQuery', () => {
+  it('builds from the mapped fields when available', () => {
+    const query = buildHostsKpisQuery({
+      schema: 'semconv',
+      indexPattern: 'metrics-*',
+      limit: 100,
+      availableFields: SEMCONV_FIELDS,
+      schemaHasData: true,
+    });
+    expect(query).toContain('WHERE state');
+  });
+
+  it('falls back to the full query for a stale field list when the schema has data', () => {
+    const query = buildHostsKpisQuery({
+      schema: 'semconv',
+      indexPattern: 'metrics-*',
+      limit: 100,
+      availableFields: new Set<string>(),
+      schemaHasData: true,
+    });
+    expect(query).toContain('WHERE state');
+  });
+
+  it('returns undefined instead of the fallback when the schema has no data in scope', () => {
+    // e.g. after narrowing the CPS project scope: fields absent AND metadata
+    // reports no data for the schema — a fallback query would fail ES|QL
+    // analysis with "Unknown column".
+    expect(
+      buildHostsKpisQuery({
+        schema: 'semconv',
+        indexPattern: 'metrics-*',
+        limit: 100,
+        availableFields: new Set<string>(),
+        schemaHasData: false,
+      })
+    ).toBeUndefined();
+  });
+
+  it('returns undefined without a schema, index pattern, or limit', () => {
+    const base = {
+      schema: 'ecs' as const,
+      indexPattern: 'metrics-*',
+      limit: 100,
+      availableFields: ECS_FIELDS,
+      schemaHasData: true,
+    };
+    expect(buildHostsKpisQuery({ ...base, schema: undefined })).toBeUndefined();
+    expect(buildHostsKpisQuery({ ...base, indexPattern: undefined })).toBeUndefined();
+    expect(buildHostsKpisQuery({ ...base, limit: 0 })).toBeUndefined();
   });
 });
 

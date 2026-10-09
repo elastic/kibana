@@ -43,6 +43,10 @@ describe('JOIN Validation', () => {
         joinExpectErrors('FROM index | LEFT JOIN join_index_alias_2 ON keywordField', []);
       });
 
+      test('skips lookup index existence validation for coordinator targets', () => {
+        joinExpectErrors('FROM index | LOOKUP JOIN _coordinator:join_index ON keywordField', []);
+      });
+
       test('handles correctly conflicts', () => {
         joinExpectErrors(
           'FROM index  | EVAL keywordField = to_IP(keywordField) | LEFT JOIN join_index ON keywordField',

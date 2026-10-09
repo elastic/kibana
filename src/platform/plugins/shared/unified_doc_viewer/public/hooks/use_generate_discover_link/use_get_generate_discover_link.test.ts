@@ -8,6 +8,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import { where } from '@kbn/esql-composer';
 import { useGetGenerateDiscoverLink } from '.';
 
 jest.mock('../../plugin', () => ({
@@ -100,5 +101,24 @@ describe('useGetGenerateDiscoverLink', () => {
 
     expect(esql).toBe(`FROM traces-*
   | WHERE trace.id == "abc123" AND exception.message == "Test error"`);
+  });
+
+  it('prepends the SET unmapped_fields directive to the Discover URL query when unmappedFieldsPolicy is provided', () => {
+    const { result } = renderHook(() =>
+      useGetGenerateDiscoverLink({ indexPattern: 'traces-*', unmappedFieldsPolicy: 'NULLIFY' })
+    );
+    const mockGetRedirectUrl = jest.fn(() => DISCOVER_URL);
+    mockDiscoverLocator.getRedirectUrl = mockGetRedirectUrl;
+
+    const url = result.current.generateDiscoverLink(
+      where('trace.id == ?traceId', { traceId: 'abc123' })
+    );
+
+    expect(url).toBe(DISCOVER_URL);
+    const esql = (mockGetRedirectUrl.mock.calls[0] as any)?.[0]?.query?.esql;
+
+    expect(esql).toBe(`SET unmapped_fields = "NULLIFY";
+FROM traces-*
+  | WHERE trace.id == "abc123"`);
   });
 });

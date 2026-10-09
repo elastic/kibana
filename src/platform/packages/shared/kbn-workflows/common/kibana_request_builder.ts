@@ -193,7 +193,7 @@ function selectBestPattern(patterns: string[], params: Record<string, unknown>):
  * Applies the space prefix to the path for non-default spaces
  * Following Kibana's standard space-aware API pattern: /s/{spaceId}/api/...
  */
-function applySpacePrefix(path: string, spaceId?: string): string {
+export function applySpacePrefix(path: string, spaceId?: string): string {
   // Only prepend space prefix for non-default spaces
   // Default space can use /api/... directly without the /s/default prefix
   if (spaceId && spaceId !== 'default') {

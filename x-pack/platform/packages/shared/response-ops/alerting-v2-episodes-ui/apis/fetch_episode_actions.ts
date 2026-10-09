@@ -6,6 +6,7 @@
  */
 
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { asEsqlRows } from '@kbn/alerting-v2-common-queries';
 import {
   buildEpisodeActionsQuery,
   type AlertEpisodeAction,
@@ -28,11 +29,12 @@ export const fetchEpisodeActions = ({
   abortSignal,
   expressions,
 }: FetchEpisodeActionsOptions): Promise<AlertEpisodeAction[]> => {
-  return executeEsqlQuery<AlertEpisodeAction>({
+  const query = buildEpisodeActionsQuery(spaceId, episodeIds);
+  return executeEsqlQuery({
     expressions,
-    query: buildEpisodeActionsQuery(spaceId, episodeIds).print('basic'),
+    query: query.print('basic'),
     input: null,
     abortSignal,
     noCache: true,
-  });
+  }).then((rows) => asEsqlRows(query, rows));
 };

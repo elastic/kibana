@@ -16,14 +16,14 @@
       "data",
       "expressions",
       "visualizations",
-      "fieldFormats",
-      "presentationUtil"
+      "fieldFormats"
     ],
     "optionalPlugins": [
       "usageCollection"
     ],
     "requiredBundles": [
-      "kibanaUtils"
+      "kibanaUtils",
+      "presentationUtil"
     ],
     "extraPublicDirs": [
       "common"

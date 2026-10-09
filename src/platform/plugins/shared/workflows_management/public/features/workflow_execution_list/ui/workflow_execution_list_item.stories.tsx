@@ -10,6 +10,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import moment from 'moment';
 import React from 'react';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionListItem } from './workflow_execution_list_item';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
@@ -23,11 +24,23 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj<typeof WorkflowExecutionListItem>;
 
+const executedByProfile: UserProfileWithAvatar = {
+  uid: 'u_john_doe',
+  enabled: true,
+  user: {
+    username: 'john.doe@example.com',
+    full_name: 'John Doe',
+    email: 'john.doe@example.com',
+  },
+  data: {},
+};
+
 export const Completed: Story = {
   args: {
     status: ExecutionStatus.COMPLETED,
     startedAt: new Date(),
-    executedBy: 'john.doe@example.com',
+    executedByProfile,
+    showExecutor: true,
     triggeredBy: 'manual',
   },
 };
@@ -39,7 +52,7 @@ export const CompletedRecentPrevMonth: Story = {
   args: {
     status: ExecutionStatus.COMPLETED,
     startedAt: moment().startOf('month').subtract(6, 'days').toDate(),
-    executedBy: 'john.doe@example.com',
+    executedByLabel: 'john.doe@example.com',
     triggeredBy: 'manual',
   },
 };
@@ -48,7 +61,8 @@ export const Failed: Story = {
   args: {
     status: ExecutionStatus.FAILED,
     startedAt: new Date(),
-    executedBy: 'jane.smith@example.com',
+    executedByProfile,
+    showExecutor: true,
     triggeredBy: 'manual',
   },
 };
@@ -92,7 +106,8 @@ export const Selected: Story = {
   args: {
     status: ExecutionStatus.COMPLETED,
     startedAt: new Date(),
-    executedBy: 'admin@example.com',
+    executedByProfile,
+    showExecutor: true,
     triggeredBy: 'scheduled',
     selected: true,
   },
@@ -102,7 +117,8 @@ export const RunningSelected: Story = {
   args: {
     status: ExecutionStatus.RUNNING,
     startedAt: new Date(),
-    executedBy: 'system',
+    executedByProfile,
+    showExecutor: true,
     triggeredBy: 'scheduled',
     selected: true,
   },

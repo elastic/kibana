@@ -165,6 +165,28 @@ describe('persistQueries', () => {
     expect(kiClient.syncQueries).not.toHaveBeenCalled();
   });
 
+  it('deduplicates when the stored FROM differs from the stream sources', async () => {
+    const existing = makeLink({
+      id: 'q1',
+      esql: 'FROM logs.test | WHERE body.text:"error"',
+    });
+    const { kiClient, streamsClient } = createMocks([existing]);
+
+    const duplicate = makeGeneratedQuery({
+      esql: { query: 'FROM logs.test, logs.test.* | WHERE body.text:"error"' },
+    });
+
+    const { skippedQueries } = await persistQueries(
+      'logs.test',
+      [duplicate],
+      persistDeps(kiClient, streamsClient)
+    );
+
+    expect(skippedQueries).toHaveLength(1);
+    expect(kiClient.bulk).not.toHaveBeenCalled();
+    expect(kiClient.syncQueries).not.toHaveBeenCalled();
+  });
+
   it('routes replaces for non-rule-backed queries to bulk with rule_backed: false', async () => {
     const existing = makeLink({ id: 'q1', ruleBacked: false });
     const { kiClient, streamsClient } = createMocks([existing]);

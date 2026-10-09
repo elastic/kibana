@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import { StepExecutionRepository } from './step_execution_repository';
 
 describe('StepExecutionRepository', () => {
@@ -30,7 +31,7 @@ describe('StepExecutionRepository', () => {
         create: jest.fn().mockResolvedValue({}),
       },
     };
-    underTest = new StepExecutionRepository(esClient as any);
+    underTest = new StepExecutionRepository(esClient as any, loggerMock.create());
   });
 
   describe('bulkUpsert', () => {
@@ -56,11 +57,11 @@ describe('StepExecutionRepository', () => {
         refresh: false,
         index: expect.any(String),
         body: [
-          { update: { _id: 'step-1' } },
+          { update: { _id: 'step-1', retry_on_conflict: 3 } },
           { doc: stepExecutions[0], doc_as_upsert: true },
-          { update: { _id: 'step-2' } },
+          { update: { _id: 'step-2', retry_on_conflict: 3 } },
           { doc: stepExecutions[1], doc_as_upsert: true },
-          { update: { _id: 'step-3' } },
+          { update: { _id: 'step-3', retry_on_conflict: 3 } },
           { doc: stepExecutions[2], doc_as_upsert: true },
         ],
       });
@@ -220,7 +221,10 @@ describe('StepExecutionRepository', () => {
       expect(esClient.bulk).toHaveBeenCalledWith({
         refresh: false,
         index: expect.any(String),
-        body: [{ update: { _id: 'step-1' } }, { doc: stepExecutions[0], doc_as_upsert: true }],
+        body: [
+          { update: { _id: 'step-1', retry_on_conflict: 3 } },
+          { doc: stepExecutions[0], doc_as_upsert: true },
+        ],
       });
     });
 

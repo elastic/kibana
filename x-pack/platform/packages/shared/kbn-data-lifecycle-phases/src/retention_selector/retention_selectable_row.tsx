@@ -64,6 +64,7 @@ export const RetentionSelectableRow = ({
 }: RetentionSelectableRowProps) => {
   const { euiTheme } = useEuiTheme();
   const styles = getRetentionSelectableRowStyles({ euiTheme });
+
   const shouldShowInspectInBadge =
     inspectPlacement === 'badge' && option.inspectable && option.badge && onInspect;
 

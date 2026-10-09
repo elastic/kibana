@@ -1,5 +1,5 @@
-# gh-aw-metadata: {"schema_version":"v4","frontmatter_hash":"0365fe3034bb6c97996375dfbf3f0abd5790c436f64e0972dd1bdd8d4992778b","body_hash":"0295256ea09db7ff721b37630ba898d92cd71de37a8fb35ae4e087d693f065cb","compiler_version":"v0.81.6","strict":true,"agent_id":"codex","agent_model":"gpt-5.5","engine_versions":{"codex":"0.142.1"}}
-# gh-aw-manifest: {"version":1,"secrets":["GH_AW_GITHUB_MCP_SERVER_TOKEN","GH_AW_GITHUB_TOKEN","GITHUB_TOKEN","OPENROUTER_API_KEY"],"actions":[{"repo":"actions/cache/restore","sha":"27d5ce7f107fe9357f9df03efb73ab90386fccae","version":"v5.0.5"},{"repo":"actions/cache/save","sha":"27d5ce7f107fe9357f9df03efb73ab90386fccae","version":"v5.0.5"},{"repo":"actions/checkout","sha":"9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0","version":"v7.0.0"},{"repo":"actions/checkout","sha":"de0fac2e4500dabe0009e67214ff5f5447ce83dd","version":"v6.0.2"},{"repo":"actions/download-artifact","sha":"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c","version":"v8.0.1"},{"repo":"actions/github-script","sha":"3a2844b7e9c422d3c10d287c895573f7108da1b3","version":"v9.0.0"},{"repo":"actions/setup-node","sha":"48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e","version":"v6.4.0"},{"repo":"actions/upload-artifact","sha":"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a","version":"v7.0.1"},{"repo":"github/gh-aw-actions/setup","sha":"ba6380cc6e5be5d21677bebe04d52fb48e3abec7","version":"v0.81.6"}],"containers":[{"image":"ghcr.io/github/gh-aw-firewall/agent:0.27.11","digest":"sha256:979723c628182da7729333f2208bb249fd25ddee579645cf9a3892d681a929c7","pinned_image":"ghcr.io/github/gh-aw-firewall/agent:0.27.11@sha256:979723c628182da7729333f2208bb249fd25ddee579645cf9a3892d681a929c7"},{"image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.27.11","digest":"sha256:807e4831999b44513b0a66e5859d478dc4da7ae74ab1918cec967d513f95bf9d","pinned_image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.27.11@sha256:807e4831999b44513b0a66e5859d478dc4da7ae74ab1918cec967d513f95bf9d"},{"image":"ghcr.io/github/gh-aw-firewall/squid:0.27.11","digest":"sha256:ff27ea0525ad953a6adee28a5fbe9d2e22be47dbec755c15767af4ea3f91df7d","pinned_image":"ghcr.io/github/gh-aw-firewall/squid:0.27.11@sha256:ff27ea0525ad953a6adee28a5fbe9d2e22be47dbec755c15767af4ea3f91df7d"},{"image":"ghcr.io/github/gh-aw-mcpg:v0.3.30","digest":"sha256:35625d1a2269b1238606078c879f59a91cffc4ac33eb54bf39c6418822c1a8be","pinned_image":"ghcr.io/github/gh-aw-mcpg:v0.3.30@sha256:35625d1a2269b1238606078c879f59a91cffc4ac33eb54bf39c6418822c1a8be"},{"image":"ghcr.io/github/gh-aw-node","digest":"sha256:529d02eb970b1161aa25c593a9c3df57fdfad5a8add328cb3b6eccef66f3183b","pinned_image":"ghcr.io/github/gh-aw-node@sha256:529d02eb970b1161aa25c593a9c3df57fdfad5a8add328cb3b6eccef66f3183b"},{"image":"ghcr.io/github/github-mcp-server:v1.4.0","digest":"sha256:2afb26356481d1a350e14544a6e160f7f7ec1561a1ea309b823665abf0309036","pinned_image":"ghcr.io/github/github-mcp-server:v1.4.0@sha256:2afb26356481d1a350e14544a6e160f7f7ec1561a1ea309b823665abf0309036"}]}
+# gh-aw-metadata: {"schema_version":"v4","frontmatter_hash":"7c1a9a52a3c5503926013b96320a102f70894d451b4046733861095dbe348abb","body_hash":"76398c34b50e11ef63e7eaff2e23782d0fe0b7b5c36d7ddf51b8c63f1b66cccc","compiler_version":"v0.81.6","strict":true,"agent_id":"codex","agent_model":"gpt-5.5","engine_versions":{"codex":"0.142.1"}}
+# gh-aw-manifest: {"version":1,"secrets":["GH_AW_GITHUB_MCP_SERVER_TOKEN","GH_AW_GITHUB_TOKEN","GITHUB_TOKEN","KIBANAMACHINE_TOKEN","OPENROUTER_API_KEY"],"actions":[{"repo":"actions/cache/restore","sha":"27d5ce7f107fe9357f9df03efb73ab90386fccae","version":"v5.0.5"},{"repo":"actions/cache/save","sha":"27d5ce7f107fe9357f9df03efb73ab90386fccae","version":"v5.0.5"},{"repo":"actions/checkout","sha":"9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0","version":"v7.0.0"},{"repo":"actions/checkout","sha":"de0fac2e4500dabe0009e67214ff5f5447ce83dd","version":"v6.0.2"},{"repo":"actions/download-artifact","sha":"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c","version":"v8.0.1"},{"repo":"actions/github-script","sha":"3a2844b7e9c422d3c10d287c895573f7108da1b3","version":"v9.0.0"},{"repo":"actions/setup-node","sha":"48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e","version":"v6.4.0"},{"repo":"actions/upload-artifact","sha":"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a","version":"v7.0.1"},{"repo":"github/gh-aw-actions/setup","sha":"ba6380cc6e5be5d21677bebe04d52fb48e3abec7","version":"v0.81.6"}],"containers":[{"image":"ghcr.io/github/gh-aw-firewall/agent:0.27.11","digest":"sha256:979723c628182da7729333f2208bb249fd25ddee579645cf9a3892d681a929c7","pinned_image":"ghcr.io/github/gh-aw-firewall/agent:0.27.11@sha256:979723c628182da7729333f2208bb249fd25ddee579645cf9a3892d681a929c7"},{"image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.27.11","digest":"sha256:807e4831999b44513b0a66e5859d478dc4da7ae74ab1918cec967d513f95bf9d","pinned_image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.27.11@sha256:807e4831999b44513b0a66e5859d478dc4da7ae74ab1918cec967d513f95bf9d"},{"image":"ghcr.io/github/gh-aw-firewall/squid:0.27.11","digest":"sha256:ff27ea0525ad953a6adee28a5fbe9d2e22be47dbec755c15767af4ea3f91df7d","pinned_image":"ghcr.io/github/gh-aw-firewall/squid:0.27.11@sha256:ff27ea0525ad953a6adee28a5fbe9d2e22be47dbec755c15767af4ea3f91df7d"},{"image":"ghcr.io/github/gh-aw-mcpg:v0.3.30","digest":"sha256:35625d1a2269b1238606078c879f59a91cffc4ac33eb54bf39c6418822c1a8be","pinned_image":"ghcr.io/github/gh-aw-mcpg:v0.3.30@sha256:35625d1a2269b1238606078c879f59a91cffc4ac33eb54bf39c6418822c1a8be"},{"image":"ghcr.io/github/gh-aw-node","digest":"sha256:529d02eb970b1161aa25c593a9c3df57fdfad5a8add328cb3b6eccef66f3183b","pinned_image":"ghcr.io/github/gh-aw-node@sha256:529d02eb970b1161aa25c593a9c3df57fdfad5a8add328cb3b6eccef66f3183b"},{"image":"ghcr.io/github/github-mcp-server:v1.4.0","digest":"sha256:2afb26356481d1a350e14544a6e160f7f7ec1561a1ea309b823665abf0309036","pinned_image":"ghcr.io/github/github-mcp-server:v1.4.0@sha256:2afb26356481d1a350e14544a6e160f7f7ec1561a1ea309b823665abf0309036"}]}
 # This file was automatically generated by gh-aw (v0.81.6). DO NOT EDIT. To debug this workflow, load the skill at https://github.com/github/gh-aw/blob/main/debug.md
 #
 #    ___                   _   _      
@@ -32,11 +32,13 @@
 #   - PR_CONTEXT_ARTIFACT_NAME: (main workflow)
 #   - PR_NUMBER: (main workflow)
 #   - REVIEWER_COMMENT_ID: (main workflow)
+#   - REVIEWER_COMMENT_TYPE: (main workflow)
 #
 # Secrets used:
 #   - GH_AW_GITHUB_MCP_SERVER_TOKEN
 #   - GH_AW_GITHUB_TOKEN
 #   - GITHUB_TOKEN
+#   - KIBANAMACHINE_TOKEN
 #   - OPENROUTER_API_KEY
 #
 # Custom actions used:
@@ -79,6 +81,10 @@ on:
         description: Triggering comment id for dispatched follow-up runs
         required: false
         type: string
+      comment_type:
+        description: Triggering comment event type for dispatched follow-up runs
+        required: false
+        type: string
       pr_number:
         description: Pull request number to review
         required: true
@@ -106,6 +112,7 @@ env:
   PR_CONTEXT_ARTIFACT_NAME: prefetched-pr-context-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
   PR_NUMBER: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
   REVIEWER_COMMENT_ID: ${{ github.event.inputs.comment_id }}
+  REVIEWER_COMMENT_TYPE: ${{ github.event.inputs.comment_type }}
 
 jobs:
   activation:
@@ -314,6 +321,7 @@ jobs:
           GH_AW_EXPR_FF1D34CE: ${{ github.event.comment.id || fromJSON(github.event.inputs.aw_context || github.event.client_payload.aw_context || '{}').comment_id }}
           GH_AW_GITHUB_ACTOR: ${{ github.actor }}
           GH_AW_GITHUB_EVENT_INPUTS_COMMENT_ID: ${{ github.event.inputs.comment_id }}
+          GH_AW_GITHUB_EVENT_INPUTS_COMMENT_TYPE: ${{ github.event.inputs.comment_type }}
           GH_AW_GITHUB_EVENT_INPUTS_PR_NUMBER: ${{ github.event.inputs.pr_number }}
           GH_AW_GITHUB_REPOSITORY: ${{ github.repository }}
           GH_AW_GITHUB_RUN_ID: ${{ github.run_id }}
@@ -378,6 +386,7 @@ jobs:
           GH_AW_PROMPT: /tmp/gh-aw/aw-prompts/prompt.txt
           GH_AW_ENGINE_ID: "codex"
           GH_AW_GITHUB_EVENT_INPUTS_COMMENT_ID: ${{ github.event.inputs.comment_id }}
+          GH_AW_GITHUB_EVENT_INPUTS_COMMENT_TYPE: ${{ github.event.inputs.comment_type }}
           GH_AW_GITHUB_EVENT_INPUTS_PR_NUMBER: ${{ github.event.inputs.pr_number }}
         with:
           script: |
@@ -395,6 +404,7 @@ jobs:
           GH_AW_EXPR_FF1D34CE: ${{ github.event.comment.id || fromJSON(github.event.inputs.aw_context || github.event.client_payload.aw_context || '{}').comment_id }}
           GH_AW_GITHUB_ACTOR: ${{ github.actor }}
           GH_AW_GITHUB_EVENT_INPUTS_COMMENT_ID: ${{ github.event.inputs.comment_id }}
+          GH_AW_GITHUB_EVENT_INPUTS_COMMENT_TYPE: ${{ github.event.inputs.comment_type }}
           GH_AW_GITHUB_EVENT_INPUTS_PR_NUMBER: ${{ github.event.inputs.pr_number }}
           GH_AW_GITHUB_REPOSITORY: ${{ github.repository }}
           GH_AW_GITHUB_RUN_ID: ${{ github.run_id }}
@@ -418,6 +428,7 @@ jobs:
                 GH_AW_EXPR_FF1D34CE: process.env.GH_AW_EXPR_FF1D34CE,
                 GH_AW_GITHUB_ACTOR: process.env.GH_AW_GITHUB_ACTOR,
                 GH_AW_GITHUB_EVENT_INPUTS_COMMENT_ID: process.env.GH_AW_GITHUB_EVENT_INPUTS_COMMENT_ID,
+                GH_AW_GITHUB_EVENT_INPUTS_COMMENT_TYPE: process.env.GH_AW_GITHUB_EVENT_INPUTS_COMMENT_TYPE,
                 GH_AW_GITHUB_EVENT_INPUTS_PR_NUMBER: process.env.GH_AW_GITHUB_EVENT_INPUTS_PR_NUMBER,
                 GH_AW_GITHUB_REPOSITORY: process.env.GH_AW_GITHUB_REPOSITORY,
                 GH_AW_GITHUB_RUN_ID: process.env.GH_AW_GITHUB_RUN_ID,
@@ -600,13 +611,15 @@ jobs:
       - name: Download container images
         run: bash "${RUNNER_TEMP}/gh-aw/actions/download_docker_images.sh" ghcr.io/github/gh-aw-firewall/agent:0.27.11@sha256:979723c628182da7729333f2208bb249fd25ddee579645cf9a3892d681a929c7 ghcr.io/github/gh-aw-firewall/api-proxy:0.27.11@sha256:807e4831999b44513b0a66e5859d478dc4da7ae74ab1918cec967d513f95bf9d ghcr.io/github/gh-aw-firewall/squid:0.27.11@sha256:ff27ea0525ad953a6adee28a5fbe9d2e22be47dbec755c15767af4ea3f91df7d ghcr.io/github/gh-aw-mcpg:v0.3.30@sha256:35625d1a2269b1238606078c879f59a91cffc4ac33eb54bf39c6418822c1a8be ghcr.io/github/gh-aw-node@sha256:529d02eb970b1161aa25c593a9c3df57fdfad5a8add328cb3b6eccef66f3183b ghcr.io/github/github-mcp-server:v1.4.0@sha256:2afb26356481d1a350e14544a6e160f7f7ec1561a1ea309b823665abf0309036
       - name: Generate Safe Outputs Config
+        env:
+          GH_AW_SECRET_KIBANAMACHINE_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
         run: |
           mkdir -p "${RUNNER_TEMP}/gh-aw/safeoutputs"
           mkdir -p /tmp/gh-aw/safeoutputs
           mkdir -p /tmp/gh-aw/mcp-logs/safeoutputs
-          cat > "${RUNNER_TEMP}/gh-aw/safeoutputs/config.json" << 'GH_AW_SAFE_OUTPUTS_CONFIG_0fc3397420ed6972_EOF'
-          {"add_comment":{"discussions":false,"footer":true,"max":1,"target":"${{ env.PR_NUMBER }}"},"create_pull_request_review_comment":{"max":10,"side":"RIGHT","target":"${{ env.PR_NUMBER }}"},"create_report_incomplete_issue":{},"missing_data":{},"missing_tool":{},"noop":{"max":1,"report-as-issue":"false"},"reply_to_pull_request_review_comment":{"footer":true,"max":10,"target":"${{ env.PR_NUMBER }}"},"report_incomplete":{},"resolve_pull_request_review_thread":{"max":10},"submit_pull_request_review":{"allowed_events":["COMMENT"],"footer":"if-body","max":1,"target":"${{ env.PR_NUMBER }}"}}
-          GH_AW_SAFE_OUTPUTS_CONFIG_0fc3397420ed6972_EOF
+          cat > "${RUNNER_TEMP}/gh-aw/safeoutputs/config.json" << 'GH_AW_SAFE_OUTPUTS_CONFIG_b6fc809395bfce56_EOF'
+          {"add_comment":{"discussions":false,"footer":true,"max":1,"target":"${{ env.PR_NUMBER }}"},"create_pull_request_review_comment":{"max":10,"side":"RIGHT","target":"${{ env.PR_NUMBER }}"},"create_report_incomplete_issue":{},"missing_data":{},"missing_tool":{},"noop":{"max":1,"report-as-issue":"false"},"reply_to_pull_request_review_comment":{"footer":true,"max":10,"target":"${{ env.PR_NUMBER }}"},"report_incomplete":{},"resolve_pull_request_review_thread":{"github-token":"${GH_AW_SECRET_KIBANAMACHINE_TOKEN}","max":10},"submit_pull_request_review":{"allowed_events":["COMMENT"],"footer":"if-body","max":1,"target":"${{ env.PR_NUMBER }}"}}
+          GH_AW_SAFE_OUTPUTS_CONFIG_b6fc809395bfce56_EOF
       - name: Generate Safe Outputs Tools
         env:
           GH_AW_TOOLS_META_JSON: |
@@ -1077,10 +1090,11 @@ jobs:
             const { main } = require('${{ runner.temp }}/gh-aw/actions/redact_secrets.cjs');
             await main();
         env:
-          GH_AW_SECRET_NAMES: 'GH_AW_GITHUB_MCP_SERVER_TOKEN,GH_AW_GITHUB_TOKEN,GITHUB_TOKEN,OPENROUTER_API_KEY'
+          GH_AW_SECRET_NAMES: 'GH_AW_GITHUB_MCP_SERVER_TOKEN,GH_AW_GITHUB_TOKEN,GITHUB_TOKEN,KIBANAMACHINE_TOKEN,OPENROUTER_API_KEY'
           SECRET_GH_AW_GITHUB_MCP_SERVER_TOKEN: ${{ secrets.GH_AW_GITHUB_MCP_SERVER_TOKEN }}
           SECRET_GH_AW_GITHUB_TOKEN: ${{ secrets.GH_AW_GITHUB_TOKEN }}
           SECRET_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SECRET_KIBANAMACHINE_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
           SECRET_OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
       - name: Append agent step summary
         if: always()
@@ -1906,7 +1920,7 @@ jobs:
           GH_AW_ALLOWED_DOMAINS: "*.githubusercontent.com,172.30.0.1,api.github.com,api.openai.com,api.snapcraft.io,archive.ubuntu.com,azure.archive.ubuntu.com,chatgpt.com,codeload.github.com,crl.geotrust.com,crl.globalsign.com,crl.identrust.com,crl.sectigo.com,crl.thawte.com,crl.usertrust.com,crl.verisign.com,crl3.digicert.com,crl4.digicert.com,crls.ssl.com,docs.github.com,github-cloud.githubusercontent.com,github-cloud.s3.amazonaws.com,github.blog,github.com,github.githubassets.com,host.docker.internal,json-schema.org,json.schemastore.org,keyserver.ubuntu.com,lfs.github.com,objects.githubusercontent.com,ocsp.digicert.com,ocsp.geotrust.com,ocsp.globalsign.com,ocsp.identrust.com,ocsp.sectigo.com,ocsp.ssl.com,ocsp.thawte.com,ocsp.usertrust.com,ocsp.verisign.com,openai.com,openrouter.ai,packagecloud.io,packages.cloud.google.com,packages.microsoft.com,patch-diff.githubusercontent.com,ppa.launchpad.net,raw.githubusercontent.com,s.symcb.com,s.symcd.com,security.ubuntu.com,ts-crl.ws.symantec.com,ts-ocsp.ws.symantec.com,www.googleapis.com"
           GITHUB_SERVER_URL: ${{ github.server_url }}
           GITHUB_API_URL: ${{ github.api_url }}
-          GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: "{\"add_comment\":{\"discussions\":false,\"footer\":true,\"max\":1,\"target\":\"${{ env.PR_NUMBER }}\"},\"create_pull_request_review_comment\":{\"max\":10,\"side\":\"RIGHT\",\"target\":\"${{ env.PR_NUMBER }}\"},\"create_report_incomplete_issue\":{},\"missing_data\":{},\"missing_tool\":{},\"noop\":{\"max\":1,\"report-as-issue\":\"false\"},\"reply_to_pull_request_review_comment\":{\"footer\":true,\"max\":10,\"target\":\"${{ env.PR_NUMBER }}\"},\"report_incomplete\":{},\"resolve_pull_request_review_thread\":{\"max\":10},\"submit_pull_request_review\":{\"allowed_events\":[\"COMMENT\"],\"footer\":\"if-body\",\"max\":1,\"target\":\"${{ env.PR_NUMBER }}\"}}"
+          GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: "{\"add_comment\":{\"discussions\":false,\"footer\":true,\"max\":1,\"target\":\"${{ env.PR_NUMBER }}\"},\"create_pull_request_review_comment\":{\"max\":10,\"side\":\"RIGHT\",\"target\":\"${{ env.PR_NUMBER }}\"},\"create_report_incomplete_issue\":{},\"missing_data\":{},\"missing_tool\":{},\"noop\":{\"max\":1,\"report-as-issue\":\"false\"},\"reply_to_pull_request_review_comment\":{\"footer\":true,\"max\":10,\"target\":\"${{ env.PR_NUMBER }}\"},\"report_incomplete\":{},\"resolve_pull_request_review_thread\":{\"github-token\":\"${{ secrets.KIBANAMACHINE_TOKEN }}\",\"max\":10},\"submit_pull_request_review\":{\"allowed_events\":[\"COMMENT\"],\"footer\":\"if-body\",\"max\":1,\"target\":\"${{ env.PR_NUMBER }}\"}}"
         with:
           github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           script: |

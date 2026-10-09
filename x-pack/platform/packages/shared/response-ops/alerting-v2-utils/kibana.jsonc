@@ -1,5 +1,5 @@
 {
-  "type": "shared-browser",
+  "type": "shared-common",
   "id": "@kbn/alerting-v2-utils",
   "owner": "@elastic/response-ops",
   "group": "platform",

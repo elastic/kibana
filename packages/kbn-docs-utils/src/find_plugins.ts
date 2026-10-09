@@ -25,6 +25,7 @@ function toApiScope(pkg: Package): ApiScope {
     case 'test-helper':
     case 'functional-tests':
     case 'shared-common':
+    case 'tooling':
       return ApiScope.COMMON;
     case 'plugin':
       return pkg.manifest.plugin.server && !pkg.manifest.plugin.browser

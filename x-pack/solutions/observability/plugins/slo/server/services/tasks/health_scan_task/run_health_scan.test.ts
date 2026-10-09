@@ -23,7 +23,7 @@ describe('runHealthScan', () => {
   let scopedClusterClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
-  let abortController: AbortController;
+  let signal: AbortSignal;
 
   const TEST_SCAN_ID = 'test-scan-id';
   const TEST_DATE = new Date('2024-01-01T00:00:00.000Z');
@@ -32,7 +32,7 @@ describe('runHealthScan', () => {
     scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     soClient = savedObjectsClientMock.create();
     logger = loggerMock.create();
-    abortController = new AbortController();
+    signal = new AbortController().signal;
     jest.clearAllMocks();
     jest.useFakeTimers().setSystemTime(TEST_DATE);
     jest.spyOn(global, 'setTimeout').mockImplementation((fn: () => void) => {
@@ -107,7 +107,7 @@ describe('runHealthScan', () => {
 
       const result = await runHealthScan(
         { scanId: TEST_SCAN_ID },
-        { scopedClusterClient, soClient: soClient as any, logger, abortController }
+        { scopedClusterClient, soClient: soClient as any, logger, signal }
       );
 
       expect(result).toEqual({ processed: 0, problematic: 0 });
@@ -130,7 +130,7 @@ describe('runHealthScan', () => {
 
       const result = await runHealthScan(
         { scanId: TEST_SCAN_ID },
-        { scopedClusterClient, soClient: soClient as any, logger, abortController }
+        { scopedClusterClient, soClient: soClient as any, logger, signal }
       );
 
       expect(result).toEqual({ processed: 2, problematic: 1 });
@@ -155,7 +155,7 @@ describe('runHealthScan', () => {
 
       await runHealthScan(
         { scanId: TEST_SCAN_ID },
-        { scopedClusterClient, soClient: soClient as any, logger, abortController }
+        { scopedClusterClient, soClient: soClient as any, logger, signal }
       );
 
       expect(scopedClusterClient.asInternalUser.bulk).toHaveBeenCalledWith(
@@ -177,7 +177,7 @@ describe('runHealthScan', () => {
           ],
           refresh: false,
         },
-        { signal: abortController.signal }
+        { signal }
       );
       expect(closeMock).toHaveBeenCalled();
     });
@@ -200,7 +200,7 @@ describe('runHealthScan', () => {
 
       const result = await runHealthScan(
         { scanId: TEST_SCAN_ID },
-        { scopedClusterClient, soClient: soClient as any, logger, abortController }
+        { scopedClusterClient, soClient: soClient as any, logger, signal }
       );
 
       expect(result).toEqual({ processed: 4, problematic: 2 });
@@ -228,7 +228,7 @@ describe('runHealthScan', () => {
 
       const result = await runHealthScan(
         { scanId: TEST_SCAN_ID },
-        { scopedClusterClient, soClient: soClient as any, logger, abortController }
+        { scopedClusterClient, soClient: soClient as any, logger, signal }
       );
 
       expect(result).toEqual({ processed: 5, problematic: 2 });
@@ -255,7 +255,7 @@ describe('runHealthScan', () => {
 
       await runHealthScan(
         { scanId: TEST_SCAN_ID },
-        { scopedClusterClient, soClient: soClient as any, logger, abortController }
+        { scopedClusterClient, soClient: soClient as any, logger, signal }
       );
 
       expect(scopedClusterClient.asInternalUser.bulk).toHaveBeenNthCalledWith(
@@ -300,7 +300,7 @@ describe('runHealthScan', () => {
       await expect(
         runHealthScan(
           { scanId: TEST_SCAN_ID },
-          { scopedClusterClient, soClient: soClient as any, logger, abortController }
+          { scopedClusterClient, soClient: soClient as any, logger, signal }
         )
       ).rejects.toThrow('Test error');
 
@@ -314,7 +314,7 @@ describe('runHealthScan', () => {
 
       await runHealthScan(
         { scanId: TEST_SCAN_ID },
-        { scopedClusterClient, soClient: soClient as any, logger, abortController }
+        { scopedClusterClient, soClient: soClient as any, logger, signal }
       );
 
       expect(soClient.createPointInTimeFinder).toHaveBeenCalledWith({
@@ -346,7 +346,7 @@ describe('runHealthScan', () => {
 
       await runHealthScan(
         { scanId: TEST_SCAN_ID },
-        { scopedClusterClient, soClient: soClient as any, logger, abortController }
+        { scopedClusterClient, soClient: soClient as any, logger, signal }
       );
 
       expect(scopedClusterClient.asInternalUser.bulk).toHaveBeenCalledWith(

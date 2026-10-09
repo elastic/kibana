@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/inspector-plugin'
   - '@kbn/core'
   - '@kbn/es-types'
+  - '@kbn/ui-callout'
 tags:
   - shared-browser
   - package

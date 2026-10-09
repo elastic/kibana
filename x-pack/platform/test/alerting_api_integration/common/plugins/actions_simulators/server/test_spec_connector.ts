@@ -97,4 +97,5 @@ export const TestSingleFileConnector: ConnectorSpec = {
       },
     },
   },
+  test: { handler: async () => ({}), enabled: false },
 };

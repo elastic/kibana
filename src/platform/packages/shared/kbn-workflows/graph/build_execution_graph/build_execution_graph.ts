@@ -1117,7 +1117,7 @@ function buildParallelBranchBody(
       `Parallel step "${stepId}" has a branch body containing unsupported flow-control ` +
         `("${flowControlNode.type}"). A parallel branch body must be a straight-line sequence of ` +
         `atomic steps with no nested flow-control (if/switch/foreach/while), no step-level ` +
-        `"on-failure" handler, and no step-level "timeout".`,
+        `"if", no step-level "on-failure" handler, and no step-level "timeout".`,
       stepId
     );
   }

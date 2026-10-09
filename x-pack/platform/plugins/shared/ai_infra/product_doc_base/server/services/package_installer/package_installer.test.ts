@@ -454,6 +454,11 @@ describe('PackageInstaller', () => {
       expect(ensureDefaultElserDeployedMock).toHaveBeenCalledTimes(1);
 
       expect(fetchSecurityLabsVersionsMock).toHaveBeenCalledTimes(1);
+      expect(fetchSecurityLabsVersionsMock).toHaveBeenCalledWith({
+        artifactRepositoryUrl,
+        artifactRepositoryProxyUrl: undefined,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
       expect(downloadToDiskMock).toHaveBeenCalledWith(
         `${artifactRepositoryUrl}/${artifactName}`,
         `${artifactsFolder}/${artifactName}`,

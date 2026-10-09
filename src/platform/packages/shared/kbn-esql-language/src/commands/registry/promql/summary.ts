@@ -8,44 +8,30 @@
  */
 
 import type { ESQLAstPromqlCommand, ESQLCommand } from '@elastic/esql/types';
-import { isBinaryExpression, isIdentifier } from '@elastic/esql';
 import type { ESQLCommandSummary } from '../..';
-import { PromqlParamName } from './utils';
-
-/** Returns true if PROMQL has the specified parameter */
-const hasParam = (command: ESQLAstPromqlCommand, paramName: PromqlParamName): boolean => {
-  if (!command.params) {
-    return false;
-  }
-  return command.params.entries.some(
-    (param) => isIdentifier(param.key) && param.key.name === paramName
-  );
-};
+import { getPromqlOutputMetadata, getPromqlUserDefinedColumn, PromqlParamName } from './utils';
 
 export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {
   const promqlCommand = command as ESQLAstPromqlCommand;
   const newColumns: string[] = [];
 
-  // "step" or "buckets" param creates a step column in the output
-  if (
-    hasParam(promqlCommand, PromqlParamName.Step) ||
-    hasParam(promqlCommand, PromqlParamName.Buckets)
-  ) {
+  // A query produces a "step" column in the output.
+  if (promqlCommand.query) {
     newColumns.push(PromqlParamName.Step);
   }
 
-  // col = query, left side of assignment is the name of the new column (label)
-  if (isBinaryExpression(promqlCommand.query)) {
-    if (isIdentifier(promqlCommand.query.args[0])) {
-      newColumns.push(promqlCommand.query.args[0].name);
-    }
+  const { expression, breakdownLabels } = getPromqlOutputMetadata(promqlCommand);
+
+  const userDefinedColumn = getPromqlUserDefinedColumn(promqlCommand);
+  if (userDefinedColumn) {
+    newColumns.push(userDefinedColumn.name);
+  } else if (expression && expression.type !== 'selector') {
+    newColumns.push(query.substring(expression.location.min, expression.location.max + 1));
   }
 
-  // If no label is provided, the new column name is the query text
-  // TODO: complete when we have the query node.
-
-  // Collect columns derivated from the query, for instance by clauses. (Does "OR" generate new columns by merging query results?)
-  // TODO: complete when we have the query node.
+  for (const label of breakdownLabels) {
+    newColumns.push(label);
+  }
 
   return { newColumns: new Set(newColumns) };
 };

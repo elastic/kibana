@@ -12,7 +12,7 @@ import type { DataViewsContract, RuntimeField } from '@kbn/data-views-plugin/pub
 import { useMemo } from 'react';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { buildEpisodesBaseQuery } from '../queries/episodes_query';
+import { buildEpisodesBaseQuery } from '@kbn/alerting-v2-common-queries';
 import * as i18n from './translations';
 import { useSpaceId } from './use_space_id';
 

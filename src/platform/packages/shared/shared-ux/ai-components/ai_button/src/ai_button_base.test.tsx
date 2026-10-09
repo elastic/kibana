@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { css } from '@emotion/react';
 
 import { AiButtonBase } from './ai_button_base';
@@ -66,8 +66,8 @@ describe('<AiButtonBase />', () => {
     expect(mockUseSvgAiGradient).toHaveBeenCalledWith({ variant: 'empty' });
   });
 
-  it('iconOnly variant renders EuiButtonIcon and passes iconOnly to hooks', () => {
-    const { container } = render(
+  it('iconOnly variant renders a button and passes iconOnly to hooks', () => {
+    render(
       <AiButtonBase
         variant="base"
         iconOnly
@@ -77,11 +77,95 @@ describe('<AiButtonBase />', () => {
       />
     );
 
-    expect(container.querySelector('button.euiButtonIcon')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'AI Icon' })).toBeInTheDocument();
     expect(mockUseAiButtonGradientStyles).toHaveBeenCalledWith({
       variant: 'base',
       iconOnly: true,
     });
+  });
+
+  it('does not show a tooltip on hover for iconOnly buttons by default', () => {
+    render(
+      <AiButtonBase
+        variant="base"
+        iconOnly
+        iconType="sparkles"
+        aria-label="AI Icon"
+        onClick={() => undefined}
+      />
+    );
+
+    fireEvent.mouseOver(screen.getByRole('button', { name: 'AI Icon' }));
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+  });
+
+  it('shows a tooltip on hover when withToolTip is true', async () => {
+    render(
+      <AiButtonBase
+        variant="base"
+        iconOnly
+        withToolTip
+        iconType="sparkles"
+        aria-label="Custom tooltip"
+        onClick={() => undefined}
+      />
+    );
+
+    fireEvent.mouseOver(screen.getByRole('button', { name: 'Custom tooltip' }));
+    expect(await screen.findByRole('tooltip')).toBeInTheDocument();
+  });
+
+  it('shows aria-label in tooltip when withToolTip is true and toolTipContent is omitted', async () => {
+    render(
+      <AiButtonBase
+        variant="base"
+        iconOnly
+        withToolTip
+        iconType="sparkles"
+        aria-label="Custom tooltip"
+        onClick={() => undefined}
+      />
+    );
+
+    const button = screen.getByRole('button', { name: 'Custom tooltip' });
+    fireEvent.mouseOver(button);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Custom tooltip');
+  });
+
+  it('shows toolTipContent in tooltip when withToolTip is true', async () => {
+    render(
+      <AiButtonBase
+        variant="base"
+        iconOnly
+        withToolTip
+        toolTipContent="Explicit tooltip"
+        iconType="sparkles"
+        aria-label="Accessible name"
+        onClick={() => undefined}
+      />
+    );
+
+    const button = screen.getByRole('button', { name: 'Accessible name' });
+    fireEvent.mouseOver(button);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Explicit tooltip');
+  });
+
+  it('shows static add-to-chat label in tooltip when withToolTip is true and iconType is addToChat', async () => {
+    render(
+      <AiButtonBase
+        variant="base"
+        iconOnly
+        withToolTip
+        toolTipContent="Should not appear"
+        iconType="addToChat"
+        aria-label="Different aria label"
+        onClick={() => undefined}
+      />
+    );
+
+    const button = screen.getByRole('button', { name: 'Different aria label' });
+    fireEvent.mouseOver(button);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Add to chat');
   });
 
   it('renders gradient defs only when iconGradientCss is set', () => {
@@ -104,5 +188,27 @@ describe('<AiButtonBase />', () => {
     render(<AiButtonBase variant="base">Gradient check</AiButtonBase>);
 
     expect(screen.queryByTestId('svg-ai-gradient-defs')).not.toBeInTheDocument();
+  });
+
+  it('uses static "Add to chat" label when iconType is addToChat', () => {
+    render(
+      <AiButtonBase variant="base" iconType="addToChat">
+        Custom label
+      </AiButtonBase>
+    );
+
+    expect(screen.getByText('Add to chat')).toBeInTheDocument();
+    expect(screen.queryByText('Custom label')).not.toBeInTheDocument();
+  });
+
+  it('uses children as label when iconType is productAgent', () => {
+    render(
+      <AiButtonBase variant="base" iconType="productAgent">
+        Custom label
+      </AiButtonBase>
+    );
+
+    expect(screen.getByText('Custom label')).toBeInTheDocument();
+    expect(screen.queryByText('Add to chat')).not.toBeInTheDocument();
   });
 });

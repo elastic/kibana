@@ -25,7 +25,8 @@
     "@kbn/content-management-favorites-public",
     "@kbn/content-management-table-list-view-common",
     "@kbn/content-management-tags",
-    "@kbn/content-list-page"
+    "@kbn/content-list-page",
+    "@kbn/ui-callout"
   ],
   "exclude": [
     "target/**/*"

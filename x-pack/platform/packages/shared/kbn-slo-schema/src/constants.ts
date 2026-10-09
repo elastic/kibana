@@ -6,3 +6,5 @@
  */
 
 export const ALL_VALUE = '*';
+
+export const SLO_GROUPINGS_PREFIX = 'slo.groupings.';

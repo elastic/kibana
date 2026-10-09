@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import { get, isEmpty } from 'lodash/fp';
 import type { Query } from '@kbn/es-query';
 import {
@@ -180,3 +180,11 @@ export const selectIsPinnedEventInTimeline = () =>
     (_: State, __: string, pinnedEventId: string) => pinnedEventId,
     (timeline, pinnedEventId): boolean => !!timeline?.pinnedEventIds?.[pinnedEventId]
   );
+
+/**
+ * Selector that returns true when the active timeline is a transient, read-only Super Timeline.
+ */
+export const selectIsSuperTimeline = createSelector(
+  selectTimelineById,
+  (timeline): boolean => !!timeline?.isSuperTimeline
+);

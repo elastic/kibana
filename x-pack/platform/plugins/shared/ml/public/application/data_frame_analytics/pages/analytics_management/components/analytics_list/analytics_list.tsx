@@ -9,14 +9,8 @@ import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiSearchBarProps } from '@elastic/eui';
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiInMemoryTable,
-  EuiSearchBar,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
   ANALYSIS_CONFIG_TYPE,
   DATA_FRAME_TASK_STATE,
@@ -204,16 +198,14 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
   if (typeof errorMessage !== 'undefined') {
     return (
-      <EuiCallOut
+      <KbnDangerCallout
         announceOnMount
         title={i18n.translate('xpack.ml.dataFrame.analyticsList.errorPromptTitle', {
           defaultMessage: 'An error occurred getting the data frame analytics list.',
         })}
-        color="danger"
-        iconType="warning"
       >
         <pre>{JSON.stringify(errorMessage)}</pre>
-      </EuiCallOut>
+      </KbnDangerCallout>
     );
   }
 
@@ -246,7 +238,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
   return (
     <SpaceManagementContextWrapper>
-      <EuiSpacer size="m" />
       <div data-test-subj="mlAnalyticsJobList">
         {modals}
         <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />

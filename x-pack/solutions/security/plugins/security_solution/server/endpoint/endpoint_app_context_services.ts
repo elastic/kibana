@@ -8,12 +8,14 @@
 import type {
   AnalyticsServiceSetup,
   ElasticsearchClient,
+  IClusterClient,
   KibanaRequest,
   LoggerFactory,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
   SecurityServiceStart,
 } from '@kbn/core/server';
+import type { IScopedSearchClient, PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type {
   ExceptionListClient,
   ListPluginSetup,
@@ -110,6 +112,12 @@ export interface EndpointAppContextServiceStartContract {
   experimentalFeatures: ExperimentalFeatures;
   /** An internal ES client */
   esClient: ElasticsearchClient;
+  /** Used to build the request-scoped, project-routed client that CPS reads fan out on */
+  clusterClient: IClusterClient;
+  /** Used to build the project-routed search client that CPS search strategies fan out on */
+  dataStart: DataPluginStart;
+  /** CPS enabled on the deployment AND the `defendCrossProjectSearch` flag on */
+  cpsEnabled: boolean;
   productFeaturesService: ProductFeaturesService;
   savedObjectsServiceStart: SavedObjectsServiceStart;
   connectorActions: ActionsPluginStartContract;
@@ -117,6 +125,26 @@ export interface EndpointAppContextServiceStartContract {
   spacesService: SpacesServiceStart | undefined;
   agentBuilder?: AgentBuilderPluginStart;
   getExceptionListClient?: ListPluginSetup['getExceptionListClient'];
+}
+
+/**
+ * The request-bound half of the CPS primitives, handed out by `EndpointAppContextService.asScoped()`.
+ *
+ * Services take this rather than a `KibanaRequest` so that they stay independent of the HTTP routing
+ * layer. Holding one means the caller had a request identity, which is the precondition for a read to
+ * fan out; a service that receives none reads origin-only, exactly as before CPS.
+ */
+export interface ScopedEndpointServices {
+  /** `true` when reads made through this instance fan out across linked projects */
+  isCpsRead: () => boolean;
+  /** The client for reads against Defend-owned indices. Fleet-owned ones stay on the internal client */
+  getEsClient: () => ElasticsearchClient;
+  /** The search client the Defend search strategies dispatch through */
+  getSearchClient: () => IScopedSearchClient;
+  /** The active space, which is also what bounds the set of projects a fanned-out read reaches */
+  getSpaceId: () => string;
+  /** Resolves the active space, rejecting when it does not exist on this project */
+  getSpace: () => Promise<Space>;
 }
 
 /**
@@ -318,6 +346,88 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.esClient;
+  }
+
+  /** `true` when Defend reads should fan out across linked projects via Cross-Project Search */
+  public isCpsEnabled(): boolean {
+    if (this.startDependencies == null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.cpsEnabled;
+  }
+
+  /**
+   * `true` when this particular read fans out. Background callers hold no request identity, so they
+   * stay origin-only even with CPS on, and must keep the pre-CPS space semantics along with it:
+   * client choice and space filtering have to agree on one answer or a local document can be
+   * filtered out of an origin-only read.
+   */
+  public isCpsRead(request?: KibanaRequest): boolean {
+    if (!this.isCpsEnabled()) {
+      return false;
+    }
+
+    if (!request) {
+      this.createLogger('isCpsRead').debug(
+        'CPS is enabled but this read was requested without a KibanaRequest, so it cannot fan out and will return origin data only'
+      );
+
+      return false;
+    }
+
+    return true;
+  }
+
+  /** The client for reads against Defend-owned indices. Fleet-owned ones keep `getInternalEsClient()` */
+  public getReadEsClient(request?: KibanaRequest): ElasticsearchClient {
+    if (!this.startDependencies?.clusterClient) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    // `isCpsRead` first, so a caller with no request gets its breadcrumb; the second half narrows
+    if (!this.isCpsRead(request) || !request) {
+      return this.getInternalEsClient();
+    }
+
+    return this.startDependencies.clusterClient.asScoped(request, { projectRouting: 'space' })
+      .asCurrentUser;
+  }
+
+  /**
+   * The search client the Defend search strategies dispatch through. Carries the same routing as
+   * `getReadEsClient()` when CPS is on, so callers do not branch on the flag themselves.
+   */
+  public getScopedSearchClient(request: KibanaRequest): IScopedSearchClient {
+    if (!this.startDependencies?.dataStart) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    const { dataStart } = this.startDependencies;
+
+    return this.isCpsEnabled()
+      ? dataStart.search.asScoped(request, { projectRouting: 'space' })
+      : dataStart.search.asScoped(request);
+  }
+
+  /**
+   * A request-bound view of the three CPS primitives above, so the services that need them do not
+   * have to take a `KibanaRequest` of their own. The server-side services are deliberately detached
+   * from the HTTP routing layer; handing them this instead keeps that separation while still making
+   * "this read can fan out" visible in their signatures. A service that receives no scoped instance
+   * cannot fan out, which is the same rule `isCpsRead` applies to a missing request.
+   *
+   * Modelled on `getScopedEndpointArtifactClient()`, which hands out a request-scoped service object
+   * in the same way.
+   */
+  public asScoped(request: KibanaRequest): ScopedEndpointServices {
+    return {
+      isCpsRead: () => this.isCpsRead(request),
+      getEsClient: () => this.getReadEsClient(request),
+      getSearchClient: () => this.getScopedSearchClient(request),
+      getSpaceId: () => this.getActiveSpaceId(request),
+      getSpace: () => this.getActiveSpace(request),
+    };
   }
 
   public getAgentBuilder(): AgentBuilderPluginStart {

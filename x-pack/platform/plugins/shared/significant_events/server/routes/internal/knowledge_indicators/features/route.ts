@@ -23,7 +23,7 @@ import type { KIBulkOperation } from '../../../../lib/knowledge_indicators';
 
 const MAX_INPUT_STRING_LENGTH = 255;
 
-export const upsertFeatureRoute = createServerRoute({
+const upsertFeatureRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/features',
   options: {
     access: 'internal',
@@ -82,7 +82,7 @@ export const upsertFeatureRoute = createServerRoute({
   },
 });
 
-export const deleteFeatureRoute = createServerRoute({
+const deleteFeatureRoute = createServerRoute({
   endpoint: 'DELETE /internal/streams/{name}/features/{id}',
   options: {
     access: 'internal',
@@ -131,7 +131,7 @@ export const deleteFeatureRoute = createServerRoute({
   },
 });
 
-export const listFeaturesRoute = createServerRoute({
+const listFeaturesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/features',
   options: {
     access: 'internal',
@@ -236,7 +236,7 @@ export const listAllFeaturesRoute = createServerRoute({
   },
 });
 
-export const bulkFeaturesRoute = createServerRoute({
+const bulkFeaturesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/features/_bulk',
   options: {
     access: 'internal',
@@ -322,7 +322,7 @@ export const bulkFeaturesRoute = createServerRoute({
   },
 });
 
-export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
+const bulkFeaturesAcrossStreamsRoute = createServerRoute({
   endpoint: 'POST /internal/streams/features/_bulk',
   options: {
     access: 'internal',

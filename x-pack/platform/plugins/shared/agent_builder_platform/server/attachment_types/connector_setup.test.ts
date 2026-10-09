@@ -92,6 +92,7 @@ describe('connector_setup attachment type', () => {
           supportedFeatureIds: [],
         },
         actions: {},
+        test: { handler: jest.fn(), enabled: false },
       });
 
       const formatted = attachmentType.format(

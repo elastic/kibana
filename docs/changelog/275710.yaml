@@ -1,0 +1,14 @@
+prs:
+- https://github.com/elastic/kibana/pull/275710
+type: breaking-change
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+title: Update script library APIs to enforce field length limits
+description: Script library APIs now validate the length of script names, descriptions,
+  instructions, examples, executable paths, versions, and script IDs.
+impact: Requests that exceed the new field-length limits are rejected.
+action: Update script library API clients to keep request fields within the documented
+  limits.
+subtype: api

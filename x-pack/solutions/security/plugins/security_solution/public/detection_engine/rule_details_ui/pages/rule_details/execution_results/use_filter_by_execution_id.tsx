@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import moment from 'moment';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Filter, Query } from '@kbn/es-query';

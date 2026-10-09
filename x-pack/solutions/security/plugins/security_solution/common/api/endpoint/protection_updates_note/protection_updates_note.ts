@@ -9,15 +9,15 @@ import { schema } from '@kbn/config-schema';
 
 export const GetProtectionUpdatesNoteSchema = {
   params: schema.object({
-    package_policy_id: schema.string(),
+    package_policy_id: schema.string({ maxLength: 256 }),
   }),
 };
 
 export const CreateUpdateProtectionUpdatesNoteSchema = {
   body: schema.object({
-    note: schema.string(),
+    note: schema.string({ maxLength: 10000 }),
   }),
   params: schema.object({
-    package_policy_id: schema.string(),
+    package_policy_id: schema.string({ maxLength: 256 }),
   }),
 };

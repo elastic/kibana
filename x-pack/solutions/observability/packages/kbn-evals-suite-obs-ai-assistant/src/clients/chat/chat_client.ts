@@ -23,11 +23,11 @@ export function createChatClient(
   log: ToolingLog,
   connectorId: string
 ): ChatClient {
-  const clientTypeValue = process.env.EVALUATION_CLIENT || 'obs_ai_assistant';
+  const clientTypeValue = process.env.EVAL_CLIENT || 'obs_ai_assistant';
 
   if (!isValidClientType(clientTypeValue)) {
     throw new Error(
-      `Invalid EVALUATION_CLIENT value: "${clientTypeValue}". Must be "obs_ai_assistant" or "agent_builder".`
+      `Invalid EVAL_CLIENT value: "${clientTypeValue}". Must be "obs_ai_assistant" or "agent_builder".`
     );
   }
 

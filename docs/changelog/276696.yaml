@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/276696
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.4.4
+title: "Fix false install success for partially translated migration rules"
+description: "Selecting a partially translated rule no longer enables the \"Install selected\" button or shows a misleading success message without installing a rule."

@@ -1,0 +1,14 @@
+prs:
+- https://github.com/elastic/kibana/pull/278895
+issues:
+- https://github.com/elastic/kibana/issues/276520
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+areas:
+- Alerting and reporting
+title: "Fix Rules appearing in global search for alerts-only users"
+description: "Users with alerts-only access (`stackAlertsOnly`) no longer see the Rules entry in Kibana global search."

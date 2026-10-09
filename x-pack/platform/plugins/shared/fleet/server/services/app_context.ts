@@ -84,7 +84,7 @@ class AppContextService {
   private messageSigningService: MessageSigningServiceInterface | undefined;
   private uninstallTokenService: UninstallTokenServiceInterface | undefined;
   private taskManagerStart: TaskManagerStartContract | undefined;
-  private fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
+  private fetchUsage?: (signal: AbortSignal) => Promise<FleetUsage | undefined>;
   private lockManagerService: LockManagerService | undefined;
   private alertingStart: AlertingServerStart | undefined;
   private includedHiddenTypes: string[] = [

@@ -103,6 +103,7 @@ export const AGENT_DISK_GIB = {
 /** Well-known Buildkite pipeline slugs referenced in source prioritization. */
 export const PIPELINES = {
   ON_MERGE: 'kibana-on-merge',
+  MERGE_QUEUE: 'kibana-merge-queue',
   PULL_REQUEST: 'kibana-pull-request',
   ES_SERVERLESS_VERIFY: 'kibana-elasticsearch-serverless-verify-and-promote',
 } as const;

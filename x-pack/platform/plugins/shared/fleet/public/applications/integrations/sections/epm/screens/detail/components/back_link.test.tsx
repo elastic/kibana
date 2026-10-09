@@ -69,4 +69,28 @@ describe('BackLink', () => {
       });
     });
   });
+
+  it('renders back to collection link when collectionTitle is provided', async () => {
+    const appId = 'integrations';
+    const collectionPath = '/collection/nginx';
+    const queryParams = new URLSearchParams();
+    const { getByText } = render(
+      <I18nProvider>
+        <BackLink
+          queryParams={queryParams}
+          integrationsPath={collectionPath}
+          collectionTitle="Nginx"
+        />
+      </I18nProvider>
+    );
+    expect(getByText('Back to Nginx collection')).toBeInTheDocument();
+    await act(async () => {
+      fireEvent.click(getByText('Back to Nginx collection'));
+    });
+    await waitFor(() => {
+      expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(appId, {
+        path: collectionPath,
+      });
+    });
+  });
 });

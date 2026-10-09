@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { getSpaceNPRE, PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import type { ProjectTagsResponse } from '@kbn/cps-utils';
-import { asSpaceId } from '@kbn/core-spaces-common';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { CpsData } from '../types';
 
 /**
@@ -31,16 +31,16 @@ export const resolveCpsData = async (
   spaceId: string,
   logger: Logger
 ): Promise<CpsData> => {
-  const npreRef = getSpaceNPRE(asSpaceId(spaceId));
+  const npreRef = getSpaceNPRE(brandSpaceId(spaceId));
   const npreName = npreRef.replace(/^@/, '');
 
   try {
     const resolvedExpression = await internalUserEsClient.transport
-      .request<{ [key: string]: { expression: string } }>({
+      .request<{ expression: string }>({
         method: 'GET',
         path: `/_project_routing/${npreName}`,
       })
-      .then((res) => res[npreName]?.expression ?? PROJECT_ROUTING_ALL)
+      .then((res) => res.expression ?? PROJECT_ROUTING_ALL)
       .catch((error: { statusCode?: number }) => {
         // A missing routing expression (404) is a legitimate "no routing configured" case: fall
         // back to the default "all projects" scope silently.

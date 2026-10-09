@@ -109,7 +109,7 @@ describe('RuleMigrationResultPanel', () => {
         last_execution: { error: 'Something went wrong' },
       },
     });
-    expect(screen.getByTestId(/ruleMigrationLastError/)).toBeVisible();
+    expect(screen.getByTestId('ruleMigrationLastError')).toBeVisible();
   });
 
   it('renders loading spinner if translation stats are loading', () => {

@@ -50,6 +50,7 @@ const defaultProps = {
   openDetailsPanel: () => {},
   isPreviewMode: false,
   entityStoreEntityId: 'service:nginx@okta',
+  riskScoreQueryId: 'servicePanelRiskScoreQuery',
 };
 
 describe('ServicePanelContent — resolution license gating', () => {

@@ -9,8 +9,6 @@ import type React from 'react';
 import type { EuiCommentProps, IconType, EuiButtonProps, EuiThemeComputed } from '@elastic/eui';
 import type { z } from '@kbn/zod/v4';
 import type {
-  ExternalReferenceAttachmentPayload,
-  PersistableStateAttachmentPayload,
   UnifiedReferenceAttachmentPayload,
   UnifiedValueAttachmentPayload,
 } from '../../../common/types/domain';
@@ -66,16 +64,6 @@ export interface CommonAttachmentViewProps {
 export interface CommonAttachmentTabViewProps {
   caseData: CaseUI;
   searchTerm?: string;
-}
-
-export interface ExternalReferenceAttachmentViewProps extends CommonAttachmentViewProps {
-  externalReferenceId: ExternalReferenceAttachmentPayload['externalReferenceId'];
-  externalReferenceMetadata: ExternalReferenceAttachmentPayload['externalReferenceMetadata'];
-}
-
-export interface PersistableStateAttachmentViewProps extends CommonAttachmentViewProps {
-  persistableStateAttachmentTypeId: PersistableStateAttachmentPayload['persistableStateAttachmentTypeId'];
-  persistableStateAttachmentState: PersistableStateAttachmentPayload['persistableStateAttachmentState'];
 }
 
 export interface RowContext {
@@ -147,9 +135,6 @@ interface UnifiedAttachmentSchema {
   workflowSchema?: z.ZodObject | false;
 }
 
-export type ExternalReferenceAttachmentType = AttachmentType<ExternalReferenceAttachmentViewProps>;
-export type PersistableStateAttachmentType = AttachmentType<PersistableStateAttachmentViewProps>;
-
 type UnifiedAttachmentRegistration<Props> = AttachmentType<Props> & UnifiedAttachmentSchema;
 export type UnifiedReferenceAttachmentType<
   Metadata = ReferenceMetadata,
@@ -173,11 +158,5 @@ export type RegisteredUnifiedAttachmentType =
   | UnifiedHybridAttachmentType;
 
 export interface AttachmentFramework {
-  registerExternalReference: (
-    externalReferenceAttachmentType: ExternalReferenceAttachmentType
-  ) => void;
-  registerPersistableState: (
-    persistableStateAttachmentType: PersistableStateAttachmentType
-  ) => void;
   registerUnified: (unifiedAttachmentType: RegisteredUnifiedAttachmentType) => void;
 }

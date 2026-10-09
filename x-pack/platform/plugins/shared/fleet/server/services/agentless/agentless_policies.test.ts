@@ -140,6 +140,8 @@ describe('AgentlessPoliciesService', () => {
         expect.anything(),
         expect.objectContaining({
           supports_agentless: true,
+          data_output_id: expect.any(String),
+          monitoring_output_id: expect.any(String),
         }),
         expect.objectContaining({})
       );

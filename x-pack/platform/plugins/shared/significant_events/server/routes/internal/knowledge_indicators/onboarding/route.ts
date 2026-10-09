@@ -17,6 +17,7 @@ import {
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
 import {
   MAX_STREAMS_PER_QUERY,
@@ -35,7 +36,7 @@ const mapStepsToSkipFlags = (
   skipQueries: !steps.includes(KIsOnboardingStep.QueriesGeneration),
 });
 
-export const onboardingExecuteRoute = createServerRoute({
+const onboardingExecuteRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{streamName}/onboarding/_execute',
   options: {
     access: 'internal',
@@ -91,6 +92,7 @@ export const onboardingExecuteRoute = createServerRoute({
     getScopedClients,
     server,
     workflowClients,
+    maintenanceService,
   }): Promise<KIsOnboardingStatusResult> => {
     const { streamsKIsOnboardingClient } = workflowClients;
     if (!streamsKIsOnboardingClient) {
@@ -106,6 +108,7 @@ export const onboardingExecuteRoute = createServerRoute({
     } = params;
 
     if (body.action === 'schedule') {
+      await assertNotPaused({ maintenanceService, request });
       const { skipFeatures, skipQueries } = mapStepsToSkipFlags(body.steps);
 
       const inputs: SignificantEventsKIsOnboardingInputs = {
@@ -136,7 +139,7 @@ export const onboardingExecuteRoute = createServerRoute({
   },
 });
 
-export const onboardingStatusRoute = createServerRoute({
+const onboardingStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{streamName}/onboarding/_status',
   options: {
     access: 'internal',
@@ -174,7 +177,7 @@ export const onboardingStatusRoute = createServerRoute({
   },
 });
 
-export const onboardingBulkStatusRoute = createServerRoute({
+const onboardingBulkStatusRoute = createServerRoute({
   endpoint: 'POST /internal/streams/onboarding/_bulk_status',
   options: {
     access: 'internal',

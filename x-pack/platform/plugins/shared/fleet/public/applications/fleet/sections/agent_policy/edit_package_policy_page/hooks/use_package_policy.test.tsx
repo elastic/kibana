@@ -658,7 +658,17 @@ describe('usePackagePolicy - agentless', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Pin the legacy-block flag off so this describe exercises the default (flag-off) agentless
+    // behavior — the flag-on counterpart lives in the describe below.
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+      ...allowedExperimentalValues,
+      disableAgentlessLegacyAPI: false,
+    });
     jest.mocked(sendGetAgentlessPolicy).mockResolvedValue({ item: agentlessPolicy } as any);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('reads through the agentless API and skips the upgrade dry-run', async () => {
@@ -928,11 +938,10 @@ describe('usePackagePolicy - agentless with disableAgentlessLegacyAPI enabled', 
   beforeEach(() => {
     jest.clearAllMocks();
     // The legacy-block flag makes the package-policy upgrade dry-run 400 for agentless policies
-    // server-side. `enableAgentlessPoliciesUI` stays on (its default) so the save still routes
-    // through the agentless API.
+    // server-side. It (and `enableAgentlessPoliciesUI`) are on by default via
+    // allowedExperimentalValues, so the save still routes through the agentless API.
     jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
       ...allowedExperimentalValues,
-      disableAgentlessLegacyAPI: true,
     });
   });
 
@@ -972,6 +981,8 @@ describe('usePackagePolicy - agentless policies UI kill switch off', () => {
     jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
       ...allowedExperimentalValues,
       enableAgentlessPoliciesUI: false,
+      // disableAgentlessLegacyAPI forces the UI on, so it must be off to exercise the kill switch.
+      disableAgentlessLegacyAPI: false,
     });
     jest.mocked(sendUpdatePackagePolicy).mockResolvedValue({
       data: { item: { id: 'nginx-1' } },

@@ -7,7 +7,7 @@
 
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { type FakeRawRequest, type Headers, type KibanaRequest } from '@kbn/core-http-server';
-import { asSpaceId } from '@kbn/core-spaces-common';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
@@ -187,7 +187,6 @@ export function getFakeKibanaRequest(
   let effectiveApiKey: string | null = null;
 
   const shouldUseUiamApiKey = context.shouldGrantUiam && context.apiKeyType === ApiKeyType.UIAM;
-  const logTags = ruleId ? [...UIAM_LOGS_USAGE_TAGS, ruleId] : UIAM_LOGS_USAGE_TAGS;
 
   if (shouldUseUiamApiKey) {
     if (!uiamApiKey) {
@@ -200,7 +199,8 @@ export function getFakeKibanaRequest(
         context.logger.debug(
           'UIAM API key is not provided to create a fake request, falling back to ES API key created by the user.',
           {
-            tags: logTags,
+            labels: { ...(ruleId && { ruleId }), spaceId },
+            tags: UIAM_LOGS_USAGE_TAGS,
           }
         );
       } else if (isLikelyNonCloudUserApiKeyOwner(apiKeyOwner)) {
@@ -208,7 +208,8 @@ export function getFakeKibanaRequest(
         context.logger.debug(
           'UIAM API key is not provided because the Elasticsearch API key creator is likely a non-Cloud user, falling back to regular API key.',
           {
-            tags: logTags,
+            labels: { ...(ruleId && { ruleId }), spaceId },
+            tags: UIAM_LOGS_USAGE_TAGS,
           }
         );
       } else {
@@ -221,7 +222,8 @@ export function getFakeKibanaRequest(
         context.logger.debug(
           'UIAM API key is not provided to create a fake request, falling back to regular API key.',
           {
-            tags: logTags,
+            labels: { ...(ruleId && { ruleId }), spaceId },
+            tags: UIAM_LOGS_USAGE_TAGS,
           }
         );
       }
@@ -237,7 +239,7 @@ export function getFakeKibanaRequest(
 
   const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
-    spaceId: asSpaceId(spaceId),
+    spaceId: brandSpaceId(spaceId),
   };
 
   const fakeRequest = kibanaRequestFactory(fakeRawRequest);

@@ -87,6 +87,7 @@ describe('createExecuteConnectorSubActionTool', () => {
         listChannels: { isTool: true, input: {} as any, handler: jest.fn() },
         sendMessage: { isTool: true, input: {} as any, handler: jest.fn() },
       },
+      test: { handler: jest.fn(), enabled: false },
     });
     isToolActionMock.mockReturnValue(true);
     mockCheckAuthorizationStatus.mockReturnValue({ status: AuthorizationStatus.unprompted });
@@ -219,6 +220,7 @@ describe('createExecuteConnectorSubActionTool', () => {
         supportedFeatureIds: [],
       },
       actions: { internalAction: { isTool: false, input: {} as any, handler: jest.fn() } },
+      test: { handler: jest.fn(), enabled: false },
     });
     isToolActionMock.mockReturnValue(false);
 

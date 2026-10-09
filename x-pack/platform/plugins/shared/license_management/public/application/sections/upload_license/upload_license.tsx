@@ -23,6 +23,7 @@ import {
   EuiPanel,
   htmlIdGenerator,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { TelemetryOptIn } from '../../components/telemetry_opt_in';
@@ -197,6 +198,9 @@ export class UploadLicense extends React.PureComponent<Props, State> {
             <EuiFilePicker
               fullWidth
               id="licenseFile"
+              aria-label={i18n.translate('xpack.licenseMgmt.uploadLicense.licenseFileAriaLabel', {
+                defaultMessage: 'License file',
+              })}
               initialPromptText={
                 <FormattedMessage
                   id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"

@@ -55,6 +55,11 @@ describe('IGNORED_WATCH_PATTERNS', () => {
 
       ['tsbuildinfo at package root', p('repo', 'pkg', 'tsconfig.tsbuildinfo')],
       ['type_check tsbuildinfo variant', p('repo', 'pkg', 'tsconfig.type_check.tsbuildinfo')],
+      ['generated type_check tsconfig', p('repo', 'pkg', 'tsconfig.type_check.json')],
+      [
+        'generated variant type_check tsconfig',
+        p('repo', 'pkg', 'tsconfig.browser.type_check.json'),
+      ],
 
       ['unit test file (.test.ts)', p('repo', 'pkg', 'src', 'foo.test.ts')],
       ['unit test file (.test.tsx)', p('repo', 'pkg', 'src', 'foo.test.tsx')],

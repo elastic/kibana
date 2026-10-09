@@ -224,6 +224,11 @@ export const deleteMappings = async (es: Client): Promise<void> => {
 };
 
 export const deleteTemplates = async (es: Client): Promise<void> => {
+  // Creating a case from a template bumps the template's usage stats with `refresh: false`,
+  // leaving the search index with a stale seq_no. Without a refresh, deleteByQuery hits a
+  // version conflict on that doc and `conflicts: 'proceed'` silently skips it, so the template
+  // survives cleanup and the next test's same-name create fails with a 409.
+  await es.indices.refresh({ index: ALERTING_CASES_SAVED_OBJECT_INDEX });
   await es.deleteByQuery({
     index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     q: 'type:cases-templates',

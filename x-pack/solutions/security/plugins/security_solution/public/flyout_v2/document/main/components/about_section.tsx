@@ -28,6 +28,7 @@ import { MitreAttack } from './mitre_attack';
 import { EventCategoryDescription } from './event_category_description';
 import { EventKindDescription } from './event_kind_description';
 import { EventRenderer } from './event_renderer';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 export const ABOUT_SECTION_TEST_ID = `${PREFIX}AboutSection` as const;
 
@@ -64,7 +65,11 @@ export const AboutSection = memo(({ hit }: AboutSectionProps) => {
 
   const onShowRuleSummary = useCallback(() => {
     if (ruleId) {
-      openRuleFlyout({ ruleId, title: formatFlyoutTitle(RULE_TITLE, ruleName) });
+      openRuleFlyout({
+        ruleId,
+        origin: FLYOUT_ORIGIN.ABOUT_SECTION,
+        title: formatFlyoutTitle(RULE_TITLE, ruleName),
+      });
     }
   }, [openRuleFlyout, ruleId, ruleName]);
 

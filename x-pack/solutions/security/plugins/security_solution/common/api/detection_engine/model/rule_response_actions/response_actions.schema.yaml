@@ -169,15 +169,46 @@ components:
             windows:
               $ref: '#/components/schemas/RunScriptOsConfigValues'
 
-    ProcessesParams:
+    KillProcessParams:
       type: object
       properties:
         command:
           type: string
           enum:
             - kill-process
+          description: 'To run an endpoint response action, specify a value for the command field. Example: "command": "kill-process"'
+        comment:
+          type: string
+          description: 'Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"'
+        config:
+          required:
+            - field
+          type: object
+          properties:
+            field:
+              type: string
+              description: Field to use instead of `process.pid`
+              maxLength: 2000
+            overwrite:
+              type: boolean
+              description: Whether to overwrite field with `process.pid`
+              default: true
+            kill_descendants:
+              type: boolean
+              description: 'Whether to also terminate the descendant processes of the targeted process.'
+              x-state: Added in 9.6.0
+      required:
+        - command
+        - config
+
+    SuspendProcessParams:
+      type: object
+      properties:
+        command:
+          type: string
+          enum:
             - suspend-process
-          description: 'To run an endpoint response action, specify a value for the command field. Example: "command": "isolate"'
+          description: 'To run an endpoint response action, specify a value for the command field. Example: "command": "suspend-process"'
         comment:
           type: string
           description: 'Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"'
@@ -189,6 +220,7 @@ components:
             field:
               type: string
               description: Field to use instead of process.pid
+              maxLength: 2000
             overwrite:
               type: boolean
               description: Whether to overwrite field with process.pid
@@ -196,6 +228,16 @@ components:
       required:
         - command
         - config
+
+    ProcessesParams:
+      discriminator:
+        propertyName: command
+        mapping:
+          kill-process: '#/components/schemas/KillProcessParams'
+          suspend-process: '#/components/schemas/SuspendProcessParams'
+      oneOf:
+        - $ref: '#/components/schemas/KillProcessParams'
+        - $ref: '#/components/schemas/SuspendProcessParams'
 
     EndpointResponseAction:
       type: object

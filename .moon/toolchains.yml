@@ -1,5 +1,5 @@
 # https://moonrepo.dev/docs/config/toolchains
-$schema: 'https://moonrepo.dev/schemas/toolchains.json'
+$schema: 'https://moonrepo.dev/schemas/v2/toolchains.json'
 
 javascript:
   packageManager: yarn

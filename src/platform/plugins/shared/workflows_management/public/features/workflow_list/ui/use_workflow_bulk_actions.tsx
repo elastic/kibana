@@ -236,7 +236,7 @@ export const useWorkflowBulkActions = ({
         name: i18n.translate('workflows.bulkActions.export', {
           defaultMessage: 'Export',
         }),
-        icon: 'exportAction',
+        icon: 'upload',
         disabled: isDisabled,
         onClick: handleExportWorkflows,
         'data-test-subj': 'workflows-bulk-action-export',

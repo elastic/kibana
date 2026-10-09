@@ -17,7 +17,7 @@ import type { CaseFilesFilteringOptions } from '../../../containers/use_get_case
 import { useGetCaseFiles } from '../../../containers/use_get_case_files';
 import { FilesTable } from './files_table';
 import { FilesUtilityBar } from './files_utility_bar';
-import { getFileIdsFromComments } from './utils';
+import { getFileIdsFromComments, getFilesFromComments } from './utils';
 
 export const DEFAULT_CASE_FILES_FILTERING_OPTIONS = {
   page: 0,
@@ -63,6 +63,11 @@ export const CaseViewFiles = ({ caseData, searchTerm }: CommonAttachmentTabViewP
     [caseData.comments, caseData.owner]
   );
 
+  const existingFiles = useMemo(
+    () => getFilesFromComments(caseData.comments, caseData.owner),
+    [caseData.comments, caseData.owner]
+  );
+
   const visibleFiles = useMemo(
     () => (caseFiles?.files ?? []).filter((file) => allowedFileIds.has(file.id)),
     [caseFiles?.files, allowedFileIds]
@@ -95,7 +100,7 @@ export const CaseViewFiles = ({ caseData, searchTerm }: CommonAttachmentTabViewP
   return (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem>
-        <FilesUtilityBar caseId={caseData.id} />
+        <FilesUtilityBar caseId={caseData.id} existingFiles={existingFiles} />
         <FilesTable
           caseId={caseData.id}
           isLoading={isLoading}

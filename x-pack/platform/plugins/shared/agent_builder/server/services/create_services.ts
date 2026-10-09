@@ -32,7 +32,7 @@ import {
   type ConsumptionService,
 } from './metering';
 import { type PluginsService, createPluginsService } from './plugins';
-import { CallbackDeliveryService } from './execution/callback_delivery_service';
+import { CallbackDeliveryService } from './execution/callback';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -106,6 +106,7 @@ export class ServiceManager {
     security,
     spaces,
     elasticsearch,
+    http,
     inference,
     uiSettings,
     savedObjects,
@@ -190,6 +191,7 @@ export class ServiceManager {
       logger: logger.get('runnerFactory'),
       security,
       elasticsearch,
+      http,
       uiSettings,
       savedObjects,
       inference,

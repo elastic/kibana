@@ -280,21 +280,12 @@ export const JinaReaderConnector: ConnectorSpec = {
 
   test: {
     handler: async (ctx) => {
-      try {
-        const r = await ctx.client.get(
-          (ctx.config?.overrideBrowseUrl as string | undefined) || JINA_READER_BROWSE_URL
-        );
-        return {
-          ok: true,
-          message: `Successfully connected to Jina Reader API: \n${r.data}`,
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          message: `Failed to connect: ${error}`,
-        };
-      }
+      await ctx.client.get(
+        (ctx.config?.overrideBrowseUrl as string | undefined) || JINA_READER_BROWSE_URL
+      );
+      return {};
     },
     description: 'Verifies Jina Reader API connectivity',
+    enabled: true,
   },
 };

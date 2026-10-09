@@ -154,6 +154,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
   const header = uiDefinition?.getHeader?.({ attachment });
   const maxWidth = uiDefinition?.getMaxWidth?.(attachment);
+  const isHeaderOnly = !uiDefinition.renderInlineContent;
 
   return (
     <EuiSplitPanel.Outer
@@ -174,24 +175,39 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
         actionButtons={inlineActionButtons}
         previewBadgeState={resolvedPreviewBadgeState}
         onClosePreview={closeCanvas}
+        isHeaderOnly={isHeaderOnly}
       />
-      <EuiSplitPanel.Inner grow={false} paddingSize="none">
-        <AttachmentRenderErrorBoundary key={attachmentPreviewKey}>
-          {() =>
-            uiDefinition?.renderInlineContent?.(
-              {
-                attachment,
-                isSidebar,
-                screenContext,
-                openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
-              },
-              {
-                registerActionButtons,
-              }
-            )
-          }
-        </AttachmentRenderErrorBoundary>
-      </EuiSplitPanel.Inner>
+      {!isHeaderOnly && (
+        <EuiSplitPanel.Inner
+          grow={false}
+          paddingSize="none"
+          css={css`
+            border-radius: 0 0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px;
+            overflow: hidden;
+
+            /* Nested panels default to EUI medium radius (6px); match the card shell (12px). */
+            > .euiPanel {
+              border-radius: 0 0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px;
+            }
+          `}
+        >
+          <AttachmentRenderErrorBoundary key={attachmentPreviewKey}>
+            {() =>
+              uiDefinition.renderInlineContent?.(
+                {
+                  attachment,
+                  isSidebar,
+                  screenContext,
+                  openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+                },
+                {
+                  registerActionButtons,
+                }
+              )
+            }
+          </AttachmentRenderErrorBoundary>
+        </EuiSplitPanel.Inner>
+      )}
     </EuiSplitPanel.Outer>
   );
 };

@@ -8,7 +8,7 @@
  */
 
 import { useMemo, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { monaco } from '@kbn/monaco';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 import { selectDetail } from '../../../../entities/workflows/store/workflow_detail/selectors';

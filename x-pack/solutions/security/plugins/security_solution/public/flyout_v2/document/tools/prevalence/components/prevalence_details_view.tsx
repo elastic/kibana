@@ -168,6 +168,7 @@ export const PrevalenceDetailsView: React.FC<PrevalenceDetailsViewProps> = ({
         canUseTimeline,
         documentHostEntityIdentifiers,
         documentUserEntityIdentifiers,
+        documentHit: hit,
       })),
     [
       data,
@@ -178,6 +179,7 @@ export const PrevalenceDetailsView: React.FC<PrevalenceDetailsViewProps> = ({
       scopeId,
       documentHostEntityIdentifiers,
       documentUserEntityIdentifiers,
+      hit,
     ]
   );
 

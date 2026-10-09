@@ -14,6 +14,7 @@ import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from
 import { appContextService } from '../app_context';
 
 import { agentPolicyService } from '../agent_policy';
+import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
 
 import { ActionRunner } from './action_runner';
 
@@ -84,6 +85,7 @@ export async function reassignBatch(
       agentId: agent.id,
       data: {
         policy_id: options.newAgentPolicyId,
+        policy_base_id: removeVersionSuffixFromPolicyId(options.newAgentPolicyId),
         policy_revision: null,
         ...(newAgentPolicy?.space_ids ? { namespaces: newAgentPolicy.space_ids } : {}),
       },

@@ -112,7 +112,7 @@ export const AgentsPopoverView: React.FC<AgentsPopoverViewProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               color="text"
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               size="s"
               flush="left"
               onClick={onBack}
@@ -128,7 +128,7 @@ export const AgentsPopoverView: React.FC<AgentsPopoverViewProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               size="s"
-              iconType="popout"
+              iconType="external"
               iconSide="right"
               color="text"
               fill={false}

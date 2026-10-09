@@ -97,7 +97,7 @@ describe('getPreconfiguredFleetServerHostFromConfig', () => {
       },
       {
         id: 'internal-agentless-fleet-server',
-        name: 'Internal Fleet Server for agentless',
+        name: 'Internal Fleet Server for managed integrations',
         host_urls: ['https://test-deployment.fleet.test.co'],
         is_default: false,
         is_preconfigured: true,

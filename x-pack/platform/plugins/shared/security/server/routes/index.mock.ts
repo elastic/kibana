@@ -55,6 +55,7 @@ export const routeDefinitionParamsMock = {
       getAnonymousAccessService: jest.fn(),
       getUserProfileService: jest.fn().mockReturnValue(userProfileServiceMock.createStart()),
       serverlessProjectId: 'mock-project-id',
+      serverlessProjectType: 'search',
       analyticsService: analyticsServiceMock.createSetup(),
       buildFlavor: 'traditional',
       docLinks: { links: getDocLinks({ kibanaBranch: 'main', buildFlavor: 'traditional' }) },

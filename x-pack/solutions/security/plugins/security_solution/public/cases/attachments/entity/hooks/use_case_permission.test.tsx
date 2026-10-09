@@ -9,6 +9,7 @@ import type { CasesPermissions } from '@kbn/cases-plugin/common';
 import { renderHook } from '@testing-library/react';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { noCasesPermissions } from '../../../../cases_test_utils';
+import { APP_ID } from '../../../../../common/constants';
 import { useEntityCasePermissions } from './use_case_permission';
 
 jest.mock('../../../../common/lib/kibana');
@@ -25,6 +26,11 @@ describe('useEntityCasePermissions', () => {
     mockCanUseCases.mockReturnValue({ ...noCasesPermissions(), ...permissions });
     return renderHook(() => useEntityCasePermissions()).result;
   };
+
+  it('calls canUseCases scoped to the securitySolution owner', () => {
+    renderWithPermissions({});
+    expect(mockCanUseCases).toHaveBeenCalledWith([APP_ID]);
+  });
 
   it('canAddToExistingCase is true when the user has update and createComment', () => {
     const { current } = renderWithPermissions({ update: true, createComment: true });

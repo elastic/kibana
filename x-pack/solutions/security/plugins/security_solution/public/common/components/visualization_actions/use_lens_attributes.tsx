@@ -40,7 +40,7 @@ export const useLensAttributes = ({
 }: UseLensAttributesProps): LensAttributes | null => {
   const { euiTheme } = useEuiTheme();
   const { dataView } = useDataView(scopeId);
-  const dataViewSelectedPatterns = useSelectedPatterns(scopeId);
+  const dataViewSelectedPatterns = useSelectedPatterns(dataView);
   const indicesExist = !!dataView.matchedIndices?.length;
   const selectedPatterns = useMemo(() => {
     if (signalIndexName) {

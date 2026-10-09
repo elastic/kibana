@@ -143,7 +143,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
     }
   `;
   const fontStyles = css`
-    ${useEuiFontSize('m')}
+    ${useEuiFontSize('s')}
   `;
   const commandBadgeStyles = css`
     [${COMMAND_BADGE_ATTRIBUTE}] {

@@ -14,82 +14,81 @@ description: |
   normalization — to build a post-validation pipeline tailored to your needs.
 enabled: true
 tags:
-  - Attack discovery
-  - Security
-  - Example
+  - attack-discovery
+  - security
+  - example
   - attackDiscovery:custom_validation_example
 
 triggers:
   - type: manual
-
-inputs:
-  additionalProperties: false
-  properties:
-    alerts_context_count:
-      description: Number of alerts analyzed
-      type: integer
-    alerts_index_pattern:
-      description: >
-        Elasticsearch index pattern for security alerts. When not provided,
-        defaults to .alerts-security.alerts-<spaceId> using the current
-        Kibana space (via workflow.spaceId).
-      type: string
-    anonymized_alerts:
-      description: Anonymized alerts in Document format
-      items:
-        additionalProperties: true
-        type: object
-      type: array
-    api_config:
+    inputs:
       additionalProperties: false
-      description: LLM API configuration
       properties:
-        action_type_id:
+        alerts_context_count:
+          description: Number of alerts analyzed
+          type: integer
+        alerts_index_pattern:
+          description: >
+            Elasticsearch index pattern for security alerts. When not provided,
+            defaults to .alerts-security.alerts-<spaceId> using the current
+            Kibana space (via workflow.spaceId).
           type: string
-        connector_id:
+        anonymized_alerts:
+          description: Anonymized alerts in Document format
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+        api_config:
+          additionalProperties: false
+          description: LLM API configuration
+          properties:
+            action_type_id:
+              type: string
+            connector_id:
+              type: string
+            model:
+              type: string
+          required:
+            - connector_id
+          type: object
+        attack_discoveries:
+          description: Attack discoveries to validate
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+        connector_name:
+          description: LLM connector name
           type: string
-        model:
+        enable_field_rendering:
+          default: true
+          description: Enable field rendering in UI
+          type: boolean
+        generation_uuid:
+          description: Generation execution UUID for tracking
           type: string
+        replacements:
+          additionalProperties: true
+          description: Anonymization replacements
+          type: object
+        source:
+          description: How the generation was triggered (interactive, scheduled, or action)
+          enum:
+            - action
+            - interactive
+            - scheduled
+          type: string
+        with_replacements:
+          default: false
+          description: Include replacements in response
+          type: boolean
       required:
-        - connector_id
-      type: object
-    attack_discoveries:
-      description: Attack discoveries to validate
-      items:
-        additionalProperties: true
-        type: object
-      type: array
-    connector_name:
-      description: LLM connector name
-      type: string
-    enable_field_rendering:
-      default: true
-      description: Enable field rendering in UI
-      type: boolean
-    generation_uuid:
-      description: Generation execution UUID for tracking
-      type: string
-    replacements:
-      additionalProperties: true
-      description: Anonymization replacements
-      type: object
-    source:
-      description: How the generation was triggered (interactive, scheduled, or action)
-      enum:
-        - action
-        - interactive
-        - scheduled
-      type: string
-    with_replacements:
-      default: false
-      description: Include replacements in response
-      type: boolean
-  required:
-    - alerts_context_count
-    - anonymized_alerts
-    - api_config
-    - attack_discoveries
-    - generation_uuid
+        - alerts_context_count
+        - anonymized_alerts
+        - api_config
+        - attack_discoveries
+        - generation_uuid
 
 steps:
   # Step 1: Filter hallucinated alert IDs and deduplicate discoveries.

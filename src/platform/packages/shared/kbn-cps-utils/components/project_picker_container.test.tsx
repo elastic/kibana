@@ -56,6 +56,7 @@ describe('ProjectPickerContainer', () => {
       getProjectPickerAccess$: jest.fn(() => mockProjectPickerAccess$),
       getDefaultProjectRouting: jest.fn(() => PROJECT_ROUTING.ALL),
       getTotalProjectCount: jest.fn(() => 2),
+      hasLinkedProjects: jest.fn(() => true),
       updateDefaultProjectRouting: jest.fn(),
       registerAppAccess: jest.fn(),
       ...props.cpsManager,

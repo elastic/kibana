@@ -12,9 +12,16 @@ import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
+import {
+  FlyoutV2EventTypes,
+  FLYOUT_ORIGIN,
+  FLYOUT_SURFACE,
+  FLYOUT_TYPE,
+  FLYOUT_SESSION_KIND,
+} from '../../common/lib/telemetry';
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useStore: jest.fn(() => ({})),
 }));
 jest.mock('react-router-dom', () => ({
@@ -31,13 +38,18 @@ jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
 }));
 
 const mockOpenSystemFlyout = jest.fn();
+const mockReportEvent = jest.fn();
 const ruleId = 'rule-1';
 
 describe('useRuleFlyoutApi', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
     (useKibana as jest.Mock).mockReturnValue({
-      services: { overlays: { openSystemFlyout: mockOpenSystemFlyout } },
+      services: {
+        overlays: { openSystemFlyout: mockOpenSystemFlyout },
+        telemetry: { reportEvent: mockReportEvent },
+      },
     });
     (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
   });
@@ -51,6 +63,26 @@ describe('useRuleFlyoutApi', () => {
       'FLYOUT_CONTENT',
       expect.objectContaining({ size: 's', session: 'start', historyKey: documentFlyoutHistoryKey })
     );
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.RULE,
+      tool: undefined,
+      session: FLYOUT_SESSION_KIND.START,
+      origin: undefined,
+    });
+  });
+
+  it('openRuleFlyout forwards the given origin', () => {
+    const { result } = renderHook(() => useRuleFlyoutApi());
+    result.current.openRuleFlyout({ ruleId, origin: FLYOUT_ORIGIN.FLYOUT_FIELD_LINK });
+
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.RULE,
+      tool: undefined,
+      session: FLYOUT_SESSION_KIND.START,
+      origin: FLYOUT_ORIGIN.FLYOUT_FIELD_LINK,
+    });
   });
 
   it('openRuleFlyoutAsChild opens a system flyout that inherits the current session', () => {
@@ -66,6 +98,13 @@ describe('useRuleFlyoutApi', () => {
         historyKey: documentFlyoutHistoryKey,
       })
     );
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.FLYOUT,
+      flyoutType: FLYOUT_TYPE.RULE,
+      tool: undefined,
+      session: FLYOUT_SESSION_KIND.INHERIT,
+      origin: undefined,
+    });
   });
 
   it('uses the doc-viewer history key when outside the security app', () => {

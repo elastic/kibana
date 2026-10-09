@@ -120,7 +120,7 @@ export function ApmEmbeddableContext({
     lens: deps.pluginsStart.lens,
     uiActions: deps.pluginsStart.uiActions,
     observabilityAIAssistant: deps.pluginsStart.observabilityAIAssistant,
-    share: deps.pluginsSetup.share,
+    share: deps.pluginsStart.share,
     kibanaEnvironment: deps.kibanaEnvironment,
     observabilityRuleTypeRegistry: deps.observabilityRuleTypeRegistry,
     licensing: deps.pluginsStart.licensing,

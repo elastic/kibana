@@ -39,7 +39,7 @@ describe('Bulk uninstall task', () => {
   describe('_runBulkUninstallTask', () => {
     it('should work for successfull uninstall', async () => {
       const res = await _runBulkUninstallTask({
-        abortController: new AbortController(),
+        signal: new AbortController().signal,
         logger: loggingSystemMock.createLogger(),
         taskParams: {
           type: 'bulk_uninstall',
@@ -60,7 +60,7 @@ describe('Bulk uninstall task', () => {
 
     it('should return error for non successful upgrade', async () => {
       const res = await _runBulkUninstallTask({
-        abortController: new AbortController(),
+        signal: new AbortController().signal,
         logger: loggingSystemMock.createLogger(),
         taskParams: {
           type: 'bulk_uninstall',
@@ -95,7 +95,7 @@ describe('Bulk uninstall task', () => {
       abortController.abort();
       await expect(() =>
         _runBulkUninstallTask({
-          abortController,
+          signal: abortController.signal,
           logger: loggingSystemMock.createLogger(),
           taskParams: {
             type: 'bulk_uninstall',

@@ -33,7 +33,11 @@ test.describe('Home page', { tag: tags.stateful.classic }, () => {
 
   test('navigates through the tabs', async ({ pageObjects: { profilingHomePage }, page }) => {
     await profilingHomePage.gotoWithTimeRange(rangeFrom, rangeTo);
+    await profilingHomePage.expectUrlToInclude('/app/profiling/stacktraces/executables');
+
+    await profilingHomePage.clickTab('Threads');
     await profilingHomePage.expectUrlToInclude('/app/profiling/stacktraces/threads');
+    expect(page.url()).toContain('/app/profiling/stacktraces/threads');
 
     await profilingHomePage.clickTab('Traces');
     await profilingHomePage.expectUrlToInclude('/app/profiling/stacktraces/traces');

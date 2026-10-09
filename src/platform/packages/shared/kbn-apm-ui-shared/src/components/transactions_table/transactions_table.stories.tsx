@@ -275,14 +275,14 @@ const actionsColumn: EuiBasicTableColumn<TransactionGroup> = {
             {
               id: 'createLatencySlo',
               name: 'Create APM latency SLO',
-              icon: 'visGauge',
+              icon: 'chartGauge',
               onClick: () => alert(`Create latency SLO: ${item.name}`),
               ebt: { action: 'createLatencySlo', element: 'transactionsTableRowActions' },
             },
             {
               id: 'createAvailabilitySlo',
               name: 'Create APM availability SLO',
-              icon: 'visGauge',
+              icon: 'chartGauge',
               onClick: () => alert(`Create availability SLO: ${item.name}`),
               ebt: { action: 'createAvailabilitySlo', element: 'transactionsTableRowActions' },
             },

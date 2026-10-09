@@ -17,8 +17,8 @@ const makeAction = (id: string, label: string) => ({
 });
 
 const mockCommands: EditorCommand[] = [
-  { id: 'foldAll', label: 'Collapse all', iconType: 'minusInCircle' },
-  { id: 'unfoldAll', label: 'Expand all', iconType: 'plusInCircle' },
+  { id: 'foldAll', label: 'Collapse all', iconType: 'minusCircle' },
+  { id: 'unfoldAll', label: 'Expand all', iconType: 'plusCircle' },
 ];
 
 const mockJumps: JumpToStepEntry[] = [

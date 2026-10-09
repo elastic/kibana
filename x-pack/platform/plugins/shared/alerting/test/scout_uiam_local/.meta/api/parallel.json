@@ -1,0 +1,65 @@
+{
+  "sha1": "5eb5a650e6e7f07ad52f9983b366694223fb43c7",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "4adce93c9c34324-4605cdea5bf880b",
+      "title": "[NON-MKI] Rule operations with an organization-level UIAM API key creating an enabled rule fails with a clear 400 instead of a parse error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting/test/scout_uiam_local/api/parallel_tests/org_level_uiam_api_key.spec.ts",
+        "line": 35,
+        "column": 47
+      }
+    },
+    {
+      "id": "4adce93c9c34324-cb6acea62df327e",
+      "title": "[NON-MKI] Rule operations with an organization-level UIAM API key creating a disabled rule succeeds (no rule API key is resolved for disabled rules)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting/test/scout_uiam_local/api/parallel_tests/org_level_uiam_api_key.spec.ts",
+        "line": 48,
+        "column": 26
+      }
+    }
+  ]
+}

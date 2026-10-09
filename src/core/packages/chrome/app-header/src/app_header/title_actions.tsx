@@ -9,14 +9,24 @@
 
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { FavoriteButton } from '@kbn/favorite-button';
 import { i18n } from '@kbn/i18n';
-import type { MouseEvent as ReactMouseEvent, ReactNode } from 'react';
+import type { MouseEvent as ReactMouseEvent } from 'react';
 import React, { useMemo } from 'react';
-import type { ShareAction } from './hooks';
+import type { AppHeaderFavoriteAction, AppHeaderShareAction } from '../types';
+import { asOptionalPlainText } from './as_plain_text';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
 const SHARE_ARIA_LABEL = i18n.translate('core.ui.chrome.appHeader.shareAriaLabel', {
   defaultMessage: 'Share',
+});
+
+const ADD_TO_STARRED_LABEL = i18n.translate('core.ui.chrome.appHeader.favoriteAddLabel', {
+  defaultMessage: 'Add to Starred',
+});
+
+const REMOVE_FROM_STARRED_LABEL = i18n.translate('core.ui.chrome.appHeader.favoriteRemoveLabel', {
+  defaultMessage: 'Remove from Starred',
 });
 
 const useTitleActionsStyles = () => {
@@ -32,6 +42,8 @@ const useTitleActionsStyles = () => {
 
     const iconButton = css`
       color: ${euiTheme.colors.textSubdued};
+      block-size: 24px;
+      inline-size: 24px;
     `;
 
     const favoriteSlot = css`
@@ -51,8 +63,8 @@ const useTitleActionsStyles = () => {
 };
 
 export interface TitleActionsProps {
-  shareAction?: ShareAction;
-  favorite?: ReactNode;
+  shareAction?: AppHeaderShareAction;
+  favorite?: AppHeaderFavoriteAction;
 }
 
 export const TitleActions = React.memo<TitleActionsProps>(({ shareAction, favorite }) => {
@@ -62,16 +74,17 @@ export const TitleActions = React.memo<TitleActionsProps>(({ shareAction, favori
     return null;
   }
 
-  const shareTooltipContent = shareAction?.tooltipContent ?? SHARE_ARIA_LABEL;
-  const hasCustomTooltip = !!shareAction?.tooltipContent || !!shareAction?.tooltipTitle;
+  const shareTooltipContent = asOptionalPlainText(shareAction?.tooltip?.content);
+  const shareTooltipTitle = asOptionalPlainText(shareAction?.tooltip?.title);
+  const hasCustomShareTooltip = !!shareTooltipContent || !!shareTooltipTitle;
 
   return (
     <div css={styles.root} data-test-subj={APP_HEADER_TEST_SUBJECTS.titleActions}>
       {shareAction ? (
         <EuiToolTip
-          content={shareTooltipContent}
-          title={shareAction.tooltipTitle}
-          {...(!hasCustomTooltip && { disableScreenReaderOutput: true })}
+          content={shareTooltipContent ?? SHARE_ARIA_LABEL}
+          title={shareTooltipTitle}
+          {...(!hasCustomShareTooltip && { disableScreenReaderOutput: true })}
         >
           <EuiButtonIcon
             iconType="share"
@@ -81,21 +94,31 @@ export const TitleActions = React.memo<TitleActionsProps>(({ shareAction, favori
             css={styles.iconButton}
             aria-label={SHARE_ARIA_LABEL}
             isDisabled={shareAction.isDisabled}
-            data-test-subj={`${APP_HEADER_TEST_SUBJECTS.sharePrefix} ${
-              shareAction.testId ?? ''
-            }`.trim()}
-            onClick={(event: ReactMouseEvent<HTMLButtonElement>) =>
-              shareAction.onClick(event.currentTarget)
-            }
+            data-test-subj={`${APP_HEADER_TEST_SUBJECTS.sharePrefix} ${APP_HEADER_TEST_SUBJECTS.shareButton}`}
+            onClick={(event: ReactMouseEvent<HTMLButtonElement>) => {
+              const triggerElement = event.currentTarget;
+              void shareAction.onClick({
+                returnFocus: () => triggerElement.focus(),
+              });
+            }}
           />
         </EuiToolTip>
       ) : null}
       {favorite ? (
-        // Temporary slot: favorite is still a caller-owned React node.
-        // Replace with a typed app-header action before treating it as a stable API.
-        // https://github.com/elastic/kibana/issues/271402
         <div css={styles.favoriteSlot} data-test-subj={APP_HEADER_TEST_SUBJECTS.favorite}>
-          {favorite}
+          <FavoriteButton
+            status={favorite.status}
+            onClick={favorite.onToggle}
+            isDisabled={favorite.isDisabled}
+            addLabel={ADD_TO_STARRED_LABEL}
+            removeLabel={REMOVE_FROM_STARRED_LABEL}
+            data-test-subj={[
+              APP_HEADER_TEST_SUBJECTS.favoriteButton,
+              favorite.status === 'favorited' || favorite.status === 'removing'
+                ? 'unfavoriteButton'
+                : 'favoriteButton',
+            ].join(' ')}
+          />
         </div>
       ) : null}
     </div>

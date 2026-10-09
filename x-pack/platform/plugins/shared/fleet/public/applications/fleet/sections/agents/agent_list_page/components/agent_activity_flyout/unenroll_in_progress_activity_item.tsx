@@ -20,6 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { ActionStatus } from '../../../../../types';
 
+import { isScheduledAction } from './agent_activity_helper';
 import { formattedTime, inProgressDescription, inProgressTitle } from './helpers';
 
 import { ViewAgentsButton } from './view_agents_button';
@@ -40,10 +41,7 @@ export const UnenrollInProgressActivityItem: React.FunctionComponent<{
     }
   }, [action, abortUnenroll]);
 
-  const isScheduled = useMemo(() => {
-    if (!action.startTime) return false;
-    return new Date(action.startTime).getTime() > Date.now();
-  }, [action]);
+  const isScheduled = useMemo(() => isScheduledAction(action), [action]);
 
   return (
     <EuiPanel hasBorder={true} borderRadius="none">

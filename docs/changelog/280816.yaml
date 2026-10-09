@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/280816
+issues:
+- https://github.com/elastic/kibana/issues/277163
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-28
+- product: kibana
+areas:
+- Dashboards and visualizations
+title: Fix metric chart text color when values are outside the color range
+description: Value text in Metric charts now uses the default readable color when color-by-value is applied and the value falls outside the scale domain.

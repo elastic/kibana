@@ -130,160 +130,142 @@ evaluate.describe(
   'ES search step correctness',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate(
-      'search step includes a query with actual filter conditions',
-      async ({ evaluateEsOpsDataset }) => {
-        await evaluateEsOpsDataset({
-          dataset: {
-            name: 'workflow-es-ops: search-with-query',
-            description:
-              'Model must include a query body in elasticsearch.search — omitting it returns all documents silently',
-            examples: [
-              {
-                // Canonical: two filters (level + time range) on logs-*
-                input: {
-                  instruction:
-                    'Create an "Error Monitor" workflow that runs every 10 minutes, searches logs-* for error-level log entries from the last hour, and prints how many were found.',
-                },
-                output: {
-                  criteria: [
-                    'There is an elasticsearch.search step targeting the logs-* index.',
-                    'The search step has a query field containing actual filter conditions — it must NOT be missing and must NOT be just an empty object or match_all with no additional filters.',
-                    'The query filters on a log level or severity field to select only error entries (e.g. term on log.level, level, or severity).',
-                    'A time range filter is applied so only logs from the last hour are returned (e.g. range on @timestamp gte: now-1h).',
-                    'A console step logs the number of hits from the search result.',
-                    'The step type is elasticsearch.search — not a fictional type like elasticsearch.query or elasticsearch.find.',
-                  ],
-                  expectedStepTypes: ['elasticsearch.search', 'console'],
-                  expectedStepCount: { min: 2, max: 3 },
-                  expectedMaxToolCalls: 6,
-                  expectedToolSequence: ['platform.core.generate_workflow'],
-                },
-                metadata: { category: 'es-ops-correctness' },
+    evaluate('search step correctness cases', async ({ evaluateEsOpsDataset }) => {
+      await evaluateEsOpsDataset({
+        dataset: {
+          name: 'workflow-es-ops: search-correctness',
+          description:
+            'elasticsearch.search must include a query body (not match_all or empty), and must fetch documents by ID via query or path — not fictional step types.',
+          examples: [
+            {
+              // Canonical: two filters (level + time range) on logs-*
+              input: {
+                instruction:
+                  'Create an "Error Monitor" workflow that runs every 10 minutes, searches logs-* for error-level log entries from the last hour, and prints how many were found.',
               },
-              {
-                // Different index (metrics-*) and numeric threshold query — not a term/level filter
-                input: {
-                  instruction:
-                    'Set up an "Outage Detector" workflow on a 5-minute schedule that searches metrics-* for hosts with CPU above 90% in the last 10 minutes and logs the hostname of each one.',
-                },
-                output: {
-                  criteria: [
-                    'There is an elasticsearch.search step targeting the metrics-* index.',
-                    'The search step has a query field with filter conditions — NOT missing and NOT an empty match_all.',
-                    'The query filters on a CPU metric field with a threshold above 90.',
-                    'A time range filter restricts results to the past 10 minutes.',
-                    'A console step logs the result.',
-                    'The step type is elasticsearch.search — not a fictional type like elasticsearch.query or elasticsearch.find.',
-                  ],
-                  expectedStepTypes: ['elasticsearch.search', 'console'],
-                  expectedStepCount: { min: 2, max: 3 },
-                  expectedMaxToolCalls: 6,
-                  expectedToolSequence: ['platform.core.generate_workflow'],
-                },
-                metadata: { category: 'es-ops-correctness' },
+              output: {
+                criteria: [
+                  'There is an elasticsearch.search step targeting the logs-* index.',
+                  'The search step has a query field containing actual filter conditions — it must NOT be missing and must NOT be just an empty object or match_all with no additional filters.',
+                  'The query filters on a log level or severity field to select only error entries (e.g. term on log.level, level, or severity).',
+                  'A time range filter is applied so only logs from the last hour are returned (e.g. range on @timestamp gte: now-1h).',
+                  'A console step logs the number of hits from the search result.',
+                  'The step type is elasticsearch.search — not a fictional type like elasticsearch.query or elasticsearch.find.',
+                ],
+                expectedStepTypes: ['elasticsearch.search', 'console'],
+                expectedStepCount: { min: 2, max: 3 },
+                expectedMaxToolCalls: 6,
+                expectedToolSequence: ['platform.core.generate_workflow'],
               },
-              {
-                // Security domain: term query on a specific named field (not a range/level)
-                input: {
-                  instruction:
-                    'Create a "Threat Indicator Scanner" workflow that runs every hour, searches logs-* for events where threat.indicator.type is domain, and logs how many were found in the last hour.',
-                },
-                output: {
-                  criteria: [
-                    'There is an elasticsearch.search step targeting the logs-* index.',
-                    'The search step has a query field that filters on threat.indicator.type — NOT missing and NOT just match_all.',
-                    'A time range filter restricts results to the past hour.',
-                    'A console step logs the count.',
-                    'The step type is elasticsearch.search — not a fictional type like elasticsearch.query or elasticsearch.find.',
-                  ],
-                  expectedStepTypes: ['elasticsearch.search', 'console'],
-                  expectedStepCount: { min: 2, max: 3 },
-                  expectedMaxToolCalls: 6,
-                  expectedToolSequence: ['platform.core.generate_workflow'],
-                },
-                metadata: { category: 'es-ops-correctness' },
+              metadata: { category: 'es-search-with-query' },
+            },
+            {
+              // Different index (metrics-*) and numeric threshold query — not a term/level filter
+              input: {
+                instruction:
+                  'Set up an "Outage Detector" workflow on a 5-minute schedule that searches metrics-* for hosts with CPU above 90% in the last 10 minutes and logs the hostname of each one.',
               },
-            ],
-          },
-        });
-      }
-    );
-
-    evaluate(
-      'search step uses term query to find a document by ID',
-      async ({ evaluateEsOpsDataset }) => {
-        await evaluateEsOpsDataset({
-          dataset: {
-            name: 'workflow-es-ops: search-by-id',
-            description:
-              'Model must fetch a document by ID correctly — either via elasticsearch.search with a query, or elasticsearch.request GET to /<index>/_doc/{{ id }}',
-            examples: [
-              {
-                // Canonical: explicit "document_id" input name
-                input: {
-                  instruction:
-                    'Create a "Document Fetcher" workflow with manual trigger and an input called document_id. It should fetch the document with that ID from the my-records index and log the result.',
-                },
-                output: {
-                  criteria: [
-                    'There is a step that fetches a document from the my-records index using inputs.document_id.',
-                    'The step is either: (a) elasticsearch.search with a query filtering on _id or a document ID field referencing inputs.document_id — the ID must NOT be a top-level parameter outside the query; or (b) elasticsearch.request GET to /my-records/_doc/{{ inputs.document_id }}.',
-                    'A console step logs the result.',
-                    'The step type is elasticsearch.search or elasticsearch.request — not a fictional type like elasticsearch.get or elasticsearch.getById.',
-                  ],
-                  expectedStepTypes: ['console'],
-                  expectedStepCount: { min: 2, max: 3 },
-                  expectedMaxToolCalls: 6,
-                  expectedToolSequence: ['platform.core.generate_workflow'],
-                },
-                metadata: { category: 'es-ops-correctness' },
+              output: {
+                criteria: [
+                  'There is an elasticsearch.search step targeting the metrics-* index.',
+                  'The search step has a query field with filter conditions — NOT missing and NOT an empty match_all.',
+                  'The query filters on a CPU metric field with a threshold above 90.',
+                  'A time range filter restricts results to the past 10 minutes.',
+                  'A console step logs the result.',
+                  'The step type is elasticsearch.search — not a fictional type like elasticsearch.query or elasticsearch.find.',
+                ],
+                expectedStepTypes: ['elasticsearch.search', 'console'],
+                expectedStepCount: { min: 2, max: 3 },
+                expectedMaxToolCalls: 6,
+                expectedToolSequence: ['platform.core.generate_workflow'],
               },
-              {
-                // Different domain: users index, user_id
-                input: {
-                  instruction:
-                    'Create a "User Profile Fetcher" workflow with a user_id input. It should retrieve the user document from the users index and log the user name.',
-                },
-                output: {
-                  criteria: [
-                    'There is a step that fetches a document from the users index using inputs.user_id.',
-                    'The step is either: (a) elasticsearch.search with a query filtering on user_id referencing inputs.user_id — the ID must NOT be a top-level parameter outside the query; or (b) elasticsearch.request GET to /users/_doc/{{ inputs.user_id }}.',
-                    'A console step logs a field from the result.',
-                    'The step type is elasticsearch.search or elasticsearch.request — not a fictional type like elasticsearch.get or elasticsearch.getById.',
-                  ],
-                  expectedStepTypes: ['console'],
-                  expectedStepCount: { min: 2, max: 3 },
-                  expectedMaxToolCalls: 6,
-                  expectedToolSequence: ['platform.core.generate_workflow'],
-                },
-                metadata: { category: 'es-ops-correctness' },
+              metadata: { category: 'es-search-with-query' },
+            },
+            {
+              // Security domain: term query on a specific named field (not a range/level)
+              input: {
+                instruction:
+                  'Create a "Threat Indicator Scanner" workflow that runs every hour, searches logs-* for events where threat.indicator.type is domain, and logs how many were found in the last hour.',
               },
-              {
-                // Non-"id" named key (product_code) — tests the pattern isn't just triggered by "id" suffix
-                input: {
-                  instruction:
-                    'I need a workflow that looks up a product by its product_code input in the products-catalog index and logs the product details.',
-                },
-                output: {
-                  criteria: [
-                    'There is a step that fetches a document from the products-catalog index using inputs.product_code.',
-                    'The step is either: (a) elasticsearch.search with a query filtering on product_code referencing inputs.product_code — the lookup value must be inside the query, NOT a top-level parameter; or (b) elasticsearch.request GET to /products-catalog/_doc/{{ inputs.product_code }}.',
-                    'A console step logs the output.',
-                    'The step type is elasticsearch.search or elasticsearch.request — not a fictional type like elasticsearch.get or elasticsearch.getById.',
-                  ],
-                  expectedStepTypes: ['console'],
-                  expectedStepCount: { min: 2, max: 3 },
-                  expectedMaxToolCalls: 6,
-                  expectedToolSequence: ['platform.core.generate_workflow'],
-                },
-                metadata: { category: 'es-ops-correctness' },
+              output: {
+                criteria: [
+                  'There is an elasticsearch.search step targeting the logs-* index.',
+                  'The search step has a query field that filters on threat.indicator.type — NOT missing and NOT just match_all.',
+                  'A time range filter restricts results to the past hour.',
+                  'A console step logs the count.',
+                  'The step type is elasticsearch.search — not a fictional type like elasticsearch.query or elasticsearch.find.',
+                ],
+                expectedStepTypes: ['elasticsearch.search', 'console'],
+                expectedStepCount: { min: 2, max: 3 },
+                expectedMaxToolCalls: 6,
+                expectedToolSequence: ['platform.core.generate_workflow'],
               },
-            ],
-          },
-        });
-      }
-    );
+              metadata: { category: 'es-search-with-query' },
+            },
+            {
+              // Canonical: explicit "document_id" input name
+              input: {
+                instruction:
+                  'Create a "Document Fetcher" workflow with manual trigger and an input called document_id. It should fetch the document with that ID from the my-records index and log the result.',
+              },
+              output: {
+                criteria: [
+                  'There is a step that fetches a document from the my-records index using inputs.document_id.',
+                  'The step is either: (a) elasticsearch.search with a query filtering on _id or a document ID field referencing inputs.document_id — the ID must NOT be a top-level parameter outside the query; or (b) elasticsearch.request GET to /my-records/_doc/{{ inputs.document_id }}.',
+                  'A console step logs the result.',
+                  'The step type is elasticsearch.search or elasticsearch.request — not a fictional type like elasticsearch.get or elasticsearch.getById.',
+                ],
+                expectedStepTypes: ['console'],
+                expectedStepCount: { min: 2, max: 3 },
+                expectedMaxToolCalls: 6,
+                expectedToolSequence: ['platform.core.generate_workflow'],
+              },
+              metadata: { category: 'es-search-by-id' },
+            },
+            {
+              // Different domain: users index, user_id
+              input: {
+                instruction:
+                  'Create a "User Profile Fetcher" workflow with a user_id input. It should retrieve the user document from the users index and log the user name.',
+              },
+              output: {
+                criteria: [
+                  'There is a step that fetches a document from the users index using inputs.user_id.',
+                  'The step is either: (a) elasticsearch.search with a query filtering on user_id referencing inputs.user_id — the ID must NOT be a top-level parameter outside the query; or (b) elasticsearch.request GET to /users/_doc/{{ inputs.user_id }}.',
+                  'A console step logs a field from the result.',
+                  'The step type is elasticsearch.search or elasticsearch.request — not a fictional type like elasticsearch.get or elasticsearch.getById.',
+                ],
+                expectedStepTypes: ['console'],
+                expectedStepCount: { min: 2, max: 3 },
+                expectedMaxToolCalls: 6,
+                expectedToolSequence: ['platform.core.generate_workflow'],
+              },
+              metadata: { category: 'es-search-by-id' },
+            },
+            {
+              // Non-"id" named key (product_code) — tests the pattern isn't just triggered by "id" suffix
+              input: {
+                instruction:
+                  'I need a workflow that looks up a product by its product_code input in the products-catalog index and logs the product details.',
+              },
+              output: {
+                criteria: [
+                  'There is a step that fetches a document from the products-catalog index using inputs.product_code.',
+                  'The step is either: (a) elasticsearch.search with a query filtering on product_code referencing inputs.product_code — the lookup value must be inside the query, NOT a top-level parameter; or (b) elasticsearch.request GET to /products-catalog/_doc/{{ inputs.product_code }}.',
+                  'A console step logs the output.',
+                  'The step type is elasticsearch.search or elasticsearch.request — not a fictional type like elasticsearch.get or elasticsearch.getById.',
+                ],
+                expectedStepTypes: ['console'],
+                expectedStepCount: { min: 2, max: 3 },
+                expectedMaxToolCalls: 6,
+                expectedToolSequence: ['platform.core.generate_workflow'],
+              },
+              metadata: { category: 'es-search-by-id' },
+            },
+          ],
+        },
+      });
+    });
   }
 );
 
@@ -642,12 +624,12 @@ evaluate.describe(
   'Alert trigger: event.rule.* field usage',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate('routes by rule owner using event.rule.consumer', async ({ evaluateEsOpsDataset }) => {
+    evaluate('event.rule.* routing cases', async ({ evaluateEsOpsDataset }) => {
       await evaluateEsOpsDataset({
         dataset: {
-          name: 'workflow-alert-rule: consumer-routing',
+          name: 'workflow-alert-rule: rule-field-routing',
           description:
-            'Routing by which team owns the rule requires event.rule.consumer — the model must not substitute alert severity',
+            'Alert routing must use event.rule.consumer (for owner) and event.rule.ruleTypeId (for detection type) — not alert severity.',
           examples: [
             {
               // Canonical: Slack channel routing by consumer
@@ -667,7 +649,7 @@ evaluate.describe(
                 expectedMaxToolCalls: 8,
                 expectedToolSequence: ['platform.core.generate_workflow'],
               },
-              metadata: { category: 'alert-rule-field-correctness' },
+              metadata: { category: 'alert-rule-consumer-routing' },
             },
             {
               // Different integration: Jira project routing
@@ -687,7 +669,7 @@ evaluate.describe(
                 expectedMaxToolCalls: 8,
                 expectedToolSequence: ['platform.core.generate_workflow'],
               },
-              metadata: { category: 'alert-rule-field-correctness' },
+              metadata: { category: 'alert-rule-consumer-routing' },
             },
             {
               // Explicitly calls out the failure mode: "not based on alert severity"
@@ -707,90 +689,75 @@ evaluate.describe(
                 expectedMaxToolCalls: 8,
                 expectedToolSequence: ['platform.core.generate_workflow'],
               },
-              metadata: { category: 'alert-rule-field-correctness' },
+              metadata: { category: 'alert-rule-consumer-routing' },
+            },
+            {
+              // Canonical 3-branch: thresholdRule→PagerDuty, ml→console, else→Slack
+              input: {
+                instruction:
+                  'Create a "Rule Type Router" workflow triggered by security alerts. Threshold rules (ruleTypeId is "siem.thresholdRule") are likely brute force — page PagerDuty immediately with critical severity. ML anomaly rules (ruleTypeId is "ml") may be false positives — just log them to console for manual review. All other rule types should send a Slack notification.',
+              },
+              output: {
+                criteria: [
+                  'The trigger type is alert.',
+                  'There is conditional logic that reads event.rule.ruleTypeId to decide the action.',
+                  'The "siem.thresholdRule" branch triggers a PagerDuty step.',
+                  'The "ml" branch logs to console.',
+                  'A default or else branch sends a Slack notification.',
+                  'The branching condition uses event.rule.ruleTypeId — NOT alert severity, rule name, or any alert field.',
+                ],
+                expectedStepCount: { min: 3, max: 7 },
+                expectedMaxToolCalls: 8,
+                expectedToolSequence: ['platform.core.generate_workflow'],
+              },
+              metadata: { category: 'alert-rule-type-routing' },
+            },
+            {
+              // Uses eqlRule — tests that the model knows a different ruleTypeId value
+              input: {
+                instruction:
+                  'Create a workflow that opens a critical case for EQL sequence rules (ruleTypeId "siem.eqlRule") because sequences indicate multi-stage attacks. For threshold rules just send a Slack message. For ML rules log to console.',
+              },
+              output: {
+                criteria: [
+                  'The trigger type is alert.',
+                  'There is conditional logic reading event.rule.ruleTypeId.',
+                  'The "siem.eqlRule" branch creates a case.',
+                  'The threshold rule branch sends Slack.',
+                  'The ML branch logs to console.',
+                  'The branching uses event.rule.ruleTypeId — NOT alert severity or any event.alerts field.',
+                ],
+                expectedStepCount: { min: 3, max: 7 },
+                expectedMaxToolCalls: 8,
+                expectedToolSequence: ['platform.core.generate_workflow'],
+              },
+              metadata: { category: 'alert-rule-type-routing' },
+            },
+            {
+              // Explicitly names the failure mode: "not on severity"
+              input: {
+                instruction:
+                  'I need an alert workflow that branches on what kind of detection rule triggered it — not on severity. Threshold rules should page PagerDuty, ML rules should log to console, and all others should send an email.',
+              },
+              output: {
+                criteria: [
+                  'The trigger type is alert.',
+                  'There is conditional logic reading event.rule.ruleTypeId.',
+                  'The threshold rule branch pages PagerDuty.',
+                  'The ML rule branch logs to console.',
+                  'A default branch sends an email.',
+                  'The condition uses event.rule.ruleTypeId — NOT event.alerts[0].kibana.alert.severity or any severity field.',
+                ],
+                expectedStepCount: { min: 3, max: 7 },
+                expectedMaxToolCalls: 8,
+                expectedToolSequence: ['platform.core.generate_workflow'],
+              },
+              metadata: { category: 'alert-rule-type-routing' },
             },
           ],
         },
       });
     });
-
-    evaluate(
-      'routes by rule type using event.rule.ruleTypeId',
-      async ({ evaluateEsOpsDataset }) => {
-        await evaluateEsOpsDataset({
-          dataset: {
-            name: 'workflow-alert-rule: rule-type-routing',
-            description:
-              'Routing by detection rule type requires event.rule.ruleTypeId — the model must not use alert severity or rule name',
-            examples: [
-              {
-                // Canonical 3-branch: thresholdRule→PagerDuty, ml→console, else→Slack
-                input: {
-                  instruction:
-                    'Create a "Rule Type Router" workflow triggered by security alerts. Threshold rules (ruleTypeId is "siem.thresholdRule") are likely brute force — page PagerDuty immediately with critical severity. ML anomaly rules (ruleTypeId is "ml") may be false positives — just log them to console for manual review. All other rule types should send a Slack notification.',
-                },
-                output: {
-                  criteria: [
-                    'The trigger type is alert.',
-                    'There is conditional logic that reads event.rule.ruleTypeId to decide the action.',
-                    'The "siem.thresholdRule" branch triggers a PagerDuty step.',
-                    'The "ml" branch logs to console.',
-                    'A default or else branch sends a Slack notification.',
-                    'The branching condition uses event.rule.ruleTypeId — NOT alert severity, rule name, or any alert field.',
-                  ],
-                  expectedStepCount: { min: 3, max: 7 },
-                  expectedMaxToolCalls: 8,
-                  expectedToolSequence: ['platform.core.generate_workflow'],
-                },
-                metadata: { category: 'alert-rule-field-correctness' },
-              },
-              {
-                // Uses eqlRule — tests that the model knows a different ruleTypeId value
-                input: {
-                  instruction:
-                    'Create a workflow that opens a critical case for EQL sequence rules (ruleTypeId "siem.eqlRule") because sequences indicate multi-stage attacks. For threshold rules just send a Slack message. For ML rules log to console.',
-                },
-                output: {
-                  criteria: [
-                    'The trigger type is alert.',
-                    'There is conditional logic reading event.rule.ruleTypeId.',
-                    'The "siem.eqlRule" branch creates a case.',
-                    'The threshold rule branch sends Slack.',
-                    'The ML branch logs to console.',
-                    'The branching uses event.rule.ruleTypeId — NOT alert severity or any event.alerts field.',
-                  ],
-                  expectedStepCount: { min: 3, max: 7 },
-                  expectedMaxToolCalls: 8,
-                  expectedToolSequence: ['platform.core.generate_workflow'],
-                },
-                metadata: { category: 'alert-rule-field-correctness' },
-              },
-              {
-                // Explicitly names the failure mode: "not on severity"
-                input: {
-                  instruction:
-                    'I need an alert workflow that branches on what kind of detection rule triggered it — not on severity. Threshold rules should page PagerDuty, ML rules should log to console, and all others should send an email.',
-                },
-                output: {
-                  criteria: [
-                    'The trigger type is alert.',
-                    'There is conditional logic reading event.rule.ruleTypeId.',
-                    'The threshold rule branch pages PagerDuty.',
-                    'The ML rule branch logs to console.',
-                    'A default branch sends an email.',
-                    'The condition uses event.rule.ruleTypeId — NOT event.alerts[0].kibana.alert.severity or any severity field.',
-                  ],
-                  expectedStepCount: { min: 3, max: 7 },
-                  expectedMaxToolCalls: 8,
-                  expectedToolSequence: ['platform.core.generate_workflow'],
-                },
-                metadata: { category: 'alert-rule-field-correctness' },
-              },
-            ],
-          },
-        });
-      }
-    );
   }
 );
 

@@ -238,7 +238,10 @@ describe('createApi', () => {
         },
       ]);
 
-      const { validate } = get.mock.calls[0][0];
+      const { validate: validateFn } = get.mock.calls[0][0];
+
+      // validate is now a thunk; call it to get the validation object
+      const validate = validateFn();
 
       // Every route (including param-less ones) is now Core-validated via a zod
       // validation object, never the pass-through object.
@@ -270,7 +273,10 @@ describe('createApi', () => {
         },
       ]);
 
-      const { validate } = post.mock.calls[0][0];
+      const { validate: validateFn } = post.mock.calls[0][0];
+
+      // validate is now a thunk; call it to get the validation object
+      const validate = validateFn();
 
       expect(validate.query.parse({})).toEqual({});
       expect(validate.query.parse({ _inspect: 'false' })).toEqual({ _inspect: false });

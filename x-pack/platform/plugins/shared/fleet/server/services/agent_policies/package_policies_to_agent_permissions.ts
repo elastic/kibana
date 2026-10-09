@@ -20,6 +20,7 @@ import {
   OTEL_COLLECTOR_INPUT_TYPE,
   OTEL_TEMPLATE_SUFFIX,
   UNIVERSAL_PROFILING_INDEX_PATTERNS,
+  UNIVERSAL_PROFILING_QUEUE_INDEX_PATTERNS,
   USE_APM_VAR_NAME,
 } from '../../../common/constants';
 
@@ -53,6 +54,8 @@ export const UNIVERSAL_PROFILING_PERMISSIONS = [
   'index',
   'view_index_metadata',
 ];
+
+export const UNIVERSAL_PROFILING_QUEUE_PERMISSIONS = ['read', 'write', 'maintenance'];
 
 export const ELASTIC_CONNECTORS_INDEX_PERMISSIONS = [
   'read',
@@ -139,7 +142,10 @@ export function storedPackagePoliciesToAgentPermissions(
       pkg.name === FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE ||
       pkg.name === FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE
     ) {
-      return universalProfilingPermissions(packagePolicy.id);
+      return universalProfilingPermissions(
+        packagePolicy.id,
+        pkg.name === FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE
+      );
     }
 
     if (pkg.name === FLEET_APM_PACKAGE) {
@@ -420,16 +426,27 @@ export function getDataStreamPrivileges(
   };
 }
 
-function universalProfilingPermissions(packagePolicyId: string): [string, SecurityRoleDescriptor] {
+function universalProfilingPermissions(
+  packagePolicyId: string,
+  includeSymbolizationQueues: boolean
+): [string, SecurityRoleDescriptor] {
+  const indices: SecurityIndicesPrivileges[] = [
+    {
+      names: [...UNIVERSAL_PROFILING_INDEX_PATTERNS],
+      privileges: UNIVERSAL_PROFILING_PERMISSIONS,
+    },
+  ];
+  if (includeSymbolizationQueues) {
+    indices.push({
+      names: [...UNIVERSAL_PROFILING_QUEUE_INDEX_PATTERNS],
+      privileges: UNIVERSAL_PROFILING_QUEUE_PERMISSIONS,
+    });
+  }
+
   return [
     packagePolicyId,
     {
-      indices: [
-        {
-          names: [...UNIVERSAL_PROFILING_INDEX_PATTERNS],
-          privileges: UNIVERSAL_PROFILING_PERMISSIONS,
-        },
-      ],
+      indices,
     },
   ];
 }

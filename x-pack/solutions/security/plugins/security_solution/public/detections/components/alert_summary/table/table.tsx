@@ -27,7 +27,6 @@ import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import styled from '@emotion/styled';
 import { RELATED_INTEGRATION } from '../../../constants';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
-import { PageScope } from '../../../../data_view_manager/constants';
 import { useAdditionalBulkActions } from '../../../hooks/alert_summary/use_additional_bulk_actions';
 import { APP_ID, CASES_FEATURE_ID } from '../../../../../common';
 import { ActionsCell } from './actions_cell';
@@ -194,7 +193,7 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
     [globalFilters, groupingFilters, timeRangeFilter]
   );
 
-  const browserFields = useBrowserFields(PageScope.alerts);
+  const browserFields = useBrowserFields(dataView);
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);

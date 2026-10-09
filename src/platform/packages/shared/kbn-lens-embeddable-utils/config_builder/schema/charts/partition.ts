@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { MosaicConfig, MosaicConfigESQL, MosaicConfigNoESQL } from './mosaic';
 import { mosaicConfigSchema } from './mosaic';
 import type { PieConfig, PieConfigESQL, PieConfigNoESQL } from './pie';
@@ -17,17 +17,13 @@ import { treemapConfigSchema } from './treemap';
 import type { WaffleConfig, WaffleConfigESQL, WaffleConfigNoESQL } from './waffle';
 import { waffleConfigSchema } from './waffle';
 
-export const partitionConfigSchema = schema.oneOf(
-  [mosaicConfigSchema, pieConfigSchema, treemapConfigSchema, waffleConfigSchema],
-  {
-    meta: {
-      id: 'lensPartitionChart',
-      title: 'Partition Chart',
-      description:
-        'Partition chart configuration for pie, mosaic, treemap, and waffle chart types.',
-    },
-  }
-);
+export const partitionConfigSchema = z
+  .union([mosaicConfigSchema, pieConfigSchema, treemapConfigSchema, waffleConfigSchema])
+  .meta({
+    id: 'lensPartitionChart',
+    title: 'Partition Chart',
+    description: 'Partition chart configuration for pie, mosaic, treemap, and waffle chart types.',
+  });
 
 export type PartitionConfig = PieConfig | MosaicConfig | TreemapConfig | WaffleConfig;
 export type PartitionConfigNoESQL =

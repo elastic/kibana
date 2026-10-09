@@ -30,7 +30,7 @@ export const StaticByValueExample = () => {
           getCreationOptions={async () => {
             return {
               getInitialInput: () => ({
-                timeRange: { from: 'now-30d', to: 'now' },
+                time_range: { from: 'now-30d', to: 'now' },
                 viewMode: 'view',
                 panels: panels as DashboardState['panels'],
               }),

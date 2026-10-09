@@ -25,19 +25,20 @@ export const columnsAfter = async (
   const sources = command.args.filter((arg) => !Array.isArray(arg) && arg.type === 'source');
   const subqueries = command.args.filter(isSubQuery);
 
-  const promises = [
-    ...sources.map((source) =>
-      additionalFields.fromFrom({ ...command, args: [source, ...options] })
-    ),
-    ...subqueries.map((subquery) =>
-      processSubquery(subquery.child, query, additionalFields, unmappedFieldsStrategy)
-    ),
-  ];
+  const promises: Array<Promise<ESQLColumnData[]>> = [];
+
+  // Batch all plain sources into a single FROM s1, s2, ... request instead of N individual
+  // ones. ES returns the column-union in one round-trip, which is identical to merging N results.
+  if (sources.length > 0) {
+    promises.push(additionalFields.fromFrom({ ...command, args: [...sources, ...options] }));
+  }
+
+  for (const subquery of subqueries) {
+    promises.push(processSubquery(subquery.child, query, additionalFields, unmappedFieldsStrategy));
+  }
 
   const results = await Promise.all(promises);
-  const allColumns = results.flat();
-
-  return uniqBy(allColumns, 'name');
+  return uniqBy(results.flat(), 'name');
 };
 
 async function processSubquery(

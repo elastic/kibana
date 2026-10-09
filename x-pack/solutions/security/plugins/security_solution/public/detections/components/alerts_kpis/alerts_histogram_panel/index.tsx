@@ -50,6 +50,7 @@ const ViewAlertsFlexItem = styled(EuiFlexItem)`
 `;
 
 const CHART_HEIGHT = 155; // px
+const COLLAPSED_HEIGHT = 64; // px
 
 interface AlertsHistogramPanelProps {
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
@@ -222,7 +223,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
 
     return (
       <KpiPanel
-        height={panelHeight}
+        height={showHistogram ? panelHeight : COLLAPSED_HEIGHT}
         hasBorder
         paddingSize={paddingSize}
         data-test-subj="alerts-histogram-panel"

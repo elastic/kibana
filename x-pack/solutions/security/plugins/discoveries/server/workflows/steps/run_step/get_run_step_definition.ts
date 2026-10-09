@@ -16,6 +16,7 @@ import { getSpaceId } from '@kbn/discoveries/impl/lib/helpers/get_space_id';
 
 import { RunStepCommonDefinition } from '../../../../common/step_types/run_step';
 import { getAlertsIndexForSpace } from '../../../lib/get_alerts_index_for_space';
+import { isWorkflowsEnabledForSpace } from '../../../lib/is_workflows_enabled_for_space';
 import type { DiscoveriesPluginStartDeps } from '../../../types';
 import { resolveConnectorDetails } from '../../helpers/resolve_connector_details';
 import { resolveDefaultConnectorId } from '../../helpers/resolve_default_connector_id';
@@ -80,6 +81,19 @@ export const getRunStepDefinition = ({
         const { coreStart, pluginsStart } = await getStartServices();
         const request = context.contextManager.getFakeRequest();
 
+        const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
+          coreStart.savedObjects.getScopedClient(request)
+        );
+
+        if (
+          !(await isWorkflowsEnabledForSpace({
+            featureFlags: coreStart.featureFlags,
+            uiSettingsClient,
+          }))
+        ) {
+          throw new Error('Attack Discovery workflows are not enabled for this space');
+        }
+
         // Resolve the space from the (space-scoped) fake request the same way
         // `executeGenerationWorkflow` does for its authorization guard, so the
         // alerts index is bounded to the schedule's space rather than `-default`.
@@ -96,9 +110,7 @@ export const getRunStepDefinition = ({
               inference: pluginsStart.inference,
               logger,
               request,
-              uiSettingsClient: coreStart.uiSettings.asScopedToClient(
-                coreStart.savedObjects.getScopedClient(request)
-              ),
+              uiSettingsClient,
             });
 
         context.logger.info(

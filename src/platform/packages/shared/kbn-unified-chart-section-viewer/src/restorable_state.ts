@@ -8,7 +8,7 @@
  */
 
 import { createRestorableStateProvider } from '@kbn/restorable-state';
-import type { Dimension, MetricsSort } from './types';
+import type { Dimension } from './types';
 
 export type FlyoutTabId = 'overview' | 'esql-query';
 
@@ -38,9 +38,6 @@ export interface MetricsExperienceRestorableState {
 
   // Open metric details flyout state, persisted across navigation.
   flyoutState?: FlyoutState;
-
-  // Selected sort
-  metricsSort: MetricsSort;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

@@ -49,7 +49,12 @@ export default ({ getService }: FtrProviderContext) => {
         const missingPrivileges = await apis.get({});
 
         expect(missingPrivileges).toEqual({
-          feature_privileges: [],
+          feature_privileges: [
+            {
+              feature_id: 'workflowsManagement',
+              privileges: ['execute'],
+            },
+          ],
           index_privileges: [
             {
               index_name: '.alerts-security.attack.discovery.alerts-default',

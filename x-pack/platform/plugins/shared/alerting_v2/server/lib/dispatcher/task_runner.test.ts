@@ -6,13 +6,14 @@
  */
 
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
+import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import type { DispatcherServiceContract } from './dispatcher';
 import { DispatcherTaskRunner } from './task_runner';
 
 describe('DispatcherTaskRunner', () => {
   let dispatcherService: jest.Mocked<DispatcherServiceContract>;
   let runner: DispatcherTaskRunner;
-  let abortController: AbortController;
+  let signal: AbortSignal;
 
   // @ts-expect-error: not all fields are required for these tests
   const taskInstance: ConcreteTaskInstance = {
@@ -27,8 +28,8 @@ describe('DispatcherTaskRunner', () => {
 
   beforeEach(() => {
     dispatcherService = { run: jest.fn() };
-    runner = new DispatcherTaskRunner(dispatcherService);
-    abortController = new AbortController();
+    runner = new DispatcherTaskRunner(dispatcherService, createLoggerService().loggerService);
+    signal = new AbortController().signal;
   });
 
   afterEach(() => {
@@ -41,11 +42,12 @@ describe('DispatcherTaskRunner', () => {
         startedAt: new Date('2026-01-22T07:45:00.000Z'),
       });
 
-      await runner.run({ taskInstance, abortController });
+      await runner.run({ taskInstance, signal });
 
       const [params] = dispatcherService.run.mock.calls[0];
-      expect(params.abortController).toBe(abortController);
+      expect(params.signal).toBe(signal);
       expect(params.previousStartedAt?.toISOString()).toBe('2026-01-22T07:30:00.000Z');
+      expect(params.logger).toBeDefined();
     });
 
     it('returns updated previousStartedAt in state', async () => {
@@ -53,7 +55,7 @@ describe('DispatcherTaskRunner', () => {
         startedAt: new Date('2026-01-22T07:45:00.000Z'),
       });
 
-      const result = await runner.run({ taskInstance, abortController });
+      const result = await runner.run({ taskInstance, signal });
 
       expect(result).toEqual({
         state: {

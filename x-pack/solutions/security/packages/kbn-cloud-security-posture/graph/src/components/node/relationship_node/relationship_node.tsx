@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { css } from '@emotion/react';
-import { EuiText, EuiTextTruncate, EuiToolTip, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { EuiText, EuiTextTruncate, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import {
   LabelNodeContainer,
   LabelShape,
@@ -22,11 +22,8 @@ import {
   GRAPH_RELATIONSHIP_NODE_SHAPE_ID,
   GRAPH_RELATIONSHIP_NODE_HANDLE_ID,
   GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID,
-  GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID,
   GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID,
 } from '../../test_ids';
-
-const MAX_LABEL_LENGTH = 27;
 
 export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
   const { id, label, interactive } = props.data as RelationshipNodeViewModel;
@@ -74,25 +71,11 @@ export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
               font-size: ${euiTheme.font.scale.xs * 10.5}px;
             `}
           >
-            {text.length > MAX_LABEL_LENGTH ? (
-              <EuiToolTip
-                content={text}
-                display="block"
-                data-test-subj={GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID}
-              >
-                <EuiTextTruncate
-                  data-test-subj={GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID}
-                  truncation="middle"
-                  text={text}
-                />
-              </EuiToolTip>
-            ) : (
-              <EuiTextTruncate
-                data-test-subj={GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID}
-                truncation="middle"
-                text={text}
-              />
-            )}
+            <EuiTextTruncate
+              data-test-subj={GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID}
+              truncation="middle"
+              text={text}
+            />
           </EuiText>
         </div>
       </LabelShape>

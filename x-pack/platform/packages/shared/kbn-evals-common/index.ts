@@ -12,6 +12,7 @@ export {
   buildExperimentFilterQuery,
   buildExampleScoresQuery,
   buildDatasetExampleScoresQuery,
+  buildSpaceFilter,
   buildStatsAggregation,
   parseStatsAggregationResponse,
   SCORES_SORT_ORDER,
@@ -19,10 +20,13 @@ export {
   buildExperimentsListingAggregation,
   parseExperimentsListingResponse,
   buildModelDisplayId,
+  escapeWildcard,
 } from './impl/query_builders';
 export type {
   ExperimentsListingResult,
   ExperimentDetailEvaluatorStat,
 } from './impl/query_builders';
+export { getDatasetId } from './impl/dataset_ids';
+export { ALL_SPACES_ID, DEFAULT_SPACE_ID, resolveDatasetHomeSpace } from './impl/spaces';
 export { pairScores, computePairedTTestResults } from './impl/statistical_analysis';
 export type { PairedScore } from './impl/statistical_analysis';

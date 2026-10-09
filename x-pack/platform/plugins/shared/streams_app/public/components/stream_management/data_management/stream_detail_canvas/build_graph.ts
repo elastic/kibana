@@ -6,78 +6,43 @@
  */
 
 import type { Streams } from '@kbn/streams-schema';
-import {
-  ANIMATED_EDGE_TYPE,
-  DESTINATION_NODE_TYPE,
-  SOURCE_NODE_TYPE,
-  type ClassicCanvasGraph,
-  type DestinationNodeData,
-  type SourceNodeData,
-} from './types';
+import { buildSourceNode } from './build_source';
+import { buildDestinationNode } from './build_destination';
+import { layoutGraph } from './layout';
+import { ANIMATED_EDGE_TYPE, type ClassicCanvasGraph, type ClassicCanvasNode } from './types';
 
 /**
- * Classic streams have no first-class `source` for now, so we infer a generic async
- * `_bulk` (async_bulk) source.
+ * Orchestrates the whole classic-streams graph: it delegates node construction to
+ * the per-area builders (`build_source`, `build_destination`), wires the edges,
+ * and runs the shared auto-layout. Each new node kind (pipeline, routing, ...)
+ * gets its own `build_*` module and is composed in here.
  */
-export const BULK_SOURCE_SUBTITLE = '_bulk';
-
-const SOURCE_ICON_TYPE = 'push';
-
-// Static layout: one source -> destination row per stream. Kept intentionally
-// simple since this ticket renders a flat list of pairs for now.
-const ROW_HEIGHT = 120;
-const ROW_Y_OFFSET = 24;
-const SOURCE_X = 0;
-const DESTINATION_X = 360;
-
-/** A classic stream has processing when it carries at least one Streamlang step. */
-export const hasProcessing = (definition: Streams.ClassicStream.Definition): boolean =>
-  (definition.ingest.processing.steps?.length ?? 0) > 0;
-
-export const inferSource = (definition: Streams.ClassicStream.Definition): SourceNodeData => ({
-  title: definition.name,
-  subtitle: BULK_SOURCE_SUBTITLE,
-  iconType: SOURCE_ICON_TYPE,
-});
-
-const buildDestination = (definition: Streams.ClassicStream.Definition): DestinationNodeData => ({
-  title: definition.name,
-  hasProcessing: hasProcessing(definition),
-});
-
 export const buildClassicStreamsGraph = (
   streams: Streams.ClassicStream.Definition[]
 ): ClassicCanvasGraph => {
-  const nodes: ClassicCanvasGraph['nodes'] = [];
+  const nodes: ClassicCanvasNode[] = [];
   const edges: ClassicCanvasGraph['edges'] = [];
 
-  // The position calculations will change later on when we start saving the graph layout.
-  streams.forEach((definition, index) => {
-    const y = ROW_Y_OFFSET + index * ROW_HEIGHT;
-    const sourceId = `source-${definition.name}`;
-    const destinationId = `destination-${definition.name}`;
+  streams.forEach((definition) => {
+    const source = buildSourceNode(definition);
+    const destination = buildDestinationNode(definition);
 
-    nodes.push({
-      id: sourceId,
-      type: SOURCE_NODE_TYPE,
-      position: { x: SOURCE_X, y },
-      data: inferSource(definition),
-    });
-
-    nodes.push({
-      id: destinationId,
-      type: DESTINATION_NODE_TYPE,
-      position: { x: DESTINATION_X, y },
-      data: buildDestination(definition),
-    });
-
+    nodes.push(source, destination);
     edges.push({
-      id: `${sourceId}->${destinationId}`,
-      source: sourceId,
-      target: destinationId,
+      id: `${source.id}->${destination.id}`,
+      source: source.id,
+      target: destination.id,
       type: ANIMATED_EDGE_TYPE,
     });
   });
 
-  return { nodes, edges };
+  // Positions come from the shared auto-layout so the placement logic stays in
+  // one place and extends to richer topologies (pipelines, routing) later.
+  const positions = layoutGraph(nodes, edges);
+  const positionedNodes = nodes.map((node) => ({
+    ...node,
+    position: positions.get(node.id) ?? node.position,
+  })) as ClassicCanvasNode[];
+
+  return { nodes: positionedNodes, edges };
 };

@@ -124,7 +124,12 @@ export const ConversationsPopoverView: React.FC<ConversationsPopoverViewProps> =
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="arrowRight" aria-label={labels.availableAgents} color="text" size="m" />
+            <EuiIcon
+              type="chevronSingleRight"
+              aria-label={labels.availableAgents}
+              color="text"
+              size="m"
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

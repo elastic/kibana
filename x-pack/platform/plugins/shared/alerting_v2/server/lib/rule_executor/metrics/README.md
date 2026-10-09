@@ -1,16 +1,20 @@
 # Rule executor metrics
 
 Per-run metric collection for the rule executor. Collects lightweight counters
-across streaming batches, exposes a finalized snapshot on the pipeline result,
-and publishes a `rule.execution.completed` event on the alerting bus so
-asynchronous subscribers (event log, usage counters, OTel exporter) can react
+across streaming batches and exposes a finalized snapshot on the pipeline
+result. The pipeline uses the finalized counters to publish a
+`rule.execution.succeeded` event on the alerting bus after a successful run
+(and a `rule.execution.failed` event when the run throws), so asynchronous
+subscribers (workflows, event log, usage counters, OTel exporter) can react
 without coupling to Task Manager state.
 
 ## How collection works
 
 1. `RuleExecutionPipeline.execute()` asks `MetricCollectorFactory` for a fresh
-   collector. The collector holds a UUID (`executionId`), a `startedAt`
-   timestamp and a `Map<string, number>` for counter aggregation.
+   collector, passing Task Manager's `RunContext.executionUuid` as the
+   `executionId` so the collector shares one identity with the rest of the run
+   instead of minting its own. The collector holds that `executionId`, a
+   `startedAt` timestamp and a `Map<string, number>` for counter aggregation.
 2. The **write-only** view of the collector is threaded through
    `RuleExecutionMiddlewareContext.collector`. Steps cannot see it — only the
    middleware can, and only via the writer contract.
@@ -23,8 +27,13 @@ without coupling to Task Manager state.
 5. Recorder failures are caught and logged as warnings. Telemetry must never
    break a rule execution.
 6. At the end of the run (success, halt, or thrown), the pipeline `finalize`s
-   the collector, returns the snapshot on `RuleExecutionPipelineResult.metrics`
-   AND publishes it on the alerting bus in the `finally` block.
+   the collector and returns the snapshot on
+   `RuleExecutionPipelineResult.metrics`. Publishing to the alerting bus is
+   outcome-specific: a successful run publishes `rule.execution.succeeded`
+   (carrying the rule's `kind`/`tags` and `ruleEventsGenerated` from the
+   snapshot); a thrown run publishes `rule.execution.failed` (carrying the
+   rule's `id`/`spaceId` and the error message) before the error propagates.
+   Halted runs publish neither.
 
 Steps never import the collector. They contribute to metrics via one of two
 per-emission channels on `EmissionMeta`:
@@ -116,5 +125,6 @@ observation-driven metrics, the producing step publishes to
 - The alerting bus dispatches on `setImmediate`, so publishing never blocks
   the pipeline.
 - Recorder failures are isolated and logged; they never propagate.
-- The `finally` block guarantees the completion event is emitted even on
-  throw or halt.
+- The `finally` block guarantees the collector is finalized (frozen) on every
+  outcome, including throw. Bus events are emitted per outcome: succeeded on a
+  completed run, failed on a thrown run, neither on halt.

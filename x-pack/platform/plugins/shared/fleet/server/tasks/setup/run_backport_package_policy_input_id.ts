@@ -14,7 +14,7 @@ import { getInputsWithIds } from '../../services/package_policies/get_input_with
 import { getPackagePolicySavedObjectType } from '../../services/package_policy';
 
 export async function runBackportPackagePolicyInputId(params: {
-  abortController: AbortController;
+  signal: AbortSignal;
   logger: Logger;
 }) {
   const esClient = appContextService.getInternalUserESClient();
@@ -24,7 +24,7 @@ export async function runBackportPackagePolicyInputId(params: {
     savedObjectsClient,
     esClient,
     params.logger,
-    params.abortController
+    params.signal
   );
 }
 
@@ -32,10 +32,10 @@ export async function _runBackportPackagePolicyInputId(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   logger: Logger,
-  abortController?: AbortController
+  signal?: AbortSignal
 ) {
   for await (const items of await packagePolicyService.fetchAllItems(soClient)) {
-    if (abortController?.signal.aborted) {
+    if (signal?.aborted) {
       throw new Error('Task was aborted');
     }
     const packagePolicyToUpdate = items.reduce((acc, packagePolicy) => {
@@ -51,7 +51,7 @@ export async function _runBackportPackagePolicyInputId(
 
     const updates: Pick<PackagePolicy, 'id' | 'inputs'>[] = [];
     for (const packagePolicy of packagePolicyToUpdate) {
-      if (abortController?.signal.aborted) {
+      if (signal?.aborted) {
         throw new Error('Task was aborted');
       }
       if (!packagePolicy.package) {

@@ -1,11 +1,37 @@
 {
-  "sha1": "179cba27417de831dea95a4014b47ceeb551773d",
+  "sha1": "da84074f9df3424e3fea37d6cea4594b7e798b42",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
+    {
+      "id": "325fb397dafd269-6f4132847896834",
+      "title": "GET api/searchprofiler/has_indices reports that the cluster has indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/searchprofiler/test/scout/api/tests/has_indices.spec.ts",
+        "line": 32,
+        "column": 60
+      }
+    },
     {
       "id": "bc1b4b6c83e365a-ac00700134ab2e2",
       "title": "POST api/searchprofiler/profile profiles a valid query",
       "expectedStatus": "passed",
       "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -15,8 +41,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/searchprofiler/test/scout/api/tests/profile_api.spec.ts",
-        "line": 46,
-        "column": 12
+        "line": 44,
+        "column": 60
       }
     },
     {
@@ -24,6 +50,8 @@
       "title": "POST api/searchprofiler/profile returns an error for an invalid index",
       "expectedStatus": "passed",
       "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -33,8 +61,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/searchprofiler/test/scout/api/tests/profile_api.spec.ts",
-        "line": 64,
-        "column": 12
+        "line": 57,
+        "column": 10
       }
     }
   ]

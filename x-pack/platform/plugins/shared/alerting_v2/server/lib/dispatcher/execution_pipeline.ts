@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { inject, injectable, multiInject } from 'inversify';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../services/logger_service/logger_service';
+import { injectable, multiInject } from 'inversify';
 import type {
   DispatcherHaltReason,
   DispatcherPipelineInput,
@@ -32,20 +28,21 @@ export interface DispatcherPipelineContract {
 @injectable()
 export class DispatcherPipeline implements DispatcherPipelineContract {
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @multiInject(DispatcherExecutionStepsToken) private readonly steps: DispatcherStep[]
   ) {}
 
   public async execute(input: DispatcherPipelineInput): Promise<DispatcherPipelineResult> {
-    let pipelineState: DispatcherPipelineState = { input };
+    let pipelineState: DispatcherPipelineState = { input, logger: input.logger };
 
     for (const step of this.steps) {
-      this.logger.debug({ message: `Dispatcher: Executing step: ${step.name}` });
+      const logger = pipelineState.logger.withLabels({ step: step.name });
+
+      logger.debug({ message: `Dispatcher: Executing step: ${step.name}` });
 
       const output = await withDispatcherSpan(step.name, () => step.execute(pipelineState));
 
       if (output.type === 'halt') {
-        this.logger.debug({
+        logger.debug({
           message: `Dispatcher: Pipeline halted at step: ${step.name}, reason: ${output.reason}`,
         });
 

@@ -167,7 +167,7 @@ export const DataTableScoreColumnHeader = ({
             content={tooltipContent}
             color="warning"
             size="s"
-            type="alert"
+            type="warning"
             position="left"
           />
         </span>

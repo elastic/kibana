@@ -28,9 +28,10 @@ import { buildSpaceIdFilter } from '../../utils/build_space_id_filter';
  */
 export const enforceSpaceScope = (
   dsl: ISearchRequestParams,
-  spaceId: string
+  spaceId: string,
+  { matchMissingSpaceId = true }: { matchMissingSpaceId?: boolean } = {}
 ): ISearchRequestParams => {
-  const spaceIdFilter = buildSpaceIdFilter(spaceId);
+  const spaceIdFilter = buildSpaceIdFilter(spaceId, { matchMissingSpaceId });
 
   const query = (dsl.query ?? {}) as { bool?: { filter?: unknown } };
   const bool = (query.bool ?? {}) as { filter?: unknown };

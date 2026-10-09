@@ -171,6 +171,16 @@ export const resolveResourceForEsql = async ({
   esClient: ElasticsearchClient;
   includeDatasets?: boolean;
 }): Promise<ResolveResourceResponse> => {
+  if (isCcsTarget(resourceName)) {
+    const fields = await getFieldsFromFieldCaps({ resource: resourceName, esClient });
+    return {
+      name: resourceName,
+      type: EsResourceType.indexPattern,
+      fields,
+      isTsdb: deriveIsTsdb(fields),
+    };
+  }
+
   let resolveRes: IndicesResolveIndexResponse;
   try {
     resolveRes = await esClient.indices.resolveIndex({

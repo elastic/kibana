@@ -18,6 +18,7 @@ project:
   sourceRoot: packages/kbn-api-contracts
 dependsOn:
   - '@kbn/dev-cli-runner'
+  - '@kbn/router-to-openapispec'
 tags:
   - shared-common
   - package

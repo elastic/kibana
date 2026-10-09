@@ -6,6 +6,16 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "mode": {
+        "__one_of": [
+          "upgrade"
+        ]
+      },
+      "source": {
+        "index": ""
+      }
+    },
     "methods": [
       "POST"
     ],

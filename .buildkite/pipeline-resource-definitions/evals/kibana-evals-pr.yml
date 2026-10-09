@@ -1,0 +1,63 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bk-kibana-evals-pr-llm-evals
+  description: 'Runs label-triggered @kbn/evals suites for a PR, out-of-band from kibana-pull-request'
+  links:
+    - url: 'https://buildkite.com/elastic/kibana-evals-pr-llm-evals'
+      title: Pipeline link
+spec:
+  type: buildkite-pipeline
+  owner: 'group:nightshift-context-and-research-team'
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: 'Kibana / Evals / PR LLM Evals'
+      description: 'Runs the label-selected @kbn/evals suites for a PR (triggered asynchronously from kibana-pull-request)'
+    spec:
+      env:
+        KBN_EVALS: '1'
+        # Heavy eval steps run on non-preemptible agents here so a lost spot worker
+        # or timeout does not silently re-run the whole suite (agents are controlled
+        # independently now that evals run outside kibana-pull-request).
+        EVAL_PREEMPTIBLE: '0'
+        # Publish eval results back to the PR as a distinct commit status (context
+        # `kibana-evals`), using the same mechanism as kibana-pr and kibana-on-merge.
+        KIBANA_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
+        GITHUB_BUILD_COMMIT_STATUS_CONTEXT: kibana-evals
+      allow_rebuilds: true
+      branch_configuration: ''
+      cancel_intermediate_builds: true
+      default_branch: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/scripts/pipelines/evals_pr/pipeline.sh
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite
+              - .node-version
+              - package.json
+              - tsconfig.base.json
+              - versions.json
+            cleanup_sparse_state: true
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        trigger_mode: none
+        prefix_pull_request_fork_branch_names: false
+        skip_pull_request_builds_for_existing_commits: false
+        build_tags: false
+      teams:
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        nightshift-context-and-research-team:
+          access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: BUILD_AND_READ
+      tags:
+        - kibana
+        - kbn-evals

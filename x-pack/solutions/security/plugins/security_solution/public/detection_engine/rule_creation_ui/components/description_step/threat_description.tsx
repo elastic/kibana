@@ -61,6 +61,15 @@ const UnsupportedMitreIdWarning = ({ id }: { id: string }) => (
   />
 );
 
+/**
+ * NOTE: the agent builder rule attachment renders MITRE mappings with its own
+ * context-free copy of this component
+ * (`public/agent_builder/attachment_types/rule/mitre_display.tsx`), because this one
+ * depends on the Security Solution redux store (via `useIsExperimentalFeatureEnabled`)
+ * and throws when rendered outside the app's `<Provider>` (e.g. in the agent builder
+ * chat flyout). If you change how threat entries are displayed here, propagate the
+ * update there.
+ */
 export const ThreatEuiFlexGroup = ({
   threat,
   'data-test-subj': dataTestSubj = 'threat',

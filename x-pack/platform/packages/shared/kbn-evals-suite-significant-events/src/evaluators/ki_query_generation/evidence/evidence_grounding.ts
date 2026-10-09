@@ -295,7 +295,7 @@ export const evidenceGroundingEvaluator: KIQueryGenerationEvaluator = {
               .slice(0, 5)
               .join(', ')}`
           : `All ${totalEvidence} evidence strings are grounded in sample docs or features`,
-      details: {
+      metadata: {
         totalEvidence,
         groundedEvidence,
         ungroundedItems,

@@ -14,7 +14,7 @@ import { useGetCasesMockState } from '../../containers/mock';
 import { connectors, useCaseConfigureResponse } from '../configure_cases/__mock__';
 
 import { readCasesPermissions, renderWithTestingProviders, TestProviders } from '../../common/mock';
-import { renderHook, screen } from '@testing-library/react';
+import { fireEvent, renderHook, screen } from '@testing-library/react';
 import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
 import { userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
@@ -517,6 +517,66 @@ describe('useCasesColumns ', () => {
         "width": "8em",
       }
     `);
+  });
+
+  it('disables the select button and shows a tooltip when the case is already attached', async () => {
+    const theCase = useGetCasesMockState.data.cases[0];
+    const { result } = renderHook(
+      () =>
+        useCasesColumns({
+          ...useCasesColumnsProps,
+          isSelectorView: true,
+          disabledCases: new Set([theCase.id]),
+        }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    const assignActionColumn = result.current.columns[
+      result.current.columns.length - 1
+    ] as unknown as {
+      render: (theCase: (typeof useGetCasesMockState.data.cases)[number]) => JSX.Element;
+    };
+
+    renderWithTestingProviders(assignActionColumn.render(theCase));
+
+    const button = screen.getByTestId(`cases-table-row-select-${theCase.id}`);
+    expect(button).toBeDisabled();
+    expect(button).toHaveTextContent('Added');
+
+    // EuiToolTip renders its content lazily on hover; the disabled button is
+    // wrapped in a span so the tooltip anchor still receives the pointer event.
+    fireEvent.mouseOver(screen.getByTestId(`cases-table-row-select-tooltip-${theCase.id}`));
+    expect(await screen.findByText('This item is already added to this case')).toBeInTheDocument();
+  });
+
+  it('shows an enabled select button without a tooltip when the case is not attached', async () => {
+    const theCase = useGetCasesMockState.data.cases[0];
+    const { result } = renderHook(
+      () =>
+        useCasesColumns({
+          ...useCasesColumnsProps,
+          isSelectorView: true,
+          disabledCases: new Set<string>(),
+        }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    const assignActionColumn = result.current.columns[
+      result.current.columns.length - 1
+    ] as unknown as {
+      render: (theCase: (typeof useGetCasesMockState.data.cases)[number]) => JSX.Element;
+    };
+
+    renderWithTestingProviders(assignActionColumn.render(theCase));
+
+    const button = screen.getByTestId(`cases-table-row-select-${theCase.id}`);
+    expect(button).toBeEnabled();
+    expect(button).toHaveTextContent('Select');
+    expect(screen.queryByText('This item is already added to this case')).not.toBeInTheDocument();
   });
 
   it('does not shows the actions if the user does not have the right permissions', async () => {

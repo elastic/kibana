@@ -48,6 +48,7 @@ import type {
   CspServerPluginStartServices,
 } from './types';
 import { setupRoutes } from './routes/setup_routes';
+import { cspUiSettings } from './ui_settings';
 import { cspBenchmarkRule, cspSettings } from './saved_objects';
 import { deleteOldAndLegacyCdrDataViewsForAllSpaces } from './saved_objects/data_views';
 import { initializeCspIndices } from './create_indices/create_indices';
@@ -96,6 +97,7 @@ export class CspPlugin
   ): CspServerPluginSetup {
     core.savedObjects.registerType<CspBenchmarkRule>(cspBenchmarkRule);
     core.savedObjects.registerType<CspSettings>(cspSettings);
+    core.uiSettings.register(cspUiSettings);
 
     setupRoutes({
       core,
@@ -124,9 +126,20 @@ export class CspPlugin
           getRetryOptions(this.logger, 'getInstallation')
         );
 
-        // If package is installed we want to make sure all needed assets are installed
+        // If package is installed we want to make sure all needed assets are installed.
+        // initialize() is idempotent, so retrying on transient failures (e.g. ES not ready,
+        // transforms not yet available) is safe and prevents isPluginInitialized from
+        // staying false when CI infrastructure is slow to come up.
         if (packageInfo) {
-          this.initialize(core, plugins.taskManager, packageInfo.install_version).catch(() => {});
+          pRetry(() => this.initialize(core, plugins.taskManager, packageInfo.install_version), {
+            ...getRetryOptions(this.logger, 'initialize'),
+            // Use longer backoff than the default (1s) so transient ES/transform
+            // failures have time to resolve before the next attempt.
+            minTimeout: 5_000,
+            maxTimeout: 30_000,
+          }).catch((e) => {
+            this.logger.error('CSP plugin initialization failed after all retries', e);
+          });
         }
 
         plugins.fleet.registerExternalCallback(
@@ -337,8 +350,9 @@ const getRetryOptions = (logger: Logger, operation: string): Options => {
   return {
     retries: 3,
     onFailedAttempt: (err: FailedAttemptError) => {
-      const message = `CSP plugin ${operation} operation failed and will be retried: ${err.retriesLeft} more times; error: ${err.message}`;
-      logger.warn(message);
+      logger.warn(
+        `CSP plugin ${operation} operation failed and will be retried: ${err.retriesLeft} more times; error: ${err.message}`
+      );
     },
   };
 };
